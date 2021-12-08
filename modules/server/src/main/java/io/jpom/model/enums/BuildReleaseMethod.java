@@ -36,6 +36,7 @@ public enum BuildReleaseMethod implements BaseEnum {
 	Outgiving(1, "节点分发"),
 	Project(2, "项目"),
 	Ssh(3, "SSH"),
+	LocalCommand(4, "本地命令行"),
 	;
 	private final int code;
 	private final String desc;

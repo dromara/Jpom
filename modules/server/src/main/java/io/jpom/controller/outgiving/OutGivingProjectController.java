@@ -38,26 +38,23 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.OutGivingNodeProject;
 import io.jpom.model.data.ServerWhitelist;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.OutGivingServer;
-import io.jpom.service.node.manage.ProjectInfoService;
-import io.jpom.service.system.ServerWhitelistServer;
+import io.jpom.service.node.ProjectInfoCacheService;
+import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -85,10 +82,14 @@ public class OutGivingProjectController extends BaseServerController {
 
 	@Resource
 	private OutGivingServer outGivingServer;
-	@Resource
-	private ProjectInfoService projectInfoService;
-	@Resource
-	private ServerWhitelistServer serverWhitelistServer;
+	private final ProjectInfoCacheService projectInfoCacheService;
+	private final SystemParametersServer systemParametersServer;
+
+	public OutGivingProjectController(ProjectInfoCacheService projectInfoCacheService,
+									  SystemParametersServer systemParametersServer) {
+		this.projectInfoCacheService = projectInfoCacheService;
+		this.systemParametersServer = systemParametersServer;
+	}
 
 	@RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -98,18 +99,17 @@ public class OutGivingProjectController extends BaseServerController {
 
 
 	@RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) throws IOException {
-		OutGivingModel outGivingServerItem = outGivingServer.getItem(id);
+	public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) {
+		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id);
 		Objects.requireNonNull(outGivingServerItem, "没有数据");
-		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.getOutGivingNodeProjectList();
+		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
 		JSONArray jsonArray = new JSONArray();
 		outGivingNodeProjectList.forEach(outGivingNodeProject -> {
-			NodeModel nodeModel = nodeService.getItem(outGivingNodeProject.getNodeId());
+			NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject.getNodeId());
 			JSONObject jsonObject = new JSONObject();
 			JSONObject projectInfo = null;
 			try {
-				projectInfo = projectInfoService.getItem(nodeModel, outGivingNodeProject.getProjectId());
+				projectInfo = projectInfoCacheService.getItem(nodeModel, outGivingNodeProject.getProjectId());
 			} catch (Exception e) {
 				jsonObject.put("errorMsg", "error " + e.getMessage());
 			}
@@ -173,7 +173,6 @@ public class OutGivingProjectController extends BaseServerController {
 	 */
 	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.UploadOutGiving)
 	@Feature(method = MethodFeature.UPLOAD)
 	public String upload(String id, String afterOpt, String clearOld, String autoUnzip) throws IOException {
 		OutGivingModel outGivingModel = this.check(id);
@@ -196,17 +195,17 @@ public class OutGivingProjectController extends BaseServerController {
 		outGivingModel.setClearOld(Convert.toBool(clearOld, false));
 		outGivingModel.setAfterOpt(afterOpt1.getCode());
 
-		outGivingServer.updateItem(outGivingModel);
+		outGivingServer.update(outGivingModel);
 		// 开启
 		OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip);
 		return JsonMessage.getString(200, "分发成功");
 	}
 
 	private OutGivingModel check(String id) {
-		OutGivingModel outGivingModel = outGivingServer.getItem(id);
+		OutGivingModel outGivingModel = outGivingServer.getByKey(id);
 		Assert.notNull(outGivingModel, "上传失败,没有找到对应的分发项目");
 		// 检查状态
-		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.getOutGivingNodeProjectList();
+		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.outGivingNodeProjectList();
 		Objects.requireNonNull(outGivingNodeProjectList);
 		for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
 			Assert.state(outGivingNodeProject.getStatus() != OutGivingNodeProject.Status.Ing.getCode(), "当前还在分发中,请等待分发结束");
@@ -222,15 +221,13 @@ public class OutGivingProjectController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "remote_download", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.UploadOutGiving)
 	@Feature(method = MethodFeature.REMOTE_DOWNLOAD)
 	public String remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip) {
 		OutGivingModel outGivingModel = this.check(id);
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
 		Assert.notNull(afterOpt1, "请选择分发后的操作");
 		// 验证远程 地址
-		ServerWhitelist whitelist = serverWhitelistServer.getWhitelist();
+		ServerWhitelist whitelist = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
 		Set<String> allowRemoteDownloadHost = whitelist.getAllowRemoteDownloadHost();
 		Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
 		List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
@@ -239,7 +236,7 @@ public class OutGivingProjectController extends BaseServerController {
 			//outGivingModel = outGivingServer.getItem(id);
 			outGivingModel.setClearOld(Convert.toBool(clearOld, false));
 			outGivingModel.setAfterOpt(afterOpt1.getCode());
-			outGivingServer.updateItem(outGivingModel);
+			outGivingServer.update(outGivingModel);
 			//下载
 			File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), ServerConfigBean.OUTGIVING_FILE, id);
 			FileUtil.mkdir(file);

@@ -23,13 +23,13 @@
 package io.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
-import io.jpom.model.BaseModel;
+import com.alibaba.fastjson.JSON;
+import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.service.h2db.TableName;
+import io.jpom.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 分发实体
@@ -37,129 +37,152 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/21
  */
-public class OutGivingModel extends BaseModel {
-    /**
-     * 节点下的项目列表
-     */
-    private List<OutGivingNodeProject> outGivingNodeProjectList;
-    /**
-     * 分发后的操作
-     */
-    private int afterOpt;
-    /**
-     * 是否清空旧包发布
-     */
-    private boolean clearOld;
-    /**
-     * 临时缓存
-     */
-    @JSONField(serialize = false, deserialize = false)
-    private Map<NodeModel, JSONObject> tempCacheMap;
-    /**
-     * 是否为单独创建的分发项目
-     */
-    private boolean outGivingProject;
+@TableName("OUT_GIVING")
+public class OutGivingModel extends BaseWorkspaceModel {
+	private String name;
+	/**
+	 * 节点下的项目列表
+	 */
+	private String outGivingNodeProjectList;
+	/**
+	 * 分发后的操作
+	 */
+	private Integer afterOpt;
+	/**
+	 * 是否清空旧包发布
+	 */
+	private Boolean clearOld;
+	/**
+	 * 是否为单独创建的分发项目
+	 */
+	private Boolean outGivingProject;
 
-    public boolean isClearOld() {
-        return clearOld;
-    }
+	public Boolean getClearOld() {
+		return clearOld;
+	}
 
-    public void setClearOld(boolean clearOld) {
-        this.clearOld = clearOld;
-    }
+	public void setClearOld(Boolean clearOld) {
+		this.clearOld = clearOld;
+	}
 
-    public boolean isOutGivingProject() {
-        return outGivingProject;
-    }
+	public Boolean getOutGivingProject() {
+		return outGivingProject;
+	}
 
-    public void setOutGivingProject(boolean outGivingProject) {
-        this.outGivingProject = outGivingProject;
-    }
+	public void setOutGivingProject(Boolean outGivingProject) {
+		this.outGivingProject = outGivingProject;
+	}
 
-    public Map<NodeModel, JSONObject> getTempCacheMap() {
-        return tempCacheMap;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setTempCacheMap(Map<NodeModel, JSONObject> tempCacheMap) {
-        this.tempCacheMap = tempCacheMap;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public int getAfterOpt() {
-        return afterOpt;
-    }
+	public boolean isClearOld() {
+		return clearOld != null && clearOld;
+	}
 
-    public void setAfterOpt(int afterOpt) {
-        this.afterOpt = afterOpt;
-    }
+	public boolean isOutGivingProject() {
+		return outGivingProject != null && outGivingProject;
+	}
 
-    public List<OutGivingNodeProject> getOutGivingNodeProjectList() {
-        return outGivingNodeProjectList;
-    }
 
-    public void setOutGivingNodeProjectList(List<OutGivingNodeProject> outGivingNodeProjectList) {
-        this.outGivingNodeProjectList = outGivingNodeProjectList;
-    }
+	public void setAfterOpt(Integer afterOpt) {
+		this.afterOpt = afterOpt;
+	}
 
-    /**
-     * 判断是否包含某个项目id
-     *
-     * @param projectId 项目id
-     * @return true 包含
-     */
-    public boolean checkContains(String nodeId, String projectId) {
-        return getNodeProject(nodeId, projectId) != null;
-    }
 
-    /**
-     * 获取节点的项目信息
-     *
-     * @param nodeId    节点
-     * @param projectId 项目
-     * @return outGivingNodeProject
-     */
-    public OutGivingNodeProject getNodeProject(String nodeId, String projectId) {
-        List<OutGivingNodeProject> thisPs = getOutGivingNodeProjectList();
-        return getNodeProject(thisPs, nodeId, projectId);
-    }
+	public Integer getAfterOpt() {
+		return afterOpt;
+	}
 
-    /**
-     * 从指定数组中获取对应信息
-     *
-     * @param outGivingNodeProjects 节点项目列表
-     * @param nodeId                节点id
-     * @param projectId             项目id
-     * @return 实体
-     */
-    private OutGivingNodeProject getNodeProject(List<OutGivingNodeProject> outGivingNodeProjects, String nodeId, String projectId) {
-        if (outGivingNodeProjects == null) {
-            return null;
-        }
-        for (OutGivingNodeProject outGivingNodeProject1 : outGivingNodeProjects) {
-            if (StrUtil.equalsIgnoreCase(outGivingNodeProject1.getProjectId(), projectId) && StrUtil.equalsIgnoreCase(outGivingNodeProject1.getNodeId(), nodeId)) {
-                return outGivingNodeProject1;
-            }
-        }
-        return null;
-    }
+	public void setAfterOpt(int afterOpt) {
+		this.afterOpt = afterOpt;
+	}
 
-    /**
-     * 获取已经删除的节点项目
-     *
-     * @param newsProject 要比较的分发项目
-     * @return 已经删除过的
-     */
-    public List<OutGivingNodeProject> getDelete(List<OutGivingNodeProject> newsProject) {
-        List<OutGivingNodeProject> old = getOutGivingNodeProjectList();
-        if (old == null || old.isEmpty()) {
-            return null;
-        }
-        List<OutGivingNodeProject> delete = new ArrayList<>();
-        old.forEach(outGivingNodeProject -> {
-            if (getNodeProject(newsProject, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId()) != null) {
-                return;
-            }
-            delete.add(outGivingNodeProject);
-        });
-        return delete;
-    }
+	public String getOutGivingNodeProjectList() {
+		return outGivingNodeProjectList;
+	}
+
+	public void setOutGivingNodeProjectList(String outGivingNodeProjectList) {
+		this.outGivingNodeProjectList = outGivingNodeProjectList;
+	}
+
+	public List<OutGivingNodeProject> outGivingNodeProjectList() {
+		return StringUtil.jsonConvertArray(outGivingNodeProjectList, OutGivingNodeProject.class);
+	}
+
+	public void outGivingNodeProjectList(List<OutGivingNodeProject> outGivingNodeProjectList) {
+		if (outGivingNodeProjectList == null) {
+			this.outGivingNodeProjectList = null;
+		} else {
+			this.outGivingNodeProjectList = JSON.toJSONString(outGivingNodeProjectList);
+		}
+	}
+
+	/**
+	 * 判断是否包含某个项目id
+	 *
+	 * @param projectId 项目id
+	 * @return true 包含
+	 */
+	public boolean checkContains(String nodeId, String projectId) {
+		return getNodeProject(nodeId, projectId) != null;
+	}
+
+	/**
+	 * 获取节点的项目信息
+	 *
+	 * @param nodeId    节点
+	 * @param projectId 项目
+	 * @return outGivingNodeProject
+	 */
+	public OutGivingNodeProject getNodeProject(String nodeId, String projectId) {
+		List<OutGivingNodeProject> thisPs = outGivingNodeProjectList();
+		return getNodeProject(thisPs, nodeId, projectId);
+	}
+
+	/**
+	 * 从指定数组中获取对应信息
+	 *
+	 * @param outGivingNodeProjects 节点项目列表
+	 * @param nodeId                节点id
+	 * @param projectId             项目id
+	 * @return 实体
+	 */
+	private OutGivingNodeProject getNodeProject(List<OutGivingNodeProject> outGivingNodeProjects, String nodeId, String projectId) {
+		if (outGivingNodeProjects == null) {
+			return null;
+		}
+		for (OutGivingNodeProject outGivingNodeProject1 : outGivingNodeProjects) {
+			if (StrUtil.equalsIgnoreCase(outGivingNodeProject1.getProjectId(), projectId) && StrUtil.equalsIgnoreCase(outGivingNodeProject1.getNodeId(), nodeId)) {
+				return outGivingNodeProject1;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 获取已经删除的节点项目
+	 *
+	 * @param newsProject 要比较的分发项目
+	 * @return 已经删除过的
+	 */
+	public List<OutGivingNodeProject> getDelete(List<OutGivingNodeProject> newsProject) {
+		List<OutGivingNodeProject> old = outGivingNodeProjectList();
+		if (old == null || old.isEmpty()) {
+			return null;
+		}
+		List<OutGivingNodeProject> delete = new ArrayList<>();
+		old.forEach(outGivingNodeProject -> {
+			if (getNodeProject(newsProject, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId()) != null) {
+				return;
+			}
+			delete.add(outGivingNodeProject);
+		});
+		return delete;
+	}
 }

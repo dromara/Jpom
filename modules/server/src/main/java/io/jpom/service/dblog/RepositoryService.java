@@ -23,7 +23,7 @@
 package io.jpom.service.dblog;
 
 import io.jpom.model.data.RepositoryModel;
-import io.jpom.service.h2db.BaseDbService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,6 +31,15 @@ import org.springframework.stereotype.Service;
  * Repository service
  */
 @Service
-public class RepositoryService extends BaseDbService<RepositoryModel> {
+public class RepositoryService extends BaseWorkspaceService<RepositoryModel> {
 
+	@Override
+	protected void fillSelectResult(RepositoryModel repositoryModel) {
+		if (repositoryModel == null) {
+			return;
+		}
+		// 隐藏密码字段
+		repositoryModel.setPassword(null);
+		repositoryModel.setRsaPrv(null);
+	}
 }

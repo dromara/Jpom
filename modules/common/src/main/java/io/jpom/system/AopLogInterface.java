@@ -22,7 +22,7 @@
  */
 package io.jpom.system;
 
-import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 
 /**
  * 日志接口
@@ -36,7 +36,7 @@ public interface AopLogInterface {
      *
      * @param joinPoint point
      */
-    void before(JoinPoint joinPoint);
+    void before(ProceedingJoinPoint joinPoint);
 
     /**
      * 执行后

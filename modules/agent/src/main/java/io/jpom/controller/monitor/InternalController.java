@@ -29,7 +29,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.util.CommandUtil;
 import org.springframework.http.MediaType;
@@ -184,7 +184,7 @@ public class InternalController extends BaseAgentController {
 	@RequestMapping(value = "internal_stack", method = RequestMethod.GET)
 	@ResponseBody
 	public String stack(String tag, String copyId) {
-		tag = ProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
+		tag = NodeProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
 		//
 		String fileName = AgentConfigBean.getInstance().getTempPathName() + StrUtil.SLASH + tag + "_java_cpu.txt";
 		fileName = FileUtil.normalize(fileName);
@@ -212,7 +212,7 @@ public class InternalController extends BaseAgentController {
 	@RequestMapping(value = "internal_ram", method = RequestMethod.GET)
 	@ResponseBody
 	public String ram(String tag, String copyId) {
-		tag = ProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
+		tag = NodeProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
 		//
 		String fileName = AgentConfigBean.getInstance().getTempPathName() + StrUtil.SLASH + tag + "_java_ram.txt";
 		fileName = FileUtil.normalize(fileName);

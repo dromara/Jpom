@@ -20,43 +20,28 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.service.system;
-
-import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.BaseDataService;
-import io.jpom.model.data.MailAccountModel;
-import io.jpom.system.ServerConfigBean;
-import io.jpom.util.JsonFileUtil;
-import org.springframework.stereotype.Service;
+package io.jpom.model;
 
 /**
- * 监控管理Service
+ * 节点 数据
  *
- * @author Arno
+ * @author bwcx_jzy
+ * @since 2021/12/05
  */
-@Service
-public class SystemMailConfigService extends BaseDataService {
+public abstract class BaseNodeModel extends BaseWorkspaceModel {
 
-    /**
-     * 获取配置
-     *
-     * @return config
-     */
-    public MailAccountModel getConfig() {
-        JSONObject config = getJSONObject(ServerConfigBean.MAIL_CONFIG);
-        if (config == null) {
-            return null;
-        }
-        return config.toJavaObject(MailAccountModel.class);
-    }
+	/**
+	 * 节点Id
+	 *
+	 * @see io.jpom.model.data.NodeModel
+	 */
+	private String nodeId;
 
-    /**
-     * 保存配置
-     *
-     * @param mailAccountModel config
-     */
-    public void save(MailAccountModel mailAccountModel) {
-        String path = getDataFilePath(ServerConfigBean.MAIL_CONFIG);
-        JsonFileUtil.saveJson(path, mailAccountModel.toJson());
-    }
+	public String getNodeId() {
+		return nodeId;
+	}
+
+	public void setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+	}
 }

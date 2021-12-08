@@ -36,7 +36,6 @@ import io.jpom.model.BaseModel;
 import io.jpom.model.RunMode;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.system.JpomRuntimeException;
-import io.jpom.util.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,11 +49,11 @@ import java.util.stream.Collectors;
  *
  * @author jiangzeyin
  */
-public class ProjectInfoModel extends BaseModel {
-	/**
-	 * 分组
-	 */
-	private String group;
+public class NodeProjectInfoModel extends BaseModel {
+//	/**
+//	 * 分组
+//	 */
+//	private String group;
 	private String mainClass;
 	private String lib;
 	/**
@@ -113,6 +112,16 @@ public class ProjectInfoModel extends BaseModel {
 	 * 填写【lib:conf】
 	 */
 	private String javaExtDirsCp;
+
+	private String workspaceId;
+
+	public String getWorkspaceId() {
+		return workspaceId;
+	}
+
+	public void setWorkspaceId(String workspaceId) {
+		this.workspaceId = workspaceId;
+	}
 
 	public List<JavaCopyItem> getJavaCopyItemList() {
 		return javaCopyItemList;
@@ -231,17 +240,17 @@ public class ProjectInfoModel extends BaseModel {
 			this.jvm = jvm;
 		}
 	}
-
-	public String getGroup() {
-		if (StrUtil.isEmpty(group)) {
-			return "默认";
-		}
-		return group;
-	}
-
-	public void setGroup(String group) {
-		this.group = group;
-	}
+//
+//	public String getGroup() {
+//		if (StrUtil.isEmpty(group)) {
+//			return "默认";
+//		}
+//		return group;
+//	}
+//
+//	public void setGroup(String group) {
+//		this.group = group;
+//	}
 
 	public String getMainClass() {
 		return StrUtil.emptyToDefault(mainClass, StrUtil.EMPTY);
@@ -294,11 +303,11 @@ public class ProjectInfoModel extends BaseModel {
 	/**
 	 * 获取项目文件中的所有jar 文件
 	 *
-	 * @param projectInfoModel 项目
+	 * @param nodeProjectInfoModel 项目
 	 * @return list
 	 */
-	public static List<File> listJars(ProjectInfoModel projectInfoModel) {
-		File fileLib = new File(projectInfoModel.allLib());
+	public static List<File> listJars(NodeProjectInfoModel nodeProjectInfoModel) {
+		File fileLib = new File(nodeProjectInfoModel.allLib());
 		File[] files = fileLib.listFiles();
 		List<File> files1 = new ArrayList<>();
 		if (files != null) {
@@ -306,11 +315,11 @@ public class ProjectInfoModel extends BaseModel {
 				if (!file.isFile()) {
 					continue;
 				}
-				if (projectInfoModel.getRunMode() == RunMode.ClassPath || projectInfoModel.getRunMode() == RunMode.Jar) {
+				if (nodeProjectInfoModel.getRunMode() == RunMode.ClassPath || nodeProjectInfoModel.getRunMode() == RunMode.Jar) {
 					if (!StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true)) {
 						continue;
 					}
-				} else if (projectInfoModel.getRunMode() == RunMode.JarWar) {
+				} else if (nodeProjectInfoModel.getRunMode() == RunMode.JarWar) {
 					if (!StrUtil.endWith(file.getName(), "war", true)) {
 						continue;
 					}
@@ -324,17 +333,17 @@ public class ProjectInfoModel extends BaseModel {
 	/**
 	 * 拼接java 执行的jar路径
 	 *
-	 * @param projectInfoModel 项目
+	 * @param nodeProjectInfoModel 项目
 	 * @return classpath 或者 jar
 	 */
-	public static String getClassPathLib(ProjectInfoModel projectInfoModel) {
-		List<File> files = listJars(projectInfoModel);
+	public static String getClassPathLib(NodeProjectInfoModel nodeProjectInfoModel) {
+		List<File> files = listJars(nodeProjectInfoModel);
 		if (files.size() <= 0) {
 			return "";
 		}
 		// 获取lib下面的所有jar包
 		StringBuilder classPath = new StringBuilder();
-		RunMode runMode = projectInfoModel.getRunMode();
+		RunMode runMode = nodeProjectInfoModel.getRunMode();
 		int len = files.size();
 		if (runMode == RunMode.ClassPath) {
 			classPath.append("-classpath ");
@@ -344,7 +353,7 @@ public class ProjectInfoModel extends BaseModel {
 			len = 1;
 		} else if (runMode == RunMode.JavaExtDirsCp) {
 			classPath.append("-Djava.ext.dirs=");
-			String javaExtDirsCp = projectInfoModel.getJavaExtDirsCp();
+			String javaExtDirsCp = nodeProjectInfoModel.getJavaExtDirsCp();
 			String[] split = StrUtil.splitToArray(javaExtDirsCp, StrUtil.COLON);
 			if (ArrayUtil.isEmpty(split)) {
 				classPath.append(". -cp ");
@@ -487,10 +496,8 @@ public class ProjectInfoModel extends BaseModel {
 	}
 
 	public boolean removeCopyItem(String copyId) {
-		if (StrUtil.isEmpty(copyId)) {
-			return true;
-		}
-		if (CollUtil.isEmpty(javaCopyItemList)) {
+
+		if (StrUtil.isEmpty(copyId) || CollUtil.isEmpty(javaCopyItemList)) {
 			return true;
 		}
 		int size = javaCopyItemList.size();

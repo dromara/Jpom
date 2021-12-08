@@ -15,8 +15,7 @@
       },
       {
         "title": "项目搜索",
-        "id": "projectSearch",
-        "role": "sys"
+        "id": "projectSearch"
       },
       {
         "title": "SSH管理",
@@ -27,7 +26,6 @@
   {
     "title": "节点分发",
     "icon_v3": "apartment",
-    "dynamic": "showOutGiving",
     "childs": [
       {
         "id": "outgiving",
@@ -35,13 +33,11 @@
       },
       {
         "id": "outgivingLog",
-        "title": "分发日志",
-        "dynamic": "showOutGiving"
+        "title": "分发日志"
       },
       {
         "id": "outgivingWhitelistDirectory",
-        "title": "分发白名单配置",
-        "dynamic": "showOutGiving"
+        "title": "分发白名单配置"
       }
     ]
   },
@@ -87,15 +83,13 @@
     "childs": [
       {
         "id": "user",
-        "title": "用户列表"
-      },
-      {
-        "id": "roleList",
-        "title": "角色管理"
+        "title": "用户列表",
+        "role": "system"
       },
       {
         "id": "user_log",
-        "title": "操作日志"
+        "title": "操作日志",
+        "role": "system"
       }
     ]
   },
@@ -106,27 +100,38 @@
     "childs": [
       {
         "id": "monitorConfigEmail",
-        "title": "邮箱配置"
+        "title": "邮箱配置",
+        "role": "system"
       },
       {
         "id": "cacheManage",
-        "title": "缓存管理"
+        "title": "缓存管理",
+        "role": "system"
       },
       {
         "id": "logManage",
-        "title": "系统日志"
+        "title": "系统日志",
+        "role": "system"
       },
       {
         "id": "update",
-        "title": "在线升级"
+        "title": "在线升级",
+        "role": "sys"
       },
       {
         "id": "sysConfig",
-        "title": "系统配置"
+        "title": "系统配置",
+        "role": "system"
       },
       {
         "id": "backup",
-        "title": "数据库备份"
+        "title": "数据库备份",
+        "role": "system"
+      },
+      {
+        "id": "workspace",
+        "title": "工作空间",
+        "role": "system"
       }
     ]
   }

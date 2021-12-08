@@ -15,11 +15,8 @@
       },
       {
         "id": "jdkList",
-        "title": "JDK管理"
-      },
-      {
-        "id": "projectRecover",
-        "title": "项目回收"
+        "title": "JDK管理",
+        "role": "system"
       }
     ]
   },
@@ -30,11 +27,13 @@
     "childs": [
       {
         "id": "tomcatManage",
-        "title": "Tomcat管理"
+        "title": "Tomcat管理",
+        "role": "system"
       },
       {
         "id": "script",
-        "title": "脚本模板"
+        "title": "脚本模板",
+        "role": "system"
       }
     ]
   },
@@ -45,11 +44,13 @@
     "childs": [
       {
         "id": "nginxList",
-        "title": "nginx列表"
+        "title": "nginx列表",
+        "role": "system"
       },
       {
         "id": "certificate",
-        "title": "证书管理"
+        "title": "证书管理",
+        "role": "system"
       }
     ]
   },
@@ -61,23 +62,28 @@
     "childs": [
       {
         "id": "whitelistDirectory",
-        "title": "白名单配置"
+        "title": "白名单配置",
+        "role": "system"
       },
       {
         "id": "cacheManage",
-        "title": "缓存管理"
+        "title": "缓存管理",
+        "role": "system"
       },
       {
         "id": "logManage",
-        "title": "系统日志"
+        "title": "系统日志",
+        "role": "system"
       },
       {
         "id": "update",
-        "title": "在线升级"
+        "title": "在线升级",
+        "role": "sys"
       },
       {
         "id": "sysConfig",
-        "title": "系统配置"
+        "title": "系统配置",
+        "role": "system"
       }
     ]
   }

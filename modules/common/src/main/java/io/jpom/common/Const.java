@@ -32,8 +32,6 @@ public class Const {
 	 */
 	public static final String ID_STR = "id";
 	public static final String GROUP_STR = "group";
-	public static final String GROUP_COLUMN_STR = "`group`";
-
 
 	/**
 	 * 应用程序类型的配置 key
@@ -68,4 +66,13 @@ public class Const {
 	 * 备份 SQL 文件 后缀
 	 */
 	public static final String SQL_FILE_SUFFIX = ".sql";
+	/**
+	 * 升级提示语
+	 */
+	public static final String UPGRADE_MSG = "升级中大约需要30秒";
+
+	/**
+	 * 请求 header
+	 */
+	public static final String WORKSPACEID_REQ_HEADER = "workspaceId";
 }

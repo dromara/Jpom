@@ -22,6 +22,7 @@
  */
 package io.jpom.common.interceptor;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -30,20 +31,16 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.permission.DynamicData;
 import io.jpom.permission.SystemPermission;
-import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.NodeService;
-import io.jpom.service.user.RoleService;
 import io.jpom.system.AgentException;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * 权限拦截器
@@ -55,25 +52,25 @@ import java.io.IOException;
 public class PermissionInterceptor extends BaseJpomInterceptor {
 
 	private NodeService nodeService;
-	private RoleService roleService;
+	private static final MethodFeature[] DEMO = new MethodFeature[]{
+			MethodFeature.DEL,
+			MethodFeature.UPLOAD,
+			MethodFeature.REMOTE_DOWNLOAD,
+			MethodFeature.EXECUTE};
 
-	/**
-	 * 操作类型参数
-	 */
-	private static final String TYPE = "type";
-
-	/**
-	 * 新增操作
-	 */
-	private static final String TYPE_ADD = "add";
 
 	private void init() {
 		if (nodeService == null) {
 			nodeService = SpringUtil.getBean(NodeService.class);
 		}
-		if (roleService == null) {
-			roleService = SpringUtil.getBean(RoleService.class);
+	}
+
+	private SystemPermission getSystemPermission(HandlerMethod handlerMethod) {
+		SystemPermission systemPermission = handlerMethod.getMethodAnnotation(SystemPermission.class);
+		if (systemPermission == null) {
+			systemPermission = handlerMethod.getBeanType().getAnnotation(SystemPermission.class);
 		}
+		return systemPermission;
 	}
 
 	@Override
@@ -81,62 +78,40 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 		this.init();
 		this.addNode(request);
 		UserModel userModel = BaseServerController.getUserModel();
-		if (userModel == null || userModel.isSystemUser()) {
+		if (userModel == null || userModel.isSuperSystemUser()) {
 			// 没有登录、或者超级管理自己放过
 			return true;
 		}
-		SystemPermission systemPermission = handlerMethod.getMethodAnnotation(SystemPermission.class);
-		if (systemPermission != null && !userModel.isSystemUser()) {
-			// 系统管理员权限
-			this.errorMsg(request, response);
+		boolean systemPermission = this.checkSystemPermission(userModel, response, handlerMethod);
+		if (!systemPermission) {
 			return false;
 		}
-		//
-		Feature feature = handlerMethod.getBeanType().getAnnotation(Feature.class);
-		if (feature == null || feature.cls() == ClassFeature.NULL) {
-			return true;
-		}
-		ClassFeature classFeature = feature.cls();
-		feature = handlerMethod.getMethodAnnotation(Feature.class);
-		if (feature == null || feature.method() == MethodFeature.NULL) {
+		Feature feature = handlerMethod.getMethodAnnotation(Feature.class);
+		if (feature == null) {
 			return true;
 		}
 		MethodFeature method = feature.method();
-		// 判断方法
-		if (roleService.errorMethodPermission(userModel, classFeature, method)) {
-			this.errorMsg(request, response);
+		if (ArrayUtil.contains(DEMO, method) && userModel.isDemoUser()) {
+			this.errorMsg(response, "演示系统不能使用该功能,如果完整体验请部署后使用");
 			return false;
 		}
-		// 判断动态权限
-		DynamicData dynamicData = DynamicData.getDynamicData(classFeature);
-		if (dynamicData != null) {
-			// 排除的方法
-			MethodFeature[] excludeMethod = dynamicData.getExcludeMethod();
-			if (excludeMethod != null) {
-				for (MethodFeature methodFeature : excludeMethod) {
-					if (methodFeature == method) {
-						// 排除方法
-						return true;
-					}
-				}
-			}
-			// 动态参数
-			String parameterName = dynamicData.getParameterName();
-			String parameter = request.getParameter(parameterName);
+		return true;
+	}
 
-			//新增操作不需要校验是否有动态权限
-			String type = request.getParameter(TYPE);
-			if (TYPE_ADD.equalsIgnoreCase(type) && roleService.canAdd(userModel)) {
-				return true;
-			}
+	private boolean checkSystemPermission(UserModel userModel, HttpServletResponse response, HandlerMethod handlerMethod) {
 
-			//
-			if (StrUtil.isNotEmpty(parameter) && roleService.errorDynamicPermission(userModel, classFeature, parameter)) {
-				this.errorMsg(request, response);
-				return false;
-			}
+		SystemPermission systemPermission = this.getSystemPermission(handlerMethod);
+		if (systemPermission == null) {
+			return true;
 		}
-
+		if (!userModel.isSystemUser()) {
+			this.errorMsg(response, "你没有权限:-2");
+			return false;
+		}
+		if (systemPermission.superUser() && !userModel.isSuperSystemUser()) {
+			this.errorMsg(response, "你没有权限:-2");
+			return false;
+		}
 		return true;
 	}
 
@@ -144,7 +119,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 		String nodeId = request.getParameter("nodeId");
 		if (!StrUtil.isBlankOrUndefined(nodeId)) {
 			// 节点信息
-			NodeModel nodeModel = nodeService.getItem(nodeId);
+			NodeModel nodeModel = nodeService.getByKey(nodeId);
 			if (nodeModel != null && !nodeModel.isOpenStatus()) {
 				throw new AgentException(nodeModel.getName() + "节点未启用");
 			}
@@ -152,9 +127,8 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 		}
 	}
 
-	private void errorMsg(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-		JsonMessage<String> jsonMessage = new JsonMessage<>(302, "你没有权限:-2");
+	private void errorMsg(HttpServletResponse response, String msg) {
+		JsonMessage<String> jsonMessage = new JsonMessage<>(302, msg);
 		ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_VALUE);
 	}
 }

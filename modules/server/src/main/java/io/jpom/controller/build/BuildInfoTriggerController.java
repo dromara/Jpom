@@ -25,12 +25,15 @@ package io.jpom.controller.build;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.DigestAlgorithm;
+import cn.hutool.crypto.digest.Digester;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.UrlRedirectUtil;
 import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.model.data.BuildInfoModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -38,10 +41,8 @@ import io.jpom.service.dblog.BuildInfoService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,28 +56,38 @@ import java.util.Map;
 @Feature(cls = ClassFeature.BUILD)
 public class BuildInfoTriggerController extends BaseServerController {
 
-	@Resource
-	private BuildInfoService buildInfoService;
+	private final BuildInfoService buildInfoService;
+
+	/**
+	 * 填充的长度
+	 */
+	public static final int BUILD_INFO_TRIGGER_TOKEN_FILL_LEN = 3;
+	public static final int BUILD_INFO_TRIGGER_TOKEN_DIGEST_COUNT_MAX = 500;
+
+	public BuildInfoTriggerController(BuildInfoService buildInfoService) {
+		this.buildInfoService = buildInfoService;
+	}
 
 	/**
 	 * get a trigger url
 	 *
-	 * @param id
-	 * @return
+	 * @param id id
+	 * @return json
 	 */
 	@RequestMapping(value = "/build/trigger/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EDIT)
 	public String getTriggerUrl(String id) {
 		BuildInfoModel item = buildInfoService.getByKey(id);
 		if (StrUtil.isEmpty(item.getTriggerToken())) {
-			item.setTriggerToken(RandomUtil.randomString(10));
+			item.setTriggerToken(this.createTriggerUrl());
 			buildInfoService.update(item);
 		}
 		String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
 		String url = ServerOpenApi.BUILD_TRIGGER_BUILD2.
-			replace("{id}", item.getId()).
-			replace("{token}", item.getTriggerToken());
+				replace("{id}", item.getId()).
+				replace("{token}", item.getTriggerToken());
 		String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
-		Map<String, String> map = new HashMap<>();
+		Map<String, String> map = new HashMap<>(10);
 		map.put("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
 		return JsonMessage.getString(200, "ok", map);
 	}
@@ -85,18 +96,24 @@ public class BuildInfoTriggerController extends BaseServerController {
 	/**
 	 * reset new trigger url
 	 *
-	 * @param id
-	 * @return
+	 * @param id id
+	 * @return json
 	 */
 	@RequestMapping(value = "/build/trigger/rest", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EDIT)
 	public String triggerRest(String id) {
-		BuildInfoModel item = buildInfoService.getByKey(id);
+		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
 		// new trigger url
-		item.setTriggerToken(RandomUtil.randomString(10));
+		item.setTriggerToken(this.createTriggerUrl());
 		buildInfoService.update(item);
 		return JsonMessage.getString(200, "ok");
 	}
 
+	private String createTriggerUrl() {
+		UserModel user = getUser();
+		int randomInt = RandomUtil.randomInt(1, BUILD_INFO_TRIGGER_TOKEN_DIGEST_COUNT_MAX);
+		String fill = StrUtil.fillBefore(randomInt + "", '0', BUILD_INFO_TRIGGER_TOKEN_FILL_LEN);
+		String nowStr = new Digester(DigestAlgorithm.SHA256).setDigestCount(randomInt).digestHex(user.getId());
+		return StrUtil.format("{}{}", fill, nowStr);
+	}
 }

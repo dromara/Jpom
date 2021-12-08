@@ -24,6 +24,7 @@ package io.jpom.service.dblog;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
@@ -39,12 +40,11 @@ import io.jpom.build.BuildUtil;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
-import io.jpom.service.h2db.BaseDbCommonService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.sql.SQLException;
 
@@ -55,12 +55,12 @@ import java.sql.SQLException;
  * @date 2019/7/20
  */
 @Service
-public class DbBuildHistoryLogService extends BaseDbCommonService<BuildHistoryLog> {
-	@Resource
-	private BuildInfoService buildService;
+public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryLog> {
 
-	public DbBuildHistoryLogService() {
-		super(BuildHistoryLog.TABLE_NAME, "id", BuildHistoryLog.class);
+	private final BuildInfoService buildService;
+
+	public DbBuildHistoryLogService(BuildInfoService buildService) {
+		this.buildService = buildService;
 	}
 
 	/**
@@ -84,17 +84,14 @@ public class DbBuildHistoryLogService extends BaseDbCommonService<BuildHistoryLo
 		if (logId == null) {
 			return;
 		}
-
-		Entity entity = new Entity();
-		entity.set("status", status.getCode());
+		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
+		buildHistoryLog.setId(logId);
+		buildHistoryLog.setStatus(status.getCode());
 		if (status != BuildStatus.PubIng) {
 			// 结束
-			entity.set("endTime", System.currentTimeMillis());
+			buildHistoryLog.setEndTime(SystemClock.now());
 		}
-		//
-		Entity where = new Entity();
-		where.set("id", logId);
-		update(entity, where);
+		this.update(buildHistoryLog);
 	}
 
 	/**
@@ -108,12 +105,10 @@ public class DbBuildHistoryLogService extends BaseDbCommonService<BuildHistoryLo
 			return;
 		}
 
-		Entity entity = new Entity();
-		entity.set("resultDirFile", resultDirFile);
-		//
-		Entity where = new Entity();
-		where.set("id", logId);
-		update(entity, where);
+		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
+		buildHistoryLog.setId(logId);
+		buildHistoryLog.setResultDirFile(resultDirFile);
+		this.update(buildHistoryLog);
 	}
 
 	/**
@@ -124,21 +119,33 @@ public class DbBuildHistoryLogService extends BaseDbCommonService<BuildHistoryLo
 	 */
 	public JsonMessage<String> deleteLogAndFile(String logId) {
 		BuildHistoryLog buildHistoryLog = getByKey(logId);
+		return this.deleteLogAndFile(buildHistoryLog);
+	}
+
+	/**
+	 * 清理文件并删除记录
+	 *
+	 * @param buildHistoryLog 构建记录
+	 * @return json
+	 */
+	public JsonMessage<String> deleteLogAndFile(BuildHistoryLog buildHistoryLog) {
 		if (buildHistoryLog == null) {
 			return new JsonMessage<>(405, "没有对应构建记录");
 		}
 		BuildInfoModel item = buildService.getByKey(buildHistoryLog.getBuildDataId());
 		if (item != null) {
 			File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
-			File dataFile = logFile.getParentFile();
-			if (dataFile.exists()) {
-				boolean s = FileUtil.del(dataFile);
-				if (!s) {
-					return new JsonMessage<>(500, "清理文件失败");
+			if (logFile != null) {
+				File dataFile = logFile.getParentFile();
+				if (dataFile.exists()) {
+					boolean s = FileUtil.del(dataFile);
+					if (!s) {
+						return new JsonMessage<>(500, "清理文件失败");
+					}
 				}
 			}
 		}
-		int count = delByKey(logId);
+		int count = delByKey(buildHistoryLog.getId());
 		return new JsonMessage<>(200, "删除成功", count + "");
 	}
 

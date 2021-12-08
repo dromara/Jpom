@@ -36,7 +36,10 @@ import cn.hutool.setting.Setting;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.JpomManifest;
+import io.jpom.service.node.ProjectInfoCacheService;
+import io.jpom.service.system.WorkspaceService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import org.springframework.beans.factory.DisposableBean;
@@ -96,10 +99,11 @@ public class InitDb implements DisposableBean, InitializingBean {
 			 */
 			String[] files = new String[]{
 					"classpath:/bin/h2-db-v1.sql",
-					"classpath:/bin/h2-db-v2.sql"
+					"classpath:/bin/h2-db-v2.sql",
+					"classpath:/bin/h2-db-v3.sql",
 			};
 			// 加载 sql 变更记录，避免重复执行
-			Set<String> executeSqlLog = DbConfig.loadExecuteSqlLog();
+			Set<String> executeSqlLog = instance.loadExecuteSqlLog();
 			for (String sqlFile : files) {
 				InputStream inputStream = ResourceUtil.getStream(sqlFile);
 				String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
@@ -112,20 +116,17 @@ public class InitDb implements DisposableBean, InitializingBean {
 				DefaultSystemLog.getLog().info("exec init SQL file: {} complete, and affected rows is: {}", sqlFile, rows);
 				executeSqlLog.add(sha1);
 			}
-			DbConfig.saveExecuteSqlLog(executeSqlLog);
+			instance.saveExecuteSqlLog(executeSqlLog);
 			DSFactory.setCurrentDSFactory(dsFactory);
-			/**
-			 * @author Hotstrip
-			 * @date 2021-08-03
-			 * load build.js data to DB
-			 */
-			LoadBuildJsonToDB.getInstance().doJsonToSql();
+			//
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("初始化数据库失败", e);
 			System.exit(0);
 			return;
 		}
 		instance.initOk();
+		// json load to db
+		InitDb.loadJsonToDb();
 		Console.log("h2 db Successfully loaded, url is 【{}】", dbUrl);
 		if (JpomManifest.getInstance().isDebug()) {
 			//
@@ -139,6 +140,35 @@ public class InitDb implements DisposableBean, InitializingBean {
 		}
 	}
 
+	private static void loadJsonToDb() {
+		/**
+		 * @author Hotstrip
+		 * @date 2021-08-03
+		 * load build.js data to DB
+		 */
+		LoadBuildJsonToDB.getInstance().doJsonToSql();
+		// @author bwcx_jzy @date 2021-12-02
+		LoadJsonConfigToDb instance = LoadJsonConfigToDb.getInstance();
+		instance.loadIpConfig();
+		instance.loadMailConfig();
+		instance.loadOutGivingWhitelistConfig();
+		instance.loadUserInfo();
+		// init workspace
+		WorkspaceService workspaceService = SpringUtil.getBean(WorkspaceService.class);
+		workspaceService.checkInitDefault();
+		//
+		instance.loadNodeInfo();
+		instance.loadSshInfo();
+		instance.loadMonitorInfo();
+		instance.loadOutgivinInfo();
+		//
+		workspaceService.convertNullWorkspaceId();
+		instance.convertMonitorLogField();
+		//  同步项目
+		ProjectInfoCacheService projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
+		projectInfoCacheService.syncAllNode();
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
@@ -150,7 +180,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 			DSFactory dsFactory = GlobalDSFactory.get();
 			dsFactory.destroy();
 			Console.log("h2 db destroy");
-		} catch (Exception ignored) {
+		} catch (Throwable ignored) {
 		}
 	}
 }

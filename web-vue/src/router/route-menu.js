@@ -30,7 +30,8 @@ const routeMenuMap = {
   'sysConfig': '/system/config',
   'projectSearch': '/node/search',
   // 数据库备份
-  'backup': '/system/backup'
+  'backup': '/system/backup',
+  'workspace': '/system/workspace'
 }
 
 export default routeMenuMap

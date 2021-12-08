@@ -27,9 +27,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -38,13 +35,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.Const;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.data.*;
+import io.jpom.model.PageResultDto;
+import io.jpom.model.data.BuildInfoModel;
+import io.jpom.model.data.RepositoryModel;
+import io.jpom.model.data.SshModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -57,12 +55,8 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
@@ -78,53 +72,46 @@ import java.util.Objects;
 @Feature(cls = ClassFeature.BUILD)
 public class BuildInfoController extends BaseServerController {
 
-	@Resource
-	private DbBuildHistoryLogService dbBuildHistoryLogService;
-	@Resource
-	private SshService sshService;
 
-	@Resource
-	private BuildInfoService buildInfoService;
-	@Resource
-	private RepositoryService repositoryService;
+	private final DbBuildHistoryLogService dbBuildHistoryLogService;
+	private final SshService sshService;
+	private final BuildInfoService buildInfoService;
+	private final RepositoryService repositoryService;
 
-
-	/**
-	 * @return
-	 * @author Hotstrip
-	 * get build group list
-	 * 获取构建分组列表
-	 */
-	@RequestMapping(value = "/build/group/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String groupList() {
-		List<String> groupList = buildInfoService.listGroup();
-		return JsonMessage.getString(200, "success", groupList);
+	public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
+							   SshService sshService,
+							   BuildInfoService buildInfoService,
+							   RepositoryService repositoryService) {
+		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+		this.sshService = sshService;
+		this.buildInfoService = buildInfoService;
+		this.repositoryService = repositoryService;
 	}
 
 	/**
 	 * load build list with params
 	 *
-	 * @param group
-	 * @return
+	 * @return json
 	 */
 	@RequestMapping(value = "/build/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
-	public String getBuildList(String group,
-							   @ValidatorConfig(value = {
-									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
-							   }, defaultVal = "10") int limit,
-							   @ValidatorConfig(value = {
-									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
-							   }, defaultVal = "1") int page) {
-		// if group is empty string, dont set into entity property
-		Entity where = Entity.create()
-				.setIgnoreNull(Const.GROUP_COLUMN_STR, StrUtil.isEmpty(group) ? null : group);
-		Page pageReq = new Page(page, limit);
+	public String getBuildList() {
 		// load list with page
-		PageResult<BuildInfoModel> list = buildInfoService.listPage(where, pageReq);
-		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", list);
-		jsonObject.put("total", list.getTotal());
-		return jsonObject.toString();
+		PageResultDto<BuildInfoModel> list = buildInfoService.listPage(getRequest());
+		return JsonMessage.getString(200, "", list);
+	}
+
+	/**
+	 * load build list with params
+	 *
+	 * @return json
+	 */
+	@GetMapping(value = "/build/list_all", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String getBuildListAll() {
+		// load list with page
+		List<BuildInfoModel> modelList = buildInfoService.listByWorkspace(getRequest());
+		return JsonMessage.getString(200, "", modelList);
 	}
 
 	/**
@@ -142,7 +129,6 @@ public class BuildInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.EditBuild)
 	@Feature(method = MethodFeature.EDIT)
 	public String updateMonitor(String id,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空")) String name,
@@ -153,7 +139,7 @@ public class BuildInfoController extends BaseServerController {
 								String branchName, String branchTagName, String group,
 								String extraData) {
 		// 根据 repositoryId 查询仓库信息
-		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId);
+		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, getRequest());
 		Assert.notNull(repositoryModel, "无效的仓库信息");
 		// 如果是 GIT 需要检测分支是否存在
 		if (RepositoryModel.RepoType.Git.getCode() == repositoryModel.getRepoType()) {
@@ -196,16 +182,16 @@ public class BuildInfoController extends BaseServerController {
 				return formatProject;
 			}
 		} else if (releaseMethod1 == BuildReleaseMethod.Ssh) {
-			String formatSsh = formatSsh(jsonObject);
-			if (formatSsh != null) {
-				return formatSsh;
-			}
+			this.formatSsh(jsonObject);
 		} else if (releaseMethod1 == BuildReleaseMethod.Outgiving) {
 			String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_1");
 			if (StrUtil.isEmpty(releaseMethodDataId)) {
 				return JsonMessage.getString(405, "请选择分发项目");
 			}
 			jsonObject.put("releaseMethodDataId", releaseMethodDataId);
+		} else if (releaseMethod1 == BuildReleaseMethod.LocalCommand) {
+			this.formatLocalCommand(jsonObject);
+			jsonObject.put("releaseMethodDataId", "LocalCommand");
 		}
 		// 检查关联数据ID
 		buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));
@@ -231,38 +217,32 @@ public class BuildInfoController extends BaseServerController {
 	 * 当发布方式为【SSH】的时候
 	 *
 	 * @param jsonObject 配置信息
-	 * @return 非 null 错误信息
 	 */
-	private String formatSsh(JSONObject jsonObject) {
+	private void formatSsh(JSONObject jsonObject) {
 		// 发布方式
 		String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_3");
-		if (StrUtil.isEmpty(releaseMethodDataId)) {
-			return JsonMessage.getString(405, "请选择分发SSH项");
-		}
+		Assert.hasText(releaseMethodDataId, "请选择分发SSH项");
+
 		String releasePath = jsonObject.getString("releasePath");
-		if (StrUtil.isEmpty(releasePath)) {
-			return JsonMessage.getString(405, "请输入发布到ssh中的目录");
-		}
+		Assert.hasText(releasePath, "请输入发布到ssh中的目录");
+
 		releasePath = FileUtil.normalize(releasePath);
-		SshModel sshServiceItem = sshService.getItem(releaseMethodDataId);
+		SshModel sshServiceItem = sshService.getByKey(releaseMethodDataId, getRequest());
 		Assert.notNull(sshServiceItem, "没有对应的ssh项");
 		jsonObject.put("releaseMethodDataId", releaseMethodDataId);
 		//
 		if (releasePath.startsWith(StrUtil.SLASH)) {
 			// 以根路径开始
-			List<String> fileDirs = sshServiceItem.getFileDirs();
-			if (fileDirs == null || fileDirs.isEmpty()) {
-				return JsonMessage.getString(405, "此ssh未授权操作此目录");
-			}
+			List<String> fileDirs = sshServiceItem.fileDirs();
+			Assert.notEmpty(fileDirs, "此ssh未授权操作此目录");
+
 			boolean find = false;
 			for (String fileDir : fileDirs) {
 				if (FileUtil.isSub(new File(fileDir), new File(releasePath))) {
 					find = true;
 				}
 			}
-			if (!find) {
-				return JsonMessage.getString(405, "此ssh未授权操作此目录");
-			}
+			Assert.state(find, "此ssh未授权操作此目录");
 		}
 		// 发布命令
 		String releaseCommand = jsonObject.getString("releaseCommand");
@@ -273,12 +253,19 @@ public class BuildInfoController extends BaseServerController {
 			String[] commands = StrUtil.splitToArray(releaseCommand, StrUtil.LF);
 
 			for (String commandItem : commands) {
-				if (!SshModel.checkInputItem(sshServiceItem, commandItem)) {
-					return JsonMessage.getString(405, "发布命令中包含禁止执行的命令");
-				}
+				boolean checkInputItem = SshModel.checkInputItem(sshServiceItem, commandItem);
+				Assert.state(checkInputItem, "发布命令中包含禁止执行的命令");
 			}
 		}
-		return null;
+	}
+
+	private void formatLocalCommand(JSONObject jsonObject) {
+		// 发布命令
+		String releaseCommand = jsonObject.getString("releaseCommand");
+		if (StrUtil.isNotEmpty(releaseCommand)) {
+			int length = releaseCommand.length();
+			Assert.state(length <= 4000, "发布命令长度限制在4000字符");
+		}
 	}
 
 	/**
@@ -314,10 +301,11 @@ public class BuildInfoController extends BaseServerController {
 	 * @throws Exception 异常
 	 */
 	@RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
 	public String branchList(
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空")) String repositoryId) throws Exception {
 		// 根据 repositoryId 查询仓库信息
-		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId);
+		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, false);
 		Assert.notNull(repositoryModel, "无效的仓库信息");
 		//
 		Assert.state(repositoryModel.getRepoType() == 0, "只有 GIT 仓库才有分支信息");
@@ -335,11 +323,10 @@ public class BuildInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@PostMapping(value = "/build/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.DelBuild)
 	@Feature(method = MethodFeature.DEL)
 	public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
 		// 查询构建信息
-		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
+		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
 		//
 		String e = buildInfoService.checkStatus(buildInfoModel.getStatus());
@@ -368,11 +355,10 @@ public class BuildInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@PostMapping(value = "/build/clean-source", produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.BuildCleanSource)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
 		// 查询构建信息
-		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
+		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
 
 		File source = BuildUtil.getSourceById(buildInfoModel.getId());

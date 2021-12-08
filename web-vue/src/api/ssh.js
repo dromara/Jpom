@@ -1,19 +1,32 @@
 import axios from "./config";
 
 // ssh 列表
-export function getSshList() {
+export function getSshList(params) {
   return axios({
     url: "/node/ssh/list_data.json",
     method: "post",
+    data: params,
+  });
+}
+
+// 检查 ssh 是否安装 插件端
+export function getSshCheckAgent(params) {
+  return axios({
+    url: "/node/ssh/check_agent.json",
+    method: "get",
+    params: params,
+    timeout: 0,
+    headers: {
+      loading: "no",
+    },
   });
 }
 
 // 根据 nodeId 查询列表
-export function getSshListByNodeId(nodeId) {
+export function getSshListAll() {
   return axios({
-    url: "/node/ssh/list_by_node_id",
-    method: "post",
-    data: { nodeId },
+    url: "/node/ssh/list_data_all.json",
+    method: "get",
   });
 }
 

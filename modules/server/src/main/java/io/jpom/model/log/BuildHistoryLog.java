@@ -22,107 +22,221 @@
  */
 package io.jpom.model.log;
 
+import cn.hutool.core.annotation.PropIgnore;
+import cn.hutool.core.io.FileUtil;
 import io.jpom.build.BaseBuildModule;
+import io.jpom.build.BuildUtil;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
+import io.jpom.service.h2db.TableName;
+
+import java.io.File;
 
 /**
  * 构建历史记录
  *
  * @author bwcx_jzy
  * @date 2019/7/17
+ * @see BaseBuildModule
  **/
-public class BuildHistoryLog extends BaseBuildModule {
-    /**
-     * 表名
-     */
-    public static final String TABLE_NAME = BuildHistoryLog.class.getSimpleName().toUpperCase();
-
-    /**
-     * 关联的构建id
-     *
-     * @see BuildInfoModel#getId()
-     */
-    private String buildDataId;
+@TableName("BUILDHISTORYLOG")
+public class BuildHistoryLog extends BaseWorkspaceModel {
+	/**
+	 * 发布方式
+	 *
+	 * @see BuildReleaseMethod
+	 * @see BuildInfoModel#getReleaseMethod()
+	 */
+	private Integer releaseMethod;
+	/**
+	 * 发布方法的数据id
+	 *
+	 * @see BuildInfoModel#getReleaseMethodDataId()
+	 */
+	private String releaseMethodDataId;
+	/**
+	 * 分发后的操作
+	 * 仅在项目发布类型生效
+	 *
+	 * @see io.jpom.model.AfterOpt
+	 * @see BuildInfoModel#getExtraData()
+	 */
+	private Integer afterOpt;
+	/**
+	 * 是否清空旧包发布
+	 */
+	private Boolean clearOld;
+	/**
+	 * 构建产物目录
+	 */
+	private String resultDirFile;
+	/**
+	 * 发布命令  ssh 才能用上
+	 */
+	private String releaseCommand;
+	/**
+	 * 发布到ssh中的目录
+	 */
+	private String releasePath;
+	/**
+	 * 关联的构建id
+	 *
+	 * @see BuildInfoModel#getId()
+	 */
+	private String buildDataId;
 	/**
 	 * 构建名称
 	 */
 	private String buildName;
-    /**
-     * 构建编号
-     *
-     * @see BuildInfoModel#getBuildId()
-     */
-    private int buildNumberId;
-    /**
-     * 状态
-     *
-     * @see BuildStatus
-     */
-    private int status;
-    /**
-     * 开始时间
-     */
-    private long startTime;
-    /**
-     * 结束时间
-     */
-    private long endTime;
-    /**
-     * 构建人
-     *
-     * @see UserModel#getName()
-     */
-    private String buildUser;
+	/**
+	 * 构建编号
+	 *
+	 * @see BuildInfoModel#getBuildId()
+	 */
+	private Integer buildNumberId;
+	/**
+	 * 状态
+	 *
+	 * @see BuildStatus
+	 */
+	private Integer status;
+	/**
+	 * 开始时间
+	 */
+	private Long startTime;
+	/**
+	 * 结束时间
+	 */
+	private Long endTime;
+	/**
+	 * 是否存在构建产物
+	 */
+	@PropIgnore
+	private Boolean hashFile;
+	/**
+	 * 是否存在日志
+	 */
+	@PropIgnore
+	private Boolean hasLog;
 
-    public String getBuildUser() {
-        return buildUser;
-    }
+	public Boolean getHashFile() {
+		File file = BuildUtil.getHistoryPackageFile(getBuildDataId(), getBuildNumberId(), getResultDirFile());
+		hashFile = FileUtil.exist(file);
+		return hashFile;
+	}
 
-    public void setBuildUser(String buildUser) {
-        this.buildUser = buildUser;
-    }
+	public void setHashFile(Boolean hashFile) {
+		this.hashFile = hashFile;
+	}
 
-    public String getBuildDataId() {
-        return buildDataId;
-    }
+	public Boolean getHasLog() {
+		File file = BuildUtil.getLogFile(getBuildDataId(), getBuildNumberId());
+		hasLog = FileUtil.exist(file);
+		return hasLog;
+	}
 
-    public void setBuildDataId(String buildDataId) {
-        this.buildDataId = buildDataId;
-    }
+	public void setHasLog(Boolean hasLog) {
+		this.hasLog = hasLog;
+	}
 
-    public int getBuildNumberId() {
-        return buildNumberId;
-    }
+	public Integer getReleaseMethod() {
+		return releaseMethod;
+	}
 
-    public void setBuildNumberId(int buildNumberId) {
-        this.buildNumberId = buildNumberId;
-    }
+	public void setReleaseMethod(Integer releaseMethod) {
+		this.releaseMethod = releaseMethod;
+	}
 
-    public int getStatus() {
-        return status;
-    }
+	public String getReleaseMethodDataId() {
+		return releaseMethodDataId;
+	}
 
-    public void setStatus(int status) {
-        this.status = status;
-    }
+	public void setReleaseMethodDataId(String releaseMethodDataId) {
+		this.releaseMethodDataId = releaseMethodDataId;
+	}
 
-    public long getStartTime() {
-        return startTime;
-    }
+	public Integer getAfterOpt() {
+		return afterOpt;
+	}
 
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
+	public void setAfterOpt(Integer afterOpt) {
+		this.afterOpt = afterOpt;
+	}
 
-    public long getEndTime() {
-        return endTime;
-    }
+	public Boolean getClearOld() {
+		return clearOld;
+	}
 
-    public void setEndTime(long endTime) {
-        this.endTime = endTime;
-    }
+	public void setClearOld(Boolean clearOld) {
+		this.clearOld = clearOld;
+	}
+
+	public String getResultDirFile() {
+		return resultDirFile;
+	}
+
+	public void setResultDirFile(String resultDirFile) {
+		this.resultDirFile = resultDirFile;
+	}
+
+	public String getReleaseCommand() {
+		return releaseCommand;
+	}
+
+	public void setReleaseCommand(String releaseCommand) {
+		this.releaseCommand = releaseCommand;
+	}
+
+	public String getReleasePath() {
+		return releasePath;
+	}
+
+	public void setReleasePath(String releasePath) {
+		this.releasePath = releasePath;
+	}
+
+
+	public String getBuildDataId() {
+		return buildDataId;
+	}
+
+	public void setBuildDataId(String buildDataId) {
+		this.buildDataId = buildDataId;
+	}
+
+	public Integer getBuildNumberId() {
+		return buildNumberId;
+	}
+
+	public void setBuildNumberId(Integer buildNumberId) {
+		this.buildNumberId = buildNumberId;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
 
 	public String getBuildName() {
 		return buildName;

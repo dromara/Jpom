@@ -34,20 +34,21 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.JpomServerApplication;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.JpomManifest;
-import io.jpom.common.RemoteVersion;
-import io.jpom.common.Type;
+import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,9 +64,12 @@ import java.util.Objects;
  */
 @RestController
 @RequestMapping(value = "system")
+@Feature(cls = ClassFeature.SYSTEM_UPGRADE)
+@SystemPermission(superUser = true)
 public class SystemUpdateController extends BaseServerController {
 
 	@PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
 	public String info() {
 		NodeModel nodeModel = tryGetNode();
 		if (nodeModel != null) {
@@ -102,8 +106,7 @@ public class SystemUpdateController extends BaseServerController {
 	}
 
 	@PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.UpdateSys)
-	@SystemPermission
+	@Feature(method = MethodFeature.EXECUTE)
 	public String uploadJar() throws IOException {
 		NodeModel nodeModel = tryGetNode();
 		if (nodeModel != null) {
@@ -132,7 +135,7 @@ public class SystemUpdateController extends BaseServerController {
 		JpomManifest.releaseJar(path, version);
 		//
 		JpomApplication.restart();
-		return JsonMessage.getString(200, "升级中大约需要30秒");
+		return JsonMessage.getString(200, Const.UPGRADE_MSG);
 	}
 
 	/**
@@ -158,12 +161,13 @@ public class SystemUpdateController extends BaseServerController {
 	 * @see RemoteVersion
 	 */
 	@GetMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DOWNLOAD)
 	public String upgrade() throws IOException {
 		NodeModel nodeModel = tryGetNode();
 		if (nodeModel != null) {
 			return NodeForward.request(getNode(), getRequest(), NodeUrl.REMOTE_UPGRADE).toString();
 		}
 		RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath());
-		return JsonMessage.getString(200, "升级中大约需要30秒");
+		return JsonMessage.getString(200, Const.UPGRADE_MSG);
 	}
 }

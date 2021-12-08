@@ -33,10 +33,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import io.jpom.JpomAgentApplication;
 import io.jpom.JpomApplication;
-import io.jpom.common.BaseAgentController;
-import io.jpom.common.JpomManifest;
-import io.jpom.common.RemoteVersion;
-import io.jpom.common.Type;
+import io.jpom.common.*;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
@@ -84,7 +81,7 @@ public class SystemUpdateController extends BaseAgentController {
 		JpomManifest.releaseJar(path, version);
 		//
 		JpomApplication.restart();
-		return JsonMessage.getString(200, "升级中大约需要30秒");
+		return JsonMessage.getString(200, Const.UPGRADE_MSG);
 	}
 
 	@PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -120,6 +117,6 @@ public class SystemUpdateController extends BaseAgentController {
 	@PostMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String upgrade() throws IOException {
 		RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath());
-		return JsonMessage.getString(200, "升级中大约需要30秒");
+		return JsonMessage.getString(200, Const.UPGRADE_MSG);
 	}
 }

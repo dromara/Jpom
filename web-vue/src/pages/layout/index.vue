@@ -1,15 +1,22 @@
 <template>
   <a-layout id="app-layout">
     <a-layout-sider v-model="collapsed" :trigger="null" collapsible class="sider">
-      <div class="logo" @click="toggleGuide()">
-        <img src="/logo_image" />
-        {{ this.subName }}
-      </div>
+      <a-tooltip placement="right" title="点击可以切换开启操作引导">
+        <div class="logo" @click="toggleGuide()">
+          <img :src="logoUrl" />
+          {{ this.subName }}
+        </div>
+      </a-tooltip>
       <side-menu class="side-menu" />
     </a-layout-sider>
     <a-layout>
       <a-layout-header class="app-header">
-        <a-icon class="trigger" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="() => (collapsed = !collapsed)" />
+        <a-tooltip title="折叠左侧菜单栏">
+          <a-icon class="icon-btn" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="() => (collapsed = !collapsed)" />
+        </a-tooltip>
+        <a-tooltip title="关闭其他标签，只保留当前的 Tab">
+          <a-icon class="icon-btn" style="padding-left: 0px" type="close-circle" @click="closeTabs" />
+        </a-tooltip>
         <content-tab />
         <user-header />
       </a-layout-header>
@@ -38,6 +45,7 @@ export default {
     return {
       collapsed: false,
       subName: "项目管理",
+      logoUrl: "",
     };
   },
   computed: {
@@ -131,6 +139,7 @@ export default {
           if (res.data.subName) {
             this.subName = res.data.subName;
           }
+          this.logoUrl = ((res.data.routerBase || "") + "/logo_image").replace(new RegExp("//", "gm"), "/");
         }
 
         if (res.code === 999) {
@@ -145,18 +154,27 @@ export default {
         }
       });
     },
+    // 关闭 tabs
+    closeTabs() {
+      this.$notification.success({
+        message: "操作成功",
+        top: "100px",
+        duration: 1,
+      });
+      this.$store.dispatch("clearTabs");
+    },
   },
 };
 </script>
 <style>
 #app-layout {
-  height: 100vh;
+  min-height: 100vh;
 }
-#app-layout .trigger {
+#app-layout .icon-btn {
   float: left;
   font-size: 18px;
   line-height: 64px;
-  padding: 0 24px;
+  padding: 0 14px;
   cursor: pointer;
   transition: color 0.3s;
 }
@@ -187,7 +205,7 @@ export default {
   padding: 0;
 }
 .sider {
-  max-height: 100vh;
+  min-height: 100vh;
   overflow-y: auto;
 }
 .layout-content {

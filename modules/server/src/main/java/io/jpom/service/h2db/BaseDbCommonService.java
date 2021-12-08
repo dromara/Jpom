@@ -25,6 +25,7 @@ package io.jpom.service.h2db;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.PageUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.TypeUtil;
@@ -32,6 +33,9 @@ import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
+import cn.hutool.db.sql.Order;
+import cn.jiangzeyin.common.DefaultSystemLog;
+import io.jpom.model.PageResultDto;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.db.DbConfig;
 
@@ -40,10 +44,11 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * db 日志记录表
+ * 数据库基础操作 通用 service
  *
  * @author bwcx_jzy
  * @date 2019/7/20
@@ -89,7 +94,7 @@ public abstract class BaseDbCommonService<T> {
 		return tableName;
 	}
 
-	protected String getTableName() {
+	public String getTableName() {
 		return tableName;
 	}
 
@@ -105,6 +110,7 @@ public abstract class BaseDbCommonService<T> {
 	public void insert(T t) {
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
 			return;
 		}
 		Db db = Db.use();
@@ -125,6 +131,7 @@ public abstract class BaseDbCommonService<T> {
 	public void insert(Collection<T> t) {
 		if (!DbConfig.getInstance().isInit() || CollUtil.isEmpty(t)) {
 			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
 			return;
 		}
 		Db db = Db.use();
@@ -143,7 +150,7 @@ public abstract class BaseDbCommonService<T> {
 	 * @param data 实体对象
 	 * @return entity
 	 */
-	protected Entity dataBeanToEntity(T data) {
+	public Entity dataBeanToEntity(T data) {
 		Entity entity = new Entity(tableName);
 		// 转换为 map
 		Map<String, Object> beanToMap = BeanUtil.beanToMap(data, new LinkedHashMap<>(), true, s -> StrUtil.format("`{}`", s));
@@ -160,6 +167,7 @@ public abstract class BaseDbCommonService<T> {
 	public int insert(Entity entity) {
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
 			return 0;
 		}
 		Db db = Db.use();
@@ -192,6 +200,7 @@ public abstract class BaseDbCommonService<T> {
 	public int update(Entity entity, Entity where) {
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
 			return 0;
 		}
 		Db db = Db.use();
@@ -215,24 +224,52 @@ public abstract class BaseDbCommonService<T> {
 	 * @return 数据
 	 */
 	public T getByKey(String keyValue) {
+		return this.getByKey(keyValue, true);
+	}
+
+	/**
+	 * 根据主键查询实体
+	 *
+	 * @param keyValue 主键值
+	 * @return 数据
+	 */
+	public T getByKey(String keyValue, boolean fill) {
+		return this.getByKey(keyValue, fill, null);
+	}
+
+	/**
+	 * 根据主键查询实体
+	 *
+	 * @param keyValue 主键值
+	 * @return 数据
+	 */
+	public T getByKey(String keyValue, boolean fill, Consumer<Entity> consumer) {
 		if (StrUtil.isEmpty(keyValue)) {
 			return null;
 		}
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
 			return null;
 		}
 		Entity where = new Entity(tableName);
 		where.set(key, keyValue);
 		Db db = Db.use();
 		db.setWrapper((Character) null);
+		if (consumer != null) {
+			consumer.accept(where);
+		}
 		Entity entity;
 		try {
 			entity = db.get(where);
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
-		return this.entityToBean(entity, this.tClass);
+		T entityToBean = this.entityToBean(entity, this.tClass);
+		if (fill) {
+			this.fillSelectResult(entityToBean);
+		}
+		return entityToBean;
 	}
 
 	/**
@@ -254,21 +291,54 @@ public abstract class BaseDbCommonService<T> {
 	}
 
 	/**
+	 * entity 转 实体
+	 *
+	 * @param entity Entity
+	 * @return data
+	 */
+	public T entityToBean(Entity entity) {
+		if (entity == null) {
+			return null;
+		}
+		CopyOptions copyOptions = new CopyOptions();
+		copyOptions.setIgnoreError(true);
+		copyOptions.setIgnoreCase(true);
+		T toBean = BeanUtil.toBean(entity, this.tClass, copyOptions);
+		this.fillSelectResult(toBean);
+		return toBean;
+	}
+
+	/**
 	 * 根据主键生成
 	 *
 	 * @param keyValue 主键值
 	 * @return 影响行数
 	 */
 	public int delByKey(String keyValue) {
-		if (StrUtil.isEmpty(keyValue)) {
+		return this.delByKey(keyValue, null);
+	}
+
+	/**
+	 * 根据主键生成
+	 *
+	 * @param keyValue 主键值
+	 * @param consumer 回调
+	 * @return 影响行数
+	 */
+	public int delByKey(Object keyValue, Consumer<Entity> consumer) {
+		if (ObjectUtil.isEmpty(keyValue)) {
 			return 0;
 		}
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
 			return 0;
 		}
 		Entity where = new Entity(tableName);
 		where.set(key, keyValue);
+		if (consumer != null) {
+			consumer.accept(where);
+		}
 		return del(where);
 	}
 
@@ -281,6 +351,7 @@ public abstract class BaseDbCommonService<T> {
 	public int del(Entity where) {
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
 			return 0;
 		}
 		where.setTableName(tableName);
@@ -314,20 +385,79 @@ public abstract class BaseDbCommonService<T> {
 	 * @return true 存在
 	 */
 	public boolean exists(Entity where) {
+		long count = this.count(where);
+		return count > 0;
+	}
+
+	/**
+	 * 查询记录条数
+	 *
+	 * @param where 条件
+	 * @return count
+	 */
+	public long count(Entity where) {
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
-			return false;
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
+			return 0;
 		}
 		where.setTableName(getTableName());
 		Db db = Db.use();
 		db.setWrapper((Character) null);
-		long count;
 		try {
-			count = db.count(where);
+			return db.count(where);
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
-		return count > 0;
+	}
+
+	/**
+	 * 查询一个
+	 *
+	 * @param where 条件
+	 * @return Entity
+	 */
+	public Entity query(Entity where) {
+		List<Entity> entities = this.queryList(where);
+		return CollUtil.getFirst(entities);
+	}
+
+	/**
+	 * 查询列表
+	 *
+	 * @param where 条件
+	 * @return List
+	 */
+	public List<Entity> queryList(Entity where) {
+		if (!DbConfig.getInstance().isInit()) {
+			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
+			return null;
+		}
+		where.setTableName(getTableName());
+		Db db = Db.use();
+		db.setWrapper((Character) null);
+		try {
+			return db.find(where);
+		} catch (SQLException e) {
+			throw new JpomRuntimeException("数据库异常", e);
+		}
+	}
+
+	/**
+	 * 查询列表
+	 *
+	 * @param data   数据
+	 * @param count  查询数量
+	 * @param orders 排序
+	 * @return List
+	 */
+	public List<T> queryList(T data, int count, Order... orders) {
+		Entity where = this.dataBeanToEntity(data);
+		Page page = new Page(1, count);
+		page.addOrder(orders);
+		PageResultDto<T> tPageResultDto = this.listPage(where, page);
+		return tPageResultDto.getResult();
 	}
 
 	/**
@@ -337,10 +467,12 @@ public abstract class BaseDbCommonService<T> {
 	 * @param page  分页
 	 * @return 结果
 	 */
-	public PageResult<T> listPage(Entity where, Page page) {
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public PageResultDto<T> listPage(Entity where, Page page) {
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
-			return new PageResult<>(page.getPageNumber(), page.getPageSize(), 0);
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
+			return PageResultDto.EMPTY;
 		}
 		where.setTableName(getTableName());
 		PageResult<Entity> pageResult;
@@ -349,13 +481,29 @@ public abstract class BaseDbCommonService<T> {
 		try {
 			pageResult = db.page(where, page);
 		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+			throw new JpomRuntimeException("数据库异常:" + e.getMessage(), e);
 		}
 		//
-		List<T> list = pageResult.stream().map(entity -> this.entityToBean(entity, this.tClass)).collect(Collectors.toList());
-		PageResult<T> pageResult1 = new PageResult<>(pageResult.getPage(), pageResult.getPageSize(), pageResult.getTotal());
-		pageResult1.addAll(list);
-		return pageResult1;
+		List<T> list = pageResult.stream().map(entity -> {
+			T entityToBean = this.entityToBean(entity, this.tClass);
+			this.fillSelectResult(entityToBean);
+			return entityToBean;
+		}).collect(Collectors.toList());
+		PageResultDto<T> pageResultDto = new PageResultDto(pageResult);
+		pageResultDto.setResult(list);
+		return pageResultDto;
+	}
+
+	/**
+	 * 分页查询
+	 *
+	 * @param where 条件
+	 * @param page  分页
+	 * @return 结果
+	 */
+	public List<T> listPageOnlyResult(Entity where, Page page) {
+		PageResultDto<T> pageResultDto = this.listPage(where, page);
+		return pageResultDto.getResult();
 	}
 
 	/**
@@ -366,8 +514,33 @@ public abstract class BaseDbCommonService<T> {
 	 * @return list
 	 */
 	public List<Entity> query(String sql, Object... params) {
+		if (!DbConfig.getInstance().isInit()) {
+			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
+			return null;
+		}
 		try {
 			return Db.use().query(sql, params);
+		} catch (SQLException e) {
+			throw new JpomRuntimeException("数据库异常", e);
+		}
+	}
+
+	/**
+	 * sql 执行
+	 *
+	 * @param sql    sql 语句
+	 * @param params 参数
+	 * @return list
+	 */
+	public int execute(String sql, Object... params) {
+		if (!DbConfig.getInstance().isInit()) {
+			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
+			return 0;
+		}
+		try {
+			return Db.use().execute(sql, params);
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
@@ -383,9 +556,58 @@ public abstract class BaseDbCommonService<T> {
 	 */
 	public List<T> queryList(String sql, Object... params) {
 		List<Entity> query = this.query(sql, params);
-		if (query == null) {
+		if (query != null) {
+			return query.stream().map((entity -> {
+				T entityToBean = this.entityToBean(entity, this.tClass);
+				this.fillSelectResult(entityToBean);
+				return entityToBean;
+			})).collect(Collectors.toList());
+		}
+		return null;
+	}
+
+	/**
+	 * 查询实体对象
+	 *
+	 * @param data 实体
+	 * @return data
+	 */
+	public List<T> listByBean(T data) {
+		Entity where = this.dataBeanToEntity(data);
+		List<Entity> entitys = this.queryList(where);
+		return this.entityToBeanList(entitys);
+	}
+
+	public List<T> entityToBeanList(List<Entity> entitys) {
+		if (entitys == null) {
 			return null;
 		}
-		return query.stream().map((entity -> this.entityToBean(entity, this.tClass))).collect(Collectors.toList());
+		return entitys.stream().map((entity -> {
+			T entityToBean = this.entityToBean(entity, this.tClass);
+			this.fillSelectResult(entityToBean);
+			return entityToBean;
+		})).collect(Collectors.toList());
+	}
+
+	/**
+	 * 查询实体对象
+	 *
+	 * @param data 实体
+	 * @return data
+	 */
+	public T queryByBean(T data) {
+		Entity where = this.dataBeanToEntity(data);
+		Entity entity = this.query(where);
+		T entityToBean = this.entityToBean(entity, this.tClass);
+		this.fillSelectResult(entityToBean);
+		return entityToBean;
+	}
+
+	/**
+	 * 查询结果 填充
+	 *
+	 * @param data 数据
+	 */
+	protected void fillSelectResult(T data) {
 	}
 }

@@ -15,6 +15,17 @@ export function getRepositoryList(params) {
 }
 
 /**
+ * 仓库列表 all
+ *
+ */
+export function getRepositoryListAll() {
+  return axios({
+    url: "/build/repository/list_all",
+    method: "get",
+  });
+}
+
+/**
  * 编辑仓库信息，新增或者删除
  * @param {
  *  id: id

@@ -5,22 +5,19 @@ import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.AgentWhitelist;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
 import io.jpom.service.system.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,11 +26,17 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/2/28
  */
-@Controller
+@RestController
 @RequestMapping(value = "/node/system")
+@Feature(cls = ClassFeature.NODE_CONFIG_WHITELIST)
+@SystemPermission
 public class WhitelistDirectoryController extends BaseServerController {
-	@Resource
-	private WhitelistDirectoryService whitelistDirectoryService;
+
+	private final WhitelistDirectoryService whitelistDirectoryService;
+
+	public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService) {
+		this.whitelistDirectoryService = whitelistDirectoryService;
+	}
 
 
 	/**
@@ -45,7 +48,6 @@ public class WhitelistDirectoryController extends BaseServerController {
 	 */
 	@RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@SystemPermission
-	@ResponseBody
 	public String whiteList() {
 		AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
 		Map<String, String> map = new HashMap<>(8);
@@ -70,8 +72,6 @@ public class WhitelistDirectoryController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.EditWhitelist)
 	@SystemPermission
 	public String whitelistDirectorySubmit() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.WhitelistDirectory_Submit).toString();

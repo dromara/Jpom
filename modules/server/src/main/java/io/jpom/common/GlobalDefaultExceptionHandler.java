@@ -24,12 +24,14 @@ package io.jpom.common;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.exceptions.ValidateException;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.JpomRuntimeException;
+import io.jpom.system.ServerConfigBean;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -123,7 +125,12 @@ public class GlobalDefaultExceptionHandler {
 	@ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ValidateException.class})
 	public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 		DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e);
-		ServletUtil.write(response, JsonMessage.getString(405, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+		String message = e.getMessage();
+		if (ObjectUtil.equals(message, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE)) {
+			ServletUtil.write(response, JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_VALUE);
+		} else {
+			ServletUtil.write(response, JsonMessage.getString(405, message), MediaType.APPLICATION_JSON_VALUE);
+		}
 	}
 
 	@ExceptionHandler({HttpMessageNotReadableException.class, HttpMessageConversionException.class})

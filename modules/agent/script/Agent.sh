@@ -45,7 +45,7 @@ Log="${Path}agent.log"
 LogBack="${Path}log/"
 JVM="-server -Xms200m -Xmx400m"
 # 修改项目端口号 日志路径
-ARGS="--jpom.applicationTag=${Tag} --spring.profiles.active=pro --server.port=2123  --jpom.log=${Path}log"
+ARGS="--jpom.applicationTag=${Tag} --spring.profiles.active=pro --server.port=2123  --jpom.log=${Path}log $@"
 
 echo ${Tag}
 echo ${Path}

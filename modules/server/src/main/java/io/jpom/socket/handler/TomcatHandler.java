@@ -28,6 +28,8 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.ProxySession;
@@ -46,6 +48,7 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/24
  */
+@Feature(cls = ClassFeature.TOMCAT)
 public class TomcatHandler extends BaseProxyHandler {
 
 	public TomcatHandler() {
@@ -65,6 +68,8 @@ public class TomcatHandler extends BaseProxyHandler {
 			// 服务端心跳
 			return;
 		}
+		super.logOpt(attributes, json);
+		//
 		if (consoleCommandOp == ConsoleCommandOp.showlog && JpomApplication.SYSTEM_ID.equals(tomcatId)) {
 			WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
 			// 进入管理页面后需要实时加载日志

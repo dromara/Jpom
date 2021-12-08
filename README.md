@@ -60,7 +60,7 @@
 4. 多节点管理、多节点自动分发
 5. 在线  SSH 终端，并且有终端日志和禁用命令
 6. 实时监控项目状态异常自动报警
-7. cpu、ram 监控、导出堆栈信息、查看项目进程端口、服务器状态监控
+7. ~~cpu、ram 监控、(已经取消该功能)~~ 导出堆栈信息、查看项目进程端口、服务器状态监控
 8. 多用户管理，用户项目权限独立(上传、删除权限可控制),完善的操作日志
 9. 系统路径白名单模式，杜绝用户误操作系统文件
 10. 在线管理 Nginx 配置文件、ssl 证书文件
@@ -126,7 +126,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ```
 
-启动成功后,服务端的端口为 `2122` 访问管理页面 例如`http://localhost:2122/`
+启动成功后,服务端的端口为 `2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
 > 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
 > 
@@ -166,7 +166,7 @@ docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:r
     1. server-x.x.x-release 目录为服务端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Server.sh、Server.bat）
-    4. 默认运行端口：`2122` 访问管理页面 例如`http://localhost:2122/`
+    4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
 ### 编译安装
 
@@ -185,7 +185,7 @@ docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:r
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Server.sh、Server.bat）
-    4. 默认运行端口：`2122` 访问管理页面 例如`http://localhost:2122/`
+    4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
 > 也可以使用 `script/release.bat` `script/release.sh` 快速打包
 
@@ -202,7 +202,7 @@ docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:r
 4. 构建vue页面 切换到`web-vue`目录（前提需要本地开发环境有node、npm环境）
 5. 安装项目vue依赖 控制台执行 `npm install`
 6. 启动开发模式 控制台执行 `npm serve`
-7. 根据控制台输出的地址访问前端页面 例如`http://localhost:3000/`
+7. 根据控制台输出的地址访问前端页面 例如`http://127.0.0.1:3000/`
 
 ### 管理命令
 

@@ -26,22 +26,17 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.build.BuildInfoManage;
-import io.jpom.common.Const;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
-import io.jpom.service.h2db.BaseDbService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 构建 service 新版本，数据从数据库里面加载
@@ -50,26 +45,29 @@ import java.util.stream.Stream;
  * @date 2021-08-10
  **/
 @Service
-public class BuildInfoService extends BaseDbService<BuildInfoModel> {
+public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> {
 
-	@Resource
-	private RepositoryService repositoryService;
+	private final RepositoryService repositoryService;
 
-	/**
-	 * load date group by group name
-	 *
-	 * @return list
-	 */
-	public List<String> listGroup() {
-		String sql = "select `GROUP` from " + getTableName() + " where 1=1 group by `GROUP`";
-		List<Entity> list = super.query(sql);
-		// 筛选字段
-		return list.stream()
-				.filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.GROUP_STR))))
-				.flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.GROUP_STR))))
-				.distinct()
-				.collect(Collectors.toList());
+	public BuildInfoService(RepositoryService repositoryService) {
+		this.repositoryService = repositoryService;
 	}
+
+//	/**
+//	 * load date group by group name
+//	 *
+//	 * @return list
+//	 */
+//	public List<String> listGroup() {
+//		String sql = "select `GROUP` from " + getTableName() + " where 1=1 group by `GROUP`";
+//		List<Entity> list = super.query(sql);
+//		// 筛选字段
+//		return list.stream()
+//				.filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.GROUP_STR))))
+//				.flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.GROUP_STR))))
+//				.distinct()
+//				.collect(Collectors.toList());
+//	}
 
 	/**
 	 * start build
@@ -81,10 +79,8 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 	 */
 	public String start(final BuildInfoModel buildInfoModel, final UserModel userModel, Integer delay) {
 		// load repository
-		RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId());
-		if (null == repositoryModel) {
-			return JsonMessage.getString(404, "仓库信息不存在");
-		}
+		RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
+		Assert.notNull(repositoryModel, "仓库信息不存在");
 		BuildInfoManage.create(buildInfoModel, repositoryModel, userModel, delay);
 		String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
 		return JsonMessage.getString(200, msg, buildInfoModel.getBuildId());

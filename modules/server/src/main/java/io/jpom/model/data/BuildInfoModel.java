@@ -22,7 +22,7 @@
  */
 package io.jpom.model.data;
 
-import io.jpom.model.BaseUserModifyDbModel;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
 
 /**
@@ -30,7 +30,7 @@ import io.jpom.service.h2db.TableName;
  * new BuildModel class, for replace old BuildModel
  */
 @TableName("BUILD_INFO")
-public class BuildInfoModel extends BaseUserModifyDbModel {
+public class BuildInfoModel extends BaseWorkspaceModel {
 
 	/**
 	 * 仓库 ID

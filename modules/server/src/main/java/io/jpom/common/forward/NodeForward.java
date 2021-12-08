@@ -29,16 +29,21 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.*;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpStatus;
+import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.request.XssFilter;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.service.node.NodeService;
 import io.jpom.system.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -313,7 +318,14 @@ public class NodeForward {
 			httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, URLEncoder.DEFAULT.encode(UserModel.getOptUserName(userModel), CharsetUtil.CHARSET_UTF_8));
 //            httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, userModel.getUserRole(nodeModel).name());
 		}
+		if (StrUtil.isEmpty(nodeModel.getLoginPwd())) {
+			NodeService nodeService = SpringUtil.getBean(NodeService.class);
+			NodeModel model = nodeService.getByKey(nodeModel.getId(), false);
+			nodeModel.setLoginPwd(model.getLoginPwd());
+			nodeModel.setLoginName(model.getLoginName());
+		}
 		httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
+		httpRequest.header(Const.WORKSPACEID_REQ_HEADER, nodeModel.getWorkspaceId());
 		//
 		int timeOut = nodeModel.getTimeOut();
 		if (nodeUrl.getTimeOut() != -1 && timeOut > 0) {
@@ -336,6 +348,12 @@ public class NodeForward {
 			ws = "wss";
 		} else {
 			ws = "ws";
+		}
+		if (StrUtil.isEmpty(nodeModel.getLoginPwd())) {
+			NodeService nodeService = SpringUtil.getBean(NodeService.class);
+			NodeModel model = nodeService.getByKey(nodeModel.getId(), false);
+			nodeModel.setLoginPwd(model.getLoginPwd());
+			nodeModel.setLoginName(model.getLoginName());
 		}
 		UrlQuery urlQuery = new UrlQuery();
 		urlQuery.add(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());

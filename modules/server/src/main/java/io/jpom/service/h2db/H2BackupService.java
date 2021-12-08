@@ -34,6 +34,7 @@ import org.springframework.util.CollectionUtils;
 import javax.sql.DataSource;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -56,11 +57,6 @@ public class H2BackupService {
 	 */
 	public void backupSql(String url, String user, String password,
 						  String backupSqlPath, List<String> tableNameList) throws SQLException {
-		// 加载数据源
-//		DataSource dataSource = DSFactory.get();
-//		Assert.notNull(dataSource, "Backup sql error...H2 DataSource not null");
-//		Connection connection = dataSource.getConnection();
-
 		// 备份 SQL
 		String sql = StrUtil.format("SCRIPT DROP to '{}'", backupSqlPath);
 		// 判断是否部分部分表
@@ -98,19 +94,18 @@ public class H2BackupService {
 	/**
 	 * 还原备份 SQL
 	 * @param backupSqlPath backup SQL file path, absolute path
-	 * @throws SQLException
-	 * @throws FileNotFoundException
+	 * @throws SQLException SQLException
+	 * @throws FileNotFoundException FileNotFoundException
 	 */
-	public void restoreBackupSql(String backupSqlPath) throws SQLException, FileNotFoundException {
-		// 读取数据库备份文件
-		FileReader fileReader = new FileReader(backupSqlPath);
-
+	public void restoreBackupSql(String backupSqlPath) throws SQLException, IOException {
 		// 加载数据源
 		DataSource dataSource = DSFactory.get();
 		Assert.notNull(dataSource, "Restore Backup sql error...H2 DataSource not null");
 		Connection connection = dataSource.getConnection();
 
-		// 执行还原
-		RunScript.execute(connection, fileReader);
+		// 读取数据库备份文件，执行还原
+		try (FileReader fileReader = new FileReader(backupSqlPath)) {
+			RunScript.execute(connection, fileReader);
+		}
 	}
 }

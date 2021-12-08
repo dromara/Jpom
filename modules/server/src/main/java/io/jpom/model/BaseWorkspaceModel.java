@@ -20,28 +20,29 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.common.interceptor;
-
-import io.jpom.model.log.UserOperateLogV1;
-
-import java.lang.annotation.*;
+package io.jpom.model;
 
 /**
- * 操作日志记录
+ * 工作空间 数据
  *
- * @author jiangzeyin
- * @date 2019/03/16
+ * @author bwcx_jzy
+ * @since 2021/12/04
  */
-@Documented
-@Target(ElementType.METHOD)
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-public @interface OptLog {
+public abstract class BaseWorkspaceModel extends BaseStrikeDbModel {
 
-    /**
-     * 操作类型
-     *
-     * @return 枚举
-     */
-    UserOperateLogV1.OptType value();
+	/**
+	 * 工作空间ID
+	 *
+	 * @see io.jpom.model.data.WorkspaceModel
+	 * @see io.jpom.common.Const#WORKSPACEID_REQ_HEADER
+	 */
+	private String workspaceId;
+
+	public String getWorkspaceId() {
+		return workspaceId;
+	}
+
+	public void setWorkspaceId(String workspaceId) {
+		this.workspaceId = workspaceId;
+	}
 }

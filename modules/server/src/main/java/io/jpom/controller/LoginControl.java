@@ -37,24 +37,25 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.dto.UserLoginDto;
-import io.jpom.model.log.UserOperateLogV1;
+import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.JwtUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -76,8 +77,14 @@ public class LoginControl extends BaseServerController {
 //    public static final int INPUT_CODE = 600;
 //    private static final int INPUT_CODE_ERROR_COUNT = 3;
 
-	@Resource
-	private UserService userService;
+	private final UserService userService;
+	private final UserBindWorkspaceService userBindWorkspaceService;
+
+	public LoginControl(UserService userService,
+						UserBindWorkspaceService userBindWorkspaceService) {
+		this.userService = userService;
+		this.userBindWorkspaceService = userBindWorkspaceService;
+	}
 
 	/**
 	 * 验证码
@@ -145,7 +152,6 @@ public class LoginControl extends BaseServerController {
 	@RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@NotLogin
-	@OptLog(UserOperateLogV1.OptType.Login)
 	public String userLogin(
 			@ValidatorConfig(value = {
 					@ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
@@ -158,7 +164,7 @@ public class LoginControl extends BaseServerController {
 			return JsonMessage.getString(400, "尝试次数太多，请稍后再来");
 		}
 		synchronized (UserModel.class) {
-			UserModel userModel = userService.getItem(userName);
+			UserModel userModel = userService.getByKey(userName);
 			if (userModel == null) {
 				this.ipError();
 				return JsonMessage.getString(400, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
@@ -179,12 +185,16 @@ public class LoginControl extends BaseServerController {
 					return JsonMessage.getString(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
 				}
 				// 验证
-				if (userPwd.equals(userModel.getPassword())) {
+				if (userService.simpleLogin(userName, userPwd) != null) {
 					userModel.unLock();
+					// 判断工作空间
+					List<WorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspaceInfo(userModel);
+					Assert.notEmpty(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
 					setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
 					removeSessionAttribute(SHOW_CODE);
 					this.ipSuccess();
-					UserLoginDto userLoginDto = new UserLoginDto(userModel, JwtUtil.builder(userModel));
+					String jwtId = userService.getUserJwtId(userName);
+					UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
 					return JsonMessage.getString(200, "登录成功", userLoginDto);
 				} else {
 					userModel.errorLock();
@@ -192,7 +202,7 @@ public class LoginControl extends BaseServerController {
 					return JsonMessage.getString(501, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
 				}
 			} finally {
-				userService.updateItem(userModel);
+				userService.update(userModel);
 			}
 		}
 	}
@@ -232,7 +242,8 @@ public class LoginControl extends BaseServerController {
 		if (userModel == null) {
 			return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "没有对应的用户");
 		}
-		UserLoginDto userLoginDto = new UserLoginDto(userModel, JwtUtil.builder(userModel));
+		String jwtId = userService.getUserJwtId(userModel.getId());
+		UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
 		return JsonMessage.getString(200, "", userLoginDto);
 	}
 }

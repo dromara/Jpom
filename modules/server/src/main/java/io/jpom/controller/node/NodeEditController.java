@@ -1,26 +1,26 @@
 package io.jpom.controller.node;
 
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.OptLog;
+import io.jpom.common.forward.NodeForward;
+import io.jpom.common.forward.NodeUrl;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.log.UserOperateLogV1;
+import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.OutGivingServer;
-import io.jpom.service.node.ssh.SshService;
-import io.jpom.service.user.UserService;
+import io.jpom.service.node.ProjectInfoCacheService;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 节点管理
@@ -28,88 +28,85 @@ import javax.annotation.Resource;
  * @author jiangzeyin
  * @date 2019/4/16
  */
-@Controller
+@RestController
 @RequestMapping(value = "/node")
 @Feature(cls = ClassFeature.NODE)
 public class NodeEditController extends BaseServerController {
 
-    @Resource
-    private UserService userService;
-    @Resource
-    private OutGivingServer outGivingServer;
-    @Resource
-    private MonitorService monitorService;
-    @Resource
-    private BuildInfoService buildService;
-    @Resource
-    private SshService sshService;
+	private final OutGivingServer outGivingServer;
+	private final MonitorService monitorService;
+	private final BuildInfoService buildService;
+	private final ProjectInfoCacheService projectInfoCacheService;
 
-//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.EDIT)
-//    public String edit(String id) {
-//        setAttribute("type", "add");
-//        if (StrUtil.isNotEmpty(id)) {
-//            NodeModel nodeModel = nodeService.getItem(id);
-//            if (nodeModel != null) {
-//                setAttribute("item", nodeModel);
-//                setAttribute("type", "edit");
-//            }
-//        }
-//        // group
-//        HashSet<String> allGroup = nodeService.getAllGroup();
-//        setAttribute("groups", allGroup);
-//        JSONArray sshList = sshService.listSelect(id);
-//        setAttribute("sshList", sshList);
-//        //监控周期
-//        JSONArray cycleArray = Cycle.getAllJSONArray();
-//        setAttribute("cycleArray", cycleArray);
-//        return "node/edit";
-//    }
-
-    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @OptLog(UserOperateLogV1.OptType.EditNode)
-    @ResponseBody
-    @Feature(method = MethodFeature.EDIT)
-    public String save(String type) {
-        NodeModel model = ServletUtil.toBean(getRequest(), NodeModel.class, true);
-        if ("add".equalsIgnoreCase(type)) {
-            return nodeService.addNode(model, getRequest());
-        } else {
-            return nodeService.updateNode(model);
-        }
-    }
+	public NodeEditController(OutGivingServer outGivingServer,
+							  MonitorService monitorService,
+							  BuildInfoService buildService,
+							  ProjectInfoCacheService projectInfoCacheService) {
+		this.outGivingServer = outGivingServer;
+		this.monitorService = monitorService;
+		this.buildService = buildService;
+		this.projectInfoCacheService = projectInfoCacheService;
+	}
 
 
-    /**
-     * 删除节点
-     *
-     * @param id 节点id
-     * @return json
-     */
-    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @OptLog(UserOperateLogV1.OptType.DelNode)
-    @ResponseBody
-    @Feature(method = MethodFeature.DEL)
-    public String del(String id) {
-        //  判断分发
-        if (outGivingServer.checkNode(id)) {
-            return JsonMessage.getString(400, "该节点存在分发项目，不能删除");
-        }
-        // 监控
-        if (monitorService.checkNode(id)) {
-            return JsonMessage.getString(400, "该节点存在监控项，不能删除");
-        }
-        if (buildService.checkNode(id)) {
-            return JsonMessage.getString(400, "该节点存在构建项，不能删除");
-        }
-        nodeService.deleteItem(id);
-        // 删除授权
-        //        List<UserModel> list = userService.list();
-        //        if (list != null) {
-        //            list.forEach(userModel -> {
-        //                userService.updateItem(userModel);
-        //            });
-        //        }
-        return JsonMessage.getString(200, "操作成功");
-    }
+	@PostMapping(value = "list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String listJson() {
+		PageResultDto<NodeModel> nodeModelPageResultDto = nodeService.listPage(getRequest());
+		return JsonMessage.getString(200, "", nodeModelPageResultDto);
+	}
+
+	@GetMapping(value = "list_data_all.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String listDataAll() {
+		List<NodeModel> list = nodeService.listByWorkspace(getRequest());
+		return JsonMessage.getString(200, "", list);
+	}
+
+	@RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.LIST)
+	public String nodeStatus() {
+		long timeMillis = System.currentTimeMillis();
+		JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Status, getRequest(), JSONObject.class);
+		Assert.notNull(jsonObject, "获取信息失败");
+		JSONArray jsonArray = new JSONArray();
+		jsonObject.put("timeOut", System.currentTimeMillis() - timeMillis);
+		jsonArray.add(jsonObject);
+		return JsonMessage.getString(200, "", jsonArray);
+	}
+
+	@PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EDIT)
+	public String save() {
+		nodeService.update(getRequest());
+		return JsonMessage.getString(200, "操作成功");
+	}
+
+
+	/**
+	 * 删除节点
+	 *
+	 * @param id 节点id
+	 * @return json
+	 */
+	@PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DEL)
+	public String del(String id) {
+		//  判断分发
+		boolean checkNode = outGivingServer.checkNode(id, getRequest());
+		Assert.state(!checkNode, "该节点存在分发项目，不能删除");
+		// 监控
+		boolean checkNode1 = monitorService.checkNode(id);
+		Assert.state(!checkNode1, "该节点存在监控项，不能删除");
+		boolean checkNode2 = buildService.checkNode(id);
+		Assert.state(!checkNode2, "该节点存在构建项，不能删除");
+		//
+		ProjectInfoModel projectInfoModel = new ProjectInfoModel();
+		projectInfoModel.setNodeId(id);
+		boolean exists = projectInfoCacheService.exists(projectInfoModel);
+		Assert.state(!exists, "该节点下还存在项目，不能删除");
+		nodeService.delByKey(id, getRequest());
+		return JsonMessage.getString(200, "操作成功");
+	}
 }

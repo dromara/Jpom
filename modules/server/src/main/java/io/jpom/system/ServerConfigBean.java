@@ -41,26 +41,31 @@ public class ServerConfigBean {
 	/**
 	 * 用户数据文件
 	 */
+	@Deprecated
 	public static final String USER = "user.json";
 
 	/**
 	 * 节点数据文件
 	 */
+	@Deprecated
 	public static final String NODE = "node.json";
 
 	/**
 	 * Agent信息文件
 	 */
+	@Deprecated
 	public static final String AGENT_FILE = "agent_file.json";
 
 	/**
 	 * 分发数据文件
 	 */
+	@Deprecated
 	public static final String OUTGIVING = "outgiving.json";
 
 	/**
 	 * 白名单数据
 	 */
+	@Deprecated
 	public static final String OUTGIVING_WHITELIST = "outgiving_whitelist.json";
 
 	/**
@@ -71,6 +76,7 @@ public class ServerConfigBean {
 	/**
 	 * 项目监控文件
 	 */
+	@Deprecated
 	public static final String MONITOR_FILE = "monitor.json";
 
 	/**
@@ -81,6 +87,7 @@ public class ServerConfigBean {
 	/**
 	 * 邮箱配置
 	 */
+	@Deprecated
 	public static final String MAIL_CONFIG = "mail_config.json";
 
 	/**
@@ -97,6 +104,7 @@ public class ServerConfigBean {
 	/**
 	 * ssh信息
 	 */
+	@Deprecated
 	public static final String SSH_LIST = "ssh_list.json";
 
 	/**
@@ -107,6 +115,7 @@ public class ServerConfigBean {
 	/**
 	 * ip配置
 	 */
+	@Deprecated
 	public static final String IP_CONFIG = "ip_config.json";
 
 	/**

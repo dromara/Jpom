@@ -23,6 +23,8 @@
 package io.jpom.model;
 
 /**
+ * 带最后修改人字段 数据表实体
+ *
  * @author bwcx_jzy
  * @since 2021/8/24
  */

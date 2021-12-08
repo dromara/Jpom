@@ -25,25 +25,17 @@ package io.jpom.controller.build;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
-import cn.hutool.db.sql.Direction;
-import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.RepositoryModel;
-import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -53,12 +45,12 @@ import io.jpom.service.dblog.RepositoryService;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.GitUtil;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.File;
+import java.util.List;
 
 /**
  * @author Hotstrip
@@ -68,42 +60,37 @@ import java.io.File;
 @Feature(cls = ClassFeature.BUILD_REPOSITORY)
 public class RepositoryController extends BaseServerController {
 
-	@Resource
-	private RepositoryService repositoryService;
+	private final RepositoryService repositoryService;
+	private final BuildInfoService buildInfoService;
 
-	@Resource
-	private BuildInfoService buildInfoService;
+	public RepositoryController(RepositoryService repositoryService,
+								BuildInfoService buildInfoService) {
+		this.repositoryService = repositoryService;
+		this.buildInfoService = buildInfoService;
+	}
 
 	/**
 	 * load repository list
 	 *
-	 * @param limit    每页条数
-	 * @param page     页码
-	 * @param repoType 仓库类型 0: GIT 1: SVN
-	 * @param strike   逻辑删除  1 删除  0 未删除
 	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/list")
-	@Feature(method = MethodFeature.LOG)
-	public Object loadRepositoryList(@ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")}, defaultVal = "10") int limit,
-									 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
-									 Integer repoType, @RequestParam(value = "strike", defaultValue = "0") Integer strike) {
-		Page pageObj = new Page(page, limit);
-		pageObj.addOrder(new Order("modifyTimeMillis", Direction.DESC));
-		UserModel userModel = getUser();
-		Entity entity = Entity.create();
-		entity.setIgnoreNull("repoType", repoType);
-		//管理员可以获取删除或者没删除的
-		entity.setIgnoreNull("strike", userModel.isSystemUser() ? strike : 0);
-		PageResult<RepositoryModel> pageResult = repositoryService.listPage(entity, pageObj);
-		pageResult.forEach(repositoryModel -> {
-			// 隐藏密码字段
-			repositoryModel.setPassword(null);
-			repositoryModel.setRsaPrv(null);
-		});
-		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
-		jsonObject.put("total", pageResult.getTotal());
-		return jsonObject;
+	@Feature(method = MethodFeature.LIST)
+	public Object loadRepositoryList() {
+		PageResultDto<RepositoryModel> pageResult = repositoryService.listPage(getRequest());
+		return JsonMessage.getString(200, "获取成功", pageResult);
+	}
+
+	/**
+	 * load repository list
+	 *
+	 * @return json
+	 */
+	@GetMapping(value = "/build/repository/list_all")
+	@Feature(method = MethodFeature.LIST)
+	public Object loadRepositoryListAll() {
+		List<RepositoryModel> repositoryModels = repositoryService.listByWorkspace(getRequest());
+		return JsonMessage.getString(200, "", repositoryModels);
 	}
 
 	/**
@@ -117,9 +104,8 @@ public class RepositoryController extends BaseServerController {
 	public Object editRepository(RepositoryModel repositoryModelReq) {
 		this.checkInfo(repositoryModelReq);
 
-		if (null == repositoryModelReq.getId()) {
+		if (StrUtil.isEmpty(repositoryModelReq.getId())) {
 			// insert data
-			repositoryModelReq.setId(IdUtil.fastSimpleUUID());
 			repositoryService.insert(repositoryModelReq);
 		} else {
 			// update data
@@ -129,14 +115,15 @@ public class RepositoryController extends BaseServerController {
 			if (StrUtil.isEmpty(repositoryModelReq.getPassword())) {
 				repositoryModelReq.setPassword(null);
 			}
+			repositoryModelReq.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
 			repositoryService.updateById(repositoryModelReq);
 		}
 		// 检查 rsa 私钥
-		if (!checkAndUpdateSshKey(repositoryModelReq)) {
-			return JsonMessage.toJson(500, "rsa 私钥文件不存在或者有误");
-		}
+		boolean andUpdateSshKey = checkAndUpdateSshKey(repositoryModelReq);
+		Assert.state(andUpdateSshKey, "rsa 私钥文件不存在或者有误");
+
 		if (repositoryModelReq.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
-			RepositoryModel repositoryModel = repositoryService.getByKey(repositoryModelReq.getId());
+			RepositoryModel repositoryModel = repositoryService.getByKey(repositoryModelReq.getId(), false);
 			// 验证 git 仓库信息
 			try {
 				Tuple tuple = GitUtil.getBranchAndTagList(repositoryModel);
@@ -163,6 +150,7 @@ public class RepositoryController extends BaseServerController {
 		repositoryModel.setId(id);
 		repositoryModel.setPassword(StrUtil.EMPTY);
 		repositoryModel.setRsaPrv(StrUtil.EMPTY);
+		repositoryModel.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
 		repositoryService.updateById(repositoryModel);
 		return JsonMessage.toJson(200, "操作成功");
 	}
@@ -194,7 +182,6 @@ public class RepositoryController extends BaseServerController {
 		if (repositoryModelReq.getId() != null) {
 			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
 			entity.set("id", "<> " + repositoryModelReq.getId());
-			entity.set("strike", 0);
 		}
 		entity.set("gitUrl", repositoryModelReq.getGitUrl());
 		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
@@ -232,57 +219,19 @@ public class RepositoryController extends BaseServerController {
 	/**
 	 * delete
 	 *
-	 * @param id        仓库ID
-	 * @param isRealDel 是否真删
+	 * @param id 仓库ID
 	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/delete")
 	@Feature(method = MethodFeature.DEL)
-	public Object delRepository(String id, Boolean isRealDel) {
+	public Object delRepository(String id) {
 		// 判断仓库是否被关联
 		Entity entity = Entity.create();
 		entity.set("repositoryId", id);
 		boolean exists = buildInfoService.exists(entity);
 		Assert.state(!exists, "当前仓库被构建关联，不能直接删除");
-		UserModel user = getUser();
-		if (user.isSystemUser() && isRealDel) {
-			repositoryService.delByKey(id);
-		} else {
-			Entity updateEntity = Entity.create();
-			updateEntity.set("strike", 1);
-			Entity whereEntity = Entity.create();
-			whereEntity.set("id", id);
-			repositoryService.update(updateEntity, whereEntity);
-		}
+
+		repositoryService.getByKey(id, getRequest());
 		return JsonMessage.getString(200, "删除成功");
-	}
-
-
-	/**
-	 * 恢复仓库
-	 *
-	 * @param id 仓库ID
-	 * @return json
-	 */
-	@PostMapping(value = "/build/repository/recovery")
-	@Feature(method = MethodFeature.EXECUTE)
-	public Object recoveryRepository(String id) {
-		RepositoryModel repositoryModelReq = repositoryService.getByKey(id);
-		// 判断仓库是否重复
-		Entity entity = Entity.create();
-		if (repositoryModelReq.getId() != null) {
-			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
-			entity.set("id", "<> " + repositoryModelReq.getId());
-			entity.set("strike", 0);
-		}
-		entity.set("gitUrl", repositoryModelReq.getGitUrl());
-		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦!");
-		// 判断仓库是否被关联
-		Entity whereEntity = Entity.create();
-		whereEntity.set("id", id);
-		Entity updateEntity = Entity.create();
-		updateEntity.set("strike", 0);
-		repositoryService.update(updateEntity, whereEntity);
-		return JsonMessage.getString(200, "恢复成功");
 	}
 }

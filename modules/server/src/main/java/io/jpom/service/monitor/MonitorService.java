@@ -22,17 +22,15 @@
  */
 package io.jpom.service.monitor;
 
-import cn.hutool.core.date.DateUtil;
-import io.jpom.common.BaseOperService;
+import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.monitor.Monitor;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 监控管理Service
@@ -40,130 +38,115 @@ import java.util.stream.Collectors;
  * @author Arno
  */
 @Service
-public class MonitorService extends BaseOperService<MonitorModel> {
+public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 
-    public MonitorService() {
-        super(ServerConfigBean.MONITOR_FILE);
-    }
+	@Override
+	public void insert(MonitorModel monitorModel) {
+		super.insert(monitorModel);
+		if (monitorModel.status()) {
+			Monitor.start();
+		}
+	}
 
-    @Override
-    public void addItem(MonitorModel monitorModel) {
-        super.addItem(monitorModel);
-        //
-        if (monitorModel.isStatus()) {
-            Monitor.start();
-        }
-    }
+	@Override
+	public int delByKey(String keyValue) {
+		int byKey = super.delByKey(keyValue);
+		this.checkCronStatus();
+		return byKey;
+	}
 
-    @Override
-    public void deleteItem(String id) {
-        super.deleteItem(id);
-        this.checkCronStatus();
-    }
+	public boolean checkCronStatus() {
+		// 关闭监听
+		MonitorModel monitorModel = new MonitorModel();
+		monitorModel.setStatus(true);
+		long count = super.count(super.dataBeanToEntity(monitorModel));
+		if (count > 0) {
+			Monitor.start();
+		} else {
+			Monitor.stop();
+		}
+		return count > 0;
+	}
 
-    public boolean checkCronStatus() {
-        // 关闭监听
-        List<MonitorModel> list = list();
-        if (list == null || list.isEmpty()) {
-            Monitor.stop();
-            return false;
-        } else {
-            boolean stop = true;
-            for (MonitorModel monitorModel : list) {
-                if (monitorModel.isStatus()) {
-                    Monitor.start();
-                    stop = false;
-                    break;
-                }
-            }
-            if (stop) {
-                Monitor.stop();
-                return false;
-            }
-            return true;
-        }
-    }
-
-    @Override
-    public void updateItem(MonitorModel monitorModel) {
-        monitorModel.setModifyTime(DateUtil.date().getTime());
-        super.updateItem(monitorModel);
-        this.checkCronStatus();
-    }
-
-    /**
-     * 根据周期获取list
-     *
-     * @param cycle 周期
-     * @return list
-     */
-    public List<MonitorModel> listRunByCycle(Cycle cycle) {
-        List<MonitorModel> list = this.list();
-        if (list == null) {
-            return new ArrayList<>();
-        }
-        return list.stream()
-                .filter(monitorModel -> monitorModel.getCycle() == cycle.getCode() && monitorModel.isStatus())
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 设置报警状态
-     *
-     * @param id    监控id
-     * @param alarm 状态
-     */
-    public synchronized void setAlarm(String id, boolean alarm) {
-        MonitorModel monitorModel = getItem(id);
-        if (monitorModel != null) {
-            monitorModel.setAlarm(alarm);
-            updateItem(monitorModel);
-        }
-    }
-
-    /**
-     * 判断是否存在对应节点数据
-     *
-     * @param nodeId 节点id
-     * @return true 存在
-     */
-    public boolean checkNode(String nodeId) {
-        List<MonitorModel> list = list();
-        if (list == null || list.isEmpty()) {
-            return false;
-        }
-        for (MonitorModel monitorModel : list) {
-            List<MonitorModel.NodeProject> projects = monitorModel.getProjects();
-            if (projects != null) {
-                for (MonitorModel.NodeProject project : projects) {
-                    if (nodeId.equals(project.getNode())) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
+	@Override
+	public int updateById(MonitorModel info) {
+		int updateById = super.updateById(info);
+		this.checkCronStatus();
+		return updateById;
+	}
 
 
-    public boolean checkProject(String nodeId, String projectId) {
-        List<MonitorModel> list = list();
-        if (list == null || list.isEmpty()) {
-            return false;
-        }
-        for (MonitorModel monitorModel : list) {
-            List<MonitorModel.NodeProject> projects = monitorModel.getProjects();
-            if (projects != null) {
-                for (MonitorModel.NodeProject project : projects) {
-                    if (project.getNode().equals(nodeId)) {
-                        List<String> projects1 = project.getProjects();
-                        if (projects1 != null && projects1.contains(projectId)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
+	/**
+	 * 根据周期获取list
+	 *
+	 * @param cycle 周期
+	 * @return list
+	 */
+	public List<MonitorModel> listRunByCycle(Cycle cycle) {
+		MonitorModel monitorModel = new MonitorModel();
+		monitorModel.setCycle(cycle.getCode());
+		monitorModel.setStatus(true);
+		List<MonitorModel> monitorModels = this.listByBean(monitorModel);
+		return ObjectUtil.defaultIfNull(monitorModels, Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * 设置报警状态
+	 *
+	 * @param id    监控id
+	 * @param alarm 状态
+	 */
+	public synchronized void setAlarm(String id, boolean alarm) {
+		MonitorModel monitorModel = super.getByKey(id);
+		if (monitorModel != null) {
+			monitorModel.setAlarm(alarm);
+			super.update(monitorModel);
+		}
+	}
+
+	/**
+	 * 判断是否存在对应节点数据
+	 *
+	 * @param nodeId 节点id
+	 * @return true 存在
+	 */
+	public boolean checkNode(String nodeId) {
+		List<MonitorModel> list = list();
+		if (list == null || list.isEmpty()) {
+			return false;
+		}
+		for (MonitorModel monitorModel : list) {
+			List<MonitorModel.NodeProject> projects = monitorModel.projects();
+			if (projects != null) {
+				for (MonitorModel.NodeProject project : projects) {
+					if (nodeId.equals(project.getNode())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+
+	public boolean checkProject(String nodeId, String projectId) {
+		List<MonitorModel> list = list();
+		if (list == null || list.isEmpty()) {
+			return false;
+		}
+		for (MonitorModel monitorModel : list) {
+			List<MonitorModel.NodeProject> projects = monitorModel.projects();
+			if (projects != null) {
+				for (MonitorModel.NodeProject project : projects) {
+					if (project.getNode().equals(nodeId)) {
+						List<String> projects1 = project.getProjects();
+						if (projects1 != null && projects1.contains(projectId)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
 }

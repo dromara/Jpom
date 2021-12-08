@@ -22,8 +22,9 @@
  */
 package io.jpom.model.log;
 
-import io.jpom.model.BaseJsonModel;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.MonitorModel;
+import io.jpom.service.h2db.TableName;
 
 /**
  * 监控日志
@@ -31,143 +32,145 @@ import io.jpom.model.data.MonitorModel;
  * @author bwcx_jzy
  * @date 2019/7/13
  */
-public class MonitorNotifyLog extends BaseJsonModel {
-    /**
-     * 表名
-     */
-    public static final String TABLE_NAME = MonitorNotifyLog.class.getSimpleName().toUpperCase();
-    /**
-     *
-     */
-    private String logId;
-    private String nodeId;
-    private String projectId;
-    /**
-     * 异常发生时间
-     */
-    private Long createTime;
-    private String title;
-    private String content;
-    /**
-     * 项目状态状态
-     */
-    private boolean status;
-    /**
-     * 通知方式
-     *
-     * @see MonitorModel.NotifyType
-     */
-    private int notifyStyle;
-    /**
-     * 通知发送状态
-     */
-    private boolean notifyStatus;
-    /**
-     * 监控id
-     */
-    private String monitorId;
-    /**
-     * 通知对象
-     */
-    private String notifyObject;
-    /**
-     * 通知异常消息
-     */
-    private String notifyError;
+@TableName("MONITORNOTIFYLOG")
+public class MonitorNotifyLog extends BaseWorkspaceModel {
+	/**
+	 *
+	 */
+//	private String logId;
+	private String nodeId;
+	private String projectId;
+	/**
+	 * 异常发生时间
+	 */
+	private Long createTime;
+	private String title;
+	private String content;
+	/**
+	 * 项目状态状态
+	 */
+	private Boolean status;
+	/**
+	 * 通知方式
+	 *
+	 * @see MonitorModel.NotifyType
+	 */
+	private Integer notifyStyle;
+	/**
+	 * 通知发送状态
+	 */
+	private Boolean notifyStatus;
+	/**
+	 * 监控id
+	 */
+	private String monitorId;
+	/**
+	 * 通知对象
+	 */
+	private String notifyObject;
+	/**
+	 * 通知异常消息
+	 */
+	private String notifyError;
 
-    public String getNotifyObject() {
-        return notifyObject;
-    }
+	public String getNotifyObject() {
+		return notifyObject;
+	}
 
-    public void setNotifyObject(String notifyObject) {
-        this.notifyObject = notifyObject;
-    }
+	public void setNotifyObject(String notifyObject) {
+		this.notifyObject = notifyObject;
+	}
 
-    public String getNotifyError() {
-        return notifyError;
-    }
+	public String getNotifyError() {
+		return notifyError;
+	}
 
-    public void setNotifyError(String notifyError) {
-        this.notifyError = notifyError;
-    }
+	public void setNotifyError(String notifyError) {
+		this.notifyError = notifyError;
+	}
 
-    public boolean isNotifyStatus() {
-        return notifyStatus;
-    }
+	public Boolean getStatus() {
+		return status;
+	}
 
-    public void setNotifyStatus(boolean notifyStatus) {
-        this.notifyStatus = notifyStatus;
-    }
+	public void setStatus(Boolean status) {
+		this.status = status;
+	}
 
-    public String getMonitorId() {
-        return monitorId;
-    }
+	public Boolean getNotifyStatus() {
+		return notifyStatus;
+	}
 
-    public void setMonitorId(String monitorId) {
-        this.monitorId = monitorId;
-    }
+	public void setNotifyStatus(Boolean notifyStatus) {
+		this.notifyStatus = notifyStatus;
+	}
 
-    public int getNotifyStyle() {
-        return notifyStyle;
-    }
+	public void setNotifyStatus(boolean notifyStatus) {
+		this.notifyStatus = notifyStatus;
+	}
 
-    public void setNotifyStyle(int notifyStyle) {
-        this.notifyStyle = notifyStyle;
-    }
+	public String getMonitorId() {
+		return monitorId;
+	}
 
-    public String getLogId() {
-        return logId;
-    }
+	public void setMonitorId(String monitorId) {
+		this.monitorId = monitorId;
+	}
 
-    public void setLogId(String logId) {
-        this.logId = logId;
-    }
+	public Integer getNotifyStyle() {
+		return notifyStyle;
+	}
 
-    public String getNodeId() {
-        return nodeId;
-    }
+	public void setNotifyStyle(Integer notifyStyle) {
+		this.notifyStyle = notifyStyle;
+	}
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
 
-    public String getProjectId() {
-        return projectId;
-    }
+	public String getNodeId() {
+		return nodeId;
+	}
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
+	public void setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+	}
 
-    public Long getCreateTime() {
-        return createTime;
-    }
+	public String getProjectId() {
+		return projectId;
+	}
 
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
 
-    public String getTitle() {
-        return title;
-    }
+	public Long getCreateTime() {
+		return createTime;
+	}
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
+	}
 
-    public String getContent() {
-        return content;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public void setContent(String content) {
-        this.content = content;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    public boolean isStatus() {
-        return status;
-    }
+	public String getContent() {
+		return content;
+	}
 
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public Boolean isStatus() {
+		return status;
+	}
+
+	public void setStatus(boolean status) {
+		this.status = status;
+	}
 }

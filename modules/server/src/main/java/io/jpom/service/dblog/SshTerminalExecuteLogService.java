@@ -24,10 +24,11 @@ package io.jpom.service.dblog;
 
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.StrUtil;
+import io.jpom.common.BaseServerController;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.SshTerminalExecuteLog;
-import io.jpom.service.h2db.BaseDbService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,7 +42,7 @@ import java.util.stream.Collectors;
  * @date 2021/08/04
  */
 @Service
-public class SshTerminalExecuteLogService extends BaseDbService<SshTerminalExecuteLog> {
+public class SshTerminalExecuteLogService extends BaseWorkspaceService<SshTerminalExecuteLog> {
 
 	/**
 	 * 批量记录日志
@@ -55,21 +56,27 @@ public class SshTerminalExecuteLogService extends BaseDbService<SshTerminalExecu
 	 */
 	public void batch(UserModel userInfo, SshModel sshItem, String ip, String userAgent, boolean refuse, List<String> commands) {
 		long optTime = SystemClock.now();
-		List<SshTerminalExecuteLog> executeLogs = commands.stream().filter(StrUtil::isNotEmpty).map(s -> {
-			SshTerminalExecuteLog sshTerminalExecuteLog = new SshTerminalExecuteLog();
-			//sshTerminalExecuteLog.setId(IdUtil.fastSimpleUUID());
-			if (sshItem != null) {
-				sshTerminalExecuteLog.setSshId(sshItem.getId());
-				sshTerminalExecuteLog.setSshName(sshItem.getName());
-			}
-			sshTerminalExecuteLog.setCommands(s);
-			sshTerminalExecuteLog.setRefuse(refuse);
-			sshTerminalExecuteLog.setOptTime(optTime);
-			sshTerminalExecuteLog.setIp(ip);
-			sshTerminalExecuteLog.setUserAgent(userAgent);
-			sshTerminalExecuteLog.setUserId(UserModel.getOptUserName(userInfo));
-			return sshTerminalExecuteLog;
-		}).collect(Collectors.toList());
-		super.insert(executeLogs);
+		try {
+			BaseServerController.resetInfo(UserModel.EMPTY);
+			List<SshTerminalExecuteLog> executeLogs = commands.stream().filter(StrUtil::isNotEmpty).map(s -> {
+				SshTerminalExecuteLog sshTerminalExecuteLog = new SshTerminalExecuteLog();
+				//sshTerminalExecuteLog.setId(IdUtil.fastSimpleUUID());
+				if (sshItem != null) {
+					sshTerminalExecuteLog.setSshId(sshItem.getId());
+					sshTerminalExecuteLog.setSshName(sshItem.getName());
+					sshTerminalExecuteLog.setWorkspaceId(sshItem.getWorkspaceId());
+				}
+				sshTerminalExecuteLog.setCommands(s);
+				sshTerminalExecuteLog.setRefuse(refuse);
+				sshTerminalExecuteLog.setCreateTimeMillis(optTime);
+				sshTerminalExecuteLog.setIp(ip);
+				sshTerminalExecuteLog.setUserAgent(userAgent);
+				sshTerminalExecuteLog.setUserId(UserModel.getOptUserName(userInfo));
+				return sshTerminalExecuteLog;
+			}).collect(Collectors.toList());
+			super.insert(executeLogs);
+		} finally {
+			BaseServerController.remove();
+		}
 	}
 }

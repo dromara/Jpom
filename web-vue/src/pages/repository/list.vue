@@ -1,21 +1,19 @@
 <template>
-  <div>
+  <div class="full-content">
     <!-- 搜索区 -->
     <div ref="filter" class="filter">
+      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="仓库名" />
+      <a-input class="search-input-item" v-model="listQuery['%gitUrl%']" placeholder="仓库地址" />
       <a-select v-model="listQuery.repoType" allowClear placeholder="请选择仓库类型" class="filter-item" @change="handleFilter">
         <a-select-option :value="'0'">GIT</a-select-option>
         <a-select-option :value="'1'">SVN</a-select-option>
       </a-select>
-      <a-select v-if="isSystem" default-value="0" v-model="listQuery.strike" allowClear placeholder="选择删除情况" class="filter-item" @change="handleFilter">
-        <a-select-option :value="0">未删除</a-select-option>
-        <a-select-option :value="1">已删除</a-select-option>
-      </a-select>
-      <a-button type="primary" @click="handleFilter">搜索</a-button>
+
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{ 'max-height': tableHeight + 'px' }" :scroll="{ y: tableHeight - 120 }" bordered rowKey="id" :pagination="pagination">
+    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -36,7 +34,6 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-        <a-button v-if="isSystem && record.strike === 1" type="primary" @click="handlerecovery(record)">恢复</a-button>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -114,45 +111,42 @@
           </a-form-model-item>
         </template>
         <a-form-model-item v-if="temp.id">
-            <template slot="label">
-              隐藏字段
-              <a-tooltip>
-                <template slot="title"> 密码字段和私钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我 </template>
-                <a-icon type="question-circle" theme="filled" />
-              </a-tooltip>
-            </template>
-            <a-button style="margin-left: 10px" type="danger" @click="restHideField(temp)">清除</a-button>
-          </a-form-model-item>
+          <template slot="label">
+            隐藏字段
+            <a-tooltip>
+              <template slot="title"> 密码字段和私钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-button style="margin-left: 10px" type="danger" @click="restHideField(temp)">清除</a-button>
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
   </div>
 </template>
 <script>
-import { getRepositoryList, editRepository, deleteRepository, recoveryRepository, restHideField } from "../../api/repository";
-import { parseTime } from "../../utils/time";
+import { getRepositoryList, editRepository, deleteRepository, restHideField } from "@/api/repository";
+import { parseTime } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {},
   data() {
     return {
       loading: false,
-      listQuery: {
-        page: 1,
-        limit: 20,
-        strike: 0,
-      },
-      tableHeight: "70vh",
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       total: 0,
       temp: {},
       isSystem: false,
       editVisible: false,
       columns: [
-        { title: "仓库名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "仓库名称", dataIndex: "name", sorter: true, width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         {
           title: "仓库地址",
           dataIndex: "gitUrl",
           width: 300,
+          sorter: true,
           ellipsis: true,
           scopedSlots: { customRender: "gitUrl" },
         },
@@ -160,6 +154,7 @@ export default {
           title: "仓库类型",
           dataIndex: "repoType",
           width: 100,
+          sorter: true,
           ellipsis: true,
           scopedSlots: { customRender: "repoType" },
         },
@@ -167,12 +162,14 @@ export default {
           title: "协议",
           dataIndex: "protocol",
           width: 100,
+          sorter: true,
           ellipsis: true,
           scopedSlots: { customRender: "protocol" },
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
+          sorter: true,
           customRender: (text) => {
             if (!text) {
               return "";
@@ -201,38 +198,28 @@ export default {
       return {
         total: this.total,
         current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || 10,
-        pageSizeOptions: ["10", "20", "50", "100"],
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
         showTotal: (total) => {
-          if (total <= this.listQuery.limit) {
-            return "";
-          }
-          return `总计 ${total} 条`;
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
       };
     },
   },
   watch: {},
   created() {
-    this.calcTableHeight();
-    this.handleFilter();
-    this.isSystem = this.$store.getters.getUserInfo.systemUser;
+    this.loadData();
   },
   methods: {
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-      });
-    },
     // 加载数据
     loadData() {
       this.list = [];
       this.loading = true;
       getRepositoryList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data.result;
+          this.total = res.data.total;
         }
         this.loading = false;
       });
@@ -305,26 +292,7 @@ export default {
         },
       });
     },
-    handlerecovery(record) {
-      this.$confirm({
-        title: "系统提示",
-        content: "真的要恢复仓库信息么？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 恢复
-          recoveryRepository(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-                duration: 2,
-              });
-              this.loadData();
-            }
-          });
-        },
-      });
-    },
+
     // 清除隐藏字段
     restHideField(record) {
       this.$confirm({
@@ -345,6 +313,16 @@ export default {
           });
         },
       });
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
     },
   },
 };

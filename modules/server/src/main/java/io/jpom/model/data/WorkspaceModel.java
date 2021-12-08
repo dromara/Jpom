@@ -20,47 +20,57 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.service.system;
+package io.jpom.model.data;
 
-import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.BaseDataService;
-import io.jpom.model.data.SystemIpConfigModel;
-import io.jpom.system.ServerConfigBean;
-import io.jpom.util.JsonFileUtil;
-import org.springframework.stereotype.Service;
+import io.jpom.model.BaseStrikeDbModel;
+import io.jpom.service.h2db.TableName;
 
 /**
- * 系统ip 白名单
+ * 工作空间
  *
  * @author bwcx_jzy
+ * @since 2021/12/3
  */
-@Service
-public class SystemIpConfigService extends BaseDataService {
+@TableName("WORKSPACE")
+public class WorkspaceModel extends BaseStrikeDbModel {
 
-    /**
-     * 获取配置
-     *
-     * @return config
-     */
-    public SystemIpConfigModel getConfig() {
-        JSONObject config = getJSONObject(ServerConfigBean.IP_CONFIG);
-        if (config == null) {
-            return null;
-        }
-        return config.toJavaObject(SystemIpConfigModel.class);
-    }
+	/**
+	 * 默认的工作空间
+	 */
+	public static final String DEFAULT_ID = "DEFAULT";
 
-    /**
-     * 保存配置
-     *
-     * @param configModel config
-     */
-    public void save(SystemIpConfigModel configModel) {
-        String path = getDataFilePath(ServerConfigBean.IP_CONFIG);
-        JsonFileUtil.saveJson(path, configModel.toJson());
-    }
 
-    public String filePath() {
-        return getDataFilePath(ServerConfigBean.IP_CONFIG);
-    }
+
+	/**
+	 * 名称
+	 */
+	private String name;
+
+	/**
+	 * 描述
+	 */
+	private String description;
+
+	public WorkspaceModel() {
+	}
+
+	public WorkspaceModel(String id) {
+		this.setId(id);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 }

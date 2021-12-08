@@ -22,10 +22,15 @@
  */
 package io.jpom.socket;
 
+import cn.hutool.core.lang.Tuple;
+import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
+import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.Type;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.UploadFileModel;
@@ -106,13 +111,18 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 	 * @return 结果
 	 */
 	public String restart(Session session) {
-		String result = "重启中";
+		String result = Const.UPGRADE_MSG;
 		try {
 			UploadFileModel uploadFile = UPLOAD_FILE_INFO.get(session.getId());
-			JpomManifest.releaseJar(uploadFile.getFilePath(), uploadFile.getVersion(), true);
+			String filePath = uploadFile.getFilePath();
+			JsonMessage<Tuple> error = JpomManifest.checkJpomJar(filePath, Type.Agent.getApplicationClass());
+			if (error.getCode() != HttpStatus.HTTP_OK) {
+				return error.getMsg();
+			}
+			JpomManifest.releaseJar(filePath, uploadFile.getVersion(), true);
 			JpomApplication.restart();
 		} catch (RuntimeException e) {
-			result = e.getMessage();
+			result = "重启失败" + e.getMessage();
 			DefaultSystemLog.getLog().error("重启失败", e);
 		}
 		return result;

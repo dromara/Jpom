@@ -22,82 +22,188 @@
  */
 package io.jpom.controller.user;
 
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserModel;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.user.RoleService;
+import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
+import io.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 用户列表
  *
  * @author Administrator
  */
-@Controller
+@RestController
 @RequestMapping(value = "/user")
 @Feature(cls = ClassFeature.USER)
+@SystemPermission
 public class UserListController extends BaseServerController {
 
-	@Resource
-	private UserService userService;
+	private final UserService userService;
+	private final UserBindWorkspaceService userBindWorkspaceService;
 
+	public UserListController(UserService userService,
+							  UserBindWorkspaceService userBindWorkspaceService) {
+		this.userService = userService;
+		this.userBindWorkspaceService = userBindWorkspaceService;
+	}
 
 	/**
 	 * 查询所有用户
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "getUserList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@RequestMapping(value = "get_user_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String getUserList() {
-		UserModel userName = getUser();
-		List<UserModel> userList = userService.list();
-		if (userList != null) {
-			userList = userList.stream().filter(userModel -> {
-				// 不显示自己的信息
-				return !userModel.getId().equals(userName.getId());
-			}).collect(Collectors.toList());
-		}
-		return JsonMessage.getString(200, "", userList);
+		PageResultDto<UserModel> userModelPageResultDto = userService.listPage(getRequest());
+		return JsonMessage.getString(200, "", userModelPageResultDto);
 	}
 
 	/**
-	 * @return
-	 * @author Hotstrip
-	 * get all admin user list
 	 * 获取所有管理员信息
+	 * get all admin user list
+	 *
+	 * @return json
+	 * @author Hotstrip
 	 */
-	@RequestMapping(value = "get-admin-user-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@RequestMapping(value = "get_user_list_all", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
-	public String getAdminUserList() {
-		List<UserModel> list = userService.list(false);
-		JSONArray jsonArray = new JSONArray();
-		list.forEach(userModel -> {
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("title", userModel.getName());
-			jsonObject.put("value", userModel.getId());
-			if (StrUtil.isAllEmpty(userModel.getEmail(), userModel.getDingDing(), userModel.getWorkWx())) {
-				jsonObject.put("disabled", true);
-			}
-			jsonArray.add(jsonObject);
-		});
-		return JsonMessage.getString(200, "success", jsonArray);
+	public String getUserListAll() {
+		List<UserModel> list = userService.list();
+		return JsonMessage.getString(200, "success", list);
 	}
+
+	/**
+	 * 编辑用户
+	 *
+	 * @param type 操作类型
+	 * @return String
+	 */
+	@PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EDIT)
+	public String addUser(String type) {
+		//
+		boolean create = StrUtil.equals(type, "add");
+		UserModel userModel = this.parseUser(create);
+
+		if (create) {
+			userService.insert(userModel);
+		} else {
+			UserModel model = userService.getByKey(userModel.getId());
+			Assert.notNull(model, "不存在对应的用户");
+			boolean systemUser = userModel.isSystemUser();
+			if (!systemUser) {
+				Assert.state(!model.isSuperSystemUser(), "不能取消超级管理员的权限");
+			}
+			userService.update(userModel);
+		}
+		//
+		String workspace = getParameter("workspace");
+		JSONArray jsonArray = JSONArray.parseArray(workspace);
+		List<String> workspaceList = jsonArray.toJavaList(String.class);
+		userBindWorkspaceService.updateUserWorkspace(userModel.getId(), workspaceList);
+		return JsonMessage.getString(200, "操作成功");
+	}
+
+	private UserModel parseUser(boolean create) {
+		String id = getParameter("id");
+		Assert.hasText(id, "登录名不能为空");
+		int length = id.length();
+		Assert.state(length <= 20 && length >= UserModel.USER_NAME_MIN_LEN, "登录名不能为空,并且长度必须" + UserModel.USER_NAME_MIN_LEN + "-20");
+
+		Assert.state(!StrUtil.equalsAnyIgnoreCase(id, UserModel.SYSTEM_OCCUPY_NAME, UserModel.SYSTEM_ADMIN), "当前登录名已经被系统占用");
+
+		Validator.validateGeneral(id, "登录名不能包含特殊字符");
+		UserModel userModel = new UserModel();
+		UserModel optUser = getUser();
+		if (create) {
+			long size = userService.count();
+			Assert.state(size <= ServerExtConfigBean.getInstance().userMaxCount, "当前用户个数超过系统上限");
+			// 登录名重复
+			boolean exists = userService.exists(new UserModel(id));
+			Assert.state(!exists, "登录名已经存在");
+			userModel.setParent(optUser.getId());
+		}
+		userModel.setId(id);
+		//
+		String name = getParameter("name");
+		Assert.hasText(name, "请输入账户昵称");
+		int len = name.length();
+		Assert.state(len <= 10 && len >= 2, "昵称长度只能是2-10");
+
+		userModel.setName(name);
+
+		String password = getParameter("password");
+		if (create || StrUtil.isNotEmpty(password)) {
+			Assert.hasText(password, "密码不能为空");
+			// 修改用户
+			Assert.state(create || optUser.isSystemUser(), "只有系统管理员才能重置用户密码");
+			userModel.setSalt(userService.generateSalt());
+			userModel.setPassword(SecureUtil.sha1(password + userModel.getSalt()));
+		}
+		int systemUser = getParameterInt("systemUser", 0);
+		userModel.setSystemUser(systemUser);
+		return userModel;
+	}
+
+	/**
+	 * 删除用户
+	 *
+	 * @param id 用户id
+	 * @return String
+	 */
+	@RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DEL)
+	public String deleteUser(String id) {
+		UserModel userName = getUser();
+		Assert.state(!StrUtil.equals(userName.getId(), id), "不能删除自己");
+
+		UserModel userModel = userService.getByKey(id);
+		Assert.notNull(userModel, "非法访问");
+		if (userModel.isSystemUser()) {
+			// 如果是系统管理员，判断个数
+			Assert.state(userService.systemUserCount() > 1, "系统中的系统管理员账号数量必须存在一个以上");
+		}
+		// 非系统管理员不支持删除演示账号
+		Assert.state(!userModel.isDemoUser(), "演示账号不支持删除");
+		userService.delByKey(id);
+		return JsonMessage.getString(200, "删除成功");
+	}
+
+	/**
+	 * 解锁用户锁定状态
+	 *
+	 * @param id id
+	 * @return json
+	 */
+	@RequestMapping(value = "unlock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EDIT)
+	public String unlock(String id) {
+		UserModel userModel = userService.getByKey(id);
+		Assert.notNull(userModel, "修改失败:-1");
+		userModel.unLock();
+		userService.update(userModel);
+		return JsonMessage.getString(200, "解锁成功");
+	}
+
+
 }

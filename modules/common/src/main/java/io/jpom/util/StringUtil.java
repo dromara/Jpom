@@ -32,6 +32,7 @@ import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSON;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * main 方法运行参数工具
@@ -157,10 +158,33 @@ public class StringUtil {
 	 * @return data
 	 */
 	public static <T> T jsonConvert(String jsonStr, Class<T> cls) {
+		if (StrUtil.isEmpty(jsonStr)) {
+			return null;
+		}
 		try {
 			return JSON.parseObject(jsonStr, cls);
 		} catch (Exception e) {
 			return JSON.parseObject(JSON.parse(jsonStr).toString(), cls);
+		}
+	}
+
+	/**
+	 * json 字符串转 bean，兼容普通json和字符串包裹情况
+	 *
+	 * @param jsonStr json 字符串
+	 * @param cls     要转为bean的类
+	 * @param <T>     泛型
+	 * @return data
+	 */
+	public static <T> List<T> jsonConvertArray(String jsonStr, Class<T> cls) {
+		try {
+			if (StrUtil.isEmpty(jsonStr)) {
+				return null;
+			}
+			return JSON.parseArray(jsonStr, cls);
+		} catch (Exception e) {
+			Object parse = JSON.parse(jsonStr);
+			return JSON.parseArray(parse.toString(), cls);
 		}
 	}
 }

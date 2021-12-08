@@ -1,20 +1,12 @@
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
+      <a-input v-model="listQuery['%name%']" placeholder="监控名称" class="search-input-item" />
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      :loading="loading"
-      :columns="columns"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ x: 1110, y: tableHeight - 60 }"
-      :pagination="false"
-      bordered
-      :rowKey="(record, index) => index"
-    >
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -50,15 +42,21 @@
           </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="监控项目" prop="projects">
-          <a-select v-model="projectKeys" mode="multiple" :token-separators="[',']" @change="handleSelectChange">
-            <a-select-opt-group v-for="node in nodeProjectList" :key="`group_${node.id}`">
-              <span slot="label">{{ node.name }}</span>
-              <a-select-option v-for="project in node.projects" :key="project.id">{{ project.name }}</a-select-option>
-            </a-select-opt-group>
+          <a-select v-model="projectKeys" mode="multiple" show-search option-filter-prop="children">
+            <a-select-option v-for="project in nodeProjectList" :key="project.id">【{{ project.nodeName }}】{{ project.name }}</a-select-option>
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="报警联系人" prop="notifyUser" class="jpom-notify">
-          <a-transfer :data-source="userList" show-search :filter-option="filterOption" :target-keys="targetKeys" :render="(item) => item.title" @change="handleChange" />
+          <a-transfer
+            :data-source="userList"
+            :lazy="false"
+            :titles="['待选择', '已选择']"
+            show-search
+            :filter-option="filterOption"
+            :target-keys="targetKeys"
+            :render="(item) => item.name"
+            @change="handleChange"
+          />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -66,15 +64,16 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getMonitorList, editMonitor, deleteMonitor } from "../../api/monitor";
-import { getAdminUserList } from "../../api/user";
-import { getNodeProjectList } from "../../api/node";
-import { parseTime } from "../../utils/time";
+import { getMonitorList, editMonitor, deleteMonitor } from "@/api/monitor";
+import { getUserListAll } from "@/api/user";
+import { getProjectListAll, getNodeListAll } from "@/api/node";
+import { parseTime, itemGroupBy } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
   data() {
     return {
       loading: false,
-      tableHeight: "70vh",
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       userList: [],
       nodeProjectList: [],
@@ -89,10 +88,11 @@ export default {
         { title: "开启状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" }, width: 150 },
         { title: "自动重启", dataIndex: "autoRestart", ellipsis: true, scopedSlots: { customRender: "autoRestart" }, width: 150 },
         { title: "报警状态", dataIndex: "alarm", ellipsis: true, scopedSlots: { customRender: "alarm" }, width: 150 },
-        { title: "创建人", dataIndex: "parent", ellipsis: true, scopedSlots: { customRender: "parent" }, width: 120 },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         {
           title: "修改时间",
-          dataIndex: "modifyTime",
+          dataIndex: "modifyTimeMillis",
+          sorter: true,
           customRender: (text) => {
             if (!text || text === "0") {
               return "";
@@ -110,6 +110,18 @@ export default {
   },
   computed: {
     ...mapGetters(["getGuideFlag"]),
+    pagination() {
+      return {
+        total: this.listQuery.total,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
+        },
+      };
+    },
   },
   watch: {
     getGuideFlag() {
@@ -117,10 +129,7 @@ export default {
     },
   },
   created() {
-    this.calcTableHeight();
     this.loadData();
-    this.loadUserList();
-    this.loadNodeProjectList();
   },
   methods: {
     // 页面引导
@@ -142,78 +151,67 @@ export default {
       }
       this.$introJs().exit();
     },
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-      });
-    },
+
     // 加载数据
     loadData() {
       this.loading = true;
-      const params = {
-        nodeId: "",
-      };
-      getMonitorList(params).then((res) => {
+
+      getMonitorList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data.result;
+          this.listQuery.total = res.data.total;
         }
         this.loading = false;
       });
     },
     // 加载用户列表
-    loadUserList() {
-      this.userList = [];
-      getAdminUserList().then((res) => {
+    loadUserList(fn) {
+      getUserListAll().then((res) => {
         if (res.code === 200) {
-          res.data.forEach((element) => {
-            this.userList.push({ key: element.value, title: element.title, disabled: element.disabled || false });
+          this.$nextTick(() => {
+            this.userList = res.data.map((element) => {
+              let canUse = element.email || element.dingDing || element.workWx;
+              return { key: element.id, name: element.name, disabled: !canUse };
+            });
+
+            fn && fn();
           });
         }
       });
     },
     // 加载节点项目列表
-    loadNodeProjectList() {
-      getNodeProjectList().then((res) => {
+    loadNodeProjectList(fn) {
+      this.nodeProjectList = [];
+      getProjectListAll().then((res) => {
         if (res.code === 200) {
-          this.nodeProjectList = res.data;
+          getNodeListAll().then((res1) => {
+            this.nodeProjectList = res.data.map((item) => {
+              let nodeInfo = res1.data.filter((nodeItem) => nodeItem.id === item.nodeId);
+              item.nodeName = nodeInfo.length > 0 ? nodeInfo[0].name : "未知";
+              return item;
+            });
+            fn && fn();
+          });
         }
       });
     },
     // 穿梭框筛选
     filterOption(inputValue, option) {
-      return option.title.indexOf(inputValue) > -1;
+      return option.name.indexOf(inputValue) > -1;
     },
     // 穿梭框 change
     handleChange(targetKeys) {
       this.targetKeys = targetKeys;
     },
-    // 下拉框选择
-    handleSelectChange(value) {
-      this.projectKeys = value;
-      let projects = [];
-      this.nodeProjectList.forEach((node) => {
-        let tempProjects = [];
-        node.projects.forEach((project) => {
-          this.projectKeys.forEach((element) => {
-            if (project.id === element) {
-              tempProjects.push(project.id);
-            }
-          });
-        });
-        if (tempProjects.length > 0) {
-          projects.push({
-            node: node.id,
-            projects: tempProjects,
-          });
-        }
-      });
-      this.temp.projects = projects;
-    },
+
     // 新增
     handleAdd() {
       this.temp = {};
+      this.targetKeys = [];
+      this.projectKeys = [];
       this.editMonitorVisible = true;
+      this.loadUserList();
+      this.loadNodeProjectList();
       this.$nextTick(() => {
         setTimeout(() => {
           this.introGuide();
@@ -223,15 +221,32 @@ export default {
     // 修改
     handleEdit(record) {
       this.temp = Object.assign(record);
-      this.targetKeys = this.temp.notifyUser;
-      // 设置监控项目
-      this.projectKeys = [];
-      this.temp.projects.forEach((node) => {
-        node.projects.forEach((project) => {
-          this.projectKeys.push(project);
+      this.temp.projectsTemp = JSON.parse(this.temp.projects);
+      this.targetKeys = [];
+      this.loadUserList(() => {
+        this.targetKeys = JSON.parse(this.temp.notifyUser);
+
+        this.loadNodeProjectList(() => {
+          // 设置监控项目
+          this.projectKeys = this.nodeProjectList
+            .filter((item) => {
+              return (
+                this.temp.projectsTemp.filter((item2) => {
+                  let isNode = item.nodeId === item2.node;
+                  if (!isNode) {
+                    return false;
+                  }
+                  return item2.projects.filter((item3) => item.projectId === item3).length > 0;
+                }).length > 0
+              );
+            })
+            .map((item) => {
+              return item.id;
+            });
+
+          this.editMonitorVisible = true;
         });
       });
-      this.editMonitorVisible = true;
     },
     handleEditMonitorOk() {
       // 检验表单
@@ -239,12 +254,38 @@ export default {
         if (!valid) {
           return false;
         }
+        let projects = this.nodeProjectList.filter((item) => {
+          return this.projectKeys.includes(item.id);
+        });
+        projects = itemGroupBy(projects, "nodeId", "node", "projects");
+        projects.map((item) => {
+          item.projects = item.projects.map((item) => {
+            return item.projectId;
+          });
+          return item;
+        });
+
+        let targetKeysTemp = this.targetKeys || [];
+        targetKeysTemp = this.userList
+          .filter((item) => {
+            return targetKeysTemp.includes(item.key);
+          })
+          .map((item) => item.key);
+
+        if (targetKeysTemp.length <= 0) {
+          this.$notification.warn({
+            message: "请选择报警联系人",
+            duration: 2,
+          });
+          return false;
+        }
+
         const params = {
           ...this.temp,
           status: this.temp.status ? "on" : "off",
           autoRestart: this.temp.autoRestart ? "on" : "off",
-          projects: JSON.stringify(this.temp.projects),
-          notifyUser: JSON.stringify(this.targetKeys),
+          projects: JSON.stringify(projects),
+          notifyUser: JSON.stringify(targetKeysTemp),
         };
         editMonitor(params).then((res) => {
           if (res.code === 200) {
@@ -280,6 +321,16 @@ export default {
           });
         },
       });
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
     },
   },
 };

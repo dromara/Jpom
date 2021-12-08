@@ -46,6 +46,8 @@ db:
   userPwd:
   # h2 数据库缓存大小  kilobyte 1KB 1,024 megabyte 1MB 1,048,576
   cacheSize:
+  # 自动备份间隔天数 小于等于 0 不自动备份
+  autoBackupIntervalDay: 1
 # spring 相关配置
 spring:
   h2:

@@ -32,88 +32,90 @@ import io.jpom.model.BaseJsonModel;
  **/
 public class MailAccountModel extends BaseJsonModel {
 
-    /**
-     * SMTP服务器域名
-     */
-    private String host;
-    /**
-     * SMTP服务端口
-     */
-    private Integer port;
-    /**
-     * 用户名
-     */
-    private String user;
-    /**
-     * 密码
-     */
-    private String pass;
-    /**
-     * 发送方，遵循RFC-822标准
-     */
-    private String from;
-    /**
-     * 使用 SSL安全连接
-     */
-    private Boolean sslEnable;
-    /**
-     * 指定的端口连接到在使用指定的套接字工厂。如果没有设置,将使用默认端口
-     */
-    private Integer socketFactoryPort;
+	public static final String ID = "MAIL_CONFIG";
 
-    public String getHost() {
-        return host;
-    }
+	/**
+	 * SMTP服务器域名
+	 */
+	private String host;
+	/**
+	 * SMTP服务端口
+	 */
+	private Integer port;
+	/**
+	 * 用户名
+	 */
+	private String user;
+	/**
+	 * 密码
+	 */
+	private String pass;
+	/**
+	 * 发送方，遵循RFC-822标准
+	 */
+	private String from;
+	/**
+	 * 使用 SSL安全连接
+	 */
+	private Boolean sslEnable;
+	/**
+	 * 指定的端口连接到在使用指定的套接字工厂。如果没有设置,将使用默认端口
+	 */
+	private Integer socketFactoryPort;
 
-    public void setHost(String host) {
-        this.host = host;
-    }
+	public String getHost() {
+		return host;
+	}
 
-    public Integer getPort() {
-        return port;
-    }
+	public void setHost(String host) {
+		this.host = host;
+	}
 
-    public void setPort(Integer port) {
-        this.port = port;
-    }
+	public Integer getPort() {
+		return port;
+	}
 
-    public String getUser() {
-        return user;
-    }
+	public void setPort(Integer port) {
+		this.port = port;
+	}
 
-    public void setUser(String user) {
-        this.user = user;
-    }
+	public String getUser() {
+		return user;
+	}
 
-    public String getPass() {
-        return pass;
-    }
+	public void setUser(String user) {
+		this.user = user;
+	}
 
-    public void setPass(String pass) {
-        this.pass = pass;
-    }
+	public String getPass() {
+		return pass;
+	}
 
-    public String getFrom() {
-        return from;
-    }
+	public void setPass(String pass) {
+		this.pass = pass;
+	}
 
-    public void setFrom(String from) {
-        this.from = from;
-    }
+	public String getFrom() {
+		return from;
+	}
 
-    public Boolean getSslEnable() {
-        return sslEnable;
-    }
+	public void setFrom(String from) {
+		this.from = from;
+	}
 
-    public void setSslEnable(Boolean sslEnable) {
-        this.sslEnable = sslEnable;
-    }
+	public Boolean getSslEnable() {
+		return sslEnable;
+	}
 
-    public Integer getSocketFactoryPort() {
-        return socketFactoryPort;
-    }
+	public void setSslEnable(Boolean sslEnable) {
+		this.sslEnable = sslEnable;
+	}
 
-    public void setSocketFactoryPort(Integer socketFactoryPort) {
-        this.socketFactoryPort = socketFactoryPort;
-    }
+	public Integer getSocketFactoryPort() {
+		return socketFactoryPort;
+	}
+
+	public void setSocketFactoryPort(Integer socketFactoryPort) {
+		this.socketFactoryPort = socketFactoryPort;
+	}
 }

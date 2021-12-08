@@ -24,8 +24,12 @@ package io.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.model.BaseModel;
+import com.alibaba.fastjson.JSONArray;
+import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.service.h2db.TableName;
+import io.jpom.util.StringUtil;
 
 import java.nio.charset.Charset;
 import java.util.List;
@@ -36,9 +40,12 @@ import java.util.List;
  * @author bwcx_jzy
  * @date 2019/8/9
  */
-public class SshModel extends BaseModel {
+@TableName("SSH_INFO")
+public class SshModel extends BaseWorkspaceModel {
+
+	private String name;
 	private String host;
-	private int port;
+	private Integer port;
 	private String user;
 	private String password;
 	/**
@@ -49,19 +56,14 @@ public class SshModel extends BaseModel {
 	/**
 	 * 文件目录
 	 */
-	private List<String> fileDirs;
+	private String fileDirs;
 
 	/**
 	 * ssh 私钥
 	 */
 	private String privateKey;
 
-	private ConnectType connectType;
-
-	/**
-	 * 临时缓存model
-	 */
-	private BaseModel nodeModel;
+	private String connectType;
 
 	/**
 	 * 不允许执行的命令
@@ -69,9 +71,17 @@ public class SshModel extends BaseModel {
 	private String notAllowedCommand;
 
 	/**
-	 * 运行编辑的后缀文件
+	 * 允许编辑的后缀文件
 	 */
-	private List<String> allowEditSuffix;
+	private String allowEditSuffix;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getNotAllowedCommand() {
 		return notAllowedCommand;
@@ -81,14 +91,15 @@ public class SshModel extends BaseModel {
 		this.notAllowedCommand = notAllowedCommand;
 	}
 
-	public ConnectType getConnectType() {
-		if (connectType == null) {
-			return ConnectType.PASS;
-		}
+	public ConnectType connectType() {
+		return EnumUtil.fromString(ConnectType.class, this.connectType, ConnectType.PASS);
+	}
+
+	public String getConnectType() {
 		return connectType;
 	}
 
-	public void setConnectType(ConnectType connectType) {
+	public void setConnectType(String connectType) {
 		this.connectType = connectType;
 	}
 
@@ -100,39 +111,28 @@ public class SshModel extends BaseModel {
 		this.privateKey = privateKey;
 	}
 
-	public BaseModel getNodeModel() {
-		return nodeModel;
-	}
-
-	public void setNodeModel(BaseModel nodeModel) {
-		if (nodeModel == null) {
-			return;
-		}
-		this.nodeModel = new BaseModel() {
-			@Override
-			public String getName() {
-				return nodeModel.getName();
-			}
-
-			@Override
-			public String getId() {
-				return nodeModel.getId();
-			}
-		};
-	}
-
-	public List<String> getFileDirs() {
+	public String getFileDirs() {
 		return fileDirs;
 	}
 
-	public void setFileDirs(List<String> fileDirs) {
+	public void setFileDirs(String fileDirs) {
+		this.fileDirs = fileDirs;
+	}
+
+	public List<String> fileDirs() {
+		return StringUtil.jsonConvertArray(this.fileDirs, String.class);
+	}
+
+	public void fileDirs(List<String> fileDirs) {
 		if (fileDirs != null) {
 			for (int i = fileDirs.size() - 1; i >= 0; i--) {
 				String s = fileDirs.get(i);
 				fileDirs.set(i, FileUtil.normalize(s));
 			}
+			this.fileDirs = JSONArray.toJSONString(fileDirs);
+		} else {
+			this.fileDirs = null;
 		}
-		this.fileDirs = fileDirs;
 	}
 
 	public String getHost() {
@@ -143,11 +143,11 @@ public class SshModel extends BaseModel {
 		this.host = host;
 	}
 
-	public int getPort() {
+	public Integer getPort() {
 		return port;
 	}
 
-	public void setPort(int port) {
+	public void setPort(Integer port) {
 		this.port = port;
 	}
 
@@ -185,11 +185,23 @@ public class SshModel extends BaseModel {
 		return charset;
 	}
 
-	public List<String> getAllowEditSuffix() {
+	public List<String> allowEditSuffix() {
+		return StringUtil.jsonConvertArray(this.allowEditSuffix, String.class);
+	}
+
+	public void allowEditSuffix(List<String> allowEditSuffix) {
+		if (allowEditSuffix == null) {
+			this.allowEditSuffix = null;
+		} else {
+			this.allowEditSuffix = JSONArray.toJSONString(allowEditSuffix);
+		}
+	}
+
+	public String getAllowEditSuffix() {
 		return allowEditSuffix;
 	}
 
-	public void setAllowEditSuffix(List<String> allowEditSuffix) {
+	public void setAllowEditSuffix(String allowEditSuffix) {
 		this.allowEditSuffix = allowEditSuffix;
 	}
 

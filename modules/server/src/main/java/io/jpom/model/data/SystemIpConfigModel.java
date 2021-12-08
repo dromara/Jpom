@@ -30,29 +30,31 @@ import io.jpom.model.BaseJsonModel;
  */
 public class SystemIpConfigModel extends BaseJsonModel {
 
-    /**
-     * ip 白名单  允许访问
-     */
-    private String allowed;
+	public static final String ID = "IP_CONFIG";
 
-    /**
-     * 禁止
-     */
-    private String prohibited;
+	/**
+	 * ip 白名单  允许访问
+	 */
+	private String allowed;
 
-    public String getAllowed() {
-        return allowed;
-    }
+	/**
+	 * 禁止
+	 */
+	private String prohibited;
 
-    public void setAllowed(String allowed) {
-        this.allowed = allowed;
-    }
+	public String getAllowed() {
+		return allowed;
+	}
 
-    public String getProhibited() {
-        return prohibited;
-    }
+	public void setAllowed(String allowed) {
+		this.allowed = allowed;
+	}
 
-    public void setProhibited(String prohibited) {
-        this.prohibited = prohibited;
-    }
+	public String getProhibited() {
+		return prohibited;
+	}
+
+	public void setProhibited(String prohibited) {
+		this.prohibited = prohibited;
+	}
 }

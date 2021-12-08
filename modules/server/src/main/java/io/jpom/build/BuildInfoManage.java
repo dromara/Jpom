@@ -28,7 +28,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
@@ -37,6 +36,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
+import io.jpom.common.BaseServerController;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
@@ -51,6 +51,7 @@ import io.jpom.util.GitUtil;
 import io.jpom.util.StringUtil;
 import io.jpom.util.SvnKitUtil;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
 
 import java.io.*;
 import java.nio.file.FileVisitResult;
@@ -83,7 +84,6 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	private final File gitFile;
 	private Process process;
 	private String logId;
-	private final String optUserName;
 	private final UserModel userModel;
 	private final BaseBuildModule baseBuildModule;
 	/**
@@ -97,11 +97,10 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		this.buildInfoModel = buildInfoModel;
 		this.repositoryModel = repositoryModel;
 		this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
-		this.optUserName = UserModel.getOptUserName(userModel);
 		this.userModel = userModel;
 		// 解析 其他配置信息
 		BaseBuildModule baseBuildModule = StringUtil.jsonConvert(this.buildInfoModel.getExtraData(), BaseBuildModule.class);
-		Assert.notNull(baseBuildModule);
+		Assert.notNull(baseBuildModule, "构建信息缺失");
 		// update value
 		baseBuildModule.updateValue(this.buildInfoModel);
 		this.baseBuildModule = baseBuildModule;
@@ -187,6 +186,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		buildHistoryLog.setReleaseMethod(baseBuildModule.getReleaseMethod());
 		buildHistoryLog.setReleaseMethodDataId(baseBuildModule.getReleaseMethodDataId());
 		buildHistoryLog.setAfterOpt(baseBuildModule.getAfterOpt());
+		buildHistoryLog.setWorkspaceId(this.buildInfoModel.getWorkspaceId());
 		buildHistoryLog.setReleaseCommand(baseBuildModule.getReleaseCommand());
 		BeanUtil.copyProperties(this.buildInfoModel, buildHistoryLog);
 
@@ -196,7 +196,6 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		buildHistoryLog.setStartTime(System.currentTimeMillis());
 		buildHistoryLog.setBuildNumberId(buildInfoModel.getBuildId());
 		buildHistoryLog.setBuildName(buildInfoModel.getName());
-		buildHistoryLog.setBuildUser(optUserName);
 
 		DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
 		dbBuildHistoryLogService.insert(buildHistoryLog);
@@ -389,6 +388,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		suppliers.put("release", BuildInfoManage.this::packageRelease);
 		// 依次执行流程，发生异常结束整个流程
 		String processName = StrUtil.EMPTY;
+		BaseServerController.resetInfo(this.userModel);
 		try {
 			for (Map.Entry<String, Supplier<Boolean>> stringSupplierEntry : suppliers.entrySet()) {
 				processName = stringSupplierEntry.getKey();
@@ -406,6 +406,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			this.log("构建失败:" + processName, e);
 		} finally {
 			BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
+			BaseServerController.remove();
 		}
 	}
 

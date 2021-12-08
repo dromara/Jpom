@@ -30,21 +30,16 @@ import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.controller.LoginControl;
-import io.jpom.model.log.UserOperateLogV1;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.socket.ServiceFileTailWatcher;
 import io.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,21 +49,23 @@ import java.util.Map;
  * @author bwcx_jzy
  * @date 2019/7/20
  */
-@Controller
+@RestController
 @RequestMapping(value = "system")
-@Feature(cls = ClassFeature.SYSTEM)
+@Feature(cls = ClassFeature.SYSTEM_CACHE)
+@SystemPermission
 public class CacheManageController extends BaseServerController {
 
 	/**
-	 * @return
-	 * @author Hotstrip
 	 * get server's cache data
 	 * 获取 Server 的缓存数据
+	 *
+	 * @return json
+	 * @author Hotstrip
 	 */
-	@RequestMapping(value = "server-cache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@PostMapping(value = "server-cache", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
 	public String serverCache() {
-		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<>(10);
 		String fileSize = FileUtil.readableFileSize(BuildUtil.tempFileCacheSize);
 		map.put("cacheFileSize", fileSize);
 
@@ -90,8 +87,7 @@ public class CacheManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "node_cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.CACHE)
+	@Feature(method = MethodFeature.LIST)
 	public String nodeCache() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Cache).toString();
 	}
@@ -103,9 +99,7 @@ public class CacheManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.ClearCache)
-	@Feature(method = MethodFeature.CACHE)
+	@Feature(method = MethodFeature.DEL)
 	public String clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
 		switch (type) {
 			case "serviceCacheFileSize":

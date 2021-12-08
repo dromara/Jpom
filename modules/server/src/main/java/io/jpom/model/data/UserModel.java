@@ -23,13 +23,12 @@
 package io.jpom.model.data;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.crypto.SecureUtil;
-import io.jpom.model.BaseModel;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import io.jpom.model.BaseStrikeDbModel;
+import io.jpom.service.h2db.TableName;
 import io.jpom.system.ServerExtConfigBean;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,252 +37,278 @@ import java.util.concurrent.TimeUnit;
  * @author jiangzeyin
  * @date 2019/1/16
  */
-public class UserModel extends BaseModel {
-    /**
-     * 系统管理员
-     */
-    public static String SYSTEM_ADMIN = "sys";
-    /**
-     * 系统占用名
-     */
-    public static String SYSTEM_OCCUPY_NAME = "系统管理员";
-    /**
-     * 用户名限制
-     */
-    public static int USER_NAME_MIN_LEN = 3;
-    /**
-     * 密码
-     */
-    private String password;
-    /**
-     * 创建此用户的人
-     */
-    private String parent;
-    /**
-     * 连续登录失败次数
-     */
-    private int pwdErrorCount;
-    /**
-     * 最后失败时间
-     */
-    private long lastPwdErrorTime;
-    /**
-     * 账号被锁定的时长
-     */
-    private long lockTime;
-    /**
-     * 记录最后修改时间
-     */
-    private long modifyTime;
-    /**
-     * 角色
-     */
-    private Set<String> roles;
-    /**
-     * 邮箱
-     */
-    private String email;
-    /**
-     * 钉钉
-     */
-    private String dingDing;
-    /**
-     * 企业微信
-     */
-    private String workWx;
+@TableName("USER_INFO")
+public class UserModel extends BaseStrikeDbModel {
+	/**
+	 * 系统管理员
+	 */
+	public static String SYSTEM_ADMIN = "sys";
+	/**
+	 *
+	 */
+	public static final UserModel EMPTY = new UserModel(UserModel.SYSTEM_ADMIN);
+	/**
+	 * 系统占用名
+	 */
+	public static String SYSTEM_OCCUPY_NAME = "系统管理员";
+	/**
+	 * 用户名限制
+	 */
+	public static int USER_NAME_MIN_LEN = 3;
+	/**
+	 * 盐值长度
+	 */
+	public static int SALT_LEN = 8;
+	/**
+	 * 昵称
+	 */
+	private String name;
+	/**
+	 * 密码
+	 */
+	private String password;
+	private String salt;
+	/**
+	 * 创建此用户的人
+	 */
+	private String parent;
+	/**
+	 * 系统管理员
+	 */
+	private Integer systemUser;
+	/**
+	 * 连续登录失败次数
+	 */
+	private Integer pwdErrorCount;
+	/**
+	 * 最后失败时间
+	 */
+	private Long lastPwdErrorTime;
+	/**
+	 * 账号被锁定的时长
+	 */
+	private Long lockTime;
+	/**
+	 * 邮箱
+	 */
+	private String email;
+	/**
+	 * 钉钉
+	 */
+	private String dingDing;
+	/**
+	 * 企业微信
+	 */
+	private String workWx;
 
-    public long getLockTime() {
-        return lockTime;
-    }
+	public UserModel(String id) {
+		this.setId(id);
+	}
 
-    public long getLastPwdErrorTime() {
-        return lastPwdErrorTime;
-    }
+	public UserModel() {
+	}
 
-    public void setLastPwdErrorTime(long lastPwdErrorTime) {
-        this.lastPwdErrorTime = lastPwdErrorTime;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setLockTime(long lockTime) {
-        this.lockTime = lockTime;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public int getPwdErrorCount() {
-        return pwdErrorCount;
-    }
+	public String getSalt() {
+		return salt;
+	}
 
-    public void setPwdErrorCount(int pwdErrorCount) {
-        this.pwdErrorCount = pwdErrorCount;
-    }
+	public void setSalt(String salt) {
+		this.salt = salt;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public Integer getSystemUser() {
+		return systemUser;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setSystemUser(Integer systemUser) {
+		this.systemUser = ObjectUtil.defaultIfNull(systemUser, 0) == 1 ? systemUser : 0;
+	}
 
-    public String getDingDing() {
-        return dingDing;
-    }
+	public Long getLockTime() {
+		return lockTime;
+	}
 
-    public void setDingDing(String dingDing) {
-        this.dingDing = dingDing;
-    }
+	public Long getLastPwdErrorTime() {
+		return lastPwdErrorTime;
+	}
 
-    public String getWorkWx() {
-        return workWx;
-    }
+	public void setLastPwdErrorTime(Long lastPwdErrorTime) {
+		this.lastPwdErrorTime = lastPwdErrorTime;
+	}
 
-    public void setWorkWx(String workWx) {
-        this.workWx = workWx;
-    }
+	public void setLockTime(long lockTime) {
+		this.lockTime = lockTime;
+	}
 
-    /**
-     * 解锁
-     */
-    public void unLock() {
-        setPwdErrorCount(0);
-        setLockTime(0);
-        setLastPwdErrorTime(0);
-    }
+	public Integer getPwdErrorCount() {
+		return pwdErrorCount;
+	}
 
-    /**
-     * 剩余解锁时间
-     *
-     * @return 0是未锁定
-     */
-    public long overLockTime() {
-        if (ServerExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
-            return 0;
-        }
-        // 不限制演示账号的登录
-        if (isDemoUser()) {
-            return 0;
-        }
-        // 最后一次失败时间
-        long lastTime = getLastPwdErrorTime();
-        if (lastTime <= 0) {
-            return 0;
-        }
-        // 当前锁定时间
-        long lockTime = getLockTime();
-        if (lockTime <= 0) {
-            return 0;
-        }
-        // 解锁时间
-        lastTime += lockTime;
-        long nowTime = DateUtil.currentSeconds();
-        // 剩余解锁时间
-        lastTime -= nowTime;
-        if (lastTime > 0) {
-            return lastTime;
-        }
-        return 0;
-    }
+	public void setPwdErrorCount(int pwdErrorCount) {
+		this.pwdErrorCount = pwdErrorCount;
+	}
 
-    /**
-     * 登录失败，重新计算锁定时间
-     */
-    public void errorLock() {
-        // 未开启锁定功能
-        if (ServerExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
-            return;
-        }
-        setPwdErrorCount(getPwdErrorCount() + 1);
-        int count = getPwdErrorCount();
-        // 记录错误时间
-        setLastPwdErrorTime(DateUtil.currentSeconds());
-        if (count < ServerExtConfigBean.getInstance().userAlwaysLoginError) {
-            // 还未达到锁定条件
-            return;
-        }
-        int level = count / ServerExtConfigBean.getInstance().userAlwaysLoginError;
-        switch (level) {
-            case 1:
-                // 在错误倍数 为1 锁定 30分钟
-                setLockTime(TimeUnit.MINUTES.toSeconds(30));
-                break;
-            case 2:
-                // 在错误倍数 为2 锁定 1小时
-                setLockTime(TimeUnit.HOURS.toSeconds(1));
-                break;
-            default:
-                // 其他情况 10小时
-                setLockTime(TimeUnit.HOURS.toSeconds(10));
-                break;
-        }
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public String getParent() {
-        return parent;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public void setParent(String parent) {
-        this.parent = parent;
-    }
+	public String getDingDing() {
+		return dingDing;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public void setDingDing(String dingDing) {
+		this.dingDing = dingDing;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-        // 记录修改时间，如果在线用户线退出
-        this.setModifyTime(DateUtil.current());
-    }
+	public String getWorkWx() {
+		return workWx;
+	}
 
-    public String getUserMd5Key() {
-        return SecureUtil.md5(String.format("%s:%s", getId(), password));
-    }
+	public void setWorkWx(String workWx) {
+		this.workWx = workWx;
+	}
 
-    public boolean isSystemUser() {
-        return UserModel.SYSTEM_ADMIN.equals(getParent());
-    }
+	/**
+	 * 解锁
+	 */
+	public void unLock() {
+		setPwdErrorCount(0);
+		setLockTime(0);
+		setLastPwdErrorTime(0L);
+	}
 
-    /**
-     * demo 登录名默认为系统验证账号
-     *
-     * @return true
-     */
-    public boolean isDemoUser() {
-        return "demo".equals(getId());
-    }
+	/**
+	 * 剩余解锁时间
+	 *
+	 * @return 0是未锁定
+	 */
+	public long overLockTime() {
+		if (ServerExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
+			return 0;
+		}
+		// 不限制演示账号的登录
+		if (isDemoUser()) {
+			return 0;
+		}
+		// 最后一次失败时间
+		Long lastTime = getLastPwdErrorTime();
+		if (lastTime == null || lastTime <= 0) {
+			return 0;
+		}
+		// 当前锁定时间
+		Long lockTime = getLockTime();
+		if (lockTime == null || lockTime <= 0) {
+			return 0;
+		}
+		// 解锁时间
+		lastTime += lockTime;
+		long nowTime = DateUtil.currentSeconds();
+		// 剩余解锁时间
+		lastTime -= nowTime;
+		if (lastTime > 0) {
+			return lastTime;
+		}
+		return 0;
+	}
 
-    public long getModifyTime() {
-        return modifyTime;
-    }
+	/**
+	 * 登录失败，重新计算锁定时间
+	 */
+	public void errorLock() {
+		// 未开启锁定功能
+		if (ServerExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
+			return;
+		}
+		setPwdErrorCount(getPwdErrorCount() + 1);
+		int count = getPwdErrorCount();
+		// 记录错误时间
+		setLastPwdErrorTime(DateUtil.currentSeconds());
+		if (count < ServerExtConfigBean.getInstance().userAlwaysLoginError) {
+			// 还未达到锁定条件
+			return;
+		}
+		int level = count / ServerExtConfigBean.getInstance().userAlwaysLoginError;
+		switch (level) {
+			case 1:
+				// 在错误倍数 为1 锁定 30分钟
+				setLockTime(TimeUnit.MINUTES.toSeconds(30));
+				break;
+			case 2:
+				// 在错误倍数 为2 锁定 1小时
+				setLockTime(TimeUnit.HOURS.toSeconds(1));
+				break;
+			default:
+				// 其他情况 10小时
+				setLockTime(TimeUnit.HOURS.toSeconds(10));
+				break;
+		}
+	}
 
-    public void setModifyTime(long modifyTime) {
-        this.modifyTime = modifyTime;
-    }
+	public String getParent() {
+		return parent;
+	}
 
-    /**
-     * 隐藏系统管理的真实id
-     *
-     * @param userModel 实体
-     * @return 系统管理员返回默认
-     */
-    public static String getOptUserName(UserModel userModel) {
-        String userId;
-        if (userModel.isSystemUser()) {
-            userId = UserModel.SYSTEM_OCCUPY_NAME;
-        } else {
-            userId = userModel.getId();
-        }
-        return userId;
-    }
+	public void setParent(String parent) {
+		this.parent = parent;
+	}
 
-    public Set<String> getRoles() {
-        return roles;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+		// 记录修改时间，如果在线用户线退出
+		//this.setModifyTime(DateUtil.current());
+	}
 
-    public void setRoles(List<String> roles) {
-        this.roles = new HashSet<>(roles);
-    }
+	public boolean isSystemUser() {
+		return systemUser != null && systemUser == 1;
+	}
+
+	/**
+	 * 是否为超级管理员
+	 *
+	 * @return true 是
+	 */
+	public boolean isSuperSystemUser() {
+		return StrUtil.equals(getParent(), SYSTEM_ADMIN);
+	}
+
+	/**
+	 * demo 登录名默认为系统验证账号
+	 *
+	 * @return true
+	 */
+	public boolean isDemoUser() {
+		return "demo".equals(getId());
+	}
+
+	/**
+	 * 隐藏系统管理的真实id
+	 *
+	 * @param userModel 实体
+	 * @return 系统管理员返回默认
+	 */
+	public static String getOptUserName(UserModel userModel) {
+		String userId;
+		if (userModel.isSystemUser()) {
+			userId = UserModel.SYSTEM_OCCUPY_NAME;
+		} else {
+			userId = userModel.getId();
+		}
+		return userId;
+	}
 }

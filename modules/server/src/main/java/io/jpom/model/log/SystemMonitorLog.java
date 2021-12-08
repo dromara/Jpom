@@ -22,7 +22,8 @@
  */
 package io.jpom.model.log;
 
-import io.jpom.model.BaseJsonModel;
+import io.jpom.model.BaseDbModel;
+import io.jpom.service.h2db.TableName;
 
 /**
  * 系统监控记录
@@ -30,13 +31,9 @@ import io.jpom.model.BaseJsonModel;
  * @author Arno
  * @date 2019/9/16
  */
-public class SystemMonitorLog extends BaseJsonModel {
-	/**
-	 * 表名
-	 */
-	public static final String TABLE_NAME = SystemMonitorLog.class.getSimpleName().toUpperCase();
+@TableName("SYSTEMMONITORLOG")
+public class SystemMonitorLog extends BaseDbModel {
 
-	private String id;
 	/**
 	 * 节点id
 	 */
@@ -61,14 +58,6 @@ public class SystemMonitorLog extends BaseJsonModel {
 	 * 占用磁盘
 	 */
 	private double occupyDisk;
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
 
 	public String getNodeId() {
 		return nodeId;
@@ -116,17 +105,5 @@ public class SystemMonitorLog extends BaseJsonModel {
 
 	public void setOccupyMemoryUsed(double occupyMemoryUsed) {
 		this.occupyMemoryUsed = occupyMemoryUsed;
-	}
-
-	@Override
-	public String toString() {
-		return "SystemMonitorLog{" +
-				"id='" + id + '\'' +
-				", nodeId='" + nodeId + '\'' +
-				", monitorTime=" + monitorTime +
-				", occupyCpu=" + occupyCpu +
-				", occupyMemory=" + occupyMemory +
-				", occupyDisk=" + occupyDisk +
-				'}';
 	}
 }

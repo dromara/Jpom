@@ -1,12 +1,13 @@
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
+      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="名称" />
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleLink">添加关联项目</a-button>
       <a-button type="primary" @click="handleAdd">创建分发项目</a-button>
-      <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 表格 :scroll="{x: 740, y: tableHeight - 60}" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
-    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :style="{ 'max-height': tableHeight + 'px' }" @expand="expand" :pagination="false">
+    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="this.pagination" @change="changePage">
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -40,8 +41,8 @@
         <a-tooltip slot="projectName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="outGivingResult" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
+        <a-tooltip slot="outGivingResult" slot-scope="text, item" placement="topLeft" :title="text">
+          <span>{{ text }} {{ item.errorMsg || "" }}</span>
         </a-tooltip>
         <a-switch slot="projectStatus" slot-scope="text" :checked="text" checked-children="运行中" un-checked-children="未运行" />
         <template slot="child-operation" slot-scope="text, record">
@@ -84,10 +85,10 @@
                 style="width: 140px"
                 :defaultValue="item.index === '' ? undefined : item.index"
                 @change="(value) => handleNodeListChange(value, index)"
-                :disabled="item.index === '' ? false : !nodeNameList[item.index].openStatus"
+                :disabled="item.index === '' ? false : !nodeNameList[item.index].nodeData.openStatus"
               >
-                <a-select-option :value="index" v-for="(nodeList, index) in nodeNameList" :key="nodeList.id" :disabled="!nodeList.openStatus">
-                  {{ nodeList.name }}
+                <a-select-option :value="index" v-for="(nodeList, index) in nodeNameList" :key="nodeList.id" :disabled="nodeList.nodeData.openStatus !== 1">
+                  {{ nodeList.nodeData.name }}
                 </a-select-option>
               </a-select>
               <span>项目: </span>
@@ -99,7 +100,16 @@
                 @change="(value) => handleProjectChange(value, index)"
                 :disabled="dispatchList[index].disabled"
               >
-                <a-select-option :value="project.id" v-for="project in item.project" :key="project.id">
+                <a-select-option
+                  :value="project.projectId"
+                  v-for="project in item.project"
+                  :disabled="
+                    dispatchList.filter((item, nowIndex) => {
+                      return item.projectId === project.projectId && nowIndex !== index;
+                    }).length > 0
+                  "
+                  :key="project.projectId"
+                >
                   {{ project.name }}
                 </a-select-option>
               </a-select>
@@ -215,7 +225,7 @@
         <!-- 节点 -->
         <a-form-model-item label="分发节点" prop="nodeId">
           <a-select v-model="temp.nodeIdList" mode="multiple" placeholder="请选择分发节点">
-            <a-select-option v-for="node in nodeList" :key="node.key">{{ `${node.title} ( ${node.key} )` }}</a-select-option>
+            <a-select-option v-for="node in nodeList" :key="node.id">{{ `${node.name} ( ${node.id} )` }}</a-select-option>
           </a-select>
         </a-form-model-item>
         <a-collapse v-show="temp.runMode && temp.runMode !== 'File'">
@@ -227,7 +237,7 @@
               <a-textarea v-model="temp[`${nodeId}_jvm`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
             </a-form-model-item>
             <a-form-model-item label="args 参数" prop="args">
-              <a-textarea v-model="temp[`${nodeId}_args`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080" />
+              <a-textarea v-model="temp[`${nodeId}_args`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
             </a-form-model-item>
             <!-- 副本信息 -->
             <a-row v-for="replica in temp[`${nodeId}_javaCopyItemList`]" :key="replica.id">
@@ -235,7 +245,7 @@
                 <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
               </a-form-model-item>
               <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
-                <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080" />
+                <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
               </a-form-model-item>
               <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
                 <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(nodeId, replica)">删除</a-button>
@@ -311,9 +321,11 @@
 import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
-import { getDishPatchList, getDispatchProject, getReqId, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch, remoteDownload } from "../../api/dispatch";
-import { getNodeProjectList } from "../../api/node";
-import { getProjectData } from "../../api/node-project";
+import { getDishPatchList, getDispatchProject, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch, remoteDownload } from "../../api/dispatch";
+import { getNodeListAll, getProjectListAll } from "@/api/node";
+import { getProjectData, runModeList } from "@/api/node-project";
+import { itemGroupBy, parseTime } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
   components: {
     File,
@@ -323,17 +335,17 @@ export default {
     return {
       loading: false,
       childLoading: false,
-      tableHeight: "70vh",
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       accessList: [],
       nodeList: [],
       projectList: [],
-      nodeProjectMap: {},
+
       targetKeys: [],
       reqId: "",
       temp: {},
       fileList: [],
-      runModeList: ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"],
+      runModeList: runModeList,
       list_expanded: {},
       linkDispatchVisible: false,
       editDispatchVisible: false,
@@ -348,6 +360,16 @@ export default {
         { title: "分发 ID", dataIndex: "id", width: 100, ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "分发名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "类型", dataIndex: "outGivingProject", width: 100, ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+          width: 170,
+        },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 380, align: "left" },
       ],
       childColumns: [
@@ -375,6 +397,19 @@ export default {
     filePath() {
       return (this.temp.whitelistDirectory || "") + (this.temp.lib || "");
     },
+    // 分页
+    pagination() {
+      return {
+        total: this.listQuery.total,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
+        },
+      };
+    },
   },
   watch: {
     getGuideFlag() {
@@ -382,8 +417,7 @@ export default {
     },
   },
   created() {
-    this.calcTableHeight();
-    this.handleFilter();
+    this.loadData();
   },
   methods: {
     // 页面引导
@@ -405,30 +439,18 @@ export default {
       }
       this.$introJs().exit();
     },
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-      });
-    },
+
     // 加载数据
     loadData() {
       this.list = [];
       this.loading = true;
       this.childLoading = false;
-      getDishPatchList().then((res) => {
+      getDishPatchList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data.result;
+          this.listQuery.total = res.data.total;
         }
         this.loading = false;
-      });
-    },
-    // 获取 reqId
-    loadReqId() {
-      getReqId().then((res) => {
-        if (res.code === 200) {
-          this.reqId = res.data;
-        }
       });
     },
     // 加载项目白名单列表
@@ -447,11 +469,10 @@ export default {
         this.handleReload(record);
       }
     },
-    // 筛选
-    handleFilter() {
-      this.loadData();
-      this.loadNodeList();
-    },
+    // // 筛选
+    // handleFilter() {
+    //   this.loadData();
+    // },
     // 关联分发
     handleLink() {
       this.$refs["linkDispatchForm"] && this.$refs["linkDispatchForm"].resetFields();
@@ -461,40 +482,48 @@ export default {
         name: "",
         projectId: "",
       };
-      this.loadReqId();
+      this.loadNodeList(() => {
+        this.loadProjectListAll();
+      });
       this.linkDispatchVisible = true;
     },
     // 编辑分发
     handleEditDispatch(record) {
       this.$nextTick(() => {
         this.$refs["linkDispatchForm"] && this.$refs["linkDispatchForm"].resetFields();
-        //分发节点重新渲染
-        record.outGivingNodeProjectList.forEach((ele) => {
-          let index = "";
-          let projects = [];
-          this.nodeNameList.forEach((item, idx) => {
-            if (item.id === ele.nodeId) {
-              index = idx;
-              projects = item.projects;
-              item.openStatus = false;
-            }
+      });
+      this.loadNodeList(() => {
+        this.loadProjectListAll(() => {
+          //分发节点重新渲染
+
+          JSON.parse(record.outGivingNodeProjectList).forEach((ele, eleIndex) => {
+            let index = "";
+            let projects = [];
+            this.nodeNameList.forEach((item, idx) => {
+              if (item.id === ele.nodeId) {
+                index = idx;
+                projects = item.projects;
+                item.openStatus = false;
+              }
+            });
+            this.temp[`node_${ele.nodeId}_${eleIndex}`] = ele.projectId;
+            this.dispatchList.push({
+              nodeId: ele.nodeId,
+              projectId: ele.projectId,
+              index: index,
+              project: projects,
+              status: true,
+            });
+            console.log(ele, eleIndex);
           });
-          this.temp[`node_${ele.nodeId}`] = ele.projectId;
-          this.dispatchList.push({
-            nodeId: ele.nodeId,
-            projectId: ele.projectId,
-            index: index,
-            project: projects,
-            status: true,
-          });
+          this.temp.type = "edit";
+          this.temp.projectId = record.projectId;
+          this.temp.name = record.name;
+          this.temp.afterOpt = record.afterOpt;
+          this.temp.id = record.id;
+
+          this.linkDispatchVisible = true;
         });
-        this.temp.type = "edit";
-        this.temp.projectId = record.projectId;
-        this.temp.name = record.name;
-        this.temp.afterOpt = record.afterOpt;
-        this.temp.id = record.id;
-        this.loadReqId();
-        this.linkDispatchVisible = true;
       });
     },
     // 选择项目
@@ -532,8 +561,7 @@ export default {
         } else if (this.dispatchList.length < 2) {
           return this.$message.error("至少选择2个节点项目");
         }
-        // 设置 reqId
-        this.temp.reqId = this.reqId;
+
         // 提交
         editDispatch(this.temp).then((res) => {
           if (res.code === 200) {
@@ -555,30 +583,32 @@ export default {
     },
     // 添加分发项目
     handleAdd() {
-      this.temp = {
-        type: "add",
-        id: "",
-        name: "",
-        afterOpt: undefined,
-        runMode: undefined,
-        mainClass: "",
-        javaExtDirsCp: "",
-        whitelistDirectory: undefined,
-        lib: "",
-        nodeIdList: [],
-      };
-      // 添加 javaCopyItemList
-      this.nodeList.forEach((node) => {
-        this.temp[`${node.key}_javaCopyItemList`] = [];
-      });
-      this.loadAccesList();
-      this.loadReqId();
-      this.editDispatchVisible = true;
-      this.$nextTick(() => {
-        this.$refs["editDispatchForm"].resetFields();
-        setTimeout(() => {
-          this.introGuide();
-        }, 500);
+      this.loadNodeList(() => {
+        this.temp = {
+          type: "add",
+          id: "",
+          name: "",
+          afterOpt: undefined,
+          runMode: undefined,
+          mainClass: "",
+          javaExtDirsCp: "",
+          whitelistDirectory: undefined,
+          lib: "",
+          nodeIdList: [],
+        };
+        // 添加 javaCopyItemList
+        this.nodeList.forEach((node) => {
+          this.temp[`${node.key}_javaCopyItemList`] = [];
+        });
+        this.loadAccesList();
+
+        this.editDispatchVisible = true;
+        this.$nextTick(() => {
+          this.$refs["editDispatchForm"].resetFields();
+          setTimeout(() => {
+            this.introGuide();
+          }, 500);
+        });
       });
     },
     // 编辑分发项目
@@ -587,7 +617,7 @@ export default {
         this.$refs["editDispatchForm"] && this.$refs["editDispatchForm"].resetFields();
         //
         this.temp = {};
-        record.outGivingNodeProjectList.forEach((ele) => {
+        JSON.parse(record.outGivingNodeProjectList).forEach((ele) => {
           const params = {
             id: ele.projectId,
             nodeId: ele.nodeId,
@@ -623,7 +653,7 @@ export default {
         });
         // 加载其他数据
         this.loadAccesList();
-        this.loadReqId();
+
         this.editDispatchVisible = true;
       });
     },
@@ -832,44 +862,27 @@ export default {
     onConsoleClose() {
       this.drawerConsoleVisible = false;
     },
-    // 加载节点以及项目
-    loadNodeList() {
-      this.nodeList = [];
-      getNodeProjectList().then((res) => {
+    loadProjectListAll(fn) {
+      getProjectListAll().then((res) => {
         if (res.code === 200) {
-          this.nodeNameList = res.data;
-          // 新增或者编辑分发项目时需要
-          res.data.forEach((node) => {
-            const nodeItem = {
-              title: node.name,
-              key: node.id,
-              disabled: true,
-              projectPlaceholder: "请选择项目",
-              projectDisabled: true,
-            };
-            node.projects.forEach((project) => {
-              ++this.totalProjectNum;
-              // 如果项目 ID 存在就不用继续添加
-              const index = this.projectList.findIndex((p) => p.id === project.id);
-              if (index === -1) {
-                const projectItem = {
-                  name: `${project.name} ( ${project.id} )`,
-                  id: project.id,
-                };
-                this.projectList.push(projectItem);
-              }
-              // 判断对象是否存在
-              if (!this.nodeProjectMap[`${project.id}`]) {
-                this.nodeProjectMap[`${project.id}`] = [...(this.nodeProjectMap[`${project.id}`] || []), node.id];
-              } else {
-                const tempIndex = this.nodeProjectMap[`${project.id}`].findIndex((nodeId) => node.id === nodeId);
-                if (tempIndex === -1) {
-                  this.nodeProjectMap[`${project.id}`].push(node.id);
-                }
-              }
-            });
-            this.nodeList.push(nodeItem);
+          this.totalProjectNum = res.data ? res.data.length : 0;
+          this.nodeNameList = itemGroupBy(res.data, "nodeId", "id", "projects");
+          this.nodeNameList = this.nodeNameList.map((item) => {
+            item.nodeData = this.nodeList.filter((node) => node.id === item.id)[0];
+            return item;
           });
+          fn && fn();
+          console.log(this.nodeNameList);
+        }
+      });
+    },
+    // 加载节点以及项目
+    loadNodeList(fn) {
+      this.nodeList = [];
+      getNodeListAll().then((res) => {
+        if (res.code === 200) {
+          this.nodeList = res.data;
+          fn && fn();
         }
       });
     },
@@ -891,11 +904,14 @@ export default {
     // 选择项目
     handleProjectChange(value, index) {
       this.dispatchList[index].projectId = value;
-      this.temp["node_" + this.dispatchList[index].nodeId] = value;
+      this.temp["node_" + this.dispatchList[index].nodeId + "_" + index] = value;
     },
     // 添加分发
     addDispachList() {
-      if (this.dispatchList.length >= this.totalProjectNum) return this.$message.error("已无更多节点项目，请先创建项目");
+      if (this.dispatchList.length >= this.totalProjectNum) {
+        this.$message.error("已无更多节点项目，请先创建项目");
+        return false;
+      }
       this.dispatchList.push({ nodeId: "", projectId: "", index: "", project: [], status: true, placeholder: "请先选择节点", disabled: true });
     },
     // 删除分发
@@ -913,6 +929,16 @@ export default {
       for (let node in this.nodeNameList) {
         this.nodeNameList[node].openStatus = true;
       }
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
     },
   },
 };

@@ -3,16 +3,12 @@ package io.jpom.controller.node.manage.file;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.node.manage.ProjectInfoService;
+import io.jpom.service.node.ProjectInfoCacheService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
 
 /**
  * 文件管理
@@ -21,10 +17,14 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping(value = "/node/manage/file/")
-@Feature(cls = ClassFeature.PROJECT)
+@Feature(cls = ClassFeature.PROJECT_FILE)
 public class ProjectFileControl extends BaseServerController {
-	@Resource
-	private ProjectInfoService projectInfoService;
+
+	private final ProjectInfoCacheService projectInfoService;
+
+	public ProjectFileControl(ProjectInfoCacheService projectInfoService) {
+		this.projectInfoService = projectInfoService;
+	}
 
 	/**
 	 * 列出目录下的文件
@@ -34,7 +34,7 @@ public class ProjectFileControl extends BaseServerController {
 	@RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	// @ProjectPermission()
-	@Feature(method = MethodFeature.FILE)
+	@Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.LIST)
 	public String getFileList() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_GetFileList).toString();
 	}
@@ -47,8 +47,7 @@ public class ProjectFileControl extends BaseServerController {
 	 */
 	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.UploadProjectFile)
-	@Feature(method = MethodFeature.UPLOAD)
+	@Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.UPLOAD)
 	public String upload() {
 		return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload).toString();
 	}
@@ -58,8 +57,7 @@ public class ProjectFileControl extends BaseServerController {
 	 */
 	@RequestMapping(value = "download", method = RequestMethod.GET)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.DownloadProjectFile)
-	@Feature(method = MethodFeature.DOWNLOAD)
+	@Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.DOWNLOAD)
 	public void download() {
 		NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_File_Download);
 	}
@@ -71,8 +69,7 @@ public class ProjectFileControl extends BaseServerController {
 	 */
 	@RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.DEL_FILE)
-	@OptLog(UserOperateLogV1.OptType.DelProjectFile)
+	@Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.DEL)
 	public String deleteFile() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_DeleteFile).toString();
 	}
@@ -85,7 +82,7 @@ public class ProjectFileControl extends BaseServerController {
 	 */
 	@PostMapping(value = "update_config_file", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.UPDATE_CONFIG_FILE)
+	@Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.EDIT)
 	public String updateConfigFile() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_UpdateConfigFile).toString();
 	}
@@ -97,7 +94,7 @@ public class ProjectFileControl extends BaseServerController {
 	 */
 	@GetMapping(value = "read_file", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.READ_FILE)
+	@Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.LIST)
 	public String readFile() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_ReadFile).toString();
 	}
@@ -108,7 +105,7 @@ public class ProjectFileControl extends BaseServerController {
 	 * @return json
 	 */
 	@GetMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.REMOTE_DOWNLOAD)
+	@Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.REMOTE_DOWNLOAD)
 	public String remoteDownload() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_Remote_Download).toString();
 

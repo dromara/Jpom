@@ -1,8 +1,9 @@
 <template>
   <div class="user-header">
-    <a-tooltip placement="left">
-      <a-button title="只保留当前的 Tab" :disabled="getTabList.length <= 1" class="close-all jpom-close-tabs" @click="closeTabs">关闭 Tab</a-button>
-      <!--      <a-button title="回到旧版 UI" class="close-all jpom-old-version" @click="toOldIndex">旧版</a-button>-->
+    <a-tooltip placement="left" title="切换工作空间">
+      <a-select v-model="selectWorkspace" class="workspace" option-filter-prop="children" show-search placeholder="工作空间" @change="handleChange">
+        <a-select-option v-for="item in myWorkspaceList" :key="item.id">{{ item.name }}</a-select-option>
+      </a-select>
     </a-tooltip>
     <a-dropdown>
       <!--      <a-avatar-->
@@ -11,14 +12,16 @@
       <!--        :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle' ,fontSize:'40px'}">-->
       <!--        -->
       <!--      </a-avatar>-->
-      <a-button
-        class="ant-dropdown-link jpom-user-operation"
-        :style="{ backgroundColor: '#f56a00', color: '#fff', verticalAlign: 'middle' }"
-        @click="(e) => e.preventDefault()"
-        :title="getUserInfo.name"
-      >
-        {{ avatarName }} <a-icon type="down" />
-      </a-button>
+      <a-tooltip placement="left" :title="this.getUserInfo.name">
+        <a-button
+          class="ant-dropdown-link jpom-user-operation"
+          :style="{ backgroundColor: '#f56a00', color: '#fff', verticalAlign: 'middle' }"
+          @click="(e) => e.preventDefault()"
+          :title="getUserInfo.name"
+        >
+          {{ avatarName }} <a-icon type="down" />
+        </a-button>
+      </a-tooltip>
       <a-menu slot="overlay">
         <a-menu-item>
           <a href="javascript:;" @click="handleUpdatePwd">修改密码</a>
@@ -82,7 +85,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { updatePwd, sendEmailCode, editUserInfo, getUserInfo } from "../../api/user";
+import { updatePwd, sendEmailCode, editUserInfo, getUserInfo, myWorkspace } from "@/api/user";
 import sha1 from "sha1";
 export default {
   data() {
@@ -92,17 +95,31 @@ export default {
       updateNameVisible: false,
       updateUserVisible: false,
       temp: {},
+      myWorkspaceList: [],
+      selectWorkspace: "",
       // 表单校验规则
       rules: {
-        oldPwd: [{ required: true, message: "Please input old password", trigger: "blur" }],
-        newPwd: [{ required: true, message: "Please input new password", trigger: "blur" }],
-        confirmPwd: [{ required: true, message: "Please input confirmPwd password", trigger: "blur" }],
+        oldPwd: [
+          { required: true, message: "Please input old password", trigger: "blur" },
+          { max: 20, message: "密码长度为6-20", trigger: "blur" },
+          { min: 6, message: "密码长度为6-20", trigger: "blur" },
+        ],
+        newPwd: [
+          { required: true, message: "Please input new password", trigger: "blur" },
+          { max: 20, message: "密码长度为6-20", trigger: "blur" },
+          { min: 6, message: "密码长度为6-20", trigger: "blur" },
+        ],
+        confirmPwd: [
+          { required: true, message: "Please input confirmPwd password", trigger: "blur" },
+          { max: 20, message: "密码长度为6-20", trigger: "blur" },
+          { min: 6, message: "密码长度为6-20", trigger: "blur" },
+        ],
         email: [{ required: true, message: "Please input email", trigger: "blur" }],
       },
     };
   },
   computed: {
-    ...mapGetters(["getToken", "getUserInfo", "getTabList"]),
+    ...mapGetters(["getToken", "getUserInfo", "getWorkspaceId"]),
     // 处理展示的名称 中文 3 个字 其他 4 个字符
     avatarName() {
       const reg = new RegExp("[\u4E00-\u9FA5]+");
@@ -116,7 +133,19 @@ export default {
       return this.getUserInfo.email !== this.temp.email;
     },
   },
+  created() {
+    this.init();
+  },
   methods: {
+    init() {
+      myWorkspace().then((res) => {
+        this.myWorkspaceList = res.data;
+        this.selectWorkspace = this.getWorkspaceId;
+        if (!this.selectWorkspace) {
+          this.handleChange(res.data[0].id);
+        }
+      });
+    },
     // 退出登录
     logOut() {
       this.$confirm({
@@ -231,14 +260,9 @@ export default {
         });
       });
     },
-    // 关闭 tabs
-    closeTabs() {
-      this.$notification.success({
-        message: "操作成功",
-        top: "100px",
-        duration: 1,
-      });
-      this.$store.dispatch("clearTabs");
+    handleChange(vlaue) {
+      this.$store.dispatch("changeWorkspace", vlaue);
+      location.reload();
     },
     // toOldIndex() {
     //   window.location.href = '/old.html'
@@ -247,9 +271,13 @@ export default {
 };
 </script>
 <style scoped>
+.workspace {
+  width: 100px;
+  margin-right: 10px;
+}
 .user-header {
   display: inline-table;
-  width: 300px;
+  width: 220px;
   text-align: right;
   margin-right: 20px;
   cursor: pointer;

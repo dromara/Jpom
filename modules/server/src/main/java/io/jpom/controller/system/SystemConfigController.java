@@ -36,19 +36,19 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.SystemIpConfigModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
-import io.jpom.service.system.SystemIpConfigService;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
+import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ExtConfigBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,27 +60,29 @@ import java.nio.charset.StandardCharsets;
  * @author bwcx_jzy
  * @date 2019/08/08
  */
-@Controller
+@RestController
 @RequestMapping(value = "system")
+@Feature(cls = ClassFeature.SYSTEM_CONFIG)
+@SystemPermission
 public class SystemConfigController extends BaseServerController {
 
-	private final SystemIpConfigService systemIpConfigService;
+	private final SystemParametersServer systemParametersServer;
 
-	public SystemConfigController(SystemIpConfigService systemIpConfigService) {
-		this.systemIpConfigService = systemIpConfigService;
+	public SystemConfigController(SystemParametersServer systemParametersServer) {
+		this.systemParametersServer = systemParametersServer;
 	}
 
 	/**
-	 * @param nodeId
-	 * @return
-	 * @throws IOException
-	 * @author Hotstrip
 	 * get server's config or node's config
 	 * 加载服务端或者节点端配置
+	 *
+	 * @param nodeId 节点ID
+	 * @return json
+	 * @throws IOException io
+	 * @author Hotstrip
 	 */
 	@RequestMapping(value = "config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
-	@ResponseBody
+	@Feature(method = MethodFeature.LIST)
 	public String configData(String nodeId) throws IOException {
 		String content;
 		if (StrUtil.isNotEmpty(nodeId)) {
@@ -93,9 +95,7 @@ public class SystemConfigController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.EditSysConfig)
-	@SystemPermission
+	@Feature(method = MethodFeature.EDIT)
 	public String saveConfig(String nodeId, String content, String restart) {
 		if (StrUtil.isNotEmpty(nodeId)) {
 			return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemSaveConfig).toString();
@@ -138,29 +138,26 @@ public class SystemConfigController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "ip-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
-	@ResponseBody
+	@Feature(cls = ClassFeature.SYSTEM_CONFIG_IP, method = MethodFeature.LIST)
 	public String ipConfigData() {
-		SystemIpConfigModel config = systemIpConfigService.getConfig();
+		SystemIpConfigModel config = systemParametersServer.getConfig(SystemIpConfigModel.ID, SystemIpConfigModel.class);
 		JSONObject jsonObject = new JSONObject();
 		if (config != null) {
 			jsonObject.put("allowed", config.getAllowed());
 			jsonObject.put("prohibited", config.getProhibited());
 		}
-		jsonObject.put("path", FileUtil.getAbsolutePath(systemIpConfigService.filePath()));
+		//jsonObject.put("path", FileUtil.getAbsolutePath(systemIpConfigService.filePath()));
 		jsonObject.put("ip", getIp());
 		return JsonMessage.getString(200, "加载成功", jsonObject);
 	}
 
 	@RequestMapping(value = "save_ip_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.EditSysConfig)
-	@SystemPermission
+	@Feature(cls = ClassFeature.SYSTEM_CONFIG_IP, method = MethodFeature.EDIT)
 	public String saveIpConfig(String allowed, String prohibited) {
 		SystemIpConfigModel systemIpConfigModel = new SystemIpConfigModel();
 		systemIpConfigModel.setAllowed(StrUtil.emptyToDefault(allowed, StrUtil.EMPTY));
 		systemIpConfigModel.setProhibited(StrUtil.emptyToDefault(prohibited, StrUtil.EMPTY));
-		systemIpConfigService.save(systemIpConfigModel);
+		systemParametersServer.upsert(SystemIpConfigModel.ID, systemIpConfigModel, SystemIpConfigModel.ID);
 		//
 		return JsonMessage.getString(200, "修改成功");
 	}

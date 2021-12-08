@@ -41,7 +41,7 @@ import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.AgentWhitelist;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.service.manage.ConsoleService;
 import io.jpom.socket.ConsoleCommandOp;
@@ -80,7 +80,7 @@ public class ProjectFileControl extends BaseAgentController {
 	@RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getFileList(String id, String path) {
 		// 查询项目路径
-		ProjectInfoModel pim = projectInfoService.getItem(id);
+		NodeProjectInfoModel pim = projectInfoService.getItem(id);
 		Assert.notNull(pim, "查询失败：项目不存在");
 		String lib = pim.allLib();
 		File fileDir = FileUtil.file(lib, StrUtil.emptyToDefault(path, FileUtil.FILE_SEPARATOR));
@@ -107,7 +107,7 @@ public class ProjectFileControl extends BaseAgentController {
 
 	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String upload() throws Exception {
-		ProjectInfoModel pim = getProjectInfoModel();
+		NodeProjectInfoModel pim = getProjectInfoModel();
 		MultipartFileBuilder multipartFileBuilder = createMultipart()
 				.addFieldName("file");
 		// 压缩文件
@@ -154,7 +154,7 @@ public class ProjectFileControl extends BaseAgentController {
 		String after = getParameter("after");
 		if (StrUtil.isNotEmpty(after)) {
 			//
-			List<ProjectInfoModel.JavaCopyItem> javaCopyItemList = pim.getJavaCopyItemList();
+			List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = pim.getJavaCopyItemList();
 			//
 			AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(after, AfterOpt.No.getCode()));
 			if ("restart".equalsIgnoreCase(after) || afterOpt == AfterOpt.Restart) {
@@ -176,7 +176,7 @@ public class ProjectFileControl extends BaseAgentController {
 				if (javaCopyItemList != null) {
 					ThreadUtil.execute(() -> {
 						// 副本
-						for (ProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+						for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
 							if (!this.restart(pim, javaCopyItem, afterOpt)) {
 								return;
 							}
@@ -194,9 +194,9 @@ public class ProjectFileControl extends BaseAgentController {
 	}
 
 
-	private boolean restart(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem, AfterOpt afterOpt) {
+	private boolean restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, AfterOpt afterOpt) {
 		try {
-			String result = consoleService.execCommand(ConsoleCommandOp.restart, projectInfoModel, javaCopyItem);
+			String result = consoleService.execCommand(ConsoleCommandOp.restart, nodeProjectInfoModel, javaCopyItem);
 			int pid = AbstractProjectCommander.parsePid(result);
 			if (pid <= 0) {
 				// 完整重启，不再继续剩余的节点项目
@@ -212,7 +212,7 @@ public class ProjectFileControl extends BaseAgentController {
 
 	@RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String deleteFile(String filename, String type, String levelName) {
-		ProjectInfoModel pim = getProjectInfoModel();
+		NodeProjectInfoModel pim = getProjectInfoModel();
 		if ("clear".equalsIgnoreCase(type)) {
 			// 清空文件
 			File file = new File(pim.allLib());
@@ -255,7 +255,7 @@ public class ProjectFileControl extends BaseAgentController {
 	 */
 	@PostMapping(value = "read_file", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String readFile(String filePath, String filename) {
-		ProjectInfoModel pim = getProjectInfoModel();
+		NodeProjectInfoModel pim = getProjectInfoModel();
 		filePath = StrUtil.emptyToDefault(filePath, File.separator);
 		// 判断文件后缀
 		AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
@@ -275,7 +275,7 @@ public class ProjectFileControl extends BaseAgentController {
 	 */
 	@PostMapping(value = "update_config_file", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String updateConfigFile(String filePath, String filename, String fileText) {
-		ProjectInfoModel pim = getProjectInfoModel();
+		NodeProjectInfoModel pim = getProjectInfoModel();
 		filePath = StrUtil.emptyToDefault(filePath, File.separator);
 		// 判断文件后缀
 		AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
@@ -300,7 +300,7 @@ public class ProjectFileControl extends BaseAgentController {
 			return JsonMessage.getString(405, "非法操作");
 		}
 		try {
-			ProjectInfoModel pim = projectInfoService.getItem(id);
+			NodeProjectInfoModel pim = projectInfoService.getItem(id);
 			File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
 			if (file.isDirectory()) {
 				return "暂不支持下载文件夹";
@@ -332,7 +332,7 @@ public class ProjectFileControl extends BaseAgentController {
 		List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
 		Assert.state(CollUtil.isNotEmpty(collect), "不允许下载当前地址的文件");
 		try {
-			ProjectInfoModel pim = projectInfoService.getItem(id);
+			NodeProjectInfoModel pim = projectInfoService.getItem(id);
 			File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
 			File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
 			if (BooleanUtil.toBoolean(unzip)) {

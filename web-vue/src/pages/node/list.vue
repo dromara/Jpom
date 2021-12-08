@@ -1,15 +1,15 @@
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="handleFilter">
-        <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-      </a-select>
+      <a-input class="search-input-item" v-model="listQuery['%id%']" placeholder="节点ID" />
+      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
+      <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
       <a-button type="primary" @click="handleFilter">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
+      <!-- <a-button type="primary" @click="loadData">刷新</a-button> -->
     </div>
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
-    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{ 'max-height': tableHeight + 'px' }" bordered rowKey="id" @expand="expand" :pagination="false">
+    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="(this, pagination)" @change="changePage">
       <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -17,7 +17,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleNode(record)" :disabled="record.openStatus === false">节点管理</a-button>
+        <a-button type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1">节点管理</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
           <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>
@@ -40,39 +40,14 @@
     <!-- 编辑区 -->
     <a-modal v-model="editNodeVisible" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
       <a-form-model ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-form-model-item label="节点 ID" prop="id">
+        <!-- <a-form-model-item label="节点 ID" prop="id">
           <a-input v-model="temp.id" placeholder="创建之后不能修改" />
-        </a-form-model-item>
+        </a-form-model-item> -->
         <a-form-model-item label="节点名称" prop="name">
           <a-input v-model="temp.name" placeholder="节点名称" />
         </a-form-model-item>
-        <a-form-model-item label="分组名称" prop="group">
-          <custom-select v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder="分组名称,可以不选择"> </custom-select>
-          <!-- <a-row>
-            <a-col :span="18">
-              <a-select v-model="temp.group" placeholder="可手动输入">
-                <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-              </a-select>
-            </a-col>
-            <a-col :span="6">
-              <a-popover v-model="addGroupvisible" title="添加分组" trigger="click">
-                <template slot="content">
-                  <a-row>
-                    <a-col :span="18">
-                      <a-input v-model="temp.tempGroup" placeholder="分组名称" />
-                    </a-col>
-                    <a-col :span="6">
-                      <a-button type="primary" @click="handleAddGroup">确认</a-button>
-                    </a-col>
-                  </a-row>
-                </template>
-                <a-button type="primary" class="btn-add">添加分组</a-button>
-              </a-popover>
-            </a-col>
-          </a-row> -->
-        </a-form-model-item>
         <a-form-model-item label="绑定 SSH " prop="sshId">
-          <a-select v-model="temp.sshId" placeholder="请选择SSH">
+          <a-select show-search option-filter-prop="children" v-model="temp.sshId" placeholder="请选择SSH">
             <a-select-option value="">不绑定</a-select-option>
             <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{ ssh.name }}</a-select-option>
           </a-select>
@@ -89,7 +64,17 @@
         </a-form-model-item>
 
         <a-form-model-item label="节点状态" prop="openStatus">
-          <a-switch v-model="temp.openStatus" checked-children="启用" un-checked-children="停用" default-checked />
+          <a-switch
+            :checked="temp.openStatus == 1"
+            @change="
+              (checked) => {
+                temp.openStatus = checked ? 1 : 0;
+              }
+            "
+            checked-children="启用"
+            un-checked-children="停用"
+            default-checked
+          />
         </a-form-model-item>
         <a-form-model-item label="节点地址" prop="url">
           <a-input v-model="temp.url" placeholder="节点地址 (127.0.0.1:2123)">
@@ -113,7 +98,7 @@
           <a-form-model-item label="节点账号" prop="loginName">
             <a-input v-model="temp.loginName" placeholder="节点账号,请查看节点启动输出的信息" />
           </a-form-model-item>
-          <a-form-model-item label="节点密码" prop="loginPwd">
+          <a-form-model-item label="节点密码" :prop="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
             <a-input-password v-model="temp.loginPwd" placeholder="节点密码,请查看节点启动输出的信息" />
           </a-form-model-item>
         </div>
@@ -135,25 +120,23 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeGroupList, getNodeList, getNodeStatus, editNode, deleteNode } from "../../api/node";
-import { getSshListByNodeId } from "../../api/ssh";
+import { getNodeList, getNodeStatus, editNode, deleteNode } from "@/api/node";
+import { getSshListAll } from "@/api/ssh";
 import NodeLayout from "./node-layout";
 import Terminal from "./terminal";
-import CustomSelect from "@/components/customSelect";
+import { parseTime } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {
     NodeLayout,
     Terminal,
-    CustomSelect,
   },
   data() {
     return {
       loading: false,
       childLoading: false,
-      listQuery: {},
-      tableHeight: "70vh",
-      groupList: [],
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       sshList: [],
       list: [],
       temp: {
@@ -165,13 +148,23 @@ export default {
       // addGroupvisible: false,
       drawerTitle: "",
       columns: [
-        { title: "节点 ID", dataIndex: "id", key: "id", width: 100, ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "节点名称", dataIndex: "name", key: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "分组", dataIndex: "group", key: "group", width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
-        { title: "节点协议", dataIndex: "protocol", key: "protocol", width: 100, ellipsis: true, scopedSlots: { customRender: "protocol" } },
-        { title: "节点地址", dataIndex: "url", key: "url", width: 150, ellipsis: true, scopedSlots: { customRender: "url" } },
-        { title: "超时时间", dataIndex: "timeOut", key: "timeOut", width: 100, ellipsis: true },
-        { title: "操作", dataIndex: "operation", key: "operation", scopedSlots: { customRender: "operation" }, width: "360px", align: "left" },
+        // { title: "节点 ID", dataIndex: "id", sorter: true, key: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
+        { title: "节点名称", dataIndex: "name", sorter: true, key: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+
+        { title: "节点协议", dataIndex: "protocol", sorter: true, key: "protocol", width: 100, ellipsis: true, scopedSlots: { customRender: "protocol" } },
+        { title: "节点地址", dataIndex: "url", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
+        { title: "超时时间", dataIndex: "timeOut", sorter: true, key: "timeOut", width: 100, ellipsis: true },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+          width: 170,
+        },
+        { title: "操作", dataIndex: "operation", key: "operation", width: 360, scopedSlots: { customRender: "operation" }, align: "left" },
       ],
       childColumns: [
         { title: "系统名", dataIndex: "osName", key: "osName", width: 100, ellipsis: true, scopedSlots: { customRender: "osName" } },
@@ -196,6 +189,18 @@ export default {
   },
   computed: {
     ...mapGetters(["getGuideFlag"]),
+    pagination() {
+      return {
+        total: this.listQuery.total || 0,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
+        },
+      };
+    },
   },
   watch: {
     getGuideFlag() {
@@ -203,8 +208,6 @@ export default {
     },
   },
   created() {
-    this.calcTableHeight();
-    this.loadGroupList();
     this.handleFilter();
   },
   methods: {
@@ -227,23 +230,10 @@ export default {
       }
       this.$introJs().exit();
     },
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-      });
-    },
-    // 分组列表
-    loadGroupList() {
-      getNodeGroupList().then((res) => {
-        if (res.code === 200) {
-          this.groupList = res.data;
-        }
-      });
-    },
+
     // 加载 SSH 列表
     loadSshList() {
-      getSshListByNodeId(this.temp.id).then((res) => {
+      getSshListAll().then((res) => {
         if (res.code === 200) {
           this.sshList = res.data;
         }
@@ -255,7 +245,8 @@ export default {
       this.loading = true;
       getNodeList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data.result;
+          this.listQuery.total = res.data.total;
           let nodeId = this.$route.query.nodeId;
           this.list.map((item) => {
             if (nodeId === item.id) {
@@ -298,7 +289,7 @@ export default {
         type: "add",
         cycle: 0,
         protocol: "http",
-        openStatus: true,
+        openStatus: 1,
         timeOut: 0,
         loginName: "jpomAgent",
       };
@@ -307,6 +298,7 @@ export default {
         setTimeout(() => {
           this.introGuide();
         }, 500);
+        this.$refs["editNodeForm"].resetFields();
       });
     },
     // 进入终端
@@ -339,7 +331,6 @@ export default {
             this.$refs["editNodeForm"].resetFields();
             this.editNodeVisible = false;
             this.loadData();
-            this.loadGroupList();
           }
         });
       });
@@ -383,26 +374,16 @@ export default {
         query: { nodeId: null },
       });
     },
-    // // 添加分组
-    // handleAddGroup() {
-    //   if (!this.temp.tempGroup || this.temp.tempGroup.length === 0) {
-    //     this.$notification.warning({
-    //       message: "分组名称不能为空",
-    //       duration: 2,
-    //     });
-    //     return false;
-    //   }
-    //   // 添加到分组列表
-    //   if (this.groupList.indexOf(this.temp.tempGroup) === -1) {
-    //     this.groupList.push(this.temp.tempGroup);
-    //   }
-    //   this.temp.tempGroup = "";
-    //   this.$notification.success({
-    //     message: "添加成功",
-    //     duration: 2,
-    //   });
-    //   this.addGroupvisible = false;
-    // },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
+    },
   },
 };
 </script>

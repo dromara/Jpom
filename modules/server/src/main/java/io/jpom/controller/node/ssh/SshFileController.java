@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -50,23 +49,26 @@ import java.util.Vector;
  */
 @RestController
 @RequestMapping("node/ssh")
-@Feature(cls = ClassFeature.SSH)
+@Feature(cls = ClassFeature.SSH_FILE)
 public class SshFileController extends BaseServerController {
 
-	@Resource
-	private SshService sshService;
+	private final SshService sshService;
+
+	public SshFileController(SshService sshService) {
+		this.sshService = sshService;
+	}
 
 	@RequestMapping(value = "download.html", method = RequestMethod.GET)
 	@ResponseBody
 	@Feature(method = MethodFeature.DOWNLOAD)
 	public void download(String id, String path, String name) throws IOException {
 		HttpServletResponse response = getResponse();
-		SshModel sshModel = sshService.getItem(id);
+		SshModel sshModel = sshService.getByKey(id, false);
 		if (sshModel == null) {
 			ServletUtil.write(response, "ssh error", MediaType.TEXT_HTML_VALUE);
 			return;
 		}
-		List<String> fileDirs = sshModel.getFileDirs();
+		List<String> fileDirs = sshModel.fileDirs();
 		//
 		if (StrUtil.isEmpty(path) || !fileDirs.contains(path)) {
 			ServletUtil.write(response, "没有配置此文件夹", MediaType.TEXT_HTML_VALUE);
@@ -94,25 +96,21 @@ public class SshFileController extends BaseServerController {
 	 */
 	@RequestMapping(value = "root_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.FILE)
+	@Feature(method = MethodFeature.LIST)
 	public String rootFileList(String id) {
-		SshModel sshModel = sshService.getItem(id);
-		if (sshModel == null) {
-			return JsonMessage.getString(404, "不存在对应ssh");
-		}
-		List<String> fileDirs = sshModel.getFileDirs();
-		if (CollUtil.isEmpty(fileDirs)) {
-			return JsonMessage.getString(405, "未设置授权目录");
-		}
-		JSONArray jsonArray = listDir(sshModel, fileDirs);
+		SshModel sshModel = sshService.getByKey(id, false);
+		Assert.notNull(sshModel, "不存在对应ssh");
+		List<String> fileDirs = sshModel.fileDirs();
+		Assert.notEmpty(fileDirs, "未设置授权目录");
+		JSONArray jsonArray = this.listDir(sshModel, fileDirs);
 		return JsonMessage.getString(200, "ok", jsonArray);
 	}
 
 	private SshModel check(String id, String path, String children) {
-		SshModel sshModel = sshService.getItem(id);
+		SshModel sshModel = sshService.getByKey(id, false);
 		Assert.notNull(sshModel, "不存在对应ssh");
 		Assert.hasText(path, "请选择文件夹");
-		List<String> fileDirs = sshModel.getFileDirs();
+		List<String> fileDirs = sshModel.fileDirs();
 		Assert.state(CollUtil.contains(fileDirs, path), "没有配置此文件夹");
 		//
 		if (StrUtil.isNotEmpty(children)) {
@@ -125,7 +123,7 @@ public class SshFileController extends BaseServerController {
 
 	@RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.FILE)
+	@Feature(method = MethodFeature.LIST)
 	public String listData(String id, String path, String children) throws SftpException {
 		SshModel sshModel = this.check(id, path, children);
 		//
@@ -135,11 +133,11 @@ public class SshFileController extends BaseServerController {
 
 	@RequestMapping(value = "read_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.READ_FILE)
+	@Feature(method = MethodFeature.LIST)
 	public String readFileData(String id, String path, String children) {
 		SshModel sshModel = this.check(id, path, children);
 		//
-		List<String> allowEditSuffix = sshModel.getAllowEditSuffix();
+		List<String> allowEditSuffix = sshModel.allowEditSuffix();
 		Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, children);
 		//
 		String content = this.readFile(sshModel, path, children, charset);
@@ -148,11 +146,11 @@ public class SshFileController extends BaseServerController {
 
 	@RequestMapping(value = "update_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.UPDATE_CONFIG_FILE)
+	@Feature(method = MethodFeature.EDIT)
 	public String updateFileData(String id, String path, String children, String content) {
 		SshModel sshModel = this.check(id, path, children);
 		//
-		List<String> allowEditSuffix = sshModel.getAllowEditSuffix();
+		List<String> allowEditSuffix = sshModel.allowEditSuffix();
 		Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, children);
 		// 缓存到本地
 		File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), sshModel.getId(), children);
@@ -175,7 +173,7 @@ public class SshFileController extends BaseServerController {
 	private String readFile(SshModel sshModel, String path, String name, Charset charset) {
 		Sftp sftp = null;
 		try {
-			Session session = SshService.getSession(sshModel);
+			Session session = SshService.getSessionByModel(sshModel);
 			sftp = new Sftp(session, sshModel.getCharsetT());
 			String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -198,7 +196,7 @@ public class SshFileController extends BaseServerController {
 	private void syncFile(SshModel sshModel, String path, String name, File file) {
 		Sftp sftp = null;
 		try {
-			Session session = SshService.getSession(sshModel);
+			Session session = SshService.getSessionByModel(sshModel);
 			sftp = new Sftp(session, sshModel.getCharsetT());
 			String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
 			sftp.upload(normalize, file);
@@ -225,7 +223,7 @@ public class SshFileController extends BaseServerController {
 		Session session = null;
 		ChannelSftp channel = null;
 		try {
-			session = SshService.getSession(sshModel);
+			session = SshService.getSessionByModel(sshModel);
 			channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
 			String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
 			channel.get(normalize, response.getOutputStream());
@@ -248,9 +246,9 @@ public class SshFileController extends BaseServerController {
 	private JSONArray listDir(SshModel sshModel, String path, String children) throws SftpException {
 		Session session = null;
 		ChannelSftp channel = null;
-		List<String> allowEditSuffix = sshModel.getAllowEditSuffix();
+		List<String> allowEditSuffix = sshModel.allowEditSuffix();
 		try {
-			session = SshService.getSession(sshModel);
+			session = SshService.getSessionByModel(sshModel);
 			channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
 			Vector<ChannelSftp.LsEntry> vector;
 			if (StrUtil.isNotEmpty(children)) {
@@ -308,7 +306,7 @@ public class SshFileController extends BaseServerController {
 		Session session = null;
 		ChannelSftp channel = null;
 		try {
-			session = SshService.getSession(sshModel);
+			session = SshService.getSessionByModel(sshModel);
 			channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
 			JSONArray jsonArray = new JSONArray();
 			for (String item : list) {
@@ -331,17 +329,10 @@ public class SshFileController extends BaseServerController {
 
 
 	@RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.DEL)
 	public String delete(String id, String path, String name) {
-		SshModel sshModel = sshService.getItem(id);
-		Assert.notNull(sshModel, "ssh error");
-		List<String> fileDirs = sshModel.getFileDirs();
-		//
-		if (StrUtil.isEmpty(path) || !fileDirs.contains(path)) {
-			return JsonMessage.getString(405, "没有配置此文件夹");
-		}
 		Assert.hasText(name, "name error");
+		SshModel sshModel = this.check(id, path, name);
 		name = FileUtil.normalize(name);
 		Assert.state(!StrUtil.equals(name, StrUtil.SLASH), "不能删除根目录");
 		Session session = null;
@@ -351,7 +342,7 @@ public class SshFileController extends BaseServerController {
 			FileUtil.file(path, name);
 			//
 			String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
-			session = SshService.getSession(sshModel);
+			session = SshService.getSessionByModel(sshModel);
 			sftp = new Sftp(session, sshModel.getCharsetT());
 			// 尝试删除
 			boolean dirOrFile = this.tryDelDirOrFile(sftp, normalize);
@@ -421,22 +412,17 @@ public class SshFileController extends BaseServerController {
 //	}
 
 	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.UPLOAD)
 	public String upload(String id, String path, String name) {
-		SshModel sshModel = sshService.getItem(id);
-		if (sshModel == null) {
-			return JsonMessage.getString(400, "ssh error");
-		}
-		List<String> fileDirs = sshModel.getFileDirs();
-		if (StrUtil.isEmpty(path) || !fileDirs.contains(path)) {
-			return JsonMessage.getString(400, "没有配置此文件夹");
-		}
+		SshModel sshModel = sshService.getByKey(id, false);
+		Assert.notNull(sshModel, "ssh error");
+		List<String> fileDirs = sshModel.fileDirs();
+		Assert.state(CollUtil.contains(fileDirs, path), "没有配置此文件夹");
 		Session session = null;
 		ChannelSftp channel = null;
 		String localPath = null;
 		try {
-			session = SshService.getSession(sshModel);
+			session = SshService.getSessionByModel(sshModel);
 			channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
 			MultipartFileBuilder multipartFileBuilder = createMultipart().addFieldName("file").setUseOriginalFilename(true);
 			localPath = multipartFileBuilder.save();

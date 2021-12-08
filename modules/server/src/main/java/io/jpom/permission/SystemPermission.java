@@ -31,7 +31,15 @@ import java.lang.annotation.*;
  * @date 2019/8/17
  */
 @Documented
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SystemPermission {
+
+	/**
+	 * 超级管理员
+	 *
+	 * @return true 超级管理员
+	 * @see io.jpom.model.data.UserModel#SYSTEM_ADMIN
+	 */
+	boolean superUser() default false;
 }

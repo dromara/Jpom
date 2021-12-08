@@ -7,14 +7,14 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
-import io.jpom.model.log.UserOperateLogV1;
+import io.jpom.model.data.NodeModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.node.manage.ProjectInfoService;
+import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.system.WhitelistDirectoryService;
 import io.jpom.system.ConfigBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,15 +34,19 @@ import java.util.List;
 @RequestMapping(value = "/node/manage/")
 @Feature(cls = ClassFeature.PROJECT)
 public class EditProjectController extends BaseServerController {
-	@Resource
-	private ProjectInfoService projectInfoService;
+
+	private final ProjectInfoCacheService projectInfoCacheService;
 	@Resource
 	private WhitelistDirectoryService whitelistDirectoryService;
+
+	public EditProjectController(ProjectInfoCacheService projectInfoCacheService) {
+		this.projectInfoCacheService = projectInfoCacheService;
+	}
 
 	@RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String getProjectData(@ValidatorItem String id) {
-		JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
+		JSONObject projectInfo = projectInfoCacheService.getItem(getNode(), id);
 		return JsonMessage.getString(200, "", projectInfo);
 	}
 
@@ -67,14 +71,18 @@ public class EditProjectController extends BaseServerController {
 	 */
 	@RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.SaveProject)
 	@Feature(method = MethodFeature.EDIT)
 	public String saveProject(String id) {
 		// 防止和Jpom冲突
 		if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
 			return JsonMessage.getString(401, "当前项目id已经被Jpom占用");
 		}
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_SaveProject).toString();
+		NodeModel node = getNode();
+		JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.Manage_SaveProject);
+		if (request.getCode() == HttpStatus.OK.value()) {
+			projectInfoCacheService.syncNode(node, id);
+		}
+		return request.toString();
 	}
 
 

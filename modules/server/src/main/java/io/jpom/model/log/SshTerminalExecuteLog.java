@@ -24,7 +24,7 @@ package io.jpom.model.log;
 
 import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
-import io.jpom.model.BaseDbModel;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.h2db.TableName;
 
@@ -35,7 +35,7 @@ import io.jpom.service.h2db.TableName;
  * @date 2021/08/04
  */
 @TableName("SSHTERMINALEXECUTELOG")
-public class SshTerminalExecuteLog extends BaseDbModel {
+public class SshTerminalExecuteLog extends BaseWorkspaceModel {
 	/**
 	 * 操作ip
 	 */
@@ -52,10 +52,10 @@ public class SshTerminalExecuteLog extends BaseDbModel {
 	 * 名称
 	 */
 	private String sshName;
-	/**
-	 * 操作时间
-	 */
-	private long optTime;
+//	/**
+//	 * 操作时间
+//	 */
+//	private long optTime;
 	/**
 	 * 执行的命令
 	 */
@@ -114,13 +114,13 @@ public class SshTerminalExecuteLog extends BaseDbModel {
 		}
 	}
 
-	public long getOptTime() {
-		return optTime;
-	}
-
-	public void setOptTime(long optTime) {
-		this.optTime = optTime;
-	}
+//	public long getOptTime() {
+//		return optTime;
+//	}
+//
+//	public void setOptTime(long optTime) {
+//		this.optTime = optTime;
+//	}
 
 	public String getSshId() {
 		return sshId;

@@ -40,18 +40,12 @@ import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.InputStream;
@@ -64,23 +58,21 @@ import java.util.stream.Collectors;
  *
  * @author Administrator
  */
-@Controller
+@RestController
 @RequestMapping(value = "/")
 public class IndexControl extends BaseServerController {
 
-	@Resource
-	private UserService userService;
+	private final UserService userService;
 
-	@Resource
-	private RoleService roleService;
-
+	public IndexControl(UserService userService) {
+		this.userService = userService;
+	}
 
 	/**
 	 * 加载首页
 	 */
 	@GetMapping(value = {"index", "", "/"}, produces = MediaType.TEXT_HTML_VALUE)
 	@NotLogin
-	@ResponseBody
 	public void index(HttpServletResponse response) {
 		InputStream inputStream = ResourceUtil.getStream("classpath:/dist/index.html");
 		String html = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
@@ -101,7 +93,7 @@ public class IndexControl extends BaseServerController {
 		// 修改网页标题
 		String title = ReUtil.get("<title>.*?</title>", html, 0);
 		if (StrUtil.isNotEmpty(title)) {
-			html = StrUtil.replace(html, title, ServerExtConfigBean.getInstance().getName());
+			html = StrUtil.replace(html, title, "<title>" + ServerExtConfigBean.getInstance().getName() + "</title>");
 		}
 		ServletUtil.write(response, html, ContentType.TEXT_HTML.getValue());
 	}
@@ -110,7 +102,6 @@ public class IndexControl extends BaseServerController {
 	 * logo 图片
 	 */
 	@RequestMapping(value = "logo_image", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
-	@ResponseBody
 	@NotLogin
 	public void logoImage(HttpServletResponse response) {
 		ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
@@ -139,7 +130,6 @@ public class IndexControl extends BaseServerController {
 	 */
 	@NotLogin
 	@RequestMapping(value = "check-system", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String checkSystem() {
 		JSONObject data = new JSONObject();
 		data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH));
@@ -147,14 +137,13 @@ public class IndexControl extends BaseServerController {
 		data.put("name", ServerExtConfigBean.getInstance().getName());
 		data.put("subName", ServerExtConfigBean.getInstance().getSubName());
 		data.put("loginTitle", ServerExtConfigBean.getInstance().getLoginTitle());
-		if (userService.userListEmpty()) {
-			return JsonMessage.getString(500, "need init system", data);
+		if (userService.canUse()) {
+			return JsonMessage.getString(200, "success", data);
 		}
-		return JsonMessage.getString(200, "success", data);
+		return JsonMessage.getString(500, "需要初始化系统", data);
 	}
 
 	@RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String menusData() {
 		NodeModel nodeModel = tryGetNode();
 		UserModel userModel = getUserModel();
@@ -191,28 +180,11 @@ public class IndexControl extends BaseServerController {
 
 	private boolean testMenus(JSONObject jsonObject, UserModel userModel) {
 		String role = jsonObject.getString("role");
-		if (StrUtil.equals(role, UserModel.SYSTEM_ADMIN) && !userModel.isSystemUser()) {
-			// 系统管理员权限
+		if (StrUtil.equals(role, UserModel.SYSTEM_ADMIN) && !userModel.isSuperSystemUser()) {
+			// 超级理员权限
 			return false;
 		}
-		//			CacheControllerFeature.UrlFeature urlFeature = CacheControllerFeature.getUrlFeature(url);
-		//			if (urlFeature != null) {
-		//				// 功能权限
-		//				boolean b = roleService.errorMethodPermission(userModel, urlFeature.getClassFeature(), urlFeature.getMethodFeature());
-		//				if (b) {
-		//					return false;
-		//				}
-		//			}
-
-		//
-		String dynamic = jsonObject.getString("dynamic");
-		if (StrUtil.isNotEmpty(dynamic)) {
-			if ("showOutGiving".equals(dynamic)) {
-				// 是否显示节点分发菜单
-				List<NodeModel> list = nodeService.list();
-				return list != null && list.size() > 1;
-			}
-		}
-		return true;
+		// 系统管理员权限
+		return !StrUtil.equals(role, "system") || userModel.isSystemUser();
 	}
 }

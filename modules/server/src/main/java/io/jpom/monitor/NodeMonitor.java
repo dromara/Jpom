@@ -27,6 +27,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.pattern.CronPattern;
 import cn.hutool.cron.task.Task;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -100,9 +101,13 @@ public class NodeMonitor implements Task {
 		if (nodeModels == null || nodeModels.isEmpty()) {
 			return;
 		}
-		nodeModels.forEach(nodeModel -> {
-			ThreadUtil.execute(() -> getNodeInfo(nodeModel));
-		});
+		nodeModels.forEach(nodeModel -> ThreadUtil.execute(() -> {
+			try {
+				getNodeInfo(nodeModel);
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("获取节点监控信息失败：{}", e.getMessage());
+			}
+		}));
 	}
 
 	private void getNodeInfo(NodeModel nodeModel) {

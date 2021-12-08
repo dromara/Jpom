@@ -20,9 +20,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 import cn.hutool.core.lang.PatternPool;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.digest.DigestAlgorithm;
+import cn.hutool.crypto.digest.Digester;
 import org.junit.Test;
 
 import java.nio.charset.Charset;
@@ -75,5 +78,20 @@ public class TestString {
 			}
 		}
 //        System.out.println(x);
+	}
+
+	@Test
+	public void test1() {
+		System.out.println(SecureUtil.sha256("1"));
+
+		System.out.println(SecureUtil.sha256("admin"));
+
+
+		int randomInt = 2;
+		RandomUtil.randomInt(1, 100);
+		System.out.println(randomInt);
+		String nowStr = "admin";
+		nowStr = new Digester(DigestAlgorithm.SHA256).setDigestCount(2).digestHex(nowStr);
+		System.out.println(nowStr);
 	}
 }

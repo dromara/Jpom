@@ -22,40 +22,41 @@
  */
 package io.jpom.controller.outgiving;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.OutGivingNodeProject;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
+import io.jpom.service.dblog.DbOutGivingLogService;
 import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 分发控制
@@ -63,52 +64,62 @@ import java.util.List;
  * @author jiangzeyin
  * @date 2019/4/20
  */
-@Controller
+@RestController
 @RequestMapping(value = "/outgiving")
 @Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingController extends BaseServerController {
-	@Resource
-	private OutGivingServer outGivingServer;
-	@Resource
-	private BuildInfoService buildService;
+
+	private final OutGivingServer outGivingServer;
+	private final BuildInfoService buildService;
+	private final DbOutGivingLogService dbOutGivingLogService;
+	private final ProjectInfoCacheService projectInfoCacheService;
+
+	public OutGivingController(OutGivingServer outGivingServer,
+							   BuildInfoService buildService,
+							   DbOutGivingLogService dbOutGivingLogService,
+							   ProjectInfoCacheService projectInfoCacheService) {
+		this.outGivingServer = outGivingServer;
+		this.buildService = buildService;
+		this.dbOutGivingLogService = dbOutGivingLogService;
+		this.projectInfoCacheService = projectInfoCacheService;
+	}
 
 	/**
-	 * @return
-	 * @author Hotstrip
 	 * load dispatch list
 	 * 加载分发列表
+	 *
+	 * @return json
+	 * @author Hotstrip
 	 */
-	@RequestMapping(value = "dispatch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@PostMapping(value = "dispatch-list", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String dispatchList() {
-		List<OutGivingModel> list = outGivingServer.list();
-		return JsonMessage.getString(200, "success", list);
+		PageResultDto<OutGivingModel> pageResultDto = outGivingServer.listPage(getRequest());
+		return JsonMessage.getString(200, "success", pageResultDto);
 	}
 
 	/**
-	 * @return
+	 * load dispatch list
+	 * 加载分发列表
+	 *
+	 * @return json
 	 * @author Hotstrip
-	 * get reqId for edit feature
-	 * 获取编辑时需要的 reqId
 	 */
-	@RequestMapping(value = "get-reqId", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public String getReqId() {
-		List<NodeModel> nodeModels = nodeService.listAndProject();
-		String reqId = nodeService.cacheNodeList(nodeModels);
-		return JsonMessage.getString(200, "success", reqId);
+	@GetMapping(value = "dispatch-list-all", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String dispatchListAll() {
+		List<OutGivingModel> outGivingModels = outGivingServer.listByWorkspace(getRequest());
+		return JsonMessage.getString(200, "", outGivingModels);
 	}
+
 
 	@RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.SaveOutGiving)
 	@Feature(method = MethodFeature.EDIT)
 	public String save(String type, String id) throws IOException {
 		if ("add".equalsIgnoreCase(type)) {
-			if (!StringUtil.isGeneral(id, 2, 20)) {
-				return JsonMessage.getString(401, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
-			}
+			boolean general = StringUtil.isGeneral(id, 2, 20);
+			Assert.state(general, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
 			return addOutGiving(id);
 		} else {
 			return updateGiving(id);
@@ -116,97 +127,78 @@ public class OutGivingController extends BaseServerController {
 	}
 
 	private String addOutGiving(String id) {
-		OutGivingModel outGivingModel = outGivingServer.getItem(id);
-		if (outGivingModel != null) {
-			return JsonMessage.getString(405, "分发id已经存在啦");
-		}
+		OutGivingModel outGivingModel = outGivingServer.getByKey(id);
+		Assert.isNull(outGivingModel, "分发id已经存在啦");
+		//
 		outGivingModel = new OutGivingModel();
 		outGivingModel.setId(id);
+		this.doData(outGivingModel);
 		//
-		String error = doData(outGivingModel);
-		if (error == null) {
-			outGivingServer.addItem(outGivingModel);
-			return JsonMessage.getString(200, "添加成功");
-		}
-		return error;
+		outGivingServer.insert(outGivingModel);
+		return JsonMessage.getString(200, "添加成功");
 	}
 
 	private String updateGiving(String id) {
-		OutGivingModel outGivingModel = outGivingServer.getItem(id);
-		if (outGivingModel == null) {
-			return JsonMessage.getString(405, "没有找到对应的分发id");
-		}
-		String error = doData(outGivingModel);
-		if (error == null) {
-			outGivingServer.updateItem(outGivingModel);
-			return JsonMessage.getString(200, "修改成功");
-		}
-		return error;
+		OutGivingModel outGivingModel = outGivingServer.getByKey(id);
+		Assert.notNull(outGivingModel, "没有找到对应的分发id");
+		doData(outGivingModel);
+
+		outGivingServer.update(outGivingModel);
+		return JsonMessage.getString(200, "修改成功");
 	}
 
-	private String doData(OutGivingModel outGivingModel) {
+	private void doData(OutGivingModel outGivingModel) {
 		outGivingModel.setName(getParameter("name"));
-		if (StrUtil.isEmpty(outGivingModel.getName())) {
-			return JsonMessage.getString(405, "分发名称不能为空");
-		}
-		String reqId = getParameter("reqId");
-		List<NodeModel> list = nodeService.getNodeModel(reqId);
-		if (list == null) {
-			return JsonMessage.getString(401, "页面请求超时");
-		}
+		Assert.hasText(outGivingModel.getName(), "分发名称不能为空");
+		HttpServletRequest request = getRequest();
 		List<OutGivingModel> outGivingModels = outGivingServer.list();
 		//
-		List<OutGivingNodeProject> outGivingNodeProjects = new ArrayList<>();
-		OutGivingNodeProject outGivingNodeProject;
-		for (NodeModel nodeModel : list) {
-			String nodeIdProject = getParameter("node_" + nodeModel.getId());
-			if (StrUtil.isEmpty(nodeIdProject)) {
-				continue;
-			}
-			String trueProjectId = null;
-			JSONArray jsonArray = nodeModel.getProjects();
-			for (Object o : jsonArray) {
-				JSONObject data = (JSONObject) o;
-				String id1 = data.getString("id");
-				if (id1.equals(nodeIdProject)) {
-					trueProjectId = nodeIdProject;
-					break;
-				}
-			}
-			if (trueProjectId == null) {
-				return JsonMessage.getString(405, "没有找到对应的项目id:" + nodeIdProject);
-			}
-			// 判断项目是否已经被使用过啦
-			if (outGivingModels != null) {
-				for (OutGivingModel outGivingModel1 : outGivingModels) {
-					if (outGivingModel1.getId().equalsIgnoreCase(outGivingModel.getId())) {
-						continue;
+		Map<String, String> paramMap = ServletUtil.getParamMap(request);
+		List<OutGivingNodeProject> outGivingNodeProjects = paramMap.entrySet()
+				.stream()
+				.filter(stringStringEntry -> StrUtil.startWith(stringStringEntry.getKey(), "node_"))
+				.map(stringStringEntry -> {
+					int lastIndexOf = StrUtil.lastIndexOfIgnoreCase(stringStringEntry.getKey(), StrUtil.UNDERLINE);
+					int indexOf = StrUtil.indexOfIgnoreCase(stringStringEntry.getKey(), StrUtil.UNDERLINE) + 1;
+					String nodeId = StrUtil.sub(stringStringEntry.getKey(), indexOf, lastIndexOf);
+					//
+					String nodeIdProject = stringStringEntry.getValue();
+					NodeModel nodeModel = nodeService.getByKey(nodeId);
+					Assert.notNull(nodeModel, "不存在对应的节点");
+					//
+					boolean exists = projectInfoCacheService.exists(nodeModel.getWorkspaceId(), nodeModel.getId(), nodeIdProject);
+					Assert.state(exists, "没有找到对应的项目id:" + nodeIdProject);
+					//
+					OutGivingNodeProject outGivingNodeProject = outGivingModel.getNodeProject(nodeModel.getId(), nodeIdProject);
+					if (outGivingNodeProject == null) {
+						outGivingNodeProject = new OutGivingNodeProject();
 					}
-					if (outGivingModel1.checkContains(nodeModel.getId(), trueProjectId)) {
-						return JsonMessage.getString(405, "已经存在相同的分发项目:" + trueProjectId);
+					outGivingNodeProject.setNodeId(nodeModel.getId());
+					outGivingNodeProject.setProjectId(nodeIdProject);
+					return outGivingNodeProject;
+				})
+				.peek(outGivingNodeProject -> {
+					// 判断项目是否已经被使用过啦
+					if (outGivingModels != null) {
+						for (OutGivingModel outGivingModel1 : outGivingModels) {
+							if (outGivingModel1.getId().equalsIgnoreCase(outGivingModel.getId())) {
+								continue;
+							}
+							boolean checkContains = outGivingModel1.checkContains(outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId());
+							Assert.state(!checkContains, "已经存在相同的分发项目:" + outGivingNodeProject.getProjectId());
+						}
 					}
-				}
-			}
-			outGivingNodeProject = outGivingModel.getNodeProject(nodeModel.getId(), trueProjectId);
-			if (outGivingNodeProject == null) {
-				outGivingNodeProject = new OutGivingNodeProject();
-			}
-			outGivingNodeProject.setNodeId(nodeModel.getId());
-			outGivingNodeProject.setProjectId(trueProjectId);
-			outGivingNodeProjects.add(outGivingNodeProject);
-		}
-		if (outGivingNodeProjects.size() < 2) {
-			return JsonMessage.getString(405, "至少选择2个节点项目");
-		}
-		outGivingModel.setOutGivingNodeProjectList(outGivingNodeProjects);
+				}).collect(Collectors.toList());
+
+		Assert.state(CollUtil.size(outGivingNodeProjects) >= 2, "至少选择2个节点项目");
+
+		outGivingModel.outGivingNodeProjectList(outGivingNodeProjects);
 		//
 		String afterOpt = getParameter("afterOpt");
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-		if (afterOpt1 == null) {
-			return JsonMessage.getString(400, "请选择分发后的操作");
-		}
+		Assert.notNull(afterOpt1, "请选择分发后的操作");
 		outGivingModel.setAfterOpt(afterOpt1.getCode());
-		return null;
+
 	}
 
 	/**
@@ -217,27 +209,32 @@ public class OutGivingController extends BaseServerController {
 	 */
 	@RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.DelOutGiving)
 	@Feature(method = MethodFeature.DEL)
 	public String del(String id) throws IOException {
 		// 判断构建
 		boolean releaseMethod = buildService.checkReleaseMethod(id, BuildReleaseMethod.Outgiving);
 		Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
-		OutGivingModel outGivingServerItem = outGivingServer.getItem(id);
+		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id);
 		if (outGivingServerItem.isOutGivingProject()) {
 			UserModel userModel = getUser();
 			// 解除项目分发独立分发属性
-			List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.getOutGivingNodeProjectList();
+			List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
 			if (outGivingNodeProjectList != null) {
 				outGivingNodeProjectList.forEach(outGivingNodeProject -> {
-					NodeModel item = nodeService.getItem(outGivingNodeProject.getNodeId());
+					NodeModel item = nodeService.getByKey(outGivingNodeProject.getNodeId());
 					JSONObject jsonObject = new JSONObject();
 					jsonObject.put("id", outGivingNodeProject.getProjectId());
 					NodeForward.request(item, NodeUrl.Manage_ReleaseOutGiving, userModel, jsonObject);
 				});
 			}
 		}
-		outGivingServer.deleteItem(id);
+		int byKey = outGivingServer.delByKey(id, getRequest());
+		if (byKey > 0) {
+			// 删除日志
+			Entity where = new Entity();
+			where.set("outGivingId", id);
+			dbOutGivingLogService.del(where);
+		}
 		return JsonMessage.getString(200, "操作成功");
 	}
 }

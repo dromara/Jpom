@@ -65,11 +65,6 @@ const children = [
     component: () => import("../pages/repository/list"),
   },
   {
-    path: "/build/list",
-    name: "build-list",
-    component: () => import("../pages/build/list"),
-  },
-  {
     path: "/build/list-info",
     name: "build-list-info",
     component: () => import("../pages/build/list-info"),
@@ -84,11 +79,11 @@ const children = [
     name: "user-list",
     component: () => import("../pages/user"),
   },
-  {
-    path: "/role/list",
-    name: "role-list",
-    component: () => import("../pages/role"),
-  },
+  // {
+  //   path: "/role/list",
+  //   name: "role-list",
+  //   component: () => import("../pages/role"),
+  // },
   {
     path: "/operation/log",
     name: "operation-log",
@@ -124,6 +119,12 @@ const children = [
     path: "/system/backup",
     name: "system-backup",
     component: () => import("../pages/system/backup"),
+  },
+  // 工作空间
+  {
+    path: "/system/workspace",
+    name: "system-workspace",
+    component: () => import("../pages/system/workspace"),
   },
 ];
 

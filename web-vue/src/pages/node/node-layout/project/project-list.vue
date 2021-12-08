@@ -1,35 +1,38 @@
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="handleFilter">
+      <!-- <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="loadData">
         <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-      </a-select>
+      </a-select> -->
+      <a-input class="search-input-item" v-model="listQuery['%projectId%']" placeholder="项目ID" />
+      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="项目名称" />
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="handleFilter">刷新</a-button>
+
       <a-button type="primary" @click="batchStart">批量启动</a-button>
       <a-button type="primary" @click="batchRestart">批量重启</a-button>
       <a-button type="danger" @click="batchStop">批量关闭</a-button>
+      状态数据是异步获取有一定时间延迟
     </div>
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
       :loading="loading"
       :columns="columns"
-      :pagination="false"
+      :pagination="pagination"
+      @change="changePage"
       :row-selection="{ onChange: onSelectChange, columnWidth: '25px', getCheckboxProps: getCheckboxProps, hideDefaultSelections: true }"
       bordered
       :rowKey="(record, index) => index"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ y: tableHeight - 60 }"
     >
-      <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text} 分组：${record.group || ''}`">
+      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="`名称：${text}`">
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="time" slot-scope="text, record" placement="topLeft">
-        <a-tooltip :title="`创建时间：${record.createTime}，${record.modifyTime ? '修改时间：' + record.modifyTime : ''}`">
-          <span>{{ record.modifyTime }}</span
+        <a-tooltip :title="`创建时间：${parseTime(record.createTimeMillis)}，${record.modifyTimeMillis ? '修改时间：' + parseTime(record.modifyTimeMillis) : ''}`">
+          <span>{{ parseTime(record.modifyTimeMillis) }}</span
           ><br />
-          <span>{{ record.createTime }}</span>
+          <span>{{ parseTime(record.createTimeMillis) }}</span>
         </a-tooltip>
       </template>
       <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
@@ -155,31 +158,7 @@
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="分组名称" prop="group">
-          <custom-select v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder="分组名称,可以不选择"> </custom-select>
-          <!-- <a-row>
-            <a-col :span="18">
-              <a-select v-model="temp.group" placeholder="可手动输入">
-                <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-              </a-select>
-            </a-col>
-            <a-col :span="6">
-              <a-popover v-model="addGroupvisible" title="添加分组" trigger="click">
-                <template slot="content">
-                  <a-row>
-                    <a-col :span="18">
-                      <a-input v-model="temp.tempGroup" placeholder="分组名称" />
-                    </a-col>
-                    <a-col :span="6">
-                      <a-button type="primary" @click="handleAddGroup">确认</a-button>
-                    </a-col>
-                  </a-row>
-                </template>
-                <a-button type="primary" class="btn-add">添加分组</a-button>
-              </a-popover>
-            </a-col>
-          </a-row> -->
-        </a-form-model-item>
+
         <a-form-model-item label="JDK" prop="jdkId" v-show="temp.runMode && temp.runMode !== 'File'" class="jpom-node-project-jdk">
           <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
             <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
@@ -195,7 +174,7 @@
           <a-textarea v-model="temp.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
         </a-form-model-item>
         <a-form-model-item label="args 参数" prop="args" v-show="temp.runMode && temp.runMode !== 'File'">
-          <a-textarea v-model="temp.args" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080" />
+          <a-textarea v-model="temp.args" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
         </a-form-model-item>
         <!-- 副本信息 -->
         <a-row v-for="replica in temp.javaCopyItemList" :key="replica.id">
@@ -203,7 +182,7 @@
             <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
           </a-form-model-item>
           <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
-            <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080" />
+            <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
           </a-form-model-item>
           <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
             <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)">删除</a-button>
@@ -259,21 +238,22 @@ import File from "./project-file";
 import Console from "./project-console";
 import Monitor from "./project-monitor";
 import Replica from "./project-replica";
-import CustomSelect from "@/components/customSelect";
+import { parseTime } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+
 import {
   getJdkList,
   getRuningProjectInfo,
   getProjectData,
   deleteProject,
   getProjectList,
-  getPorjectGroupList,
   getProjectAccessList,
   editProject,
   nodeJudgeLibExist,
   restartProject,
   startProject,
   stopProject,
-} from "../../../../api/node-project";
+} from "@/api/node-project";
 
 export default {
   props: {
@@ -286,14 +266,11 @@ export default {
     Console,
     Monitor,
     Replica,
-    CustomSelect,
   },
   data() {
     return {
       loading: false,
-      listQuery: {},
-      tableHeight: "70vh",
-      groupList: [],
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       accessList: [],
       jdkList: [],
       runModeList: ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"],
@@ -310,14 +287,15 @@ export default {
       selectedRows: [],
       checkRecord: "",
       columns: [
-        { title: "项目名称", dataIndex: "name", width: 60, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "创建/修改时间", dataIndex: "createTime", width: 90, ellipsis: true, scopedSlots: { customRender: "time" } },
-        // { title: "修改时间", dataIndex: "modifyTime", width: 160, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
+        { title: "项目名称", dataIndex: "name", sorter: true, width: 60, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "修改/创建时间", sorter: true, dataIndex: "modifyTimeMillis", width: 90, ellipsis: true, scopedSlots: { customRender: "time" } },
+
         {
           title: "最后操作人",
           dataIndex: "modifyUser",
           width: 60,
           ellipsis: true,
+           sorter: true,
           scopedSlots: { customRender: "modifyUser" },
         },
         { title: "运行状态", dataIndex: "status", width: 50, ellipsis: true, scopedSlots: { customRender: "status" } },
@@ -338,6 +316,18 @@ export default {
     filePath() {
       return (this.temp.whitelistDirectory || "") + (this.temp.lib || "");
     },
+    pagination() {
+      return {
+        total: this.listQuery.total || 0,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
+        },
+      };
+    },
   },
   watch: {
     getGuideFlag() {
@@ -345,13 +335,12 @@ export default {
     },
   },
   mounted() {
-    this.calcTableHeight();
-    this.loadGroupList();
-    this.loadAccesList();
-    this.loadJdkList();
-    this.handleFilter();
+    this.loadData();
   },
   methods: {
+    parseTime(v) {
+      return parseTime(v);
+    },
     // 页面引导
     introGuide() {
       if (this.getGuideFlag) {
@@ -381,20 +370,7 @@ export default {
       }
       this.$introJs().exit();
     },
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 155;
-      });
-    },
-    // 加载分组列表
-    loadGroupList() {
-      getPorjectGroupList(this.node.id).then((res) => {
-        if (res.code === 200) {
-          this.groupList = res.data;
-        }
-      });
-    },
+
     // 加载项目白名单列表
     loadAccesList() {
       getProjectAccessList(this.node.id).then((res) => {
@@ -412,51 +388,54 @@ export default {
       });
     },
     // 加载数据
-    async loadData() {
+    loadData() {
       this.loading = true;
-      const params = {
-        nodeId: this.node.id,
-        group: this.listQuery.group,
-      };
-      const res1 = await getProjectList(params);
-      if (res1.code === 200) {
-        this.list = res1.data;
 
-		// TODO: 由于Ant Design Vue的bug，当表格中首行为disabled时，表格的全选按钮也无法选择。
-		// 目前的解决方案是：把需要disabled的元素放到最后。
-		// 如果运行模式是文件，则无需批量启动/重启/关闭
-		let tempList = this.list.filter(item => item.runMode !== 'File');
-		tempList = tempList.concat(this.list.filter(item => item.runMode === 'File'));
-		this.list = tempList;
+      this.listQuery.nodeId = this.node.id;
+      getProjectList(this.listQuery).then((res1) => {
+        if (res1.code === 200) {
+          let resultList = res1.data.result;
+          this.listQuery.total = res1.data.total;
 
-        const ids = [];
-        if (res1.data) {
-          res1.data.forEach((element) => {
-            ids.push(element.id);
+          // TODO: 由于Ant Design Vue的bug，当表格中首行为disabled时，表格的全选按钮也无法选择。
+          // 目前的解决方案是：把需要disabled的元素放到最后。
+          // 如果运行模式是文件，则无需批量启动/重启/关闭
+          let tempList = resultList.filter((item) => item.runMode !== "File");
+          let fileList = resultList.filter((item) => item.runMode === "File");
+          this.list = tempList.concat(fileList);
+          // 项目ID 字段更新
+          this.list = this.list.map((element) => {
+            element.dataId = element.id;
+            element.id = element.projectId;
+            return element;
           });
-        }
-        // 如果 ids 有数据就继续请求
-        if (ids.length > 0) {
-          const tempParams = {
-            nodeId: this.node.id,
-            ids: JSON.stringify(ids),
-          };
-          const res2 = await getRuningProjectInfo(tempParams);
-          if (res2.code === 200) {
-            this.list.forEach((element) => {
-              if (res2.data[element.id]) {
-                element.port = res2.data[element.id].port;
-                element.pid = res2.data[element.id].pid;
+
+          let ids = tempList.map((item) => {
+            return item.projectId;
+          });
+          // 如果 ids 有数据就继续请求
+          if (ids.length > 0) {
+            const tempParams = {
+              nodeId: this.node.id,
+              ids: JSON.stringify(ids),
+            };
+            getRuningProjectInfo(tempParams).then((res2) => {
+              if (res2.code === 200) {
+                this.list = this.list.map((element) => {
+                  if (res2.data[element.projectId]) {
+                    element.port = res2.data[element.projectId].port;
+                    element.pid = res2.data[element.projectId].pid;
+                    element.status = true;
+                  }
+                  return element;
+                });
+                // this.list.forEach((element) => {});
               }
             });
           }
         }
-      }
-      this.loading = false;
-    },
-    // 筛选
-    handleFilter() {
-      this.loadData();
+        this.loading = false;
+      });
     },
     // 添加
     handleAdd() {
@@ -465,6 +444,8 @@ export default {
         logPath: "",
         javaCopyItemList: [],
       };
+      this.loadAccesList();
+      this.loadJdkList();
       this.editProjectVisible = true;
       this.$nextTick(() => {
         setTimeout(() => {
@@ -478,6 +459,8 @@ export default {
         id: record.id,
         nodeId: this.node.id,
       };
+      this.loadAccesList();
+      this.loadJdkList();
       getProjectData(params).then((res) => {
         if (res.code === 200) {
           this.temp = {
@@ -552,7 +535,7 @@ export default {
             });
             this.$refs["editProjectForm"].resetFields();
             this.editProjectVisible = false;
-            this.handleFilter();
+            this.loadData();
           }
         });
       });
@@ -578,7 +561,7 @@ export default {
     // 关闭控制台
     onConsoleClose() {
       this.drawerConsoleVisible = false;
-      this.handleFilter();
+      this.loadData();
     },
     // 监控
     handleMonitor(record) {
@@ -625,26 +608,7 @@ export default {
         },
       });
     },
-    // // 添加分组
-    // handleAddGroup() {
-    //   if (!this.temp.tempGroup || this.temp.tempGroup.length === 0) {
-    //     this.$notification.warning({
-    //       message: "分组名称不能为空",
-    //       duration: 2,
-    //     });
-    //     return false;
-    //   }
-    //   // 添加到分组列表
-    //   if (this.groupList.indexOf(this.temp.tempGroup) === -1) {
-    //     this.groupList.push(this.temp.tempGroup);
-    //   }
-    //   this.temp.tempGroup = "";
-    //   this.$notification.success({
-    //     message: "添加成功",
-    //     duration: 2,
-    //   });
-    //   this.addGroupvisible = false;
-    // },
+
     //检查节点是否存在
     checkLibIndexExist() {
       // 检查是否输入完整
@@ -706,7 +670,7 @@ export default {
           };
           //console.log(this.list[value]);
           startProject(params).then(() => {
-            this.handleFilter();
+            this.loadData();
           });
         }
       });
@@ -726,7 +690,7 @@ export default {
             id: value.id,
           };
           restartProject(params).then(() => {
-            this.handleFilter();
+            this.loadData();
           });
         }
       });
@@ -746,10 +710,20 @@ export default {
             id: value.id,
           };
           stopProject(params).then(() => {
-            this.handleFilter();
+            this.loadData();
           });
         }
       });
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
     },
   },
 };

@@ -1,26 +1,20 @@
 /** * 这是新版本的构建列表页面，主要是分离了部分数据到【仓库管理】，以及数据会存储到数据库 */
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="handleFilter">
-        <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+      <a-input allowClear class="search-input-item" v-model="listQuery['%name%']" placeholder="构建名称" />
+      <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="filter-item">
+        <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
       </a-select>
-      <a-button type="primary" @click="handleFilter">搜索</a-button>
+      <a-select show-search option-filter-prop="children" v-model="listQuery.releaseMethod" allowClear placeholder="发布方式" class="filter-item">
+        <a-select-option v-for="(val, key) in releaseMethodMap" :key="key">{{ val }}</a-select-option>
+      </a-select>
+      <a-input allowClear class="search-input-item" v-model="listQuery['%resultDirFile%']" placeholder="产物目录" />
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table
-      :loading="loading"
-      :columns="columns"
-      :data-source="list"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ x: 1210, y: tableHeight - 60 }"
-      bordered
-      rowKey="id"
-      :pagination="pagination"
-      @change="changePage"
-    >
+    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -31,15 +25,7 @@
         <span>{{ releaseMethodMap[text] }}</span>
       </template>
       <template slot="status" slot-scope="text">
-        <span v-if="text === 0">未构建</span>
-        <span v-else-if="text === 1">构建中</span>
-        <span v-else-if="text === 2">构建成功</span>
-        <span v-else-if="text === 3">构建失败</span>
-        <span v-else-if="text === 4">发布中</span>
-        <span v-else-if="text === 5">发布成功</span>
-        <span v-else-if="text === 6">发布失败</span>
-        <span v-else-if="text === 7">取消构建</span>
-        <span v-else>未知状态</span>
+        <span>{{ statusMap[text] || "未知" }}</span>
       </template>
       <a-tooltip slot="buildId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
         <span v-if="record.buildId <= 0"></span>
@@ -75,19 +61,11 @@
     <a-modal v-model="editBuildVisible" title="编辑构建" @ok="handleEditBuildOk" width="50%" :maskClosable="false">
       <a-form-model ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="名称" prop="name">
-          <a-row>
-            <a-col :span="10">
-              <a-input v-model="temp.name" placeholder="名称" />
-            </a-col>
-            <a-col :span="4" style="text-align: right">分组名称：</a-col>
-            <a-col :span="10">
-              <custom-select v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder="分组名称,可以不选择"> </custom-select>
-            </a-col>
-          </a-row>
+          <a-input v-model="temp.name" placeholder="名称" />
         </a-form-model-item>
 
         <a-form-model-item label="仓库地址" prop="repositoryId">
-          <a-select v-model="temp.repositoryId" @select="changeRepositpry" @change="changeRepositpry" placeholder="请选择仓库">
+          <a-select show-search option-filter-prop="children" v-model="temp.repositoryId" @select="changeRepositpry" @change="changeRepositpry" placeholder="请选择仓库">
             <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -151,10 +129,7 @@
         </a-form-model-item>
         <a-form-model-item label="发布操作" prop="releaseMethod">
           <a-radio-group v-model="temp.releaseMethod" name="releaseMethod">
-            <a-radio :value="0">不发布</a-radio>
-            <a-radio :value="1">节点分发</a-radio>
-            <a-radio :value="2">项目</a-radio>
-            <a-radio :value="3">SSH</a-radio>
+            <a-radio v-for="tempValue in releaseMethodArray" :key="tempValue.value" :value="tempValue.value">{{ tempValue.name }}</a-radio>
           </a-radio-group>
         </a-form-model-item>
         <!-- 节点分发 -->
@@ -165,7 +140,7 @@
         </a-form-model-item>
         <!-- 项目 -->
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataIdList">
-          <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="Please select" />
+          <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="请选择节点项目" />
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
           <a-select v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
@@ -188,7 +163,19 @@
             :auto-size="{ minRows: 2, maxRows: 10 }"
             type="textarea"
             :rows="3"
-            placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java"
+            placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java,支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}"
+          />
+        </a-form-model-item>
+        <!-- LocalCommand -->
+
+        <a-form-model-item v-if="temp.releaseMethod === 4" label="发布命令" prop="releaseCommand">
+          <a-input
+            v-model="tempExtraData.releaseCommand"
+            allow-clear
+            :auto-size="{ minRows: 2, maxRows: 10 }"
+            type="textarea"
+            :rows="3"
+            placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java ,支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}"
           />
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" label="清空发布" prop="clearOld">
@@ -208,6 +195,7 @@
             <a-button type="primary" class="btn-add" @click="resetTrigger">重置</a-button>
           </a-col>
         </a-row>
+        可以添加 delay=x 参数来延迟执行构建
       </a-form-model>
     </a-modal>
     <!-- 构建日志 -->
@@ -220,12 +208,13 @@
 import { mapGetters } from "vuex";
 import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
-import { getRepositoryList } from "../../api/repository";
-import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildGroupList, getBuildList, getTriggerUrl, releaseMethodMap, resetTrigger, startBuild, stopBuild } from "../../api/build-info";
-import { getDishPatchList } from "../../api/dispatch";
-import { getNodeProjectList } from "../../api/node";
-import { getSshList } from "../../api/ssh";
-import { parseTime } from "../../utils/time";
+import { getRepositoryListAll } from "../../api/repository";
+import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildList, getTriggerUrl, releaseMethodMap, releaseMethodArray, resetTrigger, startBuild, stopBuild, statusMap } from "@/api/build-info";
+import { getDishPatchListAll } from "../../api/dispatch";
+import { getProjectListAll, getNodeListAll } from "@/api/node";
+import { getSshListAll } from "../../api/ssh";
+import { itemGroupBy, parseTime } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {
@@ -235,16 +224,13 @@ export default {
   data() {
     return {
       releaseMethodMap: releaseMethodMap,
+      releaseMethodArray: releaseMethodArray,
       loading: false,
-      listQuery: {
-        page: 1,
-        limit: 10,
-      },
-      tableHeight: "70vh",
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       // 动态列表参数
       groupList: [],
       list: [],
-      total: 0,
+      statusMap: statusMap,
       repositoryList: [],
       // 当前仓库信息
       tempRepository: {},
@@ -267,8 +253,8 @@ export default {
         { title: "顺序重启(有重启失败将继续)", value: 3 },
       ],
       columns: [
-        { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "分组", dataIndex: "group", width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
+        { title: "名称", dataIndex: "name", width: 150, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        // { title: "分组", dataIndex: "group", key: "group%", sorter: true, width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
         {
           title: "分支",
           dataIndex: "branchName",
@@ -289,11 +275,13 @@ export default {
           dataIndex: "modifyUser",
           width: 150,
           ellipsis: true,
+          sorter: true,
           scopedSlots: { customRender: "modifyUser" },
         },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
+          sorter: true,
           customRender: (text) => {
             if (!text) {
               return "";
@@ -337,16 +325,13 @@ export default {
   computed: {
     pagination() {
       return {
-        total: this.total,
+        total: this.listQuery.total,
         current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || 10,
-        pageSizeOptions: ["10", "20", "50", "100"],
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
         showTotal: (total) => {
-          if (total <= this.listQuery.limit) {
-            return "";
-          }
-          return `总计 ${total} 条`;
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
       };
     },
@@ -358,9 +343,7 @@ export default {
     },
   },
   created() {
-    this.calcTableHeight();
-    this.loadGroupList();
-    this.handleFilter();
+    this.loadData();
   },
   methods: {
     // 页面引导
@@ -382,49 +365,32 @@ export default {
       }
       this.$introJs().exit();
     },
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-      });
-    },
-    // 分组列表
-    loadGroupList() {
-      getBuildGroupList().then((res) => {
-        if (res.code === 200) {
-          this.groupList = res.data;
-        }
-      });
-    },
+
     // 加载数据
     loadData() {
       this.list = [];
       this.loading = true;
       getBuildList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
-          this.total = res.total;
+          this.list = res.data.result;
+          this.listQuery.total = res.data.total;
         }
         this.loading = false;
       });
     },
     // 加载仓库列表
-    loadRepositoryList() {
-      const query = {
-        page: 1,
-        limit: 1000,
-        strike: 0,
-      };
-      getRepositoryList(query).then((res) => {
+    loadRepositoryList(fn) {
+      getRepositoryListAll().then((res) => {
         if (res.code === 200) {
           this.repositoryList = res.data;
+          fn && fn();
         }
       });
     },
     // 加载节点分发列表
     loadDispatchList() {
       this.dispatchList = [];
-      getDishPatchList().then((res) => {
+      getDishPatchListAll().then((res) => {
         if (res.code === 200) {
           this.dispatchList = res.data;
         }
@@ -433,30 +399,34 @@ export default {
     // 加载节点项目列表
     loadNodeProjectList() {
       this.cascaderList = [];
-      getNodeProjectList().then((res) => {
-        if (res.code === 200) {
-          res.data.forEach((node) => {
-            const nodeItem = {
-              label: node.name,
-              value: node.id,
-              children: [],
-            };
-            node.projects.forEach((project) => {
-              const projectItem = {
-                label: project.name,
-                value: project.id,
-              };
-              nodeItem.children.push(projectItem);
-            });
-            this.cascaderList.push(nodeItem);
-          });
+      getNodeListAll().then((res0) => {
+        if (res0.code !== 200) {
+          return;
         }
+        getProjectListAll().then((res) => {
+          if (res.code === 200) {
+            let temp = itemGroupBy(res.data, "nodeId", "value", "children");
+
+            this.cascaderList = temp.map((item) => {
+              item.label = res0.data.filter((res0Item) => {
+                return res0Item.id === item.value;
+              })[0].name;
+              item.children = item.children.map((item2) => {
+                return {
+                  label: item2.name,
+                  value: item2.projectId,
+                };
+              });
+              return item;
+            });
+          }
+        });
       });
     },
     // 加载 SSH 列表
     loadSshList() {
       this.sshList = [];
-      getSshList().then((res) => {
+      getSshListAll().then((res) => {
         if (res.code === 200) {
           this.sshList = res.data;
         }
@@ -465,7 +435,7 @@ export default {
     // 筛选
     handleFilter() {
       this.loadData();
-      this.loadRepositoryList();
+      // this.loadRepositoryList();
     },
     // 选择仓库
     changeRepositpry(value) {
@@ -483,6 +453,7 @@ export default {
     handleAdd() {
       this.temp = {};
       this.branchList = [];
+      this.loadRepositoryList();
       this.loadDispatchList();
       this.loadNodeProjectList();
       this.loadSshList();
@@ -518,14 +489,18 @@ export default {
           this.tempExtraData.releaseMethodDataId_3 = this.tempExtraData.releaseMethodDataId;
         }
       }
-      // 从仓库列表里匹配对应的仓库信息
-      this.tempRepository = this.repositoryList.filter((element) => this.temp.repositoryId === element.id)[0];
+      this.loadRepositoryList(() => {
+        // 从仓库列表里匹配对应的仓库信息
+        // console.log(this.repositoryList);
+        this.tempRepository = this.repositoryList.filter((element) => this.temp.repositoryId === element.id)[0];
+        this.editBuildVisible = true;
+        this.loadBranchList();
+      });
 
-      this.loadBranchList();
       this.loadDispatchList();
+
       this.loadNodeProjectList();
       this.loadSshList();
-      this.editBuildVisible = true;
     },
     // 获取仓库分支
     loadBranchList() {
@@ -698,9 +673,13 @@ export default {
       this.handleFilter();
     },
     // 分页、排序、筛选变化时触发
-    changePage(pagination) {
+    changePage(pagination, filters, sorter) {
       this.listQuery.page = pagination.current;
       this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
       this.loadData();
     },
   },

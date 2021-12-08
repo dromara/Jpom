@@ -40,7 +40,7 @@ public class OutGivingNodeProject extends BaseJsonModel {
 	private String nodeId;
 	private String projectId;
 	private String lastOutGivingTime;
-	private int status = Status.No.getCode();
+	private Integer status = Status.No.getCode();
 	private String result;
 
 
@@ -52,7 +52,7 @@ public class OutGivingNodeProject extends BaseJsonModel {
 		this.result = result;
 	}
 
-	public int getStatus() {
+	public Integer getStatus() {
 		return status;
 	}
 
@@ -60,7 +60,7 @@ public class OutGivingNodeProject extends BaseJsonModel {
 		return BaseEnum.getDescByCode(Status.class, getStatus());
 	}
 
-	public void setStatus(int status) {
+	public void setStatus(Integer status) {
 		this.status = status;
 	}
 
@@ -98,7 +98,7 @@ public class OutGivingNodeProject extends BaseJsonModel {
 		if (nodeService == null) {
 			nodeService = SpringUtil.getBean(NodeService.class);
 		}
-		return nodeService.getItem(this.nodeId);
+		return nodeService.getByKey(this.nodeId);
 	}
 
 	/**

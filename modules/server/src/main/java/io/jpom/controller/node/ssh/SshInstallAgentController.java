@@ -14,10 +14,8 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Type;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.model.system.AgentAutoUser;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -36,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
@@ -54,19 +51,15 @@ import java.util.zip.ZipFile;
 @Feature(cls = ClassFeature.SSH)
 public class SshInstallAgentController extends BaseServerController {
 
-	@Resource
-	private SshService sshService;
+	private final SshService sshService;
 
-//    @RequestMapping(value = "installAgent.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.INSTALL)
-//    public String installAgent() {
-//        return "node/ssh/installAgent";
-//    }
+	public SshInstallAgentController(SshService sshService) {
+		this.sshService = sshService;
+	}
 
 	@RequestMapping(value = "installAgentSubmit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.INSTALL)
-	@OptLog(UserOperateLogV1.OptType.SshInstallAgent)
+	@Feature(method = MethodFeature.EXECUTE)
 	public String installAgentSubmit(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "节点数据") String nodeData,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "安装路径") String path) throws Exception {
@@ -77,7 +70,7 @@ public class SshInstallAgentController extends BaseServerController {
 		}
 		NodeModel nodeModel = (NodeModel) object;
 		//
-		SshModel sshModel = sshService.getItem(id);
+		SshModel sshModel = sshService.getByKey(id, false);
 		Objects.requireNonNull(sshModel, "没有找到对应ssh");
 		//
 		String tempFilePath = ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath();
@@ -106,9 +99,7 @@ public class SshInstallAgentController extends BaseServerController {
 					break;
 				}
 			}
-			if (StrUtil.isEmpty(tag)) {
-				return JsonMessage.getString(405, "管理命令中不存在tag");
-			}
+			Assert.hasText(tag, "管理命令中不存在tag");
 			//  读取授权信息
 			File configFile = FileUtil.file(outFle, ExtConfigBean.FILE_NAME);
 			if (configFile.exists()) {
@@ -123,9 +114,9 @@ public class SshInstallAgentController extends BaseServerController {
 				nodeModel.setLoginPwd(Convert.toStr(pwd, ""));
 			}
 			// 查询远程是否运行
-			if (sshService.checkSshRun(sshModel, tag)) {
-				return JsonMessage.getString(300, "对应服务器中已经存在 Jpom 插件端,不需要再次安装啦");
-			}
+
+			Assert.state(!sshService.checkSshRun(sshModel, tag), "对应服务器中已经存在 Jpom 插件端,不需要再次安装啦");
+
 			// 上传文件到服务器
 			sshService.uploadDir(sshModel, path, outFle);
 			//
@@ -157,10 +148,10 @@ public class SshInstallAgentController extends BaseServerController {
 					}
 				}
 			}
-			nodeModel.setOpenStatus(true);
+			nodeModel.setOpenStatus(1);
 			// 绑定关系
-			nodeModel.setSshId(sshModel.getId());
-			nodeService.addItem(nodeModel);
+			//nodeModel.setSshId(sshModel.getId());
+			nodeService.insert(nodeModel);
 			//
 			return JsonMessage.getString(200, "操作成功:" + result);
 		} finally {
@@ -194,15 +185,12 @@ public class SshInstallAgentController extends BaseServerController {
 
 	private Object getNodeModel(String data) {
 		NodeModel nodeModel = JSONObject.toJavaObject(JSONObject.parseObject(data), NodeModel.class);
-		if (StrUtil.isEmpty(nodeModel.getId())) {
-			return new JsonMessage<>(405, "节点id错误");
-		}
-		if (StrUtil.isEmpty(nodeModel.getName())) {
-			return new JsonMessage<>(405, "输入节点名称");
-		}
-		if (StrUtil.isEmpty(nodeModel.getUrl())) {
-			return new JsonMessage<>(405, "请输入节点地址");
-		}
+		Assert.hasText(nodeModel.getId(), "节点id错误");
+
+		Assert.hasText(nodeModel.getName(), "输入节点名称");
+
+		Assert.hasText(nodeModel.getUrl(), "请输入节点地址");
+
 		return nodeModel;
 	}
 

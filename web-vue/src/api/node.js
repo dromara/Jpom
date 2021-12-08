@@ -1,21 +1,22 @@
 import axios from "./config";
 
-// 分组
-export function getNodeGroupList() {
-  return axios({
-    url: "/node/list_group.json",
-    method: "get",
-  });
-}
-
 // node 列表
 export function getNodeList(params) {
   return axios({
     url: "/node/list_data.json",
-    method: "get",
+    method: "post",
     params: params,
   });
 }
+
+// node 列表 all
+export function getNodeListAll() {
+  return axios({
+    url: "/node/list_data_all.json",
+    method: "get",
+  });
+}
+
 // 节点和版本信息
 export function getNodeListWithVersion(params) {
   return axios({
@@ -40,7 +41,24 @@ export function getNodeProjectList(params) {
     url: "/node/node_project_list",
     method: "post",
     params: params,
-    timeout: 0,
+  });
+}
+
+// 节点 + 项目列表
+export function getProjectList(params) {
+  return axios({
+    url: "/node/project_list",
+    method: "post",
+    params: params,
+  });
+}
+
+// 节点 + 项目列表
+export function getProjectListAll() {
+  return axios({
+    url: "/node/project_list_all",
+    method: "get",
+    params: {},
   });
 }
 
@@ -163,6 +181,22 @@ export function uploadAgentFile(formData) {
   });
 }
 
+/**
+ *  检查远程最新
+ * @returns json
+ */
+export function checkVersion() {
+  return axios({
+    url: "/node/check_version.json",
+    method: "get",
+    data: {},
+  });
+}
+
+/**
+ * 下载远程文件
+ * @returns json
+ */
 export function downloadRemote() {
   return axios({
     url: "/node/download_remote.json",

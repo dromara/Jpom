@@ -1,11 +1,10 @@
 <template>
-  <div class="node-update">
+  <div class="node-update full-content">
     <div class="header">
       <div class="left">
-        <a-select v-model="groupFilter" allowClear placeholder="请选择分组" class="group">
-          <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-        </a-select>
-        <a-button type="primary" @click="refresh">刷新</a-button>
+        <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
+        <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
+        <a-button type="primary" @click="refresh">搜索</a-button>
         <a-button type="primary" @click="batchUpdate">批量更新</a-button>
       </div>
       <div class="right">
@@ -25,7 +24,7 @@
       </div>
     </div>
     <div class="table-div">
-      <a-table :columns="columns" :data-source="listComputed" bordered rowKey="id" class="table" :pagination="false" :row-selection="rowSelection">
+      <a-table :loading="loading" :columns="columns" :data-source="listComputed" bordered rowKey="id" class="table" :pagination="this.pagination" @change="changePage" :row-selection="rowSelection">
         <template slot="version" slot-scope="text">
           {{ text | version }}
         </template>
@@ -45,9 +44,9 @@
 </template>
 
 <script>
-import { getNodeGroupList, uploadAgentFile, downloadRemote } from "@/api/node";
-import { systemInfo } from "@/api/system";
+import { uploadAgentFile, downloadRemote, checkVersion, getNodeList } from "@/api/node";
 import { mapGetters } from "vuex";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 
 export default {
   name: "NodeUpdate",
@@ -65,17 +64,18 @@ export default {
       agentTimeStamp: "",
       websocket: null,
       groupFilter: undefined,
-      groupList: [],
+      loading: false,
+      listQuery: { page: 1, limit: PAGE_DEFAULT_LIMIT, total: 0 },
       list: [],
       columns: [
         { title: "节点 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "节点名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "分组", dataIndex: "group", ellipsis: true, scopedSlots: { customRender: "group" } },
+        // { title: "分组", dataIndex: "group", ellipsis: true, scopedSlots: { customRender: "group" } },
         { title: "Agent版本号", dataIndex: "version", width: "100", ellipsis: true, scopedSlots: { customRender: "version" } },
         { title: "打包时间", dataIndex: "timeStamp", ellipsis: true, scopedSlots: { customRender: "timeStamp" } },
         { title: "状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
         // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true, scopedSlots: {customRender: 'autoUpdate'}},
-        { title: "操作", dataIndex: "operation", width: "100", scopedSlots: { customRender: "operation" }, align: "left" },
+        { title: "操作", dataIndex: "operation", width: 120, scopedSlots: { customRender: "operation" }, align: "left" },
       ],
       nodeVersion: {},
       nodeStatus: {},
@@ -118,19 +118,30 @@ export default {
       const url = (domain + "/node_update").replace(new RegExp("//", "gm"), "/");
       return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`;
     },
+    pagination() {
+      return {
+        total: this.listQuery.total || 0,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
+        },
+      };
+    },
   },
   mounted() {
-    this.initWebsocket();
-    this.loadGroupList();
+    this.getNodeList();
   },
   methods: {
-    initWebsocket() {
+    initWebsocket(ids) {
       if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
         this.socket = new WebSocket(this.socketUrl);
       }
 
       this.socket.onopen = () => {
-        this.init();
+        this.init(ids);
       };
       this.socket.onmessage = ({ data: socketData }) => {
         const msgObj = JSON.parse(socketData);
@@ -140,25 +151,18 @@ export default {
         }
       };
     },
-    init() {
-      this.getNodeList();
+    init(ids) {
+      this.sendMsg("getNodeList:" + ids.join(","));
       this.getAgentVersion();
       // 获取是否有新版本
-      systemInfo().then((res) => {
+      checkVersion().then((res) => {
         if (res.code === 200) {
-          let remoteVersion = res.data?.remoteVersion;
-          if (remoteVersion) {
+          let upgrade = res.data?.upgrade;
+          if (upgrade) {
             //
-            this.temp.upgrade = remoteVersion.upgrade;
-            this.temp.newVersion = remoteVersion.tagName;
+            this.temp.upgrade = upgrade;
+            this.temp.newVersion = res.data.tagName;
           }
-        }
-      });
-    },
-    loadGroupList() {
-      getNodeGroupList().then(({ code, data }) => {
-        if (code === 200) {
-          this.groupList = data;
         }
       });
     },
@@ -168,8 +172,7 @@ export default {
       }
       this.nodeStatus = {};
       this.nodeVersion = {};
-      this.initWebsocket();
-      this.loadGroupList();
+      this.getNodeList();
     },
     batchUpdate() {
       if (this.tableSelections.length === 0) {
@@ -196,7 +199,20 @@ export default {
       );
     },
     getNodeList() {
-      this.sendMsg("getNodeList");
+      this.loading = true;
+      getNodeList(this.listQuery).then((res) => {
+        if (res.code === 200) {
+          this.list = res.data.result;
+          this.listQuery.total = res.data.total;
+          let ids = this.list.map((item) => {
+            return item.id;
+          });
+          if (ids.length > 0) {
+            this.initWebsocket(ids);
+          }
+        }
+        this.loading = false;
+      });
     },
     getNodeListResult(data) {
       this.list = data;
@@ -271,6 +287,16 @@ export default {
         }
       });
     },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
+    },
   },
 };
 </script>
@@ -279,15 +305,16 @@ export default {
 .node-update {
   width 100%
   height 100%
-  display flex
+  // display flex
   flex-direction column
   justify-content space-between
 
 
   .header {
-    height 60px;
+    // height 60px;
     display flex;
     align-items center;
+    margin-bottom: 15px;
 
     > div {
       //  width 50%;
@@ -313,11 +340,11 @@ export default {
   }
 
   .table-div {
-    height calc(100% - 60px)
-    overflow auto
+    // height calc(100% - 60px)
+    // overflow auto
 
     .table {
-      height 100%
+      // height 100%
 
       .uploading {
         display flex

@@ -1,6 +1,6 @@
-
 /* 全局样式，重置样式 */
-html, body {
+html,
+body {
   width: 100vw;
   height: 100vh;
   margin: 0;
@@ -18,4 +18,10 @@ html, body {
 
 .ant-table-body {
   overflow-x: auto !important;
+}
+
+
+.search-input-item {
+  width: 140px;
+  margin-right: 10px;
 }

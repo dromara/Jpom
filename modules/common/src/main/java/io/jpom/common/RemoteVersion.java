@@ -59,7 +59,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class RemoteVersion {
 
-	public static final String CHECK_VERSION_ID = "check_version";
 	/**
 	 * 主 url 用于拉取远程版本信息
 	 */
@@ -169,17 +168,16 @@ public class RemoteVersion {
 		String body = StrUtil.EMPTY;
 		try {
 			// 获取缓存中到信息
-			RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
-			if (remoteVersion == null) {
-				// 远程获取
-				String transitUrl = RemoteVersion.loadTransitUrl();
-				if (StrUtil.isNotEmpty(transitUrl)) {
-					HttpRequest request = HttpUtil.createGet(transitUrl);
-					body = request.execute().body();
-					//
-					remoteVersion = JSONObject.parseObject(body, RemoteVersion.class);
-				}
+			RemoteVersion remoteVersion = null;
+			// 远程获取
+			String transitUrl = RemoteVersion.loadTransitUrl();
+			if (StrUtil.isNotEmpty(transitUrl)) {
+				HttpRequest request = HttpUtil.createGet(transitUrl);
+				body = request.execute().body();
+				//
+				remoteVersion = JSONObject.parseObject(body, RemoteVersion.class);
 			}
+
 			if (remoteVersion == null || StrUtil.isEmpty(remoteVersion.getTagName())) {
 				// 没有版本信息
 				return null;
@@ -228,7 +226,7 @@ public class RemoteVersion {
 			tagName = StrUtil.removePrefixIgnoreCase(tagName, "v");
 			remoteVersion.setUpgrade(StrUtil.compareVersion(version, tagName) < 0);
 		} else {
-			remoteVersion.setUpgrade(true);
+			remoteVersion.setUpgrade(false);
 		}
 		// 检查是否存在下载地址
 		Type type = instance.getType();
@@ -284,7 +282,6 @@ public class RemoteVersion {
 	public static Tuple download(String savePath, Type type) throws IOException {
 		RemoteVersion remoteVersion = loadRemoteInfo();
 		Assert.notNull(remoteVersion, "没有可用的新版本升级:-1");
-		Assert.state(remoteVersion.getUpgrade() != null && remoteVersion.getUpgrade(), "没有可用的新版本升级");
 		// 检查是否存在下载地址
 		String remoteUrl = type.getRemoteUrl(remoteVersion);
 		Assert.hasText(remoteUrl, "存在新版本,下载地址不可用");

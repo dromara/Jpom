@@ -1,27 +1,30 @@
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
+      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
+      <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
+      关联节点数据是异步获取有一定时间延迟
     </div>
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      :loading="loading"
-      :columns="columns"
-      :pagination="false"
-      bordered
-      :rowKey="(record, index) => index"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ x: 1040, y: tableHeight - 60 }"
-    >
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="nodeId" slot-scope="text, record">
-        <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button>
-        <a-tooltip v-else placement="topLeft" :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`">
-          <a-button type="primary" @click="toNode(record.nodeModel)"
-            >前往节点:
-            {{ `${record.nodeModel.id} ( ${record.nodeModel.name} )` }}
+        <!-- <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button> -->
+        <a-tooltip v-if="sshAgentInfo[record.id] && sshAgentInfo[record.id].nodeId" placement="topLeft" :title="`${sshAgentInfo[record.id].nodeName}`">
+          <a-button type="primary" @click="toNode(sshAgentInfo[record.id].nodeId)">
+            {{ sshAgentInfo[record.id].nodeName }}
           </a-button>
+        </a-tooltip>
+        <a-tooltip v-if="sshAgentInfo[record.id] && sshAgentInfo[record.id].error" placement="topLeft" :title="`${sshAgentInfo[record.id].error}`">
+          {{ sshAgentInfo[record.id].error }}
+        </a-tooltip>
+        <a-tooltip
+          v-if="sshAgentInfo[record.id] && sshAgentInfo[record.id].ok"
+          placement="topLeft"
+          :title="`${sshAgentInfo[record.id].pid > 0 ? 'ssh 中已经运行了插件端进程ID：' + sshAgentInfo[record.id].pid : '点击快速安装插件端'}`"
+        >
+          <a-button type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">安装节点</a-button>
         </a-tooltip>
       </template>
       <template slot="operation" slot-scope="text, record">
@@ -105,7 +108,7 @@
             type="textarea"
             :rows="5"
             style="resize: none"
-            placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，示例：设置编码：txt@utf-8， 不设置编码：txt"
+            placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，多个使用换行。示例：设置编码：txt@utf-8， 不设置编码：txt"
           />
         </a-form-model-item>
       </a-form-model>
@@ -182,9 +185,12 @@
     <!-- 操作日志 -->
     <a-modal v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
       <div ref="filter" class="filter">
-        <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
+        <a-input class="search-input-item" v-model="viewOperationLogListQuery['userId']" placeholder="操作人" />
+        <a-input class="search-input-item" v-model="viewOperationLogListQuery['name']" placeholder="ssh name" />
+        <a-input class="search-input-item" v-model="viewOperationLogListQuery['ip']" placeholder="ip" />
+        <a-input class="search-input-item" v-model="viewOperationLogListQuery['%commands%']" placeholder="执行命令" />
+        <a-range-picker class="filter-item search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
         <a-button type="primary" @click="handleListLog">搜索</a-button>
-        <a-button type="primary" @click="handleListLog">刷新</a-button>
       </div>
       <!-- 数据表格 -->
       <a-table
@@ -210,11 +216,11 @@
   </div>
 </template>
 <script>
-import { deleteSsh, editSsh, getSshList, getSshOperationLogList, installAgentNode } from "@/api/ssh";
-import { getNodeList } from "../../api/node";
+import { deleteSsh, editSsh, getSshList, getSshCheckAgent, getSshOperationLogList, installAgentNode } from "@/api/ssh";
 import SshFile from "./ssh-file";
 import Terminal from "./terminal";
-import { parseTime } from "../../utils/time";
+import { parseTime } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {
@@ -224,13 +230,14 @@ export default {
   data() {
     return {
       loading: false,
-      tableHeight: "70vh",
       list: [],
       temp: {},
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       editSshVisible: false,
       nodeVisible: false,
       tempNode: {},
       fileList: [],
+      sshAgentInfo: {},
       formLoading: false,
       drawerTitle: "",
       drawerVisible: false,
@@ -270,7 +277,8 @@ export default {
 
         {
           title: "操作时间",
-          dataIndex: "optTime",
+          dataIndex: "createTimeMillis",
+          sorter: true,
           customRender: (text) => {
             return parseTime(text);
           } /*width: 180*/,
@@ -280,19 +288,32 @@ export default {
       viewOperationLogListQuery: {
         page: 1,
         limit: 10,
+        total: 0,
       },
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true },
+        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true },
+
+        { title: "Host", dataIndex: "host", sorter: true, ellipsis: true },
+        { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true },
+        { title: "User", dataIndex: "user", sorter: true, width: 120, ellipsis: true },
+        { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true },
         {
           title: "关联节点",
           dataIndex: "nodeId",
           scopedSlots: { customRender: "nodeId" },
-          // width: 200,
+          width: 120,
           ellipsis: true,
         },
-        { title: "Host", dataIndex: "host", ellipsis: true },
-        { title: "Port", dataIndex: "port", width: 80, ellipsis: true },
-        { title: "User", dataIndex: "user", width: 120, ellipsis: true },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          sorter: true,
+          ellipsis: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+          width: 170,
+        },
         {
           title: "操作",
           dataIndex: "operation",
@@ -331,57 +352,57 @@ export default {
   computed: {
     viewOperationLogPagination() {
       return {
-        total: this.viewOperationLogTotal,
+        total: this.viewOperationLogListQuery.total || 0,
         current: this.viewOperationLogListQuery.page || 1,
-        pageSize: this.viewOperationLogListQuery.limit || 10,
-        pageSizeOptions: ["10", "20", "50", "100"],
+        pageSize: this.viewOperationLogListQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
         showTotal: (total) => {
-          if (total <= this.viewOperationLogListQuery.limit) {
-            return "";
-          }
-          return `总计 ${total} 条`;
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.viewOperationLogListQuery);
+        },
+      };
+    },
+    pagination() {
+      return {
+        total: this.listQuery.total || 0,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
       };
     },
   },
   created() {
-    this.calcTableHeight();
     this.loadData();
   },
   methods: {
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-      });
-    },
     // 加载数据
     loadData() {
       this.loading = true;
-      getSshList().then((res) => {
+      getSshList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data.result;
+          this.listQuery.total = res.data.total;
+          //
+          this.sshAgentInfo = {};
+          let ids = this.list
+            .map((item) => {
+              return item.id;
+            })
+            .join(",");
+          if (ids.length > 0) {
+            getSshCheckAgent({
+              ids: ids,
+            }).then((res) => {
+              this.sshAgentInfo = res.data;
+            });
+          }
         }
         this.loading = false;
-      })
-      // 如果在节点列表中存在，则标记为已安装节点
-      .then(getNodeList().then((res) => {
-        let nodeList = res.data;
-        let tempList = [];
-        this.list.forEach(element => {
-          let flag = false;
-          nodeList.forEach(node => {
-            if (element.host === node.url.substring(0, node.url.indexOf(':'))) {
-              flag = true;
-              return;
-            }
-          })
-          element.installed = flag;
-          tempList.push(element);
-        });
-        this.list = tempList;
-      }));
+      });
     },
     // 新增 SSH
     handleAdd() {
@@ -398,8 +419,8 @@ export default {
     // 修改
     handleEdit(record) {
       this.temp = Object.assign({}, record);
-      this.temp.fileDirs = record.fileDirs ? record.fileDirs.join("\r\n") : "";
-      this.temp.allowEditSuffix = record.allowEditSuffix ? record.allowEditSuffix.join("\r\n") : "";
+      this.temp.fileDirs = record.fileDirs ? JSON.parse(record.fileDirs).join("\r\n") : "";
+      this.temp.allowEditSuffix = record.allowEditSuffix ? JSON.parse(record.allowEditSuffix).join("\r\n") : "";
       this.temp.type = "edit";
       this.editSshVisible = true;
       // @author jzy 08-04
@@ -443,23 +464,27 @@ export default {
       this.viewOperationLoading = true;
       getSshOperationLogList(this.viewOperationLogListQuery).then((res) => {
         if (res.code === 200) {
-          this.viewOperationLogList = res.data;
-          this.viewOperationLogTotal = res.total;
+          this.viewOperationLogList = res.data.result;
+          this.viewOperationLogListQuery.total = res.data.total;
         }
         this.viewOperationLoading = false;
       });
     },
-    changeListLog(page) {
+    changeListLog(page, f, sorter) {
       this.viewOperationLogListQuery.page = page.current;
       this.viewOperationLogListQuery.limit = page.pageSize;
+      if (sorter) {
+        this.viewOperationLogListQuery.order = sorter.order;
+        this.viewOperationLogListQuery.order_field = sorter.field;
+      }
       this.handleListLog();
     },
     // 选择时间
     onchangeListLogTime(value, dateString) {
       if (dateString[0]) {
-        this.viewOperationLogListQuery.time = `${dateString[0]} ~ ${dateString[1]}`;
+        this.viewOperationLogListQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`;
       } else {
-        this.viewOperationLogListQuery.time = "";
+        this.viewOperationLogListQuery.createTimeMillis = "";
       }
     },
     // 文件管理
@@ -490,11 +515,11 @@ export default {
       });
     },
     // 前往节点
-    toNode(node) {
+    toNode(nodeId) {
       this.$router.push({
         path: "/node/list",
         query: {
-          nodeId: node.id,
+          nodeId: nodeId,
         },
       });
     },
@@ -559,6 +584,16 @@ export default {
           this.formLoading = false;
         });
       });
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
     },
     // 关闭抽屉层
     onClose() {

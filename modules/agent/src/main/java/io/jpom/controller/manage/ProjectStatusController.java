@@ -32,7 +32,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ConsoleService;
 import io.jpom.socket.ConsoleCommandOp;
 import org.springframework.http.HttpStatus;
@@ -68,8 +68,8 @@ public class ProjectStatusController extends BaseAgentController {
      */
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getProjectStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String getCopy) {
-        ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
-        if (projectInfoModel == null) {
+        NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
+        if (nodeProjectInfoModel == null) {
             return JsonMessage.getString(HttpStatus.NOT_FOUND.value(), "项目id不存在");
         }
         int pid = 0;
@@ -82,10 +82,10 @@ public class ProjectStatusController extends BaseAgentController {
         jsonObject.put("pId", pid);
         //
         if (StrUtil.isNotEmpty(getCopy)) {
-            List<ProjectInfoModel.JavaCopyItem> javaCopyItemList = projectInfoModel.getJavaCopyItemList();
+            List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
             JSONArray copys = new JSONArray();
             if (javaCopyItemList != null) {
-                for (ProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+                for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
                     JSONObject jsonObject1 = new JSONObject();
                     jsonObject1.put("copyId", javaCopyItem.getId());
                     jsonObject1.put("status", javaCopyItem.tryGetStatus());
@@ -145,14 +145,14 @@ public class ProjectStatusController extends BaseAgentController {
         if (StrUtil.isEmpty(copyIds) || StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "");
         }
-        ProjectInfoModel projectInfoModel = getProjectInfoModel();
+        NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
 
         JSONArray jsonArray = JSONArray.parseArray(copyIds);
         JSONObject jsonObject = new JSONObject();
         JSONObject itemObj;
         for (Object object : jsonArray) {
             String item = object.toString();
-            ProjectInfoModel.JavaCopyItem copyItem = projectInfoModel.findCopyItem(item);
+            NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(item);
             int pid;
             try {
                 pid = AbstractProjectCommander.getInstance().getPid(copyItem.getTagId());
@@ -174,11 +174,11 @@ public class ProjectStatusController extends BaseAgentController {
 
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String restart(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
-        ProjectInfoModel item = projectInfoService.getItem(id);
+        NodeProjectInfoModel item = projectInfoService.getItem(id);
         if (item == null) {
             return JsonMessage.getString(405, "没有找到对应的项目");
         }
-        ProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
+        NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
         String tagId = copyItem == null ? item.getId() : copyItem.getTagId();
         String result;
         try {
@@ -198,11 +198,11 @@ public class ProjectStatusController extends BaseAgentController {
 
 	@RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String stop(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
-		ProjectInfoModel item = projectInfoService.getItem(id);
+		NodeProjectInfoModel item = projectInfoService.getItem(id);
 		if (item == null) {
 			return JsonMessage.getString(405, "没有找到对应的项目");
 		}
-		ProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
+		NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
 		String tagId = copyItem == null ? item.getId() : copyItem.getTagId();
 		String result;
 		try {
@@ -222,11 +222,11 @@ public class ProjectStatusController extends BaseAgentController {
 
 	@RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
-		ProjectInfoModel item = projectInfoService.getItem(id);
+		NodeProjectInfoModel item = projectInfoService.getItem(id);
 		if (item == null) {
 			return JsonMessage.getString(405, "没有找到对应的项目");
 		}
-		ProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
+		NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
 		String tagId = copyItem == null ? item.getId() : copyItem.getTagId();
 		String result;
 		try {

@@ -42,10 +42,10 @@ public class ProjectRecoverModel extends BaseModel {
     /**
      * 删除的对应项目信息
      */
-    private ProjectInfoModel projectInfoModel;
+    private NodeProjectInfoModel nodeProjectInfoModel;
 
-    public ProjectRecoverModel(ProjectInfoModel projectInfoModel) {
-        this.projectInfoModel = projectInfoModel;
+    public ProjectRecoverModel(NodeProjectInfoModel nodeProjectInfoModel) {
+        this.nodeProjectInfoModel = nodeProjectInfoModel;
         // 生成操作id
         setId(ObjectId.next());
     }
@@ -53,12 +53,12 @@ public class ProjectRecoverModel extends BaseModel {
     public ProjectRecoverModel() {
     }
 
-    public ProjectInfoModel getProjectInfoModel() {
-        return projectInfoModel;
+    public NodeProjectInfoModel getProjectInfoModel() {
+        return nodeProjectInfoModel;
     }
 
-    public void setProjectInfoModel(ProjectInfoModel projectInfoModel) {
-        this.projectInfoModel = projectInfoModel;
+    public void setProjectInfoModel(NodeProjectInfoModel nodeProjectInfoModel) {
+        this.nodeProjectInfoModel = nodeProjectInfoModel;
     }
 
     public String getDelUser() {

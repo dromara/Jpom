@@ -81,6 +81,10 @@ ALTER TABLE BUILD_INFO
 ALTER TABLE BUILD_INFO
 	ADD IF NOT EXISTS TRIGGERTOKEN VARCHAR(20) comment '触发器token';
 
+-- @author bwcx_jzy 2021-12-06
+ALTER TABLE BUILD_INFO
+	ALTER COLUMN TRIGGERTOKEN VARCHAR(100) comment '触发器token';
+
 -- @author jzy 增加 RSAPRV
 ALTER TABLE REPOSITORY
 	ADD IF NOT EXISTS RSAPRV VARCHAR(4096) comment 'SSH RSA 私钥';
@@ -97,13 +101,18 @@ ALTER TABLE BUILD_INFO
 ALTER TABLE REPOSITORY
 	ADD IF NOT EXISTS STRIKE int DEFAULT 0 comment '逻辑删除';
 
+
+-- @author bwcx_jzy 增加 MODIFYUSER
+ALTER TABLE REPOSITORY
+	ADD IF NOT EXISTS MODIFYUSER VARCHAR(50) comment '修改人';
+
 -- @author jzy
 ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS BRANCHTAGNAME  VARCHAR(50) comment '标签';
+	ADD IF NOT EXISTS BRANCHTAGNAME VARCHAR(50) comment '标签';
 
 -- @author hjk 增加字段长度，200->500
 ALTER TABLE BUILD_INFO
-    ALTER COLUMN SCRIPT VARCHAR(500) comment '构建命令';
+	ALTER COLUMN SCRIPT VARCHAR(500) comment '构建命令';
 
 -- 备份数据库信息表 @author Hotstrip
 CREATE TABLE IF NOT EXISTS PUBLIC.BACKUP_INFO
@@ -123,4 +132,10 @@ comment on table BACKUP_INFO is '备份数据库信息';
 
 -- @author Hotstrip 增加字段 status
 ALTER TABLE BACKUP_INFO
-    ADD IF NOT EXISTS `STATUS` int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}';
+	ADD IF NOT EXISTS `STATUS` int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}';
+
+-- @author bwcx_jzy
+ALTER TABLE BUILD_INFO
+	ADD IF NOT EXISTS workspaceId VARCHAR(50) comment '所属工作空间';
+ALTER TABLE REPOSITORY
+	ADD IF NOT EXISTS workspaceId VARCHAR(50) comment '所属工作空间';

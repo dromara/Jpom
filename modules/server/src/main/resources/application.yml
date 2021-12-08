@@ -10,7 +10,7 @@ spring:
   application:
     name: jpomServer
   profiles:
-    active: dev
+    active: local
   mvc:
     throw-exception-if-no-handler-found: true
   servlet:

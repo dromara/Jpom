@@ -37,19 +37,16 @@ import io.jpom.build.BuildInfoManage;
 import io.jpom.build.BuildUtil;
 import io.jpom.build.ReleaseManage;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
-import io.jpom.service.dblog.RepositoryService;
 import io.jpom.util.LimitQueue;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -57,7 +54,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.util.Objects;
 
@@ -72,12 +68,15 @@ import java.util.Objects;
 @Feature(cls = ClassFeature.BUILD)
 public class BuildInfoManageController extends BaseServerController {
 
-	@Resource
-	private BuildInfoService buildInfoService;
-	@Resource
-	private RepositoryService repositoryService;
-	@Resource
-	private DbBuildHistoryLogService dbBuildHistoryLogService;
+
+	private final BuildInfoService buildInfoService;
+	private final DbBuildHistoryLogService dbBuildHistoryLogService;
+
+	public BuildInfoManageController(BuildInfoService buildInfoService,
+									 DbBuildHistoryLogService dbBuildHistoryLogService) {
+		this.buildInfoService = buildInfoService;
+		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+	}
 
 	/**
 	 * 开始构建
@@ -86,13 +85,12 @@ public class BuildInfoManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.StartBuild)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
-		BuildInfoModel item = buildInfoService.getByKey(id);
+		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
 		Assert.notNull(item, "没有对应数据");
 		String e = buildInfoService.checkStatus(item.getStatus());
-		Assert.isNull(e, e);
+		Assert.isNull(e, () -> e);
 		// set buildId field
 		int buildId = ObjectUtil.defaultIfNull(item.getBuildId(), 0);
 		item.setBuildId(buildId + 1);
@@ -112,10 +110,9 @@ public class BuildInfoManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/manage/cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.CancelBuild)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
-		BuildInfoModel item = buildInfoService.getByKey(id);
+		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
 		Objects.requireNonNull(item, "没有对应数据");
 		BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
 		Objects.requireNonNull(nowStatus);
@@ -137,10 +134,9 @@ public class BuildInfoManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.ReReleaseBuild)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
-		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
+		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
 		Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
 		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
 		Objects.requireNonNull(item, "没有对应数据");
@@ -165,15 +161,14 @@ public class BuildInfoManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/manage/get-now-log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
+	@Feature(method = MethodFeature.LIST)
 	public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
 							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
 							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-		BuildInfoModel item = buildInfoService.getByKey(id);
+		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
 		Assert.notNull(item, "没有对应数据");
-		if (buildId > item.getBuildId()) {
-			return JsonMessage.getString(405, "还没有对应的构建记录");
-		}
+		Assert.state(buildId <= item.getBuildId(), "还没有对应的构建记录");
+
 		File file = BuildUtil.getLogFile(item.getId(), buildId);
 		Assert.state(FileUtil.isFile(file), "日志文件错误");
 
