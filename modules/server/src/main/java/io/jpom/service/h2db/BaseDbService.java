@@ -39,10 +39,8 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseUserModifyDbModel;
-import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserModel;
-import io.jpom.model.data.WorkspaceModel;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -123,11 +121,6 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 			if (userModel != null) {
 				modifyDbModel.setModifyUser(ObjectUtil.defaultIfNull(modifyDbModel.getModifyUser(), userModel.getId()));
 			}
-		}
-		if (t instanceof BaseWorkspaceModel) {
-			// 数据都将绑定一个默认的工作空间
-			BaseWorkspaceModel baseWorkspaceModel = (BaseWorkspaceModel) t;
-			baseWorkspaceModel.setWorkspaceId(ObjectUtil.defaultIfNull(baseWorkspaceModel.getWorkspaceId(), WorkspaceModel.DEFAULT_ID));
 		}
 	}
 

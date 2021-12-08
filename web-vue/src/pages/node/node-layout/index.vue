@@ -173,11 +173,11 @@ export default {
 </script>
 <style scoped>
 .sider {
-  height: calc(100vh - 75px);
+  /* height: calc(100vh - 75px); */
   overflow-y: auto;
 }
 .layout-content {
-  height: calc(100vh - 95px);
+  /* min-height: calc(100vh); */
   overflow-y: auto;
 }
 /* .node-layout {

@@ -78,6 +78,7 @@ public class InstallController extends BaseServerController {
 			@ValidatorConfig(value = {
 					@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空")
 			}) String userPwd) {
+		//
 		Assert.state(!userService.canUse(), "系统已经初始化过啦，请勿重复初始化");
 
 		if (JpomApplication.SYSTEM_ID.equalsIgnoreCase(userName) || UserModel.SYSTEM_ADMIN.equals(userName)) {

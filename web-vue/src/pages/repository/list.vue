@@ -196,7 +196,7 @@ export default {
     // 分页
     pagination() {
       return {
-        total: this.total,
+        total: this.listQuery.total,
         current: this.listQuery.page || 1,
         pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
         pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
@@ -219,7 +219,7 @@ export default {
       getRepositoryList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
-          this.total = res.data.total;
+          this.listQuery.total = res.data.total;
         }
         this.loading = false;
       });

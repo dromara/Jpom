@@ -66,13 +66,14 @@ public class GlobalDefaultExceptionHandler {
 	 */
 	@ExceptionHandler({AuthorizeException.class, RuntimeException.class, Exception.class})
 	public void delExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-		DefaultSystemLog.getLog().error("global handle exception: {}", request.getRequestURI(), e);
 		if (e instanceof AuthorizeException) {
 			AuthorizeException authorizeException = (AuthorizeException) e;
 			ServletUtil.write(response, authorizeException.getJsonMessage().toString(), MediaType.APPLICATION_JSON_VALUE);
 		} else if (e instanceof JpomRuntimeException) {
+			DefaultSystemLog.getLog().error("global handle exception: {}", request.getRequestURI(), e.getCause());
 			ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
 		} else {
+			DefaultSystemLog.getLog().error("global handle exception: {}", request.getRequestURI(), e);
 			boolean causedBy = ExceptionUtil.isCausedBy(e, AccessDeniedException.class);
 			if (causedBy) {
 				ServletUtil.write(response, JsonMessage.getString(500, "操作文件权限异常,请手动处理：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);

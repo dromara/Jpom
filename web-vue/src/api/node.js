@@ -62,6 +62,33 @@ export function getProjectListAll() {
   });
 }
 
+// 同步节点项目
+export function syncProject(nodeId) {
+  return axios({
+    url: "/node/sync_project",
+    method: "get",
+    params: { nodeId: nodeId },
+  });
+}
+
+// 删除节点项目缓存
+export function delProjectCache(nodeId) {
+  return axios({
+    url: "/node/del_project_cache",
+    method: "get",
+    params: { nodeId: nodeId },
+  });
+}
+
+// 删除节点项目缓存
+export function delAllProjectCache() {
+  return axios({
+    url: "/node/clear_all_project",
+    method: "get",
+    params: {},
+  });
+}
+
 /**
  * 编辑 node
  * @param {

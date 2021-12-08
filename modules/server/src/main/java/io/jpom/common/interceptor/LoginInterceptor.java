@@ -34,6 +34,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.db.DbConfig;
 import io.jpom.util.JwtUtil;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
@@ -60,6 +61,11 @@ public class LoginInterceptor extends BaseJpomInterceptor {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 		HttpSession session = getSession();
+		boolean init = DbConfig.getInstance().isInit();
+		if (!init) {
+			ServletUtil.write(response, JsonMessage.getString(100, "数据库还没有初始化成功,请耐心等待"), MediaType.APPLICATION_JSON_VALUE);
+			return false;
+		}
 		//
 		NotLogin notLogin = handlerMethod.getMethodAnnotation(NotLogin.class);
 		if (notLogin == null) {

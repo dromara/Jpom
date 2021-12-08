@@ -48,7 +48,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -63,10 +62,15 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/manage/")
 public class ManageEditProjectController extends BaseAgentController {
-	@Resource
-	private WhitelistDirectoryService whitelistDirectoryService;
-	@Resource
-	private JdkInfoService jdkInfoService;
+
+	private final WhitelistDirectoryService whitelistDirectoryService;
+	private final JdkInfoService jdkInfoService;
+
+	public ManageEditProjectController(WhitelistDirectoryService whitelistDirectoryService,
+									   JdkInfoService jdkInfoService) {
+		this.whitelistDirectoryService = whitelistDirectoryService;
+		this.jdkInfoService = jdkInfoService;
+	}
 
 	/**
 	 * 基础检查

@@ -10,9 +10,6 @@
     </div>
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="(this, pagination)" @change="changePage">
-      <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
       <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -35,6 +32,14 @@
         <a-tooltip slot="runTime" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
+        <template slot="projectCount" slot-scope="text, item">
+          <a-tooltip placement="topLeft" :title="节点中的所有项目数量">
+            <a-tag @click="syncNode(item)">{{ text }} </a-tag>
+          </a-tooltip>
+          <a-tooltip placement="topLeft" :title="清除服务端缓存节点项目信息">
+            <a-icon @click="delNodeCache(item)" type="delete" />
+          </a-tooltip>
+        </template>
       </a-table>
     </a-table>
     <!-- 编辑区 -->
@@ -120,7 +125,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeList, getNodeStatus, editNode, deleteNode } from "@/api/node";
+import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, delProjectCache } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import NodeLayout from "./node-layout";
 import Terminal from "./terminal";
@@ -168,12 +173,12 @@ export default {
       ],
       childColumns: [
         { title: "系统名", dataIndex: "osName", key: "osName", width: 100, ellipsis: true, scopedSlots: { customRender: "osName" } },
-        { title: "JDK 版本", dataIndex: "javaVersion", key: "javaVersion", width: 120, ellipsis: true, scopedSlots: { customRender: "javaVersion" } },
-        { title: "JVM 总内存", dataIndex: "totalMemory", key: "totalMemory", width: 150 },
-        { title: "JVM 剩余内存", dataIndex: "freeMemory", key: "freeMemory", width: 180 },
-        { title: "Jpom 版本", dataIndex: "jpomVersion", key: "jpomVersion", width: 140 },
-        { title: "Java 程序数", dataIndex: "javaVirtualCount", key: "javaVirtualCount", width: 150 },
-        { title: "项目数", dataIndex: "count", key: "count", width: 100 },
+        { title: "JDK 版本", dataIndex: "javaVersion", key: "javaVersion", ellipsis: true, scopedSlots: { customRender: "javaVersion" } },
+        { title: "JVM 总内存", dataIndex: "totalMemory", key: "totalMemory", width: 120 },
+        { title: "JVM 剩余内存", dataIndex: "freeMemory", key: "freeMemory", width: 140 },
+        { title: "Jpom 版本", dataIndex: "jpomVersion", key: "jpomVersion", width: 120 },
+        { title: "Java 程序数", dataIndex: "javaVirtualCount", key: "javaVirtualCount", width: 120 },
+        { title: "项目数", dataIndex: "count", key: "count", width: 90, scopedSlots: { customRender: "projectCount" } },
         { title: "响应时间", dataIndex: "timeOut", key: "timeOut", width: 120 },
         { title: "已运行时间", dataIndex: "runTime", key: "runTime", width: 150, ellipsis: true, scopedSlots: { customRender: "runTime" } },
       ],
@@ -285,21 +290,22 @@ export default {
     },
     // 添加
     handleAdd() {
-      this.temp = {
-        type: "add",
-        cycle: 0,
-        protocol: "http",
-        openStatus: 1,
-        timeOut: 0,
-        loginName: "jpomAgent",
-      };
-      this.editNodeVisible = true;
       this.$nextTick(() => {
         setTimeout(() => {
           this.introGuide();
         }, 500);
-        this.$refs["editNodeForm"].resetFields();
+        this.$refs["editNodeForm"] && this.$refs["editNodeForm"].resetFields();
+        this.temp = {
+          type: "add",
+          cycle: 0,
+          protocol: "http",
+          openStatus: 1,
+          timeOut: 0,
+          loginName: "jpomAgent",
+        };
+        this.editNodeVisible = true;
       });
+      this.loadSshList();
     },
     // 进入终端
     handleTerminal(record) {
@@ -358,7 +364,7 @@ export default {
     // 管理节点
     handleNode(record) {
       this.temp = Object.assign(record);
-      this.drawerTitle = `${this.temp.id} (${this.temp.url})`;
+      this.drawerTitle = `${this.temp.name} (${this.temp.url})`;
       this.drawerVisible = true;
       let nodeId = this.$route.query.nodeId;
       if (nodeId !== record.id) {
@@ -366,6 +372,37 @@ export default {
           query: { nodeId: record.id },
         });
       }
+    },
+    syncNode(node) {
+      syncProject(node.nodeId).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+            duration: 4,
+          });
+          return false;
+        }
+      });
+    },
+    delNodeCache(node) {
+      this.$confirm({
+        title: "系统提示",
+        content: "确定要清除该节点下面的项目缓存信息吗？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          delProjectCache(node.nodeId).then((res) => {
+            if (res.code == 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 4,
+              });
+              return false;
+            }
+          });
+        },
+      });
     },
     // 关闭抽屉层
     onClose() {

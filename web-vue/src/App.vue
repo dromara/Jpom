@@ -20,7 +20,7 @@ export default {
   created() {
     this.$notification.config({
       top: "100px",
-      duration: 2,
+      duration: 4,
     });
   },
 };

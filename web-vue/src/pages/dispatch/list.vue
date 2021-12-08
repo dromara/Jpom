@@ -598,7 +598,7 @@ export default {
         };
         // 添加 javaCopyItemList
         this.nodeList.forEach((node) => {
-          this.temp[`${node.key}_javaCopyItemList`] = [];
+          this.temp[`${node.id}_javaCopyItemList`] = [];
         });
         this.loadAccesList();
 

@@ -12,6 +12,9 @@
       <a-button type="primary" @click="batchRestart">批量重启</a-button>
       <a-button type="danger" @click="batchStop">批量关闭</a-button>
       状态数据是异步获取有一定时间延迟
+      <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的项目信息, 需要重新同步">
+        <a-icon @click="delAll()" type="delete" />
+      </a-tooltip>
     </div>
     <a-table
       :data-source="projList"
@@ -50,7 +53,7 @@
   </div>
 </template>
 <script>
-import { getProjectList } from "@/api/node";
+import { getProjectList, delAllProjectCache } from "@/api/node";
 import { restartProject, startProject, stopProject, getRuningProjectInfo, runModeList } from "@/api/node-project";
 import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
@@ -271,6 +274,26 @@ export default {
         this.listQuery.order_field = sorter.field;
       }
       this.getNodeProjectData();
+    },
+    delAll() {
+      this.$confirm({
+        title: "系统提示",
+        content: "确定要清除服务端所有的项目缓存信息吗？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          delAllProjectCache().then((res) => {
+            if (res.code == 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 4,
+              });
+              return false;
+            }
+          });
+        },
+      });
     },
   },
 };

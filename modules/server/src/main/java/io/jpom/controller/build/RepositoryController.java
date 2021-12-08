@@ -231,7 +231,7 @@ public class RepositoryController extends BaseServerController {
 		boolean exists = buildInfoService.exists(entity);
 		Assert.state(!exists, "当前仓库被构建关联，不能直接删除");
 
-		repositoryService.getByKey(id, getRequest());
+		repositoryService.delByKey(id, getRequest());
 		return JsonMessage.getString(200, "删除成功");
 	}
 }

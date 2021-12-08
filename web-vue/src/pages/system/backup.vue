@@ -188,7 +188,7 @@ export default {
       getBackupList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
-          this.total = res.data.total;
+          this.listQuery.total = res.data.total;
         }
         this.loading = false;
       });

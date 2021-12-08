@@ -369,7 +369,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 					allData.put("args_" + copyId, copyArgs);
 				}
 			}
-			JsonMessage<String> jsonMessage = sendData(nodeModel, userModel, allData, false);
+			JsonMessage<String> jsonMessage = this.sendData(nodeModel, userModel, allData, false);
 			Assert.state(jsonMessage.getCode() == HttpStatus.HTTP_OK, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
 			tuples.add(new Tuple(nodeModel, allData));
 		}

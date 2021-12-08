@@ -114,6 +114,13 @@ public class UserListController extends BaseServerController {
 			if (!systemUser) {
 				Assert.state(!model.isSuperSystemUser(), "不能取消超级管理员的权限");
 			}
+			UserModel optUser = getUser();
+			if (StrUtil.equals(model.getId(), optUser.getId())) {
+				Assert.state(model.isSystemUser() == optUser.isSystemUser(), "不能修改自己的管理员权限");
+			}
+			if (model.isSuperSystemUser()) {
+				Assert.state(optUser.isSuperSystemUser(), "超级管理员才能修改超级管理员的信息");
+			}
 			userService.update(userModel);
 		}
 		//

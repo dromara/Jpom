@@ -14,7 +14,6 @@ export function getDishPatchListAll() {
   return axios({
     url: "/outgiving/dispatch-list-all",
     method: "get",
-    
   });
 }
 

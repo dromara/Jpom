@@ -33,8 +33,10 @@ import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.user.UserBindWorkspaceService;
 import org.springframework.util.Assert;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
@@ -93,9 +95,14 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 		super.fillInsert(t);
 		if (StrUtil.isEmpty(t.getWorkspaceId())) {
 			// 自动绑定 工作空间ID
-			HttpServletRequest request = BaseServerController.getRequestAttributes().getRequest();
-			String workspaceId = getCheckUserWorkspace(request);
-			t.setWorkspaceId(workspaceId);
+			ServletRequestAttributes servletRequestAttributes = BaseServerController.tryGetRequestAttributes();
+			if (servletRequestAttributes != null) {
+				HttpServletRequest request = servletRequestAttributes.getRequest();
+				String workspaceId = getCheckUserWorkspace(request);
+				t.setWorkspaceId(workspaceId);
+			} else {
+				t.setWorkspaceId(WorkspaceModel.DEFAULT_ID);
+			}
 		} else {
 			// 检查权限
 			this.checkUserWorkspace(t.getWorkspaceId());

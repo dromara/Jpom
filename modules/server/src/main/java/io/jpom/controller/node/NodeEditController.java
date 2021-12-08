@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -68,10 +69,12 @@ public class NodeEditController extends BaseServerController {
 	@Feature(method = MethodFeature.LIST)
 	public String nodeStatus() {
 		long timeMillis = System.currentTimeMillis();
-		JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Status, getRequest(), JSONObject.class);
+		NodeModel node = getNode();
+		JSONObject jsonObject = NodeForward.requestData(node, NodeUrl.Status, getRequest(), JSONObject.class);
 		Assert.notNull(jsonObject, "获取信息失败");
 		JSONArray jsonArray = new JSONArray();
 		jsonObject.put("timeOut", System.currentTimeMillis() - timeMillis);
+		jsonObject.put("nodeId", node.getId());
 		jsonArray.add(jsonObject);
 		return JsonMessage.getString(200, "", jsonArray);
 	}
@@ -94,7 +97,8 @@ public class NodeEditController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String del(String id) {
 		//  判断分发
-		boolean checkNode = outGivingServer.checkNode(id, getRequest());
+		HttpServletRequest request = getRequest();
+		boolean checkNode = outGivingServer.checkNode(id, request);
 		Assert.state(!checkNode, "该节点存在分发项目，不能删除");
 		// 监控
 		boolean checkNode1 = monitorService.checkNode(id);
@@ -104,9 +108,10 @@ public class NodeEditController extends BaseServerController {
 		//
 		ProjectInfoModel projectInfoModel = new ProjectInfoModel();
 		projectInfoModel.setNodeId(id);
+		projectInfoModel.setWorkspaceId(projectInfoCacheService.getCheckUserWorkspace(request));
 		boolean exists = projectInfoCacheService.exists(projectInfoModel);
 		Assert.state(!exists, "该节点下还存在项目，不能删除");
-		nodeService.delByKey(id, getRequest());
+		nodeService.delByKey(id, request);
 		return JsonMessage.getString(200, "操作成功");
 	}
 }

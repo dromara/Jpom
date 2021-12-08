@@ -158,7 +158,16 @@ public class SshController extends BaseServerController {
 		boolean exists = sshService.exists(entity);
 		Assert.state(!exists, "对应的SSH已经存在啦");
 		try {
-			Session session = add ? SshService.getSessionByModel(sshModel) : SshService.getSession(id);
+			SshModel model = sshService.getByKey(id, false);
+			if (model != null) {
+				if (StrUtil.isEmpty(sshModel.getPassword())) {
+					sshModel.setPassword(model.getPassword());
+				}
+				if (StrUtil.isEmpty(sshModel.getPrivateKey())) {
+					sshModel.setPrivateKey(model.getPrivateKey());
+				}
+			}
+			Session session = SshService.getSessionByModel(sshModel);
 			JschUtil.close(session);
 		} catch (Exception e) {
 			return JsonMessage.getString(505, "ssh连接失败：" + e.getMessage());
@@ -181,7 +190,7 @@ public class SshController extends BaseServerController {
 	@GetMapping(value = "check_agent.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String checkAgent(String ids) {
-		List<SshModel> sshModels = sshService.listById(StrUtil.split(ids, StrUtil.DOT), getRequest());
+		List<SshModel> sshModels = sshService.listById(StrUtil.split(ids, StrUtil.COMMA), getRequest());
 		Assert.notEmpty(sshModels, "没有任何节点信息");
 
 		JSONObject result = new JSONObject();
