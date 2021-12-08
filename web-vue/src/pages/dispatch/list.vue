@@ -564,7 +564,6 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2,
             });
             this.targetKeys = [];
             this.$refs["linkDispatchForm"].resetFields();
@@ -689,7 +688,6 @@ export default {
         if (this.temp.nodeIdList.length < 2) {
           this.$notification.warn({
             message: "请至少选择 2 个节点",
-            duration: 2,
           });
           return false;
         }
@@ -714,7 +712,6 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2,
             });
             this.$refs["editDispatchForm"].resetFields();
             this.editDispatchVisible = false;
@@ -765,7 +762,6 @@ export default {
           if (this.fileList.length === 0) {
             this.$notification.error({
               message: "请选择文件",
-              duration: 2,
             });
             return false;
           }
@@ -781,7 +777,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
               });
               this.$message.success({ content: "上传成功,开始分发!", key, duration: 2 });
               this.$refs["dispatchForm"].resetFields();
@@ -796,7 +791,6 @@ export default {
           if (!this.temp.url) {
             this.$notification.error({
               message: "请填写远程URL",
-              duration: 2,
             });
             return false;
           }
@@ -806,7 +800,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
               });
               this.$message.success({ content: "下载成功,开始分发!", key, duration: 2 });
               //this.$refs["dispatchForm"].resetFields();
@@ -831,7 +824,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
               });
               this.loadData();
             }

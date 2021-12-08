@@ -80,7 +80,7 @@ export default {
           // 成功
           this.$notification.success({
             message: res.msg,
-            duration: 2,
+            
           });
         }
         // button recover
@@ -96,7 +96,7 @@ export default {
           // 成功
           this.$notification.success({
             message: res.msg,
-            duration: 2,
+            
           });
         }
         // button recover
@@ -110,9 +110,6 @@ export default {
 .ant-tabs-tabpane-active {
   height: calc(100vh - 150px);
   overflow-y: scroll;
-}
-.content-config {
-  max-height: calc(100vh - 295px);
 }
 .ip-list-config {
   max-height: calc((100vh - 320px) / 2);

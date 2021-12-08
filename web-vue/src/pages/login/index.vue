@@ -57,7 +57,7 @@ export default {
         } else if (res.code !== 200) {
           this.$notification.warn({
             message: res.msg,
-            duration: 2,
+            
           });
           this.$router.push("/install");
         }
@@ -100,7 +100,7 @@ export default {
             } else {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               // 调用 store action 存储当前登录的用户名和 token
               this.$store.dispatch("login", { token: res.data.token, longTermToken: res.data.longTermToken }).then(() => {

@@ -1,7 +1,7 @@
 <template>
-  <div class="node-system-config">
+  <div class="node-full-content">
     <a-form-model ref="editForm" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-      <a-form-model-item>
+      <a-form-model-item class="node-content-config">
         <code-editor v-model="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
         <!-- <a-input v-model="temp.content" type="textarea" :rows="25" style="resize: none" class="node-content-config" placeholder="请输入配置内容，参考项目的配置文件"/> -->
       </a-form-model-item>
@@ -56,7 +56,7 @@ export default {
           // 成功
           this.$notification.success({
             message: res.msg,
-            duration: 2,
+            
           });
         }
         // button recover
@@ -67,12 +67,9 @@ export default {
 };
 </script>
 <style scoped>
-.node-system-config {
-  height: calc(100vh - 130px);
-  overflow-y: scroll;
-}
 .node-content-config {
-  max-height: calc(100vh - 240px);
+  height: calc(100vh - 200px);
+  overflow-y: scroll;
 }
 .btn {
   margin-left: 20px;

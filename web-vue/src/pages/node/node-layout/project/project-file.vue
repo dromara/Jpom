@@ -311,7 +311,7 @@ export default {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.error({
           message: "请选择一个节点",
-          duration: 2,
+          
         });
         return;
       }
@@ -334,7 +334,7 @@ export default {
     startUpload() {
       this.$notification.info({
         message: "正在上传文件，请稍后...",
-        duration: 2,
+        
       });
       // 设置上传状态
       this.uploading = true;
@@ -356,7 +356,7 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             this.successSize++;
           }
@@ -379,7 +379,7 @@ export default {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.error({
           message: "请选择一个节点",
-          duration: 2,
+          
         });
         return;
       }
@@ -398,7 +398,7 @@ export default {
     startZipUpload() {
       this.$notification.info({
         message: "正在上传文件，请稍后...",
-        duration: 2,
+        
       });
       // 设置上传状态
       this.uploading = true;
@@ -421,7 +421,7 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            duration: 2,
+            
           });
           this.successSize++;
           this.percentage = 100;
@@ -461,7 +461,7 @@ export default {
             if (res.code == 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.remoteDownloadData = {};
               this.uploadRemoteFileVisible = false;
@@ -478,7 +478,7 @@ export default {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.warn({
           message: "请选择一个节点",
-          duration: 2,
+          
         });
         return false;
       }
@@ -525,7 +525,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadFileList();
             }
@@ -537,7 +537,7 @@ export default {
     handleDownload(record) {
       this.$notification.info({
         message: "正在下载，请稍等...",
-        duration: 5,
+        
       });
       // 请求参数
       const params = {
@@ -577,7 +577,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadData();
               this.loadFileList();

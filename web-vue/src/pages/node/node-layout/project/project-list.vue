@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div class="node-full-content">
     <div ref="filter" class="filter">
       <!-- <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="loadData">
         <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
@@ -505,7 +505,7 @@ export default {
       if (this.temp.outGivingProject) {
         this.$notification.warning({
           message: "独立的项目分发请到分发管理中去修改",
-          duration: 2,
+          
         });
         return;
       }
@@ -531,7 +531,7 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             this.$refs["editProjectForm"].resetFields();
             this.editProjectVisible = false;
@@ -600,7 +600,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadData();
             }
@@ -626,7 +626,7 @@ export default {
             this.$notification.warning({
               message: res.msg,
               description: '提示',
-              duration: 4,
+              
             });
           }
         });
@@ -666,7 +666,7 @@ export default {
       if (this.selectedRows.length == 0) {
         this.$notification.warning({
           message: "请选中要启动的项目",
-          duration: 2,
+          
         });
       }
       this.selectedRows.forEach((value) => {
@@ -687,7 +687,7 @@ export default {
       if (this.selectedRows.length == 0) {
         this.$notification.warning({
           message: "请选中要重启的项目",
-          duration: 2,
+          
         });
       }
       this.selectedRows.forEach((value) => {
@@ -707,7 +707,7 @@ export default {
       if (this.selectedRows.length == 0) {
         this.$notification.warning({
           message: "请选中要关闭的项目",
-          duration: 2,
+          
         });
       }
       this.selectedRows.forEach((value) => {

@@ -1,7 +1,7 @@
 <template>
   <a-layout class="node-layout">
     <!-- 侧边栏 节点管理菜单 -->
-    <a-layout-sider theme="light" class="sider jpom-node-sider">
+    <a-layout-sider theme="light" class="node-sider jpom-node-sider">
       <a-menu theme="light" mode="inline" :default-selected-keys="selectedKeys" :default-open-keys="defaultOpenKey">
         <template v-for="menu in nodeMenuList">
           <a-sub-menu v-if="menu.childs" :key="menu.id" :class="menu.id">
@@ -174,11 +174,11 @@ export default {
 <style scoped>
 .sider {
   /* height: calc(100vh - 75px); */
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 .layout-content {
   /* min-height: calc(100vh); */
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 /* .node-layout {
   padding: 10px;

@@ -275,7 +275,7 @@ export default {
         if (targetKeysTemp.length <= 0) {
           this.$notification.warn({
             message: "请选择报警联系人",
-            duration: 2,
+            
           });
           return false;
         }
@@ -292,7 +292,7 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             this.$refs["editMonitorForm"].resetFields();
             this.editMonitorVisible = false;
@@ -314,7 +314,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadData();
             }

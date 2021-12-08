@@ -114,7 +114,6 @@ export default {
           if (!this.checkPasswordStrong(values.userPwd)) {
             this.$notification.error({
               message: "系统管理员密码强度太低",
-              duration: 2,
             });
             return false;
           }
@@ -127,7 +126,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
               });
               // 调用 store action 存储当前登录的用户名和 token
               this.$store.dispatch("login", { token: res.data.token, longTermToken: res.data.longTermToken }).then(() => {

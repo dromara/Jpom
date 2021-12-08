@@ -537,7 +537,6 @@ export default {
           if (this.temp.releaseMethodDataIdList.length < 2) {
             this.$notification.warn({
               message: "请选择节点项目",
-              duration: 2,
             });
             return false;
           }
@@ -555,7 +554,6 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2,
             });
             this.$refs["editBuildForm"].resetFields();
             this.editBuildVisible = false;
@@ -578,7 +576,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
               });
               this.loadData();
             }
@@ -602,7 +599,6 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            duration: 2,
           });
           this.triggerVisible = false;
           this.handleTrigger(this.temp);
@@ -621,7 +617,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
               });
               this.loadData();
             }
@@ -636,7 +631,6 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            duration: 2,
           });
           this.handleFilter();
           // 自动打开构建日志
@@ -654,7 +648,6 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            duration: 2,
           });
           this.handleFilter();
         }

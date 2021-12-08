@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="node-full-content">
     <a-timeline>
       <a-timeline-item>
         <span class="layui-elem-quote">文件缓存：{{temp.fileSize}}</span>

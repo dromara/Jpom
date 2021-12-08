@@ -138,7 +138,7 @@ export default {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.error({
           message: "请选择一个节点",
-          duration: 2,
+          
         });
         return;
       }
@@ -167,7 +167,7 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
 
             this.loadFileList();
@@ -232,7 +232,7 @@ export default {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.warn({
           message: "请选择一个节点",
-          duration: 2,
+          
         });
         return false;
       }
@@ -287,7 +287,7 @@ export default {
       updateFileData(params).then((res) => {
         this.$notification.success({
           message: res.msg,
-          duration: 2,
+          
         });
         if (res.code == 200) {
           this.editFileVisible = false;
@@ -337,7 +337,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               // 刷新树
               this.loadData();
@@ -365,7 +365,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadFileList();
             }

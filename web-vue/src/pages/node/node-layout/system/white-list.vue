@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="node-full-content">
     <template>
       <a-alert style="margin-bottom: 20px" message="路径需要配置绝对路径,不支持软链" type="info" />
     </template>
@@ -67,7 +67,7 @@ export default {
           // 成功
           this.$notification.success({
             message: res.msg,
-            duration: 2,
+            
           });
         }
         // button recover

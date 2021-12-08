@@ -134,7 +134,6 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            duration: 2,
           });
           this.checkUpgradeVersion();
         }
@@ -152,7 +151,6 @@ export default {
               clearInterval(this.timer);
               this.$notification.success({
                 message: "升级成功",
-                duration: 2,
               });
               this.temp = manifest;
               setTimeout(() => {
@@ -179,7 +177,6 @@ export default {
         if (tip) {
           this.$notification.success({
             message: "没有检查到最新版",
-            duration: 2,
           });
         }
         return;
@@ -192,7 +189,6 @@ export default {
       if (tip) {
         this.$notification.success({
           message: this.temp.upgrade ? "检测到新版本 " + data.tagName : "没有检查到最新版",
-          duration: 2,
         });
       }
     },
@@ -210,7 +206,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
               });
               this.checkUpgradeVersion();
               this.spinning = false;

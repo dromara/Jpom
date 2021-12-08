@@ -159,7 +159,6 @@ export default {
             this.$store.dispatch("logOut").then(() => {
               this.$notification.success({
                 message: "退出登录成功",
-                duration: 2,
               });
               this.$router.push("/login");
               resolve();
@@ -184,7 +183,6 @@ export default {
         if (this.temp.newPwd !== this.temp.confirmPwd) {
           this.$notification.error({
             message: "两次密码不一致...",
-            duration: 2,
           });
           return;
         }
@@ -200,7 +198,6 @@ export default {
             this.$store.dispatch("logOut").then(() => {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
               });
               this.$refs["pwdForm"].resetFields();
               this.updateNameVisible = false;
@@ -226,7 +223,6 @@ export default {
       if (!this.temp.email) {
         this.$notification.error({
           message: "请输入邮箱地址",
-          duration: 2,
         });
         return;
       }
@@ -234,7 +230,7 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            duration: 2,
+            
           });
         }
       });
@@ -251,7 +247,7 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             // 清空表单校验
             this.$refs["userForm"].resetFields();

@@ -1,5 +1,7 @@
 <template>
-  <upgrade :nodeId="this.node.id"></upgrade>
+  <div :class="`${node.id ? 'node-full-content' : 'full-content'}`">
+    <upgrade :nodeId="this.node.id"></upgrade>
+  </div>
 </template>
 <script>
 import upgrade from "@/components/upgrade";

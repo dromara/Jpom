@@ -208,7 +208,7 @@ export default {
         if (this.targetKeys.length === 0) {
           this.$notification.error({
             message: "请选择工作空间",
-            duration: 2,
+            
           });
           return false;
         }
@@ -218,7 +218,7 @@ export default {
           if (paramsTemp.password.length < 6 || paramsTemp.password.length > 20) {
             this.$notification.warn({
               message: "密码长度为6-20",
-              duration: 2,
+              
             });
             return;
           }
@@ -232,7 +232,7 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             this.$refs["editUserForm"].resetFields();
             this.editUserVisible = false;
@@ -254,7 +254,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadData();
             }
@@ -275,7 +275,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadData();
             }

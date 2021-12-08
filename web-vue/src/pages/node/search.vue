@@ -217,7 +217,7 @@ export default {
       if (this.selectedRowKeys.length == 0) {
         this.$notification.warning({
           message: "请选中要启动的项目",
-          duration: 2,
+          
         });
       }
       this.selectedRowKeys.forEach((value) => {
@@ -237,7 +237,7 @@ export default {
       if (this.selectedRowKeys.length == 0) {
         this.$notification.warning({
           message: "请选中要重启的项目",
-          duration: 2,
+          
         });
       }
       console.log(this.selectedRowKeys);
@@ -258,7 +258,7 @@ export default {
       if (this.selectedRowKeys.length == 0) {
         this.$notification.warning({
           message: "请选中要关闭的项目",
-          duration: 2,
+          
         });
       }
       this.selectedRowKeys.forEach((value) => {
@@ -295,7 +295,7 @@ export default {
             if (res.code == 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 4,
+                
               });
               return false;
             }

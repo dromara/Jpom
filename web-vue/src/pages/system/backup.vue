@@ -235,7 +235,7 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             this.$refs["editBackupForm"].resetFields();
             this.createBackupVisible = false;
@@ -261,7 +261,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadData();
             }
@@ -282,7 +282,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadData();
             }
@@ -306,7 +306,7 @@ export default {
     startSqlUpload() {
       this.$notification.info({
         message: "正在上传文件，请稍后...",
-        duration: 2,
+        
       });
       // 设置上传状态
       this.uploading = true;
@@ -324,7 +324,7 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            duration: 2,
+            
           });
           this.successSize++;
           this.percentage = 100;

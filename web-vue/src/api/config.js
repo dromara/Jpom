@@ -3,7 +3,7 @@ import axios from "axios";
 import Qs from "qs";
 import store from "../store";
 import router from "../router";
-import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY,CACHE_WORKSPACE_ID } from "@/utils/const";
+import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from "@/utils/const";
 import { refreshToken } from "./user";
 
 import { notification } from "ant-design-vue";
@@ -84,7 +84,6 @@ request.interceptors.response.use(
     if (res.code === 999) {
       notification.error({
         message: "禁止访问",
-        duration: 2,
       });
       router.push("/system/ipAccess");
       return false;
@@ -97,7 +96,6 @@ request.interceptors.response.use(
         notification.error({
           message: res.msg,
           description: response.config.url,
-          duration: 2,
         });
       }
     }
@@ -111,7 +109,6 @@ request.interceptors.response.use(
       notification.error({
         message: "Network Error",
         description: "网络开了小差！请重试...:" + error,
-        duration: 2,
       });
       return Promise.reject(error);
     }
@@ -126,13 +123,11 @@ request.interceptors.response.use(
         notification.error({
           message: "Network Error",
           description: "网络开了小差！请重试...:" + error,
-          duration: 2,
         });
       } else {
         notification.error({
           message: status,
           description: (statusText || "") + (data || ""),
-          duration: 2,
         });
       }
     }
@@ -147,7 +142,7 @@ function checkJWTToken(res, response) {
     notification.warn({
       message: res.msg,
       description: response.config.url,
-      duration: 3,
+      
     });
     store.dispatch("logOut").then(() => {
       router.push("/login");
@@ -161,7 +156,7 @@ function checkJWTToken(res, response) {
     notification.info({
       message: "登录信息过期，尝试自动续签...",
       description: "如果不需要自动续签，请修改配置文件。该续签将不会影响页面。",
-      duration: 3,
+      
     });
     // 续签且重试请求
     return redoRequest(response.config);

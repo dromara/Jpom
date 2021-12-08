@@ -268,7 +268,7 @@ export default {
         if (!record.openStatus) {
           this.$notification.error({
             message: "节点未启用",
-            duration: 2,
+            
           });
           return false;
         }
@@ -332,7 +332,7 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             this.$refs["editNodeForm"].resetFields();
             this.editNodeVisible = false;
@@ -353,7 +353,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadData();
             }
@@ -378,7 +378,7 @@ export default {
         if (res.code == 200) {
           this.$notification.success({
             message: res.msg,
-            duration: 4,
+            
           });
           return false;
         }
@@ -396,7 +396,7 @@ export default {
             if (res.code == 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 4,
+                
               });
               return false;
             }

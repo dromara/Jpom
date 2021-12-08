@@ -119,14 +119,12 @@ export default {
       if (!this.getGuideFlag) {
         this.$notification.success({
           message: "开启页面导航",
-          duration: 2,
         });
         // 重置 GUIDE_HOME_USED_KEY
         localStorage.setItem(GUIDE_HOME_USED_KEY, "false");
       } else {
         this.$notification.success({
           message: "关闭页面导航",
-          duration: 2,
         });
       }
       this.$store.dispatch("toggleGuideFlag");
@@ -148,7 +146,6 @@ export default {
         } else if (res.code !== 200) {
           this.$notification.warn({
             message: res.msg,
-            duration: 2,
           });
           this.$router.push("/install");
         }
@@ -159,7 +156,6 @@ export default {
       this.$notification.success({
         message: "操作成功",
         top: "100px",
-        duration: 1,
       });
       this.$store.dispatch("clearTabs");
     },

@@ -438,7 +438,7 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             //this.$refs['editSshForm'].resetFields();
             this.fileList = [];
@@ -506,7 +506,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadData();
             }
@@ -558,7 +558,7 @@ export default {
         if (this.fileList.length === 0) {
           this.$notification.error({
             message: "请选择 zip 文件",
-            duration: 2,
+            
           });
           return false;
         }
@@ -575,7 +575,7 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: "操作成功",
-              duration: 2,
+              
             });
             //this.$refs['nodeForm'].resetFields();
             this.nodeVisible = false;

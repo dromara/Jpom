@@ -1,8 +1,8 @@
 <template>
   <!-- 布局 -->
-  <a-layout class="file-layout">
+  <a-layout class="file-layout node-full-content">
     <!-- 目录树 -->
-    <a-layout-sider theme="light" class="sider" width="25%">
+    <a-layout-sider theme="light" class="nginx-sider" width="25%">
       <a-empty v-if="treeList.length === 0" />
       <el-tree ref="tree" :data="treeList" :props="defaultProps" :expand-on-click-node="false" node-key="$treeNodeId" highlight-current default-expand-all @node-click="nodeClick"></el-tree>
     </a-layout-sider>
@@ -33,16 +33,7 @@
           </a-menu>
         </a-dropdown>
       </div>
-      <a-table
-        :data-source="fileList"
-        :loading="loading"
-        :columns="columns"
-        :pagination="false"
-        bordered
-        :style="{ 'max-height': tableHeight + 'px' }"
-        :scroll="{ y: tableHeight - 60 }"
-        :rowKey="(record, index) => index"
-      >
+      <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}  server 节点数 ${record.serverCount}`">
           <div @click="handleEdit(record)" style="color: blue">
             <span>{{ text }}</span>
@@ -151,14 +142,14 @@ export default {
     };
   },
   mounted() {
-    this.calcTableHeight();
+    // this.calcTableHeight();
     this.handleFilter();
   },
   methods: {
-    // 计算表格高度
-    calcTableHeight() {
-      this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 175;
-    },
+    // // 计算表格高度
+    // calcTableHeight() {
+    //   this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 175;
+    // },
     // 加载 Nginx 数据
     loadNginxData() {
       const params = {
@@ -281,7 +272,7 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             this.$refs["editNginxForm"].resetFields();
             this.editNginxVisible = false;
@@ -310,7 +301,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               //this.loadDirectoryList();
               this.loadFileList();
@@ -338,7 +329,7 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             this.$refs["editNginxNameForm"].resetFields();
             this.editNginxNameVisible = false;
@@ -357,7 +348,7 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            duration: 2,
+            
           });
           this.loadNginxData();
         }
@@ -369,11 +360,13 @@ export default {
 <style scoped>
 .file-layout {
   padding: 0;
+  margin: 0;
 }
-.sider {
+.nginx-sider {
   border: 1px solid #e2e2e2;
-  height: calc(100vh - 130px);
-  overflow-y: auto;
+  /* height: calc(100vh - 130px); */
+  /* overflow-y: auto; */
+  overflow-x: auto;
 }
 .file-content {
   height: calc(100vh - 150px);

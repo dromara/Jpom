@@ -267,28 +267,28 @@ export default {
         if (this.monitorUserKeys.length === 0) {
           this.$notification.error({
             message: "请选择监控用户",
-            duration: 2,
+            
           });
           return false;
         }
         if (this.methodFeatureKeys.length === 0) {
           this.$notification.error({
             message: "请选择监控操作",
-            duration: 2,
+            
           });
           return false;
         }
         if (this.classFeatureKeys.length === 0) {
           this.$notification.error({
             message: "请选择监控的功能",
-            duration: 2,
+            
           });
           return false;
         }
         if (this.notifyUserKeys.length === 0) {
           this.$notification.error({
             message: "请选择报警联系人",
-            duration: 2,
+            
           });
           return false;
         }
@@ -303,7 +303,7 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2,
+              
             });
             this.$refs["editMonitorForm"].resetFields();
             this.editOperateMonitorVisible = false;
@@ -325,7 +325,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2,
+                
               });
               this.loadData();
             }

@@ -1,7 +1,7 @@
 <template>
-  <a-layout class="log-layout">
+  <a-layout class="log-layout node-full-content">
     <!-- 侧边栏 文件树 -->
-    <a-layout-sider theme="light" class="sider jpom-node-log-tree" width="20%">
+    <a-layout-sider theme="light" class="log-sider jpom-node-log-tree" width="20%">
       <a-empty v-if="list.length === 0" />
       <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select"
         @rightClick="rightClick" default-expand-all>
@@ -205,10 +205,10 @@ export default {
   padding: 0;
   margin: 0;
 }
-.sider {
+.log-sider {
   border: 1px solid #e2e2e2;
-  height: calc(100vh - 130px);
-  overflow-y: auto;
+  /* height: calc(100vh - 130px); */
+  overflow-x: auto;
 }
 .log-content {
   margin: 0;

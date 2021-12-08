@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="node-full-content">
     <div ref="filter" class="filter">
       <a-button type="primary" @click="handleAdd">导入证书</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
