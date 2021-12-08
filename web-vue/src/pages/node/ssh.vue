@@ -12,7 +12,7 @@
       <template slot="nodeId" slot-scope="text, record">
         <!-- <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button> -->
         <a-tooltip v-if="sshAgentInfo[record.id] && sshAgentInfo[record.id].nodeId" placement="topLeft" :title="`${sshAgentInfo[record.id].nodeName}`">
-          <a-button type="primary" @click="toNode(sshAgentInfo[record.id].nodeId)">
+          <a-button style="width: 90px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" type="primary" @click="toNode(sshAgentInfo[record.id].nodeId)">
             {{ sshAgentInfo[record.id].nodeName }}
           </a-button>
         </a-tooltip>

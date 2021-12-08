@@ -4,9 +4,13 @@
       <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="filter-item">
         <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
       </a-select>
+      <a-select v-model="listQuery.status" allowClear placeholder="报警状态" class="filter-item">
+        <a-select-option :value="1">正常</a-select-option>
+        <a-select-option :value="0">异常</a-select-option>
+      </a-select>
       <a-select v-model="listQuery.notifyStatus" allowClear placeholder="请选择通知状态" class="filter-item">
-        <a-select-option :value="'true'">成功</a-select-option>
-        <a-select-option :value="'false'">失败</a-select-option>
+        <a-select-option :value="1">成功</a-select-option>
+        <a-select-option :value="0">失败</a-select-option>
       </a-select>
       <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
       <a-button type="primary" @click="loadData">搜索</a-button>

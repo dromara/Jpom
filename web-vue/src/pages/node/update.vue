@@ -46,7 +46,7 @@
 <script>
 import { uploadAgentFile, downloadRemote, checkVersion, getNodeList } from "@/api/node";
 import { mapGetters } from "vuex";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   name: "NodeUpdate",
@@ -65,12 +65,12 @@ export default {
       websocket: null,
       groupFilter: undefined,
       loading: false,
-      listQuery: { page: 1, limit: PAGE_DEFAULT_LIMIT, total: 0 },
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       columns: [
-        { title: "节点 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
+        // { title: "节点 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "节点名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        // { title: "分组", dataIndex: "group", ellipsis: true, scopedSlots: { customRender: "group" } },
+        { title: "节点地址", dataIndex: "url", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
         { title: "Agent版本号", dataIndex: "version", width: "100", ellipsis: true, scopedSlots: { customRender: "version" } },
         { title: "打包时间", dataIndex: "timeStamp", ellipsis: true, scopedSlots: { customRender: "timeStamp" } },
         { title: "状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" } },

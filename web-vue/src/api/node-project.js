@@ -480,6 +480,9 @@ export function nodeJudgeLibExist(params) {
     url: "/node/manage/judge_lib.json",
     method: "post",
     data: params,
+    headers: {
+      tip: "no",
+    },
   });
 }
 

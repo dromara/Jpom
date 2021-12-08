@@ -105,7 +105,8 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 	@Override
 	public void insert(NodeModel nodeModel) {
 		super.insert(nodeModel);
-		if (nodeModel.isOpenStatus() && nodeModel.getCycle() != Cycle.none.getCode()) {
+		Integer cycle = nodeModel.getCycle();
+		if (nodeModel.isOpenStatus() && cycle != null && cycle != Cycle.none.getCode()) {
 			NodeMonitor.start();
 		}
 	}
@@ -114,7 +115,8 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 	public void insertNotFill(NodeModel nodeModel) {
 		nodeModel.setWorkspaceId(WorkspaceModel.DEFAULT_ID);
 		super.insertNotFill(nodeModel);
-		if (nodeModel.isOpenStatus() && nodeModel.getCycle() != Cycle.none.getCode()) {
+		Integer cycle = nodeModel.getCycle();
+		if (nodeModel.isOpenStatus() && cycle != null && cycle != Cycle.none.getCode()) {
 			NodeMonitor.start();
 		}
 	}

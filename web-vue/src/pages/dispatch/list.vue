@@ -225,7 +225,7 @@
         <!-- 节点 -->
         <a-form-model-item label="分发节点" prop="nodeId">
           <a-select v-model="temp.nodeIdList" mode="multiple" placeholder="请选择分发节点">
-            <a-select-option v-for="node in nodeList" :key="node.id">{{ `${node.name} ( ${node.id} )` }}</a-select-option>
+            <a-select-option v-for="node in nodeList" :key="node.id">{{ `${node.name}` }}</a-select-option>
           </a-select>
         </a-form-model-item>
         <a-collapse v-show="temp.runMode && temp.runMode !== 'File'">
@@ -357,9 +357,9 @@ export default {
       dispatchList: [],
       totalProjectNum: 0,
       columns: [
-        { title: "分发 ID", dataIndex: "id", width: 100, ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "分发名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "类型", dataIndex: "outGivingProject", width: 100, ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
+        { title: "分发 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
+        { title: "分发名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "类型", dataIndex: "outGivingProject", ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
@@ -370,7 +370,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 380, align: "left" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 300, align: "left" },
       ],
       childColumns: [
         { title: "节点名称", dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
@@ -469,10 +469,6 @@ export default {
         this.handleReload(record);
       }
     },
-    // // 筛选
-    // handleFilter() {
-    //   this.loadData();
-    // },
     // 关联分发
     handleLink() {
       this.$refs["linkDispatchForm"] && this.$refs["linkDispatchForm"].resetFields();
@@ -514,7 +510,7 @@ export default {
               project: projects,
               status: true,
             });
-            console.log(ele, eleIndex);
+            // console.log(ele, eleIndex);
           });
           this.temp.type = "edit";
           this.temp.projectId = record.projectId;
@@ -574,7 +570,7 @@ export default {
             this.$refs["linkDispatchForm"].resetFields();
             this.linkDispatchVisible = false;
             this.clearDispatchList();
-            this.handleFilter();
+            this.loadData();
           } else {
             this.targetKeys = [];
           }
@@ -617,40 +613,41 @@ export default {
         this.$refs["editDispatchForm"] && this.$refs["editDispatchForm"].resetFields();
         //
         this.temp = {};
-        JSON.parse(record.outGivingNodeProjectList).forEach((ele) => {
+        JSON.parse(record.outGivingNodeProjectList).forEach(async (ele) => {
           const params = {
             id: ele.projectId,
             nodeId: ele.nodeId,
           };
-          getProjectData(params).then((res) => {
-            if (res.code === 200) {
-              // 如果 temp.id 不存在
-              if (!this.temp.id) {
-                this.temp = {
-                  id: res.data.id,
-                  name: res.data.name,
-                  type: "edit",
-                  afterOpt: record.afterOpt,
-                  runMode: res.data.runMode,
-                  mainClass: res.data.mainClass,
-                  javaExtDirsCp: res.data.javaExtDirsCp,
-                  whitelistDirectory: res.data.whitelistDirectory,
-                  lib: res.data.lib,
-                  logPath: res.data.logPath,
-                  nodeIdList: [],
-                };
-              }
-              // 添加 nodeIdList
-              this.temp.nodeIdList.push(ele.nodeId);
-              // 添加 jvm token args
-              this.temp[`${ele.nodeId}_jvm`] = res.data.jvm || "";
-              this.temp[`${ele.nodeId}_token`] = res.data.token || "";
-              this.temp[`${ele.nodeId}_args`] = res.data.args || "";
-              // 添加 javaCopyItemList
-              this.temp[`${ele.nodeId}_javaCopyItemList`] = res.data.javaCopyItemList || [];
+          const res = await getProjectData(params);
+          if (res.code === 200) {
+            // 如果 temp.id 不存在
+            if (!this.temp.id) {
+              this.temp = {
+                id: res.data.id,
+                name: res.data.name,
+                type: "edit",
+                afterOpt: record.afterOpt,
+                runMode: res.data.runMode,
+                mainClass: res.data.mainClass,
+                javaExtDirsCp: res.data.javaExtDirsCp,
+                whitelistDirectory: res.data.whitelistDirectory,
+                lib: res.data.lib,
+                logPath: res.data.logPath,
+                nodeIdList: [],
+              };
             }
-          });
+            // 添加 nodeIdList
+            this.temp.nodeIdList.push(ele.nodeId);
+            // 添加 jvm token args
+            this.temp[`${ele.nodeId}_jvm`] = res.data.jvm || "";
+            this.temp[`${ele.nodeId}_token`] = res.data.token || "";
+            this.temp[`${ele.nodeId}_args`] = res.data.args || "";
+            // 添加 javaCopyItemList
+            this.temp[`${ele.nodeId}_javaCopyItemList`] = res.data.javaCopyItemList || [];
+            this.temp = { ...this.temp };
+          }
         });
+
         // 加载其他数据
         this.loadAccesList();
 
@@ -721,7 +718,7 @@ export default {
             });
             this.$refs["editDispatchForm"].resetFields();
             this.editDispatchVisible = false;
-            this.handleFilter();
+            this.loadData();
           }
         });
       });
@@ -836,7 +833,7 @@ export default {
                 message: res.msg,
                 duration: 2,
               });
-              this.handleFilter();
+              this.loadData();
             }
           });
         },

@@ -390,7 +390,7 @@ public class ManageEditProjectController extends BaseAgentController {
 	public String saveProject(String id, String newLib) {
 		File file = new File(newLib);
 		//  填写的jar路径是一个存在的文件
-		Assert.state(FileUtil.isFile(file), "填写jar目录当前是一个已经存在的文件,请修改");
+		Assert.state(!FileUtil.isFile(file), "填写jar目录当前是一个已经存在的文件,请修改");
 
 		NodeProjectInfoModel exits = projectInfoService.getItem(id);
 		if (exits == null) {

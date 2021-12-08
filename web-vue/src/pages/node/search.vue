@@ -1,6 +1,9 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
+      <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="filter-item">
+        <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
+      </a-select>
       <a-input v-model="listQuery['%name%']" placeholder="搜索项目" class="search-input-item" />
 
       <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="filter-item">
@@ -53,7 +56,7 @@
   </div>
 </template>
 <script>
-import { getProjectList, delAllProjectCache } from "@/api/node";
+import { getProjectList, delAllProjectCache, getNodeListAll } from "@/api/node";
 import { restartProject, startProject, stopProject, getRuningProjectInfo, runModeList } from "@/api/node-project";
 import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
@@ -71,7 +74,7 @@ export default {
       runModeList: runModeList,
       selectedRowKeys: [],
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-
+      nodeList: [],
       drawerTitle: "",
       temp: {},
       drawerFileVisible: false,
@@ -130,6 +133,11 @@ export default {
   },
   mounted() {
     this.getNodeProjectData();
+    getNodeListAll().then((res) => {
+      if (res.code === 200) {
+        this.nodeList = res.data;
+      }
+    });
   },
   methods: {
     getNodeProjectData() {

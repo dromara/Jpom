@@ -1,8 +1,10 @@
 <template>
   <div>
     <div ref="filter" class="filter">
+      <a-input v-model="listQuery['%name%']" placeholder="监控名称" class="search-input-item" />
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
+      
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" @change="changePage" bordered :rowKey="(record, index) => index">

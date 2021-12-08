@@ -295,7 +295,7 @@ export default {
           dataIndex: "modifyUser",
           width: 60,
           ellipsis: true,
-           sorter: true,
+          sorter: true,
           scopedSlots: { customRender: "modifyUser" },
         },
         { title: "运行状态", dataIndex: "status", width: 50, ellipsis: true, scopedSlots: { customRender: "status" } },
@@ -621,6 +621,13 @@ export default {
           if (res.code === 401) {
             this.temp.libExist = true;
             this.temp = { ...this.temp };
+          }
+          if (res.code !== 200) {
+            this.$notification.warning({
+              message: res.msg,
+              description: '提示',
+              duration: 4,
+            });
           }
         });
       }
