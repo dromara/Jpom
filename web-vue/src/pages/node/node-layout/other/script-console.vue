@@ -95,7 +95,7 @@ export default {
           } else {
             this.$notification.error({
               message: res.msg,
-              duration: 5
+              
             });
             this.scriptStatus = 0;
           }

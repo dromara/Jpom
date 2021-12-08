@@ -170,7 +170,7 @@ export default {
 					} else {
 						this.$notification.error({
 							message: res.msg,
-							duration: 5
+							
 						});
 						// 设置未启动
 						if (this.copyId) {
@@ -251,7 +251,7 @@ export default {
 		handleDownload() {
 			this.$notification.info({
 				message: '正在下载，请稍等...',
-				duration: 5
+				
 			});
 			// 请求参数
 			const params = {
@@ -295,7 +295,7 @@ export default {
 		handleDownloadLogback(record) {
 			this.$notification.info({
 				message: '正在下载，请稍等...',
-				duration: 5
+				
 			});
 			// 请求参数
 			const params = {

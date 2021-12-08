@@ -233,7 +233,7 @@ export default {
     handleDownload(record) {
       this.$notification.info({
         message: '正在下载，请稍等...',
-        duration: 5
+        
       });
       // 请求参数
       const params = {
