@@ -22,6 +22,8 @@
  */
 package io.jpom.system;
 
+import cn.hutool.core.util.StrUtil;
+
 /**
  * Jpom 运行错误
  *
@@ -30,11 +32,11 @@ package io.jpom.system;
  */
 public class JpomRuntimeException extends RuntimeException {
 
-    public JpomRuntimeException(String message) {
-        super(message);
-    }
+	public JpomRuntimeException(String message) {
+		super(message);
+	}
 
-    public JpomRuntimeException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
+	public JpomRuntimeException(String message, Throwable throwable) {
+		super(StrUtil.format("{} {}", message, StrUtil.emptyToDefault(throwable.getMessage(), StrUtil.EMPTY)), throwable);
+	}
 }

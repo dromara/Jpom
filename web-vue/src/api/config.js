@@ -24,6 +24,8 @@ const request = axios.create({
   responseType: "json",
 });
 
+let pro = process.env.NODE_ENV === "pro";
+
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
@@ -96,8 +98,9 @@ request.interceptors.response.use(
       if (!response.config.headers[NO_NOTIFY_KEY]) {
         notification.error({
           message: res.msg,
-          description: response.config.url,
+          description: pro ? "提示信息" : response.config.url,
         });
+        console.error(response.config.url, res);
       }
     }
 
@@ -142,8 +145,9 @@ function checkJWTToken(res, response) {
   if (res.code === 800) {
     notification.warn({
       message: res.msg,
-      description: response.config.url,
+      description: pro ? "提示信息" : response.config.url,
     });
+    console.error(response.config.url, res);
     store.dispatch("logOut").then(() => {
       router.push("/login");
       location.reload();
