@@ -15,7 +15,7 @@
     <a-tab-pane key="2" tab="IP白名单配置" class="ip-config-panel">
       <a-alert :message="`当前访问IP：${ipTemp.ip}`" type="success" />
       <a-alert message="请仔细确认后配置，ip配置后立即生效。配置时需要保证当前ip能访问！127.0.0.1 该IP不受访问限制" style="margin-top: 10px" banner />
-      <a-alert :message="`如果配置错误需要到服务端的服务器里面去修改对应的配置文件，配置文件路径：${ipTemp.path}`" style="margin-top: 10px" banner />
+      <a-alert message="如果配置错误需要重新服务端并添加命令行参数 --rest:ip_config 将恢复默认配置" style="margin-top: 10px" banner />
       <a-form-model style="margin-top: 10px" ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="IP白名单" prop="content">
           <a-input v-model="ipTemp.allowed" type="textarea" :rows="10" class="ip-list-config" placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开发所有IP,支持配置IP段 192.168.1.1/192.168.1.254" />
@@ -31,8 +31,10 @@
   </a-tabs>
 </template>
 <script>
-import { getConfigData, editConfig, getIpConfigData, editIpConfig } from "../../api/system";
+import { getConfigData, editConfig, getIpConfigData, editIpConfig, systemInfo } from "@/api/system";
 import codeEditor from "@/components/codeEditor";
+import { RESTART_UPGRADE_WAIT_TIME_COUNT } from "@/utils/const";
+import Vue from "vue";
 
 export default {
   components: {
@@ -49,6 +51,8 @@ export default {
       },
       submitAble: false,
       submitIpAble: false,
+      $global_loading: null,
+      checkCount: 0,
     };
   },
   mounted() {
@@ -80,12 +84,57 @@ export default {
           // 成功
           this.$notification.success({
             message: res.msg,
-            
           });
+          if (this.temp.restart) {
+            this.startCheckRestartStatus(res.msg);
+          }
+          //
         }
         // button recover
         this.submitAble = false;
       });
+    },
+    startCheckRestartStatus(msg) {
+      this.checkCount = 0;
+      this.$global_loading = Vue.prototype.$loading.service({
+        lock: true,
+        text: (msg || "重启中，请稍候...") + ",请耐心等待暂时不用刷新页面,重启成功后会自动刷新",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+      //
+      this.timer = setInterval(() => {
+        systemInfo()
+          .then((res) => {
+            if (res.code === 200) {
+              clearInterval(this.timer);
+              this.$global_loading && this.$global_loading.close();
+              this.$notification.success({
+                message: "重启成功",
+              });
+
+              setTimeout(() => {
+                location.reload();
+              }, 1000);
+            } else {
+              if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
+                this.$notification.warning({
+                  message: "未重启成功：" + (res.msg || ""),
+                });
+              }
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
+              this.$global_loading && this.$global_loading.close();
+              this.$notification.error({
+                message: "重启超时,请去服务器查看控制台日志排查问题",
+              });
+            }
+          });
+        this.checkCount = this.checkCount + 1;
+      }, 2000);
     },
     // submit ip config
     onSubmitIp() {
@@ -96,7 +145,6 @@ export default {
           // 成功
           this.$notification.success({
             message: res.msg,
-            
           });
         }
         // button recover

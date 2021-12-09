@@ -54,3 +54,8 @@ export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: PAGE_DEFAULT_LIMIT, tot
  * 缓存当前的工作空间 ID
  */
 export const CACHE_WORKSPACE_ID = "workspaceId";
+
+/**
+ * 升级 重启检查等待次数
+ */
+export const RESTART_UPGRADE_WAIT_TIME_COUNT = 80;

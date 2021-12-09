@@ -33,6 +33,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
+import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.system.ExtConfigBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
@@ -93,6 +94,7 @@ public class SystemConfigController extends BaseAgentController {
 				}
 				JpomApplication.restart();
 			});
+			return JsonMessage.getString(200, Const.UPGRADE_MSG);
 		}
 		return JsonMessage.getString(200, "修改成功");
 	}

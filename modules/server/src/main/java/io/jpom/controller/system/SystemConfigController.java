@@ -33,6 +33,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -97,6 +98,7 @@ public class SystemConfigController extends BaseServerController {
 
 	@RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
+	@SystemPermission(superUser = true)
 	public String saveConfig(String nodeId, String content, String restart) {
 		if (StrUtil.isNotEmpty(nodeId)) {
 			return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemSaveConfig).toString();
@@ -116,7 +118,8 @@ public class SystemConfigController extends BaseServerController {
 		File resourceFile = ExtConfigBean.getResourceFile();
 		FileUtil.writeString(content, resourceFile, CharsetUtil.CHARSET_UTF_8);
 
-		if (Convert.toBool(restart, false)) {
+		boolean restartBool = Convert.toBool(restart, false);
+		if (restartBool) {
 			// 重启
 			ThreadUtil.execute(() -> {
 				try {
@@ -125,6 +128,7 @@ public class SystemConfigController extends BaseServerController {
 				}
 				JpomApplication.restart();
 			});
+			return JsonMessage.getString(200, Const.UPGRADE_MSG);
 		}
 		return JsonMessage.getString(200, "修改成功");
 	}

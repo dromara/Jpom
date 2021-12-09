@@ -41,9 +41,11 @@
 </template>
 <script>
 import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade } from "@/api/system";
+import Vue from "vue";
 import { parseTime } from "@/utils/time";
 import MarkdownItVue from "markdown-it-vue";
 import "markdown-it-vue/dist/markdown-it-vue.css";
+import { RESTART_UPGRADE_WAIT_TIME_COUNT } from "@/utils/const";
 export default {
   name: "Upgrade",
   components: {
@@ -59,6 +61,7 @@ export default {
     return {
       temp: {},
       spinning: false,
+      checkCount: 0,
       fileList: [],
       timer: null,
       changelog: "",
@@ -73,6 +76,7 @@ export default {
           },
         },
       },
+      $global_loading: null,
     };
   },
   mounted() {
@@ -135,20 +139,29 @@ export default {
           this.$notification.success({
             message: res.msg,
           });
-          this.checkUpgradeVersion();
+
+          this.startCheckUpgradeStatus(res.msg);
         }
         this.spinning = false;
       });
       this.fileList = [];
     },
-    // 定时查询版本号
-    checkUpgradeVersion() {
+    startCheckUpgradeStatus(msg) {
+      this.checkCount = 0;
+      this.$global_loading = Vue.prototype.$loading.service({
+        lock: true,
+        text: (msg || "升级中，请稍候...") + ",请耐心等待暂时不用刷新页面,升级成功后会自动刷新",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+      //
       this.timer = setInterval(() => {
         systemInfo(this.nodeId)
           .then((res) => {
             let manifest = res.data?.manifest;
             if (res.code === 200 && manifest?.timeStamp !== this.temp.timeStamp) {
               clearInterval(this.timer);
+              this.$global_loading && this.$global_loading.close();
               this.$notification.success({
                 message: "升级成功",
               });
@@ -156,11 +169,24 @@ export default {
               setTimeout(() => {
                 location.reload();
               }, 1000);
+            } else {
+              if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
+                this.$notification.warning({
+                  message: "未升级成功：" + (res.msg || ""),
+                });
+              }
             }
           })
           .catch((error) => {
             console.log(error);
+            if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
+              this.$global_loading && this.$global_loading.close();
+              this.$notification.error({
+                message: "升级超时,请去服务器查看控制台日志排查问题",
+              });
+            }
           });
+        this.checkCount = this.checkCount + 1;
       }, 2000);
     },
     // 检查新版本
@@ -207,9 +233,10 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              this.checkUpgradeVersion();
-              this.spinning = false;
+
+              this.startCheckUpgradeStatus(res.msg);
             }
+            this.spinning = false;
           });
         },
       });

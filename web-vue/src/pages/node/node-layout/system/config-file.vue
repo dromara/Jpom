@@ -13,8 +13,10 @@
   </div>
 </template>
 <script>
-import { getConfigData, editConfig } from "../../../../api/system";
+import { getConfigData, editConfig, systemInfo } from "../../../../api/system";
 import codeEditor from "@/components/codeEditor";
+import { RESTART_UPGRADE_WAIT_TIME_COUNT } from "@/utils/const";
+import Vue from "vue";
 
 export default {
   components: {
@@ -31,6 +33,8 @@ export default {
         content: "",
       },
       submitAble: false,
+      $global_loading: null,
+      checkCount: 0,
     };
   },
   mounted() {
@@ -56,12 +60,56 @@ export default {
           // 成功
           this.$notification.success({
             message: res.msg,
-            
           });
+          if (this.temp.restart) {
+            this.startCheckRestartStatus(res.msg);
+          }
         }
         // button recover
         this.submitAble = false;
       });
+    },
+    startCheckRestartStatus(msg) {
+      this.checkCount = 0;
+      this.$global_loading = Vue.prototype.$loading.service({
+        lock: true,
+        text: (msg || "重启中，请稍候...") + ",请耐心等待暂时不用刷新页面,重启成功后会自动刷新",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+      //
+      this.timer = setInterval(() => {
+        systemInfo(this.node.id)
+          .then((res) => {
+            if (res.code === 200) {
+              clearInterval(this.timer);
+              this.$global_loading && this.$global_loading.close();
+              this.$notification.success({
+                message: "重启成功",
+              });
+
+              setTimeout(() => {
+                location.reload();
+              }, 1000);
+            } else {
+              if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
+                this.$notification.warning({
+                  message: "未重启成功：" + (res.msg || ""),
+                });
+              }
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
+              this.$global_loading && this.$global_loading.close();
+              this.$notification.error({
+                message: "重启超时,请去服务器查看控制台日志排查问题",
+              });
+            }
+          });
+        this.checkCount = this.checkCount + 1;
+      }, 2000);
     },
   },
 };

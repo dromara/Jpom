@@ -87,6 +87,11 @@ export default {
               },
               {
                 title: "Jpom 导航助手",
+                element: document.querySelector(".jpom-workspace"),
+                intro: "这里是工作空间,可以自由切换工作空间",
+              },
+              {
+                title: "Jpom 导航助手",
                 element: document.querySelector(".app-header"),
                 intro: "这是页面头部，会出现多个 Tab 标签页，以及个人信息等操作按钮",
               },
@@ -104,6 +109,16 @@ export default {
                 title: "Jpom 导航助手",
                 element: document.querySelector(".layout-content"),
                 intro: "这里是主要的内容展示区域",
+              },
+              {
+                title: "Jpom 导航助手",
+                element: document.querySelector(".jpom-node-manage-btn"),
+                intro: "点击【节点管理】按钮可以进入节点管理",
+              },
+              {
+                title: "Jpom 导航助手",
+                element: document.querySelector(".jpom-node-manage-add"),
+                intro: "如果还没有节点 可以点击【新增】按钮新增节点",
               },
             ],
           })
@@ -210,7 +225,9 @@ export default {
 }
 .layout-content {
   margin: 10px;
+  margin-bottom: 0;
   padding: 15px;
+  padding-bottom: 0;
   background: #fff;
   min-height: 280px;
 }

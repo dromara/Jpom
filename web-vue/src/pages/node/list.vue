@@ -5,7 +5,7 @@
       <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
       <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
       <a-button type="primary" @click="handleFilter">搜索</a-button>
-      <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-button type="primary jpom-node-manage-add" @click="handleAdd">新增</a-button>
       <!-- <a-button type="primary" @click="loadData">刷新</a-button> -->
     </div>
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
@@ -14,7 +14,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1">节点管理</a-button>
+        <a-button class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1">节点管理</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
           <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>

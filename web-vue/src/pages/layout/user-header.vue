@@ -1,8 +1,12 @@
 <template>
   <div class="user-header">
     <a-tooltip placement="left" title="切换工作空间">
-      <a-select v-model="selectWorkspace" class="workspace" option-filter-prop="children" show-search placeholder="工作空间" @change="handleChange">
-        <a-select-option v-for="item in myWorkspaceList" :key="item.id">{{ item.name }}</a-select-option>
+      <a-select v-model="selectWorkspace" class="workspace jpom-workspace" option-filter-prop="children" show-search placeholder="工作空间" @change="handleChange">
+        <a-select-option v-for="item in myWorkspaceList" :key="item.id">
+          <a-tooltip placement="left" :title="item.name">
+            {{ item.name }}
+          </a-tooltip>
+        </a-select-option>
       </a-select>
     </a-tooltip>
     <a-dropdown>
@@ -15,7 +19,7 @@
       <a-tooltip placement="left" :title="this.getUserInfo.name">
         <a-button
           class="ant-dropdown-link jpom-user-operation"
-          :style="{ backgroundColor: '#f56a00', color: '#fff', verticalAlign: 'middle' }"
+          :style="{ backgroundColor: '#1890ff', color: '#fff', verticalAlign: 'middle' }"
           @click="(e) => e.preventDefault()"
           :title="getUserInfo.name"
         >

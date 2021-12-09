@@ -69,7 +69,7 @@ public class Const {
 	/**
 	 * 升级提示语
 	 */
-	public static final String UPGRADE_MSG = "升级中大约需要30秒";
+	public static final String UPGRADE_MSG = "升级(重启)中大约需要30秒～2分钟左右";
 
 	/**
 	 * 请求 header
