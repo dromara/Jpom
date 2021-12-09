@@ -2,7 +2,7 @@
   <div class="full-content">
     <div ref="filter" class="filter">
       <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="filter-item">
-        <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
+        <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
       </a-select>
       <a-select v-model="listQuery.status" allowClear placeholder="报警状态" class="filter-item">
         <a-select-option :value="1">正常</a-select-option>
@@ -18,7 +18,7 @@
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" bordered :rowKey="(record, index) => index" @change="change">
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
+        <span>{{ nodeMap[text] }}</span>
       </a-tooltip>
       <a-tooltip slot="projectId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -57,13 +57,13 @@ export default {
     return {
       loading: false,
       list: [],
-      nodeList: [],
+      nodeMap: {},
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       temp: {},
       detailVisible: false,
       detailData: [],
       columns: [
-        { title: "节点 ID", dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "节点名称", dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         { title: "项目 ID", dataIndex: "projectId", width: 100, ellipsis: true, scopedSlots: { customRender: "projectId" } },
         { title: "报警状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "报警方式", dataIndex: "notifyStyle", width: 100, ellipsis: true, scopedSlots: { customRender: "notifyStyle" } },
@@ -104,7 +104,9 @@ export default {
     loadNodeList() {
       getNodeListAll().then((res) => {
         if (res.code === 200) {
-          this.nodeList = res.data;
+          res.data.forEach((element) => {
+            this.nodeMap[element.id] = element.name;
+          });
         }
       });
     },

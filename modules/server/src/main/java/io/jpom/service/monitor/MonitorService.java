@@ -97,11 +97,10 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 	 * @param alarm 状态
 	 */
 	public synchronized void setAlarm(String id, boolean alarm) {
-		MonitorModel monitorModel = super.getByKey(id);
-		if (monitorModel != null) {
-			monitorModel.setAlarm(alarm);
-			super.update(monitorModel);
-		}
+		MonitorModel monitorModel = new MonitorModel();
+		monitorModel.setId(id);
+		monitorModel.setAlarm(alarm);
+		super.update(monitorModel);
 	}
 
 	/**

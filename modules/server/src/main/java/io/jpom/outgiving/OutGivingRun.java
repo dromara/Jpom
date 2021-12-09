@@ -117,10 +117,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 							}
 						}
 						// 休眠x秒 等待之前项目正常启动
-						try {
-							TimeUnit.SECONDS.sleep(sleepTime);
-						} catch (InterruptedException ignored) {
-						}
+						ThreadUtil.sleep(sleepTime, TimeUnit.SECONDS);
 					}
 				}
 			});

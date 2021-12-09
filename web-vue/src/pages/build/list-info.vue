@@ -408,9 +408,10 @@ export default {
             let temp = itemGroupBy(res.data, "nodeId", "value", "children");
 
             this.cascaderList = temp.map((item) => {
-              item.label = res0.data.filter((res0Item) => {
+              let findArra = res0.data.filter((res0Item) => {
                 return res0Item.id === item.value;
-              })[0].name;
+              });
+              item.label = findArra.length ? findArra[0].name : "未知";
               item.children = item.children.map((item2) => {
                 return {
                   label: item2.name,

@@ -22,13 +22,13 @@
  */
 package io.jpom.socket.client;
 
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.NodeModel;
-import io.jpom.socket.handler.NodeUpdateHandler;
 import io.jpom.system.init.OperateLogController;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -66,10 +66,7 @@ public class NodeClient extends WebSocketClient {
 	private void loopOpen() {
 		int count = 0;
 		while (!this.isOpen() && count < 20) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException ignored) {
-			}
+			ThreadUtil.sleep(500);
 			count++;
 		}
 	}

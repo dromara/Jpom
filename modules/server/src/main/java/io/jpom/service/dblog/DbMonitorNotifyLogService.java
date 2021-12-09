@@ -23,7 +23,9 @@
 package io.jpom.service.dblog;
 
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.MonitorNotifyLog;
@@ -45,6 +47,10 @@ public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotif
 	public void insert(MonitorNotifyLog monitorNotifyLog) {
 		try {
 			BaseServerController.resetInfo(UserModel.EMPTY);
+			if (MonitorNotifyLog.HAS_LOG_ID) {
+				// 兼容历史字段
+				monitorNotifyLog.setLogId(StrUtil.emptyToDefault(monitorNotifyLog.getId(), IdUtil.fastSimpleUUID()));
+			}
 			//
 			monitorNotifyLog.setCreateTime(ObjectUtil.defaultIfNull(monitorNotifyLog.getCreateTime(), SystemClock.now()));
 			super.insert(monitorNotifyLog);

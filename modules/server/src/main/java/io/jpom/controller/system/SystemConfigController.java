@@ -122,10 +122,7 @@ public class SystemConfigController extends BaseServerController {
 		if (restartBool) {
 			// 重启
 			ThreadUtil.execute(() -> {
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException ignored) {
-				}
+				ThreadUtil.sleep(2000);
 				JpomApplication.restart();
 			});
 			return JsonMessage.getString(200, Const.UPGRADE_MSG);

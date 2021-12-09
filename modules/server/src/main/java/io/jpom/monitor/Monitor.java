@@ -29,8 +29,6 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
-import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.http.HttpStatus;
@@ -42,7 +40,6 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.Cycle;
-import io.jpom.model.PageResultDto;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
@@ -268,20 +265,15 @@ public class Monitor implements Task {
 	 */
 	private boolean getPreStatus(String monitorId, String nodeId, String projectId) {
 		// 检查是否已经触发通知
-		Entity entity = Entity.create();
-		entity.set("nodeId", nodeId);
-		entity.set("projectId", projectId);
-		entity.set("monitorId", monitorId);
-		Page page = new Page(0, 1);
-		page.addOrder(new Order("createTime", Direction.DESC));
 
+		MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
+		monitorNotifyLog.setNodeId(nodeId);
+		monitorNotifyLog.setProjectId(projectId);
+		monitorNotifyLog.setMonitorId(monitorId);
 
-		PageResultDto<MonitorNotifyLog> pageResult = dbMonitorNotifyLogService.listPage(entity, page);
-		if (pageResult.isEmpty()) {
-			return true;
-		}
-		MonitorNotifyLog entity1 = pageResult.get(0);
-		return entity1.isStatus();
+		List<MonitorNotifyLog> queryList = dbMonitorNotifyLogService.queryList(monitorNotifyLog, 1, new Order("createTime", Direction.DESC));
+		MonitorNotifyLog entity1 = CollUtil.getFirst(queryList);
+		return entity1 == null || entity1.isStatus();
 	}
 
 	private void notifyMsg(final List<String> notify, final MonitorNotifyLog monitorNotifyLog) {

@@ -33,10 +33,10 @@
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="projectCount" slot-scope="text, item">
-          <a-tooltip placement="topLeft" :title="节点中的所有项目数量">
+          <a-tooltip placement="topLeft" title="节点中的所有项目数量">
             <a-tag @click="syncNode(item)">{{ text }} </a-tag>
           </a-tooltip>
-          <a-tooltip placement="topLeft" :title="清除服务端缓存节点项目信息">
+          <a-tooltip placement="topLeft" title="清除服务端缓存节点项目信息">
             <a-icon @click="delNodeCache(item)" type="delete" />
           </a-tooltip>
         </template>

@@ -34,6 +34,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.data.*;
+import io.jpom.model.log.MonitorNotifyLog;
 import io.jpom.service.dblog.DbMonitorNotifyLogService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.NodeService;
@@ -300,6 +301,10 @@ public class LoadJsonConfigToDb {
 		}
 		String sql = "update " + tableName + " set ID = LOGID where ID = '' and LOGID is not null  and LOGID <> '';";
 		int execute = monitorNotifyLogService.execute(sql);
-		Console.log("convert monitor log field {}", execute);
+		if (execute > 0) {
+			Console.log("convert monitor log field {}", execute);
+		}
+		// 标记包含旧字段
+		MonitorNotifyLog.HAS_LOG_ID = true;
 	}
 }

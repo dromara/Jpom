@@ -149,6 +149,10 @@ export default {
         this.selectWorkspace = wid ? wid : this.getWorkspaceId;
         if (!this.selectWorkspace) {
           this.handleChange(res.data[0]?.id);
+        } else {
+          this.$router.push({
+            query: { ...this.$route.query, wid: this.selectWorkspace },
+          });
         }
       });
     },

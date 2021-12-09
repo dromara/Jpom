@@ -95,6 +95,7 @@ public class NodeProjectInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@GetMapping(value = "del_project_cache", produces = MediaType.APPLICATION_JSON_VALUE)
+	@SystemPermission()
 	public String delProjectCache(String nodeId) {
 		NodeModel nodeModel = nodeService.getByKey(nodeId);
 		Assert.notNull(nodeModel, "对应的节点不存在");

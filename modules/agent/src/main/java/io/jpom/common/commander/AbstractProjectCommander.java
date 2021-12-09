@@ -547,10 +547,7 @@ public abstract class AbstractProjectCommander {
 			if (isRun(tag) == status) {
 				return status;
 			}
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException ignored) {
-			}
+			ThreadUtil.sleep(500);
 		} while (count++ < loopCount);
 		return !status;
 	}

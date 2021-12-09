@@ -34,10 +34,17 @@ import io.jpom.service.h2db.TableName;
  */
 @TableName("MONITORNOTIFYLOG")
 public class MonitorNotifyLog extends BaseWorkspaceModel {
+
+	/**
+	 * 是否包含旧字段
+	 */
+	public static boolean HAS_LOG_ID = false;
+
 	/**
 	 *
 	 */
-//	private String logId;
+	@Deprecated
+	private String logId;
 	private String nodeId;
 	private String projectId;
 	/**
@@ -72,6 +79,16 @@ public class MonitorNotifyLog extends BaseWorkspaceModel {
 	 * 通知异常消息
 	 */
 	private String notifyError;
+
+	@Deprecated
+	public String getLogId() {
+		return logId;
+	}
+
+	@Deprecated
+	public void setLogId(String logId) {
+		this.logId = logId;
+	}
 
 	public String getNotifyObject() {
 		return notifyObject;

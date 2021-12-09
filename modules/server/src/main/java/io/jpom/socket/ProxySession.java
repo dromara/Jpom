@@ -23,6 +23,7 @@
 package io.jpom.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -63,10 +64,7 @@ public class ProxySession extends WebSocketClient {
 	private void loopOpen() {
 		int count = 0;
 		while (!this.isOpen() && count < 20) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException ignored) {
-			}
+			ThreadUtil.sleep(500);
 			count++;
 		}
 	}
