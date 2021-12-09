@@ -96,17 +96,19 @@ export default {
     },
   },
   created() {
-    this.loadData();
-    this.loadNodeList();
+    this.loadNodeList(() => {
+      this.loadData();
+    });
   },
   methods: {
     // 加载 node
-    loadNodeList() {
+    loadNodeList(fn) {
       getNodeListAll().then((res) => {
         if (res.code === 200) {
           res.data.forEach((element) => {
             this.nodeMap[element.id] = element.name;
           });
+          fn && fn();
         }
       });
     },

@@ -147,6 +147,9 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoModel> {
 			}).filter(projectInfoModel -> {
 				// 检查对应的工作空间 是否存在
 				return workspaceService.exists(new WorkspaceModel(projectInfoModel.getWorkspaceId()));
+			}).filter(projectInfoModel -> {
+				// 避免重复同步
+				return StrUtil.equals(nodeModel.getWorkspaceId(), projectInfoModel.getWorkspaceId());
 			}).peek(projectInfoModel -> cacheIds.remove(projectInfoModel.getProjectId())).collect(Collectors.toList());
 			// 设置 临时缓存，便于放行检查
 			BaseServerController.resetInfo(UserModel.EMPTY);

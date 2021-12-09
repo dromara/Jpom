@@ -33,6 +33,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.WorkspaceModel;
+import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -142,9 +143,19 @@ public class WorkspaceController extends BaseServerController {
 		Assert.state(!StrUtil.equals(id, WorkspaceModel.DEFAULT_ID), "不能删除默认工作空间");
 		// 判断是否存在关联数据
 		Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom.model", BaseWorkspaceModel.class::isAssignableFrom);
+		StringBuilder autoDelete = new StringBuilder(StrUtil.EMPTY);
 		for (Class<?> aClass : classes) {
 			TableName tableName = aClass.getAnnotation(TableName.class);
 			if (tableName == null) {
+				continue;
+			}
+			if (aClass == UserOperateLogV1.class) {
+				// 用户操作日志
+				String sql = "delete from " + tableName.value() + " where workspaceId=?";
+				int execute = workspaceService.execute(sql, id);
+				if (execute > 0) {
+					autoDelete.append(StrUtil.format(" 自动删除 {} 表中数据 {} 条数据", execute));
+				}
 				continue;
 			}
 			String sql = "select  count(1) as cnt from " + tableName.value() + " where workspaceId=?";
@@ -161,6 +172,6 @@ public class WorkspaceController extends BaseServerController {
 		Assert.state(!workspace, "当前工作空间下还绑定着用户信息");
 		// 删除信息
 		workspaceService.delByKey(id);
-		return JsonMessage.toJson(200, "删除成功");
+		return JsonMessage.toJson(200, "删除成功 " + autoDelete);
 	}
 }

@@ -47,7 +47,7 @@ request.interceptors.request.use(
     if (config.headers["Content-Type"].indexOf("application/x-www-form-urlencoded") !== -1) {
       config.data = Qs.stringify(config.data);
     }
-    let wid = router.history.current.query.wid;
+    let wid = router.app.$route.query.wid;
     config.headers[TOKEN_HEADER_KEY] = store.getters.getToken;
     config.headers[CACHE_WORKSPACE_ID] = wid ? wid : store.getters.getWorkspaceId;
     return config;
