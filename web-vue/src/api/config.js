@@ -48,6 +48,9 @@ request.interceptors.request.use(
       config.data = Qs.stringify(config.data);
     }
     let wid = router.app.$route.query.wid;
+    if (!wid) {
+      wid = getHashVars().wid;
+    }
     config.headers[TOKEN_HEADER_KEY] = store.getters.getToken;
     config.headers[CACHE_WORKSPACE_ID] = wid ? wid : store.getters.getWorkspaceId;
     return config;
@@ -56,6 +59,14 @@ request.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+function getHashVars() {
+  var vars = {};
+  location.hash.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+    vars[key] = value;
+  });
+  return vars;
+}
 
 // 响应拦截器
 request.interceptors.response.use(

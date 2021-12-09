@@ -183,9 +183,9 @@ public class MonitorUserOptListController extends BaseServerController {
 		if (monitorModel == null) {
 			monitorModel = new MonitorUserOptModel();
 		}
-		monitorModel.setMonitorUser(monitorUserArrays);
+		monitorModel.monitorUser(monitorUserArrays);
 		monitorModel.setStatus(start);
-		monitorModel.setMonitorOpt(monitorOptArrays);
+		monitorModel.monitorOpt(monitorOptArrays);
 		monitorModel.monitorFeature(monitorFeatureArrays);
 		monitorModel.notifyUser(notifyUsers);
 		monitorModel.setName(name);

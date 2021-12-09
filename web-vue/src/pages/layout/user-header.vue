@@ -264,12 +264,15 @@ export default {
         });
       });
     },
-    handleChange(vlaue) {
-      this.$store.dispatch("changeWorkspace", vlaue);
-      this.$router.push({
-        query: { ...this.$route.query, wid: vlaue },
-      });
-      this.reload();
+    handleChange(value) {
+      this.$store.dispatch("changeWorkspace", value);
+      this.$router
+        .push({
+          query: { ...this.$route.query, wid: value },
+        })
+        .then(() => {
+          this.reload();
+        });
     },
     // toOldIndex() {
     //   window.location.href = '/old.html'

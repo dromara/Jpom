@@ -27,6 +27,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.PatternPool;
+import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
@@ -197,9 +198,7 @@ public class ManageEditProjectController extends BaseAgentController {
 //		log = String.format("%s/%s.log", log, id);
 //		projectInfo.setLog(FileUtil.normalize(log));
 		String log = projectInfo.getLog();
-		if (StrUtil.isEmpty(log)) {
-			return JsonMessage.getString(401, "项目log解析读取失败");
-		}
+		Assert.hasText(log, "项目log解析读取失败");
 		checkFile = new File(log);
 		if (checkFile.exists() && checkFile.isDirectory()) {
 			return JsonMessage.getString(401, "项目log是一个已经存在的文件夹");
@@ -207,7 +206,7 @@ public class ManageEditProjectController extends BaseAgentController {
 		//
 		String token = projectInfo.getToken();
 		if (StrUtil.isNotEmpty(token) && !ReUtil.isMatch(PatternPool.URL_HTTP, token)) {
-			return JsonMessage.getString(401, "WebHooks 地址不合法");
+			Validator.validateMatchRegex(RegexPool.URL_HTTP, token, "WebHooks 地址不合法");
 		}
 		// 判断空格
 		if (id.contains(StrUtil.SPACE) || allLib.contains(StrUtil.SPACE)) {
@@ -216,9 +215,7 @@ public class ManageEditProjectController extends BaseAgentController {
 		String jdkId = projectInfo.getJdkId();
 		if (StrUtil.isNotEmpty(jdkId)) {
 			JdkInfoModel item = jdkInfoService.getItem(jdkId);
-			if (null == item) {
-				return JsonMessage.getString(401, "jdk 信息错误");
-			}
+			Assert.notNull(item, "jdk 信息错误");
 		}
 		return save(projectInfo, previewData);
 	}

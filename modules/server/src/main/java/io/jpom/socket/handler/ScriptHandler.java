@@ -54,7 +54,9 @@ public class ScriptHandler extends BaseProxyHandler {
 
 	@Override
 	protected void handleTextMessage(Map<String, Object> attributes, ProxySession proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) {
-		super.logOpt(attributes, json);
+		if (consoleCommandOp != ConsoleCommandOp.heart) {
+			super.logOpt(attributes, json);
+		}
 		proxySession.send(json.toString());
 	}
 }

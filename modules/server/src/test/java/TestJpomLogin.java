@@ -20,44 +20,17 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.socket.handler;
-
-import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.forward.NodeUrl;
-import io.jpom.plugin.ClassFeature;
-import io.jpom.plugin.Feature;
-import io.jpom.socket.BaseProxyHandler;
-import io.jpom.socket.ConsoleCommandOp;
-import io.jpom.socket.ProxySession;
-
-import java.util.Map;
+import org.junit.Test;
 
 /**
- * 控制台消息处理器
- *
- * @author jiangzeyin
- * @date 2019/4/19
+ * @author bwcx_jzy
+ * @since 2021/12/9
  */
-@Feature(cls = ClassFeature.PROJECT_CONSOLE)
-public class ConsoleHandler extends BaseProxyHandler {
+public class TestJpomLogin {
 
-	public ConsoleHandler() {
-		super(NodeUrl.TopSocket);
-	}
+	@Test
+	public void test(){
+//		HttpRequest post = HttpUtil.createPost("https://jpom.keepbx.cn/userLogin");
 
-	@Override
-	protected Object[] getParameters(Map<String, Object> attributes) {
-		return new Object[]{"projectId", attributes.get("projectId"), "copyId", attributes.get("copyId")};
-	}
-
-	@Override
-	protected void handleTextMessage(Map<String, Object> attributes,
-									 ProxySession proxySession,
-									 JSONObject json,
-									 ConsoleCommandOp consoleCommandOp) {
-		if(consoleCommandOp!=ConsoleCommandOp.heart) {
-			super.logOpt(attributes, json);
-		}
-		proxySession.send(json.toString());
 	}
 }

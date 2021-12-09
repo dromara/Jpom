@@ -22,7 +22,6 @@
  */
 package io.jpom.socket;
 
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -155,15 +154,17 @@ public abstract class BaseProxyHandler extends BaseHandler {
 		// 记录操作日志
 		UserModel userInfo = (UserModel) attributes.get("userInfo");
 		cacheInfo.setMethodFeature(MethodFeature.EXECUTE);
+		Object proxySession = attributes.get("proxySession");
 		try {
-			Map<String, Object> clone = ObjectUtil.clone(attributes);
-			clone.remove("proxySession");
-			clone.put("use_type", "WebSocket");
-			clone.put("class_type", cls.getName());
+			attributes.remove("proxySession");
+			attributes.put("use_type", "WebSocket");
+			attributes.put("class_type", cls.getName());
 			OperateLogController operateLogController = SpringUtil.getBean(OperateLogController.class);
-			operateLogController.log(userInfo, JSONObject.toJSONString(clone), cacheInfo);
+			operateLogController.log(userInfo, JSONObject.toJSONString(attributes), cacheInfo);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("记录操作日志异常", e);
+		} finally {
+			attributes.put("proxySession", proxySession);
 		}
 	}
 

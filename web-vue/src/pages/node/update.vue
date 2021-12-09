@@ -29,7 +29,9 @@
           {{ text | version }}
         </template>
         <template slot="status" slot-scope="text">
-          <div class="restarting" v-if="text && text.type === 'restarting'">{{ text.data }}</div>
+          <div class="restarting" v-if="text && text.type === 'restarting'">
+            <a-tooltip :title="text.data"> {{ text.data }} </a-tooltip>
+          </div>
           <div class="uploading" v-if="text && text.type === 'uploading'">
             <div class="text">{{ text.percent === 100 ? "上传成功" : "正在上传文件" }}</div>
             <a-progress :percent="text.percent" />

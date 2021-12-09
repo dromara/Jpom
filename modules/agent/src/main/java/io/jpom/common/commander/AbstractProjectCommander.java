@@ -165,7 +165,9 @@ public abstract class AbstractProjectCommander {
 		});
 		//
 		loopCheckRun(nodeProjectInfoModel.getId(), true);
-		return status(nodeProjectInfoModel.getId());
+		String status = status(nodeProjectInfoModel.getId());
+		this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "start", "result", status);
+		return status;
 	}
 
 	/**
@@ -186,20 +188,9 @@ public abstract class AbstractProjectCommander {
 	 */
 	public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
 		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
-		String token = nodeProjectInfoModel.getToken();
-		if (StrUtil.isNotEmpty(token)) {
-			try {
-				HttpRequest httpRequest = HttpUtil.createGet(token)
-						.form("projectId", nodeProjectInfoModel.getId());
-				if (javaCopyItem != null) {
-					httpRequest.form("copyId", javaCopyItem.getId());
-				}
-				String body = httpRequest.execute().body();
-				DefaultSystemLog.getLog().info(nodeProjectInfoModel.getName() + ":" + body);
-			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
-				return "WebHooks error:" + e.getMessage();
-			}
+		String beforeStop = this.webHooks(nodeProjectInfoModel, javaCopyItem, "beforeStop");
+		if (StrUtil.isNotEmpty(beforeStop)) {
+			return beforeStop;
 		}
 		// 再次查看进程信息
 		String result = status(tag);
@@ -211,7 +202,55 @@ public abstract class AbstractProjectCommander {
 			// 端口号缓存
 			PID_PORT.remove(pid);
 		}
+		this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "stop", "result", result);
 		return result;
+	}
+
+	/**
+	 * 执行 webhooks 通知
+	 *
+	 * @param nodeProjectInfoModel 项目信息
+	 * @param javaCopyItem         副本信息
+	 * @param type                 类型
+	 * @param other                其他参数
+	 */
+	private void asyncWebHooks(NodeProjectInfoModel nodeProjectInfoModel,
+							   NodeProjectInfoModel.JavaCopyItem javaCopyItem,
+							   String type, Object... other) {
+		ThreadUtil.execute(() -> this.webHooks(nodeProjectInfoModel, javaCopyItem, type, other));
+	}
+
+	/**
+	 * 执行 webhooks 通知
+	 *
+	 * @param nodeProjectInfoModel 项目信息
+	 * @param javaCopyItem         副本信息
+	 * @param type                 类型
+	 * @param other                其他参数
+	 * @return 结果
+	 */
+	private String webHooks(NodeProjectInfoModel nodeProjectInfoModel,
+							NodeProjectInfoModel.JavaCopyItem javaCopyItem,
+							String type, Object... other) {
+		String token = nodeProjectInfoModel.getToken();
+		if (StrUtil.isEmpty(token)) {
+			return StrUtil.EMPTY;
+		}
+		try {
+			HttpRequest httpRequest = HttpUtil.createGet(token);
+			httpRequest.form("projectId", nodeProjectInfoModel.getId());
+			httpRequest.form("projectName", nodeProjectInfoModel.getName());
+			httpRequest.form("type", type, other);
+			if (javaCopyItem != null) {
+				httpRequest.form("copyId", javaCopyItem.getId());
+			}
+			String body = httpRequest.execute().body();
+			DefaultSystemLog.getLog().info(nodeProjectInfoModel.getName() + ":" + body);
+			return body;
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
+			return "WebHooks error:" + e.getMessage();
+		}
 	}
 
 	/**
@@ -222,9 +261,10 @@ public abstract class AbstractProjectCommander {
 	 * @throws Exception 异常
 	 */
 	public String restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+		this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "beforeRestart");
 		if (javaCopyItem == null) {
 			if (isRun(nodeProjectInfoModel.getId())) {
-				stop(nodeProjectInfoModel, javaCopyItem);
+				stop(nodeProjectInfoModel, null);
 			}
 		} else {
 			if (isRun(javaCopyItem.getTagId())) {

@@ -116,7 +116,7 @@ public class MonitorUserOptModel extends BaseWorkspaceModel {
 		this.monitorOpt = monitorOpt;
 	}
 
-	public void setMonitorOpt(List<MethodFeature> monitorOpt) {
+	public void monitorOpt(List<MethodFeature> monitorOpt) {
 		if (monitorOpt == null) {
 			this.monitorOpt = null;
 		} else {
@@ -147,7 +147,7 @@ public class MonitorUserOptModel extends BaseWorkspaceModel {
 		return StringUtil.jsonConvertArray(monitorUser, String.class);
 	}
 
-	public void setMonitorUser(List<String> monitorUser) {
+	public void monitorUser(List<String> monitorUser) {
 		if (monitorUser == null) {
 			this.monitorUser = null;
 		} else {
