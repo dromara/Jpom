@@ -12,3 +12,8 @@ spring:
     console:
       # 是否开启 web 访问数据库（url: http://${ip}:${port}/h2-console）
       enabled: true
+#
+#jpom:
+#  subTitle: "测试"
+#  name: "ccsfsdfdsf"
+#  loginTitle: dsfasdf

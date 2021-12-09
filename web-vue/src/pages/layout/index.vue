@@ -4,7 +4,7 @@
       <a-tooltip placement="right" title="点击可以切换开启操作引导">
         <div class="logo" @click="toggleGuide()">
           <img :src="logoUrl" />
-          {{ this.subName }}
+          {{ this.subTitle }}
         </div>
       </a-tooltip>
       <side-menu class="side-menu" />
@@ -44,7 +44,7 @@ export default {
   data() {
     return {
       collapsed: false,
-      subName: "项目管理",
+      subTitle: "项目管理",
       logoUrl: "",
     };
   },
@@ -150,8 +150,8 @@ export default {
       checkSystem().then((res) => {
         if (res.data) {
           window.routerBase = res.data.routerBase || "";
-          if (res.data.subName) {
-            this.subName = res.data.subName;
+          if (res.data.subTitle) {
+            this.subTitle = res.data.subTitle;
           }
           this.logoUrl = ((res.data.routerBase || "") + "/logo_image").replace(new RegExp("//", "gm"), "/");
         }

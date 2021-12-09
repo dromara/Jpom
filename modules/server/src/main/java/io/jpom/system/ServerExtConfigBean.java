@@ -163,19 +163,19 @@ public class ServerExtConfigBean implements DisposableBean {
 	/**
 	 * 系统名称
 	 */
-	@Value("${jpom.name:Jpom项目管理系统}")
+	@Value("${jpom.name:}")
 	private String name;
 
 	/**
 	 * 系统副名称（标题） 建议4个汉字以内
 	 */
-	@Value("${jpom.subName:项目管理}")
-	private String subName;
+	@Value("${jpom.subTitle:}")
+	private String subTitle;
 
 	/**
 	 * 登录页标题
 	 */
-	@Value("${jpom.loginTitle:登录JPOM}")
+	@Value("${jpom.loginTitle:}")
 	private String loginTitle;
 
 	/**
@@ -276,8 +276,8 @@ public class ServerExtConfigBean implements DisposableBean {
 		return StrUtil.emptyToDefault(name, "Jpom项目管理系统");
 	}
 
-	public String getSubName() {
-		return StrUtil.emptyToDefault(subName, "项目管理");
+	public String getSubTitle() {
+		return StrUtil.emptyToDefault(subTitle, "项目管理");
 	}
 
 	public String getLoginTitle() {

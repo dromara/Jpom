@@ -134,9 +134,10 @@ public class IndexControl extends BaseServerController {
 		JSONObject data = new JSONObject();
 		data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH));
 		//
-		data.put("name", ServerExtConfigBean.getInstance().getName());
-		data.put("subName", ServerExtConfigBean.getInstance().getSubName());
-		data.put("loginTitle", ServerExtConfigBean.getInstance().getLoginTitle());
+		ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
+		data.put("name", instance.getName());
+		data.put("subTitle", instance.getSubTitle());
+		data.put("loginTitle", instance.getLoginTitle());
 		if (userService.canUse()) {
 			return JsonMessage.getString(200, "success", data);
 		}
