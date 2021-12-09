@@ -229,7 +229,7 @@ export function deleteBuildHistory(logId) {
 
 export const statusMap = {
   1: "构建中",
-  2: "构建成功",
+  2: "构建完成",
   3: "构建失败",
   4: "发布中",
   5: "发布成功",

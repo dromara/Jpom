@@ -23,6 +23,7 @@
 package io.jpom.socket.handler;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
@@ -32,7 +33,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONValidator;
-import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import io.jpom.model.data.SshModel;
@@ -106,6 +107,11 @@ public class SshHandler extends BaseHandler {
 				// 心跳消息不转发
 				return;
 			}
+			if (StrUtil.equals(data, "resize")) {
+				// 缓存区大小
+				handlerItem.resize(jsonObject);
+				return;
+			}
 		}
 		try {
 			this.sendCommand(handlerItem, payload);
@@ -160,7 +166,7 @@ public class SshHandler extends BaseHandler {
 		private final InputStream inputStream;
 		private final OutputStream outputStream;
 		private final Session openSession;
-		private final Channel channel;
+		private final ChannelShell channel;
 		private final SshModel sshItem;
 		private final StringBuilder nowLineInput = new StringBuilder();
 
@@ -168,7 +174,7 @@ public class SshHandler extends BaseHandler {
 			this.session = session;
 			this.sshItem = sshItem;
 			this.openSession = SshService.getSessionByModel(sshItem);
-			this.channel = JschUtil.createChannel(openSession, ChannelType.SHELL);
+			this.channel = (ChannelShell) JschUtil.createChannel(openSession, ChannelType.SHELL);
 			this.inputStream = channel.getInputStream();
 			this.outputStream = channel.getOutputStream();
 		}
@@ -176,6 +182,19 @@ public class SshHandler extends BaseHandler {
 		void startRead() throws JSchException {
 			this.channel.connect();
 			ThreadUtil.execute(this);
+		}
+
+		/**
+		 * 调整 缓存区大小
+		 *
+		 * @param jsonObject 参数
+		 */
+		private void resize(JSONObject jsonObject) {
+			Integer rows = Convert.toInt(jsonObject.getString("rows"), 10);
+			Integer cols = Convert.toInt(jsonObject.getString("cols"), 10);
+			Integer wp = Convert.toInt(jsonObject.getString("wp"), 10);
+			Integer hp = Convert.toInt(jsonObject.getString("hp"), 10);
+			this.channel.setPtySize(cols, rows, wp, hp);
 		}
 
 		/**

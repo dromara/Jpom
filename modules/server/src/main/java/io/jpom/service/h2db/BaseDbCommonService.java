@@ -129,7 +129,10 @@ public abstract class BaseDbCommonService<T> {
 	 * @param t 数据
 	 */
 	public void insert(Collection<T> t) {
-		if (!DbConfig.getInstance().isInit() || CollUtil.isEmpty(t)) {
+		if (CollUtil.isEmpty(t)) {
+			return;
+		}
+		if (!DbConfig.getInstance().isInit()) {
 			// ignore
 			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
 			return;

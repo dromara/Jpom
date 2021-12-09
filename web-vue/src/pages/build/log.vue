@@ -47,17 +47,20 @@ export default {
             if (this.logText === "loading...") {
               this.logText = "";
             }
-            res.data.dataLines.forEach((element) => {
+            let lines = res.data.dataLines;
+            lines.forEach((element) => {
               this.logText += `${element}\r\n`;
             });
             this.line = res.data.line;
-            // 自动滚动到底部
-            this.$nextTick(() => {
-              setTimeout(() => {
-                const textarea = document.getElementById("build-log-textarea");
-                textarea.scrollTop = textarea.scrollHeight;
-              }, 100);
-            });
+            if (lines.length) {
+              // 自动滚动到底部
+              this.$nextTick(() => {
+                setTimeout(() => {
+                  const textarea = document.getElementById("build-log-textarea");
+                  textarea.scrollTop = textarea.scrollHeight;
+                }, 100);
+              });
+            }
           }
         });
       }, 2000);

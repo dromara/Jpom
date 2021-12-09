@@ -164,7 +164,9 @@ public abstract class BaseProxyHandler extends BaseHandler {
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("记录操作日志异常", e);
 		} finally {
-			attributes.put("proxySession", proxySession);
+			if (proxySession != null) {
+				attributes.put("proxySession", proxySession);
+			}
 		}
 	}
 

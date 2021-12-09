@@ -34,6 +34,8 @@ export default {
       heart: null,
       rows: 40,
       cols: 100,
+      wp: 0,
+      hp: 0,
     };
   },
   computed: {
@@ -69,8 +71,10 @@ export default {
     // 初始化 Terminal
     initTerminal() {
       // 获取容器宽高/字号大小，定义行数和列数
-      this.rows = document.querySelector("#xterm").offsetHeight / 16 - 6;
-      this.cols = document.querySelector("#xterm").offsetWidth / 14;
+      this.hp = document.querySelector("#xterm").offsetHeight;
+      this.wp = document.querySelector("#xterm").offsetWidth;
+      this.rows = this.hp / 16 - 6;
+      this.cols = this.wp / 8;
       //
       this.terminal = new Terminal({
         fontSize: 14,
@@ -102,20 +106,20 @@ export default {
           // 窗口大小改变时，触发xterm的resize方法使自适应
           fitAddon.fit();
           // 窗口大小改变时触发xterm的resize方法，向后端发送行列数，格式由后端决定
-          // this.terminal.onResize((size) => {
-          //   this.socket.onSend({ Op: "resize", Cols: size.cols, Rows: size.rows });
-          // });
+          this.terminal.onResize((size) => {
+            this.sendJson({ data: "resize", cols: size.cols, rows: size.rows, wp: this.wp, hp: this.hp });
+          });
         } catch (e) {
           console.log("e", e.message);
         }
       });
-      //this.socket.send({ Op: "resize", Cols: this.cols, Rows: this.rows });
+      this.sendJson({ data: "resize", cols: this.cols, rows: this.rows, wp: this.wp, hp: this.hp });
       // 创建心跳，防止掉线
       this.heart = setInterval(() => {
         let op = {
           data: "jpom-heart",
         };
-        this.socket.send(JSON.stringify(op));
+        this.sendJson(op);
       }, 5000);
       // this.terminal.onKey(data => {
       //   this.keyCode = data.domEvent.keyCode;
@@ -144,6 +148,9 @@ export default {
       //   // 将每次输入的字符拼凑起来
       //   this.text += data.key;
       // })
+    },
+    sendJson(data) {
+      this.socket.send(JSON.stringify(data));
     },
   },
 };

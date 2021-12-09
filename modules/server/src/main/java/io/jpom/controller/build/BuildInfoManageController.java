@@ -169,6 +169,12 @@ public class BuildInfoManageController extends BaseServerController {
 		Assert.notNull(item, "没有对应数据");
 		Assert.state(buildId <= item.getBuildId(), "还没有对应的构建记录");
 
+		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
+		buildHistoryLog.setBuildDataId(id);
+		buildHistoryLog.setBuildNumberId(buildId);
+		BuildHistoryLog queryByBean = dbBuildHistoryLogService.queryByBean(buildHistoryLog);
+		Assert.notNull(queryByBean, "没有对应的构建历史");
+
 		File file = BuildUtil.getLogFile(item.getId(), buildId);
 		Assert.state(FileUtil.isFile(file), "日志文件错误");
 
@@ -180,9 +186,10 @@ public class BuildInfoManageController extends BaseServerController {
 		}
 		JSONObject data = new JSONObject();
 		// 运行中
-		data.put("run", item.getStatus() == BuildStatus.Ing.getCode() || item.getStatus() == BuildStatus.PubIng.getCode());
+		Integer status = queryByBean.getStatus();
+		data.put("run", status == BuildStatus.Ing.getCode() || status == BuildStatus.PubIng.getCode());
 		// 构建中
-		data.put("buildRun", item.getStatus() == BuildStatus.Ing.getCode());
+		data.put("buildRun", status == BuildStatus.Ing.getCode());
 		// 读取文件
 		int linesInt = Convert.toInt(line, 1);
 		LimitQueue<String> lines = new LimitQueue<>(500);
