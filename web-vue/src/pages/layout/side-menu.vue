@@ -2,29 +2,26 @@
   <a-menu theme="dark" mode="inline" v-model="selectedKeys">
     <a-sub-menu v-for="menu in getMenus" :key="menu.id">
       <span slot="title">
-        <a-icon :type="menu.icon_v3" :style="{ fontSize: '18px'}" />
-        <span>{{menu.title}}</span>
+        <a-icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
+        <span>{{ menu.title }}</span>
       </span>
       <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleClick(subMenu)">
-        <span>{{subMenu.title}}</span>
+        <span>{{ subMenu.title }}</span>
       </a-menu-item>
     </a-sub-menu>
   </a-menu>
 </template>
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters } from "vuex";
 export default {
   data() {
     return {
       selectedKeys: [],
-      timer: null
-    }
+      timer: null,
+    };
   },
   computed: {
-    ...mapGetters([
-      'getMenus',
-      'getActiveMenuKey'
-    ])
+    ...mapGetters(["getMenus", "getActiveMenuKey"]),
   },
   created() {
     this.activeMenu();
@@ -40,21 +37,23 @@ export default {
       // 如果路由不存在
       if (!menu.path) {
         this.$notification.error({
-          message: '路由无效，无法跳转',
-          
+          message: "路由无效，无法跳转",
         });
         return false;
       }
       // 如果跳转路由跟当前一致
       if (this.$route.path === menu.path) {
         this.$notification.warn({
-          message: '已经在当前页面了',
-          
+          message: "已经在当前页面了",
         });
         return false;
       }
       // 跳转路由
-      this.$router.push(menu.path)
+      this.$router.push({
+        query: { ...this.$route.query },
+        path: menu.path,
+      });
+      // this.$router.push()
     },
     // 自动激活当前菜单
     activeMenu() {
@@ -63,7 +62,7 @@ export default {
           this.selectedKeys = [this.getActiveMenuKey];
         }
       }, 1000);
-    }
-  }
-}
+    },
+  },
+};
 </script>

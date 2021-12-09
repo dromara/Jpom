@@ -34,7 +34,7 @@
           <a-switch v-model="temp.autoRestart" checked-children="开" un-checked-children="关" />
         </a-form-model-item>
         <a-form-model-item label="监控周期" prop="cycle">
-          <a-radio-group v-model="temp.cycle" name="cycle" :default-value="1">
+          <a-radio-group v-model="temp.cycle" name="cycle">
             <a-radio :value="1">1 分钟</a-radio>
             <a-radio :value="5">5 分钟</a-radio>
             <a-radio :value="10">10 分钟</a-radio>
@@ -275,7 +275,6 @@ export default {
         if (targetKeysTemp.length <= 0) {
           this.$notification.warn({
             message: "请选择报警联系人",
-            
           });
           return false;
         }
@@ -292,7 +291,6 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              
             });
             this.$refs["editMonitorForm"].resetFields();
             this.editMonitorVisible = false;
@@ -314,7 +312,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }

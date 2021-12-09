@@ -25,6 +25,7 @@ package io.jpom.system.init;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -293,10 +294,12 @@ public class LoadJsonConfigToDb {
 		List<Entity> query = monitorNotifyLogService.query("select * from " + tableName + " order by createTime asc limit 1");
 		Entity first = CollUtil.getFirst(query);
 		if (first == null) {
+			this.checkLogFiled(monitorNotifyLogService);
 			return;
 		}
 		Object logId = first.get("logId");
 		if (logId == null) {
+			this.checkLogFiled(monitorNotifyLogService);
 			return;
 		}
 		String sql = "update " + tableName + " set ID = LOGID where ID = '' and LOGID is not null  and LOGID <> '';";
@@ -306,5 +309,14 @@ public class LoadJsonConfigToDb {
 		}
 		// 标记包含旧字段
 		MonitorNotifyLog.HAS_LOG_ID = true;
+	}
+
+	private void checkLogFiled(DbMonitorNotifyLogService monitorNotifyLogService) {
+		//show COLUMNS from tablename
+		List<Entity> query = monitorNotifyLogService.query("show COLUMNS from " + monitorNotifyLogService.getTableName());
+		MonitorNotifyLog.HAS_LOG_ID = query.stream().anyMatch(entity -> {
+			Object field = entity.get("field");
+			return StrUtil.equalsIgnoreCase(StrUtil.toString(field), "LOGID");
+		});
 	}
 }

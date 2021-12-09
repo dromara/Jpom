@@ -113,7 +113,6 @@ public class OperateLogController implements AopLogInterface {
 			//
 			ServletRequestAttributes servletRequestAttributes = BaseServerController.getRequestAttributes();
 			HttpServletRequest request = servletRequestAttributes.getRequest();
-			UserModel userModel = BaseServerController.getUserByThreadLocal();
 			// 获取ip地址
 			cacheInfo.ip = ServletUtil.getClientIP(request);
 			// 获取节点
@@ -124,15 +123,16 @@ public class OperateLogController implements AopLogInterface {
 			cacheInfo.userAgent = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.USER_AGENT);
 			cacheInfo.workspaceId = ServletUtil.getHeaderIgnoreCase(request, Const.WORKSPACEID_REQ_HEADER);
 			//
-			Map<String, String[]> map = ObjectUtil.clone(request.getParameterMap());
+			Map<String, String> map = ServletUtil.getParamMap(request);
 			// 过滤密码字段
-			Set<Map.Entry<String, String[]>> entries = map.entrySet();
-			for (Map.Entry<String, String[]> entry : entries) {
+			Set<Map.Entry<String, String>> entries = map.entrySet();
+			for (Map.Entry<String, String> entry : entries) {
 				String key = entry.getKey();
 				if (StrUtil.containsAnyIgnoreCase(key, "pwd", "password")) {
-					entry.setValue(new String[]{"***"});
+					entry.setValue("***");
 				}
 			}
+			map.put("request_url", request.getRequestURI());
 			cacheInfo.reqData = JSONObject.toJSONString(map);
 			CACHE_INFO_THREAD_LOCAL.set(cacheInfo);
 		}
