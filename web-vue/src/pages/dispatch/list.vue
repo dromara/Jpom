@@ -5,6 +5,19 @@
       <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleLink">添加关联项目</a-button>
       <a-button type="primary" @click="handleAdd">创建分发项目</a-button>
+      <a-tooltip>
+        <template slot="title">
+          <div>节点分发是指,一个项目运行需要在多个节点(服务器)中运行,使用节点分发来统一管理这个项目(可以实现分布式项目管理功能)</div>
+
+          <div>
+            <ul>
+              <li>添加关联项目是指,将已经在节点中创建好的项目关联为节点分发项目来实现统一管理</li>
+              <li>创建分发项目是指,全新创建一个属于节点分发到项目,创建成功后项目信息将自动同步到对应的节点中,修改节点分发信息也自动同步到对应的节点中</li>
+            </ul>
+          </div>
+        </template>
+        <a-icon type="question-circle" theme="filled" />
+      </a-tooltip>
     </div>
     <!-- 表格 :scroll="{x: 740, y: tableHeight - 60}" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="this.pagination" @change="changePage">
@@ -23,7 +36,7 @@
         <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
         <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
         <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-button type="danger" v-if="!list_expanded[record.id]" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
       <a-table
@@ -413,6 +426,7 @@ export default {
         whitelistDirectory: [{ required: true, message: "请选择项目白名单路径", trigger: "blur" }],
         lib: [{ required: true, message: "请输入项目文件夹", trigger: "blur" }],
         afterOpt: [{ required: true, message: "请选择发布后操作", trigger: "blur" }],
+        url: [{ required: true, message: "请输入远程地址", trigger: "blur" }],
       },
     };
   },

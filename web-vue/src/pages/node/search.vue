@@ -2,7 +2,7 @@
   <div class="full-content">
     <div ref="filter" class="filter">
       <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="filter-item">
-        <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
+        <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
       </a-select>
       <a-input v-model="listQuery['%name%']" placeholder="搜索项目" class="search-input-item" />
 
@@ -31,6 +31,13 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ nodeMap[text] }}</span>
+      </a-tooltip>
+      <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
+        <span>{{ item.whitelistDirectory + item.lib }}</span>
+      </a-tooltip>
+
       <template slot="status" slot-scope="text, record">
         <a-tooltip v-if="record.runMode !== 'File'" placement="topLeft" title="状态操作请到控制台中控制">
           <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
@@ -74,20 +81,19 @@ export default {
       runModeList: runModeList,
       selectedRowKeys: [],
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      nodeList: [],
+      nodeMap: {},
       drawerTitle: "",
       temp: {},
       drawerFileVisible: false,
       drawerConsoleVisible: false,
       columns: [
         { title: "项目名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         {
           title: "项目路径",
           dataIndex: "path",
           ellipsis: true,
-          customRender: (text, item) => {
-            return item.whitelistDirectory + item.lib;
-          },
+          scopedSlots: { customRender: "path" },
         },
         {
           title: "创建时间",
@@ -99,7 +105,7 @@ export default {
           },
           width: 170,
         },
-        { title: "运行方式", dataIndex: "runMode", ellipsis: true, scopedSlots: { customRender: "runMode" } },
+        { title: "运行方式", dataIndex: "runMode", width: 90, ellipsis: true, scopedSlots: { customRender: "runMode" } },
         {
           title: "最后操作人",
           dataIndex: "modifyUser",
@@ -135,7 +141,9 @@ export default {
     this.getNodeProjectData();
     getNodeListAll().then((res) => {
       if (res.code === 200) {
-        this.nodeList = res.data;
+        res.data.forEach((item) => {
+          this.nodeMap[item.id] = item.name;
+        });
       }
     });
   },
@@ -217,7 +225,6 @@ export default {
       if (this.selectedRowKeys.length == 0) {
         this.$notification.warning({
           message: "请选中要启动的项目",
-          
         });
       }
       this.selectedRowKeys.forEach((value) => {
@@ -237,7 +244,6 @@ export default {
       if (this.selectedRowKeys.length == 0) {
         this.$notification.warning({
           message: "请选中要重启的项目",
-          
         });
       }
       console.log(this.selectedRowKeys);
@@ -258,7 +264,6 @@ export default {
       if (this.selectedRowKeys.length == 0) {
         this.$notification.warning({
           message: "请选中要关闭的项目",
-          
         });
       }
       this.selectedRowKeys.forEach((value) => {
@@ -295,7 +300,6 @@ export default {
             if (res.code == 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               return false;
             }

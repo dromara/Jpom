@@ -25,8 +25,11 @@ package io.jpom.outgiving;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -35,7 +38,6 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AfterOpt;
-import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.OutGivingNodeProject;
@@ -44,6 +46,7 @@ import io.jpom.model.log.OutGivingLog;
 import io.jpom.service.dblog.DbOutGivingLogService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.OutGivingServer;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.util.List;
@@ -87,11 +90,8 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 		OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
 		OutGivingModel item = outGivingServer.getByKey(id);
 		Objects.requireNonNull(item, "不存在分发");
-		AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, item.getAfterOpt());
-		if (afterOpt == null) {
-			afterOpt = AfterOpt.No;
-		}
-		AfterOpt finalAfterOpt = afterOpt;
+		AfterOpt afterOpt = ObjectUtil.defaultIfNull(EnumUtil.likeValueOf(AfterOpt.class, item.getAfterOpt()), AfterOpt.No);
+
 		//
 		List<OutGivingNodeProject> outGivingNodeProjects = item.outGivingNodeProjectList();
 		// 开启线程
@@ -111,7 +111,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 						OutGivingRun outGivingRun = new OutGivingRun(item, outGivingNodeProject, file, userModel, unzip);
 						OutGivingNodeProject.Status status = outGivingRun.call();
 						if (status != OutGivingNodeProject.Status.Ok) {
-							if (finalAfterOpt == AfterOpt.Order_Must_Restart) {
+							if (afterOpt == AfterOpt.Order_Must_Restart) {
 								// 完整重启，不再继续剩余的节点项目
 								cancel = true;
 							}
@@ -141,11 +141,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 		this.clearOld = item.isClearOld();
 		this.outGivingNodeProject = outGivingNodeProject;
 		this.file = file;
-		AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, item.getAfterOpt());
-		if (afterOpt == null) {
-			afterOpt = AfterOpt.No;
-		}
-		this.afterOpt = afterOpt;
+		this.afterOpt = ObjectUtil.defaultIfNull(EnumUtil.likeValueOf(AfterOpt.class, item.getAfterOpt()), AfterOpt.No);
 		//
 		NodeService nodeService = SpringUtil.getBean(NodeService.class);
 		this.nodeModel = nodeService.getByKey(outGivingNodeProject.getNodeId());
@@ -233,8 +229,10 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 		synchronized (OutGivingRun.class) {
 			OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
 			OutGivingModel outGivingModel = outGivingServer.getByKey(outGivingId);
-			OutGivingNodeProject finOutGivingNodeProject = null;
+
 			List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
+			Assert.notEmpty(outGivingNodeProjects, "没有分发项目");
+			OutGivingNodeProject finOutGivingNodeProject = null;
 			for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
 				if (!outGivingNodeProject.getProjectId().equalsIgnoreCase(outGivingNodeProjectItem.getProjectId()) ||
 						!outGivingNodeProject.getNodeId().equalsIgnoreCase(outGivingNodeProjectItem.getNodeId())) {
@@ -246,7 +244,12 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 				//
 				finOutGivingNodeProject = outGivingNodeProject;
 			}
-			outGivingServer.update(outGivingModel);
+			{
+				OutGivingModel outGivingModel1 = new OutGivingModel();
+				outGivingModel1.setId(outGivingId);
+				outGivingModel1.outGivingNodeProjectList(outGivingNodeProjects);
+				outGivingServer.update(outGivingModel1);
+			}
 			//
 			OutGivingLog outGivingLog = new OutGivingLog();
 			if (logId != null) {
@@ -266,7 +269,15 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 				// 开始或者 取消都还没有记录
 				dbOutGivingLogService.insert(outGivingLog);
 			} else {
-				dbOutGivingLogService.update(outGivingLog);
+				Entity entity = new Entity();
+				entity.set("status", outGivingLog.getStatus());
+				// 结束
+				entity.set("endTime", System.currentTimeMillis());
+				entity.set("result", outGivingLog.getResult());
+				//
+				Entity where = new Entity();
+				where.set("id", outGivingLog.getId());
+				dbOutGivingLogService.update(entity, where);
 			}
 		}
 	}

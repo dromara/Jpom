@@ -23,6 +23,7 @@
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.crypto.digest.Digester;
@@ -37,6 +38,16 @@ import java.util.regex.Pattern;
  * Created by jiangzeyin on 2019/3/1.
  */
 public class TestString {
+
+	@Test
+	public void test2() {
+		System.out.println(StrUtil.format("#{{}}", 1)
+		);
+
+		String replace = "#{A}";
+		replace = StrUtil.replace(replace, "#{AAAAAAA}", "1");
+		System.out.println(replace);
+	}
 
 	@Test
 	public void test() {
