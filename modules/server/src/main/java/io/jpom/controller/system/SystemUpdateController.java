@@ -33,7 +33,6 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
-import io.jpom.JpomServerApplication;
 import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -126,7 +125,7 @@ public class SystemUpdateController extends BaseServerController {
 		File file = JpomManifest.zipFileFind(path, Type.Server, absolutePath);
 		path = FileUtil.getAbsolutePath(file);
 		// 基础检查
-		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, JpomServerApplication.class);
+		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Server);
 		if (error.getCode() != HttpStatus.HTTP_OK) {
 			return error.toString();
 		}

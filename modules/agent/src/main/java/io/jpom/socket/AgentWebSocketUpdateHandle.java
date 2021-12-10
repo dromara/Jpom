@@ -115,7 +115,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 		try {
 			UploadFileModel uploadFile = UPLOAD_FILE_INFO.get(session.getId());
 			String filePath = uploadFile.getFilePath();
-			JsonMessage<Tuple> error = JpomManifest.checkJpomJar(filePath, Type.Agent.getApplicationClass());
+			JsonMessage<Tuple> error = JpomManifest.checkJpomJar(filePath, Type.Agent);
 			if (error.getCode() != HttpStatus.HTTP_OK) {
 				return error.getMsg();
 			}

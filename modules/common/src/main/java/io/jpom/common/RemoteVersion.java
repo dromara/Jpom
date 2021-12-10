@@ -290,7 +290,7 @@ public class RemoteVersion {
 		// 解析压缩包
 		File file = JpomManifest.zipFileFind(FileUtil.getAbsolutePath(downloadFileFromUrl), type, savePath);
 		// 检查
-		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(FileUtil.getAbsolutePath(file), type.getApplicationClass());
+		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(FileUtil.getAbsolutePath(file), type);
 		Assert.state(error.getCode() == HttpStatus.HTTP_OK, error.getMsg());
 		return error.getData();
 	}

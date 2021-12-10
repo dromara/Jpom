@@ -287,36 +287,25 @@ public class JpomManifest {
 	/**
 	 * 检查是否为jpom包
 	 *
-	 * @param path    路径
-	 * @param clsName 类名
-	 * @return 结果消息
-	 */
-	public static JsonMessage<Tuple> checkJpomJar(String path, Class<?> clsName) {
-		return checkJpomJar(path, clsName.getName(), true);
-	}
-
-	/**
-	 * 检查是否为jpom包
-	 *
 	 * @param path 路径
-	 * @param name 类名
+	 * @param type 类型
 	 * @return 结果消息
 	 * @see Type#getApplicationClass()
 	 */
-	public static JsonMessage<Tuple> checkJpomJar(String path, String name) {
-		return checkJpomJar(path, name, true);
+	public static JsonMessage<Tuple> checkJpomJar(String path, Type type) {
+		return checkJpomJar(path, type, true);
 	}
 
 	/**
 	 * 检查是否为jpom包
 	 *
 	 * @param path        路径
-	 * @param name        类名称
+	 * @param type        类型
 	 * @param checkRepeat 是否检查版本重复
 	 * @return 结果消息
 	 * @see Type#getApplicationClass()
 	 */
-	public static JsonMessage<Tuple> checkJpomJar(String path, String name, boolean checkRepeat) {
+	public static JsonMessage<Tuple> checkJpomJar(String path, Type type, boolean checkRepeat) {
 		String version;
 		File jarFile = new File(path);
 		Tuple jarVersion = getJarVersion(jarFile);
@@ -336,18 +325,16 @@ public class JpomManifest {
 			} catch (ClassNotFoundException notFound) {
 				return new JsonMessage<>(405, "中没有找到对应的MainClass:" + mainClass);
 			}
+			String applicationClass = type.getApplicationClass();
 			ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
-					StrUtil.replace(name, ".", StrUtil.SLASH)));
+					StrUtil.replace(applicationClass, ".", StrUtil.SLASH)));
 			if (entry == null) {
-				return new JsonMessage<>(405, "此包不是Jpom【" + JpomApplication.getAppType().name() + "】包");
+				return new JsonMessage<>(405, "此包不是Jpom【" + type.name() + "】包");
 			}
 			version = jarVersion.get(0);
-			if (StrUtil.isEmpty(version)) {
-				return new JsonMessage<>(405, "此包没有版本号");
-			}
 			String timeStamp = jarVersion.get(1);
-			if (StrUtil.isEmpty(timeStamp)) {
-				return new JsonMessage<>(405, "此包没有版本号");
+			if (StrUtil.hasEmpty(version, timeStamp)) {
+				return new JsonMessage<>(405, "此包没有版本号或者打包时间");
 			}
 
 			if (checkRepeat && StrUtil.equals(version, JpomManifest.getInstance().getVersion()) &&

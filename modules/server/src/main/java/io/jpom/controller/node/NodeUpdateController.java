@@ -99,7 +99,7 @@ public class NodeUpdateController extends BaseServerController {
 		File file = JpomManifest.zipFileFind(path, Type.Agent, saveDir);
 		path = FileUtil.getAbsolutePath(file);
 		// 基础检查
-		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Agent.getApplicationClass(), false);
+		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Agent, false);
 		if (error.getCode() != HttpStatus.HTTP_OK) {
 			FileUtil.del(path);
 			return error.toString();
