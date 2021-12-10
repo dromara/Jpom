@@ -148,7 +148,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 
 
 	private String updateGiving(String id) {
-		OutGivingModel outGivingModel = outGivingServer.getByKey(id);
+		OutGivingModel outGivingModel = outGivingServer.getByKey(id, getRequest());
 		Assert.notNull(outGivingModel, "没有找到对应的分发id");
 		List<Tuple> tuples = doData(outGivingModel, true);
 
@@ -304,7 +304,11 @@ public class OutGivingProjectEditController extends BaseServerController {
 	private List<Tuple> doData(OutGivingModel outGivingModel, boolean edit) {
 		outGivingModel.setName(getParameter("name"));
 		Assert.hasText(outGivingModel.getName(), "分发名称不能为空");
-
+		//
+		int intervalTime = getParameterInt("intervalTime", 10);
+		outGivingModel.setIntervalTime(intervalTime);
+		outGivingModel.setClearOld(Convert.toBool(getParameter("clearOld"), false));
+		//
 		List<NodeModel> nodeModelList = nodeService.listByWorkspace(getRequest());
 		Assert.notEmpty(nodeModelList, "没有任何节点信息");
 

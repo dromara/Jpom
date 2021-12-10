@@ -185,7 +185,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	}
 
 	/**
-	 * 通用的分页查询, 使用该方法查询，数据库表字段不能保护 "page", "limit", "order_field", "order", "total"
+	 * 通用的分页查询, 使用该方法查询，数据库表字段不能包含 "page", "limit", "order_field", "order", "total"
 	 * <p>
 	 * page=1&limit=10&order=ascend&order_field=name
 	 *
@@ -247,6 +247,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	public PageResultDto<T> listPage(Entity where, Page page) {
 		if (ArrayUtil.isEmpty(page.getOrders())) {
 			page.addOrder(new Order("createTimeMillis", Direction.DESC));
+			page.addOrder(new Order("modifyTimeMillis", Direction.DESC));
 		}
 		return super.listPage(where, page);
 	}

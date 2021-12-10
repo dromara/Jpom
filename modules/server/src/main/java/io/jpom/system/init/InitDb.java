@@ -104,6 +104,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 					"classpath:/bin/h2-db-v2.sql",
 					"classpath:/bin/h2-db-v2.1.sql",
 					"classpath:/bin/h2-db-v3.sql",
+					"classpath:/bin/h2-db-v3.1.sql",
 			};
 			// 加载 sql 变更记录，避免重复执行
 			Set<String> executeSqlLog = instance.loadExecuteSqlLog();

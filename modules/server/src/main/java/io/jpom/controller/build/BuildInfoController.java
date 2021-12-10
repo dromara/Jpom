@@ -125,7 +125,7 @@ public class BuildInfoController extends BaseServerController {
 	 * @param script
 	 * @param releaseMethod
 	 * @param branchName
-	 * @param group
+	 * @param webhook
 	 * @param extraData
 	 * @return json
 	 */
@@ -276,7 +276,7 @@ public class BuildInfoController extends BaseServerController {
 		String releaseMethodDataId2Node = jsonObject.getString("releaseMethodDataId_2_node");
 		String releaseMethodDataId2Project = jsonObject.getString("releaseMethodDataId_2_project");
 
-		Assert.state(StrUtil.hasEmpty(releaseMethodDataId2Node, releaseMethodDataId2Project), "请选择节点和项目");
+		Assert.state(!StrUtil.hasEmpty(releaseMethodDataId2Node, releaseMethodDataId2Project), "请选择节点和项目");
 		jsonObject.put("releaseMethodDataId", String.format("%s:%s", releaseMethodDataId2Node, releaseMethodDataId2Project));
 		//
 		String afterOpt = jsonObject.getString("afterOpt");

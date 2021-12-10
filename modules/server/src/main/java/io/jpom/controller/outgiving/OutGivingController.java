@@ -114,7 +114,6 @@ public class OutGivingController extends BaseServerController {
 
 
 	@RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EDIT)
 	public String save(String type, String id) throws IOException {
 		if ("add".equalsIgnoreCase(type)) {
@@ -198,6 +197,11 @@ public class OutGivingController extends BaseServerController {
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
 		Assert.notNull(afterOpt1, "请选择分发后的操作");
 		outGivingModel.setAfterOpt(afterOpt1.getCode());
+		//
+		int intervalTime = getParameterInt("intervalTime", 10);
+		outGivingModel.setIntervalTime(intervalTime);
+		//
+		outGivingModel.setClearOld(Convert.toBool(getParameter("clearOld"), false));
 
 	}
 
@@ -208,7 +212,6 @@ public class OutGivingController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.DEL)
 	public String del(String id) throws IOException {
 		// 判断构建

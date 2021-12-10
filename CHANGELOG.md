@@ -17,6 +17,7 @@
 11. 【agent】项目的 webhook 新增项目启动成功后通知，并且参数新增 `type` 指包括：`beforeStop`,`start`,`stop`,`beforeRestart` 
 12. 【agent】项目新增自启动配置项,在 agent 启动时候检查对应项目是否启动，未启动执行启动逻辑
 13. 【server】构建新增 webhook，实时通知构建进度
+14. 【server】节点分发新增分发间隔时间配置
 
 ### 解决BUG、优化功能
 

@@ -67,27 +67,20 @@
     <!-- 添加/编辑关联项目 -->
     <a-modal v-model="linkDispatchVisible" width="600px" :title="temp.type === 'edit' ? '编辑关联项目' : '添加关联项目'" @ok="handleLinkDispatchOk" :maskClosable="false" @cancel="clearDispatchList">
       <a-form-model ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="分发 ID" prop="id">
+        <a-form-model-item prop="id">
+          <template slot="label">
+            分发 ID
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">分发 ID 等同于项目 ID</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
         <a-form-model-item label="分发名称" prop="name">
           <a-input v-model="temp.name" placeholder="分发名称" />
         </a-form-model-item>
-        <!-- <a-form-model-item label="分发项目" prop="projectId">
-          <a-select v-model="temp.projectId" placeholder="请选择需要分发的项目" @select="selectProject">
-            <a-select-option v-for="project in projectList" :key="project.id">{{ project.name }}</a-select-option>
-          </a-select>
-        </a-form-model-item>
-        <a-form-model-item label="勾选节点" prop="nodeId">
-          <a-transfer
-            :data-source="nodeList"
-            show-search
-            :filter-option="filterOption"
-            :target-keys="targetKeys"
-            :render="item => item.title"
-            @change="handleChange"
-          />
-        </a-form-model-item> -->
+
         <a-form-model-item label="分发节点" required>
           <a-list item-layout="horizontal" :data-source="dispatchList">
             <a-list-item slot="renderItem" slot-scope="item, index" v-if="item.status">
@@ -98,10 +91,10 @@
                 style="width: 140px"
                 :defaultValue="item.index === '' ? undefined : item.index"
                 @change="(value) => handleNodeListChange(value, index)"
-                :disabled="item.index === '' ? false : !nodeNameList[item.index].nodeData.openStatus"
+                :disabled="item.index === '' ? false : !nodeNameList[item.index].nodeData || !nodeNameList[item.index].nodeData.openStatus"
               >
-                <a-select-option :value="index" v-for="(nodeList, index) in nodeNameList" :key="nodeList.id" :disabled="nodeList.nodeData.openStatus !== 1">
-                  {{ nodeList.nodeData.name }}
+                <a-select-option :value="index" v-for="(nodeList, index) in nodeNameList" :key="nodeList.id" :disabled="!nodeList.nodeData || nodeList.nodeData.openStatus !== 1">
+                  {{ nodeList.nodeData && nodeList.nodeData.name }}
                 </a-select-option>
               </a-select>
               <span>项目: </span>
@@ -133,23 +126,51 @@
         </a-form-model-item>
         <a-form-model-item label="分发后操作" prop="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
-            <a-select-option :key="0">不做任何操作</a-select-option>
-            <a-select-option :key="1">并发重启</a-select-option>
-            <a-select-option :key="2">完整顺序重启(有重启失败将结束本次)</a-select-option>
-            <a-select-option :key="3">顺序重启(有重启失败将继续)</a-select-option>
+            <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
+        </a-form-model-item>
+        <a-form-model-item prop="intervalTime">
+          <template slot="label">
+            间隔时间
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+                在执行多节点分发时候使用 顺序重启、完整顺序重启 时候需要保证项目能正常重启,并等待上一个项目启动完成才能关闭下一个项目,请根据自身项目启动时间来配置
+                <li>一般建议 10 秒以上</li>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input v-model="temp.intervalTime" placeholder="分发间隔时间 （顺序重启、完整顺序重启）方式才生效" />
+        </a-form-model-item>
+        <a-form-model-item prop="clearOld">
+          <template slot="label">
+            清空发布
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件现删除后再保存新文件 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 创建/编辑分发项目 -->
     <a-modal v-model="editDispatchVisible" width="600px" :title="temp.type === 'edit' ? '编辑分发项目' : '创建分发项目'" @ok="handleEditDispatchOk" :maskClosable="false">
       <a-form-model ref="editDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="项目 ID" prop="id">
+        <a-form-model-item prop="id">
+          <template slot="label">
+            分发 ID
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">分发 ID 等同于项目 ID</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
         <a-form-model-item label="项目名称" prop="name">
           <a-input v-model="temp.name" placeholder="项目名称" />
         </a-form-model-item>
+
         <a-form-model-item prop="runMode">
           <template slot="label">
             运行方式
@@ -229,11 +250,31 @@
         </a-form-model-item>
         <a-form-model-item label="分发后操作" prop="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
-            <a-select-option :key="0">不做任何操作</a-select-option>
-            <a-select-option :key="1">并发重启</a-select-option>
-            <a-select-option :key="2">完整顺序重启(有重启失败将结束本次)</a-select-option>
-            <a-select-option :key="3">顺序重启(有重启失败将继续)</a-select-option>
+            <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
+        </a-form-model-item>
+        <a-form-model-item prop="intervalTime">
+          <template slot="label">
+            间隔时间
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+                在执行多节点分发时候使用 顺序重启、完整顺序重启 时候需要保证项目能正常重启,并等待上一个项目启动完成才能关闭下一个项目,请根据自身项目启动时间来配置
+                <li>一般建议 10 秒以上</li>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input v-model="temp.intervalTime" placeholder="分发间隔时间 （顺序重启、完整顺序重启）方式才生效" />
+        </a-form-model-item>
+        <a-form-model-item prop="clearOld">
+          <template slot="label">
+            清空发布
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件现删除后再保存新文件 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
         <!-- 节点 -->
         <a-form-model-item label="分发节点" prop="nodeId">
@@ -336,10 +377,7 @@
         </a-form-model-item>
         <a-form-model-item label="分发后操作" prop="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
-            <a-select-option :key="0">不做任何操作</a-select-option>
-            <a-select-option :key="1">并发重启</a-select-option>
-            <a-select-option :key="2">完整顺序重启(有重启失败将结束本次)</a-select-option>
-            <a-select-option :key="3">顺序重启(有重启失败将继续)</a-select-option>
+            <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-model-item>
       </a-form-model>
@@ -358,7 +396,7 @@
 import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
-import { getDishPatchList, getDispatchProject, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch, remoteDownload } from "../../api/dispatch";
+import { getDishPatchList, getDispatchProject, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch, remoteDownload, afterOptList } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, runModeList } from "@/api/node-project";
 import { itemGroupBy, parseTime } from "@/utils/time";
@@ -377,7 +415,7 @@ export default {
       accessList: [],
       nodeList: [],
       projectList: [],
-
+      afterOptList: afterOptList,
       targetKeys: [],
       reqId: "",
       temp: {},
@@ -550,11 +588,17 @@ export default {
             });
             // console.log(ele, eleIndex);
           });
-          this.temp.type = "edit";
-          this.temp.projectId = record.projectId;
-          this.temp.name = record.name;
-          this.temp.afterOpt = record.afterOpt;
-          this.temp.id = record.id;
+          this.temp = {
+            ...{
+              type: "edit",
+              projectId: record.projectId,
+              name: record.name,
+              afterOpt: record.afterOpt,
+              id: record.id,
+              intervalTime: record.intervalTime,
+              clearOld: record.clearOld,
+            },
+          };
 
           this.linkDispatchVisible = true;
         });
@@ -591,9 +635,11 @@ export default {
         }
         // 校验分发节点数据
         if (this.dispatchList.length === 0) {
-          return this.$message.error("请添加分发节点!");
+          this.$notification.error({ message: "请添加分发节点!" });
+          return false;
         } else if (this.dispatchList.length < 2) {
-          return this.$message.error("至少选择2个节点项目");
+          this.$notification.error({ message: "至少选择2个节点项目" });
+          return false;
         }
 
         // 提交
@@ -671,6 +717,8 @@ export default {
                 lib: res.data.lib,
                 logPath: res.data.logPath,
                 nodeIdList: [],
+                intervalTime: record.intervalTime,
+                clearOld: record.clearOld,
               };
             }
             // 添加 nodeIdList
@@ -818,11 +866,11 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              this.$message.success({ content: "上传成功,开始分发!", key, duration: 2 });
-              this.$refs["dispatchForm"].resetFields();
+              this.$message.success({ content: "上传成功,开始分发!", key });
               this.fileList = [];
               this.loadData();
               this.dispatchVisible = false;
+              this.$refs["dispatchForm"].resetFields();
             }
           });
           return true;
@@ -841,10 +889,13 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              this.$message.success({ content: "下载成功,开始分发!", key, duration: 2 });
-              //this.$refs["dispatchForm"].resetFields();
+              this.$message.success({ content: "下载成功,开始分发!", key });
+
               this.loadData();
               this.dispatchVisible = false;
+              this.$refs["dispatchForm"] && this.$refs["dispatchForm"].resetFields();
+            } else {
+              this.$message.warn({ content: "下载失败", key });
             }
           });
           return true;
@@ -900,8 +951,11 @@ export default {
             item.nodeData = this.nodeList.filter((node) => node.id === item.id)[0];
             return item;
           });
+          // .filter((item) => {
+          //   return item.nodeData;
+          // });
           fn && fn();
-          console.log(this.nodeNameList);
+          // console.log(this.nodeNameList);
         }
       });
     },
@@ -938,7 +992,7 @@ export default {
     // 添加分发
     addDispachList() {
       if (this.dispatchList.length >= this.totalProjectNum) {
-        this.$message.error("已无更多节点项目，请先创建项目");
+        this.$$notification.error("已无更多节点项目，请先创建项目");
         return false;
       }
       this.dispatchList.push({ nodeId: "", projectId: "", index: "", project: [], status: true, placeholder: "请先选择节点", disabled: true });

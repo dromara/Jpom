@@ -250,7 +250,7 @@ import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
 import { getRepositoryListAll } from "../../api/repository";
 import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildList, getTriggerUrl, releaseMethodMap, releaseMethodArray, resetTrigger, startBuild, stopBuild, statusMap } from "@/api/build-info";
-import { getDishPatchListAll } from "../../api/dispatch";
+import { getDishPatchListAll, afterOptList } from "@/api/dispatch";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { getSshListAll } from "../../api/ssh";
 import { itemGroupBy, parseTime } from "@/utils/time";
@@ -286,12 +286,7 @@ export default {
       editBuildVisible: false,
       triggerVisible: false,
       buildLogVisible: false,
-      afterOptList: [
-        { title: "不做任何操作", value: 0 },
-        { title: "并发重启", value: 1 },
-        { title: "完整顺序重启(有重启失败将结束本次)", value: 2 },
-        { title: "顺序重启(有重启失败将继续)", value: 3 },
-      ],
+      afterOptList: afterOptList,
       columns: [
         { title: "名称", dataIndex: "name", width: 100, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         // { title: "分组", dataIndex: "group", key: "group%", sorter: true, width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
@@ -599,7 +594,7 @@ export default {
             this.$refs["editBuildForm"].resetFields();
             this.editBuildVisible = false;
             this.handleFilter();
-            this.loadGroupList();
+            // this.loadGroupList();
           }
         });
       });

@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -97,6 +98,9 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		}
 		if (create) {
 			this.insert(nodeModel);
+			// 同步项目
+			ProjectInfoCacheService projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
+			projectInfoCacheService.syncNode(nodeModel);
 		} else {
 			this.update(nodeModel);
 		}

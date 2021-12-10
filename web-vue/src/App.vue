@@ -28,6 +28,8 @@ export default {
       top: "100px",
       duration: 4,
     });
+
+    this.$message.config({ duration: 4 });
   },
   methods: {
     reload() {

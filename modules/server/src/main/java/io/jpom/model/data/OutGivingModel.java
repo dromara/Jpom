@@ -39,7 +39,14 @@ import java.util.List;
  */
 @TableName(value = "OUT_GIVING", name = "节点分发")
 public class OutGivingModel extends BaseWorkspaceModel {
+	/**
+	 * 名称
+	 */
 	private String name;
+	/**
+	 * 分发间隔时间
+	 */
+	private Integer intervalTime;
 	/**
 	 * 节点下的项目列表
 	 */
@@ -56,6 +63,14 @@ public class OutGivingModel extends BaseWorkspaceModel {
 	 * 是否为单独创建的分发项目
 	 */
 	private Boolean outGivingProject;
+
+	public Integer getIntervalTime() {
+		return intervalTime;
+	}
+
+	public void setIntervalTime(Integer intervalTime) {
+		this.intervalTime = intervalTime;
+	}
 
 	public Boolean getClearOld() {
 		return clearOld;

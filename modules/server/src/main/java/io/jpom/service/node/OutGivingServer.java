@@ -17,9 +17,6 @@ import java.util.List;
 @Service
 public class OutGivingServer extends BaseWorkspaceService<OutGivingModel> {
 
-//    public OutGivingServer() {
-//        super(ServerConfigBean.OUTGIVING);
-//    }
 
 	public boolean checkNode(String nodeId, HttpServletRequest request) {
 		List<OutGivingModel> list = super.listByWorkspace(request);

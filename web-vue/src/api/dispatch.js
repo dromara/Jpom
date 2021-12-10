@@ -169,3 +169,10 @@ export function editDispatchWhiteList(params) {
     data: params,
   });
 }
+
+export const afterOptList = [
+  { title: "不做任何操作", value: 0 },
+  { title: "并发重启", value: 1 },
+  { title: "完整顺序重启(有重启失败将结束本次)", value: 2 },
+  { title: "顺序重启(有重启失败将继续)", value: 3 },
+];
