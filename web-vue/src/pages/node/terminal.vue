@@ -5,7 +5,7 @@
 import "xterm/css/xterm.css";
 import "xterm/lib/xterm.js";
 import { Terminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";
+// import { FitAddon } from "xterm-addon-fit";
 import { AttachAddon } from "xterm-addon-attach";
 import { mapGetters } from "vuex";
 
@@ -71,10 +71,13 @@ export default {
     // 初始化 Terminal
     initTerminal() {
       // 获取容器宽高/字号大小，定义行数和列数
-      this.hp = document.querySelector("#xterm").offsetHeight;
-      this.wp = document.querySelector("#xterm").offsetWidth;
-      this.rows = this.hp / 16 - 6;
-      this.cols = this.wp / 8;
+      // // this.hp = ;
+      // this.wp = 100;
+      //;
+      this.rows = document.querySelector("#xterm").offsetHeight / 16;
+      this.cols = document.querySelector("#xterm").offsetWidth / 8;
+      this.hp = this.rows * 8;
+      this.wp = this.cols * 8;
       //
       this.terminal = new Terminal({
         fontSize: 14,
@@ -94,25 +97,25 @@ export default {
       });
       // const attachAddon = new AttachAddon(this.socket, { bidirectional: false });
       const attachAddon = new AttachAddon(this.socket);
-      const fitAddon = new FitAddon();
+      // const fitAddon = new FitAddon();
       this.terminal.loadAddon(attachAddon);
-      this.terminal.loadAddon(fitAddon);
+      // this.terminal.loadAddon(fitAddon);
       this.terminal.open(document.getElementById("xterm"));
       this.terminal.focus();
-      fitAddon.fit();
+      // fitAddon.fit();
       //
-      window.addEventListener("resize", () => {
-        try {
-          // 窗口大小改变时，触发xterm的resize方法使自适应
-          fitAddon.fit();
-          // 窗口大小改变时触发xterm的resize方法，向后端发送行列数，格式由后端决定
-          this.terminal.onResize((size) => {
-            this.sendJson({ data: "resize", cols: size.cols, rows: size.rows, wp: this.wp, hp: this.hp });
-          });
-        } catch (e) {
-          console.log("e", e.message);
-        }
-      });
+      // window.addEventListener("resize", () => {
+      //   try {
+      //     // 窗口大小改变时，触发xterm的resize方法使自适应
+      //     fitAddon.fit();
+      //     // 窗口大小改变时触发xterm的resize方法，向后端发送行列数，格式由后端决定
+      //     this.terminal.onResize((size) => {
+      //       this.sendJson({ data: "resize", cols: size.cols, rows: size.rows, wp: this.wp, hp: this.hp });
+      //     });
+      //   } catch (e) {
+      //     console.log("e", e.message);
+      //   }
+      // });
       this.sendJson({ data: "resize", cols: this.cols, rows: this.rows, wp: this.wp, hp: this.hp });
       // 创建心跳，防止掉线
       this.heart = setInterval(() => {
@@ -121,33 +124,6 @@ export default {
         };
         this.sendJson(op);
       }, 5000);
-      // this.terminal.onKey(data => {
-      //   this.keyCode = data.domEvent.keyCode;
-      //   // 将输入的字符打印到黑板中
-      //   this.terminal.write(data.key);
-      //   // 输入回车
-      //   if (this.keyCode === 13) {
-      //     // 使用 webscoket 发送数据
-      //     let op = {
-      //       'data': this.text + '\r'
-      //     }
-      //     this.socket.send(JSON.stringify(op));
-      //     this.text = '';
-      //     return;
-      //   }
-      //   // 删除按钮
-      //   if (this.keyCode === 8) {
-      //     // 截取字符串[0,lenth-1]
-      //     this.text = this.text.substr(0,this.text.length-1);
-      //     // 清空当前一条的命令(光标前移 n 个字符，删除光标之后的数据)
-      //     this.terminal.write(`\x1b[${this.text.length + 1}D\x1b[0J`);
-      //     // 简化当前的新的命令显示上
-      //     this.terminal.write(this.text);
-      //     return;
-      //   }
-      //   // 将每次输入的字符拼凑起来
-      //   this.text += data.key;
-      // })
     },
     sendJson(data) {
       this.socket.send(JSON.stringify(data));
@@ -155,3 +131,10 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="stylus">
+
+.xterm{
+margin-left: -8px;
+}
+</style>
