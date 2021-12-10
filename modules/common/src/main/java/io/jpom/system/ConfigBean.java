@@ -30,6 +30,7 @@ import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
@@ -84,6 +85,9 @@ public class ConfigBean {
 	 */
 	@Value("${server.port}")
 	private int port;
+
+	@Value("${" + ConfigFileApplicationListener.ACTIVE_PROFILES_PROPERTY + "}")
+	private String active;
 
 	private volatile static ConfigBean configBean;
 
@@ -148,6 +152,14 @@ public class ConfigBean {
 		return FileUtil.normalize(dataPath + StrUtil.SLASH + ConfigBean.AUTHORIZE);
 	}
 
+	/**
+	 * 是否为 pro 模式运行
+	 *
+	 * @return pro
+	 */
+	public boolean isPro() {
+		return StrUtil.equals(this.active, "pro");
+	}
 
 	/**
 	 * 获取临时文件存储路径
@@ -156,7 +168,8 @@ public class ConfigBean {
 	 */
 	public File getTempPath() {
 		File file = new File(ConfigBean.getInstance().getDataPath());
-		file = new File(file.getPath() + "/temp/");
+		file = FileUtil.file(file, "temp");
+		//new File(file.getPath() + "/temp/");
 		FileUtil.mkdir(file);
 		return file;
 	}

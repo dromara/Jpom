@@ -40,6 +40,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.JpomManifest;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.system.WorkspaceService;
+import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import org.springframework.beans.factory.DisposableBean;
@@ -76,14 +77,14 @@ public class InitDb implements DisposableBean, InitializingBean {
 		setting.set("maxWait", "10");
 		setting.set("minIdle", "1");
 		// 调试模式显示sql 信息
-		if (JpomManifest.getInstance().isDebug()) {
+		if (!ConfigBean.getInstance().isPro()) {
 
 			setting.set(SqlLog.KEY_SHOW_SQL, "true");
-			/**
-			 * @author Hotstrip
-			 * sql log only show when it's needed,
-			 * if you want to check init sql,
-			 * set the [sqlLevel] from [DEBUG] to [INFO]
+			/*
+			  @author Hotstrip
+			  sql log only show when it's needed,
+			  if you want to check init sql,
+			  set the [sqlLevel] from [DEBUG] to [INFO]
 			 */
 			setting.set(SqlLog.KEY_SQL_LEVEL, "DEBUG");
 			setting.set(SqlLog.KEY_SHOW_PARAMS, "true");

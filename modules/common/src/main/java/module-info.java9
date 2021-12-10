@@ -1,3 +1,0 @@
-module io.jpom {
-    requires javax.management;
-}
