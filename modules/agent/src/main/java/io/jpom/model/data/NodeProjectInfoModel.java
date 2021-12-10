@@ -27,10 +27,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HtmlUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.request.XssFilter;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.model.BaseModel;
 import io.jpom.model.RunMode;
@@ -50,7 +48,7 @@ import java.util.stream.Collectors;
  * @author jiangzeyin
  */
 public class NodeProjectInfoModel extends BaseModel {
-//	/**
+	//	/**
 //	 * 分组
 //	 */
 //	private String group;
@@ -115,6 +113,11 @@ public class NodeProjectInfoModel extends BaseModel {
 
 	private String workspaceId;
 
+	/**
+	 * 项目自动启动
+	 */
+	private Boolean autoStart;
+
 	public String getWorkspaceId() {
 		return workspaceId;
 	}
@@ -177,21 +180,6 @@ public class NodeProjectInfoModel extends BaseModel {
 		this.modifyUser = modifyUser;
 	}
 
-	/**
-	 * 项目是否正在运行
-	 *
-	 * @return true 正在运行
-	 */
-	public boolean tryGetStatus() {
-		try {
-			status = AbstractProjectCommander.getInstance().isRun(getId());
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("检查项目状态错误", e);
-			status = false;
-		}
-		return status;
-	}
-
 	public void setStatus(boolean status) {
 		this.status = status;
 	}
@@ -240,7 +228,16 @@ public class NodeProjectInfoModel extends BaseModel {
 			this.jvm = jvm;
 		}
 	}
-//
+
+	public Boolean getAutoStart() {
+		return autoStart;
+	}
+
+	public void setAutoStart(Boolean autoStart) {
+		this.autoStart = autoStart;
+	}
+
+	//
 //	public String getGroup() {
 //		if (StrUtil.isEmpty(group)) {
 //			return "默认";
@@ -563,20 +560,6 @@ public class NodeProjectInfoModel extends BaseModel {
 
 		public void setModifyTime(String modifyTime) {
 			this.modifyTime = modifyTime;
-		}
-
-		/**
-		 * 项目是否正在运行
-		 *
-		 * @return true 正在运行
-		 */
-		public boolean tryGetStatus() {
-			try {
-				return AbstractProjectCommander.getInstance().isRun(getTagId());
-			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("检查项目状态错误", e);
-				return false;
-			}
 		}
 
 		public String getParendId() {

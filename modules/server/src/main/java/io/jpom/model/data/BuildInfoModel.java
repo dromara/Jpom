@@ -47,6 +47,7 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 	/**
 	 * 分组名称
 	 */
+	@Deprecated
 	private String group;
 	/**
 	 * 分支
@@ -85,6 +86,9 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 	 */
 	private String extraData;
 
+
+	private String webhook;
+
 	public String getRepositoryId() {
 		return repositoryId;
 	}
@@ -115,6 +119,14 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 
 	public void setGroup(String group) {
 		this.group = group;
+	}
+
+	public String getWebhook() {
+		return webhook;
+	}
+
+	public void setWebhook(String webhook) {
+		this.webhook = webhook;
 	}
 
 	public String getBranchName() {

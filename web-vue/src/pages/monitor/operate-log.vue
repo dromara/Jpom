@@ -4,7 +4,6 @@
       <a-input v-model="listQuery['%name%']" placeholder="监控名称" class="search-input-item" />
       <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" @change="changePage" bordered :rowKey="(record, index) => index">
@@ -64,7 +63,14 @@
             @change="handleMethodFeatureChange"
           />
         </a-form-model-item>
-        <a-form-model-item label="报警联系人" prop="notifyUser" class="jpom-monitor-notify">
+        <a-form-model-item prop="notifyUser" class="jpom-monitor-notify">
+          <template slot="label">
+            报警联系人
+            <a-tooltip v-show="!temp.id">
+              <template slot="title"> 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-transfer :data-source="userList" :lazy="false" show-search :filter-option="filterOption" :target-keys="notifyUserKeys" :render="(item) => item.title" @change="handleNotifyUserChange" />
         </a-form-model-item>
       </a-form-model>
@@ -267,28 +273,24 @@ export default {
         if (this.monitorUserKeys.length === 0) {
           this.$notification.error({
             message: "请选择监控用户",
-            
           });
           return false;
         }
         if (this.methodFeatureKeys.length === 0) {
           this.$notification.error({
             message: "请选择监控操作",
-            
           });
           return false;
         }
         if (this.classFeatureKeys.length === 0) {
           this.$notification.error({
             message: "请选择监控的功能",
-            
           });
           return false;
         }
         if (this.notifyUserKeys.length === 0) {
           this.$notification.error({
             message: "请选择报警联系人",
-            
           });
           return false;
         }
@@ -303,7 +305,6 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              
             });
             this.$refs["editMonitorForm"].resetFields();
             this.editOperateMonitorVisible = false;
@@ -325,7 +326,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }

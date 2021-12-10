@@ -357,6 +357,8 @@ public class OutGivingProjectEditController extends BaseServerController {
 			allData.put("jvm", jvm);
 			String args = getParameter(StrUtil.format("{}_args", nodeModel.getId()));
 			allData.put("args", args);
+			String autoStart = getParameter(StrUtil.format("{}_autoStart", nodeModel.getId()));
+			allData.put("autoStart", Convert.toBool(autoStart, false));
 			// 项目副本
 			String javaCopyIds = getParameter(StrUtil.format("{}_javaCopyIds", nodeModel.getId()));
 			allData.put("javaCopyIds", javaCopyIds);

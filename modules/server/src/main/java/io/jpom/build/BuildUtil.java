@@ -26,6 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.core.util.ZipUtil;
+import cn.hutool.crypto.SecureUtil;
 import io.jpom.common.Const;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
@@ -171,7 +172,13 @@ public class BuildUtil {
 			String rsaPath = StrUtil.removePrefix(repositoryModel.getRsaPrv(), URLUtil.FILE_URL_PREFIX);
 			rsaFile = FileUtil.file(rsaPath);
 		} else {
-			rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
+			if (StrUtil.isEmpty(repositoryModel.getId())) {
+				rsaFile = FileUtil.file(ConfigBean.getInstance().getTempPath(), Const.SSH_KEY, SecureUtil.sha1(repositoryModel.getGitUrl()) + Const.ID_RSA);
+			} else {
+				rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
+			}
+			// 写入
+			FileUtil.writeUtf8String(repositoryModel.getRsaPrv(), rsaFile);
 		}
 		Assert.state(FileUtil.isFile(rsaFile), "仓库密钥文件不存在或者异常,请检查后操作");
 		return rsaFile;

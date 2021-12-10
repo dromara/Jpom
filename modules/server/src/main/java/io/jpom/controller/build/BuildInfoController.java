@@ -24,8 +24,9 @@ package io.jpom.controller.build;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Tuple;
-import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
@@ -136,7 +137,7 @@ public class BuildInfoController extends BaseServerController {
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200")) String resultDirFile,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
 								@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
-								String branchName, String branchTagName, String group,
+								String branchName, String branchTagName, String webhook,
 								String extraData) {
 		// 根据 repositoryId 查询仓库信息
 		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, getRequest());
@@ -153,13 +154,15 @@ public class BuildInfoController extends BaseServerController {
 			Assert.state(!CommandUtil.checkContainsDel(script), "不能包含删除命令");
 		}
 		// 查询构建信息
-		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
+		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
 		if (null == buildInfoModel) {
 			buildInfoModel = new BuildInfoModel();
-			buildInfoModel.setId(IdUtil.fastSimpleUUID());
 		}
 		// 设置参数
-		buildInfoModel.setGroup(group);
+		if (StrUtil.isNotEmpty(webhook)) {
+			Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
+		}
+		buildInfoModel.setWebhook(webhook);
 		buildInfoModel.setRepositoryId(repositoryId);
 		buildInfoModel.setName(name);
 		buildInfoModel.setBranchName(branchName);
@@ -177,17 +180,12 @@ public class BuildInfoController extends BaseServerController {
 
 		// 验证发布方式 和 extraData 信息
 		if (releaseMethod1 == BuildReleaseMethod.Project) {
-			String formatProject = formatProject(jsonObject);
-			if (formatProject != null) {
-				return formatProject;
-			}
+			this.formatProject(jsonObject);
 		} else if (releaseMethod1 == BuildReleaseMethod.Ssh) {
 			this.formatSsh(jsonObject);
 		} else if (releaseMethod1 == BuildReleaseMethod.Outgiving) {
 			String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_1");
-			if (StrUtil.isEmpty(releaseMethodDataId)) {
-				return JsonMessage.getString(405, "请选择分发项目");
-			}
+			Assert.hasText(releaseMethodDataId, "请选择分发项目");
 			jsonObject.put("releaseMethodDataId", releaseMethodDataId);
 		} else if (releaseMethod1 == BuildReleaseMethod.LocalCommand) {
 			this.formatLocalCommand(jsonObject);
@@ -273,14 +271,12 @@ public class BuildInfoController extends BaseServerController {
 	 * 当发布方式为【项目】的时候
 	 *
 	 * @param jsonObject 配置信息
-	 * @return null 没有错误信息
 	 */
-	private String formatProject(JSONObject jsonObject) {
+	private void formatProject(JSONObject jsonObject) {
 		String releaseMethodDataId2Node = jsonObject.getString("releaseMethodDataId_2_node");
 		String releaseMethodDataId2Project = jsonObject.getString("releaseMethodDataId_2_project");
-		if (StrUtil.isEmpty(releaseMethodDataId2Node) || StrUtil.isEmpty(releaseMethodDataId2Project)) {
-			return JsonMessage.getString(405, "请选择节点和项目");
-		}
+
+		Assert.state(StrUtil.hasEmpty(releaseMethodDataId2Node, releaseMethodDataId2Project), "请选择节点和项目");
 		jsonObject.put("releaseMethodDataId", String.format("%s:%s", releaseMethodDataId2Node, releaseMethodDataId2Project));
 		//
 		String afterOpt = jsonObject.getString("afterOpt");
@@ -290,7 +286,6 @@ public class BuildInfoController extends BaseServerController {
 		String clearOld = jsonObject.getString("clearOld");
 		jsonObject.put("afterOpt", afterOpt1.getCode());
 		jsonObject.put("clearOld", Convert.toBool(clearOld, false));
-		return null;
 	}
 
 	/**

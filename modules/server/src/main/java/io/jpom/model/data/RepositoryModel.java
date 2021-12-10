@@ -64,6 +64,7 @@ public class RepositoryModel extends BaseWorkspaceModel {
 	/**
 	 * SSH RSA 公钥
 	 */
+	@Deprecated
 	private String rsaPub;
 	/**
 	 * SSH RSA 私钥
@@ -134,10 +135,12 @@ public class RepositoryModel extends BaseWorkspaceModel {
 		this.password = password;
 	}
 
+	@Deprecated
 	public String getRsaPub() {
 		return rsaPub;
 	}
 
+	@Deprecated
 	public void setRsaPub(String rsaPub) {
 		this.rsaPub = rsaPub;
 	}

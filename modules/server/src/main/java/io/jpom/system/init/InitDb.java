@@ -101,6 +101,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 					"classpath:/bin/h2-db-v1.sql",
 					"classpath:/bin/h2-db-v1.1.sql",
 					"classpath:/bin/h2-db-v2.sql",
+					"classpath:/bin/h2-db-v2.1.sql",
 					"classpath:/bin/h2-db-v3.sql",
 			};
 			// 加载 sql 变更记录，避免重复执行

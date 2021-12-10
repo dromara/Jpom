@@ -203,8 +203,31 @@
           </template>
           <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
         </a-form-model-item>
-        <a-form-model-item label="WebHooks" prop="token" v-show="temp.runMode && temp.runMode !== 'File'" class="jpom-node-project-token">
-          <a-input v-model="temp.token" placeholder="关闭程序时自动请求,非必填，GET请求" />
+        <a-form-model-item prop="autoStart">
+          <template slot="label">
+            自启动
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-switch v-model="temp.autoStart" checked-children="开" un-checked-children="关" />
+        </a-form-model-item>
+        <a-form-model-item prop="token" v-show="temp.runMode && temp.runMode !== 'File'" class="jpom-node-project-token">
+          <template slot="label">
+            WebHooks
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+                <ul>
+                  <li>项目启动,停止,重启都将请求对应的地址</li>
+                  <li>传人参数有：projectId、projectName、type、copyId、result</li>
+                  <li>type 的值有：stop、beforeStop、start、beforeRestart</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input v-model="temp.token" placeholder="项目启动,停止,重启都将请求对应的地址,非必填，GET请求" />
         </a-form-model-item>
         <a-form-model-item v-show="temp.type === 'edit' && temp.runMode !== 'File'" label="日志路径" prop="log">
           <a-alert :message="temp.log" type="success" />
@@ -505,7 +528,6 @@ export default {
       if (this.temp.outGivingProject) {
         this.$notification.warning({
           message: "独立的项目分发请到分发管理中去修改",
-          
         });
         return;
       }
@@ -531,7 +553,6 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              
             });
             this.$refs["editProjectForm"].resetFields();
             this.editProjectVisible = false;
@@ -600,7 +621,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }
@@ -625,8 +645,7 @@ export default {
           if (res.code !== 200) {
             this.$notification.warning({
               message: res.msg,
-              description: '提示',
-              
+              description: "提示",
             });
           }
         });
@@ -666,7 +685,6 @@ export default {
       if (this.selectedRows.length == 0) {
         this.$notification.warning({
           message: "请选中要启动的项目",
-          
         });
       }
       this.selectedRows.forEach((value) => {
@@ -687,7 +705,6 @@ export default {
       if (this.selectedRows.length == 0) {
         this.$notification.warning({
           message: "请选中要重启的项目",
-          
         });
       }
       this.selectedRows.forEach((value) => {
@@ -707,7 +724,6 @@ export default {
       if (this.selectedRows.length == 0) {
         this.$notification.warning({
           message: "请选中要关闭的项目",
-          
         });
       }
       this.selectedRows.forEach((value) => {

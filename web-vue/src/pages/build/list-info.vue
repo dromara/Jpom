@@ -181,6 +181,22 @@
         <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" label="清空发布" prop="clearOld">
           <a-switch v-model="tempExtraData.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
+        <a-form-model-item prop="webhook">
+          <template slot="label">
+            WebHooks
+            <a-tooltip v-show="!temp.id">
+              <template slot="title">
+                <ul>
+                  <li>构建过程请求对应的地址,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
+                  <li>传人参数有：buildId、buildName、type、error</li>
+                  <li>type 的值有：startReady、pull、executeCommand、release、done、stop、success</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 触发器 -->
@@ -253,7 +269,7 @@ export default {
         { title: "顺序重启(有重启失败将继续)", value: 3 },
       ],
       columns: [
-        { title: "名称", dataIndex: "name", width: 150, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "名称", dataIndex: "name", width: 100, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         // { title: "分组", dataIndex: "group", key: "group%", sorter: true, width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
         {
           title: "分支",
@@ -627,19 +643,27 @@ export default {
     },
     // 开始构建
     handleStartBuild(record) {
-      this.temp = Object.assign(record);
-      startBuild(this.temp.id).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
+      this.$confirm({
+        title: "系统提示",
+        content: "确定要开始构建 【名称：" + record.name + "】 【分支：" + record.branchName + "】 吗？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          this.temp = Object.assign(record);
+          startBuild(this.temp.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.handleFilter();
+              // 自动打开构建日志
+              this.handleBuildLog({
+                id: this.temp.id,
+                buildId: res.data,
+              });
+            }
           });
-          this.handleFilter();
-          // 自动打开构建日志
-          this.handleBuildLog({
-            id: this.temp.id,
-            buildId: res.data,
-          });
-        }
+        },
       });
     },
     // 停止构建

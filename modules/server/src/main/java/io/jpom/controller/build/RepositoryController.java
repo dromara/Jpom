@@ -103,30 +103,19 @@ public class RepositoryController extends BaseServerController {
 	@Feature(method = MethodFeature.EDIT)
 	public Object editRepository(RepositoryModel repositoryModelReq) {
 		this.checkInfo(repositoryModelReq);
-
-		if (StrUtil.isEmpty(repositoryModelReq.getId())) {
-			// insert data
-			repositoryService.insert(repositoryModelReq);
-		} else {
-			// update data
-			if (StrUtil.isEmpty(repositoryModelReq.getRsaPrv())) {
-				repositoryModelReq.setRsaPrv(null);
-			}
-			if (StrUtil.isEmpty(repositoryModelReq.getPassword())) {
-				repositoryModelReq.setPassword(null);
-			}
-			repositoryModelReq.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
-			repositoryService.updateById(repositoryModelReq);
-		}
 		// 检查 rsa 私钥
-		boolean andUpdateSshKey = checkAndUpdateSshKey(repositoryModelReq);
+		boolean andUpdateSshKey = this.checkAndUpdateSshKey(repositoryModelReq);
 		Assert.state(andUpdateSshKey, "rsa 私钥文件不存在或者有误");
 
 		if (repositoryModelReq.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
 			RepositoryModel repositoryModel = repositoryService.getByKey(repositoryModelReq.getId(), false);
+			if (repositoryModel != null) {
+				repositoryModelReq.setRsaPrv(StrUtil.emptyToDefault(repositoryModelReq.getRsaPrv(), repositoryModel.getRsaPrv()));
+				repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), repositoryModel.getPassword()));
+			}
 			// 验证 git 仓库信息
 			try {
-				Tuple tuple = GitUtil.getBranchAndTagList(repositoryModel);
+				Tuple tuple = GitUtil.getBranchAndTagList(repositoryModelReq);
 			} catch (JpomRuntimeException jpomRuntimeException) {
 				throw jpomRuntimeException;
 			} catch (Exception e) {
@@ -134,6 +123,15 @@ public class RepositoryController extends BaseServerController {
 				return JsonMessage.toJson(500, "无法连接此仓库，" + e.getMessage());
 			}
 		}
+		if (StrUtil.isEmpty(repositoryModelReq.getId())) {
+			// insert data
+			repositoryService.insert(repositoryModelReq);
+		} else {
+			// update data
+			repositoryModelReq.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
+			repositoryService.updateById(repositoryModelReq);
+		}
+
 		return JsonMessage.toJson(200, "操作成功");
 	}
 
@@ -183,6 +181,8 @@ public class RepositoryController extends BaseServerController {
 			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
 			entity.set("id", "<> " + repositoryModelReq.getId());
 		}
+		String workspaceId = repositoryService.getCheckUserWorkspace(getRequest());
+		entity.set("workspaceId", workspaceId);
 		entity.set("gitUrl", repositoryModelReq.getGitUrl());
 		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
 	}
@@ -196,20 +196,20 @@ public class RepositoryController extends BaseServerController {
 		if (repositoryModelReq.getProtocol() == GitProtocolEnum.SSH.getCode()) {
 			// if rsa key is not empty
 			if (StrUtil.isNotEmpty(repositoryModelReq.getRsaPrv())) {
-				File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModelReq.getId() + Const.ID_RSA);
 				/**
 				 * if rsa key is start with "file:"
 				 * copy this file
 				 */
 				if (StrUtil.startWith(repositoryModelReq.getRsaPrv(), URLUtil.FILE_URL_PREFIX)) {
 					String rsaPath = StrUtil.removePrefix(repositoryModelReq.getRsaPrv(), URLUtil.FILE_URL_PREFIX);
-					if (!FileUtil.file(rsaPath).exists()) {
+					if (!FileUtil.exist(rsaPath)) {
 						DefaultSystemLog.getLog().warn("there is no rsa file... {}", rsaPath);
 						return false;
 					}
 				} else {
+					//File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModelReq.getId() + Const.ID_RSA);
 					//  or else put into file
-					FileUtil.writeUtf8String(repositoryModelReq.getRsaPrv(), rsaFile);
+					//FileUtil.writeUtf8String(repositoryModelReq.getRsaPrv(), rsaFile);
 				}
 			}
 		}
@@ -232,6 +232,8 @@ public class RepositoryController extends BaseServerController {
 		Assert.state(!exists, "当前仓库被构建关联，不能直接删除");
 
 		repositoryService.delByKey(id, getRequest());
+		File rsaFile = BuildUtil.getRepositoryRsaFile(id + Const.ID_RSA);
+		FileUtil.del(rsaFile);
 		return JsonMessage.getString(200, "删除成功");
 	}
 }

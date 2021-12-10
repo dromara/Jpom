@@ -219,9 +219,8 @@ public class ProjectFileControl extends BaseAgentController {
 			if (FileUtil.clean(file)) {
 				return JsonMessage.getString(200, "清除成功");
 			}
-			if (pim.tryGetStatus()) {
-				return JsonMessage.getString(501, "文件被占用，请先停止项目");
-			}
+			boolean run = AbstractProjectCommander.getInstance().isRun(pim, null);
+			Assert.state(!run, "文件被占用，请先停止项目");
 			return JsonMessage.getString(500, "删除失败：" + file.getAbsolutePath());
 		} else {
 			// 删除文件

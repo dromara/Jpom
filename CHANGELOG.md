@@ -15,6 +15,8 @@
 9. 【server】发布命令（SSH发布命令、本地命令）支持变量替换：`#{BUILD_ID}`、`#{BUILD_NAME}`、`#{BUILD_RESULT_FILE}`、`#{BUILD_NUMBER_ID}`
 10. 【server】新增自动备份全量数据配置 `db.autoBackupIntervalDay` 默认一天备份一次,执行备份时间 凌晨0点或者中午12点
 11. 【agent】项目的 webhook 新增项目启动成功后通知，并且参数新增 `type` 指包括：`beforeStop`,`start`,`stop`,`beforeRestart` 
+12. 【agent】项目新增自启动配置项,在 agent 启动时候检查对应项目是否启动，未启动执行启动逻辑
+13. 【server】构建新增 webhook，实时通知构建进度
 
 ### 解决BUG、优化功能
 
@@ -50,7 +52,7 @@
 >
 > 7: 此次升级启动耗时可能需要2分钟以上（耗时根据数据量来决定），请耐心等待和观察控制台日志输出
 > 
-> 8: 一个节点不要被多个服务端绑定
+> 8: 一个节点建议不要被多个服务端绑定（可能出现数据工作空间错乱情况）
 ------
 
 # 2.7.3

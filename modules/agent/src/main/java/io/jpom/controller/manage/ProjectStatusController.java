@@ -35,8 +35,8 @@ import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ConsoleService;
 import io.jpom.socket.ConsoleCommandOp;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,161 +53,154 @@ import java.util.List;
 @RequestMapping(value = "/manage/")
 public class ProjectStatusController extends BaseAgentController {
 
-    private final ConsoleService consoleService;
+	private final ConsoleService consoleService;
 
-    public ProjectStatusController(ConsoleService consoleService) {
-        this.consoleService = consoleService;
-    }
-
-
-    /**
-     * 获取项目的进程id
-     *
-     * @param id 项目id
-     * @return json
-     */
-    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getProjectStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String getCopy) {
-        NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
-        if (nodeProjectInfoModel == null) {
-            return JsonMessage.getString(HttpStatus.NOT_FOUND.value(), "项目id不存在");
-        }
-        int pid = 0;
-        try {
-            pid = AbstractProjectCommander.getInstance().getPid(id);
-        } catch (Exception e) {
-            DefaultSystemLog.getLog().error("获取项目pid 失败", e);
-        }
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("pId", pid);
-        //
-        if (StrUtil.isNotEmpty(getCopy)) {
-            List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
-            JSONArray copys = new JSONArray();
-            if (javaCopyItemList != null) {
-                for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-                    JSONObject jsonObject1 = new JSONObject();
-                    jsonObject1.put("copyId", javaCopyItem.getId());
-                    jsonObject1.put("status", javaCopyItem.tryGetStatus());
-                    copys.add(jsonObject1);
-                }
-            }
-            jsonObject.put("copys", copys);
-        }
-        return JsonMessage.getString(200, "", jsonObject);
-    }
-
-    /**
-     * 获取项目的运行端口
-     *
-     * @param ids ids
-     * @return obj
-     */
-    @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getProjectPort(String ids) {
-        if (StrUtil.isEmpty(ids)) {
-            return JsonMessage.getString(400, "");
-        }
-        JSONArray jsonArray = JSONArray.parseArray(ids);
-        JSONObject jsonObject = new JSONObject();
-        JSONObject itemObj;
-        for (Object object : jsonArray) {
-            String item = object.toString();
-            int pid;
-            try {
-                pid = AbstractProjectCommander.getInstance().getPid(item);
-            } catch (Exception e) {
-                DefaultSystemLog.getLog().error("获取端口错误", e);
-                continue;
-            }
-            if (pid <= 0) {
-                continue;
-            }
-            itemObj = new JSONObject();
-            String port = AbstractProjectCommander.getInstance().getMainPort(pid);
-            itemObj.put("port", port);
-            itemObj.put("pid", pid);
-            jsonObject.put(item, itemObj);
-        }
-        return JsonMessage.getString(200, "", jsonObject);
-    }
+	public ProjectStatusController(ConsoleService consoleService) {
+		this.consoleService = consoleService;
+	}
 
 
-    /**
-     * 获取项目的运行端口
-     *
-     * @param id      项目id
-     * @param copyIds 副本 ids ["aa","ss"]
-     * @return obj
-     */
-    @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getProjectPort(String id, String copyIds) {
-        if (StrUtil.isEmpty(copyIds) || StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(400, "");
-        }
-        NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
+	/**
+	 * 获取项目的进程id
+	 *
+	 * @param id 项目id
+	 * @return json
+	 */
+	@RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String getProjectStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String getCopy) {
+		NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
+		Assert.notNull(nodeProjectInfoModel, "项目id不存在");
+		int pid = 0;
+		try {
+			pid = AbstractProjectCommander.getInstance().getPid(id);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("获取项目pid 失败", e);
+		}
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("pId", pid);
+		//
+		if (StrUtil.isNotEmpty(getCopy)) {
+			List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
+			JSONArray copys = new JSONArray();
+			if (javaCopyItemList != null) {
+				for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+					JSONObject jsonObject1 = new JSONObject();
+					jsonObject1.put("copyId", javaCopyItem.getId());
+					boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, javaCopyItem);
+					jsonObject1.put("status", run);
+					copys.add(jsonObject1);
+				}
+			}
+			jsonObject.put("copys", copys);
+		}
+		return JsonMessage.getString(200, "", jsonObject);
+	}
 
-        JSONArray jsonArray = JSONArray.parseArray(copyIds);
-        JSONObject jsonObject = new JSONObject();
-        JSONObject itemObj;
-        for (Object object : jsonArray) {
-            String item = object.toString();
-            NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(item);
-            int pid;
-            try {
-                pid = AbstractProjectCommander.getInstance().getPid(copyItem.getTagId());
-                if (pid <= 0) {
-                    continue;
-                }
-            } catch (Exception e) {
-                DefaultSystemLog.getLog().error("获取端口错误", e);
-                continue;
-            }
-            itemObj = new JSONObject();
-            String port = AbstractProjectCommander.getInstance().getMainPort(pid);
-            itemObj.put("port", port);
-            itemObj.put("pid", pid);
-            jsonObject.put(item, itemObj);
-        }
-        return JsonMessage.getString(200, "", jsonObject);
-    }
+	/**
+	 * 获取项目的运行端口
+	 *
+	 * @param ids ids
+	 * @return obj
+	 */
+	@RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String getProjectPort(String ids) {
+		Assert.hasText(ids, "没有要获取的信息");
+		JSONArray jsonArray = JSONArray.parseArray(ids);
+		JSONObject jsonObject = new JSONObject();
+		JSONObject itemObj;
+		for (Object object : jsonArray) {
+			String item = object.toString();
+			int pid;
+			try {
+				pid = AbstractProjectCommander.getInstance().getPid(item);
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("获取端口错误", e);
+				continue;
+			}
+			if (pid <= 0) {
+				continue;
+			}
+			itemObj = new JSONObject();
+			String port = AbstractProjectCommander.getInstance().getMainPort(pid);
+			itemObj.put("port", port);
+			itemObj.put("pid", pid);
+			jsonObject.put(item, itemObj);
+		}
+		return JsonMessage.getString(200, "", jsonObject);
+	}
 
-    @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String restart(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
-        NodeProjectInfoModel item = projectInfoService.getItem(id);
-        if (item == null) {
-            return JsonMessage.getString(405, "没有找到对应的项目");
-        }
-        NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
-        String tagId = copyItem == null ? item.getId() : copyItem.getTagId();
-        String result;
-        try {
-            result = consoleService.execCommand(ConsoleCommandOp.restart, item, copyItem);
-            boolean status = AbstractProjectCommander.getInstance().isRun(tagId);
-            if (status) {
-                return JsonMessage.getString(200, result);
-            }
-            return JsonMessage.getString(201, "重启项目失败：" + result);
-        } catch (Exception e) {
-            DefaultSystemLog.getLog().error("获取项目pid 失败", e);
-            result = "error:" + e.getMessage();
-            return JsonMessage.getString(500, "重启项目异常：" + result);
-        }
-    }
+
+	/**
+	 * 获取项目的运行端口
+	 *
+	 * @param id      项目id
+	 * @param copyIds 副本 ids ["aa","ss"]
+	 * @return obj
+	 */
+	@RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String getProjectPort(String id, String copyIds) {
+		if (StrUtil.isEmpty(copyIds) || StrUtil.isEmpty(id)) {
+			return JsonMessage.getString(400, "");
+		}
+		NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
+
+		JSONArray jsonArray = JSONArray.parseArray(copyIds);
+		JSONObject jsonObject = new JSONObject();
+		JSONObject itemObj;
+		for (Object object : jsonArray) {
+			String item = object.toString();
+			NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(item);
+			int pid;
+			try {
+				pid = AbstractProjectCommander.getInstance().getPid(copyItem.getTagId());
+				if (pid <= 0) {
+					continue;
+				}
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("获取端口错误", e);
+				continue;
+			}
+			itemObj = new JSONObject();
+			String port = AbstractProjectCommander.getInstance().getMainPort(pid);
+			itemObj.put("port", port);
+			itemObj.put("pid", pid);
+			jsonObject.put(item, itemObj);
+		}
+		return JsonMessage.getString(200, "", jsonObject);
+	}
+
+	@RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String restart(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
+		NodeProjectInfoModel item = projectInfoService.getItem(id);
+		Assert.notNull(item, "没有找到对应的项目");
+		NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
+
+		String result;
+		try {
+			result = consoleService.execCommand(ConsoleCommandOp.restart, item, copyItem);
+			boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
+			if (status) {
+				return JsonMessage.getString(200, result);
+			}
+			return JsonMessage.getString(201, "重启项目失败：" + result);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("获取项目pid 失败", e);
+			result = "error:" + e.getMessage();
+			return JsonMessage.getString(500, "重启项目异常：" + result);
+		}
+	}
 
 
 	@RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String stop(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
 		NodeProjectInfoModel item = projectInfoService.getItem(id);
-		if (item == null) {
-			return JsonMessage.getString(405, "没有找到对应的项目");
-		}
+		Assert.notNull(item, "没有找到对应的项目");
 		NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
-		String tagId = copyItem == null ? item.getId() : copyItem.getTagId();
+
 		String result;
 		try {
 			result = consoleService.execCommand(ConsoleCommandOp.stop, item, copyItem);
-			boolean status = AbstractProjectCommander.getInstance().isRun(tagId);
+			boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
 			if (!status) {
 				return JsonMessage.getString(200, result);
 			}
@@ -223,15 +216,12 @@ public class ProjectStatusController extends BaseAgentController {
 	@RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
 		NodeProjectInfoModel item = projectInfoService.getItem(id);
-		if (item == null) {
-			return JsonMessage.getString(405, "没有找到对应的项目");
-		}
+		Assert.notNull(item, "没有找到对应的项目");
 		NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
-		String tagId = copyItem == null ? item.getId() : copyItem.getTagId();
 		String result;
 		try {
 			result = consoleService.execCommand(ConsoleCommandOp.start, item, copyItem);
-			boolean status = AbstractProjectCommander.getInstance().isRun(tagId);
+			boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
 			if (status) {
 				return JsonMessage.getString(200, result);
 			}

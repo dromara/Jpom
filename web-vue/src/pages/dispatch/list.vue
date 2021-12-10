@@ -230,15 +230,39 @@
         </a-form-model-item>
         <a-collapse v-show="temp.runMode && temp.runMode !== 'File'">
           <a-collapse-panel v-for="nodeId in temp.nodeIdList" :key="nodeId" :header="nodeId">
-            <a-form-model-item label="WebHooks" prop="token">
-              <a-input v-model="temp[`${nodeId}_token`]" placeholder="关闭程序时自动请求,非必填，GET请求" />
-            </a-form-model-item>
             <a-form-model-item label="JVM 参数" prop="jvm">
               <a-textarea v-model="temp[`${nodeId}_jvm`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
             </a-form-model-item>
             <a-form-model-item label="args 参数" prop="args">
               <a-textarea v-model="temp[`${nodeId}_args`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
             </a-form-model-item>
+            <a-form-model-item prop="autoStart">
+              <template slot="label">
+                自启动
+                <a-tooltip v-show="temp.type !== 'edit'">
+                  <template slot="title">插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-switch v-model="temp[`${nodeId}_autoStart`]" checked-children="开" un-checked-children="关" />
+            </a-form-model-item>
+            <a-form-model-item prop="token">
+              <template slot="label">
+                WebHooks
+                <a-tooltip v-show="temp.type !== 'edit'">
+                  <template slot="title">
+                    <ul>
+                      <li>项目启动,停止,重启都将请求对应的地址</li>
+                      <li>传人参数有：projectId、projectName、type、copyId、result</li>
+                      <li>type 的值有：stop、beforeStop、start、beforeRestart</li>
+                    </ul>
+                  </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-input v-model="temp[`${nodeId}_token`]" placeholder="项目启动,停止,重启都将请求对应的地址,非必填，GET请求" />
+            </a-form-model-item>
+
             <!-- 副本信息 -->
             <a-row v-for="replica in temp[`${nodeId}_javaCopyItemList`]" :key="replica.id">
               <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
@@ -641,6 +665,8 @@ export default {
             this.temp[`${ele.nodeId}_jvm`] = res.data.jvm || "";
             this.temp[`${ele.nodeId}_token`] = res.data.token || "";
             this.temp[`${ele.nodeId}_args`] = res.data.args || "";
+            this.temp[`${ele.nodeId}_autoStart`] = res.data.autoStart;
+
             // 添加 javaCopyItemList
             this.temp[`${ele.nodeId}_javaCopyItemList`] = res.data.javaCopyItemList || [];
             this.temp = { ...this.temp };

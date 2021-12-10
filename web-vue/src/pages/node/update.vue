@@ -253,7 +253,7 @@ export default {
         [nodeId]: {
           ...data,
           type: "uploading",
-          percent: (completeSize / size) * 100,
+          percent: Math.floor((completeSize / size) * 100),
         },
       });
     },

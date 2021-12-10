@@ -105,6 +105,8 @@ public class AutoRegSeverNode {
 				serverJson.put("updateTime", DateTime.now().toString());
 			}
 			JsonFileUtil.saveJson(file.getAbsolutePath(), serverJson);
+		} else {
+			DefaultSystemLog.getLog().error("自动注册插件端失败：{}", body);
 		}
 	}
 }

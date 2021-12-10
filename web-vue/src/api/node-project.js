@@ -142,6 +142,7 @@ export function editProject(params, replicaParams) {
     javaCopyIds: params.javaCopyIds,
     token: params.token,
     logPath: params.logPath,
+    autoStart: params.autoStart,
     ...replicaParams,
   };
   return axios({

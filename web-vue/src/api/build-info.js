@@ -71,6 +71,7 @@ export function editBuild(params) {
     repoType: params.repoType,
     // 其他参数
     extraData: params.extraData,
+    webhook: params.webhook,
   };
   return axios({
     url: "/build/edit",

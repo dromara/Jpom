@@ -46,7 +46,14 @@
             <a-select-option v-for="project in nodeProjectList" :key="project.id">【{{ project.nodeName }}】{{ project.name }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="报警联系人" prop="notifyUser" class="jpom-notify">
+        <a-form-model-item prop="notifyUser" class="jpom-notify">
+          <template slot="label">
+            报警联系人
+            <a-tooltip v-show="!temp.id">
+              <template slot="title"> 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-transfer
             :data-source="userList"
             :lazy="false"

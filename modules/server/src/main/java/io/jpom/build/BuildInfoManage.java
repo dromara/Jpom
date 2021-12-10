@@ -33,6 +33,8 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
@@ -393,20 +395,27 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			for (Map.Entry<String, Supplier<Boolean>> stringSupplierEntry : suppliers.entrySet()) {
 				processName = stringSupplierEntry.getKey();
 				Supplier<Boolean> value = stringSupplierEntry.getValue();
+				//
+				this.asyncWebHooks(processName);
 				Boolean aBoolean = value.get();
 				if (!aBoolean) {
 					// 有条件结束构建流程
+					this.asyncWebHooks("stop", "process", processName);
 					break;
 				}
 			}
+			this.asyncWebHooks("success");
 		} catch (RuntimeException runtimeException) {
 			Throwable cause = runtimeException.getCause();
 			this.log("构建失败:" + processName, cause == null ? runtimeException : cause);
+			this.asyncWebHooks(processName, "error", runtimeException.getMessage());
 		} catch (Exception e) {
 			this.log("构建失败:" + processName, e);
+			this.asyncWebHooks(processName, "error", e.getMessage());
 		} finally {
 			BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
 			BaseServerController.remove();
+			this.asyncWebHooks("done");
 		}
 	}
 
@@ -441,5 +450,31 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		int waitFor = process.waitFor();
 		log("process result " + waitFor);
 		return status[0];
+	}
+
+	/**
+	 * 执行 webhooks 通知
+	 *
+	 * @param type  类型
+	 * @param other 其他参数
+	 */
+	private void asyncWebHooks(String type, Object... other) {
+		String webhook = this.buildInfoModel.getWebhook();
+		if (StrUtil.isEmpty(webhook)) {
+			return;
+		}
+		ThreadUtil.execute(() -> {
+			try {
+				HttpRequest httpRequest = HttpUtil.createGet(webhook);
+				httpRequest.form("buildId", this.buildInfoModel.getId());
+				httpRequest.form("buildName", this.buildInfoModel.getName());
+				httpRequest.form("type", type, other);
+				String body = httpRequest.execute().body();
+				DefaultSystemLog.getLog().info(this.buildInfoModel.getName() + ":" + body);
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
+			}
+		});
+
 	}
 }

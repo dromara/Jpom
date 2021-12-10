@@ -262,14 +262,9 @@ public abstract class AbstractProjectCommander {
 	 */
 	public String restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
 		this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "beforeRestart");
-		if (javaCopyItem == null) {
-			if (isRun(nodeProjectInfoModel.getId())) {
-				stop(nodeProjectInfoModel, null);
-			}
-		} else {
-			if (isRun(javaCopyItem.getTagId())) {
-				stop(nodeProjectInfoModel, javaCopyItem);
-			}
+		boolean run = this.isRun(nodeProjectInfoModel, javaCopyItem);
+		if (run) {
+			stop(nodeProjectInfoModel, javaCopyItem);
 		}
 		return start(nodeProjectInfoModel, javaCopyItem);
 	}
@@ -367,33 +362,23 @@ public abstract class AbstractProjectCommander {
 		return "ok";
 	}
 
+	public String status(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+		return this.status(tag);
+	}
+
 	/**
 	 * 查看状态
 	 *
 	 * @param tag 运行标识
 	 * @return 查询结果
-	 * @throws Exception 异常
 	 */
-	public String status(String tag) throws Exception {
-		boolean disableVirtualMachine = AgentExtConfigBean.getInstance().isDisableVirtualMachine();
-		if (disableVirtualMachine) {
-			String jpsStatus = getJpsStatus(tag);
-			if (StrUtil.equals(AbstractProjectCommander.STOP_TAG, jpsStatus) && SystemUtil.getOsInfo().isLinux()) {
-				return getLinuxPsStatus(tag);
-			}
-			return jpsStatus;
-		} else {
-			Integer pid = JvmUtil.getPidByTag(tag);
-			if (pid == null) {
-				String jpsStatus = getJpsStatus(tag);
-				if (StrUtil.equals(AbstractProjectCommander.STOP_TAG, jpsStatus) && SystemUtil.getOsInfo().isLinux()) {
-					return getLinuxPsStatus(tag);
-				}
-				return jpsStatus;
-			}
-			return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, pid);
-
+	protected String status(String tag) {
+		String jpsStatus = getJpsStatus(tag);
+		if (StrUtil.equals(AbstractProjectCommander.STOP_TAG, jpsStatus) && SystemUtil.getOsInfo().isLinux()) {
+			return getLinuxPsStatus(tag);
 		}
+		return jpsStatus;
 	}
 
 	/**
@@ -403,15 +388,11 @@ public abstract class AbstractProjectCommander {
 	 * @return 运行标识
 	 */
 	private String getJpsStatus(String tag) {
-		String execSystemCommand = CommandUtil.execSystemCommand("jps -mv");
-		List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
-		for (String item : list) {
-			if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
-				String[] split = StrUtil.splitToArray(item, StrUtil.SPACE);
-				return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, split[0]);
-			}
+		Integer pid = JvmUtil.getPidByTag(tag);
+		if (pid == null || pid <= 0) {
+			return AbstractProjectCommander.STOP_TAG;
 		}
-		return AbstractProjectCommander.STOP_TAG;
+		return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, pid);
 	}
 
 
@@ -562,12 +543,23 @@ public abstract class AbstractProjectCommander {
 	/**
 	 * 是否正在运行
 	 *
-	 * @param tag id
+	 * @param nodeProjectInfoModel 项目
 	 * @return true 正在运行
-	 * @throws Exception 异常
 	 */
-	public boolean isRun(String tag) throws Exception {
-		String result = status(tag);
+	public boolean isRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+		String result = this.status(tag);
+		return result.contains(AbstractProjectCommander.RUNNING_TAG);
+	}
+
+	/**
+	 * 是否正在运行
+	 *
+	 * @param tag 运行标识
+	 * @return true 正在运行
+	 */
+	private boolean isRun(String tag) {
+		String result = this.status(tag);
 		return result.contains(AbstractProjectCommander.RUNNING_TAG);
 	}
 

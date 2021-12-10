@@ -38,57 +38,56 @@ import javax.annotation.Resource;
  */
 @Service
 public class ConsoleService {
-    @Resource
-    private ProjectInfoService projectInfoService;
+	@Resource
+	private ProjectInfoService projectInfoService;
 
-    /**
-     * 执行shell命令
-     *
-     * @param consoleCommandOp 执行的操作
-     * @param nodeProjectInfoModel 项目信息
-     * @param copyItem         副本信息
-     * @return 执行结果
-     * @throws Exception 异常
-     */
-    public String execCommand(ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) throws Exception {
-        String result;
-        AbstractProjectCommander abstractProjectCommander = AbstractProjectCommander.getInstance();
-        // 执行命令
-        switch (consoleCommandOp) {
-            case restart:
-                result = abstractProjectCommander.restart(nodeProjectInfoModel, copyItem);
-                break;
-            case start:
-                result = abstractProjectCommander.start(nodeProjectInfoModel, copyItem);
-                break;
-            case stop:
-                result = abstractProjectCommander.stop(nodeProjectInfoModel, copyItem);
-                break;
-            case status: {
-                String tag = copyItem == null ? nodeProjectInfoModel.getId() : copyItem.getTagId();
-                result = abstractProjectCommander.status(tag);
-                break;
-            }
-            case top:
-            case showlog:
-            default:
-                throw new IllegalArgumentException(consoleCommandOp + " error");
-        }
-        //  通知日志刷新
-        if (consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
-            // 修改 run lib 使用情况
-            NodeProjectInfoModel modify = projectInfoService.getItem(nodeProjectInfoModel.getId());
-            //
-            if (copyItem != null) {
-                NodeProjectInfoModel.JavaCopyItem copyItem1 = modify.findCopyItem(copyItem.getId());
-                copyItem1.setModifyTime(DateUtil.now());
-            }
-            modify.setRunLibDesc(nodeProjectInfoModel.getUseLibDesc());
-            try {
-                projectInfoService.updateItem(modify);
-            } catch (Exception ignored) {
-            }
-        }
-        return result;
-    }
+	/**
+	 * 执行shell命令
+	 *
+	 * @param consoleCommandOp     执行的操作
+	 * @param nodeProjectInfoModel 项目信息
+	 * @param copyItem             副本信息
+	 * @return 执行结果
+	 * @throws Exception 异常
+	 */
+	public String execCommand(ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) throws Exception {
+		String result;
+		AbstractProjectCommander abstractProjectCommander = AbstractProjectCommander.getInstance();
+		// 执行命令
+		switch (consoleCommandOp) {
+			case restart:
+				result = abstractProjectCommander.restart(nodeProjectInfoModel, copyItem);
+				break;
+			case start:
+				result = abstractProjectCommander.start(nodeProjectInfoModel, copyItem);
+				break;
+			case stop:
+				result = abstractProjectCommander.stop(nodeProjectInfoModel, copyItem);
+				break;
+			case status: {
+				result = abstractProjectCommander.status(nodeProjectInfoModel, copyItem);
+				break;
+			}
+			case top:
+			case showlog:
+			default:
+				throw new IllegalArgumentException(consoleCommandOp + " error");
+		}
+		//  通知日志刷新
+		if (consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
+			// 修改 run lib 使用情况
+			NodeProjectInfoModel modify = projectInfoService.getItem(nodeProjectInfoModel.getId());
+			//
+			if (copyItem != null) {
+				NodeProjectInfoModel.JavaCopyItem copyItem1 = modify.findCopyItem(copyItem.getId());
+				copyItem1.setModifyTime(DateUtil.now());
+			}
+			modify.setRunLibDesc(nodeProjectInfoModel.getUseLibDesc());
+			try {
+				projectInfoService.updateItem(modify);
+			} catch (Exception ignored) {
+			}
+		}
+		return result;
+	}
 }

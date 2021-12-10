@@ -4,7 +4,7 @@
     <div ref="filter" class="filter">
       <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="仓库名" />
       <a-input class="search-input-item" v-model="listQuery['%gitUrl%']" placeholder="仓库地址" />
-      <a-select v-model="listQuery.repoType" allowClear placeholder="请选择仓库类型" class="filter-item" @change="handleFilter">
+      <a-select v-model="listQuery.repoType" allowClear placeholder="请选择仓库类型" class="filter-item">
         <a-select-option :value="'0'">GIT</a-select-option>
         <a-select-option :value="'1'">SVN</a-select-option>
       </a-select>
@@ -110,7 +110,7 @@
             <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
           </a-form-model-item>
         </template>
-        <a-form-model-item v-if="temp.id">
+        <a-form-model-item v-if="temp.id" prop="restHideField">
           <template slot="label">
             隐藏字段
             <a-tooltip>
@@ -224,10 +224,10 @@ export default {
         this.loading = false;
       });
     },
-    // 筛选
-    handleFilter() {
-      this.loadData();
-    },
+    // // 筛选
+    // handleFilter() {
+    //   this.loadData();
+    // },
     // 添加
     handleAdd() {
       this.temp = {
@@ -258,11 +258,10 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              
             });
-            this.$refs["editForm"].resetFields();
             this.editVisible = false;
-            this.handleFilter();
+            this.loadData();
+            this.$refs["editForm"].resetFields();
           }
         });
       });
@@ -277,14 +276,13 @@ export default {
         onOk: () => {
           const params = {
             id: record.id,
-            isRealDel: this.isSystem,
+            //isRealDel: this.isSystem,
           };
           // 删除
           deleteRepository(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }
@@ -306,7 +304,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }

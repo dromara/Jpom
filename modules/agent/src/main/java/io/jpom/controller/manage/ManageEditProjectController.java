@@ -26,10 +26,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -79,9 +77,8 @@ public class ManageEditProjectController extends BaseAgentController {
 	 * @param projectInfo        项目实体
 	 * @param whitelistDirectory 白名单
 	 * @param previewData        预检查数据
-	 * @return null 检查正常
 	 */
-	private String checkParameter(NodeProjectInfoModel projectInfo, String whitelistDirectory, boolean previewData) {
+	private void checkParameter(NodeProjectInfoModel projectInfo, String whitelistDirectory, boolean previewData) {
 		String id = projectInfo.getId();
 		Assert.state(!StrUtil.isEmptyOrUndefined(id), "项目id不能为空");
 		Assert.state(StringUtil.isGeneral(id, 2, 20), "项目id 长度范围2-20（英文字母 、数字和下划线）");
@@ -117,7 +114,7 @@ public class ManageEditProjectController extends BaseAgentController {
 				if (outGivingProject) {
 					whitelistDirectoryService.addProjectWhiteList(whitelistDirectory);
 				} else {
-					return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
+					throw new IllegalArgumentException("请选择正确的项目路径,或者还没有配置白名单");
 				}
 			}
 			String logPath = projectInfo.getLogPath();
@@ -126,7 +123,7 @@ public class ManageEditProjectController extends BaseAgentController {
 					if (outGivingProject) {
 						whitelistDirectoryService.addProjectWhiteList(logPath);
 					} else {
-						return JsonMessage.getString(401, "请填写的项目日志存储路径,或者还没有配置白名单");
+						throw new IllegalArgumentException("请填写的项目日志存储路径,或者还没有配置白名单");
 					}
 				}
 			}
@@ -162,7 +159,6 @@ public class ManageEditProjectController extends BaseAgentController {
 		} else {
 			projectInfo.setJavaCopyItemList(null);
 		}
-		return null;
 	}
 
 
@@ -173,10 +169,8 @@ public class ManageEditProjectController extends BaseAgentController {
 		boolean previewData = Convert.toBool(strPreviewData, false);
 		String whitelistDirectory = projectInfo.getWhitelistDirectory();
 		//
-		String error = checkParameter(projectInfo, whitelistDirectory, previewData);
-		if (error != null) {
-			return error;
-		}
+		this.checkParameter(projectInfo, whitelistDirectory, previewData);
+
 		String id = projectInfo.getId();
 		//
 		String allLib = projectInfo.allLib();
@@ -205,7 +199,7 @@ public class ManageEditProjectController extends BaseAgentController {
 		}
 		//
 		String token = projectInfo.getToken();
-		if (StrUtil.isNotEmpty(token) && !ReUtil.isMatch(PatternPool.URL_HTTP, token)) {
+		if (StrUtil.isNotEmpty(token)) {
 			Validator.validateMatchRegex(RegexPool.URL_HTTP, token, "WebHooks 地址不合法");
 		}
 		// 判断空格
@@ -234,7 +228,7 @@ public class ManageEditProjectController extends BaseAgentController {
 			this.checkPath(projectInfo);
 			if (exits == null) {
 				// 检查运行中的tag 是否被占用
-				Assert.state(!AbstractProjectCommander.getInstance().isRun(projectInfo.getId()), "当前项目id已经被正在运行的程序占用");
+				Assert.state(!AbstractProjectCommander.getInstance().isRun(projectInfo, null), "当前项目id已经被正在运行的程序占用");
 				if (previewData) {
 					// 预检查数据
 					return JsonMessage.getString(200, "检查通过");
@@ -251,6 +245,7 @@ public class ManageEditProjectController extends BaseAgentController {
 				exits.setLogPath(projectInfo.getLogPath());
 				exits.setName(projectInfo.getName());
 //				exits.setGroup(projectInfo.getGroup());
+				exits.setAutoStart(projectInfo.getAutoStart());
 				exits.setMainClass(projectInfo.getMainClass());
 				exits.setLib(projectInfo.getLib());
 				exits.setJvm(projectInfo.getJvm());
@@ -348,13 +343,15 @@ public class ManageEditProjectController extends BaseAgentController {
 		Assert.notNull(nodeProjectInfoModel, "项目不存在");
 		try {
 			NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
+
 			if (copyItem == null) {
 				// 运行判断
-				Assert.state(!nodeProjectInfoModel.tryGetStatus(), "不能删除正在运行的项目");
-
+				boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, null);
+				Assert.state(!run, "不能删除正在运行的项目");
 				projectInfoService.deleteItem(nodeProjectInfoModel.getId());
 			} else {
-				Assert.state(!copyItem.tryGetStatus(), "不能删除正在运行的项目副本");
+				boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, copyItem);
+				Assert.state(!run, "不能删除正在运行的项目副本");
 				boolean removeCopyItem = nodeProjectInfoModel.removeCopyItem(copyId);
 				Assert.state(removeCopyItem, "删除对应副本集不存在");
 				projectInfoService.updateItem(nodeProjectInfoModel);

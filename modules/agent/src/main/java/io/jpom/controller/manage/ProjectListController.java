@@ -22,8 +22,6 @@
  */
 package io.jpom.controller.manage;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
@@ -32,6 +30,7 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,52 +65,17 @@ public class ProjectListController extends BaseAgentController {
 		return JsonMessage.getString(200, "", nodeProjectInfoModel);
 	}
 
-//	/**
-//	 * 获取所有的分组
-//	 *
-//	 * @return array
-//	 */
-//	@RequestMapping(value = "getProjectGroup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-//	public String getProjectGroup() {
-//		HashSet<String> strings = projectInfoService.getAllGroup();
-//		return JsonMessage.getString(200, "", strings);
-//	}
-
 	/**
 	 * 程序项目信息
 	 *
-	 * @param notStatus 不包含运行状态
 	 * @return json
 	 */
 	@RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String getProjectInfo(String notStatus) {
+	public String getProjectInfo() {
 		try {
-			boolean status = StrUtil.isEmpty(notStatus);
 			// 查询数据
 			List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
-			// 转换为数据
-			JSONArray array = new JSONArray();
-			for (NodeProjectInfoModel nodeProjectInfoModel : nodeProjectInfoModels) {
-//				if (StrUtil.isNotEmpty(group) && !group.equals(nodeProjectInfoModel.getGroup())) {
-//					continue;
-//				}
-				JSONObject object = nodeProjectInfoModel.toJson();
-				if (status) {
-					object.put("status", nodeProjectInfoModel.tryGetStatus());
-				}
-				array.add(object);
-			}
-			array.sort((oo1, oo2) -> {
-				JSONObject o1 = (JSONObject) oo1;
-				JSONObject o2 = (JSONObject) oo2;
-				String group1 = o1.getString("group");
-				String group2 = o2.getString("group");
-				if (group1 == null || group2 == null) {
-					return -1;
-				}
-				return group1.compareTo(group2);
-			});
-			return JsonMessage.getString(200, "查询成功！", array);
+			return JsonMessage.getString(200, "查询成功！", nodeProjectInfoModels);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error(e.getMessage(), e);
 			return JsonMessage.getString(500, "查询异常：" + e.getMessage());
@@ -124,20 +88,17 @@ public class ProjectListController extends BaseAgentController {
 	@RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String projectCopyList(String id) {
 		NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(id);
-		if (nodeProjectInfoModel == null) {
-			return JsonMessage.getString(404, "没有对应项目");
-		}
+		Assert.notNull(nodeProjectInfoModel, "没有对应项目");
+
 		List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
-		if (CollUtil.isEmpty(javaCopyItemList)) {
-			return JsonMessage.getString(404, "对应项目没有副本集");
-		}
+		Assert.notEmpty(javaCopyItemList, "对应项目没有副本集");
 		JSONArray array = new JSONArray();
 		for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
 			JSONObject object = javaCopyItem.toJson();
-			object.put("status", javaCopyItem.tryGetStatus());
+			boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, javaCopyItem);
+			object.put("status", run);
 			array.add(object);
 		}
-
 		return JsonMessage.getString(200, "", array);
 	}
 }
