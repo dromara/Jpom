@@ -44,8 +44,14 @@ import java.io.PrintWriter;
  */
 public abstract class BaseBuild {
 
-	private final File logFile;
-	String buildModelId;
+	/**
+	 * 日志文件
+	 */
+	protected final File logFile;
+	/**
+	 * 构建ID
+	 */
+	protected final String buildModelId;
 
 	BaseBuild(File logFile, String buildModelId) {
 		this.logFile = logFile;

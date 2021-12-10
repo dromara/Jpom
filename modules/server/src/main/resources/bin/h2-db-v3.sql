@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.WORKSPACE
 	MODIFYUSER       VARCHAR(50) comment '修改人',
 	STRIKE           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
 	`NAME`           VARCHAR(50) comment '名称',
-	DESCRIPTION      varchar(255) comment '参数描述',
+	DESCRIPTION      varchar(255) comment '描述',
 	CONSTRAINT WORKSPACE_PK PRIMARY KEY (ID)
 );
 comment on table WORKSPACE is '用户信息表';
@@ -200,6 +200,23 @@ CREATE TABLE IF NOT EXISTS PUBLIC.MONITOR_USER_OPT
 	CONSTRAINT MONITOR_USER_OPT_PK PRIMARY KEY (ID)
 );
 comment on table MONITOR_USER_OPT is '监控信息';
+
+
+-- 工作空间环境变量表
+CREATE TABLE IF NOT EXISTS PUBLIC.WORKSPACE_ENV_VAR
+(
+	ID               VARCHAR(50) not null comment 'id',
+	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
+	MODIFYUSER       VARCHAR(50) comment '修改人',
+	STRIKE           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId      varchar(50) not null comment '所属工作空间',
+	`NAME`           VARCHAR(50) comment '名称',
+	DESCRIPTION      varchar(255) comment '参数描述',
+	`value`          CLOB comment '值',
+	CONSTRAINT WORKSPACE_ENV_VAR_PK PRIMARY KEY (ID)
+);
+comment on table WORKSPACE_ENV_VAR is '用户信息表';
 
 
 

@@ -33,7 +33,7 @@ import io.jpom.service.h2db.TableName;
  * @author jiangzeyin
  * @date 2019/4/19
  */
-@TableName("USEROPERATELOGV1")
+@TableName(value = "USEROPERATELOGV1", name = "用户操作日志")
 public class UserOperateLogV1 extends BaseWorkspaceModel {
 	/**
 	 * 操作ip

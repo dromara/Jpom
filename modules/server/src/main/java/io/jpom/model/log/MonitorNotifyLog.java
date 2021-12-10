@@ -32,7 +32,7 @@ import io.jpom.service.h2db.TableName;
  * @author bwcx_jzy
  * @date 2019/7/13
  */
-@TableName("MONITORNOTIFYLOG")
+@TableName(value = "MONITORNOTIFYLOG", name = "监控通知")
 public class MonitorNotifyLog extends BaseWorkspaceModel {
 
 	/**

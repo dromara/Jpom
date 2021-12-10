@@ -1,3 +1,4 @@
+
 /*
  * The MIT License (MIT)
  *
@@ -22,42 +23,23 @@
  */
 package io.jpom.model.data;
 
-import io.jpom.model.BaseDbModel;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
 
 /**
- * @author Hotstrip
- * @since 2021-11-18
- * Backup info with H2 database
+ * 工作空间环境变量
+ *
+ * @author bwcx_jzy
+ * @date 2021/12/10
  */
-@TableName(value = "BACKUP_INFO", name = "数据备份")
-public class BackupInfoModel extends BaseDbModel {
+@TableName(value = "WORKSPACE_ENV_VAR", name = "工作空间环境变量")
+public class WorkspaceEnvVarModel extends BaseWorkspaceModel {
 
-	/**
-	 * 备份名称
-	 */
 	private String name;
-	/**
-	 * 文件地址
-	 */
-	private String filePath;
-	/**
-	 * 备份类型{0: 全量, 1: 部分, 2: 导入, 3 自动}
-	 */
-	private Integer backupType;
-	/**
-	 * 文件大小
-	 */
-	private Long fileSize;
-	/**
-	 * SHA1SUM
-	 */
-	private String sha1Sum;
 
-	/**
-	 * 状态{0: 默认; 1: 成功; 2: 失败}
-	 */
-	private Integer status;
+	private String value;
+
+	private String description;
 
 	public String getName() {
 		return name;
@@ -67,43 +49,19 @@ public class BackupInfoModel extends BaseDbModel {
 		this.name = name;
 	}
 
-	public String getFilePath() {
-		return filePath;
+	public String getValue() {
+		return value;
 	}
 
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
+	public void setValue(String value) {
+		this.value = value;
 	}
 
-	public Integer getBackupType() {
-		return backupType;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setBackupType(Integer backupType) {
-		this.backupType = backupType;
-	}
-
-	public Long getFileSize() {
-		return fileSize;
-	}
-
-	public void setFileSize(Long fileSize) {
-		this.fileSize = fileSize;
-	}
-
-	public String getSha1Sum() {
-		return sha1Sum;
-	}
-
-	public void setSha1Sum(String sha1Sum) {
-		this.sha1Sum = sha1Sum;
-	}
-
-	public Integer getStatus() {
-		return status;
-	}
-
-	public void setStatus(Integer status) {
-		this.status = status;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }

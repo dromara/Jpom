@@ -32,7 +32,7 @@ import io.jpom.util.StringUtil;
  * @author bwcx_jzy
  * @since 2021/12/2
  */
-@TableName("SYSTEM_PARAMETERS")
+@TableName(value = "SYSTEM_PARAMETERS", name = "系统参数")
 public class SystemParametersModel extends BaseStrikeDbModel {
 
 	/**

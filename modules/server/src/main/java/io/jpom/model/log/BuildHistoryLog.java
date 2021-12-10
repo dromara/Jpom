@@ -24,7 +24,7 @@ package io.jpom.model.log;
 
 import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.io.FileUtil;
-import io.jpom.build.BaseBuildModule;
+import io.jpom.build.BuildExtraModule;
 import io.jpom.build.BuildUtil;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.BuildInfoModel;
@@ -39,9 +39,9 @@ import java.io.File;
  *
  * @author bwcx_jzy
  * @date 2019/7/17
- * @see BaseBuildModule
+ * @see BuildExtraModule
  **/
-@TableName("BUILDHISTORYLOG")
+@TableName(value = "BUILDHISTORYLOG", name = "构建历史")
 public class BuildHistoryLog extends BaseWorkspaceModel {
 	/**
 	 * 发布方式

@@ -36,7 +36,7 @@ import java.util.List;
  *
  * @author Arno
  */
-@TableName("MONITOR_INFO")
+@TableName(value = "MONITOR_INFO", name = "监控信息")
 public class MonitorModel extends BaseWorkspaceModel {
 	private String name;
 	/**

@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * @author bwcx_jzy
  * @since 2021/12/5
  */
-@TableName("PROJECT_INFO")
+@TableName(value = "PROJECT_INFO", name = "项目信息")
 public class ProjectInfoModel extends BaseNodeModel {
 
 	private String projectId;

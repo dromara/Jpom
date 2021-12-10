@@ -33,7 +33,7 @@ import io.jpom.service.h2db.TableName;
  * @author Hotstrip
  * 仓库地址实体类
  */
-@TableName("REPOSITORY")
+@TableName(value = "REPOSITORY", name = "仓库信息")
 public class RepositoryModel extends BaseWorkspaceModel {
 	/**
 	 * 名称

@@ -164,7 +164,7 @@ public class WorkspaceController extends BaseServerController {
 			if (first != null) {
 				Assert.notEmpty(first, "没有对应的用户信息");
 				Integer cnt = first.getInt("cnt");
-				Assert.state(cnt == null || cnt <= 0, "当前工作空间下还存在关联数据：" + tableName.value());
+				Assert.state(cnt == null || cnt <= 0, "当前工作空间下还存在关联数据：" + tableName.name());
 			}
 		}
 		// 判断用户绑定关系

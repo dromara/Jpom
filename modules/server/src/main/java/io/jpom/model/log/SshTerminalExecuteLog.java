@@ -34,7 +34,7 @@ import io.jpom.service.h2db.TableName;
  * @author jiangzeyin
  * @date 2021/08/04
  */
-@TableName("SSHTERMINALEXECUTELOG")
+@TableName(value = "SSHTERMINALEXECUTELOG",name = "ssh 终端执行日志")
 public class SshTerminalExecuteLog extends BaseWorkspaceModel {
 	/**
 	 * 操作ip

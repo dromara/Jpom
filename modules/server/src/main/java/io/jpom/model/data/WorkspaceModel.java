@@ -31,14 +31,13 @@ import io.jpom.service.h2db.TableName;
  * @author bwcx_jzy
  * @since 2021/12/3
  */
-@TableName("WORKSPACE")
+@TableName(value = "WORKSPACE", name = "工作空间")
 public class WorkspaceModel extends BaseStrikeDbModel {
 
 	/**
 	 * 默认的工作空间
 	 */
 	public static final String DEFAULT_ID = "DEFAULT";
-
 
 
 	/**

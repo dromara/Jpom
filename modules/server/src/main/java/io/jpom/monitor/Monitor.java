@@ -164,7 +164,7 @@ public class Monitor implements Task {
 					context = jsonMessage.toString();
 				}
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("节点异常", e);
+				DefaultSystemLog.getLog().error("监控 {} 节点异常 {}", nodeModel.getName(), e.getMessage());
 				//
 				title = StrUtil.format("【{}】节点的运行状态异常", nodeModel.getName());
 				context = ExceptionUtil.stacktraceToString(e);

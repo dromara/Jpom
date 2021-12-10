@@ -50,3 +50,41 @@ export function deleteWorkspace(id) {
     params: { id: id },
   });
 }
+
+/*
+ * 工作空间环境变量列表
+ * @param {*}
+ * } params
+ */
+export function getWorkspaceEnvList(params) {
+  return axios({
+    url: "/system/workspace_env/list",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ *
+ * @param data
+ */
+export function editWorkspaceEnv(data) {
+  return axios({
+    url: "/system/workspace_env/edit",
+    method: "post",
+    data: data,
+  });
+}
+
+/*
+ * 删除工作空间变量
+ * @param {String} id
+ * } params
+ */
+export function deleteWorkspaceEnv(id) {
+  return axios({
+    url: "/system/workspace_env/delete",
+    method: "get",
+    params: { id: id },
+  });
+}

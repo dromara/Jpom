@@ -37,7 +37,7 @@ import java.util.List;
  * @author jiangzeyin
  * @date 2019/4/21
  */
-@TableName("OUT_GIVING")
+@TableName(value = "OUT_GIVING", name = "节点分发")
 public class OutGivingModel extends BaseWorkspaceModel {
 	private String name;
 	/**

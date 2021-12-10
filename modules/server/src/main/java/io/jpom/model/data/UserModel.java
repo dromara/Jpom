@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @author jiangzeyin
  * @date 2019/1/16
  */
-@TableName("USER_INFO")
+@TableName(value = "USER_INFO", name = "用户账号")
 public class UserModel extends BaseStrikeDbModel {
 	/**
 	 * 系统管理员

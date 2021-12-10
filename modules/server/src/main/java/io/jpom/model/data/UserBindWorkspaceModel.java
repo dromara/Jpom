@@ -30,7 +30,7 @@ import io.jpom.service.h2db.TableName;
  * @author bwcx_jzy
  * @since 2021/12/4
  */
-@TableName("USER_BIND_WORKSPACE")
+@TableName(value = "USER_BIND_WORKSPACE", name = "用户工作空间关系表")
 public class UserBindWorkspaceModel extends BaseDbModel {
 
 	private String userId;

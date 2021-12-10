@@ -42,18 +42,21 @@ import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
+import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -66,33 +69,22 @@ public class ReleaseManage extends BaseBuild {
 
 	private final UserModel userModel;
 	private final int buildId;
-	private final BaseBuildModule baseBuildModule;
+	private final BuildExtraModule buildExtraModule;
 	private final File resultFile;
 	private BaseBuild baseBuild;
-
-//	@Deprecated
-//	ReleaseManage(BuildModel buildModel, UserModel userModel, BaseBuild baseBuild) {
-//		super(BuildUtil.getLogFile(buildModel.getId(), buildModel.getBuildId()),
-//				buildModel.getId());
-//		this.baseBuildModule = buildModel;
-//		this.buildId = buildModel.getBuildId();
-//		this.userModel = userModel;
-//		this.baseBuild = baseBuild;
-//		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildModel.getResultDirFile());
-//	}
 
 	/**
 	 * new ReleaseManage constructor
 	 *
-	 * @param buildModel
-	 * @param userModel
-	 * @param baseBuild
-	 * @param buildId
+	 * @param buildModel 构建信息
+	 * @param userModel  用户信息
+	 * @param baseBuild  基础构建
+	 * @param buildId    构建序号ID
 	 */
-	ReleaseManage(BaseBuildModule buildModel, UserModel userModel, BaseBuild baseBuild, int buildId) {
+	ReleaseManage(BuildExtraModule buildModel, UserModel userModel, BaseBuild baseBuild, int buildId) {
 		super(BuildUtil.getLogFile(buildModel.getId(), buildId),
 				buildModel.getId());
-		this.baseBuildModule = buildModel;
+		this.buildExtraModule = buildModel;
 		this.buildId = buildId;
 		this.userModel = userModel;
 		this.baseBuild = baseBuild;
@@ -108,18 +100,8 @@ public class ReleaseManage extends BaseBuild {
 	public ReleaseManage(BuildHistoryLog buildHistoryLog, UserModel userModel) {
 		super(BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId()),
 				buildHistoryLog.getBuildDataId());
-		this.baseBuildModule = new BaseBuildModule();
-		{
-			//
-			this.baseBuildModule.setAfterOpt(buildHistoryLog.getAfterOpt());
-			this.baseBuildModule.setReleaseMethod(buildHistoryLog.getReleaseMethod());
-			this.baseBuildModule.setReleaseCommand(buildHistoryLog.getReleaseCommand());
-			this.baseBuildModule.setReleasePath(buildHistoryLog.getReleasePath());
-			this.baseBuildModule.setReleaseMethodDataId(buildHistoryLog.getReleaseMethodDataId());
-			this.baseBuildModule.setClearOld(buildHistoryLog.getClearOld());
-			this.baseBuildModule.setResultDirFile(buildHistoryLog.getResultDirFile());
-			this.baseBuildModule.setName(buildHistoryLog.getBuildName());
-		}
+		this.buildExtraModule = new BuildExtraModule();
+		this.buildExtraModule.updateValue(buildHistoryLog);
 
 		this.buildId = buildHistoryLog.getBuildNumberId();
 		this.userModel = userModel;
@@ -147,18 +129,18 @@ public class ReleaseManage extends BaseBuild {
 			return;
 		}
 		long time = SystemClock.now();
-		int releaseMethod = this.baseBuildModule.getReleaseMethod();
+		int releaseMethod = this.buildExtraModule.getReleaseMethod();
 		this.log("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
 		try {
 			if (releaseMethod == BuildReleaseMethod.Outgiving.getCode()) {
 				//
 				this.doOutGiving();
 			} else if (releaseMethod == BuildReleaseMethod.Project.getCode()) {
-				AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.baseBuildModule.getAfterOpt());
+				AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.buildExtraModule.getAfterOpt());
 				if (afterOpt == null) {
 					afterOpt = AfterOpt.No;
 				}
-				this.doProject(afterOpt, this.baseBuildModule.isClearOld());
+				this.doProject(afterOpt, this.buildExtraModule.isClearOld());
 			} else if (releaseMethod == BuildReleaseMethod.Ssh.getCode()) {
 				this.doSsh();
 			} else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
@@ -185,14 +167,37 @@ public class ReleaseManage extends BaseBuild {
 	/**
 	 * 格式化命令模版
 	 *
+	 * @param commands 命令
+	 */
+	private void formatCommand(String[] commands) {
+		//
+		WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
+		WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceEnvVarModel();
+		workspaceEnvVarModel.setWorkspaceId(this.buildExtraModule.getWorkspaceId());
+		List<WorkspaceEnvVarModel> list = workspaceEnvVarService.listByBean(workspaceEnvVarModel);
+		for (int i = 0; i < commands.length; i++) {
+			commands[i] = this.formatCommandItem(commands[i], list);
+		}
+	}
+
+	/**
+	 * 格式化命令模版
+	 *
 	 * @param command 命令
+	 * @param list    工作空间变量列表
 	 * @return 格式化后
 	 */
-	private String formatCommand(String command) {
+	private String formatCommandItem(String command, List<WorkspaceEnvVarModel> list) {
 		String replace = StrUtil.replace(command, "#{BUILD_ID}", this.buildModelId);
-		replace = StrUtil.replace(replace, "#{BUILD_NAME}", this.baseBuildModule.getName());
+		replace = StrUtil.replace(replace, "#{BUILD_NAME}", this.buildExtraModule.getName());
 		replace = StrUtil.replace(replace, "#{BUILD_RESULT_FILE}", FileUtil.getAbsolutePath(this.resultFile));
 		replace = StrUtil.replace(replace, "#{BUILD_NUMBER_ID}", this.buildId + StrUtil.EMPTY);
+
+		if (list != null) {
+			for (WorkspaceEnvVarModel envVarModel : list) {
+				replace = StrUtil.replace(replace, StrUtil.format("#{{}}", envVarModel.getName()), envVarModel.getValue());
+			}
+		}
 		return replace;
 	}
 
@@ -201,7 +206,7 @@ public class ReleaseManage extends BaseBuild {
 	 */
 	private void localCommand() {
 		// 执行命令
-		String[] commands = StrUtil.splitToArray(this.baseBuildModule.getReleaseCommand(), StrUtil.LF);
+		String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
 		if (ArrayUtil.isEmpty(commands)) {
 			this.log("没有需要执行的ssh命令");
 			return;
@@ -217,9 +222,10 @@ public class ReleaseManage extends BaseBuild {
 			}
 			String sshExecTemplate = IoUtil.readUtf8(templateInputStream);
 			StringBuilder stringBuilder = new StringBuilder(sshExecTemplate);
-			for (String s : commands) {
-				stringBuilder.append(this.formatCommand(s)).append(StrUtil.LF);
-			}
+			// 替换变量
+			this.formatCommand(commands);
+			//
+			stringBuilder.append(ArrayUtil.join(commands, StrUtil.LF));
 			File tempPath = ConfigBean.getInstance().getTempPath();
 			File commandFile = FileUtil.file(tempPath, "build", this.buildModelId + StrUtil.DOT + CommandUtil.SUFFIX);
 			FileUtil.writeUtf8String(stringBuilder.toString(), commandFile);
@@ -239,7 +245,7 @@ public class ReleaseManage extends BaseBuild {
 	 * ssh 发布
 	 */
 	private void doSsh() {
-		String releaseMethodDataId = this.baseBuildModule.getReleaseMethodDataId();
+		String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
 		SshService sshService = SpringUtil.getBean(SshService.class);
 		SshModel item = sshService.getByKey(releaseMethodDataId, false);
 		if (item == null) {
@@ -249,18 +255,18 @@ public class ReleaseManage extends BaseBuild {
 		Session session = SshService.getSessionByModel(item);
 		try {
 			try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
-				if (this.baseBuildModule.isClearOld() && StrUtil.isNotEmpty(this.baseBuildModule.getReleasePath())) {
+				if (this.buildExtraModule.isClearOld() && StrUtil.isNotEmpty(this.buildExtraModule.getReleasePath())) {
 					try {
-						sftp.delDir(this.baseBuildModule.getReleasePath());
+						sftp.delDir(this.buildExtraModule.getReleasePath());
 					} catch (Exception e) {
 						this.pubLog("清除构建产物失败", e);
 					}
 				}
 				String prefix = "";
-				if (!StrUtil.startWith(this.baseBuildModule.getReleasePath(), StrUtil.SLASH)) {
+				if (!StrUtil.startWith(this.buildExtraModule.getReleasePath(), StrUtil.SLASH)) {
 					prefix = sftp.pwd();
 				}
-				String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + this.baseBuildModule.getReleasePath());
+				String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + this.buildExtraModule.getReleasePath());
 				sftp.syncUpload(this.resultFile, normalizePath);
 			} catch (Exception e) {
 				this.pubLog("执行ssh发布异常", e);
@@ -270,14 +276,14 @@ public class ReleaseManage extends BaseBuild {
 		}
 		this.log("");
 		// 执行命令
-		String[] commands = StrUtil.splitToArray(this.baseBuildModule.getReleaseCommand(), StrUtil.LF);
+		String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
 		if (commands == null || commands.length <= 0) {
 			this.log("没有需要执行的ssh命令");
 			return;
 		}
-		for (int i = 0; i < commands.length; i++) {
-			commands[i] = this.formatCommand(commands[i]);
-		}
+		// 替换变量
+		this.formatCommand(commands);
+		//
 		this.log(DateUtil.now() + " start exec");
 		try {
 			String s = sshService.exec(item, commands);
@@ -293,7 +299,7 @@ public class ReleaseManage extends BaseBuild {
 	 * @param afterOpt 后续操作
 	 */
 	private void doProject(AfterOpt afterOpt, boolean clearOld) {
-		String releaseMethodDataId = this.baseBuildModule.getReleaseMethodDataId();
+		String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
 		String[] strings = StrUtil.splitToArray(releaseMethodDataId, ":");
 		if (strings == null || strings.length != 2) {
 			throw new JpomRuntimeException(releaseMethodDataId + " error");
@@ -324,7 +330,7 @@ public class ReleaseManage extends BaseBuild {
 	 * 分发包
 	 */
 	private void doOutGiving() {
-		String releaseMethodDataId = this.baseBuildModule.getReleaseMethodDataId();
+		String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
 		File zipFile = BuildUtil.isDirPackage(this.resultFile);
 		boolean unZip = true;
 		if (zipFile == null) {

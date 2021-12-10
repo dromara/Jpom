@@ -34,7 +34,7 @@ import io.jpom.service.h2db.TableName;
  * @author jiangzeyin
  * @date 2019/4/16
  */
-@TableName("NODE_INFO")
+@TableName(value = "NODE_INFO", name = "节点信息")
 public class NodeModel extends BaseWorkspaceModel {
 
 	private String url;

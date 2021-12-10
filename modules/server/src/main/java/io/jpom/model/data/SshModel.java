@@ -40,7 +40,7 @@ import java.util.List;
  * @author bwcx_jzy
  * @date 2019/8/9
  */
-@TableName("SSH_INFO")
+@TableName(value = "SSH_INFO", name = "SSH 信息")
 public class SshModel extends BaseWorkspaceModel {
 
 	private String name;

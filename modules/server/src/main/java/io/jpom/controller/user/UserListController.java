@@ -193,6 +193,8 @@ public class UserListController extends BaseServerController {
 		// 非系统管理员不支持删除演示账号
 		Assert.state(!userModel.isDemoUser(), "演示账号不支持删除");
 		userService.delByKey(id);
+		// 删除工作空间
+		userBindWorkspaceService.deleteByUserId(id);
 		return JsonMessage.getString(200, "删除成功");
 	}
 

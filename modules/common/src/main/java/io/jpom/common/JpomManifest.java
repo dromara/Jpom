@@ -116,7 +116,8 @@ public class JpomManifest {
 						JPOM_MANIFEST.setTimeStamp(jarVersion.get(1));
 					}
 				}
-				GlobalHeaders.INSTANCE.header(Header.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36 Jpom " + JPOM_MANIFEST.getType(), true);
+				String jpomTag = StrUtil.format("Jpom {}/{}", JPOM_MANIFEST.getType(), JPOM_MANIFEST.getVersion());
+				GlobalHeaders.INSTANCE.header(Header.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36 " + jpomTag, true);
 			}
 		}
 	}

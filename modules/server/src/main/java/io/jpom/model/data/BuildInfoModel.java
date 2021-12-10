@@ -29,7 +29,7 @@ import io.jpom.service.h2db.TableName;
  * @author Hotstrip
  * new BuildModel class, for replace old BuildModel
  */
-@TableName("BUILD_INFO")
+@TableName(value = "BUILD_INFO",name = "构建信息")
 public class BuildInfoModel extends BaseWorkspaceModel {
 
 	/**

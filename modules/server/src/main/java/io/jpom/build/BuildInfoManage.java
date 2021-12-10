@@ -24,6 +24,7 @@ package io.jpom.build;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
@@ -87,7 +88,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	private Process process;
 	private String logId;
 	private final UserModel userModel;
-	private final BaseBuildModule baseBuildModule;
+	private final BuildExtraModule buildExtraModule;
 	/**
 	 * 延迟执行的时间（单位秒）
 	 */
@@ -101,11 +102,11 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
 		this.userModel = userModel;
 		// 解析 其他配置信息
-		BaseBuildModule baseBuildModule = StringUtil.jsonConvert(this.buildInfoModel.getExtraData(), BaseBuildModule.class);
-		Assert.notNull(baseBuildModule, "构建信息缺失");
+		BuildExtraModule buildExtraModule = StringUtil.jsonConvert(this.buildInfoModel.getExtraData(), BuildExtraModule.class);
+		Assert.notNull(buildExtraModule, "构建信息缺失");
 		// update value
-		baseBuildModule.updateValue(this.buildInfoModel);
-		this.baseBuildModule = baseBuildModule;
+		buildExtraModule.updateValue(this.buildInfoModel);
+		this.buildExtraModule = buildExtraModule;
 	}
 
 	/**
@@ -184,12 +185,12 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		this.logId = IdUtil.fastSimpleUUID();
 		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
 		// 更新其他配置字段
-		buildHistoryLog.setResultDirFile(baseBuildModule.getResultDirFile());
-		buildHistoryLog.setReleaseMethod(baseBuildModule.getReleaseMethod());
-		buildHistoryLog.setReleaseMethodDataId(baseBuildModule.getReleaseMethodDataId());
-		buildHistoryLog.setAfterOpt(baseBuildModule.getAfterOpt());
+		buildHistoryLog.setResultDirFile(buildExtraModule.getResultDirFile());
+		buildHistoryLog.setReleaseMethod(buildExtraModule.getReleaseMethod());
+		buildHistoryLog.setReleaseMethodDataId(buildExtraModule.getReleaseMethodDataId());
+		buildHistoryLog.setAfterOpt(buildExtraModule.getAfterOpt());
 		buildHistoryLog.setWorkspaceId(this.buildInfoModel.getWorkspaceId());
-		buildHistoryLog.setReleaseCommand(baseBuildModule.getReleaseCommand());
+		buildHistoryLog.setReleaseCommand(buildExtraModule.getReleaseCommand());
 		BeanUtil.copyProperties(this.buildInfoModel, buildHistoryLog);
 
 		buildHistoryLog.setId(this.logId);
@@ -266,7 +267,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			dbBuildHistoryLogService.updateResultDirFile(this.logId, resultDirFile);
 			//
 			this.buildInfoModel.setResultDirFile(resultDirFile);
-			this.baseBuildModule.setResultDirFile(resultDirFile);
+			this.buildExtraModule.setResultDirFile(resultDirFile);
 		}
 		return true;
 	}
@@ -372,7 +373,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		boolean status = packageFile();
 		if (status && buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
 			// 发布文件
-			new ReleaseManage(baseBuildModule, this.userModel, this, buildInfoModel.getBuildId()).start();
+			new ReleaseManage(buildExtraModule, this.userModel, this, buildInfoModel.getBuildId()).start();
 		} else {
 			//
 			updateStatus(BuildStatus.Success);
@@ -463,12 +464,14 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		if (StrUtil.isEmpty(webhook)) {
 			return;
 		}
+		long triggerTime = SystemClock.now();
 		ThreadUtil.execute(() -> {
 			try {
 				HttpRequest httpRequest = HttpUtil.createGet(webhook);
 				httpRequest.form("buildId", this.buildInfoModel.getId());
 				httpRequest.form("buildName", this.buildInfoModel.getName());
 				httpRequest.form("type", type, other);
+				httpRequest.form("triggerTime", triggerTime);
 				String body = httpRequest.execute().body();
 				DefaultSystemLog.getLog().info(this.buildInfoModel.getName() + ":" + body);
 			} catch (Exception e) {

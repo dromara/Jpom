@@ -22,6 +22,7 @@
  */
 package io.jpom.service.user;
 
+import cn.hutool.db.Entity;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
@@ -115,5 +116,17 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 		Assert.notEmpty(userBindWorkspaceModels, "没有任何工作空间信息");
 		List<String> collect = userBindWorkspaceModels.stream().map(UserBindWorkspaceModel::getWorkspaceId).collect(Collectors.toList());
 		return workspaceService.listById(collect);
+	}
+
+	/**
+	 * 删除
+	 *
+	 * @param userId 用户ID
+	 */
+	public void deleteByUserId(String userId) {
+		UserBindWorkspaceModel bindWorkspaceModel = new UserBindWorkspaceModel();
+		bindWorkspaceModel.setUserId(userId);
+		Entity where = super.dataBeanToEntity(bindWorkspaceModel);
+		super.del(where);
 	}
 }

@@ -106,10 +106,10 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item label="构建命令" prop="script">
-          <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package" />
+          <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build" />
         </a-form-model-item>
         <a-form-model-item label="产物目录" prop="resultDirFile" class="jpom-target-dir">
-          <a-input v-model="temp.resultDirFile" placeholder="构建产物目录，相对路径">
+          <a-input v-model="temp.resultDirFile" placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist">
             <a-tooltip slot="suffix">
               <template slot="title">
                 <div>可以理解为项目打包的目录。 如 Jpom 项目执行（构建命令） <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b></div>
@@ -127,7 +127,23 @@
             </a-tooltip>
           </a-input>
         </a-form-model-item>
-        <a-form-model-item label="发布操作" prop="releaseMethod">
+        <a-form-model-item prop="releaseMethod">
+          <template slot="label">
+            发布操作
+            <a-tooltip v-show="!temp.id">
+              <template slot="title">
+                <ul>
+                  <li>发布操作是指,执行完构建命令后将构建产物目录中的文件用不同的方式发布(上传)到对应的地方</li>
+                  <li>节点分发是指,一个项目部署在多个节点中使用节点分发一步完成多个节点中的项目发布操作</li>
+                  <li>项目是指,节点中的某一个项目,需要提前在节点中创建项目</li>
+                  <li>SSH 是指,通过 SSH 命令的方式对产物进行发布或者执行多条命令来实现发布(需要到 SSH 中提前去添加)</li>
+                  <li>本地命令是指,在服务端本地执行多条命令来实现发布</li>
+                  <li>SSH、本地命令发布都执行变量替换,系统预留变量有：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-radio-group v-model="temp.releaseMethod" name="releaseMethod">
             <a-radio v-for="tempValue in releaseMethodArray" :key="tempValue.value" :value="tempValue.value">{{ tempValue.name }}</a-radio>
           </a-radio-group>
@@ -188,8 +204,9 @@
               <template slot="title">
                 <ul>
                   <li>构建过程请求对应的地址,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
-                  <li>传人参数有：buildId、buildName、type、error</li>
+                  <li>传人参数有：buildId、buildName、type、error、triggerTime</li>
                   <li>type 的值有：startReady、pull、executeCommand、release、done、stop、success</li>
+                  <li>异步请求不能保证有序性</li>
                 </ul>
               </template>
               <a-icon type="question-circle" theme="filled" />
@@ -553,7 +570,7 @@ export default {
         if (this.temp.releaseMethod === 2) {
           if (this.temp.releaseMethodDataIdList.length < 2) {
             this.$notification.warn({
-              message: "请选择节点项目",
+              message: "请选择节点项目,可能是节点中不存在任何项目,需要去节点中创建项目",
             });
             return false;
           }

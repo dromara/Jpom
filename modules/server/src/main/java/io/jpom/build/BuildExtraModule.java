@@ -26,6 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import io.jpom.model.BaseModel;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
+import io.jpom.model.log.BuildHistoryLog;
 
 /**
  * 构建物基类
@@ -33,7 +34,7 @@ import io.jpom.model.enums.BuildReleaseMethod;
  * @author bwcx_jzy
  * @date 2019/7/19
  */
-public class BaseBuildModule extends BaseModel {
+public class BuildExtraModule extends BaseModel {
 	/**
 	 * 发布方式
 	 *
@@ -71,6 +72,11 @@ public class BaseBuildModule extends BaseModel {
 	 * 发布到ssh中的目录
 	 */
 	private String releasePath;
+
+	/**
+	 * 工作空间 ID
+	 */
+	private String workspaceId;
 
 	public String getReleasePath() {
 		return releasePath;
@@ -131,6 +137,14 @@ public class BaseBuildModule extends BaseModel {
 		this.resultDirFile = resultDirFile;
 	}
 
+	public String getWorkspaceId() {
+		return workspaceId;
+	}
+
+	public void setWorkspaceId(String workspaceId) {
+		this.workspaceId = workspaceId;
+	}
+
 	/**
 	 * 更新 字段值
 	 *
@@ -141,5 +155,20 @@ public class BaseBuildModule extends BaseModel {
 		this.setName(buildInfoModel.getName());
 		this.setReleaseMethod(buildInfoModel.getReleaseMethod());
 		this.setResultDirFile(buildInfoModel.getResultDirFile());
+		this.setWorkspaceId(buildInfoModel.getWorkspaceId());
+	}
+
+	public void updateValue(BuildHistoryLog buildHistoryLog) {
+		//
+		this.setAfterOpt(buildHistoryLog.getAfterOpt());
+		this.setReleaseMethod(buildHistoryLog.getReleaseMethod());
+		this.setReleaseCommand(buildHistoryLog.getReleaseCommand());
+		this.setReleasePath(buildHistoryLog.getReleasePath());
+		this.setReleaseMethodDataId(buildHistoryLog.getReleaseMethodDataId());
+		this.setClearOld(buildHistoryLog.getClearOld());
+		this.setResultDirFile(buildHistoryLog.getResultDirFile());
+		this.setName(buildHistoryLog.getBuildName());
+		this.setId(buildHistoryLog.getBuildDataId());
+		this.setWorkspaceId(buildHistoryLog.getWorkspaceId());
 	}
 }

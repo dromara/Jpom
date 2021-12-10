@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  *
  * @author Arno
  */
-@TableName("MONITOR_USER_OPT")
+@TableName(value = "MONITOR_USER_OPT",name = "监控用户操作")
 public class MonitorUserOptModel extends BaseWorkspaceModel {
 	/**
 	 *

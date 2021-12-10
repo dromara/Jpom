@@ -42,4 +42,11 @@ public @interface TableName {
 	 * @return tableName
 	 */
 	String value();
+
+	/**
+	 * 表描述
+	 *
+	 * @return 描述
+	 */
+	String name();
 }
