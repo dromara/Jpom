@@ -4,9 +4,24 @@
       <a-input class="search-input-item" v-model="listQuery['%id%']" placeholder="节点ID" />
       <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
       <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
-      <a-button type="primary" @click="handleFilter">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
       <a-button type="primary jpom-node-manage-add" @click="handleAdd">新增</a-button>
-      <!-- <a-button type="primary" @click="loadData">刷新</a-button> -->
+      <a-tooltip>
+        <template slot="title">
+          <div>点击节点管理进入节点管理页面</div>
+
+          <div>
+            <ul>
+              <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
+              <li>节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件）</li>
+              <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
+            </ul>
+          </div>
+        </template>
+        <a-icon type="question-circle" theme="filled" />
+      </a-tooltip>
     </div>
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="(this, pagination)" @change="changePage">
@@ -81,7 +96,20 @@
             default-checked
           />
         </a-form-model-item>
-        <a-form-model-item label="节点地址" prop="url">
+        <a-form-model-item prop="url">
+          <template slot="label">
+            节点地址
+            <a-tooltip v-show="!temp.id">
+              <template slot="title"
+                >节点地址为插件端的 IP:PORT 插件端端口默认为：2123
+                <ul>
+                  <li>节点地址建议使用内网地址</li>
+                  <li>如果插件端正常运行但是连接失败请检查端口是否开放,防火墙规则,云服务器的安全组入站规则</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-input v-model="temp.url" placeholder="节点地址 (127.0.0.1:2123)">
             <a-select slot="addonBefore" v-model="temp.protocol" default-value="Http://" style="width: 80px">
               <a-select-option value="Http"> Http:// </a-select-option>
@@ -103,7 +131,14 @@
           <a-form-model-item label="节点账号" prop="loginName">
             <a-input v-model="temp.loginName" placeholder="节点账号,请查看节点启动输出的信息" />
           </a-form-model-item>
-          <a-form-model-item label="节点密码" :prop="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
+          <a-form-model-item :prop="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
+            <template slot="label">
+              节点密码
+              <a-tooltip v-show="!temp.id">
+                <template slot="title"> 节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件） </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </template>
             <a-input-password v-model="temp.loginPwd" placeholder="节点密码,请查看节点启动输出的信息" />
           </a-form-model-item>
         </div>
@@ -213,7 +248,7 @@ export default {
     },
   },
   created() {
-    this.handleFilter();
+    this.loadData();
   },
   methods: {
     // 页面引导
@@ -245,8 +280,8 @@ export default {
       });
     },
     // 加载数据
-    loadData() {
-      this.list = [];
+    loadData(pointerEvent) {
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
       getNodeList(this.listQuery).then((res) => {
         if (res.code === 200) {
@@ -282,10 +317,6 @@ export default {
           this.childLoading = false;
         });
       }
-    },
-    // 筛选
-    handleFilter() {
-      this.loadData();
     },
     // 添加
     handleAdd() {

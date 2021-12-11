@@ -2,7 +2,9 @@
   <div class="full-content">
     <div ref="filter" class="filter">
       <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="名称" />
-      <a-button type="primary" @click="loadData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
       <a-button type="primary" @click="handleLink">添加关联项目</a-button>
       <a-button type="primary" @click="handleAdd">创建分发项目</a-button>
       <a-tooltip>
@@ -517,8 +519,8 @@ export default {
     },
 
     // 加载数据
-    loadData() {
-      this.list = [];
+    loadData(pointerEvent) {
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
       this.childLoading = false;
       getDishPatchList(this.listQuery).then((res) => {

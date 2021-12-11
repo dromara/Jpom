@@ -3,7 +3,9 @@
     <div ref="filter" class="filter">
       <a-input v-model="listQuery.id" placeholder="用户名ID" class="search-input-item" />
       <a-input v-model="listQuery['%name%']" placeholder="用户名" class="search-input-item" />
-      <a-button type="primary" @click="loadData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
       <a-button type="primary" @click="handleAdd">新增</a-button>
     </div>
     <!-- 数据表格 -->
@@ -142,8 +144,9 @@ export default {
       this.$introJs().exit();
     },
     // 加载数据
-    loadData() {
+    loadData(pointerEvent) {
       this.loading = true;
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       getUserList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
@@ -208,7 +211,6 @@ export default {
         if (this.targetKeys.length === 0) {
           this.$notification.error({
             message: "请选择工作空间",
-            
           });
           return false;
         }
@@ -218,7 +220,6 @@ export default {
           if (paramsTemp.password.length < 6 || paramsTemp.password.length > 20) {
             this.$notification.warn({
               message: "密码长度为6-20",
-              
             });
             return;
           }
@@ -232,7 +233,6 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              
             });
             this.$refs["editUserForm"].resetFields();
             this.editUserVisible = false;
@@ -254,7 +254,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }
@@ -275,7 +274,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }

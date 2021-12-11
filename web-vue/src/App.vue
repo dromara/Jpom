@@ -2,6 +2,9 @@
   <a-config-provider :locale="locale">
     <div id="app">
       <router-view v-if="routerActivation" />
+      <template>
+        <a-back-top />
+      </template>
     </div>
   </a-config-provider>
 </template>

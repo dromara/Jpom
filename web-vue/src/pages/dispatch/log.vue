@@ -8,15 +8,13 @@
         <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
       </a-select>
       <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="filter-item" @change="loadData">
-        <a-select-option :value="0">未分发</a-select-option>
-        <a-select-option :value="1">分发中</a-select-option>
-        <a-select-option :value="2">分发成功</a-select-option>
-        <a-select-option :value="3">分发失败</a-select-option>
-        <a-select-option :value="4">取消分发</a-select-option>
+        <a-select-option v-for="(item, key) in dispatchStatusMap" :key="key" :value="key">{{ item }}</a-select-option>
       </a-select>
       <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-      <a-button type="primary" @click="loadData">搜索</a-button>
-      <a-button type="primary" @click="handleFilter">刷新</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
+      <!-- <a-button type="primary" @click="handleFilter">刷新</a-button> -->
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
@@ -29,13 +27,9 @@
       <a-tooltip slot="projectId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="status" slot-scope="text">
-        <span v-if="text === 0">未分发</span>
-        <span v-if="text === 1">分发中</span>
-        <span v-if="text === 2">分发成功</span>
-        <span v-if="text === 3">分发失败</span>
-        <span v-if="text === 4">取消分发</span>
-      </template>
+      <a-tooltip slot="status" slot-scope="text">
+        {{ dispatchStatusMap[text] || "未知" }}
+      </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleDetail(record)">详情</a-button>
       </template>
@@ -54,7 +48,7 @@
 </template>
 <script>
 import { getNodeListAll } from "@/api/node";
-import { getDishPatchLogList, getDishPatchListAll } from "@/api/dispatch";
+import { getDishPatchLogList, getDishPatchListAll, dispatchStatusMap } from "@/api/dispatch";
 import { parseTime } from "@/utils/time";
 
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
@@ -67,14 +61,14 @@ export default {
       dispatchList: [],
       total: 0,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-
+      dispatchStatusMap: dispatchStatusMap,
       temp: {},
       detailVisible: false,
       detailData: [],
       columns: [
-        { title: "分发项目 ID", dataIndex: "outGivingId", width: 100, ellipsis: true, scopedSlots: { customRender: "outGivingId" } },
-        { title: "节点 ID", dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
-        { title: "项目 ID", dataIndex: "projectId", width: 100, ellipsis: true, scopedSlots: { customRender: "projectId" } },
+        { title: "分发项目 ID", dataIndex: "outGivingId", ellipsis: true, scopedSlots: { customRender: "outGivingId" } },
+        { title: "节点 ID", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "项目 ID", dataIndex: "projectId", ellipsis: true, scopedSlots: { customRender: "projectId" } },
         {
           title: "开始时间",
           dataIndex: "startTime",
@@ -82,7 +76,7 @@ export default {
             return parseTime(text);
           },
           sorter: true,
-          width: 180,
+          width: 170,
         },
         {
           title: "结束时间",
@@ -91,8 +85,9 @@ export default {
           customRender: (text) => {
             return parseTime(text);
           },
-          width: 180,
+          width: 170,
         },
+        { title: "操作人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 100 },
       ],
@@ -139,9 +134,9 @@ export default {
       });
     },
     // 加载数据
-    loadData() {
+    loadData(pointerEvent) {
       this.loading = true;
-
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       getDishPatchLogList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;

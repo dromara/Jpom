@@ -176,3 +176,11 @@ export const afterOptList = [
   { title: "完整顺序重启(有重启失败将结束本次)", value: 2 },
   { title: "顺序重启(有重启失败将继续)", value: 3 },
 ];
+
+export const dispatchStatusMap = {
+  0: "未分发",
+  1: "分发中",
+  2: "分发成功",
+  3: "分发失败",
+  4: "取消分发",
+};

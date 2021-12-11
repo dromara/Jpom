@@ -3,7 +3,9 @@
     <div ref="filter" class="filter">
       <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
       <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
-      <a-button type="primary" @click="loadData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
       <a-button type="primary" @click="handleAdd">新增</a-button>
       关联节点数据是异步获取有一定时间延迟
     </div>
@@ -380,8 +382,9 @@ export default {
   },
   methods: {
     // 加载数据
-    loadData() {
+    loadData(pointerEvent) {
       this.loading = true;
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       getSshList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
@@ -438,7 +441,6 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              
             });
             //this.$refs['editSshForm'].resetFields();
             this.fileList = [];
@@ -506,7 +508,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }
@@ -558,7 +559,6 @@ export default {
         if (this.fileList.length === 0) {
           this.$notification.error({
             message: "请选择 zip 文件",
-            
           });
           return false;
         }
@@ -575,7 +575,6 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: "操作成功",
-              
             });
             //this.$refs['nodeForm'].resetFields();
             this.nodeVisible = false;

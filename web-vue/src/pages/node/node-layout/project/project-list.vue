@@ -6,7 +6,9 @@
       </a-select> -->
       <a-input class="search-input-item" v-model="listQuery['%projectId%']" placeholder="项目ID" />
       <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="项目名称" />
-      <a-button type="primary" @click="loadData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
       <a-button type="primary" @click="handleAdd">新增</a-button>
 
       <a-button type="primary" @click="batchStart">批量启动</a-button>
@@ -411,9 +413,9 @@ export default {
       });
     },
     // 加载数据
-    loadData() {
+    loadData(pointerEvent) {
       this.loading = true;
-
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.listQuery.nodeId = this.node.id;
       getProjectList(this.listQuery).then((res1) => {
         if (res1.code === 200) {

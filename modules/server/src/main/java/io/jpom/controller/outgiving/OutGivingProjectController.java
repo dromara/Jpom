@@ -58,10 +58,8 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -80,19 +78,19 @@ import java.util.stream.Collectors;
 @Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingProjectController extends BaseServerController {
 
-	@Resource
-	private OutGivingServer outGivingServer;
+	private final OutGivingServer outGivingServer;
 	private final ProjectInfoCacheService projectInfoCacheService;
 	private final SystemParametersServer systemParametersServer;
 
-	public OutGivingProjectController(ProjectInfoCacheService projectInfoCacheService,
+	public OutGivingProjectController(OutGivingServer outGivingServer,
+									  ProjectInfoCacheService projectInfoCacheService,
 									  SystemParametersServer systemParametersServer) {
+		this.outGivingServer = outGivingServer;
 		this.projectInfoCacheService = projectInfoCacheService;
 		this.systemParametersServer = systemParametersServer;
 	}
 
 	@RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String getProjectStatus() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectStatus).toString();
 	}
@@ -100,7 +98,7 @@ public class OutGivingProjectController extends BaseServerController {
 
 	@RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) {
-		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id);
+		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, getRequest());
 		Objects.requireNonNull(outGivingServerItem, "没有数据");
 		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
 		JSONArray jsonArray = new JSONArray();
@@ -172,7 +170,6 @@ public class OutGivingProjectController extends BaseServerController {
 	 * @throws IOException IO
 	 */
 	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.UPLOAD)
 	public String upload(String id, String afterOpt, String clearOld, String autoUnzip) throws IOException {
 		OutGivingModel outGivingModel = this.check(id);
@@ -202,7 +199,7 @@ public class OutGivingProjectController extends BaseServerController {
 	}
 
 	private OutGivingModel check(String id) {
-		OutGivingModel outGivingModel = outGivingServer.getByKey(id);
+		OutGivingModel outGivingModel = outGivingServer.getByKey(id, getRequest());
 		Assert.notNull(outGivingModel, "上传失败,没有找到对应的分发项目");
 		// 检查状态
 		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.outGivingNodeProjectList();

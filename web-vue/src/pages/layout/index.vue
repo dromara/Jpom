@@ -11,10 +11,10 @@
     </a-layout-sider>
     <a-layout>
       <a-layout-header class="app-header">
-        <a-tooltip title="折叠左侧菜单栏">
+        <a-tooltip placement="right" title="折叠左侧菜单栏">
           <a-icon class="icon-btn" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="changeCollapsed" />
         </a-tooltip>
-        <a-tooltip v-if="getTabList.length > 1" title="关闭其他标签，只保留当前的 Tab">
+        <a-tooltip placement="right" v-if="getTabList.length > 1" title="关闭其他标签，只保留当前的 Tab">
           <a-icon class="icon-btn" style="padding-left: 0px" type="close-circle" @click="closeTabs" />
         </a-tooltip>
         <content-tab />

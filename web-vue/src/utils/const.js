@@ -34,7 +34,7 @@ export const PAGE_DEFAULT_LIMIT = 10;
 /**
  * 分页选择条
  */
-export const PAGE_DEFAULT_SIZW_OPTIONS = ["10", "20", "50", "100"];
+export const PAGE_DEFAULT_SIZW_OPTIONS = ["5", PAGE_DEFAULT_LIMIT + "", "20", "30", "40", "50"];
 /**
  * 展示总条数计算方法
  * @param {Number} total 总记录数
@@ -43,7 +43,7 @@ export const PAGE_DEFAULT_SIZW_OPTIONS = ["10", "20", "50", "100"];
  */
 export function PAGE_DEFAULT_SHOW_TOTAL(total, listQuery) {
   if (total <= listQuery.limit) {
-    return "";
+    return `总计 ${total} 条`;
   }
   return `总计 ${total} 条`;
 }

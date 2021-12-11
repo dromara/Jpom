@@ -1,11 +1,13 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input v-model="listQuery.name" placeholder="请输入备份名称" class="filter-item" />
+      <a-input v-model="listQuery['%name%']" placeholder="请输入备份名称" class="filter-item" />
       <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="filter-item">
         <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
       </a-select>
-      <a-button type="primary" @click="loadData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
       <a-button type="primary" @click="handleAdd">创建备份</a-button>
       <a-button type="primary" @click="handleSqlUpload">导入备份</a-button>
     </div>
@@ -179,12 +181,10 @@ export default {
       return renderSize(value);
     },
     // 加载数据
-    loadData() {
-      this.list = [];
+    loadData(pointerEvent) {
       this.loading = true;
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
 
-      this.listQuery["name%"] = this.listQuery.name;
-      delete this.listQuery.name;
       getBackupList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
@@ -235,7 +235,6 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              
             });
             this.$refs["editBackupForm"].resetFields();
             this.createBackupVisible = false;
@@ -261,7 +260,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }
@@ -282,7 +280,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }
@@ -306,7 +303,6 @@ export default {
     startSqlUpload() {
       this.$notification.info({
         message: "正在上传文件，请稍后...",
-        
       });
       // 设置上传状态
       this.uploading = true;
@@ -324,7 +320,6 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            
           });
           this.successSize++;
           this.percentage = 100;

@@ -10,7 +10,9 @@
         <a-select-option v-for="(val, key) in releaseMethodMap" :key="key">{{ val }}</a-select-option>
       </a-select>
       <a-input allowClear class="search-input-item" v-model="listQuery['%resultDirFile%']" placeholder="产物目录" />
-      <a-button type="primary" @click="loadData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
       <a-button type="primary" @click="handleAdd">新增</a-button>
     </div>
     <!-- 表格 -->
@@ -402,8 +404,8 @@ export default {
     },
 
     // 加载数据
-    loadData() {
-      this.list = [];
+    loadData(pointerEvent) {
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
       getBuildList(this.listQuery).then((res) => {
         if (res.code === 200) {

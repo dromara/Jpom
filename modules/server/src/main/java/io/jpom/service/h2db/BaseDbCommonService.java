@@ -38,6 +38,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.PageResultDto;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.db.DbConfig;
+import org.springframework.util.Assert;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -494,6 +495,9 @@ public abstract class BaseDbCommonService<T> {
 		}).collect(Collectors.toList());
 		PageResultDto<T> pageResultDto = new PageResultDto(pageResult);
 		pageResultDto.setResult(list);
+		if (pageResultDto.isEmpty() && pageResultDto.getPage() > 1) {
+			Assert.state(pageResultDto.getTotal() <= 0, "筛选的分页有问题,当前页码查询不到任何数据");
+		}
 		return pageResultDto;
 	}
 

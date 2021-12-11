@@ -13,7 +13,9 @@
         <a-select-option :value="0">失败</a-select-option>
       </a-select>
       <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-      <a-button type="primary" @click="loadData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" bordered :rowKey="(record, index) => index" @change="change">
@@ -113,9 +115,9 @@ export default {
       });
     },
     // 加载数据
-    loadData() {
+    loadData(pointerEvent) {
       this.loading = true;
-
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       getMonitorLogList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;

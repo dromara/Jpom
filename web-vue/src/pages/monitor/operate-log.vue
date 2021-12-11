@@ -2,7 +2,9 @@
   <div>
     <div ref="filter" class="filter">
       <a-input v-model="listQuery['%name%']" placeholder="监控名称" class="search-input-item" />
-      <a-button type="primary" @click="loadData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
       <a-button type="primary" @click="handleAdd">新增</a-button>
     </div>
     <!-- 数据表格 -->
@@ -170,8 +172,9 @@ export default {
     },
 
     // 加载数据
-    loadData() {
+    loadData(pointerEvent) {
       this.loading = true;
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       getMonitorOperateLogList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;

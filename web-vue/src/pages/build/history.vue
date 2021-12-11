@@ -8,7 +8,9 @@
         <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
       </a-select>
       <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-      <a-button type="primary" @click="handleFilter">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="loadData">搜索</a-button>
+      </a-tooltip>
       <!-- <a-button type="primary" @click="handleFilter">刷新</a-button> -->
     </div>
     <!-- 数据表格 -->
@@ -130,7 +132,9 @@ export default {
       });
     },
     // 加载数据
-    loadData() {
+    loadData(pointerEvent) {
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
+
       this.loading = true;
 
       geteBuildHistory(this.listQuery).then((res) => {
@@ -159,11 +163,6 @@ export default {
         this.listQuery.startTime = `${dateString[0]} ~ ${dateString[1]}`;
       }
     },
-    // 搜索
-    handleFilter() {
-      this.listQuery.page = 1;
-      this.loadData();
-    },
 
     // 下载构建日志
     handleDownload(record) {
@@ -189,7 +188,7 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              this.handleFilter();
+              this.loadData();
             }
           });
         },
@@ -209,7 +208,7 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              this.handleFilter();
+              this.loadData();
             }
           });
         },
@@ -225,7 +224,7 @@ export default {
     },
     // 关闭日志对话框
     closeBuildLogModel() {
-      this.handleFilter();
+      this.loadData();
     },
   },
 };
