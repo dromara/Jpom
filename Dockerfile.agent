@@ -2,12 +2,12 @@ FROM maven:3.8.4-jdk-8-slim as builder
 WORKDIR /target/dependency
 COPY . .
 
-RUN curl -o settings.xml https://ldl-oss-bucket.oss-cn-shanghai.aliyuncs.com/release/settings.xml
-RUN mvn -B -e -T 1C clean package -pl modules/agent -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s settings.xml
+RUN mvn -B -e -T 1C clean package -pl modules/agent -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
 
 FROM maven:3.8.4-jdk-8-slim
 ENV JPOM_HOME	/usr/local/jpom-agent
-ENV JPOM_PKG    agent-2.8.0-release
+ARG JPOM_VERSION
+ENV JPOM_PKG    agent-${JPOM_VERSION}-release
 WORKDIR $JPOM_HOME
 ARG DEPENDENCY=/target/dependency
 COPY --from=builder ${DEPENDENCY}/modules/agent/target/${JPOM_PKG} ${JPOM_HOME}
