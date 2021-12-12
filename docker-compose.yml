@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  server:
+    image: jpom_server:2.8.0
+    build:
+      dockerfile: Dockerfile.server
+      context: .
+    volumes:
+      - jpom-server:/usr/local/jpom-server
+    ports:
+      - "2122:2122"
+  agent:
+    image: jpom_agent:2.8.0
+    build:
+      dockerfile: Dockerfile.agent
+      context: .
+    volumes:
+      - jpom-agent:/usr/local/jpom-agent
+    ports:
+      - "2123:2123"
+volumes:
+  jpom-agent:
+  jpom-server:
