@@ -9,7 +9,9 @@
       <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="filter-item">
         <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
       </a-select>
-      <a-button type="primary" @click="getNodeProjectData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="getNodeProjectData">搜索</a-button>
+      </a-tooltip>
       <span>| </span>
       <a-button type="primary" @click="batchStart">批量启动</a-button>
       <a-button type="primary" @click="batchRestart">批量重启</a-button>
@@ -148,7 +150,8 @@ export default {
     });
   },
   methods: {
-    getNodeProjectData() {
+    getNodeProjectData(pointerEvent) {
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       getProjectList(this.listQuery).then((res) => {
         if (res.code === 200) {
           let resultList = res.data.result;
@@ -301,7 +304,7 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              return false;
+              this.getNodeProjectData();
             }
           });
         },

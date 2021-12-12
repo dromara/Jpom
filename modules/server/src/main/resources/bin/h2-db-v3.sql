@@ -219,5 +219,39 @@ CREATE TABLE IF NOT EXISTS PUBLIC.WORKSPACE_ENV_VAR
 comment on table WORKSPACE_ENV_VAR is '用户信息表';
 
 
+-- 脚本模版
+CREATE TABLE IF NOT EXISTS PUBLIC.SCRIPT_INFO
+(
+	ID               VARCHAR(50) not null comment 'id',
+	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
+	MODIFYUSER       VARCHAR(50) comment '修改人',
+	STRIKE           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId      varchar(50) not null comment '所属工作空间',
+	nodeId           varchar(50) not null comment '节点ID',
+	scriptId         varchar(50) not null comment '脚本ID',
+	`NAME`           VARCHAR(50) not null comment '名称',
+	lastRunUser      varchar(50) comment '最后执行人',
+	CONSTRAINT SCRIPT_INFO_PK PRIMARY KEY (ID)
+);
+comment on table SCRIPT_INFO is '脚本模版';
+
+
+-- 脚本模版-执行记录
+CREATE TABLE IF NOT EXISTS PUBLIC.SCRIPT_EXECUTE_LOG
+(
+	ID               VARCHAR(50) not null comment 'id',
+	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
+	MODIFYUSER       VARCHAR(50) comment '修改人',
+	STRIKE           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId      varchar(50) not null comment '所属工作空间',
+	nodeId           varchar(50) not null comment '节点ID',
+	scriptId         varchar(50) not null comment '脚本ID',
+	CONSTRAINT SCRIPT_EXECUTE_LOG_PK PRIMARY KEY (ID)
+);
+comment on table SCRIPT_EXECUTE_LOG is '脚本模版执行记录';
+
+
 
 

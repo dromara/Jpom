@@ -24,7 +24,7 @@ package io.jpom.service.script;
 
 import cn.hutool.core.io.FileUtil;
 import io.jpom.common.BaseOperService;
-import io.jpom.model.data.ScriptModel;
+import io.jpom.model.data.NodeScriptModel;
 import io.jpom.system.AgentConfigBean;
 import org.springframework.stereotype.Service;
 
@@ -37,49 +37,49 @@ import java.util.List;
  * @date 2019/4/24
  */
 @Service
-public class ScriptServer extends BaseOperService<ScriptModel> {
+public class ScriptServer extends BaseOperService<NodeScriptModel> {
 
     public ScriptServer() {
         super(AgentConfigBean.SCRIPT);
     }
 
     @Override
-    public List<ScriptModel> list() {
-        List<ScriptModel> scriptModels = super.list();
-        if (scriptModels == null) {
+    public List<NodeScriptModel> list() {
+        List<NodeScriptModel> nodeScriptModels = super.list();
+        if (nodeScriptModels == null) {
             return null;
         }
         // 读取文件内容
-        scriptModels.forEach(ScriptModel::readFileTime);
-        return scriptModels;
+        nodeScriptModels.forEach(NodeScriptModel::readFileTime);
+        return nodeScriptModels;
     }
 
     @Override
-    public ScriptModel getItem(String id) {
-        ScriptModel scriptModel = super.getItem(id);
-        if (scriptModel != null) {
-            scriptModel.readFileContext();
+    public NodeScriptModel getItem(String id) {
+        NodeScriptModel nodeScriptModel = super.getItem(id);
+        if (nodeScriptModel != null) {
+            nodeScriptModel.readFileContext();
         }
-        return scriptModel;
+        return nodeScriptModel;
     }
 
     @Override
-    public void addItem(ScriptModel scriptModel) {
-        super.addItem(scriptModel);
-        scriptModel.saveFile();
+    public void addItem(NodeScriptModel nodeScriptModel) {
+        super.addItem(nodeScriptModel);
+        nodeScriptModel.saveFile();
     }
 
     @Override
-    public void updateItem(ScriptModel scriptModel) {
-        super.updateItem(scriptModel);
-        scriptModel.saveFile();
+    public void updateItem(NodeScriptModel nodeScriptModel) {
+        super.updateItem(nodeScriptModel);
+        nodeScriptModel.saveFile();
     }
 
     @Override
     public void deleteItem(String id) {
-        ScriptModel scriptModel = getItem(id);
-        if (scriptModel != null) {
-            FileUtil.del(scriptModel.getFile(true).getParentFile());
+        NodeScriptModel nodeScriptModel = getItem(id);
+        if (nodeScriptModel != null) {
+            FileUtil.del(nodeScriptModel.getFile(true).getParentFile());
         }
         super.deleteItem(id);
     }

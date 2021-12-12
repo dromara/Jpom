@@ -27,7 +27,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.model.data.ScriptModel;
+import io.jpom.model.data.NodeScriptModel;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.util.SocketSessionUtil;
 import org.springframework.stereotype.Component;
@@ -62,12 +62,12 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 				SocketSessionUtil.send(session, "脚本模板未知");
 				return;
 			}
-			ScriptModel scriptModel = scriptServer.getItem(id);
-			if (scriptModel == null) {
+			NodeScriptModel nodeScriptModel = scriptServer.getItem(id);
+			if (nodeScriptModel == null) {
 				SocketSessionUtil.send(session, "没有找到对应的脚本模板");
 				return;
 			}
-			SocketSessionUtil.send(session, "连接成功：" + scriptModel.getName());
+			SocketSessionUtil.send(session, "连接成功：" + nodeScriptModel.getName());
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("socket 错误", e);
 			try {
@@ -83,8 +83,8 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 	public void onMessage(String message, Session session) throws Exception {
 		JSONObject json = JSONObject.parseObject(message);
 		String scriptId = json.getString("scriptId");
-		ScriptModel scriptModel = scriptServer.getItem(scriptId);
-		if (scriptModel == null) {
+		NodeScriptModel nodeScriptModel = scriptServer.getItem(scriptId);
+		if (nodeScriptModel == null) {
 			SocketSessionUtil.send(session, "没有对应脚本模板:" + scriptId);
 			session.close();
 			return;
@@ -92,22 +92,36 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 		String op = json.getString("op");
 		ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
 		switch (consoleCommandOp) {
-			case start:
+			case start: {
 				String args = json.getString("args");
-				ScriptProcessBuilder.addWatcher(scriptModel, args, session);
+				String executeId = json.getString("executeId");
+				if (StrUtil.isEmpty(executeId)) {
+					SocketSessionUtil.send(session, "没有执行ID");
+					session.close();
+					return;
+				}
+				ScriptProcessBuilder.addWatcher(nodeScriptModel, executeId, args, session);
 				break;
-			case stop:
-				ScriptProcessBuilder.stopRun(scriptModel);
+			}
+			case stop: {
+				String executeId = json.getString("executeId");
+				if (StrUtil.isEmpty(executeId)) {
+					SocketSessionUtil.send(session, "没有执行ID");
+					session.close();
+					return;
+				}
+				ScriptProcessBuilder.stopRun( executeId);
 				break;
+			}
 			case heart:
 			default:
 				return;
 		}
 		// 记录操作人
-		scriptModel = scriptServer.getItem(scriptId);
+		nodeScriptModel = scriptServer.getItem(scriptId);
 		String name = getOptUserName(session);
-		scriptModel.setLastRunUser(name);
-		scriptServer.updateItem(scriptModel);
+		nodeScriptModel.setLastRunUser(name);
+		scriptServer.updateItem(nodeScriptModel);
 		json.put("code", 200);
 		json.put("msg", "执行成功");
 		DefaultSystemLog.getLog().info(json.toString());

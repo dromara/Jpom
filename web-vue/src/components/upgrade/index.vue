@@ -20,13 +20,21 @@
         <span class="layui-elem-quote">已经运行时间：{{ temp.upTime }}</span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">端口号：{{ temp.port }}</span>
+        <span class="layui-elem-quote"
+          >端口号：<a-tag>{{ temp.port }}</a-tag></span
+        >
+        <span class="layui-elem-quote">&nbsp;&nbsp;</span>
+        <span class="layui-elem-quote"
+          >进程号：<a-tag>{{ temp.pid }}</a-tag></span
+        >
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">进程号：{{ temp.pid }}</span>
+        <a-alert message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除" type="warning" />
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">数据存储目录：{{ temp.dataPath }}</span>
+        <span class="layui-elem-quote"
+          >数据存储目录： <a-tag>{{ temp.dataPath }}</a-tag></span
+        >
       </a-timeline-item>
     </a-timeline>
     <a-spin v-if="!temp.debug" :spinning="spinning">

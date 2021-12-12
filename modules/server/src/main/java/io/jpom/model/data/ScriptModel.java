@@ -20,54 +20,63 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.socket;
+package io.jpom.model.data;
 
-import io.jpom.service.h2db.BaseWorkspaceService;
-import io.jpom.service.node.ProjectInfoCacheService;
-import io.jpom.service.node.script.ScriptServer;
-import io.jpom.service.node.ssh.SshService;
-import io.jpom.socket.handler.*;
+import io.jpom.model.BaseNodeModel;
+import io.jpom.service.h2db.TableName;
 
 /**
+ * 脚本模版实体
+ *
  * @author bwcx_jzy
- * @date 2019/8/9
- */
-public enum HandlerType {
+ * @date 2021/12/12
+ **/
+@TableName(value = "SCRIPT_INFO", name = "脚本模版")
+public class ScriptModel extends BaseNodeModel {
 	/**
-	 * 脚本模板
+	 * 脚本ID
 	 */
-	script(ScriptHandler.class, ScriptServer.class),
+	private String scriptId;
 	/**
-	 * tomcat
+	 * 模版名称
 	 */
-	tomcat(TomcatHandler.class, null),
+	private String name;
 	/**
-	 * 项目控制台和首页监控
+	 * 最后执行人员
 	 */
-	console(ConsoleHandler.class, ProjectInfoCacheService.class),
-	/**
-	 * ssh
-	 */
-	ssh(SshHandler.class, SshService.class),
-	/**
-	 * 节点升级
-	 */
-	nodeUpdate(NodeUpdateHandler.class, null),
-	;
-	final Class<?> handlerClass;
+	private String lastRunUser;
 
-	final Class<? extends BaseWorkspaceService<?>> serviceClass;
-
-	HandlerType(Class<?> handlerClass, Class<? extends BaseWorkspaceService<?>> serviceClass) {
-		this.handlerClass = handlerClass;
-		this.serviceClass = serviceClass;
+	public String getScriptId() {
+		return scriptId;
 	}
 
-	public Class<?> getHandlerClass() {
-		return handlerClass;
+	public void setScriptId(String scriptId) {
+		this.scriptId = scriptId;
 	}
 
-	public Class<? extends BaseWorkspaceService<?>> getServiceClass() {
-		return serviceClass;
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getLastRunUser() {
+		return lastRunUser;
+	}
+
+	public void setLastRunUser(String lastRunUser) {
+		this.lastRunUser = lastRunUser;
+	}
+
+	@Override
+	public String dataId() {
+		return getScriptId();
+	}
+
+	@Override
+	public void dataId(String id) {
+		setScriptId(id);
 	}
 }

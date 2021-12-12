@@ -22,6 +22,10 @@
  */
 package io.jpom.model;
 
+import cn.hutool.crypto.SecureUtil;
+import io.jpom.model.data.ProjectInfoModel;
+import org.springframework.util.Assert;
+
 /**
  * 节点 数据
  *
@@ -44,4 +48,38 @@ public abstract class BaseNodeModel extends BaseWorkspaceModel {
 	public void setNodeId(String nodeId) {
 		this.nodeId = nodeId;
 	}
+
+	public String fullId() {
+		String workspaceId = this.getWorkspaceId();
+
+		String nodeId = this.getNodeId();
+
+		String dataId = this.dataId();
+
+		return ProjectInfoModel.fullId(workspaceId, nodeId, dataId);
+	}
+
+	public static String fullId(String workspaceId, String nodeId, String dataId) {
+
+		Assert.hasText(workspaceId, "workspaceId");
+
+		Assert.hasText(workspaceId, "nodeId");
+
+		Assert.hasText(workspaceId, "dataId");
+		return SecureUtil.sha1(workspaceId + nodeId + dataId);
+	}
+
+	/**
+	 * 获取数据ID
+	 *
+	 * @return 数据ID
+	 */
+	public abstract String dataId();
+
+	/**
+	 * 设置数据ID
+	 *
+	 * @param id 数据ID
+	 */
+	public abstract void dataId(String id);
 }

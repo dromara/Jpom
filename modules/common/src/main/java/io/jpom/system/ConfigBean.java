@@ -85,9 +85,15 @@ public class ConfigBean {
 	 */
 	@Value("${server.port}")
 	private int port;
-
+	/**
+	 * 环境
+	 */
 	@Value("${" + ConfigFileApplicationListener.ACTIVE_PROFILES_PROPERTY + "}")
 	private String active;
+	/**
+	 * 数据目录缓存大小
+	 */
+	private long dataSizeCache;
 
 	private volatile static ConfigBean configBean;
 
@@ -169,8 +175,23 @@ public class ConfigBean {
 	public File getTempPath() {
 		File file = new File(ConfigBean.getInstance().getDataPath());
 		file = FileUtil.file(file, "temp");
-		//new File(file.getPath() + "/temp/");
 		FileUtil.mkdir(file);
 		return file;
+	}
+
+	/**
+	 * 数据目录大小
+	 *
+	 * @return byte
+	 */
+	public long dataSize() {
+		String dataPath = getDataPath();
+		long size = FileUtil.size(FileUtil.file(dataPath));
+		dataSizeCache = size;
+		return size;
+	}
+
+	public long getDataSizeCache() {
+		return dataSizeCache;
 	}
 }

@@ -22,15 +22,16 @@
  */
 package io.jpom.socket;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.NodeService;
-import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.user.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
@@ -75,52 +76,46 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 			}
 			// 判断拦截类型
 			String type = httpServletRequest.getParameter("type");
-			HandlerType handlerType;
-			try {
-				handlerType = HandlerType.valueOf(type);
-			} catch (Exception e) {
-				//throw new JpomRuntimeException("type 错误：" + type);
+			HandlerType handlerType = EnumUtil.fromString(HandlerType.class, type, null);
+			if (handlerType == null) {
 				DefaultSystemLog.getLog().warn("传入的类型错误：{}", type);
 				return false;
 			}
 			switch (handlerType) {
-				case console:
+				case console: {
 					//控制台
-					String projectId = httpServletRequest.getParameter("projectId");
-					// 判断权限
-//					if (roleService.errorDynamicPermission(userModel, ClassFeature.PROJECT, projectId)) {
-//						return false;
-//					}
-					attributes.put("copyId", httpServletRequest.getParameter("copyId"));
-					attributes.put("projectId", projectId);
-					break;
-				case script:
-					// 脚本模板
-					String scriptId = httpServletRequest.getParameter("scriptId");
-//					if (roleService.errorDynamicPermission(userModel, ClassFeature.SCRIPT, scriptId)) {
-//						return false;
-//					}
-					attributes.put("scriptId", scriptId);
-					break;
-				case tomcat:
-					String tomcatId = httpServletRequest.getParameter("tomcatId");
-//					if (roleService.errorDynamicPermission(userModel, ClassFeature.TOMCAT, tomcatId)) {
-//						return false;
-//					}
-					attributes.put("tomcatId", tomcatId);
-					break;
-				case ssh:
-					String sshId = httpServletRequest.getParameter("sshId");
-
-					SshService bean = SpringUtil.getBean(SshService.class);
-					SshModel sshModel = bean.getByKey(sshId, userModel);
-					if (sshModel == null) {
+					Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
+					if (dataItem == null) {
 						return false;
 					}
-					Map<String, String[]> parameterMap = httpServletRequest.getParameterMap();
-					attributes.put("parameterMap", parameterMap);
-					attributes.put("sshItem", sshModel);
+					attributes.put("copyId", httpServletRequest.getParameter("copyId"));
+					attributes.put("projectId", BeanUtil.getProperty(dataItem, "projectId"));
+					attributes.put("dataItem", dataItem);
 					break;
+				}
+				case script: {
+					// 脚本模板
+					Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
+					if (dataItem == null) {
+						return false;
+					}
+					attributes.put("dataItem", dataItem);
+					attributes.put("scriptId", BeanUtil.getProperty(dataItem, "scriptId"));
+					break;
+				}
+				case tomcat:
+					String tomcatId = httpServletRequest.getParameter("tomcatId");
+
+					attributes.put("tomcatId", tomcatId);
+					break;
+				case ssh: {
+					Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
+					if (dataItem == null) {
+						return false;
+					}
+					attributes.put("dataItem", dataItem);
+					break;
+				}
 				case nodeUpdate:
 					if (!userModel.isSuperSystemUser()) {
 						return false;
@@ -139,6 +134,12 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 			return true;
 		}
 		return false;
+	}
+
+	private Object checkData(HandlerType handlerType, UserModel userModel, HttpServletRequest httpServletRequest) {
+		String id = httpServletRequest.getParameter("id");
+		BaseWorkspaceService<?> workspaceService = SpringUtil.getBean(handlerType.getServiceClass());
+		return workspaceService.getByKey(id, userModel);
 	}
 
 	@Override

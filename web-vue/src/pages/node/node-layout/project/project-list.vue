@@ -241,11 +241,11 @@
     </a-modal>
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :nodeId="node.id" :projectId="temp.id" :runMode="temp.runMode" :absPath="(temp.whitelistDirectory || '') + (temp.lib || '')" @goConsole="goConsole" />
+      <file v-if="drawerFileVisible" :nodeId="node.id" :projectId="temp.projectId" :runMode="temp.runMode" :absPath="(temp.whitelistDirectory || '') + (temp.lib || '')" @goConsole="goConsole" />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :nodeId="node.id" :projectId="temp.id" @goFile="goFile" />
+      <console v-if="drawerConsoleVisible" :nodeId="node.id" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
     <!-- 项目监控组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerMonitorVisible" @close="onMonitorClose">
@@ -428,12 +428,12 @@ export default {
           let tempList = resultList.filter((item) => item.runMode !== "File");
           let fileList = resultList.filter((item) => item.runMode === "File");
           this.list = tempList.concat(fileList);
-          // 项目ID 字段更新
-          this.list = this.list.map((element) => {
-            element.dataId = element.id;
-            element.id = element.projectId;
-            return element;
-          });
+          // // 项目ID 字段更新
+          // this.list = this.list.map((element) => {
+          //   //element.dataId = element.id;
+          //   //element.id = element.projectId;
+          //   return element;
+          // });
 
           let ids = tempList.map((item) => {
             return item.projectId;
@@ -481,7 +481,7 @@ export default {
     // 编辑
     handleEdit(record) {
       const params = {
-        id: record.id,
+        id: record.projectId,
         nodeId: this.node.id,
       };
       this.loadAccesList();
@@ -617,7 +617,7 @@ export default {
           // 删除
           const params = {
             nodeId: this.node.id,
-            id: record.id,
+            id: record.projectId,
           };
           deleteProject(params).then((res) => {
             if (res.code === 200) {

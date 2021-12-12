@@ -38,6 +38,7 @@ import io.jpom.common.JpomManifest;
 import io.jpom.system.ExtConfigBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -59,9 +60,11 @@ public class SystemConfigController extends BaseAgentController {
 
 	@RequestMapping(value = "getConfig.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String config() throws IOException {
-		String content = IoUtil.read(ExtConfigBean.getResource().getInputStream(), CharsetUtil.CHARSET_UTF_8);
+		Resource resource = ExtConfigBean.getResource();
+		String content = IoUtil.read(resource.getInputStream(), CharsetUtil.CHARSET_UTF_8);
 		JSONObject json = new JSONObject();
 		json.put("content", content);
+		json.put("file", FileUtil.getAbsolutePath(resource.getFile()));
 		return JsonMessage.getString(200, "ok", json);
 	}
 
