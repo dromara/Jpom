@@ -22,10 +22,8 @@
  */
 package io.jpom.model.data;
 
-import cn.hutool.crypto.SecureUtil;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.service.h2db.TableName;
-import org.springframework.util.Assert;
 
 /**
  * @author bwcx_jzy
@@ -35,7 +33,6 @@ import org.springframework.util.Assert;
 public class ProjectInfoModel extends BaseNodeModel {
 
 	private String projectId;
-
 
 	private String name;
 
@@ -77,24 +74,14 @@ public class ProjectInfoModel extends BaseNodeModel {
 	 */
 	private String javaExtDirsCp;
 
-	public String fullId() {
-		String workspaceId = this.getWorkspaceId();
-
-		String nodeId = this.getNodeId();
-
-		String projectId = this.getProjectId();
-
-		return ProjectInfoModel.fullId(workspaceId, nodeId, projectId);
+	@Override
+	public String dataId() {
+		return getProjectId();
 	}
 
-	public static String fullId(String workspaceId, String nodeId, String projectId) {
-
-		Assert.hasText(workspaceId, "workspaceId");
-
-		Assert.hasText(workspaceId, "nodeId");
-
-		Assert.hasText(workspaceId, "projectId");
-		return SecureUtil.sha1(workspaceId + nodeId + projectId);
+	@Override
+	public void dataId(String id) {
+		setProjectId(id);
 	}
 
 	public String getProjectId() {

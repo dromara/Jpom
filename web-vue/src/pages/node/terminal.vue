@@ -44,7 +44,7 @@ export default {
       const protocol = location.protocol === "https:" ? "wss://" : "ws://";
       const domain = window.routerBase;
       const url = (domain + "/ssh").replace(new RegExp("//", "gm"), "/");
-      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&sshId=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;
+      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&id=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;
     },
   },
   mounted() {

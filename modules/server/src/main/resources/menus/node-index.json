@@ -32,8 +32,7 @@
       },
       {
         "id": "script",
-        "title": "脚本模板",
-        "role": "system"
+        "title": "脚本模板"
       }
     ]
   },

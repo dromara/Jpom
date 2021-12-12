@@ -34,6 +34,7 @@ import io.jpom.common.RemoteVersion;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.NodeService;
+import io.jpom.system.ConfigBean;
 import io.jpom.util.CronUtils;
 
 /**
@@ -57,8 +58,14 @@ public class CheckMonitor {
 			Console.log("已经开启监听调度：节点信息采集");
 		}
 		// 缓存检测调度
-		CronUtil.schedule("cache_manger_schedule", "0 0/10 * * * ?", BuildUtil::reloadCacheSize);
-		ThreadUtil.execute(BuildUtil::reloadCacheSize);
+		CronUtil.schedule("cache_manger_schedule", "0 0/10 * * * ?", () -> {
+			BuildUtil.reloadCacheSize();
+			ConfigBean.getInstance().dataSize();
+		});
+		ThreadUtil.execute(() -> {
+			BuildUtil.reloadCacheSize();
+			ConfigBean.getInstance().dataSize();
+		});
 		// 开启版本检测调度
 		CronUtil.schedule("system_monitor", "0 0 0,12 * * ?", () -> {
 			try {

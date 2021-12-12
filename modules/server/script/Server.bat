@@ -56,6 +56,8 @@ if "%1"=="" (
         echo.  [4] 重启 restart
         echo.  [5] 帮助 use
         echo.  [6] 清除 IP 白名单配置
+        echo.  [7] 重新加载数据库初始化操作
+        echo.  [8] 重置超级管理员密码
         echo.  [0] 退 出 0
     echo.
     @REM 输入
@@ -67,6 +69,8 @@ if "%1"=="" (
     IF "!ID!"=="4" call:restart
     IF "!ID!"=="5" call:use
     IF "!ID!"=="6" call:restart --rest:ip_config
+    IF "!ID!"=="7" call:restart --rest:load_init_db
+    IF "!ID!"=="8" call:restart --rest:super_user_pwd
     IF "!ID!"=="0" EXIT
 )else (
      if "%1"=="restart" (

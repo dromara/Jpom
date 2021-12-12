@@ -72,7 +72,7 @@ public class SshHandler extends BaseHandler {
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		Map<String, Object> attributes = session.getAttributes();
-		SshModel sshItem = (SshModel) attributes.get("sshItem");
+		SshModel sshItem = (SshModel) attributes.get("dataItem");
 		BaseProxyHandler.logOpt(this.getClass(), attributes, attributes);
 		//
 		HandlerItem handlerItem;

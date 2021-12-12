@@ -24,6 +24,7 @@ package io.jpom.socket.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -68,7 +69,6 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
 	private SystemParametersServer systemParametersServer;
 	private NodeService nodeService;
-	private UserModel userInfo;
 
 	public NodeUpdateHandler() {
 		super(null);
@@ -77,7 +77,6 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	private void init(Map<String, Object> attributes) {
 		systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
 		nodeService = SpringUtil.getBean(NodeService.class);
-		userInfo = (UserModel) attributes.get("userInfo");
 	}
 
 	@Override
@@ -213,7 +212,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 				try (FileInputStream fis = new FileInputStream(agentFileModel.getSavePath())) {
 					// 发送文件内容
 					int len;
-					byte[] buffer = new byte[1024 * 1024];
+					byte[] buffer = new byte[NioUtil.DEFAULT_MIDDLE_BUFFER_SIZE];
 					while ((len = fis.read(buffer)) > 0) {
 						client.send(ByteBuffer.wrap(buffer, 0, len));
 					}
@@ -275,23 +274,4 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 		}
 		return JSONObject.toJSONString(agentFileModel);
 	}
-
-//	/**
-//	 * 获取节点列表
-//	 *
-//	 * @return 节点列表
-//	 */
-//	private List<NodeVersionModel> getNodeList() {
-//		NodeOld1Service nodeService = SpringUtil.getBean(NodeOld1Service.class);
-//		List<NodeModel> nodeModels = nodeService.list();
-//		List<NodeVersionModel> result = new ArrayList<>();
-//		for (NodeModel node : nodeModels) {
-//			NodeVersionModel model = new NodeVersionModel();
-//			model.setId(node.getId());
-//			model.setName(node.getName());
-////			model.setGroup(node.getGroup());
-//			result.add(model);
-//		}
-//		return result;
-//	}
 }

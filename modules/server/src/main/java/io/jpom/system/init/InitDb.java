@@ -38,7 +38,7 @@ import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.JpomManifest;
-import io.jpom.service.node.ProjectInfoCacheService;
+import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerExtConfigBean;
@@ -48,6 +48,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -93,10 +94,10 @@ public class InitDb implements DisposableBean, InitializingBean {
 		try {
 			// 创建连接
 			DSFactory dsFactory = DSFactory.create(setting);
-			/**
-			 * @author Hotstrip
-			 * add another sql init file, if there are more sql file,
-			 * please add it with same way
+			/*
+			  @author Hotstrip
+			  add another sql init file, if there are more sql file,
+			  please add it with same way
 			 */
 			String[] files = new String[]{
 					"classpath:/bin/h2-db-v1.sql",
@@ -145,10 +146,10 @@ public class InitDb implements DisposableBean, InitializingBean {
 	}
 
 	private static void loadJsonToDb() {
-		/**
-		 * @author Hotstrip
-		 * @date 2021-08-03
-		 * load build.js data to DB
+		/*
+		  @author Hotstrip
+		  @date 2021-08-03
+		  load build.js data to DB
 		 */
 		LoadBuildJsonToDB.getInstance().doJsonToSql();
 		// @author bwcx_jzy @date 2021-12-02
@@ -169,8 +170,10 @@ public class InitDb implements DisposableBean, InitializingBean {
 		workspaceService.convertNullWorkspaceId();
 		instance.convertMonitorLogField();
 		//  同步项目
-		ProjectInfoCacheService projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
-		projectInfoCacheService.syncAllNode();
+		Map<String, BaseNodeService> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeService.class);
+		for (BaseNodeService<?> value : beansOfType.values()) {
+			value.syncAllNode();
+		}
 	}
 
 	@Override

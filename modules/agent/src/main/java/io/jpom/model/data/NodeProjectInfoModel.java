@@ -30,7 +30,6 @@ import cn.hutool.http.HtmlUtil;
 import cn.jiangzeyin.common.request.XssFilter;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.model.BaseJsonModel;
-import io.jpom.model.BaseModel;
 import io.jpom.model.RunMode;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.system.JpomRuntimeException;
@@ -47,7 +46,7 @@ import java.util.stream.Collectors;
  *
  * @author jiangzeyin
  */
-public class NodeProjectInfoModel extends BaseModel {
+public class NodeProjectInfoModel extends BaseWorkspaceModel {
 	//	/**
 //	 * 分组
 //	 */
@@ -78,7 +77,7 @@ public class NodeProjectInfoModel extends BaseModel {
 	 * WebHooks
 	 */
 	private String token;
-	private boolean status;
+	//	private boolean status;
 	private String createTime;
 	private String modifyTime;
 	private String jdkId;
@@ -111,20 +110,10 @@ public class NodeProjectInfoModel extends BaseModel {
 	 */
 	private String javaExtDirsCp;
 
-	private String workspaceId;
-
 	/**
 	 * 项目自动启动
 	 */
 	private Boolean autoStart;
-
-	public String getWorkspaceId() {
-		return workspaceId;
-	}
-
-	public void setWorkspaceId(String workspaceId) {
-		this.workspaceId = workspaceId;
-	}
 
 	public List<JavaCopyItem> getJavaCopyItemList() {
 		return javaCopyItemList;
@@ -180,9 +169,9 @@ public class NodeProjectInfoModel extends BaseModel {
 		this.modifyUser = modifyUser;
 	}
 
-	public void setStatus(boolean status) {
-		this.status = status;
-	}
+//	public void setStatus(boolean status) {
+//		this.status = status;
+//	}
 
 	public String getRunLibDesc() {
 		return runLibDesc;

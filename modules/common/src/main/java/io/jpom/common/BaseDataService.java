@@ -23,7 +23,6 @@
 package io.jpom.common;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.BaseModel;
@@ -107,14 +106,14 @@ public abstract class BaseDataService {
 	protected void deleteJson(String filename, String key) {
 		// 读取文件，如果存在记录，则抛出异常
 		JSONObject allData = getJSONObject(filename);
-		JSONObject data = allData.getJSONObject(key);
-		// 判断是否存在数据
-		if (MapUtil.isEmpty(data)) {
-			throw new JpomRuntimeException("项目名称存不在！");
-		} else {
-			allData.remove(key);
-			JsonFileUtil.saveJson(getDataFilePath(filename), allData);
+		if (allData == null) {
+			return;
 		}
+		//Assert.notNull(allData, "没有任何数据");
+		//JSONObject data = allData.getJSONObject(key);
+		allData.remove(key);
+		JsonFileUtil.saveJson(getDataFilePath(filename), allData);
+
 	}
 
 	/**

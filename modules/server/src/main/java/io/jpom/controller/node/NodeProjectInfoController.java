@@ -99,7 +99,7 @@ public class NodeProjectInfoController extends BaseServerController {
 	public String delProjectCache(String nodeId) {
 		NodeModel nodeModel = nodeService.getByKey(nodeId);
 		Assert.notNull(nodeModel, "对应的节点不存在");
-		int count = projectInfoCacheService.delProjectCache(nodeId, getRequest());
+		int count = projectInfoCacheService.delCache(nodeId, getRequest());
 		return JsonMessage.getString(200, "成功删除" + count + "条项目缓存");
 	}
 

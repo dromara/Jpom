@@ -86,6 +86,9 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	 */
 	public T getByKey(String keyValue, UserModel userModel) {
 		T byKey = super.getByKey(keyValue, false);
+		if (byKey == null) {
+			return null;
+		}
 		this.checkUserWorkspace(byKey.getWorkspaceId(), userModel);
 		return byKey;
 	}

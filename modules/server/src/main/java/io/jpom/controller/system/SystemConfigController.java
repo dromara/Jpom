@@ -46,6 +46,7 @@ import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ExtConfigBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -86,14 +87,18 @@ public class SystemConfigController extends BaseServerController {
 	@RequestMapping(value = "config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String configData(String nodeId) throws IOException {
-		String content;
+		JSONObject jsonObject;
 		if (StrUtil.isNotEmpty(nodeId)) {
-			JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.SystemGetConfig, getRequest(), JSONObject.class);
-			content = jsonObject.getString("content");
+			jsonObject = NodeForward.requestData(getNode(), NodeUrl.SystemGetConfig, getRequest(), JSONObject.class);
 		} else {
-			content = IoUtil.read(ExtConfigBean.getResource().getInputStream(), CharsetUtil.CHARSET_UTF_8);
+			jsonObject = new JSONObject();
+			Resource resource = ExtConfigBean.getResource();
+			String content = IoUtil.read(resource.getInputStream(), CharsetUtil.CHARSET_UTF_8);
+			jsonObject.put("content", content);
+			jsonObject.put("file", FileUtil.getAbsolutePath(resource.getFile()));
 		}
-		return JsonMessage.getString(200, "加载成功", content);
+
+		return JsonMessage.getString(200, "", jsonObject);
 	}
 
 	@RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

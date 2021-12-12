@@ -20,54 +20,23 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.socket;
+package io.jpom.model.data;
 
-import io.jpom.service.h2db.BaseWorkspaceService;
-import io.jpom.service.node.ProjectInfoCacheService;
-import io.jpom.service.node.script.ScriptServer;
-import io.jpom.service.node.ssh.SshService;
-import io.jpom.socket.handler.*;
+import io.jpom.model.BaseModel;
 
 /**
  * @author bwcx_jzy
- * @date 2019/8/9
+ * @since 2021/12/12
  */
-public enum HandlerType {
-	/**
-	 * 脚本模板
-	 */
-	script(ScriptHandler.class, ScriptServer.class),
-	/**
-	 * tomcat
-	 */
-	tomcat(TomcatHandler.class, null),
-	/**
-	 * 项目控制台和首页监控
-	 */
-	console(ConsoleHandler.class, ProjectInfoCacheService.class),
-	/**
-	 * ssh
-	 */
-	ssh(SshHandler.class, SshService.class),
-	/**
-	 * 节点升级
-	 */
-	nodeUpdate(NodeUpdateHandler.class, null),
-	;
-	final Class<?> handlerClass;
+public abstract class BaseWorkspaceModel extends BaseModel {
 
-	final Class<? extends BaseWorkspaceService<?>> serviceClass;
+	private String workspaceId;
 
-	HandlerType(Class<?> handlerClass, Class<? extends BaseWorkspaceService<?>> serviceClass) {
-		this.handlerClass = handlerClass;
-		this.serviceClass = serviceClass;
+	public String getWorkspaceId() {
+		return workspaceId;
 	}
 
-	public Class<?> getHandlerClass() {
-		return handlerClass;
-	}
-
-	public Class<? extends BaseWorkspaceService<?>> getServiceClass() {
-		return serviceClass;
+	public void setWorkspaceId(String workspaceId) {
+		this.workspaceId = workspaceId;
 	}
 }

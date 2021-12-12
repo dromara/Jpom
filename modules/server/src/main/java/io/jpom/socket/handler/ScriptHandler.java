@@ -22,11 +22,17 @@
  */
 package io.jpom.socket.handler;
 
+import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.permission.SystemPermission;
+import io.jpom.model.data.NodeModel;
+import io.jpom.model.data.ScriptExecuteLogModel;
+import io.jpom.model.data.ScriptModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
+import io.jpom.service.node.script.ScriptExecuteLogServer;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.ProxySession;
@@ -39,8 +45,7 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/24
  */
-@SystemPermission
-@Feature(cls = ClassFeature.UPGRADE_NODE_LIST)
+@Feature(cls = ClassFeature.NODE_SCRIPT)
 public class ScriptHandler extends BaseProxyHandler {
 
 	public ScriptHandler() {
@@ -57,6 +62,36 @@ public class ScriptHandler extends BaseProxyHandler {
 		if (consoleCommandOp != ConsoleCommandOp.heart) {
 			super.logOpt(attributes, json);
 		}
+		if (consoleCommandOp == ConsoleCommandOp.start) {
+			// 开始执行
+			String executeId = this.createLog(attributes);
+			json.put("executeId", executeId);
+		}
 		proxySession.send(json.toString());
+	}
+
+	/**
+	 * 创建执行日志
+	 *
+	 * @param attributes 参数属性
+	 * @return 执行ID
+	 */
+	private String createLog(Map<String, Object> attributes) {
+		NodeModel nodeInfo = (NodeModel) attributes.get("nodeInfo");
+		UserModel userModel = (UserModel) attributes.get("userInfo");
+		ScriptModel dataItem = (ScriptModel) attributes.get("dataItem");
+		ScriptExecuteLogServer logServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
+		//
+		try {
+			BaseServerController.resetInfo(userModel);
+			ScriptExecuteLogModel scriptExecuteLogModel = new ScriptExecuteLogModel();
+			scriptExecuteLogModel.setScriptId(dataItem.getScriptId());
+			scriptExecuteLogModel.setNodeId(nodeInfo.getId());
+			scriptExecuteLogModel.setWorkspaceId(nodeInfo.getWorkspaceId());
+			logServer.insert(scriptExecuteLogModel);
+			return scriptExecuteLogModel.getId();
+		} finally {
+			BaseServerController.remove();
+		}
 	}
 }

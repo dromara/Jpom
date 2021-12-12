@@ -68,7 +68,7 @@ public class CacheManageController extends BaseServerController {
 		Map<String, Object> map = new HashMap<>(10);
 		String fileSize = FileUtil.readableFileSize(BuildUtil.tempFileCacheSize);
 		map.put("cacheFileSize", fileSize);
-
+		map.put("dataSize", FileUtil.readableFileSize(ConfigBean.getInstance().getDataSizeCache()));
 		int size = LoginControl.LFU_CACHE.size();
 		map.put("ipSize", size);
 		int oneLineCount = ServiceFileTailWatcher.getOneLineCount();

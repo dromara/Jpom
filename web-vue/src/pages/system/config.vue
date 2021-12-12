@@ -1,6 +1,7 @@
 <template>
   <a-tabs default-active-key="1">
     <a-tab-pane key="1" tab="系统配置">
+      <a-alert v-if="temp.file" :message="`配置文件路径:${temp.file}`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item class="config-editor">
           <code-editor v-model="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
@@ -18,12 +19,12 @@
       <a-alert message="如果配置错误需要重新服务端并添加命令行参数 --rest:ip_config 将恢复默认配置" style="margin-top: 10px" banner />
       <a-form-model style="margin-top: 10px" ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="IP白名单" prop="content">
-          <a-input v-model="ipTemp.allowed" type="textarea" :rows="10" class="ip-list-config" placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开发所有IP,支持配置IP段 192.168.1.1/192.168.1.254" />
+          <a-input v-model="ipTemp.allowed" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开发所有IP,支持配置IP段 192.168.1.1/192.168.1.254" />
         </a-form-model-item>
         <a-form-model-item label="IP黑名单" prop="content">
-          <a-input v-model="ipTemp.prohibited" type="textarea" :rows="10" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254" />
+          <a-input v-model="ipTemp.prohibited" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254" />
         </a-form-model-item>
-        <a-form-model-item :wrapper-col="{ span: 14, offset: 2 }" class="ip-config-button">
+        <a-form-model-item :wrapper-col="{ offset: 10 }" class="ip-config-button">
           <a-button type="primary" class="btn" :disabled="submitIpAble" @click="onSubmitIp()">保存</a-button>
         </a-form-model-item>
       </a-form-model>
@@ -63,7 +64,8 @@ export default {
     loadData() {
       getConfigData().then((res) => {
         if (res.code === 200) {
-          this.temp.content = res.data;
+          this.temp.content = res.data.content;
+          this.temp.file = res.data.file;
         }
       });
       getIpConfigData().then((res) => {
@@ -169,15 +171,15 @@ textarea {
   margin-left: 20px;
 }
 .config-editor {
-  height: calc(100vh - 240px);
+  height: calc(100vh - 300px);
   overflow-y: scroll;
 }
 .ip-config-panel {
-  height: calc(100vh - 240px);
-  overflow-y: scroll;
+  /* height: calc(100vh - 240px); */
+  /* overflow-y: scroll; */
 }
-.ip-config-button {
+/* .ip-config-button {
   position: fixed;
   bottom: 10px;
-}
+} */
 </style>

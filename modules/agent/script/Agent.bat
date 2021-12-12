@@ -55,7 +55,6 @@ if "%1"=="" (
         echo.  [3] 查看运行状态 status
         echo.  [4] 重启 restart
         echo.  [5] 帮助 use
-        echo.  [6] 清除 IP 白名单配置
         echo.  [0] 退 出 0
     echo.
     @REM 输入
@@ -66,7 +65,6 @@ if "%1"=="" (
     IF "!ID!"=="3" call:status
     IF "!ID!"=="4" call:restart
     IF "!ID!"=="5" call:use
-    IF "!ID!"=="6" call:restart --rest:ip_config
     IF "!ID!"=="0" EXIT
 )else (
      if "%1"=="restart" (
