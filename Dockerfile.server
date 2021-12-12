@@ -1,0 +1,22 @@
+FROM maven:3.8.4-jdk-8-slim as builder
+WORKDIR /target/dependency
+COPY . .
+RUN apt-get update && apt-get install -y npm
+RUN npm config set registry https://registry.npmmirror.com
+RUN cd web-vue && npm install && npm run build
+RUN curl -o settings.xml https://ldl-oss-bucket.oss-cn-shanghai.aliyuncs.com/release/settings.xml
+RUN mvn -B -e -T 1C clean package -pl modules/server -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s settings.xml
+
+FROM maven:3.8.4-jdk-8-slim
+ENV JPOM_HOME   /usr/local/jpom-server
+ENV JPOM_PKG    server-2.8.0-release
+WORKDIR $JPOM_HOME
+ARG DEPENDENCY=/target/dependency
+COPY --from=builder ${DEPENDENCY}/modules/server/target/${JPOM_PKG} ${JPOM_HOME}
+
+VOLUME $JPOM_HOME
+EXPOSE 2122
+
+ENTRYPOINT ["/bin/bash", "Server.sh", "start"]
+
+
