@@ -688,17 +688,37 @@ export default {
         this.$notification.warning({
           message: "请选中要启动的项目",
         });
+        return;
       }
+      let $global_loading = this.$loading.service({
+        lock: true,
+        text: "批量启动中，请稍候...",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+      let count = 0;
       this.selectedRows.forEach((value) => {
-        if (value.status == false && value.runMode !== "File") {
+        if (value.status === undefined && value.runMode !== "File") {
+          count++;
           const params = {
             nodeId: this.node.id,
             id: value.id,
           };
-          //console.log(this.list[value]);
-          startProject(params).then(() => {
-            this.loadData();
-          });
+          startProject(params)
+            .then(() => {
+              count--;
+              if (count == 0) {
+                this.loadData();
+                $global_loading.close();
+              }
+            })
+            .catch(() => {
+              count--;
+              if (count == 0) {
+                this.loadData();
+                $global_loading.close();
+              }
+            });
         }
       });
     },
@@ -708,16 +728,37 @@ export default {
         this.$notification.warning({
           message: "请选中要重启的项目",
         });
+        return;
       }
+      let $global_loading = this.$loading.service({
+        lock: true,
+        text: "批量重启中，请稍候...",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+      let count = 0;
       this.selectedRows.forEach((value) => {
-        if (value.runMode != "File") {
+        if (value.status === true && value.runMode != "File") {
           const params = {
             nodeId: this.node.id,
             id: value.id,
           };
-          restartProject(params).then(() => {
-            this.loadData();
-          });
+          count++;
+          restartProject(params)
+            .then(() => {
+              count--;
+              if (count == 0) {
+                this.loadData();
+                $global_loading.close();
+              }
+            })
+            .catch(() => {
+              count--;
+              if (count == 0) {
+                this.loadData();
+                $global_loading.close();
+              }
+            });
         }
       });
     },
@@ -727,16 +768,37 @@ export default {
         this.$notification.warning({
           message: "请选中要关闭的项目",
         });
+        return;
       }
+      let $global_loading = this.$loading.service({
+        lock: true,
+        text: "批量关闭中，请稍候...",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+      let count = 0;
       this.selectedRows.forEach((value) => {
-        if (value.status == true && value.runMode != "File") {
+        if (value.status === true && value.runMode != "File") {
+          count++;
           const params = {
             nodeId: this.node.id,
             id: value.id,
           };
-          stopProject(params).then(() => {
-            this.loadData();
-          });
+          stopProject(params)
+            .then(() => {
+              count--;
+              if (count == 0) {
+                this.loadData();
+                $global_loading.close();
+              }
+            })
+            .catch(() => {
+              count--;
+              if (count == 0) {
+                this.loadData();
+                $global_loading.close();
+              }
+            });
         }
       });
     },
