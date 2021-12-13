@@ -47,10 +47,12 @@ public class JvmUtil {
 	/**
 	 * 旧版jpom进程标记
 	 */
+	@Deprecated
 	private static final String OLD_JPOM_PID_TAG = "Dapplication";
 	/**
 	 * 旧版jpom进程标记
 	 */
+	@Deprecated
 	private static final String OLD2_JPOM_PID_TAG = "Jpom.application";
 	private static final String POM_PID_TAG = "DJpom.application";
 
@@ -130,6 +132,29 @@ public class JvmUtil {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * 解析命令行的 tag 信息
+	 *
+	 * @param commandLine 命令行
+	 * @return tag         标识
+	 */
+	public static String parseCommandJpomTag(String commandLine) {
+		if (StrUtil.isEmpty(commandLine)) {
+			return null;
+		}
+		String[] split = StrUtil.splitToArray(commandLine, StrUtil.SPACE);
+		String appTag = String.format("-%s=", JvmUtil.POM_PID_TAG);
+		String appTag2 = String.format("-%s=", JvmUtil.OLD_JPOM_PID_TAG);
+		String appTag3 = String.format("-%s=", JvmUtil.OLD2_JPOM_PID_TAG);
+		for (String item : split) {
+			if (StrUtil.startWithAny(item, appTag, appTag2, appTag3)) {
+				List<String> split1 = StrUtil.split(item, "=");
+				return CollUtil.get(split1, 1);
+			}
+		}
+		return null;
 	}
 
 	/**
