@@ -25,12 +25,17 @@ package io.jpom.socket.handler;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.NioUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.JpomManifest;
+import io.jpom.common.Type;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AgentFileModel;
@@ -179,6 +184,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 			//
 			if (agentFileModel == null || !FileUtil.exist(agentFileModel.getSavePath())) {
 				this.onError(session, "Agent JAR包不存在");
+				return;
+			}
+			JsonMessage<Tuple> error = JpomManifest.checkJpomJar(agentFileModel.getSavePath(), Type.Agent, false);
+			if (error.getCode() != HttpStatus.HTTP_OK) {
+				this.onError(session, "Agent JAR 损坏请重新上传," + error.getMsg());
 				return;
 			}
 			for (int i = 0; i < ids.size(); i++) {

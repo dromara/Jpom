@@ -190,6 +190,10 @@ public class LoadJsonConfigToDb {
 			if (nodeModels == null) {
 				return;
 			}
+			nodeModels = nodeModels.stream().peek(nodeModel -> {
+				//
+				nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
+			}).collect(Collectors.toList());
 			BaseServerController.resetInfo(UserModel.EMPTY);
 			NodeService nodeService = SpringUtil.getBean(NodeService.class);
 			nodeService.insert(nodeModels);

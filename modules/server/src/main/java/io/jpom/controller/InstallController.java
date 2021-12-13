@@ -93,6 +93,7 @@ public class InstallController extends BaseServerController {
 		userModel.setSystemUser(1);
 		userModel.setParent(UserModel.SYSTEM_ADMIN);
 		try {
+			BaseServerController.resetInfo(userModel);
 			userService.insert(userModel);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("初始化用户失败", e);

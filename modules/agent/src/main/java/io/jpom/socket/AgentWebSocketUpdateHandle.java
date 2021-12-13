@@ -22,6 +22,7 @@
  */
 package io.jpom.socket;
 
+import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -60,7 +61,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 		if (super.checkAuthorize(session)) {
 			return;
 		}
-		session.setMaxBinaryMessageBufferSize(1024 * 1024);
+		session.setMaxBinaryMessageBufferSize(NioUtil.DEFAULT_LARGE_BUFFER_SIZE);
 		//
 	}
 
