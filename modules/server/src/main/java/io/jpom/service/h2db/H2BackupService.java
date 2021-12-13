@@ -101,11 +101,11 @@ public class H2BackupService {
 		// 加载数据源
 		DataSource dataSource = DSFactory.get();
 		Assert.notNull(dataSource, "Restore Backup sql error...H2 DataSource not null");
-		Connection connection = dataSource.getConnection();
-
-		// 读取数据库备份文件，执行还原
-		try (FileReader fileReader = new FileReader(backupSqlPath)) {
-			RunScript.execute(connection, fileReader);
+		try (Connection connection = dataSource.getConnection()) {
+			// 读取数据库备份文件，执行还原
+			try (FileReader fileReader = new FileReader(backupSqlPath)) {
+				RunScript.execute(connection, fileReader);
+			}
 		}
 	}
 }
