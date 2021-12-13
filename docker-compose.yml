@@ -7,6 +7,8 @@ services:
       context: .
       args:
         JPOM_VERSION: ${JPOM_VERSION}
+    environment:
+      "jpom.authorize.token": ${SERVER_TOKEN}
     volumes:
       - jpom-server:/usr/local/jpom-server
     ports:
@@ -18,10 +20,17 @@ services:
       context: .
       args:
         JPOM_VERSION: ${JPOM_VERSION}
+    environment:
+      "jpom.server.token": ${SERVER_TOKEN}
+      "jpom.server.url": http://server:2122
+      "jpom.agent.id": agent01
+      "jpom.agent.url": http://agent:2123
     volumes:
       - jpom-agent:/usr/local/jpom-agent
     ports:
       - "2123:2123"
+    depends_on:
+      - server
 volumes:
   jpom-agent:
   jpom-server:
