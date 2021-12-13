@@ -64,12 +64,12 @@
     </a-drawer>
     <!-- 批量操作状态 -->
     <a-modal v-model="batchVisible" :title="batchTitle" :closable="false" :ok-button-props="{ props: { disabled: true } }" :cancel-button-props="{ props: { disabled: true } }">
-      <a-list bordered :data-source="selectedRows">
+      <a-list bordered :data-source="selectedRowKeys">
         <a-list-item slot="renderItem" slot-scope="item">
           <a-list-item-meta :description="item.email">
-            <a slot="title"> {{ item.name }}</a>
+            <a slot="title"> {{ projList[item].name }}</a>
           </a-list-item-meta>
-          <div>{{ item.cause === undefined ? "未开始" : item.cause }}</div>
+          <div>{{ projList[item].cause === undefined ? "未开始" : projList[item].cause }}</div>
         </a-list-item>
       </a-list>
     </a-modal>
@@ -250,40 +250,45 @@ export default {
     batchStartInfo(count) {
       this.batchVisible = true;
       this.batchTitle = "批量启动";
-      let value = this.selectedRows[count - 1];
-      value.cause = "启动中";
+      console.log(this.selectedRowKeys);
+      let value = this.selectedRowKeys[count - 1];
+      this.projList[value].cause = "启动中";
+
       count++;
-      if (value.status === undefined && value.runMode !== "File") {
+      if (this.projList[value].status === undefined && this.projList[value].runMode !== "File") {
         const params = {
           nodeId: this.projList[value].nodeId,
           id: this.projList[value].id,
         };
         startProject(params)
           .then((data) => {
-            value.cause = data.code == 200 ? "启动成功" : data.msg;
-            this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
+            this.projList[value].cause = data.code == 200 ? "启动成功" : data.msg;
+            this.selectedRowKeys = [...this.selectedRowKeys];
+            if (count <= this.selectedRowKeys.length) {
               this.batchStartInfo(count);
             } else {
-              this.loadData();
+              //this.loadData();
+              this.batchVisible = false;
             }
           })
           .catch(() => {
-            value.cause = "启动失败";
-            this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
+            this.projList[value].cause = "启动失败";
+            this.selectedRowKeys = [...this.selectedRowKeys];
+            if (count <= this.selectedRowKeys.length) {
               this.batchStartInfo(count);
             } else {
-              this.loadData();
+              //this.loadData();
+              this.batchVisible = false;
             }
           });
       } else {
-        value.cause = "跳过";
-        this.selectedRows = [...this.selectedRows];
-        if (count <= this.selectedRows.length) {
+        this.projList[value].cause = "跳过";
+        this.selectedRowKeys = [...this.selectedRowKeys];
+        if (count <= this.selectedRowKeys.length) {
           this.batchStartInfo(count);
         } else {
-          this.loadData();
+         // this.loadData();
+          this.batchVisible = false;
         }
       }
     },
@@ -299,42 +304,45 @@ export default {
     },
     //批量重启详情
     batchRestartInfo(count) {
-       this.batchVisible = true;
+      this.batchVisible = true;
       this.batchTitle = "批量重新启动";
-      let value = this.selectedRows[count - 1];
-      value.cause = "重新启动中";
+      let value = this.selectedRowKeys[count - 1];
+      this.projList[value].cause = "重新启动中";
       count++;
-      if (value.status === undefined && value.runMode !== "File") {
+      if (this.projList[value].status === undefined && this.projList[value].runMode !== "File") {
         const params = {
           nodeId: this.projList[value].nodeId,
           id: this.projList[value].id,
         };
         restartProject(params)
           .then((data) => {
-            value.cause = data.code == 200 ? "重新启动成功" : data.msg;
-            this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
+            this.projList[value].cause = data.code == 200 ? "重新启动成功" : data.msg;
+            this.selectedRowKeys = [...this.selectedRowKeys];
+            if (count <= this.selectedRowKeys.length) {
               this.batchStartInfo(count);
             } else {
-              this.loadData();
+             // this.loadData();
+              this.batchVisible = false;
             }
           })
           .catch(() => {
-            value.cause = "重新启动失败";
-            this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
+            this.projList[value].cause = "重新启动失败";
+            this.selectedRowKeys = [...this.selectedRowKeys];
+            if (count <= this.selectedRowKeys.length) {
               this.batchStartInfo(count);
             } else {
-              this.loadData();
+            //  this.loadData();
+              this.batchVisible = false;
             }
           });
       } else {
-        value.cause = "跳过";
-        this.selectedRows = [...this.selectedRows];
-        if (count <= this.selectedRows.length) {
+        this.projList[value].cause = "跳过";
+        this.selectedRowKeys = [...this.selectedRowKeys];
+        if (count <= this.selectedRowKeys.length) {
           this.batchStartInfo(count);
         } else {
-          this.loadData();
+         // this.loadData();
+          this.batchVisible = false;
         }
       }
     },
@@ -349,42 +357,45 @@ export default {
     },
     //批量关闭详情
     batchStopInfo(count) {
-     this.batchVisible = true;
+      this.batchVisible = true;
       this.batchTitle = "批量关闭启动";
-      let value = this.selectedRows[count - 1];
-      value.cause = "关闭中";
+      let value = this.selectedRowKeys[count - 1];
+      this.projList[value].cause = "关闭中";
       count++;
-      if (value.status === undefined && value.runMode !== "File") {
+      if (this.projList[value].status === undefined && this.projList[value].runMode !== "File") {
         const params = {
-             nodeId: this.projList[value].nodeId,
+          nodeId: this.projList[value].nodeId,
           id: this.projList[value].id,
         };
         stopProject(params)
           .then((data) => {
-            value.cause = data.code == 200 ? "关闭成功" : data.msg;
-            this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
+            this.projList[value].cause = data.code == 200 ? "关闭成功" : data.msg;
+            this.selectedRowKeys = [...this.selectedRowKeys];
+            if (count <= this.selectedRowKeys.length) {
               this.batchStartInfo(count);
             } else {
-              this.loadData();
+            //  this.loadData();
+              this.batchVisible = false;
             }
           })
           .catch(() => {
-            value.cause = "关闭失败";
-            this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
+            this.projList[value].cause = "关闭失败";
+            this.selectedRowKeys = [...this.selectedRowKeys];
+            if (count <= this.selectedRowKeys.length) {
               this.batchStartInfo(count);
             } else {
-              this.loadData();
+             // this.loadData();
+              this.batchVisible = false;
             }
           });
       } else {
-        value.cause = "跳过";
-        this.selectedRows = [...this.selectedRows];
-        if (count <= this.selectedRows.length) {
+        this.projList[value].cause = "跳过";
+        this.selectedRowKeys = [...this.selectedRowKeys];
+        if (count <= this.selectedRowKeys.length) {
           this.batchStartInfo(count);
         } else {
-          this.loadData();
+         // this.loadData();
+          this.batchVisible = false;
         }
       }
     },
