@@ -374,7 +374,7 @@ public abstract class AbstractProjectCommander {
 	 * @return 查询结果
 	 */
 	protected String status(String tag) {
-		String jpsStatus = getJpsStatus(tag);
+		String jpsStatus = this.getJpsStatus(tag);
 		if (StrUtil.equals(AbstractProjectCommander.STOP_TAG, jpsStatus) && SystemUtil.getOsInfo().isLinux()) {
 			return getLinuxPsStatus(tag);
 		}
@@ -522,7 +522,7 @@ public abstract class AbstractProjectCommander {
 	 * @throws Exception 异常
 	 */
 	public int getPid(String tag) throws Exception {
-		String result = status(tag);
+		String result = this.status(tag);
 		return parsePid(result);
 	}
 

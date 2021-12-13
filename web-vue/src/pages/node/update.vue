@@ -5,6 +5,11 @@
         <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
         <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
         <a-button type="primary" @click="refresh">搜索</a-button>
+        |
+        <a-select v-model="temp.protocol" placeholder="升级协议" class="search-input-item">
+          <a-select-option value="WebSocket">WebSocket</a-select-option>
+          <a-select-option value="Http">Http</a-select-option>
+        </a-select>
         <a-button type="primary" @click="batchUpdate">批量更新</a-button>
       </div>
       <div class="right">
@@ -136,6 +141,10 @@ export default {
   mounted() {
     this.getNodeList();
   },
+  beforeDestroy() {
+    this.socket && this.socket.close();
+    clearInterval(this.heart);
+  },
   methods: {
     initWebsocket(ids) {
       if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
@@ -162,11 +171,17 @@ export default {
           let upgrade = res.data?.upgrade;
           if (upgrade) {
             //
-            this.temp.upgrade = upgrade;
-            this.temp.newVersion = res.data.tagName;
+            this.temp = { ...this.temp, upgrade: upgrade, newVersion: res.data.tagName };
+            // this.temp.upgrade = upgrade;
+            // this.temp.newVersion = ;
           }
         }
       });
+      // 创建心跳，防止掉线
+      this.heart && clearInterval(this.heart);
+      this.heart = setInterval(() => {
+        this.sendMsg("heart", {});
+      }, 2000);
     },
     refresh() {
       if (this.socket) {
@@ -244,6 +259,7 @@ export default {
     updateNode() {
       this.sendMsg("updateNode", {
         ids: this.tableSelections,
+        protocol: this.temp.protocol,
       });
       this.tableSelections = [];
     },
@@ -297,7 +313,7 @@ export default {
         this.listQuery.order = sorter.order;
         this.listQuery.order_field = sorter.field;
       }
-      this.loadData();
+      this.getNodeList();
     },
   },
 };

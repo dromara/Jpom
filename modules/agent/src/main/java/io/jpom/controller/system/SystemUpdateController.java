@@ -76,7 +76,8 @@ public class SystemUpdateController extends BaseAgentController {
 		if (error.getCode() != HttpStatus.HTTP_OK) {
 			return error.toString();
 		}
-		String version = error.getMsg();
+		Tuple data = error.getData();
+		String version = data.get(0);
 		JpomManifest.releaseJar(path, version);
 		//
 		JpomApplication.restart();

@@ -52,6 +52,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -269,6 +270,32 @@ public class NodeForward {
 				DefaultSystemLog.getLog().error("转发文件异常", e);
 			}
 		});
+		HttpResponse response;
+		try {
+			// @author jzy add  timeout
+			httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+			response = httpRequest.execute();
+		} catch (Exception e) {
+			throw NodeForward.responseException(e, nodeModel);
+		}
+		return parseBody(response, nodeModel);
+	}
+
+	/**
+	 * 上传文件消息转发
+	 *
+	 * @param nodeModel 节点
+	 * @param fileName  文件字段名
+	 * @param file      上传的文件
+	 * @param nodeUrl   节点的url
+	 * @return json
+	 */
+	public static JsonMessage<String> requestMultipart(NodeModel nodeModel, String fileName, File file, NodeUrl nodeUrl) {
+		String url = nodeModel.getRealUrl(nodeUrl);
+		HttpRequest httpRequest = HttpUtil.createPost(url);
+		addUser(httpRequest, nodeModel, nodeUrl);
+		//
+		httpRequest.form(fileName, file);
 		HttpResponse response;
 		try {
 			// @author jzy add  timeout
