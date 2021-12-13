@@ -91,6 +91,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 			setting.set(SqlLog.KEY_SHOW_PARAMS, "true");
 		}
 		Console.log("start load h2 db");
+		String sqlFileNow = StrUtil.EMPTY;
 		try {
 			// 创建连接
 			DSFactory dsFactory = DSFactory.create(setting);
@@ -117,6 +118,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 					// 已经执行过啦，不再执行
 					continue;
 				}
+				sqlFileNow = sqlFile;
 				int rows = Db.use(dsFactory.getDataSource()).execute(sql);
 				DefaultSystemLog.getLog().info("exec init SQL file: {} complete, and affected rows is: {}", sqlFile, rows);
 				executeSqlLog.add(sha1);
@@ -125,7 +127,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 			DSFactory.setCurrentDSFactory(dsFactory);
 			//
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("初始化数据库失败", e);
+			DefaultSystemLog.getLog().error("初始化数据库失败 {}", sqlFileNow, e);
 			System.exit(0);
 			return;
 		}
