@@ -56,8 +56,9 @@ public class AutoRegSeverNode {
 
 	@PreLoadMethod
 	private static void reg() throws FileNotFoundException {
-		String agentId = AgentExtConfigBean.getInstance().getAgentId();
-		String serverUrl = AgentExtConfigBean.getInstance().getServerUrl();
+		AgentExtConfigBean instance = AgentExtConfigBean.getInstance();
+		String agentId = instance.getAgentId();
+		String serverUrl = instance.getServerUrl();
 		if (StrUtil.isEmpty(agentId) || StrUtil.isEmpty(serverUrl)) {
 			//  如果二者缺一不注册
 			return;
@@ -69,7 +70,7 @@ public class AutoRegSeverNode {
 			serverJson = (JSONObject) JsonFileUtil.readJson(file.getAbsolutePath());
 			oldInstallId = serverJson.getString("installId");
 		}
-		HttpRequest installRequest = AgentExtConfigBean.getInstance().createServerRequest(ServerOpenApi.INSTALL_ID);
+		HttpRequest installRequest = instance.createServerRequest(ServerOpenApi.INSTALL_ID);
 		String body1 = installRequest.execute().body();
 		JsonMessage jsonMessage = JSON.parseObject(body1, JsonMessage.class);
 		if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
@@ -79,10 +80,10 @@ public class AutoRegSeverNode {
 		String installId = jsonMessage.dataToString();
 		boolean eqInstall = StrUtil.equals(oldInstallId, installId);
 		//
-		URL url = URLUtil.toUrlForHttp(AgentExtConfigBean.getInstance().getAgentUrl());
+		URL url = URLUtil.toUrlForHttp(instance.getAgentUrl());
 		String protocol = url.getProtocol();
 
-		HttpRequest serverRequest = AgentExtConfigBean.getInstance().createServerRequest(ServerOpenApi.UPDATE_NODE_INFO);
+		HttpRequest serverRequest = instance.createServerRequest(ServerOpenApi.UPDATE_NODE_INFO);
 		serverRequest.form("id", agentId);
 		serverRequest.form("name", "节点：" + agentId);
 		serverRequest.form("openStatus", 1);
