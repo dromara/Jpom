@@ -782,7 +782,7 @@ export default {
       let value = this.selectedRows[count - 1];
       value.cause = "重新启动中";
       count++;
-      if (value.status === undefined && value.runMode !== "File") {
+      if (value.runMode !== "File") {
         const params = {
           nodeId: this.node.id,
           id: value.projectId,
@@ -824,7 +824,7 @@ export default {
       let value = this.selectedRows[count - 1];
       value.cause = "关闭中";
       count++;
-      if (value.status === undefined && value.runMode !== "File") {
+      if (value.runMode !== "File") {
         const params = {
           nodeId: this.node.id,
           id: value.projectId,
