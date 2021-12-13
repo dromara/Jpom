@@ -96,8 +96,8 @@ public class BuildInfoManageController extends BaseServerController {
 		item.setBuildId(buildId + 1);
 		// userModel
 		UserModel userModel = getUser();
-		String optUserName = userModel == null ? "openApi" : UserModel.getOptUserName(userModel);
-		item.setModifyUser(optUserName);
+		//String optUserName = userModel == null ? "openApi" : UserModel.getOptUserName(userModel);
+		//item.setModifyUser(optUserName);
 		buildInfoService.update(item);
 		// 执行构建
 		return buildInfoService.start(item, userModel, null);

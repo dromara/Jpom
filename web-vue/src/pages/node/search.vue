@@ -13,23 +13,34 @@
         <a-button type="primary" @click="getNodeProjectData">搜索</a-button>
       </a-tooltip>
       <span>| </span>
-      <a-button type="primary" @click="batchStart">批量启动</a-button>
+
+      <a-dropdown>
+        <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+          批量操作
+          <a-icon type="down" />
+        </a>
+        <a-menu slot="overlay">
+          <a-menu-item>
+            <a-button type="primary" @click="batchStart">批量启动</a-button>
+          </a-menu-item>
+          <a-menu-item>
+            <a-button type="primary" @click="batchRestart">批量重启</a-button>
+          </a-menu-item>
+          <a-menu-item>
+            <a-button type="danger" @click="batchStop">批量关闭</a-button>
+          </a-menu-item>
+        </a-menu>
+      </a-dropdown>
+
+      <!-- <a-button type="primary" @click="batchStart">批量启动</a-button>
       <a-button type="primary" @click="batchRestart">批量重启</a-button>
-      <a-button type="danger" @click="batchStop">批量关闭</a-button>
+      <a-button type="danger" @click="batchStop">批量关闭</a-button> -->
       状态数据是异步获取有一定时间延迟
       <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的项目信息, 需要重新同步">
         <a-icon @click="delAll()" type="delete" />
       </a-tooltip>
     </div>
-    <a-table
-      :data-source="projList"
-      :columns="columns"
-      bordered
-      :pagination="pagination"
-      @change="changePage"
-      :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
-      :rowKey="(record, index) => index"
-    >
+    <a-table :data-source="projList" :columns="columns" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -63,13 +74,15 @@
       <console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
     </a-drawer>
     <!-- 批量操作状态 -->
-    <a-modal v-model="batchVisible" :title="batchTitle" :closable="false" :ok-button-props="{ props: { disabled: true } }" :cancel-button-props="{ props: { disabled: true } }">
+    <a-modal v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="selectedRowKeys">
         <a-list-item slot="renderItem" slot-scope="item">
           <a-list-item-meta :description="item.email">
             <a slot="title"> {{ projList[item].name }}</a>
           </a-list-item-meta>
-          <div>{{ projList[item].cause === undefined ? "未开始" : projList[item].cause }}</div>
+          <div>
+            <a-tooltip :title="`${projList[item].cause || '未开始'}`">{{ projList[item].cause || "未开始" }} </a-tooltip>
+          </div>
         </a-list-item>
       </a-list>
     </a-modal>
@@ -149,6 +162,14 @@ export default {
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
+      };
+    },
+    rowSelection() {
+      return {
+        selectedRowKeys: this.selectedRowKeys,
+        onChange: this.onSelectChange,
+        columnWidth: "40px",
+        getCheckboxProps: this.getCheckboxProps,
       };
     },
   },
@@ -236,6 +257,11 @@ export default {
     onSelectChange(selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys;
     },
+    batchClose() {
+      this.batchVisible = false;
+      this.getNodeProjectData();
+      this.selectedRowKeys = [];
+    },
     //批量开始
     batchStart() {
       if (this.selectedRowKeys.length == 0) {
@@ -244,52 +270,42 @@ export default {
         });
         return;
       }
+      this.batchVisible = true;
+      this.batchTitle = "批量启动";
+      this.projList = this.projList.map((item) => {
+        delete item.cause;
+        return item;
+      });
       this.batchStartInfo(1);
     },
     //批量启动详情
     batchStartInfo(count) {
-      this.batchVisible = true;
-      this.batchTitle = "批量启动";
-      console.log(this.selectedRowKeys);
+      if (count > this.selectedRowKeys.length) {
+        return;
+      }
       let value = this.selectedRowKeys[count - 1];
       this.projList[value].cause = "启动中";
-
       count++;
-      if (this.projList[value].status === undefined && this.projList[value].runMode !== "File") {
+      if (this.projList[value].runMode !== "File") {
         const params = {
           nodeId: this.projList[value].nodeId,
-          id: this.projList[value].id,
+          id: this.projList[value].projectId,
         };
         startProject(params)
           .then((data) => {
-            this.projList[value].cause = data.code == 200 ? "启动成功" : data.msg;
+            this.projList[value].cause = data.msg;
             this.selectedRowKeys = [...this.selectedRowKeys];
-            if (count <= this.selectedRowKeys.length) {
-              this.batchStartInfo(count);
-            } else {
-              //this.loadData();
-              this.batchVisible = false;
-            }
+            this.batchStartInfo(count);
           })
           .catch(() => {
             this.projList[value].cause = "启动失败";
             this.selectedRowKeys = [...this.selectedRowKeys];
-            if (count <= this.selectedRowKeys.length) {
-              this.batchStartInfo(count);
-            } else {
-              //this.loadData();
-              this.batchVisible = false;
-            }
+            this.batchStartInfo(count);
           });
       } else {
         this.projList[value].cause = "跳过";
         this.selectedRowKeys = [...this.selectedRowKeys];
-        if (count <= this.selectedRowKeys.length) {
-          this.batchStartInfo(count);
-        } else {
-         // this.loadData();
-          this.batchVisible = false;
-        }
+        this.batchStartInfo(count);
       }
     },
     //批量重启
@@ -300,50 +316,42 @@ export default {
         });
         return;
       }
+      this.batchVisible = true;
+      this.batchTitle = "批量重新启动";
+      this.projList = this.projList.map((item) => {
+        delete item.cause;
+        return item;
+      });
       this.batchRestartInfo(1);
     },
     //批量重启详情
     batchRestartInfo(count) {
-      this.batchVisible = true;
-      this.batchTitle = "批量重新启动";
+      if (count > this.selectedRowKeys.length) {
+        return;
+      }
       let value = this.selectedRowKeys[count - 1];
       this.projList[value].cause = "重新启动中";
       count++;
-      if (this.projList[value].status === undefined && this.projList[value].runMode !== "File") {
+      if (this.projList[value].runMode !== "File") {
         const params = {
           nodeId: this.projList[value].nodeId,
-          id: this.projList[value].id,
+          id: this.projList[value].projectId,
         };
         restartProject(params)
           .then((data) => {
-            this.projList[value].cause = data.code == 200 ? "重新启动成功" : data.msg;
+            this.projList[value].cause = data.msg;
             this.selectedRowKeys = [...this.selectedRowKeys];
-            if (count <= this.selectedRowKeys.length) {
-              this.batchStartInfo(count);
-            } else {
-             // this.loadData();
-              this.batchVisible = false;
-            }
+            this.batchRestartInfo(count);
           })
           .catch(() => {
             this.projList[value].cause = "重新启动失败";
             this.selectedRowKeys = [...this.selectedRowKeys];
-            if (count <= this.selectedRowKeys.length) {
-              this.batchStartInfo(count);
-            } else {
-            //  this.loadData();
-              this.batchVisible = false;
-            }
+            this.batchRestartInfo(count);
           });
       } else {
         this.projList[value].cause = "跳过";
         this.selectedRowKeys = [...this.selectedRowKeys];
-        if (count <= this.selectedRowKeys.length) {
-          this.batchStartInfo(count);
-        } else {
-         // this.loadData();
-          this.batchVisible = false;
-        }
+        this.batchRestartInfo(count);
       }
     },
     //批量关闭
@@ -353,51 +361,52 @@ export default {
           message: "请选中要关闭的项目",
         });
       }
+      this.batchVisible = true;
+      this.batchTitle = "批量关闭启动";
+      this.projList = this.projList.map((item) => {
+        delete item.cause;
+        return item;
+      });
       this.batchStopInfo(1);
     },
     //批量关闭详情
     batchStopInfo(count) {
-      this.batchVisible = true;
-      this.batchTitle = "批量关闭启动";
+      if (count > this.selectedRowKeys.length) {
+        return;
+      }
       let value = this.selectedRowKeys[count - 1];
       this.projList[value].cause = "关闭中";
       count++;
-      if (this.projList[value].status === undefined && this.projList[value].runMode !== "File") {
+      if (this.projList[value].runMode !== "File") {
         const params = {
           nodeId: this.projList[value].nodeId,
-          id: this.projList[value].id,
+          id: this.projList[value].projectId,
         };
         stopProject(params)
           .then((data) => {
-            this.projList[value].cause = data.code == 200 ? "关闭成功" : data.msg;
+            this.projList[value].cause = data.msg;
             this.selectedRowKeys = [...this.selectedRowKeys];
-            if (count <= this.selectedRowKeys.length) {
-              this.batchStartInfo(count);
-            } else {
-            //  this.loadData();
-              this.batchVisible = false;
-            }
+            this.batchStopInfo(count);
           })
           .catch(() => {
             this.projList[value].cause = "关闭失败";
             this.selectedRowKeys = [...this.selectedRowKeys];
-            if (count <= this.selectedRowKeys.length) {
-              this.batchStartInfo(count);
-            } else {
-             // this.loadData();
-              this.batchVisible = false;
-            }
+            this.batchStopInfo(count);
           });
       } else {
         this.projList[value].cause = "跳过";
         this.selectedRowKeys = [...this.selectedRowKeys];
-        if (count <= this.selectedRowKeys.length) {
-          this.batchStartInfo(count);
-        } else {
-         // this.loadData();
-          this.batchVisible = false;
-        }
+        this.batchStopInfo(count);
       }
+    },
+    // 获取复选框属性 判断是否可以勾选
+    getCheckboxProps(record) {
+      return {
+        props: {
+          disabled: record.runMode === "File",
+          name: record.name,
+        },
+      };
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {

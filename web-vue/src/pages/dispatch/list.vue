@@ -2,6 +2,10 @@
   <div class="full-content">
     <div ref="filter" class="filter">
       <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="名称" />
+      <a-select v-model="listQuery.outGivingProject" allowClear placeholder="分发类型" class="search-input-item">
+        <a-select-option :value="1">独立</a-select-option>
+        <a-select-option :value="0">关联</a-select-option>
+      </a-select>
       <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
         <a-button type="primary" @click="loadData">搜索</a-button>
       </a-tooltip>

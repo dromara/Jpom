@@ -156,7 +156,7 @@ public class SshHandler extends BaseHandler {
 		UserModel userInfo = (UserModel) attributes.get("userInfo");
 		String ip = (String) attributes.get("ip");
 		String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
-		SshModel sshItem = (SshModel) attributes.get("sshItem");
+		SshModel sshItem = (SshModel) attributes.get("dataItem");
 		//
 		sshTerminalExecuteLogService.batch(userInfo, sshItem, ip, userAgent, refuse, split);
 	}

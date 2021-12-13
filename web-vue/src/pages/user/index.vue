@@ -32,17 +32,19 @@
           <a-input v-model="temp.name" placeholder="昵称" />
         </a-form-model-item>
         <a-form-model-item label="管理员" prop="systemUser">
-          <a-switch
-            :checked="temp.systemUser == 1"
-            @change="
-              (checked) => {
-                temp.systemUser = checked ? 1 : 0;
-              }
-            "
-            checked-children="是"
-            un-checked-children="否"
-            default-checked
-          />
+          <a-tooltip title="管理员拥有：管理服务端和插件端的权限">
+            <a-switch
+              :checked="temp.systemUser == 1"
+              @change="
+                (checked) => {
+                  temp.systemUser = checked ? 1 : 0;
+                }
+              "
+              checked-children="是"
+              un-checked-children="否"
+              default-checked
+            />
+          </a-tooltip>
         </a-form-model-item>
 
         <a-form-model-item label="工作空间" prop="feature" class="feature jpom-userWorkspace">

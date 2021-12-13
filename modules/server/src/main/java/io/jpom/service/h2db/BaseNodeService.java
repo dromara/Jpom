@@ -42,6 +42,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.WorkspaceService;
+import io.jpom.system.AgentException;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -185,6 +186,9 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 					CollUtil.size(strings));
 			DefaultSystemLog.getLog().debug(format);
 			return format;
+		} catch (AgentException agentException) {
+			DefaultSystemLog.getLog().error("同步失败 {}", agentException.getMessage());
+			return "同步失败" + agentException.getMessage();
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("同步节点" + dataName + "失败:" + nodeModelName, e);
 			return "同步节点" + dataName + "失败" + e.getMessage();

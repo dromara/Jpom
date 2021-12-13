@@ -228,6 +228,8 @@ export function downloadRemote() {
   return axios({
     url: "/node/download_remote.json",
     method: "get",
+    // 0 表示无超时时间
+    timeout: 0,
     data: {},
   });
 }
