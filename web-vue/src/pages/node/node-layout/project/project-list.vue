@@ -690,37 +690,47 @@ export default {
         });
         return;
       }
-      let $global_loading = this.$loading.service({
-        lock: true,
-        text: "批量启动中，请稍候...",
-        spinner: "el-icon-loading",
-        background: "rgba(0, 0, 0, 0.7)",
+      this.batchStartInfo(1);
+    },
+    //批量启动详情
+    batchStartInfo(count) {
+      let value = this.selectedRows[count - 1];
+      count++;
+      const h = this.$createElement;
+      let info = this.$info({
+        title: "批量启动",
+        content: h("div", {}, [h("p", "正在启动项目:" + value.name + ",请稍等~~")]),
       });
-      let count = 0;
-      this.selectedRows.forEach((value) => {
-        if (value.status === undefined && value.runMode !== "File") {
-          count++;
-          const params = {
-            nodeId: this.node.id,
-            id: value.id,
-          };
-          startProject(params)
-            .then(() => {
-              count--;
-              if (count == 0) {
-                this.loadData();
-                $global_loading.close();
-              }
-            })
-            .catch(() => {
-              count--;
-              if (count == 0) {
-                this.loadData();
-                $global_loading.close();
-              }
-            });
+      if (value.status === undefined && value.runMode !== "File") {
+        const params = {
+          nodeId: this.node.id,
+          id: value.id,
+        };
+        startProject(params)
+          .then(() => {
+            info.destroy();
+            if (count <= this.selectedRows.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          })
+          .catch(() => {
+            info.destroy();
+            if (count <= this.selectedRows.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          });
+      } else {
+        info.destroy();
+        if (count <= this.selectedRows.length) {
+          this.batchStartInfo(count);
+        } else {
+          this.loadData();
         }
-      });
+      }
     },
     //批量重启
     batchRestart() {
@@ -730,37 +740,47 @@ export default {
         });
         return;
       }
-      let $global_loading = this.$loading.service({
-        lock: true,
-        text: "批量重启中，请稍候...",
-        spinner: "el-icon-loading",
-        background: "rgba(0, 0, 0, 0.7)",
+      this.batchRestartInfo(1);
+    },
+    //批量重启详情
+    batchRestartInfo(count) {
+      let value = this.selectedRows[count - 1];
+      count++;
+      const h = this.$createElement;
+      let info = this.$info({
+        title: "批量重启",
+        content: h("div", {}, [h("p", "正在重启项目:" + value.name + ",请稍等~~")]),
       });
-      let count = 0;
-      this.selectedRows.forEach((value) => {
-        if (value.status === true && value.runMode != "File") {
-          const params = {
-            nodeId: this.node.id,
-            id: value.id,
-          };
-          count++;
-          restartProject(params)
-            .then(() => {
-              count--;
-              if (count == 0) {
-                this.loadData();
-                $global_loading.close();
-              }
-            })
-            .catch(() => {
-              count--;
-              if (count == 0) {
-                this.loadData();
-                $global_loading.close();
-              }
-            });
+      if (value.status === undefined && value.runMode !== "File") {
+        const params = {
+          nodeId: this.node.id,
+          id: value.id,
+        };
+        restartProject(params)
+          .then(() => {
+            info.destroy();
+            if (count <= this.selectedRows.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          })
+          .catch(() => {
+            info.destroy();
+            if (count <= this.selectedRows.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          });
+      } else {
+        info.destroy();
+        if (count <= this.selectedRows.length) {
+          this.batchStartInfo(count);
+        } else {
+          this.loadData();
         }
-      });
+      }
     },
     //批量关闭
     batchStop() {
@@ -770,37 +790,47 @@ export default {
         });
         return;
       }
-      let $global_loading = this.$loading.service({
-        lock: true,
-        text: "批量关闭中，请稍候...",
-        spinner: "el-icon-loading",
-        background: "rgba(0, 0, 0, 0.7)",
+     this.batchStopInfo(1);
+    },
+     //批量关闭详情
+    batchStopInfo(count) {
+      let value = this.selectedRows[count - 1];
+      count++;
+      const h = this.$createElement;
+      let info = this.$info({
+        title: "批量关闭",
+        content: h("div", {}, [h("p", "正在关闭项目:" + value.name + ",请稍等~~")]),
       });
-      let count = 0;
-      this.selectedRows.forEach((value) => {
-        if (value.status === true && value.runMode != "File") {
-          count++;
-          const params = {
-            nodeId: this.node.id,
-            id: value.id,
-          };
-          stopProject(params)
-            .then(() => {
-              count--;
-              if (count == 0) {
-                this.loadData();
-                $global_loading.close();
-              }
-            })
-            .catch(() => {
-              count--;
-              if (count == 0) {
-                this.loadData();
-                $global_loading.close();
-              }
-            });
+      if (value.status === undefined && value.runMode !== "File") {
+        const params = {
+          nodeId: this.node.id,
+          id: value.id,
+        };
+        stopProject(params)
+          .then(() => {
+            info.destroy();
+            if (count <= this.selectedRows.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          })
+          .catch(() => {
+            info.destroy();
+            if (count <= this.selectedRows.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          });
+      } else {
+        info.destroy();
+        if (count <= this.selectedRows.length) {
+          this.batchStartInfo(count);
+        } else {
+          this.loadData();
         }
-      });
+      }
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {

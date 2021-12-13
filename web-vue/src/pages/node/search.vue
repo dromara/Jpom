@@ -229,18 +229,49 @@ export default {
         this.$notification.warning({
           message: "请选中要启动的项目",
         });
+        return;
       }
-      this.selectedRowKeys.forEach((value) => {
-        if (this.projList[value].status == false && this.projList[value].runMode != "File") {
-          const params = {
-            nodeId: this.projList[value].nodeId,
-            id: this.projList[value].id,
-          };
-          startProject(params).then(() => {
-            this.getNodeProjectData();
-          });
-        }
+    this.batchStartInfo(1);
+    },
+    //批量启动详情
+    batchStartInfo(count) {
+      let value = this.selectedRowKeys[count - 1];
+      count++;
+      const h = this.$createElement;
+      let info = this.$info({
+        title: "批量启动",
+        content: h("div", {}, [h("p", "正在启动项目:" + value.name + ",请稍等~~")]),
       });
+      if (value.status === undefined && value.runMode !== "File") {
+        const params = {
+           nodeId: this.projList[value].nodeId,
+           id: this.projList[value].id,
+        };
+        startProject(params)
+          .then(() => {
+            info.destroy();
+            if (count <= this.selectedRowKeys.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          })
+          .catch(() => {
+            info.destroy();
+            if (count <= this.selectedRowKeys.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          });
+      } else {
+        info.destroy();
+        if (count <= this.selectedRowKeys.length) {
+          this.batchStartInfo(count);
+        } else {
+          this.loadData();
+        }
+      }
     },
     //批量重启
     batchRestart() {
@@ -248,19 +279,49 @@ export default {
         this.$notification.warning({
           message: "请选中要重启的项目",
         });
+        return;
       }
-      console.log(this.selectedRowKeys);
-      this.selectedRowKeys.forEach((value) => {
-        if (this.projList[value].runMode != "File") {
-          const params = {
-            nodeId: this.projList[value].nodeId,
-            id: this.projList[value].id,
-          };
-          restartProject(params).then(() => {
-            this.getNodeProjectData();
-          });
-        }
+      this.batchRestartInfo(1);
+    },
+     //批量重启详情
+    batchRestartInfo(count) {
+      let value = this.selectedRowKeys[count - 1];
+      count++;
+      const h = this.$createElement;
+      let info = this.$info({
+        title: "批量重启",
+        content: h("div", {}, [h("p", "正在重启项目:" + value.name + ",请稍等~~")]),
       });
+      if (value.status === undefined && value.runMode !== "File") {
+        const params = {
+           nodeId: this.projList[value].nodeId,
+           id: this.projList[value].id,
+        };
+        restartProject(params)
+          .then(() => {
+            info.destroy();
+            if (count <= this.selectedRowKeys.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          })
+          .catch(() => {
+            info.destroy();
+            if (count <= this.selectedRowKeys.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          });
+      } else {
+        info.destroy();
+        if (count <= this.selectedRowKeys.length) {
+          this.batchStartInfo(count);
+        } else {
+          this.loadData();
+        }
+      }
     },
     //批量关闭
     batchStop() {
@@ -269,17 +330,47 @@ export default {
           message: "请选中要关闭的项目",
         });
       }
-      this.selectedRowKeys.forEach((value) => {
-        if (this.projList[value].status == true && this.projList[value].runMode != "File") {
-          const params = {
-            nodeId: this.projList[value].nodeId,
-            id: this.projList[value].id,
-          };
-          stopProject(params).then(() => {
-            this.getNodeProjectData();
-          });
-        }
+      this.batchStopInfo(1);
+    },
+     //批量关闭详情
+    batchStopInfo(count) {
+      let value = this.selectedRows[count - 1];
+      count++;
+      const h = this.$createElement;
+      let info = this.$info({
+        title: "批量关闭",
+        content: h("div", {}, [h("p", "正在关闭项目:" + value.name + ",请稍等~~")]),
       });
+      if (value.status === undefined && value.runMode !== "File") {
+        const params = {
+           nodeId: this.projList[value].nodeId,
+           id: this.projList[value].id,
+        };
+        stopProject(params)
+          .then(() => {
+            info.destroy();
+            if (count <= this.selectedRowKeys.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          })
+          .catch(() => {
+            info.destroy();
+            if (count <= this.selectedRowKeys.length) {
+              this.batchStartInfo(count);
+            } else {
+              this.loadData();
+            }
+          });
+      } else {
+        info.destroy();
+        if (count <= this.selectedRowKeys.length) {
+          this.batchStartInfo(count);
+        } else {
+          this.loadData();
+        }
+      }
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
