@@ -66,16 +66,16 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 			Assert.state(general, "节点id不能为空并且2-20（英文字母 、数字和下划线）");
 		}
 		Assert.hasText(nodeModel.getName(), "节点名称 不能为空");
+		NodeModel existsNode = super.getByKey(id);
 		String workspaceId;
 		if (autoReg) {
-			NodeModel nodeModel1 = super.getByKey(id);
 			if (create) {
-				Assert.isNull(nodeModel1, "对应的节点 id 已经存在啦");
+				Assert.isNull(existsNode, "对应的节点 id 已经存在啦");
 				// 绑定到默认工作空间
 				workspaceId = Const.WORKSPACE_DEFAULT_ID;
 			} else {
-				Assert.notNull(nodeModel1, "对应的节点不存在");
-				workspaceId = nodeModel1.getWorkspaceId();
+				Assert.notNull(existsNode, "对应的节点不存在");
+				workspaceId = existsNode.getWorkspaceId();
 			}
 		} else {
 			workspaceId = this.getCheckUserWorkspace(request);
@@ -110,9 +110,9 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		}
 		if (nodeModel.isOpenStatus()) {
 			//
-			this.checkLockType(nodeModel.getId());
+			this.checkLockType(existsNode);
 			//
-			int timeOut = nodeModel.getTimeOut();
+			int timeOut = ObjectUtil.defaultIfNull(nodeModel.getTimeOut(), 0);
 			// 检查是否可用默认为5秒，避免太长时间无法连接一直等待
 			nodeModel.setTimeOut(5);
 			JpomManifest jpomManifest = NodeForward.requestData(nodeModel, NodeUrl.Info, request, JpomManifest.class);
@@ -155,8 +155,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		super.update(nodeModel1);
 	}
 
-	private void checkLockType(String id) {
-		NodeModel nodeModel = super.getByKey(id);
+	private void checkLockType(NodeModel nodeModel) {
 		if (nodeModel == null) {
 			return;
 		}
