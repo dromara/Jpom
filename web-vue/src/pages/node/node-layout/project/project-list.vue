@@ -720,7 +720,7 @@ export default {
     },
     //批量开始
     batchStart() {
-      if (this.selectedRows.length == 0) {
+      if (this.selectedRows.length <= 0) {
         this.$notification.warning({
           message: "请选中要启动的项目",
         });
@@ -764,7 +764,7 @@ export default {
     },
     //批量重启
     batchRestart() {
-      if (this.selectedRows.length == 0) {
+      if (this.selectedRows.length <= 0) {
         this.$notification.warning({
           message: "请选中要重启的项目",
         });
@@ -789,7 +789,7 @@ export default {
         };
         restartProject(params)
           .then((data) => {
-            value.cause = data.code == 200 ? "重新启动成功" : data.msg;
+            value.cause = data.msg;
             this.selectedRows = [...this.selectedRows];
             this.batchRestartInfo(count);
           })
@@ -806,7 +806,7 @@ export default {
     },
     //批量关闭
     batchStop() {
-      if (this.selectedRows.length == 0) {
+      if (this.selectedRows.length <= 0) {
         this.$notification.warning({
           message: "请选中要关闭的项目",
         });
@@ -831,7 +831,7 @@ export default {
         };
         stopProject(params)
           .then((data) => {
-            value.cause = data.code == 200 ? "关闭成功" : data.msg;
+            value.cause = data.msg;
             this.selectedRows = [...this.selectedRows];
 
             this.batchStopInfo(count);
