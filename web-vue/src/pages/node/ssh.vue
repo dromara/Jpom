@@ -187,7 +187,7 @@
     <!-- 操作日志 -->
     <a-modal v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
       <div ref="filter" class="filter">
-        <a-input class="search-input-item" v-model="viewOperationLogListQuery['userId']" placeholder="操作人" />
+        <a-input class="search-input-item" v-model="viewOperationLogListQuery['modifyUser']" placeholder="操作人" />
         <a-input class="search-input-item" v-model="viewOperationLogListQuery['name']" placeholder="ssh name" />
         <a-input class="search-input-item" v-model="viewOperationLogListQuery['ip']" placeholder="ip" />
         <a-input class="search-input-item" v-model="viewOperationLogListQuery['%commands%']" placeholder="执行命令" />
@@ -207,6 +207,10 @@
         <a-tooltip slot="commands" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
+        <a-tooltip slot="modifyUser" slot-scope="text, item" placement="topLeft" :title="item.modifyUser || item.userId">
+          <span>{{ item.modifyUser || item.userId }}</span>
+        </a-tooltip>
+
         <a-tooltip slot="userAgent" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
@@ -248,7 +252,7 @@ export default {
       viewOperationLoading: false,
       viewOperationLogList: [],
       viewOperationLogColumns: [
-        { title: "操作者", dataIndex: "userId", width: 100 },
+        { title: "操作者", dataIndex: "modifyUser", width: 100, scopedSlots: { customRender: "modifyUser" } },
         { title: "IP", dataIndex: "ip" /*width: 130*/ },
         {
           title: "sshName",

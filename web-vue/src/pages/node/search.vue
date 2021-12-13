@@ -264,7 +264,7 @@ export default {
     },
     //批量开始
     batchStart() {
-      if (this.selectedRowKeys.length == 0) {
+      if (this.selectedRowKeys.length <= 0) {
         this.$notification.warning({
           message: "请选中要启动的项目",
         });
@@ -310,7 +310,7 @@ export default {
     },
     //批量重启
     batchRestart() {
-      if (this.selectedRowKeys.length == 0) {
+      if (this.selectedRowKeys.length <= 0) {
         this.$notification.warning({
           message: "请选中要重启的项目",
         });
@@ -356,7 +356,7 @@ export default {
     },
     //批量关闭
     batchStop() {
-      if (this.selectedRowKeys.length == 0) {
+      if (this.selectedRowKeys.length <= 0) {
         this.$notification.warning({
           message: "请选中要关闭的项目",
         });
