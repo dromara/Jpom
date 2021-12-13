@@ -83,7 +83,7 @@ public class JvmUtil {
 	 * @param pid 进程id
 	 * @return command line info
 	 */
-	public static String getVirtualMachineInfo(int pid) {
+	public static String getPidJpsInfoInfo(int pid) {
 		String execSystemCommand = CommandUtil.execSystemCommand("jps -mv");
 		List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
 		Optional<String> any = list.stream().filter(s -> {
