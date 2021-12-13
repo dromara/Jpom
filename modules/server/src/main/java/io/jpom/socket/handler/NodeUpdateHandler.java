@@ -24,7 +24,6 @@ package io.jpom.socket.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
@@ -34,6 +33,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
 import io.jpom.common.forward.NodeForward;
@@ -53,6 +53,7 @@ import io.jpom.socket.client.NodeClient;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -71,6 +72,8 @@ import java.util.concurrent.ConcurrentMap;
 public class NodeUpdateHandler extends BaseProxyHandler {
 
 	private final ConcurrentMap<String, NodeClient> clientMap = new ConcurrentHashMap<>();
+
+	private static final int CHECK_COUNT = 60;
 
 	private SystemParametersServer systemParametersServer;
 	private NodeService nodeService;
@@ -146,6 +149,8 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 				super.logOpt(attributes, json);
 				updateNode(model, session);
 				break;
+			case "heart":
+				break;
 			default: {
 				if (StrUtil.startWith(command, "getNodeList:")) {
 					ids = StrUtil.removePrefix(command, "getNodeList:");
@@ -179,6 +184,8 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 		if (CollUtil.isEmpty(ids)) {
 			return;
 		}
+		String protocol = params.getString("protocol");
+		boolean http = StrUtil.equalsIgnoreCase(protocol, "http");
 		try {
 			AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class);
 			//
@@ -193,14 +200,85 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 			}
 			for (int i = 0; i < ids.size(); i++) {
 				int finalI = i;
-				ThreadUtil.execute(() -> this.updateNodeItem(ids.getString(finalI), session, agentFileModel));
+				ThreadUtil.execute(() -> this.updateNodeItem(ids.getString(finalI), session, agentFileModel, http));
 			}
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("升级失败", e);
 		}
 	}
 
-	private void updateNodeItem(String id, WebSocketSession session, AgentFileModel agentFileModel) {
+	private void updateNodeItemHttp(NodeModel nodeModel, WebSocketSession session, AgentFileModel agentFileModel) {
+		File file = FileUtil.file(agentFileModel.getSavePath());
+		JsonMessage<String> message = NodeForward.requestMultipart(nodeModel, "file", file, NodeUrl.SystemUploadJar);
+		String id = nodeModel.getId();
+		WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", id);
+		callbackRestartMessage.setData(message.getMsg());
+		this.sendMsg(callbackRestartMessage, session);
+		// 先等待一会，太快可能还没重启
+		ThreadUtil.sleep(5000L);
+		int retryCount = 0;
+		try {
+			while (retryCount <= CHECK_COUNT) {
+				++retryCount;
+				try {
+					ThreadUtil.sleep(1000L);
+					JsonMessage<Object> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Info, "nodeId", id);
+					if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
+						this.sendMsg(callbackRestartMessage.setData("重启完成"), session);
+						return;
+					}
+				} catch (Exception ignored) {
+				}
+			}
+			this.sendMsg(callbackRestartMessage.setData("重连失败"), session);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("升级后重连插件端失败:" + id, e);
+			this.sendMsg(callbackRestartMessage.setData("重连插件端失败"), session);
+		}
+	}
+
+	private void updateNodeItemWebSocket(NodeClient client, String id, WebSocketSession session, AgentFileModel agentFileModel) throws IOException {
+		// 发送文件信息
+		WebSocketMessageModel webSocketMessageModel = new WebSocketMessageModel("upload", id);
+		webSocketMessageModel.setNodeId(id);
+		webSocketMessageModel.setParams(agentFileModel);
+		client.send(webSocketMessageModel.toString());
+		//
+		try (FileInputStream fis = new FileInputStream(agentFileModel.getSavePath())) {
+			// 发送文件内容
+			int len;
+			byte[] buffer = new byte[Const.DEFAULT_BUFFER_SIZE];
+			while ((len = fis.read(buffer)) > 0) {
+				client.send(ByteBuffer.wrap(buffer, 0, len));
+			}
+		}
+		WebSocketMessageModel restartMessage = new WebSocketMessageModel("restart", id);
+		client.send(restartMessage.toString());
+		// 先等待一会，太快可能还没重启
+		ThreadUtil.sleep(10000L);
+		// 重启后尝试访问插件端，能够连接说明重启完毕
+		//WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", id);
+		int retryCount = 0;
+		try {
+			while (retryCount <= CHECK_COUNT) {
+				++retryCount;
+				try {
+					ThreadUtil.sleep(1000L);
+					if (client.reconnectBlocking()) {
+						this.sendMsg(restartMessage.setData("重启完成"), session);
+						return;
+					}
+				} catch (Exception ignored) {
+				}
+			}
+			this.sendMsg(restartMessage.setData("重连失败"), session);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("升级后重连插件端失败:" + id, e);
+			this.sendMsg(restartMessage.setData("重连插件端失败"), session);
+		}
+	}
+
+	private void updateNodeItem(String id, WebSocketSession session, AgentFileModel agentFileModel, boolean http) {
 		try {
 			NodeModel node = nodeService.getByKey(id);
 			if (node == null) {
@@ -213,46 +291,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 				return;
 			}
 			if (client.isOpen()) {
-				// 发送文件信息
-				WebSocketMessageModel webSocketMessageModel = new WebSocketMessageModel("upload", id);
-				webSocketMessageModel.setNodeId(id);
-				webSocketMessageModel.setParams(agentFileModel);
-				client.send(webSocketMessageModel.toString());
-				//
-				try (FileInputStream fis = new FileInputStream(agentFileModel.getSavePath())) {
-					// 发送文件内容
-					int len;
-					byte[] buffer = new byte[NioUtil.DEFAULT_MIDDLE_BUFFER_SIZE];
-					while ((len = fis.read(buffer)) > 0) {
-						client.send(ByteBuffer.wrap(buffer, 0, len));
-					}
+				if (http) {
+					this.updateNodeItemHttp(node, session, agentFileModel);
+				} else {
+					this.updateNodeItemWebSocket(client, id, session, agentFileModel);
 				}
-				WebSocketMessageModel restartMessage = new WebSocketMessageModel("restart", id);
-				client.send(restartMessage.toString());
-				// 重启后尝试访问插件端，能够连接说明重启完毕
-				ThreadUtil.execute(() -> {
-					WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", id);
-					int retryCount = 0;
-					try {
-						// 先等待一会，太快可能还没重启
-						ThreadUtil.sleep(10000L);
-						while (retryCount <= 30) {
-							++retryCount;
-							try {
-								ThreadUtil.sleep(1000L);
-								if (client.reconnectBlocking()) {
-									this.sendMsg(callbackRestartMessage.setData("重启完成"), session);
-									return;
-								}
-							} catch (Exception ignored) {
-							}
-						}
-						this.sendMsg(callbackRestartMessage.setData("重连失败"), session);
-					} catch (Exception e) {
-						DefaultSystemLog.getLog().error("升级后重连插件端失败:" + id, e);
-						this.sendMsg(callbackRestartMessage.setData("重连插件端失败"), session);
-					}
-				});
 			} else {
 				this.onError(session, "节点连接丢失");
 			}

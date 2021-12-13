@@ -22,7 +22,6 @@
  */
 package io.jpom.socket;
 
-import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -61,7 +60,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 		if (super.checkAuthorize(session)) {
 			return;
 		}
-		session.setMaxBinaryMessageBufferSize(NioUtil.DEFAULT_LARGE_BUFFER_SIZE);
+		session.setMaxBinaryMessageBufferSize(Const.DEFAULT_BUFFER_SIZE);
 		//
 	}
 
@@ -122,7 +121,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 			}
 			JpomManifest.releaseJar(filePath, uploadFile.getVersion(), true);
 			JpomApplication.restart();
-		} catch (RuntimeException e) {
+		} catch (Exception e) {
 			result = "重启失败" + e.getMessage();
 			DefaultSystemLog.getLog().error("重启失败", e);
 		}

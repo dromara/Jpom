@@ -75,4 +75,9 @@ public class Const {
 	 * 请求 header
 	 */
 	public static final String WORKSPACEID_REQ_HEADER = "workspaceId";
+
+	/**
+	 * websocket 传输 agent 包 buffer size
+	 */
+	public static final int DEFAULT_BUFFER_SIZE = 1024 * 1024;
 }

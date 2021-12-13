@@ -9,4 +9,4 @@ cd ../ && cd web-vue && rm -rf node_modules
 cd ../ && cd web-vue && npm i && npm run build
 
 # 构建 Java
-cd ../ && mvn clean package
+cd ../ && mvn clean && mvn clean package
