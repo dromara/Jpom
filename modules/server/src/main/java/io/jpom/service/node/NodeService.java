@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
@@ -12,6 +13,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.monitor.NodeMonitor;
 import io.jpom.service.h2db.BaseWorkspaceService;
@@ -119,19 +121,28 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 			Assert.notNull(jpomManifest, "节点连接失败，请检查节点是否在线");
 			nodeModel.setTimeOut(timeOut);
 		}
-		if (create) {
+		try {
 			if (autoReg) {
-				// 自动注册节点默认关闭
-				nodeModel.setOpenStatus(0);
-				// 默认锁定 (原因未分配工作空间)
-				nodeModel.setUnLockType("unassignedWorkspace");
+				BaseServerController.resetInfo(UserModel.EMPTY);
 			}
-			this.insert(nodeModel);
-			// 同步项目
-			ProjectInfoCacheService projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
-			projectInfoCacheService.syncNode(nodeModel);
-		} else {
-			this.update(nodeModel);
+			if (create) {
+				if (autoReg) {
+					// 自动注册节点默认关闭
+					nodeModel.setOpenStatus(0);
+					// 默认锁定 (原因未分配工作空间)
+					nodeModel.setUnLockType("unassignedWorkspace");
+				}
+				this.insert(nodeModel);
+				// 同步项目
+				ProjectInfoCacheService projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
+				projectInfoCacheService.syncNode(nodeModel);
+			} else {
+				this.update(nodeModel);
+			}
+		} finally {
+			if (autoReg) {
+				BaseServerController.remove();
+			}
 		}
 	}
 

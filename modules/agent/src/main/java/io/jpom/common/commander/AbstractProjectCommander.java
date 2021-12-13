@@ -404,6 +404,7 @@ public abstract class AbstractProjectCommander {
 	 */
 	private String getLinuxPsStatus(String tag) {
 		String execSystemCommand = CommandUtil.execSystemCommand("ps -ef | grep " + tag);
+		DefaultSystemLog.getLog().debug("getLinuxPsStatus {} {}", tag, execSystemCommand);
 		List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
 		for (String item : list) {
 			if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
@@ -492,20 +493,14 @@ public abstract class AbstractProjectCommander {
 		if (virtualMachine == null) {
 			return StrUtil.DASHED;
 		}
-		DefaultSystemLog.getLog().debug("getJpomNameByPid pid: {} {}", pid, virtualMachine);
+		String tag = JvmUtil.parseCommandJpomTag(virtualMachine);
+		DefaultSystemLog.getLog().debug("getJpomNameByPid pid: {} {} {}", pid, tag, virtualMachine);
 		ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-		List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
-		if (nodeProjectInfoModels == null || nodeProjectInfoModels.isEmpty()) {
+		NodeProjectInfoModel item = projectInfoService.getItem(tag);
+		if (item == null) {
 			return StrUtil.DASHED;
 		}
-
-		for (NodeProjectInfoModel nodeProjectInfoModel : nodeProjectInfoModels) {
-			if (JvmUtil.checkCommandLineIsJpom(virtualMachine, nodeProjectInfoModel.getId())) {
-				name = nodeProjectInfoModel.getName();
-				break;
-			}
-		}
-
+		name = item.getName();
 		if (name != null) {
 			PID_JPOM_NAME.put(pid, name);
 			return name;
