@@ -80,6 +80,14 @@ export function delProjectCache(nodeId) {
   });
 }
 
+export function unLockWorkspace(params) {
+  return axios({
+    url: "/node/un_lock_workspace",
+    method: "get",
+    params: params,
+  });
+}
+
 // 删除节点项目缓存
 export function delAllProjectCache() {
   return axios({

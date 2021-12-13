@@ -157,7 +157,7 @@ export default {
         this.loading = false;
       });
     },
-    // 加载角色数据
+    // 加载工作空间数据
     loadWorkSpaceListAll() {
       this.workspaceList = [];
       getWorkSpaceListAll().then((res) => {

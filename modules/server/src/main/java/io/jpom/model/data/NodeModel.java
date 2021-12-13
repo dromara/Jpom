@@ -65,6 +65,11 @@ public class NodeModel extends BaseWorkspaceModel {
 //	private String group;
 
 	/**
+	 * 锁定类型
+	 */
+	private String unLockType;
+
+	/**
 	 * 监控周期
 	 */
 	private Integer cycle;
@@ -150,6 +155,14 @@ public class NodeModel extends BaseWorkspaceModel {
 
 	public void setLoginPwd(String loginPwd) {
 		this.loginPwd = loginPwd;
+	}
+
+	public String getUnLockType() {
+		return unLockType;
+	}
+
+	public void setUnLockType(String unLockType) {
+		this.unLockType = unLockType;
 	}
 
 	/**

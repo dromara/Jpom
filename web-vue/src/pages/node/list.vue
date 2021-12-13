@@ -29,7 +29,8 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1">节点管理</a-button>
+        <a-button v-if="record.unLockType" type="primary" @click="unlock(record)">解锁节点</a-button>
+        <a-button v-else class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1">节点管理</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
           <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>
@@ -156,17 +157,27 @@
     <a-modal v-model="terminalVisible" width="80%" title="Terminal" :footer="null" :maskClosable="false">
       <terminal v-if="terminalVisible" :sshId="temp.sshId" :nodeId="temp.id" />
     </a-modal>
+    <!-- 解锁节点 -->
+    <a-modal v-model="unlockNode" title="解锁节点" @ok="handleUnLockNodeOk" :maskClosable="false">
+      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item label="绑定工作空间" prop="workspaceId">
+          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
+            <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, delProjectCache } from "@/api/node";
+import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, delProjectCache, unLockWorkspace } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import NodeLayout from "./node-layout";
 import Terminal from "./terminal";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-
+import { getWorkSpaceListAll } from "@/api/workspace";
 export default {
   components: {
     NodeLayout,
@@ -185,7 +196,7 @@ export default {
       editNodeVisible: false,
       drawerVisible: false,
       terminalVisible: false,
-      // addGroupvisible: false,
+      unlockNode: false,
       drawerTitle: "",
       columns: [
         // { title: "节点 ID", dataIndex: "id", sorter: true, key: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
@@ -225,6 +236,7 @@ export default {
         loginPwd: [{ required: true, message: "Please input login password", trigger: "blur" }],
         timeOut: [{ required: true, message: "Please input timeout", trigger: "blur" }],
       },
+      workspaceList: [],
     };
   },
   computed: {
@@ -449,6 +461,52 @@ export default {
         this.listQuery.order_field = sorter.field;
       }
       this.loadData();
+    },
+    // 加载工作空间数据
+    loadWorkSpaceListAll() {
+      getWorkSpaceListAll().then((res) => {
+        if (res.code === 200) {
+          this.workspaceList = res.data;
+        }
+      });
+    },
+
+    unlock(record) {
+      this.unlockNode = true;
+      this.loadWorkSpaceListAll();
+
+      this.temp = Object.assign({}, record);
+      this.temp.workspaceId = "";
+    },
+    handleUnLockNodeOk() {
+      if (!this.temp.workspaceId) {
+        this.$notification.warn({
+          message: "请选择工作空间",
+        });
+        return false;
+      }
+      this.$confirm({
+        title: "系统提示",
+        content: "确定要将此节点绑定到这个工作空间吗？绑定后不可更改",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          unLockWorkspace({
+            id: this.temp.id,
+            workspaceId: this.temp.workspaceId,
+          }).then((res) => {
+            if (res.code == 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.unlockNode = false;
+              this.loadData();
+              return false;
+            }
+          });
+        },
+      });
     },
   },
 };

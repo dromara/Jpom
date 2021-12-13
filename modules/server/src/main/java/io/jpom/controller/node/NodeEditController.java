@@ -1,6 +1,7 @@
 package io.jpom.controller.node;
 
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
@@ -9,6 +10,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -82,7 +84,7 @@ public class NodeEditController extends BaseServerController {
 	@PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
 	public String save() {
-		nodeService.update(getRequest());
+		nodeService.update(getRequest(), false);
 		return JsonMessage.getString(200, "操作成功");
 	}
 
@@ -95,7 +97,7 @@ public class NodeEditController extends BaseServerController {
 	 */
 	@PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
-	public String del(String id) {
+	public String del(@ValidatorItem String id) {
 		//  判断分发
 		HttpServletRequest request = getRequest();
 		boolean checkNode = outGivingServer.checkNode(id, request);
@@ -112,6 +114,14 @@ public class NodeEditController extends BaseServerController {
 		boolean exists = projectInfoCacheService.exists(projectInfoModel);
 		Assert.state(!exists, "该节点下还存在项目，不能删除");
 		nodeService.delByKey(id, request);
+		return JsonMessage.getString(200, "操作成功");
+	}
+
+	@GetMapping(value = "un_lock_workspace", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EDIT)
+	@SystemPermission(superUser = true)
+	public String unLockWorkspace(@ValidatorItem String id, @ValidatorItem String workspaceId) {
+		nodeService.unLock(id, workspaceId);
 		return JsonMessage.getString(200, "操作成功");
 	}
 }

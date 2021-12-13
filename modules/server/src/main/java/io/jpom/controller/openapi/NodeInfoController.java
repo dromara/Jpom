@@ -54,7 +54,7 @@ public class NodeInfoController extends AbstractController {
 	 */
 	@RequestMapping(value = ServerOpenApi.UPDATE_NODE_INFO, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String update() {
-		nodeService.update(getRequest());
+		nodeService.update(getRequest(), true);
 		return JsonMessage.getString(200, "操作成功");
 	}
 }
