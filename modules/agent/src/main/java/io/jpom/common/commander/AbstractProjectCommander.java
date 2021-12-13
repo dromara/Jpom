@@ -488,14 +488,14 @@ public abstract class AbstractProjectCommander {
 		if (name != null) {
 			return name;
 		}
-		DefaultSystemLog.getLog().debug("getJpomNameByPid pid: {}", pid);
+		String virtualMachine = JvmUtil.getPidJpsInfoInfo(pid);
+		if (virtualMachine == null) {
+			return StrUtil.DASHED;
+		}
+		DefaultSystemLog.getLog().debug("getJpomNameByPid pid: {} {}", pid, virtualMachine);
 		ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
 		List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
 		if (nodeProjectInfoModels == null || nodeProjectInfoModels.isEmpty()) {
-			return StrUtil.DASHED;
-		}
-		String virtualMachine = JvmUtil.getVirtualMachineInfo(pid);
-		if (virtualMachine == null) {
 			return StrUtil.DASHED;
 		}
 
