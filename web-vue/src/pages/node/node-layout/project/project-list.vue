@@ -255,6 +255,17 @@
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReplicaVisible" @close="onReplicaClose">
       <replica v-if="drawerReplicaVisible" :node="node" :project="temp" />
     </a-drawer>
+    <!-- 批量操作状态 -->
+    <a-modal v-model="batchVisible" :title="batchTitle" :closable="false" :ok-button-props="{ props: { disabled: true } }" :cancel-button-props="{ props: { disabled: true } }">
+      <a-list bordered :data-source="selectedRows">
+        <a-list-item slot="renderItem" slot-scope="item">
+          <a-list-item-meta :description="item.email">
+            <a slot="title"> {{ item.name }}</a>
+          </a-list-item-meta>
+          <div>{{ item.cause === undefined ? "未开始" : item.cause }}</div>
+        </a-list-item>
+      </a-list>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -311,6 +322,8 @@ export default {
       libExist: false,
       selectedRows: [],
       checkRecord: "",
+      batchVisible: false,
+      batchTitle: "",
       columns: [
         { title: "项目名称", dataIndex: "name", sorter: true, width: 60, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "修改/创建时间", sorter: true, dataIndex: "modifyTimeMillis", width: 90, ellipsis: true, scopedSlots: { customRender: "time" } },
@@ -694,21 +707,20 @@ export default {
     },
     //批量启动详情
     batchStartInfo(count) {
+      this.batchVisible = true;
+      this.batchTitle = "批量启动";
       let value = this.selectedRows[count - 1];
+      value.cause = "启动中";
       count++;
-      const h = this.$createElement;
-      let info = this.$info({
-        title: "批量启动",
-        content: h("div", {}, [h("p", "正在启动项目:" + value.name + ",请稍等~~")]),
-      });
       if (value.status === undefined && value.runMode !== "File") {
         const params = {
           nodeId: this.node.id,
           id: value.id,
         };
         startProject(params)
-          .then(() => {
-            info.destroy();
+          .then((data) => {
+            value.cause = data.code == 200 ? "启动成功" : data.msg;
+            this.selectedRows = [...this.selectedRows];
             if (count <= this.selectedRows.length) {
               this.batchStartInfo(count);
             } else {
@@ -716,7 +728,8 @@ export default {
             }
           })
           .catch(() => {
-            info.destroy();
+            value.cause = "启动失败";
+            this.selectedRows = [...this.selectedRows];
             if (count <= this.selectedRows.length) {
               this.batchStartInfo(count);
             } else {
@@ -724,7 +737,8 @@ export default {
             }
           });
       } else {
-        info.destroy();
+        value.cause = "跳过";
+        this.selectedRows = [...this.selectedRows];
         if (count <= this.selectedRows.length) {
           this.batchStartInfo(count);
         } else {
@@ -744,21 +758,20 @@ export default {
     },
     //批量重启详情
     batchRestartInfo(count) {
+      this.batchVisible = true;
+      this.batchTitle = "批量重新启动";
       let value = this.selectedRows[count - 1];
+      value.cause = "重新启动中";
       count++;
-      const h = this.$createElement;
-      let info = this.$info({
-        title: "批量重启",
-        content: h("div", {}, [h("p", "正在重启项目:" + value.name + ",请稍等~~")]),
-      });
       if (value.status === undefined && value.runMode !== "File") {
         const params = {
           nodeId: this.node.id,
           id: value.id,
         };
         restartProject(params)
-          .then(() => {
-            info.destroy();
+          .then((data) => {
+            value.cause = data.code == 200 ? "重新启动成功" : data.msg;
+            this.selectedRows = [...this.selectedRows];
             if (count <= this.selectedRows.length) {
               this.batchStartInfo(count);
             } else {
@@ -766,7 +779,8 @@ export default {
             }
           })
           .catch(() => {
-            info.destroy();
+            value.cause = "重新启动失败";
+            this.selectedRows = [...this.selectedRows];
             if (count <= this.selectedRows.length) {
               this.batchStartInfo(count);
             } else {
@@ -774,7 +788,8 @@ export default {
             }
           });
       } else {
-        info.destroy();
+        value.cause = "跳过";
+        this.selectedRows = [...this.selectedRows];
         if (count <= this.selectedRows.length) {
           this.batchStartInfo(count);
         } else {
@@ -790,25 +805,24 @@ export default {
         });
         return;
       }
-     this.batchStopInfo(1);
+      this.batchStopInfo(1);
     },
-     //批量关闭详情
+    //批量关闭详情
     batchStopInfo(count) {
+      this.batchVisible = true;
+      this.batchTitle = "批量关闭启动";
       let value = this.selectedRows[count - 1];
+      value.cause = "关闭中";
       count++;
-      const h = this.$createElement;
-      let info = this.$info({
-        title: "批量关闭",
-        content: h("div", {}, [h("p", "正在关闭项目:" + value.name + ",请稍等~~")]),
-      });
       if (value.status === undefined && value.runMode !== "File") {
         const params = {
           nodeId: this.node.id,
           id: value.id,
         };
         stopProject(params)
-          .then(() => {
-            info.destroy();
+          .then((data) => {
+            value.cause = data.code == 200 ? "关闭成功" : data.msg;
+            this.selectedRows = [...this.selectedRows];
             if (count <= this.selectedRows.length) {
               this.batchStartInfo(count);
             } else {
@@ -816,7 +830,8 @@ export default {
             }
           })
           .catch(() => {
-            info.destroy();
+            value.cause = "关闭失败";
+            this.selectedRows = [...this.selectedRows];
             if (count <= this.selectedRows.length) {
               this.batchStartInfo(count);
             } else {
@@ -824,7 +839,8 @@ export default {
             }
           });
       } else {
-        info.destroy();
+        value.cause = "跳过";
+        this.selectedRows = [...this.selectedRows];
         if (count <= this.selectedRows.length) {
           this.batchStartInfo(count);
         } else {

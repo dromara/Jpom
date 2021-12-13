@@ -500,6 +500,10 @@ export function restartProject(params) {
     url: "/node/manage/restart",
     method: "post",
     data: params,
+    headers: {
+      loading: "no",
+      tip:"no",
+    },
   });
 }
 
@@ -516,6 +520,10 @@ export function startProject(params) {
     url: "/node/manage/start",
     method: "post",
     data: params,
+    headers: {
+      loading: "no",
+      tip:"no",
+    },
   });
 }
 
@@ -532,6 +540,10 @@ export function stopProject(params) {
     url: "/node/manage/stop",
     method: "post",
     data: params,
+    headers: {
+      loading: "no",
+      tip:"no",
+    },
   });
 }
 
