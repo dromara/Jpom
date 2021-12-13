@@ -26,6 +26,7 @@ import cn.hutool.core.util.ClassUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
@@ -47,14 +48,14 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> {
 	 * 检查初始化 默认的工作空间
 	 */
 	public void checkInitDefault() {
-		WorkspaceModel workspaceModel = super.getByKey(WorkspaceModel.DEFAULT_ID);
+		WorkspaceModel workspaceModel = super.getByKey(Const.WORKSPACE_DEFAULT_ID);
 		if (workspaceModel != null) {
 			return;
 		}
 		try {
 			BaseServerController.resetInfo(UserModel.EMPTY);
 			WorkspaceModel defaultWorkspace = new WorkspaceModel();
-			defaultWorkspace.setId(WorkspaceModel.DEFAULT_ID);
+			defaultWorkspace.setId(Const.WORKSPACE_DEFAULT_ID);
 			defaultWorkspace.setName("默认");
 			defaultWorkspace.setDescription("系统默认的工作空间,不能删除");
 			super.insert(defaultWorkspace);
@@ -77,7 +78,7 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> {
 			}
 			String sql = "update " + tableName.value() + " set workspaceId=? where workspaceId is null";
 			NodeService nodeService = SpringUtil.getBean(NodeService.class);
-			int execute = nodeService.execute(sql, WorkspaceModel.DEFAULT_ID);
+			int execute = nodeService.execute(sql, Const.WORKSPACE_DEFAULT_ID);
 			if (execute > 0) {
 				DefaultSystemLog.getLog().info("convertNullWorkspaceId {} {}", tableName.value(), execute);
 			}

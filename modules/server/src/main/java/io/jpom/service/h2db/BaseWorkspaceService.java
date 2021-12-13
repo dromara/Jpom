@@ -33,7 +33,6 @@ import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.user.UserBindWorkspaceService;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -104,7 +103,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 				String workspaceId = getCheckUserWorkspace(request);
 				t.setWorkspaceId(workspaceId);
 			} else {
-				t.setWorkspaceId(WorkspaceModel.DEFAULT_ID);
+				t.setWorkspaceId(Const.WORKSPACE_DEFAULT_ID);
 			}
 		} else {
 			// 检查权限

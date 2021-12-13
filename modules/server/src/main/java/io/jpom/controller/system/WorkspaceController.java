@@ -30,6 +30,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.WorkspaceModel;
@@ -140,7 +141,7 @@ public class WorkspaceController extends BaseServerController {
 	@SystemPermission(superUser = true)
 	public Object delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
 		//
-		Assert.state(!StrUtil.equals(id, WorkspaceModel.DEFAULT_ID), "不能删除默认工作空间");
+		Assert.state(!StrUtil.equals(id, Const.WORKSPACE_DEFAULT_ID), "不能删除默认工作空间");
 		// 判断是否存在关联数据
 		Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom.model", BaseWorkspaceModel.class::isAssignableFrom);
 		StringBuilder autoDelete = new StringBuilder(StrUtil.EMPTY);

@@ -35,12 +35,6 @@ import io.jpom.service.h2db.TableName;
 public class WorkspaceModel extends BaseStrikeDbModel {
 
 	/**
-	 * 默认的工作空间
-	 */
-	public static final String DEFAULT_ID = "DEFAULT";
-
-
-	/**
 	 * 名称
 	 */
 	private String name;

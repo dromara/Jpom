@@ -34,6 +34,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
@@ -98,10 +99,10 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 			}
 			// 排序 避免项目被个节点绑定
 			list.sort((o1, o2) -> {
-				if (StrUtil.equals(o1.getWorkspaceId(), WorkspaceModel.DEFAULT_ID)) {
+				if (StrUtil.equals(o1.getWorkspaceId(), Const.WORKSPACE_DEFAULT_ID)) {
 					return 1;
 				}
-				if (StrUtil.equals(o2.getWorkspaceId(), WorkspaceModel.DEFAULT_ID)) {
+				if (StrUtil.equals(o2.getWorkspaceId(), Const.WORKSPACE_DEFAULT_ID)) {
 					return 1;
 				}
 				return 0;
