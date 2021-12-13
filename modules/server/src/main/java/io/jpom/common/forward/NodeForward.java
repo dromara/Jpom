@@ -22,6 +22,7 @@
  */
 package io.jpom.common.forward;
 
+import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.ArrayUtil;
@@ -44,7 +45,10 @@ import io.jpom.common.Const;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.node.NodeService;
-import io.jpom.system.*;
+import io.jpom.system.AgentException;
+import io.jpom.system.AuthorizeException;
+import io.jpom.system.ConfigBean;
+import io.jpom.system.ServerExtConfigBean;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -161,16 +165,35 @@ public class NodeForward {
 					.form(params)
 					.execute();
 		} catch (Exception e) {
-			/**
-			 * @author Hotstrip
-			 * revert version and add log print
-			 * @author jzy 2021-08-01 add exception
-			 */
-			DefaultSystemLog.getLog().error("node [{}] connect failed...message: [{}]", nodeModel.getName(), e.getMessage());
-			throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage());
+			throw NodeForward.responseException(e, nodeModel);
 		}
 		//
 		return parseBody(response);
+	}
+
+	/**
+	 * 插件端 异常类型判断
+	 *
+	 * @param exception 异常
+	 * @param nodeModel 插件端
+	 */
+	private static AgentException responseException(Exception exception, NodeModel nodeModel) {
+		exception.printStackTrace();
+		String message = exception.getMessage();
+		Throwable cause = exception.getCause();
+		DefaultSystemLog.getLog().error("node [{}] connect failed...message: [{}]", nodeModel.getName(), message);
+		if (exception instanceof IORuntimeException) {
+			if (cause instanceof java.net.ConnectException || cause instanceof java.net.SocketTimeoutException) {
+				return new AgentException(nodeModel.getName() + "节点网络连接异常或超时,请检查 IP 地址、" +
+						"端口号是否配置正确,防火墙规则," +
+						"云服务器的安全组配置等网络相关问题排查定位。" + message);
+			}
+		} else if (exception instanceof cn.hutool.http.HttpException) {
+			if (cause instanceof java.net.SocketTimeoutException) {
+				return new AgentException(nodeModel.getName() + "节点网络连接超时,请检查节点超时时间配置是否合理,上传文件超时时间配置是否合理。" + message);
+			}
+		}
+		return new AgentException(nodeModel.getName() + "节点异常：" + message);
 	}
 
 	/**
@@ -215,13 +238,7 @@ public class NodeForward {
 			response = httpRequest
 					.execute();
 		} catch (Exception e) {
-			/**
-			 * @author Hotstrip
-			 * revert version and add log print
-			 * @author jzy 2021-08-01 add exception
-			 */
-			DefaultSystemLog.getLog().error("node [{}] connect failed", nodeModel.getName(), e);
-			throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage());
+			throw NodeForward.responseException(e, nodeModel);
 		}
 		//
 		JsonMessage<T> jsonMessage = parseBody(response);
@@ -260,7 +277,7 @@ public class NodeForward {
 			httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
 			response = httpRequest.execute();
 		} catch (Exception e) {
-			throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage(), e);
+			throw NodeForward.responseException(e, nodeModel);
 		}
 		return parseBody(response);
 	}
@@ -288,7 +305,7 @@ public class NodeForward {
 			httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
 			response1 = httpRequest.execute();
 		} catch (Exception e) {
-			throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage(), e);
+			throw NodeForward.responseException(e, nodeModel);
 		}
 		String contentDisposition = response1.header("Content-Disposition");
 		response.setHeader("Content-Disposition", contentDisposition);
@@ -312,7 +329,7 @@ public class NodeForward {
 	private static void addUser(HttpRequest httpRequest, NodeModel nodeModel, NodeUrl nodeUrl, UserModel userModel) {
 		// 判断开启状态
 		if (!nodeModel.isOpenStatus()) {
-			throw new JpomRuntimeException(nodeModel.getName() + "节点未启用");
+			throw new AgentException(nodeModel.getName() + "节点未启用");
 		}
 		if (userModel != null) {
 			httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, URLEncoder.DEFAULT.encode(UserModel.getOptUserName(userModel), CharsetUtil.CHARSET_UTF_8));
