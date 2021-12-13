@@ -25,7 +25,9 @@ package io.jpom.service.system;
 import cn.hutool.core.util.ClassUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import io.jpom.common.BaseServerController;
 import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.h2db.TableName;
@@ -49,11 +51,16 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> {
 		if (workspaceModel != null) {
 			return;
 		}
-		WorkspaceModel defaultWorkspace = new WorkspaceModel();
-		defaultWorkspace.setId(WorkspaceModel.DEFAULT_ID);
-		defaultWorkspace.setName("默认");
-		defaultWorkspace.setDescription("系统默认的工作空间,不能删除");
-		super.insert(defaultWorkspace);
+		try {
+			BaseServerController.resetInfo(UserModel.EMPTY);
+			WorkspaceModel defaultWorkspace = new WorkspaceModel();
+			defaultWorkspace.setId(WorkspaceModel.DEFAULT_ID);
+			defaultWorkspace.setName("默认");
+			defaultWorkspace.setDescription("系统默认的工作空间,不能删除");
+			super.insert(defaultWorkspace);
+		} finally {
+			BaseServerController.remove();
+		}
 		DefaultSystemLog.getLog().info("init created default workspace");
 	}
 

@@ -70,6 +70,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		//		}
 		//		boolean exists = super.exists(entity);
 		//		Assert.state(!exists, "对应的节点已经存在啦");
+		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
 		{
 			NodeModel nodeModel1 = new NodeModel();
 			nodeModel1.setUrl(nodeModel.getUrl());
