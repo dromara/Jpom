@@ -725,6 +725,7 @@ export default {
               this.batchStartInfo(count);
             } else {
               this.loadData();
+              this.batchVisible = false;
             }
           })
           .catch(() => {
@@ -734,6 +735,7 @@ export default {
               this.batchStartInfo(count);
             } else {
               this.loadData();
+              this.batchVisible = false;
             }
           });
       } else {
@@ -743,6 +745,7 @@ export default {
           this.batchStartInfo(count);
         } else {
           this.loadData();
+          this.batchVisible = false;
         }
       }
     },
@@ -776,6 +779,7 @@ export default {
               this.batchStartInfo(count);
             } else {
               this.loadData();
+              this.batchVisible = false;
             }
           })
           .catch(() => {
@@ -785,6 +789,7 @@ export default {
               this.batchStartInfo(count);
             } else {
               this.loadData();
+              this.batchVisible = false;
             }
           });
       } else {
@@ -794,6 +799,7 @@ export default {
           this.batchStartInfo(count);
         } else {
           this.loadData();
+          this.batchVisible = false;
         }
       }
     },
@@ -827,6 +833,7 @@ export default {
               this.batchStartInfo(count);
             } else {
               this.loadData();
+              this.batchVisible = false;
             }
           })
           .catch(() => {
@@ -836,6 +843,7 @@ export default {
               this.batchStartInfo(count);
             } else {
               this.loadData();
+              this.batchVisible = false;
             }
           });
       } else {
@@ -845,6 +853,7 @@ export default {
           this.batchStartInfo(count);
         } else {
           this.loadData();
+          this.batchVisible = false;
         }
       }
     },
