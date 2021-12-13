@@ -11,22 +11,28 @@
       </a-tooltip>
       <a-button type="primary" @click="handleAdd">新增</a-button>
 
-      <a-button type="primary" @click="batchStart">批量启动</a-button>
-      <a-button type="primary" @click="batchRestart">批量重启</a-button>
-      <a-button type="danger" @click="batchStop">批量关闭</a-button>
+      <a-dropdown>
+        <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+          批量操作
+          <a-icon type="down" />
+        </a>
+        <a-menu slot="overlay">
+          <a-menu-item>
+            <a-button type="primary" @click="batchStart">批量启动</a-button>
+          </a-menu-item>
+          <a-menu-item>
+            <a-button type="primary" @click="batchRestart">批量重启</a-button>
+          </a-menu-item>
+          <a-menu-item>
+            <a-button type="danger" @click="batchStop">批量关闭</a-button>
+          </a-menu-item>
+        </a-menu>
+      </a-dropdown>
+
       状态数据是异步获取有一定时间延迟
     </div>
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      :loading="loading"
-      :columns="columns"
-      :pagination="pagination"
-      @change="changePage"
-      :row-selection="{ onChange: onSelectChange, columnWidth: '25px', getCheckboxProps: getCheckboxProps, hideDefaultSelections: true }"
-      bordered
-      :rowKey="(record, index) => index"
-    >
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="pagination" @change="changePage" :row-selection="rowSelection" bordered :rowKey="(record, index) => index">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="`名称：${text}`">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -256,7 +262,7 @@
       <replica v-if="drawerReplicaVisible" :node="node" :project="temp" />
     </a-drawer>
     <!-- 批量操作状态 -->
-    <a-modal v-model="batchVisible" :title="batchTitle" :closable="false" :ok-button-props="{ props: { disabled: true } }" :cancel-button-props="{ props: { disabled: true } }">
+    <a-modal v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="selectedRows">
         <a-list-item slot="renderItem" slot-scope="item">
           <a-list-item-meta :description="item.email">
@@ -321,6 +327,7 @@ export default {
       // addGroupvisible: false,
       libExist: false,
       selectedRows: [],
+      selectedRowKeys: [],
       checkRecord: "",
       batchVisible: false,
       batchTitle: "",
@@ -364,6 +371,15 @@ export default {
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
+      };
+    },
+    rowSelection() {
+      return {
+        onChange: this.onSelectChange,
+        columnWidth: "25px",
+        getCheckboxProps: this.getCheckboxProps,
+        selectedRowKeys: this.selectedRowKeys,
+        // hideDefaultSelections: true,
       };
     },
   },
@@ -690,11 +706,18 @@ export default {
     //选中项目
     onSelectChange(selectedRowKeys, selectedRows) {
       this.selectedRows = selectedRows;
+      this.selectedRowKeys = selectedRowKeys;
       //console.log(selectedRowKeys, selectedRows);
     },
     // onSelectAll() {
 
     // },
+
+    batchClose() {
+      this.batchVisible = false;
+      this.selectedRowKeys = [];
+      this.loadData();
+    },
     //批量开始
     batchStart() {
       if (this.selectedRows.length == 0) {
@@ -703,50 +726,40 @@ export default {
         });
         return;
       }
+      this.batchVisible = true;
+      this.batchTitle = "批量启动";
       this.batchStartInfo(1);
     },
     //批量启动详情
     batchStartInfo(count) {
-      this.batchVisible = true;
-      this.batchTitle = "批量启动";
+      if (count > this.selectedRows.length) {
+        return;
+      }
       let value = this.selectedRows[count - 1];
       value.cause = "启动中";
       count++;
-      if (value.status === undefined && value.runMode !== "File") {
+      if (value.runMode !== "File") {
         const params = {
           nodeId: this.node.id,
-          id: value.id,
+          id: value.projectId,
         };
         startProject(params)
           .then((data) => {
-            value.cause = data.code == 200 ? "启动成功" : data.msg;
+            value.cause = data.msg;
             this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
-              this.batchStartInfo(count);
-            } else {
-              this.loadData();
-              this.batchVisible = false;
-            }
+            this.batchStartInfo(count);
           })
           .catch(() => {
             value.cause = "启动失败";
             this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
-              this.batchStartInfo(count);
-            } else {
-              this.loadData();
-              this.batchVisible = false;
-            }
+
+            this.batchStartInfo(count);
           });
       } else {
         value.cause = "跳过";
         this.selectedRows = [...this.selectedRows];
-        if (count <= this.selectedRows.length) {
-          this.batchStartInfo(count);
-        } else {
-          this.loadData();
-          this.batchVisible = false;
-        }
+
+        this.batchStartInfo(count);
       }
     },
     //批量重启
@@ -757,50 +770,38 @@ export default {
         });
         return;
       }
+      this.batchVisible = true;
+      this.batchTitle = "批量重新启动";
       this.batchRestartInfo(1);
     },
     //批量重启详情
     batchRestartInfo(count) {
-      this.batchVisible = true;
-      this.batchTitle = "批量重新启动";
+      if (count > this.selectedRows.length) {
+        return;
+      }
       let value = this.selectedRows[count - 1];
       value.cause = "重新启动中";
       count++;
       if (value.status === undefined && value.runMode !== "File") {
         const params = {
           nodeId: this.node.id,
-          id: value.id,
+          id: value.projectId,
         };
         restartProject(params)
           .then((data) => {
             value.cause = data.code == 200 ? "重新启动成功" : data.msg;
             this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
-              this.batchStartInfo(count);
-            } else {
-              this.loadData();
-              this.batchVisible = false;
-            }
+            this.batchRestartInfo(count);
           })
           .catch(() => {
             value.cause = "重新启动失败";
             this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
-              this.batchStartInfo(count);
-            } else {
-              this.loadData();
-              this.batchVisible = false;
-            }
+            this.batchRestartInfo(count);
           });
       } else {
         value.cause = "跳过";
         this.selectedRows = [...this.selectedRows];
-        if (count <= this.selectedRows.length) {
-          this.batchStartInfo(count);
-        } else {
-          this.loadData();
-          this.batchVisible = false;
-        }
+        this.batchRestartInfo(count);
       }
     },
     //批量关闭
@@ -811,50 +812,39 @@ export default {
         });
         return;
       }
+      this.batchVisible = true;
+      this.batchTitle = "批量关闭启动";
       this.batchStopInfo(1);
     },
     //批量关闭详情
     batchStopInfo(count) {
-      this.batchVisible = true;
-      this.batchTitle = "批量关闭启动";
+      if (count > this.selectedRowKeys.length) {
+        return;
+      }
       let value = this.selectedRows[count - 1];
       value.cause = "关闭中";
       count++;
       if (value.status === undefined && value.runMode !== "File") {
         const params = {
           nodeId: this.node.id,
-          id: value.id,
+          id: value.projectId,
         };
         stopProject(params)
           .then((data) => {
             value.cause = data.code == 200 ? "关闭成功" : data.msg;
             this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
-              this.batchStartInfo(count);
-            } else {
-              this.loadData();
-              this.batchVisible = false;
-            }
+
+            this.batchStopInfo(count);
           })
           .catch(() => {
             value.cause = "关闭失败";
             this.selectedRows = [...this.selectedRows];
-            if (count <= this.selectedRows.length) {
-              this.batchStartInfo(count);
-            } else {
-              this.loadData();
-              this.batchVisible = false;
-            }
+            this.batchStopInfo(count);
           });
       } else {
         value.cause = "跳过";
         this.selectedRows = [...this.selectedRows];
-        if (count <= this.selectedRows.length) {
-          this.batchStartInfo(count);
-        } else {
-          this.loadData();
-          this.batchVisible = false;
-        }
+        this.batchStopInfo(count);
       }
     },
     // 分页、排序、筛选变化时触发

@@ -42,7 +42,6 @@ import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.SshModel;
-import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -170,7 +169,7 @@ public class BuildInfoController extends BaseServerController {
 		buildInfoModel.setResultDirFile(resultDirFile);
 		buildInfoModel.setScript(script);
 		// 设置修改人
-		buildInfoModel.setModifyUser(UserModel.getOptUserName(getUser()));
+		//buildInfoModel.setModifyUser(UserModel.getOptUserName(getUser()));
 		// 发布方式
 		BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
 		Assert.notNull(releaseMethod1, "发布方法不正确");

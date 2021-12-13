@@ -32,6 +32,21 @@
             </a-menu-item>
           </a-menu>
         </a-dropdown>
+        <a-tooltip>
+          <template slot="title">
+            <div>nginx 管理是指通过 Jpom 去编辑配置文件，并自动重新加载(reload)</div>
+
+            <div>
+              <ul>
+                <li>linux 服务器默认执行 nginx -s reload 、service xxxx start、service xxxx top</li>
+                <li>linux 服务器如果为编译安装则需要将 nginx 服务名称配置到 nginx执行文件的绝对路径，如 <b>/usr/local/nginx/sbin/nginx</b></li>
+                <li>windows 服务器是需要提前安装 nginx 并配置服务,默认执行 net start xxxx、net stop xxxx、net、sc query xxxx</li>
+                
+              </ul>
+            </div>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}  server 节点数 ${record.serverCount}`">
@@ -272,7 +287,6 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              
             });
             this.$refs["editNginxForm"].resetFields();
             this.editNginxVisible = false;
@@ -301,7 +315,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               //this.loadDirectoryList();
               this.loadFileList();
@@ -329,7 +342,6 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              
             });
             this.$refs["editNginxNameForm"].resetFields();
             this.editNginxNameVisible = false;
@@ -348,7 +360,6 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            
           });
           this.loadNginxData();
         }

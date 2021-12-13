@@ -23,10 +23,8 @@
 package io.jpom.common.forward;
 
 import cn.hutool.core.io.IORuntimeException;
-import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -168,7 +166,7 @@ public class NodeForward {
 			throw NodeForward.responseException(e, nodeModel);
 		}
 		//
-		return parseBody(response);
+		return parseBody(response, nodeModel);
 	}
 
 	/**
@@ -241,7 +239,7 @@ public class NodeForward {
 			throw NodeForward.responseException(e, nodeModel);
 		}
 		//
-		JsonMessage<T> jsonMessage = parseBody(response);
+		JsonMessage<T> jsonMessage = parseBody(response, nodeModel);
 		return jsonMessage.getData(tClass);
 	}
 
@@ -279,7 +277,7 @@ public class NodeForward {
 		} catch (Exception e) {
 			throw NodeForward.responseException(e, nodeModel);
 		}
-		return parseBody(response);
+		return parseBody(response, nodeModel);
 	}
 
 	/**
@@ -332,7 +330,7 @@ public class NodeForward {
 			throw new AgentException(nodeModel.getName() + "节点未启用");
 		}
 		if (userModel != null) {
-			httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, URLEncoder.DEFAULT.encode(UserModel.getOptUserName(userModel), CharsetUtil.CHARSET_UTF_8));
+			httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, URLUtil.encode(userModel.getId()));
 //            httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, userModel.getUserRole(nodeModel).name());
 		}
 		if (StrUtil.isEmpty(nodeModel.getLoginPwd())) {
@@ -378,7 +376,7 @@ public class NodeForward {
 		urlQuery.add("name", nodeModel.getLoginName());
 		urlQuery.add("password", nodeModel.getLoginPwd());
 		//
-		String optUser = UserModel.getOptUserName(userInfo);
+		String optUser = userInfo.getId();
 		optUser = URLUtil.encode(optUser);
 		urlQuery.add("optUser", optUser);
 		if (ArrayUtil.isNotEmpty(parameters)) {
@@ -395,12 +393,13 @@ public class NodeForward {
 	 * @param response 响应
 	 * @return json
 	 */
-	private static <T> JsonMessage<T> parseBody(HttpResponse response) {
+	private static <T> JsonMessage<T> parseBody(HttpResponse response, NodeModel nodeModel) {
 		int status = response.getStatus();
-		if (status != HttpStatus.HTTP_OK) {
-			throw new AgentException("agent 端响应异常：" + status);
-		}
 		String body = response.body();
+		if (status != HttpStatus.HTTP_OK) {
+			DefaultSystemLog.getLog().warn("{} 响应异常 状态码错误：{} {}", nodeModel.getName(), status, body);
+			throw new AgentException(nodeModel.getName() + " 节点响应异常：" + status);
+		}
 		return toJsonMessage(body);
 	}
 

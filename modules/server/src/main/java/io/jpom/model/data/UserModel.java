@@ -296,19 +296,19 @@ public class UserModel extends BaseStrikeDbModel {
 		return "demo".equals(getId());
 	}
 
-	/**
-	 * 隐藏系统管理的真实id
-	 *
-	 * @param userModel 实体
-	 * @return 系统管理员返回默认
-	 */
-	public static String getOptUserName(UserModel userModel) {
-		String userId;
-		if (userModel.isSystemUser()) {
-			userId = UserModel.SYSTEM_OCCUPY_NAME;
-		} else {
-			userId = userModel.getId();
-		}
-		return userId;
-	}
+//	/**
+//	 * 隐藏系统管理的真实id
+//	 *
+//	 * @param userModel 实体
+//	 * @return 系统管理员返回默认
+//	 */
+//	public static String getOptUserName(UserModel userModel) {
+//		String userId;
+//		if (userModel.isSystemUser()) {
+//			userId = UserModel.SYSTEM_OCCUPY_NAME;
+//		} else {
+//			userId = userModel.getId();
+//		}
+//		return userId;
+//	}
 }

@@ -85,6 +85,9 @@ public abstract class BaseAgentWebSocketHandle {
 	 */
 	private void addUser(Session session, String name) {
 		String optUser = URLUtil.decode(name);
+		if (optUser == null) {
+			return;
+		}
 		USER.put(session.getId(), optUser);
 	}
 

@@ -270,10 +270,10 @@ export default {
       formData.append("file", file);
       uploadAgentFile(formData).then(({ code, msg }) => {
         if (code === 200) {
-          this.$notification.success({ message: "上传成功" });
+          this.$notification.success({ message: msg });
           this.getAgentVersion();
         } else {
-          this.$notification.error({ message: msg });
+          //this.$notification.error({ message: msg });
         }
       });
       return false;
@@ -285,7 +285,7 @@ export default {
           this.$notification.success({ message: res.msg });
           this.getAgentVersion();
         } else {
-          this.$notification.error({ message: res.msg });
+          //this.$notification.error({ message: res.msg });
         }
       });
     },
