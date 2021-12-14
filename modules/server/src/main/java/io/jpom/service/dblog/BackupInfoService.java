@@ -44,12 +44,14 @@ import io.jpom.service.h2db.H2BackupService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,23 +75,58 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 	 * 检查数据库备份
 	 */
 	public void checkAutoBackup() {
-		Integer autoBackupIntervalDay = ServerExtConfigBean.getInstance().getAutoBackupIntervalDay();
-		if (autoBackupIntervalDay == null || autoBackupIntervalDay <= 0) {
-			return;
-		}
-		BackupInfoModel backupInfoModel = new BackupInfoModel();
-		backupInfoModel.setBackupType(3);
-		List<BackupInfoModel> infoModels = super.queryList(backupInfoModel, 1, new Order("createTimeMillis", Direction.DESC));
-		BackupInfoModel first = CollUtil.getFirst(infoModels);
-		if (first != null) {
-			Long createTimeMillis = first.getCreateTimeMillis();
-			long interval = SystemClock.now() - createTimeMillis;
-			if (interval < TimeUnit.DAYS.toMillis(autoBackupIntervalDay)) {
-				return;
+		ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
+		// 创建备份
+		this.createAutoBackup(instance);
+		// 删除历史备份
+		this.deleteAutoBackup(instance);
+	}
+
+	/**
+	 * 删除历史 自动备份信息
+	 *
+	 * @param instance 配置新
+	 */
+	private void deleteAutoBackup(ServerExtConfigBean instance) {
+		Integer autoBackupReserveDay = instance.getAutoBackupReserveDay();
+		if (autoBackupReserveDay != null && autoBackupReserveDay > 0) {
+			//
+			Entity entity = Entity.create();
+			entity.set("backupType", 3);
+			entity.set("createTimeMillis", " < " + (SystemClock.now() - TimeUnit.DAYS.toMillis(autoBackupReserveDay)));
+			List<Entity> entities = super.queryList(entity);
+			if (entities != null) {
+				for (Entity entity1 : entities) {
+					String id = entity1.getStr("id");
+					this.delByKey(id);
+				}
 			}
 		}
-		// 执行数据库备份
-		this.backupToSql(null, 3);
+	}
+
+	/**
+	 * 创建自动备份数据
+	 *
+	 * @param instance 配置信息
+	 */
+	private void createAutoBackup(ServerExtConfigBean instance) {
+		// 自动备份
+		Integer autoBackupIntervalDay = instance.getAutoBackupIntervalDay();
+		if (autoBackupIntervalDay != null && autoBackupIntervalDay > 0) {
+			BackupInfoModel backupInfoModel = new BackupInfoModel();
+			backupInfoModel.setBackupType(3);
+			List<BackupInfoModel> infoModels = super.queryList(backupInfoModel, 1, new Order("createTimeMillis", Direction.DESC));
+			BackupInfoModel first = CollUtil.getFirst(infoModels);
+			if (first != null) {
+				Long createTimeMillis = first.getCreateTimeMillis();
+				long interval = SystemClock.now() - createTimeMillis;
+				if (interval < TimeUnit.DAYS.toMillis(autoBackupIntervalDay)) {
+					return;
+				}
+			}
+			// 执行数据库备份
+			this.backupToSql(null, 3);
+		}
 	}
 
 	/**
@@ -194,5 +231,19 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 				.flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.TABLE_NAME))))
 				.distinct()
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public int delByKey(String keyValue) {
+		// 根据 id 查询备份信息
+		BackupInfoModel backupInfoModel = super.getByKey(keyValue);
+		Objects.requireNonNull(backupInfoModel, "备份数据不存在");
+
+		// 删除对应的文件
+		boolean del = FileUtil.del(backupInfoModel.getFilePath());
+		Assert.state(del, "删除备份数据文件失败");
+
+		// 删除备份信息
+		return super.delByKey(keyValue);
 	}
 }

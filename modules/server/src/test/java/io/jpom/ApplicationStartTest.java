@@ -22,6 +22,7 @@
  */
 package io.jpom;
 
+import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.system.init.InitDb;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -31,6 +32,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.annotation.Resource;
+
 /**
  * @author Hotstrip
  * Test application start, then you can use such as service instance to test your methods
@@ -38,12 +41,20 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest(classes = {JpomServerApplication.class, InitDb.class})
 @AutoConfigureMockMvc
 public class ApplicationStartTest {
-	protected  static Logger logger = LoggerFactory.getLogger(ApplicationStartTest.class);
+	protected static Logger logger = LoggerFactory.getLogger(ApplicationStartTest.class);
 	@Autowired
 	protected MockMvc mockMvc;
+
+	@Resource
+	private BackupInfoService backupInfoService;
 
 	@Test
 	public void testApplicationStart() {
 		logger.info("Jpom Server Application started.....");
+	}
+
+	@Test
+	public void testBackup() {
+		backupInfoService.checkAutoBackup();
 	}
 }

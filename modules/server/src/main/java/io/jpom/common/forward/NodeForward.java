@@ -177,7 +177,6 @@ public class NodeForward {
 	 * @param nodeModel 插件端
 	 */
 	private static AgentException responseException(Exception exception, NodeModel nodeModel) {
-		exception.printStackTrace();
 		String message = exception.getMessage();
 		Throwable cause = exception.getCause();
 		DefaultSystemLog.getLog().error("node [{}] connect failed...message: [{}]", nodeModel.getName(), message);
