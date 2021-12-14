@@ -140,23 +140,23 @@ public class JpomApplication extends ApplicationBuilder {
 		new JpomClose().main(args);
 	}
 
-	/**
-	 * 获取当前系统编码
-	 *
-	 * @return charset
-	 */
-	public static Charset getCharset() {
-		if (charset == null) {
-			if (SystemUtil.getOsInfo().isLinux()) {
-				charset = CharsetUtil.CHARSET_UTF_8;
-			} else if (SystemUtil.getOsInfo().isMac()) {
-				charset = CharsetUtil.CHARSET_UTF_8;
-			} else {
-				charset = CharsetUtil.CHARSET_GBK;
-			}
-		}
-		return charset;
-	}
+//	/**
+//	 * 获取当前系统编码
+//	 *
+//	 * @return charset
+//	 */
+//	public static Charset getCharset() {
+//		if (charset == null) {
+//			if (SystemUtil.getOsInfo().isLinux()) {
+//				charset = CharsetUtil.CHARSET_UTF_8;
+//			} else if (SystemUtil.getOsInfo().isMac()) {
+//				charset = CharsetUtil.CHARSET_UTF_8;
+//			} else {
+//				charset = CharsetUtil.CHARSET_GBK;
+//			}
+//		}
+//		return charset;
+//	}
 
 	/**
 	 * 获取当前程序的类型

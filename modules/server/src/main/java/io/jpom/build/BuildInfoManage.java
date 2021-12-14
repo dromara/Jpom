@@ -38,7 +38,6 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
@@ -48,6 +47,7 @@ import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
@@ -56,7 +56,9 @@ import io.jpom.util.SvnKitUtil;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
@@ -444,7 +446,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		process = processBuilder.start();
 		//
 		InputStream inputStream = process.getInputStream();
-		IoUtil.readLines(inputStream, JpomApplication.getCharset(), (LineHandler) line -> {
+		IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) line -> {
 			log(line);
 			status[0] = true;
 		});

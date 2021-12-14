@@ -27,6 +27,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
 import io.jpom.system.AgentConfigBean;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 
 import java.io.File;
@@ -94,7 +95,7 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 
 	public void saveFile() {
 		File file = getFile(true);
-		FileUtil.writeString(getContext(), file, JpomApplication.getCharset());
+		FileUtil.writeString(getContext(), file, ExtConfigBean.getInstance().getConsoleLogCharset());
 //        // 添加权限
 //        if (SystemUtil.getOsInfo().isLinux()) {
 //            CommandUtil.execCommand("chmod 755 " + FileUtil.getAbsolutePath(file));
@@ -115,7 +116,7 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 		File file = getFile(true);
 		if (FileUtil.exist(file)) {
 			//
-			String context = FileUtil.readString(file, JpomApplication.getCharset());
+			String context = FileUtil.readString(file, ExtConfigBean.getInstance().getConsoleLogCharset());
 			setContext(context);
 		}
 	}

@@ -33,8 +33,8 @@ import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.JpomApplication;
 import io.jpom.model.data.NodeScriptModel;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.SocketSessionUtil;
 
@@ -126,7 +126,7 @@ public class ScriptProcessBuilder implements Runnable {
 			process = processBuilder.start();
 			{
 				inputStream = process.getInputStream();
-				IoUtil.readLines(inputStream, JpomApplication.getCharset(), (LineHandler) ScriptProcessBuilder.this::handle);
+				IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) ScriptProcessBuilder.this::handle);
 			}
 			int waitFor = process.waitFor();
 			JsonMessage<String> jsonMessage = new JsonMessage<>(200, "执行完毕:" + waitFor);

@@ -73,6 +73,13 @@ public class ExtConfigBean {
 	@Value("${log.intiReadLine:10}")
 	private int logInitReadLine;
 	/**
+	 * 控制台编码格式
+	 */
+	@Value("${consoleLog.charset:}")
+	private String consoleLogCharset;
+
+	private Charset consoleLogCharsetCache;
+	/**
 	 *
 	 */
 	private Charset logFileCharsets;
@@ -178,7 +185,10 @@ public class ExtConfigBean {
 		return path;
 	}
 
-//	public String getAbsolutePath() {
-//		return FileUtil.getAbsolutePath(FileUtil.file(getPath()));
-//	}
+	public Charset getConsoleLogCharset() {
+		if (consoleLogCharsetCache == null) {
+			consoleLogCharsetCache = CharsetUtil.parse(consoleLogCharset, CharsetUtil.systemCharset());
+		}
+		return consoleLogCharsetCache;
+	}
 }

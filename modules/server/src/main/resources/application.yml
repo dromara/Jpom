@@ -19,7 +19,7 @@ spring:
       max-file-size: 1GB
 #thymeleaf end
 banner:
-  msg: Jpom-Server 管理系统启动中
+  msg: Jpom-Server Starting
 # 静态资源配置
 interceptor:
   resourceHandler: /css/**,/fonts/**,/img/**,/js/**,/favicon.ico
