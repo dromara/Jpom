@@ -33,7 +33,6 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.BaseServerController;
 import io.jpom.model.data.*;
 import io.jpom.model.log.MonitorNotifyLog;
 import io.jpom.service.dblog.DbMonitorNotifyLogService;
@@ -151,7 +150,6 @@ public class LoadJsonConfigToDb {
 			return;
 		}
 		try {
-			BaseServerController.resetInfo(UserModel.EMPTY);
 			JSON json = JsonFileUtil.readJson(file.getAbsolutePath());
 			JSONArray jsonArray = JsonFileUtil.formatToArray((JSONObject) json);
 			List<UserModel> userModels = jsonArray.toJavaList(UserModel.class);
@@ -174,8 +172,6 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load user info error ", e);
-		} finally {
-			BaseServerController.remove();
 		}
 	}
 
@@ -197,7 +193,7 @@ public class LoadJsonConfigToDb {
 				//
 				nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
 			}).collect(Collectors.toList());
-			BaseServerController.resetInfo(UserModel.EMPTY);
+
 			NodeService nodeService = SpringUtil.getBean(NodeService.class);
 			nodeService.insert(nodeModels);
 			// 将 json 文件转移到备份目录
@@ -205,8 +201,6 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load node error ", e);
-		} finally {
-			BaseServerController.remove();
 		}
 	}
 
@@ -224,7 +218,6 @@ public class LoadJsonConfigToDb {
 			if (sshModels == null) {
 				return;
 			}
-			BaseServerController.resetInfo(UserModel.EMPTY);
 			SshService sshService = SpringUtil.getBean(SshService.class);
 			sshService.insert(sshModels);
 			// 将 json 文件转移到备份目录
@@ -232,8 +225,6 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load ssh error ", e);
-		} finally {
-			BaseServerController.remove();
 		}
 	}
 
@@ -251,7 +242,7 @@ public class LoadJsonConfigToDb {
 			if (monitorModels == null) {
 				return;
 			}
-			BaseServerController.resetInfo(UserModel.EMPTY);
+
 			MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
 			monitorService.insert(monitorModels);
 			// 将 json 文件转移到备份目录
@@ -259,8 +250,6 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load monitor error ", e);
-		} finally {
-			BaseServerController.remove();
 		}
 	}
 
@@ -279,7 +268,7 @@ public class LoadJsonConfigToDb {
 			if (outGivingModels == null) {
 				return;
 			}
-			BaseServerController.resetInfo(UserModel.EMPTY);
+
 			OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
 			outGivingServer.insert(outGivingModels);
 			// 将 json 文件转移到备份目录
@@ -287,8 +276,6 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load OUTGIVING error ", e);
-		} finally {
-			BaseServerController.remove();
 		}
 	}
 

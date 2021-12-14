@@ -158,13 +158,15 @@ public class InitDb implements DisposableBean, InitializingBean {
 		LoadBuildJsonToDB.getInstance().doJsonToSql();
 		// @author bwcx_jzy @date 2021-12-02
 		LoadJsonConfigToDb instance = LoadJsonConfigToDb.getInstance();
-		instance.loadIpConfig();
-		instance.loadMailConfig();
-		instance.loadOutGivingWhitelistConfig();
 		// init workspace
 		WorkspaceService workspaceService = SpringUtil.getBean(WorkspaceService.class);
 		try {
 			BaseServerController.resetInfo(UserModel.EMPTY);
+			//
+			instance.loadIpConfig();
+			instance.loadMailConfig();
+			instance.loadOutGivingWhitelistConfig();
+			//
 			instance.loadUserInfo();
 			workspaceService.checkInitDefault();
 			//
