@@ -5,125 +5,125 @@
 -- 仓库信息
 CREATE TABLE IF NOT EXISTS PUBLIC.REPOSITORY
 (
-	ID               VARCHAR(50) not null comment 'id',
-	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
-	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
-	`NAME`           VARCHAR(50) comment '仓库名称',
-	GITURL           varchar(255) comment '仓库地址',
-	REPOTYPE         int comment '仓库类型{0: GIT, 1: SVN}',
-	PROTOCOL         int comment '拉取代码的协议{0: http, 1: ssh}',
-	USERNAME         VARCHAR(50) comment '登录用户',
-	PASSWORD         VARCHAR(50) comment '登录密码',
-	RSAPUB           VARCHAR(2048) comment 'SSH RSA 公钥',
-	RSAPRV           VARCHAR(4096) comment 'SSH RSA 私钥',
-	STRIKE           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
-	CONSTRAINT REPOSITORY_PK PRIMARY KEY (ID)
+	id               VARCHAR(50) not null comment 'id',
+	createTimeMillis BIGINT COMMENT '数据创建时间',
+	modifyTimeMillis BIGINT COMMENT '数据修改时间',
+	`name`           VARCHAR(50) comment '仓库名称',
+	gitUrl           varchar(255) comment '仓库地址',
+	repoType         int comment '仓库类型{0: GIT, 1: SVN}',
+	protocol         int comment '拉取代码的协议{0: http, 1: ssh}',
+	userName         VARCHAR(50) comment '登录用户',
+	password         VARCHAR(50) comment '登录密码',
+	rsaPub           VARCHAR(2048) comment 'SSH RSA 公钥',
+	rsaPrv           VARCHAR(4096) comment 'SSH RSA 私钥',
+	strike           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	CONSTRAINT REPOSITORY_PK PRIMARY KEY (id)
 );
 comment on table REPOSITORY is '仓库信息';
 
 -- 构建信息
 CREATE TABLE IF NOT EXISTS PUBLIC.BUILD_INFO
 (
-	ID                  VARCHAR(50) not null comment 'id',
-	REPOSITORYID        VARCHAR(50) not null comment '仓库 ID',
-	CREATETIMEMILLIS    BIGINT COMMENT '数据创建时间',
-	MODIFYTIMEMILLIS    BIGINT COMMENT '数据修改时间',
-	`NAME`              VARCHAR(50) comment '构建名称',
-	BUILDID             int comment '构建 ID',
-	`GROUP`             VARCHAR(50) comment '分组名称',
-	BRANCHNAME          VARCHAR(50) comment '分支',
-	SCRIPT              VARCHAR(200) comment '构建命令',
-	RESULTDIRFILE       VARCHAR(50) comment '构建产物目录',
-	RELEASEMETHOD       int comment '发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}',
-	MODIFYUSER          VARCHAR(50) comment '修改人',
-	`STATUS`            int comment '状态',
-	TRIGGERTOKEN        VARCHAR(20) comment '触发器token',
-	EXTRADATA           CLOB comment '额外信息，JSON 字符串格式',
-	RELEASEMETHODDATAID VARCHAR(200) comment '构建关联的数据ID',
-	CONSTRAINT BUILD_INFO_PK PRIMARY KEY (ID)
+	id                  VARCHAR(50) not null comment 'id',
+	repositoryId        VARCHAR(50) not null comment '仓库 id',
+	createTimeMillis    BIGINT COMMENT '数据创建时间',
+	modifyTimeMillis    BIGINT COMMENT '数据修改时间',
+	`name`              VARCHAR(50) comment '构建名称',
+	buildId             int comment '构建 id',
+	`group`             VARCHAR(50) comment '分组名称',
+	branchName          VARCHAR(50) comment '分支',
+	script              VARCHAR(200) comment '构建命令',
+	resultDirFile       VARCHAR(50) comment '构建产物目录',
+	releaseMethod       int comment '发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}',
+	modifyUser          VARCHAR(50) comment '修改人',
+	`status`            int comment '状态',
+	triggerToken        VARCHAR(20) comment '触发器token',
+	extraData           CLOB comment '额外信息，JSON 字符串格式',
+	releaseMethodDataId VARCHAR(200) comment '构建关联的数据ID',
+	CONSTRAINT BUILD_INFO_PK PRIMARY KEY (id)
 );
 comment on table BUILD_INFO is '构建信息';
 
 -- @author jzy 2021-08-13 添加基础字段
 
 ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS CREATETIMEMILLIS BIGINT COMMENT '数据创建时间';
+	ADD IF NOT EXISTS createTimeMillis BIGINT COMMENT '数据创建时间';
 ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间';
+	ADD IF NOT EXISTS modifyTimeMillis BIGINT COMMENT '数据修改时间';
 
 ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS CREATETIMEMILLIS BIGINT COMMENT '数据创建时间';
+	ADD IF NOT EXISTS createTimeMillis BIGINT COMMENT '数据创建时间';
 ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间';
+	ADD IF NOT EXISTS modifyTimeMillis BIGINT COMMENT '数据修改时间';
 
--- @author Hotstrip -> add REPOSITORYID in case it's not exists
+-- @author Hotstrip -> add repositoryId in case it's not exists
 ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS REPOSITORYID VARCHAR(50) COMMENT '仓库 ID';
+	ADD IF NOT EXISTS repositoryId VARCHAR(50) COMMENT '仓库 id';
 
--- @author Hotstrip 增加 MODIFYUSER
+-- @author Hotstrip 增加 modifyUser
 ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS MODIFYUSER VARCHAR(50) comment '修改人';
+	ADD IF NOT EXISTS modifyUser VARCHAR(50) comment '修改人';
 
--- @author Hotstrip 增加 STATUS
+-- @author Hotstrip 增加 status
 ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS `STATUS` int comment '状态';
+	ADD IF NOT EXISTS `status` int comment '状态';
 
 -- @author Hotstrip 增加 TRIGGERTOKEN
 ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS TRIGGERTOKEN VARCHAR(20) comment '触发器token';
+	ADD IF NOT EXISTS triggerToken VARCHAR(100) comment '触发器token';
 
 -- @author bwcx_jzy 2021-12-06
 ALTER TABLE BUILD_INFO
-	ALTER COLUMN TRIGGERTOKEN VARCHAR(100) comment '触发器token';
+	ALTER COLUMN triggerToken VARCHAR(100) comment '触发器token';
 
 -- @author jzy 增加 RSAPRV
 ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS RSAPRV VARCHAR(4096) comment 'SSH RSA 私钥';
+	ADD IF NOT EXISTS rsaPrv VARCHAR(4096) comment 'SSH RSA 私钥';
 
 -- @author Hotstrip update RSAPRV field length
 ALTER TABLE REPOSITORY
-	ALTER COLUMN RSAPRV VARCHAR(4096) comment 'SSH RSA 私钥';
+	ALTER COLUMN rsaPrv VARCHAR(4096) comment 'SSH RSA 私钥';
 
--- @author bwcx_jzy 增加 RELEASEMETHODDATAID
+-- @author bwcx_jzy 增加 releaseMethodDataId
 ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS RELEASEMETHODDATAID VARCHAR(200) comment '构建关联的数据ID';
+	ADD IF NOT EXISTS releaseMethodDataId VARCHAR(200) comment '构建关联的数据ID';
 
--- @author lidaofu 增加 STRIKE
+-- @author lidaofu 增加 strike
 ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS STRIKE int DEFAULT 0 comment '逻辑删除';
+	ADD IF NOT EXISTS strike int DEFAULT 0 comment '逻辑删除';
 
 
--- @author bwcx_jzy 增加 MODIFYUSER
+-- @author bwcx_jzy 增加 modifyUser
 ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS MODIFYUSER VARCHAR(50) comment '修改人';
+	ADD IF NOT EXISTS modifyUser VARCHAR(50) comment '修改人';
 
 -- @author jzy
 ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS BRANCHTAGNAME VARCHAR(50) comment '标签';
+	ADD IF NOT EXISTS branchTagName VARCHAR(50) comment '标签';
 
 -- @author hjk 增加字段长度，200->500
 ALTER TABLE BUILD_INFO
-	ALTER COLUMN SCRIPT VARCHAR(500) comment '构建命令';
+	ALTER COLUMN script VARCHAR(500) comment '构建命令';
 
 -- 备份数据库信息表 @author Hotstrip
 CREATE TABLE IF NOT EXISTS PUBLIC.BACKUP_INFO
 (
-	ID               VARCHAR(50) not null comment 'id',
-	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
-	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
-	`NAME`           VARCHAR(50) comment '备份名称',
-	FILEPATH         VARCHAR(200) comment '文件地址',
-	BACKUPTYPE       int comment '备份类型{0: 全量, 1: 部分}',
-	FILESIZE         BIGINT comment '文件大小',
-	SHA1SUM          VARCHAR(50) comment 'SHA1 信息',
-	`STATUS`         int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}',
-	CONSTRAINT BACKUP_INFO_PK PRIMARY KEY (ID)
+	id               VARCHAR(50) not null comment 'id',
+	createTimeMillis BIGINT COMMENT '数据创建时间',
+	modifyTimeMillis BIGINT COMMENT '数据修改时间',
+	`name`           VARCHAR(50) comment '备份名称',
+	filePath         VARCHAR(200) comment '文件地址',
+	backupType       int comment '备份类型{0: 全量, 1: 部分}',
+	fileSize         BIGINT comment '文件大小',
+	sha1Sum          VARCHAR(50) comment 'SHA1 信息',
+	`status`         int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}',
+	CONSTRAINT BACKUP_INFO_PK PRIMARY KEY (id)
 );
 comment on table BACKUP_INFO is '备份数据库信息';
 
 -- @author Hotstrip 增加字段 status
 ALTER TABLE BACKUP_INFO
-	ADD IF NOT EXISTS `STATUS` int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}';
+	ADD IF NOT EXISTS `status` int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}';
 
 -- @author bwcx_jzy
 ALTER TABLE BUILD_INFO
