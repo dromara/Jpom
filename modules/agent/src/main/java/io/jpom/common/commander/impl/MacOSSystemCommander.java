@@ -86,7 +86,7 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
 		double used = 0, free = 0;
 		DefaultSystemLog.getLog().debug("Mac Os mem info: {}", info);
 		int index = info.indexOf(CharPool.COLON) + 1;
-		String[] split = info.substring(index).split(",");
+		String[] split = info.substring(index).split(StrUtil.COMMA);
 		for (String str : split) {
 			str = str.trim();
 			if (str.contains("unused.")) {
@@ -113,7 +113,7 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
 		}
 		DefaultSystemLog.getLog().debug("Mac Os cpu info: {}", info);
 		int i = info.indexOf(CharPool.COLON);
-		String[] split = info.substring(i + 1).split(",");
+		String[] split = info.substring(i + 1).split(StrUtil.COMMA);
 		for (String str : split) {
 			str = str.trim();
 			if (str.contains("idle")) {

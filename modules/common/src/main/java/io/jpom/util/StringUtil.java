@@ -76,7 +76,7 @@ public class StringUtil {
 	 * @return true
 	 */
 	public static boolean isGeneral(CharSequence value, int min, int max) {
-		String reg = "^[a-zA-Z0-9_-]{" + min + "," + max + "}$";
+		String reg = "^[a-zA-Z0-9_-]{" + min + StrUtil.COMMA + max + "}$";
 		return Validator.isMatchRegex(reg, value);
 	}
 
