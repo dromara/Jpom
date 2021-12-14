@@ -63,7 +63,13 @@
         <a-tooltip slot="outGivingResult" slot-scope="text, item" placement="topLeft" :title="text">
           <span>{{ text }} {{ item.errorMsg || "" }}</span>
         </a-tooltip>
-        <a-switch slot="projectStatus" slot-scope="text" :checked="text" checked-children="运行中" un-checked-children="未运行" />
+        <template slot="projectStatus" slot-scope="text, item">
+          <a-tooltip v-if="item.errorMsg" :title="item.errorMsg">
+            <span>{{ item.errorMsg }}</span>
+          </a-tooltip>
+          <a-switch v-else :checked="text" checked-children="运行中" un-checked-children="未运行" />
+        </template>
+
         <template slot="child-operation" slot-scope="text, record">
           <a-button :disabled="!record.projectName" type="primary" @click="handleFile(record)">文件</a-button>
           <a-button :disabled="!record.projectName" type="primary" @click="handleConsole(record)">控制台</a-button>
@@ -390,11 +396,11 @@
     </a-modal>
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
+      <file v-if="drawerFileVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goConsole="goConsole" />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
+      <console v-if="drawerConsoleVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
   </div>
 </template>
@@ -949,6 +955,18 @@ export default {
     // 关闭控制台
     onConsoleClose() {
       this.drawerConsoleVisible = false;
+    },
+    //前往控制台
+    goConsole() {
+      //关闭文件
+      this.onFileClose();
+      this.handleConsole(this.temp);
+    },
+    //前往文件
+    goFile() {
+      // 关闭控制台
+      this.onConsoleClose();
+      this.handleFile(this.temp);
     },
     loadProjectListAll(fn) {
       getProjectListAll().then((res) => {
