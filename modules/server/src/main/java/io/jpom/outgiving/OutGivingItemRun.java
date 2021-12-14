@@ -32,6 +32,7 @@ import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import io.jpom.JpomApplication;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
@@ -123,7 +124,8 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
 							 OutGivingNodeProject outGivingNodeProjectItem,
 							 OutGivingNodeProject.Status status,
 							 String msg) {
-		updateStatus(this.logId, outGivingId, outGivingNodeProjectItem, status, msg, this.userModel.getId());
+		String userId = this.userModel == null ? JpomApplication.SYSTEM_ID : this.userModel.getId();
+		updateStatus(this.logId, outGivingId, outGivingNodeProjectItem, status, msg, userId);
 	}
 
 	/**

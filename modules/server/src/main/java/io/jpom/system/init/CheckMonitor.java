@@ -24,7 +24,6 @@ package io.jpom.system.init;
 
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.cron.CronUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
@@ -32,6 +31,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.RemoteVersion;
 import io.jpom.service.dblog.BackupInfoService;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.ConfigBean;
@@ -58,16 +58,19 @@ public class CheckMonitor {
 			Console.log("已经开启监听调度：节点信息采集");
 		}
 		// 缓存检测调度
-		CronUtil.schedule("cache_manger_schedule", "0 0/10 * * * ?", () -> {
+		CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
 			BuildUtil.reloadCacheSize();
 			ConfigBean.getInstance().dataSize();
 		});
 		ThreadUtil.execute(() -> {
 			BuildUtil.reloadCacheSize();
 			ConfigBean.getInstance().dataSize();
+			// 加载构建定时器
+			BuildInfoService buildInfoService = SpringUtil.getBean(BuildInfoService.class);
+			buildInfoService.startCron();
 		});
 		// 开启版本检测调度
-		CronUtil.schedule("system_monitor", "0 0 0,12 * * ?", () -> {
+		CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {
 			try {
 				BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
 				backupInfoService.checkAutoBackup();
@@ -77,7 +80,5 @@ public class CheckMonitor {
 				DefaultSystemLog.getLog().error("系统调度执行出现错误", e);
 			}
 		});
-		// 开启调度
-		CronUtils.start();
 	}
 }

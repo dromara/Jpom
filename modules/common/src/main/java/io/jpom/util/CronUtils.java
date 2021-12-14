@@ -24,6 +24,7 @@ package io.jpom.util;
 
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
+import cn.hutool.cron.task.Task;
 
 /**
  * @author bwcx_jzy
@@ -32,7 +33,7 @@ import cn.hutool.cron.Scheduler;
 public class CronUtils {
 
 	/**
-	 *
+	 * 开始
 	 */
 	public static void start() {
 		// 开启秒级
@@ -42,5 +43,24 @@ public class CronUtils {
 		if (!scheduler.isStarted()) {
 			CronUtil.start();
 		}
+	}
+
+	/**
+	 * 添加任务、自动去重
+	 *
+	 * @param id   任务ID
+	 * @param cron 表达式
+	 * @param task 任务作业
+	 */
+	public static void upsert(String id, String cron, Task task) {
+		Scheduler scheduler = CronUtil.getScheduler();
+		Task schedulerTask = scheduler.getTask(id);
+		if (schedulerTask != null) {
+			CronUtil.remove(id);
+		}
+		// 创建任务
+		CronUtil.schedule(id, cron, task);
+		//
+		CronUtils.start();
 	}
 }

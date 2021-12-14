@@ -29,7 +29,7 @@ import io.jpom.service.h2db.TableName;
  * @author Hotstrip
  * new BuildModel class, for replace old BuildModel
  */
-@TableName(value = "BUILD_INFO",name = "构建信息")
+@TableName(value = "BUILD_INFO", name = "构建信息")
 public class BuildInfoModel extends BaseWorkspaceModel {
 
 	/**
@@ -85,9 +85,22 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 	 * 额外信息，JSON 字符串格式
 	 */
 	private String extraData;
-
-
+	/**
+	 * 构建 webhook
+	 */
 	private String webhook;
+	/**
+	 * 定时构建表达式
+	 */
+	private String autoBuildCron;
+
+	public String getAutoBuildCron() {
+		return autoBuildCron;
+	}
+
+	public void setAutoBuildCron(String autoBuildCron) {
+		this.autoBuildCron = autoBuildCron;
+	}
 
 	public String getRepositoryId() {
 		return repositoryId;

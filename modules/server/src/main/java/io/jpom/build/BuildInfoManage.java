@@ -22,7 +22,6 @@
  */
 package io.jpom.build;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
@@ -82,6 +81,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	 * 缓存构建中
 	 */
 	private static final Map<String, BuildInfoManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
+
 	private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
 	private final BuildInfoModel buildInfoModel;
@@ -94,15 +94,25 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	/**
 	 * 延迟执行的时间（单位秒）
 	 */
-	private Integer delay;
+	private final Integer delay;
+	/**
+	 * 触发类型
+	 */
+	private final int triggerBuildType;
 
-	private BuildInfoManage(final BuildInfoModel buildInfoModel, final RepositoryModel repositoryModel, final UserModel userModel) {
+	private BuildInfoManage(final BuildInfoModel buildInfoModel,
+							final RepositoryModel repositoryModel,
+							final UserModel userModel,
+							Integer delay,
+							int triggerBuildType) {
 		super(BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId()),
 				buildInfoModel.getId());
 		this.buildInfoModel = buildInfoModel;
 		this.repositoryModel = repositoryModel;
 		this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
 		this.userModel = userModel;
+		this.triggerBuildType = triggerBuildType;
+		this.delay = delay;
 		// 解析 其他配置信息
 		BuildExtraModule buildExtraModule = StringUtil.jsonConvert(this.buildInfoModel.getExtraData(), BuildExtraModule.class);
 		Assert.notNull(buildExtraModule, "构建信息缺失");
@@ -136,22 +146,23 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	/**
 	 * 创建构建
 	 *
-	 * @param buildInfoModel  构建项
-	 * @param userModel       操作人
-	 * @param repositoryModel 仓库信息
-	 * @param delay           延迟执行的时间 单位秒
+	 * @param buildInfoModel   构建项
+	 * @param userModel        操作人
+	 * @param repositoryModel  仓库信息
+	 * @param delay            延迟执行的时间 单位秒
+	 * @param triggerBuildType 触发构建类型
 	 * @return this
 	 */
 	public static BuildInfoManage create(final BuildInfoModel buildInfoModel,
 										 final RepositoryModel repositoryModel,
 										 final UserModel userModel,
-										 Integer delay) {
+										 Integer delay,
+										 int triggerBuildType) {
 		if (BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId())) {
 			throw new JpomRuntimeException("当前构建还在进行中");
 		}
-		BuildInfoManage manage = new BuildInfoManage(buildInfoModel, repositoryModel, userModel);
+		BuildInfoManage manage = new BuildInfoManage(buildInfoModel, repositoryModel, userModel, delay, triggerBuildType);
 		BUILD_MANAGE_MAP.put(buildInfoModel.getId(), manage);
-		manage.delay = delay;
 		//
 		ThreadUtil.execute(manage);
 		return manage;
@@ -188,20 +199,21 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
 		// 更新其他配置字段
 		buildHistoryLog.setResultDirFile(buildExtraModule.getResultDirFile());
+		buildHistoryLog.setTriggerBuildType(triggerBuildType);
 		buildHistoryLog.setReleaseMethod(buildExtraModule.getReleaseMethod());
 		buildHistoryLog.setReleaseMethodDataId(buildExtraModule.getReleaseMethodDataId());
 		buildHistoryLog.setAfterOpt(buildExtraModule.getAfterOpt());
-		buildHistoryLog.setWorkspaceId(this.buildInfoModel.getWorkspaceId());
-		buildHistoryLog.setReleaseCommand(buildExtraModule.getReleaseCommand());
-		BeanUtil.copyProperties(this.buildInfoModel, buildHistoryLog);
-
-		buildHistoryLog.setId(this.logId);
 		buildHistoryLog.setBuildDataId(buildInfoModel.getId());
-		buildHistoryLog.setStatus(BuildStatus.Ing.getCode());
-		buildHistoryLog.setStartTime(System.currentTimeMillis());
+		buildHistoryLog.setReleasePath(buildExtraModule.getReleasePath());
+		buildHistoryLog.setReleaseCommand(buildExtraModule.getReleaseCommand());
 		buildHistoryLog.setBuildNumberId(buildInfoModel.getBuildId());
 		buildHistoryLog.setBuildName(buildInfoModel.getName());
-
+		buildHistoryLog.setClearOld(buildExtraModule.isClearOld());
+		//
+		buildHistoryLog.setWorkspaceId(this.buildInfoModel.getWorkspaceId());
+		buildHistoryLog.setId(this.logId);
+		buildHistoryLog.setStatus(BuildStatus.Ing.getCode());
+		buildHistoryLog.setStartTime(SystemClock.now());
 		DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
 		dbBuildHistoryLogService.insert(buildHistoryLog);
 	}
@@ -393,7 +405,12 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		suppliers.put("release", BuildInfoManage.this::packageRelease);
 		// 依次执行流程，发生异常结束整个流程
 		String processName = StrUtil.EMPTY;
-		BaseServerController.resetInfo(this.userModel);
+		if (this.triggerBuildType == 2) {
+			// 系统触发构建
+			BaseServerController.resetInfo(UserModel.EMPTY);
+		} else {
+			BaseServerController.resetInfo(this.userModel);
+		}
 		try {
 			for (Map.Entry<String, Supplier<Boolean>> stringSupplierEntry : suppliers.entrySet()) {
 				processName = stringSupplierEntry.getKey();
@@ -473,6 +490,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 				httpRequest.form("buildId", this.buildInfoModel.getId());
 				httpRequest.form("buildName", this.buildInfoModel.getName());
 				httpRequest.form("type", type, other);
+				httpRequest.form("triggerBuildType", this.triggerBuildType);
 				httpRequest.form("triggerTime", triggerTime);
 				String body = httpRequest.execute().body();
 				DefaultSystemLog.getLog().info(this.buildInfoModel.getName() + ":" + body);

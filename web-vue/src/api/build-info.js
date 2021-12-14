@@ -72,6 +72,7 @@ export function editBuild(params) {
     // 其他参数
     extraData: params.extraData,
     webhook: params.webhook,
+    autoBuildCron: params.autoBuildCron,
   };
   return axios({
     url: "/build/edit",
@@ -244,6 +245,12 @@ export const releaseMethodMap = {
   2: "项目",
   3: "SSH",
   4: "本地命令",
+};
+
+export const triggerBuildTypeMap = {
+  0: "手动",
+  1: "触发器",
+  2: "定时",
 };
 
 export const releaseMethodArray = Object.keys(releaseMethodMap).map((item) => {

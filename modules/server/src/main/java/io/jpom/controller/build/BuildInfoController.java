@@ -28,6 +28,7 @@ import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.pattern.CronPattern;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -117,15 +118,17 @@ public class BuildInfoController extends BaseServerController {
 	/**
 	 * edit build info
 	 *
-	 * @param id
-	 * @param name
-	 * @param repositoryId
-	 * @param resultDirFile
-	 * @param script
-	 * @param releaseMethod
-	 * @param branchName
-	 * @param webhook
-	 * @param extraData
+	 * @param id            构建ID
+	 * @param name          构建名称
+	 * @param repositoryId  仓库ID
+	 * @param resultDirFile 构建产物目录
+	 * @param script        构建命令
+	 * @param releaseMethod 发布方法
+	 * @param branchName    分支名称
+	 * @param webhook       webhook
+	 * @param extraData     构建的其他信息
+	 * @param autoBuildCron 自动构建表达是
+	 * @param branchTagName 标签名
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -136,7 +139,7 @@ public class BuildInfoController extends BaseServerController {
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200")) String resultDirFile,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
 								@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
-								String branchName, String branchTagName, String webhook,
+								String branchName, String branchTagName, String webhook, String autoBuildCron,
 								String extraData) {
 		// 根据 repositoryId 查询仓库信息
 		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, getRequest());
@@ -161,6 +164,14 @@ public class BuildInfoController extends BaseServerController {
 		if (StrUtil.isNotEmpty(webhook)) {
 			Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
 		}
+		if (StrUtil.isNotEmpty(autoBuildCron)) {
+			try {
+				new CronPattern(autoBuildCron);
+			} catch (Exception e) {
+				throw new IllegalArgumentException("定时构建表达式格式不正确");
+			}
+		}
+		buildInfoModel.setAutoBuildCron(autoBuildCron);
 		buildInfoModel.setWebhook(webhook);
 		buildInfoModel.setRepositoryId(repositoryId);
 		buildInfoModel.setName(name);
@@ -324,9 +335,7 @@ public class BuildInfoController extends BaseServerController {
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
 		//
 		String e = buildInfoService.checkStatus(buildInfoModel.getStatus());
-		if (e != null) {
-			return e;
-		}
+		Assert.isNull(e, () -> e);
 		dbBuildHistoryLogService.delByBuildId(buildInfoModel.getId());
 
 		// 删除构建信息文件
