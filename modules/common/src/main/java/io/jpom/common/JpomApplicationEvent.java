@@ -149,12 +149,12 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 			FileUtil.mkdir(file);
 			file = FileUtil.createTempFile("jpom", ".temp", file, true);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error(StrUtil.format("Jpom创建数据目录失败,目录位置：{},请检查当前用户是否有此目录权限或修改配置文件：{}中的jpom.path为可创建目录的路径", path, extConfigPath), e);
+			DefaultSystemLog.getLog().error(StrUtil.format("Jpom Failed to create data directory, directory location：{}," +
+					"Please check whether the current user has permission to this directory or modify the configuration file：{} jpom.path in is the path where the directory can be created", path, extConfigPath), e);
 			System.exit(-1);
 		}
 		FileUtil.del(file);
-		//        Console.log("", path);
-		Console.log("Jpom[{}] 当前数据路径：{} 外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), path, extConfigPath);
+		Console.log("Jpom[{}] Current data path：{} External configuration file path：{}", JpomManifest.getInstance().getVersion(), path, extConfigPath);
 	}
 
 	private static void checkUpdate() {

@@ -23,6 +23,7 @@
 package io.jpom.model.data;
 
 import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.h2db.TableName;
 
 /**
@@ -42,6 +43,8 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 	private String name;
 	/**
 	 * 构建 ID
+	 *
+	 * @see BuildHistoryLog#getBuildNumberId()
 	 */
 	private Integer buildId;
 	/**
