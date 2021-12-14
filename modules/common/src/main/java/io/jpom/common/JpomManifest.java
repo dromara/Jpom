@@ -45,6 +45,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.system.ConfigBean;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JsonFileUtil;
@@ -56,6 +57,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -393,7 +395,9 @@ public class JpomManifest {
 		String typeName = JpomApplication.getAppType().name().toLowerCase();
 		final String[] oldName = new String[]{typeName + ".log"};
 		final boolean[] logBack = {true};
-		FileUtil.readLines(getScriptFile(), JpomApplication.getCharset(), (LineHandler) line -> {
+		File scriptFile = getScriptFile();
+		Charset charset = ExtConfigBean.getInstance().getConsoleLogCharset();
+		FileUtil.readLines(scriptFile, charset, (LineHandler) line -> {
 			if (!line.startsWith(String.valueOf(StrUtil.C_TAB)) &&
 					!line.startsWith(String.valueOf(StrUtil.C_SPACE))) {
 				if (StrUtil.containsAny(line, "RUNJAR=")) {
@@ -431,7 +435,7 @@ public class JpomManifest {
 		jsonObject.put("logBack", logBack[0]);
 		//
 		JsonFileUtil.saveJson(upgrade, jsonObject);
-		FileUtil.writeLines(newData, getScriptFile(), JpomApplication.getCharset());
+		FileUtil.writeLines(newData, scriptFile, charset);
 	}
 
 	/**

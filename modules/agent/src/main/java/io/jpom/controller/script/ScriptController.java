@@ -28,11 +28,11 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HtmlUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
-import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.system.AgentConfigBean;
+import io.jpom.system.ExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -108,7 +108,7 @@ public class ScriptController extends BaseAgentController {
 		multipartFileBuilder.setUseOriginalFilename(true);
 		String path = multipartFileBuilder.save();
 		File file = FileUtil.file(path);
-		String context = FileUtil.readString(path, JpomApplication.getCharset());
+		String context = FileUtil.readString(path, ExtConfigBean.getInstance().getConsoleLogCharset());
 		Assert.hasText(context, "脚本内容为空");
 
 		String name = file.getName();

@@ -89,7 +89,7 @@ public class JvmUtil {
 		String execSystemCommand = CommandUtil.execSystemCommand("jps -mv");
 		List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
 		Optional<String> any = list.stream().filter(s -> {
-			List<String> split = StrUtil.split(s, StrUtil.SPACE);
+			List<String> split = StrSplitter.splitTrim(s, StrUtil.SPACE, true);
 			return StrUtil.equals(pid + "", CollUtil.getFirst(split));
 		}).findAny();
 		return any.orElse(null);

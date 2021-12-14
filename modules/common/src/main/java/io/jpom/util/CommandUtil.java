@@ -27,9 +27,11 @@ import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import io.jpom.system.ExtConfigBean;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -122,9 +124,11 @@ public class CommandUtil {
 	 * @throws IOException IO
 	 */
 	private static String exec(String[] cmd, File file) throws IOException {
-		DefaultSystemLog.getLog().info(Arrays.toString(cmd));
 		Process process = new ProcessBuilder(cmd).directory(file).redirectErrorStream(true).start();
-		return RuntimeUtil.getResult(process);
+		Charset charset = ExtConfigBean.getInstance().getConsoleLogCharset();
+		String result = RuntimeUtil.getResult(process, charset);
+		DefaultSystemLog.getLog().debug("exec {} {} {}", charset.name(), Arrays.toString(cmd), result);
+		return result;
 	}
 
 	/**
@@ -138,7 +142,7 @@ public class CommandUtil {
 		String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
 		newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
 		//
-		DefaultSystemLog.getLog().info(newCommand);
+		DefaultSystemLog.getLog().debug(newCommand);
 		List<String> commands = getCommand();
 		commands.add(newCommand);
 		ProcessBuilder pb = new ProcessBuilder(commands);

@@ -32,6 +32,8 @@ consoleLog:
   reqXss: true
   # 是否记录接口响应日志
   reqResponse: true
+  # 控制台编码格式
+  charset:
 log:
   # 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
   fileCharset:
