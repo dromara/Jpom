@@ -134,22 +134,16 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 > 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中关闭防火墙
 
 ### 容器化安装
-
-#### 插件端
-
+> 注意：容器化安装方式需要先安装docker
 ```
-docker pull samho2008/jpom-agent
-docker volume create jpom-agent-vol
-docker run -d -p 2123:2123 --name jpom-agent -v /etc/localtime:/etc/localtime:ro -v jpom-agent-vol:/usr/local/jpom-agent samho2008/jpom-agent
-```
-
-#### 服务端
-
-```
-docker pull samho2008/jpom-server
+docker pull jpomdocker/jpom
 docker volume create jpom-server-vol
-docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:ro -v jpom-server-vol:/usr/local/jpom-server samho2008/jpom-server
+docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:ro -v jpom-server-vol:/usr/local/jpom-server jpomdocker/jpom
 ```
+
+> 容器化安装仅提供服务端版。由于容器和宿主机环境隔离，而导致插件端的很多功能无法正常使用，因此对插件端容器化意义不大。
+>
+> 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档[https://jpom.io/docs/](https://jpom.io/docs/)
 
 ### docker-compose 一键启动
 
