@@ -68,6 +68,8 @@ public class CheckMonitor {
 			// 加载构建定时器
 			BuildInfoService buildInfoService = SpringUtil.getBean(BuildInfoService.class);
 			buildInfoService.startCron();
+			//
+			RemoteVersion.loadRemoteInfo();
 		});
 		// 开启版本检测调度
 		CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {
