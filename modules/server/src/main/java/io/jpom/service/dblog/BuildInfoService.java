@@ -93,14 +93,21 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> {
 		}
 	}
 
+	/**
+	 * 检查定时任务 状态
+	 *
+	 * @param buildInfoModel 构建信息
+	 */
 	private void checkCron(BuildInfoModel buildInfoModel) {
+		String id = buildInfoModel.getId();
+		String taskId = "build:" + id;
 		String autoBuildCron = buildInfoModel.getAutoBuildCron();
 		if (StrUtil.isEmpty(autoBuildCron)) {
+			CronUtils.remove(taskId);
 			return;
 		}
-		String id = buildInfoModel.getId();
 		DefaultSystemLog.getLog().debug("start build cron {} {} {}", id, buildInfoModel.getName(), autoBuildCron);
-		CronUtils.upsert("build:" + id, autoBuildCron, new CronTask(id));
+		CronUtils.upsert(taskId, autoBuildCron, new CronTask(id));
 	}
 
 	private class CronTask implements Task {
