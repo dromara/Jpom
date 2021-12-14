@@ -151,6 +151,16 @@ docker volume create jpom-server-vol
 docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:ro -v jpom-server-vol:/usr/local/jpom-server samho2008/jpom-server
 ```
 
+### docker-compose 一键启动
+
+- 无需安装任何环境,自动编译构建
+
+```shell
+git clone https://gitee.com/dromara/Jpom.git
+cd Jpom
+docker-compose up -d
+```
+
 ### 下载安装
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
