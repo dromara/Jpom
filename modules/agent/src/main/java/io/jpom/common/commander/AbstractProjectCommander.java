@@ -450,7 +450,7 @@ public abstract class AbstractProjectCommander {
 		if (CollUtil.isEmpty(ports)) {
 			return StrUtil.DASHED;
 		}
-		String allPort = CollUtil.join(ports, ",");
+		String allPort = CollUtil.join(ports, StrUtil.COMMA);
 		// 缓存
 		PID_PORT.put(pid, allPort);
 		return allPort;

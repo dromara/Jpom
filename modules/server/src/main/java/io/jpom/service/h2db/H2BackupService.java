@@ -41,6 +41,7 @@ import java.util.List;
 
 /**
  * H2 数据库备份与还原 service
+ *
  * @author Hotstrip
  * @since 2021-11-17
  */
@@ -49,9 +50,10 @@ public class H2BackupService {
 
 	/**
 	 * 备份 SQL
-	 * @param url jdbc url
-	 * @param user user
-	 * @param password password
+	 *
+	 * @param url           jdbc url
+	 * @param user          user
+	 * @param password      password
 	 * @param backupSqlPath backup SQL file path, absolute path
 	 * @param tableNameList backup table name list, if need backup all table, use null
 	 */
@@ -61,7 +63,7 @@ public class H2BackupService {
 		String sql = StrUtil.format("SCRIPT DROP to '{}'", backupSqlPath);
 		// 判断是否部分部分表
 		if (!CollectionUtils.isEmpty(tableNameList)) {
-			String tableNames = StrUtil.join(",", tableNameList.toArray());
+			String tableNames = StrUtil.join(StrUtil.COMMA, tableNameList.toArray());
 			sql = StrUtil.format("{} TABLE {}", sql, tableNames);
 		}
 
@@ -81,7 +83,7 @@ public class H2BackupService {
 		 * - ${fileName1} 表示备份之后的文件名
 		 * - table 表示需要备份的表名称，后面跟多个表名，用英文逗号分割
 		 */
-		String[] params = new String[] {
+		String[] params = new String[]{
 				"-url", url,
 				"-user", user,
 				"-password", password,
@@ -93,8 +95,9 @@ public class H2BackupService {
 
 	/**
 	 * 还原备份 SQL
+	 *
 	 * @param backupSqlPath backup SQL file path, absolute path
-	 * @throws SQLException SQLException
+	 * @throws SQLException          SQLException
 	 * @throws FileNotFoundException FileNotFoundException
 	 */
 	public void restoreBackupSql(String backupSqlPath) throws SQLException, IOException {

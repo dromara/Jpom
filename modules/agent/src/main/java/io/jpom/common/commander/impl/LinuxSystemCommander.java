@@ -174,7 +174,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 			return null;
 		}
 		int index = info.indexOf(CharPool.COLON) + 1;
-		String[] split = info.substring(index).split(",");
+		String[] split = info.substring(index).split(StrUtil.COMMA);
 //            509248k total — 物理内存总量（509M）
 //            495964k used — 使用中的内存总量（495M）
 //            13284k free — 空闲内存总量（13M）
@@ -211,7 +211,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 			return null;
 		}
 		int i = info.indexOf(CharPool.COLON);
-		String[] split = info.substring(i + 1).split(",");
+		String[] split = info.substring(i + 1).split(StrUtil.COMMA);
 //            1.3% us — 用户空间占用CPU的百分比。
 //            1.0% sy — 内核空间占用CPU的百分比。
 //            0.0% ni — 改变过优先级的进程占用CPU的百分比
