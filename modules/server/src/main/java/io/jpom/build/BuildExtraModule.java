@@ -168,6 +168,7 @@ public class BuildExtraModule extends BaseModel {
 		this.setClearOld(buildHistoryLog.getClearOld());
 		this.setResultDirFile(buildHistoryLog.getResultDirFile());
 		this.setName(buildHistoryLog.getBuildName());
+		//
 		this.setId(buildHistoryLog.getBuildDataId());
 		this.setWorkspaceId(buildHistoryLog.getWorkspaceId());
 	}

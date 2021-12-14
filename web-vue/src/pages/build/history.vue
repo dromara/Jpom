@@ -7,6 +7,9 @@
       <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="请选择状态" class="filter-item">
         <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
       </a-select>
+      <a-select show-search option-filter-prop="children" v-model="listQuery.triggerBuildType" allowClear placeholder="请选择触发类型" class="filter-item">
+        <a-select-option v-for="(val, key) in triggerBuildTypeMap" :key="key">{{ val }}</a-select-option>
+      </a-select>
       <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
       <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
         <a-button type="primary" @click="loadData">搜索</a-button>
@@ -27,9 +30,15 @@
       <template slot="releaseMethod" slot-scope="text" placement="topleft" :title="text">
         <span>{{ releaseMethodMap[text] }}</span>
       </template>
-      <!-- <a-tooltip slot="buildUser" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip> -->
+      <template slot="triggerBuildType" slot-scope="text" placement="topleft" :title="text">
+        <span>{{ triggerBuildTypeMap[text] }}</span>
+      </template>
+
+      <template slot="startTime" slot-scope="text, record" placement="topLeft">
+        <a-tooltip :title="`开始时间：${parseTime(record.startTime)}，${record.endTime ? '结束时间：' + parseTime(record.endTime) : ''}`">
+          <span>{{ parseTime(record.startTime) }}</span>
+        </a-tooltip>
+      </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="download" />日志</a-button>
         <a-button type="primary" :disabled="!record.hashFile" @click="handleFile(record)"><a-icon type="download" />产物</a-button>
@@ -57,7 +66,7 @@
 </template>
 <script>
 import BuildLog from "./log";
-import { geteBuildHistory, getBuildListAll, downloadBuildLog, rollback, deleteBuildHistory, releaseMethodMap, statusMap, downloadBuildFile } from "@/api/build-info";
+import { geteBuildHistory, getBuildListAll, downloadBuildLog, rollback, deleteBuildHistory, releaseMethodMap, statusMap, downloadBuildFile, triggerBuildTypeMap } from "@/api/build-info";
 import { parseTime } from "@/utils/time";
 
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
@@ -68,6 +77,7 @@ export default {
   data() {
     return {
       releaseMethodMap: releaseMethodMap,
+      triggerBuildTypeMap: triggerBuildTypeMap,
       loading: false,
       list: [],
       buildList: [],
@@ -80,26 +90,25 @@ export default {
         { title: "构建名称", dataIndex: "buildName", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "buildName" } },
         { title: "构建 ID", dataIndex: "buildNumberId", width: 100, ellipsis: true, scopedSlots: { customRender: "buildNumberId" } },
         { title: "状态", dataIndex: "status", width: 120, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "触发类型", dataIndex: "triggerBuildType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerBuildType" } },
         {
           title: "开始时间",
           dataIndex: "startTime",
           sorter: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
-          width: 180,
+          scopedSlots: { customRender: "startTime" },
+          width: 170,
         },
-        {
-          title: "结束时间",
-          dataIndex: "endTime",
-          sorter: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
-          width: 180,
-        },
+        // {
+        //   title: "结束时间",
+        //   dataIndex: "endTime",
+        //   sorter: true,
+        //   customRender: (text) => {
+        //     return parseTime(text);
+        //   },
+        //   width: 170,
+        // },
         { title: "发布方式", dataIndex: "releaseMethod", width: 100, ellipsis: true, scopedSlots: { customRender: "releaseMethod" } },
-        { title: "构建人", dataIndex: "modifyUser", /*width: 150,*/ ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
+        { title: "构建人", dataIndex: "modifyUser", width: 150, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 280, fixed: "right" },
       ],
     };
@@ -123,6 +132,7 @@ export default {
     this.loadData();
   },
   methods: {
+    parseTime: parseTime,
     // 加载构建列表
     loadBuildList() {
       getBuildListAll().then((res) => {

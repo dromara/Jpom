@@ -223,6 +223,9 @@
           </template>
           <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
         </a-form-model-item>
+        <a-form-model-item label="自动构建" prop="autoBuildCron">
+          <a-input v-model="temp.autoBuildCron" placeholder="如果需要定时自动构建则填写,cron 表达式" />
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 触发器 -->

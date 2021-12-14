@@ -22,8 +22,11 @@
  */
 package io.jpom.service.dblog;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.build.BuildInfoManage;
 import io.jpom.model.BaseEnum;
@@ -33,9 +36,11 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.util.CronUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -53,37 +58,99 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> {
 		this.repositoryService = repositoryService;
 	}
 
-//	/**
-//	 * load date group by group name
-//	 *
-//	 * @return list
-//	 */
-//	public List<String> listGroup() {
-//		String sql = "select `GROUP` from " + getTableName() + " where 1=1 group by `GROUP`";
-//		List<Entity> list = super.query(sql);
-//		// 筛选字段
-//		return list.stream()
-//				.filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.GROUP_STR))))
-//				.flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.GROUP_STR))))
-//				.distinct()
-//				.collect(Collectors.toList());
-//	}
+	@Override
+	public void insert(BuildInfoModel buildInfoModel) {
+		super.insert(buildInfoModel);
+		this.checkCron(buildInfoModel);
+	}
+
+	@Override
+	public int update(BuildInfoModel buildInfoModel) {
+		int update = super.update(buildInfoModel);
+		if (update > 0) {
+			this.checkCron(buildInfoModel);
+		}
+		return update;
+	}
+
+	/**
+	 * 开启定时构建任务
+	 */
+	public void startCron() {
+		String sql = "select * from " + super.getTableName() + " where autoBuildCron is not null and autoBuildCron <> ''";
+		List<BuildInfoModel> buildInfoModels = super.queryList(sql);
+		if (buildInfoModels == null) {
+			return;
+		}
+		for (BuildInfoModel buildInfoModel : buildInfoModels) {
+			this.checkCron(buildInfoModel);
+		}
+		// 恢复异常数据
+		String updateSql = "update " + super.getTableName() + " set status=? where status=? or status=?";
+		int execute = super.execute(updateSql, BuildStatus.No.getCode(), BuildStatus.Ing.getCode(), BuildStatus.PubIng.getCode());
+		if (execute > 0) {
+			DefaultSystemLog.getLog().info("build Recover bad data {}", execute);
+		}
+	}
+
+	private void checkCron(BuildInfoModel buildInfoModel) {
+		String autoBuildCron = buildInfoModel.getAutoBuildCron();
+		if (StrUtil.isEmpty(autoBuildCron)) {
+			return;
+		}
+		String id = buildInfoModel.getId();
+		DefaultSystemLog.getLog().debug("start build cron {} {} {}", id, buildInfoModel.getName(), autoBuildCron);
+		CronUtils.upsert("build:" + id, autoBuildCron, new CronTask(id));
+	}
+
+	private class CronTask implements Task {
+
+		private final String buildId;
+
+		public CronTask(String buildId) {
+			this.buildId = buildId;
+		}
+
+		@Override
+		public void execute() {
+			try {
+				BuildInfoService.this.start(this.buildId, null, null, 2);
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("触发自动构建异常", e);
+			}
+		}
+	}
 
 	/**
 	 * start build
 	 *
-	 * @param buildInfoModel 构建信息
-	 * @param userModel      用户信息
-	 * @param delay          延迟的时间
+	 * @param buildInfoId      构建Id
+	 * @param userModel        用户信息
+	 * @param delay            延迟的时间
+	 * @param triggerBuildType 触发构建类型
 	 * @return json
 	 */
-	public String start(final BuildInfoModel buildInfoModel, final UserModel userModel, Integer delay) {
-		// load repository
-		RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
-		Assert.notNull(repositoryModel, "仓库信息不存在");
-		BuildInfoManage.create(buildInfoModel, repositoryModel, userModel, delay);
-		String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
-		return JsonMessage.getString(200, msg, buildInfoModel.getBuildId());
+	public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType) {
+		synchronized (buildInfoId.intern()) {
+			BuildInfoModel buildInfoModel = super.getByKey(buildInfoId);
+			String e = this.checkStatus(buildInfoModel.getStatus());
+			Assert.isNull(e, () -> e);
+			// set buildId field
+			int buildId = ObjectUtil.defaultIfNull(buildInfoModel.getBuildId(), 0);
+			{
+				BuildInfoModel buildInfoModel1 = new BuildInfoModel();
+				buildInfoModel1.setBuildId(buildId + 1);
+				buildInfoModel1.setId(buildInfoId);
+				buildInfoModel.setBuildId(buildInfoModel1.getBuildId());
+				super.update(buildInfoModel1);
+			}
+			// load repository
+			RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
+			Assert.notNull(repositoryModel, "仓库信息不存在");
+			BuildInfoManage.create(buildInfoModel, repositoryModel, userModel, delay, triggerBuildType);
+			String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
+			return new JsonMessage<>(200, msg, buildInfoModel.getBuildId());
+		}
 	}
 
 	/**

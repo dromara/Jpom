@@ -71,7 +71,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
 	public void delByBuildId(String buildDataId) {
 		Entity where = new Entity(getTableName());
 		where.set("buildDataId", buildDataId);
-		del(where);
+		super.del(where);
 	}
 
 	/**

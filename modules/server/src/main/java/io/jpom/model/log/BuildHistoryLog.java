@@ -97,6 +97,10 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	 */
 	private Integer buildNumberId;
 	/**
+	 * 触发构建类型 触发类型{0，手动，1 触发器,2 自动触发}
+	 */
+	private Integer triggerBuildType;
+	/**
 	 * 状态
 	 *
 	 * @see BuildStatus
@@ -120,6 +124,15 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	 */
 	@PropIgnore
 	private Boolean hasLog;
+
+
+	public Integer getTriggerBuildType() {
+		return triggerBuildType;
+	}
+
+	public void setTriggerBuildType(Integer triggerBuildType) {
+		this.triggerBuildType = triggerBuildType;
+	}
 
 	public Boolean getHashFile() {
 		File file = BuildUtil.getHistoryPackageFile(getBuildDataId(), getBuildNumberId(), getResultDirFile());

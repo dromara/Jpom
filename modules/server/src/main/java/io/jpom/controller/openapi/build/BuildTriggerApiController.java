@@ -26,6 +26,12 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.JsonMessage;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.BaseJpomController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.controller.build.BuildInfoTriggerController;
@@ -37,10 +43,12 @@ import org.h2.util.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -48,7 +56,7 @@ import java.util.List;
  */
 @RestController
 @NotLogin
-public class BuildTriggerApiController {
+public class BuildTriggerApiController extends BaseJpomController {
 
 	private final BuildInfoService buildInfoService;
 
@@ -107,6 +115,66 @@ public class BuildTriggerApiController {
 
 		Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
 
-		return buildInfoService.start(item, userModel, Convert.toInt(delay, 0));
+		JsonMessage<Integer> start = buildInfoService.start(id, userModel, Convert.toInt(delay, 0), 1);
+		return start.toString();
+	}
+
+	/**
+	 * 构建触发器
+	 * <p>
+	 * 参数 <code>[
+	 * {
+	 * "id":"1",
+	 * "token":"a",
+	 * "delay":"0"
+	 * }
+	 * ]</code>
+	 * <p>
+	 * 响应 <code>[
+	 * {
+	 * "id":"1",
+	 * "token":"a",
+	 * "delay":"0",
+	 * "msg":"开始构建",
+	 * "data":1
+	 * }
+	 * ]</code>
+	 *
+	 * @return json
+	 */
+	@PostMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String triggerBatch() {
+		try {
+			String body = ServletUtil.getBody(getRequest());
+			JSONArray jsonArray = JSONArray.parseArray(body);
+			List<Object> collect = jsonArray.stream().peek(o -> {
+				JSONObject jsonObject = (JSONObject) o;
+				String id = jsonObject.getString("id");
+				String token = jsonObject.getString("token");
+				Integer delay = jsonObject.getInteger("delay");
+				BuildInfoModel item = buildInfoService.getByKey(id);
+				if (item == null) {
+					jsonObject.put("msg", "没有对应数据");
+					return;
+				}
+				UserModel userModel = BuildTriggerApiController.this.getByUrlToken(token);
+				if (userModel == null) {
+					jsonObject.put("msg", "没有对应数据");
+					return;
+				}
+				//
+				if (!StrUtil.equals(token, item.getTriggerToken())) {
+					jsonObject.put("msg", "触发token错误,或者已经失效");
+					return;
+				}
+				JsonMessage<Integer> start = buildInfoService.start(id, userModel, delay, 1);
+				jsonObject.put("msg", start.getMsg());
+				jsonObject.put("buildId", start.getData());
+			}).collect(Collectors.toList());
+			return JsonMessage.getString(200, "触发成功", collect);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("构建触发批量触发异常", e);
+			return JsonMessage.getString(500, "触发异常", e.getMessage());
+		}
 	}
 }

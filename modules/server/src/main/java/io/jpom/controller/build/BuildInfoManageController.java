@@ -27,7 +27,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -89,18 +88,10 @@ public class BuildInfoManageController extends BaseServerController {
 	public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
 		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
 		Assert.notNull(item, "没有对应数据");
-		String e = buildInfoService.checkStatus(item.getStatus());
-		Assert.isNull(e, () -> e);
-		// set buildId field
-		int buildId = ObjectUtil.defaultIfNull(item.getBuildId(), 0);
-		item.setBuildId(buildId + 1);
 		// userModel
 		UserModel userModel = getUser();
-		//String optUserName = userModel == null ? "openApi" : UserModel.getOptUserName(userModel);
-		//item.setModifyUser(optUserName);
-		buildInfoService.update(item);
 		// 执行构建
-		return buildInfoService.start(item, userModel, null);
+		return buildInfoService.start(item.getId(), userModel, null, 0).toString();
 	}
 
 	/**
@@ -141,9 +132,7 @@ public class BuildInfoManageController extends BaseServerController {
 		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
 		Objects.requireNonNull(item, "没有对应数据");
 		String e = buildInfoService.checkStatus(item.getStatus());
-		if (e != null) {
-			return e;
-		}
+		Assert.isNull(e, () -> e);
 		UserModel userModel = getUser();
 		ReleaseManage releaseManage = new ReleaseManage(buildHistoryLog, userModel);
 		// 标记发布中

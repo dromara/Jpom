@@ -117,10 +117,12 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		if (t instanceof BaseUserModifyDbModel) {
 			// 获取数据修改人
 			BaseUserModifyDbModel modifyDbModel = (BaseUserModifyDbModel) t;
-			UserModel userModel = BaseServerController.getUserModel();
-			userModel = userModel == null ? BaseServerController.getUserByThreadLocal() : userModel;
-			if (userModel != null) {
-				modifyDbModel.setModifyUser(ObjectUtil.defaultIfNull(modifyDbModel.getModifyUser(), userModel.getId()));
+			if (StrUtil.isEmpty(modifyDbModel.getModifyUser())) {
+				UserModel userModel = BaseServerController.getUserModel();
+				userModel = userModel == null ? BaseServerController.getUserByThreadLocal() : userModel;
+				if (userModel != null) {
+					modifyDbModel.setModifyUser(ObjectUtil.defaultIfNull(modifyDbModel.getModifyUser(), userModel.getId()));
+				}
 			}
 		}
 	}

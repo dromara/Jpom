@@ -574,7 +574,7 @@ export default {
       this.loadNodeList(() => {
         this.loadProjectListAll(() => {
           //分发节点重新渲染
-
+          this.temp = {};
           JSON.parse(record.outGivingNodeProjectList).forEach((ele, eleIndex) => {
             let index = "";
             let projects = [];
@@ -595,18 +595,19 @@ export default {
             });
             // console.log(ele, eleIndex);
           });
-          this.temp = {
-            ...{
-              type: "edit",
-              projectId: record.projectId,
-              name: record.name,
-              afterOpt: record.afterOpt,
-              id: record.id,
-              intervalTime: record.intervalTime,
-              clearOld: record.clearOld,
-            },
-          };
+          this.temp = { ...this.temp };
 
+          this.temp = {
+            ...this.temp,
+            type: "edit",
+            projectId: record.projectId,
+            name: record.name,
+            afterOpt: record.afterOpt,
+            id: record.id,
+            intervalTime: record.intervalTime,
+            clearOld: record.clearOld,
+          };
+          // console.log(this.temp);
           this.linkDispatchVisible = true;
         });
       });
@@ -1009,7 +1010,7 @@ export default {
       if (this.dispatchList[value].index !== "") {
         this.nodeNameList[this.dispatchList[value].index].openStatus = true;
       }
-      delete this.temp[`node_${this.dispatchList[value].nodeId}`];
+      delete this.temp[`node_${this.dispatchList[value].nodeId}_${this.dispatchList[value].index}`];
       this.dispatchList[value].status = false;
       this.dispatchList.splice(value, 1);
     },
