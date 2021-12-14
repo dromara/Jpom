@@ -25,7 +25,7 @@ if [ ! -n "$old_version" ]; then
 fi
 
 # 替换所有模块pom.xml中的版本
-mvn versions:set -DnewVersion=$1
+cd ../ && mvn versions:set -DnewVersion=$1
 
 # 替换 jpom.io 主页版本号
 sed -i "s/${old_version}/${new_version}/g" $pwd/../docs/js/version.js
