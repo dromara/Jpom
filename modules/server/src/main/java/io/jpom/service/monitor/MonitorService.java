@@ -25,7 +25,7 @@ package io.jpom.service.monitor;
 import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.MonitorModel;
-import io.jpom.monitor.Monitor;
+import io.jpom.monitor.MonitorTask;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +44,7 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 	public void insert(MonitorModel monitorModel) {
 		super.insert(monitorModel);
 		if (monitorModel.status()) {
-			Monitor.start();
+			MonitorTask.start();
 		}
 	}
 
@@ -61,9 +61,9 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 		monitorModel.setStatus(true);
 		long count = super.count(super.dataBeanToEntity(monitorModel));
 		if (count > 0) {
-			Monitor.start();
+			MonitorTask.start();
 		} else {
-			Monitor.stop();
+			MonitorTask.stop();
 		}
 		return count > 0;
 	}
