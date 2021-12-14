@@ -22,6 +22,7 @@
  */
 package io.jpom.util;
 
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -125,7 +126,13 @@ public class CommandUtil {
 	 */
 	private static String exec(String[] cmd, File file) throws IOException {
 		Process process = new ProcessBuilder(cmd).directory(file).redirectErrorStream(true).start();
-		Charset charset = ExtConfigBean.getInstance().getConsoleLogCharset();
+		Charset charset;
+		try {
+			charset = ExtConfigBean.getInstance().getConsoleLogCharset();
+		} catch (Exception e) {
+			charset = CharsetUtil.systemCharset();
+		}
+		charset = ObjectUtil.defaultIfNull(charset, CharsetUtil.defaultCharset());
 		String result = RuntimeUtil.getResult(process, charset);
 		DefaultSystemLog.getLog().debug("exec {} {} {}", charset.name(), Arrays.toString(cmd), result);
 		return result;
