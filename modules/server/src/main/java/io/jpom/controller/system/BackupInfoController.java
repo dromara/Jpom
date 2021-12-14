@@ -94,13 +94,6 @@ public class BackupInfoController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	@SystemPermission(superUser = true)
 	public Object deleteBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
-		// 根据 id 查询备份信息
-		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
-		Objects.requireNonNull(backupInfoModel, "备份数据不存在");
-
-		// 删除对应的文件
-		FileUtil.del(backupInfoModel.getFilePath());
-
 		// 删除备份信息
 		backupInfoService.delByKey(id);
 		return JsonMessage.toJson(200, "删除成功");

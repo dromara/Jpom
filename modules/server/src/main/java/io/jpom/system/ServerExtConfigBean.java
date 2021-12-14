@@ -95,6 +95,12 @@ public class ServerExtConfigBean implements DisposableBean {
 	private Integer autoBackupIntervalDay;
 
 	/**
+	 * 自动备份保留天数 小于等于 0，不自动删除自动备份数据
+	 */
+	@Value("${db.autoBackupReserveDay:5}")
+	private Integer autoBackupReserveDay;
+
+	/**
 	 * author Hotstrip
 	 * 是否开启 web 访问数据库
 	 *
@@ -290,6 +296,10 @@ public class ServerExtConfigBean implements DisposableBean {
 
 	public Integer getAutoBackupIntervalDay() {
 		return autoBackupIntervalDay;
+	}
+
+	public Integer getAutoBackupReserveDay() {
+		return autoBackupReserveDay;
 	}
 
 	/**

@@ -50,6 +50,8 @@ db:
   cacheSize:
   # 自动备份间隔天数 小于等于 0 不自动备份
   autoBackupIntervalDay: 1
+  # 自动备份保留天数 小于等于 0，不自动删除自动备份数据
+  autoBackupReserveDay: 5
 # spring 相关配置
 spring:
   h2:
