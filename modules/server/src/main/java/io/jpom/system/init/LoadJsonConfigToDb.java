@@ -151,6 +151,7 @@ public class LoadJsonConfigToDb {
 			return;
 		}
 		try {
+			BaseServerController.resetInfo(UserModel.EMPTY);
 			JSON json = JsonFileUtil.readJson(file.getAbsolutePath());
 			JSONArray jsonArray = JsonFileUtil.formatToArray((JSONObject) json);
 			List<UserModel> userModels = jsonArray.toJavaList(UserModel.class);
@@ -173,6 +174,8 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load user info error ", e);
+		} finally {
+			BaseServerController.remove();
 		}
 	}
 

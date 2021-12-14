@@ -23,12 +23,8 @@
 package io.jpom.model;
 
 import cn.hutool.cron.pattern.CronPattern;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 周期
@@ -86,29 +82,29 @@ public enum Cycle implements BaseEnum {
 		return desc;
 	}
 
-	public static JSONArray getAllJSONArray() {
-		//监控周期
-		JSONArray jsonArray = BaseEnum.toJSONArray(Cycle.class);
-		jsonArray = jsonArray.stream().filter(o -> {
-			JSONObject jsonObject = (JSONObject) o;
-			int code = jsonObject.getIntValue("code");
-			return code != none.getCode();
-		}).collect(Collectors.toCollection(JSONArray::new));
-		try {
-			JSONObject jsonObject = BaseEnum.toJSONObject(Cycle.none);
-			jsonArray.add(0, jsonObject);
-		} catch (InvocationTargetException | IllegalAccessException ignored) {
-		}
-		return jsonArray;
-	}
-
-	public static JSONArray getJSONArray() {
-		//监控周期
-		JSONArray cycleArray = getAllJSONArray();
-		return cycleArray.stream().filter(o -> {
-			JSONObject jsonObject = (JSONObject) o;
-			int code = jsonObject.getIntValue("code");
-			return code > none.getCode();
-		}).collect(Collectors.toCollection(JSONArray::new));
-	}
+//	public static JSONArray getAllJSONArray() {
+//		//监控周期
+//		JSONArray jsonArray = BaseEnum.toJSONArray(Cycle.class);
+//		jsonArray = jsonArray.stream().filter(o -> {
+//			JSONObject jsonObject = (JSONObject) o;
+//			int code = jsonObject.getIntValue("code");
+//			return code != none.getCode();
+//		}).collect(Collectors.toCollection(JSONArray::new));
+//		try {
+//			JSONObject jsonObject = BaseEnum.toJSONObject(Cycle.none);
+//			jsonArray.add(0, jsonObject);
+//		} catch (InvocationTargetException | IllegalAccessException ignored) {
+//		}
+//		return jsonArray;
+//	}
+//
+//	public static JSONArray getJSONArray() {
+//		//监控周期
+//		JSONArray cycleArray = getAllJSONArray();
+//		return cycleArray.stream().filter(o -> {
+//			JSONObject jsonObject = (JSONObject) o;
+//			int code = jsonObject.getIntValue("code");
+//			return code > none.getCode();
+//		}).collect(Collectors.toCollection(JSONArray::new));
+//	}
 }

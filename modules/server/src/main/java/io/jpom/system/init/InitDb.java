@@ -37,7 +37,9 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
+import io.jpom.model.data.UserModel;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.system.ConfigBean;
@@ -159,15 +161,20 @@ public class InitDb implements DisposableBean, InitializingBean {
 		instance.loadIpConfig();
 		instance.loadMailConfig();
 		instance.loadOutGivingWhitelistConfig();
-		instance.loadUserInfo();
 		// init workspace
 		WorkspaceService workspaceService = SpringUtil.getBean(WorkspaceService.class);
-		workspaceService.checkInitDefault();
-		//
-		instance.loadNodeInfo();
-		instance.loadSshInfo();
-		instance.loadMonitorInfo();
-		instance.loadOutgivinInfo();
+		try {
+			BaseServerController.resetInfo(UserModel.EMPTY);
+			instance.loadUserInfo();
+			workspaceService.checkInitDefault();
+			//
+			instance.loadNodeInfo();
+			instance.loadSshInfo();
+			instance.loadMonitorInfo();
+			instance.loadOutgivinInfo();
+		} finally {
+			BaseServerController.remove();
+		}
 		//
 		workspaceService.convertNullWorkspaceId();
 		instance.convertMonitorLogField();
