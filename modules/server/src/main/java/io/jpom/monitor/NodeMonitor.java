@@ -61,8 +61,7 @@ public class NodeMonitor implements Task {
 		Task task = CronUtil.getScheduler().getTask(CRON_ID);
 		if (task == null) {
 			CronPattern cronPattern = Cycle.seconds30.getCronPattern();
-			CronUtil.schedule(CRON_ID, cronPattern.toString(), new NodeMonitor());
-			CronUtils.start();
+			CronUtils.upsert(CRON_ID, cronPattern.toString(), new NodeMonitor());
 		}
 		dbSystemMonitorLogService = SpringUtil.getBean(DbSystemMonitorLogService.class);
 	}

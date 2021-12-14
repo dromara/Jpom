@@ -71,8 +71,7 @@ public class Monitor implements Task {
 	public static void start() {
 		Task task = CronUtil.getScheduler().getTask(CRON_ID);
 		if (task == null) {
-			CronUtil.schedule(CRON_ID, Cycle.one.getCronPattern().toString(), new Monitor());
-			CronUtils.start();
+			CronUtils.upsert(CRON_ID, Cycle.one.getCronPattern().toString(), new Monitor());
 		}
 		dbMonitorNotifyLogService = SpringUtil.getBean(DbMonitorNotifyLogService.class);
 	}
