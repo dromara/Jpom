@@ -94,19 +94,17 @@ export default {
     // 加载数据
     loadData() {
       systemInfo(this.nodeId).then((res) => {
-        if (res.code === 200) {
-          this.temp = res.data?.manifest;
+        this.temp = res.data?.manifest;
+        //
+        // vueTimeStamp
+        this.temp = { ...this.temp, vueTimeStamp: parseTime(this.getMeta("build-time")) };
+        //
+        changelog(this.nodeId).then((resLog) => {
+          this.changelog = resLog.data;
           //
-          // vueTimeStamp
-          this.temp.vueTimeStamp = parseTime(this.getMeta("build-time"));
-          //
-          changelog(this.nodeId).then((resLog) => {
-            this.changelog = resLog.data;
-            //
-            // res.data.
-            this.showVersion(false, res.data?.remoteVersion);
-          });
-        }
+          // res.data.
+          this.showVersion(false, res.data?.remoteVersion);
+        });
       });
     },
     getMeta(metaName) {
