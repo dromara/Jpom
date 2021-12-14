@@ -1,7 +1,7 @@
 #!/bin/bash
 # The MIT License (MIT)
 #
-# Copyright (c) 2019 码之科技工作室
+# Copyright (c) 2019 Code Technology Studio
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -19,7 +19,7 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-# ssh 支持读取环境变量
+# ssh try load env
 if [ -f /etc/profile ]; then
     . /etc/profile
 fi
@@ -32,9 +32,9 @@ fi
 if [ -f ~/.bashrc ]; then
     . ~/.bashrc
 fi
-# 请不要修改 tag 属性的值，修改后会影响程序的停止、查看状态
+# Please do not modify the value of the tag attribute, the modification will affect the stop and view status of the program
 Tag="KeepBx-Agent-System-JpomAgentApplication"
-# 自动获取当前路径
+# Obtain the current path automatically
 Path=$(
   cd $(dirname $0)
   pwd
@@ -44,13 +44,13 @@ RUNJAR=""
 Log="${Path}agent.log"
 LogBack="${Path}log/"
 JVM="-server -Xms200m -Xmx400m"
-# 修改项目端口号 日志路径
+# Modify project port number Log path
 ARGS="--jpom.applicationTag=${Tag} --spring.profiles.active=pro --server.port=2123  --jpom.log=${Path}log $@"
 
 echo ${Tag}
 echo ${Path}
 RETVAL="0"
-# 升级执行命令标识
+# upgrade tag
 upgrade="$2"
 
 # now set the path to java
@@ -65,19 +65,19 @@ else
 fi
 
 if [[ ! -x "$JAVA" ]]; then
-  echo "没有找到JAVA 文件,请配置【JAVA_HOME】环境变量"
+  echo "JAVA file is not found, please configure [JAVA_HOME] environment variable"
   exit 1
 fi
 
-# 启动程序
+# start
 function start() {
   pid=$(getPid)
   if [[ "$pid" != "" ]]; then
-    echo "程序正在运行中：${pid}"
+    echo "Program is running：${pid}"
     exit 2
   fi
   echo ${Log}
-  # 备份日志
+  # Backup log
   if [[ -f ${Log} ]]; then
     if [[ ! -d ${LogBack} ]]; then
       mkdir ${LogBack}
@@ -90,16 +90,16 @@ function start() {
   # jar
   if [[ -z "${RUNJAR}" ]]; then
     RUNJAR=$(listDir ${Lib})
-    echo "自动运行：${RUNJAR}"
+    echo "automatic running：${RUNJAR}"
   fi
   # error
   if [[ -z "${RUNJAR}" ]]; then
-    echo "没有找到jar"
+    echo "Jar not found"
     exit 2
   fi
 
   nohup ${JAVA} ${JVM} -jar ${Lib}${RUNJAR} -Dapplication=${Tag} -Dbasedir=${Path} ${ARGS} >>${Log} 2>&1 &
-  # 升级不执行查看日志
+  # The upgrade is not executed. View the log
   if [[ ${upgrade} == "upgrade" ]]; then
     exit 0
   fi
@@ -110,17 +110,17 @@ function start() {
     if [[ -f ${Log} ]]; then
       tail -f ${Log}
     else
-      echo "还没有生成日志文件:${Log}"
+      echo "No log files have been generated:${Log}"
     fi
   fi
 }
 
-# 找出第一个jar包
+# Find the first jar package
 function listDir() {
   ALL=""
   for file in "$1"/*.jar; do
     if [[ -f "${file}" ]]; then
-      #得到文件的完整的目录
+      # Get the complete list of files
       ALL="${file}"
       break
     fi
@@ -128,7 +128,7 @@ function listDir() {
   echo ${ALL##*/}
 }
 
-# 停止程序
+# stop
 function stop() {
   pid=$(getPid)
   if [[ "$pid" != "" ]]; then
@@ -149,7 +149,7 @@ function stop() {
   status
 }
 
-# 获取程序状态
+# status
 function status() {
   pid=$(getPid)
   #echo "$pid"
@@ -165,25 +165,25 @@ function getPid() {
   echo ${pid}
 }
 
-# 提示使用语法
+# usage
 function usage() {
   echo "Usage: $0 {start|stop|restart|status|create}"
   RETVAL="2"
 }
 
-# 创建自启动服务文件
+# Create a self-starting service file
 function create() {
 	yum install -y wget && wget -O jpom-agent https://dromara.gitee.io/jpom/docs/jpom-service.sh
-	#判断当前脚本是否为绝对路径，匹配以/开头下的所有
+	# Determine whether the current script is an absolute path, matching all beginning with /
 	if [[ $0 =~ ^\/.* ]]
     then
       selfpath=$0
     else
       selfpath=$(pwd)/$0
     fi
-    #获取文件的真实路径
+    # Get the complete list of files
     selfpath=`readlink -f $selfpath`
-    # 替换路径
+    # Replacement path
     sed -i "s|JPOM_RUN_PATH|${selfpath}|g" jpom-agent
     echo 'create jpom-agent file done'
     mv -f jpom-agent /etc/init.d/jpom-agent

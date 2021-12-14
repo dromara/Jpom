@@ -1,6 +1,6 @@
 @REM The MIT License (MIT)
 @REM
-@REM Copyright (c) 2019 码之科技工作室
+@REM Copyright (c) 2019 Code Technology Studio
 @REM
 @REM Permission is hereby granted, free of charge, to any person obtaining a copy of
 @REM this software and associated documentation files (the "Software"), to deal in
@@ -24,44 +24,44 @@
 CHCP 65001
 setlocal enabledelayedexpansion
 
-@REM 设置环境变量，避免部分服务器没有 taskkill
+@REM Set environment variables to prevent some servers from failing to taskkill
 set PATH = %PATH%;C:\Windows\system32;C:\Windows;C:\Windows\system32\Wbem
 
 set Tag=KeepBx-System-JpomServerApplication
 set MainClass=org.springframework.boot.loader.JarLauncher
 set basePath=%~dp0
 set Lib=%basePath%lib\
-@REM 请勿修改----------------------------------↓
+@REM Do not modify----------------------------------↓
 set LogName=server.log
-@REM 在线升级会自动修改此属性
+@REM Online upgrade will automatically modify this attribute
 set RUNJAR=
-@REM 请勿修改----------------------------------↑
-@REM 是否开启控制台日志文件备份
+@REM Do not modify----------------------------------↑
+@REM Whether to enable console log file backup
 set LogBack=true
 set JVM=-server -Xms254m -Xmx1024m
 set ARGS= --jpom.applicationTag=%Tag%  --spring.profiles.active=pro --jpom.log=%basePath%log --server.port=2122
 
-@REM 读取jar
+@REM get list jar
 call:listDir
 
 if "%1"=="" (
     color 0a
-    TITLE Jpom管理系统BAT控制台
-    echo. ***** Jpom管理系统BAT控制台 *****
+    TITLE Jpom management system BAT console
+    echo. ***** Jpom management system BAT console *****
     ::*************************************************************************************************************
     echo.
-        echo.  [1] 启动 start
-        echo.  [2] 关闭 stop
-        echo.  [3] 查看运行状态 status
-        echo.  [4] 重启 restart
-        echo.  [5] 帮助 use
-        echo.  [6] 清除 IP 白名单配置
-        echo.  [7] 重新加载数据库初始化操作
-        echo.  [8] 重置超级管理员密码
-        echo.  [0] 退 出 0
+        echo.  [1] start
+        echo.  [2] stop
+        echo.  [3] status
+        echo.  [4] restart
+        echo.  [5] use / help
+        echo.  [6] clear ip config
+        echo.  [7] load init db
+        echo.  [8] rest super user pwd
+        echo.  [0] exit 0
     echo.
-    @REM 输入
-    echo.请输入选择的序号:
+    @REM enter
+    echo.Please enter the selected serial number:
     set /p ID=
     IF "!ID!"=="1" call:start
     IF "!ID!"=="2" call:stop
@@ -82,26 +82,26 @@ if "%1"=="" (
 if "%2" NEQ "upgrade" (
     PAUSE
 )else (
- @REM 升级直接结束
+ @REM The upgrade ends directly
 )
 EXIT 0
 
 @REM 启动
 :start
     if "%JAVA_HOME%"=="" (
-        echo 请配置【JAVA_HOME】环境变量
+        echo please configure [JAVA_HOME] environment variable
         PAUSE
         EXIT 2
     )
 
-	echo 启动中.....启动成功后关闭窗口不影响运行
-	echo 启动详情请查看：%LogName%
+	echo Starting..... Closing the window after a successful start does not affect the operation
+	echo Please check for startup details：%LogName%
 	javaw %JVM% -Djava.class.path="%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% %1 >> %basePath%%LogName%
 	timeout 3
 goto:eof
 
 
-@REM 获取jar
+@REM  get jar
 :listDir
 	if "%RUNJAR%"=="" (
 		for /f "delims=" %%I in ('dir /B %Lib%') do (
@@ -116,29 +116,29 @@ goto:eof
 	)else (
 		set RUNJAR=%Lib%%RUNJAR%
 	)
-	echo 运行：%RUNJAR%
+	echo run：%RUNJAR%
 goto:eof
 
-@REM 关闭Jpom
+@REM  stop Jpom
 :stop
 	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=stop
 goto:eof
 
-@REM 查看Jpom运行状态
+@REM view Jpom status
 :status
 	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=status
 goto:eof
 
-@REM 重启Jpom
+@REM restart Jpom
 :restart
-	echo 停止中....
+	echo Stopping....
 	call:stop
 	timeout 3
-	echo 启动中....
+	echo starting....
 	call:start %1
 goto:eof
 
-@REM 提示用法
+@REM use
 :use
 	echo please use (start、stop、restart、status)
 goto:eof
