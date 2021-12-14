@@ -33,13 +33,13 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.BaseNodeModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.OutGivingNodeProject;
@@ -60,6 +60,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -98,36 +99,40 @@ public class OutGivingProjectController extends BaseServerController {
 
 	@RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) {
-		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, getRequest());
+		HttpServletRequest request = getRequest();
+		String workspaceId = outGivingServer.getCheckUserWorkspace(request);
+		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
 		Objects.requireNonNull(outGivingServerItem, "没有数据");
 		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
-		JSONArray jsonArray = new JSONArray();
-		outGivingNodeProjectList.forEach(outGivingNodeProject -> {
+		List<JSONObject> collect = outGivingNodeProjectList.stream().map(outGivingNodeProject -> {
 			NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject.getNodeId());
 			JSONObject jsonObject = new JSONObject();
-			JSONObject projectInfo = null;
-			try {
-				projectInfo = projectInfoCacheService.getItem(nodeModel, outGivingNodeProject.getProjectId());
-			} catch (Exception e) {
-				jsonObject.put("errorMsg", "error " + e.getMessage());
-			}
 
 			jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
 			jsonObject.put("projectId", outGivingNodeProject.getProjectId());
 			jsonObject.put("nodeName", nodeModel.getName());
-			if (projectInfo != null) {
-				jsonObject.put("projectName", projectInfo.getString("name"));
-			}
-
+			jsonObject.put("id", BaseNodeModel.fullId(workspaceId, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId()));
 			// set projectStatus property
 			//NodeModel node = nodeService.getItem(outGivingNodeProject.getNodeId());
 			// Project Status: data.pid > 0 means running
 			JSONObject projectStatus = JsonMessage.toJson(200, "success");
 			if (nodeModel.isOpenStatus()) {
-				projectStatus = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId()).toJson();
+				JSONObject projectInfo = null;
+				try {
+					projectInfo = projectInfoCacheService.getItem(nodeModel, outGivingNodeProject.getProjectId());
+					projectStatus = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId()).toJson();
+				} catch (Exception e) {
+					jsonObject.put("errorMsg", "error " + e.getMessage());
+				}
+				if (projectInfo != null) {
+					jsonObject.put("projectName", projectInfo.getString("name"));
+				}
+			} else {
+				jsonObject.put("errorMsg", "节点未启用");
 			}
-			if (projectStatus.getJSONObject("data") != null && projectStatus.getJSONObject("data").getInteger("pId") != null) {
-				jsonObject.put("projectStatus", projectStatus.getJSONObject("data").getIntValue("pId") > 0);
+			JSONObject data = projectStatus.getJSONObject("data");
+			if (data != null && data.getInteger("pId") != null) {
+				jsonObject.put("projectStatus", data.getIntValue("pId") > 0);
 			} else {
 				jsonObject.put("projectStatus", false);
 			}
@@ -135,9 +140,9 @@ public class OutGivingProjectController extends BaseServerController {
 			jsonObject.put("outGivingStatus", outGivingNodeProject.getStatusMsg());
 			jsonObject.put("outGivingResult", outGivingNodeProject.getResult());
 			jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());
-			jsonArray.add(jsonObject);
-		});
-		return JsonMessage.getString(200, "", jsonArray);
+			return jsonObject;
+		}).collect(Collectors.toList());
+		return JsonMessage.getString(200, "", collect);
 	}
 
 	private File checkZip(String path, boolean unzip) {

@@ -67,11 +67,11 @@
     </a-table>
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
+      <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" @goConsole="goConsole"/>
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
+      <console v-if="drawerConsoleVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goFile="goFile"/>
     </a-drawer>
     <!-- 批量操作状态 -->
     <a-modal v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
@@ -252,6 +252,18 @@ export default {
     onConsoleClose() {
       this.drawerConsoleVisible = false;
       this.getNodeProjectData();
+    },
+     //前往文件
+    goFile() {
+      // 关闭控制台
+      this.onConsoleClose();
+      this.handleFile(this.temp);
+    },
+     //前往控制台
+    goConsole() {
+      //关闭文件
+      this.onFileClose();
+      this.handleConsole(this.temp);
     },
     //选中项目
     onSelectChange(selectedRowKeys) {
