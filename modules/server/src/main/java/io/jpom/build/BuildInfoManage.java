@@ -29,6 +29,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -493,7 +494,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 				httpRequest.form("triggerBuildType", this.triggerBuildType);
 				httpRequest.form("triggerTime", triggerTime);
 				String body = httpRequest.execute().body();
-				DefaultSystemLog.getLog().info(this.buildInfoModel.getName() + ":" + body);
+				DefaultSystemLog.getLog().info(this.buildInfoModel.getName() + CharPool.COLON + body);
 			} catch (Exception e) {
 				DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
 			}

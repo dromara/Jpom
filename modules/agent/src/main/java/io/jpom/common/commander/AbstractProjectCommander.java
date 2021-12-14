@@ -29,6 +29,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
@@ -245,7 +246,7 @@ public abstract class AbstractProjectCommander {
 				httpRequest.form("copyId", javaCopyItem.getId());
 			}
 			String body = httpRequest.execute().body();
-			DefaultSystemLog.getLog().info(nodeProjectInfoModel.getName() + ":" + body);
+			DefaultSystemLog.getLog().info(nodeProjectInfoModel.getName() + CharPool.COLON + body);
 			return body;
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
@@ -529,7 +530,7 @@ public abstract class AbstractProjectCommander {
 	 */
 	public static int parsePid(String result) {
 		if (result.startsWith(AbstractProjectCommander.RUNNING_TAG)) {
-			String[] split = result.split(":");
+			String[] split = result.split(StrUtil.COLON);
 			return Convert.toInt(ArrayUtil.get(split, 1), 0);
 		}
 		return 0;
