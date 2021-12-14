@@ -28,6 +28,7 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.JschUtil;
@@ -300,7 +301,7 @@ public class ReleaseManage extends BaseBuild {
 	 */
 	private void doProject(AfterOpt afterOpt, boolean clearOld) {
 		String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
-		String[] strings = StrUtil.splitToArray(releaseMethodDataId, ":");
+		String[] strings = StrUtil.splitToArray(releaseMethodDataId, CharPool.COLON);
 		if (strings == null || strings.length != 2) {
 			throw new JpomRuntimeException(releaseMethodDataId + " error");
 		}

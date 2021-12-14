@@ -22,6 +22,7 @@
  */
 package io.jpom.model.log;
 
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseWorkspaceModel;
@@ -194,7 +195,7 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
 		if (getOptStatus() == Status.Success.getCode()) {
 			return Status.Success.getDesc();
 		}
-		return Status.Fail.getDesc() + ":" + getOptStatus();
+		return Status.Fail.getDesc() + CharPool.COLON + getOptStatus();
 	}
 
 	public void setOptStatus(int optStatus) {

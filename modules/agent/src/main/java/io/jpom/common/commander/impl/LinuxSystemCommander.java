@@ -23,6 +23,7 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
@@ -172,7 +173,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 		if (StrUtil.isEmpty(info)) {
 			return null;
 		}
-		int index = info.indexOf(":") + 1;
+		int index = info.indexOf(CharPool.COLON) + 1;
 		String[] split = info.substring(index).split(",");
 //            509248k total — 物理内存总量（509M）
 //            495964k used — 使用中的内存总量（495M）
@@ -209,7 +210,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 		if (StrUtil.isEmpty(info)) {
 			return null;
 		}
-		int i = info.indexOf(":");
+		int i = info.indexOf(CharPool.COLON);
 		String[] split = info.substring(i + 1).split(",");
 //            1.3% us — 用户空间占用CPU的百分比。
 //            1.0% sy — 内核空间占用CPU的百分比。

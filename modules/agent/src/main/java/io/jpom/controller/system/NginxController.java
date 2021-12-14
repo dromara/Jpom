@@ -23,6 +23,7 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -343,7 +344,7 @@ public class NginxController extends BaseAgentController {
 			for (String str : strings) {
 				str = str.toUpperCase().trim();
 				if (str.startsWith("BINARY_PATH_NAME")) {
-					String path = str.substring(str.indexOf(":") + 1).replace("\"", "").trim();
+					String path = str.substring(str.indexOf(CharPool.COLON) + 1).replace("\"", "").trim();
 					file = FileUtil.file(path).getParentFile();
 					break;
 				}
