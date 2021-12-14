@@ -63,4 +63,13 @@ public class CronUtils {
 		//
 		CronUtils.start();
 	}
+
+	/**
+	 * 停止定时任务
+	 *
+	 * @param id ID
+	 */
+	public static void remove(String id) {
+		CronUtil.remove(id);
+	}
 }
