@@ -1,7 +1,7 @@
 @REM
 @REM The MIT License (MIT)
 @REM
-@REM Copyright (c) 2019 码之科技工作室
+@REM Copyright (c) 2019 Code Technology Studio
 @REM
 @REM Permission is hereby granted, free of charge, to any person obtaining a copy of
 @REM this software and associated documentation files (the "Software"), to deal in
@@ -24,6 +24,5 @@
 @echo off
 CHCP 65001
 
-
-@REM 设置环境变量，避免部分服务器没有 taskkill
+@REM Set environment variables to prevent some servers from failing to taskkill
 set PATH = %PATH%;C:\Windows\system32;C:\Windows;C:\Windows\system32\Wbem
