@@ -22,21 +22,18 @@
  */
 package io.jpom.service.dblog;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.build.BuildUtil;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
@@ -46,7 +43,7 @@ import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.sql.SQLException;
+import java.util.List;
 
 /**
  * 构建历史db
@@ -145,7 +142,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
 				}
 			}
 		}
-		int count = delByKey(buildHistoryLog.getId());
+		int count = this.delByKey(buildHistoryLog.getId());
 		return new JsonMessage<>(200, "删除成功", count + "");
 	}
 
@@ -169,30 +166,22 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
 		if (buildDataId != null) {
 			entity.set("buildDataId", buildDataId);
 		}
+
 		Page page = new Page(pageNo, 10);
 		page.addOrder(new Order("startTime", Direction.DESC));
-		PageResult<Entity> pageResult;
-		try {
-			pageResult = Db.use().setWrapper((Character) null).page(entity, page);
-			if (pageResult.isEmpty()) {
-				return;
+		PageResultDto<BuildHistoryLog> pageResultDto = super.listPage(entity, page);
+		if (pageResultDto.isEmpty()) {
+			return;
+		}
+		List<BuildHistoryLog> result = pageResultDto.getResult();
+		for (BuildHistoryLog buildHistoryLog : result) {
+			JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog);
+			if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+				DefaultSystemLog.getLog().info(jsonMessage.toString());
 			}
-			pageResult.forEach(entity1 -> {
-				CopyOptions copyOptions = new CopyOptions();
-				copyOptions.setIgnoreError(true);
-				copyOptions.setIgnoreCase(true);
-				BuildHistoryLog v1 = BeanUtil.mapToBean(entity1, BuildHistoryLog.class, copyOptions);
-				String id = v1.getId();
-				JsonMessage<String> jsonMessage = deleteLogAndFile(id);
-				if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-					DefaultSystemLog.getLog().info(jsonMessage.toString());
-				}
-			});
-			if (pageResult.getTotalPage() > pageResult.getPage()) {
-				doClearPage(pageNo + 1, time, buildDataId);
-			}
-		} catch (SQLException e) {
-			DefaultSystemLog.getLog().error("数据库查询异常", e);
+		}
+		if (pageResultDto.getTotalPage() > pageResultDto.getPage()) {
+			doClearPage(pageNo + 1, time, buildDataId);
 		}
 	}
 }

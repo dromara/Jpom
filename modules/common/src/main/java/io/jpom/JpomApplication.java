@@ -94,7 +94,7 @@ public class JpomApplication extends ApplicationBuilder {
 		JpomApplication.args = args;
 		// 检查 type 中的 applicationClass 配置是否正确
 		String applicationClass = appType.getApplicationClass();
-		Assert.state(StrUtil.equals(applicationClass, appClass.getName()), "当前允许的类和配置的类名不一致：io.jpom.common.Type#getApplicationClass()");
+		Assert.state(StrUtil.equals(applicationClass, appClass.getName()), "The currently allowed classes are inconsistent with the configured class names：io.jpom.common.Type#getApplicationClass()");
 
 		addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8));
 
@@ -169,7 +169,7 @@ public class JpomApplication extends ApplicationBuilder {
 			Environment environment = JpomApplication.getEnvironment();
 			String property = environment.getProperty(Const.APPLICATION_NAME);
 			property = StrUtil.removeAll(property, "jpom");
-			Assert.hasLength(property, "请配置程序类型：" + Const.APPLICATION_NAME);
+			Assert.hasLength(property, "Please configure the program type：" + Const.APPLICATION_NAME);
 			appType = Type.valueOf(property);
 		}
 		return appType;

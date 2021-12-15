@@ -42,7 +42,7 @@ class CheckDuplicateRun {
 			if (mainClassPid == null || pid.equals(ObjectUtil.toString(mainClassPid))) {
 				return;
 			}
-			DefaultSystemLog.getLog().warn("Jpom 程序建议一个机器上只运行一个对应的程序：" + JpomApplication.getAppType() + "  pid:" + mainClassPid);
+			DefaultSystemLog.getLog().warn("The Jpom program recommends that only one corresponding program be run on a machine：" + JpomApplication.getAppType() + "  pid:" + mainClassPid);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("检查异常", e);
 		}

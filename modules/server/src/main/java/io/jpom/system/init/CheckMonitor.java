@@ -49,13 +49,13 @@ public class CheckMonitor {
 		MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
 		boolean status = monitorService.checkCronStatus();
 		if (status) {
-			Console.log("已经开启监听调度：监控");
+			Console.log("Monitoring scheduling has been turned on: Monitoring");
 		}
 		//
 		NodeService nodeService = SpringUtil.getBean(NodeService.class);
 		status = nodeService.checkCronStatus();
 		if (status) {
-			Console.log("已经开启监听调度：节点信息采集");
+			Console.log("Monitoring scheduling has been started: node information collection");
 		}
 		// 缓存检测调度
 		CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
