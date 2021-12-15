@@ -20,14 +20,25 @@
         <span class="layui-elem-quote">在线构建文件占用空间：{{ temp.cacheBuildFileSize }} (10分钟刷新一次)</span>
       </a-timeline-item>
     </a-timeline>
+    <a-list v-if="taskList && taskList.length" bordered :data-source="taskList">
+      <a-list-item slot="renderItem" slot-scope="item">
+        <a-list-item-meta :description="item.taskId">
+          <a slot="title"> {{ item.id }}</a>
+        </a-list-item-meta>
+        <div>
+          {{ item.cron }}
+        </div>
+      </a-list-item>
+    </a-list>
   </div>
 </template>
 <script>
-import { getServerCache, clearCache } from "../../api/system";
+import { getServerCache, clearCache } from "@/api/system";
 export default {
   data() {
     return {
       temp: {},
+      taskList: [],
     };
   },
   mounted() {
@@ -39,6 +50,7 @@ export default {
       getServerCache().then((res) => {
         if (res.code === 200) {
           this.temp = res.data;
+          this.taskList = res.data?.taskList;
         }
       });
     },

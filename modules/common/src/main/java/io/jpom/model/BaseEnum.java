@@ -92,7 +92,10 @@ public interface BaseEnum {
 	 * @param <T>  泛型
 	 * @return 对应的枚举
 	 */
-	static <T extends BaseEnum> T getEnum(Class<? extends BaseEnum> t, int code) {
+	static <T extends BaseEnum> T getEnum(Class<? extends BaseEnum> t, Integer code) {
+		if (code == null) {
+			return null;
+		}
 		Map<Integer, BaseEnum> map = getMap(t);
 		if (map == null) {
 			return null;
@@ -107,7 +110,7 @@ public interface BaseEnum {
 	 * @param code code
 	 * @return desc
 	 */
-	static String getDescByCode(Class<? extends BaseEnum> t, int code) {
+	static String getDescByCode(Class<? extends BaseEnum> t, Integer code) {
 		BaseEnum baseEnums = getEnum(t, code);
 		if (baseEnums == null) {
 			return null;

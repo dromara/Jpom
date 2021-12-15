@@ -25,6 +25,16 @@
         <span class="layui-elem-quote">在读取的日志文件数：{{ temp.readFileOnLineCount }}</span>
       </a-timeline-item>
     </a-timeline>
+    <a-list v-if="taskList && taskList.length" bordered :data-source="taskList">
+      <a-list-item slot="renderItem" slot-scope="item">
+        <a-list-item-meta :description="item.taskId">
+          <a slot="title"> {{ item.id }}</a>
+        </a-list-item-meta>
+        <div>
+          {{ item.cron }}
+        </div>
+      </a-list-item>
+    </a-list>
   </div>
 </template>
 <script>
@@ -38,6 +48,7 @@ export default {
   data() {
     return {
       temp: {},
+      taskList: [],
     };
   },
   mounted() {
@@ -49,6 +60,7 @@ export default {
       getNodeCache(this.node.id).then((res) => {
         if (res.code === 200) {
           this.temp = res.data;
+          this.taskList = res.data?.taskList;
         }
       });
     },

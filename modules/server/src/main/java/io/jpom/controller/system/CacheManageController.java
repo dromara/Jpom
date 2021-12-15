@@ -37,6 +37,7 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.socket.ServiceFileTailWatcher;
 import io.jpom.system.ConfigBean;
+import io.jpom.util.CronUtils;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -77,6 +78,8 @@ public class CacheManageController extends BaseServerController {
 
 		fileSize = FileUtil.readableFileSize(BuildUtil.buildCacheSize);
 		map.put("cacheBuildFileSize", fileSize);
+
+		map.put("taskList", CronUtils.list());
 
 		return JsonMessage.getString(200, "ok", map);
 	}

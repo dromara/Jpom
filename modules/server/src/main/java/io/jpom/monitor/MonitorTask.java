@@ -49,10 +49,7 @@ public class MonitorTask implements Task {
 	 * 开启调度
 	 */
 	public static void start() {
-		Task task = CronUtil.getScheduler().getTask(CRON_ID);
-		if (task == null) {
-			CronUtils.upsert(CRON_ID, Cycle.one.getCronPattern().toString(), new MonitorTask());
-		}
+		CronUtils.add(CRON_ID, Cycle.one.getCronPattern().toString(), MonitorTask::new);
 	}
 
 	public static void stop() {
@@ -92,7 +89,7 @@ public class MonitorTask implements Task {
 				return;
 			}
 			//
-			ThreadUtil.execute(() -> new MonitorItem(monitorModel));
+			ThreadUtil.execute(new MonitorItem(monitorModel));
 		});
 	}
 
