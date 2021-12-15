@@ -32,7 +32,6 @@ import org.springframework.context.ApplicationListener;
  * @author Hotstrip
  * load Jpom version and print Jpom logo
  */
-//@Order(LoggingApplicationListener.DEFAULT_ORDER + 1)
 public class JpomLogo implements ApplicationListener<ApplicationReadyEvent> {
 
     @Override

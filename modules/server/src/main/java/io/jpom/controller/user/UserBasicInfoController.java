@@ -90,7 +90,7 @@ public class UserBasicInfoController extends BaseServerController {
 		UserModel userModel = getUser();
 		userModel = userService.getByKey(userModel.getId(), false);
 		// return basic info
-		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<>(10);
 		map.put("id", userModel.getId());
 		map.put("name", userModel.getName());
 		map.put("systemUser", userModel.isSystemUser());

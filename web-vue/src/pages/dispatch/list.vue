@@ -1078,7 +1078,7 @@ export default {
 }
 .replica-btn-del {
   position: absolute;
-  right: 0px;
+  right: 0;
   top: 74px;
 }
 </style>

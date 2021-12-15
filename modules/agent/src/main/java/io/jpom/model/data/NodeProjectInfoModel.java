@@ -77,7 +77,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 	 * WebHooks
 	 */
 	private String token;
-	//	private boolean status;
+
 	private String createTime;
 	private String modifyTime;
 	private String jdkId;

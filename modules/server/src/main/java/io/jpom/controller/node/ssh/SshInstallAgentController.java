@@ -2,6 +2,7 @@ package io.jpom.controller.node.ssh;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -31,15 +32,16 @@ import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -49,7 +51,7 @@ import java.util.zip.ZipFile;
  * @author bwcx_jzy
  * @date 2019/8/17
  */
-@Controller
+@RestController
 @RequestMapping(value = "node/ssh")
 @Feature(cls = ClassFeature.SSH)
 public class SshInstallAgentController extends BaseServerController {
@@ -64,7 +66,6 @@ public class SshInstallAgentController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "installAgentSubmit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EXECUTE)
 	public String installAgentSubmit(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "节点数据") String nodeData,
@@ -85,9 +86,7 @@ public class SshInstallAgentController extends BaseServerController {
 				// 判断文件是否正确
 				ZipEntry sh = zipFile.getEntry(Type.Agent.name() + ".sh");
 				ZipEntry lib = zipFile.getEntry("lib" + StrUtil.SLASH);
-				if (sh == null || null == lib || !lib.isDirectory()) {
-					return JsonMessage.getString(405, "不是 Jpom 插件包");
-				}
+				Assert.state(sh != null && lib != null && lib.isDirectory(), "不是 Jpom 插件包");
 				ZipUtil.unzip(zipFile, outFle);
 			}
 			// 获取上传的tag
@@ -102,23 +101,10 @@ public class SshInstallAgentController extends BaseServerController {
 				}
 			}
 			Assert.hasText(tag, "管理命令中不存在tag");
-			//  读取授权信息
-			File configFile = FileUtil.file(outFle, ExtConfigBean.FILE_NAME);
-			if (configFile.exists()) {
-				YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
-				List<PropertySource<?>> extConfig = yamlPropertySourceLoader.load(ExtConfigBean.FILE_NAME, new FileUrlResource(configFile.getAbsolutePath()));
-				Assert.notEmpty(extConfig, "没有加载到配置信息,或者配置信息为空");
-				PropertySource<?> propertySource = extConfig.get(0);
-				Object user = propertySource.getProperty(ConfigBean.AUTHORIZE_USER_KEY);
-				nodeModel.setLoginName(Convert.toStr(user, ""));
-				//
-				Object pwd = propertySource.getProperty(ConfigBean.AUTHORIZE_AUTHORIZE_KEY);
-				nodeModel.setLoginPwd(Convert.toStr(pwd, ""));
-			}
+			//
+			this.readNodeAuthorize(outFle, nodeModel);
 			// 查询远程是否运行
-
 			Assert.state(!sshService.checkSshRun(sshModel, tag), "对应服务器中已经存在 Jpom 插件端,不需要再次安装啦");
-
 			// 上传文件到服务器
 			sshService.uploadDir(sshModel, path, outFle);
 			//
@@ -134,24 +120,7 @@ public class SshInstallAgentController extends BaseServerController {
 			DefaultSystemLog.getLog().debug("ssh install agent node {} {}", command, result);
 			// 休眠 5 秒, 尝试 5 次
 			int waitCount = getParameterInt("waitCount", 5);
-			waitCount = Math.max(waitCount, 5);
-			//int time = 3;
-			while (--waitCount >= 0) {
-				//DefaultSystemLog.getLog().debug("there is left {} / 3 times try to get authorize info", waitCount);
-				Thread.sleep(5 * 1000);
-				if (StrUtil.isEmpty(nodeModel.getLoginName()) || StrUtil.isEmpty(nodeModel.getLoginPwd())) {
-					String error = this.getAuthorize(sshModel, nodeModel, path);
-					// 获取授权成功就不需要继续循环了
-					if (error == null) {
-						waitCount = -1;
-					}
-					// 获取授权失败且尝试次数用完
-					if (error != null && waitCount == 0) {
-						return JsonMessage.getString(500, StrUtil.format("{} {}", error, result));
-					}
-				}
-			}
-			nodeModel.setOpenStatus(1);
+			this.loopCheck(waitCount, nodeModel, sshModel, path, result);
 			// 绑定关系
 			nodeModel.setSshId(sshModel.getId());
 			nodeService.insert(nodeModel);
@@ -161,6 +130,44 @@ public class SshInstallAgentController extends BaseServerController {
 			// 清理资源
 			FileUtil.del(filePath);
 			FileUtil.del(outFle);
+		}
+	}
+
+	private void readNodeAuthorize(File outFle, NodeModel nodeModel) throws IOException {
+		//  读取授权信息
+		File configFile = FileUtil.file(outFle, ExtConfigBean.FILE_NAME);
+		if (configFile.exists()) {
+			YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
+			List<PropertySource<?>> extConfig = yamlPropertySourceLoader.load(ExtConfigBean.FILE_NAME, new FileUrlResource(configFile.getAbsolutePath()));
+			Assert.notEmpty(extConfig, "没有加载到配置信息,或者配置信息为空");
+			PropertySource<?> propertySource = extConfig.get(0);
+			Object user = propertySource.getProperty(ConfigBean.AUTHORIZE_USER_KEY);
+			nodeModel.setLoginName(Convert.toStr(user, ""));
+			//
+			Object pwd = propertySource.getProperty(ConfigBean.AUTHORIZE_AUTHORIZE_KEY);
+			nodeModel.setLoginPwd(Convert.toStr(pwd, ""));
+		}
+	}
+
+	private void loopCheck(int waitCount, NodeModel nodeModel, SshModel sshModel, String path, String result) {
+		waitCount = Math.max(waitCount, 5);
+		//int time = 3;
+		while (--waitCount >= 0) {
+			//DefaultSystemLog.getLog().debug("there is left {} / 3 times try to get authorize info", waitCount);
+			ThreadUtil.sleep(5, TimeUnit.SECONDS);
+			if (StrUtil.hasEmpty(nodeModel.getLoginName(), nodeModel.getLoginPwd())) {
+				String error = this.getAuthorize(sshModel, nodeModel, path);
+				// 获取授权成功就不需要继续循环了
+				if (error == null) {
+					waitCount = -1;
+				}
+				// 获取授权失败且尝试次数用完
+				if (error != null && waitCount == 0) {
+					throw new IllegalStateException(StrUtil.format("{} {}", error, result));
+				}
+			} else {
+				break;
+			}
 		}
 	}
 
@@ -201,6 +208,8 @@ public class SshInstallAgentController extends BaseServerController {
 		entity.set("workspaceId", sshModel.getWorkspaceId());
 		boolean exists = nodeService.exists(entity);
 		Assert.state(!exists, "对应的节点已经存在啦");
+		//
+		nodeModel.setOpenStatus(1);
 
 		return nodeModel;
 	}
