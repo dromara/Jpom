@@ -28,11 +28,15 @@ fi
 cd ../ && mvn versions:set -DnewVersion=$1
 
 # 替换 jpom.io 主页版本号
-sed -i "s/${old_version}/${new_version}/g" $pwd/../docs/js/version.js
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/js/version.js
 # 替换远程更新包的版本号
-sed -i "s/${old_version}/${new_version}/g" $pwd/../docs/version.json
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/versions.json
 # 替换 docker 中的版本
-sed -i "s/${old_version}/${new_version}/g" $pwd/../.env
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../.env
+
+# 替换 Dockerfile 中的版本
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/server/Dockerfile
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/agent/Dockerfile
 
 # 保留新版本号
 echo "$new_version" > $pwd/../docs/version.txt

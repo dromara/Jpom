@@ -27,6 +27,7 @@ yarn-error.log
 yarn.lock
 package-lock.json
 *bak
+pom.xml.versionsBackup
 .vscode
 
 # visual studio code
