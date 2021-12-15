@@ -45,6 +45,11 @@ import java.util.jar.Manifest;
 public class JvmUtil {
 
 	/**
+	 * 状态服务器 jps 命令执行是否正常
+	 */
+	public static boolean jpsNormal = false;
+
+	/**
 	 * 旧版jpom进程标记
 	 */
 	@Deprecated
@@ -55,6 +60,10 @@ public class JvmUtil {
 	@Deprecated
 	private static final String OLD2_JPOM_PID_TAG = "Jpom.application";
 	private static final String POM_PID_TAG = "DJpom.application";
+
+	public static void setJpsNormal(boolean jpsNormal) {
+		JvmUtil.jpsNormal = jpsNormal;
+	}
 
 	/**
 	 * 获取进程标识
@@ -77,6 +86,21 @@ public class JvmUtil {
 		String execSystemCommand = CommandUtil.execSystemCommand("jps -l");
 		List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
 		return Math.max(CollUtil.size(list) - 1, 0);
+	}
+
+	/**
+	 * 执行 jps 判断是否存在 对应的进程
+	 *
+	 * @return true 存在
+	 */
+	public static boolean exist(long pid) {
+		String execSystemCommand = CommandUtil.execSystemCommand("jps -l");
+		List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
+		String pidCommandInfo = list.stream().filter(s -> {
+			List<String> split = StrSplitter.splitTrim(s, StrUtil.SPACE, true);
+			return StrUtil.equals(pid + "", CollUtil.getFirst(split));
+		}).findAny().orElse(null);
+		return StrUtil.isNotEmpty(pidCommandInfo);
 	}
 
 	/**

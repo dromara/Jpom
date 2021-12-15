@@ -117,6 +117,6 @@ public class AutoImportLocalNode {
 		//
 		nodeModel.setOpenStatus(1);
 		nodeService.insertNotFill(nodeModel);
-		Console.log("自动添加本机节点成功：" + nodeModel.getId());
+		Console.log("Automatically add native node successfully：" + nodeModel.getId());
 	}
 }

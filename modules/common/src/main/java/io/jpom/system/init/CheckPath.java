@@ -47,28 +47,6 @@ import java.util.Map;
  */
 @PreLoadClass(value = Integer.MIN_VALUE)
 public class CheckPath {
-//	/**
-//	 * 待检查的类
-//	 */
-//	private static final String[] CLASS_NAME = new String[]{"sun.jvmstat.monitor.MonitorException", "com.sun.tools.attach.VirtualMachine"};
-//
-//
-//	@PreLoadMethod(1)
-//	private static void checkToolsJar() {
-//		try {
-//			for (String item : CLASS_NAME) {
-//				ClassUtil.loadClass(item, false);
-//			}
-//		} catch (Exception e) {
-//			File file = StringUtil.getToolsJar();
-//			if (file.exists() && file.isFile()) {
-//				DefaultSystemLog.getLog().error("Jpom未能正常加载tools.jar,请检查当前系统环境变量是否配置：JAVA_HOME，或者检查Jpom管理命令是否正确", e);
-//			} else {
-//				DefaultSystemLog.getLog().error("当前JDK中没有找到tools.jar,请检查当前JDK是否安装完整，文件完整路径是：" + file.getAbsolutePath(), e);
-//			}
-//			System.exit(-1);
-//		}
-//	}
 
 	/**
 	 * 判断是否重复运行
@@ -121,10 +99,10 @@ public class CheckPath {
 			FileUtil.del(file);
 		} catch (Exception e) {
 			// Try again  jzy 2021-07-31
-			DefaultSystemLog.getLog().warn("尝试删除临时文件夹失败,尝试处理只读权限：{}", e.getMessage());
+			DefaultSystemLog.getLog().warn("Attempt to delete temporary folder failed, try to handle read-only permission：{}", e.getMessage());
 			List<File> files = FileUtil.loopFiles(file);
 			long count = files.stream().map(file12 -> file12.setWritable(true)).filter(aBoolean -> aBoolean).count();
-			DefaultSystemLog.getLog().warn("临时文件夹累计文件数：{},处理成功数：{}", CollUtil.size(files), count);
+			DefaultSystemLog.getLog().warn("Cumulative number of files in temporary folder: {}, number of successful processing：{}", CollUtil.size(files), count);
 			try {
 				FileUtil.del(file.toPath());
 			} catch (Exception e1) {
