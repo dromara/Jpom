@@ -56,7 +56,11 @@ public class NodeWelcomeController extends BaseServerController {
 
 	private Cycle getCycle() {
 		NodeModel node = getNode();
-		return BaseEnum.getEnum(Cycle.class, node.getCycle());
+		Integer cycle = node.getCycle();
+		if (cycle == null) {
+			return null;
+		}
+		return BaseEnum.getEnum(Cycle.class, cycle);
 	}
 
 	private long getCycleMillis() {

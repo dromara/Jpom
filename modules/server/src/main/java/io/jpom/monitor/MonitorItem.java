@@ -107,22 +107,19 @@ public class MonitorItem implements Runnable {
 				if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
 					JSONObject jsonObject = jsonMessage.getData();
 					int pid = jsonObject.getIntValue("pId");
-					final boolean[] runStatus = {this.checkNotify(monitorModel, nodeModel, id, null, pid > 0)};
+					boolean runStatus = this.checkNotify(monitorModel, nodeModel, id, null, pid > 0);
 					// 检查副本
+					List<Boolean> booleanList = null;
 					JSONArray copys = jsonObject.getJSONArray("copys");
 					if (CollUtil.isNotEmpty(copys)) {
-						copys.forEach(o -> {
+						booleanList = copys.stream().map(o -> {
 							JSONObject jsonObject1 = (JSONObject) o;
 							String copyId = jsonObject1.getString("copyId");
 							boolean status = jsonObject1.getBooleanValue("status");
-							boolean now = MonitorItem.this.checkNotify(monitorModel, nodeModel, id, copyId, status);
-							if (runStatus[0] && !now) {
-								// 保留一个异常
-								runStatus[0] = false;
-							}
-						});
+							return MonitorItem.this.checkNotify(monitorModel, nodeModel, id, copyId, status);
+						}).filter(aBoolean -> !aBoolean).collect(Collectors.toList());
 					}
-					return runStatus[0];
+					return runStatus && CollUtil.isEmpty(booleanList);
 				} else {
 					title = StrUtil.format("【{}】节点的状态码异常：{}", nodeModel.getName(), jsonMessage.getCode());
 					context = jsonMessage.toString();
