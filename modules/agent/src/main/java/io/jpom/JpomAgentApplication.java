@@ -58,7 +58,7 @@ public class JpomAgentApplication {
 				// 添加 参数 url 解码
 				//				.addHandlerMethodArgumentResolver(UrlDecodeHandlerMethodArgumentResolver.class)
 				.run(args);
-		Console.log("本次启动耗时：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
+		Console.log("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
 	}
 
 }

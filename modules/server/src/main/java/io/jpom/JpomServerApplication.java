@@ -86,7 +86,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
 			// 重置 ip 白名单配置
 			SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
 			parametersServer.delByKey(SystemIpConfigModel.ID);
-			Console.log("清除 IP 白名单配置成功");
+			Console.log("Clear IP whitelist configuration successfully");
 		}
 		if (ArrayUtil.containsIgnoreCase(args, "--rest:super_user_pwd")) {
 			UserService userService = SpringUtil.getBean(UserService.class);
@@ -94,11 +94,11 @@ public class JpomServerApplication implements ApplicationEventLoad {
 			if (restResult != null) {
 				Console.log(restResult);
 			} else {
-				Console.log("系统中还没有超级管理员账号");
+				Console.log("There is no super administrator account in the system");
 			}
 		}
 		//
-		Console.log("本次启动耗时：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
+		Console.log("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
 	}
 
 
