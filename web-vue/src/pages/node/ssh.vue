@@ -119,9 +119,9 @@
     <a-modal v-model="nodeVisible" width="600px" title="安装节点" @ok="handleEditNodeOk" :maskClosable="false">
       <a-spin :spinning="formLoading" tip="这可能会花费一些时间，请勿关闭该页面">
         <a-form-model ref="nodeForm" :rules="rules" :model="tempNode" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-          <a-form-model-item label="节点 ID" prop="id">
+          <!-- <a-form-model-item label="节点 ID" prop="id">
             <a-input v-model="tempNode.id" placeholder="节点 ID" />
-          </a-form-model-item>
+          </a-form-model-item> -->
           <a-form-model-item label="节点名称" prop="name">
             <a-input v-model="tempNode.name" placeholder="节点名称" />
           </a-form-model-item>
@@ -572,8 +572,8 @@ export default {
         formData.append("id", this.temp.id);
         formData.append("nodeData", JSON.stringify({ ...this.tempNode }));
         formData.append("path", this.tempNode.path);
-        formData.append("waitCount", this.tempNode.waitCount);
-        formData.append("chmod", this.tempNode.chmod);
+        formData.append("waitCount", this.tempNode.waitCount || '');
+        formData.append("chmod", this.tempNode.chmod || '');
         // 提交数据
         installAgentNode(formData).then((res) => {
           if (res.code === 200) {

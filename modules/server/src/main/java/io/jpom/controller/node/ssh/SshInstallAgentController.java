@@ -64,11 +64,7 @@ public class SshInstallAgentController extends BaseServerController {
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "节点数据") String nodeData,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "安装路径") String path) throws Exception {
 		// 判断输入的节点信息
-		Object object = getNodeModel(nodeData);
-		if (object instanceof JsonMessage) {
-			return object.toString();
-		}
-		NodeModel nodeModel = (NodeModel) object;
+		NodeModel nodeModel = this.getNodeModel(nodeData);
 		//
 		SshModel sshModel = sshService.getByKey(id, false);
 		Objects.requireNonNull(sshModel, "没有找到对应ssh");
@@ -122,13 +118,14 @@ public class SshInstallAgentController extends BaseServerController {
 			//
 			String shPtah = FileUtil.normalize(path + StrUtil.SLASH + Type.Agent.name() + ".sh");
 			String chmod = getParameter("chmod");
-			if (StrUtil.isEmpty(chmod)) {
+			if (StrUtil.isEmptyOrUndefined(chmod)) {
 				chmod = StrUtil.EMPTY;
 			} else {
 				chmod = StrUtil.format("{} {} && ", chmod, shPtah);
 			}
 			String command = StrUtil.format("{}sh {} start upgrade", chmod, shPtah);
 			String result = sshService.exec(sshModel, command);
+			DefaultSystemLog.getLog().debug("ssh install agent node {} {}", command, result);
 			// 休眠 5 秒, 尝试 5 次
 			int waitCount = getParameterInt("waitCount", 5);
 			waitCount = Math.max(waitCount, 5);
@@ -150,7 +147,7 @@ public class SshInstallAgentController extends BaseServerController {
 			}
 			nodeModel.setOpenStatus(1);
 			// 绑定关系
-			//nodeModel.setSshId(sshModel.getId());
+			nodeModel.setSshId(sshModel.getId());
 			nodeService.insert(nodeModel);
 			//
 			return JsonMessage.getString(200, "操作成功:" + result);
@@ -183,9 +180,9 @@ public class SshInstallAgentController extends BaseServerController {
 		return null;
 	}
 
-	private Object getNodeModel(String data) {
+	private NodeModel getNodeModel(String data) {
 		NodeModel nodeModel = JSONObject.toJavaObject(JSONObject.parseObject(data), NodeModel.class);
-		Assert.hasText(nodeModel.getId(), "节点id错误");
+		//Assert.hasText(nodeModel.getId(), "节点id错误");
 
 		Assert.hasText(nodeModel.getName(), "输入节点名称");
 
