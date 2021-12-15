@@ -123,7 +123,7 @@ public class SshInstallAgentController extends BaseServerController {
 			} else {
 				chmod = StrUtil.format("{} {} && ", chmod, shPtah);
 			}
-			String command = StrUtil.format("{}sh {} start upgrade", chmod, shPtah);
+			String command = StrUtil.format("{}bash {} start upgrade", chmod, shPtah);
 			String result = sshService.exec(sshModel, command);
 			DefaultSystemLog.getLog().debug("ssh install agent node {} {}", command, result);
 			// 休眠 5 秒, 尝试 5 次
