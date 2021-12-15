@@ -381,10 +381,24 @@
         <!-- <a-form-model-item label="是否为压缩包" v-if="temp.type == 'download'">
           <a-switch v-model="temp.unzip" checked-children="是" un-checked-children="否" v-decorator="['unzip', { valuePropName: 'checked' }]" />
         </a-form-model-item> -->
-        <a-form-model-item label="清空发布" prop="clearOld">
+        <a-form-model-item prop="clearOld">
+          <template slot="label">
+            清空发布
+            <a-tooltip>
+              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件现删除后再保存新文件 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
-        <a-form-model-item label="是否解压" prop="unzip">
+        <a-form-model-item prop="unzip">
+          <template slot="label">
+            是否解压
+            <a-tooltip>
+              <template slot="title"> 如果上传的压缩文件是否自动解压 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-switch v-model="temp.autoUnzip" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
         <a-form-model-item label="分发后操作" prop="afterOpt">

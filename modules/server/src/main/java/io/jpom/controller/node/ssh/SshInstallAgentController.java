@@ -6,6 +6,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
+import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -14,12 +15,14 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Type;
+import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.system.AgentAutoUser;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
@@ -52,9 +55,12 @@ import java.util.zip.ZipFile;
 public class SshInstallAgentController extends BaseServerController {
 
 	private final SshService sshService;
+	private final NodeService nodeService;
 
-	public SshInstallAgentController(SshService sshService) {
+	public SshInstallAgentController(SshService sshService,
+									 NodeService nodeService) {
 		this.sshService = sshService;
+		this.nodeService = nodeService;
 	}
 
 	@RequestMapping(value = "installAgentSubmit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -63,11 +69,11 @@ public class SshInstallAgentController extends BaseServerController {
 	public String installAgentSubmit(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "节点数据") String nodeData,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "安装路径") String path) throws Exception {
-		// 判断输入的节点信息
-		NodeModel nodeModel = this.getNodeModel(nodeData);
 		//
 		SshModel sshModel = sshService.getByKey(id, false);
 		Objects.requireNonNull(sshModel, "没有找到对应ssh");
+		// 判断输入的节点信息
+		NodeModel nodeModel = this.getNodeModel(nodeData, sshModel);
 		//
 		String tempFilePath = ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath();
 		MultipartFileBuilder cert = createMultipart().addFieldName("file").setSavePath(tempFilePath);
@@ -141,7 +147,7 @@ public class SshInstallAgentController extends BaseServerController {
 					}
 					// 获取授权失败且尝试次数用完
 					if (error != null && waitCount == 0) {
-						return error;
+						return JsonMessage.getString(500, StrUtil.format("{} {}", error, result));
 					}
 				}
 			}
@@ -173,20 +179,28 @@ public class SshInstallAgentController extends BaseServerController {
 			nodeModel.setLoginName(autoUser.getAgentName());
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("拉取授权信息失败:{}", e.getMessage());
-			return JsonMessage.getString(500, "获取授权信息失败,请检查对应的插件端运行状态", e.getMessage());
+			return "获取授权信息失败,请检查对应的插件端运行状态" + e.getMessage();
 		} finally {
 			FileUtil.del(saveFile);
 		}
 		return null;
 	}
 
-	private NodeModel getNodeModel(String data) {
+	private NodeModel getNodeModel(String data, SshModel sshModel) {
 		NodeModel nodeModel = JSONObject.toJavaObject(JSONObject.parseObject(data), NodeModel.class);
-		//Assert.hasText(nodeModel.getId(), "节点id错误");
 
 		Assert.hasText(nodeModel.getName(), "输入节点名称");
 
 		Assert.hasText(nodeModel.getUrl(), "请输入节点地址");
+		nodeModel.setCycle(Cycle.one.getCode());
+		//
+		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
+		//
+		Entity entity = Entity.create();
+		entity.set("url", nodeModel.getUrl());
+		entity.set("workspaceId", sshModel.getWorkspaceId());
+		boolean exists = nodeService.exists(entity);
+		Assert.state(!exists, "对应的节点已经存在啦");
 
 		return nodeModel;
 	}

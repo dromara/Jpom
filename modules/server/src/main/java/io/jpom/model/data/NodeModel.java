@@ -71,6 +71,8 @@ public class NodeModel extends BaseWorkspaceModel {
 
 	/**
 	 * 监控周期
+	 *
+	 * @see io.jpom.model.Cycle
 	 */
 	private Integer cycle;
 
@@ -86,6 +88,10 @@ public class NodeModel extends BaseWorkspaceModel {
 		return cycle;
 	}
 
+	/**
+	 * @param cycle 监控频率
+	 * @see io.jpom.model.Cycle
+	 */
 	public void setCycle(Integer cycle) {
 		this.cycle = cycle;
 	}

@@ -203,7 +203,14 @@
             placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java ,支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}"
           />
         </a-form-model-item>
-        <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" label="清空发布" prop="clearOld">
+        <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" prop="clearOld">
+          <template slot="label">
+            清空发布
+            <a-tooltip v-show="!temp.id">
+              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件现删除后再保存新文件 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-switch v-model="tempExtraData.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
         <a-form-model-item prop="webhook">
