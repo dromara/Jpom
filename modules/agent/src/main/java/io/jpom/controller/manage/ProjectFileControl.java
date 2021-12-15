@@ -322,9 +322,7 @@ public class ProjectFileControl extends BaseAgentController {
 	 */
 	@PostMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String remoteDownload(String id, String url, String levelName, String unzip) {
-		if (StrUtil.isEmpty(url)) {
-			return JsonMessage.getString(405, "请输入正确的远程地址");
-		}
+		Assert.hasText(url, "请输入正确的远程地址");
 		AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
 		Set<String> allowRemoteDownloadHost = whitelist.getAllowRemoteDownloadHost();
 		Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
