@@ -93,7 +93,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
 			this.updateStatus(this.outGivingId, this.outGivingNodeProject,
 					OutGivingNodeProject.Status.Ing, "开始分发");
 			//
-			JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file,
+			JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, null,
 					this.outGivingNodeProject.getProjectId(),
 					unzip,
 					afterOpt,

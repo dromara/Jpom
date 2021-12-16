@@ -25,6 +25,7 @@ package io.jpom.outgiving;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -117,7 +118,7 @@ public class OutGivingRun {
 	 * @param userModel 操作用户
 	 * @return json
 	 */
-	public static JsonMessage<String> fileUpload(File file, String projectId,
+	public static JsonMessage<String> fileUpload(File file, String levelName, String projectId,
 												 boolean unzip,
 												 AfterOpt afterOpt,
 												 NodeModel nodeModel,
@@ -126,6 +127,9 @@ public class OutGivingRun {
 		JSONObject data = new JSONObject();
 		data.put("file", file);
 		data.put("id", projectId);
+		if (StrUtil.isNotEmpty(levelName)) {
+			data.put("levelName", levelName);
+		}
 		if (unzip) {
 			// 解压
 			data.put("type", "unzip");

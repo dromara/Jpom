@@ -106,6 +106,14 @@ public enum NodeUrl {
 	Manage_File_Upload("/manage/file/upload", ServerExtConfigBean.getInstance().getUploadFileTimeOut()),
 
 	Manage_File_DeleteFile("/manage/file/deleteFile"),
+	/**
+	 * 对比项目文件
+	 */
+	MANAGE_FILE_DIFF_FILE("/manage/file/diff_file"),
+	/**
+	 * 批量删除文件
+	 */
+	MANAGE_FILE_BATCH_DELETE("/manage/file/batch_delete"),
 
 	Manage_File_UpdateConfigFile("/manage/file/update_config_file"),
 
