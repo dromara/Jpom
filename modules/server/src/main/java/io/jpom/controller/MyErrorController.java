@@ -75,9 +75,4 @@ public class MyErrorController extends AbstractErrorController {
 
 		return new ResponseEntity<>(body, HttpStatus.OK);
 	}
-
-	@Override
-	public String getErrorPath() {
-		return null;
-	}
 }

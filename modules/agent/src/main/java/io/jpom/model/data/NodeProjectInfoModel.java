@@ -35,10 +35,7 @@ import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.system.JpomRuntimeException;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -295,25 +292,38 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 	public static List<File> listJars(NodeProjectInfoModel nodeProjectInfoModel) {
 		File fileLib = new File(nodeProjectInfoModel.allLib());
 		File[] files = fileLib.listFiles();
-		List<File> files1 = new ArrayList<>();
-		if (files != null) {
-			for (File file : files) {
-				if (!file.isFile()) {
-					continue;
-				}
-				if (nodeProjectInfoModel.getRunMode() == RunMode.ClassPath || nodeProjectInfoModel.getRunMode() == RunMode.Jar) {
-					if (!StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true)) {
-						continue;
-					}
-				} else if (nodeProjectInfoModel.getRunMode() == RunMode.JarWar) {
-					if (!StrUtil.endWith(file.getName(), "war", true)) {
-						continue;
-					}
-				}
-				files1.add(file);
-			}
+		if (files == null) {
+			return new ArrayList<>();
 		}
-		return files1;
+		RunMode runMode = nodeProjectInfoModel.getRunMode();
+		return Arrays.stream(files).filter(File::isFile).filter(file -> {
+			if (runMode == RunMode.ClassPath || runMode == RunMode.Jar || runMode == RunMode.JavaExtDirsCp) {
+				return StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true);
+			} else if (runMode == RunMode.JarWar) {
+				return StrUtil.endWith(file.getName(), "war", true);
+			}
+			return false;
+		}).collect(Collectors.toList());
+		//		List<File> files1 = new ArrayList<>();
+		//		if (files != null) {
+		//			for (File file : files) {
+		//				if (!file.isFile()) {
+		//					continue;
+		//				}
+		//
+		//				if (runMode == RunMode.ClassPath || runMode == RunMode.Jar || runMode == RunMode.JavaExtDirsCp) {
+		//					if (!StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true)) {
+		//						continue;
+		//					}
+		//				} else if (runMode == RunMode.JarWar) {
+		//					if (!StrUtil.endWith(file.getName(), "war", true)) {
+		//						continue;
+		//					}
+		//				}
+		//				files1.add(file);
+		//			}
+		//		}
+		//		return files1;
 	}
 
 	/**
