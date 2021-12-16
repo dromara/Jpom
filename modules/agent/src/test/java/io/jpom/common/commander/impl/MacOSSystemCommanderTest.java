@@ -64,7 +64,7 @@ public class MacOSSystemCommanderTest {
 
             DefaultSystemLog.getLog().info("-----------------------------");
 
-            MacOSSystemCommander macOSSystemCommander = new MacOSSystemCommander();
+            MacOsSystemCommander macOSSystemCommander = new MacOsSystemCommander();
             macOSSystemCommander.getAllMonitor();
         }
     }

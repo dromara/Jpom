@@ -395,7 +395,7 @@
           <template slot="label">
             是否解压
             <a-tooltip>
-              <template slot="title"> 如果上传的压缩文件是否自动解压 </template>
+              <template slot="title"> 如果上传的压缩文件是否自动解压 支持的压缩包类型有 tar.bz2, tar.gz, tar, bz2, zip, gz</template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>

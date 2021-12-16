@@ -72,8 +72,8 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 	}
 
 	@Override
-	public List<ProcessModel> getProcessList() {
-		String s = CommandUtil.execSystemCommand("top -b -n 1 | grep java");
+	public List<ProcessModel> getProcessList(String processName) {
+		String s = CommandUtil.execSystemCommand("top -b -n 1 | grep " + processName);
 		return formatLinuxTop(s, false);
 	}
 

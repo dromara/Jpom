@@ -22,6 +22,7 @@
  */
 package io.jpom.model.log;
 
+import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.service.h2db.TableName;
@@ -110,6 +111,10 @@ public class MonitorNotifyLog extends BaseWorkspaceModel {
 		return status;
 	}
 
+	public boolean isStatus() {
+		return ObjectUtil.defaultIfNull(status, false);
+	}
+
 	public void setStatus(Boolean status) {
 		this.status = status;
 	}
@@ -181,14 +186,6 @@ public class MonitorNotifyLog extends BaseWorkspaceModel {
 
 	public void setContent(String content) {
 		this.content = content;
-	}
-
-	public Boolean isStatus() {
-		return status;
-	}
-
-	public void setStatus(boolean status) {
-		this.status = status;
 	}
 
 	@Override

@@ -63,7 +63,7 @@ public abstract class BaseBuild {
 		FileUtil.appendLines(CollectionUtil.toList(title), this.logFile, CharsetUtil.CHARSET_UTF_8);
 		String s = ExceptionUtil.stacktraceToString(throwable);
 		FileUtil.appendLines(CollectionUtil.toList(s), this.logFile, CharsetUtil.CHARSET_UTF_8);
-		updateStatus(status);
+		this.updateStatus(status);
 	}
 
 	protected void log(String info) {

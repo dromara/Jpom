@@ -7,6 +7,15 @@
     <div id="top-chart">loading...</div>
     <a-divider>进程监控表格</a-divider>
     <!-- 进程表格数据 -->
+    <div ref="filter" class="filter">
+      <a-select @change="loadNodeProcess" v-model="processName" allowClear placeholder="进程类型" class="filter-item">
+        <a-select-option value="java">java</a-select-option>
+        <a-select-option value="python">python</a-select-option>
+        <a-select-option value="mysql">mysql</a-select-option>
+        <a-select-option value="php">php</a-select-option>
+      </a-select>
+      <!-- <a-button type="primary" @click="loadData">切换</a-button> -->
+    </div>
     <a-table :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="pid" class="node-table" :pagination="false">
       <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -50,6 +59,7 @@ export default {
       monitorVisible: false,
       timeRange: "",
       historyData: [],
+      processName: "java",
       columns: [
         { title: "进程 ID", dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
         { title: "进程名称", dataIndex: "command", width: 150, ellipsis: true, scopedSlots: { customRender: "command" } },
@@ -190,9 +200,14 @@ export default {
     // 加载节点进程列表
     loadNodeProcess() {
       this.loading = true;
-      getProcessList(this.node.id).then((res) => {
+      getProcessList({
+        nodeId: this.node.id,
+        processName: this.processName,
+      }).then((res) => {
         if (res.code === 200) {
           this.processList = res.data;
+        } else {
+          this.processList = [];
         }
         this.loading = false;
       });

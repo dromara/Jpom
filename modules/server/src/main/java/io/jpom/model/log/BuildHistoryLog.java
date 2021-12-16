@@ -81,6 +81,14 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	 */
 	private String releasePath;
 	/**
+	 * 触发构建类型 触发类型{0，手动，1 触发器,2 自动触发}
+	 */
+	private Integer triggerBuildType;
+	/**
+	 * 增量同步
+	 */
+	private Boolean diffSync;
+	/**
 	 * 关联的构建id
 	 *
 	 * @see BuildInfoModel#getId()
@@ -96,10 +104,6 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	 * @see BuildInfoModel#getBuildId()
 	 */
 	private Integer buildNumberId;
-	/**
-	 * 触发构建类型 触发类型{0，手动，1 触发器,2 自动触发}
-	 */
-	private Integer triggerBuildType;
 	/**
 	 * 状态
 	 *
@@ -148,6 +152,14 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 		File file = BuildUtil.getLogFile(getBuildDataId(), getBuildNumberId());
 		hasLog = FileUtil.exist(file);
 		return hasLog;
+	}
+
+	public Boolean getDiffSync() {
+		return diffSync;
+	}
+
+	public void setDiffSync(Boolean diffSync) {
+		this.diffSync = diffSync;
 	}
 
 	public void setHasLog(Boolean hasLog) {

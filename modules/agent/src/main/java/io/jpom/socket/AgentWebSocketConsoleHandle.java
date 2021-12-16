@@ -105,7 +105,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 	private NodeProjectInfoModel checkProject(String projectId, String copyId, Session session) throws IOException {
 		NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(projectId);
 		if (nodeProjectInfoModel == null) {
-			SocketSessionUtil.send(session, "没有对应项目");
+			SocketSessionUtil.send(session, "没有对应项目：" + projectId);
 			session.close();
 			return null;
 		}

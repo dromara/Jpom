@@ -199,17 +199,20 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		this.logId = IdUtil.fastSimpleUUID();
 		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
 		// 更新其他配置字段
-		buildHistoryLog.setResultDirFile(buildExtraModule.getResultDirFile());
+		buildExtraModule.fillLogValue(buildHistoryLog);
+//		buildHistoryLog.setResultDirFile(buildExtraModule.getResultDirFile());
+//		buildHistoryLog.setReleaseMethod(buildExtraModule.getReleaseMethod());
+//		buildHistoryLog.setReleaseMethodDataId(buildExtraModule.getReleaseMethodDataId());
+//		buildHistoryLog.setAfterOpt(buildExtraModule.getAfterOpt());
+//		buildHistoryLog.setReleasePath(buildExtraModule.getReleasePath());
+//		buildHistoryLog.setReleaseCommand(buildExtraModule.getReleaseCommand());
+//		buildHistoryLog.setClearOld(buildExtraModule.isClearOld());
+
 		buildHistoryLog.setTriggerBuildType(triggerBuildType);
-		buildHistoryLog.setReleaseMethod(buildExtraModule.getReleaseMethod());
-		buildHistoryLog.setReleaseMethodDataId(buildExtraModule.getReleaseMethodDataId());
-		buildHistoryLog.setAfterOpt(buildExtraModule.getAfterOpt());
-		buildHistoryLog.setBuildDataId(buildInfoModel.getId());
-		buildHistoryLog.setReleasePath(buildExtraModule.getReleasePath());
-		buildHistoryLog.setReleaseCommand(buildExtraModule.getReleaseCommand());
 		buildHistoryLog.setBuildNumberId(buildInfoModel.getBuildId());
 		buildHistoryLog.setBuildName(buildInfoModel.getName());
-		buildHistoryLog.setClearOld(buildExtraModule.isClearOld());
+		buildHistoryLog.setBuildDataId(buildInfoModel.getId());
+
 		//
 		buildHistoryLog.setWorkspaceId(this.buildInfoModel.getWorkspaceId());
 		buildHistoryLog.setId(this.logId);

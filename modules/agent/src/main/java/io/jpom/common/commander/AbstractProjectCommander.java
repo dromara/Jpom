@@ -40,7 +40,7 @@ import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.commander.impl.LinuxProjectCommander;
-import io.jpom.common.commander.impl.MacOSProjectCommander;
+import io.jpom.common.commander.impl.MacOsProjectCommander;
 import io.jpom.common.commander.impl.WindowsProjectCommander;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.JdkInfoModel;
@@ -101,7 +101,7 @@ public abstract class AbstractProjectCommander {
 			// Windows系统
 			abstractProjectCommander = new WindowsProjectCommander();
 		} else if (SystemUtil.getOsInfo().isMac()) {
-			abstractProjectCommander = new MacOSProjectCommander();
+			abstractProjectCommander = new MacOsProjectCommander();
 		} else {
 			throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
 		}

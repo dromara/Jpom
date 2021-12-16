@@ -137,11 +137,8 @@ public class ReleaseManage extends BaseBuild {
 				//
 				this.doOutGiving();
 			} else if (releaseMethod == BuildReleaseMethod.Project.getCode()) {
-				AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.buildExtraModule.getAfterOpt());
-				if (afterOpt == null) {
-					afterOpt = AfterOpt.No;
-				}
-				this.doProject(afterOpt, this.buildExtraModule.isClearOld());
+				AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.buildExtraModule.getAfterOpt(), AfterOpt.No);
+				this.doProject(afterOpt, this.buildExtraModule.isClearOld(), this.buildExtraModule.isDiffSync());
 			} else if (releaseMethod == BuildReleaseMethod.Ssh.getCode()) {
 				this.doSsh();
 			} else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
@@ -294,21 +291,30 @@ public class ReleaseManage extends BaseBuild {
 		}
 	}
 
+	private void diffSyncProject() {
+		File resultFile = this.resultFile;
+		List<File> files = FileUtil.loopFiles(resultFile);
+		this.log("还没有实现");
+	}
+
 	/**
 	 * 发布项目
 	 *
 	 * @param afterOpt 后续操作
 	 */
-	private void doProject(AfterOpt afterOpt, boolean clearOld) {
+	private void doProject(AfterOpt afterOpt, boolean clearOld, boolean diffSync) {
 		String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
 		String[] strings = StrUtil.splitToArray(releaseMethodDataId, CharPool.COLON);
-		if (strings == null || strings.length != 2) {
-			throw new JpomRuntimeException(releaseMethodDataId + " error");
+		if (ArrayUtil.length(strings) != 2) {
+			throw new IllegalArgumentException(releaseMethodDataId + " error");
 		}
 		NodeService nodeService = SpringUtil.getBean(NodeService.class);
 		NodeModel nodeModel = nodeService.getByKey(strings[0]);
 		Objects.requireNonNull(nodeModel, "节点不存在");
-
+		if (diffSync) {
+			this.diffSyncProject();
+			return;
+		}
 		File zipFile = BuildUtil.isDirPackage(this.resultFile);
 		boolean unZip = true;
 		if (zipFile == null) {

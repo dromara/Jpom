@@ -86,6 +86,8 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 	private String triggerToken;
 	/**
 	 * 额外信息，JSON 字符串格式
+	 *
+	 * @see io.jpom.build.BuildExtraModule
 	 */
 	private String extraData;
 	/**
