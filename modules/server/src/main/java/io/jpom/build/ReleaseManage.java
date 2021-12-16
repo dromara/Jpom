@@ -306,7 +306,7 @@ public class ReleaseManage extends BaseBuild {
 	 * @param projectId 项目ID
 	 * @param afterOpt  发布后的操作
 	 */
-	private void diffSyncProject(NodeModel nodeModel, String projectId, AfterOpt afterOpt) {
+	private void diffSyncProject(NodeModel nodeModel, String projectId, AfterOpt afterOpt, boolean clearOld) {
 		File resultFile = this.resultFile;
 		String resultFileParent = resultFile.isFile() ?
 				FileUtil.getAbsolutePath(resultFile.getParent()) : FileUtil.getAbsolutePath(this.resultFile);
@@ -332,9 +332,13 @@ public class ReleaseManage extends BaseBuild {
 		JSONArray del = data.getJSONArray("del");
 		int delSize = CollUtil.size(del);
 		int diffSize = CollUtil.size(diff);
-		this.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize));
-		// 先删除
-		if (delSize > 0) {
+		if (clearOld) {
+			this.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize));
+		} else {
+			this.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff)));
+		}
+		// 清空发布才先执行删除
+		if (delSize > 0 && clearOld) {
 			jsonObject.put("data", del);
 			requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_BATCH_DELETE, this.userModel, jsonObject);
 			if (requestBody.getCode() != HttpStatus.HTTP_OK) {
@@ -377,7 +381,7 @@ public class ReleaseManage extends BaseBuild {
 		Objects.requireNonNull(nodeModel, "节点不存在");
 		String projectId = strings[1];
 		if (diffSync) {
-			this.diffSyncProject(nodeModel, projectId, afterOpt);
+			this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
 			return;
 		}
 		File zipFile = BuildUtil.isDirPackage(this.resultFile);
