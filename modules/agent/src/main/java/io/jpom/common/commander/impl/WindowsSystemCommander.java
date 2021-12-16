@@ -76,13 +76,13 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
 	}
 
 	@Override
-	public List<ProcessModel> getProcessList() {
+	public List<ProcessModel> getProcessList(String processName) {
 		Scheduler scheduler = CronUtil.getScheduler();
 		Task task = scheduler.getTask(ID);
 		if (task == null) {
 			CronUtil.schedule(ID, "0 0/1 * * * ?", () -> {
 				try {
-					lastResult = CommandUtil.execSystemCommand("tasklist /V | findstr java");
+					lastResult = CommandUtil.execSystemCommand("tasklist /V | findstr " + processName);
 				} catch (Exception e) {
 					DefaultSystemLog.getLog().error("执行控制台进程统计错误", e);
 				}

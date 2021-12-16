@@ -211,7 +211,25 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-switch v-model="tempExtraData.clearOld" checked-children="是" un-checked-children="否" />
+          <a-row>
+            <a-col :span="4">
+              <a-switch v-model="tempExtraData.clearOld" checked-children="是" un-checked-children="否" />
+            </a-col>
+            <div v-if="temp.releaseMethod === 2">
+              <a-col :span="4" style="text-align: right">
+                <a-tooltip v-if="!temp.id">
+                  <template slot="title">
+                    差异发布是指对应构建产物和项目文件夹里面的文件是否存在差异,如果存在增量差异那么上传或者覆盖文件,如果是项目目录存在构建产物目录不存在对应的文件那么将删除项目目录里面的文件
+                  </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+                差异发布：
+              </a-col>
+              <a-col :span="10">
+                <a-switch v-model="tempExtraData.diffSync" checked-children="是" un-checked-children="否" />
+              </a-col>
+            </div>
+          </a-row>
         </a-form-model-item>
         <a-form-model-item prop="webhook">
           <template slot="label">

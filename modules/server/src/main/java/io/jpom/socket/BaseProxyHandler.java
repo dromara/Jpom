@@ -40,6 +40,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
@@ -51,6 +52,7 @@ import java.util.Map;
 public abstract class BaseProxyHandler extends BaseHandler {
 
 	private final NodeUrl nodeUrl;
+	private boolean init;
 
 	public BaseProxyHandler(NodeUrl nodeUrl) {
 		this.nodeUrl = nodeUrl;
@@ -75,6 +77,13 @@ public abstract class BaseProxyHandler extends BaseHandler {
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		this.init(session);
+	}
+
+	private void init(WebSocketSession session) throws URISyntaxException, IOException {
+		if (init) {
+			return;
+		}
 		Map<String, Object> attributes = session.getAttributes();
 		NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
 		UserModel userInfo = (UserModel) attributes.get("userInfo");
@@ -90,10 +99,12 @@ public abstract class BaseProxyHandler extends BaseHandler {
 		if (this.showHelloMsg()) {
 			session.sendMessage(new TextMessage(StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId())));
 		}
+		init = true;
 	}
 
 	@Override
-	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+		this.init(session);
 		String msg = message.getPayload();
 		Map<String, Object> attributes = session.getAttributes();
 		ProxySession proxySession = (ProxySession) attributes.get("proxySession");

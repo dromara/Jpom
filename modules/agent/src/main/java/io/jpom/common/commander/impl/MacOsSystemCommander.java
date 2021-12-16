@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * @author User
  */
-public class MacOSSystemCommander extends AbstractSystemCommander {
+public class MacOsSystemCommander extends AbstractSystemCommander {
 
 	@Override
 	public JSONObject getAllMonitor() {
@@ -126,8 +126,8 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
 	}
 
 	@Override
-	public List<ProcessModel> getProcessList() {
-		String s = CommandUtil.execSystemCommand("top -l 1 | grep java");
+	public List<ProcessModel> getProcessList(String processName) {
+		String s = CommandUtil.execSystemCommand("top -l 1 | grep " + processName);
 		return formatLinuxTop(s, false);
 	}
 

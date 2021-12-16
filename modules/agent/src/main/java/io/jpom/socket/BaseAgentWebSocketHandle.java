@@ -53,7 +53,12 @@ public abstract class BaseAgentWebSocketHandle {
 	protected String getParameters(Session session, String name) {
 		Map<String, List<String>> pathParameters = session.getRequestParameterMap();
 		List<String> strings = pathParameters.get(name);
-		return CollUtil.join(strings, StrUtil.COMMA);
+		String join = CollUtil.join(strings, StrUtil.COMMA);
+		if (StrUtil.isEmpty(join)) {
+			Map<String, String> parameters = session.getPathParameters();
+			return parameters.get(name);
+		}
+		return join;
 	}
 
 	/**
