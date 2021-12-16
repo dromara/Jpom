@@ -131,7 +131,7 @@ public class MonitorItem implements Runnable {
 				context = ExceptionUtil.stacktraceToString(e);
 			}
 			// 获取上次状态
-			boolean pre = getPreStatus(monitorModel.getId(), nodeModel.getId(), id);
+			boolean pre = this.getPreStatus(monitorModel.getId(), nodeModel.getId(), id);
 			if (pre) {
 				// 上次正常
 				MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
@@ -238,7 +238,7 @@ public class MonitorItem implements Runnable {
 
 		List<MonitorNotifyLog> queryList = dbMonitorNotifyLogService.queryList(monitorNotifyLog, 1, new Order("createTime", Direction.DESC));
 		MonitorNotifyLog entity1 = CollUtil.getFirst(queryList);
-		return entity1 == null || entity1.isStatus();
+		return entity1 == null || entity1.status();
 	}
 
 	private void notifyMsg(final List<String> notify, final MonitorNotifyLog monitorNotifyLog) {
