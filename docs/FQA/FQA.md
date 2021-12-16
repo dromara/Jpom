@@ -2,9 +2,24 @@
 
 ### 忘记系统管理员密码
 
-> 1. 删除服务端的数据目录中【data/user.json】所有用户信息将失效，需要重新初始化系统管理员账号信息（次操作不会其他其他信息以及项目运行状态）
+##### 2.8.0 版本及其以上
+
+> linux 执行：sh /xxxx/Server.sh restart --rest:super_user_pwd
+> 
+> windows 执行 Server.bat 操作面板会提示如果执行
+
+#### 2.8.0 版本以下
+
+> 1. 删除服务端的数据目录中【data/user.json】所有用户信息将失效，需要重新初始化系统管理员账号信息（此操作不会其他其他信息以及项目运行状态）
 
 > 2. 重新确定密码，并js sha1后修改【data/user.json】中对应的系统管理员中的密码字段即可
+
+### IP 白名单配置错误需要手动恢复
+
+
+> linux 执行：sh /xxxx/Server.sh restart --rest:ip_config
+>
+> windows 执行 Server.bat 操作面板会提示如果执行
     
 ### 在linux 系统中执行管理sh 提示
 
