@@ -13,6 +13,7 @@
         <a-select-option value="python">python</a-select-option>
         <a-select-option value="mysql">mysql</a-select-option>
         <a-select-option value="php">php</a-select-option>
+        <a-select-option value="docker">docker</a-select-option>
       </a-select>
       <!-- <a-button type="primary" @click="loadData">切换</a-button> -->
     </div>
