@@ -123,9 +123,10 @@ public class ProjectFileControl extends BaseAgentController {
 		//
 		List<DiffFileVo.DiffItem> data = diffFileVo.getData();
 		Assert.notEmpty(data, "没有要对比的数据");
-		//
+		// 扫描项目目录下面的所有文件
 		String path = projectInfoModel.allLib();
 		List<File> files = FileUtil.loopFiles(path);
+		// 将所有的文件信息组装并签名
 		List<JSONObject> collect = files.stream().map(file -> {
 			//
 			JSONObject item = new JSONObject();
@@ -133,12 +134,13 @@ public class ProjectFileControl extends BaseAgentController {
 			item.put("sha1", SecureUtil.sha1(file));
 			return item;
 		}).collect(Collectors.toList());
+		// 得到 当前下面文件夹下面所有的文件信息 map
 		Map<String, String> nowMap = CollStreamUtil.toMap(collect,
 				jsonObject12 -> jsonObject12.getString("name"),
 				jsonObject1 -> jsonObject1.getString("sha1"));
-		//
+		// 将需要对应的信息转为 map
 		Map<String, String> tryMap = CollStreamUtil.toMap(data, DiffFileVo.DiffItem::getName, DiffFileVo.DiffItem::getSha1);
-		//
+		// 对应需要 当前项目文件夹下没有的和文件内容有变化的
 		List<JSONObject> canSync = tryMap.entrySet()
 				.stream()
 				.filter(stringStringEntry -> {
@@ -158,7 +160,7 @@ public class ProjectFileControl extends BaseAgentController {
 					return item;
 				})
 				.collect(Collectors.toList());
-		//
+		// 对比项目文件夹下有对，但是需要对应对信息里面没有对。此类文件需要删除
 		List<JSONObject> delArray = nowMap.entrySet()
 				.stream()
 				.filter(stringStringEntry -> !tryMap.containsKey(stringStringEntry.getKey()))
