@@ -28,10 +28,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpStatus;
-import cn.hutool.http.HttpUtil;
+import cn.hutool.http.*;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -102,6 +99,38 @@ public class NodeForward {
 	 */
 	public static <T> JsonMessage<T> requestBySys(NodeModel nodeModel, NodeUrl nodeUrl, String pName, Object pVal, Object... val) {
 		return request(nodeModel, null, nodeUrl, false, null, null, pName, pVal, val);
+	}
+
+	/**
+	 * post body 消息转发
+	 *
+	 * @param nodeModel 节点
+	 * @param nodeUrl   节点的url
+	 * @param userModel 用户
+	 * @param jsonData  数据
+	 * @param <T>       泛型
+	 * @return JSON
+	 */
+	public static <T> JsonMessage<T> requestBody(NodeModel nodeModel,
+												 NodeUrl nodeUrl,
+												 UserModel userModel,
+												 JSONObject jsonData) {
+		String url = nodeModel.getRealUrl(nodeUrl);
+		HttpRequest httpRequest = HttpUtil.createPost(url);
+
+		addUser(httpRequest, nodeModel, nodeUrl, userModel);
+
+		httpRequest.body(jsonData.toString(), ContentType.JSON.getValue());
+
+		HttpResponse response;
+		try {
+			response = httpRequest
+					.execute();
+		} catch (Exception e) {
+			throw NodeForward.responseException(e, nodeModel);
+		}
+		//
+		return parseBody(response, nodeModel);
 	}
 
 	/**

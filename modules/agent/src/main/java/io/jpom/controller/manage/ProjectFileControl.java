@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.manage;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
@@ -29,6 +30,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -38,6 +40,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.controller.manage.vo.DiffFileVo;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.AgentWhitelist;
@@ -53,10 +56,10 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -71,11 +74,14 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/manage/file/")
 public class ProjectFileControl extends BaseAgentController {
 
-	@Resource
-	private ConsoleService consoleService;
+	private final ConsoleService consoleService;
+	private final WhitelistDirectoryService whitelistDirectoryService;
 
-	@Resource
-	private WhitelistDirectoryService whitelistDirectoryService;
+	public ProjectFileControl(ConsoleService consoleService,
+							  WhitelistDirectoryService whitelistDirectoryService) {
+		this.consoleService = consoleService;
+		this.whitelistDirectoryService = whitelistDirectoryService;
+	}
 
 	@RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getFileList(String id, String path) {
@@ -102,6 +108,73 @@ public class ProjectFileControl extends BaseAgentController {
 		}
 
 		return JsonMessage.getString(200, "查询成功", arrayFile);
+	}
+
+	/**
+	 * 对比文件
+	 *
+	 * @param diffFileVo 参数
+	 * @return json
+	 */
+	@PostMapping(value = "diff_file", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String diffFile(@RequestBody DiffFileVo diffFileVo) {
+		String id = diffFileVo.getId();
+		NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
+		//
+		List<DiffFileVo.DiffItem> data = diffFileVo.getData();
+		Assert.notEmpty(data, "没有要对比的数据");
+		//
+		String path = projectInfoModel.allLib();
+		List<File> files = FileUtil.loopFiles(path);
+		List<JSONObject> collect = files.stream().map(file -> {
+			//
+			JSONObject item = new JSONObject();
+			item.put("name", StringUtil.delStartPath(file, path, true));
+			item.put("sha1", SecureUtil.sha1(file));
+			return item;
+		}).collect(Collectors.toList());
+		Map<String, String> nowMap = CollStreamUtil.toMap(collect,
+				jsonObject12 -> jsonObject12.getString("name"),
+				jsonObject1 -> jsonObject1.getString("sha1"));
+		//
+		Map<String, String> tryMap = CollStreamUtil.toMap(data, DiffFileVo.DiffItem::getName, DiffFileVo.DiffItem::getSha1);
+		//
+		List<JSONObject> canSync = tryMap.entrySet()
+				.stream()
+				.filter(stringStringEntry -> {
+					String nowSha1 = nowMap.get(stringStringEntry.getKey());
+					if (StrUtil.isEmpty(nowSha1)) {
+						// 不存在
+						return true;
+					}
+					// 如果 文件信息一致 则过滤
+					return !StrUtil.equals(stringStringEntry.getValue(), nowSha1);
+				})
+				.map(stringStringEntry -> {
+					//
+					JSONObject item = new JSONObject();
+					item.put("name", stringStringEntry.getKey());
+					item.put("sha1", stringStringEntry.getValue());
+					return item;
+				})
+				.collect(Collectors.toList());
+		//
+		List<JSONObject> delArray = nowMap.entrySet()
+				.stream()
+				.filter(stringStringEntry -> !tryMap.containsKey(stringStringEntry.getKey()))
+				.map(stringStringEntry -> {
+					//
+					JSONObject item = new JSONObject();
+					item.put("name", stringStringEntry.getKey());
+					item.put("sha1", stringStringEntry.getValue());
+					return item;
+				})
+				.collect(Collectors.toList());
+		//
+		JSONObject result = new JSONObject();
+		result.put("diff", canSync);
+		result.put("del", delArray);
+		return JsonMessage.getString(200, "", result);
 	}
 
 
@@ -243,6 +316,26 @@ public class ProjectFileControl extends BaseAgentController {
 			}
 			return JsonMessage.getString(500, "删除失败");
 		}
+	}
+
+
+	@RequestMapping(value = "batch_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String batchDelete(@RequestBody DiffFileVo diffFileVo) {
+		String id = diffFileVo.getId();
+		NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
+		//
+		List<DiffFileVo.DiffItem> data = diffFileVo.getData();
+		Assert.notEmpty(data, "没有要对比的数据");
+		//
+		String path = projectInfoModel.allLib();
+		for (DiffFileVo.DiffItem datum : data) {
+			File file = FileUtil.file(path, datum.getName());
+			if (FileUtil.del(file)) {
+				continue;
+			}
+			return JsonMessage.getString(500, "删除失败");
+		}
+		return JsonMessage.getString(200, "删除成功");
 	}
 
 	/**

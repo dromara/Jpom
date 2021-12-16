@@ -283,7 +283,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 	}
 
 	public String allLib() {
-		return FileUtil.file(getWhitelistDirectory(), getLib()).getAbsolutePath();
+		return FileUtil.file(this.getWhitelistDirectory(), this.getLib()).getAbsolutePath();
 	}
 
 	/**

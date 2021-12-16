@@ -84,7 +84,7 @@ public abstract class BaseAgentController extends BaseJpomController {
 	/**
 	 * 获取拦截器中缓存的项目信息
 	 *
-	 * @return this
+	 * @return NodeProjectInfoModel
 	 */
 	protected NodeProjectInfoModel getProjectInfoModel() {
 		NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
@@ -92,9 +92,24 @@ public abstract class BaseAgentController extends BaseJpomController {
 		return nodeProjectInfoModel;
 	}
 
+	/**
+	 * 根据 项目ID 获取项目信息
+	 *
+	 * @return NodeProjectInfoModel
+	 */
+	protected NodeProjectInfoModel getProjectInfoModel(String id) {
+		NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel(id);
+		Objects.requireNonNull(nodeProjectInfoModel, "获取项目信息失败");
+		return nodeProjectInfoModel;
+	}
+
 	protected NodeProjectInfoModel tryGetProjectInfoModel() {
-		NodeProjectInfoModel nodeProjectInfoModel = null;
 		String id = getParameter("id");
+		return tryGetProjectInfoModel(id);
+	}
+
+	protected NodeProjectInfoModel tryGetProjectInfoModel(String id) {
+		NodeProjectInfoModel nodeProjectInfoModel = null;
 		if (StrUtil.isNotEmpty(id)) {
 			nodeProjectInfoModel = projectInfoService.getItem(id);
 		}
