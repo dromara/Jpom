@@ -21,6 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 import cn.hutool.core.lang.PatternPool;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
@@ -38,6 +39,13 @@ import java.util.regex.Pattern;
  * Created by jiangzeyin on 2019/3/1.
  */
 public class TestString {
+
+	@Test
+	public void testCharset() {
+		Charset utf8 = CharsetUtil.charset("utf8");
+		Charset utf82 = CharsetUtil.charset("utf-8");
+		System.out.println(utf82 == utf8);
+	}
 
 	@Test
 	public void test2() {
