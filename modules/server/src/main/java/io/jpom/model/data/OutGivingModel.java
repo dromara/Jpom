@@ -96,11 +96,11 @@ public class OutGivingModel extends BaseWorkspaceModel {
 		this.name = name;
 	}
 
-	public boolean isClearOld() {
+	public boolean clearOld() {
 		return clearOld != null && clearOld;
 	}
 
-	public boolean isOutGivingProject() {
+	public boolean outGivingProject() {
 		return outGivingProject != null && outGivingProject;
 	}
 

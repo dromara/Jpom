@@ -180,6 +180,8 @@ export default {
                 this.$notification.warning({
                   message: "未升级成功：" + (res.msg || ""),
                 });
+                this.$global_loading && this.$global_loading.close();
+                clearInterval(this.timer);
               }
             }
           })
@@ -190,6 +192,7 @@ export default {
               this.$notification.error({
                 message: "升级超时,请去服务器查看控制台日志排查问题",
               });
+              clearInterval(this.timer);
             }
           });
         this.checkCount = this.checkCount + 1;
@@ -256,6 +259,7 @@ export default {
   margin: -15px -30px 0 -15px;
   padding: 15px;
 }
+
 .upload-btn {
   margin-top: 20px;
 }

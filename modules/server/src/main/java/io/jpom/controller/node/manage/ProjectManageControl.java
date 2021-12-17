@@ -24,7 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -37,16 +36,19 @@ import java.util.List;
 @Feature(cls = ClassFeature.PROJECT)
 public class ProjectManageControl extends BaseServerController {
 
-	@Resource
-	private OutGivingServer outGivingServer;
-	@Resource
-	private MonitorService monitorService;
-	@Resource
-	private BuildInfoService buildService;
+	private final OutGivingServer outGivingServer;
+	private final MonitorService monitorService;
+	private final BuildInfoService buildService;
 
 	private final ProjectInfoCacheService projectInfoCacheService;
 
-	public ProjectManageControl(ProjectInfoCacheService projectInfoCacheService) {
+	public ProjectManageControl(OutGivingServer outGivingServer,
+								MonitorService monitorService,
+								BuildInfoService buildService,
+								ProjectInfoCacheService projectInfoCacheService) {
+		this.outGivingServer = outGivingServer;
+		this.monitorService = monitorService;
+		this.buildService = buildService;
 		this.projectInfoCacheService = projectInfoCacheService;
 	}
 
