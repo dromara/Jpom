@@ -185,6 +185,7 @@ public abstract class AbstractProjectCommander {
 	 * 停止
 	 *
 	 * @param nodeProjectInfoModel 项目
+	 * @param javaCopyItem         副本信息
 	 * @return 结果
 	 * @throws Exception 异常
 	 */
@@ -201,7 +202,7 @@ public abstract class AbstractProjectCommander {
 		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
 		String beforeStop = this.webHooks(nodeProjectInfoModel, javaCopyItem, "beforeStop");
 		// 再次查看进程信息
-		String result = status(tag);
+		String result = this.status(tag);
 		//
 		int pid = parsePid(result);
 		if (pid > 0) {
