@@ -42,7 +42,7 @@
         <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
         <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
         <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
-        <a-button type="danger" v-if="!list_expanded[record.id]" @click="handleDelete(record)">删除</a-button>
+        <a-button type="danger" v-if="!list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
       </template>
       <!-- 嵌套表格 -->
       <a-table
@@ -422,7 +422,18 @@
 import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
-import { getDishPatchList, getDispatchProject, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch, remoteDownload, afterOptList } from "@/api/dispatch";
+import {
+  getDishPatchList,
+  getDispatchProject,
+  editDispatch,
+  editDispatchProject,
+  uploadDispatchFile,
+  getDispatchWhiteList,
+  releaseDelDisPatch,
+  delDisPatchProject,
+  remoteDownload,
+  afterOptList,
+} from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, runModeList } from "@/api/node-project";
 import { itemGroupBy, parseTime } from "@/utils/time";
@@ -932,14 +943,34 @@ export default {
     },
     // 删除
     handleDelete(record) {
+      if (record.outGivingProject) {
+        this.$confirm({
+          title: "系统提示",
+          content: "真的要删除分发信息么？删除后节点下面的项目也都将删除",
+          okText: "确认",
+          cancelText: "取消",
+          onOk: () => {
+            // 删除
+            delDisPatchProject(record.id).then((res) => {
+              if (res.code === 200) {
+                this.$notification.success({
+                  message: res.msg,
+                });
+                this.loadData();
+              }
+            });
+          },
+        });
+        return;
+      }
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除分发信息么？",
+        content: "真的要释放分发信息么？释放之后节点下面的项目信息还会保留，如需删除还需要到节点管理中操作",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
           // 删除
-          deleteDisPatch(record.id).then((res) => {
+          releaseDelDisPatch(record.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,

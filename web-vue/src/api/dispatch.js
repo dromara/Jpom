@@ -122,12 +122,24 @@ export function remoteDownload(params) {
 }
 
 /**
+ * 释放分发
+ * @param {*} id 分发 ID
+ */
+export function releaseDelDisPatch(id) {
+  return axios({
+    url: "/outgiving/release_del.json",
+    method: "post",
+    data: { id },
+  });
+}
+
+/**
  * 删除分发
  * @param {*} id 分发 ID
  */
-export function deleteDisPatch(id) {
+export function delDisPatchProject(id) {
   return axios({
-    url: "/outgiving/del.json",
+    url: "/outgiving/delete_project",
     method: "post",
     data: { id },
   });
