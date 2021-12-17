@@ -132,7 +132,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 > 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
 > 
 > 如无法访问，检查下是否开启了防火墙`systemctl status firewalld`，如状态显示为绿色`Active: active (running)`可临时关闭防火墙`systemctl stop firewalld`，然后重启防火墙`firewall-cmd --reload`（建议仅测试环境下使用，生产环境下慎用）
-> 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中关闭防火墙
+> 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中检查安全组规则(关闭防火墙)
 
 ### 容器化安装
 > 注意：容器化安装方式需要先安装docker
