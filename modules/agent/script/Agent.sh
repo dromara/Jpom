@@ -40,6 +40,7 @@ Path=$(
   pwd
 )"/"
 Lib="${Path}lib/"
+# Online upgrade will automatically modify this attribute
 RUNJAR=""
 Log="${Path}agent.log"
 LogBack="${Path}log/"
