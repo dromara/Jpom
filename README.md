@@ -135,6 +135,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 > 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中检查安全组规则(关闭防火墙)
 
 ### 容器化安装
+
 > 注意：容器化安装方式需要先安装docker
 ```
 docker pull jpomdocker/jpom
@@ -145,6 +146,19 @@ docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:r
 > 容器化安装仅提供服务端版。由于容器和宿主机环境隔离，而导致插件端的很多功能无法正常使用，因此对插件端容器化意义不大。
 >
 > 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档[https://jpom.io/docs/](https://jpom.io/docs/)
+
+
+### docker-compose 一键启动
+
+- 无需安装任何环境,自动编译构建
+
+> 需要注意修改 `.env` 文件中的 token 值
+
+```shell
+git clone https://gitee.com/dromara/Jpom.git
+cd Jpom
+docker-compose up -d
+```
 
 ### 下载安装
 
