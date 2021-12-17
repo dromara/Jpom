@@ -71,6 +71,7 @@
 > 2. 服务端和插件端请安装到不同目录中，切勿安装到同一目录中
 > 3. 卸载 Jpom 插件端或者服务端，先停止对应服务，删除对应的程序文件、日志文件夹、数据目录文件夹即可
 > 4. 构建依赖的是系统环境，如果需要 maven 或者 node 需要服务端所在的服务器中有对应插件，如果已经启动服务端再安装的对应环境需要通过命令行重启服务端后才生效。
+> 5. 在Ubuntu/Debian服务器作为插件端可能会添加失败，请在当前用户的根目录创建 .bash_profile文件
 
 > 升级 2.7.x 后不建议降级操作,会涉及到数据不兼容到情况
 > 
@@ -131,7 +132,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 > 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
 > 
 > 如无法访问，检查下是否开启了防火墙`systemctl status firewalld`，如状态显示为绿色`Active: active (running)`可临时关闭防火墙`systemctl stop firewalld`，然后重启防火墙`firewall-cmd --reload`（建议仅测试环境下使用，生产环境下慎用）
-> 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中关闭防火墙
+> 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中检查安全组规则(关闭防火墙)
 
 ### 容器化安装
 > 注意：容器化安装方式需要先安装docker
@@ -144,16 +145,6 @@ docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:r
 > 容器化安装仅提供服务端版。由于容器和宿主机环境隔离，而导致插件端的很多功能无法正常使用，因此对插件端容器化意义不大。
 >
 > 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档[https://jpom.io/docs/](https://jpom.io/docs/)
-
-### docker-compose 一键启动
-
-- 无需安装任何环境,自动编译构建
-
-```shell
-git clone https://gitee.com/dromara/Jpom.git
-cd Jpom
-docker-compose up -d
-```
 
 ### 下载安装
 
@@ -178,7 +169,7 @@ docker-compose up -d
 
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支)
 2. 切换到`web-vue`目录 执行`npm install` (vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
-3. 执行`npm build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
+3. 执行`npm run build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
 4. 切换到项目根目录执行:`mvn clean package`
 5. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
@@ -299,12 +290,12 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 ### 精品项目推荐
 
-|项目名称 | 项目地址 | 项目介绍 |
-|---|---|---|
-| SpringBoot_v2      | [https://gitee.com/bdj/SpringBoot_v2](https://gitee.com/bdj/SpringBoot_v2) | 基于springboot的一款纯净脚手架|
-| TLog GVP 项目 | [https://gitee.com/dromara/TLog](https://gitee.com/dromara/TLog) | 一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪 |
-| Sa-Token | [https://gitee.com/dromara/sa-token](https://gitee.com/dromara/sa-token) | 这可能是史上功能最全的 Java 权限认证框架！ |
-| Erupt | [https://gitee.com/erupt/erupt](https://gitee.com/erupt/erupt) | 零前端代码，纯注解开发 admin 管理后台 |
+| 项目名称          | 项目地址                                                                       | 项目介绍                                          |
+|---------------|----------------------------------------------------------------------------|-----------------------------------------------|
+| SpringBoot_v2 | [https://gitee.com/bdj/SpringBoot_v2](https://gitee.com/bdj/SpringBoot_v2) | 基于springboot的一款纯净脚手架                          |
+| TLog GVP 项目   | [https://gitee.com/dromara/TLog](https://gitee.com/dromara/TLog)           | 一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪 |
+| Sa-Token      | [https://gitee.com/dromara/sa-token](https://gitee.com/dromara/sa-token)   | 这可能是史上功能最全的 Java 权限认证框架！                      |
+| Erupt         | [https://gitee.com/erupt/erupt](https://gitee.com/erupt/erupt)             | 零前端代码，纯注解开发 admin 管理后台                        |
 
 ### giteye
 

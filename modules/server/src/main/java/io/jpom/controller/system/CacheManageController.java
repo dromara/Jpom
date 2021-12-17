@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -37,6 +37,7 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.socket.ServiceFileTailWatcher;
 import io.jpom.system.ConfigBean;
+import io.jpom.util.CronUtils;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -77,6 +78,8 @@ public class CacheManageController extends BaseServerController {
 
 		fileSize = FileUtil.readableFileSize(BuildUtil.buildCacheSize);
 		map.put("cacheBuildFileSize", fileSize);
+
+		map.put("taskList", CronUtils.list());
 
 		return JsonMessage.getString(200, "ok", map);
 	}

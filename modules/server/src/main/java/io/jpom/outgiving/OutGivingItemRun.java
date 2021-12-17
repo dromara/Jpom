@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -74,7 +74,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
 							boolean unzip) {
 		this.outGivingId = item.getId();
 		this.unzip = unzip;
-		this.clearOld = item.isClearOld();
+		this.clearOld = item.clearOld();
 		this.outGivingNodeProject = outGivingNodeProject;
 		this.file = file;
 		this.afterOpt = ObjectUtil.defaultIfNull(EnumUtil.likeValueOf(AfterOpt.class, item.getAfterOpt()), AfterOpt.No);
@@ -93,7 +93,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
 			this.updateStatus(this.outGivingId, this.outGivingNodeProject,
 					OutGivingNodeProject.Status.Ing, "开始分发");
 			//
-			JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file,
+			JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, null,
 					this.outGivingNodeProject.getProjectId(),
 					unzip,
 					afterOpt,

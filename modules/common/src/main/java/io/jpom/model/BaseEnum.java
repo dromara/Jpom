@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -92,10 +92,26 @@ public interface BaseEnum {
 	 * @param <T>  泛型
 	 * @return 对应的枚举
 	 */
-	static <T extends BaseEnum> T getEnum(Class<? extends BaseEnum> t, int code) {
+	static <T extends BaseEnum> T getEnum(Class<? extends BaseEnum> t, Integer code) {
+		return getEnum(t, code, null);
+	}
+
+	/**
+	 * 根据枚举获取枚举对象
+	 *
+	 * @param t    枚举类型
+	 * @param code code
+	 * @param def  默认值
+	 * @param <T>  泛型
+	 * @return 对应的枚举
+	 */
+	static <T extends BaseEnum> T getEnum(Class<? extends BaseEnum> t, Integer code, T def) {
+		if (code == null) {
+			return def;
+		}
 		Map<Integer, BaseEnum> map = getMap(t);
 		if (map == null) {
-			return null;
+			return def;
 		}
 		return (T) map.get(code);
 	}
@@ -107,7 +123,7 @@ public interface BaseEnum {
 	 * @param code code
 	 * @return desc
 	 */
-	static String getDescByCode(Class<? extends BaseEnum> t, int code) {
+	static String getDescByCode(Class<? extends BaseEnum> t, Integer code) {
 		BaseEnum baseEnums = getEnum(t, code);
 		if (baseEnums == null) {
 			return null;

@@ -56,7 +56,11 @@ public class NodeWelcomeController extends BaseServerController {
 
 	private Cycle getCycle() {
 		NodeModel node = getNode();
-		return BaseEnum.getEnum(Cycle.class, node.getCycle());
+		Integer cycle = node.getCycle();
+		if (cycle == null) {
+			return null;
+		}
+		return BaseEnum.getEnum(Cycle.class, cycle);
 	}
 
 	private long getCycleMillis() {
@@ -163,9 +167,9 @@ public class NodeWelcomeController extends BaseServerController {
 			List<SystemMonitorLog> result = monitorData.getResult();
 			for (SystemMonitorLog log : result) {
 				long monitorTime = log.getMonitorTime();
-				buf.append(DateUtil.date(monitorTime).toString()).append(",")
-						.append(log.getOccupyCpu()).append("%").append(",")
-						.append(log.getOccupyMemory()).append("%").append(",")
+				buf.append(DateUtil.date(monitorTime)).append(StrUtil.COMMA)
+						.append(log.getOccupyCpu()).append("%").append(StrUtil.COMMA)
+						.append(log.getOccupyMemory()).append("%").append(StrUtil.COMMA)
 						.append(log.getOccupyDisk()).append("%").append("\r\n");
 			}
 			String fileName = URLEncoder.encode("Jpom系统监控-" + node.getId(), "UTF-8");

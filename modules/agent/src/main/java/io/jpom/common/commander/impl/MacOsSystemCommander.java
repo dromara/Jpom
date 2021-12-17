@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,7 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
@@ -40,7 +41,7 @@ import java.util.List;
 /**
  * @author User
  */
-public class MacOSSystemCommander extends AbstractSystemCommander {
+public class MacOsSystemCommander extends AbstractSystemCommander {
 
 	@Override
 	public JSONObject getAllMonitor() {
@@ -84,8 +85,8 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
 		}
 		double used = 0, free = 0;
 		DefaultSystemLog.getLog().debug("Mac Os mem info: {}", info);
-		int index = info.indexOf(":") + 1;
-		String[] split = info.substring(index).split(",");
+		int index = info.indexOf(CharPool.COLON) + 1;
+		String[] split = info.substring(index).split(StrUtil.COMMA);
 		for (String str : split) {
 			str = str.trim();
 			if (str.contains("unused.")) {
@@ -111,8 +112,8 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
 			return null;
 		}
 		DefaultSystemLog.getLog().debug("Mac Os cpu info: {}", info);
-		int i = info.indexOf(":");
-		String[] split = info.substring(i + 1).split(",");
+		int i = info.indexOf(CharPool.COLON);
+		String[] split = info.substring(i + 1).split(StrUtil.COMMA);
 		for (String str : split) {
 			str = str.trim();
 			if (str.contains("idle")) {
@@ -125,8 +126,8 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
 	}
 
 	@Override
-	public List<ProcessModel> getProcessList() {
-		String s = CommandUtil.execSystemCommand("top -l 1 | grep java");
+	public List<ProcessModel> getProcessList(String processName) {
+		String s = CommandUtil.execSystemCommand("top -l 1 | grep " + processName);
 		return formatLinuxTop(s, false);
 	}
 
@@ -154,7 +155,7 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
 			DefaultSystemLog.getLog().debug("process item: {}", item);
 			List<String> values = StrSplitter.splitTrim(item, StrUtil.SPACE, true);
 			DefaultSystemLog.getLog().debug(JSON.toJSONString(values));
-			processModel.setPid(Convert.toInt(values.get(0),0));
+			processModel.setPid(Convert.toInt(values.get(0), 0));
 			processModel.setPort(values.get(6));
 			processModel.setCommand(values.get(1));
 			processModel.setCpu(values.get(2) + "%");

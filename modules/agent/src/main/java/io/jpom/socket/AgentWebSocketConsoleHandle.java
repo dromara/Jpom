@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -105,7 +105,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 	private NodeProjectInfoModel checkProject(String projectId, String copyId, Session session) throws IOException {
 		NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(projectId);
 		if (nodeProjectInfoModel == null) {
-			SocketSessionUtil.send(session, "没有对应项目");
+			SocketSessionUtil.send(session, "没有对应项目：" + projectId);
 			session.close();
 			return null;
 		}
@@ -163,7 +163,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 					// 停止项目
 					strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
 					if (strResult.contains(AbstractProjectCommander.STOP_TAG)) {
-						resultData = JsonMessage.toJson(200, "操作成功");
+						resultData = JsonMessage.toJson(200, "操作成功：" + strResult);
 					} else {
 						resultData = JsonMessage.toJson(500, strResult);
 					}

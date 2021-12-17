@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,6 +22,7 @@
  */
 package io.jpom.util;
 
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -125,9 +126,22 @@ public class CommandUtil {
 	 */
 	private static String exec(String[] cmd, File file) throws IOException {
 		Process process = new ProcessBuilder(cmd).directory(file).redirectErrorStream(true).start();
-		Charset charset = ExtConfigBean.getInstance().getConsoleLogCharset();
+		Charset charset;
+		boolean log;
+		try {
+			charset = ExtConfigBean.getInstance().getConsoleLogCharset();
+			log = true;
+		} catch (Exception e) {
+			// 直接执行，使用默认编码格式
+			charset = CharsetUtil.systemCharset();
+			// 不记录日志
+			log = false;
+		}
+		charset = ObjectUtil.defaultIfNull(charset, CharsetUtil.defaultCharset());
 		String result = RuntimeUtil.getResult(process, charset);
-		DefaultSystemLog.getLog().debug("exec {} {} {}", charset.name(), Arrays.toString(cmd), result);
+		if (log) {
+			DefaultSystemLog.getLog().debug("exec {} {} {}", charset.name(), Arrays.toString(cmd), result);
+		}
 		return result;
 	}
 

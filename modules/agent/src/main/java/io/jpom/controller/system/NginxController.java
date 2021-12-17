@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,7 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -343,7 +344,7 @@ public class NginxController extends BaseAgentController {
 			for (String str : strings) {
 				str = str.toUpperCase().trim();
 				if (str.startsWith("BINARY_PATH_NAME")) {
-					String path = str.substring(str.indexOf(":") + 1).replace("\"", "").trim();
+					String path = str.substring(str.indexOf(CharPool.COLON) + 1).replace("\"", "").trim();
 					file = FileUtil.file(path).getParentFile();
 					break;
 				}

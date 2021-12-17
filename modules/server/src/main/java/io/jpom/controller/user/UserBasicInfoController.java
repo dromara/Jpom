@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -90,7 +90,7 @@ public class UserBasicInfoController extends BaseServerController {
 		UserModel userModel = getUser();
 		userModel = userService.getByKey(userModel.getId(), false);
 		// return basic info
-		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<>(10);
 		map.put("id", userModel.getId());
 		map.put("name", userModel.getName());
 		map.put("systemUser", userModel.isSystemUser());

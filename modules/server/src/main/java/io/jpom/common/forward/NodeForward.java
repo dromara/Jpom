@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,16 +22,14 @@
  */
 package io.jpom.common.forward;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpStatus;
-import cn.hutool.http.HttpUtil;
+import cn.hutool.http.*;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -102,6 +100,38 @@ public class NodeForward {
 	 */
 	public static <T> JsonMessage<T> requestBySys(NodeModel nodeModel, NodeUrl nodeUrl, String pName, Object pVal, Object... val) {
 		return request(nodeModel, null, nodeUrl, false, null, null, pName, pVal, val);
+	}
+
+	/**
+	 * post body 消息转发
+	 *
+	 * @param nodeModel 节点
+	 * @param nodeUrl   节点的url
+	 * @param userModel 用户
+	 * @param jsonData  数据
+	 * @param <T>       泛型
+	 * @return JSON
+	 */
+	public static <T> JsonMessage<T> requestBody(NodeModel nodeModel,
+												 NodeUrl nodeUrl,
+												 UserModel userModel,
+												 JSONObject jsonData) {
+		String url = nodeModel.getRealUrl(nodeUrl);
+		HttpRequest httpRequest = HttpUtil.createPost(url);
+
+		addUser(httpRequest, nodeModel, nodeUrl, userModel);
+
+		httpRequest.body(jsonData.toString(), ContentType.JSON.getValue());
+
+		HttpResponse response;
+		try {
+			response = httpRequest
+					.execute();
+		} catch (Exception e) {
+			throw NodeForward.responseException(e, nodeModel);
+		}
+		//
+		return parseBody(response, nodeModel);
 	}
 
 	/**
@@ -398,19 +428,23 @@ public class NodeForward {
 		}
 		UrlQuery urlQuery = new UrlQuery();
 		urlQuery.add(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
-		// 兼容旧版本-节点升级 @author jzy
-		urlQuery.add("name", nodeModel.getLoginName());
-		urlQuery.add("password", nodeModel.getLoginPwd());
 		//
 		String optUser = userInfo.getId();
 		optUser = URLUtil.encode(optUser);
 		urlQuery.add("optUser", optUser);
 		if (ArrayUtil.isNotEmpty(parameters)) {
 			for (int i = 0; i < parameters.length; i += 2) {
-				urlQuery.add(parameters[i].toString(), parameters[i + 1]);
+				Object parameter = parameters[i + 1];
+				String value = Convert.toStr(parameter, StrUtil.EMPTY);
+				urlQuery.add(parameters[i].toString(), URLUtil.encode(value));
 			}
 		}
-		return StrUtil.format("{}://{}{}?{}", ws, nodeModel.getUrl(), nodeUrl.getUrl(), urlQuery.toString());
+		// 兼容旧版本-节点升级 @author jzy
+		urlQuery.add("name", URLUtil.encode(nodeModel.getLoginName()));
+		urlQuery.add("password", URLUtil.encode(nodeModel.getLoginPwd()));
+		String format = StrUtil.format("{}://{}{}?{}", ws, nodeModel.getUrl(), nodeUrl.getUrl(), urlQuery.toString());
+		DefaultSystemLog.getLog().debug("web socket url:{}", format);
+		return format;
 	}
 
 	/**

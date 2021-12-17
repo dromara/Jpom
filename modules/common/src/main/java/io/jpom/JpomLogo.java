@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -32,7 +32,6 @@ import org.springframework.context.ApplicationListener;
  * @author Hotstrip
  * load Jpom version and print Jpom logo
  */
-//@Order(LoggingApplicationListener.DEFAULT_ORDER + 1)
 public class JpomLogo implements ApplicationListener<ApplicationReadyEvent> {
 
     @Override

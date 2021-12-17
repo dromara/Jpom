@@ -1,5 +1,5 @@
 <template>
-  <div class="full-content">
+  <div class="node-full-content">
     <!-- 历史监控数据 -->
     <a-button v-show="node.cycle && node.cycle !== 0" type="primary" @click="handleHistory">历史监控图表</a-button>
     <a-divider>图表</a-divider>
@@ -7,7 +7,16 @@
     <div id="top-chart">loading...</div>
     <a-divider>进程监控表格</a-divider>
     <!-- 进程表格数据 -->
-    <a-table :loading="loading" :columns="columns" :data-source="processList" :scroll="{ x: '80vw' }" bordered rowKey="pid" class="node-table" :pagination="false">
+    <div ref="filter" class="filter">
+      <a-select @change="loadNodeProcess" v-model="processName" allowClear placeholder="进程类型" class="filter-item">
+        <a-select-option value="java">java</a-select-option>
+        <a-select-option value="python">python</a-select-option>
+        <a-select-option value="mysql">mysql</a-select-option>
+        <a-select-option value="php">php</a-select-option>
+      </a-select>
+      <!-- <a-button type="primary" @click="loadData">切换</a-button> -->
+    </div>
+    <a-table :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="pid" class="node-table" :pagination="false">
       <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -50,6 +59,7 @@ export default {
       monitorVisible: false,
       timeRange: "",
       historyData: [],
+      processName: "java",
       columns: [
         { title: "进程 ID", dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
         { title: "进程名称", dataIndex: "command", width: 150, ellipsis: true, scopedSlots: { customRender: "command" } },
@@ -79,11 +89,12 @@ export default {
         this.loadNodeTop();
         this.loadNodeProcess();
         // 计算多久时间绘制图表
-        const millis = this.node.cycle < 30000 ? 30000 : this.node.cycle;
+        // const millis = this.node.cycle < 30000 ? 30000 : this.node.cycle;
+        // console.log(millis);
         this.topChartTimer = setInterval(() => {
           this.loadNodeTop();
           this.loadNodeProcess();
-        }, millis);
+        }, 20000);
       }
     },
     // 请求 top 命令绘制图表
@@ -91,8 +102,8 @@ export default {
       getNodeTop(this.node.id).then((res) => {
         if (res.code === 200) {
           this.topData = res.data;
+          this.drawTopChart();
         }
-        this.drawTopChart();
       });
     },
     generateChart(data) {
@@ -177,17 +188,26 @@ export default {
     },
     // 绘制 top 图表
     drawTopChart() {
+      let topChartDom = document.getElementById("top-chart");
+      if (!topChartDom) {
+        return;
+      }
       let option = this.generateChart(this.topData);
       // 绘制图表
-      const topChart = echarts.init(document.getElementById("top-chart"));
+      const topChart = echarts.init(topChartDom);
       topChart.setOption(option);
     },
     // 加载节点进程列表
     loadNodeProcess() {
       this.loading = true;
-      getProcessList(this.node.id).then((res) => {
+      getProcessList({
+        nodeId: this.node.id,
+        processName: this.processName,
+      }).then((res) => {
         if (res.code === 200) {
           this.processList = res.data;
+        } else {
+          this.processList = [];
         }
         this.loading = false;
       });
@@ -209,7 +229,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadNodeProcess();
             }
@@ -234,8 +253,8 @@ export default {
       nodeMonitorData(params).then((res) => {
         if (res.code === 200) {
           this.historyData = res.data;
+          this.drawHistoryChart();
         }
-        this.drawHistoryChart();
       });
     },
     // 选择时间
@@ -244,9 +263,13 @@ export default {
     },
     // 画历史图表
     drawHistoryChart() {
+      let historyChartDom = document.getElementById("history-chart");
+      if (!historyChartDom) {
+        return;
+      }
       let option = this.generateChart(this.historyData);
       // 绘制图表
-      const historyChart = echarts.init(document.getElementById("history-chart"));
+      const historyChart = echarts.init(historyChartDom);
       historyChart.setOption(option);
     },
   },

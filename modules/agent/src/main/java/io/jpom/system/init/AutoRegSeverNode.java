@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,6 +24,7 @@ package io.jpom.system.init;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpRequest;
@@ -88,7 +89,7 @@ public class AutoRegSeverNode {
 		serverRequest.form("name", "节点：" + agentId);
 		serverRequest.form("openStatus", 1);
 		serverRequest.form("protocol", protocol);
-		serverRequest.form("url", url.getHost() + ":" + url.getPort());
+		serverRequest.form("url", url.getHost() + CharPool.COLON + url.getPort());
 		serverRequest.form("loginName", AgentAuthorize.getInstance().getAgentName());
 		serverRequest.form("loginPwd", AgentAuthorize.getInstance().getAgentPwd());
 		serverRequest.form("type", eqInstall ? "update" : "add");

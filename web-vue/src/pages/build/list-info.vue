@@ -116,14 +116,15 @@
         <a-form-model-item label="构建命令" prop="script">
           <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build" />
         </a-form-model-item>
-        <a-form-model-item label="产物目录" prop="resultDirFile" class="jpom-target-dir">
-          <a-input v-model="temp.resultDirFile" placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist">
-            <a-tooltip slot="suffix">
+        <a-form-model-item prop="resultDirFile" class="jpom-target-dir">
+          <template slot="label">
+            产物目录
+            <a-tooltip v-show="!temp.id">
               <template slot="title">
                 <div>可以理解为项目打包的目录。 如 Jpom 项目执行（构建命令） <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b></div>
                 <div><br /></div>
                 <div>
-                  支持通配符(AntPathMatcher)
+                  支持通配符(AntPathMatcher)【目前只使用匹配到的第一项】
                   <ul>
                     <li>? 匹配一个字符</li>
                     <li>* 匹配零个或多个字符</li>
@@ -133,7 +134,8 @@
               </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
-          </a-input>
+          </template>
+          <a-input v-model="temp.resultDirFile" placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist" />
         </a-form-model-item>
         <a-form-model-item prop="releaseMethod">
           <template slot="label">
@@ -181,7 +183,21 @@
             <a-input style="width: 70%" v-model="tempExtraData.releasePath" placeholder="发布目录,构建产物上传到对应目录" />
           </a-input-group>
         </a-form-model-item>
-        <a-form-model-item v-if="temp.releaseMethod === 3" label="发布命令" prop="releaseCommand">
+        <a-form-model-item v-if="temp.releaseMethod === 3 || temp.releaseMethod === 4" prop="releaseCommand">
+         <!-- sshCommand LocalCommand -->
+          <template slot="label">
+            发布命令
+            <a-tooltip v-show="!temp.id">
+              <template slot="title">
+                发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java
+                <ul>
+                  <li>支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}</li>
+                  <li>可以引用工作空间的环境变量 变量占位符 #{xxxx} xxxx 为变量名称</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-input
             v-model="tempExtraData.releaseCommand"
             allow-clear
@@ -191,20 +207,38 @@
             placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java,支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}"
           />
         </a-form-model-item>
-        <!-- LocalCommand -->
-
-        <a-form-model-item v-if="temp.releaseMethod === 4" label="发布命令" prop="releaseCommand">
-          <a-input
-            v-model="tempExtraData.releaseCommand"
-            allow-clear
-            :auto-size="{ minRows: 2, maxRows: 10 }"
-            type="textarea"
-            :rows="3"
-            placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java ,支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}"
-          />
-        </a-form-model-item>
-        <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" label="清空发布" prop="clearOld">
-          <a-switch v-model="tempExtraData.clearOld" checked-children="是" un-checked-children="否" />
+        
+        <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" prop="clearOld">
+          <template slot="label">
+            清空发布
+            <a-tooltip v-show="!temp.id">
+              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件现删除后再保存新文件 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-row>
+            <a-col :span="4">
+              <a-switch v-model="tempExtraData.clearOld" checked-children="是" un-checked-children="否" />
+            </a-col>
+            <div v-if="temp.releaseMethod === 2">
+              <a-col :span="4" style="text-align: right">
+                <a-tooltip v-if="!temp.id">
+                  <template slot="title">
+                    差异发布是指对应构建产物和项目文件夹里面的文件是否存在差异,如果存在增量差异那么上传或者覆盖文件。
+                    <ul>
+                      <li>开启差异发布并且开启清空发布时将自动删除项目目录下面有的文件但是构建产物目录下面没有的文件 【清空发布差异上传前会先执行删除差异文件再执行上传差异文件】</li>
+                      <li>开启差异发布但不开启清空发布时相当于只做增量和变动更新</li>
+                    </ul>
+                  </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+                差异发布：
+              </a-col>
+              <a-col :span="10">
+                <a-switch v-model="tempExtraData.diffSync" checked-children="是" un-checked-children="否" />
+              </a-col>
+            </div>
+          </a-row>
         </a-form-model-item>
         <a-form-model-item prop="webhook">
           <template slot="label">
@@ -253,11 +287,11 @@
 import { mapGetters } from "vuex";
 import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
-import { getRepositoryListAll } from "../../api/repository";
+import { getRepositoryListAll } from "@/api/repository";
 import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildList, getTriggerUrl, releaseMethodMap, releaseMethodArray, resetTrigger, startBuild, stopBuild, statusMap } from "@/api/build-info";
 import { getDishPatchListAll, afterOptList } from "@/api/dispatch";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
-import { getSshListAll } from "../../api/ssh";
+import { getSshListAll } from "@/api/ssh";
 import { itemGroupBy, parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 

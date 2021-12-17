@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -70,7 +70,7 @@ public class AgentAuthorize {
 			agentAuthorize = SpringUtil.getBean(AgentAuthorize.class);
 			// 登录名不能为空
 			if (StrUtil.isEmpty(agentAuthorize.agentName)) {
-				throw new JpomRuntimeException("agent 端登录名不能为空");
+				throw new JpomRuntimeException("The agent login name cannot be empty");
 			}
 			agentAuthorize.checkPwd();
 			// 生成密码授权字符串
@@ -105,7 +105,7 @@ public class AgentAuthorize {
 		if (StrUtil.isNotEmpty(agentPwd)) {
 			// 有指定密码 清除旧密码信息
 			FileUtil.del(path);
-			Console.log("已经自定义配置授权信息啦,账号：{}", this.agentName);
+			Console.log("Authorization information has been customized,account：{}", this.agentName);
 			return;
 		}
 		if (FileUtil.exist(path)) {
@@ -113,13 +113,13 @@ public class AgentAuthorize {
 			try {
 				String json = FileUtil.readString(path, CharsetUtil.CHARSET_UTF_8);
 				AgentAutoUser autoUser = JSONObject.parseObject(json, AgentAutoUser.class);
-				String oldAgentPwd = autoUser.getAgentPwd();
 				if (!StrUtil.equals(autoUser.getAgentName(), this.agentName)) {
-					throw new JpomRuntimeException("已经存在的登录名和配置的登录名不一致");
+					throw new JpomRuntimeException("The existing login name is inconsistent with the configured login name");
 				}
+				String oldAgentPwd = autoUser.getAgentPwd();
 				if (StrUtil.isNotEmpty(oldAgentPwd)) {
 					this.agentPwd = oldAgentPwd;
-					Console.log("已有授权账号:{}  密码:{}  授权信息保存位置：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
+					Console.log("Already authorized account:{}  password:{}  Authorization information storage location：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
 					return;
 				}
 			} catch (JpomRuntimeException e) {
@@ -133,6 +133,6 @@ public class AgentAuthorize {
 		autoUser.setAgentPwd(this.agentPwd);
 		// 写入文件中
 		JsonFileUtil.saveJson(path, autoUser.toJson());
-		Console.log("已经自动生成授权账号:{}  密码:{}  授权信息保存位置：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
+		Console.log("Automatically generate authorized account:{}  password:{}  Authorization information storage location：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
 	}
 }

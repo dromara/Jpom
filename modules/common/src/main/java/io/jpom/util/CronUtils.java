@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,13 @@ package io.jpom.util;
 
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
+import cn.hutool.cron.TaskTable;
 import cn.hutool.cron.task.Task;
+import com.alibaba.fastjson.JSONObject;
+
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -43,6 +49,41 @@ public class CronUtils {
 		if (!scheduler.isStarted()) {
 			CronUtil.start();
 		}
+	}
+
+	/**
+	 * 获取任务列表
+	 *
+	 * @return list
+	 */
+	public static List<JSONObject> list() {
+		Scheduler scheduler = CronUtil.getScheduler();
+		TaskTable taskTable = scheduler.getTaskTable();
+		List<String> ids = taskTable.getIds();
+		return ids.stream().map(s -> {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("taskId", s);
+			jsonObject.put("cron", scheduler.getPattern(s).toString());
+			return jsonObject;
+		}).collect(Collectors.toList());
+	}
+
+	/**
+	 * 添加任务 已经存在则不添加
+	 *
+	 * @param id       任务ID
+	 * @param cron     表达式
+	 * @param supplier 创建任务回调
+	 */
+	public static void add(String id, String cron, Supplier<Task> supplier) {
+		Scheduler scheduler = CronUtil.getScheduler();
+		Task task = scheduler.getTask(id);
+		if (task != null) {
+			return;
+		}
+		scheduler.schedule(id, cron, supplier.get());
+		//
+		CronUtils.start();
 	}
 
 	/**

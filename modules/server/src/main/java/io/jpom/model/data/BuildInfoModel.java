@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,7 @@
 package io.jpom.model.data;
 
 import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.h2db.TableName;
 
 /**
@@ -42,6 +43,8 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 	private String name;
 	/**
 	 * 构建 ID
+	 *
+	 * @see BuildHistoryLog#getBuildNumberId()
 	 */
 	private Integer buildId;
 	/**
@@ -83,6 +86,8 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 	private String triggerToken;
 	/**
 	 * 额外信息，JSON 字符串格式
+	 *
+	 * @see io.jpom.build.BuildExtraModule
 	 */
 	private String extraData;
 	/**

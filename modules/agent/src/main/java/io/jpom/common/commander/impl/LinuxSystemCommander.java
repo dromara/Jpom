@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,7 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
@@ -71,8 +72,8 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 	}
 
 	@Override
-	public List<ProcessModel> getProcessList() {
-		String s = CommandUtil.execSystemCommand("top -b -n 1 | grep java");
+	public List<ProcessModel> getProcessList(String processName) {
+		String s = CommandUtil.execSystemCommand("top -b -n 1 | grep " + processName);
 		return formatLinuxTop(s, false);
 	}
 
@@ -172,8 +173,8 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 		if (StrUtil.isEmpty(info)) {
 			return null;
 		}
-		int index = info.indexOf(":") + 1;
-		String[] split = info.substring(index).split(",");
+		int index = info.indexOf(CharPool.COLON) + 1;
+		String[] split = info.substring(index).split(StrUtil.COMMA);
 //            509248k total — 物理内存总量（509M）
 //            495964k used — 使用中的内存总量（495M）
 //            13284k free — 空闲内存总量（13M）
@@ -209,8 +210,8 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 		if (StrUtil.isEmpty(info)) {
 			return null;
 		}
-		int i = info.indexOf(":");
-		String[] split = info.substring(i + 1).split(",");
+		int i = info.indexOf(CharPool.COLON);
+		String[] split = info.substring(i + 1).split(StrUtil.COMMA);
 //            1.3% us — 用户空间占用CPU的百分比。
 //            1.0% sy — 内核空间占用CPU的百分比。
 //            0.0% ni — 改变过优先级的进程占用CPU的百分比

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,7 +25,6 @@ package io.jpom.system.init;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -35,7 +34,6 @@ import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.JpomManifest;
-import io.jpom.common.RemoteVersion;
 import io.jpom.common.Type;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.system.AgentAutoUser;
@@ -69,8 +67,6 @@ public class AutoImportLocalNode {
 		jsonObject.put("installTime", DateTime.now().toString());
 		jsonObject.put("desc", "请勿删除此文件,服务端安装id和插件端互通关联");
 		JsonFileUtil.saveJson(file.getAbsolutePath(), jsonObject);
-		// 检查新版本
-		ThreadUtil.execute(RemoteVersion::loadRemoteInfo);
 	}
 
 	@PreLoadMethod
@@ -115,12 +111,13 @@ public class AutoImportLocalNode {
 		NodeModel nodeModel = new NodeModel();
 		nodeModel.setUrl(StrUtil.format("127.0.0.1:{}", jpomManifest.getPort()));
 		nodeModel.setName("本机");
+		//nodeModel.setProtocol("http");
 		//
 		nodeModel.setLoginPwd(autoUser.getAgentPwd());
 		nodeModel.setLoginName(autoUser.getAgentName());
 		//
 		nodeModel.setOpenStatus(1);
 		nodeService.insertNotFill(nodeModel);
-		Console.log("自动添加本机节点成功：" + nodeModel.getId());
+		Console.log("Automatically add native node successfully：" + nodeModel.getId());
 	}
 }

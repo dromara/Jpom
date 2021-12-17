@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -42,7 +42,7 @@ class CheckDuplicateRun {
 			if (mainClassPid == null || pid.equals(ObjectUtil.toString(mainClassPid))) {
 				return;
 			}
-			DefaultSystemLog.getLog().warn("Jpom 程序建议一个机器上只运行一个对应的程序：" + JpomApplication.getAppType() + "  pid:" + mainClassPid);
+			DefaultSystemLog.getLog().warn("The Jpom program recommends that only one corresponding program be run on a machine：" + JpomApplication.getAppType() + "  pid:" + mainClassPid);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("检查异常", e);
 		}

@@ -158,11 +158,11 @@ export function getNodeTop(nodeId) {
 }
 
 // 获取进程列表
-export function getProcessList(nodeId) {
+export function getProcessList(data) {
   return axios({
     url: "/node/processList",
     method: "post",
-    data: { nodeId },
+    data: data,
     headers: {
       loading: "no",
     },

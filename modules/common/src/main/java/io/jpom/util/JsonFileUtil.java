@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -61,7 +61,7 @@ public class JsonFileUtil {
 		READ_LOCK.lock();
 		// 防止多线程操作文件异常
 		try {
-			String json = FileUtil.readString(file, CharsetUtil.UTF_8);
+			String json = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
 			if (StrUtil.isEmpty(json)) {
 				return new JSONObject();
 			}
