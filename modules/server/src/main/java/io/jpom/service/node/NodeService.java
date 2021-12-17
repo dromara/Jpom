@@ -161,6 +161,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 
 		NodeModel nodeModel1 = new NodeModel();
 		nodeModel1.setId(id);
+		nodeModel1.setWorkspaceId(workspaceId);
 		nodeModel1.setUnLockType(StrUtil.EMPTY);
 		nodeModel1.setOpenStatus(1);
 		super.update(nodeModel1);
