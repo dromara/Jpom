@@ -20,90 +20,96 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.common.commander.impl;
+package io.jpom.common.commander;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.common.commander.AbstractProjectCommander;
-import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JvmUtil;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
- * windows 版
+ * unix
  *
- * @author Administrator
+ * @author bwcx_jzy
+ * @since 2021/12/17
  */
-public class WindowsProjectCommander extends AbstractProjectCommander {
+public abstract class BaseUnixProjectCommander extends AbstractProjectCommander {
+
 
 	@Override
 	public String buildCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
-		String classPath = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
-		if (StrUtil.isBlank(classPath)) {
+		String path = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
+		if (StrUtil.isBlank(path)) {
 			return null;
 		}
-		// 拼接命令
-		String jvm = javaCopyItem == null ? nodeProjectInfoModel.getJvm() : javaCopyItem.getJvm();
 		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
-		String mainClass = nodeProjectInfoModel.getMainClass();
-		String args = javaCopyItem == null ? nodeProjectInfoModel.getArgs() : javaCopyItem.getArgs();
-		return String.format("%s %s %s " +
-						"%s  %s  %s >> %s &",
-				getRunJavaPath(nodeProjectInfoModel, true),
-				jvm, JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
-				classPath, mainClass, args, nodeProjectInfoModel.getAbsoluteLog(javaCopyItem));
+		return String.format("nohup %s %s %s" +
+						" %s  %s  %s >> %s 2>&1 &",
+				getRunJavaPath(nodeProjectInfoModel, false),
+				javaCopyItem == null ? nodeProjectInfoModel.getJvm() : javaCopyItem.getJvm(),
+				JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
+				path,
+				nodeProjectInfoModel.getMainClass(),
+				javaCopyItem == null ? nodeProjectInfoModel.getArgs() : javaCopyItem.getArgs(),
+				nodeProjectInfoModel.getAbsoluteLog(javaCopyItem));
 	}
 
 	@Override
 	public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
 		Tuple tuple = super.stopBefore(nodeProjectInfoModel, javaCopyItem);
-		String webHook = tuple.get(0);
 		String result = tuple.get(1);
-		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
-		// 查询状态，如果正在运行，则执行杀进程命令
+		String webHook = tuple.get(0);
 		int pid = parsePid(result);
 		if (pid > 0) {
-			String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
-			loopCheckRun(nodeProjectInfoModel.getId(), false);
+			File file = FileUtil.file(nodeProjectInfoModel.allLib());
+			String kill = AbstractSystemCommander.getInstance().kill(file, pid);
+			if (this.loopCheckRun(nodeProjectInfoModel.getId(), false)) {
+				// 强制杀进程
+				String cmd = String.format("kill -9 %s", pid);
+				CommandUtil.asyncExeLocalCommand(file, cmd);
+			}
+			String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
 			result = status(tag) + StrUtil.SPACE + kill;
 		}
 		return StrUtil.format("{}  {}", result, webHook);
 	}
 
-	@Override
-	public List<NetstatModel> listNetstat(int pId, boolean listening) {
-		String cmd;
-		if (listening) {
-			cmd = "netstat -nao -p tcp | findstr \"LISTENING\" | findstr " + pId;
-		} else {
-			cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
-		}
+	protected List<NetstatModel> listNetstat(String cmd) {
 		String result = CommandUtil.execSystemCommand(cmd);
 		List<String> netList = StrSplitter.splitTrim(result, StrUtil.LF, true);
-		if (netList == null || netList.size() <= 0) {
+		if (CollUtil.isEmpty(netList)) {
 			return null;
 		}
-		List<NetstatModel> array = new ArrayList<>();
-		for (String str : netList) {
+		return netList.stream().map(str -> {
 			List<String> list = StrSplitter.splitTrim(str, " ", true);
 			if (list.size() < 5) {
-				continue;
+				return null;
 			}
 			NetstatModel netstatModel = new NetstatModel();
 			netstatModel.setProtocol(list.get(0));
-			netstatModel.setLocal(list.get(1));
-			netstatModel.setForeign(list.get(2));
-			netstatModel.setStatus(list.get(3));
-			netstatModel.setName(list.get(4));
-			array.add(netstatModel);
-		}
-		return array;
+			netstatModel.setReceive(list.get(1));
+			netstatModel.setSend(list.get(2));
+			netstatModel.setLocal(list.get(3));
+			netstatModel.setForeign(list.get(4));
+			if ("tcp".equalsIgnoreCase(netstatModel.getProtocol())) {
+				netstatModel.setStatus(CollUtil.get(list, 5));
+				netstatModel.setName(CollUtil.get(list, 6));
+			} else {
+				netstatModel.setStatus(StrUtil.DASHED);
+				netstatModel.setName(CollUtil.get(list, 5));
+			}
+
+			return netstatModel;
+		}).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 }
