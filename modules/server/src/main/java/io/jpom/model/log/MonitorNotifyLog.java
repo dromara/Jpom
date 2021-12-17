@@ -111,7 +111,7 @@ public class MonitorNotifyLog extends BaseWorkspaceModel {
 		return status;
 	}
 
-	public boolean isStatus() {
+	public boolean status() {
 		return ObjectUtil.defaultIfNull(status, false);
 	}
 

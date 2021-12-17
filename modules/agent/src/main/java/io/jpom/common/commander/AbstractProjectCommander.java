@@ -29,6 +29,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
@@ -187,12 +188,18 @@ public abstract class AbstractProjectCommander {
 	 * @return 结果
 	 * @throws Exception 异常
 	 */
-	public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+	public abstract String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception;
+
+	/**
+	 * 停止之前
+	 *
+	 * @param nodeProjectInfoModel 项目
+	 * @return 结果
+	 * @throws Exception 异常
+	 */
+	public Tuple stopBefore(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
 		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
 		String beforeStop = this.webHooks(nodeProjectInfoModel, javaCopyItem, "beforeStop");
-		if (StrUtil.isNotEmpty(beforeStop)) {
-			return beforeStop;
-		}
 		// 再次查看进程信息
 		String result = status(tag);
 		//
@@ -204,7 +211,7 @@ public abstract class AbstractProjectCommander {
 			PID_PORT.remove(pid);
 		}
 		this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "stop", "result", result);
-		return result;
+		return new Tuple(StrUtil.emptyToDefault(beforeStop, StrUtil.EMPTY), result);
 	}
 
 	/**
@@ -563,16 +570,16 @@ public abstract class AbstractProjectCommander {
 	 * 阻塞检查程序状态
 	 * @param tag 程序tag
 	 * @param status 要检查的状态
-	 * @throws Exception 异常
+	 *
 	 * @return 和参数status相反
 	 */
-	protected boolean loopCheckRun(String tag, boolean status) throws Exception {
+	protected boolean loopCheckRun(String tag, boolean status) {
 		int stopWaitTime = AgentExtConfigBean.getInstance().getStopWaitTime();
 		stopWaitTime = Math.max(stopWaitTime, 1);
 		int loopCount = (int) (TimeUnit.SECONDS.toMillis(stopWaitTime) / 500);
 		int count = 0;
 		do {
-			if (isRun(tag) == status) {
+			if (this.isRun(tag) == status) {
 				return status;
 			}
 			ThreadUtil.sleep(500);
