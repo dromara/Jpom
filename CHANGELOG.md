@@ -19,6 +19,7 @@
 7. 【server】优化 ssh 安装插件端,不输入节点ID、没有配置权限报错（感谢@大土豆）
 8. 【agent】修护项目 `JavaExtDirsCp` 模式加载非 Jar 文件问题（感谢@大灰灰）
 9. 升级 SpringBoot 版本 2.6.1
+10. 【agent】修护项目配置 webhook 后无法关闭进程的情况（感谢@大土豆）
 
 ------
 
