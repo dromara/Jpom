@@ -20,6 +20,7 @@
 8. 【agent】修护项目 `JavaExtDirsCp` 模式加载非 Jar 文件问题（感谢@大灰灰）
 9. 升级 SpringBoot 版本 2.6.1
 10. 【agent】修护项目配置 webhook 后无法关闭进程的情况（感谢@大土豆）
+11. 【server】ssh 命令日志低版本字段类型文件修护（感谢@大土豆）
 
 ------
 
