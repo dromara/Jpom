@@ -180,33 +180,27 @@ public class ManageEditProjectController extends BaseAgentController {
 		if (list != null) {
 			for (NodeProjectInfoModel nodeProjectInfoModel : list) {
 				if (!nodeProjectInfoModel.getId().equals(id) && nodeProjectInfoModel.allLib().equals(allLib)) {
-					return JsonMessage.getString(401, "当前项目Jar路径已经被【" + nodeProjectInfoModel.getName() + "】占用,请检查");
+					return JsonMessage.getString(401, "当前项目路径已经被【" + nodeProjectInfoModel.getName() + "】占用,请检查");
 				}
 			}
 		}
 		File checkFile = new File(allLib);
-		if (checkFile.exists() && checkFile.isFile()) {
-			return JsonMessage.getString(401, "项目Jar路径是一个已经存在的文件");
-		}
+		Assert.state(!FileUtil.exist(checkFile) || FileUtil.isDirectory(checkFile), "项目路径是一个已经存在的文件");
+
 		// 自动生成log文件
-//		String log = new File(allLib).getParent();
-//		log = String.format("%s/%s.log", log, id);
-//		projectInfo.setLog(FileUtil.normalize(log));
 		String log = projectInfo.getLog();
 		Assert.hasText(log, "项目log解析读取失败");
 		checkFile = new File(log);
-		if (checkFile.exists() && checkFile.isDirectory()) {
-			return JsonMessage.getString(401, "项目log是一个已经存在的文件夹");
-		}
+		Assert.state(!FileUtil.exist(checkFile) || FileUtil.isFile(checkFile), "项目log是一个已经存在的文件夹");
+
 		//
 		String token = projectInfo.getToken();
 		if (StrUtil.isNotEmpty(token)) {
 			Validator.validateMatchRegex(RegexPool.URL_HTTP, token, "WebHooks 地址不合法");
 		}
 		// 判断空格
-		if (id.contains(StrUtil.SPACE) || allLib.contains(StrUtil.SPACE)) {
-			return JsonMessage.getString(401, "项目Id、项目Jar不能包含空格");
-		}
+		Assert.state(!id.contains(StrUtil.SPACE) && !allLib.contains(StrUtil.SPACE), "项目Id、项目路径不能包含空格");
+
 		String jdkId = projectInfo.getJdkId();
 		if (StrUtil.isNotEmpty(jdkId)) {
 			JdkInfoModel item = jdkInfoService.getItem(jdkId);
@@ -341,7 +335,9 @@ public class ManageEditProjectController extends BaseAgentController {
 	@RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String deleteProject(String copyId) {
 		NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
-		Assert.notNull(nodeProjectInfoModel, "项目不存在");
+		if (nodeProjectInfoModel == null) {
+			return JsonMessage.getString(200, "项目不存在");
+		}
 		try {
 			NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
 

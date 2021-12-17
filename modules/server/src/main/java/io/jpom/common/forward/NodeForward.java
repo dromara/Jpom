@@ -22,6 +22,7 @@
  */
 package io.jpom.common.forward;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.ArrayUtil;
@@ -427,19 +428,23 @@ public class NodeForward {
 		}
 		UrlQuery urlQuery = new UrlQuery();
 		urlQuery.add(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
-		// 兼容旧版本-节点升级 @author jzy
-		urlQuery.add("name", nodeModel.getLoginName());
-		urlQuery.add("password", nodeModel.getLoginPwd());
 		//
 		String optUser = userInfo.getId();
 		optUser = URLUtil.encode(optUser);
 		urlQuery.add("optUser", optUser);
 		if (ArrayUtil.isNotEmpty(parameters)) {
 			for (int i = 0; i < parameters.length; i += 2) {
-				urlQuery.add(parameters[i].toString(), parameters[i + 1]);
+				Object parameter = parameters[i + 1];
+				String value = Convert.toStr(parameter, StrUtil.EMPTY);
+				urlQuery.add(parameters[i].toString(), URLUtil.encode(value));
 			}
 		}
-		return StrUtil.format("{}://{}{}?{}", ws, nodeModel.getUrl(), nodeUrl.getUrl(), urlQuery.toString());
+		// 兼容旧版本-节点升级 @author jzy
+		urlQuery.add("name", URLUtil.encode(nodeModel.getLoginName()));
+		urlQuery.add("password", URLUtil.encode(nodeModel.getLoginPwd()));
+		String format = StrUtil.format("{}://{}{}?{}", ws, nodeModel.getUrl(), nodeUrl.getUrl(), urlQuery.toString());
+		DefaultSystemLog.getLog().debug("web socket url:{}", format);
+		return format;
 	}
 
 	/**

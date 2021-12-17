@@ -123,6 +123,8 @@ export default {
                 this.$notification.warning({
                   message: "未重启成功：" + (res.msg || ""),
                 });
+                this.$global_loading && this.$global_loading.close();
+                clearInterval(this.timer);
               }
             }
           })
@@ -133,6 +135,7 @@ export default {
               this.$notification.error({
                 message: "重启超时,请去服务器查看控制台日志排查问题",
               });
+              clearInterval(this.timer);
             }
           });
         this.checkCount = this.checkCount + 1;

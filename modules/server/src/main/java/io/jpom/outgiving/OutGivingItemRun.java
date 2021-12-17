@@ -74,7 +74,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
 							boolean unzip) {
 		this.outGivingId = item.getId();
 		this.unzip = unzip;
-		this.clearOld = item.isClearOld();
+		this.clearOld = item.clearOld();
 		this.outGivingNodeProject = outGivingNodeProject;
 		this.file = file;
 		this.afterOpt = ObjectUtil.defaultIfNull(EnumUtil.likeValueOf(AfterOpt.class, item.getAfterOpt()), AfterOpt.No);

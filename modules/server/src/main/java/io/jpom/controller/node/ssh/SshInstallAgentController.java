@@ -201,7 +201,7 @@ public class SshInstallAgentController extends BaseServerController {
 		Assert.hasText(nodeModel.getUrl(), "请输入节点地址");
 		nodeModel.setCycle(Cycle.one.getCode());
 		//
-		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
+		//nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
 		//
 		Entity entity = Entity.create();
 		entity.set("url", nodeModel.getUrl());

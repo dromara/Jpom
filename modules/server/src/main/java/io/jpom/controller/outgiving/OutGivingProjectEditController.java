@@ -48,7 +48,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -104,13 +103,12 @@ public class OutGivingProjectEditController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.DEL)
 	public String delete(String id) {
 		OutGivingModel outGivingModel = outGivingServer.getByKey(id);
 		Assert.notNull(outGivingModel, "没有对应的分发项目");
 
-		Assert.state(outGivingModel.isOutGivingProject(), "该项目不是节点分发项目,不能在此次删除");
+		Assert.state(outGivingModel.outGivingProject(), "该项目不是节点分发项目,不能在此次删除");
 
 		UserModel userModel = getUser();
 		List<OutGivingNodeProject> deleteNodeProject = outGivingModel.outGivingNodeProjectList();
