@@ -37,9 +37,11 @@ import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.*;
+import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.system.SystemParametersServer;
@@ -68,13 +70,16 @@ public class OutGivingProjectEditController extends BaseServerController {
 	private final SystemParametersServer systemParametersServer;
 	private final OutGivingServer outGivingServer;
 	private final ProjectInfoCacheService projectInfoCacheService;
+	private final BuildInfoService buildService;
 
 	public OutGivingProjectEditController(SystemParametersServer systemParametersServer,
 										  OutGivingServer outGivingServer,
-										  ProjectInfoCacheService projectInfoCacheService) {
+										  ProjectInfoCacheService projectInfoCacheService,
+										  BuildInfoService buildService) {
 		this.systemParametersServer = systemParametersServer;
 		this.outGivingServer = outGivingServer;
 		this.projectInfoCacheService = projectInfoCacheService;
+		this.buildService = buildService;
 	}
 
 	/**
@@ -108,6 +113,10 @@ public class OutGivingProjectEditController extends BaseServerController {
 		OutGivingModel outGivingModel = outGivingServer.getByKey(id);
 		Assert.notNull(outGivingModel, "没有对应的分发项目");
 
+		// 判断构建
+		boolean releaseMethod = buildService.checkReleaseMethod(id, BuildReleaseMethod.Outgiving);
+		Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
+		//
 		Assert.state(outGivingModel.outGivingProject(), "该项目不是节点分发项目,不能在此次删除");
 
 		UserModel userModel = getUser();
@@ -116,7 +125,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 			// 删除实际的项目
 			for (OutGivingNodeProject outGivingNodeProject1 : deleteNodeProject) {
 				NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject1.getNodeId());
-				JsonMessage<String> jsonMessage = deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
+				JsonMessage<String> jsonMessage = this.deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
 				if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
 					return JsonMessage.getString(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
 				}
