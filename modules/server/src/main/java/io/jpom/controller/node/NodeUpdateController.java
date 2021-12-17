@@ -51,7 +51,7 @@ public class NodeUpdateController extends BaseServerController {
 	@GetMapping(value = "download_remote.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.REMOTE_DOWNLOAD)
 	public String downloadRemote() throws IOException {
-		Tuple download = RemoteVersion.download(ConfigBean.getInstance().getTempPath().getAbsolutePath(), Type.Agent);
+		Tuple download = RemoteVersion.download(ConfigBean.getInstance().getTempPath().getAbsolutePath(), Type.Agent, false);
 		// 保存文件
 		this.saveAgentFile(download);
 		return JsonMessage.getString(200, "下载成功");
@@ -73,6 +73,7 @@ public class NodeUpdateController extends BaseServerController {
 			jsonObject.put("upgrade", false);
 		} else {
 			String tagName = StrUtil.removePrefixIgnoreCase(remoteVersion.getTagName(), "v");
+			jsonObject.put("tagName", tagName);
 			if (agentFileModel == null) {
 				jsonObject.put("upgrade", true);
 			} else {

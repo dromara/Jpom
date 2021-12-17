@@ -274,12 +274,13 @@ public class RemoteVersion {
 	/**
 	 * 下载
 	 *
-	 * @param savePath 下载文件保存路径
-	 * @param type     类型
+	 * @param savePath    下载文件保存路径
+	 * @param type        类型
+	 * @param checkRepeat 是否验证重复
 	 * @return 保存的全路径
 	 * @throws IOException 异常
 	 */
-	public static Tuple download(String savePath, Type type) throws IOException {
+	public static Tuple download(String savePath, Type type, boolean checkRepeat) throws IOException {
 		RemoteVersion remoteVersion = loadRemoteInfo();
 		Assert.notNull(remoteVersion, "没有可用的新版本升级:-1");
 		// 检查是否存在下载地址
@@ -290,9 +291,21 @@ public class RemoteVersion {
 		// 解析压缩包
 		File file = JpomManifest.zipFileFind(FileUtil.getAbsolutePath(downloadFileFromUrl), type, savePath);
 		// 检查
-		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(FileUtil.getAbsolutePath(file), type);
+		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(FileUtil.getAbsolutePath(file), type, checkRepeat);
 		Assert.state(error.getCode() == HttpStatus.HTTP_OK, error.getMsg());
 		return error.getData();
+	}
+
+	/**
+	 * 下载
+	 *
+	 * @param savePath 下载文件保存路径
+	 * @param type     类型
+	 * @return 保存的全路径
+	 * @throws IOException 异常
+	 */
+	public static Tuple download(String savePath, Type type) throws IOException {
+		return download(savePath, type, true);
 	}
 
 	/**
