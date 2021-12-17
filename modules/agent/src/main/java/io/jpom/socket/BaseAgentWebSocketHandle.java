@@ -27,6 +27,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.system.AgentAuthorize;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.SocketSessionUtil;
@@ -51,14 +52,15 @@ public abstract class BaseAgentWebSocketHandle {
 	private static final ConcurrentHashMap<String, String> USER = new ConcurrentHashMap<>();
 
 	protected String getParameters(Session session, String name) {
-		Map<String, List<String>> pathParameters = session.getRequestParameterMap();
-		List<String> strings = pathParameters.get(name);
-		String join = CollUtil.join(strings, StrUtil.COMMA);
-		if (StrUtil.isEmpty(join)) {
-			Map<String, String> parameters = session.getPathParameters();
-			return parameters.get(name);
+		Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
+		Map<String, String> parameters = session.getPathParameters();
+		DefaultSystemLog.getLog().debug("web socket parameters: {} {}", JSONObject.toJSONString(requestParameterMap), parameters);
+		List<String> strings = requestParameterMap.get(name);
+		String value = CollUtil.join(strings, StrUtil.COMMA);
+		if (StrUtil.isEmpty(value)) {
+			value = parameters.get(name);
 		}
-		return join;
+		return URLUtil.decode(value);
 	}
 
 	/**
