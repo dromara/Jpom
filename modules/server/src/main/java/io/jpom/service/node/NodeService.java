@@ -179,6 +179,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 
 	@Override
 	public void insert(NodeModel nodeModel) {
+		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
 		super.insert(nodeModel);
 		Integer cycle = nodeModel.getCycle();
 		if (nodeModel.isOpenStatus() && cycle != null && cycle != Cycle.none.getCode()) {
@@ -189,6 +190,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 	@Override
 	public void insertNotFill(NodeModel nodeModel) {
 		nodeModel.setWorkspaceId(Const.WORKSPACE_DEFAULT_ID);
+		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
 		super.insertNotFill(nodeModel);
 		Integer cycle = nodeModel.getCycle();
 		if (nodeModel.isOpenStatus() && cycle != null && cycle != Cycle.none.getCode()) {
