@@ -91,7 +91,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		//		}
 		//		boolean exists = super.exists(entity);
 		//		Assert.state(!exists, "对应的节点已经存在啦");
-		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
+		//nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
 		{// 节点地址 重复
 			NodeModel nodeModel1 = new NodeModel();
 			nodeModel1.setUrl(nodeModel.getUrl());
@@ -179,7 +179,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 
 	@Override
 	public void insert(NodeModel nodeModel) {
-		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
+		this.fillNodeInfo(nodeModel);
 		super.insert(nodeModel);
 		Integer cycle = nodeModel.getCycle();
 		if (nodeModel.isOpenStatus() && cycle != null && cycle != Cycle.none.getCode()) {
@@ -190,12 +190,18 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 	@Override
 	public void insertNotFill(NodeModel nodeModel) {
 		nodeModel.setWorkspaceId(Const.WORKSPACE_DEFAULT_ID);
-		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
+		this.fillNodeInfo(nodeModel);
 		super.insertNotFill(nodeModel);
 		Integer cycle = nodeModel.getCycle();
 		if (nodeModel.isOpenStatus() && cycle != null && cycle != Cycle.none.getCode()) {
 			NodeMonitor.start();
 		}
+	}
+
+	private void fillNodeInfo(NodeModel nodeModel) {
+		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
+		nodeModel.setCycle(ObjectUtil.defaultIfNull(nodeModel.getCycle(), Cycle.none.getCode()));
+		nodeModel.setOpenStatus(ObjectUtil.defaultIfNull(nodeModel.getOpenStatus(), 0));
 	}
 
 	@Override

@@ -111,7 +111,7 @@ public class AutoImportLocalNode {
 		NodeModel nodeModel = new NodeModel();
 		nodeModel.setUrl(StrUtil.format("127.0.0.1:{}", jpomManifest.getPort()));
 		nodeModel.setName("本机");
-		nodeModel.setProtocol("http");
+		//nodeModel.setProtocol("http");
 		//
 		nodeModel.setLoginPwd(autoUser.getAgentPwd());
 		nodeModel.setLoginName(autoUser.getAgentName());
