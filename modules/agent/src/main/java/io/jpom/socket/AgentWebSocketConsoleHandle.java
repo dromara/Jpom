@@ -163,7 +163,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 					// 停止项目
 					strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
 					if (strResult.contains(AbstractProjectCommander.STOP_TAG)) {
-						resultData = JsonMessage.toJson(200, "操作成功");
+						resultData = JsonMessage.toJson(200, "操作成功：" + strResult);
 					} else {
 						resultData = JsonMessage.toJson(500, strResult);
 					}
