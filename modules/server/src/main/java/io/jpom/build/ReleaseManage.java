@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,21 +22,28 @@
  */
 package io.jpom.build;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.Session;
+import io.jpom.common.forward.NodeForward;
+import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
@@ -53,11 +60,13 @@ import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.StringUtil;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 发布管理
@@ -136,11 +145,8 @@ public class ReleaseManage extends BaseBuild {
 				//
 				this.doOutGiving();
 			} else if (releaseMethod == BuildReleaseMethod.Project.getCode()) {
-				AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.buildExtraModule.getAfterOpt());
-				if (afterOpt == null) {
-					afterOpt = AfterOpt.No;
-				}
-				this.doProject(afterOpt, this.buildExtraModule.isClearOld());
+				AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.buildExtraModule.getAfterOpt(), AfterOpt.No);
+				this.doProject(afterOpt, this.buildExtraModule.isClearOld(), this.buildExtraModule.isDiffSync());
 			} else if (releaseMethod == BuildReleaseMethod.Ssh.getCode()) {
 				this.doSsh();
 			} else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
@@ -294,28 +300,98 @@ public class ReleaseManage extends BaseBuild {
 	}
 
 	/**
+	 * 差异上传发布
+	 *
+	 * @param nodeModel 节点
+	 * @param projectId 项目ID
+	 * @param afterOpt  发布后的操作
+	 */
+	private void diffSyncProject(NodeModel nodeModel, String projectId, AfterOpt afterOpt, boolean clearOld) {
+		File resultFile = this.resultFile;
+		String resultFileParent = resultFile.isFile() ?
+				FileUtil.getAbsolutePath(resultFile.getParent()) : FileUtil.getAbsolutePath(this.resultFile);
+		//
+		List<File> files = FileUtil.loopFiles(resultFile);
+		List<JSONObject> collect = files.stream().map(file -> {
+			//
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", StringUtil.delStartPath(file, resultFileParent, true));
+			jsonObject.put("sha1", SecureUtil.sha1(file));
+			return jsonObject;
+		}).collect(Collectors.toList());
+		//
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("id", projectId);
+		jsonObject.put("data", collect);
+		JsonMessage<JSONObject> requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_DIFF_FILE, this.userModel, jsonObject);
+		if (requestBody.getCode() != HttpStatus.HTTP_OK) {
+			throw new JpomRuntimeException("对比项目文件失败：" + requestBody);
+		}
+		JSONObject data = requestBody.getData();
+		JSONArray diff = data.getJSONArray("diff");
+		JSONArray del = data.getJSONArray("del");
+		int delSize = CollUtil.size(del);
+		int diffSize = CollUtil.size(diff);
+		if (clearOld) {
+			this.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize));
+		} else {
+			this.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff)));
+		}
+		// 清空发布才先执行删除
+		if (delSize > 0 && clearOld) {
+			jsonObject.put("data", del);
+			requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_BATCH_DELETE, this.userModel, jsonObject);
+			if (requestBody.getCode() != HttpStatus.HTTP_OK) {
+				throw new JpomRuntimeException("删除项目文件失败：" + requestBody);
+			}
+		}
+		for (int i = 0; i < diffSize; i++) {
+			boolean last = (i == diffSize - 1);
+			JSONObject diffData = (JSONObject) diff.get(i);
+			String name = diffData.getString("name");
+			File file = FileUtil.file(resultFileParent, name);
+			//
+			String startPath = StringUtil.delStartPath(file, resultFileParent, false);
+			//
+			JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
+					projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, this.userModel, false);
+			if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+				throw new JpomRuntimeException("同步项目文件失败：" + jsonMessage);
+			}
+			if (last) {
+				// 最后一个
+				this.log("发布项目包成功：" + jsonMessage);
+			}
+		}
+	}
+
+	/**
 	 * 发布项目
 	 *
 	 * @param afterOpt 后续操作
 	 */
-	private void doProject(AfterOpt afterOpt, boolean clearOld) {
+	private void doProject(AfterOpt afterOpt, boolean clearOld, boolean diffSync) {
 		String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
-		String[] strings = StrUtil.splitToArray(releaseMethodDataId, ":");
-		if (strings == null || strings.length != 2) {
-			throw new JpomRuntimeException(releaseMethodDataId + " error");
+		String[] strings = StrUtil.splitToArray(releaseMethodDataId, CharPool.COLON);
+		if (ArrayUtil.length(strings) != 2) {
+			throw new IllegalArgumentException(releaseMethodDataId + " error");
 		}
 		NodeService nodeService = SpringUtil.getBean(NodeService.class);
 		NodeModel nodeModel = nodeService.getByKey(strings[0]);
 		Objects.requireNonNull(nodeModel, "节点不存在");
-
+		String projectId = strings[1];
+		if (diffSync) {
+			this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
+			return;
+		}
 		File zipFile = BuildUtil.isDirPackage(this.resultFile);
 		boolean unZip = true;
 		if (zipFile == null) {
 			zipFile = this.resultFile;
 			unZip = false;
 		}
-		JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile,
-				strings[1],
+		JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile, null,
+				projectId,
 				unZip,
 				afterOpt,
 				nodeModel, this.userModel, clearOld);

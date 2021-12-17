@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -29,6 +29,7 @@ import io.jpom.plugin.Feature;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.ProxySession;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Map;
 
@@ -51,11 +52,16 @@ public class ConsoleHandler extends BaseProxyHandler {
 	}
 
 	@Override
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+
+	}
+
+	@Override
 	protected void handleTextMessage(Map<String, Object> attributes,
 									 ProxySession proxySession,
 									 JSONObject json,
 									 ConsoleCommandOp consoleCommandOp) {
-		if(consoleCommandOp!=ConsoleCommandOp.heart) {
+		if (consoleCommandOp != ConsoleCommandOp.heart) {
 			super.logOpt(attributes, json);
 		}
 		proxySession.send(json.toString());

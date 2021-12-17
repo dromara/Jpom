@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -76,7 +76,7 @@ public class StringUtil {
 	 * @return true
 	 */
 	public static boolean isGeneral(CharSequence value, int min, int max) {
-		String reg = "^[a-zA-Z0-9_-]{" + min + "," + max + "}$";
+		String reg = "^[a-zA-Z0-9_-]{" + min + StrUtil.COMMA + max + "}$";
 		return Validator.isMatchRegex(reg, value);
 	}
 

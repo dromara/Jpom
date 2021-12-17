@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,7 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
@@ -42,65 +43,67 @@ import java.util.List;
  */
 public class WindowsProjectCommander extends AbstractProjectCommander {
 
-    @Override
-    public String buildCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
-        String classPath = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
-        if (StrUtil.isBlank(classPath)) {
-            return null;
-        }
-        // 拼接命令
-        String jvm = javaCopyItem == null ? nodeProjectInfoModel.getJvm() : javaCopyItem.getJvm();
-        String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
-        String mainClass = nodeProjectInfoModel.getMainClass();
-        String args = javaCopyItem == null ? nodeProjectInfoModel.getArgs() : javaCopyItem.getArgs();
-        return String.format("%s %s %s " +
-                        "%s  %s  %s >> %s &",
-                getRunJavaPath(nodeProjectInfoModel, true),
-                jvm, JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
-                classPath, mainClass, args, nodeProjectInfoModel.getAbsoluteLog(javaCopyItem));
-    }
+	@Override
+	public String buildCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+		String classPath = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
+		if (StrUtil.isBlank(classPath)) {
+			return null;
+		}
+		// 拼接命令
+		String jvm = javaCopyItem == null ? nodeProjectInfoModel.getJvm() : javaCopyItem.getJvm();
+		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+		String mainClass = nodeProjectInfoModel.getMainClass();
+		String args = javaCopyItem == null ? nodeProjectInfoModel.getArgs() : javaCopyItem.getArgs();
+		return String.format("%s %s %s " +
+						"%s  %s  %s >> %s &",
+				getRunJavaPath(nodeProjectInfoModel, true),
+				jvm, JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
+				classPath, mainClass, args, nodeProjectInfoModel.getAbsoluteLog(javaCopyItem));
+	}
 
-    @Override
-    public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-        String result = super.stop(nodeProjectInfoModel, javaCopyItem);
-        String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
-        // 查询状态，如果正在运行，则执行杀进程命令
-        int pid = parsePid(result);
-        if (pid > 0) {
-            String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
-            loopCheckRun(nodeProjectInfoModel.getId(), false);
-            result = status(tag) + StrUtil.SPACE + kill;
-        }
-        return result;
-    }
+	@Override
+	public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+		Tuple tuple = super.stopBefore(nodeProjectInfoModel, javaCopyItem);
+		String webHook = tuple.get(0);
+		String result = tuple.get(1);
+		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+		// 查询状态，如果正在运行，则执行杀进程命令
+		int pid = parsePid(result);
+		if (pid > 0) {
+			String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
+			loopCheckRun(nodeProjectInfoModel.getId(), false);
+			result = status(tag) + StrUtil.SPACE + kill;
+		}
+		return StrUtil.format("{}  {}", result, webHook);
+	}
 
-    @Override
-    public List<NetstatModel> listNetstat(int pId, boolean listening) {
-        String cmd;
-        if (listening) {
-            cmd = "netstat -nao -p tcp | findstr \"LISTENING\" | findstr " + pId;
-        } else {
-            cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
-        }
-        String result = CommandUtil.execSystemCommand(cmd);
-        List<String> netList = StrSplitter.splitTrim(result, StrUtil.LF, true);
-        if (netList == null || netList.size() <= 0) {
-            return null;
-        }
-        List<NetstatModel> array = new ArrayList<>();
-        for (String str : netList) {
-            List<String> list = StrSplitter.splitTrim(str, " ", true);
-            if (list.size() < 5) {
-                continue;
-            }
-            NetstatModel netstatModel = new NetstatModel();
-            netstatModel.setProtocol(list.get(0));
-            netstatModel.setLocal(list.get(1));
-            netstatModel.setForeign(list.get(2));
-            netstatModel.setStatus(list.get(3));
-            netstatModel.setName(list.get(4));
-            array.add(netstatModel);
-        }
-        return array;
-    }
+	@Override
+	public List<NetstatModel> listNetstat(int pId, boolean listening) {
+		String cmd;
+		if (listening) {
+			cmd = "netstat -nao -p tcp | findstr \"LISTENING\" | findstr " + pId;
+		} else {
+			cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
+		}
+		String result = CommandUtil.execSystemCommand(cmd);
+		List<String> netList = StrSplitter.splitTrim(result, StrUtil.LF, true);
+		if (netList == null || netList.size() <= 0) {
+			return null;
+		}
+		List<NetstatModel> array = new ArrayList<>();
+		for (String str : netList) {
+			List<String> list = StrSplitter.splitTrim(str, " ", true);
+			if (list.size() < 5) {
+				continue;
+			}
+			NetstatModel netstatModel = new NetstatModel();
+			netstatModel.setProtocol(list.get(0));
+			netstatModel.setLocal(list.get(1));
+			netstatModel.setForeign(list.get(2));
+			netstatModel.setStatus(list.get(3));
+			netstatModel.setName(list.get(4));
+			array.add(netstatModel);
+		}
+		return array;
+	}
 }

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,6 +27,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.system.AgentAuthorize;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.SocketSessionUtil;
@@ -51,9 +52,15 @@ public abstract class BaseAgentWebSocketHandle {
 	private static final ConcurrentHashMap<String, String> USER = new ConcurrentHashMap<>();
 
 	protected String getParameters(Session session, String name) {
-		Map<String, List<String>> pathParameters = session.getRequestParameterMap();
-		List<String> strings = pathParameters.get(name);
-		return CollUtil.join(strings, StrUtil.COMMA);
+		Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
+		Map<String, String> parameters = session.getPathParameters();
+		DefaultSystemLog.getLog().debug("web socket parameters: {} {}", JSONObject.toJSONString(requestParameterMap), parameters);
+		List<String> strings = requestParameterMap.get(name);
+		String value = CollUtil.join(strings, StrUtil.COMMA);
+		if (StrUtil.isEmpty(value)) {
+			value = parameters.get(name);
+		}
+		return URLUtil.decode(value);
 	}
 
 	/**

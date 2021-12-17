@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,7 +25,7 @@ package io.jpom.service.monitor;
 import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.MonitorModel;
-import io.jpom.monitor.Monitor;
+import io.jpom.monitor.MonitorTask;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +44,7 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 	public void insert(MonitorModel monitorModel) {
 		super.insert(monitorModel);
 		if (monitorModel.status()) {
-			Monitor.start();
+			MonitorTask.start();
 		}
 	}
 
@@ -61,9 +61,9 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 		monitorModel.setStatus(true);
 		long count = super.count(super.dataBeanToEntity(monitorModel));
 		if (count > 0) {
-			Monitor.start();
+			MonitorTask.start();
 		} else {
-			Monitor.stop();
+			MonitorTask.stop();
 		}
 		return count > 0;
 	}
@@ -96,7 +96,7 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 	 * @param id    监控id
 	 * @param alarm 状态
 	 */
-	public synchronized void setAlarm(String id, boolean alarm) {
+	public void setAlarm(String id, boolean alarm) {
 		MonitorModel monitorModel = new MonitorModel();
 		monitorModel.setId(id);
 		monitorModel.setAlarm(alarm);

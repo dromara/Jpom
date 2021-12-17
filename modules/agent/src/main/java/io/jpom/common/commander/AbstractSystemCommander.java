@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,7 +25,7 @@ package io.jpom.common.commander;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.commander.impl.LinuxSystemCommander;
-import io.jpom.common.commander.impl.MacOSSystemCommander;
+import io.jpom.common.commander.impl.MacOsSystemCommander;
 import io.jpom.common.commander.impl.WindowsSystemCommander;
 import io.jpom.model.system.ProcessModel;
 import io.jpom.system.JpomRuntimeException;
@@ -55,7 +55,7 @@ public abstract class AbstractSystemCommander {
 			// Windows系统
 			abstractSystemCommander = new WindowsSystemCommander();
 		} else if (SystemUtil.getOsInfo().isMac()) {
-			abstractSystemCommander = new MacOSSystemCommander();
+			abstractSystemCommander = new MacOsSystemCommander();
 		} else {
 			throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
 		}
@@ -72,9 +72,10 @@ public abstract class AbstractSystemCommander {
 	/**
 	 * 获取当前服务器的所有进程列表
 	 *
+	 * @param processName 进程名称
 	 * @return array
 	 */
-	public abstract List<ProcessModel> getProcessList();
+	public abstract List<ProcessModel> getProcessList(String processName);
 
 	/**
 	 * 获取指定进程的 内存信息

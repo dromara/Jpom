@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -31,6 +31,7 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.socket.AgentFileTailWatcher;
 import io.jpom.system.ConfigBean;
+import io.jpom.util.CronUtils;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -68,6 +69,7 @@ public class AgentCacheManageController extends BaseAgentController {
 
 		int oneLineCount = AgentFileTailWatcher.getOneLineCount();
 		jsonObject.put("readFileOnLineCount", oneLineCount);
+		jsonObject.put("taskList", CronUtils.list());
 		//
 		return JsonMessage.getString(200, "ok", jsonObject);
 	}

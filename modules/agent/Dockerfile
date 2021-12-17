@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2019 码之科技工作室
+# Copyright (c) 2019 Code Technology Studio
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -26,7 +26,7 @@ FROM centos:7
 ENV LANG		en_US.utf8
 
 ENV JPOM_HOME	/usr/local/jpom-agent
-ENV JPOM_PKG	agent-2.8.0-release.zip
+ENV JPOM_PKG	agent-2.8.1-release.zip
 
 ADD jdk-8u202-linux-x64.tar.gz /usr/local/java/
 ENV JAVA_HOME	/usr/local/java/jdk1.8.0_202

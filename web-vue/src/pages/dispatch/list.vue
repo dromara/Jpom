@@ -42,7 +42,7 @@
         <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
         <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
         <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
-        <a-button type="danger" v-if="!list_expanded[record.id]" @click="handleDelete(record)">删除</a-button>
+        <a-button type="danger" v-if="!list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
       </template>
       <!-- 嵌套表格 -->
       <a-table
@@ -63,7 +63,13 @@
         <a-tooltip slot="outGivingResult" slot-scope="text, item" placement="topLeft" :title="text">
           <span>{{ text }} {{ item.errorMsg || "" }}</span>
         </a-tooltip>
-        <a-switch slot="projectStatus" slot-scope="text" :checked="text" checked-children="运行中" un-checked-children="未运行" />
+        <template slot="projectStatus" slot-scope="text, item">
+          <a-tooltip v-if="item.errorMsg" :title="item.errorMsg">
+            <span>{{ item.errorMsg }}</span>
+          </a-tooltip>
+          <a-switch v-else :checked="text" checked-children="运行中" un-checked-children="未运行" />
+        </template>
+
         <template slot="child-operation" slot-scope="text, record">
           <a-button :disabled="!record.projectName" type="primary" @click="handleFile(record)">文件</a-button>
           <a-button :disabled="!record.projectName" type="primary" @click="handleConsole(record)">控制台</a-button>
@@ -375,10 +381,24 @@
         <!-- <a-form-model-item label="是否为压缩包" v-if="temp.type == 'download'">
           <a-switch v-model="temp.unzip" checked-children="是" un-checked-children="否" v-decorator="['unzip', { valuePropName: 'checked' }]" />
         </a-form-model-item> -->
-        <a-form-model-item label="清空发布" prop="clearOld">
+        <a-form-model-item prop="clearOld">
+          <template slot="label">
+            清空发布
+            <a-tooltip>
+              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件现删除后再保存新文件 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
-        <a-form-model-item label="是否解压" prop="unzip">
+        <a-form-model-item prop="unzip">
+          <template slot="label">
+            是否解压
+            <a-tooltip>
+              <template slot="title"> 如果上传的压缩文件是否自动解压 支持的压缩包类型有 tar.bz2, tar.gz, tar, bz2, zip, gz</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-switch v-model="temp.autoUnzip" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
         <a-form-model-item label="分发后操作" prop="afterOpt">
@@ -390,11 +410,11 @@
     </a-modal>
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
+      <file v-if="drawerFileVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goConsole="goConsole" />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
+      <console v-if="drawerConsoleVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
   </div>
 </template>
@@ -402,7 +422,18 @@
 import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
-import { getDishPatchList, getDispatchProject, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch, remoteDownload, afterOptList } from "@/api/dispatch";
+import {
+  getDishPatchList,
+  getDispatchProject,
+  editDispatch,
+  editDispatchProject,
+  uploadDispatchFile,
+  getDispatchWhiteList,
+  releaseDelDisPatch,
+  delDisPatchProject,
+  remoteDownload,
+  afterOptList,
+} from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, runModeList } from "@/api/node-project";
 import { itemGroupBy, parseTime } from "@/utils/time";
@@ -682,6 +713,8 @@ export default {
           whitelistDirectory: undefined,
           lib: "",
           nodeIdList: [],
+          intervalTime: undefined,
+          clearOld: false,
         };
         // 添加 javaCopyItemList
         this.nodeList.forEach((node) => {
@@ -912,14 +945,34 @@ export default {
     },
     // 删除
     handleDelete(record) {
+      if (record.outGivingProject) {
+        this.$confirm({
+          title: "系统提示",
+          content: "真的要删除分发信息么？删除后节点下面的项目也都将删除",
+          okText: "确认",
+          cancelText: "取消",
+          onOk: () => {
+            // 删除
+            delDisPatchProject(record.id).then((res) => {
+              if (res.code === 200) {
+                this.$notification.success({
+                  message: res.msg,
+                });
+                this.loadData();
+              }
+            });
+          },
+        });
+        return;
+      }
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除分发信息么？",
+        content: "真的要释放分发信息么？释放之后节点下面的项目信息还会保留，如需删除还需要到节点管理中操作",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
           // 删除
-          deleteDisPatch(record.id).then((res) => {
+          releaseDelDisPatch(record.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -949,6 +1002,18 @@ export default {
     // 关闭控制台
     onConsoleClose() {
       this.drawerConsoleVisible = false;
+    },
+    //前往控制台
+    goConsole() {
+      //关闭文件
+      this.onFileClose();
+      this.handleConsole(this.temp);
+    },
+    //前往文件
+    goFile() {
+      // 关闭控制台
+      this.onConsoleClose();
+      this.handleFile(this.temp);
     },
     loadProjectListAll(fn) {
       getProjectListAll().then((res) => {
@@ -1046,7 +1111,7 @@ export default {
 }
 .replica-btn-del {
   position: absolute;
-  right: 0px;
+  right: 0;
   top: 74px;
 }
 </style>

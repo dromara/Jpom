@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,8 @@
 package io.jpom.build;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
+import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseModel;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
@@ -72,11 +74,22 @@ public class BuildExtraModule extends BaseModel {
 	 * 发布到ssh中的目录
 	 */
 	private String releasePath;
-
 	/**
 	 * 工作空间 ID
 	 */
 	private String workspaceId;
+	/**
+	 * 增量同步
+	 */
+	private boolean diffSync;
+
+	public boolean isDiffSync() {
+		return diffSync;
+	}
+
+	public void setDiffSync(boolean diffSync) {
+		this.diffSync = diffSync;
+	}
 
 	public String getReleasePath() {
 		return releasePath;
@@ -160,16 +173,30 @@ public class BuildExtraModule extends BaseModel {
 
 	public void updateValue(BuildHistoryLog buildHistoryLog) {
 		//
-		this.setAfterOpt(buildHistoryLog.getAfterOpt());
+		this.setAfterOpt(ObjectUtil.defaultIfNull(buildHistoryLog.getAfterOpt(), AfterOpt.No.getCode()));
 		this.setReleaseMethod(buildHistoryLog.getReleaseMethod());
 		this.setReleaseCommand(buildHistoryLog.getReleaseCommand());
 		this.setReleasePath(buildHistoryLog.getReleasePath());
 		this.setReleaseMethodDataId(buildHistoryLog.getReleaseMethodDataId());
-		this.setClearOld(buildHistoryLog.getClearOld());
+		this.setClearOld(ObjectUtil.defaultIfNull(buildHistoryLog.getClearOld(), false));
 		this.setResultDirFile(buildHistoryLog.getResultDirFile());
 		this.setName(buildHistoryLog.getBuildName());
 		//
 		this.setId(buildHistoryLog.getBuildDataId());
 		this.setWorkspaceId(buildHistoryLog.getWorkspaceId());
+		this.setDiffSync(ObjectUtil.defaultIfNull(buildHistoryLog.getDiffSync(), false));
+	}
+
+	public void fillLogValue(BuildHistoryLog buildHistoryLog) {
+		//
+		buildHistoryLog.setAfterOpt(ObjectUtil.defaultIfNull(this.getAfterOpt(), AfterOpt.No.getCode()));
+		buildHistoryLog.setReleaseMethod(this.getReleaseMethod());
+		buildHistoryLog.setReleaseCommand(this.getReleaseCommand());
+		buildHistoryLog.setReleasePath(this.getReleasePath());
+		buildHistoryLog.setReleaseMethodDataId(this.getReleaseMethodDataId());
+		buildHistoryLog.setClearOld(this.isClearOld());
+		buildHistoryLog.setResultDirFile(this.getResultDirFile());
+		buildHistoryLog.setDiffSync(this.isDiffSync());
+
 	}
 }

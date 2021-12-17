@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -148,6 +148,7 @@ public class RepositoryController extends BaseServerController {
 		repositoryModel.setId(id);
 		repositoryModel.setPassword(StrUtil.EMPTY);
 		repositoryModel.setRsaPrv(StrUtil.EMPTY);
+		repositoryModel.setRsaPub(StrUtil.EMPTY);
 		repositoryModel.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
 		repositoryService.updateById(repositoryModel);
 		return JsonMessage.toJson(200, "操作成功");
@@ -171,6 +172,7 @@ public class RepositoryController extends BaseServerController {
 		if (protocol == GitProtocolEnum.HTTP.getCode()) {
 			//  http
 			repositoryModelReq.setRsaPub(StrUtil.EMPTY);
+			repositoryModelReq.setRsaPrv(StrUtil.EMPTY);
 		} else if (protocol == GitProtocolEnum.SSH.getCode()) {
 			// ssh
 			repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), StrUtil.EMPTY));

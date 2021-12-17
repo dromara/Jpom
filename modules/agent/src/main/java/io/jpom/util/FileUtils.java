@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -41,12 +41,12 @@ public class FileUtils {
 
 	private static JSONObject fileToJson(File file) {
 		JSONObject jsonObject = new JSONObject(6);
+		long sizeFile = FileUtil.size(file);
 		if (file.isDirectory()) {
 			jsonObject.put("isDirectory", true);
-			long sizeFile = FileUtil.size(file);
 			jsonObject.put("fileSize", FileUtil.readableFileSize(sizeFile));
 		} else {
-			jsonObject.put("fileSize", FileUtil.readableFileSize(file.length()));
+			jsonObject.put("fileSize", FileUtil.readableFileSize(sizeFile));
 		}
 		jsonObject.put("filename", file.getName());
 		long mTime = file.lastModified();

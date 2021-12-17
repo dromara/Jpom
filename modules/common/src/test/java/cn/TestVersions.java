@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -20,26 +20,21 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-//package io.jpom.socket.spring;
-//
-//import io.jpom.socket.spring.handler.NodeUpdateHandler;
-//import io.jpom.socket.spring.interceptor.NodeUpdateInterceptor;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.web.socket.config.annotation.EnableWebSocket;
-//import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-//import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-//
-///**
-// * @author lf
-// */
-//@Configuration
-//@EnableWebSocket
-//public class WebSocketConfig implements WebSocketConfigurer {
-//    private final NodeUpdateInterceptor nodeUpdateInterceptor = new NodeUpdateInterceptor();
-//
-//    @Override
-//    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-//        // 节点升级
-//        registry.addHandler(new NodeUpdateHandler(), "/node_update").addInterceptors(nodeUpdateInterceptor);
-//    }
-//}
+package cn;
+
+import cn.hutool.http.HttpUtil;
+import io.jpom.util.VersionUtils;
+import org.junit.Test;
+
+/**
+ * @author bwcx_jzy
+ * @since 2021/12/16
+ */
+public class TestVersions {
+
+	@Test
+	public void test() {
+		String version = VersionUtils.getVersion(HttpUtil.class, null);
+		System.out.println(version);
+	}
+}

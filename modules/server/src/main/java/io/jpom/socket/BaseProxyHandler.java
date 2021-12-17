@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -40,6 +40,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
@@ -75,7 +76,15 @@ public abstract class BaseProxyHandler extends BaseHandler {
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		this.init(session);
+	}
+
+	private void init(WebSocketSession session) throws URISyntaxException, IOException {
 		Map<String, Object> attributes = session.getAttributes();
+		boolean init = (boolean) attributes.getOrDefault("init", false);
+		if (init) {
+			return;
+		}
 		NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
 		UserModel userInfo = (UserModel) attributes.get("userInfo");
 
@@ -90,10 +99,12 @@ public abstract class BaseProxyHandler extends BaseHandler {
 		if (this.showHelloMsg()) {
 			session.sendMessage(new TextMessage(StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId())));
 		}
+		attributes.put("init", true);
 	}
 
 	@Override
-	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+		this.init(session);
 		String msg = message.getPayload();
 		Map<String, Object> attributes = session.getAttributes();
 		ProxySession proxySession = (ProxySession) attributes.get("proxySession");

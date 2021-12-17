@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -211,26 +211,26 @@ public class OutGivingController extends BaseServerController {
 	 * @param id 分发id
 	 * @return json
 	 */
-	@RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "release_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
-	public String del(String id) throws IOException {
+	public String releaseDel(String id) {
 		// 判断构建
 		boolean releaseMethod = buildService.checkReleaseMethod(id, BuildReleaseMethod.Outgiving);
 		Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
 		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id);
-		if (outGivingServerItem.isOutGivingProject()) {
-			UserModel userModel = getUser();
-			// 解除项目分发独立分发属性
-			List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
-			if (outGivingNodeProjectList != null) {
-				outGivingNodeProjectList.forEach(outGivingNodeProject -> {
-					NodeModel item = nodeService.getByKey(outGivingNodeProject.getNodeId());
-					JSONObject jsonObject = new JSONObject();
-					jsonObject.put("id", outGivingNodeProject.getProjectId());
-					NodeForward.request(item, NodeUrl.Manage_ReleaseOutGiving, userModel, jsonObject);
-				});
-			}
+
+		UserModel userModel = getUser();
+		// 解除项目分发独立分发属性
+		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
+		if (outGivingNodeProjectList != null) {
+			outGivingNodeProjectList.forEach(outGivingNodeProject -> {
+				NodeModel item = nodeService.getByKey(outGivingNodeProject.getNodeId());
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("id", outGivingNodeProject.getProjectId());
+				NodeForward.request(item, NodeUrl.Manage_ReleaseOutGiving, userModel, jsonObject);
+			});
 		}
+
 		int byKey = outGivingServer.delByKey(id, getRequest());
 		if (byKey > 0) {
 			// 删除日志

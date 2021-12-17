@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -35,6 +35,7 @@ import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ConsoleService;
 import io.jpom.socket.ConsoleCommandOp;
+import io.jpom.util.JvmUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -75,6 +76,9 @@ public class ProjectStatusController extends BaseAgentController {
 			pid = AbstractProjectCommander.getInstance().getPid(id);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("获取项目pid 失败", e);
+		}
+		if (pid <= 0) {
+			Assert.state(JvmUtil.jpsNormal, "当前服务器 jps 命令异常,请检查 jdk 是否完整,以及 java 环境变量是否配置正确");
 		}
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("pId", pid);
@@ -118,6 +122,7 @@ public class ProjectStatusController extends BaseAgentController {
 				continue;
 			}
 			if (pid <= 0) {
+				Assert.state(JvmUtil.jpsNormal, "当前服务器 jps 命令异常,请检查 jdk 是否完整,以及 java 环境变量是否配置正确");
 				continue;
 			}
 			itemObj = new JSONObject();
@@ -154,6 +159,7 @@ public class ProjectStatusController extends BaseAgentController {
 			try {
 				pid = AbstractProjectCommander.getInstance().getPid(copyItem.getTagId());
 				if (pid <= 0) {
+					Assert.state(JvmUtil.jpsNormal, "当前服务器 jps 命令异常,请检查 jdk 是否完整,以及 java 环境变量是否配置正确");
 					continue;
 				}
 			} catch (Exception e) {

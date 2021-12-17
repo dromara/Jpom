@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -187,15 +187,21 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 					CollUtil.size(strings));
 			DefaultSystemLog.getLog().debug(format);
 			return format;
-		} catch (AgentException agentException) {
-			DefaultSystemLog.getLog().error("同步失败 {}", agentException.getMessage());
-			return "同步失败" + agentException.getMessage();
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("同步节点" + dataName + "失败:" + nodeModelName, e);
-			return "同步节点" + dataName + "失败" + e.getMessage();
+			return this.checkException(e, nodeModelName);
 		} finally {
 			BaseServerController.remove();
 		}
+	}
+
+	private String checkException(Exception e, String nodeModelName) {
+		if (e instanceof AgentException) {
+			AgentException agentException = (AgentException) e;
+			DefaultSystemLog.getLog().error("同步失败 {}", agentException.getMessage());
+			return "同步失败" + agentException.getMessage();
+		}
+		DefaultSystemLog.getLog().error("同步节点" + dataName + "失败:" + nodeModelName, e);
+		return "同步节点" + dataName + "失败" + e.getMessage();
 	}
 
 	/**
@@ -213,6 +219,9 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 			try {
 				JSONObject data = this.getItem(nodeModel, id);
 				if (data == null) {
+					// 删除
+					String fullId = BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), id);
+					super.delByKey(fullId);
 					return;
 				}
 				T projectInfoModel = data.toJavaObject(this.tClass);
@@ -222,7 +231,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 				//
 				super.upsert(projectInfoModel);
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("同步节点" + dataName + "失败:" + nodeModel.getId(), e);
+				this.checkException(e, nodeModelName);
 			} finally {
 				BaseServerController.remove();
 			}

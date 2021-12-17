@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -29,6 +29,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -198,17 +199,20 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		this.logId = IdUtil.fastSimpleUUID();
 		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
 		// 更新其他配置字段
-		buildHistoryLog.setResultDirFile(buildExtraModule.getResultDirFile());
+		buildExtraModule.fillLogValue(buildHistoryLog);
+//		buildHistoryLog.setResultDirFile(buildExtraModule.getResultDirFile());
+//		buildHistoryLog.setReleaseMethod(buildExtraModule.getReleaseMethod());
+//		buildHistoryLog.setReleaseMethodDataId(buildExtraModule.getReleaseMethodDataId());
+//		buildHistoryLog.setAfterOpt(buildExtraModule.getAfterOpt());
+//		buildHistoryLog.setReleasePath(buildExtraModule.getReleasePath());
+//		buildHistoryLog.setReleaseCommand(buildExtraModule.getReleaseCommand());
+//		buildHistoryLog.setClearOld(buildExtraModule.isClearOld());
+
 		buildHistoryLog.setTriggerBuildType(triggerBuildType);
-		buildHistoryLog.setReleaseMethod(buildExtraModule.getReleaseMethod());
-		buildHistoryLog.setReleaseMethodDataId(buildExtraModule.getReleaseMethodDataId());
-		buildHistoryLog.setAfterOpt(buildExtraModule.getAfterOpt());
-		buildHistoryLog.setBuildDataId(buildInfoModel.getId());
-		buildHistoryLog.setReleasePath(buildExtraModule.getReleasePath());
-		buildHistoryLog.setReleaseCommand(buildExtraModule.getReleaseCommand());
 		buildHistoryLog.setBuildNumberId(buildInfoModel.getBuildId());
 		buildHistoryLog.setBuildName(buildInfoModel.getName());
-		buildHistoryLog.setClearOld(buildExtraModule.isClearOld());
+		buildHistoryLog.setBuildDataId(buildInfoModel.getId());
+
 		//
 		buildHistoryLog.setWorkspaceId(this.buildInfoModel.getWorkspaceId());
 		buildHistoryLog.setId(this.logId);
@@ -493,7 +497,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 				httpRequest.form("triggerBuildType", this.triggerBuildType);
 				httpRequest.form("triggerTime", triggerTime);
 				String body = httpRequest.execute().body();
-				DefaultSystemLog.getLog().info(this.buildInfoModel.getName() + ":" + body);
+				DefaultSystemLog.getLog().info(this.buildInfoModel.getName() + CharPool.COLON + body);
 			} catch (Exception e) {
 				DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
 			}

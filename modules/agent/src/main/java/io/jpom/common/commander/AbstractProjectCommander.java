@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -29,6 +29,8 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
@@ -39,7 +41,7 @@ import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.commander.impl.LinuxProjectCommander;
-import io.jpom.common.commander.impl.MacOSProjectCommander;
+import io.jpom.common.commander.impl.MacOsProjectCommander;
 import io.jpom.common.commander.impl.WindowsProjectCommander;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.JdkInfoModel;
@@ -100,7 +102,7 @@ public abstract class AbstractProjectCommander {
 			// Windows系统
 			abstractProjectCommander = new WindowsProjectCommander();
 		} else if (SystemUtil.getOsInfo().isMac()) {
-			abstractProjectCommander = new MacOSProjectCommander();
+			abstractProjectCommander = new MacOsProjectCommander();
 		} else {
 			throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
 		}
@@ -183,17 +185,24 @@ public abstract class AbstractProjectCommander {
 	 * 停止
 	 *
 	 * @param nodeProjectInfoModel 项目
+	 * @param javaCopyItem         副本信息
 	 * @return 结果
 	 * @throws Exception 异常
 	 */
-	public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+	public abstract String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception;
+
+	/**
+	 * 停止之前
+	 *
+	 * @param nodeProjectInfoModel 项目
+	 * @return 结果
+	 * @throws Exception 异常
+	 */
+	public Tuple stopBefore(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
 		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
 		String beforeStop = this.webHooks(nodeProjectInfoModel, javaCopyItem, "beforeStop");
-		if (StrUtil.isNotEmpty(beforeStop)) {
-			return beforeStop;
-		}
 		// 再次查看进程信息
-		String result = status(tag);
+		String result = this.status(tag);
 		//
 		int pid = parsePid(result);
 		if (pid > 0) {
@@ -203,7 +212,7 @@ public abstract class AbstractProjectCommander {
 			PID_PORT.remove(pid);
 		}
 		this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "stop", "result", result);
-		return result;
+		return new Tuple(StrUtil.emptyToDefault(beforeStop, StrUtil.EMPTY), result);
 	}
 
 	/**
@@ -245,7 +254,7 @@ public abstract class AbstractProjectCommander {
 				httpRequest.form("copyId", javaCopyItem.getId());
 			}
 			String body = httpRequest.execute().body();
-			DefaultSystemLog.getLog().info(nodeProjectInfoModel.getName() + ":" + body);
+			DefaultSystemLog.getLog().info(nodeProjectInfoModel.getName() + CharPool.COLON + body);
 			return body;
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
@@ -449,7 +458,7 @@ public abstract class AbstractProjectCommander {
 		if (CollUtil.isEmpty(ports)) {
 			return StrUtil.DASHED;
 		}
-		String allPort = CollUtil.join(ports, ",");
+		String allPort = CollUtil.join(ports, StrUtil.COMMA);
 		// 缓存
 		PID_PORT.put(pid, allPort);
 		return allPort;
@@ -529,7 +538,7 @@ public abstract class AbstractProjectCommander {
 	 */
 	public static int parsePid(String result) {
 		if (result.startsWith(AbstractProjectCommander.RUNNING_TAG)) {
-			String[] split = result.split(":");
+			String[] split = result.split(StrUtil.COLON);
 			return Convert.toInt(ArrayUtil.get(split, 1), 0);
 		}
 		return 0;
@@ -562,16 +571,16 @@ public abstract class AbstractProjectCommander {
 	 * 阻塞检查程序状态
 	 * @param tag 程序tag
 	 * @param status 要检查的状态
-	 * @throws Exception 异常
+	 *
 	 * @return 和参数status相反
 	 */
-	protected boolean loopCheckRun(String tag, boolean status) throws Exception {
+	protected boolean loopCheckRun(String tag, boolean status) {
 		int stopWaitTime = AgentExtConfigBean.getInstance().getStopWaitTime();
 		stopWaitTime = Math.max(stopWaitTime, 1);
 		int loopCount = (int) (TimeUnit.SECONDS.toMillis(stopWaitTime) / 500);
 		int count = 0;
 		do {
-			if (isRun(tag) == status) {
+			if (this.isRun(tag) == status) {
 				return status;
 			}
 			ThreadUtil.sleep(500);

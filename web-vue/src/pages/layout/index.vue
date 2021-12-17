@@ -15,7 +15,7 @@
           <a-icon class="icon-btn" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="changeCollapsed" />
         </a-tooltip>
         <a-tooltip placement="right" v-if="getTabList.length > 1" title="关闭其他标签，只保留当前的 Tab">
-          <a-icon class="icon-btn" style="padding-left: 0px" type="close-circle" @click="closeTabs" />
+          <a-icon class="icon-btn" style="padding-left: 0" type="close-circle" @click="closeTabs" />
         </a-tooltip>
         <content-tab />
         <user-header />
@@ -224,10 +224,8 @@ export default {
   overflow-y: auto;
 }
 .layout-content {
-  margin: 10px;
-  margin-bottom: 0;
-  padding: 15px;
-  padding-bottom: 0;
+  margin: 10px 10px 0;
+  padding: 15px 15px 0;
   background: #fff;
   min-height: 280px;
 }

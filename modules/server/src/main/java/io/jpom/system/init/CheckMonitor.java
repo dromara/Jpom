@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -49,13 +49,13 @@ public class CheckMonitor {
 		MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
 		boolean status = monitorService.checkCronStatus();
 		if (status) {
-			Console.log("已经开启监听调度：监控");
+			Console.log("Monitoring scheduling has been turned on: Monitoring");
 		}
 		//
 		NodeService nodeService = SpringUtil.getBean(NodeService.class);
 		status = nodeService.checkCronStatus();
 		if (status) {
-			Console.log("已经开启监听调度：节点信息采集");
+			Console.log("Monitoring scheduling has been started: node information collection");
 		}
 		// 缓存检测调度
 		CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
@@ -68,6 +68,8 @@ public class CheckMonitor {
 			// 加载构建定时器
 			BuildInfoService buildInfoService = SpringUtil.getBean(BuildInfoService.class);
 			buildInfoService.startCron();
+			//
+			RemoteVersion.loadRemoteInfo();
 		});
 		// 开启版本检测调度
 		CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {

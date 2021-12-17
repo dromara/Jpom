@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,6 +22,7 @@
  */
 package io.jpom.model.log;
 
+import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.service.h2db.TableName;
@@ -110,6 +111,10 @@ public class MonitorNotifyLog extends BaseWorkspaceModel {
 		return status;
 	}
 
+	public boolean status() {
+		return ObjectUtil.defaultIfNull(status, false);
+	}
+
 	public void setStatus(Boolean status) {
 		this.status = status;
 	}
@@ -183,11 +188,8 @@ public class MonitorNotifyLog extends BaseWorkspaceModel {
 		this.content = content;
 	}
 
-	public Boolean isStatus() {
-		return status;
-	}
+	@Override
+	public void setModifyUser(String modifyUser) {
 
-	public void setStatus(boolean status) {
-		this.status = status;
 	}
 }

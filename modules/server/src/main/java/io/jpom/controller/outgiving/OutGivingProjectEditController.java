@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -37,9 +37,11 @@ import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.*;
+import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.system.SystemParametersServer;
@@ -48,7 +50,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -69,13 +70,16 @@ public class OutGivingProjectEditController extends BaseServerController {
 	private final SystemParametersServer systemParametersServer;
 	private final OutGivingServer outGivingServer;
 	private final ProjectInfoCacheService projectInfoCacheService;
+	private final BuildInfoService buildService;
 
 	public OutGivingProjectEditController(SystemParametersServer systemParametersServer,
 										  OutGivingServer outGivingServer,
-										  ProjectInfoCacheService projectInfoCacheService) {
+										  ProjectInfoCacheService projectInfoCacheService,
+										  BuildInfoService buildService) {
 		this.systemParametersServer = systemParametersServer;
 		this.outGivingServer = outGivingServer;
 		this.projectInfoCacheService = projectInfoCacheService;
+		this.buildService = buildService;
 	}
 
 	/**
@@ -104,13 +108,16 @@ public class OutGivingProjectEditController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.DEL)
 	public String delete(String id) {
 		OutGivingModel outGivingModel = outGivingServer.getByKey(id);
 		Assert.notNull(outGivingModel, "没有对应的分发项目");
 
-		Assert.state(outGivingModel.isOutGivingProject(), "该项目不是节点分发项目,不能在此次删除");
+		// 判断构建
+		boolean releaseMethod = buildService.checkReleaseMethod(id, BuildReleaseMethod.Outgiving);
+		Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
+		//
+		Assert.state(outGivingModel.outGivingProject(), "该项目不是节点分发项目,不能在此次删除");
 
 		UserModel userModel = getUser();
 		List<OutGivingNodeProject> deleteNodeProject = outGivingModel.outGivingNodeProjectList();
@@ -118,7 +125,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 			// 删除实际的项目
 			for (OutGivingNodeProject outGivingNodeProject1 : deleteNodeProject) {
 				NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject1.getNodeId());
-				JsonMessage<String> jsonMessage = deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
+				JsonMessage<String> jsonMessage = this.deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
 				if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
 					return JsonMessage.getString(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
 				}

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 码之科技工作室
+ * Copyright (c) 2019 Code Technology Studio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -31,6 +31,7 @@ import io.jpom.system.AgentAuthorize;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.util.JvmUtil;
 
 import java.io.File;
 
@@ -43,26 +44,32 @@ import java.io.File;
 @PreLoadClass
 public class CheckAuthorize {
 
-    @PreLoadMethod
-    private static void startAutoBackLog() {
-        AgentAuthorize.getInstance();
-    }
+	@PreLoadMethod
+	private static void checkAgentAuthorize() {
+		AgentAuthorize.getInstance();
+	}
 
-    /**
-     * 修护脚本模板路径
-     */
-    @PreLoadMethod
-    private static void repairScriptPath() {
-        if (!JpomManifest.getInstance().isDebug()) {
-            if (StrUtil.compareVersion(JpomManifest.getInstance().getVersion(), "2.4.2") < 0) {
-                return;
-            }
-        }
-        File oldDir = FileUtil.file(ExtConfigBean.getInstance().getPath(), AgentConfigBean.SCRIPT_DIRECTORY);
-        if (!oldDir.exists()) {
-            return;
-        }
-        File newDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), AgentConfigBean.SCRIPT_DIRECTORY);
-        FileUtil.move(oldDir, newDir, true);
-    }
+	@PreLoadMethod
+	private static void checkJps() {
+		boolean exist = JvmUtil.exist(JpomManifest.getInstance().getPid());
+		JvmUtil.setJpsNormal(exist);
+	}
+
+	/**
+	 * 修护脚本模板路径
+	 */
+	@PreLoadMethod
+	private static void repairScriptPath() {
+		if (!JpomManifest.getInstance().isDebug()) {
+			if (StrUtil.compareVersion(JpomManifest.getInstance().getVersion(), "2.4.2") < 0) {
+				return;
+			}
+		}
+		File oldDir = FileUtil.file(ExtConfigBean.getInstance().getPath(), AgentConfigBean.SCRIPT_DIRECTORY);
+		if (!oldDir.exists()) {
+			return;
+		}
+		File newDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), AgentConfigBean.SCRIPT_DIRECTORY);
+		FileUtil.move(oldDir, newDir, true);
+	}
 }
