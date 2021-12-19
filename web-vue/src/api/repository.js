@@ -88,10 +88,10 @@ export function restHideField(id) {
   });
 }
 
-export function giteeRepos(param) {
-    return axios({
-        url: "/build/repository/gitee_repos",
-        method: "get",
-        params: param
-    })
+export function authorizeRepos(param) {
+  return axios({
+    url: "/build/repository/authorize_repos",
+    method: "get",
+    params: param,
+  });
 }
