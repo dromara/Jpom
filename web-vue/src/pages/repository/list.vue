@@ -132,6 +132,7 @@
             <a-select v-model="giteeImportForm.type">
               <a-select-option value="gitee"> gitee </a-select-option>
               <a-select-option value="github"> github </a-select-option>
+              <a-select-option value="gitlab"> gitlab </a-select-option>
             </a-select>
             <a-input-search style="width: 50%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" placeholder="请输入私人令牌" />
           </a-input-group>
