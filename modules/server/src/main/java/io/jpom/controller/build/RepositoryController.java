@@ -31,6 +31,7 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -165,15 +166,85 @@ public class RepositoryController extends BaseServerController {
 		return JsonMessage.toJson(200, "操作成功");
 	}
 
-	@GetMapping(value = "/build/repository/gitee_repos")
+	@GetMapping(value = "/build/repository/authorize_repos")
 	@Feature(method = MethodFeature.LIST)
-	public Object giteeRepos() {
+	public Object authorizeRepos() {
 		// 获取分页信息
 		HttpServletRequest request = getRequest();
 		Map<String, String> paramMap = ServletUtil.getParamMap(request);
 		Page page = repositoryService.parsePage(paramMap);
 		String token = paramMap.get("token");
 		Assert.hasText(token, "请填写个人令牌");
+		//
+		String type = paramMap.get("type");
+		PageResultDto<JSONObject> pageResultDto;
+		switch (type) {
+			case "gitee":
+				pageResultDto = this.giteeRepos(token, page);
+				break;
+			case "github":
+				pageResultDto = this.githubRepos(token, page);
+				break;
+			default:
+				throw new IllegalArgumentException("不支持的类型");
+		}
+		return JsonMessage.toJson(HttpStatus.OK.value(), HttpStatus.OK.name(), pageResultDto);
+	}
+
+	/**
+	 * github 仓库
+	 *
+	 * @param token 个人令牌
+	 * @param page  分页
+	 * @return page
+	 */
+	private PageResultDto<JSONObject> githubRepos(String token, Page page) {
+		String accept = "application/vnd.github.v3+json";
+		// 拉取仓库信息
+		HttpRequest httpRequestRepos = HttpUtil.createGet("https://api.github.com/user/repos");
+		httpRequestRepos.header("Authorization", StrUtil.format("token {}", token));
+		httpRequestRepos.header("Accept", accept);
+		HttpResponse reposResponse = httpRequestRepos
+				.form("access_token", token)
+				.form("sort", "pushed")
+				.form("page", page.getPageNumber())
+				.form("per_page", page.getPageSize())
+				.execute();
+		String body = reposResponse.body();
+		Assert.state(reposResponse.isOk(), "拉取仓库信息错误：" + body);
+		JSONArray jsonArray = JSONArray.parseArray(body);
+		List<JSONObject> objects = jsonArray.stream().map(o -> {
+			JSONObject repo = (JSONObject) o;
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", repo.getString("name"));
+			String cloneUrl = repo.getString("clone_url");
+			jsonObject.put("url", cloneUrl);
+			jsonObject.put("full_name", repo.getString("full_name"));
+			jsonObject.put("description", repo.getString("description"));
+			jsonObject.put("private", repo.getBooleanValue("private"));
+			//
+			JSONObject owner = repo.getJSONObject("owner");
+			if (owner != null) {
+				jsonObject.put("username", owner.getString("login"));
+			}
+			jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(null, cloneUrl));
+			return jsonObject;
+		}).collect(Collectors.toList());
+		//
+		PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), 1000);
+		pageResultDto.setResult(objects);
+		return pageResultDto;
+	}
+
+
+	/**
+	 * gitee 仓库
+	 *
+	 * @param token 个人令牌
+	 * @param page  分页
+	 * @return page
+	 */
+	private PageResultDto<JSONObject> giteeRepos(String token, Page page) {
 		//
 		HttpResponse userResponse = HttpUtil.createGet("https://gitee.com/api/v5/user")
 				.form("access_token", token)
@@ -184,27 +255,35 @@ public class RepositoryController extends BaseServerController {
 		String username = userBody.getString("login");
 		HttpResponse reposResponse = HttpUtil.createGet("https://gitee.com/api/v5/user/repos")
 				.form("access_token", token)
+				.form("sort", "pushed")
 				.form("page", page.getPageNumber())
 				.form("per_page", page.getPageSize())
 				.execute();
-		Assert.state(userResponse.isOk(), "拉取仓库信息错误：" + userResponse.body());
+		String body = reposResponse.body();
+		Assert.state(userResponse.isOk(), "拉取仓库信息错误：" + body);
 
 		String totalCountStr = reposResponse.header("total_count");
 		int totalCount = Convert.toInt(totalCountStr, 0);
 		//String totalPage = reposResponse.header("total_page");
-		String body = reposResponse.body();
 		JSONArray jsonArray = JSONArray.parseArray(body);
 		List<JSONObject> objects = jsonArray.stream().map(o -> {
 			JSONObject repo = (JSONObject) o;
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", repo.getString("name"));
 			String htmlUrl = repo.getString("html_url");
-			repo.put("exists", RepositoryController.this.checkRepositoryUrl(null, htmlUrl));
-			repo.put("username", username);
-			return repo;
+			jsonObject.put("url", htmlUrl);
+			jsonObject.put("full_name", repo.getString("full_name"));
+			jsonObject.put("private", repo.getBooleanValue("private"));
+			jsonObject.put("description", repo.getString("description"));
+			//
+			jsonObject.put("username", username);
+			jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(null, htmlUrl));
+			return jsonObject;
 		}).collect(Collectors.toList());
 		//
 		PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), totalCount);
 		pageResultDto.setResult(objects);
-		return JsonMessage.toJson(HttpStatus.OK.value(), HttpStatus.OK.name(), pageResultDto);
+		return pageResultDto;
 	}
 
 	/**

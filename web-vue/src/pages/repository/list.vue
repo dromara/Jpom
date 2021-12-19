@@ -13,7 +13,7 @@
         <a-button type="primary" @click="loadData">搜索</a-button>
       </a-tooltip>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="handleAddGitee">新增Gitee仓库</a-button>
+      <a-button type="primary" @click="handleAddGitee">导入仓库</a-button>
     </div>
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
@@ -125,25 +125,35 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <a-modal v-model="giteeImportVisible" title="新增Gitee仓库" width="80%" :footer="null" :maskClosable="false">
+    <a-modal v-model="giteeImportVisible" title="导入仓库" width="80%" :footer="null" :maskClosable="false">
       <a-form-model :label-col="{ span: 4 }" :rules="giteeImportFormRules" :model="giteeImportForm" ref="giteeImportForm" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="私人令牌" prop="token">
-          <a-input-search enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" placeholder="请输入Gitee 私人令牌" />
+          <a-input-group compact>
+            <a-select v-model="giteeImportForm.type">
+              <a-select-option value="gitee"> gitee </a-select-option>
+              <a-select-option value="github"> github </a-select-option>
+            </a-select>
+            <a-input-search style="width: 50%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" placeholder="请输入私人令牌" />
+          </a-input-group>
         </a-form-model-item>
       </a-form-model>
       <a-table :loading="loading" :columns="reposColumns" :data-source="repos" bordered rowKey="id" @change="reposChange" :pagination="reposPagination">
         <template slot="private" slot-scope="text, record">
           <a-switch :disabled="true" :checked="record.private" />
         </template>
-        <a-tooltip slot="human_name" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
         <a-tooltip slot="full_name" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="html_url" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
+        <a-tooltip slot="description" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+
         <template slot="operation" slot-scope="text, record">
           <a-button type="primary" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{ record.exists ? "已存在" : "添加" }}</a-button>
         </template>
@@ -152,7 +162,7 @@
   </div>
 </template>
 <script>
-import { deleteRepository, editRepository, getRepositoryList, giteeRepos, restHideField } from "@/api/repository";
+import { deleteRepository, editRepository, getRepositoryList, authorizeRepos, restHideField } from "@/api/repository";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_SIZW_OPTIONS } from "@/utils/const";
 
@@ -217,43 +227,27 @@ export default {
         },
       ],
       reposColumns: [
-        { title: "仓库名称", dataIndex: "human_name", width: 150, ellipsis: true, scopedSlots: { customRender: "human_name" } },
-        { title: "仓库路径", dataIndex: "full_name", width: 150, ellipsis: true, scopedSlots: { customRender: "full_name" } },
-        { title: "GitUrl", dataIndex: "html_url", width: 200, ellipsis: true, scopedSlots: { customRender: "html_url" } },
-        { title: "私有", dataIndex: "private", width: 80, ellipsis: true, scopedSlots: { customRender: "private" } },
+        { title: "仓库名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "仓库路径", dataIndex: "full_name", ellipsis: true, scopedSlots: { customRender: "full_name" } },
+        { title: "GitUrl", dataIndex: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
+
         {
-          title: "角色",
-          dataIndex: "relation",
-          width: 80,
+          title: "描述",
+          dataIndex: "description",
+
           ellipsis: true,
-          customRender(text) {
-            switch (text) {
-              case "master":
-                return "管理员";
-              case "leader":
-                return "负责人";
-              case "developer":
-                return "开发者";
-              case "viewer":
-                return "观察者";
-              case "reporter":
-                return "报告者";
-            }
-          },
+          scopedSlots: { customRender: "description" },
         },
+        { title: "私有", dataIndex: "private", width: 80, ellipsis: true, scopedSlots: { customRender: "private" } },
         {
           title: "操作",
           dataIndex: "operation",
-          width: 80,
+          width: 100,
           scopedSlots: { customRender: "operation" },
           align: "left",
         },
       ],
-      giteeImportForm: {
-        perPage: PAGE_DEFAULT_LIMIT,
-        page: 1,
-        total: 0,
-      },
+      giteeImportForm: Object.assign({ type: "gitee" }, PAGE_DEFAULT_LIST_QUERY),
       giteeImportFormRules: {
         token: [{ required: true, message: "请输入私人令牌", trigger: "blur" }],
       },
@@ -327,7 +321,7 @@ export default {
         if (!valid) {
           return false;
         }
-        giteeRepos(this.giteeImportForm).then((res) => {
+        authorizeRepos(this.giteeImportForm).then((res) => {
           if (res.code === 200) {
             // 成功
             //this.username = res.data.username;
@@ -348,8 +342,8 @@ export default {
         protocol: 0,
         userName: record.username,
         password: this.giteeImportForm.token,
-        name: record.human_name,
-        gitUrl: record.html_url,
+        name: record.name,
+        gitUrl: record.url,
       }).then((res) => {
         if (res.code === 200) {
           // 成功
