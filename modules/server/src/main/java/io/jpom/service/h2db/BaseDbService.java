@@ -188,6 +188,23 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	}
 
 	/**
+	 * 转换为 page 对象
+	 *
+	 * @param paramMap 请求参数
+	 * @return page
+	 */
+	public Page parsePage(Map<String, String> paramMap) {
+		int page = Convert.toInt(paramMap.get("page"), 1);
+		int limit = Convert.toInt(paramMap.get("limit"), 10);
+		Assert.state(page > 0, "page value error");
+		Assert.state(limit > 0 && limit < 200, "limit value error");
+		// 移除 默认字段
+		MapUtil.removeAny(paramMap, "page", "limit", "order_field", "order", "total");
+		//
+		return new Page(page, limit);
+	}
+
+	/**
 	 * 通用的分页查询, 使用该方法查询，数据库表字段不能包含 "page", "limit", "order_field", "order", "total"
 	 * <p>
 	 * page=1&limit=10&order=ascend&order_field=name
@@ -196,16 +213,10 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	 * @return page
 	 */
 	public PageResultDto<T> listPage(Map<String, String> paramMap) {
-		int page = Convert.toInt(paramMap.get("page"), 1);
-		int limit = Convert.toInt(paramMap.get("limit"), 10);
-		Assert.state(page > 0, "page value error");
-		Assert.state(limit > 0 && limit < 200, "limit value error");
 		String orderField = paramMap.get("order_field");
 		String order = paramMap.get("order");
-		// 移除 默认字段
-		MapUtil.removeAny(paramMap, "page", "limit", "order_field", "order", "total");
 		//
-		Page pageReq = new Page(page, limit);
+		Page pageReq = this.parsePage(paramMap);
 		Entity where = Entity.create();
 		// 查询条件
 		for (Map.Entry<String, String> stringStringEntry : paramMap.entrySet()) {

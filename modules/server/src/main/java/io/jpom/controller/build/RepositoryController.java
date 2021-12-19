@@ -22,20 +22,22 @@
  */
 package io.jpom.controller.build;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.db.Page;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -53,12 +55,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Hotstrip
@@ -164,41 +167,44 @@ public class RepositoryController extends BaseServerController {
 
 	@GetMapping(value = "/build/repository/gitee_repos")
 	@Feature(method = MethodFeature.LIST)
-	public Object giteeRepos(@ValidatorItem String token,@RequestParam(defaultValue = "1",required = false) Integer page,@RequestParam(defaultValue = "20",required = false) Integer perPage) {
-		HashMap<String, Object> paramMap = new HashMap<>();
-		paramMap.put("access_token", token);
+	public Object giteeRepos() {
+		// 获取分页信息
+		HttpServletRequest request = getRequest();
+		Map<String, String> paramMap = ServletUtil.getParamMap(request);
+		Page page = repositoryService.parsePage(paramMap);
+		String token = paramMap.get("token");
+		Assert.hasText(token, "请填写个人令牌");
+		//
 		HttpResponse userResponse = HttpUtil.createGet("https://gitee.com/api/v5/user")
 				.form("access_token", token)
 				.execute();
-		if (!userResponse.isOk()) {
-			return JsonMessage.toJson(500, userResponse.body());
-		}
-		JSONObject userBody = JSONUtil.parseObj(userResponse.body());
-		String username = userBody.getStr("login");
+		Assert.state(userResponse.isOk(), "令牌不正确：" + userResponse.body());
+		// 拉取仓库信息
+		JSONObject userBody = JSONObject.parseObject(userResponse.body());
+		String username = userBody.getString("login");
 		HttpResponse reposResponse = HttpUtil.createGet("https://gitee.com/api/v5/user/repos")
 				.form("access_token", token)
-				.form("page", page)
-				.form("per_page", perPage)
+				.form("page", page.getPageNumber())
+				.form("per_page", page.getPageSize())
 				.execute();
-		if (!reposResponse.isOk()) {
-			return JsonMessage.toJson(500, userResponse.body());
-		}
+		Assert.state(userResponse.isOk(), "拉取仓库信息错误：" + userResponse.body());
 
-		String totalCount = reposResponse.header("total_count");
-		String totalPage = reposResponse.header("total_page");
-		JSONObject obj = JSONUtil.createObj();
-		JSONArray repos = new JSONArray();
-		for (Object repoObj : JSONUtil.parseArray(reposResponse.body())) {
-			JSONObject repo = (JSONObject) repoObj;
-			String htmlUrl = repo.getStr("html_url");
-			repo.putOpt("exists", repositoryService.exists(Entity.create().set("gitUrl", htmlUrl)));
-			repos.add(repo);
-		}
-		obj.putOpt("username", username);
-		obj.putOpt("repos", repos);
-		obj.putOpt("totalCount", totalCount);
-		obj.putOpt("totalPage", totalPage);
-		return JsonMessage.toJson(HttpStatus.OK.value(), HttpStatus.OK.name(), obj);
+		String totalCountStr = reposResponse.header("total_count");
+		int totalCount = Convert.toInt(totalCountStr, 0);
+		//String totalPage = reposResponse.header("total_page");
+		String body = reposResponse.body();
+		JSONArray jsonArray = JSONArray.parseArray(body);
+		List<JSONObject> objects = jsonArray.stream().map(o -> {
+			JSONObject repo = (JSONObject) o;
+			String htmlUrl = repo.getString("html_url");
+			repo.put("exists", RepositoryController.this.checkRepositoryUrl(null, htmlUrl));
+			repo.put("username", username);
+			return repo;
+		}).collect(Collectors.toList());
+		//
+		PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), totalCount);
+		pageResultDto.setResult(objects);
+		return JsonMessage.toJson(HttpStatus.OK.value(), HttpStatus.OK.name(), pageResultDto);
 	}
 
 	/**
@@ -224,16 +230,29 @@ public class RepositoryController extends BaseServerController {
 			// ssh
 			repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), StrUtil.EMPTY));
 		}
+		//
+		boolean repositoryUrl = this.checkRepositoryUrl(repositoryModelReq.getId(), repositoryModelReq.getGitUrl());
+		Assert.state(!repositoryUrl, "已经存在对应的仓库信息啦");
+	}
+
+	/**
+	 * 判断仓库地址是否存在
+	 *
+	 * @param id  仓库ID
+	 * @param url 仓库 url
+	 * @return true 在当前工作空间已经存在拉
+	 */
+	private boolean checkRepositoryUrl(String id, String url) {
 		// 判断仓库是否重复
 		Entity entity = Entity.create();
-		if (repositoryModelReq.getId() != null) {
-			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
-			entity.set("id", "<> " + repositoryModelReq.getId());
+		if (StrUtil.isNotEmpty(id)) {
+			Validator.validateGeneral(id, "错误的ID");
+			entity.set("id", "<> " + id);
 		}
 		String workspaceId = repositoryService.getCheckUserWorkspace(getRequest());
 		entity.set("workspaceId", workspaceId);
-		entity.set("gitUrl", repositoryModelReq.getGitUrl());
-		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
+		entity.set("gitUrl", url);
+		return repositoryService.exists(entity);
 	}
 
 	/**
