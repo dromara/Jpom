@@ -52,8 +52,8 @@ export function editRepository(params) {
 @param {
   *  id: id
   *  isRealDel: 是否真删
-  * } params 
- * @returns 
+  * } params
+ * @returns
  */
 export function deleteRepository(params) {
   return axios({
@@ -86,4 +86,12 @@ export function restHideField(id) {
     method: "post",
     data: { id },
   });
+}
+
+export function giteeRepos(param) {
+    return axios({
+        url: "/build/repository/gitee_repos",
+        method: "get",
+        params: param
+    })
 }

@@ -13,6 +13,7 @@
         <a-button type="primary" @click="loadData">搜索</a-button>
       </a-tooltip>
       <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-button type="primary" @click="handleAddGitee">新增Gitee仓库</a-button>
     </div>
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
@@ -124,12 +125,27 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <a-modal v-model="giteeImportVisible" title="新增Gitee仓库" width="80%" okText="加载仓库" @ok="handleGiteeImportFormOk" :maskClosable="false" >
+      <a-form-model :label-col="{ span: 4 }"  :rules="giteeImportFormRules" :model="giteeImportForm"  ref="giteeImportForm"   :wrapper-col="{ span: 20 }">
+        <a-form-model-item label="私人令牌"   prop="token">
+          <a-input v-model="giteeImportForm.token"  placeholder="请输入Gitee 私人令牌"/>
+        </a-form-model-item>
+      </a-form-model>
+      <a-table :loading="loading" :columns="reposColumns" :data-source="repos" bordered rowKey="id"  @change="reposChange" :pagination="reposPagination" >
+        <template slot="private" slot-scope="text, record">
+          <a-switch  :disabled="true" :checked="record.private" />
+        </template>
+        <template slot="operation" slot-scope="text, record">
+          <a-button type="primary" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{record.exists ? '已存在':'添加'}}</a-button>
+        </template>
+      </a-table>
+    </a-modal>
   </div>
 </template>
 <script>
-import { getRepositoryList, editRepository, deleteRepository, restHideField } from "@/api/repository";
-import { parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import {deleteRepository, editRepository, getRepositoryList, giteeRepos, restHideField} from "@/api/repository";
+import {parseTime} from "@/utils/time";
+import {PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_SIZW_OPTIONS} from "@/utils/const";
 
 export default {
   components: {},
@@ -142,6 +158,9 @@ export default {
       temp: {},
       isSystem: false,
       editVisible: false,
+      giteeImportVisible: false,
+      repos:[],
+      username:null,
       columns: [
         { title: "仓库名称", dataIndex: "name", sorter: true, width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         {
@@ -188,6 +207,41 @@ export default {
           align: "left",
         },
       ],
+      reposColumns:[
+        { title: "仓库名称", dataIndex: "human_name", width: 150, ellipsis: true, scopedSlots: { customRender: "human_name" } },
+        { title: "仓库路径", dataIndex: "full_name", width: 150, ellipsis: true, scopedSlots: { customRender: "full_name" } },
+        { title: "GitUrl", dataIndex: "html_url", width: 200, ellipsis: true, scopedSlots: { customRender: "html_url" } },
+        { title: "是否私有", dataIndex: "private", width: 50, ellipsis: true, scopedSlots: { customRender: "private" } },
+        { title: "角色", dataIndex: "relation", width: 100, ellipsis: true, customRender(text) {
+            switch (text) {
+              case 'master':
+                return '管理员'
+              case 'leader':
+                return '负责人'
+              case 'developer':
+                return '开发者'
+              case 'viewer':
+                return '观察者'
+              case 'reporter':
+                return '报告者'
+            }
+          } },
+        {
+          title: "操作",
+          dataIndex: "operation",
+          width: 160,
+          scopedSlots: { customRender: "operation" },
+          align: "left",
+        },
+      ],
+      giteeImportForm: {
+        perPage: PAGE_DEFAULT_LIMIT,
+        page: 1,
+        total: 0
+      },
+      giteeImportFormRules: {
+        token: [{ required: true, message: "请输入私人令牌", trigger: "blur" }],
+      },
       rules: {
         name: [{ required: true, message: "Please input build name", trigger: "blur" }],
         gitUrl: [{ required: true, message: "Please input git url", trigger: "blur" }],
@@ -208,6 +262,14 @@ export default {
         },
       };
     },
+    reposPagination(){
+      return {
+        total: this.giteeImportForm.total,
+        current: this.giteeImportForm.page || 1,
+        pageSize: this.giteeImportForm.perPage || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+      }
+    }
   },
   watch: {},
   created() {
@@ -237,6 +299,50 @@ export default {
         protocol: 0,
       };
       this.editVisible = true;
+    },
+    handleAddGitee(){
+      this.giteeImportVisible = true;
+    },
+    handleGiteeImportFormOk(){
+      this.$refs["giteeImportForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        giteeRepos(this.giteeImportForm).then(res => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.username = res.data.username
+            this.giteeImportForm.total = Number(res.data.totalCount)
+            this.repos = res.data.repos
+          }
+        })
+      });
+    },
+    reposChange(pagination){
+      this.giteeImportForm.page=pagination.current
+      this.handleGiteeImportFormOk()
+    },
+    handleGiteeRepoAdd(record) {
+      editRepository({
+        repoType: 0,
+        protocol: 0,
+        userName: this.username,
+        password: this.giteeImportForm.token,
+        name: record.human_name,
+        gitUrl: record.html_url,
+      }).then((res) => {
+        if (res.code === 200) {
+          // 成功
+          this.$notification.success({
+            message: res.msg,
+          });
+          record.exists = true
+          this.loadData();
+        }
+      });
     },
     // 修改
     handleEdit(record) {
