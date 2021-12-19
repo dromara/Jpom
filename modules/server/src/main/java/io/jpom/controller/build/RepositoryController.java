@@ -28,6 +28,11 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -44,12 +49,15 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.GitUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -152,6 +160,45 @@ public class RepositoryController extends BaseServerController {
 		repositoryModel.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
 		repositoryService.updateById(repositoryModel);
 		return JsonMessage.toJson(200, "操作成功");
+	}
+
+	@GetMapping(value = "/build/repository/gitee_repos")
+	@Feature(method = MethodFeature.LIST)
+	public Object giteeRepos(@ValidatorItem String token,@RequestParam(defaultValue = "1",required = false) Integer page,@RequestParam(defaultValue = "20",required = false) Integer perPage) {
+		HashMap<String, Object> paramMap = new HashMap<>();
+		paramMap.put("access_token", token);
+		HttpResponse userResponse = HttpUtil.createGet("https://gitee.com/api/v5/user")
+				.form("access_token", token)
+				.execute();
+		if (!userResponse.isOk()) {
+			return JsonMessage.toJson(500, userResponse.body());
+		}
+		JSONObject userBody = JSONUtil.parseObj(userResponse.body());
+		String username = userBody.getStr("login");
+		HttpResponse reposResponse = HttpUtil.createGet("https://gitee.com/api/v5/user/repos")
+				.form("access_token", token)
+				.form("page", page)
+				.form("per_page", perPage)
+				.execute();
+		if (!reposResponse.isOk()) {
+			return JsonMessage.toJson(500, userResponse.body());
+		}
+
+		String totalCount = reposResponse.header("total_count");
+		String totalPage = reposResponse.header("total_page");
+		JSONObject obj = JSONUtil.createObj();
+		JSONArray repos = new JSONArray();
+		for (Object repoObj : JSONUtil.parseArray(reposResponse.body())) {
+			JSONObject repo = (JSONObject) repoObj;
+			String htmlUrl = repo.getStr("html_url");
+			repo.putOpt("exists", repositoryService.exists(Entity.create().set("gitUrl", htmlUrl)));
+			repos.add(repo);
+		}
+		obj.putOpt("username", username);
+		obj.putOpt("repos", repos);
+		obj.putOpt("totalCount", totalCount);
+		obj.putOpt("totalPage", totalPage);
+		return JsonMessage.toJson(HttpStatus.OK.value(), HttpStatus.OK.name(), obj);
 	}
 
 	/**
