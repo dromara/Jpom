@@ -339,6 +339,7 @@ export default {
     },
     reposChange(pagination) {
       this.giteeImportForm.page = pagination.current;
+      this.giteeImportForm.limit = pagination.pageSize;
       this.handleGiteeImportFormOk();
     },
     handleGiteeRepoAdd(record) {
