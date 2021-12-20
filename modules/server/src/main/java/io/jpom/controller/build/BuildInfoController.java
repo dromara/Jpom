@@ -363,12 +363,23 @@ public class BuildInfoController extends BaseServerController {
 		// 查询构建信息
 		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
-
 		File source = BuildUtil.getSourceById(buildInfoModel.getId());
-		boolean del = FileUtil.del(source);
-		if (!del) {
-			del = FileUtil.del(source.toPath());
+		boolean del=false;
+
+		if(source.toPath().endsWith("source")){
+			if(!FileUtil.isWindows()) { // Linux MacOS
+				CommandUtil.execSystemCommand("rm -rf " + source.toPath());
+			}else{ // Windows
+				CommandUtil.execSystemCommand("rd /s/q " + source.toPath());
+			}
+		}else{
+			return JsonMessage.getString(500, "构建路径获取异常", del);
 		}
+
+		// del = FileUtil.del(source);
+		// if (!del) {
+			// del = FileUtil.del(source.toPath());
+		// }
 		return JsonMessage.getString(200, "清理成功", del);
 	}
 
