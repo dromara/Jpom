@@ -104,42 +104,44 @@ export default {
         spinner: "el-icon-loading",
         background: "rgba(0, 0, 0, 0.7)",
       });
-      //
-      this.timer = setInterval(() => {
-        systemInfo()
-          .then((res) => {
-            if (res.code === 200) {
-              clearInterval(this.timer);
-              this.$global_loading && this.$global_loading.close();
-              this.$notification.success({
-                message: "重启成功",
-              });
-
-              setTimeout(() => {
-                location.reload();
-              }, 1000);
-            } else {
-              if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-                this.$notification.warning({
-                  message: "未重启成功：" + (res.msg || ""),
-                });
+      setTimeout(() => {
+        //
+        this.timer = setInterval(() => {
+          systemInfo()
+            .then((res) => {
+              if (res.code === 200) {
+                clearInterval(this.timer);
                 this.$global_loading && this.$global_loading.close();
+                this.$notification.success({
+                  message: "重启成功",
+                });
+
+                setTimeout(() => {
+                  location.reload();
+                }, 1000);
+              } else {
+                if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
+                  this.$notification.warning({
+                    message: "未重启成功：" + (res.msg || ""),
+                  });
+                  this.$global_loading && this.$global_loading.close();
+                  clearInterval(this.timer);
+                }
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+              if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
+                this.$global_loading && this.$global_loading.close();
+                this.$notification.error({
+                  message: "重启超时,请去服务器查看控制台日志排查问题",
+                });
                 clearInterval(this.timer);
               }
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-              this.$global_loading && this.$global_loading.close();
-              this.$notification.error({
-                message: "重启超时,请去服务器查看控制台日志排查问题",
-              });
-              clearInterval(this.timer);
-            }
-          });
-        this.checkCount = this.checkCount + 1;
-      }, 2000);
+            });
+          this.checkCount = this.checkCount + 1;
+        }, 2000);
+      }, 6000);
     },
     // submit ip config
     onSubmitIp() {
