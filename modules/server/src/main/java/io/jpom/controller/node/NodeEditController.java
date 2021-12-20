@@ -10,6 +10,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.ScriptModel;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -18,6 +19,7 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
+import io.jpom.service.node.script.ScriptServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -40,15 +42,18 @@ public class NodeEditController extends BaseServerController {
 	private final MonitorService monitorService;
 	private final BuildInfoService buildService;
 	private final ProjectInfoCacheService projectInfoCacheService;
+	private final ScriptServer scriptServer;
 
 	public NodeEditController(OutGivingServer outGivingServer,
 							  MonitorService monitorService,
 							  BuildInfoService buildService,
-							  ProjectInfoCacheService projectInfoCacheService) {
+							  ProjectInfoCacheService projectInfoCacheService,
+							  ScriptServer scriptServer) {
 		this.outGivingServer = outGivingServer;
 		this.monitorService = monitorService;
 		this.buildService = buildService;
 		this.projectInfoCacheService = projectInfoCacheService;
+		this.scriptServer = scriptServer;
 	}
 
 
@@ -108,11 +113,22 @@ public class NodeEditController extends BaseServerController {
 		boolean checkNode2 = buildService.checkNode(id);
 		Assert.state(!checkNode2, "该节点存在构建项，不能删除");
 		//
-		ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-		projectInfoModel.setNodeId(id);
-		projectInfoModel.setWorkspaceId(projectInfoCacheService.getCheckUserWorkspace(request));
-		boolean exists = projectInfoCacheService.exists(projectInfoModel);
-		Assert.state(!exists, "该节点下还存在项目，不能删除");
+		{
+			ProjectInfoModel projectInfoModel = new ProjectInfoModel();
+			projectInfoModel.setNodeId(id);
+			projectInfoModel.setWorkspaceId(projectInfoCacheService.getCheckUserWorkspace(request));
+			boolean exists = projectInfoCacheService.exists(projectInfoModel);
+			Assert.state(!exists, "该节点下还存在项目，不能删除");
+		}
+		//
+		{
+			ScriptModel scriptModel = new ScriptModel();
+			scriptModel.setNodeId(id);
+			scriptModel.setWorkspaceId(scriptServer.getCheckUserWorkspace(request));
+			boolean exists = scriptServer.exists(scriptModel);
+			Assert.state(!exists, "该节点下还存在脚本模版，不能删除");
+		}
+
 		nodeService.delByKey(id, request);
 		return JsonMessage.getString(200, "操作成功");
 	}

@@ -77,7 +77,10 @@
               <a-button type="primary" @click="handleReplica(record)" v-show="record.runMode !== 'File'" :disabled="!record.javaCopyItemList">副本集 </a-button>
             </a-menu-item>
             <a-menu-item>
-              <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+              <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
+                <a-button type="danger" :disabled="record.outGivingProject">删除</a-button>
+              </a-tooltip>
+              <a-button v-else type="danger" @click="handleDelete(record)">删除</a-button>
             </a-menu-item>
           </a-menu>
         </a-dropdown>

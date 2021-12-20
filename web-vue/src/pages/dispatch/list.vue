@@ -713,6 +713,8 @@ export default {
           whitelistDirectory: undefined,
           lib: "",
           nodeIdList: [],
+          intervalTime: undefined,
+          clearOld: false,
         };
         // 添加 javaCopyItemList
         this.nodeList.forEach((node) => {

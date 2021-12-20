@@ -13,6 +13,7 @@
         <a-button type="primary" @click="loadData">搜索</a-button>
       </a-tooltip>
       <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-button type="primary" @click="handleAddGitee">导入仓库</a-button>
     </div>
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
@@ -124,12 +125,47 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <a-modal v-model="giteeImportVisible" title="导入仓库" width="80%" :footer="null" :maskClosable="false">
+      <a-form-model :label-col="{ span: 4 }" :rules="giteeImportFormRules" :model="giteeImportForm" ref="giteeImportForm" :wrapper-col="{ span: 20 }">
+        <a-form-model-item label="私人令牌" prop="token">
+          <a-input-group compact>
+            <a-select v-model="giteeImportForm.type">
+              <a-select-option value="gitee"> gitee </a-select-option>
+              <a-select-option value="github"> github </a-select-option>
+              <a-select-option value="gitlab"> gitlab </a-select-option>
+            </a-select>
+            <a-input-search style="width: 50%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" placeholder="请输入私人令牌" />
+          </a-input-group>
+        </a-form-model-item>
+      </a-form-model>
+      <a-table :loading="loading" :columns="reposColumns" :data-source="repos" bordered rowKey="id" @change="reposChange" :pagination="reposPagination">
+        <template slot="private" slot-scope="text, record">
+          <a-switch :disabled="true" :checked="record.private" />
+        </template>
+        <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+        <a-tooltip slot="full_name" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+        <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+        <a-tooltip slot="description" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+
+        <template slot="operation" slot-scope="text, record">
+          <a-button type="primary" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{ record.exists ? "已存在" : "添加" }}</a-button>
+        </template>
+      </a-table>
+    </a-modal>
   </div>
 </template>
 <script>
-import { getRepositoryList, editRepository, deleteRepository, restHideField } from "@/api/repository";
+import { deleteRepository, editRepository, getRepositoryList, authorizeRepos, restHideField } from "@/api/repository";
 import { parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_SIZW_OPTIONS } from "@/utils/const";
 
 export default {
   components: {},
@@ -142,6 +178,9 @@ export default {
       temp: {},
       isSystem: false,
       editVisible: false,
+      giteeImportVisible: false,
+      repos: [],
+      username: null,
       columns: [
         { title: "仓库名称", dataIndex: "name", sorter: true, width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         {
@@ -188,6 +227,31 @@ export default {
           align: "left",
         },
       ],
+      reposColumns: [
+        { title: "仓库名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "仓库路径", dataIndex: "full_name", ellipsis: true, scopedSlots: { customRender: "full_name" } },
+        { title: "GitUrl", dataIndex: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
+
+        {
+          title: "描述",
+          dataIndex: "description",
+
+          ellipsis: true,
+          scopedSlots: { customRender: "description" },
+        },
+        { title: "私有", dataIndex: "private", width: 80, ellipsis: true, scopedSlots: { customRender: "private" } },
+        {
+          title: "操作",
+          dataIndex: "operation",
+          width: 100,
+          scopedSlots: { customRender: "operation" },
+          align: "left",
+        },
+      ],
+      giteeImportForm: Object.assign({ type: "gitee" }, PAGE_DEFAULT_LIST_QUERY),
+      giteeImportFormRules: {
+        token: [{ required: true, message: "请输入私人令牌", trigger: "blur" }],
+      },
       rules: {
         name: [{ required: true, message: "Please input build name", trigger: "blur" }],
         gitUrl: [{ required: true, message: "Please input git url", trigger: "blur" }],
@@ -205,6 +269,18 @@ export default {
         showSizeChanger: true,
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
+        },
+      };
+    },
+    reposPagination() {
+      return {
+        total: this.giteeImportForm.total,
+        current: this.giteeImportForm.page || 1,
+        pageSize: this.giteeImportForm.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.giteeImportForm);
         },
       };
     },
@@ -237,6 +313,48 @@ export default {
         protocol: 0,
       };
       this.editVisible = true;
+    },
+    handleAddGitee() {
+      this.giteeImportVisible = true;
+    },
+    handleGiteeImportFormOk() {
+      this.$refs["giteeImportForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        authorizeRepos(this.giteeImportForm).then((res) => {
+          if (res.code === 200) {
+            // 成功
+            //this.username = res.data.username;
+            this.giteeImportForm.total = res.data.total;
+            this.repos = res.data.result;
+          }
+        });
+      });
+    },
+    reposChange(pagination) {
+      this.giteeImportForm.page = pagination.current;
+      this.giteeImportForm.limit = pagination.pageSize;
+      this.handleGiteeImportFormOk();
+    },
+    handleGiteeRepoAdd(record) {
+      editRepository({
+        repoType: 0,
+        protocol: 0,
+        userName: record.username,
+        password: this.giteeImportForm.token,
+        name: record.name,
+        gitUrl: record.url,
+      }).then((res) => {
+        if (res.code === 200) {
+          // 成功
+          this.$notification.success({
+            message: res.msg,
+          });
+          record.exists = true;
+          this.loadData();
+        }
+      });
     },
     // 修改
     handleEdit(record) {

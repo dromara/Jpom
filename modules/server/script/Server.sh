@@ -37,6 +37,7 @@ Tag="KeepBx-System-JpomServerApplication"
 # Obtain the current path automatically
 Path=$(cd `dirname $0`; pwd)"/"
 Lib="${Path}lib/"
+# Online upgrade will automatically modify this attribute
 RUNJAR=""
 Log="${Path}server.log"
 LogBack="${Path}log/"

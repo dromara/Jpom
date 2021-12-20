@@ -184,7 +184,7 @@
           </a-input-group>
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 3 || temp.releaseMethod === 4" prop="releaseCommand">
-         <!-- sshCommand LocalCommand -->
+          <!-- sshCommand LocalCommand -->
           <template slot="label">
             发布命令
             <a-tooltip v-show="!temp.id">
@@ -207,7 +207,7 @@
             placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java,支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}"
           />
         </a-form-model-item>
-        
+
         <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" prop="clearOld">
           <template slot="label">
             清空发布

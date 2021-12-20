@@ -22,15 +22,23 @@
  */
 package io.jpom.controller.build;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.db.Page;
+import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -44,13 +52,17 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.GitUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Hotstrip
@@ -154,6 +166,187 @@ public class RepositoryController extends BaseServerController {
 		return JsonMessage.toJson(200, "操作成功");
 	}
 
+	@GetMapping(value = "/build/repository/authorize_repos")
+	@Feature(method = MethodFeature.LIST)
+	public Object authorizeRepos() {
+		// 获取分页信息
+		HttpServletRequest request = getRequest();
+		Map<String, String> paramMap = ServletUtil.getParamMap(request);
+		Page page = repositoryService.parsePage(paramMap);
+		String token = paramMap.get("token");
+		Assert.hasText(token, "请填写个人令牌");
+		//
+		String type = paramMap.get("type");
+		PageResultDto<JSONObject> pageResultDto;
+		switch (type) {
+			case "gitee":
+				pageResultDto = this.giteeRepos(token, page);
+				break;
+			case "github":
+				pageResultDto = this.githubRepos(token, page);
+				break;
+			case "gitlab":
+				pageResultDto = this.gitlabRepos(token, page);
+				break;
+			default:
+				throw new IllegalArgumentException("不支持的类型");
+		}
+		return JsonMessage.toJson(HttpStatus.OK.value(), HttpStatus.OK.name(), pageResultDto);
+	}
+
+	/**
+	 * gitlab 仓库
+	 * <p>
+	 * https://docs.gitlab.com/ee/api/projects.html#list-all-projects
+	 *
+	 * @param token 个人令牌
+	 * @param page  分页
+	 * @return page
+	 */
+	private PageResultDto<JSONObject> gitlabRepos(String token, Page page) {
+		//
+		HttpResponse userResponse = HttpUtil.createGet("https://gitlab.com/api/v4/user")
+				.form("access_token", token)
+				.execute();
+		Assert.state(userResponse.isOk(), "令牌不正确：" + userResponse.body());
+		JSONObject userBody = JSONObject.parseObject(userResponse.body());
+		String username = userBody.getString("username");
+		// 拉取仓库信息
+		HttpResponse reposResponse = HttpUtil.createGet("https://gitlab.com/api/v4/projects")
+				.form("private_token", token)
+				.form("membership", true)
+				.form("simple", true)
+				.form("order_by", "updated_at")
+				.form("page", page.getPageNumber())
+				.form("per_page", Math.max(page.getPageSize(), 15))
+				.execute();
+		String body = reposResponse.body();
+		Assert.state(userResponse.isOk(), "拉取仓库信息错误：" + body);
+
+		String totalCountStr = reposResponse.header("X-Total");
+		int totalCount = Convert.toInt(totalCountStr, 0);
+		//String totalPage = reposResponse.header("total_page");
+		JSONArray jsonArray = JSONArray.parseArray(body);
+		List<JSONObject> objects = jsonArray.stream().map(o -> {
+			JSONObject repo = (JSONObject) o;
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", repo.getString("name"));
+			String htmlUrl = repo.getString("http_url_to_repo");
+			jsonObject.put("url", htmlUrl);
+			jsonObject.put("full_name", repo.getString("path_with_namespace"));
+			jsonObject.put("private", StrUtil.equalsIgnoreCase("private", repo.getString("visibility")));
+			jsonObject.put("description", repo.getString("description"));
+			//
+			jsonObject.put("username", username);
+			jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(null, htmlUrl));
+			return jsonObject;
+		}).collect(Collectors.toList());
+		//
+		PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), totalCount);
+		pageResultDto.setResult(objects);
+		return pageResultDto;
+	}
+
+	/**
+	 * github 仓库
+	 *
+	 * @param token 个人令牌
+	 * @param page  分页
+	 * @return page
+	 */
+	private PageResultDto<JSONObject> githubRepos(String token, Page page) {
+		String accept = "application/vnd.github.v3+json";
+		HttpRequest request = HttpUtil.createGet("https://api.github.com/user");
+		request.header("Authorization", StrUtil.format("token {}", token));
+		request.header("Accept", accept);
+		HttpResponse httpResponse = request.execute();
+		String body = httpResponse.body();
+		Assert.state(httpResponse.isOk(), "令牌信息错误：" + body);
+		JSONObject userBody = JSONObject.parseObject(body);
+		String username = userBody.getString("login");
+		// 拉取仓库信息
+		HttpRequest httpRequestRepos = HttpUtil.createGet("https://api.github.com/user/repos");
+		httpRequestRepos.header("Authorization", StrUtil.format("token {}", token));
+		httpRequestRepos.header("Accept", accept);
+		HttpResponse reposResponse = httpRequestRepos
+				.form("access_token", token)
+				.form("sort", "pushed")
+				.form("page", page.getPageNumber())
+				.form("per_page", page.getPageSize())
+				.execute();
+		body = reposResponse.body();
+		Assert.state(reposResponse.isOk(), "拉取仓库信息错误：" + body);
+		JSONArray jsonArray = JSONArray.parseArray(body);
+		List<JSONObject> objects = jsonArray.stream().map(o -> {
+			JSONObject repo = (JSONObject) o;
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", repo.getString("name"));
+			String cloneUrl = repo.getString("clone_url");
+			jsonObject.put("url", cloneUrl);
+			jsonObject.put("full_name", repo.getString("full_name"));
+			jsonObject.put("description", repo.getString("description"));
+			jsonObject.put("private", repo.getBooleanValue("private"));
+			//
+			jsonObject.put("username", username);
+			jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(null, cloneUrl));
+			return jsonObject;
+		}).collect(Collectors.toList());
+		//
+		PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), 1000);
+		pageResultDto.setResult(objects);
+		return pageResultDto;
+	}
+
+
+	/**
+	 * gitee 仓库
+	 *
+	 * @param token 个人令牌
+	 * @param page  分页
+	 * @return page
+	 */
+	private PageResultDto<JSONObject> giteeRepos(String token, Page page) {
+		//
+		HttpResponse userResponse = HttpUtil.createGet("https://gitee.com/api/v5/user")
+				.form("access_token", token)
+				.execute();
+		Assert.state(userResponse.isOk(), "令牌不正确：" + userResponse.body());
+		JSONObject userBody = JSONObject.parseObject(userResponse.body());
+		String username = userBody.getString("login");
+		// 拉取仓库信息
+		HttpResponse reposResponse = HttpUtil.createGet("https://gitee.com/api/v5/user/repos")
+				.form("access_token", token)
+				.form("sort", "pushed")
+				.form("page", page.getPageNumber())
+				.form("per_page", page.getPageSize())
+				.execute();
+		String body = reposResponse.body();
+		Assert.state(userResponse.isOk(), "拉取仓库信息错误：" + body);
+
+		String totalCountStr = reposResponse.header("total_count");
+		int totalCount = Convert.toInt(totalCountStr, 0);
+		//String totalPage = reposResponse.header("total_page");
+		JSONArray jsonArray = JSONArray.parseArray(body);
+		List<JSONObject> objects = jsonArray.stream().map(o -> {
+			JSONObject repo = (JSONObject) o;
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", repo.getString("name"));
+			String htmlUrl = repo.getString("html_url");
+			jsonObject.put("url", htmlUrl);
+			jsonObject.put("full_name", repo.getString("full_name"));
+			jsonObject.put("private", repo.getBooleanValue("private"));
+			jsonObject.put("description", repo.getString("description"));
+			//
+			jsonObject.put("username", username);
+			jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(null, htmlUrl));
+			return jsonObject;
+		}).collect(Collectors.toList());
+		//
+		PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), totalCount);
+		pageResultDto.setResult(objects);
+		return pageResultDto;
+	}
+
 	/**
 	 * 检查信息
 	 *
@@ -177,16 +370,29 @@ public class RepositoryController extends BaseServerController {
 			// ssh
 			repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), StrUtil.EMPTY));
 		}
+		//
+		boolean repositoryUrl = this.checkRepositoryUrl(repositoryModelReq.getId(), repositoryModelReq.getGitUrl());
+		Assert.state(!repositoryUrl, "已经存在对应的仓库信息啦");
+	}
+
+	/**
+	 * 判断仓库地址是否存在
+	 *
+	 * @param id  仓库ID
+	 * @param url 仓库 url
+	 * @return true 在当前工作空间已经存在拉
+	 */
+	private boolean checkRepositoryUrl(String id, String url) {
 		// 判断仓库是否重复
 		Entity entity = Entity.create();
-		if (repositoryModelReq.getId() != null) {
-			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
-			entity.set("id", "<> " + repositoryModelReq.getId());
+		if (StrUtil.isNotEmpty(id)) {
+			Validator.validateGeneral(id, "错误的ID");
+			entity.set("id", "<> " + id);
 		}
 		String workspaceId = repositoryService.getCheckUserWorkspace(getRequest());
 		entity.set("workspaceId", workspaceId);
-		entity.set("gitUrl", repositoryModelReq.getGitUrl());
-		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
+		entity.set("gitUrl", url);
+		return repositoryService.exists(entity);
 	}
 
 	/**
