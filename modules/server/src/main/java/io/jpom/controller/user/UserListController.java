@@ -28,6 +28,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserModel;
 import io.jpom.permission.SystemPermission;
@@ -133,13 +134,16 @@ public class UserListController extends BaseServerController {
 
 	private UserModel parseUser(boolean create) {
 		String id = getParameter("id");
-		Assert.hasText(id, "登录名不能为空");
-		int length = id.length();
-		Assert.state(length <= 20 && length >= UserModel.USER_NAME_MIN_LEN, "登录名不能为空,并且长度必须" + UserModel.USER_NAME_MIN_LEN + "-20");
+		boolean email = Validator.isEmail(id);
+		if (email) {
+			int length = id.length();
+			Assert.state(length <= Const.ID_MAX_LEN && length >= UserModel.USER_NAME_MIN_LEN, "登录名如果为邮箱格式,长度必须" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN);
+		} else {
+			Validator.validateGeneral(id, UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN, "登录名不能为空,并且长度必须" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN);
+		}
 
 		Assert.state(!StrUtil.equalsAnyIgnoreCase(id, UserModel.SYSTEM_OCCUPY_NAME, UserModel.SYSTEM_ADMIN), "当前登录名已经被系统占用");
 
-		Validator.validateGeneral(id, "登录名不能包含特殊字符");
 		UserModel userModel = new UserModel();
 		UserModel optUser = getUser();
 		if (create) {

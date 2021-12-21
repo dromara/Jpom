@@ -18,6 +18,9 @@
       <template slot="systemUser" slot-scope="text, record">
         <a-switch size="small" checked-children="是" un-checked-children="否" :checked="record.systemUser == 1" />
       </template>
+      <a-tooltip slot="id" slot-scope="text" :title="text">
+        <span>{{ text }}</span></a-tooltip
+      >
     </a-table>
     <!-- 编辑区 -->
     <a-modal v-model="editUserVisible" width="600px" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
@@ -73,7 +76,7 @@ export default {
       editUserVisible: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
-        { title: "ID", dataIndex: "id", ellipsis: true, width: 150 },
+        { title: "ID", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
         { title: "昵称", dataIndex: "name", ellipsis: true },
         { title: "管理员", dataIndex: "systemUser", ellipsis: true, width: 90, scopedSlots: { customRender: "systemUser" } },
         { title: "邮箱", dataIndex: "email", ellipsis: true, width: 150 },
