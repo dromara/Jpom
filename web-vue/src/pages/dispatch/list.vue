@@ -295,7 +295,7 @@
           </a-select>
         </a-form-model-item>
         <a-collapse v-show="temp.runMode && temp.runMode !== 'File'">
-          <a-collapse-panel v-for="nodeId in temp.nodeIdList" :key="nodeId" :header="nodeId">
+          <a-collapse-panel v-for="nodeId in temp.nodeIdList" :key="nodeId" :header="nodeNameMap[nodeId] || nodeId">
             <a-form-model-item label="JVM 参数" prop="jvm">
               <a-textarea v-model="temp[`${nodeId}_jvm`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
             </a-form-model-item>
@@ -466,6 +466,7 @@ export default {
       drawerFileVisible: false,
       drawerConsoleVisible: false,
       nodeNameList: [],
+      nodeNameMap: {},
       dispatchList: [],
       totalProjectNum: 0,
       columns: [
@@ -735,6 +736,9 @@ export default {
     handleEditDispatchProject(record) {
       this.$nextTick(() => {
         this.$refs["editDispatchForm"] && this.$refs["editDispatchForm"].resetFields();
+      });
+
+      this.loadNodeList(() => {
         //
         this.temp = {};
         JSON.parse(record.outGivingNodeProjectList).forEach(async (ele) => {
@@ -1038,6 +1042,9 @@ export default {
       getNodeListAll().then((res) => {
         if (res.code === 200) {
           this.nodeList = res.data;
+          this.nodeList.map((item) => {
+            this.nodeNameMap[item.id] = item.name;
+          });
           fn && fn();
         }
       });
