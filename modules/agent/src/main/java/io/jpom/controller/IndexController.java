@@ -31,6 +31,7 @@ import io.jpom.common.JpomManifest;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.interceptor.NotAuthorize;
 import io.jpom.model.data.NodeProjectInfoModel;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.util.JvmUtil;
@@ -70,6 +71,7 @@ public class IndexController extends BaseAgentController {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("manifest", instance);
 		jsonObject.put("remoteVersion", remoteVersion);
+		jsonObject.put("pluginSize", PluginFactory.size());
 		return JsonMessage.getString(200, "", jsonObject);
 	}
 

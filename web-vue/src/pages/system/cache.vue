@@ -19,6 +19,9 @@
       <a-timeline-item>
         <span class="layui-elem-quote">在线构建文件占用空间：{{ temp.cacheBuildFileSize }} (10分钟刷新一次)</span>
       </a-timeline-item>
+      <a-timeline-item>
+        <span class="layui-elem-quote">插件数：{{ temp.pluginSize || 0 }}</span>
+      </a-timeline-item>
     </a-timeline>
     <a-list v-if="taskList && taskList.length" bordered :data-source="taskList">
       <a-list-item slot="renderItem" slot-scope="item">
