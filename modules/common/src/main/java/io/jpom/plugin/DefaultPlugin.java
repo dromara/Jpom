@@ -31,6 +31,7 @@ public enum DefaultPlugin {
 	 * web hook
 	 */
 	WebHook("webhook"),
+	Email("email"),
 	;
 
 	private final String name;

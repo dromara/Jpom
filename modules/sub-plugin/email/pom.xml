@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>jpom-parent</artifactId>
+		<groupId>io.jpom</groupId>
+		<version>2.8.1</version>
+		<relativePath>../../../pom.xml</relativePath>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>io.jpom.plugin</groupId>
+	<artifactId>email</artifactId>
+	<name>plugin-email</name>
+
+	<properties>
+
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.jpom</groupId>
+			<artifactId>common</artifactId>
+			<version>${pom.version}</version>
+		</dependency>
+
+		<!--邮件-->
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<!--这里要替换成jar包main方法所在类 -->
+						</manifest>
+					</archive>
+					<appendAssemblyId>false</appendAssemblyId>
+					<descriptors>
+						<descriptor>script/release.xml</descriptor>
+					</descriptors>
+
+				</configuration>
+
+				<executions>
+
+					<execution>
+						<id>make-assembly</id> <!-- this is used for inheritance merges -->
+						<phase>package</phase> <!-- 指定在打包节点执行jar包合并操作 -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

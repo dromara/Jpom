@@ -23,16 +23,13 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.mail.MailAccount;
-import cn.hutool.extra.mail.MailUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.monitor.EmailUtil;
 import io.jpom.permission.SystemPermission;
-import io.jpom.plugin.ClassFeature;
-import io.jpom.plugin.Feature;
-import io.jpom.plugin.MethodFeature;
+import io.jpom.plugin.*;
 import io.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -41,8 +38,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import javax.mail.Session;
-import javax.mail.Transport;
 
 /**
  * 监控邮箱配置
@@ -90,15 +85,18 @@ public class SystemMailConfigController extends BaseServerController {
 		} else {
 			Assert.hasText(mailAccountModel.getPass(), "请填写pass");
 		}
-		try {
-			MailAccount account = EmailUtil.getAccount(mailAccountModel);
-			Session session = MailUtil.getSession(account, false);
-			Transport transport = session.getTransport("smtp");
-			transport.connect();
-			transport.close();
-		} catch (Exception e) {
-			return JsonMessage.getString(406, "验证邮箱信息失败，请检查配置的邮箱信息。端口号、授权码等。" + e.getMessage());
-		}
+		IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.Email);
+		boolean checkInfo = plugin.check("checkInfo", JSONObject.toJSON(mailAccountModel), null);
+		Assert.state(checkInfo, "验证邮箱信息失败，请检查配置的邮箱信息。端口号、授权码等。");
+//		try {
+//			MailAccount account = EmailUtil.getAccount(mailAccountModel);
+//			Session session = MailUtil.getSession(account, false);
+//			Transport transport = session.getTransport("smtp");
+//			transport.connect();
+//			transport.close();
+//		} catch (Exception e) {
+//			return JsonMessage.getString(406, "验证邮箱信息失败，请检查配置的邮箱信息。端口号、授权码等。" + e.getMessage());
+//		}
 		systemParametersServer.upsert(MailAccountModel.ID, mailAccountModel, MailAccountModel.ID);
 		//
 		EmailUtil.refreshConfig();

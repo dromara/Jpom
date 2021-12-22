@@ -9,6 +9,7 @@
 		<module>modules/server</module>
 		<module>modules/common</module>
 		<module>modules/sub-plugin/webhook</module>
+		<module>modules/sub-plugin/email</module>
 	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>

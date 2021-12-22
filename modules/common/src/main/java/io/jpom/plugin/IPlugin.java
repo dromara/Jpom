@@ -42,11 +42,32 @@ public interface IPlugin {
 	Object execute(Object main, Map<String, Object> parameter);
 
 	/**
+	 * 做一些检查
+	 *
+	 * @param type      检查的类型
+	 * @param main      拦截到到对象
+	 * @param parameter 执行方法传人的参数
+	 * @return true 检测通过
+	 */
+	default boolean check(String type, Object main, Map<String, Object> parameter) {
+		throw new RuntimeException("Not implements");
+	}
+
+	/**
 	 * 插件的名字
 	 *
 	 * @return 名称
 	 */
 	String name();
+
+	/**
+	 * 插件父级
+	 *
+	 * @return 父级名称
+	 */
+	default String parent() {
+		return null;
+	}
 
 	/**
 	 * 排序值

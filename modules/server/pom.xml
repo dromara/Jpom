@@ -62,9 +62,9 @@
 
 		<!--邮件-->
 		<dependency>
-			<groupId>com.sun.mail</groupId>
-			<artifactId>javax.mail</artifactId>
-			<version>1.6.2</version>
+			<groupId>io.jpom.plugin</groupId>
+			<artifactId>email</artifactId>
+			<version>${pom.version}</version>
 		</dependency>
 
 		<dependency>

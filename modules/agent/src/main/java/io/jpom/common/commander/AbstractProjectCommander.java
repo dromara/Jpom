@@ -30,13 +30,10 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.lang.Tuple;
-import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -47,6 +44,9 @@ import io.jpom.model.RunMode;
 import io.jpom.model.data.JdkInfoModel;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
+import io.jpom.plugin.DefaultPlugin;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.service.manage.JdkInfoService;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.system.AgentExtConfigBean;
@@ -58,7 +58,9 @@ import io.jpom.util.JvmUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
@@ -242,24 +244,19 @@ public abstract class AbstractProjectCommander {
 							NodeProjectInfoModel.JavaCopyItem javaCopyItem,
 							String type, Object... other) {
 		String token = nodeProjectInfoModel.getToken();
-		if (StrUtil.isEmpty(token)) {
-			return StrUtil.EMPTY;
+		IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.WebHook);
+		Map<String, Object> map = new HashMap<>(10);
+		map.put("projectId", nodeProjectInfoModel.getId());
+		map.put("projectName", nodeProjectInfoModel.getName());
+		map.put("type", type);
+		if (javaCopyItem != null) {
+			map.put("copyId", javaCopyItem.getId());
 		}
-		try {
-			HttpRequest httpRequest = HttpUtil.createGet(token);
-			httpRequest.form("projectId", nodeProjectInfoModel.getId());
-			httpRequest.form("projectName", nodeProjectInfoModel.getName());
-			httpRequest.form("type", type, other);
-			if (javaCopyItem != null) {
-				httpRequest.form("copyId", javaCopyItem.getId());
-			}
-			String body = httpRequest.execute().body();
-			DefaultSystemLog.getLog().info(nodeProjectInfoModel.getName() + CharPool.COLON + body);
-			return body;
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
-			return "WebHooks error:" + e.getMessage();
+		for (int i = 0; i < other.length; i += 2) {
+			map.put(other[i].toString(), other[i + 1]);
 		}
+		Object execute = plugin.execute(token, map);
+		return Convert.toStr(execute, StrUtil.EMPTY);
 	}
 
 	/**
