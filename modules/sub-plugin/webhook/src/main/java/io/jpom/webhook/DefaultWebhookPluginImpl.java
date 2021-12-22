@@ -38,7 +38,7 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2021/12/22
  */
-public class DefaultSimplePluginImpl implements IDefaultPlugin {
+public class DefaultWebhookPluginImpl implements IDefaultPlugin {
 
 	@Override
 	public Object execute(Object main, Map<String, Object> parameter) {
@@ -54,8 +54,8 @@ public class DefaultSimplePluginImpl implements IDefaultPlugin {
 			return body;
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
+			return "WebHooks error:" + e.getMessage();
 		}
-		return null;
 	}
 
 	@Override

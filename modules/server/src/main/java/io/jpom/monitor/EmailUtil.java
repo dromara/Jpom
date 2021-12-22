@@ -22,15 +22,17 @@
  */
 package io.jpom.monitor;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.mail.MailAccount;
-import cn.hutool.extra.mail.MailUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.MonitorModel;
+import io.jpom.plugin.DefaultPlugin;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.service.system.SystemParametersServer;
 
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 邮件工具
@@ -44,8 +46,8 @@ public class EmailUtil implements INotify {
 
 	@Override
 	public void send(MonitorModel.Notify notify, String title, String context) {
-		MailAccount mailAccount = getAccount();
-		MailUtil.send(mailAccount, StrUtil.split(notify.getValue(), StrUtil.COMMA), title, context, false);
+		String value = notify.getValue();
+		EmailUtil.send(value, title, context);
 	}
 
 	private static void init() {
@@ -64,35 +66,6 @@ public class EmailUtil implements INotify {
 		config = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
 	}
 
-	public static MailAccount getAccount() {
-		if (config == null) {
-			// 没有数据才加载
-			refreshConfig();
-		}
-		return getAccount(config);
-	}
-
-	public static MailAccount getAccount(MailAccountModel config) {
-		Objects.requireNonNull(config, "获取邮箱信息失败");
-		MailAccount mailAccount = new MailAccount();
-		mailAccount.setUser(config.getUser());
-		mailAccount.setPass(config.getPass());
-		mailAccount.setFrom(config.getFrom());
-		mailAccount.setPort(config.getPort());
-		mailAccount.setHost(config.getHost());
-		//
-		mailAccount.setTimeout(10 * 1000);
-		mailAccount.setConnectionTimeout(10 * 1000);
-		//
-		if (config.getSslEnable() != null && config.getSslEnable()) {
-			mailAccount.setSslEnable(config.getSslEnable());
-			if (config.getSocketFactoryPort() != null) {
-				mailAccount.setSocketFactoryPort(config.getSocketFactoryPort());
-			}
-		}
-		mailAccount.setAuth(true);
-		return mailAccount;
-	}
 
 	/**
 	 * 发送邮箱
@@ -102,7 +75,17 @@ public class EmailUtil implements INotify {
 	 * @param context 内容
 	 */
 	public static void send(String email, String title, String context) {
-		MailAccount mailAccount = getAccount();
-		MailUtil.send(mailAccount, email, title, context, false);
+		if (config == null) {
+			// 没有数据才加载
+			refreshConfig();
+		}
+		//
+		Map<String, Object> mailMap = new HashMap<>(10);
+		mailMap.put("toEmail", email);
+		mailMap.put("title", title);
+		mailMap.put("context", context);
+		//
+		IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.Email);
+		plugin.execute(JSONObject.toJSON(config), mailMap);
 	}
 }

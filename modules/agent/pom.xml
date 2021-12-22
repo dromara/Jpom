@@ -38,6 +38,11 @@
 			<artifactId>commons-compress</artifactId>
 			<version>1.21</version>
 		</dependency>
+		<dependency>
+			<groupId>io.jpom.plugin</groupId>
+			<artifactId>webhook</artifactId>
+			<version>${pom.version}</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
