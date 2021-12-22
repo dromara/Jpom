@@ -167,6 +167,10 @@ public class ConfigBean {
 		return StrUtil.equals(this.active, "pro");
 	}
 
+	public String getActive() {
+		return active;
+	}
+
 	/**
 	 * 获取临时文件存储路径
 	 *

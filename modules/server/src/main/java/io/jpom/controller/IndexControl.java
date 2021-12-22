@@ -41,10 +41,14 @@ import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserService;
+import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -180,6 +184,13 @@ public class IndexControl extends BaseServerController {
 	}
 
 	private boolean testMenus(JSONObject jsonObject, UserModel userModel) {
+		String active = jsonObject.getString("active");
+		if (StrUtil.isNotEmpty(active)) {
+			String active1 = ConfigBean.getInstance().getActive();
+			if (!StrUtil.equals(active1, active1)) {
+				return false;
+			}
+		}
 		String role = jsonObject.getString("role");
 		if (StrUtil.equals(role, UserModel.SYSTEM_ADMIN) && !userModel.isSuperSystemUser()) {
 			// 超级理员权限
