@@ -340,10 +340,13 @@ public class BuildInfoController extends BaseServerController {
 
 		// 删除构建信息文件
 		File file = BuildUtil.getBuildDataFile(buildInfoModel.getId());
+		// 快速删除
+		CommandUtil.systemFastDel(file);
+		//
 		if (!FileUtil.del(file)) {
 			FileUtil.del(file.toPath());
-			return JsonMessage.getString(500, "清理历史构建产物失败,已经重新尝试");
 		}
+		Assert.state(!FileUtil.exist(file), "清理历史构建产物失败,已经重新尝试");
 
 		// 删除构建信息数据
 		buildInfoService.delByKey(buildInfoModel.getId());
@@ -364,23 +367,15 @@ public class BuildInfoController extends BaseServerController {
 		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
 		File source = BuildUtil.getSourceById(buildInfoModel.getId());
-		boolean del=false;
-
-		if(source.toPath().endsWith("source")){
-			if(!FileUtil.isWindows()) { // Linux MacOS
-				CommandUtil.execSystemCommand("rm -rf " + source.toPath());
-			}else{ // Windows
-				CommandUtil.execSystemCommand("rd /s/q " + source.toPath());
-			}
-		}else{
-			return JsonMessage.getString(500, "构建路径获取异常", del);
+		// 快速删除
+		CommandUtil.systemFastDel(source);
+		// 二次检查
+		boolean del = FileUtil.del(source);
+		if (!del) {
+			FileUtil.del(source.toPath());
 		}
-
-		// del = FileUtil.del(source);
-		// if (!del) {
-			// del = FileUtil.del(source.toPath());
-		// }
-		return JsonMessage.getString(200, "清理成功", del);
+		Assert.state(!FileUtil.exist(source), "删除文件失败,请检查");
+		return JsonMessage.getString(200, "清理成功");
 	}
 
 }
