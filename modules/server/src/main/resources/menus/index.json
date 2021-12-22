@@ -16,16 +16,23 @@
       {
         "title": "项目搜索",
         "id": "projectSearch"
+      }
+    ]
+  },
+  {
+    "title": "SSH管理",
+    "icon_v3": "code",
+    "id": "sshManager",
+    "childs": [
+      {
+        "title": "SSH列表",
+        "id": "sshList"
       },
       {
-        "title": "SSH管理",
-        "id": "sshList"
+        "title": "命令管理",
+        "id": "commandList",
+        "active": "local"
       }
-//    ,
-//      {
-//        "title": "命令管理",
-//        "id": "commandList"
-//      }
     ]
   },
   {
