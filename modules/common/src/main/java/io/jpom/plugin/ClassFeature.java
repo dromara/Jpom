@@ -40,13 +40,13 @@ public enum ClassFeature {
 	SSH_FILE("SSH文件管理"),
 	SSH_TERMINAL("SSH终端"),
 	SSH_TERMINAL_LOG("SSH终端日志"),
+	SSH_COMMAND("命令管理"),
 	OUTGIVING("分发管理"),
 	OUTGIVING_LOG("分发日志"),
 	OUTGIVING_CONFIG_WHITELIST("分发白名单配置"),
 	MONITOR("项目监控"),
 	MONITOR_LOG("监控日志"),
 	OPT_MONITOR("操作监控"),
-	COMMAND("命令管理"),
 	/**
 	 * ssh
 	 */

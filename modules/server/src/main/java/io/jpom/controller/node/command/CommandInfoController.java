@@ -25,13 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
+ * 命令管理
+ *
  * @author : Arno
- * @description : 命令管理
  * @since : 2021/12/6 21:42
  */
 @RestController
 @RequestMapping(value = "/node/command")
-@Feature(cls = ClassFeature.COMMAND)
+@Feature(cls = ClassFeature.SSH_COMMAND)
 public class CommandInfoController extends BaseServerController {
 
 	private final CommandService commandService;
