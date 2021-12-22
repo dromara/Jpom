@@ -11,6 +11,7 @@
 1. 【server】nginx 列表显示不全，无法滚动问题（感谢@）
 2. 【server】独立节点分发显示节点名称（感谢@奥特曼打猪）
 3. 【server】用户ID（登录名）支持邮箱格式（感谢@陈力）
+4. 【server】优化清除构建和删除构建时候删除相关文件操作（使用系统命令快速删除）（感谢@大土豆、[Gitee PR](https://gitee.com/dromara/Jpom/pulls/155)）
 
 ------
 

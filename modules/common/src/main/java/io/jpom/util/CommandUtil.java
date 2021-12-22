@@ -22,10 +22,8 @@
  */
 package io.jpom.util;
 
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RuntimeUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.system.ExtConfigBean;
@@ -73,22 +71,14 @@ public class CommandUtil {
 		}
 	}
 
+	/**
+	 * 获取执行命令的 前缀
+	 *
+	 * @return list
+	 */
 	public static List<String> getCommand() {
 		return ObjectUtil.clone(COMMAND);
 	}
-
-    /*public static String execCommand(String command) {
-        String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
-        newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
-        String result = "error";
-        try {
-            result = exec(new String[]{newCommand}, null);
-        } catch (Exception e) {
-            DefaultSystemLog.getLog().error("执行命令异常", e);
-            result += e.getMessage();
-        }
-        return result;
-    }*/
 
 	public static String execSystemCommand(String command) {
 		return execSystemCommand(command, null);
@@ -184,6 +174,24 @@ public class CommandUtil {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * 执行系统命令 快速删除
+	 *
+	 * @param file 文件或者文件夹
+	 */
+	public static void systemFastDel(File file) {
+		String path = FileUtil.getAbsolutePath(file);
+		String command;
+		if (SystemUtil.getOsInfo().isWindows()) {
+			// Windows
+			command = StrUtil.format("rd /s/q '{}'", path);
+		} else {
+			// Linux MacOS
+			command = StrUtil.format("rm -rf '{}'", path);
+		}
+		CommandUtil.execSystemCommand(command);
 	}
 
 	private static boolean checkContainsDelItem(String script) {
