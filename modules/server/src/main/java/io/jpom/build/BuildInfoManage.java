@@ -29,13 +29,10 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Tuple;
-import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
@@ -45,6 +42,9 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
+import io.jpom.plugin.DefaultPlugin;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.system.ExtConfigBean;
@@ -63,10 +63,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -484,20 +481,21 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	 */
 	private void asyncWebHooks(String type, Object... other) {
 		String webhook = this.buildInfoModel.getWebhook();
-		if (StrUtil.isEmpty(webhook)) {
-			return;
-		}
+		IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.WebHook);
+		Map<String, Object> map = new HashMap<>(10);
 		long triggerTime = SystemClock.now();
+		map.put("buildId", this.buildInfoModel.getId());
+		map.put("buildName", this.buildInfoModel.getName());
+		map.put("type", type);
+		map.put("triggerBuildType", this.triggerBuildType);
+		map.put("triggerTime", triggerTime);
+		//
+		for (int i = 0; i < other.length; i += 2) {
+			map.put(other[i].toString(), other[i + 1]);
+		}
 		ThreadUtil.execute(() -> {
 			try {
-				HttpRequest httpRequest = HttpUtil.createGet(webhook);
-				httpRequest.form("buildId", this.buildInfoModel.getId());
-				httpRequest.form("buildName", this.buildInfoModel.getName());
-				httpRequest.form("type", type, other);
-				httpRequest.form("triggerBuildType", this.triggerBuildType);
-				httpRequest.form("triggerTime", triggerTime);
-				String body = httpRequest.execute().body();
-				DefaultSystemLog.getLog().info(this.buildInfoModel.getName() + CharPool.COLON + body);
+				plugin.execute(webhook, map);
 			} catch (Exception e) {
 				DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
 			}
