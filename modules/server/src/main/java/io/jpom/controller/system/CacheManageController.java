@@ -35,6 +35,7 @@ import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.socket.ServiceFileTailWatcher;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.CronUtils;
@@ -80,6 +81,7 @@ public class CacheManageController extends BaseServerController {
 		map.put("cacheBuildFileSize", fileSize);
 
 		map.put("taskList", CronUtils.list());
+		map.put("pluginSize", PluginFactory.size());
 
 		return JsonMessage.getString(200, "ok", map);
 	}

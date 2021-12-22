@@ -29,6 +29,7 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.socket.AgentFileTailWatcher;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.CronUtils;
@@ -70,6 +71,7 @@ public class AgentCacheManageController extends BaseAgentController {
 		int oneLineCount = AgentFileTailWatcher.getOneLineCount();
 		jsonObject.put("readFileOnLineCount", oneLineCount);
 		jsonObject.put("taskList", CronUtils.list());
+		jsonObject.put("pluginSize", PluginFactory.size());
 		//
 		return JsonMessage.getString(200, "ok", jsonObject);
 	}

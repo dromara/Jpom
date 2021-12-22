@@ -91,6 +91,15 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
 	}
 
 	/**
+	 * 插件数量
+	 *
+	 * @return 当前加载的插件数量
+	 */
+	public static int size() {
+		return PLUGIN_MAP.size();
+	}
+
+	/**
 	 * 正式环境添加依赖
 	 */
 	private static void init() {
