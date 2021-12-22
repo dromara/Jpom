@@ -47,9 +47,9 @@ public class TestFile {
 
 	@Test
 	public void testDel() {
-		// 蒋泽银-Java开发-上海 (1).pdf
-		// 蒋泽银-Java开发-上海 (1).pdf
-		CommandUtil.systemFastDel(new File("/Users/user/Downloads/蒋泽银-Java开发-上海 (1).pdf"));
+		// xxx.pdf
+		// xxx (1).pdf
+		CommandUtil.systemFastDel(new File("/Users/user/Downloads/xxx (1).pdf"));
 	}
 
 
