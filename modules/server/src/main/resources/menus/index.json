@@ -20,11 +20,12 @@
       {
         "title": "SSH管理",
         "id": "sshList"
-      },
-      {
-        "title": "命令管理",
-        "id": "commandList"
       }
+//    ,
+//      {
+//        "title": "命令管理",
+//        "id": "commandList"
+//      }
     ]
   },
   {
