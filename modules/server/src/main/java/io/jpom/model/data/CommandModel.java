@@ -1,7 +1,7 @@
 package io.jpom.model.data;
 
-import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseJsonModel;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;
 
@@ -9,11 +9,11 @@ import java.util.List;
 
 /**
  * @author : Arno
- * @description : 指令信息
+ * 指令信息
  * @since : 2021/12/4 18:38
  */
 @TableName(value = "COMMAND_MODEL", name = "命令管理")
-public class CommandModel extends BaseDbModel {
+public class CommandModel extends BaseWorkspaceModel {
 	/**
 	 * 命令名称
 	 */
@@ -45,15 +45,7 @@ public class CommandModel extends BaseDbModel {
 	/**
 	 * 超时时间,单位：秒，默认60
 	 */
-	private int timeout = 60;
-	/**
-	 * 逻辑删除
-	 */
-	private boolean strike = false;
-	/**
-	 * 修改人
-	 */
-	private String modifyUser;
+	private Integer timeout;
 
 	public String getName() {
 		return name;
@@ -91,24 +83,8 @@ public class CommandModel extends BaseDbModel {
 		return timeout;
 	}
 
-	public void setTimeout(int timeout) {
+	public void setTimeout(Integer timeout) {
 		this.timeout = timeout;
-	}
-
-	public boolean isStrike() {
-		return strike;
-	}
-
-	public void setStrike(boolean strike) {
-		this.strike = strike;
-	}
-
-	public String getModifyUser() {
-		return modifyUser;
-	}
-
-	public void setModifyUser(String modifyUser) {
-		this.modifyUser = modifyUser;
 	}
 
 	public Integer getType() {
