@@ -37,6 +37,7 @@ import java.util.jar.Manifest;
  */
 public class TestJarClass {
 
+
 	@Test
 	public void test(){
 		JarFile jarFile = URLUtil.getJarFile(Hutool.class.getResource(""));
