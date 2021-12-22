@@ -28,6 +28,7 @@ import cn.hutool.db.PageResult;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * 分页查询结果对象
@@ -83,6 +84,13 @@ public class PageResultDto<T> implements Serializable {
 
 	public List<T> getResult() {
 		return result;
+	}
+
+	public void each(Consumer<T> consumer) {
+		if (result == null) {
+			return;
+		}
+		result.forEach(consumer);
 	}
 
 	public void setResult(List<T> result) {

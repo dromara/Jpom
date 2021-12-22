@@ -22,6 +22,7 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.annotation.PropIgnore;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.h2db.TableName;
@@ -98,6 +99,11 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 	 * 定时构建表达式
 	 */
 	private String autoBuildCron;
+	/**
+	 * 源码目录是否存在
+	 */
+	@PropIgnore
+	private Boolean sourceDirExist;
 
 	public String getAutoBuildCron() {
 		return autoBuildCron;
@@ -221,5 +227,13 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 
 	public void setBranchTagName(String branchTagName) {
 		this.branchTagName = branchTagName;
+	}
+
+	public void setSourceDirExist(Boolean sourceDirExist) {
+		this.sourceDirExist = sourceDirExist;
+	}
+
+	public Boolean getSourceDirExist() {
+		return sourceDirExist;
 	}
 }

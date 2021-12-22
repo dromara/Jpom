@@ -23,16 +23,12 @@
 package io.jpom.model.log;
 
 import cn.hutool.core.annotation.PropIgnore;
-import cn.hutool.core.io.FileUtil;
 import io.jpom.build.BuildExtraModule;
-import io.jpom.build.BuildUtil;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.h2db.TableName;
-
-import java.io.File;
 
 /**
  * 构建历史记录
@@ -139,8 +135,6 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	}
 
 	public Boolean getHashFile() {
-		File file = BuildUtil.getHistoryPackageFile(getBuildDataId(), getBuildNumberId(), getResultDirFile());
-		hashFile = FileUtil.exist(file);
 		return hashFile;
 	}
 
@@ -149,8 +143,6 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	}
 
 	public Boolean getHasLog() {
-		File file = BuildUtil.getLogFile(getBuildDataId(), getBuildNumberId());
-		hasLog = FileUtil.exist(file);
 		return hasLog;
 	}
 

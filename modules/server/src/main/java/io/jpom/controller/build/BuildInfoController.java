@@ -98,8 +98,13 @@ public class BuildInfoController extends BaseServerController {
 	@Feature(method = MethodFeature.LIST)
 	public String getBuildList() {
 		// load list with page
-		PageResultDto<BuildInfoModel> list = buildInfoService.listPage(getRequest());
-		return JsonMessage.getString(200, "", list);
+		PageResultDto<BuildInfoModel> page = buildInfoService.listPage(getRequest());
+		page.each(buildInfoModel -> {
+			// 获取源码目录是否存在
+			File source = BuildUtil.getSourceById(buildInfoModel.getId());
+			buildInfoModel.setSourceDirExist(FileUtil.exist(source));
+		});
+		return JsonMessage.getString(200, "", page);
 	}
 
 	/**

@@ -14,6 +14,14 @@
       <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
         <a-button type="primary" @click="loadData">搜索</a-button>
       </a-tooltip>
+      <a-tooltip>
+        <template slot="title">
+          <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
+          <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
+          <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
+        </template>
+        <a-icon type="question-circle" theme="filled" />
+      </a-tooltip>
       <!-- <a-button type="primary" @click="handleFilter">刷新</a-button> -->
     </div>
     <!-- 数据表格 -->

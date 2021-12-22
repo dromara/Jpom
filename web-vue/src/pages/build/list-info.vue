@@ -59,7 +59,11 @@
               <a-button type="danger" @click="handleDelete(record)">删除</a-button>
             </a-menu-item>
             <a-menu-item>
-              <a-button type="danger" @click="handleClear(record)">清除构建 </a-button>
+              <a-tooltip
+                title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
+              >
+                <a-button type="danger" :disabled="!record.sourceDirExist" @click="handleClear(record)">清除代码 </a-button>
+              </a-tooltip>
             </a-menu-item>
           </a-menu>
         </a-dropdown>
@@ -642,7 +646,7 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除构建信息么？",
+        content: "真的要删除构建信息么？删除也将同步删除所有的构建历史记录信息",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
