@@ -97,7 +97,7 @@
 							<fork>true</fork>
 							<mainClass>${start-class}</mainClass>
 							<jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
-							<excludeGroupIds>io.jpom.plugin</excludeGroupIds>
+							<!--	<excludeGroupIds>io.jpom.plugin</excludeGroupIds>-->
 						</configuration>
 						<executions>
 							<execution>
