@@ -20,42 +20,46 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-import cn.hutool.core.io.FileUtil;
-import io.jpom.util.CommandUtil;
-import org.junit.Test;
+package io.jpom.webhook;
 
-import java.io.File;
-import java.io.IOException;
+import cn.hutool.core.text.CharPool;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
+import io.jpom.plugin.DefaultPlugin;
+import io.jpom.plugin.IDefaultPlugin;
+
+import java.util.Map;
 
 /**
- * Created by jiangzeyin on 2019/3/15.
+ * 默认到 webhook 实现
+ *
+ * @author bwcx_jzy
+ * @since 2021/12/22
  */
-public class TestFile {
-	public static void main(String[] args) throws IOException {
-//        File file = new File("C:/WINDOWS/system32/s/s");
-//        System.out.println(file.toPath().startsWith(new File("C:/Windows/System32/s/S").toPath()));
-////        System.out.println(file());
-//
-//
-//        File file1 = new File("D:/keystore.p12");
-//        System.out.println(file1.exists() && file1.isFile());
-		File file = FileUtil.file("D:\\jpom\\server\\data\\build\\39a61a05c63b4f56baf0d90bad498ac2\\history\\#7");
-		System.out.println(FileUtil.mainName(file));
+public class DefaultSimplePluginImpl implements IDefaultPlugin {
+
+	@Override
+	public Object execute(Object main, Map<String, Object> parameter) {
+		String webhook = StrUtil.toString(main);
+		if (StrUtil.isEmpty(webhook)) {
+			return null;
+		}
+		try {
+			HttpRequest httpRequest = HttpUtil.createGet(webhook);
+			httpRequest.form(parameter);
+			String body = httpRequest.execute().body();
+			DefaultSystemLog.getLog().info(webhook + CharPool.COLON + body);
+			return body;
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
+		}
+		return null;
 	}
 
-
-	@Test
-	public void testDel() {
-		// xxx.pdf
-		// xxx (1).pdf
-		CommandUtil.systemFastDel(new File("/Users/user/Downloads/xxx (1).pdf"));
+	@Override
+	public String name() {
+		return DefaultPlugin.WebHook.getName();
 	}
-
-
-	@Test
-	public void testFile() {
-		File file = FileUtil.file("D:\\Idea\\hutool\\.git");
-		System.out.println(file.isHidden());
-	}
-
 }

@@ -53,6 +53,12 @@
 				<include>io.jpom:server</include>
 			</includes>
 		</dependencySet>
+		<dependencySet>
+			<outputDirectory>lib/plugins</outputDirectory>
+			<includes>
+				<include>io.jpom.plugin</include>
+			</includes>
+		</dependencySet>
 	</dependencySets>
 
 </assembly>
