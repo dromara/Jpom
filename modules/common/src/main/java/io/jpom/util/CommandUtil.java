@@ -186,7 +186,7 @@ public class CommandUtil {
 		String command;
 		if (SystemUtil.getOsInfo().isWindows()) {
 			// Windows
-			command = StrUtil.format("rd /s/q '{}'", path);
+			command = StrUtil.format("rd /s/q \"{}\"", path);
 		} else {
 			// Linux MacOS
 			command = StrUtil.format("rm -rf '{}'", path);

@@ -118,6 +118,13 @@ public class BuildInfoHistoryController extends BaseServerController {
 	@Feature(method = MethodFeature.LIST)
 	public String historyList() {
 		PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(getRequest());
+		pageResultTemp.each(buildHistoryLog -> {
+			File file = BuildUtil.getHistoryPackageFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
+			buildHistoryLog.setHashFile(FileUtil.exist(file));
+			//
+			File logFile = BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId());
+			buildHistoryLog.setHasLog(FileUtil.exist(logFile));
+		});
 		return JsonMessage.getString(200, "获取成功", pageResultTemp);
 	}
 
