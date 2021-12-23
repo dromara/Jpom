@@ -1,33 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>jpom-parent</artifactId>
-        <groupId>io.jpom</groupId>
-        <version>2.8.1</version>
-        <relativePath>../../pom.xml</relativePath>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
-    <name>Jpom 公共模块</name>
-    <artifactId>common</artifactId>
-    <version>2.8.1</version>
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>jpom-parent</artifactId>
+		<groupId>io.jpom</groupId>
+		<version>2.8.1</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<name>Jpom 公共模块</name>
+	<artifactId>common</artifactId>
+	<version>2.8.1</version>
 
-    <dependencies>
-        <!--  文件编码识别-->
-        <dependency>
-            <groupId>net.sourceforge.jchardet</groupId>
-            <artifactId>jchardet</artifactId>
-            <version>1.0</version>
-        </dependency>
-    </dependencies>
+	<dependencies>
 
-    <profiles>
-        <profile>
-            <id>release-plugin-profile</id>
-        </profile>
-        <profile>
-            <id>install-plugin-profile</id>
-        </profile>
-    </profiles>
+		<dependency>
+			<groupId>cn.jiangzeyin.fast-boot</groupId>
+			<artifactId>common-boot</artifactId>
+			<version>${common-boot.version}</version>
+
+			<exclusions>
+				<exclusion>
+					<groupId>cn.hutool</groupId>
+					<artifactId>hutool-all</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-all</artifactId>
+			<version>${hutool-all.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+		<!--   aop-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+
+		<!--  文件编码识别-->
+		<dependency>
+			<groupId>net.sourceforge.jchardet</groupId>
+			<artifactId>jchardet</artifactId>
+			<version>1.0</version>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>release-plugin-profile</id>
+		</profile>
+		<profile>
+			<id>install-plugin-profile</id>
+		</profile>
+	</profiles>
 </project>
