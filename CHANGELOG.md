@@ -6,6 +6,7 @@
 
 1. 【server】仓库新增导入 Gitee、Github 仓库信息（感谢@💎ℳ๓₯㎕斌💎💘）
 2. 【server】ssh 新增命令模版、可以用于批量执行命令脚本
+3. 新增配置属性 `system.timerMatchSecond` 调度(定时任务)是否开启秒级匹配（感谢@大土豆）
 
 ### 解决BUG、优化功能
 

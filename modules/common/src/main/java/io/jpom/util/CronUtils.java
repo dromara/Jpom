@@ -27,6 +27,7 @@ import cn.hutool.cron.Scheduler;
 import cn.hutool.cron.TaskTable;
 import cn.hutool.cron.task.Task;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.system.ExtConfigBean;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -42,8 +43,9 @@ public class CronUtils {
 	 * 开始
 	 */
 	public static void start() {
+		boolean matchSecond = ExtConfigBean.getInstance().getTimerMatchSecond();
 		// 开启秒级
-		//CronUtil.setMatchSecond(true);
+		CronUtil.setMatchSecond(matchSecond);
 		//
 		Scheduler scheduler = CronUtil.getScheduler();
 		if (!scheduler.isStarted()) {
