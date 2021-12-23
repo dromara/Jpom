@@ -60,11 +60,6 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 	 */
 	public void updateUserWorkspace(String userId, List<String> workspace) {
 		Assert.notEmpty(workspace, "没有任何工作空间信息");
-		String[] appendWorkspaceIds = new String[]{SYSTEM_USER,
-				StrUtil.DASHED + MethodFeature.DEL.name(),
-				StrUtil.DASHED + MethodFeature.EXECUTE.name(),
-				StrUtil.DASHED + MethodFeature.UPLOAD.name(),
-		};
 		List<UserBindWorkspaceModel> list = new HashSet<>(workspace).stream()
 				// 过滤
 				.filter(s -> {
