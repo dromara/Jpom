@@ -12,6 +12,7 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
+import io.jpom.permission.NodeDataPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -34,6 +35,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/node/manage/")
 @Feature(cls = ClassFeature.PROJECT)
+@NodeDataPermission(cls = ProjectInfoCacheService.class)
 public class ProjectManageControl extends BaseServerController {
 
 	private final OutGivingServer outGivingServer;
@@ -58,7 +60,6 @@ public class ProjectManageControl extends BaseServerController {
 	 */
 	@RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
-	@ResponseBody
 	public String projectCopyList() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_ProjectCopyList).toString();
 	}
@@ -69,7 +70,6 @@ public class ProjectManageControl extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String getProjectPort() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectPort).toString();
 	}
@@ -80,7 +80,6 @@ public class ProjectManageControl extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String getProjectCopyPort() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectCopyPort).toString();
 	}
@@ -142,7 +141,6 @@ public class ProjectManageControl extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EXECUTE)
 	public String restart() {
 		NodeModel nodeModel = getNode();
@@ -158,7 +156,6 @@ public class ProjectManageControl extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EXECUTE)
 	public String start() {
 		NodeModel nodeModel = getNode();
@@ -174,7 +171,6 @@ public class ProjectManageControl extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EXECUTE)
 	public String stop() {
 		NodeModel nodeModel = getNode();

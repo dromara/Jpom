@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.permission.NodeDataPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value = "node/manage/log")
 @Feature(cls = ClassFeature.PROJECT_LOG)
+@NodeDataPermission(cls = ProjectInfoCacheService.class)
 public class LogBackController extends BaseServerController {
 
 	private final ProjectInfoCacheService projectInfoCacheService;

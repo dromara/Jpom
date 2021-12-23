@@ -29,12 +29,16 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.model.BaseNodeModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.permission.NodeDataPermission;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.node.NodeService;
+import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.system.AgentException;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
@@ -52,6 +56,10 @@ import javax.servlet.http.HttpServletResponse;
 public class PermissionInterceptor extends BaseJpomInterceptor {
 
 	private NodeService nodeService;
+	private UserBindWorkspaceService userBindWorkspaceService;
+	/**
+	 * demo 账号不能使用的功能
+	 */
 	private static final MethodFeature[] DEMO = new MethodFeature[]{
 			MethodFeature.DEL,
 			MethodFeature.UPLOAD,
@@ -63,6 +71,9 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 		if (nodeService == null) {
 			nodeService = SpringUtil.getBean(NodeService.class);
 		}
+		if (userBindWorkspaceService == null) {
+			userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
+		}
 	}
 
 	private SystemPermission getSystemPermission(HandlerMethod handlerMethod) {
@@ -73,17 +84,30 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 		return systemPermission;
 	}
 
+	private NodeDataPermission getNodeDataPermission(HandlerMethod handlerMethod) {
+		NodeDataPermission nodeDataPermission = handlerMethod.getMethodAnnotation(NodeDataPermission.class);
+		if (nodeDataPermission == null) {
+			nodeDataPermission = handlerMethod.getBeanType().getAnnotation(NodeDataPermission.class);
+		}
+		return nodeDataPermission;
+	}
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 		this.init();
 		this.addNode(request);
 		UserModel userModel = BaseServerController.getUserModel();
 		if (userModel == null || userModel.isSuperSystemUser()) {
-			// 没有登录、或者超级管理自己放过
+			// 没有登录、或者超级管理直接放过
 			return true;
 		}
-		boolean systemPermission = this.checkSystemPermission(userModel, response, handlerMethod);
-		if (!systemPermission) {
+		//
+		boolean permission = this.checkSystemPermission(userModel, response, handlerMethod);
+		if (!permission) {
+			return false;
+		}
+		permission = this.checkNodeDataPermission(userModel, request, response, handlerMethod);
+		if (!permission) {
 			return false;
 		}
 		Feature feature = handlerMethod.getMethodAnnotation(Feature.class);
@@ -98,8 +122,47 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 		return true;
 	}
 
-	private boolean checkSystemPermission(UserModel userModel, HttpServletResponse response, HandlerMethod handlerMethod) {
+	/**
+	 * 检查管理员权限
+	 *
+	 * @param userModel     用户
+	 * @param response      响应
+	 * @param handlerMethod 拦截到到方法
+	 * @return true 有权限
+	 */
+	private boolean checkNodeDataPermission(UserModel userModel, HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) {
+		NodeDataPermission nodeDataPermission = this.getNodeDataPermission(handlerMethod);
+		if (nodeDataPermission == null || userModel.isSuperSystemUser()) {
+			return true;
+		}
+		NodeModel node = (NodeModel) request.getAttribute("node");
+		if (node != null) {
+			String parameterName = nodeDataPermission.parameterName();
+			BaseNodeService<?> baseNodeService = SpringUtil.getBean(nodeDataPermission.cls());
+			String dataId = request.getParameter(parameterName);
+			if (StrUtil.isNotEmpty(dataId)) {
+				BaseNodeModel data = baseNodeService.getData(node.getId(), dataId);
+				if (data != null) {
+					boolean exists = userBindWorkspaceService.exists(userModel.getId(), data.getWorkspaceId());
+					if (!exists) {
+						this.errorMsg(response, "你没有对应到数据权限:-3");
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
 
+	/**
+	 * 检查管理员权限
+	 *
+	 * @param userModel     用户
+	 * @param response      响应
+	 * @param handlerMethod 拦截到到方法
+	 * @return true 有权限
+	 */
+	private boolean checkSystemPermission(UserModel userModel, HttpServletResponse response, HandlerMethod handlerMethod) {
 		SystemPermission systemPermission = this.getSystemPermission(handlerMethod);
 		if (systemPermission == null) {
 			return true;

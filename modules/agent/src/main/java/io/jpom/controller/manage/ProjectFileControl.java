@@ -299,15 +299,13 @@ public class ProjectFileControl extends BaseAgentController {
 			return JsonMessage.getString(500, "删除失败：" + file.getAbsolutePath());
 		} else {
 			// 删除文件
-			String fileName = pathSafe(filename);
-			if (StrUtil.isEmpty(fileName)) {
-				return JsonMessage.getString(405, "非法操作");
-			}
+			Assert.hasText(filename, "请选择要删除的文件");
+
 			File file;
 			if (StrUtil.isEmpty(levelName)) {
-				file = FileUtil.file(pim.allLib(), fileName);
+				file = FileUtil.file(pim.allLib(), filename);
 			} else {
-				file = FileUtil.file(pim.allLib(), levelName, fileName);
+				file = FileUtil.file(pim.allLib(), levelName, filename);
 			}
 			if (file.exists()) {
 				if (FileUtil.del(file)) {
@@ -389,10 +387,11 @@ public class ProjectFileControl extends BaseAgentController {
 	 */
 	@GetMapping(value = "download", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String download(String id, String filename, String levelName) {
-		String safeFileName = pathSafe(filename);
-		if (StrUtil.isEmpty(safeFileName)) {
-			return JsonMessage.getString(405, "非法操作");
-		}
+		Assert.hasText(filename, "请选择文件");
+//		String safeFileName = pathSafe(filename);
+//		if (StrUtil.isEmpty(safeFileName)) {
+//			return JsonMessage.getString(405, "非法操作");
+//		}
 		try {
 			NodeProjectInfoModel pim = projectInfoService.getItem(id);
 			File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);

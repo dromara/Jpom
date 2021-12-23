@@ -84,8 +84,7 @@ public class NginxController extends BaseAgentController {
 		if (StrUtil.isEmpty(name)) {
 			name = StrUtil.SLASH;
 		}
-		String newName = pathSafe(name);
-		JSONArray array = nginxService.list(whitePath, newName);
+		JSONArray array = nginxService.list(whitePath, name);
 		return JsonMessage.getString(200, "", array);
 	}
 
@@ -242,12 +241,9 @@ public class NginxController extends BaseAgentController {
 		if (!whitelistDirectoryService.checkNgxDirectory(path)) {
 			return JsonMessage.getString(400, "非法操作");
 		}
-		String safePath = pathSafe(path);
-		String safeName = pathSafe(name);
-		if (StrUtil.isEmpty(safeName)) {
-			return JsonMessage.getString(400, "删除失败,请正常操作");
-		}
-		File file = FileUtil.file(safePath, safeName);
+		Assert.hasText(name, "请选择文件");
+
+		File file = FileUtil.file(path, name);
 		try {
 			FileUtil.rename(file, file.getName() + "_back", false, true);
 		} catch (Exception e) {

@@ -41,7 +41,6 @@ import io.jpom.util.JsonFileUtil;
 import io.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -53,8 +52,11 @@ import java.util.List;
 @Service
 public class NginxService extends BaseDataService {
 
-	@Resource
-	private WhitelistDirectoryService whitelistDirectoryService;
+	private final WhitelistDirectoryService whitelistDirectoryService;
+
+	public NginxService(WhitelistDirectoryService whitelistDirectoryService) {
+		this.whitelistDirectoryService = whitelistDirectoryService;
+	}
 
 	public JSONArray list(String whitePath, String fileName) {
 		AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
