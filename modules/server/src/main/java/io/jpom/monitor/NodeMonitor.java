@@ -23,7 +23,6 @@
 package io.jpom.monitor;
 
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.pattern.CronPattern;
 import cn.hutool.cron.task.Task;
@@ -121,7 +120,6 @@ public class NodeMonitor implements Task {
 		}
 		//
 		SystemMonitorLog log = new SystemMonitorLog();
-		log.setId(IdUtil.fastSimpleUUID());
 		log.setOccupyMemory(jsonObject.getDoubleValue("memory"));
 		log.setOccupyMemoryUsed(jsonObject.getDoubleValue("memoryUsed"));
 		log.setOccupyDisk(disk);

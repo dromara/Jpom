@@ -33,7 +33,7 @@ import io.jpom.build.BuildUtil;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
-import io.jpom.service.h2db.BaseLogAutoClearService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +46,7 @@ import java.io.File;
  * @date 2019/7/20
  */
 @Service
-public class DbBuildHistoryLogService extends BaseLogAutoClearService<BuildHistoryLog> {
+public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryLog> {
 
 	private final BuildInfoService buildService;
 
@@ -172,5 +172,10 @@ public class DbBuildHistoryLogService extends BaseLogAutoClearService<BuildHisto
 						DefaultSystemLog.getLog().info(jsonMessage.toString());
 					}
 				});
+	}
+
+	@Override
+	protected String[] clearTimeColumns() {
+		return super.clearTimeColumns();
 	}
 }
