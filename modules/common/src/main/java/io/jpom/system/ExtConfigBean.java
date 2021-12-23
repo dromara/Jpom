@@ -25,6 +25,7 @@ package io.jpom.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -77,8 +78,15 @@ public class ExtConfigBean {
 	 */
 	@Value("${consoleLog.charset:}")
 	private String consoleLogCharset;
-
+	/**
+	 *
+	 */
 	private Charset consoleLogCharsetCache;
+	/**
+	 * 是否开启秒级匹配
+	 */
+	@Value("${system.timerMatchSecond:false}")
+	private Boolean timerMatchSecond;
 	/**
 	 *
 	 */
@@ -190,5 +198,9 @@ public class ExtConfigBean {
 			consoleLogCharsetCache = CharsetUtil.parse(consoleLogCharset, CharsetUtil.systemCharset());
 		}
 		return consoleLogCharsetCache;
+	}
+
+	public boolean getTimerMatchSecond() {
+		return ObjectUtil.defaultIfNull(timerMatchSecond, false);
 	}
 }

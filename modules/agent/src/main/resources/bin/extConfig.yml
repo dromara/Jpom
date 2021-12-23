@@ -42,3 +42,6 @@ project:
   disableVirtualMachine: false
   # 停止项目等待的时长 单位秒
   stopWaitTime: 10
+system:
+  # cron 定时器是否开启匹配秒
+  timerMatchSecond: false

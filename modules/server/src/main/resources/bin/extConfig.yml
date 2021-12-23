@@ -75,3 +75,6 @@ ssh:
 node:
   # 上传文件的超时时间 单位秒,最短5秒钟
   uploadFileTimeOut: 300
+system:
+  # cron 定时器是否开启匹配秒
+  timerMatchSecond: false
