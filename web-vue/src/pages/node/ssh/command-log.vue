@@ -6,6 +6,9 @@
       <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="search-input-item">
         <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
       </a-select>
+      <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
+        <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
+      </a-select>
       <a-button type="primary" @click="getCommandLogData">搜索</a-button>
     </div>
     <a-table :loading="loading" :data-source="commandList" :columns="columns" bordered :pagination="pagination" @change="changePage" :rowKey="(record, index) => index">
@@ -17,6 +20,9 @@
       </a-tooltip>
       <template slot="status" slot-scope="text">
         <span>{{ statusMap[text] || "未知" }}</span>
+      </template>
+      <template slot="triggerExecTypeMap" slot-scope="text">
+        <span>{{ triggerExecTypeMap[text] || "未知" }}</span>
       </template>
 
       <template slot="operation" slot-scope="text, record">
@@ -33,7 +39,7 @@
 </template>
 
 <script>
-import { getCommandLogList, statusMap, deleteCommandLog, downloadLog } from "@/api/command";
+import { getCommandLogList, statusMap, triggerExecTypeMap, deleteCommandLog, downloadLog } from "@/api/command";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_SIZW_OPTIONS } from "@/utils/const";
 import { parseTime } from "@/utils/time";
 import CommandLog from "./command-view-log";
@@ -49,11 +55,13 @@ export default {
       loading: false,
       temp: {},
       statusMap: statusMap,
+      triggerExecTypeMap: triggerExecTypeMap,
       logVisible: false,
       columns: [
         { title: "ssh 名称", dataIndex: "sshName", ellipsis: true, scopedSlots: { customRender: "sshName" } },
         { title: "命令名称", dataIndex: "commandName", ellipsis: true, scopedSlots: { customRender: "commandName" } },
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
         {
           title: "执行时间",
           dataIndex: "createTimeMillis",

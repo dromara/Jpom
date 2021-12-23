@@ -9,6 +9,9 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <a-tooltip slot="desc" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
 
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -48,6 +51,9 @@
           </div>
 
           <a-button type="primary" @click="handleAddParam">添加参数</a-button>
+        </a-form-model-item>
+        <a-form-model-item label="自动执行" prop="autoExecCron">
+          <a-input v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式" />
         </a-form-model-item>
         <a-form-model-item label="命令描述" prop="desc">
           <a-input v-model="temp.desc" type="textarea" :rows="3" style="resize: none" placeholder="命令详细描述" />

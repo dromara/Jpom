@@ -1,6 +1,7 @@
 package io.jpom.controller.node.ssh;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.pattern.CronPattern;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
@@ -69,6 +70,7 @@ public class CommandInfoController extends BaseServerController {
 		String defParams = data.getString("defParams");
 		Assert.hasText(name, "请输入命令名称");
 		Assert.hasText(command, "请输入命令内容");
+		String autoExecCron = data.getString("autoExecCron");
 		String id = data.getString("id");
 		//
 		CommandModel commandModel = new CommandModel();
@@ -76,6 +78,14 @@ public class CommandInfoController extends BaseServerController {
 		commandModel.setCommand(command);
 		commandModel.setDesc(desc);
 		commandModel.setSshIds(data.getString("sshIds"));
+		if (StrUtil.isNotEmpty(autoExecCron)) {
+			try {
+				new CronPattern(autoExecCron);
+			} catch (Exception e) {
+				throw new IllegalArgumentException("定时构建表达式格式不正确");
+			}
+		}
+		commandModel.setAutoExecCron(autoExecCron);
 		//
 		if (StrUtil.isNotEmpty(defParams)) {
 			List<CommandModel.CommandParam> params = CommandModel.params(defParams);

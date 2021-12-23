@@ -1,5 +1,6 @@
 package io.jpom.service.node.command;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -7,18 +8,23 @@ import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.task.Task;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.ChannelExec;
+import io.jpom.common.BaseServerController;
 import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.model.data.CommandModel;
 import io.jpom.model.data.SshModel;
+import io.jpom.model.data.UserModel;
+import io.jpom.service.ICron;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
+import io.jpom.util.CronUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -37,7 +43,7 @@ import java.util.stream.Collectors;
  * @since : 2021/12/6 22:11
  */
 @Service
-public class CommandService extends BaseWorkspaceService<CommandModel> {
+public class CommandService extends BaseWorkspaceService<CommandModel> implements ICron {
 
 	private final SshService sshService;
 	private final CommandExecLogService commandExecLogService;
@@ -51,6 +57,85 @@ public class CommandService extends BaseWorkspaceService<CommandModel> {
 		this.workspaceEnvVarService = workspaceEnvVarService;
 	}
 
+	@Override
+	public void insert(CommandModel commandModel) {
+		super.insert(commandModel);
+		this.checkCron(commandModel);
+	}
+
+	@Override
+	public int update(CommandModel commandModel) {
+		int update = super.update(commandModel);
+		if (update > 0) {
+			this.checkCron(commandModel);
+		}
+		return update;
+	}
+
+	@Override
+	public int updateById(CommandModel info) {
+		int update = super.updateById(info);
+		if (update > 0) {
+			this.checkCron(info);
+		}
+		return update;
+	}
+
+	/**
+	 * 检查定时任务 状态
+	 *
+	 * @param buildInfoModel 构建信息
+	 */
+	private void checkCron(CommandModel buildInfoModel) {
+		String id = buildInfoModel.getId();
+		String taskId = "ssh_command:" + id;
+		String autoExecCron = buildInfoModel.getAutoExecCron();
+		if (StrUtil.isEmpty(autoExecCron)) {
+			CronUtils.remove(taskId);
+			return;
+		}
+		DefaultSystemLog.getLog().debug("start ssh command cron {} {} {}", id, buildInfoModel.getName(), autoExecCron);
+		CronUtils.upsert(taskId, autoExecCron, new CommandService.CronTask(id));
+	}
+
+	/**
+	 * 开启定时构建任务
+	 */
+	@Override
+	public int startCron() {
+		String sql = "select * from " + super.getTableName() + " where autoExecCron is not null and autoExecCron <> ''";
+		List<CommandModel> models = super.queryList(sql);
+		if (models == null) {
+			return 0;
+		}
+		for (CommandModel buildInfoModel : models) {
+			this.checkCron(buildInfoModel);
+		}
+		return CollUtil.size(models);
+	}
+
+	private class CronTask implements Task {
+
+		private final String id;
+
+		public CronTask(String id) {
+			this.id = id;
+		}
+
+		@Override
+		public void execute() {
+			try {
+				BaseServerController.resetInfo(UserModel.EMPTY);
+				CommandModel commandModel = CommandService.this.getByKey(this.id);
+				CommandService.this.executeBatch(commandModel, commandModel.getDefParams(), commandModel.getSshIds(), 1);
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("触发自动执行命令模版异常", e);
+			} finally {
+				BaseServerController.remove();
+			}
+		}
+	}
+
 	/**
 	 * 批量执行命令
 	 *
@@ -61,13 +146,25 @@ public class CommandService extends BaseWorkspaceService<CommandModel> {
 	 */
 	public String executeBatch(String id, String params, String nodes) {
 		CommandModel commandModel = this.getByKey(id);
+		return this.executeBatch(commandModel, params, nodes, 0);
+	}
+
+	/**
+	 * 批量执行命令
+	 *
+	 * @param commandModel 命令模版
+	 * @param nodes        ssh节点
+	 * @param params       参数
+	 * @return 批次ID
+	 */
+	private String executeBatch(CommandModel commandModel, String params, String nodes, int triggerExecType) {
 		Assert.notNull(commandModel, "没有对应对命令");
 		List<CommandModel.CommandParam> commandParams = CommandModel.params(params);
 		List<String> sshIds = StrUtil.split(nodes, StrUtil.COMMA, true, true);
 		Assert.notEmpty(sshIds, "请选择 ssh 节点");
 		String batchId = IdUtil.fastSimpleUUID();
 		for (String sshId : sshIds) {
-			this.executeItem(commandModel, commandParams, sshId, batchId);
+			this.executeItem(commandModel, commandParams, sshId, batchId, triggerExecType);
 		}
 		return batchId;
 	}
@@ -80,7 +177,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> {
 	 * @param sshId         ssh id
 	 * @param batchId       批次ID
 	 */
-	private void executeItem(CommandModel commandModel, List<CommandModel.CommandParam> commandParams, String sshId, String batchId) {
+	private void executeItem(CommandModel commandModel, List<CommandModel.CommandParam> commandParams, String sshId, String batchId, int triggerExecType) {
 		SshModel sshModel = sshService.getByKey(sshId, false);
 		Assert.notNull(sshModel, "不存在对应对ssh");
 		CommandExecLogModel commandExecLogModel = new CommandExecLogModel();
@@ -88,6 +185,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> {
 		commandExecLogModel.setCommandName(commandModel.getName());
 		commandExecLogModel.setBatchId(batchId);
 		commandExecLogModel.setSshId(sshId);
+		commandExecLogModel.setTriggerExecType(triggerExecType);
 		commandExecLogModel.setSshName(sshModel.getName());
 		commandExecLogModel.setStatus(CommandExecLogModel.Status.ING.getCode());
 		// 拼接参数
@@ -181,7 +279,6 @@ public class CommandService extends BaseWorkspaceService<CommandModel> {
 	 * @param charset      编码格式
 	 */
 	private void appendLine(BufferedOutputStream outputStream, String line, byte[] lineBytes, Charset charset) {
-		System.out.println(line);
 		try {
 			outputStream.write(line.getBytes(charset));
 			outputStream.write(lineBytes);

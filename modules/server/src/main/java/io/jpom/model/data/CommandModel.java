@@ -57,9 +57,22 @@ public class CommandModel extends BaseWorkspaceModel {
 	 * 命令默认参数
 	 */
 	private String defParams;
-
+	/**
+	 * 默认关联大 ssh id
+	 */
 	private String sshIds;
+	/**
+	 * 自动执行的 cron
+	 */
+	private String autoExecCron;
 
+	public String getAutoExecCron() {
+		return autoExecCron;
+	}
+
+	public void setAutoExecCron(String autoExecCron) {
+		this.autoExecCron = autoExecCron;
+	}
 
 	public String getSshIds() {
 		return sshIds;

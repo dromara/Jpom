@@ -48,6 +48,10 @@ public class CommandExecLogModel extends BaseWorkspaceModel {
 	 * 参数
 	 */
 	private String params;
+	/**
+	 * 触发类型
+	 */
+	private Integer triggerExecType;
 
 	public File logFile() {
 		return FileUtil.file(CommandExecLogModel.logFileDir(this.getCommandId()), batchId, this.getId() + ".log");
@@ -61,6 +65,14 @@ public class CommandExecLogModel extends BaseWorkspaceModel {
 	 */
 	public static File logFileDir(String commandId) {
 		return FileUtil.file(ConfigBean.getInstance().getDataPath(), "command_log", commandId);
+	}
+
+	public Integer getTriggerExecType() {
+		return triggerExecType;
+	}
+
+	public void setTriggerExecType(Integer triggerExecType) {
+		this.triggerExecType = triggerExecType;
 	}
 
 	public String getBatchId() {
