@@ -209,7 +209,7 @@ public class OperateLogController implements AopLogInterface {
 			DbUserOperateLogService dbUserOperateLogService = SpringUtil.getBean(DbUserOperateLogService.class);
 			dbUserOperateLogService.insert(userOperateLogV1);
 		} finally {
-			BaseServerController.remove();
+			BaseServerController.removeEmpty();
 		}
 	}
 

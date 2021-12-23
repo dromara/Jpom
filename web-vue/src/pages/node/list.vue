@@ -56,6 +56,14 @@
             <a-icon @click="delNodeCache(item)" type="delete" />
           </a-tooltip>
         </template>
+        <template slot="scriptCount" slot-scope="text, item">
+          <div v-if="text" @click="syncNodeScript(item)">
+            <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
+              <a-tag>{{ text }} </a-tag>
+              <a-icon type="sync" />
+            </a-tooltip>
+          </div>
+        </template>
       </a-table>
     </a-table>
     <!-- 编辑区 -->
@@ -173,6 +181,7 @@
 import { mapGetters } from "vuex";
 import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, delProjectCache, unLockWorkspace } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
+import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
 import Terminal from "./terminal";
 import { parseTime } from "@/utils/time";
@@ -224,7 +233,9 @@ export default {
         { title: "JVM 剩余内存", dataIndex: "freeMemory", key: "freeMemory", width: 140 },
         { title: "Jpom 版本", dataIndex: "jpomVersion", key: "jpomVersion", width: 120 },
         { title: "Java 程序数", dataIndex: "javaVirtualCount", key: "javaVirtualCount", width: 120 },
+
         { title: "项目数", dataIndex: "count", key: "count", width: 90, scopedSlots: { customRender: "projectCount" } },
+        { title: "脚本数", dataIndex: "scriptCount", key: "scriptCount", width: 90, scopedSlots: { customRender: "scriptCount" } },
         { title: "响应时间", dataIndex: "timeOut", key: "timeOut", width: 120 },
         { title: "已运行时间", dataIndex: "runTime", key: "runTime", width: 150, ellipsis: true, scopedSlots: { customRender: "runTime" } },
       ],
@@ -421,6 +432,17 @@ export default {
             message: res.msg,
           });
           return false;
+        }
+      });
+    },
+    syncNodeScript(node) {
+      syncScript({
+        nodeId: node.nodeId,
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
         }
       });
     },

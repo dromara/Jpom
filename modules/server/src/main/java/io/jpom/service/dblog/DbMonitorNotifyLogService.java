@@ -55,7 +55,7 @@ public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotif
 			super.insert(monitorNotifyLog);
 			//
 		} finally {
-			BaseServerController.remove();
+			BaseServerController.removeEmpty();
 		}
 	}
 

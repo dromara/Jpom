@@ -82,6 +82,7 @@ public class NodeProjectInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@GetMapping(value = "sync_project", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
 	public String syncProject(String nodeId) {
 		NodeModel nodeModel = nodeService.getByKey(nodeId);
 		Assert.notNull(nodeModel, "对应的节点不存在");
@@ -96,6 +97,7 @@ public class NodeProjectInfoController extends BaseServerController {
 	 */
 	@GetMapping(value = "del_project_cache", produces = MediaType.APPLICATION_JSON_VALUE)
 	@SystemPermission()
+	@Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
 	public String delProjectCache(String nodeId) {
 		NodeModel nodeModel = nodeService.getByKey(nodeId);
 		Assert.notNull(nodeModel, "对应的节点不存在");
@@ -110,7 +112,7 @@ public class NodeProjectInfoController extends BaseServerController {
 	 */
 	@GetMapping(value = "clear_all_project", produces = MediaType.APPLICATION_JSON_VALUE)
 	@SystemPermission(superUser = true)
-	@Feature(method = MethodFeature.DEL)
+	@Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
 	public String clearAll() {
 		Entity where = Entity.create();
 		where.set("id", " <> id");

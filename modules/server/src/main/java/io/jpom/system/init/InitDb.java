@@ -182,7 +182,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 			instance.loadMonitorInfo();
 			instance.loadOutgivinInfo();
 		} finally {
-			BaseServerController.remove();
+			BaseServerController.removeEmpty();
 		}
 		//
 		workspaceService.convertNullWorkspaceId();
