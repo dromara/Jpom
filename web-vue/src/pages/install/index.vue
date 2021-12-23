@@ -25,7 +25,7 @@
       </g>
     </svg>
     <a-card class="login-card" hoverable>
-      <a-card-meta title="初始化JPOM账户" style="textalign: center" description="你需要创建一个账户用以后续登录管理JPOM" />
+      <a-card-meta title="初始化JPOM账户" style="textalign: center" description="您需要创建一个账户用以后续登录管理JPOM" />
       <br />
       <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin" class="init-form">
         <a-form-item :wrapper-col="{ span: 24 }" class="init-user-name">
@@ -86,7 +86,7 @@ export default {
             steps: [
               {
                 title: "Jpom 导航助手",
-                intro: "不要慌，出现这个页面表示你没有设置系统管理员信息，或者需要重置管理员信息",
+                intro: "不要慌，出现这个页面表示您没有设置系统管理员信息，或者需要重置管理员信息",
               },
               {
                 title: "Jpom 导航助手",
@@ -96,7 +96,7 @@ export default {
               {
                 title: "Jpom 导航助手",
                 element: document.querySelector(".init-user-password"),
-                intro: "为了你的账户安全，设定的密码需要包含字母、数字、字符，且长度于6-18位之间",
+                intro: "为了您的账户安全，设定的密码需要包含字母、数字、字符，且长度于6-18位之间",
               },
             ],
           })

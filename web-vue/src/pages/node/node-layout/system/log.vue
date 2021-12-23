@@ -89,7 +89,7 @@ export default {
           }, {
             title: 'Jpom 导航助手',
             element: document.querySelector('.ant-tree-node-content-wrapper'),
-            intro: '你还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。'
+            intro: '您还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。'
           }]
         }).start();
         return false;
@@ -188,7 +188,7 @@ export default {
             if(res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
+
               });
               this.visible = false;
               this.loadData();

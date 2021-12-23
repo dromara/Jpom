@@ -44,7 +44,7 @@ public class TestCert {
         PublicKey publicKey = PemUtil.readPemPublicKey(ResourceUtil.getStream("D:\\SystemDocument\\Desktop\\1979263_jpom.keepbx.cn.pem"));
 
         RSA rsa = new RSA(privateKey, publicKey);
-        String str = "你好，Hutool";//测试字符串
+        String str = "您好，Hutool";//测试字符串
 
         String encryptStr = rsa.encryptBase64(str, KeyType.PublicKey);
         String decryptStr = rsa.decryptStr(encryptStr, KeyType.PrivateKey);

@@ -35,11 +35,13 @@ import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.common.UrlRedirectUtil;
 import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
@@ -67,9 +69,12 @@ import java.util.stream.Collectors;
 public class IndexControl extends BaseServerController {
 
 	private final UserService userService;
+	private final UserBindWorkspaceService userBindWorkspaceService;
 
-	public IndexControl(UserService userService) {
+	public IndexControl(UserService userService,
+						UserBindWorkspaceService userBindWorkspaceService) {
 		this.userService = userService;
+		this.userBindWorkspaceService = userBindWorkspaceService;
 	}
 
 	/**
@@ -164,14 +169,14 @@ public class IndexControl extends BaseServerController {
 		JSONArray jsonArray = JSONArray.parseArray(json);
 		List<Object> collect1 = jsonArray.stream().filter(o -> {
 			JSONObject jsonObject = (JSONObject) o;
-			if (!testMenus(jsonObject, userModel)) {
+			if (!testMenus(jsonObject, userModel, nodeModel)) {
 				return false;
 			}
 			JSONArray childs = jsonObject.getJSONArray("childs");
 			if (childs != null) {
 				List<Object> collect = childs.stream().filter(o1 -> {
 					JSONObject jsonObject1 = (JSONObject) o1;
-					return testMenus(jsonObject1, userModel);
+					return testMenus(jsonObject1, userModel, nodeModel);
 				}).collect(Collectors.toList());
 				if (collect.isEmpty()) {
 					return false;
@@ -183,7 +188,7 @@ public class IndexControl extends BaseServerController {
 		return JsonMessage.getString(200, "", collect1);
 	}
 
-	private boolean testMenus(JSONObject jsonObject, UserModel userModel) {
+	private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel) {
 		String active = jsonObject.getString("active");
 		if (StrUtil.isNotEmpty(active)) {
 			String active1 = ConfigBean.getInstance().getActive();
@@ -197,6 +202,19 @@ public class IndexControl extends BaseServerController {
 			return false;
 		}
 		// 系统管理员权限
-		return !StrUtil.equals(role, "system") || userModel.isSystemUser();
+		boolean system = StrUtil.equals(role, "system");
+
+		if (system) {
+			if (nodeModel == null) {
+				return userModel.isSystemUser();
+			} else {
+				if (userModel.isSuperSystemUser()) {
+					return true;
+				}
+				String workspaceId = ServletUtil.getHeader(getRequest(), Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+				return userBindWorkspaceService.exists(userModel.getId(), workspaceId + UserBindWorkspaceService.SYSTEM_USER);
+			}
+		}
+		return true;
 	}
 }

@@ -33,7 +33,7 @@
 	<a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
-#### 你为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
+#### 您为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
 
 > Java 项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
 

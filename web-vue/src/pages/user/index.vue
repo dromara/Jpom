@@ -23,7 +23,7 @@
       >
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editUserVisible" width="600px" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
+    <a-modal v-model="editUserVisible" width="800px" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
       <a-form-model ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="登录名称" prop="id">
           <a-input v-model="temp.id" placeholder="创建之后不能修改" :disabled="createOption == false" />
@@ -51,7 +51,48 @@
         </a-form-model-item>
 
         <a-form-model-item label="工作空间" prop="feature" class="feature jpom-userWorkspace">
-          <a-transfer :data-source="workspaceList" show-search :filter-option="filterOption" :target-keys="targetKeys" :render="(item) => item.title" @change="handleChange" />
+          <a-transfer :show-select-all="false" :data-source="workspaceList" show-search :filter-option="filterOption" :target-keys="targetKeys" :render="(item) => item.title" @change="handleChange">
+            <template slot="children" slot-scope="{ props: { direction, selectedKeys }, on: { itemSelect } }">
+              <a-tree
+                v-if="direction === 'left'"
+                blockNode
+                checkable
+                checkStrictly
+                :defaultExpandAll="true"
+                :checkedKeys="[...selectedKeys, ...targetKeys]"
+                :treeData="treeDataLeft"
+                @check="
+                  (_, props) => {
+                    onCheckedLeft(_, props, [...selectedKeys, ...targetKeys], itemSelect);
+                  }
+                "
+                @select="
+                  (_, props) => {
+                    onCheckedLeft(_, props, [...selectedKeys, ...targetKeys], itemSelect);
+                  }
+                "
+              />
+              <a-tree
+                v-if="direction === 'right'"
+                blockNode
+                checkable
+                checkStrictly
+                :defaultExpandAll="true"
+                :checkedKeys="[...selectedKeys, ...targetKeys]"
+                :treeData="treeDataRight"
+                @check="
+                  (_, props) => {
+                    onCheckedRight(_, props, [...selectedKeys, ...targetKeys], itemSelect);
+                  }
+                "
+                @select="
+                  (_, props) => {
+                    onCheckedRight(_, props, [...selectedKeys, ...targetKeys], itemSelect);
+                  }
+                "
+              />
+            </template>
+          </a-transfer>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -61,9 +102,33 @@
 import { mapGetters } from "vuex";
 import { getUserList, editUser, deleteUser, unlockUser, workspaceList } from "@/api/user";
 import { getWorkSpaceListAll } from "@/api/workspace";
+import { getMonitorOperateTypeList } from "@/api/monitor";
 import { parseTime } from "@/utils/time";
 import sha1 from "sha1";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+function handleTreeData(data, targetKeys = [], left) {
+  if (left) {
+    data.forEach((item) => {
+      item["disabled"] = targetKeys.includes(item.key);
+      if (item.children) {
+        handleTreeData(item.children, targetKeys, left);
+      }
+    });
+    return data;
+  }
+  return data
+    .filter((item) => {
+      return targetKeys.includes(item.key);
+    })
+    .map((item) => {
+      if (item.children) {
+        handleTreeData(item.children, targetKeys, left);
+      }
+      return item;
+    });
+  // return data;
+}
+
 export default {
   data() {
     return {
@@ -71,6 +136,7 @@ export default {
       list: [],
       workspaceList: [],
       targetKeys: [],
+      methodFeature: [],
       temp: {},
       createOption: true,
       editUserVisible: false,
@@ -119,6 +185,14 @@ export default {
         },
       };
     },
+    treeDataLeft() {
+      const str = JSON.stringify(this.workspaceList);
+      return handleTreeData(JSON.parse(str), this.targetKeys, true);
+    },
+    treeDataRight() {
+      const str = JSON.stringify(this.workspaceList);
+      return handleTreeData(JSON.parse(str), this.targetKeys, false);
+    },
   },
   watch: {
     getGuideFlag() {
@@ -127,6 +201,7 @@ export default {
   },
   created() {
     this.loadData();
+    this.loadOptTypeData();
   },
   methods: {
     // 页面引导
@@ -139,7 +214,7 @@ export default {
               {
                 title: "Jpom 导航助手",
                 element: document.querySelector(".jpom-userWorkspace"),
-                intro: "如果这里面没有你想要的工作空间信息，你需要先去添加一个工作空间。",
+                intro: "如果这里面没有您想要的工作空间信息，您需要先去添加一个工作空间。",
               },
             ],
           })
@@ -147,6 +222,16 @@ export default {
         return false;
       }
       this.$introJs().exit();
+    },
+    onCheckedLeft(_, e, checkedKeys, itemSelect) {
+      const { eventKey } = e.node;
+      const isChecked = checkedKeys.indexOf(eventKey) !== -1;
+      itemSelect(eventKey, !isChecked);
+    },
+    onCheckedRight(_, e, checkedKeys, itemSelect) {
+      const { eventKey } = e.node;
+      const isChecked = checkedKeys.indexOf(eventKey) !== -1;
+      itemSelect(eventKey, isChecked);
     },
     // 加载数据
     loadData(pointerEvent) {
@@ -166,8 +251,27 @@ export default {
       getWorkSpaceListAll().then((res) => {
         if (res.code === 200) {
           res.data.forEach((element) => {
-            this.workspaceList.push({ key: element.id, title: element.name });
+            const children = this.methodFeature.map((item) => {
+              return { key: element.id + "-" + item.value, title: item.title + "权限" };
+            });
+            children.push({ key: element.id + "-systemUser", title: "节点管理员" });
+            this.workspaceList.push({
+              key: element.id,
+              title: element.name,
+              children: children,
+            });
           });
+        }
+      });
+    },
+    // 加载操作类型数据
+    loadOptTypeData() {
+      getMonitorOperateTypeList().then((res) => {
+        if (res.code === 200) {
+          this.methodFeature = res.data.methodFeature;
+          // .map((element) => {
+          //   return { key: element.value, title: element.title, disabled: false };
+          // });
         }
       });
     },
@@ -178,17 +282,20 @@ export default {
     // 穿梭框 change
     handleChange(targetKeys) {
       this.targetKeys = targetKeys;
+      console.log(targetKeys);
     },
     // 新增用户
     handleAdd() {
       this.createOption = true;
       this.temp = {};
+      this.targetKeys = [];
       this.loadWorkSpaceListAll();
       this.editUserVisible = true;
       this.$nextTick(() => {
         setTimeout(() => {
           this.introGuide();
         }, 500);
+        this.$refs["editUserForm"] && this.$refs["editUserForm"].resetFields();
       });
     },
     // 修改用户
