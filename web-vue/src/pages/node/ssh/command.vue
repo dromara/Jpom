@@ -220,6 +220,7 @@ export default {
       this.editCommandVisible = true;
       this.getAllSSHList();
       this.chooseSsh = [];
+      this.temp = {};
       this.$refs["editCommandForm"] && this.$refs["editCommandForm"].resetFields();
     },
     // 修改
