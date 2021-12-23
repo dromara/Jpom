@@ -1,5 +1,6 @@
 package io.jpom.controller.node.script;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
@@ -123,7 +124,7 @@ public class ScriptController extends BaseServerController {
 		NodeModel node = getNode();
 		int cache = scriptServer.delCache(node.getId(), getRequest());
 		String msg = scriptServer.syncExecuteNode(node);
-		return JsonMessage.getString(200, "主动清除 " + cache + " " + msg);
+		return JsonMessage.getString(200, "主动清除 " + cache + StrUtil.SPACE + msg);
 	}
 
 	/**

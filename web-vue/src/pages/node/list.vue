@@ -49,12 +49,12 @@
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="projectCount" slot-scope="text, item">
-          <a-tooltip placement="topLeft" title="节点中的所有项目数量">
-            <a-tag @click="syncNode(item)">{{ text }} </a-tag>
-          </a-tooltip>
-          <a-tooltip placement="topLeft" title="清除服务端缓存节点项目信息">
-            <a-icon @click="delNodeCache(item)" type="delete" />
-          </a-tooltip>
+          <div v-if="text" @click="syncNode(item)">
+            <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
+              <a-tag>{{ text }} </a-tag>
+              <a-icon type="sync" />
+            </a-tooltip>
+          </div>
         </template>
         <template slot="scriptCount" slot-scope="text, item">
           <div v-if="text" @click="syncNodeScript(item)">
@@ -179,7 +179,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, delProjectCache, unLockWorkspace } from "@/api/node";
+import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWorkspace } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
@@ -444,25 +444,6 @@ export default {
             message: res.msg,
           });
         }
-      });
-    },
-    delNodeCache(node) {
-      this.$confirm({
-        title: "系统提示",
-        content: "确定要清除该节点下面的项目缓存信息吗？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 删除
-          delProjectCache(node.nodeId).then((res) => {
-            if (res.code == 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              return false;
-            }
-          });
-        },
       });
     },
     // 关闭抽屉层

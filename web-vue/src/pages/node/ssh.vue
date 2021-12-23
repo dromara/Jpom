@@ -31,8 +31,9 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleTerminal(record)">终端</a-button>
-
-        <a-button type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
+        <a-tooltip placement="topLeft" title="如果按钮不可用,请去 ssh 编辑中添加允许管理的授权文件夹">
+          <a-button type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
+        </a-tooltip>
         <a-dropdown>
           <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
             更多
@@ -572,8 +573,8 @@ export default {
         formData.append("id", this.temp.id);
         formData.append("nodeData", JSON.stringify({ ...this.tempNode }));
         formData.append("path", this.tempNode.path);
-        formData.append("waitCount", this.tempNode.waitCount || '');
-        formData.append("chmod", this.tempNode.chmod || '');
+        formData.append("waitCount", this.tempNode.waitCount || "");
+        formData.append("chmod", this.tempNode.chmod || "");
         // 提交数据
         installAgentNode(formData).then((res) => {
           if (res.code === 200) {
