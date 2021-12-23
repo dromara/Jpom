@@ -115,7 +115,7 @@ public class AgentConfigBean {
         if (StrUtil.isEmpty(userName)) {
             throw new JpomRuntimeException("没有登录");
         }
-        file = new File(file, userName);
+        file = FileUtil.file(file, userName);
         FileUtil.mkdir(file);
         return file;
     }
