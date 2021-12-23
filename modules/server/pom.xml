@@ -55,9 +55,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.tmatesoft.svnkit</groupId>
-			<artifactId>svnkit</artifactId>
-			<version>1.10.3</version>
+			<groupId>io.jpom.plugin</groupId>
+			<artifactId>svn-clone</artifactId>
+			<version>${pom.version}</version>
 		</dependency>
 
 		<!--邮件-->

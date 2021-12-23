@@ -32,6 +32,7 @@ public enum DefaultPlugin {
 	 */
 	WebHook("webhook"),
 	Email("email"),
+	SvnClone("svn-clone"),
 	;
 
 	private final String name;

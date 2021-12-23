@@ -31,6 +31,7 @@ import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -41,6 +42,7 @@ import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
+import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.plugin.DefaultPlugin;
 import io.jpom.plugin.IPlugin;
@@ -52,7 +54,6 @@ import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
 import io.jpom.util.StringUtil;
-import io.jpom.util.SvnKitUtil;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 
@@ -314,7 +315,11 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	private boolean pull() {
 		try {
 			String msg = "error";
-			if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
+			Integer repoTypeCode = repositoryModel.getRepoType();
+			RepositoryModel.RepoType repoType = EnumUtil.likeValueOf(RepositoryModel.RepoType.class, repoTypeCode);
+			Integer protocolCode = repositoryModel.getProtocol();
+			GitProtocolEnum protocol = EnumUtil.likeValueOf(GitProtocolEnum.class, protocolCode);
+			if (repoType == RepositoryModel.RepoType.Git) {
 				// git with password
 				Tuple tuple = GitUtil.getBranchAndTagListChek(repositoryModel);
 				String branchName = buildInfoModel.getBranchName();
@@ -342,9 +347,19 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 					BuildInfoManage.this.log("repository [" + branchName + "] clone pull from " + newBranchName);
 					msg = GitUtil.checkoutPull(repositoryModel, gitFile, newBranchName, BuildInfoManage.this.getPrintWriter());
 				}
-			} else if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Svn.getCode()) {
+			} else if (repoType == RepositoryModel.RepoType.Svn) {
 				// svn
-				msg = SvnKitUtil.checkOut(repositoryModel, gitFile);
+				Map<String, Object> map = new HashMap<>(10);
+				map.put("url", repositoryModel.getGitUrl());
+				map.put("userName", repositoryModel.getUserName());
+				map.put("password", repositoryModel.getPassword());
+				map.put("protocol", protocol.name());
+				File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel);
+				map.put("rsaFile", rsaFile);
+				IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.SvnClone);
+				Object result = plugin.execute(gitFile, map);
+				//msg = SvnKitUtil.checkOut(repositoryModel, gitFile);
+				msg = StrUtil.toString(result);
 			}
 			BuildInfoManage.this.log(msg);
 		} catch (Exception e) {

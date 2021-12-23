@@ -21,6 +21,7 @@
 		<dependency>
 			<groupId>io.jpom</groupId>
 			<artifactId>common</artifactId>
+			<scope>provided</scope>
 			<version>${pom.version}</version>
 		</dependency>
 

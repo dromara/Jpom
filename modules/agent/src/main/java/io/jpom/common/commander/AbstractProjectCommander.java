@@ -228,7 +228,13 @@ public abstract class AbstractProjectCommander {
 	private void asyncWebHooks(NodeProjectInfoModel nodeProjectInfoModel,
 							   NodeProjectInfoModel.JavaCopyItem javaCopyItem,
 							   String type, Object... other) {
-		ThreadUtil.execute(() -> this.webHooks(nodeProjectInfoModel, javaCopyItem, type, other));
+		ThreadUtil.execute(() -> {
+			try {
+				this.webHooks(nodeProjectInfoModel, javaCopyItem, type, other);
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("project webhook {}", e.getMessage());
+			}
+		});
 	}
 
 	/**
@@ -242,7 +248,7 @@ public abstract class AbstractProjectCommander {
 	 */
 	private String webHooks(NodeProjectInfoModel nodeProjectInfoModel,
 							NodeProjectInfoModel.JavaCopyItem javaCopyItem,
-							String type, Object... other) {
+							String type, Object... other) throws Exception {
 		String token = nodeProjectInfoModel.getToken();
 		IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.WebHook);
 		Map<String, Object> map = new HashMap<>(10);

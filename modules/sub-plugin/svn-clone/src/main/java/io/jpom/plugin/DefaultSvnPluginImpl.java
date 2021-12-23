@@ -22,60 +22,25 @@
  */
 package io.jpom.plugin;
 
+import org.tmatesoft.svn.core.SVNException;
+
+import java.io.File;
 import java.util.Map;
 
 /**
- * 插件模块接口
- *
  * @author bwcx_jzy
- * @since 2021/12/22
+ * @since 2021/12/23
  */
-public interface IPlugin {
+public class DefaultSvnPluginImpl implements IDefaultPlugin {
 
-	/**
-	 * 执行插件方法
-	 *
-	 * @param main      拦截到到对象
-	 * @param parameter 执行方法传人的参数
-	 * @return 返回值
-	 * @throws Exception 异常
-	 */
-	Object execute(Object main, Map<String, Object> parameter) throws Exception;
-
-	/**
-	 * 做一些检查
-	 *
-	 * @param type      检查的类型
-	 * @param main      拦截到到对象
-	 * @param parameter 执行方法传人的参数
-	 * @return true 检测通过
-	 */
-	default boolean check(String type, Object main, Map<String, Object> parameter) {
-		throw new RuntimeException("Not implements");
+	@Override
+	public Object execute(Object main, Map<String, Object> parameter) throws SVNException {
+		File savePath = (File) main;
+		return SvnKitUtil.checkOut(parameter, savePath);
 	}
 
-	/**
-	 * 插件的名字
-	 *
-	 * @return 名称
-	 */
-	String name();
-
-	/**
-	 * 插件父级
-	 *
-	 * @return 父级名称
-	 */
-	default String parent() {
-		return null;
-	}
-
-	/**
-	 * 排序值
-	 *
-	 * @return 值越小，排到前面 正序
-	 */
-	default int order() {
-		return Integer.MIN_VALUE;
+	@Override
+	public String name() {
+		return DefaultPlugin.SvnClone.getName();
 	}
 }
