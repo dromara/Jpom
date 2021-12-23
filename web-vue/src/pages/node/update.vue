@@ -161,6 +161,12 @@ export default {
           this[`${command}Result`] && this[`${command}Result`](data, nodeId);
         }
       };
+      this.socket.onerror = (err) => {
+        console.error(err);
+        this.$notification.error({
+          message: "web socket 错误,请检查是否开启 ws 代理,或者没有对应的权限",
+        });
+      };
     },
     init(ids) {
       this.sendMsg("getNodeList:" + ids.join(","));
