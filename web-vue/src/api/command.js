@@ -92,3 +92,8 @@ export const statusMap = {
   2: "执行错误",
   3: "会话异常",
 };
+
+export const triggerExecTypeMap = {
+  0: "手动",
+  1: "自动",
+};

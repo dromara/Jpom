@@ -22,7 +22,6 @@
  */
 package io.jpom.system.init;
 
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
@@ -30,12 +29,12 @@ import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.RemoteVersion;
+import io.jpom.service.ICron;
 import io.jpom.service.dblog.BackupInfoService;
-import io.jpom.service.dblog.BuildInfoService;
-import io.jpom.service.monitor.MonitorService;
-import io.jpom.service.node.NodeService;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.CronUtils;
+
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -46,17 +45,7 @@ public class CheckMonitor {
 
 	@PreLoadMethod
 	private static void init() {
-		MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
-		boolean status = monitorService.checkCronStatus();
-		if (status) {
-			Console.log("Monitoring scheduling has been turned on: Monitoring");
-		}
 		//
-		NodeService nodeService = SpringUtil.getBean(NodeService.class);
-		status = nodeService.checkCronStatus();
-		if (status) {
-			Console.log("Monitoring scheduling has been started: node information collection");
-		}
 		// 缓存检测调度
 		CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
 			BuildUtil.reloadCacheSize();
@@ -65,9 +54,12 @@ public class CheckMonitor {
 		ThreadUtil.execute(() -> {
 			BuildUtil.reloadCacheSize();
 			ConfigBean.getInstance().dataSize();
-			// 加载构建定时器
-			BuildInfoService buildInfoService = SpringUtil.getBean(BuildInfoService.class);
-			buildInfoService.startCron();
+			// 加载定时器
+			Map<String, ICron> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(ICron.class);
+			beansOfType.forEach((name, iCron) -> {
+				int startCron = iCron.startCron();
+				DefaultSystemLog.getLog().debug("{} scheduling has been started:{}", name, startCron);
+			});
 			//
 			RemoteVersion.loadRemoteInfo();
 		});

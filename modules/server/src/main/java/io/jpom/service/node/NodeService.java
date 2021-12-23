@@ -17,6 +17,7 @@ import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.monitor.NodeMonitor;
+import io.jpom.service.ICron;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceService;
@@ -34,7 +35,7 @@ import java.util.Optional;
  * @since 2021/12/4
  */
 @Service
-public class NodeService extends BaseWorkspaceService<NodeModel> {
+public class NodeService extends BaseWorkspaceService<NodeModel> implements ICron {
 
 	private final SshService sshService;
 	private final WorkspaceService workspaceService;
@@ -217,18 +218,19 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 	@Override
 	public int update(NodeModel nodeModel) {
 		int update = super.update(nodeModel);
-		this.checkCronStatus();
+		this.startCron();
 		return update;
 	}
 
 	@Override
 	public int updateById(NodeModel info) {
 		int updateById = super.updateById(info);
-		this.checkCronStatus();
+		this.startCron();
 		return updateById;
 	}
 
-	public boolean checkCronStatus() {
+	@Override
+	public int startCron() {
 		// 关闭监听
 		Entity entity = Entity.create();
 		entity.set("openStatus", 1);
@@ -236,10 +238,10 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		long count = super.count(entity);
 		if (count <= 0) {
 			NodeMonitor.stop();
-			return false;
+		} else {
+			NodeMonitor.start();
 		}
-		NodeMonitor.start();
-		return true;
+		return (int) count;
 	}
 
 	/**

@@ -26,6 +26,7 @@ import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.monitor.MonitorTask;
+import io.jpom.service.ICron;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,7 @@ import java.util.List;
  * @author Arno
  */
 @Service
-public class MonitorService extends BaseWorkspaceService<MonitorModel> {
+public class MonitorService extends BaseWorkspaceService<MonitorModel> implements ICron {
 
 	@Override
 	public void insert(MonitorModel monitorModel) {
@@ -51,11 +52,12 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 	@Override
 	public int delByKey(String keyValue) {
 		int byKey = super.delByKey(keyValue);
-		this.checkCronStatus();
+		this.startCron();
 		return byKey;
 	}
 
-	public boolean checkCronStatus() {
+	@Override
+	public int startCron() {
 		// 关闭监听
 		MonitorModel monitorModel = new MonitorModel();
 		monitorModel.setStatus(true);
@@ -65,13 +67,13 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 		} else {
 			MonitorTask.stop();
 		}
-		return count > 0;
+		return (int) count;
 	}
 
 	@Override
 	public int updateById(MonitorModel info) {
 		int updateById = super.updateById(info);
-		this.checkCronStatus();
+		this.startCron();
 		return updateById;
 	}
 

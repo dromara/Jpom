@@ -22,6 +22,7 @@
  */
 package io.jpom.service.dblog;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
@@ -35,6 +36,7 @@ import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
+import io.jpom.service.ICron;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.util.CronUtils;
 import org.springframework.stereotype.Service;
@@ -50,7 +52,7 @@ import java.util.Objects;
  * @date 2021-08-10
  **/
 @Service
-public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> {
+public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> implements ICron {
 
 	private final RepositoryService repositoryService;
 
@@ -76,11 +78,12 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> {
 	/**
 	 * 开启定时构建任务
 	 */
-	public void startCron() {
+	@Override
+	public int startCron() {
 		String sql = "select * from " + super.getTableName() + " where autoBuildCron is not null and autoBuildCron <> ''";
 		List<BuildInfoModel> buildInfoModels = super.queryList(sql);
 		if (buildInfoModels == null) {
-			return;
+			return 0;
 		}
 		for (BuildInfoModel buildInfoModel : buildInfoModels) {
 			this.checkCron(buildInfoModel);
@@ -91,6 +94,7 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> {
 		if (execute > 0) {
 			DefaultSystemLog.getLog().info("build Recover bad data {}", execute);
 		}
+		return CollUtil.size(buildInfoModels);
 	}
 
 	/**
