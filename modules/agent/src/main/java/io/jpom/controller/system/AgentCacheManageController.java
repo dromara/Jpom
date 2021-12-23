@@ -28,12 +28,15 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
+import io.jpom.common.JpomManifest;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.socket.AgentFileTailWatcher;
 import io.jpom.system.ConfigBean;
+import io.jpom.util.CommandUtil;
 import io.jpom.util.CronUtils;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,6 +67,8 @@ public class AgentCacheManageController extends BaseAgentController {
 		String fileSize = FileUtil.readableFileSize(FileUtil.size(file));
 		jsonObject.put("fileSize", fileSize);
 		jsonObject.put("dataSize", FileUtil.readableFileSize(instance.dataSize()));
+		File oldJarsPath = JpomManifest.getOldJarsPath();
+		jsonObject.put("oldJarsSize", FileUtil.readableFileSize(FileUtil.size(oldJarsPath)));
 		//
 		jsonObject.put("pidName", AbstractProjectCommander.PID_JPOM_NAME.size());
 		jsonObject.put("pidPort", AbstractProjectCommander.PID_PORT.size());
@@ -91,12 +96,18 @@ public class AgentCacheManageController extends BaseAgentController {
 			case "pidName":
 				AbstractProjectCommander.PID_JPOM_NAME.clear();
 				break;
-			case "fileSize":
-				boolean clean = FileUtil.clean(ConfigBean.getInstance().getTempPath());
-				if (!clean) {
-					return JsonMessage.getString(504, "清空文件缓存失败");
-				}
+			case "oldJarsSize": {
+				File oldJarsPath = JpomManifest.getOldJarsPath();
+				boolean clean = CommandUtil.systemFastDel(oldJarsPath);
+				Assert.state(!clean, "清空旧版本重新包失败");
 				break;
+			}
+			case "fileSize": {
+				File tempPath = ConfigBean.getInstance().getTempPath();
+				boolean clean = CommandUtil.systemFastDel(tempPath);
+				Assert.state(!clean, "清空文件缓存失败");
+				break;
+			}
 			default:
 				return JsonMessage.getString(405, "没有对应类型：" + type);
 
