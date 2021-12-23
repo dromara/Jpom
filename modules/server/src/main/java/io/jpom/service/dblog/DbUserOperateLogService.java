@@ -38,7 +38,7 @@ import io.jpom.monitor.NotifyUtil;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.h2db.BaseDbCommonService;
-import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.h2db.BaseLogAutoClearService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.monitor.MonitorUserOptService;
 import io.jpom.service.node.NodeService;
@@ -46,7 +46,6 @@ import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.UserService;
-import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -60,7 +59,7 @@ import java.util.Map;
  * @date 2019/7/20
  */
 @Service
-public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLogV1> {
+public class DbUserOperateLogService extends BaseLogAutoClearService<UserOperateLogV1> {
 
 	private static final Map<ClassFeature, Class<? extends BaseDbCommonService<?>>> CLASS_FEATURE_SERVICE = new HashMap<>();
 
@@ -174,8 +173,6 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 	@Override
 	public void insert(UserOperateLogV1 userOperateLogV1) {
 		super.insert(userOperateLogV1);
-		DbConfig.autoClear(getTableName(), "optTime");
-		DbConfig.autoClear(getTableName(), "createTimeMillis");
 		ThreadUtil.execute(() -> {
 			try {
 				this.checkMonitor(userOperateLogV1);
@@ -183,5 +180,10 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 				DefaultSystemLog.getLog().error("执行操作监控错误", e);
 			}
 		});
+	}
+
+	@Override
+	protected String[] clearTimeColumns() {
+		return new String[]{"optTime", "createTimeMillis"};
 	}
 }

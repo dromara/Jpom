@@ -22,6 +22,7 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.io.FileUtil;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseWorkspaceModel;
@@ -74,6 +75,11 @@ public class CommandExecLogModel extends BaseWorkspaceModel {
 	 * 触发类型
 	 */
 	private Integer triggerExecType;
+	/**
+	 * 日志文件是否存在
+	 */
+	@PropIgnore
+	private Boolean hasLog;
 
 	public File logFile() {
 		return FileUtil.file(CommandExecLogModel.logFileDir(this.getCommandId()), batchId, this.getId() + ".log");
@@ -87,6 +93,14 @@ public class CommandExecLogModel extends BaseWorkspaceModel {
 	 */
 	public static File logFileDir(String commandId) {
 		return FileUtil.file(ConfigBean.getInstance().getDataPath(), "command_log", commandId);
+	}
+
+	public Boolean getHasLog() {
+		return hasLog;
+	}
+
+	public void setHasLog(Boolean hasLog) {
+		this.hasLog = hasLog;
 	}
 
 	public Integer getTriggerExecType() {

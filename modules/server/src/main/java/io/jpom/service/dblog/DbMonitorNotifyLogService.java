@@ -29,8 +29,7 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.MonitorNotifyLog;
-import io.jpom.service.h2db.BaseWorkspaceService;
-import io.jpom.system.db.DbConfig;
+import io.jpom.service.h2db.BaseLogAutoClearService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,7 +39,7 @@ import org.springframework.stereotype.Service;
  * @date 2019/7/20
  */
 @Service
-public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotifyLog> {
+public class DbMonitorNotifyLogService extends BaseLogAutoClearService<MonitorNotifyLog> {
 
 
 	@Override
@@ -55,13 +54,15 @@ public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotif
 			monitorNotifyLog.setCreateTime(ObjectUtil.defaultIfNull(monitorNotifyLog.getCreateTime(), SystemClock.now()));
 			super.insert(monitorNotifyLog);
 			//
-			DbConfig.autoClear(getTableName(), "createTime");
-			DbConfig.autoClear(getTableName(), "createTimeMillis");
 		} finally {
 			BaseServerController.remove();
 		}
 	}
 
+	@Override
+	protected String[] clearTimeColumns() {
+		return new String[]{"createTime", "createTimeMillis"};
+	}
 
 	/**
 	 * 修改执行结果
