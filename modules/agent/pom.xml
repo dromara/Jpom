@@ -39,7 +39,7 @@
 			<version>1.21</version>
 		</dependency>
 		<dependency>
-			<groupId>io.jpom.plugin</groupId>
+			<groupId>io.jpom.plugins</groupId>
 			<artifactId>webhook</artifactId>
 			<version>${pom.version}</version>
 		</dependency>
@@ -102,7 +102,7 @@
 							<fork>true</fork>
 							<mainClass>${start-class}</mainClass>
 							<jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
-							<!--	<excludeGroupIds>io.jpom.plugin</excludeGroupIds>-->
+							<!--	<excludeGroupIds>io.jpom.plugins</excludeGroupIds>-->
 						</configuration>
 						<executions>
 							<execution>

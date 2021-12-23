@@ -9,7 +9,7 @@
 		<relativePath>../../../pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>io.jpom.plugin</groupId>
+	<groupId>io.jpom.plugins</groupId>
 	<artifactId>svn-clone</artifactId>
 	<name>plugin-svn-clone</name>
 	<properties>
