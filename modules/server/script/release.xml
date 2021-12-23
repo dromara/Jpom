@@ -56,7 +56,7 @@
 		<!--		<dependencySet>-->
 		<!--			<outputDirectory>lib/plugins</outputDirectory>-->
 		<!--			<includes>-->
-		<!--				<include>io.jpom.plugin</include>-->
+		<!--				<include>io.jpom.plugins</include>-->
 		<!--			</includes>-->
 		<!--		</dependencySet>-->
 	</dependencySets>
