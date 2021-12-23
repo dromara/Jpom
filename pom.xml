@@ -10,7 +10,8 @@
 		<module>modules/common</module>
 		<module>modules/sub-plugin/webhook</module>
 		<module>modules/sub-plugin/email</module>
-	</modules>
+        <module>modules/sub-plugin/svn-clone</module>
+    </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>

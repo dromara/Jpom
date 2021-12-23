@@ -45,7 +45,7 @@ public class EmailUtil implements INotify {
 	private static MailAccountModel config;
 
 	@Override
-	public void send(MonitorModel.Notify notify, String title, String context) {
+	public void send(MonitorModel.Notify notify, String title, String context) throws Exception {
 		String value = notify.getValue();
 		EmailUtil.send(value, title, context);
 	}
@@ -74,7 +74,7 @@ public class EmailUtil implements INotify {
 	 * @param title   标题
 	 * @param context 内容
 	 */
-	public static void send(String email, String title, String context) {
+	public static void send(String email, String title, String context) throws Exception {
 		if (config == null) {
 			// 没有数据才加载
 			refreshConfig();

@@ -39,5 +39,5 @@ public interface INotify {
      * @param title   标题
      * @param context 内容
      */
-    void send(MonitorModel.Notify notify, String title, String context);
+    void send(MonitorModel.Notify notify, String title, String context) throws Exception;
 }

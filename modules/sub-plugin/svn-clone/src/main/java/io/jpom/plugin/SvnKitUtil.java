@@ -20,13 +20,10 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.util;
+package io.jpom.plugin;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.build.BuildUtil;
-import io.jpom.model.data.RepositoryModel;
-import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.system.JpomRuntimeException;
 import org.tmatesoft.svn.core.*;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
@@ -38,6 +35,7 @@ import org.tmatesoft.svn.core.internal.wc.SVNFileUtil;
 import org.tmatesoft.svn.core.wc.*;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * svn 工具
@@ -71,21 +69,23 @@ public class SvnKitUtil {
 	/**
 	 * 对SVNKit连接进行认证，并获取连接
 	 *
-	 * @param repositoryModel 仓库
+	 * @param map 仓库
 	 */
-	public static SVNClientManager getAuthClient(RepositoryModel repositoryModel) {
-		Integer protocol = repositoryModel.getProtocol();
-		String userName = repositoryModel.getUserName();
-		String password = StrUtil.emptyToDefault(repositoryModel.getPassword(), StrUtil.EMPTY);
+	public static SVNClientManager getAuthClient(Map<String, Object> map) {
+		String protocol = (String) map.get("protocol");
+		//repositoryModel.getProtocol();
+		String userName = (String) map.get("userName");
+		String password = StrUtil.emptyToDefault((CharSequence) map.get("password"), StrUtil.EMPTY);
 		//
 		ISVNAuthenticationManager authManager;
 		//
-		if (protocol == GitProtocolEnum.HTTP.getCode()) {
+		if (StrUtil.equalsIgnoreCase(protocol, "http")) {
 			authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, password.toCharArray());
-		} else if (protocol == GitProtocolEnum.SSH.getCode()) {
+		} else if (StrUtil.equalsIgnoreCase(protocol, "ssh")) {
 			File dir = SVNWCUtil.getDefaultConfigurationDirectory();
 			// ssh
-			File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel);
+			File rsaFile = (File) map.get("rsaFile");
+			//BuildUtil.getRepositoryRsaFile(repositoryModel);
 			char[] pwdEmpty = StrUtil.EMPTY.toCharArray();
 			if (rsaFile == null) {
 				authManager = SVNWCUtil.createDefaultAuthenticationManager(dir, userName, pwdEmpty, null, pwdEmpty, true);
@@ -106,15 +106,15 @@ public class SvnKitUtil {
 	/**
 	 * 判断当前仓库url是否匹配
 	 *
-	 * @param wcDir           仓库路径
-	 * @param repositoryModel 仓库
+	 * @param wcDir 仓库路径
+	 * @param map   参数
 	 * @return true 匹配
 	 * @throws SVNException 异常
 	 */
-	private static Boolean checkUrl(File wcDir, RepositoryModel repositoryModel) throws SVNException {
-		String url = repositoryModel.getGitUrl();
+	private static Boolean checkUrl(File wcDir, Map<String, Object> map) throws SVNException {
+		String url = (String) map.get("url");
 		// 实例化客户端管理类
-		SVNClientManager clientManager = getAuthClient(repositoryModel);
+		SVNClientManager clientManager = getAuthClient(map);
 		try {
 			// 通过客户端管理类获得updateClient类的实例。
 			SVNWCClient wcClient = clientManager.getWCClient();
@@ -140,14 +140,14 @@ public class SvnKitUtil {
 	/**
 	 * SVN检出
 	 *
-	 * @param repositoryModel 仓库
-	 * @param targetPath      目录
+	 * @param map        参数
+	 * @param targetPath 目录
 	 * @return Boolean
 	 * @throws SVNException svn
 	 */
-	public static String checkOut(RepositoryModel repositoryModel, File targetPath) throws SVNException {
+	public static String checkOut(Map<String, Object> map, File targetPath) throws SVNException {
 		// 实例化客户端管理类
-		SVNClientManager ourClientManager = getAuthClient(repositoryModel);
+		SVNClientManager ourClientManager = getAuthClient(map);
 		try {
 			if (targetPath.exists()) {
 				if (!FileUtil.file(targetPath, SVNFileUtil.getAdminDirectoryName()).exists()) {
@@ -156,7 +156,7 @@ public class SvnKitUtil {
 					}
 				} else {
 					// 判断url是否变更
-					if (!checkUrl(targetPath, repositoryModel)) {
+					if (!checkUrl(targetPath, map)) {
 						if (!FileUtil.del(targetPath)) {
 							FileUtil.del(targetPath.toPath());
 						}
@@ -165,7 +165,8 @@ public class SvnKitUtil {
 					}
 				}
 			}
-			return checkOut(ourClientManager, repositoryModel.getGitUrl(), targetPath);
+			String url = (String) map.get("url");
+			return checkOut(ourClientManager, url, targetPath);
 		} finally {
 			ourClientManager.dispose();
 		}

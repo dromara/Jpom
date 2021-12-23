@@ -134,20 +134,38 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 				String email = item.getEmail();
 				if (StrUtil.isNotEmpty(email)) {
 					MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.mail, email);
-					ThreadUtil.execute(() -> NotifyUtil.send(notify1, "用户操作报警", context));
+					ThreadUtil.execute(() -> {
+						try {
+							NotifyUtil.send(notify1, "用户操作报警", context);
+						} catch (Exception e) {
+							DefaultSystemLog.getLog().error("发送报警信息错误", e);
+						}
+					});
 
 				}
 				// dingding
 				String dingDing = item.getDingDing();
 				if (StrUtil.isNotEmpty(dingDing)) {
 					MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.dingding, dingDing);
-					ThreadUtil.execute(() -> NotifyUtil.send(notify1, "用户操作报警", context));
+					ThreadUtil.execute(() -> {
+						try {
+							NotifyUtil.send(notify1, "用户操作报警", context);
+						} catch (Exception e) {
+							DefaultSystemLog.getLog().error("发送报警信息错误", e);
+						}
+					});
 				}
 				// 企业微信
 				String workWx = item.getWorkWx();
 				if (StrUtil.isNotEmpty(workWx)) {
 					MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.workWx, workWx);
-					ThreadUtil.execute(() -> NotifyUtil.send(notify1, "用户操作报警", context));
+					ThreadUtil.execute(() -> {
+						try {
+							NotifyUtil.send(notify1, "用户操作报警", context);
+						} catch (Exception e) {
+							DefaultSystemLog.getLog().error("发送报警信息错误", e);
+						}
+					});
 				}
 			}
 		}
