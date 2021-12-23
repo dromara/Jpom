@@ -67,7 +67,17 @@ public abstract class BaseServerController extends BaseJpomController {
 		USER_MODEL_THREAD_LOCAL.set(getUserModel());
 	}
 
+	/**
+	 * 为线程设置 用户
+	 *
+	 * @param userModel 用户
+	 */
 	public static void resetInfo(UserModel userModel) {
+		UserModel userModel1 = USER_MODEL_THREAD_LOCAL.get();
+		if (userModel1 != null && userModel == UserModel.EMPTY) {
+			// 已经存在，更新为 empty 、跳过
+			return;
+		}
 		USER_MODEL_THREAD_LOCAL.set(userModel);
 	}
 
@@ -86,8 +96,18 @@ public abstract class BaseServerController extends BaseJpomController {
 		return userModel;
 	}
 
-	public static void remove() {
+	public static void removeAll() {
 		USER_MODEL_THREAD_LOCAL.remove();
+	}
+
+	/**
+	 * 只清理 是 empty 对象
+	 */
+	public static void removeEmpty() {
+		UserModel userModel = USER_MODEL_THREAD_LOCAL.get();
+		if (userModel == UserModel.EMPTY) {
+			USER_MODEL_THREAD_LOCAL.remove();
+		}
 	}
 
 	public static UserModel getUserModel() {

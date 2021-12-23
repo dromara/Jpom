@@ -82,7 +82,7 @@ public class SshTerminalExecuteLogService extends BaseWorkspaceService<SshTermin
 			}).collect(Collectors.toList());
 			super.insert(executeLogs);
 		} finally {
-			BaseServerController.remove();
+			BaseServerController.removeAll();
 		}
 	}
 }

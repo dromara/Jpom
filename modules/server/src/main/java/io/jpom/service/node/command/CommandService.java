@@ -131,7 +131,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
 			} catch (Exception e) {
 				DefaultSystemLog.getLog().error("触发自动执行命令模版异常", e);
 			} finally {
-				BaseServerController.remove();
+				BaseServerController.removeEmpty();
 			}
 		}
 	}

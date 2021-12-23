@@ -1,5 +1,6 @@
 package io.jpom.controller.node.script;
 
+import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
@@ -8,6 +9,7 @@ import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ScriptModel;
 import io.jpom.permission.NodeDataPermission;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -115,12 +117,28 @@ public class ScriptController extends BaseServerController {
 	 * @return json
 	 */
 	@GetMapping(value = "sync", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DEL)
 	public String syncProject() {
 		//
 		NodeModel node = getNode();
 		int cache = scriptServer.delCache(node.getId(), getRequest());
 		String msg = scriptServer.syncExecuteNode(node);
-		return JsonMessage.getString(200, msg);
+		return JsonMessage.getString(200, "主动清除 " + cache + " " + msg);
+	}
+
+	/**
+	 * 删除节点缓存的所有脚本模版
+	 *
+	 * @return json
+	 */
+	@GetMapping(value = "clear_all", produces = MediaType.APPLICATION_JSON_VALUE)
+	@SystemPermission(superUser = true)
+	@Feature(method = MethodFeature.DEL)
+	public String clearAll() {
+		Entity where = Entity.create();
+		where.set("id", " <> id");
+		int del = scriptServer.del(where);
+		return JsonMessage.getString(200, "成功删除" + del + "条脚本模版缓存");
 	}
 
 }

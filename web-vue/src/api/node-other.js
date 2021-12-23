@@ -313,6 +313,15 @@ export function deleteScript(params) {
   });
 }
 
+// 删除节点脚本模版缓存
+export function delAllCache() {
+  return axios({
+    url: "/node/script/clear_all",
+    method: "get",
+    params: {},
+  });
+}
+
 /**
  * 上传 Script 文件
  * @param {

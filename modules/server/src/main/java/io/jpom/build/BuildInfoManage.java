@@ -450,7 +450,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			this.asyncWebHooks(processName, "error", e.getMessage());
 		} finally {
 			BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
-			BaseServerController.remove();
+			BaseServerController.removeAll();
 			this.asyncWebHooks("done");
 		}
 	}

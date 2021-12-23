@@ -190,7 +190,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 		} catch (Exception e) {
 			return this.checkException(e, nodeModelName);
 		} finally {
-			BaseServerController.remove();
+			BaseServerController.removeEmpty();
 		}
 	}
 
@@ -233,7 +233,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 			} catch (Exception e) {
 				this.checkException(e, nodeModelName);
 			} finally {
-				BaseServerController.remove();
+				BaseServerController.removeEmpty();
 			}
 		});
 	}

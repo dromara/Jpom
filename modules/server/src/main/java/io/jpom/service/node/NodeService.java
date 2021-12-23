@@ -141,7 +141,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> implements ICro
 			}
 		} finally {
 			if (autoReg) {
-				BaseServerController.remove();
+				BaseServerController.removeEmpty();
 			}
 		}
 	}

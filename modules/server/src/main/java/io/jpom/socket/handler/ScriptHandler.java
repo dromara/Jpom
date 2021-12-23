@@ -91,7 +91,7 @@ public class ScriptHandler extends BaseProxyHandler {
 			logServer.insert(scriptExecuteLogModel);
 			return scriptExecuteLogModel.getId();
 		} finally {
-			BaseServerController.remove();
+			BaseServerController.removeAll();
 		}
 	}
 }

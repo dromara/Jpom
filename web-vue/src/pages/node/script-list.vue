@@ -8,6 +8,10 @@
       <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
         <a-button type="primary" @click="loadData">搜索</a-button>
       </a-tooltip>
+
+      <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息, 需要重新同步">
+        <a-icon @click="delAll()" type="delete" />
+      </a-tooltip>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
@@ -51,7 +55,7 @@
   </div>
 </template>
 <script>
-import { getScriptListAll, editScript, deleteScript, itemScript } from "@/api/node-other";
+import { getScriptListAll, editScript, deleteScript, itemScript, delAllCache } from "@/api/node-other";
 import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/node/node-layout/other/script-console";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
@@ -197,7 +201,25 @@ export default {
     onConsoleClose() {
       this.drawerConsoleVisible = false;
     },
-
+    delAll() {
+      this.$confirm({
+        title: "系统提示",
+        content: "确定要清除服务端所有的脚步模版缓存信息吗？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          delAllCache().then((res) => {
+            if (res.code == 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery.page = pagination.current;
