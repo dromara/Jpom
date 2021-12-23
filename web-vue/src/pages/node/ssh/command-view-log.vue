@@ -68,9 +68,20 @@ export default {
         const params = {
           id: item.id,
           line: this.logMap[item.id].line,
+          tryCount: 0,
         };
         getCommandLogInfo(params).then((res) => {
           if (res.code === 200) {
+            if (!res.data) {
+              this.$notification.warning({
+                message: res.msg,
+              });
+              this.logMap[item.id].tryCount = this.logMap[item.id].tryCount + 1;
+              if (this.logMap[item.id].tryCount > 10) {
+                clearInterval(this.logTimerMap[item.id]);
+              }
+              return false;
+            }
             // 停止请求
             if (res.data.run === false) {
               clearInterval(this.logTimerMap[item.id]);
