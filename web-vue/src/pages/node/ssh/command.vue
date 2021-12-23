@@ -37,17 +37,16 @@
         </a-form-model-item>
 
         <a-form-model-item label="默认参数">
-          <div v-if="commandParams.length > 0">
-            <div class="params-item" v-for="(item, index) in commandParams" :key="item.key">
-              <div class="item-info">
-                <a-input addon-before="参数值" v-model="item.value" placeholder="参数值" />
-                <a-input addon-before="描述" v-model="item.desc" placeholder="参数描述" />
-              </div>
-              <div class="item-icon" @click="handleDeleteParam(index)">
-                <a-icon type="minus-circle" style="color: #ff0000" />
-              </div>
+          <div class="params-item" v-for="(item, index) in commandParams" :key="item.key">
+            <div class="item-info">
+              <a-input addon-before="参数值" v-model="item.value" placeholder="参数值" />
+              <a-input addon-before="描述" v-model="item.desc" placeholder="参数描述" />
+            </div>
+            <div class="item-icon" @click="handleDeleteParam(index)">
+              <a-icon type="minus-circle" style="color: #ff0000" />
             </div>
           </div>
+
           <a-button type="primary" @click="handleAddParam">添加参数</a-button>
         </a-form-model-item>
         <a-form-model-item label="命令描述" prop="desc">
@@ -70,7 +69,7 @@
           </a-select>
         </a-form-model-item>
 
-        <a-form-model-item label="命令参数" v-if="commandParams && commandParams.length > 0">
+        <a-form-model-item label="命令参数">
           <div v-for="item in commandParams" :key="item.key">
             <div class="item-info">
               <a-input addon-before="参数值" v-model="item.value" placeholder="参数值" />

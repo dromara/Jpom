@@ -134,7 +134,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> {
 			channel.setCommand(StrUtil.bytes(s + StrUtil.SPACE + commandParamsLine, charset));
 			channel.setInputStream(null);
 			BufferedOutputStream outputStream = FileUtil.getOutputStream(file);
-			channel.setErrStream(outputStream);
+			channel.setErrStream(outputStream, true);
 			InputStream in = null;
 			byte[] lineBytes = SystemUtil.getOsInfo().getLineSeparator().getBytes(charset);
 			try {
@@ -181,11 +181,13 @@ public class CommandService extends BaseWorkspaceService<CommandModel> {
 	 * @param charset      编码格式
 	 */
 	private void appendLine(BufferedOutputStream outputStream, String line, byte[] lineBytes, Charset charset) {
+		System.out.println(line);
 		try {
 			outputStream.write(line.getBytes(charset));
 			outputStream.write(lineBytes);
 			outputStream.flush();
-		} catch (IOException ignored) {
+		} catch (IOException e) {
+			DefaultSystemLog.getLog().warn("command log append line:{}", e.getMessage());
 		}
 	}
 
