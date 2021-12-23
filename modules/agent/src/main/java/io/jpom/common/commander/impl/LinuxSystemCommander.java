@@ -23,6 +23,7 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.ArrayUtil;
@@ -247,7 +248,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 	public String startService(String serviceName) {
 		if (StrUtil.startWith(serviceName, StrUtil.SLASH)) {
 			try {
-				CommandUtil.asyncExeLocalCommand(new File(SystemUtil.getUserInfo().getHomeDir()), serviceName);
+				CommandUtil.asyncExeLocalCommand(FileUtil.file(SystemUtil.getUserInfo().getHomeDir()), serviceName);
 				return "ok";
 			} catch (Exception e) {
 				DefaultSystemLog.getLog().error("执行异常", e);

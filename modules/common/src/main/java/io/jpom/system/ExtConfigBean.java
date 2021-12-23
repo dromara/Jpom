@@ -125,7 +125,7 @@ public class ExtConfigBean {
 		File file = JpomManifest.getRunPath();
 		if (file.isFile()) {
 			file = file.getParentFile().getParentFile();
-			file = new File(file, FILE_NAME);
+			file = FileUtil.file(file, FILE_NAME);
 			if (file.exists() && file.isFile()) {
 				resource = new FileSystemResource(file);
 				return ExtConfigBean.resource;
@@ -138,7 +138,7 @@ public class ExtConfigBean {
 	public static File getResourceFile() {
 		File file = JpomManifest.getRunPath();
 		file = file.getParentFile().getParentFile();
-		file = new File(file, FILE_NAME);
+		file = FileUtil.file(file, FILE_NAME);
 		return file;
 	}
 
