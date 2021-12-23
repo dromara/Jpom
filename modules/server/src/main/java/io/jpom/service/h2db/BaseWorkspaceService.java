@@ -31,7 +31,6 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.PageResultDto;
-import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserBindWorkspaceService;
 import org.springframework.util.Assert;
@@ -172,10 +171,8 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 			return;
 		}
 		// 查询绑定的权限
-		UserBindWorkspaceModel workspaceModel = new UserBindWorkspaceModel();
-		workspaceModel.setId(UserBindWorkspaceModel.getId(userModel.getId(), workspaceId));
 		UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
-		boolean exists = userBindWorkspaceService.exists(workspaceModel);
+		boolean exists = userBindWorkspaceService.exists(userModel.getId(), workspaceId);
 		Assert.state(exists, "没有对应的工作空间权限");
 	}
 

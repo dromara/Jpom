@@ -238,7 +238,12 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 		});
 	}
 
-
+	/**
+	 * 填充数据ID
+	 *
+	 * @param item      对象
+	 * @param nodeModel 节点
+	 */
 	private void fullData(T item, NodeModel nodeModel) {
 		item.dataId(item.getId());
 		item.setId(null);
@@ -262,6 +267,20 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 		entity.set("nodeId", nodeId);
 		entity.set("workspaceId", checkUserWorkspace);
 		return super.del(entity);
+	}
+
+	/**
+	 * 根据 节点和数据ID查询数据
+	 *
+	 * @param nodeId 节点ID
+	 * @param dataId 数据ID
+	 * @return data
+	 */
+	public T getData(String nodeId, String dataId) {
+		T data = ReflectUtil.newInstance(this.tClass);
+		data.setNodeId(nodeId);
+		data.dataId(dataId);
+		return super.queryByBean(data);
 	}
 
 	/**

@@ -7,6 +7,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ScriptModel;
+import io.jpom.permission.NodeDataPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/node/script")
 @Feature(cls = ClassFeature.NODE_SCRIPT)
+@NodeDataPermission(cls = ScriptServer.class)
 public class ScriptController extends BaseServerController {
 
 	private final ScriptServer scriptServer;

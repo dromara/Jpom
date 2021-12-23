@@ -129,4 +129,17 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 		Entity where = super.dataBeanToEntity(bindWorkspaceModel);
 		super.del(where);
 	}
+
+	/**
+	 * 查询用户 是否存在工作空间权限
+	 *
+	 * @param userId      用户ID
+	 * @param workspaceId 工作空间
+	 * @return true 存在
+	 */
+	public boolean exists(String userId, String workspaceId) {
+		UserBindWorkspaceModel workspaceModel = new UserBindWorkspaceModel();
+		workspaceModel.setId(UserBindWorkspaceModel.getId(userId, workspaceId));
+		return this.exists(workspaceModel);
+	}
 }
