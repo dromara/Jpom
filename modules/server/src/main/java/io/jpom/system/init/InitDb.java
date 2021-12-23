@@ -23,7 +23,6 @@
 package io.jpom.system.init;
 
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -48,10 +47,16 @@ import io.jpom.system.db.DbConfig;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 初始化数据库
@@ -102,28 +107,30 @@ public class InitDb implements DisposableBean, InitializingBean {
 			  add another sql init file, if there are more sql file,
 			  please add it with same way
 			 */
-			String[] files = new String[]{
-					"classpath:/bin/h2-db-v1.sql",
-					"classpath:/bin/h2-db-v1.1.sql",
-					"classpath:/bin/h2-db-v2.sql",
-					"classpath:/bin/h2-db-v2.1.sql",
-					"classpath:/bin/h2-db-v3.sql",
-					"classpath:/bin/h2-db-v3.1.sql",
-			};
+			PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
+			Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath:/sql/*.sql");
 			// 加载 sql 变更记录，避免重复执行
 			Set<String> executeSqlLog = instance.loadExecuteSqlLog();
-			for (String sqlFile : files) {
-				InputStream inputStream = ResourceUtil.getStream(sqlFile);
-				String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
-				String sha1 = SecureUtil.sha1(sql);
-				if (executeSqlLog.contains(sha1)) {
-					// 已经执行过啦，不再执行
-					continue;
+			// 过滤 temp sql
+			List<Resource> resourcesList = Arrays.stream(resources)
+					.sorted((o1, o2) -> StrUtil.compare(o1.getFilename(), o2.getFilename(), true))
+					.filter(resource -> !StrUtil.containsIgnoreCase(resource.getFilename(), "temp"))
+					.collect(Collectors.toList());
+			// 遍历
+			for (Resource resource : resourcesList) {
+				try (InputStream inputStream = resource.getInputStream()) {
+					String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
+					String sha1 = SecureUtil.sha1(sql);
+					if (executeSqlLog.contains(sha1)) {
+						// 已经执行过啦，不再执行
+						continue;
+					}
+					sqlFileNow = resource.getFilename();
+					int rows = Db.use(dsFactory.getDataSource()).execute(sql);
+					DefaultSystemLog.getLog().info("exec init SQL file: {} complete, and affected rows is: {}", sqlFileNow, rows);
+					executeSqlLog.add(sha1);
+				} catch (IOException ignored) {
 				}
-				sqlFileNow = sqlFile;
-				int rows = Db.use(dsFactory.getDataSource()).execute(sql);
-				DefaultSystemLog.getLog().info("exec init SQL file: {} complete, and affected rows is: {}", sqlFile, rows);
-				executeSqlLog.add(sha1);
 			}
 			instance.saveExecuteSqlLog(executeSqlLog);
 			DSFactory.setCurrentDSFactory(dsFactory);

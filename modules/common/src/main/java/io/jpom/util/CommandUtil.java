@@ -177,11 +177,13 @@ public class CommandUtil {
 	}
 
 	/**
-	 * 执行系统命令 快速删除
+	 * 执行系统命令 快速删除.
+	 * 执行删除后再检查文件是否存在
 	 *
 	 * @param file 文件或者文件夹
+	 * @return true 文件还存在
 	 */
-	public static void systemFastDel(File file) {
+	public static boolean systemFastDel(File file) {
 		String path = FileUtil.getAbsolutePath(file);
 		String command;
 		if (SystemUtil.getOsInfo().isWindows()) {
@@ -192,6 +194,12 @@ public class CommandUtil {
 			command = StrUtil.format("rm -rf '{}'", path);
 		}
 		CommandUtil.execSystemCommand(command);
+		// 再次尝试
+		boolean del = FileUtil.del(file);
+		if (!del) {
+			FileUtil.del(file.toPath());
+		}
+		return FileUtil.exist(file);
 	}
 
 	private static boolean checkContainsDelItem(String script) {

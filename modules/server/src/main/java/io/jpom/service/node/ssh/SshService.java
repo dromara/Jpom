@@ -10,6 +10,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 
 /**
  * @author bwcx_jzy
@@ -136,7 +138,41 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 		}
 	}
 
+	/**
+	 * ssh 执行模版命令
+	 *
+	 * @param sshModel ssh
+	 * @param command  命令
+	 * @return 执行结果
+	 * @throws IOException io
+	 */
 	public String exec(SshModel sshModel, String... command) throws IOException {
+		Charset charset = sshModel.getCharsetT();
+		return this.exec(sshModel, (s, session) -> {
+			// 执行命令
+			String exec, error;
+			try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+				exec = JschUtil.exec(session, s, charset, stream);
+				error = new String(stream.toByteArray(), charset);
+				if (StrUtil.isNotEmpty(error)) {
+					error = " 错误：" + error;
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+			return exec + error;
+		}, command);
+	}
+
+	/**
+	 * ssh 执行模版命令
+	 *
+	 * @param sshModel ssh
+	 * @param command  命令
+	 * @return 执行结果
+	 * @throws IOException io
+	 */
+	public String exec(SshModel sshModel, BiFunction<String, Session, String> function, String... command) throws IOException {
 		if (ArrayUtil.isEmpty(command)) {
 			return "没有任何命令";
 		}
@@ -144,7 +180,8 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 		InputStream sshExecTemplateInputStream = null;
 		Sftp sftp = null;
 		try {
-			File buildSsh = FileUtil.file(ConfigBean.getInstance().getTempPath(), "build_ssh", sshModel.getId() + ".sh");
+			String tempId = SecureUtil.sha1(sshModel.getId() + ArrayUtil.join(command, StrUtil.COMMA));
+			File buildSsh = FileUtil.file(ConfigBean.getInstance().getTempPath(), "ssh_temp", tempId + ".sh");
 			sshExecTemplateInputStream = ResourceUtil.getStream("classpath:/bin/execTemplate.sh");
 			String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
 			StringBuilder stringBuilder = new StringBuilder(sshExecTemplate);
@@ -162,22 +199,19 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 			String destFile = path + IdUtil.fastSimpleUUID() + ".sh";
 			sftp.mkDirs(path);
 			sftp.upload(destFile, buildSsh);
-
 			// 执行命令
-			String exec, error;
-			try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
-				exec = JschUtil.exec(session, "sh " + destFile, charset, stream);
-				error = new String(stream.toByteArray(), charset);
-				if (StrUtil.isNotEmpty(error)) {
-					error = " 错误：" + error;
-				}
+			try {
+				String commandSh = "bash " + destFile;
+				return function.apply(commandSh, session);
 			} finally {
 				try {
+					// 删除 ssh 中临时文件
 					sftp.delFile(destFile);
 				} catch (Exception ignored) {
 				}
+				// 删除临时文件
+				FileUtil.del(buildSsh);
 			}
-			return exec + error;
 		} finally {
 			IoUtil.close(sftp);
 			IoUtil.close(sshExecTemplateInputStream);

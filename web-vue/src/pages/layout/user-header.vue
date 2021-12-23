@@ -19,7 +19,7 @@
       <a-tooltip placement="left" :title="this.getUserInfo.name">
         <a-button
           class="ant-dropdown-link jpom-user-operation"
-          :style="{ backgroundColor: '#1890ff', color: '#fff', verticalAlign: 'middle' }"
+          :style="{ backgroundColor: '#1890ff', color: '#fff', verticalAlign: 'middle', marginRight: 0 }"
           @click="(e) => e.preventDefault()"
           :title="getUserInfo.name"
         >

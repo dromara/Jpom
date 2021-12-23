@@ -20,8 +20,15 @@ body {
   overflow-x: auto !important;
 }
 
-
 .search-input-item {
   width: 140px;
+  margin-right: 10px;
+}
+
+.filter {
+  margin-bottom: 10px;
+}
+
+.ant-btn {
   margin-right: 10px;
 }

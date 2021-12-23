@@ -187,7 +187,7 @@ public class IndexControl extends BaseServerController {
 		String active = jsonObject.getString("active");
 		if (StrUtil.isNotEmpty(active)) {
 			String active1 = ConfigBean.getInstance().getActive();
-			if (!StrUtil.equals(active1, active1)) {
+			if (!StrUtil.equals(active, active1)) {
 				return false;
 			}
 		}

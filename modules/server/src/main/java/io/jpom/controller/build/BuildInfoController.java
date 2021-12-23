@@ -346,12 +346,9 @@ public class BuildInfoController extends BaseServerController {
 		// 删除构建信息文件
 		File file = BuildUtil.getBuildDataFile(buildInfoModel.getId());
 		// 快速删除
-		CommandUtil.systemFastDel(file);
+		boolean fastDel = CommandUtil.systemFastDel(file);
 		//
-		if (!FileUtil.del(file)) {
-			FileUtil.del(file.toPath());
-		}
-		Assert.state(!FileUtil.exist(file), "清理历史构建产物失败,已经重新尝试");
+		Assert.state(!fastDel, "清理历史构建产物失败,已经重新尝试");
 
 		// 删除构建信息数据
 		buildInfoService.delByKey(buildInfoModel.getId());
@@ -373,13 +370,9 @@ public class BuildInfoController extends BaseServerController {
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
 		File source = BuildUtil.getSourceById(buildInfoModel.getId());
 		// 快速删除
-		CommandUtil.systemFastDel(source);
-		// 二次检查
-		boolean del = FileUtil.del(source);
-		if (!del) {
-			FileUtil.del(source.toPath());
-		}
-		Assert.state(!FileUtil.exist(source), "删除文件失败,请检查");
+		boolean fastDel = CommandUtil.systemFastDel(source);
+		//
+		Assert.state(!fastDel, "删除文件失败,请检查");
 		return JsonMessage.getString(200, "清理成功");
 	}
 

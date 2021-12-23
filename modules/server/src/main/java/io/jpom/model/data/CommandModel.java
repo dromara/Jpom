@@ -30,11 +30,12 @@ import io.jpom.util.StringUtil;
 import java.util.List;
 
 /**
- * @author : Arno
  * 指令信息
+ *
+ * @author : Arno
  * @since : 2021/12/4 18:38
  */
-@TableName(value = "COMMAND_MODEL", name = "命令管理")
+@TableName(value = "COMMAND_INFO", name = "命令管理")
 public class CommandModel extends BaseWorkspaceModel {
 	/**
 	 * 命令名称
@@ -49,25 +50,24 @@ public class CommandModel extends BaseWorkspaceModel {
 	 */
 	private String command;
 	/**
-	 * 执行用户，默认为root
-	 */
-	private String executionRole;
-	/**
-	 * 执行路径，默认为~/
-	 */
-	private String executionPath;
-	/**
 	 * 命令类型，0-shell，1-powershell
 	 */
 	private Integer type;
 	/**
-	 * 命令参数
+	 * 命令默认参数
 	 */
-	private String params;
-	/**
-	 * 超时时间,单位：秒，默认60
-	 */
-	private Integer timeout;
+	private String defParams;
+
+	private String sshIds;
+
+
+	public String getSshIds() {
+		return sshIds;
+	}
+
+	public void setSshIds(String sshIds) {
+		this.sshIds = sshIds;
+	}
 
 	public String getName() {
 		return name;
@@ -83,30 +83,6 @@ public class CommandModel extends BaseWorkspaceModel {
 
 	public void setCommand(String command) {
 		this.command = command;
-	}
-
-	public String getExecutionRole() {
-		return executionRole;
-	}
-
-	public void setExecutionRole(String executionRole) {
-		this.executionRole = executionRole;
-	}
-
-	public String getExecutionPath() {
-		return executionPath;
-	}
-
-	public void setExecutionPath(String executionPath) {
-		this.executionPath = executionPath;
-	}
-
-	public int getTimeout() {
-		return timeout;
-	}
-
-	public void setTimeout(Integer timeout) {
-		this.timeout = timeout;
 	}
 
 	public Integer getType() {
@@ -125,46 +101,38 @@ public class CommandModel extends BaseWorkspaceModel {
 		this.desc = desc;
 	}
 
-	public String getParams() {
-		return params;
+	public String getDefParams() {
+		return defParams;
 	}
 
-	public void setParams(String params) {
-		this.params = params;
+	public void setDefParams(String defParams) {
+		this.defParams = defParams;
 	}
 
 	public List<CommandParam> params() {
-		return StringUtil.jsonConvertArray(params, CommandParam.class);
+		return params(getDefParams());
+	}
+
+	public static List<CommandParam> params(String defParams) {
+		return StringUtil.jsonConvertArray(defParams, CommandParam.class);
 	}
 
 	public static class CommandParam extends BaseJsonModel {
 		/**
-		 * 参数名
-		 */
-		private String name;
-		/**
 		 * 参数值
 		 */
-		private String val;
+		private String value;
 		/**
 		 * 描述
 		 */
 		private String desc;
 
-		public String getName() {
-			return name;
+		public String getValue() {
+			return value;
 		}
 
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public String getVal() {
-			return val;
-		}
-
-		public void setVal(String val) {
-			this.val = val;
+		public void setValue(String value) {
+			this.value = value;
 		}
 
 		public String getDesc() {
