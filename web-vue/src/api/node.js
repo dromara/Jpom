@@ -71,15 +71,6 @@ export function syncProject(nodeId) {
   });
 }
 
-// 删除节点项目缓存
-export function delProjectCache(nodeId) {
-  return axios({
-    url: "/node/del_project_cache",
-    method: "get",
-    params: { nodeId: nodeId },
-  });
-}
-
 export function unLockWorkspace(params) {
   return axios({
     url: "/node/un_lock_workspace",

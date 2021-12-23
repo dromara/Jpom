@@ -1,5 +1,6 @@
 package io.jpom.controller.node;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
@@ -86,23 +87,9 @@ public class NodeProjectInfoController extends BaseServerController {
 	public String syncProject(String nodeId) {
 		NodeModel nodeModel = nodeService.getByKey(nodeId);
 		Assert.notNull(nodeModel, "对应的节点不存在");
-		String msg = projectInfoCacheService.syncExecuteNode(nodeModel);
-		return JsonMessage.getString(200, msg);
-	}
-
-	/**
-	 * 删除节点缓存的项目信息
-	 *
-	 * @return json
-	 */
-	@GetMapping(value = "del_project_cache", produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission()
-	@Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-	public String delProjectCache(String nodeId) {
-		NodeModel nodeModel = nodeService.getByKey(nodeId);
-		Assert.notNull(nodeModel, "对应的节点不存在");
 		int count = projectInfoCacheService.delCache(nodeId, getRequest());
-		return JsonMessage.getString(200, "成功删除" + count + "条项目缓存");
+		String msg = projectInfoCacheService.syncExecuteNode(nodeModel);
+		return JsonMessage.getString(200, "主动清除：" + count + StrUtil.SPACE + msg);
 	}
 
 	/**
