@@ -16,6 +16,10 @@
       {
         "title": "项目列表",
         "id": "projectSearch"
+      },
+      {
+        "title": "脚本列表",
+        "id": "scriptAllList"
       }
     ]
   },

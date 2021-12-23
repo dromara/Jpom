@@ -14,10 +14,7 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.script.ScriptServer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 脚本管理
@@ -47,6 +44,19 @@ public class ScriptController extends BaseServerController {
 	public String scriptList() {
 		PageResultDto<ScriptModel> pageResultDto = scriptServer.listPageNode(getRequest());
 		return JsonMessage.getString(200, "success", pageResultDto);
+	}
+
+	/**
+	 * load node script list
+	 * 加载节点脚本列表
+	 *
+	 * @return json
+	 * @author Hotstrip
+	 */
+	@PostMapping(value = "list_all", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String listAll() {
+		PageResultDto<ScriptModel> modelPageResultDto = scriptServer.listPage(getRequest());
+		return JsonMessage.getString(200, "", modelPageResultDto);
 	}
 
 

@@ -37,6 +37,11 @@ const children = [
     component: () => import("../pages/node/search"),
   },
   {
+    path: "/node/script-all",
+    name: "script-list-all",
+    component: () => import("../pages/node/script-list"),
+  },
+  {
     path: "/node/ssh/command",
     name: "node-command",
     component: () => import("../pages/node/ssh/command"),

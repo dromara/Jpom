@@ -351,8 +351,16 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 			return;
 		}
 		ThreadUtil.execute(() -> {
-			long timeValue = this.getLastTimeValue(timeColumn, maxCount, null);
-			if (timeValue <= 0) {
+			long timeValue;
+			try {
+				timeValue = this.getLastTimeValue(timeColumn, maxCount, null);
+				if (timeValue <= 0) {
+					return;
+				}
+			} catch (java.lang.IllegalStateException illegalStateException) {
+				return;
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("查询数据错误 ：{}", e.getMessage());
 				return;
 			}
 			consumer.accept(timeValue);

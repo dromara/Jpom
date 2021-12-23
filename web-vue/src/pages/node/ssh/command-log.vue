@@ -9,7 +9,9 @@
       <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
         <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
       </a-select>
-      <a-button type="primary" @click="getCommandLogData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="getCommandLogData">搜索</a-button>
+      </a-tooltip>
     </div>
     <a-table :loading="loading" :data-source="commandList" :columns="columns" bordered :pagination="pagination" @change="changePage" :rowKey="(record, index) => index">
       <a-tooltip slot="sshName" slot-scope="text" placement="topLeft" :title="text">
