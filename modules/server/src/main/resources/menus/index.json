@@ -30,8 +30,11 @@
       },
       {
         "title": "命令管理",
-        "id": "commandList",
-        "active": "local"
+        "id": "commandList"
+      },
+      {
+        "title": "命令执行记录",
+        "id": "commandLogList"
       }
     ]
   },

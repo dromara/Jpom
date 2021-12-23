@@ -22,9 +22,12 @@
  */
 package io.jpom.service.system;
 
+import cn.hutool.core.util.StrUtil;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author bwcx_jzy
@@ -32,4 +35,23 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVarModel> {
+
+	public void formatCommand(String workspaceId, String[] commands) {
+		WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceEnvVarModel();
+		workspaceEnvVarModel.setWorkspaceId(workspaceId);
+		List<WorkspaceEnvVarModel> list = super.listByBean(workspaceEnvVarModel);
+		for (int i = 0; i < commands.length; i++) {
+			commands[i] = this.formatCommandItem(commands[i], list);
+		}
+	}
+
+	private String formatCommandItem(String command, List<WorkspaceEnvVarModel> list) {
+		String replace = command;
+		if (list != null) {
+			for (WorkspaceEnvVarModel envVarModel : list) {
+				replace = StrUtil.replace(replace, StrUtil.format("#{{}}", envVarModel.getName()), envVarModel.getValue());
+			}
+		}
+		return replace;
+	}
 }

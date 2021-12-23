@@ -49,7 +49,6 @@ import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
@@ -176,34 +175,26 @@ public class ReleaseManage extends BaseBuild {
 	 * @param commands 命令
 	 */
 	private void formatCommand(String[] commands) {
+		for (int i = 0; i < commands.length; i++) {
+			commands[i] = this.formatCommandItem(commands[i]);
+		}
 		//
 		WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
-		WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceEnvVarModel();
-		workspaceEnvVarModel.setWorkspaceId(this.buildExtraModule.getWorkspaceId());
-		List<WorkspaceEnvVarModel> list = workspaceEnvVarService.listByBean(workspaceEnvVarModel);
-		for (int i = 0; i < commands.length; i++) {
-			commands[i] = this.formatCommandItem(commands[i], list);
-		}
+		workspaceEnvVarService.formatCommand(this.buildExtraModule.getWorkspaceId(), commands);
+
 	}
 
 	/**
 	 * 格式化命令模版
 	 *
 	 * @param command 命令
-	 * @param list    工作空间变量列表
 	 * @return 格式化后
 	 */
-	private String formatCommandItem(String command, List<WorkspaceEnvVarModel> list) {
+	private String formatCommandItem(String command) {
 		String replace = StrUtil.replace(command, "#{BUILD_ID}", this.buildModelId);
 		replace = StrUtil.replace(replace, "#{BUILD_NAME}", this.buildExtraModule.getName());
 		replace = StrUtil.replace(replace, "#{BUILD_RESULT_FILE}", FileUtil.getAbsolutePath(this.resultFile));
 		replace = StrUtil.replace(replace, "#{BUILD_NUMBER_ID}", this.buildId + StrUtil.EMPTY);
-
-		if (list != null) {
-			for (WorkspaceEnvVarModel envVarModel : list) {
-				replace = StrUtil.replace(replace, StrUtil.format("#{{}}", envVarModel.getName()), envVarModel.getValue());
-			}
-		}
 		return replace;
 	}
 
