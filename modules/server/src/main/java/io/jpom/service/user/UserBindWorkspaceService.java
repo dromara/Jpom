@@ -22,10 +22,12 @@
  */
 package io.jpom.service.user;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,8 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 
 	private final WorkspaceService workspaceService;
 
+	public static final String SYSTEM_USER = "-systemUser";
+
 	public UserBindWorkspaceService(WorkspaceService workspaceService) {
 		this.workspaceService = workspaceService;
 	}
@@ -56,9 +60,21 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 	 */
 	public void updateUserWorkspace(String userId, List<String> workspace) {
 		Assert.notEmpty(workspace, "没有任何工作空间信息");
+		String[] appendWorkspaceIds = new String[]{SYSTEM_USER,
+				StrUtil.DASHED + MethodFeature.DEL.name(),
+				StrUtil.DASHED + MethodFeature.EXECUTE.name(),
+				StrUtil.DASHED + MethodFeature.UPLOAD.name(),
+		};
 		List<UserBindWorkspaceModel> list = new HashSet<>(workspace).stream()
 				// 过滤
-				.filter(s -> workspaceService.exists(new WorkspaceModel(s)))
+				.filter(s -> {
+					s = StrUtil.removeSuffix(s, SYSTEM_USER);
+					MethodFeature[] values = MethodFeature.values();
+					for (MethodFeature value : values) {
+						s = StrUtil.removeSuffix(s, StrUtil.DASHED + value.name());
+					}
+					return workspaceService.exists(new WorkspaceModel(s));
+				})
 				.map(s -> {
 					UserBindWorkspaceModel userBindWorkspaceModel = new UserBindWorkspaceModel();
 					userBindWorkspaceModel.setWorkspaceId(s);

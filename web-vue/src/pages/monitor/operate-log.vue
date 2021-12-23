@@ -161,7 +161,7 @@ export default {
               {
                 title: "Jpom 导航助手",
                 element: document.querySelector(".jpom-monitor-notify"),
-                intro: "这里面的报警联系人如果无法选择，你需要设置管理员的邮箱地址。",
+                intro: "这里面的报警联系人如果无法选择，您需要设置管理员的邮箱地址。",
               },
             ],
           })

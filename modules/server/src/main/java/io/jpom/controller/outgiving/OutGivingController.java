@@ -217,7 +217,7 @@ public class OutGivingController extends BaseServerController {
 		// 判断构建
 		boolean releaseMethod = buildService.checkReleaseMethod(id, BuildReleaseMethod.Outgiving);
 		Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
-		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id);
+		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, getRequest());
 
 		UserModel userModel = getUser();
 		// 解除项目分发独立分发属性

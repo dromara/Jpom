@@ -81,7 +81,8 @@ public class ManageEditProjectController extends BaseAgentController {
 	private void checkParameter(NodeProjectInfoModel projectInfo, String whitelistDirectory, boolean previewData) {
 		String id = projectInfo.getId();
 		//		Assert.state(!StrUtil.isEmptyOrUndefined(id), "项目id不能为空");
-		Validator.validateGeneral(id, 2, Const.ID_MAX_LEN, "项目id 长度范围2-20（英文字母 、数字和下划线）");
+		String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
+		Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "项目id 长度范围2-20（英文字母 、数字和下划线）");
 		Assert.state(!JpomApplication.SYSTEM_ID.equals(id), "项目id " + JpomApplication.SYSTEM_ID + " 关键词被系统占用");
 		// 防止和Jpom冲突
 		ConfigBean instance = ConfigBean.getInstance();

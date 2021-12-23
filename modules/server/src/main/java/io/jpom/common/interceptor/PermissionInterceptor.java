@@ -23,12 +23,14 @@
 package io.jpom.common.interceptor;
 
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
@@ -102,7 +104,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 			return true;
 		}
 		//
-		boolean permission = this.checkSystemPermission(userModel, response, handlerMethod);
+		boolean permission = this.checkSystemPermission(userModel, request, response, handlerMethod);
 		if (!permission) {
 			return false;
 		}
@@ -118,6 +120,15 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 		if (ArrayUtil.contains(DEMO, method) && userModel.isDemoUser()) {
 			this.errorMsg(response, "演示系统不能使用该功能,如果完整体验请部署后使用");
 			return false;
+		}
+		// 判断功能权限
+		if (method != MethodFeature.LIST) {
+			String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+			boolean exists = userBindWorkspaceService.exists(userModel.getId(), workspaceId + StrUtil.DASHED + method.name());
+			if (!exists) {
+				this.errorMsg(response, "您没有对应功能管理权限:" + method.getName());
+				return false;
+			}
 		}
 		return true;
 	}
@@ -145,7 +156,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 				if (data != null) {
 					boolean exists = userBindWorkspaceService.exists(userModel.getId(), data.getWorkspaceId());
 					if (!exists) {
-						this.errorMsg(response, "你没有对应到数据权限:-3");
+						this.errorMsg(response, "您没有对应到数据权限:-3");
 						return false;
 					}
 				}
@@ -162,18 +173,30 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 	 * @param handlerMethod 拦截到到方法
 	 * @return true 有权限
 	 */
-	private boolean checkSystemPermission(UserModel userModel, HttpServletResponse response, HandlerMethod handlerMethod) {
+	private boolean checkSystemPermission(UserModel userModel, HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) {
 		SystemPermission systemPermission = this.getSystemPermission(handlerMethod);
 		if (systemPermission == null) {
 			return true;
 		}
-		if (!userModel.isSystemUser()) {
-			this.errorMsg(response, "你没有权限:-2");
+		if (systemPermission.superUser() && !userModel.isSuperSystemUser()) {
+			this.errorMsg(response, "您不是超级管理员没有权限:-2");
 			return false;
 		}
-		if (systemPermission.superUser() && !userModel.isSuperSystemUser()) {
-			this.errorMsg(response, "你没有权限:-2");
-			return false;
+		NodeModel node = (NodeModel) request.getAttribute("node");
+		if (node == null) {
+			// 服务端
+			if (!userModel.isSystemUser()) {
+				this.errorMsg(response, "您没有服务端管理权限:-2");
+				return false;
+			}
+		} else {
+			// 判断节点管理权限
+			String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+			boolean exists = userBindWorkspaceService.exists(userModel.getId(), workspaceId + UserBindWorkspaceService.SYSTEM_USER);
+			if (!exists) {
+				this.errorMsg(response, "您没有对应节点管理权限:-3");
+				return false;
+			}
 		}
 		return true;
 	}
