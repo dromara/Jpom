@@ -7,15 +7,19 @@
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote">临时文件占用空间：{{ temp.fileSize }}</span>
-        <a-button type="primary" class="btn" @click="clear('fileSize')">清空</a-button>
+        <a-button type="primary" v-if="temp.fileSize !== '0'" class="btn" @click="clear('fileSize')">清空</a-button>
+      </a-timeline-item>
+      <a-timeline-item v-if="temp.oldJarsSize">
+        <span class="layui-elem-quote">旧版程序包占有空间：{{ temp.oldJarsSize }}</span>
+        <a-button type="primary" v-if="temp.oldJarsSize !== '0'" class="btn" @click="clear('oldJarsSize')">清空</a-button>
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote">进程名缓存：{{ temp.pidName }}</span>
-        <a-button type="primary" class="btn" @click="clear('pidName')">清空</a-button>
+        <a-button type="primary" v-if="temp.pidName" class="btn" @click="clear('pidName')">清空</a-button>
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote">进程端口缓存：{{ temp.pidPort }}</span>
-        <a-button type="primary" class="btn" @click="clear('pidPort')">清空</a-button>
+        <a-button v-if="temp.pidPort" type="primary" class="btn" @click="clear('pidPort')">清空</a-button>
       </a-timeline-item>
       <!-- <a-timeline-item>
         <span class="layui-elem-quote">错误进程缓存：{{temp.pidError}}</span>
@@ -44,7 +48,7 @@
   </div>
 </template>
 <script>
-import { getNodeCache, clearCache } from "../../../../api/system";
+import { getNodeCache, clearCache } from "@/api/system";
 export default {
   props: {
     node: {

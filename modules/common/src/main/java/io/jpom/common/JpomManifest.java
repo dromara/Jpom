@@ -269,6 +269,16 @@ public class JpomManifest {
 	}
 
 	/**
+	 * 升级之后的旧包
+	 *
+	 * @return oldJars
+	 */
+	public static File getOldJarsPath() {
+		File runFile = getRunPath().getParentFile();
+		return FileUtil.file(runFile, "oldJars");
+	}
+
+	/**
 	 * 转化时间
 	 *
 	 * @param timeStamp time

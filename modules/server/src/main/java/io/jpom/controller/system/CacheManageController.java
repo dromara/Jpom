@@ -28,6 +28,7 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.controller.LoginControl;
@@ -38,10 +39,13 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.socket.ServiceFileTailWatcher;
 import io.jpom.system.ConfigBean;
+import io.jpom.util.CommandUtil;
 import io.jpom.util.CronUtils;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,6 +76,8 @@ public class CacheManageController extends BaseServerController {
 		map.put("cacheFileSize", fileSize);
 		map.put("dataSize", FileUtil.readableFileSize(ConfigBean.getInstance().getDataSizeCache()));
 		int size = LoginControl.LFU_CACHE.size();
+		File oldJarsPath = JpomManifest.getOldJarsPath();
+		map.put("oldJarsSize", FileUtil.readableFileSize(FileUtil.size(oldJarsPath)));
 		map.put("ipSize", size);
 		int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
 		map.put("readFileOnLineCount", oneLineCount);
@@ -107,15 +113,21 @@ public class CacheManageController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
 		switch (type) {
-			case "serviceCacheFileSize":
-				boolean clean = FileUtil.clean(ConfigBean.getInstance().getTempPath());
-				if (!clean) {
-					return JsonMessage.getString(504, "清空文件缓存失败");
-				}
+			case "serviceCacheFileSize": {
+				File tempPath = ConfigBean.getInstance().getTempPath();
+				boolean clean = CommandUtil.systemFastDel(tempPath);
+				Assert.state(!clean, "清空文件缓存失败");
 				break;
+			}
 			case "serviceIpSize":
 				LoginControl.LFU_CACHE.clear();
 				break;
+			case "serviceOldJarsSize": {
+				File oldJarsPath = JpomManifest.getOldJarsPath();
+				boolean clean = CommandUtil.systemFastDel(oldJarsPath);
+				Assert.state(!clean, "清空旧版本重新包失败");
+				break;
+			}
 			default:
 				return NodeForward.request(getNode(), getRequest(), NodeUrl.ClearCache).toString();
 

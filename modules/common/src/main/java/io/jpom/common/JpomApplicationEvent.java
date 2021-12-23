@@ -174,7 +174,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 		}
 		File beforeJarFile = FileUtil.file(runFile, beforeJar);
 		if (beforeJarFile.exists()) {
-			File oldJars = FileUtil.file(runFile, "oldJars");
+			File oldJars = JpomManifest.getOldJarsPath();
 			FileUtil.mkdir(oldJars);
 			FileUtil.move(beforeJarFile, oldJars, true);
 			DefaultSystemLog.getLog().info("备份旧程序包：" + beforeJar);
