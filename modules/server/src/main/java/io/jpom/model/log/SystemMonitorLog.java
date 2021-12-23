@@ -41,23 +41,23 @@ public class SystemMonitorLog extends BaseDbModel {
 	/**
 	 * 监控时间
 	 */
-	private long monitorTime;
+	private Long monitorTime;
 	/**
 	 * 占用cpu
 	 */
-	private double occupyCpu;
+	private Double occupyCpu;
 	/**
 	 * 占用内存 （总共）
 	 */
-	private double occupyMemory;
+	private Double occupyMemory;
 	/**
 	 * 占用内存 (使用) @author jzy
 	 */
-	private double occupyMemoryUsed;
+	private Double occupyMemoryUsed;
 	/**
 	 * 占用磁盘
 	 */
-	private double occupyDisk;
+	private Double occupyDisk;
 
 	public String getNodeId() {
 		return nodeId;
@@ -67,43 +67,43 @@ public class SystemMonitorLog extends BaseDbModel {
 		this.nodeId = nodeId;
 	}
 
-	public long getMonitorTime() {
+	public Long getMonitorTime() {
 		return monitorTime;
 	}
 
-	public void setMonitorTime(long monitorTime) {
+	public void setMonitorTime(Long monitorTime) {
 		this.monitorTime = monitorTime;
 	}
 
-	public double getOccupyCpu() {
+	public Double getOccupyCpu() {
 		return occupyCpu;
 	}
 
-	public void setOccupyCpu(double occupyCpu) {
+	public void setOccupyCpu(Double occupyCpu) {
 		this.occupyCpu = occupyCpu;
 	}
 
-	public double getOccupyMemory() {
+	public Double getOccupyMemory() {
 		return occupyMemory;
 	}
 
-	public void setOccupyMemory(double occupyMemory) {
+	public void setOccupyMemory(Double occupyMemory) {
 		this.occupyMemory = occupyMemory;
 	}
 
-	public double getOccupyDisk() {
-		return occupyDisk;
-	}
-
-	public void setOccupyDisk(double occupyDisk) {
-		this.occupyDisk = occupyDisk;
-	}
-
-	public double getOccupyMemoryUsed() {
+	public Double getOccupyMemoryUsed() {
 		return occupyMemoryUsed;
 	}
 
-	public void setOccupyMemoryUsed(double occupyMemoryUsed) {
+	public void setOccupyMemoryUsed(Double occupyMemoryUsed) {
 		this.occupyMemoryUsed = occupyMemoryUsed;
+	}
+
+	public Double getOccupyDisk() {
+		return occupyDisk;
+	}
+
+	public void setOccupyDisk(Double occupyDisk) {
+		this.occupyDisk = occupyDisk;
 	}
 }

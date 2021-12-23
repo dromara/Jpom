@@ -2,7 +2,7 @@ package io.jpom.service.node.command;
 
 import cn.hutool.core.io.FileUtil;
 import io.jpom.model.data.CommandExecLogModel;
-import io.jpom.service.h2db.BaseLogAutoClearService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.util.CommandUtil;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,7 @@ import java.io.File;
  * @since 2021/12/22
  */
 @Service
-public class CommandExecLogService extends BaseLogAutoClearService<CommandExecLogModel> {
+public class CommandExecLogService extends BaseWorkspaceService<CommandExecLogModel> {
 
 	@Override
 	protected void fillSelectResult(CommandExecLogModel data) {
@@ -34,5 +34,10 @@ public class CommandExecLogService extends BaseLogAutoClearService<CommandExecLo
 				CommandUtil.systemFastDel(parentFile);
 			}
 		});
+	}
+
+	@Override
+	protected String[] clearTimeColumns() {
+		return super.clearTimeColumns();
 	}
 }

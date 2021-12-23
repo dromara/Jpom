@@ -24,6 +24,7 @@ package io.jpom.controller;
 
 import cn.hutool.cache.impl.CacheObj;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.base.AbstractController;
@@ -55,7 +56,7 @@ public class WelcomeController extends AbstractController {
 	public String getDirectTop() {
 		JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
 		//
-		topInfo.put("time", System.currentTimeMillis());
+		topInfo.put("time", SystemClock.now());
 		return JsonMessage.getString(200, "ok", topInfo);
 	}
 

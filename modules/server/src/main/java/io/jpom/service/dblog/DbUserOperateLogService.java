@@ -38,7 +38,7 @@ import io.jpom.monitor.NotifyUtil;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.h2db.BaseDbCommonService;
-import io.jpom.service.h2db.BaseLogAutoClearService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.monitor.MonitorUserOptService;
 import io.jpom.service.node.NodeService;
@@ -59,7 +59,7 @@ import java.util.Map;
  * @date 2019/7/20
  */
 @Service
-public class DbUserOperateLogService extends BaseLogAutoClearService<UserOperateLogV1> {
+public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLogV1> {
 
 	private static final Map<ClassFeature, Class<? extends BaseDbCommonService<?>>> CLASS_FEATURE_SERVICE = new HashMap<>();
 
