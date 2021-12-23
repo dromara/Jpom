@@ -78,6 +78,12 @@ export default {
       this.socket.onopen = () => {
         this.logContext = "connect success......\r\n";
       };
+      this.socket.onerror = (err) => {
+        console.error(err);
+        this.$notification.error({
+          message: "web socket 错误,请检查是否开启 ws 代理,或者没有对应的权限",
+        });
+      };
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf("code") > -1 && msg.data.indexOf("msg") > -1) {
           const res = JSON.parse(msg.data);

@@ -28,6 +28,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
@@ -136,7 +137,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 		return false;
 	}
 
-	private Object checkData(HandlerType handlerType, UserModel userModel, HttpServletRequest httpServletRequest) {
+	private BaseWorkspaceModel checkData(HandlerType handlerType, UserModel userModel, HttpServletRequest httpServletRequest) {
 		String id = httpServletRequest.getParameter("id");
 		BaseWorkspaceService<?> workspaceService = SpringUtil.getBean(handlerType.getServiceClass());
 		return workspaceService.getByKey(id, userModel);
