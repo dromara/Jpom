@@ -22,6 +22,7 @@
  */
 package io.jpom.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -31,16 +32,16 @@ import io.jpom.common.JpomManifest;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.interceptor.NotAuthorize;
 import io.jpom.model.data.NodeProjectInfoModel;
+import io.jpom.model.data.NodeScriptModel;
 import io.jpom.plugin.PluginFactory;
-import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.service.manage.ProjectInfoService;
+import io.jpom.service.script.ScriptServer;
 import io.jpom.util.JvmUtil;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -51,10 +52,15 @@ import java.util.List;
  */
 @RestController
 public class IndexController extends BaseAgentController {
-	@Resource
-	private WhitelistDirectoryService whitelistDirectoryService;
-	@Resource
-	private ProjectInfoService projectInfoService;
+
+	private final ProjectInfoService projectInfoService;
+	private final ScriptServer scriptServer;
+
+	public IndexController(ProjectInfoService projectInfoService,
+						   ScriptServer scriptServer) {
+		this.projectInfoService = projectInfoService;
+		this.scriptServer = scriptServer;
+	}
 
 	@RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
 	@NotAuthorize
@@ -83,6 +89,7 @@ public class IndexController extends BaseAgentController {
 	@RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String status() {
 		List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
+		List<NodeScriptModel> list = scriptServer.list();
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
 		jsonObject.put("osName", JpomManifest.getInstance().getOsName());
@@ -94,11 +101,9 @@ public class IndexController extends BaseAgentController {
 		//
 		long freeMemory = SystemUtil.getFreeMemory();
 		jsonObject.put("freeMemory", FileUtil.readableFileSize(freeMemory));
-		int count = 0;
-		if (nodeProjectInfoModels != null) {
-			count = nodeProjectInfoModels.size();
-		}
-		jsonObject.put("count", count);
+		//
+		jsonObject.put("count", CollUtil.size(nodeProjectInfoModels));
+		jsonObject.put("scriptCount", CollUtil.size(list));
 		// 运行时间
 		jsonObject.put("runTime", JpomManifest.getInstance().getUpTime());
 		return JsonMessage.getString(200, "", jsonObject);

@@ -17,6 +17,7 @@ const routeMenuMap = {
   userOptLog: "/monitor/operate-log",
   repository: "/repository/list",
   buildListOld: "/build/list",
+  scriptAllList: "/node/script-all",
   /**
    * new build list page
    */

@@ -1,20 +1,21 @@
 <template>
   <div class="node-full-content">
     <div ref="filter" class="filter">
+      <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+        <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
+      </a-select>
       <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
       <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
         <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="handleUpload">上传文件</a-button>
-      <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息并重新同步">
-        <a-icon @click="sync()" type="sync" spin />
       </a-tooltip>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
+      </a-tooltip>
+      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ nodeMap[text] }}</span>
       </a-tooltip>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -45,48 +46,36 @@
     </a-modal>
     <!-- 脚本控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <script-console v-if="drawerConsoleVisible" :nodeId="node.id" :id="temp.id" :scriptId="temp.scriptId" />
+      <script-console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :id="temp.id" :scriptId="temp.scriptId" />
     </a-drawer>
-    <!-- 上传文件 -->
-    <a-modal v-model="uploadFileVisible" width="300px" title="上传 bat|bash 文件" :footer="null" :maskClosable="true">
-      <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.bat,.sh'">
-        <a-button><a-icon type="upload" />选择 bat|bash 文件</a-button>
-      </a-upload>
-      <br />
-      <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
-    </a-modal>
   </div>
 </template>
 <script>
-import { getScriptList, editScript, deleteScript, uploadScriptFile, itemScript, syncScript } from "@/api/node-other";
-import ScriptConsole from "./script-console";
+import { getScriptListAll, editScript, deleteScript, itemScript } from "@/api/node-other";
+import { getNodeListAll } from "@/api/node";
+import ScriptConsole from "@/pages/node/node-layout/other/script-console";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { parseTime } from "@/utils/time";
 export default {
   components: {
     ScriptConsole,
   },
-  props: {
-    node: {
-      type: Object,
-    },
-  },
+  props: {},
   data() {
     return {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       temp: {},
+      nodeMap: {},
       editScriptVisible: false,
       drawerTitle: "",
       drawerConsoleVisible: false,
-      // 上传脚本文件相关属性
-      fileList: [],
-      uploadFileList: [],
-      uploadFileVisible: false,
+
       columns: [
         // { title: "Script ID", dataIndex: "id", width: 200, ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
@@ -114,16 +103,22 @@ export default {
   },
   mounted() {
     // this.calcTableHeight();
-    this.loadData();
+
+    getNodeListAll().then((res) => {
+      if (res.code === 200) {
+        res.data.forEach((item) => {
+          this.nodeMap[item.id] = item.name;
+        });
+      }
+      this.loadData();
+    });
   },
   methods: {
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
-      getScriptList({
-        nodeId: this.node.id,
-      }).then((res) => {
+      getScriptListAll(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
@@ -134,20 +129,14 @@ export default {
     parseTime(v) {
       return parseTime(v);
     },
-    // 添加
-    handleAdd() {
-      this.temp = {
-        type: "add",
-      };
-      this.editScriptVisible = true;
-    },
     // 修改
     handleEdit(record) {
       itemScript({
         id: record.scriptId,
-        nodeId: this.node.id,
+        nodeId: record.nodeId,
       }).then((res) => {
         this.temp = Object.assign(res.data);
+        this.temp.nodeId = record.nodeId;
         //
         this.editScriptVisible = true;
       });
@@ -159,7 +148,6 @@ export default {
         if (!valid) {
           return false;
         }
-        this.temp.nodeId = this.node.id;
         // 提交数据
         editScript(this.temp).then((res) => {
           if (res.code === 200) {
@@ -184,7 +172,7 @@ export default {
         onOk: () => {
           // 组装参数
           const params = {
-            nodeId: this.node.id,
+            nodeId: record.nodeId,
             id: record.scriptId,
           };
           // 删除
@@ -209,41 +197,6 @@ export default {
     onConsoleClose() {
       this.drawerConsoleVisible = false;
     },
-    // 准备上传文件
-    handleUpload(record) {
-      this.temp = Object.assign(record);
-      this.uploadFileVisible = true;
-    },
-    handleRemove(file) {
-      const index = this.uploadFileList.indexOf(file);
-      const newFileList = this.uploadFileList.slice();
-      newFileList.splice(index, 1);
-      this.uploadFileList = newFileList;
-    },
-    beforeUpload(file) {
-      this.uploadFileList = [...this.uploadFileList, file];
-      return false;
-    },
-    // 开始上传文件
-    startUpload() {
-      this.uploadFileList.forEach((file) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("nodeId", this.node.id);
-        // 上传文件
-        uploadScriptFile(formData).then((res) => {
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg,
-            });
-          }
-        });
-      });
-      setTimeout(() => {
-        this.loadData();
-      }, 2000);
-      this.uploadFileList = [];
-    },
 
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
@@ -254,18 +207,6 @@ export default {
         this.listQuery.order_field = sorter.field;
       }
       this.loadData();
-    },
-    sync() {
-      syncScript({
-        nodeId: this.node.id,
-      }).then((res) => {
-        if (res.code == 200) {
-          this.$notification.success({
-            message: res.msg,
-          });
-          this.loadData();
-        }
-      });
     },
   },
 };

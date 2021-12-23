@@ -247,11 +247,22 @@ export function uploadTomcatProjectFile(formData) {
  * script 列表
  * @param {String} nodeId 节点 ID
  */
-export function getScriptList(nodeId) {
+export function getScriptList(params) {
   return axios({
     url: "/node/script/list",
     method: "post",
-    data: { nodeId },
+    data: params,
+  });
+}
+
+/**
+ * script 列表
+ */
+export function getScriptListAll(params) {
+  return axios({
+    url: "/node/script/list_all",
+    method: "post",
+    data: params,
   });
 }
 

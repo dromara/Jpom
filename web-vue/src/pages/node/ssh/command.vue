@@ -2,7 +2,9 @@
   <div class="full-content">
     <div ref="filter" class="filter">
       <a-input v-model="listQuery['%name%']" placeholder="搜索命令" class="search-input-item" />
-      <a-button type="primary" @click="getCommandData">搜索</a-button>
+      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+        <a-button type="primary" @click="getCommandData">搜索</a-button>
+      </a-tooltip>
       <a-button type="primary" @click="createCommand">新建命令</a-button>
     </div>
     <a-table :loading="loading" :data-source="commandList" :columns="columns" bordered :pagination="pagination" @change="changePage" :rowKey="(record, index) => index">
