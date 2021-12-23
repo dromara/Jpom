@@ -65,7 +65,7 @@ public class ServerExtConfigBean implements DisposableBean {
 	/**
 	 * 日志记录最大条数
 	 */
-	@Value("${db.logStorageCount:100000}")
+	@Value("${db.logStorageCount:10000}")
 	private int h2DbLogStorageCount;
 
 	/**

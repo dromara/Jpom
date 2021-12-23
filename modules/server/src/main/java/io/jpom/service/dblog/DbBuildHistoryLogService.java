@@ -26,24 +26,18 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
-import cn.hutool.db.sql.Direction;
-import cn.hutool.db.sql.Order;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.build.BuildUtil;
-import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
-import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.h2db.BaseLogAutoClearService;
 import io.jpom.system.ServerExtConfigBean;
-import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * 构建历史db
@@ -52,7 +46,7 @@ import java.util.List;
  * @date 2019/7/20
  */
 @Service
-public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryLog> {
+public class DbBuildHistoryLogService extends BaseLogAutoClearService<BuildHistoryLog> {
 
 	private final BuildInfoService buildService;
 
@@ -149,39 +143,34 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
 	@Override
 	public void insert(BuildHistoryLog buildHistoryLog) {
 		super.insert(buildHistoryLog);
-		// 清理总数据
-		int buildMaxHistoryCount = ServerExtConfigBean.getInstance().getBuildMaxHistoryCount();
-		DbConfig.autoClear(getTableName(), "startTime", buildMaxHistoryCount,
-				aLong -> doClearPage(1, aLong, null));
 		// 清理单个
 		int buildItemMaxHistoryCount = ServerExtConfigBean.getInstance().getBuildItemMaxHistoryCount();
-		DbConfig.autoClear(getTableName(), "startTime", buildItemMaxHistoryCount,
+		super.autoLoopClear("startTime", buildItemMaxHistoryCount,
 				entity -> entity.set("buildDataId", buildHistoryLog.getBuildDataId()),
-				aLong -> doClearPage(1, aLong, buildHistoryLog.getBuildDataId()));
+				buildHistoryLog1 -> {
+					JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
+					if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+						DefaultSystemLog.getLog().info(jsonMessage.toString());
+					}
+				});
 	}
 
-	private void doClearPage(int pageNo, long time, String buildDataId) {
-		Entity entity = Entity.create(getTableName());
-		entity.set("startTime", "< " + time);
-		if (buildDataId != null) {
-			entity.set("buildDataId", buildDataId);
-		}
-
-		Page page = new Page(pageNo, 10);
-		page.addOrder(new Order("startTime", Direction.DESC));
-		PageResultDto<BuildHistoryLog> pageResultDto = super.listPage(entity, page);
-		if (pageResultDto.isEmpty()) {
+	@Override
+	protected void executeClearImpl(int count) {
+		// 清理总数据
+		int buildMaxHistoryCount = ServerExtConfigBean.getInstance().getBuildMaxHistoryCount();
+		int saveCount = Math.min(count, buildMaxHistoryCount);
+		if (saveCount <= 0) {
+			// 不清除
 			return;
 		}
-		List<BuildHistoryLog> result = pageResultDto.getResult();
-		for (BuildHistoryLog buildHistoryLog : result) {
-			JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog);
-			if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-				DefaultSystemLog.getLog().info(jsonMessage.toString());
-			}
-		}
-		if (pageResultDto.getTotalPage() > pageResultDto.getPage()) {
-			doClearPage(pageNo + 1, time, buildDataId);
-		}
+		super.autoLoopClear("startTime", saveCount,
+				null,
+				buildHistoryLog1 -> {
+					JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
+					if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+						DefaultSystemLog.getLog().info(jsonMessage.toString());
+					}
+				});
 	}
 }

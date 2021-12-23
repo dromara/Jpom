@@ -28,7 +28,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.SshTerminalExecuteLog;
-import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.h2db.BaseLogAutoClearService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * @date 2021/08/04
  */
 @Service
-public class SshTerminalExecuteLogService extends BaseWorkspaceService<SshTerminalExecuteLog> {
+public class SshTerminalExecuteLogService extends BaseLogAutoClearService<SshTerminalExecuteLog> {
 
 	/**
 	 * 批量记录日志

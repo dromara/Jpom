@@ -26,8 +26,8 @@
       </template>
 
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleView(record)">查看</a-button>
-        <a-button type="primary" @click="handleDownload(record)">下载日志</a-button>
+        <a-button type="primary" :disabled="!record.hasLog" @click="handleView(record)">查看</a-button>
+        <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="download" />日志</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
@@ -82,7 +82,7 @@ export default {
           width: 170,
         },
         {
-          title: "最后操作人",
+          title: "执行人",
           dataIndex: "modifyUser",
           width: 120,
           ellipsis: true,
