@@ -42,7 +42,11 @@ public class UserModel extends BaseStrikeDbModel {
 	/**
 	 * 系统管理员
 	 */
-	public static String SYSTEM_ADMIN = "sys";
+	public final static String SYSTEM_ADMIN = "sys";
+	/**
+	 * demo 演示账号、系统预设
+	 */
+	public final static String DEMO_USER = "demo";
 	/**
 	 *
 	 */
@@ -293,7 +297,7 @@ public class UserModel extends BaseStrikeDbModel {
 	 * @return true
 	 */
 	public boolean isDemoUser() {
-		return "demo".equals(getId());
+		return UserModel.DEMO_USER.equals(getId());
 	}
 
 //	/**
