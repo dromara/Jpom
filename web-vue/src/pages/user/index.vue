@@ -35,7 +35,7 @@
           <a-input v-model="temp.name" placeholder="昵称" />
         </a-form-model-item>
         <a-form-model-item label="管理员" prop="systemUser">
-          <a-tooltip title="管理员拥有：管理服务端和插件端的权限">
+          <a-tooltip title="管理员拥有：管理服务端的权限">
             <a-switch
               :checked="temp.systemUser == 1"
               @change="
