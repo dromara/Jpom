@@ -28,6 +28,7 @@ import io.jpom.util.HttpUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -90,16 +91,15 @@ public class ProjectMojo extends AbstractMojo {
 				}
 			}
 		}
-		if (nodeProjects != null) {
-			for (NodeProjectInfo nodeProject : nodeProjects) {
-				try {
-					this.send(nodeProject);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
+		Log log = getLog();
+		for (NodeProjectInfo nodeProject : nodeProjects) {
+			try {
+				this.send(nodeProject);
+			} catch (UnsupportedEncodingException e) {
+				log.error("编码错误", e);
 			}
 		}
-		getLog().info("处理结束");
+		log.info("处理结束");
 	}
 
 	private NodeProjectInfo findItem(String nodeId) {
@@ -122,32 +122,33 @@ public class ProjectMojo extends AbstractMojo {
 	 */
 	private boolean checkInfo(NodeProjectInfo nodeProjectInfo) {
 		String name = nodeProjectInfo.getName();
+		Log log = getLog();
 		if (name == null || "".equals(name)) {
-			getLog().error("请配置 project.name");
+			log.error("请配置 project.name");
 			return false;
 		}
 
 		String id = nodeProjectInfo.getId();
 		if (id == null || "".equals(id)) {
-			getLog().error("请配置 project.id");
+			log.error("请配置 project.id");
 			return false;
 		}
 
 		String runMode = nodeProjectInfo.getRunMode();
 		if (runMode == null || "".equals(runMode)) {
-			getLog().error("请配置 project.runMode");
+			log.error("请配置 project.runMode");
 			return false;
 		}
 
 		String whitelistDirectory = nodeProjectInfo.getWhitelistDirectory();
 		if (whitelistDirectory == null || "".equals(whitelistDirectory)) {
-			getLog().error("请配置 project.whitelistDirectory");
+			log.error("请配置 project.whitelistDirectory");
 			return false;
 		}
 
 		String path = nodeProjectInfo.getPath();
 		if (path == null || "".equals(path)) {
-			getLog().error("请配置 project.path");
+			log.error("请配置 project.path");
 			return false;
 		}
 		return true;
