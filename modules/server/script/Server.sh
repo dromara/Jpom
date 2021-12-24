@@ -41,7 +41,7 @@ Lib="${Path}lib/"
 RUNJAR=""
 Log="${Path}server.log"
 LogBack="${Path}log/"
-JVM="-server -Xms254m -Xmx1024m"
+JVM="-server -XX:+UseG1GC -Xms254m -Xmx1024m"
 # Modify project port number Log path
 ARGS="--jpom.applicationTag=${Tag} --spring.profiles.active=pro --server.port=2122  --jpom.log=${Path}log $@"
 
