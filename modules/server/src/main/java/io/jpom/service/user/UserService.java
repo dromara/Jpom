@@ -142,6 +142,7 @@ public class UserService extends BaseDbService<UserModel> {
 		userModel.setId(id);
 		userModel.setSalt(salt);
 		userModel.setPassword(SecureUtil.sha1(newPwd + salt));
+		userModel.unLock();
 		super.update(userModel);
 	}
 
