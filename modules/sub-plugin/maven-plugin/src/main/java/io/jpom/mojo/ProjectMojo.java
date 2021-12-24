@@ -75,6 +75,7 @@ public class ProjectMojo extends AbstractMojo {
 //            getLog().error("请配置 正确的Jpom Server地址");
 //            return;
 //        }
+		Log log = getLog();
 		if (nodeIds != null) {
 			for (String nodeId : nodeIds) {
 				NodeProjectInfo projectInfo = findItem(nodeId);
@@ -87,11 +88,11 @@ public class ProjectMojo extends AbstractMojo {
 				try {
 					this.send(projectInfo);
 				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
+					log.error("编码错误", e);
 				}
 			}
 		}
-		Log log = getLog();
+
 		for (NodeProjectInfo nodeProject : nodeProjects) {
 			try {
 				this.send(nodeProject);
@@ -199,10 +200,11 @@ public class ProjectMojo extends AbstractMojo {
 		// url
 		String allUrl = String.format("%s/node/manage/saveProject", url);
 		header.put("JPOM-USER-TOKEN", token);
-		getLog().info("处理：" + nodeProjectInfo.getNodeId());
+		Log log = getLog();
+		log.info("处理：" + nodeProjectInfo.getNodeId());
 		String post = HttpUtils.post(allUrl, parameter, header,
 				(int) TimeUnit.MINUTES.toMillis(1),
 				(int) TimeUnit.MINUTES.toMillis(1), "utf-8");
-		getLog().info(post);
+		log.info(post);
 	}
 }
