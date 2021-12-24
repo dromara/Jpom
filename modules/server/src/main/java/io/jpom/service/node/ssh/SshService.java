@@ -6,10 +6,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
@@ -21,6 +18,7 @@ import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -70,15 +68,33 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 			session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
 
 		} else if (connectType == SshModel.ConnectType.PUBKEY) {
-			File tempPath = ConfigBean.getInstance().getTempPath();
-			String sshFile = StrUtil.emptyToDefault(sshModel.getId(), IdUtil.fastSimpleUUID());
-			File ssh = FileUtil.file(tempPath, "ssh", sshFile);
-			FileUtil.writeString(sshModel.getPrivateKey(), ssh, CharsetUtil.UTF_8);
+			File rsaFile;
+			String privateKey = sshModel.getPrivateKey();
+			if (StrUtil.startWith(privateKey, URLUtil.FILE_URL_PREFIX)) {
+				String rsaPath = StrUtil.removePrefix(privateKey, URLUtil.FILE_URL_PREFIX);
+				rsaFile = FileUtil.file(rsaPath);
+			} else if (StrUtil.isEmpty(privateKey)) {
+				File home = FileUtil.getUserHomeDir();
+				Assert.notNull(home, "用户目录没有找到");
+				File identity = FileUtil.file(home, ".ssh", "identity");
+				rsaFile = FileUtil.isFile(identity) ? identity : null;
+				File idRsa = FileUtil.file(home, ".ssh", "id_rsa");
+				rsaFile = FileUtil.isFile(idRsa) ? idRsa : rsaFile;
+				File idDsa = FileUtil.file(home, ".ssh", "id_dsa");
+				rsaFile = FileUtil.isFile(idDsa) ? idDsa : rsaFile;
+				Assert.notNull(rsaFile, "用户目录没有找到私钥信息");
+			} else {
+				File tempPath = ConfigBean.getInstance().getTempPath();
+				String sshFile = StrUtil.emptyToDefault(sshModel.getId(), IdUtil.fastSimpleUUID());
+				rsaFile = FileUtil.file(tempPath, "ssh", sshFile);
+				FileUtil.writeString(privateKey, rsaFile, CharsetUtil.UTF_8);
+			}
+			Assert.state(FileUtil.isFile(rsaFile), "私钥文件不存在：" + FileUtil.getAbsolutePath(rsaFile));
 			byte[] pas = null;
 			if (StrUtil.isNotEmpty(sshModel.getPassword())) {
 				pas = sshModel.getPassword().getBytes();
 			}
-			session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), FileUtil.getAbsolutePath(ssh), pas);
+			session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), FileUtil.getAbsolutePath(rsaFile), pas);
 		} else {
 			throw new IllegalArgumentException("不支持的模式");
 		}
