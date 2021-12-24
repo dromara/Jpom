@@ -33,13 +33,13 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="700px">
-      <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+    <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="1200px">
+      <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="Script 名称" prop="name">
           <a-input v-model="temp.name" placeholder="名称" />
         </a-form-model-item>
         <a-form-model-item label="Script 内容" prop="context">
-          <a-input v-model="temp.context" type="textarea" :rows="10" style="resize: none" placeholder="Script 内容" />
+          <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -59,12 +59,13 @@
 </template>
 <script>
 import { getScriptList, editScript, deleteScript, uploadScriptFile, itemScript, syncScript } from "@/api/node-other";
+import codeEditor from "@/components/codeEditor";
 import ScriptConsole from "./script-console";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { parseTime } from "@/utils/time";
 export default {
   components: {
-    ScriptConsole,
+    ScriptConsole,codeEditor
   },
   props: {
     node: {
