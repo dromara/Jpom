@@ -79,8 +79,16 @@
         <a-form-model-item label="Password" :prop="`${temp.type === 'add' && temp.connectType === 'PASS' ? 'password' : 'password-update'}`">
           <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />
         </a-form-model-item>
-        <a-form-model-item v-if="temp.connectType === 'PUBKEY'" label="私钥内容" :prop="`${temp.type === 'add' ? 'privateKey' : ''}`">
-          <a-textarea v-model="temp.privateKey" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="私钥内容" />
+        <a-form-model-item v-if="temp.connectType === 'PUBKEY'" :prop="`${temp.type === 'add' ? 'privateKey' : ''}`">
+          <template slot="label">
+            私钥内容
+            <a-tooltip v-if="temp.type !== 'edit'" placement="topLeft">
+              <template slot="title">不填将使用默认的 $HOME/.ssh 目录中的配置,使用优先级是：id_dsa>id_rsa>identity </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+
+          <a-textarea v-model="temp.privateKey" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="私钥内容,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:/xxxx/xx" />
         </a-form-model-item>
         <a-form-model-item label="编码格式" prop="charset">
           <a-input v-model="temp.charset" placeholder="编码格式" />

@@ -1,9 +1,11 @@
 package io.jpom.controller.node.ssh;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -107,7 +109,7 @@ public class SshController extends BaseServerController {
 			if (connectType == SshModel.ConnectType.PASS) {
 				Assert.hasText(password, "请填写登录密码");
 			} else if (connectType == SshModel.ConnectType.PUBKEY) {
-				Assert.hasText(privateKey, "请填写证书内容");
+				//Assert.hasText(privateKey, "请填写证书内容");
 			}
 			sshModel = new SshModel();
 		} else {
@@ -125,6 +127,10 @@ public class SshController extends BaseServerController {
 		// 如果密码传递不为空就设置值 因为上面已经判断了只有修改的情况下 password 才可能为空
 		if (StrUtil.isNotEmpty(password)) {
 			sshModel.setPassword(password);
+		}
+		if (StrUtil.startWith(privateKey, URLUtil.FILE_URL_PREFIX)) {
+			String rsaPath = StrUtil.removePrefix(privateKey, URLUtil.FILE_URL_PREFIX);
+			Assert.state(FileUtil.isFile(rsaPath), "配置的私钥文件不存在");
 		}
 		if (StrUtil.isNotEmpty(privateKey)) {
 			sshModel.setPrivateKey(privateKey);

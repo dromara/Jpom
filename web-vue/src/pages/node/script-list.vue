@@ -8,10 +8,26 @@
       <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
         <a-button type="primary" @click="loadData">搜索</a-button>
       </a-tooltip>
+      <a-space>
+        <a-tooltip>
+          <template slot="title">
+            <div>脚本模版是存储在节点中的命令脚本用于在线管理一些脚本命令，如果初始化软件环境、管理应用程序等</div>
 
-      <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息, 需要重新同步">
-        <a-icon @click="delAll()" type="delete" />
-      </a-tooltip>
+            <div>
+              <ul>
+                <li>执行时候默认不加载全部环境变量、需要脚本里面自行加载</li>
+                <li>命令文件将在 ${jpom插件端数据目录}/script/xxxx.sh 执行</li>
+                <li>添加脚本模版需要到节点管理中去添加</li>
+              </ul>
+            </div>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
+
+        <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息, 需要重新同步">
+          <a-icon @click="delAll()" type="delete" />
+        </a-tooltip>
+      </a-space>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
