@@ -23,6 +23,7 @@
 package io.jpom.socket;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
@@ -52,6 +53,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2019/4/25
  */
 public class ScriptProcessBuilder implements Runnable {
+	/**
+	 * 执行中的缓存
+	 */
 	private static final ConcurrentHashMap<String, ScriptProcessBuilder> FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
 	private final ProcessBuilder processBuilder;
@@ -79,6 +83,14 @@ public class ScriptProcessBuilder implements Runnable {
 		processBuilder.command(command);
 	}
 
+	/**
+	 * 创建执行 并监听
+	 *
+	 * @param nodeScriptModel 脚本模版
+	 * @param executeId       执行ID
+	 * @param args            参数
+	 * @param session         会话
+	 */
 	public static void addWatcher(NodeScriptModel nodeScriptModel, String executeId, String args, Session session) {
 		ScriptProcessBuilder scriptProcessBuilder = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.computeIfAbsent(executeId, file1 -> {
 			ScriptProcessBuilder scriptProcessBuilder1 = new ScriptProcessBuilder(nodeScriptModel, executeId, args);
@@ -99,6 +111,21 @@ public class ScriptProcessBuilder implements Runnable {
 		}
 	}
 
+	/**
+	 * 判断是否还在执行中
+	 *
+	 * @param executeId 执行id
+	 * @return true 还在执行
+	 */
+	public static boolean isRun(String executeId) {
+		return FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.containsKey(executeId);
+	}
+
+	/**
+	 * 关闭会话
+	 *
+	 * @param session 会话
+	 */
 	public static void stopWatcher(Session session) {
 		Collection<ScriptProcessBuilder> scriptProcessBuilders = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.values();
 		for (ScriptProcessBuilder scriptProcessBuilder : scriptProcessBuilders) {
@@ -123,6 +150,7 @@ public class ScriptProcessBuilder implements Runnable {
 	public void run() {
 		//初始化ProcessBuilder对象
 		try {
+			this.handle("start execute:" + DateUtil.now());
 			process = processBuilder.start();
 			{
 				inputStream = process.getInputStream();
@@ -133,6 +161,7 @@ public class ScriptProcessBuilder implements Runnable {
 			JSONObject jsonObject = jsonMessage.toJson();
 			jsonObject.put("op", ConsoleCommandOp.stop.name());
 			this.end(jsonObject.toString());
+			this.handle("execute done:" + waitFor + " time:" + DateUtil.now());
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("执行异常", e);
 			this.end("执行异常：" + e.getMessage());

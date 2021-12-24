@@ -172,6 +172,8 @@ public enum NodeUrl {
 	Script_List("/script/list.json"),
 	Script_Item("/script/item.json"),
 	Script_Save("/script/save.json"),
+	SCRIPT_LOG("/script/log"),
+	SCRIPT_DEL_LOG("/script/del_log"),
 	Script_Upload("/script/upload.json"),
 	Script_Del("/script/del.json"),
 

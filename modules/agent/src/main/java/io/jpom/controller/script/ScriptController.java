@@ -22,17 +22,26 @@
  */
 package io.jpom.controller.script;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HtmlUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.service.script.ScriptServer;
+import io.jpom.socket.ScriptProcessBuilder;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.util.CommandUtil;
+import io.jpom.util.LimitQueue;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -127,5 +136,64 @@ public class ScriptController extends BaseAgentController {
 		}
 		scriptServer.addItem(eModel);
 		return JsonMessage.getString(200, "导入成功");
+	}
+
+	/**
+	 * 获取的日志
+	 *
+	 * @param id        id
+	 * @param executeId 执行ID
+	 * @param line      需要获取的行号
+	 * @return json
+	 */
+	@RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String getNowLog(@ValidatorItem() String id,
+							@ValidatorItem() String executeId,
+							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+		NodeScriptModel item = scriptServer.getItem(id);
+		Assert.notNull(item, "没有对应数据");
+		File logFile = item.logFile(executeId);
+		Assert.state(FileUtil.isFile(logFile), "日志文件错误");
+
+		JSONObject data = new JSONObject();
+		// 运行中
+		data.put("run", ScriptProcessBuilder.isRun(executeId));
+		// 读取文件
+		int linesInt = Convert.toInt(line, 1);
+		LimitQueue<String> lines = new LimitQueue<>(1000);
+		final int[] readCount = {0};
+		FileUtil.readLines(logFile, CharsetUtil.CHARSET_UTF_8, (LineHandler) line1 -> {
+			readCount[0]++;
+			if (readCount[0] < linesInt) {
+				return;
+			}
+			lines.add(line1);
+		});
+		// 下次应该获取的行数
+		data.put("line", readCount[0] + 1);
+		data.put("getLine", linesInt);
+		data.put("dataLines", lines);
+		return JsonMessage.getString(200, "ok", data);
+	}
+
+	/**
+	 * 删除日志
+	 *
+	 * @param id        id
+	 * @param executeId 执行ID
+	 * @return json
+	 */
+	@RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String delLog(@ValidatorItem() String id,
+						 @ValidatorItem() String executeId) {
+		NodeScriptModel item = scriptServer.getItem(id);
+		if (item == null) {
+			return JsonMessage.getString(200, "对应的脚本模版已经不存在拉");
+		}
+		Assert.notNull(item, "没有对应数据");
+		File logFile = item.logFile(executeId);
+		boolean fastDel = CommandUtil.systemFastDel(logFile);
+		Assert.state(!fastDel, "删除日志文件失败");
+		return JsonMessage.getString(200, "删除成功");
 	}
 }

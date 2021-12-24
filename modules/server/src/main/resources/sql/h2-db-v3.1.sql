@@ -18,3 +18,6 @@ ALTER TABLE COMMAND_EXEC_LOG
 -- 分发状态
 ALTER TABLE OUT_GIVING
 	ADD IF NOT EXISTS `status` int default '0' comment '状态{0: 未分发; 1: 分发中; 2: 分发结束}';
+
+ALTER TABLE SCRIPT_EXECUTE_LOG
+	ADD IF NOT EXISTS scriptName VARCHAR (100) comment '脚本名称';

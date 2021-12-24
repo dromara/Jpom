@@ -33,13 +33,15 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="1200px">
+    <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
       <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="Script 名称" prop="name">
           <a-input v-model="temp.name" placeholder="名称" />
         </a-form-model-item>
         <a-form-model-item label="Script 内容" prop="context">
-          <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
+          <div style="height: 40vh; overflow-y: scroll">
+            <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
+          </div>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -65,7 +67,8 @@ import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL,
 import { parseTime } from "@/utils/time";
 export default {
   components: {
-    ScriptConsole,codeEditor
+    ScriptConsole,
+    codeEditor,
   },
   props: {
     node: {
@@ -274,11 +277,5 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-.ant-btn {
-  margin-right: 10px;
-}
-.node-table {
-  overflow-x: auto;
 }
 </style>

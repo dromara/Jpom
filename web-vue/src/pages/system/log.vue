@@ -147,7 +147,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err);
         this.$notification.error({
-          message: "socket 错误,请检查是否开启 ws 代理,或者没有对应的权限",
+          message: "web socket 错误,请检查是否开启 ws 代理,或者没有对应的权限",
         });
       };
     },

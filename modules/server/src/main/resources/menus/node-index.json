@@ -33,6 +33,10 @@
       {
         "id": "script",
         "title": "脚本模板"
+      },
+      {
+        "id": "script-log",
+        "title": "脚本执行记录"
       }
     ]
   },
