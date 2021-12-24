@@ -12,6 +12,7 @@
 		<module>modules/sub-plugin/email</module>
 		<module>modules/sub-plugin/svn-clone</module>
 		<module>modules/sub-plugin/maven-plugin</module>
+		<module>modules/sub-plugin/auto-charset-jchardet</module>
 	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>

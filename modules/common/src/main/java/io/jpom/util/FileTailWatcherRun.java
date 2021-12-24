@@ -29,6 +29,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
 
 import java.io.File;
@@ -36,7 +37,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.charset.UnsupportedCharsetException;
 
 /**
  * @author bwcx_jzy
@@ -64,11 +64,11 @@ public class FileTailWatcherRun implements Runnable {
 		this.randomFile = new RandomAccessFile(file, FileMode.r.name());
 		Charset detSet = ExtConfigBean.getInstance().getLogFileCharset();
 		if (detSet == null) {
-			String charsetName = new CharsetDetector().detectChineseCharset(file);
 			try {
+				String charsetName = (String) PluginFactory.getPlugin("charset-detector").execute(file, null);
 				detSet = CharsetUtil.charset(charsetName);
-			} catch (UnsupportedCharsetException e) {
-				DefaultSystemLog.getLog().warn("自动识别文件编码格式错误：{},{}", charsetName, e.getMessage());
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().warn("自动识别文件编码格式错误：{}", e.getMessage());
 				detSet = CharsetUtil.CHARSET_UTF_8;
 			}
 			detSet = (detSet == StandardCharsets.US_ASCII) ? CharsetUtil.CHARSET_UTF_8 : detSet;

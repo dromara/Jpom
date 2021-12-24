@@ -29,6 +29,12 @@
 			<version>${pom.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>io.jpom.plugins</groupId>
+			<artifactId>auto-charset-jchardet</artifactId>
+			<version>${pom.version}</version>
+		</dependency>
+
 		<!--websocket作为客户端-->
 		<dependency>
 			<groupId>org.java-websocket</groupId>
