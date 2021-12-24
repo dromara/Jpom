@@ -1,6 +1,7 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
+      <a-input class="search-input-item" v-model="listQuery['%id%']" placeholder="id" />
       <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="名称" />
       <a-select v-model="listQuery.outGivingProject" allowClear placeholder="分发类型" class="search-input-item">
         <a-select-option :value="1">独立</a-select-option>
