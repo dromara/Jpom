@@ -24,6 +24,7 @@ package io.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;
@@ -63,6 +64,19 @@ public class OutGivingModel extends BaseWorkspaceModel {
 	 * 是否为单独创建的分发项目
 	 */
 	private Boolean outGivingProject;
+
+	/**
+	 * 状态
+	 */
+	private Integer status;
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
 
 	public Integer getIntervalTime() {
 		return intervalTime;
@@ -199,5 +213,35 @@ public class OutGivingModel extends BaseWorkspaceModel {
 			delete.add(outGivingNodeProject);
 		});
 		return delete;
+	}
+
+	/**
+	 * 状态
+	 */
+	public enum Status implements BaseEnum {
+		/**
+		 *
+		 */
+		NO(0, "未分发"),
+		ING(1, "分发中"),
+		DONE(2, "分发结束"),
+		;
+		private final int code;
+		private final String desc;
+
+		Status(int code, String desc) {
+			this.code = code;
+			this.desc = desc;
+		}
+
+		@Override
+		public int getCode() {
+			return code;
+		}
+
+		@Override
+		public String getDesc() {
+			return desc;
+		}
 	}
 }

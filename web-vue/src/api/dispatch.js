@@ -196,3 +196,9 @@ export const dispatchStatusMap = {
   3: "分发失败",
   4: "取消分发",
 };
+
+export const statusMap = {
+  0: "未分发",
+  1: "分发中",
+  2: "分发结束",
+};

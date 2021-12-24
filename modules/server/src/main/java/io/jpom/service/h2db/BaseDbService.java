@@ -325,7 +325,9 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 				Entity entity = Entity.create(super.getTableName());
 				entity.set(timeColumn, "< " + time);
 				int count = super.del(entity);
-				DefaultSystemLog.getLog().debug("{} 清理了 {}条数据", super.getTableName(), count);
+				if (count > 0) {
+					DefaultSystemLog.getLog().debug("{} 清理了 {}条数据", super.getTableName(), count);
+				}
 			});
 		}
 	}

@@ -207,11 +207,9 @@ public class OutGivingProjectController extends BaseServerController {
 		OutGivingModel outGivingModel = outGivingServer.getByKey(id, getRequest());
 		Assert.notNull(outGivingModel, "上传失败,没有找到对应的分发项目");
 		// 检查状态
-		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.outGivingNodeProjectList();
-		Objects.requireNonNull(outGivingNodeProjectList);
-		for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
-			Assert.state(outGivingNodeProject.getStatus() != OutGivingNodeProject.Status.Ing.getCode(), "当前还在分发中,请等待分发结束");
-		}
+		Integer statusCode = outGivingModel.getStatus();
+		OutGivingModel.Status status = BaseEnum.getEnum(OutGivingModel.Status.class, statusCode, OutGivingModel.Status.NO);
+		Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束");
 		return outGivingModel;
 	}
 

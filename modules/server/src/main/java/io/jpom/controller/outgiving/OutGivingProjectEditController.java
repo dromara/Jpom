@@ -409,7 +409,8 @@ public class OutGivingProjectEditController extends BaseServerController {
 			JsonMessage<String> jsonMessage;
 			// 删除实际的项目
 			for (OutGivingNodeProject outGivingNodeProject1 : deleteNodeProject) {
-				NodeModel nodeModel = outGivingNodeProject1.getNodeData(true);
+				NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject1.getNodeId());
+				//outGivingNodeProject1.getNodeData(true);
 				jsonMessage = deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
 				Assert.state(jsonMessage.getCode() == HttpStatus.HTTP_OK, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
 			}

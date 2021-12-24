@@ -14,3 +14,7 @@ ALTER TABLE COMMAND_INFO
 
 ALTER TABLE COMMAND_EXEC_LOG
 	ADD IF NOT EXISTS triggerExecType int DEFAULT 0 comment '触发类型{0，手动，1 自动触发}';
+
+-- 分发状态
+ALTER TABLE OUT_GIVING
+	ADD IF NOT EXISTS `status` int default '0' comment '状态{0: 未分发; 1: 分发中; 2: 分发结束}';

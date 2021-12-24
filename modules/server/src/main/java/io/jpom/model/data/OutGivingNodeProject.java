@@ -23,10 +23,8 @@
 package io.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseJsonModel;
-import io.jpom.service.node.NodeService;
 
 /**
  * 节点项目
@@ -35,12 +33,11 @@ import io.jpom.service.node.NodeService;
  * @date 2019/4/22
  */
 public class OutGivingNodeProject extends BaseJsonModel {
-	private static NodeService nodeService;
 
 	private String nodeId;
 	private String projectId;
 	private String lastOutGivingTime;
-	private Integer status = Status.No.getCode();
+	private Integer status;
 	private String result;
 
 
@@ -86,19 +83,6 @@ public class OutGivingNodeProject extends BaseJsonModel {
 
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
-	}
-
-	/**
-	 * 获取节点的数据
-	 *
-	 * @param get 防止自动读取
-	 * @return 实体
-	 */
-	public NodeModel getNodeData(boolean get) {
-		if (nodeService == null) {
-			nodeService = SpringUtil.getBean(NodeService.class);
-		}
-		return nodeService.getByKey(this.nodeId);
 	}
 
 	/**

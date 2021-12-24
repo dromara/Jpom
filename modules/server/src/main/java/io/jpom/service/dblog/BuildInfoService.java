@@ -37,6 +37,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.ICron;
+import io.jpom.service.IStatusRecover;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.util.CronUtils;
 import org.springframework.stereotype.Service;
@@ -52,7 +53,7 @@ import java.util.Objects;
  * @date 2021-08-10
  **/
 @Service
-public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> implements ICron {
+public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> implements ICron, IStatusRecover {
 
 	private final RepositoryService repositoryService;
 
@@ -88,13 +89,14 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
 		for (BuildInfoModel buildInfoModel : buildInfoModels) {
 			this.checkCron(buildInfoModel);
 		}
+		return CollUtil.size(buildInfoModels);
+	}
+
+	@Override
+	public int statusRecover() {
 		// 恢复异常数据
 		String updateSql = "update " + super.getTableName() + " set status=? where status=? or status=?";
-		int execute = super.execute(updateSql, BuildStatus.No.getCode(), BuildStatus.Ing.getCode(), BuildStatus.PubIng.getCode());
-		if (execute > 0) {
-			DefaultSystemLog.getLog().info("build Recover bad data {}", execute);
-		}
-		return CollUtil.size(buildInfoModels);
+		return super.execute(updateSql, BuildStatus.No.getCode(), BuildStatus.Ing.getCode(), BuildStatus.PubIng.getCode());
 	}
 
 	/**
