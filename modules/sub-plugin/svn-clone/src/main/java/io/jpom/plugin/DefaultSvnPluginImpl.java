@@ -31,16 +31,12 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2021/12/23
  */
+@PluginConfig(plugin = DefaultPlugin.SvnClone)
 public class DefaultSvnPluginImpl implements IDefaultPlugin {
 
 	@Override
 	public Object execute(Object main, Map<String, Object> parameter) throws SVNException {
 		File savePath = (File) main;
 		return SvnKitUtil.checkOut(parameter, savePath);
-	}
-
-	@Override
-	public String name() {
-		return DefaultPlugin.SvnClone.getName();
 	}
 }

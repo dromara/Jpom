@@ -29,6 +29,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.plugin.DefaultPlugin;
 import io.jpom.plugin.IDefaultPlugin;
+import io.jpom.plugin.PluginConfig;
 
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -39,6 +40,7 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2021/12/22
  */
+@PluginConfig(plugin = DefaultPlugin.Email)
 public class DefaultEmailPluginImpl implements IDefaultPlugin {
 
 	@Override
@@ -106,10 +108,5 @@ public class DefaultEmailPluginImpl implements IDefaultPlugin {
 		}
 		mailAccount.setAuth(true);
 		return mailAccount;
-	}
-
-	@Override
-	public String name() {
-		return DefaultPlugin.Email.getName();
 	}
 }

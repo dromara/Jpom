@@ -53,29 +53,4 @@ public interface IPlugin {
 	default boolean check(String type, Object main, Map<String, Object> parameter) {
 		throw new RuntimeException("Not implements");
 	}
-
-	/**
-	 * 插件的名字
-	 *
-	 * @return 名称
-	 */
-	String name();
-
-	/**
-	 * 插件父级
-	 *
-	 * @return 父级名称
-	 */
-	default String parent() {
-		return null;
-	}
-
-	/**
-	 * 排序值
-	 *
-	 * @return 值越小，排到前面 正序
-	 */
-	default int order() {
-		return Integer.MIN_VALUE;
-	}
 }

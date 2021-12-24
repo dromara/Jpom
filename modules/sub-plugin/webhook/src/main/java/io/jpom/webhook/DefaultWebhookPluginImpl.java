@@ -29,6 +29,7 @@ import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.plugin.DefaultPlugin;
 import io.jpom.plugin.IDefaultPlugin;
+import io.jpom.plugin.PluginConfig;
 
 import java.util.Map;
 
@@ -38,6 +39,7 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2021/12/22
  */
+@PluginConfig(plugin = DefaultPlugin.WebHook)
 public class DefaultWebhookPluginImpl implements IDefaultPlugin {
 
 	@Override
@@ -56,10 +58,5 @@ public class DefaultWebhookPluginImpl implements IDefaultPlugin {
 			DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
 			return "WebHooks error:" + e.getMessage();
 		}
-	}
-
-	@Override
-	public String name() {
-		return DefaultPlugin.WebHook.getName();
 	}
 }

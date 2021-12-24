@@ -28,12 +28,12 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.ClassUtil;
-import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.common.JpomManifest;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.Order;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 public class PluginFactory implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 	private static final List<FeatureCallback> FEATURE_CALLBACKS = new ArrayList<>();
-	private static final Map<String, List<PluginItem>> PLUGIN_MAP = new ConcurrentHashMap<>();
+	private static final Map<String, List<PluginItemWrap>> PLUGIN_MAP = new ConcurrentHashMap<>();
 
 	/**
 	 * 添加回调事件
@@ -84,10 +84,10 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
 	 * @return 插件对象
 	 */
 	public static IPlugin getPlugin(String name) {
-		List<PluginItem> pluginItems = PLUGIN_MAP.get(name);
-		PluginItem first = CollUtil.getFirst(pluginItems);
+		List<PluginItemWrap> pluginItemWraps = PLUGIN_MAP.get(name);
+		PluginItemWrap first = CollUtil.getFirst(pluginItemWraps);
 		Assert.notNull(first, "对应找到对应到插件：" + name);
-		return first.plugin;
+		return first.getPlugin();
 	}
 
 	/**
@@ -103,14 +103,12 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
 	 * 正式环境添加依赖
 	 */
 	private static void init() {
-		if (JpomManifest.getInstance().isDebug()) {
-			return;
-		}
 		File runPath = JpomManifest.getRunPath().getParentFile();
 		File plugin = FileUtil.file(runPath, "plugin");
 		if (!plugin.exists() || plugin.isFile()) {
 			return;
 		}
+		// 加载二级插件包
 		File[] dirFiles = plugin.listFiles(File::isDirectory);
 		if (dirFiles != null) {
 			for (File file : dirFiles) {
@@ -125,6 +123,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
 				addPlugin(file.getName(), lib);
 			}
 		}
+		// 加载一级独立插件端包
 		File[] files = plugin.listFiles(pathname -> FileUtil.isFile(pathname) && FileUtil.JAR_FILE_EXT.equalsIgnoreCase(FileUtil.extName(pathname)));
 		if (files != null) {
 			for (File file : files) {
@@ -134,7 +133,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
 	}
 
 	private static void addPlugin(String pluginName, File file) {
-		DefaultSystemLog.getLog().info("加载：{}插件", pluginName);
+		DefaultSystemLog.getLog().info("加载：{} 插件", pluginName);
 		ClassLoader contextClassLoader = ClassLoaderUtil.getClassLoader();
 		JarClassLoader.loadJar((URLClassLoader) contextClassLoader, file);
 	}
@@ -144,51 +143,31 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
 		init();
 		// 扫描插件 实现
 		Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom", IPlugin.class::isAssignableFrom);
-		List<PluginItem> pluginItems = classes.stream().filter(ClassUtil::isNormalClass).map(aClass -> {
-			PluginItem pluginItem = new PluginItem();
-			IPlugin plugin = (IPlugin) ReflectUtil.newInstance(aClass);
-			pluginItem.plugin = plugin;
-			pluginItem.name = plugin.name();
-			pluginItem.className = (Class<? extends IPlugin>) aClass;
-			return pluginItem;
-		}).collect(Collectors.toList());
+		List<PluginItemWrap> pluginItemWraps = classes
+				.stream()
+				.filter(aClass -> ClassUtil.isNormalClass(aClass) && aClass.isAnnotationPresent(PluginConfig.class))
+				.map(aClass -> new PluginItemWrap((Class<? extends IPlugin>) aClass))
+				.filter(pluginItemWrap -> {
+					if (StrUtil.isEmpty(pluginItemWrap.getName())) {
+						DefaultSystemLog.getLog().warn("plugin config name error:{}", pluginItemWrap.getClassName());
+						return false;
+					}
+					return true;
+				})
+				.collect(Collectors.toList());
 		//
-		Map<String, List<PluginItem>> pluginMap = CollStreamUtil.groupByKey(pluginItems, PluginItem::getName);
+		Map<String, List<PluginItemWrap>> pluginMap = CollStreamUtil.groupByKey(pluginItemWraps, PluginItemWrap::getName);
 		pluginMap.forEach((key, value) -> {
 			// 排序
-			value.sort((o1, o2) -> Comparator.comparingInt((ToIntFunction<PluginItem>) value1 -> value1.plugin.order()).compare(o1, o2));
+			value.sort((o1, o2) -> Comparator.comparingInt((ToIntFunction<PluginItemWrap>) value1 -> {
+				Order order = value1.getClassName().getAnnotation(Order.class);
+				if (order == null) {
+					return 0;
+				}
+				return order.value();
+			}).compare(o1, o2));
 			PLUGIN_MAP.put(key, value);
 		});
 
-	}
-
-	private static class PluginItem {
-
-		/**
-		 * 插件名
-		 */
-		private String name;
-
-		/**
-		 * 插件类名
-		 */
-		private Class<? extends IPlugin> className;
-
-		/**
-		 * 插件对象
-		 */
-		private IPlugin plugin;
-
-		public String getName() {
-			return name;
-		}
-
-		public Class<? extends IPlugin> getClassName() {
-			return className;
-		}
-
-		public IPlugin getPlugin() {
-			return plugin;
-		}
 	}
 }
