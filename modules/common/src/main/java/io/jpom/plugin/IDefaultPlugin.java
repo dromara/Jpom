@@ -30,13 +30,4 @@ package io.jpom.plugin;
  */
 public interface IDefaultPlugin extends IPlugin {
 
-	/**
-	 * 默认插件排序到最后
-	 *
-	 * @return max
-	 */
-	@Override
-	default int order() {
-		return Integer.MAX_VALUE;
-	}
 }

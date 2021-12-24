@@ -22,11 +22,19 @@
  */
 package io.jpom.plugin;
 
+import cn.hutool.core.util.StrUtil;
+
 /**
+ * 默认插件
+ *
  * @author bwcx_jzy
  * @since 2021/12/22
  */
 public enum DefaultPlugin {
+	/**
+	 * null
+	 */
+	NULL(StrUtil.EMPTY),
 	/**
 	 * web hook
 	 */
