@@ -115,47 +115,40 @@ public class HttpUtils {
 			if (paramsStr != null && method == HttpMethod.POST) {
 				//发送请求参数
 				out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream(), encoding));
-				out.write(paramsStr.toString());
+				out.write(paramsStr);
 				out.flush();
 			}
 
 			//接收返回结果
 			StringBuilder result = new StringBuilder();
-			in = new BufferedReader(new InputStreamReader(conn.getInputStream(), encoding));
-			String line = "";
-			while ((line = in.readLine()) != null) {
-				result.append(line);
+			try (InputStream inputStream = conn.getInputStream()) {
+				in = new BufferedReader(new InputStreamReader(inputStream, encoding));
+				String line = "";
+				while ((line = in.readLine()) != null) {
+					result.append(line);
+				}
 			}
 			return result.toString();
 		} catch (Exception e) {
-			//处理错误流，提高http连接被重用的几率
+			log.error("网络异常", e);
+			if (conn == null) {
+				return null;
+			}
 			try {
+				//处理错误流，提高http连接被重用的几率
 				byte[] buf = new byte[100];
 				InputStream es = conn.getErrorStream();
 				if (es != null) {
 					while (es.read(buf) > 0) {
-
 					}
-					es.close();
 				}
+				IoUtil.close(es);
 			} catch (Exception e1) {
 				log.error("网络异常", e);
 			}
 		} finally {
-			try {
-				if (out != null) {
-					out.close();
-				}
-			} catch (Exception e) {
-				log.error("io close", e);
-			}
-			try {
-				if (in != null) {
-					in.close();
-				}
-			} catch (Exception e) {
-				log.error("io close", e);
-			}
+			IoUtil.close(out);
+			IoUtil.close(in);
 			//关闭连接
 			if (conn != null) {
 				conn.disconnect();
