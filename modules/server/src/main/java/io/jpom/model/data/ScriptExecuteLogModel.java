@@ -37,6 +37,19 @@ public class ScriptExecuteLogModel extends BaseNodeModel {
 	 */
 	private String scriptId;
 
+	/**
+	 * 脚本名称
+	 */
+	private String scriptName;
+
+	public String getScriptName() {
+		return scriptName;
+	}
+
+	public void setScriptName(String scriptName) {
+		this.scriptName = scriptName;
+	}
+
 	public String getScriptId() {
 		return scriptId;
 	}

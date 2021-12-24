@@ -72,6 +72,7 @@ public enum ClassFeature {
 	PROJECT_CONSOLE("项目控制台", ClassFeature.NODE),
 	JDK_LIST("JDK管理", ClassFeature.NODE),
 	NODE_SCRIPT("脚本模板", ClassFeature.NODE),
+	NODE_SCRIPT_LOG("脚本模板日志", ClassFeature.NODE),
 	TOMCAT("Tomcat", ClassFeature.NODE),
 	TOMCAT_FILE("Tomcat file", ClassFeature.NODE),
 	TOMCAT_LOG("Tomcat log", ClassFeature.NODE),

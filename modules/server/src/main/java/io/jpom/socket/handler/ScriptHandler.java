@@ -85,16 +85,17 @@ public class ScriptHandler extends BaseProxyHandler {
 		ScriptServer scriptServer = SpringUtil.getBean(ScriptServer.class);
 		//
 		try {
+			BaseServerController.resetInfo(userModel);
 			//
 			ScriptModel scriptModel = new ScriptModel();
 			scriptModel.setId(dataItem.getId());
 			scriptModel.setLastRunUser(userModel.getId());
 			scriptServer.update(scriptModel);
 			//
-			BaseServerController.resetInfo(userModel);
 			ScriptExecuteLogModel scriptExecuteLogModel = new ScriptExecuteLogModel();
 			scriptExecuteLogModel.setScriptId(dataItem.getScriptId());
 			scriptExecuteLogModel.setNodeId(nodeInfo.getId());
+			scriptExecuteLogModel.setScriptName(dataItem.getName());
 			scriptExecuteLogModel.setWorkspaceId(nodeInfo.getWorkspaceId());
 			logServer.insert(scriptExecuteLogModel);
 			return scriptExecuteLogModel.getId();
