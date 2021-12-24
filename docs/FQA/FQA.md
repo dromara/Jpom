@@ -20,6 +20,13 @@
 > linux 执行：sh /xxxx/Server.sh restart --rest:ip_config
 >
 > windows 执行 Server.bat 操作面板会提示如果执行
+
+### 在线构建异常
+
+> 在使用在线构建中出现 xxx:未找到命令 等相关提示。
+
+> 构建依赖的是系统环境，如果需要 maven 或者 node 需要服务端所在的服务器中有对应插件，如果已经启动服务端再安装的对应环境需要通过命令行重启服务端后才生效。
+
     
 ### 在linux 系统中执行管理sh 提示
 
