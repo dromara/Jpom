@@ -33,6 +33,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.service.node.script.ScriptExecuteLogServer;
+import io.jpom.service.node.script.ScriptServer;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.ProxySession;
@@ -81,8 +82,15 @@ public class ScriptHandler extends BaseProxyHandler {
 		UserModel userModel = (UserModel) attributes.get("userInfo");
 		ScriptModel dataItem = (ScriptModel) attributes.get("dataItem");
 		ScriptExecuteLogServer logServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
+		ScriptServer scriptServer = SpringUtil.getBean(ScriptServer.class);
 		//
 		try {
+			//
+			ScriptModel scriptModel = new ScriptModel();
+			scriptModel.setId(dataItem.getId());
+			scriptModel.setLastRunUser(userModel.getId());
+			scriptServer.update(scriptModel);
+			//
 			BaseServerController.resetInfo(userModel);
 			ScriptExecuteLogModel scriptExecuteLogModel = new ScriptExecuteLogModel();
 			scriptExecuteLogModel.setScriptId(dataItem.getScriptId());
