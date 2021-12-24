@@ -168,9 +168,7 @@ export default {
         });
       };
     },
-    init(ids) {
-      this.sendMsg("getNodeList:" + ids.join(","));
-      this.getAgentVersion();
+    checkAgentFileVersion() {
       // 获取是否有新版本
       checkVersion().then((res) => {
         if (res.code === 200) {
@@ -183,6 +181,10 @@ export default {
           }
         }
       });
+    },
+    init(ids) {
+      this.sendMsg("getNodeList:" + ids.join(","));
+      this.getAgentVersion();
       // 创建心跳，防止掉线
       this.heart && clearInterval(this.heart);
       this.heart = setInterval(() => {
@@ -251,6 +253,7 @@ export default {
       } catch (e) {
         this.agentVersion = data;
       }
+      this.checkAgentFileVersion();
     },
     getVersionResult(data, nodeId) {
       this.nodeVersion = Object.assign({}, this.nodeVersion, {
