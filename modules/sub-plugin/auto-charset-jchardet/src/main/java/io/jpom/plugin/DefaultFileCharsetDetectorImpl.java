@@ -20,20 +20,25 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.service;
+package io.jpom.plugin;
+
+import java.io.File;
+import java.util.Map;
 
 /**
- * 状态恢复接口
- *
  * @author bwcx_jzy
  * @since 2021/12/24
  */
-public interface IStatusRecover {
+public class DefaultFileCharsetDetectorImpl implements IDefaultPlugin {
 
-	/**
-	 * 状态恢复
-	 *
-	 * @return 恢复条数
-	 */
-	int statusRecover();
+	@Override
+	public Object execute(Object main, Map<String, Object> parameter) throws Exception {
+		File file = (File) main;
+		return new CharsetDetector().detectChineseCharset(file);
+	}
+
+	@Override
+	public String name() {
+		return "charset-detector";
+	}
 }
