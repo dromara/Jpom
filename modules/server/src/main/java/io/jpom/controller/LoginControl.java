@@ -46,11 +46,10 @@ import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.JwtUtil;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
@@ -63,7 +62,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Administrator
  */
-@Controller
+@RestController
 public class LoginControl extends BaseServerController {
 	/**
 	 * ip 黑名单
@@ -71,11 +70,6 @@ public class LoginControl extends BaseServerController {
 	public static final LFUCache<String, Integer> LFU_CACHE = new LFUCache<>(1000);
 
 	private static final String LOGIN_CODE = "login_code";
-
-	private static final String SHOW_CODE = "show_code";
-
-//    public static final int INPUT_CODE = 600;
-//    private static final int INPUT_CODE_ERROR_COUNT = 3;
 
 	private final UserService userService;
 	private final UserBindWorkspaceService userBindWorkspaceService;
@@ -92,7 +86,6 @@ public class LoginControl extends BaseServerController {
 	 * @throws IOException IO
 	 */
 	@RequestMapping(value = "randCode.png", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
-	@ResponseBody
 	@NotLogin
 	public void randCode() throws IOException {
 		int height = 50;
@@ -104,18 +97,18 @@ public class LoginControl extends BaseServerController {
 		circleCaptcha.write(response.getOutputStream());
 		String code = circleCaptcha.getCode();
 		setSessionAttribute(LOGIN_CODE, code);
-		// 会话显示验证码
-		setSessionAttribute(SHOW_CODE, true);
 	}
 
-	private Integer ipError() {
+	/**
+	 * 记录 ip 登录失败
+	 */
+	private void ipError() {
 		if (ServerExtConfigBean.getInstance().getIpErrorLockTime() <= 0) {
-			return 0;
+			return;
 		}
 		String ip = getIp();
 		int count = ObjectUtil.defaultIfNull(LFU_CACHE.get(ip), 0) + 1;
 		LFU_CACHE.put(ip, count, ServerExtConfigBean.getInstance().getIpErrorLockTime());
-		return count;
 	}
 
 	private void ipSuccess() {
@@ -150,7 +143,6 @@ public class LoginControl extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@NotLogin
 	public String userLogin(
 			@ValidatorConfig(value = {
@@ -171,15 +163,12 @@ public class LoginControl extends BaseServerController {
 			}
 			// 获取验证码
 			String sCode = getSessionAttribute(LOGIN_CODE);
-			if (StrUtil.isEmpty(code) || !sCode.equalsIgnoreCase(code)) {
-				return JsonMessage.getString(400, "请输入正确的验证码");
-			}
+			Assert.state(StrUtil.equalsIgnoreCase(code, sCode), "请输入正确的验证码");
 			removeSessionAttribute(LOGIN_CODE);
-
 			try {
 				long lockTime = userModel.overLockTime();
 				if (lockTime > 0) {
-					String msg = DateUtil.formatBetween(lockTime * 1000, BetweenFormatter.Level.MINUTE);
+					String msg = DateUtil.formatBetween(lockTime * 1000, BetweenFormatter.Level.SECOND);
 					userModel.errorLock();
 					this.ipError();
 					return JsonMessage.getString(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
@@ -191,7 +180,6 @@ public class LoginControl extends BaseServerController {
 					List<WorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspaceInfo(userModel);
 					Assert.notEmpty(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
 					setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
-					removeSessionAttribute(SHOW_CODE);
 					this.ipSuccess();
 					String jwtId = userService.getUserJwtId(userName);
 					UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
@@ -213,7 +201,6 @@ public class LoginControl extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "logout2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@NotLogin
 	public String logout() {
 		getSession().invalidate();
@@ -224,7 +211,6 @@ public class LoginControl extends BaseServerController {
 	 * 刷新token
 	 */
 	@RequestMapping(value = "renewal", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@NotLogin
 	public String renewalToken() {
 		String token = getRequest().getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);

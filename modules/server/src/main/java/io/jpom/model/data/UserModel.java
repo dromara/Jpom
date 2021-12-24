@@ -232,18 +232,19 @@ public class UserModel extends BaseStrikeDbModel {
 	 */
 	public void errorLock() {
 		// 未开启锁定功能
-		if (ServerExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
+		int userAlwaysLoginError = ServerExtConfigBean.getInstance().userAlwaysLoginError;
+		if (userAlwaysLoginError <= 0) {
 			return;
 		}
 		setPwdErrorCount(getPwdErrorCount() + 1);
 		int count = getPwdErrorCount();
 		// 记录错误时间
 		setLastPwdErrorTime(DateUtil.currentSeconds());
-		if (count < ServerExtConfigBean.getInstance().userAlwaysLoginError) {
+		if (count < userAlwaysLoginError) {
 			// 还未达到锁定条件
 			return;
 		}
-		int level = count / ServerExtConfigBean.getInstance().userAlwaysLoginError;
+		int level = count / userAlwaysLoginError;
 		switch (level) {
 			case 1:
 				// 在错误倍数 为1 锁定 30分钟
