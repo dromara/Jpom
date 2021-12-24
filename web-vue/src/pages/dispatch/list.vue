@@ -310,7 +310,7 @@
             <a-form-model-item label="args 参数" prop="args">
               <a-textarea v-model="temp[`${nodeId}_args`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
             </a-form-model-item>
-            <a-form-model-item prop="autoStart">
+            <a-form-model-item prop="autoStart" v-show="temp.runMode && temp.runMode !== 'File'">
               <template slot="label">
                 自启动
                 <a-tooltip v-show="temp.type !== 'edit'">

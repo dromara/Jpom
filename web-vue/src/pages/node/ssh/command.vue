@@ -9,7 +9,7 @@
       <a-button type="primary" @click="createCommand">新建命令</a-button>
       <a-tooltip>
         <template slot="title">
-          <div>命令模版是用于在线管理一些脚本命令，如果初始化软件环境、管理应用程序等</div>
+          <div>命令模版是用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
 
           <div>
             <ul>

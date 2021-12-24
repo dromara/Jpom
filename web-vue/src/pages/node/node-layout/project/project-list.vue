@@ -214,7 +214,7 @@
           </template>
           <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
         </a-form-model-item>
-        <a-form-model-item prop="autoStart">
+        <a-form-model-item prop="autoStart" v-show="temp.runMode && temp.runMode !== 'File'">
           <template slot="label">
             自启动
             <a-tooltip v-show="temp.type !== 'edit'">
