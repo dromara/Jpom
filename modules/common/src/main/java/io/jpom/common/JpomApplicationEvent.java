@@ -68,21 +68,19 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 		if (event instanceof ApplicationReadyEvent) {
 			//
 			checkPath();
+			JpomManifest jpomManifest = JpomManifest.getInstance();
+			ConfigBean instance = ConfigBean.getInstance();
 			// 清理旧进程新文件
-			File dataDir = FileUtil.file(ConfigBean.getInstance().getDataPath());
+			File dataDir = FileUtil.file(instance.getDataPath());
 			List<File> files = FileUtil.loopFiles(dataDir, 1, pathname -> pathname.getName().startsWith("pid."));
 			files.forEach(FileUtil::del);
-			DefaultSystemLog.getLog().debug("clear old pid file success");
 			try {
-				this.lockFile();
+				this.lockFile(jpomManifest.getPid());
 			} catch (IOException e) {
 				DefaultSystemLog.getLog().error("lockFile", e);
 			}
-			DefaultSystemLog.getLog().debug("lock pid file success");
-			// 写入Jpom 信息
-			JpomManifest jpomManifest = JpomManifest.getInstance();
-			//  写入全局信息
-			File appJpomFile = ConfigBean.getInstance().getApplicationJpomInfo(JpomApplication.getAppType());
+			// 写入Jpom 信息 、 写入全局信息
+			File appJpomFile = instance.getApplicationJpomInfo(JpomApplication.getAppType());
 			FileUtil.writeString(jpomManifest.toString(), appJpomFile, CharsetUtil.CHARSET_UTF_8);
 			// 检查更新文件
 			checkUpdate();
@@ -96,9 +94,10 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 			// 应用关闭
 			this.unLockFile();
 			//
-			FileUtil.del(ConfigBean.getInstance().getPidFile());
+			ConfigBean instance = ConfigBean.getInstance();
+			FileUtil.del(instance.getPidFile());
 			//
-			File appJpomFile = ConfigBean.getInstance().getApplicationJpomInfo(JpomApplication.getAppType());
+			File appJpomFile = instance.getApplicationJpomInfo(JpomApplication.getAppType());
 			FileUtil.del(appJpomFile);
 		}
 	}
@@ -123,8 +122,10 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 	 *
 	 * @throws IOException IO
 	 */
-	private void lockFile() throws IOException {
+	private void lockFile(long pid) throws IOException {
 		this.fileOutputStream = new FileOutputStream(ConfigBean.getInstance().getPidFile(), true);
+		this.fileOutputStream.write(StrUtil.bytes("Jpom pid:" + pid, CharsetUtil.CHARSET_UTF_8));
+		this.fileOutputStream.flush();
 		this.fileChannel = fileOutputStream.getChannel();
 		while (true) {
 			try {
