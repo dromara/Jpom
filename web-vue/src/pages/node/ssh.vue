@@ -79,7 +79,7 @@
         <a-form-model-item label="Password" :prop="`${temp.type === 'add' && temp.connectType === 'PASS' ? 'password' : 'password-update'}`">
           <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />
         </a-form-model-item>
-        <a-form-model-item v-if="temp.connectType === 'PUBKEY'" :prop="`${temp.type === 'add' ? 'privateKey' : ''}`">
+        <a-form-model-item v-if="temp.connectType === 'PUBKEY'" prop="privateKey">
           <template slot="label">
             私钥内容
             <a-tooltip v-if="temp.type !== 'edit'" placement="topLeft">
@@ -358,7 +358,7 @@ export default {
         ],
         user: [{ required: true, message: "Please input user", trigger: "blur" }],
         password: [{ required: true, message: "Please input password", trigger: "blur" }],
-        privateKey: [{ required: true, message: "Please input key", trigger: "blur" }],
+        // privateKey: [{ required: true, message: "Please input key", trigger: "blur" }],
         url: [{ required: true, message: "Please input url", trigger: "blur" }],
         path: [{ required: true, message: "Please input path", trigger: "blur" }],
       },
