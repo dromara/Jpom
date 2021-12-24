@@ -1,12 +1,12 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="filter-item">
+      <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
         <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
       </a-select>
       <a-input v-model="listQuery['%name%']" placeholder="搜索项目" class="search-input-item" />
 
-      <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="filter-item">
+      <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
         <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
       </a-select>
       <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
@@ -67,11 +67,11 @@
     </a-table>
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" @goConsole="goConsole"/>
+      <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" @goConsole="goConsole" />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goFile="goFile"/>
+      <console v-if="drawerConsoleVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
     <!-- 批量操作状态 -->
     <a-modal v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
@@ -253,13 +253,13 @@ export default {
       this.drawerConsoleVisible = false;
       this.getNodeProjectData();
     },
-     //前往文件
+    //前往文件
     goFile() {
       // 关闭控制台
       this.onConsoleClose();
       this.handleFile(this.temp);
     },
-     //前往控制台
+    //前往控制台
     goConsole() {
       //关闭文件
       this.onFileClose();
@@ -455,15 +455,6 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-
-.ant-btn {
-  margin-right: 10px;
-}
-
-.filter-item {
-  width: 150px;
-  margin-right: 10px;
 }
 
 .btn-add {

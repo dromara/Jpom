@@ -6,6 +6,9 @@
         <a-select-option :value="1">独立</a-select-option>
         <a-select-option :value="0">关联</a-select-option>
       </a-select>
+      <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
+        <a-select-option v-for="(name, key) in statusMap" :key="key">{{ name }}</a-select-option>
+      </a-select>
       <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
         <a-button type="primary" @click="loadData">搜索</a-button>
       </a-tooltip>
@@ -33,6 +36,10 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ statusMap[text] }}</span>
+      </a-tooltip>
+
       <template slot="outGivingProject" slot-scope="text">
         <span v-if="text">独立</span>
         <span v-else>关联</span>
@@ -433,6 +440,7 @@ import {
   delDisPatchProject,
   remoteDownload,
   afterOptList,
+  statusMap,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, runModeList } from "@/api/node-project";
@@ -448,6 +456,7 @@ export default {
       loading: false,
       childLoading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      statusMap: statusMap,
       list: [],
       accessList: [],
       nodeList: [],
@@ -473,6 +482,7 @@ export default {
         { title: "分发 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "分发名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "类型", dataIndex: "outGivingProject", ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
+        { title: "状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",

@@ -30,6 +30,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.RemoteVersion;
 import io.jpom.service.ICron;
+import io.jpom.service.IStatusRecover;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.CronUtils;
@@ -55,10 +56,20 @@ public class CheckMonitor {
 			BuildUtil.reloadCacheSize();
 			ConfigBean.getInstance().dataSize();
 			// 加载定时器
-			Map<String, ICron> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(ICron.class);
-			beansOfType.forEach((name, iCron) -> {
+			Map<String, ICron> cronMap = SpringUtil.getApplicationContext().getBeansOfType(ICron.class);
+			cronMap.forEach((name, iCron) -> {
 				int startCron = iCron.startCron();
-				DefaultSystemLog.getLog().debug("{} scheduling has been started:{}", name, startCron);
+				if (startCron > 0) {
+					DefaultSystemLog.getLog().debug("{} scheduling has been started:{}", name, startCron);
+				}
+			});
+			// 状态恢复的数据
+			Map<String, IStatusRecover> statusRecoverMap = SpringUtil.getApplicationContext().getBeansOfType(IStatusRecover.class);
+			statusRecoverMap.forEach((name, iCron) -> {
+				int count = iCron.statusRecover();
+				if (count > 0) {
+					DefaultSystemLog.getLog().debug("{} Recover bad data {}", name, count);
+				}
 			});
 			//
 			RemoteVersion.loadRemoteInfo();

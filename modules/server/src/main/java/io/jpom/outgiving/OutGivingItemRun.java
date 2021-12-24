@@ -22,6 +22,7 @@
  */
 package io.jpom.outgiving;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.EnumUtil;
@@ -47,6 +48,7 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -143,13 +145,14 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
 									OutGivingNodeProject.Status status,
 									String msg,
 									String userId) {
-		synchronized (OutGivingRun.class) {
+		synchronized (outGivingId.intern()) {
 			OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
 			OutGivingModel outGivingModel = outGivingServer.getByKey(outGivingId);
 
 			List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
 			Assert.notEmpty(outGivingNodeProjects, "没有分发项目");
 			OutGivingNodeProject finOutGivingNodeProject = null;
+			//
 			for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
 				if (!outGivingNodeProject.getProjectId().equalsIgnoreCase(outGivingNodeProjectItem.getProjectId()) ||
 						!outGivingNodeProject.getNodeId().equalsIgnoreCase(outGivingNodeProjectItem.getNodeId())) {
@@ -162,12 +165,20 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
 				finOutGivingNodeProject = outGivingNodeProject;
 			}
 			{
+				List<OutGivingNodeProject.Status> collect = outGivingNodeProjects
+						.stream()
+						.map(outGivingNodeProject -> EnumUtil.likeValueOf(OutGivingNodeProject.Status.class, outGivingNodeProject.getStatus()))
+						.collect(Collectors.toList());
+				OutGivingModel.Status outGivingStatus = CollUtil.contains(collect, OutGivingNodeProject.Status.Ing)
+						? OutGivingModel.Status.ING : OutGivingModel.Status.DONE;
+				// 更新分发数据
 				OutGivingModel outGivingModel1 = new OutGivingModel();
 				outGivingModel1.setId(outGivingId);
+				outGivingModel1.setStatus(outGivingStatus.getCode());
 				outGivingModel1.outGivingNodeProjectList(outGivingNodeProjects);
 				outGivingServer.update(outGivingModel1);
 			}
-			//
+			// 更新日志数据
 			OutGivingLog outGivingLog = new OutGivingLog();
 			outGivingLog.setId(StrUtil.emptyToDefault(logId, IdUtil.fastSimpleUUID()));
 

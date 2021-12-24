@@ -2,6 +2,7 @@ package io.jpom.service.node;
 
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.OutGivingNodeProject;
+import io.jpom.service.IStatusRecover;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * @date 2019/4/21
  */
 @Service
-public class OutGivingServer extends BaseWorkspaceService<OutGivingModel> {
+public class OutGivingServer extends BaseWorkspaceService<OutGivingModel> implements IStatusRecover {
 
 
 	public boolean checkNode(String nodeId, HttpServletRequest request) {
@@ -34,5 +35,12 @@ public class OutGivingServer extends BaseWorkspaceService<OutGivingModel> {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public int statusRecover() {
+		// 恢复异常数据
+		String updateSql = "update " + super.getTableName() + " set status=? where status=?";
+		return super.execute(updateSql, OutGivingModel.Status.DONE.getCode(), OutGivingModel.Status.ING.getCode());
 	}
 }
