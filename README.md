@@ -20,9 +20,7 @@
     <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dromara/Jpom&amp;utm_campaign=Badge_Grade">
       <img src="https://app.codacy.com/project/badge/Grade/843b953f1446449c9a075e44ea778336" alt="codacy"/>
     </a>
-    <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
-        <img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
-    </a>
+     <img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
     <a target="_blank" href="https://gitee.com/dromara/Jpom">
         <img src='https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp' alt='gitee star'/>
     </a>
@@ -35,7 +33,7 @@
 	<a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
-#### 你为什么需要[Jpom](https://gitee.com/dromara/Jpom)
+#### 您为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
 
 > Java 项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
 
@@ -58,31 +56,44 @@
 
 1. 创建、修改、删除项目、Jar包管理
 2. 实时查看控制台日志、备份日志、删除日志、导出日志
-3. cpu、ram 监控、导出堆栈信息、查看项目进程端口、服务器状态监控
+3. 在线构建项目发布项目一键搞定
 4. 多节点管理、多节点自动分发
-5. 实时监控项目状态异常自动报警
-6. 在线构建项目发布项目一键搞定
-7. 多用户管理，用户项目权限独立(上传、删除权限可控制),完善的操作日志
-8. 系统路径白名单模式，杜绝用户误操作系统文件
-9. 在线管理Nginx配置、ssl证书文件
-10. Tomcat状态、文件、war包在线实时管理
+5. 在线  SSH 终端，并且有终端日志和禁用命令
+6. 实时监控项目状态异常自动报警
+7. ~~cpu、ram 监控、(已经取消该功能)~~ 导出堆栈信息、查看项目进程端口、服务器状态监控
+8. 多用户管理，用户项目权限独立(上传、删除权限可控制),完善的操作日志
+9. 系统路径白名单模式，杜绝用户误操作系统文件
+10. 在线管理 Nginx 配置文件、ssl 证书文件
+11. ~~Tomcat状态、文件、war包在线实时管理 (不再长期维护)~~
 
 > 特别提醒：
-> 1. 在Windows服务器中可能有部分功能因为系统特性造成兼容性问题，建议在实际使用中充分测试。Linux目前兼容良好
+> 1. 在 Windows 服务器中可能有部分功能因为系统特性造成兼容性问题，建议在实际使用中充分测试。Linux 目前兼容良好
 > 2. 服务端和插件端请安装到不同目录中，切勿安装到同一目录中
-> 3. 卸载Jpom插件端或者服务端，先停止对应服务，删除对应的程序文件、日志文件夹、数据目录文件夹即可
-> 4. 构建依赖的是系统环境，如果需要maven或者node需要服务端所在的服务器中有对应插件，如果已经启动服务端再安装的对应环境需要通过命令行重启服务端后才生效。
+> 3. 卸载 Jpom 插件端或者服务端，先停止对应服务，删除对应的程序文件、日志文件夹、数据目录文件夹即可
+> 4. 构建依赖的是系统环境，如果需要 maven 或者 node 需要服务端所在的服务器中有对应插件，如果已经启动服务端再安装的对应环境需要通过命令行重启服务端后才生效。
+> 5. 在Ubuntu/Debian服务器作为插件端可能会添加失败，请在当前用户的根目录创建 .bash_profile文件
 
-### 一键安装（linux）
+> 升级 2.7.x 后不建议降级操作,会涉及到数据不兼容到情况
+>
+> [2.6.x "稳定版" 分支](https://gitee.com/dromara/Jpom/tree/2.6.x/)
+
+#### 版本更新日志
+
+[CHANGELOG.md](https://gitee.com/dromara/Jpom/blob/master/CHANGELOG.md)
+
+### 一键安装（Linux）（推荐）
 
 #### 插件端
+> 如果服务端也需要被管理，在服务端上也需要安装插件端
+>
+> 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) ）
 
 ```
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent
 
 备用地址
 
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom@master/docs/install.sh && bash install.sh Agent
+yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Agent
 
 支持自动安装jdk环境
 
@@ -90,14 +101,20 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ```
 
+启动成功后,插件端的端口为 `2123`
+
 #### 服务端
+
+> 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml) ）
+>
+> 如果需要修改数据、日志存储路径请参照 `extConfig.yml` 文件中 `jpom.path` 配置属性
 
 ```
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server
 
 备用地址
 
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom@master/docs/install.sh && bash install.sh Server
+yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Server
 
 
 支持自动安装jdk环境
@@ -110,7 +127,38 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ```
 
+启动成功后,服务端的端口为 `2122` 访问管理页面 例如`http://127.0.0.1:2122/`
+
 > 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
+>
+> 如无法访问，检查下是否开启了防火墙`systemctl status firewalld`，如状态显示为绿色`Active: active (running)`可临时关闭防火墙`systemctl stop firewalld`，然后重启防火墙`firewall-cmd --reload`（建议仅测试环境下使用，生产环境下慎用）
+> 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中检查安全组规则(关闭防火墙)
+
+### 容器化安装
+
+> 注意：容器化安装方式需要先安装docker
+```
+docker pull jpomdocker/jpom
+docker volume create jpom-server-vol
+docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:ro -v jpom-server-vol:/usr/local/jpom-server jpomdocker/jpom
+```
+
+> 容器化安装仅提供服务端版。由于容器和宿主机环境隔离，而导致插件端的很多功能无法正常使用，因此对插件端容器化意义不大。
+>
+> 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档[https://jpom.io/docs/](https://jpom.io/docs/)
+
+
+### docker-compose 一键启动
+
+- 无需安装任何环境,自动编译构建
+
+> 需要注意修改 `.env` 文件中的 token 值
+
+```shell
+git clone https://gitee.com/dromara/Jpom.git
+cd Jpom
+docker-compose up -d
+```
 
 ### 下载安装
 
@@ -122,26 +170,33 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
    1. agent-x.x.x-release 目录为插件端的全部安装文件
    2. 上传到对应服务器
    3. 命令运行（Agent.sh、Agent.bat）
+   4. 默认运行端口：`2123`
 4. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
    1. server-x.x.x-release 目录为服务端的全部安装文件
    2. 上传到对应服务器
    3. 命令运行（Server.sh、Server.bat）
+   4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
 ### 编译安装
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
 
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支)
-2. 切换到`web-vue`目录 执行`yarn build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
-3. 进入项目目录执行:`mvn clean package`
-4. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
+2. 切换到`web-vue`目录 执行`npm install` (vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
+3. 执行`npm run build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
+4. 切换到项目根目录执行:`mvn clean package`
+5. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
    1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
    2. 打包上传服务器运行
    3. 命令运行（Agent.sh、Agent.bat）
-5. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
+   4. 默认运行端口：`2123`
+6. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
    1. 查看插件端安装包 modules/server/target/server-x.x.x-release
    2. 打包上传服务器运行
    3. 命令运行（Server.sh、Server.bat）
+   4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
+
+> 也可以使用 `script/release.bat` `script/release.sh` 快速打包
 
 ### 编译运行
 
@@ -153,14 +208,14 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 3. 运行服务端
    1. 运行`io.jpom.JpomServerApplication`
    2. 默认运行端口：`2122`
-4. 构建vue页面 切换到`web-vue`目录（前提需要本地开发环境有node、yarn环境）
-5. 安装项目vue依赖 控制台执行 `yarn install`
-6. 启动开发模式 控制台执行 `yarn serve`
-7. 根据控制台输出的地址访问前端页面 例如`http://localhost:3000/`
+4. 构建vue页面 切换到`web-vue`目录（前提需要本地开发环境有node、npm环境）
+5. 安装项目vue依赖 控制台执行 `npm install`
+6. 启动开发模式 控制台执行 `npm serve`
+7. 根据控制台输出的地址访问前端页面 例如`http://127.0.0.1:3000/`
 
 ### 管理命令
 
-1. windows中Agent.bat 、Server.bat
+1. windows 中 Agent.bat 、Server.bat
 
 ```
 # 服务端
@@ -170,7 +225,9 @@ Server.bat     启动管理面板(按照面板提示输入操作)
 Agent.bat     启动管理面板(按照面板提示输入操作)
 ```
 
-2. linux中Agent.sh 、Server.sh
+> windows 中执行启动后需要根据日志取跟进启动的状态
+
+2. linux 中 Agent.sh 、Server.sh
 
 ```
 # 服务端
@@ -178,13 +235,23 @@ Server.sh start     启动Jpom服务端
 Server.sh stop      停止Jpom服务端
 Server.sh restart   重启Jpom服务端
 Server.sh status    查看Jpom服务端运行状态
+Server.sh create    创建Jpom服务端的应用服务（jpom-server）
 
 # 插件端
 Agent.sh start     启动Jpom插件端
 Agent.sh stop      停止Jpom插件端
 Agent.sh restart   重启Jpom插件端
 Agent.sh status    查看Jpom插件端运行状态
+Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 ```
+
+### linux 服务方式管理
+
+> 在使用 `Server.sh create`/`Agent.sh create` 成功后
+>
+> service jpom-server {status | start | stop}
+>
+> service jpom-agent {status | start | stop}
 
 ### Jpom 的参数配置
 
@@ -222,13 +289,27 @@ Agent.sh status    查看Jpom插件端运行状态
 
 1. 微信群二维码（添加小助手：备注Jpom 进群）
 
-![Alt text](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_qrcode.jpg)
+![Alt text](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_qrcode.jpg)
 
-2. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
+2. 微信公众号：[CodeGzh](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 
 3. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
 
-4. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/dromara/Jpom)
+4. [码云赞赏： 在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
+
+5. 微信赞赏 [赞赏记录](./docs/praise/praise.md)
+
+![微信赞赏](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_praise_small.png)
+
+
+### 精品项目推荐
+
+| 项目名称          | 项目地址                                                                       | 项目介绍                                          |
+|---------------|----------------------------------------------------------------------------|-----------------------------------------------|
+| SpringBoot_v2 | [https://gitee.com/bdj/SpringBoot_v2](https://gitee.com/bdj/SpringBoot_v2) | 基于springboot的一款纯净脚手架                          |
+| TLog GVP 项目   | [https://gitee.com/dromara/TLog](https://gitee.com/dromara/TLog)           | 一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪 |
+| Sa-Token      | [https://gitee.com/dromara/sa-token](https://gitee.com/dromara/sa-token)   | 这可能是史上功能最全的 Java 权限认证框架！                      |
+| Erupt         | [https://gitee.com/erupt/erupt](https://gitee.com/erupt/erupt)             | 零前端代码，纯注解开发 admin 管理后台                        |
 
 ### giteye
 
