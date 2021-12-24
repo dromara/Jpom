@@ -353,16 +353,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 			return;
 		}
 		ThreadUtil.execute(() -> {
-			long timeValue;
-			try {
-				timeValue = this.getLastTimeValue(timeColumn, maxCount, null);
-				if (timeValue <= 0) {
-					return;
-				}
-			} catch (java.lang.IllegalStateException illegalStateException) {
-				return;
-			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("查询数据错误 ：{}", e.getMessage());
+			long timeValue = this.getLastTimeValue(timeColumn, maxCount, null);
+			if (timeValue <= 0) {
 				return;
 			}
 			consumer.accept(timeValue);
@@ -385,7 +377,15 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		}
 		Page page = new Page(maxCount, 1);
 		page.addOrder(new Order(timeColumn, Direction.DESC));
-		PageResultDto<T> pageResult = super.listPage(entity, page);
+		PageResultDto<T> pageResult;
+		try {
+			pageResult = super.listPage(entity, page);
+		} catch (java.lang.IllegalStateException illegalStateException) {
+			return 0L;
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("查询数据错误 ：{}", e.getMessage());
+			return 0L;
+		}
 		if (pageResult.isEmpty()) {
 			return 0L;
 		}
