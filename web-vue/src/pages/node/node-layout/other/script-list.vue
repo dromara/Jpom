@@ -63,6 +63,8 @@
     </a-drawer>
     <!-- 上传文件 -->
     <a-modal v-model="uploadFileVisible" width="300px" title="上传 bat|bash 文件" :footer="null" :maskClosable="true">
+      <a-alert message=" 导入文件将自动安装文件名去重、如果已经存在的将自动覆盖内容" banner />
+      <br />
       <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.bat,.sh'">
         <a-button><a-icon type="upload" />选择 bat|bash 文件</a-button>
       </a-upload>

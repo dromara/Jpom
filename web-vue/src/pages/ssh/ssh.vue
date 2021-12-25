@@ -232,8 +232,8 @@
 </template>
 <script>
 import { deleteSsh, editSsh, getSshList, getSshCheckAgent, getSshOperationLogList, installAgentNode } from "@/api/ssh";
-import SshFile from "./ssh-file";
-import Terminal from "./terminal";
+import SshFile from "@/pages/ssh/ssh-file";
+import Terminal from "@/pages/ssh/terminal";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 

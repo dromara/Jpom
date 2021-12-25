@@ -62,7 +62,7 @@ export const RESTART_UPGRADE_WAIT_TIME_COUNT = 80;
 
 /**
  * 定时 cron 默认提示
- * 
+ *
  * https://www.npmjs.com/package/cron-parser
  */
 export const CRON_DATA_SOURCE = [
@@ -119,3 +119,8 @@ export const CRON_DATA_SOURCE = [
     ],
   },
 ];
+
+/**
+ * 压缩文件格式
+ */
+export const ZIP_ACCEPT = ".tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz";

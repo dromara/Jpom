@@ -22,11 +22,6 @@ const children = [
     component: () => import("../pages/node/list"),
   },
   {
-    path: "/node/ssh",
-    name: "node-ssh",
-    component: () => import("../pages/node/ssh"),
-  },
-  {
     path: "/node/update",
     name: "node-update",
     component: () => import("../pages/node/update"),
@@ -42,14 +37,19 @@ const children = [
     component: () => import("../pages/node/script-list"),
   },
   {
-    path: "/node/ssh/command",
-    name: "node-command",
-    component: () => import("../pages/node/ssh/command"),
+    path: "/ssh",
+    name: "node-ssh",
+    component: () => import("../pages/ssh/ssh"),
   },
   {
-    path: "/node/ssh/command-log",
+    path: "/ssh/command",
     name: "node-command",
-    component: () => import("../pages/node/ssh/command-log"),
+    component: () => import("../pages/ssh/command"),
+  },
+  {
+    path: "/ssh/command-log",
+    name: "node-command",
+    component: () => import("../pages/ssh/command-log"),
   },
   {
     path: "/dispatch/list",

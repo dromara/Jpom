@@ -1,6 +1,6 @@
 <template>
   <!-- 布局 -->
-  <a-layout class="file-layout">
+  <a-layout class="ssh-file-layout">
     <!-- 目录树 -->
     <a-layout-sider theme="light" class="sider" width="25%">
       <a-empty v-if="treeList.length === 0" />
@@ -10,21 +10,13 @@
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
         <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="handleUpload">上传文件</a-button>
+        <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="handleUploadZip">上传压缩文件（自动解压）</a-button>
         <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="loadFileList()">刷新</a-button>
         <a-button :disabled="!this.tempNode.parentDir" type="danger" @click="handleDeletePath()">删除</a-button>
         <span v-if="this.tempNode.parentDir">当前目录:{{ this.tempNode.path }}</span
         ><span v-if="this.tempNode.parentDir">{{ this.tempNode.parentDir }}</span>
       </div>
-      <a-table
-        :data-source="fileList"
-        :loading="loading"
-        :columns="columns"
-        :pagination="false"
-        bordered
-        :style="{ 'max-height': tableHeight + 'px' }"
-        :scroll="{ x: 790, y: tableHeight - 60 }"
-        :rowKey="(record, index) => index"
-      >
+      <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
@@ -45,8 +37,11 @@
       </a-table>
       <!-- 上传文件 -->
       <a-modal v-model="uploadFileVisible" width="300px" title="上传文件" :footer="null" :maskClosable="true">
-        <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" multiple>
-          <a-button><a-icon type="upload" />选择文件</a-button>
+        <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="`${uploadFileZip ? ZIP_ACCEPT : ''}`" :multiple="!uploadFileZip">
+          <a-button>
+            <a-icon type="upload" />选择文件
+            {{ uploadFileZip ? "压缩包" : "" }}
+          </a-button>
         </a-upload>
         <br />
         <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
@@ -67,6 +62,7 @@
 import { getRootFileList, getFileList, downloadFile, deleteFile, uploadFile, readFile, updateFileData } from "@/api/ssh";
 import Terminal from "./terminal";
 import codeEditor from "@/components/codeEditor";
+import { ZIP_ACCEPT } from "@/utils/const";
 export default {
   props: {
     ssh: {
@@ -86,6 +82,8 @@ export default {
       tempNode: {},
       temp: {},
       uploadFileVisible: false,
+      uploadFileZip: false,
+      ZIP_ACCEPT: ZIP_ACCEPT,
       terminalVisible: false,
       tableHeight: "80vh",
       replaceFields: {
@@ -138,11 +136,15 @@ export default {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.error({
           message: "请选择一个节点",
-          
         });
         return;
       }
       this.uploadFileVisible = true;
+      this.uploadFileZip = false;
+    },
+    handleUploadZip() {
+      this.handleUpload();
+      this.uploadFileZip = true;
     },
     handleRemove(file) {
       const index = this.uploadFileList.indexOf(file);
@@ -161,17 +163,15 @@ export default {
         formData.append("file", file);
         formData.append("id", this.ssh.id);
         formData.append("name", this.tempNode.parentDir);
+        formData.append("unzip", this.uploadFileZip);
         formData.append("path", this.tempNode.path);
         // 上传文件
         uploadFile(formData).then((res) => {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              
             });
-
             this.loadFileList();
-
             this.uploadFileList = [];
             this.uploadFileVisible = false;
           }
@@ -232,7 +232,6 @@ export default {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.warn({
           message: "请选择一个节点",
-          
         });
         return false;
       }
@@ -248,15 +247,17 @@ export default {
       getFileList(params).then((res) => {
         if (res.code === 200) {
           // 区分目录和文件
-          res.data.forEach((element) => {
-            if (!element.dir) {
+          this.fileList = res.data
+            .filter((element) => {
+              return !element.dir;
+            })
+            .map((element) => {
               // 设置文件表格
-              this.fileList.push({
+              return {
                 path: this.tempNode.path,
                 ...element,
-              });
-            }
-          });
+              };
+            });
         }
         this.loading = false;
       });
@@ -287,7 +288,6 @@ export default {
       updateFileData(params).then((res) => {
         this.$notification.success({
           message: res.msg,
-          
         });
         if (res.code == 200) {
           this.editFileVisible = false;
@@ -337,7 +337,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               // 刷新树
               this.loadData();
@@ -365,7 +364,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadFileList();
             }
@@ -376,18 +374,19 @@ export default {
   },
 };
 </script>
-<style scoped>
-.file-layout {
+<style scoped lang="stylus">
+.ssh-file-layout {
   padding: 0;
+  min-height calc(100vh - 75px);
 }
 .sider {
   border: 1px solid #e2e2e2;
-  height: calc(100vh - 80px);
-  overflow-y: auto;
+  /* height: calc(100vh - 80px); */
+  /* overflow-y: auto; */
 }
 .file-content {
-  height: calc(100vh - 100px);
-  overflow-y: auto;
+  /* height: calc(100vh - 100px); */
+  /* overflow-y: auto; */
   margin: 10px 10px 0;
   padding: 10px;
   background-color: #fff;

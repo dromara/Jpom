@@ -183,7 +183,7 @@ import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWo
 import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
-import Terminal from "./terminal";
+import Terminal from "@/pages/ssh/terminal";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";

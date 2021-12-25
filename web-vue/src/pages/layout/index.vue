@@ -181,7 +181,7 @@ export default {
   },
 };
 </script>
-<style>
+<style scoped>
 #app-layout {
   min-height: 100vh;
 }
