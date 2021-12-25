@@ -1,6 +1,7 @@
 package io.jpom.controller.node.ssh;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -26,6 +27,9 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ServerConfigBean;
+import io.jpom.util.CommandUtil;
+import io.jpom.util.CompressionFileUtil;
+import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -122,7 +126,6 @@ public class SshFileController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String listData(String id, String path, String children) throws SftpException {
 		SshModel sshModel = this.check(id, path, children);
@@ -132,7 +135,6 @@ public class SshFileController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "read_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String readFileData(String id, String path, String children) {
 		SshModel sshModel = this.check(id, path, children);
@@ -145,7 +147,6 @@ public class SshFileController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "update_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EDIT)
 	public String updateFileData(String id, String path, String children, String content) {
 		SshModel sshModel = this.check(id, path, children);
@@ -413,23 +414,48 @@ public class SshFileController extends BaseServerController {
 
 	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.UPLOAD)
-	public String upload(String id, String path, String name) {
+	public String upload(String id, String path, String name, String unzip) {
 		SshModel sshModel = sshService.getByKey(id, false);
 		Assert.notNull(sshModel, "ssh error");
 		List<String> fileDirs = sshModel.fileDirs();
 		Assert.state(CollUtil.contains(fileDirs, path), "没有配置此文件夹");
+		String remotePath = FileUtil.normalize(path + StrUtil.SLASH + name);
 		Session session = null;
 		ChannelSftp channel = null;
 		String localPath = null;
 		try {
 			session = SshService.getSessionByModel(sshModel);
 			channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-			MultipartFileBuilder multipartFileBuilder = createMultipart().addFieldName("file").setUseOriginalFilename(true);
-			localPath = multipartFileBuilder.save();
-			File file = FileUtil.file(localPath);
-			String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
-			channel.cd(normalize);
-			channel.put(IoUtil.toStream(file), file.getName());
+			MultipartFileBuilder multipart = createMultipart();
+			// 保存路径
+			File tempPath = ServerConfigBean.getInstance().getUserTempPath();
+			File savePath = FileUtil.file(tempPath, "ssh", sshModel.getId());
+			multipart.setSavePath(FileUtil.getAbsolutePath(savePath));
+			multipart.addFieldName("file")
+					.setUseOriginalFilename(true);
+			//
+			if (Convert.toBool(unzip, false)) {
+				multipart.setFileExt(StringUtil.PACKAGE_EXT);
+				localPath = multipart.save();
+				// 解压
+				File file = new File(localPath);
+				File tempUnzipPath = FileUtil.file(savePath, IdUtil.fastSimpleUUID());
+				try {
+					CompressionFileUtil.unCompress(file, tempUnzipPath);
+					// 同步上传文件
+					sshService.uploadDir(sshModel, remotePath, tempUnzipPath);
+				} finally {
+					// 删除临时文件
+					CommandUtil.systemFastDel(file);
+					CommandUtil.systemFastDel(tempUnzipPath);
+				}
+			} else {
+				localPath = multipart.save();
+				File file = FileUtil.file(localPath);
+				channel.cd(remotePath);
+				channel.put(IoUtil.toStream(file), file.getName());
+			}
+
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("ssh上传文件异常", e);
 			return JsonMessage.getString(400, "上传失败");

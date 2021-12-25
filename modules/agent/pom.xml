@@ -33,11 +33,7 @@
 			<artifactId>bcprov-jdk15on</artifactId>
 			<version>1.69</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-			<version>1.21</version>
-		</dependency>
+
 		<dependency>
 			<groupId>io.jpom.plugins</groupId>
 			<artifactId>webhook</artifactId>

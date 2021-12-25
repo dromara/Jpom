@@ -72,7 +72,7 @@
       </a-modal>
       <!-- 上传压缩文件 -->
       <a-modal v-model="uploadZipFileVisible" width="300px" title="上传压缩文件" :footer="null" :maskClosable="true">
-        <a-upload :file-list="uploadFileList" :remove="handleZipRemove" :before-upload="beforeZipUpload" accept=".tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz">
+        <a-upload :file-list="uploadFileList" :remove="handleZipRemove" :before-upload="beforeZipUpload" :accept="ZIP_ACCEPT">
           <a-button><a-icon type="upload" />选择压缩文件</a-button>
         </a-upload>
         <br />
@@ -105,7 +105,7 @@
 </template>
 <script>
 import { getFileList, downloadProjectFile, deleteProjectFile, uploadProjectFile, readFile, updateFile, remoteDownload } from "../../../../api/node-project";
-
+import { ZIP_ACCEPT } from "@/utils/const";
 import codeEditor from "@/components/codeEditor";
 
 export default {
@@ -132,6 +132,7 @@ export default {
   },
   data() {
     return {
+      ZIP_ACCEPT: ZIP_ACCEPT,
       loading: false,
       treeList: [],
       fileList: [],
@@ -311,7 +312,6 @@ export default {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.error({
           message: "请选择一个节点",
-          
         });
         return;
       }
@@ -334,7 +334,6 @@ export default {
     startUpload() {
       this.$notification.info({
         message: "正在上传文件，请稍后...",
-        
       });
       // 设置上传状态
       this.uploading = true;
@@ -356,7 +355,6 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              
             });
             this.successSize++;
           }
@@ -379,7 +377,6 @@ export default {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.error({
           message: "请选择一个节点",
-          
         });
         return;
       }
@@ -398,7 +395,6 @@ export default {
     startZipUpload() {
       this.$notification.info({
         message: "正在上传文件，请稍后...",
-        
       });
       // 设置上传状态
       this.uploading = true;
@@ -421,7 +417,6 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            
           });
           this.successSize++;
           this.percentage = 100;
@@ -461,7 +456,6 @@ export default {
             if (res.code == 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.remoteDownloadData = {};
               this.uploadRemoteFileVisible = false;
@@ -478,7 +472,6 @@ export default {
       if (Object.keys(this.tempNode).length === 0) {
         this.$notification.warn({
           message: "请选择一个节点",
-          
         });
         return false;
       }
@@ -525,7 +518,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadFileList();
             }
@@ -537,7 +529,6 @@ export default {
     handleDownload(record) {
       this.$notification.info({
         message: "正在下载，请稍等...",
-        
       });
       // 请求参数
       const params = {
@@ -577,7 +568,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
               this.loadFileList();
