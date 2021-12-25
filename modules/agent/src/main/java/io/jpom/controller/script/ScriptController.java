@@ -108,6 +108,7 @@ public class ScriptController extends BaseAgentController {
 		}
 		Assert.notNull(eModel, "对应数据不存在");
 		eModel.setName(nodeScriptModel.getName());
+		eModel.setAutoExecCron(autoExecCron);
 		eModel.setContext(nodeScriptModel.getContext());
 		scriptServer.updateItem(eModel);
 		return JsonMessage.getString(200, "修改成功");
