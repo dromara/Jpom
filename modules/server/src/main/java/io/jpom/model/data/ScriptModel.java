@@ -46,6 +46,19 @@ public class ScriptModel extends BaseNodeModel {
 	 */
 	private String lastRunUser;
 
+	/**
+	 * 定时执行
+	 */
+	private String autoExecCron;
+
+	public String getAutoExecCron() {
+		return autoExecCron;
+	}
+
+	public void setAutoExecCron(String autoExecCron) {
+		this.autoExecCron = autoExecCron;
+	}
+
 	public String getScriptId() {
 		return scriptId;
 	}

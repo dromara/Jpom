@@ -262,7 +262,17 @@
           <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
         </a-form-model-item>
         <a-form-model-item label="自动构建" prop="autoBuildCron">
-          <a-input v-model="temp.autoBuildCron" placeholder="如果需要定时自动构建则填写,cron 表达式" />
+          <a-auto-complete placeholder="如果需要定时自动构建则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
+            <template slot="dataSource">
+              <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
+                <span slot="label">
+                  {{ group.title }}
+                </span>
+                <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} {{ opt.value }} </a-select-option>
+              </a-select-opt-group>
+            </template>
+            <a-input v-model="temp.autoBuildCron" placeholder="如果需要定时自动构建则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" />
+          </a-auto-complete>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -297,7 +307,7 @@ import { getDishPatchListAll, afterOptList } from "@/api/dispatch";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { itemGroupBy, parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
 
 export default {
   components: {
@@ -310,6 +320,7 @@ export default {
       releaseMethodArray: releaseMethodArray,
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      cronDataSource: CRON_DATA_SOURCE,
       // 动态列表参数
       groupList: [],
       list: [],

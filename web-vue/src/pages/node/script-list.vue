@@ -54,13 +54,28 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="1200px">
+    <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
       <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-form-model-item label="Script 名称" prop="name">
           <a-input v-model="temp.name" placeholder="名称" />
         </a-form-model-item>
         <a-form-model-item label="Script 内容" prop="context">
-          <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
+          <div style="height: 40vh; overflow-y: scroll">
+            <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
+          </div>
+        </a-form-model-item>
+        <a-form-model-item label="定时执行" prop="autoExecCron">
+          <a-auto-complete placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
+            <template slot="dataSource">
+              <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
+                <span slot="label">
+                  {{ group.title }}
+                </span>
+                <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} {{ opt.value }} </a-select-option>
+              </a-select-opt-group>
+            </template>
+            <a-input v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" />
+          </a-auto-complete>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -75,24 +90,25 @@ import { getScriptListAll, editScript, deleteScript, itemScript, delAllCache } f
 import codeEditor from "@/components/codeEditor";
 import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/node/node-layout/other/script-console";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
 import { parseTime } from "@/utils/time";
 export default {
   components: {
-    ScriptConsole,codeEditor
+    ScriptConsole,
+    codeEditor,
   },
   props: {},
   data() {
     return {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      cronDataSource: CRON_DATA_SOURCE,
       list: [],
       temp: {},
       nodeMap: {},
       editScriptVisible: false,
       drawerTitle: "",
       drawerConsoleVisible: false,
-
       columns: [
         // { title: "Script ID", dataIndex: "id", width: 200, ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },

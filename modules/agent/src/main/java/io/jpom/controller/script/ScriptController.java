@@ -27,6 +27,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.pattern.CronPattern;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HtmlUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -81,7 +83,15 @@ public class ScriptController extends BaseAgentController {
 	public String save(NodeScriptModel nodeScriptModel, String type) {
 		Assert.notNull(nodeScriptModel, "没有数据");
 		Assert.hasText(nodeScriptModel.getContext(), "内容为空");
-
+		//
+		String autoExecCron = nodeScriptModel.getAutoExecCron();
+		if (StrUtil.isNotEmpty(autoExecCron)) {
+			try {
+				new CronPattern(autoExecCron);
+			} catch (Exception e) {
+				throw new IllegalArgumentException("定时执行表达式格式不正确");
+			}
+		}
 		//
 		nodeScriptModel.setContext(HtmlUtil.unescape(nodeScriptModel.getContext()));
 		NodeScriptModel eModel = scriptServer.getItem(nodeScriptModel.getId());
