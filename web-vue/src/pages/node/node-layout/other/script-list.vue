@@ -44,7 +44,7 @@
           </div>
         </a-form-model-item>
         <a-form-model-item label="定时执行" prop="autoExecCron">
-          <a-auto-complete placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
+          <a-auto-complete v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
             <template slot="dataSource">
               <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
                 <span slot="label">
@@ -53,7 +53,6 @@
                 <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} {{ opt.value }} </a-select-option>
               </a-select-opt-group>
             </template>
-            <a-input v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" />
           </a-auto-complete>
         </a-form-model-item>
       </a-form-model>
