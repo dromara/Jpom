@@ -25,7 +25,6 @@ package io.jpom.model.data;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.JpomApplication;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
@@ -39,7 +38,6 @@ import java.io.File;
  * @date 2019/4/24
  */
 public class NodeScriptModel extends BaseWorkspaceModel {
-
 	/**
 	 * 最后执行人员
 	 */
@@ -52,6 +50,18 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 	 * 脚本内容
 	 */
 	private String context;
+	/**
+	 * 自动执行的 cron
+	 */
+	private String autoExecCron;
+
+	public String getAutoExecCron() {
+		return autoExecCron;
+	}
+
+	public void setAutoExecCron(String autoExecCron) {
+		this.autoExecCron = autoExecCron;
+	}
 
 	public String getLastRunUser() {
 		return StrUtil.emptyToDefault(lastRunUser, StrUtil.DASHED);

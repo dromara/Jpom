@@ -70,7 +70,17 @@
           <a-button type="primary" @click="handleAddParam">添加参数</a-button>
         </a-form-model-item>
         <a-form-model-item label="自动执行" prop="autoExecCron">
-          <a-input v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式" />
+          <a-auto-complete placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
+            <template slot="dataSource">
+              <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
+                <span slot="label">
+                  {{ group.title }}
+                </span>
+                <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} {{ opt.value }} </a-select-option>
+              </a-select-opt-group>
+            </template>
+            <a-input v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" />
+          </a-auto-complete>
         </a-form-model-item>
         <a-form-model-item label="命令描述" prop="desc">
           <a-input v-model="temp.desc" type="textarea" :rows="3" style="resize: none" placeholder="命令详细描述" />
@@ -115,7 +125,7 @@
 
 <script>
 import { deleteCommand, editCommand, executeBatch, getCommandList } from "@/api/command";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_SIZW_OPTIONS } from "@/utils/const";
+import { CRON_DATA_SOURCE, PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_SIZW_OPTIONS } from "@/utils/const";
 import { parseTime } from "@/utils/time";
 import { getSshListAll } from "@/api/ssh";
 import codeEditor from "@/components/codeEditor";
@@ -126,6 +136,7 @@ export default {
   data() {
     return {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      cronDataSource: CRON_DATA_SOURCE,
       commandList: [],
       loading: false,
       editCommandVisible: false,

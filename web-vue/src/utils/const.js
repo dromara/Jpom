@@ -59,3 +59,63 @@ export const CACHE_WORKSPACE_ID = "workspaceId";
  * 升级 重启检查等待次数
  */
 export const RESTART_UPGRADE_WAIT_TIME_COUNT = 80;
+
+/**
+ * 定时 cron 默认提示
+ * 
+ * https://www.npmjs.com/package/cron-parser
+ */
+export const CRON_DATA_SOURCE = [
+  {
+    title: "分钟级别",
+    children: [
+      {
+        title: "1分钟",
+        value: "0 0/1 * * * ?",
+      },
+      {
+        title: "10分钟",
+        value: "0 0/10 * * * ?",
+      },
+      {
+        title: "30分钟",
+        value: "0 0/30 * * * ?",
+      },
+    ],
+  },
+  {
+    title: "小时级别",
+    children: [
+      {
+        title: "每小时",
+        value: "0 0 0/1 * * ?",
+      },
+    ],
+  },
+  {
+    title: "天级别",
+    children: [
+      {
+        title: "凌晨0点和中午12点",
+        value: "0 0 0,12 * * ?",
+      },
+      {
+        title: "凌晨0点",
+        value: "0 0 0 * * ?",
+      },
+    ],
+  },
+  {
+    title: "秒级别（默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）",
+    children: [
+      {
+        title: "5秒一次",
+        value: "0/5 * * * * ?",
+      },
+      {
+        title: "10秒一次",
+        value: "0/10 * * * * ?",
+      },
+    ],
+  },
+];

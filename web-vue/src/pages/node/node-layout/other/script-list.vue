@@ -43,6 +43,19 @@
             <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
         </a-form-model-item>
+        <a-form-model-item label="定时执行" prop="autoExecCron">
+          <a-auto-complete placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
+            <template slot="dataSource">
+              <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
+                <span slot="label">
+                  {{ group.title }}
+                </span>
+                <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} {{ opt.value }} </a-select-option>
+              </a-select-opt-group>
+            </template>
+            <a-input v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" />
+          </a-auto-complete>
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 脚本控制台组件 -->
@@ -63,7 +76,7 @@
 import { getScriptList, editScript, deleteScript, uploadScriptFile, itemScript, syncScript } from "@/api/node-other";
 import codeEditor from "@/components/codeEditor";
 import ScriptConsole from "./script-console";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, CRON_DATA_SOURCE, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { parseTime } from "@/utils/time";
 export default {
   components: {
@@ -81,6 +94,7 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       temp: {},
+      cronDataSource: CRON_DATA_SOURCE,
       editScriptVisible: false,
       drawerTitle: "",
       drawerConsoleVisible: false,
