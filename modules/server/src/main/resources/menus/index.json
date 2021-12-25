@@ -9,11 +9,6 @@
         "id": "nodeList"
       },
       {
-        "title": "节点升级",
-        "id": "nodeUpdate",
-        "role": "sys"
-      },
-      {
         "title": "项目列表",
         "id": "projectSearch"
       },

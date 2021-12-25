@@ -22,11 +22,6 @@ const children = [
     component: () => import("../pages/node/list"),
   },
   {
-    path: "/node/update",
-    name: "node-update",
-    component: () => import("../pages/node/update"),
-  },
-  {
     path: "/node/search",
     name: "node-search",
     component: () => import("../pages/node/search"),

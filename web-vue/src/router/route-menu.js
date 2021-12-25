@@ -8,7 +8,6 @@ const routeMenuMap = {
   sshList: "/ssh",
   commandList: "/ssh/command",
   commandLogList: "/ssh/command-log",
-  nodeUpdate: "/node/update",
   outgiving: "/dispatch/list",
   outgivingLog: "/dispatch/log",
   outgivingWhitelistDirectory: "/dispatch/white-list",
