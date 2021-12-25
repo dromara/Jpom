@@ -23,15 +23,22 @@
       <a-tooltip slot="branchName" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
+      <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip slot="script" slot-scope="text" placement="topLeft" :title="text">
+      </a-tooltip> -->
+      <!-- <a-tooltip slot="script" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
-      </a-tooltip>
-      <template slot="releaseMethod" slot-scope="text" placement="topleft" :title="text">
+      </a-tooltip> -->
+      <a-tooltip slot="releaseMethod" slot-scope="text, record">
+        <template slot="title">
+          <ul>
+            <li>发布方式：{{ releaseMethodMap[text] }}</li>
+            <li>产物目录：{{ record.resultDirFile }}</li>
+            <li>构建命令：{{ record.script }}</li>
+          </ul>
+        </template>
         <span>{{ releaseMethodMap[text] }}</span>
-      </template>
+      </a-tooltip>
       <template slot="status" slot-scope="text">
         <span>{{ statusMap[text] || "未知" }}</span>
       </template>
@@ -345,12 +352,12 @@ export default {
       buildLogVisible: false,
       afterOptList: afterOptList,
       columns: [
-        { title: "名称", dataIndex: "name", width: 100, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         // { title: "分组", dataIndex: "group", key: "group%", sorter: true, width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
         {
           title: "分支",
           dataIndex: "branchName",
-          width: 100,
+
           ellipsis: true,
           scopedSlots: { customRender: "branchName" },
         },
@@ -358,7 +365,7 @@ export default {
         {
           title: "构建 ID",
           dataIndex: "buildId",
-          width: 80,
+          width: 90,
           ellipsis: true,
           scopedSlots: { customRender: "buildId" },
         },
@@ -383,20 +390,20 @@ export default {
           width: 170,
         },
         {
-          title: "发布方式",
+          title: "其他信息",
           dataIndex: "releaseMethod",
           width: 100,
           ellipsis: true,
           scopedSlots: { customRender: "releaseMethod" },
         },
-        {
-          title: "产物目录",
-          dataIndex: "resultDirFile",
-          ellipsis: true,
-          width: 100,
-          scopedSlots: { customRender: "resultDirFile" },
-        },
-        { title: "构建命令", width: 100, dataIndex: "script", ellipsis: true, scopedSlots: { customRender: "script" } },
+        // {
+        //   title: "产物目录",
+        //   dataIndex: "resultDirFile",
+        //   ellipsis: true,
+        //   width: 100,
+        //   scopedSlots: { customRender: "resultDirFile" },
+        // },
+        // { title: "构建命令", width: 100, dataIndex: "script", ellipsis: true, scopedSlots: { customRender: "script" } },
         {
           title: "操作",
           dataIndex: "operation",
