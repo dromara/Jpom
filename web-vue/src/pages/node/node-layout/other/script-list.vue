@@ -43,6 +43,9 @@
             <code-editor v-model="temp.context" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
         </a-form-model-item>
+        <a-form-model-item label="默认参数" prop="defArgs">
+          <a-input v-model="temp.defArgs" placeholder="默认参数" />
+        </a-form-model-item>
         <a-form-model-item label="定时执行" prop="autoExecCron">
           <a-auto-complete v-model="temp.autoExecCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
             <template slot="dataSource">
@@ -59,7 +62,7 @@
     </a-modal>
     <!-- 脚本控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <script-console v-if="drawerConsoleVisible" :nodeId="node.id" :id="temp.id" :scriptId="temp.scriptId" />
+      <script-console v-if="drawerConsoleVisible" :nodeId="node.id" :defArgs="temp.defArgs" :id="temp.id" :scriptId="temp.scriptId" />
     </a-drawer>
     <!-- 上传文件 -->
     <a-modal v-model="uploadFileVisible" width="300px" title="上传 bat|bash 文件" :footer="null" :maskClosable="true">

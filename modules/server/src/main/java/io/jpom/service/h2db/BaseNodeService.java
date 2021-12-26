@@ -124,7 +124,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 	}
 
 	/**
-	 * 同步执行 同步节点项目信息
+	 * 同步执行 同步节点信息
 	 *
 	 * @param nodeModel 节点信息
 	 * @return json
@@ -194,7 +194,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 		}
 	}
 
-	private String checkException(Exception e, String nodeModelName) {
+	protected String checkException(Exception e, String nodeModelName) {
 		if (e instanceof AgentException) {
 			AgentException agentException = (AgentException) e;
 			DefaultSystemLog.getLog().error("同步失败 {}", agentException.getMessage());
@@ -246,7 +246,6 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 	 */
 	private void fullData(T item, NodeModel nodeModel) {
 		item.dataId(item.getId());
-		item.setId(null);
 		item.setNodeId(nodeModel.getId());
 		if (StrUtil.isEmpty(item.getWorkspaceId())) {
 			item.setWorkspaceId(nodeModel.getWorkspaceId());

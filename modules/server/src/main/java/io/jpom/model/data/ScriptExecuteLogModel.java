@@ -36,11 +36,27 @@ public class ScriptExecuteLogModel extends BaseNodeModel {
 	 * 脚本ID
 	 */
 	private String scriptId;
-
 	/**
 	 * 脚本名称
 	 */
 	private String scriptName;
+	/**
+	 * 触发类型 {0，手动，1 自动触发}
+	 */
+	private Integer triggerExecType;
+
+	@Override
+	public String fullId() {
+		throw new IllegalStateException("NO implements");
+	}
+
+	public Integer getTriggerExecType() {
+		return triggerExecType;
+	}
+
+	public void setTriggerExecType(Integer triggerExecType) {
+		this.triggerExecType = triggerExecType;
+	}
 
 	public String getScriptName() {
 		return scriptName;
@@ -60,11 +76,11 @@ public class ScriptExecuteLogModel extends BaseNodeModel {
 
 	@Override
 	public String dataId() {
-		return getScriptId();
+		throw new IllegalStateException("NO implements");
 	}
 
 	@Override
 	public void dataId(String id) {
-		setScriptId(id);
+		throw new IllegalStateException("NO implements");
 	}
 }

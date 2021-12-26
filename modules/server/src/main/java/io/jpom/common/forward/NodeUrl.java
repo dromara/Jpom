@@ -170,6 +170,8 @@ public enum NodeUrl {
 	System_Certificate_export("/system/certificate/export"),
 
 	Script_List("/script/list.json"),
+	SCRIPT_PULL_EXEC_LOG("/script/pull_exec_log"),
+	SCRIPT_DEL_EXEC_LOG("/script/del_exec_log"),
 	Script_Item("/script/item.json"),
 	Script_Save("/script/save.json"),
 	SCRIPT_LOG("/script/log"),

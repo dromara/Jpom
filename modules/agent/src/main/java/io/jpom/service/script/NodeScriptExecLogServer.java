@@ -20,35 +20,21 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.util;
+package io.jpom.service.script;
 
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.logging.SystemStreamLog;
+import io.jpom.common.BaseOperService;
+import io.jpom.model.data.NodeScriptExecLogModel;
+import io.jpom.system.AgentConfigBean;
+import org.springframework.stereotype.Service;
 
 /**
  * @author bwcx_jzy
- * @since 2021/12/24
+ * @since 2021/12/26
  */
-public class IoUtil {
+@Service
+public class NodeScriptExecLogServer extends BaseOperService<NodeScriptExecLogModel> {
 
-	/**
-	 * 日志输出
-	 */
-	private static final Log log = new SystemStreamLog();
-
-	/**
-	 * 关闭流
-	 *
-	 * @param autoCloseable 自动关闭流接口
-	 */
-	public static void close(AutoCloseable autoCloseable) {
-		if (autoCloseable == null) {
-			return;
-		}
-		try {
-			autoCloseable.close();
-		} catch (Exception e) {
-			log.error("io close", e);
-		}
+	public NodeScriptExecLogServer() {
+		super(AgentConfigBean.SCRIPT_LOG);
 	}
 }

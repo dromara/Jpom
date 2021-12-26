@@ -35,7 +35,7 @@ import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.manage.ProjectInfoService;
-import io.jpom.service.script.ScriptServer;
+import io.jpom.service.script.NodeScriptServer;
 import io.jpom.util.JvmUtil;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,12 +54,12 @@ import java.util.List;
 public class IndexController extends BaseAgentController {
 
 	private final ProjectInfoService projectInfoService;
-	private final ScriptServer scriptServer;
+	private final NodeScriptServer nodeScriptServer;
 
 	public IndexController(ProjectInfoService projectInfoService,
-						   ScriptServer scriptServer) {
+						   NodeScriptServer nodeScriptServer) {
 		this.projectInfoService = projectInfoService;
-		this.scriptServer = scriptServer;
+		this.nodeScriptServer = nodeScriptServer;
 	}
 
 	@RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
@@ -89,7 +89,7 @@ public class IndexController extends BaseAgentController {
 	@RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String status() {
 		List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
-		List<NodeScriptModel> list = scriptServer.list();
+		List<NodeScriptModel> list = nodeScriptServer.list();
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
 		jsonObject.put("osName", JpomManifest.getInstance().getOsName());

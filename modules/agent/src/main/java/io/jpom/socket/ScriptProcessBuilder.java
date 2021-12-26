@@ -89,14 +89,26 @@ public class ScriptProcessBuilder implements Runnable {
 	 * @param nodeScriptModel 脚本模版
 	 * @param executeId       执行ID
 	 * @param args            参数
-	 * @param session         会话
 	 */
-	public static void addWatcher(NodeScriptModel nodeScriptModel, String executeId, String args, Session session) {
-		ScriptProcessBuilder scriptProcessBuilder = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.computeIfAbsent(executeId, file1 -> {
+	public static ScriptProcessBuilder create(NodeScriptModel nodeScriptModel, String executeId, String args) {
+		return FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.computeIfAbsent(executeId, file1 -> {
 			ScriptProcessBuilder scriptProcessBuilder1 = new ScriptProcessBuilder(nodeScriptModel, executeId, args);
 			ThreadUtil.execute(scriptProcessBuilder1);
 			return scriptProcessBuilder1;
 		});
+	}
+
+	/**
+	 * 创建执行 并监听
+	 *
+	 * @param nodeScriptModel 脚本模版
+	 * @param executeId       执行ID
+	 * @param args            参数
+	 * @param session         会话
+	 */
+	public static void addWatcher(NodeScriptModel nodeScriptModel, String executeId, String args, Session session) {
+		ScriptProcessBuilder scriptProcessBuilder = create(nodeScriptModel, executeId, args);
+		//
 		if (scriptProcessBuilder.sessions.add(session)) {
 			if (FileUtil.exist(scriptProcessBuilder.logFile)) {
 				// 读取之前的信息并发送

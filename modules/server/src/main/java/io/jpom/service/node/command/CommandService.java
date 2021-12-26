@@ -20,11 +20,11 @@ import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.model.data.CommandModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.service.ICron;
+import io.jpom.cron.ICron;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
-import io.jpom.util.CronUtils;
+import io.jpom.cron.CronUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -79,6 +79,16 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
 			this.checkCron(info);
 		}
 		return update;
+	}
+
+	@Override
+	public int delByKey(String keyValue) {
+		int delByKey = super.delByKey(keyValue);
+		if (delByKey > 0) {
+			String taskId = "ssh_command:" + keyValue;
+			CronUtils.remove(taskId);
+		}
+		return delByKey;
 	}
 
 	/**

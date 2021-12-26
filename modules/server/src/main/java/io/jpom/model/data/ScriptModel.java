@@ -45,11 +45,22 @@ public class ScriptModel extends BaseNodeModel {
 	 * 最后执行人员
 	 */
 	private String lastRunUser;
-
 	/**
 	 * 定时执行
 	 */
 	private String autoExecCron;
+	/**
+	 * 默认参数
+	 */
+	private String defArgs;
+
+	public String getDefArgs() {
+		return defArgs;
+	}
+
+	public void setDefArgs(String defArgs) {
+		this.defArgs = defArgs;
+	}
 
 	public String getAutoExecCron() {
 		return autoExecCron;

@@ -22,9 +22,13 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.util.StrUtil;
+import io.jpom.common.Const;
 import io.jpom.model.BaseModel;
 
 /**
+ * 插件端 工作空间相关的数据
+ *
  * @author bwcx_jzy
  * @since 2021/12/12
  */
@@ -33,7 +37,7 @@ public abstract class BaseWorkspaceModel extends BaseModel {
 	private String workspaceId;
 
 	public String getWorkspaceId() {
-		return workspaceId;
+		return StrUtil.emptyToDefault(workspaceId, Const.WORKSPACE_DEFAULT_ID);
 	}
 
 	public void setWorkspaceId(String workspaceId) {

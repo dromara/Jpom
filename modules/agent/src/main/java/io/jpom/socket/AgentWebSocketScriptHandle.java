@@ -28,7 +28,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.NodeScriptModel;
-import io.jpom.service.script.ScriptServer;
+import io.jpom.service.script.NodeScriptServer;
 import io.jpom.util.SocketSessionUtil;
 import org.springframework.stereotype.Component;
 
@@ -46,12 +46,12 @@ import java.io.IOException;
 @Component
 public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 
-	private ScriptServer scriptServer;
+	private NodeScriptServer nodeScriptServer;
 
 	@OnOpen
 	public void onOpen(Session session) {
-		if (scriptServer == null) {
-			scriptServer = SpringUtil.getBean(ScriptServer.class);
+		if (nodeScriptServer == null) {
+			nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
 		}
 		try {
 			if (super.checkAuthorize(session)) {
@@ -62,7 +62,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 				SocketSessionUtil.send(session, "脚本模板未知");
 				return;
 			}
-			NodeScriptModel nodeScriptModel = scriptServer.getItem(id);
+			NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(id);
 			if (nodeScriptModel == null) {
 				SocketSessionUtil.send(session, "没有找到对应的脚本模板");
 				return;
@@ -83,7 +83,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 	public void onMessage(String message, Session session) throws Exception {
 		JSONObject json = JSONObject.parseObject(message);
 		String scriptId = json.getString("scriptId");
-		NodeScriptModel nodeScriptModel = scriptServer.getItem(scriptId);
+		NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(scriptId);
 		if (nodeScriptModel == null) {
 			SocketSessionUtil.send(session, "没有对应脚本模板:" + scriptId);
 			session.close();
@@ -118,10 +118,10 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 				return;
 		}
 		// 记录操作人
-		nodeScriptModel = scriptServer.getItem(scriptId);
+		nodeScriptModel = nodeScriptServer.getItem(scriptId);
 		String name = getOptUserName(session);
 		nodeScriptModel.setLastRunUser(name);
-		scriptServer.updateItem(nodeScriptModel);
+		nodeScriptServer.updateItem(nodeScriptModel);
 		json.put("code", 200);
 		json.put("msg", "执行成功");
 		DefaultSystemLog.getLog().info(json.toString());

@@ -26,7 +26,7 @@ import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.monitor.MonitorTask;
-import io.jpom.service.ICron;
+import io.jpom.cron.ICron;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 

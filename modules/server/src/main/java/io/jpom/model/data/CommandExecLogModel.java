@@ -72,7 +72,7 @@ public class CommandExecLogModel extends BaseWorkspaceModel {
 	 */
 	private String params;
 	/**
-	 * 触发类型
+	 * 触发类型 {0，手动，1 自动触发}
 	 */
 	private Integer triggerExecType;
 	/**

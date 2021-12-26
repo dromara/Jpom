@@ -36,10 +36,10 @@ import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
-import io.jpom.service.ICron;
+import io.jpom.cron.ICron;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.h2db.BaseWorkspaceService;
-import io.jpom.util.CronUtils;
+import io.jpom.cron.CronUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -74,6 +74,16 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
 			this.checkCron(buildInfoModel);
 		}
 		return update;
+	}
+
+	@Override
+	public int delByKey(String keyValue) {
+		int delByKey = super.delByKey(keyValue);
+		if (delByKey > 0) {
+			String taskId = "build:" + delByKey;
+			CronUtils.remove(taskId);
+		}
+		return delByKey;
 	}
 
 	/**

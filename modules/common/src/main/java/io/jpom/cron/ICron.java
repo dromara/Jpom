@@ -20,35 +20,18 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.util;
-
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.logging.SystemStreamLog;
+package io.jpom.cron;
 
 /**
  * @author bwcx_jzy
- * @since 2021/12/24
+ * @since 2021/12/23
  */
-public class IoUtil {
+public interface ICron {
 
 	/**
-	 * 日志输出
-	 */
-	private static final Log log = new SystemStreamLog();
-
-	/**
-	 * 关闭流
+	 * 启动所有的定时任务
 	 *
-	 * @param autoCloseable 自动关闭流接口
+	 * @return 启动成功的任务数
 	 */
-	public static void close(AutoCloseable autoCloseable) {
-		if (autoCloseable == null) {
-			return;
-		}
-		try {
-			autoCloseable.close();
-		} catch (Exception e) {
-			log.error("io close", e);
-		}
-	}
+	int startCron();
 }

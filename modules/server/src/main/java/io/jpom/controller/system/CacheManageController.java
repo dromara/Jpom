@@ -40,7 +40,7 @@ import io.jpom.plugin.PluginFactory;
 import io.jpom.socket.ServiceFileTailWatcher;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.CommandUtil;
-import io.jpom.util.CronUtils;
+import io.jpom.cron.CronUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
