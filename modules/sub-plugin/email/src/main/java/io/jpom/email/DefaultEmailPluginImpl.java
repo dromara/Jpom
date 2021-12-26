@@ -44,14 +44,22 @@ import java.util.Map;
 public class DefaultEmailPluginImpl implements IDefaultPlugin {
 
 	@Override
-	public Object execute(Object main, Map<String, Object> parameter) {
+	public Object execute(Object main, Map<String, Object> parameter) throws Exception {
 		MailAccount mailAccount = getAccount(main);
 		//
 		String toEmail = (String) parameter.get("toEmail");
 		String title = (String) parameter.get("title");
 		String context = (String) parameter.get("context");
 		List<String> list = StrUtil.split(toEmail, StrUtil.COMMA, true, true);
-		return MailUtil.send(mailAccount, list, title, context, false);
+		try {
+			return MailUtil.send(mailAccount, list, title, context, false);
+		} catch (cn.hutool.extra.mail.MailException mailException) {
+			Exception cause = (Exception) mailException.getCause();
+			if (cause != null) {
+				throw cause;
+			}
+			throw mailException;
+		}
 	}
 
 	@Override
@@ -99,13 +107,11 @@ public class DefaultEmailPluginImpl implements IDefaultPlugin {
 		mailAccount.setConnectionTimeout(10 * 1000);
 		boolean sslEnable = data.getBooleanValue("sslEnable");
 		//
-		if (sslEnable) {
-			mailAccount.setSslEnable(true);
-			Integer socketFactoryPort = data.getInteger("socketFactoryPort");
-			if (socketFactoryPort != null) {
-				mailAccount.setSocketFactoryPort(socketFactoryPort);
-			}
-		}
+		mailAccount.setSslEnable(sslEnable);
+		//Integer socketFactoryPort = data.getInteger("socketFactoryPort");
+//			if (socketFactoryPort != null) {
+		mailAccount.setSocketFactoryPort(port);
+//			}
 		mailAccount.setAuth(true);
 		return mailAccount;
 	}

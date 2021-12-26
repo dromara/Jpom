@@ -22,6 +22,7 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.BaseJsonModel;
 
 /**
@@ -61,6 +62,7 @@ public class MailAccountModel extends BaseJsonModel {
 	/**
 	 * 指定的端口连接到在使用指定的套接字工厂。如果没有设置,将使用默认端口
 	 */
+	@Deprecated
 	private Integer socketFactoryPort;
 
 	public String getHost() {
@@ -71,8 +73,18 @@ public class MailAccountModel extends BaseJsonModel {
 		this.host = host;
 	}
 
+	/**
+	 * 兼容端口
+	 *
+	 * @return port
+	 */
 	public Integer getPort() {
-		return port;
+		if (sslEnable != null && sslEnable) {
+			if (socketFactoryPort != null) {
+				return socketFactoryPort;
+			}
+		}
+		return ObjectUtil.defaultIfNull(port, socketFactoryPort);
 	}
 
 	public void setPort(Integer port) {
