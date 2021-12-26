@@ -37,8 +37,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-
 /**
  * 监控邮箱配置
  *
@@ -51,8 +49,11 @@ import javax.annotation.Resource;
 @SystemPermission
 public class SystemMailConfigController extends BaseServerController {
 
-	@Resource
-	private SystemParametersServer systemParametersServer;
+	private final SystemParametersServer systemParametersServer;
+
+	public SystemMailConfigController(SystemParametersServer systemParametersServer) {
+		this.systemParametersServer = systemParametersServer;
+	}
 
 	/**
 	 * load mail config data
