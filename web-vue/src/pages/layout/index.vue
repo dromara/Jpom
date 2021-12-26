@@ -223,6 +223,9 @@ export default {
   min-height: 100vh;
   overflow-y: auto;
 }
+</style>
+
+<style>
 .layout-content {
   margin: 10px 10px 0;
   padding: 15px 15px 0;

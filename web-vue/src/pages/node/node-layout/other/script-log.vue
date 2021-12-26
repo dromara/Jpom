@@ -2,6 +2,9 @@
   <div class="node-full-content">
     <div ref="filter" class="filter">
       <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+      <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
+        <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
+      </a-select>
       <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
         <a-button type="primary" @click="loadData">搜索</a-button>
       </a-tooltip>
@@ -14,7 +17,9 @@
       <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-
+      <template slot="triggerExecTypeMap" slot-scope="text">
+        <span>{{ triggerExecTypeMap[text] || "未知" }}</span>
+      </template>
       <a-tooltip slot="createTimeMillis" slot-scope="text, record" :title="`${parseTime(record.createTimeMillis)}`">
         <span>{{ parseTime(record.createTimeMillis) }}</span>
       </a-tooltip>
@@ -32,6 +37,7 @@
 </template>
 <script>
 import { getScriptLogList, scriptDel } from "@/api/node-other";
+import { triggerExecTypeMap } from "@/api/node-script";
 import ScriptLogView from "@/pages/node/node-layout/other/script-log-view";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { parseTime } from "@/utils/time";
@@ -48,12 +54,14 @@ export default {
     return {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      triggerExecTypeMap: triggerExecTypeMap,
       list: [],
       temp: {},
       logVisible: false,
       columns: [
         { title: "名称", dataIndex: "scriptName", ellipsis: true, scopedSlots: { customRender: "scriptName" } },
         { title: "执行时间", dataIndex: "createTimeMillis", ellipsis: true, scopedSlots: { customRender: "createTimeMillis" } },
+        { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
         { title: "执行人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 220 },
       ],

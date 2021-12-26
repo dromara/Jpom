@@ -93,6 +93,10 @@ export default {
               title: "阿里云企业邮箱",
               value: "smtp.mxhichina.com",
             },
+            {
+              title: "gmail邮箱",
+              value: "smtp.gmail.com",
+            },
           ],
         },
       ],
@@ -128,6 +132,15 @@ export default {
           children: [
             {
               title: "阿里云企业邮箱 SSL",
+              value: "465",
+            },
+          ],
+        },
+        {
+          title: "通用邮箱",
+          children: [
+            {
+              title: "通用邮箱 SSL",
               value: "465",
             },
           ],

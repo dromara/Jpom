@@ -96,6 +96,7 @@ public class ScriptHandler extends BaseProxyHandler {
 			scriptExecuteLogModel.setScriptId(dataItem.getScriptId());
 			scriptExecuteLogModel.setNodeId(nodeInfo.getId());
 			scriptExecuteLogModel.setScriptName(dataItem.getName());
+			scriptExecuteLogModel.setTriggerExecType(0);
 			scriptExecuteLogModel.setWorkspaceId(nodeInfo.getWorkspaceId());
 			logServer.insert(scriptExecuteLogModel);
 			return scriptExecuteLogModel.getId();

@@ -23,21 +23,33 @@
 package io.jpom.system.init;
 
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.RemoteVersion;
-import io.jpom.service.ICron;
+import io.jpom.common.forward.NodeForward;
+import io.jpom.common.forward.NodeUrl;
+import io.jpom.cron.CronUtils;
+import io.jpom.cron.ICron;
+import io.jpom.model.data.NodeModel;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.dblog.BackupInfoService;
+import io.jpom.service.node.NodeService;
+import io.jpom.service.node.script.ScriptExecuteLogServer;
 import io.jpom.system.ConfigBean;
-import io.jpom.util.CronUtils;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
+ * 检查监控数据状态
+ *
  * @author bwcx_jzy
  * @date 2019/7/14
  */
@@ -46,12 +58,65 @@ public class CheckMonitor {
 
 	@PreLoadMethod
 	private static void init() {
-		//
 		// 缓存检测调度
 		CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
 			BuildUtil.reloadCacheSize();
 			ConfigBean.getInstance().dataSize();
 		});
+		// 开启版本检测调度
+		CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {
+			try {
+				BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
+				backupInfoService.checkAutoBackup();
+				//
+				RemoteVersion.loadRemoteInfo();
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("系统调度执行出现错误", e);
+			}
+		});
+		// 拉取 脚本模版日志
+		CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
+			NodeService bean = SpringUtil.getBean(NodeService.class);
+			List<NodeModel> list = bean.list();
+			if (list == null) {
+				return;
+			}
+
+			for (NodeModel nodeModel : list) {
+				ThreadUtil.execute(() -> CheckMonitor.pullScriptLogItem(nodeModel));
+			}
+		});
+		// 异步加载
+		CheckMonitor.asyncLoad();
+	}
+
+	/**
+	 * 同步 节点的脚本模版日志
+	 *
+	 * @param nodeModel 节点
+	 */
+	private static void pullScriptLogItem(NodeModel nodeModel) {
+		try {
+			ScriptExecuteLogServer scriptExecuteLogServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
+			Collection<String> strings = scriptExecuteLogServer.syncExecuteNodeInc(nodeModel);
+			if (strings == null) {
+				return;
+			}
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("ids", strings);
+			JsonMessage<Object> jsonMessage = NodeForward.requestBody(nodeModel, NodeUrl.SCRIPT_DEL_EXEC_LOG, null, jsonObject);
+			if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+				DefaultSystemLog.getLog().error("删除脚本模版执行数据错误:{}", jsonMessage);
+			}
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("同步脚本异常", e);
+		}
+	}
+
+	/**
+	 * 异步初始化
+	 */
+	private static void asyncLoad() {
 		ThreadUtil.execute(() -> {
 			BuildUtil.reloadCacheSize();
 			ConfigBean.getInstance().dataSize();
@@ -73,17 +138,6 @@ public class CheckMonitor {
 			});
 			//
 			RemoteVersion.loadRemoteInfo();
-		});
-		// 开启版本检测调度
-		CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {
-			try {
-				BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
-				backupInfoService.checkAutoBackup();
-				//
-				RemoteVersion.loadRemoteInfo();
-			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("系统调度执行出现错误", e);
-			}
 		});
 	}
 }

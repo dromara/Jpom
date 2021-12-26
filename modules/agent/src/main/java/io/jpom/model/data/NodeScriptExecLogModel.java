@@ -20,18 +20,52 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.service;
+package io.jpom.model.data;
 
 /**
+ * 脚本执行记录
+ *
  * @author bwcx_jzy
- * @since 2021/12/23
+ * @since 2021/12/26
  */
-public interface ICron {
+public class NodeScriptExecLogModel extends BaseWorkspaceModel {
 
 	/**
-	 * 启动所有的定时任务
-	 *
-	 * @return 启动成功的任务数
+	 * 运行时间
 	 */
-	int startCron();
+	private Long createTimeMillis;
+
+	/**
+	 * 脚本ID
+	 */
+	private String scriptId;
+
+	/**
+	 * 脚本名称
+	 */
+	private String scriptName;
+
+	public String getScriptId() {
+		return scriptId;
+	}
+
+	public void setScriptId(String scriptId) {
+		this.scriptId = scriptId;
+	}
+
+	public String getScriptName() {
+		return scriptName;
+	}
+
+	public void setScriptName(String scriptName) {
+		this.scriptName = scriptName;
+	}
+
+	public Long getCreateTimeMillis() {
+		return createTimeMillis;
+	}
+
+	public void setCreateTimeMillis(Long createTimeMillis) {
+		this.createTimeMillis = createTimeMillis;
+	}
 }

@@ -25,15 +25,14 @@ import { mapGetters } from "vuex";
 
 export default {
   props: {
-    nodeId: {
-      type: String,
-    },
+    nodeId: { type: String },
     scriptId: {
       type: String,
     },
     id: {
       type: String,
     },
+    defArgs: { type: String },
   },
   data() {
     return {
@@ -60,6 +59,7 @@ export default {
   },
   mounted() {
     this.initWebSocket();
+    this.temp.args = this.defArgs;
   },
   beforeDestroy() {
     if (this.socket) {
@@ -76,7 +76,7 @@ export default {
       }
       // 连接成功后
       this.socket.onopen = () => {
-        this.logContext = "connect success......\r\n";
+        // this.logContext = "connect success......\r\n";
       };
       this.socket.onerror = (err) => {
         console.error(err);

@@ -17,7 +17,7 @@ import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.monitor.NodeMonitor;
-import io.jpom.service.ICron;
+import io.jpom.cron.ICron;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceService;

@@ -54,6 +54,18 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 	 * 自动执行的 cron
 	 */
 	private String autoExecCron;
+	/**
+	 * 默认参数
+	 */
+	private String defArgs;
+
+	public String getDefArgs() {
+		return defArgs;
+	}
+
+	public void setDefArgs(String defArgs) {
+		this.defArgs = defArgs;
+	}
 
 	public String getAutoExecCron() {
 		return autoExecCron;
