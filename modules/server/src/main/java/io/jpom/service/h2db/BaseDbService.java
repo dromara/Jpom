@@ -146,6 +146,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		// def modify time
 		info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
 		// remove create time
+		Long createTimeMillis = info.getCreateTimeMillis();
 		info.setCreateTimeMillis(null);
 		// fill modify user
 		if (info instanceof BaseUserModifyDbModel) {
@@ -162,7 +163,10 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		//
 		Entity where = new Entity();
 		where.set(Const.ID_STR, id);
-		return super.update(entity, where);
+		int update = super.update(entity, where);
+		// backtrack
+		info.setCreateTimeMillis(createTimeMillis);
+		return update;
 	}
 
 	@Override
