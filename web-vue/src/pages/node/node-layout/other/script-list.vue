@@ -109,7 +109,7 @@ export default {
       columns: [
         // { title: "Script ID", dataIndex: "id", width: 200, ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
+        { title: "修改时间", dataIndex: "modifyTimeMillis", width: 180, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 260 },
