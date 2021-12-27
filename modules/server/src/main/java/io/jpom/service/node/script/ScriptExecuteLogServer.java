@@ -11,10 +11,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.BaseDbModel;
-import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ScriptExecuteLogModel;
-import io.jpom.model.data.UserModel;
-import io.jpom.model.data.WorkspaceModel;
+import io.jpom.model.data.*;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.WorkspaceService;
@@ -33,8 +30,8 @@ import java.util.stream.Collectors;
 @Service
 public class ScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLogModel> {
 
-	protected ScriptExecuteLogServer(NodeService nodeService,
-									 WorkspaceService workspaceService) {
+	public ScriptExecuteLogServer(NodeService nodeService,
+								  WorkspaceService workspaceService) {
 		super(nodeService, workspaceService, "脚本模版日志");
 	}
 
@@ -95,9 +92,9 @@ public class ScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLogMode
 						// 检查对应的工作空间 是否存在
 						return workspaceService.exists(new WorkspaceModel(item.getWorkspaceId()));
 					})
-					.filter(projectInfoModel -> {
+					.filter(item -> {
 						// 避免重复同步
-						return StrUtil.equals(nodeModel.getWorkspaceId(), projectInfoModel.getWorkspaceId());
+						return StrUtil.equals(nodeModel.getWorkspaceId(), item.getWorkspaceId());
 					})
 					.collect(Collectors.toList());
 			// 设置 临时缓存，便于放行检查
