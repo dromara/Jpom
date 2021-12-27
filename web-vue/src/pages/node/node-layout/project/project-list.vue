@@ -47,10 +47,10 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="status" slot-scope="text, record">
-        <a-tooltip v-if="record.runMode !== 'File'" title="状态操作请到控制台中控制">
+        <a-tooltip v-if="noFileModes.includes(record.runMode)" title="状态操作请到控制台中控制">
           <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
         </a-tooltip>
-        <span v-if="record.runMode === 'File'">-</span>
+        <span v-else>-</span>
       </template>
 
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
@@ -58,8 +58,8 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleFile(record)">文件</a-button>
-        <a-tooltip :title="`${record.runMode === 'File' ? 'File 类型项目不能使用控制台功能' : '到控制台去管理项目状态'}`">
-          <a-button type="primary" @click="handleConsole(record)" :disabled="record.runMode === 'File'">控制台</a-button>
+        <a-tooltip :title="`${noFileModes.includes(record.runMode) ? '到控制台去管理项目状态' : 'File 类型项目不能使用控制台功能'}`">
+          <a-button type="primary" @click="handleConsole(record)" :disabled="!noFileModes.includes(record.runMode)">控制台</a-button>
         </a-tooltip>
         <a-dropdown>
           <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
@@ -71,10 +71,10 @@
               <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
             </a-menu-item>
             <a-menu-item>
-              <a-button type="primary" @click="handleMonitor(record)" v-show="record.runMode !== 'File'" :disabled="!record.status">监控 </a-button>
+              <a-button type="primary" @click="handleMonitor(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.status">监控 </a-button>
             </a-menu-item>
             <a-menu-item>
-              <a-button type="primary" @click="handleReplica(record)" v-show="record.runMode !== 'File'" :disabled="!record.javaCopyItemList">副本集 </a-button>
+              <a-button type="primary" @click="handleReplica(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
             </a-menu-item>
             <a-menu-item>
               <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
@@ -87,8 +87,8 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editProjectVisible" width="800px" title="编辑项目" @ok="handleEditProjectOk" :maskClosable="false">
-      <a-form-model ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+    <a-modal v-model="editProjectVisible" width="60vw" title="编辑项目" @ok="handleEditProjectOk" :maskClosable="false">
+      <a-form-model ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="项目 ID" prop="id">
           <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
@@ -117,27 +117,12 @@
         </a-form-model-item>
         <a-form-model-item prop="whitelistDirectory" class="jpom-node-project-whitelist">
           <template slot="label">
-            项目白名单路径
+            项目路径
             <a-tooltip v-show="temp.type !== 'edit'">
               <template slot="title">
                 <ul>
                   <li>白名单路径是指项目文件存放到服务中的文件夹</li>
                   <li>可以到节点管理中的【系统管理】=>【白名单配置】修改</li>
-                </ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-select v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
-            <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
-          </a-select>
-        </a-form-model-item>
-        <a-form-model-item prop="lib">
-          <template slot="label">
-            项目文件夹
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
-                <ul>
                   <li>项目文件夹是项目实际存放的目录名称</li>
                   <li>项目文件会存放到 <br />&nbsp;&nbsp;<b>项目白名单路径+项目文件夹</b></li>
                 </ul>
@@ -145,13 +130,34 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.lib" placeholder="项目存储的文件夹" @blur.native="checkLibIndexExist" />
-          <span class="lib-exist" v-show="temp.libExist">当前文件夹已存在,创建成功后会自动同步文件.</span>
+          <a-input-group compact>
+            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
+              <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
+            </a-select>
+            <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹" @blur.native="checkLibIndexExist" />
+            <span class="lib-exist" v-show="temp.libExist">{{ temp.libExistMsg }}</span>
+          </a-input-group>
         </a-form-model-item>
+        <!-- <a-form-model-item prop="lib">
+          <template slot="label">
+            项目文件夹
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+                <ul></ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+        </a-form-model-item> -->
         <a-form-model-item v-show="filePath !== ''" label="项目完整目录">
           <a-alert :message="filePath" type="success" />
         </a-form-model-item>
-        <a-form-model-item v-show="temp.runMode && temp.runMode !== 'File'">
+        <a-form-model-item v-show="temp.runMode === 'Dsl'" label="DSL 内容" prop="dslContent">
+          <div style="height: 40vh; overflow-y: scroll">
+            <code-editor v-model="temp.dslContent" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"></code-editor>
+          </div>
+        </a-form-model-item>
+        <a-form-model-item v-show="javaModes.includes(temp.runMode)">
           <template slot="label">
             日志目录
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -170,51 +176,53 @@
           </a-select>
         </a-form-model-item>
 
-        <a-form-model-item label="JDK" prop="jdkId" v-show="temp.runMode && temp.runMode !== 'File'" class="jpom-node-project-jdk">
+        <a-form-model-item label="JDK" prop="jdkId" v-show="javaModes.includes(temp.runMode)" class="jpom-node-project-jdk">
           <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
             <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode && temp.runMode !== 'Jar' && temp.runMode !== 'File'">
+        <a-form-model-item label="Main Class" prop="mainClass" v-show="javaModes.includes(temp.runMode) && temp.runMode !== 'Jar'">
           <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
         </a-form-model-item>
-        <a-form-model-item label="JavaExtDirsCp" prop="javaExtDirsCp" v-show="temp.runMode === 'JavaExtDirsCp' && temp.runMode !== 'File'">
+        <a-form-model-item label="JavaExtDirsCp" prop="javaExtDirsCp" v-show="javaModes.includes(temp.runMode) && temp.runMode === 'JavaExtDirsCp'">
           <a-input v-model="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】" />
         </a-form-model-item>
-        <a-form-model-item label="JVM 参数" prop="jvm" v-show="temp.runMode && temp.runMode !== 'File'">
+        <a-form-model-item label="JVM 参数" prop="jvm" v-show="javaModes.includes(temp.runMode)">
           <a-textarea v-model="temp.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
         </a-form-model-item>
-        <a-form-model-item label="args 参数" prop="args" v-show="temp.runMode && temp.runMode !== 'File'">
+        <a-form-model-item label="args 参数" prop="args" v-show="javaModes.includes(temp.runMode)">
           <a-textarea v-model="temp.args" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
         </a-form-model-item>
-        <!-- 副本信息 -->
-        <a-row v-for="replica in temp.javaCopyItemList" :key="replica.id">
-          <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
-            <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
-          </a-form-model-item>
-          <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
-            <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
-          </a-form-model-item>
-          <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
-            <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)">删除</a-button>
-          </a-tooltip>
-        </a-row>
-        <!-- 添加副本 -->
-        <a-form-model-item v-show="temp.runMode && temp.runMode !== 'File'">
-          <template slot="label">
-            副本操作
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
-                <ul>
-                  <li>副本是指同一个项目在一个节点（服务器）中运行多份</li>
-                </ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
+        <div v-if="javaModes.includes(temp.runMode)">
+          <!-- 副本信息 -->
+          <a-row v-for="replica in temp.javaCopyItemList" :key="replica.id">
+            <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
+              <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
+            </a-form-model-item>
+            <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
+              <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
+            </a-form-model-item>
+            <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
+              <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)">删除</a-button>
             </a-tooltip>
-          </template>
-          <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
-        </a-form-model-item>
-        <a-form-model-item prop="autoStart" v-show="temp.runMode && temp.runMode !== 'File'">
+          </a-row>
+          <!-- 添加副本 -->
+          <a-form-model-item>
+            <template slot="label">
+              副本操作
+              <a-tooltip v-show="temp.type !== 'edit'">
+                <template slot="title">
+                  <ul>
+                    <li>副本是指同一个项目在一个节点（服务器）中运行多份</li>
+                  </ul>
+                </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </template>
+            <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
+          </a-form-model-item>
+        </div>
+        <a-form-model-item prop="autoStart" v-show="noFileModes.includes(temp.runMode)">
           <template slot="label">
             自启动
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -224,7 +232,7 @@
           </template>
           <a-switch v-model="temp.autoStart" checked-children="开" un-checked-children="关" />
         </a-form-model-item>
-        <a-form-model-item prop="token" v-show="temp.runMode && temp.runMode !== 'File'" class="jpom-node-project-token">
+        <a-form-model-item prop="token" v-show="noFileModes.includes(temp.runMode)" class="jpom-node-project-token">
           <template slot="label">
             WebHooks
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -240,10 +248,10 @@
           </template>
           <a-input v-model="temp.token" placeholder="项目启动,停止,重启都将请求对应的地址,非必填，GET请求" />
         </a-form-model-item>
-        <a-form-model-item v-show="temp.type === 'edit' && temp.runMode !== 'File'" label="日志路径" prop="log">
+        <a-form-model-item v-if="temp.log" v-show="temp.type === 'edit' && javaModes.includes(temp.runMode)" label="日志路径" prop="log">
           <a-alert :message="temp.log" type="success" />
         </a-form-model-item>
-        <a-form-model-item v-show="temp.type === 'edit' && temp.runMode !== 'File'" label="运行命令" prop="runCommand">
+        <a-form-model-item v-if="temp.runCommand" v-show="temp.type === 'edit' && javaModes.includes(temp.runMode)" label="运行命令" prop="runCommand">
           <a-alert :message="temp.runCommand || '无'" type="success" />
         </a-form-model-item>
       </a-form-model>
@@ -284,6 +292,7 @@ import Console from "./project-console";
 import Monitor from "./project-monitor";
 import Replica from "./project-replica";
 import { parseTime } from "@/utils/time";
+import codeEditor from "@/components/codeEditor";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 import {
@@ -298,6 +307,9 @@ import {
   restartProject,
   startProject,
   stopProject,
+  runModeList,
+  javaModes,
+  noFileModes,
 } from "@/api/node-project";
 
 export default {
@@ -311,6 +323,7 @@ export default {
     Console,
     Monitor,
     Replica,
+    codeEditor,
   },
   data() {
     return {
@@ -318,7 +331,9 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       accessList: [],
       jdkList: [],
-      runModeList: ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"],
+      runModeList: runModeList,
+      javaModes: javaModes,
+      noFileModes: noFileModes,
       list: [],
       temp: {},
       editProjectVisible: false,
@@ -328,7 +343,7 @@ export default {
       drawerMonitorVisible: false,
       drawerReplicaVisible: false,
       // addGroupvisible: false,
-      libExist: false,
+      // libExist: false,
       selectedRows: [],
       selectedRowKeys: [],
       checkRecord: "",
@@ -669,11 +684,13 @@ export default {
       if (this.temp.lib && this.temp.lib.length !== 0 && this.temp.whitelistDirectory && this.temp.whitelistDirectory.length !== 0) {
         const params = {
           nodeId: this.node.id,
+          id: this.temp.id,
           newLib: this.temp.whitelistDirectory + this.temp.lib,
         };
         nodeJudgeLibExist(params).then((res) => {
           if (res.code === 401) {
             this.temp.libExist = true;
+            this.temp.libExistMsg = res.msg;
             this.temp = { ...this.temp };
           }
           if (res.code !== 200) {
@@ -866,15 +883,6 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-
-.ant-btn {
-  margin-right: 10px;
-}
-
-.filter-item {
-  width: 150px;
-  margin-right: 10px;
 }
 
 .btn-add {

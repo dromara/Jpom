@@ -111,6 +111,18 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 	 * 项目自动启动
 	 */
 	private Boolean autoStart;
+	/**
+	 * dsl yml 内容
+	 */
+	private String dslContent;
+
+	public String getDslContent() {
+		return dslContent;
+	}
+
+	public void setDslContent(String dslContent) {
+		this.dslContent = dslContent;
+	}
 
 	public List<JavaCopyItem> getJavaCopyItemList() {
 		return javaCopyItemList;

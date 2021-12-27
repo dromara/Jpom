@@ -143,6 +143,7 @@ export function editProject(params, replicaParams) {
     token: params.token,
     logPath: params.logPath,
     autoStart: params.autoStart,
+    dslContent: params.dslContent,
     ...replicaParams,
   };
   return axios({
@@ -502,7 +503,7 @@ export function restartProject(params) {
     data: params,
     headers: {
       loading: "no",
-      tip:"no",
+      tip: "no",
     },
   });
 }
@@ -522,7 +523,7 @@ export function startProject(params) {
     data: params,
     headers: {
       loading: "no",
-      tip:"no",
+      tip: "no",
     },
   });
 }
@@ -542,9 +543,22 @@ export function stopProject(params) {
     data: params,
     headers: {
       loading: "no",
-      tip:"no",
+      tip: "no",
     },
   });
 }
 
-export const runModeList = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"];
+/**
+ * 所有的运行模式
+ */
+export const runModeList = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File", "Dsl"];
+
+/**
+ * java 项目的运行模式
+ */
+export const javaModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp"];
+
+/**
+ * 有状态管理的运行模式
+ */
+export const noFileModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "Dsl"];

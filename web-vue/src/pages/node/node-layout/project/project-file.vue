@@ -5,7 +5,7 @@
     <a-layout-sider theme="light" class="sider" width="25%">
       <div class="dir-container">
         <a-button type="primary" @click="loadData">刷新目录</a-button>
-        <a-button type="primary" v-if="showConsole" @click="goConsole" v-show="runMode !== 'File'">控制台</a-button>
+        <a-button type="primary" v-if="showConsole" @click="goConsole" v-show="noFileModes.includes(runMode)">控制台</a-button>
       </div>
       <a-empty v-if="treeList.length === 0" />
       <el-tree
@@ -104,7 +104,7 @@
   </a-layout>
 </template>
 <script>
-import { getFileList, downloadProjectFile, deleteProjectFile, uploadProjectFile, readFile, updateFile, remoteDownload } from "../../../../api/node-project";
+import { getFileList, downloadProjectFile, noFileModes, deleteProjectFile, uploadProjectFile, readFile, updateFile, remoteDownload } from "@/api/node-project";
 import { ZIP_ACCEPT } from "@/utils/const";
 import codeEditor from "@/components/codeEditor";
 
@@ -133,6 +133,7 @@ export default {
   data() {
     return {
       ZIP_ACCEPT: ZIP_ACCEPT,
+      noFileModes: noFileModes,
       loading: false,
       treeList: [],
       fileList: [],
