@@ -47,6 +47,7 @@ import io.jpom.system.ServerExtConfigBean;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -228,6 +229,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		//
 		Page pageReq = this.parsePage(paramMap);
 		Entity where = Entity.create();
+		List<String> ignoreField = new ArrayList<>(10);
 		// 查询条件
 		for (Map.Entry<String, String> stringStringEntry : paramMap.entrySet()) {
 			String key = stringStringEntry.getKey();
@@ -255,6 +257,25 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 					// 防止字段重复
 					where.set(key + " ", "<= " + endDateTime.getTime());
 				}
+			} else if (StrUtil.containsIgnoreCase(key, "time")) {
+				String timeKey = StrUtil.removeAny(key, "[0]", "[1]");
+				if (ignoreField.contains(timeKey)) {
+					continue;
+				}
+				String startTime = paramMap.get(timeKey + "[0]");
+				String endTime = paramMap.get(timeKey + "[1]");
+				if (StrUtil.isAllNotEmpty(startTime, endTime)) {
+					DateTime startDateTime = DateUtil.parse(startTime, DatePattern.NORM_DATETIME_FORMAT);
+					where.set(timeKey, ">= " + startDateTime.getTime());
+
+					DateTime endDateTime = DateUtil.parse(endTime, DatePattern.NORM_DATETIME_FORMAT);
+					if (startDateTime.equals(endDateTime)) {
+						endDateTime = DateUtil.endOfDay(endDateTime);
+					}
+					// 防止字段重复
+					where.set(timeKey + " ", "<= " + endDateTime.getTime());
+				}
+				ignoreField.add(timeKey);
 			} else {
 				where.set(StrUtil.format("`{}`", key), value);
 			}
