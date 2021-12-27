@@ -52,9 +52,10 @@
       </a-tooltip>
 
       <template slot="status" slot-scope="text, record">
-        <a-tooltip v-if="record.runMode !== 'File'" placement="topLeft" title="状态操作请到控制台中控制">
+        <a-tooltip v-if="noFileModes.includes(record.runMode)" placement="topLeft" title="状态操作请到控制台中控制">
           <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
         </a-tooltip>
+        <span v-else>-</span>
       </template>
 
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
@@ -62,7 +63,7 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleFile(record)">文件</a-button>
-        <a-button type="primary" @click="handleConsole(record)" v-show="record.runMode !== 'File'">控制台</a-button>
+        <a-button type="primary" @click="handleConsole(record)" v-show="noFileModes.includes(record.runMode)">控制台</a-button>
       </template>
     </a-table>
     <!-- 项目文件组件 -->
@@ -90,7 +91,7 @@
 </template>
 <script>
 import { getProjectList, delAllProjectCache, getNodeListAll } from "@/api/node";
-import { restartProject, startProject, stopProject, getRuningProjectInfo, runModeList } from "@/api/node-project";
+import { restartProject, startProject, stopProject, getRuningProjectInfo, runModeList, noFileModes } from "@/api/node-project";
 import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
@@ -107,6 +108,7 @@ export default {
       runModeList: runModeList,
       selectedRowKeys: [],
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      noFileModes: noFileModes,
       nodeMap: {},
       drawerTitle: "",
       temp: {},
