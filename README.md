@@ -87,6 +87,7 @@
 ### 一键安装（Linux）（推荐）
 
 #### 插件端
+
 > 如果服务端也需要被管理，在服务端上也需要安装插件端
 > 
 > 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) ）
@@ -172,12 +173,12 @@ docker-compose up -d
 3. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. agent-x.x.x-release 目录为插件端的全部安装文件
     2. 上传到对应服务器
-    3. 命令运行（Agent.sh、Agent.bat）
+    3. 命令运行（Agent.sh、Agent.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2123`
 4. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. server-x.x.x-release 目录为服务端的全部安装文件
     2. 上传到对应服务器
-    3. 命令运行（Server.sh、Server.bat）
+    3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
 ### 编译安装
@@ -191,12 +192,12 @@ docker-compose up -d
 5. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
     2. 打包上传服务器运行
-    3. 命令运行（Agent.sh、Agent.bat）
+    3. 命令运行（Agent.sh、Agent.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2123`
 6. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行
-    3. 命令运行（Server.sh、Server.bat）
+    3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
 > 也可以使用 `script/release.bat` `script/release.sh` 快速打包
@@ -228,7 +229,7 @@ Server.bat     启动管理面板(按照面板提示输入操作)
 Agent.bat     启动管理面板(按照面板提示输入操作)
 ```
 
-> windows 中执行启动后需要根据日志取跟进启动的状态
+> windows 中执行启动后需要根据日志取跟进启动的状态、如果出现乱码请检查或者修改编码格式，windows 中 bat 编码格式推荐为 `GB2312`
 
 2. linux 中 Agent.sh 、Server.sh
 
