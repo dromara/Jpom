@@ -88,11 +88,15 @@ public class IndexControl extends BaseServerController {
 		//<div id="jpomCommonJs"></div>
 		String path = ExtConfigBean.getInstance().getPath();
 		File file = FileUtil.file(String.format("%s/script/common.js", path));
-		String jsCommonContext = StrUtil.EMPTY;
 		if (file.exists()) {
-			jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
+			String jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
+			// <div id="jpomCommonJs"><!--Don't delete this line, place for public JS --></div>
+			String[] commonJsTemps = new String[]{"<div id=\"jpomCommonJs\"><!--Don't delete this line, place for public JS --></div>", "<div id=\"jpomCommonJs\"></div>"};
+			for (String item : commonJsTemps) {
+				html = StrUtil.replace(html, item, jsCommonContext);
+			}
 		}
-		html = StrUtil.replace(html, "<div id=\"jpomCommonJs\"></div>", jsCommonContext);
+
 		// <routerBase>
 		String proxyPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
 		html = StrUtil.replace(html, "<routerBase>", proxyPath);
