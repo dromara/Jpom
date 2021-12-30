@@ -21,32 +21,22 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-FROM centos:7
+FROM maven:3.8.4-jdk-8-slim as builder
+WORKDIR /target/dependency
+COPY . .
 
-ENV LANG		en_US.utf8
+RUN mvn -B -e -T 1C clean package -pl modules/agent -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
 
+FROM openjdk:8
 ENV JPOM_HOME	/usr/local/jpom-agent
-ENV JPOM_PKG	agent-2.8.3-release.zip
-
-ADD jdk-8u202-linux-x64.tar.gz /usr/local/java/
-ENV JAVA_HOME	/usr/local/java/jdk1.8.0_202
-ENV	CLASSPATH	.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-ENV	PATH		$JAVA_HOME/bin:$PATH
-
-ADD apache-maven-3.8.4-bin.tar.gz /usr/local/maven/
-ENV MAVEN_HOME	/usr/local/maven/apache-maven-3.8.4
-ENV PATH		$MAVEN_HOME/bin:$PATH
-
-RUN yum install -y unzip
-
-RUN mkdir -p $JPOM_HOME
-COPY $JPOM_PKG $JPOM_HOME
-RUN unzip -o $JPOM_HOME/$JPOM_PKG -d $JPOM_HOME
-RUN chmod +x $JPOM_HOME/Agent.sh
-RUN rm -rf $JPOM_HOME/$JPOM_PKG
-
+ARG JPOM_VERSION
+ENV JPOM_PKG    agent-${JPOM_VERSION}-release
 WORKDIR $JPOM_HOME
+ARG DEPENDENCY=/target/dependency
+COPY --from=builder ${DEPENDENCY}/modules/agent/target/${JPOM_PKG} ${JPOM_HOME}
 
+VOLUME $JPOM_HOME
 EXPOSE 2123
 
-ENTRYPOINT ["/bin/sh", "Agent.sh", "start"]
+ENTRYPOINT ["/bin/bash", "Agent.sh", "start"]
+
