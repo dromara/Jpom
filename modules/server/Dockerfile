@@ -25,36 +25,47 @@ FROM centos:7
 
 ENV LANG		en_US.utf8
 
-ENV JPOM_HOME	/usr/local/jpom-server
-ENV JPOM_PKG	server-2.8.3-release.zip
+ENV JPOM_HOME		/usr/local/jpom-server/
+ENV JAVA_PATH		/usr/local/java/
+ENV MAVEN_PATH		/usr/local/maven/
+ENV JPOM_PKG		server-2.8.3-release.zip
+ENV JDK_PKG			jdk-8u251-linux-x64.tar.gz
+ENV JDK_BIN_PATH	jdk1.8.0_251
+ENV MAVEN_PKG		apache-maven-3.6.3-bin.tar.gz
+ENV MAVEN_BIN_PATH 	apache-maven-3.8.4
 
+# 初始化目录
+RUN mkdir -p $JPOM_HOME
+RUN mkdir -p $JAVA_PATH
+RUN mkdir -p $MAVEN_PATH
+
+# 安装 wget 、 unzip  插件
 RUN yum install -y wget
+RUN yum install -y unzip
 
-RUN wget -O jdk-8u251-linux-x64.tar.gz https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/jdk-8u251-linux-x64.tar.gz
+# 下载依赖包
+RUN wget -O $JPOM_HOME/$JPOM_PKG https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/$JPOM_PKG
+RUN wget -O $JAVA_PATH/$JDK_PKG https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/$JDK_PKG
+RUN wget -O $MAVEN_PATH/$MAVEN_PKG https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/$MAVEN_PKG
 
-RUN wget -O apache-maven-3.6.3-bin.tar.gz https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/apache-maven-3.6.3-bin.tar.gz
-
-RUN mkdir /usr/local/java/ && tar -zxf jdk-8u251-linux-x64.tar.gz  -C /usr/local/java/
-
-# ADD jdk-8u202-linux-x64.tar.gz /usr/local/java/
-ENV JAVA_HOME	/usr/local/java/jdk1.8.0_202
+# 解压 安装 jdk
+RUN tar -zxf $JAVA_PATH/$JDK_PKG  -C $JAVA_PATH
+ENV JAVA_HOME	$JAVA_PATH/$JDK_BIN_PATH
 ENV	CLASSPATH	.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 ENV	PATH		$JAVA_HOME/bin:$PATH
 
-RUN mkdir /usr/local/maven/ && tar -zxf apache-maven-3.6.3-bin.tar.gz  -C /usr/local/maven/
-# ADD apache-maven-3.8.4-bin.tar.gz /usr/local/maven/
-ENV MAVEN_HOME	/usr/local/maven/apache-maven-3.8.4
+# 解压 安装 maven
+RUN tar -zxf $MAVEN_PATH/$MAVEN_PKG  -C $MAVEN_PATH
+ENV MAVEN_HOME	$MAVEN_PATH/$MAVEN_BIN_PATH
 ENV PATH		$MAVEN_HOME/bin:$PATH
 
-RUN rm -rf jdk-8u251-linux-x64.tar.gz
-RUN rm -rf apache-maven-3.6.3-bin.tar.gz
-
-RUN yum install -y unzip
-
-RUN mkdir -p $JPOM_HOME
-COPY $JPOM_PKG $JPOM_HOME
+# 解压 jpom
 RUN unzip -o $JPOM_HOME/$JPOM_PKG -d $JPOM_HOME
 RUN chmod +x $JPOM_HOME/Server.sh
+
+# 清理资源
+RUN rm -rf $JAVA_PATH/$JDK_PKG
+RUN rm -rf $MAVEN_PATH/$MAVEN_PKG
 RUN rm -rf $JPOM_HOME/$JPOM_PKG
 
 WORKDIR $JPOM_HOME
