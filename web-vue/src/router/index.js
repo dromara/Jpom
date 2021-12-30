@@ -43,7 +43,7 @@ const children = [
   },
   {
     path: "/ssh/command-log",
-    name: "node-command",
+    name: "node-command-log",
     component: () => import("../pages/ssh/command-log"),
   },
   {
