@@ -119,7 +119,7 @@ export default {
       const used = localStorage.getItem(GUIDE_NODE_USED_KEY) === "true";
       // 如果要显示引导并且没有使用过
       if (this.getGuideFlag && !used) {
-        this.$introJs()
+        this.$introJs
           .setOptions({
             hidePrev: true,
             steps: [
@@ -151,7 +151,7 @@ export default {
           });
         return false;
       }
-      this.$introJs().exit();
+      this.$introJs.exit();
     },
     // 加载菜单
     loadNodeMenu() {
