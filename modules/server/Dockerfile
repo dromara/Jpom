@@ -21,10 +21,6 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-# docker build -f ./modules/server/Dockerfile -t jpomdocker/jpom:x.x.x ./modules/server/target
-#
-# docker push jpomdocker/jpom:x.x.x
-
 FROM centos:7
 
 ENV LANG		en_US.utf8
@@ -49,6 +45,9 @@ RUN mkdir /usr/local/maven/ && tar -zxf apache-maven-3.6.3-bin.tar.gz  -C /usr/l
 # ADD apache-maven-3.8.4-bin.tar.gz /usr/local/maven/
 ENV MAVEN_HOME	/usr/local/maven/apache-maven-3.8.4
 ENV PATH		$MAVEN_HOME/bin:$PATH
+
+RUN rm -rf jdk-8u251-linux-x64.tar.gz
+RUN rm -rf apache-maven-3.6.3-bin.tar.gz
 
 RUN yum install -y unzip
 

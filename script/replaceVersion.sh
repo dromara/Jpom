@@ -37,6 +37,7 @@ sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../.env
 # 替换 Dockerfile 中的版本
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/server/Dockerfile
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/agent/Dockerfile
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../script/docker.sh
 
 # 保留新版本号
 echo "$new_version" > $pwd/../docs/version.txt
