@@ -551,7 +551,7 @@ export function stopProject(params) {
 /**
  * 所有的运行模式
  */
-export const runModeList = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File", "Dsl"];
+export const runModeList = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"];
 
 /**
  * java 项目的运行模式
@@ -561,4 +561,4 @@ export const javaModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp"];
 /**
  * 有状态管理的运行模式
  */
-export const noFileModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "Dsl"];
+export const noFileModes = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp"];

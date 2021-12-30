@@ -207,7 +207,7 @@ export default {
     // 页面引导
     introGuide() {
       if (this.getGuideFlag) {
-        this.$introJs()
+        this.$introJs
           .setOptions({
             hidePrev: true,
             steps: [
@@ -221,7 +221,7 @@ export default {
           .start();
         return false;
       }
-      this.$introJs().exit();
+      this.$introJs.exit();
     },
     onCheckedLeft(_, e, checkedKeys, itemSelect) {
       const { eventKey } = e.node;
@@ -286,17 +286,16 @@ export default {
     },
     // 新增用户
     handleAdd() {
-      this.createOption = true;
+      setTimeout(() => {
+        this.introGuide();
+      }, 500);
+
       this.temp = {};
+      this.createOption = true;
       this.targetKeys = [];
       this.loadWorkSpaceListAll();
       this.editUserVisible = true;
-      this.$nextTick(() => {
-        setTimeout(() => {
-          this.introGuide();
-        }, 500);
-        this.$refs["editUserForm"] && this.$refs["editUserForm"].resetFields();
-      });
+      this.$refs["editUserForm"] && this.$refs["editUserForm"].resetFields();
     },
     // 修改用户
     handleEdit(record) {

@@ -154,7 +154,7 @@ export default {
     // 页面引导
     introGuide() {
       if (this.getGuideFlag) {
-        this.$introJs()
+        this.$introJs
           .setOptions({
             hidePrev: true,
             steps: [
@@ -168,7 +168,7 @@ export default {
           .start();
         return false;
       }
-      this.$introJs().exit();
+      this.$introJs.exit();
     },
 
     // 加载数据

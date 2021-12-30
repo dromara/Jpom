@@ -18,9 +18,18 @@ import "./router/auth";
 // debug routerBase
 window.routerBase = window.routerBase === "<routerBase>" ? "" : window.routerBase;
 
+// introJs 按钮中文
+const intro = introJs();
+intro.setOptions({
+  prevLabel: "上一步",
+  nextLabel: "下一步",
+  // skipLabel: "跳过",
+  doneLabel: "结束引导",
+});
+
 Vue.config.productionTip = false;
 Vue.prototype.$loading = Loading;
-Vue.prototype.$introJs = introJs;
+Vue.prototype.$introJs = intro;
 Vue.use(Antd);
 Vue.use(Tree);
 Vue.use(Progress);
