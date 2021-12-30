@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   server:
-    image: jpom_server:${JPOM_VERSION}
+    image: jpomdocker/jpom:server-${JPOM_VERSION}
     build:
       dockerfile: Dockerfile.server
       context: .
@@ -13,8 +13,8 @@ services:
       - jpom-server:/usr/local/jpom-server
     ports:
       - "2122:2122"
-  agent:
-    image: jpom_agent:${JPOM_VERSION}
+  agent01:
+    image: jpomdocker/jpom:agent-${JPOM_VERSION}
     build:
       dockerfile: Dockerfile.agent
       context: .
@@ -24,13 +24,32 @@ services:
       "jpom.server.token": ${SERVER_TOKEN}
       "jpom.server.url": http://server:2122
       "jpom.agent.id": agent01
-      "jpom.agent.url": http://agent:2123
+      "jpom.agent.url": http://agent01:2123
     volumes:
-      - jpom-agent:/usr/local/jpom-agent
+      - jpom-agent01:/usr/local/jpom-agent
     ports:
       - "2123:2123"
     depends_on:
       - server
+  agent02:
+    image: jpomdocker/jpom:agent-${JPOM_VERSION}
+    build:
+      dockerfile: Dockerfile.agent
+      context: .
+      args:
+        JPOM_VERSION: ${JPOM_VERSION}
+    environment:
+      "jpom.server.token": ${SERVER_TOKEN}
+      "jpom.server.url": http://server:2122
+      "jpom.agent.id": agent02
+      "jpom.agent.url": http://agent02:2123
+    volumes:
+      - jpom-agent02:/usr/local/jpom-agent
+    ports:
+      - "2124:2123"
+    depends_on:
+      - server
 volumes:
-  jpom-agent:
+  jpom-agent01:
+  jpom-agent02:
   jpom-server:
