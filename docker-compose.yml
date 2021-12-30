@@ -3,7 +3,7 @@ services:
   server:
     image: jpomdocker/jpom:server-${JPOM_VERSION}
     build:
-      dockerfile: Dockerfile.server
+      dockerfile: ./modules/server/Dockerfile
       context: .
       args:
         JPOM_VERSION: ${JPOM_VERSION}
@@ -16,7 +16,7 @@ services:
   agent01:
     image: jpomdocker/jpom:agent-${JPOM_VERSION}
     build:
-      dockerfile: Dockerfile.agent
+      dockerfile: ./modules/agent/Dockerfile
       context: .
       args:
         JPOM_VERSION: ${JPOM_VERSION}
@@ -34,7 +34,7 @@ services:
   agent02:
     image: jpomdocker/jpom:agent-${JPOM_VERSION}
     build:
-      dockerfile: Dockerfile.agent
+      dockerfile: ./modules/agent/Dockerfile
       context: .
       args:
         JPOM_VERSION: ${JPOM_VERSION}

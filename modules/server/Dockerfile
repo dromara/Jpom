@@ -21,55 +21,43 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-FROM centos:7
+FROM maven:3.8.4-jdk-8-slim as builder
+WORKDIR /target/dependency
+COPY . .
 
-ENV LANG		en_US.utf8
+RUN set -eux; \
+    ARCH="$(dpkg --print-architecture)"; \
+    case "${ARCH}" in \
+       aarch64|arm64) \
+         BINARY_ARCH='arm64'; \
+         ;; \
+       amd64|x86_64) \
+         BINARY_ARCH='x64'; \
+         ;; \
+       *) \
+         echo "Unsupported arch: ${ARCH}"; \
+         exit 1; \
+         ;; \
+    esac; \
+    curl -LfsSo /opt/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz https://npmmirror.com/mirrors/node/v16.13.1/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz \
+    && tar -zxvf /opt/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz -C /opt/ && export PATH=/opt/node-v16.13.1-linux-${BINARY_ARCH}/bin:$PATH \
+    && npm config set registry https://registry.npmmirror.com \
+    && cd web-vue && npm install && npm run build
 
-ENV JPOM_HOME		/usr/local/jpom-server/
-ENV JAVA_PATH		/usr/local/java/
-ENV MAVEN_PATH		/usr/local/maven/
-ENV JPOM_PKG		server-2.8.3-release.zip
-ENV JDK_PKG			jdk-8u251-linux-x64.tar.gz
-ENV JDK_BIN_PATH	jdk1.8.0_251
-ENV MAVEN_PKG		apache-maven-3.6.3-bin.tar.gz
-ENV MAVEN_BIN_PATH 	apache-maven-3.8.4
+RUN mvn -B -e -T 1C clean package -pl modules/server -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
 
-# 初始化目录
-RUN mkdir -p $JPOM_HOME
-RUN mkdir -p $JAVA_PATH
-RUN mkdir -p $MAVEN_PATH
-
-# 安装 wget 、 unzip  插件
-RUN yum install -y wget
-RUN yum install -y unzip
-
-# 下载依赖包
-RUN wget -O $JPOM_HOME/$JPOM_PKG https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/$JPOM_PKG
-RUN wget -O $JAVA_PATH/$JDK_PKG https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/$JDK_PKG
-RUN wget -O $MAVEN_PATH/$MAVEN_PKG https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/$MAVEN_PKG
-
-# 解压 安装 jdk
-RUN tar -zxf $JAVA_PATH/$JDK_PKG  -C $JAVA_PATH
-ENV JAVA_HOME	$JAVA_PATH/$JDK_BIN_PATH
-ENV	CLASSPATH	.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-ENV	PATH		$JAVA_HOME/bin:$PATH
-
-# 解压 安装 maven
-RUN tar -zxf $MAVEN_PATH/$MAVEN_PKG  -C $MAVEN_PATH
-ENV MAVEN_HOME	$MAVEN_PATH/$MAVEN_BIN_PATH
-ENV PATH		$MAVEN_HOME/bin:$PATH
-
-# 解压 jpom
-RUN unzip -o $JPOM_HOME/$JPOM_PKG -d $JPOM_HOME
-RUN chmod +x $JPOM_HOME/Server.sh
-
-# 清理资源
-RUN rm -rf $JAVA_PATH/$JDK_PKG
-RUN rm -rf $MAVEN_PATH/$MAVEN_PKG
-RUN rm -rf $JPOM_HOME/$JPOM_PKG
-
+FROM maven:3.8.4-jdk-8
+ENV JPOM_HOME   /usr/local/jpom-server
+ARG JPOM_VERSION
+ENV JPOM_PKG    server-${JPOM_VERSION}-release
 WORKDIR $JPOM_HOME
+ARG DEPENDENCY=/target/dependency
+COPY --from=builder ${DEPENDENCY}/modules/server/target/${JPOM_PKG} ${JPOM_HOME}
 
+VOLUME $JPOM_HOME
 EXPOSE 2122
 
-ENTRYPOINT ["/bin/sh", "Server.sh", "start"]
+ENTRYPOINT ["/bin/bash", "Server.sh", "start"]
+
+
+
