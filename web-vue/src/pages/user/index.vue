@@ -290,7 +290,7 @@ export default {
         this.introGuide();
       }, 500);
 
-      this.temp = {};
+      this.temp = { systemUser: 0 };
       this.createOption = true;
       this.targetKeys = [];
       this.loadWorkSpaceListAll();
