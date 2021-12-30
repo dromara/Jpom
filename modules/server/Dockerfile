@@ -21,6 +21,10 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
+# docker build -f ./modules/server/Dockerfile -t jpomdocker/jpom:x.x.x ./modules/server/target
+#
+# docker push jpomdocker/jpom:x.x.x
+
 FROM centos:7
 
 ENV LANG		en_US.utf8
@@ -28,12 +32,21 @@ ENV LANG		en_US.utf8
 ENV JPOM_HOME	/usr/local/jpom-server
 ENV JPOM_PKG	server-2.8.3-release.zip
 
-ADD jdk-8u202-linux-x64.tar.gz /usr/local/java/
+RUN yum install -y wget
+
+RUN wget -O jdk-8u251-linux-x64.tar.gz https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/jdk-8u251-linux-x64.tar.gz
+
+RUN wget -O apache-maven-3.6.3-bin.tar.gz https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/apache-maven-3.6.3-bin.tar.gz
+
+RUN mkdir /usr/local/java/ && tar -zxf jdk-8u251-linux-x64.tar.gz  -C /usr/local/java/
+
+# ADD jdk-8u202-linux-x64.tar.gz /usr/local/java/
 ENV JAVA_HOME	/usr/local/java/jdk1.8.0_202
 ENV	CLASSPATH	.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 ENV	PATH		$JAVA_HOME/bin:$PATH
 
-ADD apache-maven-3.8.4-bin.tar.gz /usr/local/maven/
+RUN mkdir /usr/local/maven/ && tar -zxf apache-maven-3.6.3-bin.tar.gz  -C /usr/local/maven/
+# ADD apache-maven-3.8.4-bin.tar.gz /usr/local/maven/
 ENV MAVEN_HOME	/usr/local/maven/apache-maven-3.8.4
 ENV PATH		$MAVEN_HOME/bin:$PATH
 
