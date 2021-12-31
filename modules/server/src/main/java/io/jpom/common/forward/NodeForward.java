@@ -212,13 +212,13 @@ public class NodeForward {
 		DefaultSystemLog.getLog().error("node [{}] connect failed...message: [{}]", nodeModel.getName(), message);
 		if (exception instanceof IORuntimeException) {
 			if (cause instanceof java.net.ConnectException || cause instanceof java.net.SocketTimeoutException) {
-				return new AgentException(nodeModel.getName() + "节点网络连接异常或超时,请检查 IP 地址、" +
+				return new AgentException(nodeModel.getName() + "节点网络连接异常或超时,请优先检查插件端运行状态再检查 IP 地址、" +
 						"端口号是否配置正确,防火墙规则," +
 						"云服务器的安全组配置等网络相关问题排查定位。" + message);
 			}
 		} else if (exception instanceof cn.hutool.http.HttpException) {
 			if (cause instanceof java.net.SocketTimeoutException) {
-				return new AgentException(nodeModel.getName() + "节点网络连接超时,请检查节点超时时间配置是否合理,上传文件超时时间配置是否合理。" + message);
+				return new AgentException(nodeModel.getName() + "节点网络连接超时,请优先检查插件端运行状态再检查节点超时时间配置是否合理,上传文件超时时间配置是否合理。" + message);
 			}
 		}
 		return new AgentException(nodeModel.getName() + "节点异常：" + message);
