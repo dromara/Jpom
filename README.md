@@ -270,7 +270,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 ```   
 账号：demo
-密码：demo123
+密码：jpom123
 ```    
 
 > 演示系统有部分功能做了限制，完整功能请自行部署体验
