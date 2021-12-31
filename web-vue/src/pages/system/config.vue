@@ -2,7 +2,7 @@
   <a-tabs default-active-key="1">
     <a-tab-pane key="1" tab="系统配置">
       <a-alert v-if="temp.file" :message="`配置文件路径:${temp.file}`" style="margin-top: 10px; margin-bottom: 20px" banner />
-      <a-form-model ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
+      <a-form-model ref="editForm" :model="temp">
         <a-form-model-item class="config-editor">
           <code-editor v-model="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
           <!-- <a-input v-model="temp.content" type="textarea" :rows="25" class="content-config" placeholder="请输入配置内容，参考项目的配置文件" /> -->
@@ -177,6 +177,7 @@ textarea {
 }
 .config-editor {
   height: calc(100vh - 300px);
+  width: 100%;
   overflow-y: scroll;
 }
 .ip-config-panel {

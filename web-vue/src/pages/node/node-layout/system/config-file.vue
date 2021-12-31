@@ -1,6 +1,6 @@
 <template>
   <div class="node-full-content">
-    <a-form-model ref="editForm" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
+    <a-form-model ref="editForm" :model="temp">
       <a-alert v-if="temp.file" :message="`配置文件路径:${temp.file}`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model-item class="node-content-config">
         <code-editor v-model="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
