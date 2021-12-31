@@ -41,6 +41,7 @@ import io.jpom.service.IStatusRecover;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.script.ScriptExecuteLogServer;
+import io.jpom.service.node.script.ScriptServer;
 import io.jpom.system.ConfigBean;
 
 import java.util.Collection;
@@ -76,13 +77,17 @@ public class CheckMonitor {
 		});
 		// 拉取 脚本模版日志
 		CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
-			NodeService bean = SpringUtil.getBean(NodeService.class);
-			List<NodeModel> list = bean.list();
-			if (list == null) {
+			NodeService nodeService = SpringUtil.getBean(NodeService.class);
+			ScriptServer scriptServer = SpringUtil.getBean(ScriptServer.class);
+			List<String> nodeIds = scriptServer.hasScriptNode();
+			if (nodeIds == null) {
 				return;
 			}
-
-			for (NodeModel nodeModel : list) {
+			for (String nodeId : nodeIds) {
+				NodeModel nodeModel = nodeService.getByKey(nodeId);
+				if (nodeModel == null) {
+					continue;
+				}
 				ThreadUtil.execute(() -> CheckMonitor.pullScriptLogItem(nodeModel));
 			}
 		});

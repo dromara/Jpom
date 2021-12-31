@@ -62,6 +62,7 @@ public class ServerExtConfigBean implements DisposableBean {
 	@Value("${user.ipErrorLockTime:60*60*5*1000}")
 	private String ipErrorLockTime;
 	private long ipErrorLockTimeValue = -1;
+	// --------------------------------------------------------------- db start
 	/**
 	 * 日志记录最大条数
 	 */
@@ -99,6 +100,19 @@ public class ServerExtConfigBean implements DisposableBean {
 	 */
 	@Value("${db.autoBackupReserveDay:5}")
 	private Integer autoBackupReserveDay;
+
+	@Value("${db.maxActive:100}")
+	private Integer dbMaxActive;
+
+	@Value("${db.initialSize:10}")
+	private Integer dbInitialSize;
+
+	@Value("${db.maxWait:10}")
+	private Integer dbMaxWait;
+
+	@Value("${db.minIdle:1}")
+	private Integer dbMinIdle;
+	// --------------------------------------------------------------- db end
 
 	/**
 	 * author Hotstrip
@@ -300,6 +314,22 @@ public class ServerExtConfigBean implements DisposableBean {
 
 	public Integer getAutoBackupReserveDay() {
 		return autoBackupReserveDay;
+	}
+
+	public Integer getDbMaxActive() {
+		return dbMaxActive;
+	}
+
+	public Integer getDbInitialSize() {
+		return dbInitialSize;
+	}
+
+	public Integer getDbMaxWait() {
+		return dbMaxWait;
+	}
+
+	public Integer getDbMinIdle() {
+		return dbMinIdle;
 	}
 
 	/**
