@@ -1,4 +1,3 @@
-# syntax = docker/dockerfile:experimental
 #
 # The MIT License (MIT)
 #
@@ -21,6 +20,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+
 # syntax = docker/dockerfile:experimental
 
 FROM maven:3.8.4-jdk-8-slim as builder
