@@ -151,19 +151,6 @@ docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:r
 >
 > 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档[https://jpom.io/docs/](https://jpom.io/docs/)
 
-
-### docker-compose 一键启动
-
-- 无需安装任何环境,自动编译构建
-
-> 需要注意修改 `.env` 文件中的 token 值
-
-```shell
-git clone https://gitee.com/dromara/Jpom.git
-cd Jpom
-docker-compose up -d
-```
-
 ### 下载安装
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
@@ -201,6 +188,19 @@ docker-compose up -d
     4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
 > 也可以使用 `script/release.bat` `script/release.sh` 快速打包
+
+
+### 一键启动 docker-compose
+
+- 无需安装任何环境,自动编译构建
+
+> 需要注意修改 `.env` 文件中的 token 值
+
+```shell
+git clone https://gitee.com/dromara/Jpom.git
+cd Jpom
+docker-compose up
+```
 
 ### 编译运行
 
