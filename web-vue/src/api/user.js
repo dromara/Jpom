@@ -156,3 +156,17 @@ export function myWorkspace() {
     params: {},
   });
 }
+
+
+/**
+ * demo 账号信息
+ *
+ * @returns
+ */
+ export function demoInfo() {
+  return axios({
+    url: "/user_demo_info",
+    method: "get",
+    params: {},
+  });
+}

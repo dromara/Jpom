@@ -33,6 +33,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.LoginInterceptor;
@@ -47,6 +48,7 @@ import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.JwtUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -155,7 +157,7 @@ public class LoginControl extends BaseServerController {
 		if (this.ipLock()) {
 			return JsonMessage.getString(400, "尝试次数太多，请稍后再来");
 		}
-		synchronized (UserModel.class) {
+		synchronized (userName.intern()) {
 			UserModel userModel = userService.getByKey(userName);
 			if (userModel == null) {
 				this.ipError();
@@ -209,6 +211,8 @@ public class LoginControl extends BaseServerController {
 
 	/**
 	 * 刷新token
+	 *
+	 * @return json
 	 */
 	@RequestMapping(value = "renewal", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@NotLogin
@@ -231,5 +235,24 @@ public class LoginControl extends BaseServerController {
 		String jwtId = userService.getUserJwtId(userModel.getId());
 		UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
 		return JsonMessage.getString(200, "", userLoginDto);
+	}
+
+	/**
+	 * 获取 demo 账号的信息
+	 */
+	@GetMapping(value = "user_demo_info", produces = MediaType.APPLICATION_JSON_VALUE)
+	@NotLogin
+	public String demoInfo() {
+		String userDemoPwd = ServerExtConfigBean.getInstance().getUserDemoPass();
+		if (StrUtil.isEmpty(userDemoPwd)) {
+			return JsonMessage.getString(200, "");
+		}
+		if (!userService.hasDemoUser()) {
+			return JsonMessage.getString(200, "");
+		}
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("user", UserModel.DEMO_USER);
+		jsonObject.put("pass", userDemoPwd);
+		return JsonMessage.getString(200, "", jsonObject);
 	}
 }
