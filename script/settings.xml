@@ -145,9 +145,9 @@ under the License.
    |-->
   <mirrors>
     <mirror>
-      <id>huaweicloud</id>
+      <id>aliyun</id>
       <mirrorOf>*</mirrorOf>
-      <url>https://mirrors.huaweicloud.com/repository/maven/</url>
+      <url>https://maven.aliyun.com/repository/public</url>
     </mirror>
 
     <!-- mirror
