@@ -91,9 +91,11 @@ export default {
     },
     getDemoInfo() {
       demoInfo().then((res) => {
-        if (res.data && res.data.user && res.data.pass) {
+        if (res.data && res.data.user) {
+          const h = this.$createElement;
           this.$notification.info({
-            message: "演示账号：" + res.data.user + " 密码：" + res.data.pass,
+            message: "温馨提示",
+            description: h("div", null, [h("p", { domProps: { innerHTML: res.msg } }, null)]),
           });
           this.loginForm.userName = res.data.user;
         }

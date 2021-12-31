@@ -46,6 +46,7 @@ import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.JwtUtil;
+import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -243,16 +244,14 @@ public class LoginControl extends BaseServerController {
 	@GetMapping(value = "user_demo_info", produces = MediaType.APPLICATION_JSON_VALUE)
 	@NotLogin
 	public String demoInfo() {
-		String userDemoPwd = ServerExtConfigBean.getInstance().getUserDemoPass();
-		if (StrUtil.isEmpty(userDemoPwd)) {
-			return JsonMessage.getString(200, "");
-		}
-		if (!userService.hasDemoUser()) {
+		String userDemoTip = ServerExtConfigBean.getInstance().getUserDemoTip();
+		userDemoTip = StringUtil.convertFileStr(userDemoTip, StrUtil.EMPTY);
+
+		if (StrUtil.isEmpty(userDemoTip) || !userService.hasDemoUser()) {
 			return JsonMessage.getString(200, "");
 		}
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("user", UserModel.DEMO_USER);
-		jsonObject.put("pass", userDemoPwd);
-		return JsonMessage.getString(200, "", jsonObject);
+		return JsonMessage.getString(200, userDemoTip, jsonObject);
 	}
 }
