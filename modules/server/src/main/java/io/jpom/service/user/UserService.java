@@ -182,4 +182,15 @@ public class UserService extends BaseDbService<UserModel> {
 		this.updatePwd(queryByBean.getId(), SecureUtil.sha1(newPwd));
 		return StrUtil.format("重置超级管理员账号密码成功,登录账号为：{} 新密码为：{}", queryByBean.getId(), newPwd);
 	}
+
+	/**
+	 * 是否包含 demo 账号
+	 *
+	 * @return true
+	 */
+	public boolean hasDemoUser() {
+		UserModel userModel = new UserModel();
+		userModel.setId(UserModel.DEMO_USER);
+		return super.exists(userModel);
+	}
 }

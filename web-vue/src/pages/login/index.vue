@@ -4,17 +4,17 @@
     <a-card class="login-card" hoverable>
       <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
       <br />
-      <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin">
-        <a-form-item :wrapper-col="{ span: 24 }">
-          <a-input v-decorator="['userName', { rules: [{ required: true, message: '请输入用户名' }] }]" placeholder="用户名" />
-        </a-form-item>
-        <a-form-item :wrapper-col="{ span: 24 }">
-          <a-input-password v-decorator="['userPwd', { rules: [{ required: true, message: '请输入密码' }] }]" placeholder="密码" />
-        </a-form-item>
-        <a-form-item :wrapper-col="{ span: 24 }">
+      <a-form-model ref="loginForm" :label-col="{ span: 0 }" :model="loginForm" :rules="rules" @submit="handleLogin">
+        <a-form-model-item :wrapper-col="{ span: 24 }" prop="userName">
+          <a-input v-model="loginForm.userName" placeholder="用户名" />
+        </a-form-model-item>
+        <a-form-model-item :wrapper-col="{ span: 24 }" prop="userPwd">
+          <a-input-password v-model="loginForm.userPwd" placeholder="密码" />
+        </a-form-model-item>
+        <a-form-model-item :wrapper-col="{ span: 24 }" prop="code">
           <a-row>
             <a-col :span="14">
-              <a-input v-decorator="['code', { rules: [{ required: true, message: '请输入验证码' }] }]" placeholder="验证码" />
+              <a-input v-model="loginForm.code" placeholder="验证码" />
             </a-col>
             <a-col :offset="2" :span="8">
               <div class="rand-code">
@@ -22,31 +22,41 @@
               </div>
             </a-col>
           </a-row>
-        </a-form-item>
+        </a-form-model-item>
         <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
-      </a-form>
+      </a-form-model>
     </a-card>
   </div>
 </template>
 <script>
-import { login } from "../../api/user";
-import { checkSystem } from "../../api/install";
+import { login, demoInfo } from "@/api/user";
+import { checkSystem } from "@/api/install";
 import sha1 from "sha1";
 import defaultBg from "../../assets/images/bg.jpeg";
 export default {
   data() {
     return {
-      loginForm: this.$form.createForm(this, { name: "login-form" }),
+      loginForm: {
+        userName: "",
+        userPwd: "",
+        code: "",
+      },
       randCode: "randCode.png",
       bg: defaultBg,
       dynamicBg: localStorage.getItem("dynamicBg") === "false" ? false : true,
       loginTitle: "登录JPOM",
+      rules: {
+        userName: [{ required: true, message: "请输入用户名" }],
+        userPwd: [{ required: true, message: "请输入密码" }],
+        code: [{ required: true, message: "请输入验证码" }],
+      },
     };
   },
   created() {
     this.checkSystem();
     this.getBg();
     this.changeCode();
+    this.getDemoInfo();
   },
   methods: {
     // 检查是否需要初始化
@@ -57,7 +67,6 @@ export default {
         } else if (res.code !== 200) {
           this.$notification.warn({
             message: res.msg,
-            
           });
           this.$router.push("/install");
         }
@@ -80,6 +89,16 @@ export default {
         this.bg = defaultBg;
       }
     },
+    getDemoInfo() {
+      demoInfo().then((res) => {
+        if (res.data && res.data.user && res.data.pass) {
+          this.$notification.info({
+            message: "演示账号：" + res.data.user + " 密码：" + res.data.pass,
+          });
+          this.loginForm.userName = res.data.user;
+        }
+      });
+    },
     // change Code
     changeCode() {
       this.randCode = "randCode.png?r=" + new Date().getTime();
@@ -87,29 +106,29 @@ export default {
     // login
     handleLogin(e) {
       e.preventDefault();
-      this.loginForm.validateFields((err, values) => {
-        if (!err) {
-          const params = {
-            ...values,
-            userPwd: sha1(values.userPwd),
-          };
-          login(params).then((res) => {
-            // 登录不成功，更新验证码
-            if (res.code !== 200) {
-              this.changeCode();
-            } else {
-              this.$notification.success({
-                message: res.msg,
-                
-              });
-              // 调用 store action 存储当前登录的用户名和 token
-              this.$store.dispatch("login", { token: res.data.token, longTermToken: res.data.longTermToken }).then(() => {
-                // 跳转主页面
-                this.$router.push({ path: "/" });
-              });
-            }
-          });
+      this.$refs["loginForm"].validate((valid) => {
+        if (!valid) {
+          return false;
         }
+        const params = {
+          ...this.loginForm,
+          userPwd: sha1(this.loginForm.userPwd),
+        };
+        login(params).then((res) => {
+          // 登录不成功，更新验证码
+          if (res.code !== 200) {
+            this.changeCode();
+          } else {
+            this.$notification.success({
+              message: res.msg,
+            });
+            // 调用 store action 存储当前登录的用户名和 token
+            this.$store.dispatch("login", { token: res.data.token, longTermToken: res.data.longTermToken }).then(() => {
+              // 跳转主页面
+              this.$router.push({ path: "/" });
+            });
+          }
+        });
       });
     },
   },
