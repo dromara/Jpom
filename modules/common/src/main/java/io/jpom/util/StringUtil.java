@@ -26,8 +26,8 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSON;
 
@@ -68,16 +68,21 @@ public class StringUtil {
 	}
 
 	/**
-	 * id输入规则
+	 * 转换 文件内容
 	 *
-	 * @param value 值
-	 * @param min   最短
-	 * @param max   最长
-	 * @return true
+	 * @param text 字符串，可能为文件协议地址
+	 * @param def  默认值
+	 * @return 如果存在文件 则读取文件内容
 	 */
-	public static boolean isGeneral(CharSequence value, int min, int max) {
-		String reg = "^[a-zA-Z0-9_-]{" + min + StrUtil.COMMA + max + "}$";
-		return Validator.isMatchRegex(reg, value);
+	public static String convertFileStr(String text, String def) {
+		if (StrUtil.startWith(text, URLUtil.FILE_URL_PREFIX)) {
+			String path = StrUtil.removePrefix(text, URLUtil.FILE_URL_PREFIX);
+			if (FileUtil.isFile(path)) {
+				String fileText = FileUtil.readUtf8String(path);
+				return StrUtil.emptyToDefault(fileText, def);
+			}
+		}
+		return StrUtil.emptyToDefault(text, def);
 	}
 
 	/**

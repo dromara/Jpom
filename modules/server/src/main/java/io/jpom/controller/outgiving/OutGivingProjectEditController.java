@@ -25,12 +25,15 @@ package io.jpom.controller.outgiving;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AfterOpt;
@@ -45,7 +48,6 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.system.SystemParametersServer;
-import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -91,10 +93,12 @@ public class OutGivingProjectEditController extends BaseServerController {
 	 */
 	@RequestMapping(value = "save_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
-	public String save(String id, String type) {
+	public String save(@ValidatorItem String id, String type) {
 		if ("add".equalsIgnoreCase(type)) {
-			boolean general = StringUtil.isGeneral(id, 2, 20);
-			Assert.state(general, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
+			//boolean general = StringUtil.isGeneral(id, 2, 20);
+			//Assert.state(general, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
+			String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
+			Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
 			return addOutGiving(id);
 		} else {
 			return updateGiving(id);

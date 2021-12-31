@@ -63,10 +63,10 @@ public class ServerExtConfigBean implements DisposableBean {
 	private String ipErrorLockTime;
 	private long ipErrorLockTimeValue = -1;
 	/**
-	 * demo 账号的密码
+	 * demo 账号的提示
 	 */
-	@Value("${user.demoPass:}")
-	private String userDemoPass;
+	@Value("${user.demoTip:}")
+	private String userDemoTip;
 	// --------------------------------------------------------------- db start
 	/**
 	 * 日志记录最大条数
@@ -337,8 +337,8 @@ public class ServerExtConfigBean implements DisposableBean {
 		return dbMinIdle;
 	}
 
-	public String getUserDemoPass() {
-		return userDemoPass;
+	public String getUserDemoTip() {
+		return userDemoTip;
 	}
 
 	/**
