@@ -70,53 +70,19 @@ function getHashVars() {
 
 // 响应拦截器
 request.interceptors.response.use(
-  (response) => {
+  async (response) => {
     // 如果 headers 里面配置了 loading: no 就不用 loading
     if (!response.config?.headers[NO_LOADING_KEY]) {
       const endTime = new Date().getTime();
-      if (endTime - startTime < 1000) {
-        setTimeout(() => {
-          $global_loading.close();
-        }, 300);
-      } else {
+      const waitTime = endTime - startTime < 1000 ? 300 : 0;
+      // 时间过短延迟一定时间
+      await waitTimePromise(waitTime, () => {
         $global_loading.close();
-      }
-    }
-    // 如果 responseType 是 blob 表示是下载文件
-    if (response.request.responseType === "blob") {
-      return response.data;
-    }
-    // 判断返回值，权限等...
-    const res = response.data;
-
-    // 先判断 jwt token 状态
-    if (res.code === 800 || res.code === 801) {
-      return checkJWTToken(res, response);
-    }
-
-    // 禁止访问
-    if (res.code === 999) {
-      notification.error({
-        message: "禁止访问",
-        description: "禁止访问,当前IP限制访问",
       });
-      router.push("/system/ipAccess");
-      return false;
+      return wrapResult(response);
+    } else {
+      return wrapResult(response);
     }
-
-    // 其他情况
-    if (res.code !== 200) {
-      // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
-      if (!response.config.headers[NO_NOTIFY_KEY]) {
-        notification.error({
-          message: "提示信息 " + (pro ? "" : response.config.url),
-          description: res.msg,
-        });
-        console.error(response.config.url, res);
-      }
-    }
-
-    return res;
   },
   (error) => {
     if (!error.response) {
@@ -150,6 +116,55 @@ request.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// 等待 x ms
+function waitTimePromise(time, fn) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      fn && fn();
+      resolve();
+    }, time);
+  });
+}
+
+// 判断结果
+function wrapResult(response) {
+  // 如果 responseType 是 blob 表示是下载文件
+  if (response.request.responseType === "blob") {
+    return response.data;
+  }
+  // 判断返回值，权限等...
+  const res = response.data;
+
+  // 先判断 jwt token 状态
+  if (res.code === 800 || res.code === 801) {
+    return checkJWTToken(res, response);
+  }
+
+  // 禁止访问
+  if (res.code === 999) {
+    notification.error({
+      message: "禁止访问",
+      description: "禁止访问,当前IP限制访问",
+    });
+    router.push("/system/ipAccess");
+    return false;
+  }
+
+  // 其他情况
+  if (res.code !== 200) {
+    // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
+    if (!response.config.headers[NO_NOTIFY_KEY]) {
+      notification.error({
+        message: "提示信息 " + (pro ? "" : response.config.url),
+        description: res.msg,
+      });
+      console.error(response.config.url, res);
+    }
+  }
+
+  return res;
+}
 
 // 判断 jwt token 状态
 function checkJWTToken(res, response) {
