@@ -1,10 +1,11 @@
 <template>
   <!-- 布局 -->
+
   <a-layout class="file-layout node-full-content">
     <!-- 目录树 -->
     <a-layout-sider theme="light" class="nginx-sider" width="25%">
       <a-empty v-if="treeList.length === 0" />
-      <el-tree ref="tree" :data="treeList" :props="defaultProps" :expand-on-click-node="false" node-key="$treeNodeId" highlight-current default-expand-all @node-click="nodeClick"></el-tree>
+      <a-directory-tree :treeData="treeList" :replace-fields="defaultProps" @select="nodeClick"></a-directory-tree>
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
@@ -41,7 +42,6 @@
                 <li>linux 服务器默认执行 nginx -s reload 、service xxxx start、service xxxx top</li>
                 <li>linux 服务器如果为编译安装则需要将 nginx 服务名称配置到 nginx执行文件的绝对路径，如 <b>/usr/local/nginx/sbin/nginx</b></li>
                 <li>windows 服务器是需要提前安装 nginx 并配置服务,默认执行 net start xxxx、net stop xxxx、net、sc query xxxx</li>
-                
               </ul>
             </div>
           </template>
@@ -137,8 +137,8 @@ export default {
       editNginxVisible: false,
       editNginxNameVisible: false,
       defaultProps: {
-        children: "children",
-        label: "title",
+        // children: "children",
+        title: "title",
       },
       columns: [
         { title: "文件名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -186,16 +186,15 @@ export default {
       };
       getNginxDirectoryList(params).then((res) => {
         if (res.code === 200) {
-          // 添加一个唯一标识
-          const list = res.data.map((item, i) => {
-            item["$treeNodeId"] = 1 + i;
-            return item;
-          });
-          this.treeList = list;
+          // // 添加一个唯一标识
+          // const list = res.data.map((item, i) => {
+          //   return item;
+          // });
+          this.treeList = res.data;
         }
         // 取出第一个默认选中
         this.$nextTick(() => {
-          const node = this.$refs["tree"].getNode(1);
+          const node = this.treeList[0];
           if (node) {
             this.tempNode = node;
             this.loadFileList();
@@ -205,9 +204,9 @@ export default {
       });
     },
     // 点击树节点
-    nodeClick(data, node) {
-      if (data.children) {
-        this.tempNode = node;
+    nodeClick(selectedKeys, { node }) {
+      if (node.dataRef) {
+        this.tempNode = node.dataRef;
         this.loadFileList();
       }
     },
@@ -224,8 +223,8 @@ export default {
       // 请求参数
       const params = {
         nodeId: this.node.id,
-        whitePath: this.tempNode.data.whitePath,
-        name: this.tempNode.data.path,
+        whitePath: this.tempNode.whitePath,
+        name: this.tempNode.path,
       };
       // 加载文件
       getNginxFileList(params).then((res) => {

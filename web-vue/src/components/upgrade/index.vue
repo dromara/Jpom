@@ -84,7 +84,6 @@ export default {
           },
         },
       },
-      $global_loading: null,
     };
   },
   mounted() {
@@ -154,11 +153,9 @@ export default {
     },
     startCheckUpgradeStatus(msg) {
       this.checkCount = 0;
-      this.$global_loading = Vue.prototype.$loading.service({
-        lock: true,
-        text: (msg || "升级中，请稍候...") + ",请耐心等待暂时不用刷新页面,升级成功后会自动刷新",
-        spinner: "el-icon-loading",
-        background: "rgba(0, 0, 0, 0.7)",
+      Vue.prototype.$setLoading({
+        spinning: true,
+        tip: (msg || "升级中，请稍候...") + ",请耐心等待暂时不用刷新页面,升级成功后会自动刷新",
       });
       //
       this.timer = setInterval(() => {
@@ -167,7 +164,7 @@ export default {
             let manifest = res.data?.manifest;
             if (res.code === 200 && manifest?.timeStamp !== this.temp.timeStamp) {
               clearInterval(this.timer);
-              this.$global_loading && this.$global_loading.close();
+              Vue.prototype.$setLoading(false);
               this.$notification.success({
                 message: "升级成功",
               });
@@ -180,7 +177,7 @@ export default {
                 this.$notification.warning({
                   message: "未升级成功：" + (res.msg || ""),
                 });
-                this.$global_loading && this.$global_loading.close();
+                Vue.prototype.$setLoading(false);
                 clearInterval(this.timer);
               }
             }
@@ -188,7 +185,7 @@ export default {
           .catch((error) => {
             console.log(error);
             if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-              this.$global_loading && this.$global_loading.close();
+              Vue.prototype.$setLoading(false);
               this.$notification.error({
                 message: "升级超时,请去服务器查看控制台日志排查问题",
               });

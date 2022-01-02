@@ -184,9 +184,9 @@ export default {
 };
 </script>
 <style scoped>
-.sider {
-  /* height: calc(100vh - 75px); */
-  /* overflow-y: auto; */
+.node-sider {
+  height: calc(100vh - 75px);
+  overflow-y: auto;
 }
 .layout-content {
   /* min-height: calc(100vh); */

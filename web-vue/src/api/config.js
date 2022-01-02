@@ -9,7 +9,6 @@ import { refreshToken } from "./user";
 import { notification } from "ant-design-vue";
 
 // axios.defaults.baseURL = 'http://localhost:2122'
-let $global_loading;
 let startTime;
 //
 const delTimeout = 20 * 1000;
@@ -31,11 +30,9 @@ request.interceptors.request.use(
   (config) => {
     // 如果 headers 里面配置了 loading: no 就不用 loading
     if (!config.headers[NO_LOADING_KEY]) {
-      $global_loading = Vue.prototype.$loading.service({
-        lock: true,
-        text: "加载数据中，请稍候...",
-        spinner: "el-icon-loading",
-        background: "rgba(0, 0, 0, 0.7)",
+      Vue.prototype.$setLoading({
+        spinning: true,
+        tip: "加载数据中，请稍候...",
       });
       startTime = new Date().getTime();
     }
@@ -77,7 +74,7 @@ request.interceptors.response.use(
       const waitTime = endTime - startTime < 1000 ? 300 : 0;
       // 时间过短延迟一定时间
       await waitTimePromise(waitTime, () => {
-        $global_loading.close();
+        Vue.prototype.$setLoading(false);
       });
       return wrapResult(response);
     } else {
@@ -87,7 +84,7 @@ request.interceptors.response.use(
   (error) => {
     if (!error.response) {
       // 网络异常
-      $global_loading.close();
+      Vue.prototype.$setLoading(false);
       notification.error({
         message: "Network Error",
         description: "网络开了小差！请重试...:" + error,
@@ -96,7 +93,7 @@ request.interceptors.response.use(
     }
     // 如果 headers 里面配置了 loading: no 就不用 loading
     if (!error.response.config.headers[NO_LOADING_KEY]) {
-      $global_loading.close();
+      Vue.prototype.$setLoading(false);
     }
     // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
     if (!error.response.config.headers[NO_NOTIFY_KEY]) {

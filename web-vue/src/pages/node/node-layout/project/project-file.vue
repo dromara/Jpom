@@ -1,25 +1,14 @@
 <template>
   <!-- 布局 -->
-  <a-layout class="file-layout">
+  <a-layout class="file-layout node-full-content">
     <!-- 目录树 -->
     <a-layout-sider theme="light" class="sider" width="25%">
       <div class="dir-container">
         <a-button type="primary" @click="loadData">刷新目录</a-button>
         <a-button type="primary" v-if="showConsole" @click="goConsole" v-show="noFileModes.includes(runMode)">控制台</a-button>
       </div>
-      <a-empty v-if="treeList.length === 0" />
-      <el-tree
-        ref="tree"
-        :data="treeList"
-        :props="defaultProps"
-        :load="loadNode"
-        :default-expanded-keys="expandKeys"
-        :expand-on-click-node="false"
-        node-key="$treeNodeId"
-        highlight-current
-        lazy
-        @node-click="nodeClick"
-      ></el-tree>
+
+      <a-directory-tree :replace-fields="treeReplaceFields" @select="nodeClick" :loadData="onTreeData" :treeData="treeList"></a-directory-tree>
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
@@ -32,16 +21,7 @@
         <a-button type="danger" @click="clearFile">清空项目目录</a-button>
         <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath }}</a-tag>
       </div>
-      <a-table
-        :data-source="fileList"
-        :loading="loading"
-        :columns="columns"
-        :scroll="{ x: 730, y: tableHeight - 60 }"
-        :style="{ 'max-height': tableHeight + 'px' }"
-        :pagination="false"
-        bordered
-        :rowKey="(record, index) => index"
-      >
+      <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
@@ -65,7 +45,7 @@
           <a-button><a-icon type="upload" />选择文件</a-button>
         </a-upload>
         <br />
-        <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage" status="success"></el-progress>
+        <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
         <br />
         <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">开始上传</a-button>
         <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
@@ -78,7 +58,7 @@
         <br />
         <a-switch v-model="checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px" />
         <br />
-        <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage" status="success"></el-progress>
+        <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
         <br />
         <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
         <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
@@ -138,7 +118,6 @@ export default {
       treeList: [],
       fileList: [],
       uploadFileList: [],
-      expandKeys: [],
       tempNode: {},
       temp: {},
       filename: "",
@@ -148,7 +127,10 @@ export default {
       editFileVisible: false,
       successSize: 0,
       fileContent: "",
-
+      treeReplaceFields: {
+        title: "filename",
+        isLeaf: "isDirectory",
+      },
       cmOptions: {
         mode: "application/json",
       },
@@ -160,7 +142,6 @@ export default {
       defaultProps: {
         children: "children",
         label: "filename",
-        isLeaf: "isLeaf",
       },
       remoteDownloadData: {
         id: "",
@@ -184,26 +165,20 @@ export default {
       return this.uploadFileList.length === 0 || this.uploading;
     },
     uploadPath() {
-      if (!this.tempNode.data) {
+      if (!this.tempNode) {
         return "";
       }
       if (this.tempNode.level === 1) {
         return "";
       } else {
-        return (this.tempNode.data.levelName || "") + "/" + this.tempNode.data.filename;
+        return (this.tempNode.levelName || "") + "/" + this.tempNode.filename;
       }
     },
   },
   mounted() {
-    this.calcTableHeight();
     this.loadData();
   },
   methods: {
-    // 计算表格高度
-    calcTableHeight() {
-      this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-    },
-
     handleEditFile(record) {
       this.editFileVisible = true;
       this.loadFileData(record.filename);
@@ -214,29 +189,38 @@ export default {
     handleCloseModal() {
       this.fileContent = "";
     },
-
+    onTreeData(treeNode) {
+      return new Promise((resolve) => {
+        if (treeNode.dataRef.children || !treeNode.dataRef.isDirectory) {
+          resolve();
+          return;
+        }
+        this.loadNode(treeNode.dataRef, resolve);
+      });
+    },
     // 加载数据
     loadData() {
-      this.treeList = [];
-      const data = {
-        $treeNodeId: 1,
-        filename: "目录：" + (this.absPath || ""),
-        isDirectory: true,
-        isLeaf: false,
-      };
-      this.treeList.push(data);
+      const key = "root-" + new Date().getTime();
+      this.treeList = [
+        {
+          filename: "目录：" + (this.absPath || ""),
+          level: 1,
+          isDirectory: true,
+          key: key,
+          isLeaf: false,
+        },
+      ];
       // 设置默认展开第一个
       setTimeout(() => {
-        const node = this.$refs["tree"].getNode(1);
+        const node = this.treeList[0];
         this.tempNode = node;
-        this.expandKeys = [1];
+        this.expandKeys = [key];
         this.loadFileList();
       }, 1000);
     },
     // 加载子节点
-    loadNode(node, resolve) {
-      const data = node.data;
-      this.tempNode = node;
+    loadNode(data, resolve) {
+      this.tempNode = data;
       // 如果是目录
       if (data.isDirectory) {
         setTimeout(() => {
@@ -254,18 +238,26 @@ export default {
           // 加载文件
           getFileList(params).then((res) => {
             if (res.code === 200) {
-              const treeData = res.data;
-              treeData.forEach((ele) => {
-                ele.isLeaf = !ele.isDirectory;
-              });
-              resolve(res.data);
+              const treeData = res.data
+                .filter((ele) => {
+                  return ele.isDirectory;
+                })
+                .map((ele) => {
+                  ele.isLeaf = !ele.isDirectory;
+                  ele.key = ele.filename + "-" + new Date().getTime();
+                  return ele;
+                });
+              data.children = treeData;
+
+              this.treeList = [...this.treeList];
+              resolve();
             } else {
-              resolve([]);
+              resolve();
             }
           });
         }, 500);
       } else {
-        resolve([]);
+        resolve();
       }
     },
 
@@ -302,9 +294,9 @@ export default {
     },
 
     // 点击树节点
-    nodeClick(data, node) {
-      if (data.isDirectory) {
-        this.tempNode = node;
+    nodeClick(selectedKeys, { node }) {
+      if (node.dataRef.isDirectory) {
+        this.tempNode = node.dataRef;
         this.loadFileList();
       }
     },

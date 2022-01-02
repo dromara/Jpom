@@ -4,8 +4,8 @@ import App from "./App.vue";
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 import "./assets/reset.css";
-import { Tree, Progress, Loading } from "element-ui";
-import "element-ui/lib/theme-chalk/index.css";
+// import { Tree, Progress, Loading } from "element-ui";
+// import "element-ui/lib/theme-chalk/index.css";
 const introJs = require("intro.js");
 import "intro.js/introjs.css";
 // import 'intro.js/themes/introjs-flattener.css';
@@ -28,11 +28,21 @@ intro.setOptions({
 });
 
 Vue.config.productionTip = false;
-Vue.prototype.$loading = Loading;
+// Vue.prototype.$loading = Loading;
 Vue.prototype.$introJs = intro;
 Vue.use(Antd);
-Vue.use(Tree);
-Vue.use(Progress);
+// Vue.use(Tree);
+// Vue.use(Progress);
+
+Vue.prototype.$setLoading = function (props) {
+  if (typeof props === "boolean") {
+    props = { spinning: props };
+  } else if (Object.prototype.toString.call(props) !== "[object Object]") {
+    props = {};
+  }
+  props.wrapperClassName = props.spinning ? "globalLoading" : "";
+  this.$app.globalLoadingProps = { ...this.$app.globalLoadingProps, ...props };
+};
 
 new Vue({
   router,
