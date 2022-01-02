@@ -63,7 +63,7 @@
       </a-radio-group>
       <br /> -->
       <br />
-      <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage" status="success"></el-progress>
+      <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
       <br />
       <a-button type="primary" :disabled="fileUploadDisabled" @click="startSqlUpload">开始上传</a-button>
       <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
