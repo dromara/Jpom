@@ -439,7 +439,6 @@
   </div>
 </template>
 <script>
-import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import codeEditor from "@/components/codeEditor";
@@ -534,7 +533,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag"]),
     filePath() {
       return (this.temp.whitelistDirectory || "") + (this.temp.lib || "");
     },
@@ -552,33 +550,26 @@ export default {
       };
     },
   },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    },
-  },
+  watch: {},
   created() {
     this.loadData();
   },
   methods: {
     // 页面引导
     introGuide() {
-      if (this.getGuideFlag) {
-        this.$introJs
-          .setOptions({
-            hidePrev: true,
-            steps: [
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-project-whitelist"),
-                intro: "项目白名单需要在侧边栏菜单<b>分发白名单</b>组件里面去设置",
-              },
-            ],
-          })
-          .start();
-        return false;
-      }
-      this.$introJs.exit();
+      this.$store.dispatch("tryOpenGuide", {
+        key: "dispatch",
+        options: {
+          hidePrev: true,
+          steps: [
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-project-whitelist"),
+              intro: "项目白名单需要在侧边栏菜单<b>分发白名单</b>组件里面去设置",
+            },
+          ],
+        },
+      });
     },
 
     // 加载数据

@@ -3,15 +3,18 @@
  * 存储所有打开的 tab 窗口，并且记录当前激活的 tab
  * 另外提供打开新 tab、跳转 tab、移除 tab 功能
  */
-import { ACTIVE_TAB_KEY, TAB_LIST_KEY, ACTIVE_MENU_KEY, GUIDE_FLAG_KEY, CACHE_WORKSPACE_ID } from "@/utils/const";
+import { ACTIVE_TAB_KEY, TAB_LIST_KEY, ACTIVE_MENU_KEY, CACHE_WORKSPACE_ID } from "@/utils/const";
+import Vue from "vue";
 
 const app = {
   state: {
     activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY),
     tabList: JSON.parse(localStorage.getItem(TAB_LIST_KEY)),
     activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY),
-    guideFlag: localStorage.getItem(GUIDE_FLAG_KEY) === "true" ? true : false,
+    // 引导缓存
+    guideCache: localStorage.getItem("Jpom-Guide-Cache"),
     workspaceId: localStorage.getItem(CACHE_WORKSPACE_ID),
+    // 菜单折叠
     collapsed: localStorage.getItem("collapsed"),
   },
   mutations: {
@@ -24,8 +27,9 @@ const app = {
     setActiveMenuKey(state, activeMenuKey) {
       state.activeMenuKey = activeMenuKey;
     },
-    setGuideFlag(state, guideFlag) {
-      state.guideFlag = guideFlag;
+    setGuideCache(state, guideCache) {
+      state.guideCache = JSON.stringify(guideCache);
+      localStorage.setItem("Jpom-Guide-Cache", state.guideCache);
     },
     setWorkspace(state, workspaceId) {
       state.workspaceId = workspaceId;
@@ -107,12 +111,35 @@ const app = {
       localStorage.setItem(ACTIVE_MENU_KEY, activeMenuKey);
     },
     // 切换引导开关
-    toggleGuideFlag({ commit, state }) {
+    toggleGuideFlag({ commit, rootGetters }) {
       return new Promise((resolve) => {
-        const flag = state.guideFlag;
-        commit("setGuideFlag", !flag);
-        localStorage.setItem(GUIDE_FLAG_KEY, !flag);
-        resolve();
+        const cache = rootGetters.getGuideCache;
+        cache.close = !cache.close;
+        commit("setGuideCache", cache);
+        resolve(cache.close);
+      });
+    },
+    // 尝试打开引导
+    tryOpenGuide({ commit, rootGetters }, { key, options }) {
+      return new Promise((resolve) => {
+        const cache = rootGetters.getGuideCache;
+        if (cache.close) {
+          // 全局关闭
+          return;
+        }
+        // 判断是否显示过
+        if (cache[key] !== "show") {
+          Vue.prototype.$introJs
+            .setOptions(options)
+            .start()
+            .onexit(() => {
+              cache[key] = "show";
+              commit("setGuideCache", cache);
+            });
+          resolve();
+          return;
+        }
+        Vue.prototype.$introJs.exit();
       });
     },
     // 切换工作空间
@@ -135,14 +162,21 @@ const app = {
     getActiveMenuKey(state) {
       return state.activeMenuKey;
     },
-    getGuideFlag(state) {
-      return state.guideFlag;
+    getGuideCache(state) {
+      const cacheStr = state.guideCache || "";
+      let cahce;
+      try {
+        cahce = JSON.parse(cacheStr);
+      } catch (e) {
+        cahce = {};
+      }
+      return cahce;
     },
     getWorkspaceId(state) {
       return state.workspaceId;
     },
     getCollapsed(state) {
-      return state.collapsed;
+      return parseInt(state.collapsed || 1);
     },
   },
 };

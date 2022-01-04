@@ -71,7 +71,6 @@
   </div>
 </template>
 <script>
-import { mapGetters } from "vuex";
 import { getBackupList, getTableNameList, createBackup, downloadBackupFile, deleteBackup, restoreBackup, uploadBackupFile, backupTypeMap, backupTypeArray, backupStatusMap } from "@/api/backup-info";
 import { parseTime, renderSize } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
@@ -152,7 +151,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag"]),
     // 计算上传文件是否禁用
     fileUploadDisabled() {
       return this.uploadFileList.length === 0 || this.uploading;
@@ -172,7 +170,7 @@ export default {
     },
   },
   created() {
-    console.log(backupTypeMap);
+    // console.log(backupTypeMap);
     this.loadData();
   },
   methods: {

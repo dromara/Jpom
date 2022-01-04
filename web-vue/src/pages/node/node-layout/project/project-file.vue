@@ -14,12 +14,14 @@
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
         <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
-        <a-button type="primary" @click="handleUpload">批量上传文件</a-button>
-        <a-button type="primary" @click="handleZipUpload">上传压缩文件（自动解压）</a-button>
-        <a-button type="primary" @click="openRemoteUpload">远程上传</a-button>
-        <a-button type="primary" @click="loadFileList">刷新表格</a-button>
-        <a-button type="danger" @click="clearFile">清空项目目录</a-button>
-        <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath }}</a-tag>
+        <div>
+          <a-button type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleUpload">批量上传文件</a-button>
+          <a-button type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleZipUpload">上传文件（自动解压）</a-button>
+          <a-button type="primary" @click="openRemoteUpload">远程上传</a-button>
+          <a-button type="primary" @click="loadFileList">刷新表格</a-button>
+          <a-button type="danger" @click="clearFile">清空目录</a-button>
+        </div>
+        <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || "" }}</a-tag>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
@@ -165,7 +167,7 @@ export default {
       return this.uploadFileList.length === 0 || this.uploading;
     },
     uploadPath() {
-      if (!this.tempNode) {
+      if (!Object.keys(this.tempNode).length) {
         return "";
       }
       if (this.tempNode.level === 1) {
@@ -289,7 +291,11 @@ export default {
       };
 
       updateFile(params).then((res) => {
-        console.log(res, 2312);
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+        }
       });
     },
 
@@ -310,6 +316,7 @@ export default {
       }
       //初始化成功数
       this.successSize = 0;
+      this.uploadFileList = [];
       this.uploadFileVisible = true;
     },
     handleRemove(file) {
@@ -375,6 +382,7 @@ export default {
       }
       this.checkBox = false;
       this.successSize = 0;
+      this.uploadFileList = [];
       this.uploadZipFileVisible = true;
     },
     handleZipRemove() {
@@ -422,6 +430,7 @@ export default {
             this.loadFileList();
           }, 1000);
         }
+        this.percentage = 0;
       });
     },
     //打开远程上传

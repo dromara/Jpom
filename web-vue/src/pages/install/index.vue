@@ -52,7 +52,6 @@
   </div>
 </template>
 <script>
-import { mapGetters } from "vuex";
 import { initInstall } from "../../api/install";
 import sha1 from "sha1";
 export default {
@@ -61,14 +60,8 @@ export default {
       loginForm: this.$form.createForm(this, { name: "login-form" }),
     };
   },
-  computed: {
-    ...mapGetters(["getGuideFlag"]),
-  },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    },
-  },
+  computed: {},
+  watch: {},
   created() {
     this.$nextTick(() => {
       setTimeout(() => {
@@ -79,31 +72,28 @@ export default {
   methods: {
     // 页面引导
     introGuide() {
-      if (this.getGuideFlag) {
-        this.$introJs
-          .setOptions({
-            hidePrev: true,
-            steps: [
-              {
-                title: "Jpom 导航助手",
-                intro: "不要慌，出现这个页面表示您没有设置系统管理员信息，或者需要重置管理员信息",
-              },
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".login-card"),
-                intro: "此处需要填写的信息是用以管理 Jpom 系统的系统管理员的账户密码，一定要记住哦，它是登录 jpom 的唯一凭证",
-              },
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".init-user-password"),
-                intro: "为了您的账户安全，设定的密码需要包含字母、数字、字符，且长度于6-18位之间",
-              },
-            ],
-          })
-          .start();
-        return false;
-      }
-      this.$introJs.exit();
+      this.$store.dispatch("tryOpenGuide", {
+        key: "install",
+        options: {
+          hidePrev: true,
+          steps: [
+            {
+              title: "导航助手",
+              intro: "不要慌，出现这个页面表示您没有设置系统管理员信息，或者需要重置管理员信息",
+            },
+            {
+              title: "导航助手",
+              element: document.querySelector(".login-card"),
+              intro: "此处需要填写的信息是用以管理 Jpom 系统的系统管理员的账户密码，一定要记住哦，它是登录 jpom 的唯一凭证",
+            },
+            {
+              title: "导航助手",
+              element: document.querySelector(".init-user-password"),
+              intro: "为了您的账户安全，设定的密码需要包含字母、数字、字符，且长度于6-18位之间",
+            },
+          ],
+        },
+      });
     },
     // login
     handleLogin(e) {

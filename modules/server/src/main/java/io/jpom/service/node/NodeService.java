@@ -65,7 +65,8 @@ public class NodeService extends BaseWorkspaceService<NodeModel> implements ICro
 		NodeModel nodeModel = ServletUtil.toBean(request, NodeModel.class, true);
 		String id = nodeModel.getId();
 		if (StrUtil.isNotEmpty(id)) {
-			Validator.validateGeneral(id, 2, Const.ID_MAX_LEN, "节点id不能为空并且2-20（英文字母 、数字和下划线）");
+			String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
+			Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "节点id不能为空并且2-50（英文字母 、数字和下划线）");
 		}
 		Assert.hasText(nodeModel.getName(), "节点名称 不能为空");
 		NodeModel existsNode = super.getByKey(id);

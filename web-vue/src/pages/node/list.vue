@@ -157,7 +157,7 @@
       </a-form-model>
     </a-modal>
     <!-- 管理节点 -->
-    <a-drawer :title="drawerTitle" placement="right" :width="`${this.getCollapsed == '1' ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="drawerVisible" @close="onClose">
+    <a-drawer :title="drawerTitle" placement="right" :width="`${this.getCollapsed === 1 ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="drawerVisible" @close="onClose">
       <!-- 节点管理组件 -->
       <node-layout v-if="drawerVisible" :node="temp" />
     </a-drawer>
@@ -251,7 +251,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag", "getCollapsed"]),
+    ...mapGetters(["getCollapsed"]),
     pagination() {
       return {
         total: this.listQuery.total || 0,
@@ -265,33 +265,26 @@ export default {
       };
     },
   },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    },
-  },
+  watch: {},
   created() {
     this.loadData();
   },
   methods: {
     // 页面引导
     introGuide() {
-      if (this.getGuideFlag) {
-        this.$introJs
-          .setOptions({
-            hidePrev: true,
-            steps: [
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".node-config"),
-                intro: "节点的账号密码可以通过 agent_authorize.json 文件查看",
-              },
-            ],
-          })
-          .start();
-        return false;
-      }
-      this.$introJs.exit();
+      this.$store.dispatch("tryOpenGuide", {
+        key: "node-list",
+        options: {
+          hidePrev: true,
+          steps: [
+            {
+              title: "导航助手",
+              element: document.querySelector(".node-config"),
+              intro: "节点的账号密码可以通过 agent_authorize.json 文件查看",
+            },
+          ],
+        },
+      });
     },
 
     // 加载 SSH 列表
