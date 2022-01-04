@@ -27,6 +27,8 @@ export const NO_NOTIFY_KEY = "tip";
 
 export const NO_LOADING_KEY = "loading";
 
+export const LOADING_TIP = "loadingTip";
+
 /**
  * 分页默认条数
  */
