@@ -36,6 +36,8 @@
         <a-menu-item>
           <a href="javascript:;" @click="handleUpdateUser">用户资料</a>
         </a-menu-item>
+        <a-menu-item @click="toggleGuide"> {{ this.guideStatus ? "开启导航" : "关闭导航" }} </a-menu-item>
+        <a-menu-item @click="restGuide"> 重置导航</a-menu-item>
         <a-menu-item>
           <a href="javascript:;" @click="logOut">退出登录</a>
         </a-menu-item>
@@ -123,7 +125,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getToken", "getUserInfo", "getWorkspaceId"]),
+    ...mapGetters(["getToken", "getUserInfo", "getWorkspaceId", "getGuideCache"]),
     // 处理展示的名称 中文 3 个字 其他 4 个字符
     avatarName() {
       const reg = new RegExp("[\u4E00-\u9FA5]+");
@@ -135,6 +137,9 @@ export default {
     },
     showCode() {
       return this.getUserInfo.email !== this.temp.email;
+    },
+    guideStatus() {
+      return this.getGuideCache.close;
     },
   },
   inject: ["reload"],
@@ -154,6 +159,27 @@ export default {
             query: { ...this.$route.query, wid: this.selectWorkspace },
           });
         }
+      });
+    },
+    // 切换引导
+    toggleGuide() {
+      this.$store.dispatch("toggleGuideFlag").then((flag) => {
+        if (flag) {
+          this.$notification.success({
+            message: "关闭页面操作引导、导航",
+          });
+        } else {
+          this.$notification.success({
+            message: "开启页面操作引导、导航",
+          });
+        }
+      });
+    },
+    restGuide() {
+      this.$store.dispatch("restGuide").then(() => {
+        this.$notification.success({
+          message: "重置页面操作引导、导航成功",
+        });
       });
     },
     // 退出登录
@@ -287,7 +313,7 @@ export default {
 }
 .user-header {
   display: inline-table;
-  width: 220px;
+  width: 275px;
   text-align: right;
   margin-right: 20px;
   cursor: pointer;

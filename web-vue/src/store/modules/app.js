@@ -4,15 +4,12 @@
  * 另外提供打开新 tab、跳转 tab、移除 tab 功能
  */
 import { ACTIVE_TAB_KEY, TAB_LIST_KEY, ACTIVE_MENU_KEY, CACHE_WORKSPACE_ID } from "@/utils/const";
-import Vue from "vue";
 
 const app = {
   state: {
     activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY),
     tabList: JSON.parse(localStorage.getItem(TAB_LIST_KEY)),
     activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY),
-    // 引导缓存
-    guideCache: localStorage.getItem("Jpom-Guide-Cache"),
     workspaceId: localStorage.getItem(CACHE_WORKSPACE_ID),
     // 菜单折叠
     collapsed: localStorage.getItem("collapsed"),
@@ -26,10 +23,6 @@ const app = {
     },
     setActiveMenuKey(state, activeMenuKey) {
       state.activeMenuKey = activeMenuKey;
-    },
-    setGuideCache(state, guideCache) {
-      state.guideCache = JSON.stringify(guideCache);
-      localStorage.setItem("Jpom-Guide-Cache", state.guideCache);
     },
     setWorkspace(state, workspaceId) {
       state.workspaceId = workspaceId;
@@ -110,38 +103,6 @@ const app = {
       commit("setActiveMenuKey", activeMenuKey);
       localStorage.setItem(ACTIVE_MENU_KEY, activeMenuKey);
     },
-    // 切换引导开关
-    toggleGuideFlag({ commit, rootGetters }) {
-      return new Promise((resolve) => {
-        const cache = rootGetters.getGuideCache;
-        cache.close = !cache.close;
-        commit("setGuideCache", cache);
-        resolve(cache.close);
-      });
-    },
-    // 尝试打开引导
-    tryOpenGuide({ commit, rootGetters }, { key, options }) {
-      return new Promise((resolve) => {
-        const cache = rootGetters.getGuideCache;
-        if (cache.close) {
-          // 全局关闭
-          return;
-        }
-        // 判断是否显示过
-        if (cache[key] !== "show") {
-          Vue.prototype.$introJs
-            .setOptions(options)
-            .start()
-            .onexit(() => {
-              cache[key] = "show";
-              commit("setGuideCache", cache);
-            });
-          resolve();
-          return;
-        }
-        Vue.prototype.$introJs.exit();
-      });
-    },
     // 切换工作空间
     changeWorkspace({ commit }, workspaceId) {
       commit("setWorkspace", workspaceId);
@@ -161,16 +122,6 @@ const app = {
     },
     getActiveMenuKey(state) {
       return state.activeMenuKey;
-    },
-    getGuideCache(state) {
-      const cacheStr = state.guideCache || "";
-      let cahce;
-      try {
-        cahce = JSON.parse(cacheStr);
-      } catch (e) {
-        cahce = {};
-      }
-      return cahce;
     },
     getWorkspaceId(state) {
       return state.workspaceId;

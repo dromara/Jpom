@@ -231,7 +231,7 @@ export default {
         { title: "JDK 版本", dataIndex: "javaVersion", key: "javaVersion", ellipsis: true, scopedSlots: { customRender: "javaVersion" } },
         { title: "JVM 总内存", dataIndex: "totalMemory", key: "totalMemory", width: 120 },
         { title: "JVM 剩余内存", dataIndex: "freeMemory", key: "freeMemory", width: 140 },
-        { title: "Jpom 版本", dataIndex: "jpomVersion", key: "jpomVersion", width: 120 },
+        { title: "版本", dataIndex: "jpomVersion", key: "jpomVersion", width: 120 },
         { title: "Java 程序数", dataIndex: "javaVirtualCount", key: "javaVirtualCount", width: 120 },
 
         { title: "项目数", dataIndex: "count", key: "count", width: 90, scopedSlots: { customRender: "projectCount" } },

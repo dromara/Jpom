@@ -1,0 +1,75 @@
+/**
+ * 引导相关 store
+ *
+ */
+import Vue from "vue";
+
+const key = "Jpom-Guide-Cache";
+
+const app = {
+  state: {
+    // 引导缓存
+    guideCache: localStorage.getItem(key),
+  },
+  mutations: {
+    setGuideCache(state, guideCache) {
+      state.guideCache = JSON.stringify(guideCache);
+      localStorage.setItem(key, state.guideCache);
+    },
+  },
+  actions: {
+    // 切换引导开关
+    toggleGuideFlag({ commit, rootGetters }) {
+      return new Promise((resolve) => {
+        const cache = rootGetters.getGuideCache;
+        cache.close = !cache.close;
+        commit("setGuideCache", cache);
+        resolve(cache.close);
+      });
+    },
+    // 尝试打开引导
+    tryOpenGuide({ commit, rootGetters }, { key, options }) {
+      return new Promise((resolve) => {
+        const cache = rootGetters.getGuideCache;
+        if (cache.close) {
+          // 全局关闭
+          return;
+        }
+        // 判断是否显示过
+        if (cache[key] !== "show") {
+          Vue.prototype.$introJs
+            .setOptions(options)
+            .start()
+            .onexit(() => {
+              cache[key] = "show";
+              commit("setGuideCache", cache);
+            });
+          resolve();
+          return;
+        }
+        Vue.prototype.$introJs.exit();
+      });
+    },
+    // 重置导航
+    restGuide({ commit }) {
+      return new Promise((resolve) => {
+        commit("setGuideCache", {});
+        resolve();
+      });
+    },
+  },
+  getters: {
+    getGuideCache(state) {
+      const cacheStr = state.guideCache || "";
+      let cahce;
+      try {
+        cahce = JSON.parse(cacheStr);
+      } catch (e) {
+        cahce = {};
+      }
+      return cahce;
+    },
+  },
+};
+
+export default app;
