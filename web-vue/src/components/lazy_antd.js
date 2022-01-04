@@ -142,3 +142,9 @@ components.map((component) => {
 
 Vue.prototype.$message = message;
 Vue.prototype.$notification = notification;
+//
+Vue.prototype.$confirm = Modal.confirm;
+Vue.prototype.$info = Modal.info;
+Vue.prototype.$error = Modal.error;
+Vue.prototype.$warning = Modal.warning;
+Vue.prototype.$success = Modal.success;
