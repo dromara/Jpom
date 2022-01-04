@@ -78,7 +78,7 @@ export default {
             {
               title: "导航助手",
               element: document.querySelector(".jpom-node-log-tree"),
-              intro: "这里是 Jpom Agent 节点里面的日志文件，点击具体的文件可以在右边的区域查看日志内容。",
+              intro: "这里是 Agent 节点里面的日志文件，点击具体的文件可以在右边的区域查看日志内容。",
             },
             {
               title: "导航助手",

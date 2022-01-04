@@ -124,11 +124,11 @@ export default {
       this.$store.dispatch("toggleGuideFlag").then((flag) => {
         if (flag) {
           this.$notification.success({
-            message: "关闭页面导航",
+            message: "关闭页面操作引导、导航",
           });
         } else {
           this.$notification.success({
-            message: "开启页面导航",
+            message: "开启页面操作引导、导航",
           });
         }
       });

@@ -25,7 +25,7 @@
       </g>
     </svg>
     <a-card class="login-card" hoverable>
-      <a-card-meta title="初始化JPOM账户" style="textalign: center" description="您需要创建一个账户用以后续登录管理JPOM" />
+      <a-card-meta title="初始化系统账户" style="textalign: center" description="您需要创建一个账户用以后续登录管理系统" />
       <br />
       <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin" class="init-form">
         <a-form-item :wrapper-col="{ span: 24 }" class="init-user-name">
@@ -84,7 +84,7 @@ export default {
             {
               title: "导航助手",
               element: document.querySelector(".login-card"),
-              intro: "此处需要填写的信息是用以管理 Jpom 系统的系统管理员的账户密码，一定要记住哦，它是登录 jpom 的唯一凭证",
+              intro: "此处需要填写的信息是用以管理系统的系统管理员的账户密码，一定要记住哦，它是登录的唯一凭证",
             },
             {
               title: "导航助手",
