@@ -49,7 +49,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -185,7 +184,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 				backupInfo.setStatus(BackupStatusEnum.SUCCESS.getCode());
 				update(backupInfo);
 				DefaultSystemLog.getLog().info("start a new Thread to execute H2 Database backup...success");
-			} catch (SQLException e) {
+			} catch (Exception e) {
 				// 记录错误日志信息，修改备份任务执行失败
 				DefaultSystemLog.getLog().error("start a new Thread to execute H2 Database backup...catch exception...message: {}, cause: {}",
 						e.getMessage(), e.getCause());

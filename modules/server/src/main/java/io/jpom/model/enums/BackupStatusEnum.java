@@ -44,8 +44,8 @@ public enum BackupStatusEnum implements BaseEnum {
 		this.desc = desc;
 	}
 
-	int code;
-	String desc;
+	final int code;
+	final String desc;
 
 	@Override
 	public int getCode() {
