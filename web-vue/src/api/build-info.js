@@ -39,6 +39,9 @@ export function getBranchList(params) {
     method: "post",
     timeout: 0,
     data: params,
+    headers: {
+      loadingTip: "正在加载项目分支",
+    },
   });
 }
 

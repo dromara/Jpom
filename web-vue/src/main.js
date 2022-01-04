@@ -1,11 +1,9 @@
 import Vue from "vue";
 import App from "./App.vue";
 
-import Antd from "ant-design-vue";
-import "ant-design-vue/dist/antd.css";
+import "./components/lazy_antd";
+
 import "./assets/reset.css";
-// import { Tree, Progress, Loading } from "element-ui";
-// import "element-ui/lib/theme-chalk/index.css";
 const introJs = require("intro.js");
 import "intro.js/introjs.css";
 // import 'intro.js/themes/introjs-flattener.css';
@@ -30,10 +28,8 @@ intro.setOptions({
 Vue.config.productionTip = false;
 // Vue.prototype.$loading = Loading;
 Vue.prototype.$introJs = intro;
-Vue.use(Antd);
-// Vue.use(Tree);
-// Vue.use(Progress);
 
+// 全局 loading
 Vue.prototype.$setLoading = function (props) {
   if (typeof props === "boolean") {
     props = { spinning: props };

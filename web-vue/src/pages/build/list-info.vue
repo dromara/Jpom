@@ -607,12 +607,7 @@ export default {
       if (this.tempRepository.repoType !== 0) {
         return;
       }
-      const loading = this.$loading.service({
-        lock: true,
-        text: "正在加载项目分支",
-        spinner: "el-icon-loading",
-        background: "rgba(0, 0, 0, 0.7)",
-      });
+
       this.branchList = [];
       const params = {
         repositoryId: this.tempRepository?.id,
@@ -622,7 +617,6 @@ export default {
           this.branchList = res.data[0];
           this.branchTagList = res.data[1];
         }
-        loading.close();
       });
     },
     // 提交节点数据

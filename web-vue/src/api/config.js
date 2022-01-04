@@ -3,7 +3,7 @@ import axios from "axios";
 import Qs from "qs";
 import store from "../store";
 import router from "../router";
-import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID } from "@/utils/const";
+import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID, LOADING_TIP } from "@/utils/const";
 import { refreshToken } from "./user";
 
 import { notification } from "ant-design-vue";
@@ -32,10 +32,11 @@ request.interceptors.request.use(
     if (!config.headers[NO_LOADING_KEY]) {
       Vue.prototype.$setLoading({
         spinning: true,
-        tip: "加载数据中，请稍候...",
+        tip: config.headers[LOADING_TIP] || "加载数据中，请稍候...",
       });
       startTime = new Date().getTime();
     }
+    delete config.headers[LOADING_TIP];
     // 处理数据
     if (window.routerBase) {
       // 防止 url 出现 //
