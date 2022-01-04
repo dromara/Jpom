@@ -2,7 +2,7 @@ import Vue from "vue";
 
 // base library
 import {
-  Base,
+  //   Base,
   //   Affix,
   //   Anchor,
   AutoComplete,
@@ -38,10 +38,10 @@ import {
   Popover,
   Progress,
   Radio,
-  Rate,
+  //   Rate,
   Row,
   Select,
-  Slider,
+  //   Slider,
   Spin,
   //   Statistic,
   Steps,
@@ -71,7 +71,7 @@ import {
 } from "ant-design-vue";
 
 const components = [
-  Base,
+  //   Base,
   //   Affix,
   //   Anchor,
   AutoComplete,
@@ -107,10 +107,10 @@ const components = [
   Popover,
   Progress,
   Radio,
-  Rate,
+  //   Rate,
   Row,
   Select,
-  Slider,
+  //   Slider,
   Spin,
   //   Statistic,
   Steps,

@@ -17,11 +17,11 @@ export const TAB_LIST_KEY = "Jpom-TabList";
 
 export const ACTIVE_MENU_KEY = "Jpom-ActiveMenu";
 
-export const GUIDE_FLAG_KEY = "Jpom-GuideFlag";
+// export const GUIDE_FLAG_KEY = "Jpom-GuideFlag";
 
-export const GUIDE_HOME_USED_KEY = "Jpom-Home-Guide-Used";
+// export const GUIDE_HOME_USED_KEY = "Jpom-Home-Guide-Used";
 
-export const GUIDE_NODE_USED_KEY = "Jpom-Node-Guide-Used";
+// export const GUIDE_NODE_USED_KEY = "Jpom-Node-Guide-Used";
 
 export const NO_NOTIFY_KEY = "tip";
 

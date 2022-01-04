@@ -72,7 +72,6 @@
   </div>
 </template>
 <script>
-import { mapGetters } from "vuex";
 import { getMonitorList, editMonitor, deleteMonitor } from "@/api/monitor";
 import { getUserListAll } from "@/api/user";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
@@ -118,7 +117,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag"]),
     pagination() {
       return {
         total: this.listQuery.total,
@@ -132,33 +130,26 @@ export default {
       };
     },
   },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    },
-  },
+  watch: {},
   created() {
     this.loadData();
   },
   methods: {
     // 页面引导
     introGuide() {
-      if (this.getGuideFlag) {
-        this.$introJs
-          .setOptions({
-            hidePrev: true,
-            steps: [
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-notify"),
-                intro: "如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。",
-              },
-            ],
-          })
-          .start();
-        return false;
-      }
-      this.$introJs.exit();
+      this.$store.dispatch("tryOpenGuide", {
+        key: "monitor",
+        options: {
+          hidePrev: true,
+          steps: [
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-notify"),
+              intro: "如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。",
+            },
+          ],
+        },
+      });
     },
 
     // 加载数据

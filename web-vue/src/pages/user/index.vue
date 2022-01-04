@@ -99,7 +99,6 @@
   </div>
 </template>
 <script>
-import { mapGetters } from "vuex";
 import { getUserList, editUser, deleteUser, unlockUser, workspaceList } from "@/api/user";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import { getMonitorOperateTypeList } from "@/api/monitor";
@@ -172,7 +171,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag"]),
     pagination() {
       return {
         total: this.listQuery.total,
@@ -194,11 +192,7 @@ export default {
       return handleTreeData(JSON.parse(str), this.targetKeys, false);
     },
   },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    },
-  },
+  watch: {},
   created() {
     this.loadData();
     this.loadOptTypeData();
@@ -206,22 +200,19 @@ export default {
   methods: {
     // 页面引导
     introGuide() {
-      if (this.getGuideFlag) {
-        this.$introJs
-          .setOptions({
-            hidePrev: true,
-            steps: [
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-userWorkspace"),
-                intro: "如果这里面没有您想要的工作空间信息，您需要先去添加一个工作空间。",
-              },
-            ],
-          })
-          .start();
-        return false;
-      }
-      this.$introJs.exit();
+      this.$store.dispatch("tryOpenGuide", {
+        key: "user-create",
+        options: {
+          hidePrev: true,
+          steps: [
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-userWorkspace"),
+              intro: "如果这里面没有您想要的工作空间信息，您需要先去添加一个工作空间。",
+            },
+          ],
+        },
+      });
     },
     onCheckedLeft(_, e, checkedKeys, itemSelect) {
       const { eventKey } = e.node;

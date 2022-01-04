@@ -50,7 +50,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getLongTermToken", "getGuideFlag"]),
+    ...mapGetters(["getLongTermToken"]),
     socketUrl() {
       const protocol = location.protocol === "https:" ? "wss://" : "ws://";
       const domain = window.routerBase;
@@ -58,11 +58,7 @@ export default {
       return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.node.id}&type=tomcat`;
     },
   },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    },
-  },
+  watch: {},
   created() {
     this.loadData();
     this.$nextTick(() => {
@@ -74,27 +70,24 @@ export default {
   methods: {
     // 页面引导
     introGuide() {
-      if (this.getGuideFlag) {
-        this.$introJs
-          .setOptions({
-            hidePrev: true,
-            steps: [
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-node-log-tree"),
-                intro: "这里是 Jpom Agent 节点里面的日志文件，点击具体的文件可以在右边的区域查看日志内容。",
-              },
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".ant-tree-node-content-wrapper"),
-                intro: "您还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。",
-              },
-            ],
-          })
-          .start();
-        return false;
-      }
-      this.$introJs.exit();
+      this.$store.dispatch("tryOpenGuide", {
+        key: "node-log",
+        options: {
+          hidePrev: true,
+          steps: [
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-node-log-tree"),
+              intro: "这里是 Jpom Agent 节点里面的日志文件，点击具体的文件可以在右边的区域查看日志内容。",
+            },
+            {
+              title: "导航助手",
+              element: document.querySelector(".ant-tree-node-content-wrapper"),
+              intro: "您还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。",
+            },
+          ],
+        },
+      });
     },
     // 加载数据
     loadData() {

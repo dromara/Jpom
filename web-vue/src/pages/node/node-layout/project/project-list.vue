@@ -286,7 +286,6 @@
   </div>
 </template>
 <script>
-import { mapGetters } from "vuex";
 import File from "./project-file";
 import Console from "./project-console";
 import Monitor from "./project-monitor";
@@ -375,7 +374,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag"]),
     filePath() {
       return (this.temp.whitelistDirectory || "") + (this.temp.lib || "");
     },
@@ -401,11 +399,7 @@ export default {
       };
     },
   },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    },
-  },
+  watch: {},
   mounted() {
     this.loadData();
   },
@@ -415,32 +409,29 @@ export default {
     },
     // 页面引导
     introGuide() {
-      if (this.getGuideFlag) {
-        this.$introJs
-          .setOptions({
-            hidePrev: true,
-            steps: [
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-node-project-whitelist"),
-                intro: "这里是选择节点设置的白名单目录，白名单的设置在侧边栏菜单<b>系统管理</b>里面。",
-              },
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-node-project-jdk"),
-                intro: "这里选择 JDK，JDK 需要在侧边栏菜单里手动添加，并非直接读取节点服务器里面的 JDK。",
-              },
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-node-project-token"),
-                intro: "这里可以理解为当程序停止时会给这个地址发送一个 HTTP GET 请求。",
-              },
-            ],
-          })
-          .start();
-        return false;
-      }
-      this.$introJs.exit();
+      this.$store.dispatch("tryOpenGuide", {
+        key: "project",
+        options: {
+          hidePrev: true,
+          steps: [
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-node-project-whitelist"),
+              intro: "这里是选择节点设置的白名单目录，白名单的设置在侧边栏菜单<b>系统管理</b>里面。",
+            },
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-node-project-jdk"),
+              intro: " JDK，JDK 需要在侧边栏菜单里手动添加，并非直接读取节点服务器里面的 JDK。",
+            },
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-node-project-token"),
+              intro: "WebHooks 可以理解为当程序停止时会给这个地址发送一个 HTTP GET 请求。",
+            },
+          ],
+        },
+      });
     },
 
     // 加载项目白名单列表

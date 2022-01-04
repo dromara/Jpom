@@ -31,8 +31,6 @@ import cn.hutool.extra.compress.extractor.Extractor;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2Utils;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -67,9 +65,6 @@ public class CompressionFileUtil {
 				compressUtilIn = CompressUtil.getIn(null, fileInputStream);
 				if (compressUtilIn instanceof BZip2CompressorInputStream) {
 					File file = FileUtil.file(destDir, BZip2Utils.getUncompressedFilename(compressFile.getName()));
-					IoUtil.copy(compressUtilIn, new FileOutputStream(file));
-				} else if (compressUtilIn instanceof GzipCompressorInputStream) {
-					File file = FileUtil.file(destDir, GzipUtils.getUncompressedFilename(compressFile.getName()));
 					IoUtil.copy(compressUtilIn, new FileOutputStream(file));
 				} else {
 					try (Extractor extractor = CompressUtil.createExtractor(charset, compressUtilIn)) {

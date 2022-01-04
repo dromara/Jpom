@@ -1,7 +1,7 @@
 <template>
   <a-tabs
     v-model="activeKey"
-    :style="`${this.getCollapsed == '1' ? 'max-width: calc(100vw - 400px)' : 'max-width: calc(100vw - 510px)'}`"
+    :style="`${this.getCollapsed === 1 ? 'max-width: calc(100vw - 400px)' : 'max-width: calc(100vw - 510px)'}`"
     class="my-tabs"
     hide-add
     type="editable-card"

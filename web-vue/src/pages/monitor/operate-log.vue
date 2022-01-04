@@ -80,7 +80,6 @@
   </div>
 </template>
 <script>
-import { mapGetters } from "vuex";
 import { getMonitorOperateLogList, getMonitorOperateTypeList, editMonitorOperate, deleteMonitorOperate } from "@/api/monitor";
 import { getUserListAll } from "@/api/user";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
@@ -126,8 +125,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag"]),
-
     pagination() {
       return {
         total: this.listQuery.total,
@@ -141,11 +138,7 @@ export default {
       };
     },
   },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    },
-  },
+  watch: {},
   created() {
     this.loadData();
     this.loadOptTypeData();
@@ -153,22 +146,19 @@ export default {
   methods: {
     // 页面引导
     introGuide() {
-      if (this.getGuideFlag) {
-        this.$introJs
-          .setOptions({
-            hidePrev: true,
-            steps: [
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-monitor-notify"),
-                intro: "这里面的报警联系人如果无法选择，您需要设置管理员的邮箱地址。",
-              },
-            ],
-          })
-          .start();
-        return false;
-      }
-      this.$introJs.exit();
+      this.$store.dispatch("tryOpenGuide", {
+        key: "operate-log",
+        options: {
+          hidePrev: true,
+          steps: [
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-monitor-notify"),
+              intro: "这里面的报警联系人如果无法选择，您需要设置管理员的邮箱地址。",
+            },
+          ],
+        },
+      });
     },
 
     // 加载数据

@@ -1,13 +1,13 @@
 <template>
   <a-config-provider :locale="locale">
     <div id="app">
-      <a-spin v-bind="globalLoadingProps">
-        <div></div>
-      </a-spin>
       <router-view v-if="routerActivation" />
       <template>
         <a-back-top />
       </template>
+      <a-spin v-bind="globalLoadingProps">
+        <div></div>
+      </a-spin>
     </div>
   </a-config-provider>
 </template>
@@ -80,7 +80,7 @@ export default {
   height: 100vh;
   width: 100vw;
   padding: 20vh;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.7);
   position: fixed !important;
   z-index: 99999;
   top:0;
@@ -88,5 +88,8 @@ export default {
   left:0;
   right:0;
   display:flex;
+}
+.ant-spin-text{
+  text-shadow: 0 0 black !important;
 }
 </style>

@@ -13,32 +13,41 @@
         <a-button type="primary" @click="getNodeProjectData">搜索</a-button>
       </a-tooltip>
       <span>| </span>
+      <a-space>
+        <a-dropdown>
+          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+            批量操作
+            <a-icon type="down" />
+          </a>
+          <a-menu slot="overlay">
+            <a-menu-item>
+              <a-button type="primary" @click="batchStart">批量启动</a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="primary" @click="batchRestart">批量重启</a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="danger" @click="batchStop">批量关闭</a-button>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
 
-      <a-dropdown>
-        <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-          批量操作
-          <a-icon type="down" />
-        </a>
-        <a-menu slot="overlay">
-          <a-menu-item>
-            <a-button type="primary" @click="batchStart">批量启动</a-button>
-          </a-menu-item>
-          <a-menu-item>
-            <a-button type="primary" @click="batchRestart">批量重启</a-button>
-          </a-menu-item>
-          <a-menu-item>
-            <a-button type="danger" @click="batchStop">批量关闭</a-button>
-          </a-menu-item>
-        </a-menu>
-      </a-dropdown>
+        <a-tooltip>
+          <template slot="title">
+            <div>
+              <ul>
+                <li>项目是存储在节点中的、创建需要到节点管理里面去操作</li>
+                <li>状态数据是异步获取有一定时间延迟</li>
+              </ul>
+            </div>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
 
-      <!-- <a-button type="primary" @click="batchStart">批量启动</a-button>
-      <a-button type="primary" @click="batchRestart">批量重启</a-button>
-      <a-button type="danger" @click="batchStop">批量关闭</a-button> -->
-      状态数据是异步获取有一定时间延迟
-      <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的项目信息, 需要重新同步">
-        <a-icon @click="delAll()" type="delete" />
-      </a-tooltip>
+        <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的项目信息, 需要重新同步">
+          <a-icon @click="delAll()" type="delete" />
+        </a-tooltip>
+      </a-space>
     </div>
     <a-table :data-source="projList" :columns="columns" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
@@ -92,7 +101,6 @@
 <script>
 import { getProjectList, delAllProjectCache, getNodeListAll } from "@/api/node";
 import { restartProject, startProject, stopProject, getRuningProjectInfo, runModeList, noFileModes } from "@/api/node-project";
-import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { parseTime, itemGroupBy } from "@/utils/time";
@@ -150,7 +158,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag"]),
     filePath() {
       return (this.temp.whitelistDirectory || "") + (this.temp.lib || "");
     },

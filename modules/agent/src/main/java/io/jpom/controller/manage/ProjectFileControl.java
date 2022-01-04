@@ -184,7 +184,8 @@ public class ProjectFileControl extends BaseAgentController {
 	public String upload() throws Exception {
 		NodeProjectInfoModel pim = getProjectInfoModel();
 		MultipartFileBuilder multipartFileBuilder = createMultipart()
-				.addFieldName("file");
+				.addFieldName("file")
+				.setUseOriginalFilename(true);
 		// 压缩文件
 		String type = getParameter("type");
 		// 是否清空
@@ -217,8 +218,7 @@ public class ProjectFileControl extends BaseAgentController {
 				}
 			}
 		} else {
-			multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(lib))
-					.setUseOriginalFilename(true);
+			multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(lib));
 			// 保存
 			multipartFileBuilder.save();
 		}

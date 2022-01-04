@@ -40,7 +40,6 @@
   </a-layout>
 </template>
 <script>
-import { mapGetters } from "vuex";
 import { getNodeMenu } from "../../../api/menu";
 import Welcome from "./welcome";
 import ProjectList from "./project/project-list";
@@ -56,7 +55,7 @@ import Cache from "./system/cache";
 import Log from "./system/log.vue";
 import Upgrade from "./system/upgrade.vue";
 import ConfigFile from "./system/config-file.vue";
-import { GUIDE_NODE_USED_KEY } from "../../../utils/const";
+
 export default {
   components: {
     Welcome,
@@ -86,27 +85,19 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag"]),
     currentId() {
       return this.selectedKeys[0];
     },
     defaultOpenKey() {
       let keyList = [];
-      // 引导开启且没指定打开某一项菜单时打开系统配置
-      if (this.getGuideFlag && !this.$route.query.pId) {
-        keyList = ["systemConfig"];
-      } else if (this.$route.query.pId) {
+      if (this.$route.query.pId) {
         // 打开对应的父级菜单
         keyList = [this.$route.query.pId];
       }
       return keyList;
     },
   },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    },
-  },
+  watch: {},
   created() {
     this.loadNodeMenu();
     setTimeout(() => {
@@ -116,42 +107,34 @@ export default {
   methods: {
     // 页面引导
     introGuide() {
-      const used = localStorage.getItem(GUIDE_NODE_USED_KEY) === "true";
-      // 如果要显示引导并且没有使用过
-      if (this.getGuideFlag && !used) {
-        this.$introJs
-          .setOptions({
-            hidePrev: true,
-            steps: [
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".ant-drawer-title"),
-                intro: "这里是这个节点的名称和节点地址",
-              },
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-node-sider"),
-                intro: "这里是这个节点的侧边栏菜单",
-              },
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-node-content"),
-                intro: "这里是这个节点的主要内容展示区",
-              },
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".whitelistDirectory"),
-                intro: "白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p>菜单里面作为选择项出现。",
-              },
-            ],
-          })
-          .start()
-          .onexit(() => {
-            localStorage.setItem(GUIDE_NODE_USED_KEY, "true");
-          });
-        return false;
-      }
-      this.$introJs.exit();
+      this.$store.dispatch("tryOpenGuide", {
+        key: "node-index",
+        options: {
+          hidePrev: true,
+          steps: [
+            {
+              title: "导航助手",
+              element: document.querySelector(".ant-drawer-title"),
+              intro: "这里是这个节点的名称和节点地址",
+            },
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-node-sider"),
+              intro: "这里是这个节点的侧边栏菜单",
+            },
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-node-content"),
+              intro: "这里是这个节点的主要内容展示区",
+            },
+            {
+              title: "导航助手",
+              element: document.querySelector(".whitelistDirectory"),
+              intro: "白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p> 【系统管理】->【白名单配置】。",
+            },
+          ],
+        },
+      });
     },
     // 加载菜单
     loadNodeMenu() {
