@@ -32,67 +32,73 @@ import io.jpom.model.BaseJsonModel;
  * @date 2019/4/10
  */
 public class NetstatModel extends BaseJsonModel {
-    private String protocol;
-    private String receive = StrUtil.DASHED;
-    private String send = StrUtil.DASHED;
-    private String local;
-    private String foreign;
-    private String status;
-    private String name;
+	/**
+	 * 协议
+	 */
+	private String protocol;
+	private String receive = StrUtil.DASHED;
+	private String send = StrUtil.DASHED;
+	/**
+	 * 端口
+	 */
+	private String local;
+	private String foreign;
+	private String status;
+	private String name;
 
-    public String getProtocol() {
-        return protocol;
-    }
+	public String getProtocol() {
+		return protocol;
+	}
 
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
 
-    public String getReceive() {
-        return receive;
-    }
+	public String getReceive() {
+		return receive;
+	}
 
-    public void setReceive(String receive) {
-        this.receive = receive;
-    }
+	public void setReceive(String receive) {
+		this.receive = receive;
+	}
 
-    public String getSend() {
-        return send;
-    }
+	public String getSend() {
+		return send;
+	}
 
-    public void setSend(String send) {
-        this.send = send;
-    }
+	public void setSend(String send) {
+		this.send = send;
+	}
 
-    public String getLocal() {
-        return local;
-    }
+	public String getLocal() {
+		return local;
+	}
 
-    public void setLocal(String local) {
-        this.local = local;
-    }
+	public void setLocal(String local) {
+		this.local = local;
+	}
 
-    public String getForeign() {
-        return foreign;
-    }
+	public String getForeign() {
+		return foreign;
+	}
 
-    public void setForeign(String foreign) {
-        this.foreign = foreign;
-    }
+	public void setForeign(String foreign) {
+		this.foreign = foreign;
+	}
 
-    public String getStatus() {
-        return status;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 }
