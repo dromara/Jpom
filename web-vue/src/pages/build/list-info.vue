@@ -10,6 +10,9 @@
         <a-select show-search option-filter-prop="children" v-model="listQuery.releaseMethod" allowClear placeholder="发布方式" class="search-input-item">
           <a-select-option v-for="(val, key) in releaseMethodMap" :key="key">{{ val }}</a-select-option>
         </a-select>
+        <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+          <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+        </a-select>
         <a-input allowClear class="search-input-item" v-model="listQuery['%resultDirFile%']" placeholder="产物目录" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
           <a-button type="primary" @click="loadData">搜索</a-button>
@@ -84,7 +87,15 @@
     <a-modal v-model="editBuildVisible" title="编辑构建" @ok="handleEditBuildOk" width="50%" :maskClosable="false">
       <a-form-model ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="名称" prop="name">
-          <a-input v-model="temp.name" placeholder="名称" />
+          <a-row>
+            <a-col :span="10">
+              <a-input v-model="temp.name" placeholder="名称" />
+            </a-col>
+            <a-col :span="4" style="text-align: right">分组名称：</a-col>
+            <a-col :span="10">
+              <custom-select suffixIcon="" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder=""> </custom-select>
+            </a-col>
+          </a-row>
         </a-form-model-item>
 
         <a-form-model-item label="仓库地址" prop="repositoryId">
@@ -315,7 +326,21 @@
 import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
 import { getRepositoryListAll } from "@/api/repository";
-import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildList, getTriggerUrl, releaseMethodMap, releaseMethodArray, resetTrigger, startBuild, stopBuild, statusMap } from "@/api/build-info";
+import {
+  clearBuid,
+  deleteBuild,
+  editBuild,
+  getBranchList,
+  getBuildList,
+  getTriggerUrl,
+  releaseMethodMap,
+  releaseMethodArray,
+  resetTrigger,
+  startBuild,
+  stopBuild,
+  statusMap,
+  getBuildGroupAll,
+} from "@/api/build-info";
 import { getDishPatchListAll, afterOptList } from "@/api/dispatch";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
@@ -441,6 +466,7 @@ export default {
   watch: {},
   created() {
     this.loadData();
+    this.loadGroupList();
   },
   methods: {
     // 页面引导
@@ -459,7 +485,14 @@ export default {
         },
       });
     },
-
+    // 分组数据
+    loadGroupList() {
+      getBuildGroupAll().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
+      });
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
@@ -647,7 +680,7 @@ export default {
             this.$refs["editBuildForm"].resetFields();
             this.editBuildVisible = false;
             this.handleFilter();
-            // this.loadGroupList();
+            this.loadGroupList();
           }
         });
       });

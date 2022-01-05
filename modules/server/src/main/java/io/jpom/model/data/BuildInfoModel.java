@@ -23,7 +23,7 @@
 package io.jpom.model.data;
 
 import cn.hutool.core.annotation.PropIgnore;
-import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.model.BaseGroupModel;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.h2db.TableName;
 
@@ -32,7 +32,7 @@ import io.jpom.service.h2db.TableName;
  * new BuildModel class, for replace old BuildModel
  */
 @TableName(value = "BUILD_INFO", name = "构建信息")
-public class BuildInfoModel extends BaseWorkspaceModel {
+public class BuildInfoModel extends BaseGroupModel {
 
 	/**
 	 * 仓库 ID
@@ -48,11 +48,6 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 	 * @see BuildHistoryLog#getBuildNumberId()
 	 */
 	private Integer buildId;
-	/**
-	 * 分组名称
-	 */
-	@Deprecated
-	private String group;
 	/**
 	 * 分支
 	 */
@@ -135,14 +130,6 @@ public class BuildInfoModel extends BaseWorkspaceModel {
 
 	public void setBuildId(Integer buildId) {
 		this.buildId = buildId;
-	}
-
-	public String getGroup() {
-		return group;
-	}
-
-	public void setGroup(String group) {
-		this.group = group;
 	}
 
 	public String getWebhook() {

@@ -3,36 +3,30 @@
     <a-tabs type="card" default-active-key="1">
       <a-tab-pane key="1" tab="服务端"> <upgrade></upgrade></a-tab-pane>
       <a-tab-pane key="2" tab="所有节点(插件端)" force-render>
-        <div class="header">
-          <div class="left">
-            <a-space>
-              <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
-              <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
-              <a-button type="primary" @click="refresh">搜索</a-button>
-              |
-              <a-select v-model="temp.protocol" placeholder="升级协议" class="search-input-item">
-                <a-select-option value="WebSocket">WebSocket</a-select-option>
-                <a-select-option value="Http">Http</a-select-option>
-              </a-select>
-              <a-button type="primary" @click="batchUpdate">批量更新</a-button>
+        <a-space direction="vertical" size="middle">
+          <a-row>
+            <div>
+              <a-space>
+                <a-input class="search-input-item" v-model="listQuery['%id%']" placeholder="节点ID" />
+                <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
+                <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
+                <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+                  <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+                </a-select>
+                <a-button type="primary" @click="refresh">搜索</a-button>
 
-              <div class="title">
-                Agent版本：{{ agentVersion | version }}
-                <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} </a-tag>
-              </div>
-              <div class="version">打包时间：{{ agentTimeStamp | version }}</div>
-              <div class="action">
-                <a-upload name="file" accept=".jar,.zip" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
-                  <a-button type="primary">
-                    <a-icon type="upload" />
-                    上传新版本
-                  </a-button>
-                </a-upload>
-              </div>
-            </a-space>
-          </div>
-        </div>
-        <div class="table-div">
+                <div class="action">
+                  <a-upload name="file" accept=".jar,.zip" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+                    <a-button type="primary">
+                      <a-icon type="upload" />
+                      新版本
+                    </a-button>
+                  </a-upload>
+                </div>
+              </a-space>
+            </div>
+          </a-row>
+
           <a-table
             :loading="loading"
             :columns="columns"
@@ -44,6 +38,21 @@
             @change="changePage"
             :row-selection="rowSelection"
           >
+            <template slot="title">
+              <a-space>
+                <a-select v-model="temp.protocol" placeholder="升级协议" class="search-input-item">
+                  <a-select-option value="WebSocket">WebSocket</a-select-option>
+                  <a-select-option value="Http">Http</a-select-option>
+                </a-select>
+                <a-button type="primary" @click="batchUpdate">批量更新</a-button>
+                |
+                <div>
+                  Agent版本：{{ agentVersion | version }}
+                  <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} </a-tag>
+                </div>
+                <div>打包时间：{{ agentTimeStamp | version }}</div>
+              </a-space>
+            </template>
             <template slot="version" slot-scope="text">
               {{ text | version }}
             </template>
@@ -60,14 +69,14 @@
               <a-button type="primary" @click="updateNodeHandler(record)">更新</a-button>
             </template>
           </a-table>
-        </div>
+        </a-space>
       </a-tab-pane>
     </a-tabs>
   </div>
 </template>
 <script>
 import upgrade from "@/components/upgrade";
-import { uploadAgentFile, downloadRemote, checkVersion, getNodeList } from "@/api/node";
+import { uploadAgentFile, downloadRemote, checkVersion, getNodeList, getNodeGroupAll } from "@/api/node";
 import { mapGetters } from "vuex";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
@@ -92,6 +101,7 @@ export default {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
+      groupList: [],
       columns: [
         // { title: "节点 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "节点名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -158,12 +168,21 @@ export default {
   },
   mounted() {
     this.getNodeList();
+    this.loadGroupList();
   },
   beforeDestroy() {
     this.socket && this.socket.close();
     clearInterval(this.heart);
   },
   methods: {
+    // 获取所有的分组
+    loadGroupList() {
+      getNodeGroupAll().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
+      });
+    },
     initWebsocket(ids) {
       if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
         this.socket = new WebSocket(this.socketUrl);
@@ -346,58 +365,3 @@ export default {
   },
 };
 </script>
-
-<style scoped lang="stylus">
-.node-update {
-  width 100%
-  height 100%
-  // display flex
-  flex-direction column
-  justify-content space-between
-
-
-  .header {
-    // height 60px;
-    display flex;
-    align-items center;
-    margin-bottom: 15px;
-
-    > div {
-      //  width 50%;
-    }
-
-    .left {
-
-      .group {
-        width 200px
-      }
-    }
-
-    .right {
-      display flex
-      justify-content flex-end
-      align-items center;
-      flex: 1;
-
-      > div {
-        padding: 0 10px
-      }
-    }
-  }
-
-  .table-div {
-    // height calc(100% - 60px)
-    // overflow auto
-
-    .table {
-      // height 100%
-
-      .uploading {
-        display flex
-        flex-direction column
-        align-items center
-      }
-    }
-  }
-}
-</style>

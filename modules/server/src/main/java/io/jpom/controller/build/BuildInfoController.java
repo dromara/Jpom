@@ -121,6 +121,19 @@ public class BuildInfoController extends BaseServerController {
 	}
 
 	/**
+	 * load build list with params
+	 *
+	 * @return json
+	 */
+	@GetMapping(value = "/build/list_group_all", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String getBuildGroupAll() {
+		// load list with page
+		List<String> group = buildInfoService.listGroup(getRequest());
+		return JsonMessage.getString(200, "", group);
+	}
+
+	/**
 	 * edit build info
 	 *
 	 * @param id            构建ID
@@ -145,7 +158,7 @@ public class BuildInfoController extends BaseServerController {
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
 								@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
 								String branchName, String branchTagName, String webhook, String autoBuildCron,
-								String extraData) {
+								String extraData, String group) {
 		// 根据 repositoryId 查询仓库信息
 		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, getRequest());
 		Assert.notNull(repositoryModel, "无效的仓库信息");
@@ -185,7 +198,7 @@ public class BuildInfoController extends BaseServerController {
 		buildInfoModel.setResultDirFile(resultDirFile);
 		buildInfoModel.setScript(script);
 		// 设置修改人
-		//buildInfoModel.setModifyUser(UserModel.getOptUserName(getUser()));
+		buildInfoModel.setGroup(group);
 		// 发布方式
 		BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
 		Assert.notNull(releaseMethod1, "发布方法不正确");

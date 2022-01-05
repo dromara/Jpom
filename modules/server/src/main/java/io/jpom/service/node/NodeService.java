@@ -11,14 +11,14 @@ import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.cron.ICron;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.monitor.NodeMonitor;
-import io.jpom.cron.ICron;
-import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ import java.util.Optional;
  * @since 2021/12/4
  */
 @Service
-public class NodeService extends BaseWorkspaceService<NodeModel> implements ICron {
+public class NodeService extends BaseGroupService<NodeModel> implements ICron {
 
 	private final SshService sshService;
 	private final WorkspaceService workspaceService;
