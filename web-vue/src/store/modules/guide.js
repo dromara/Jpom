@@ -28,11 +28,15 @@ const app = {
       });
     },
     // 尝试打开引导
-    tryOpenGuide({ commit, rootGetters }, { key, options }) {
+    tryOpenGuide({ commit, rootGetters }, { key, beforeKey, options }) {
       return new Promise((resolve) => {
         const cache = rootGetters.getGuideCache;
         if (cache.close) {
           // 全局关闭
+          return;
+        }
+        if (beforeKey && cache[beforeKey] !== "show") {
+          // 判断在显示某个引导后才显示
           return;
         }
         // 判断是否显示过

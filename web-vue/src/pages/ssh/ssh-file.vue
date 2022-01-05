@@ -14,8 +14,8 @@
           <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="handleUploadZip">上传压缩文件（自动解压）</a-button>
           <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="loadFileList()">刷新</a-button>
           <a-button :disabled="!this.tempNode.parentDir" type="danger" @click="handleDeletePath()">删除</a-button>
-          <span v-if="this.tempNode.parentDir">当前目录:{{ this.tempNode.path }}</span>
-          <span v-if="this.tempNode.parentDir">{{ this.tempNode.parentDir }}</span>
+          <span v-if="this.nowPath">当前目录:{{ this.nowPath }}</span>
+          <!-- <span v-if="this.nowPath">{{ this.tempNode.parentDir }}</span> -->
         </a-space>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
@@ -106,14 +106,17 @@ export default {
     };
   },
   mounted() {
-    this.calcTableHeight();
     this.loadData();
   },
-  methods: {
-    // 计算表格高度
-    calcTableHeight() {
-      this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
+  computed: {
+    nowPath() {
+      if (!this.tempNode.parentDir || !this.tempNode.path) {
+        return "";
+      }
+      return ((this.tempNode.path || "") + (this.tempNode.parentDir || "")).replace(new RegExp("//", "gm"), "/");
     },
+  },
+  methods: {
     // 加载数据
     loadData() {
       this.loading = true;

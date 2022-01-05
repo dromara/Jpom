@@ -107,11 +107,6 @@ export default {
             },
             {
               title: "导航助手",
-              element: document.querySelector(".jpom-node-manage-btn"),
-              intro: "点击【节点管理】按钮可以进入节点管理",
-            },
-            {
-              title: "导航助手",
               element: document.querySelector(".jpom-node-manage-add"),
               intro: "如果还没有节点 可以点击【新增】按钮新增节点",
             },

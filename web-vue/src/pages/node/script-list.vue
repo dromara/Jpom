@@ -7,7 +7,7 @@
         </a-select>
         <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="loadData">搜索</a-button>
+          <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
 
         <a-tooltip>
@@ -31,7 +31,7 @@
       </a-space>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
+    <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>

@@ -6,7 +6,7 @@
         <a-input v-model="listQuery['%name%']" placeholder="节点名称" />
         <a-input v-model="listQuery['%url%']" placeholder="节点地址" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="loadData">搜索</a-button>
+          <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary jpom-node-manage-add" @click="handleAdd">新增</a-button>
         <a-tooltip>
@@ -26,19 +26,36 @@
       </a-space>
     </div>
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
-    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="(this, pagination)" @change="changePage">
+    <a-table :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="(this, pagination)" @change="changePage">
       <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
+      </a-tooltip>
+      <a-tooltip slot="cycle" slot-scope="text" placement="topLeft" :title="nodeMonitorCycle[text]">
+        <span>{{ nodeMonitorCycle[text] }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button v-if="record.unLockType" type="primary" @click="unlock(record)">解锁节点</a-button>
-          <a-button v-else class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1">节点管理</a-button>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button v-else class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />节点管理</a-button>
+
           <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
-            <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>
+            <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
           </a-tooltip>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+              </a-menu-item>
+
+              <a-menu-item>
+                <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
       <!-- 嵌套表格 -->
@@ -87,12 +104,7 @@
         </a-form-model-item>
         <a-form-model-item label="监控周期" prop="cycle">
           <a-select v-model="temp.cycle" defaultValue="0" placeholder="监控周期">
-            <a-select-option :key="0">不开启</a-select-option>
-            <a-select-option :key="-30">30 秒</a-select-option>
-            <a-select-option :key="1">1 分钟</a-select-option>
-            <a-select-option :key="5">5 分钟</a-select-option>
-            <a-select-option :key="10">10 分钟</a-select-option>
-            <a-select-option :key="30">30 分钟</a-select-option>
+            <a-select-option v-for="(name, key) in nodeMonitorCycle" :key="parseInt(key)">{{ name }}</a-select-option>
           </a-select>
         </a-form-model-item>
 
@@ -183,7 +195,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWorkspace } from "@/api/node";
+import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWorkspace, nodeMonitorCycle } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
@@ -201,6 +213,7 @@ export default {
       loading: false,
       childLoading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      nodeMonitorCycle: nodeMonitorCycle,
       sshList: [],
       list: [],
       temp: {
@@ -217,6 +230,8 @@ export default {
 
         { title: "节点协议", dataIndex: "protocol", sorter: true, key: "protocol", width: 100, ellipsis: true, scopedSlots: { customRender: "protocol" } },
         { title: "节点地址", dataIndex: "url", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
+        { title: "账号", dataIndex: "loginName", sorter: true, key: "loginName", ellipsis: true, scopedSlots: { customRender: "loginName" } },
+        { title: "监控周期", dataIndex: "cycle", sorter: true, key: "cycle", ellipsis: true, scopedSlots: { customRender: "cycle" } },
         { title: "超时时间", dataIndex: "timeOut", sorter: true, key: "timeOut", width: 100, ellipsis: true },
         {
           title: "修改时间",
@@ -228,7 +243,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", key: "operation", width: 360, scopedSlots: { customRender: "operation" }, align: "left" },
+        { title: "操作", dataIndex: "operation", key: "operation", width: 300, scopedSlots: { customRender: "operation" }, align: "left" },
       ],
       childColumns: [
         { title: "系统名", dataIndex: "osName", key: "osName", width: 100, ellipsis: true, scopedSlots: { customRender: "osName" } },
@@ -277,7 +292,7 @@ export default {
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {
-        key: "node-list",
+        key: "node-edit",
         options: {
           hidePrev: true,
           steps: [
@@ -285,6 +300,27 @@ export default {
               title: "导航助手",
               element: document.querySelector(".node-config"),
               intro: "节点的账号密码可以通过 agent_authorize.json 文件查看",
+            },
+          ],
+        },
+      });
+    },
+    introGuideList() {
+      this.$store.dispatch("tryOpenGuide", {
+        key: "node-list-manage",
+        beforeKey: "index",
+        options: {
+          hidePrev: true,
+          steps: [
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-node-manage-add"),
+              intro: "如果还没有节点 可以点击【新增】按钮新增节点",
+            },
+            {
+              title: "导航助手",
+              element: document.querySelector(".jpom-node-manage-btn"),
+              intro: "点击【节点管理】按钮可以进入节点管理,节点管理里面可以挖掘更多功能",
             },
           ],
         },
@@ -313,6 +349,9 @@ export default {
             if (nodeId === item.id) {
               this.handleNode(item);
             }
+          });
+          this.$nextTick(() => {
+            this.introGuideList();
           });
         }
         this.loading = false;
