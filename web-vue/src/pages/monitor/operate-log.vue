@@ -1,11 +1,13 @@
 <template>
   <div>
     <div ref="filter" class="filter">
-      <a-input v-model="listQuery['%name%']" placeholder="监控名称" class="search-input-item" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-space>
+        <a-input v-model="listQuery['%name%']" placeholder="监控名称" class="search-input-item" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary" @click="handleAdd">新增</a-button>
+      </a-space>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" @change="changePage" bordered :rowKey="(record, index) => index">
@@ -19,8 +21,10 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-space>
+          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -342,8 +346,5 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-.ant-btn {
-  margin-right: 10px;
 }
 </style>

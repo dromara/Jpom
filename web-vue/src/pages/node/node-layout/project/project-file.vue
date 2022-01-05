@@ -4,8 +4,10 @@
     <!-- 目录树 -->
     <a-layout-sider theme="light" class="sider" width="25%">
       <div class="dir-container">
-        <a-button type="primary" @click="loadData">刷新目录</a-button>
-        <a-button type="primary" v-if="showConsole" @click="goConsole" v-show="noFileModes.includes(runMode)">控制台</a-button>
+        <a-space>
+          <a-button type="primary" @click="loadData">刷新目录</a-button>
+          <a-button type="primary" v-if="showConsole" @click="goConsole" v-show="noFileModes.includes(runMode)">控制台</a-button>
+        </a-space>
       </div>
 
       <a-directory-tree :replace-fields="treeReplaceFields" @select="nodeClick" :loadData="onTreeData" :treeData="treeList"></a-directory-tree>
@@ -14,14 +16,15 @@
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
         <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
-        <div>
+        <a-space>
           <a-button type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleUpload">批量上传文件</a-button>
           <a-button type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleZipUpload">上传文件（自动解压）</a-button>
           <a-button type="primary" @click="openRemoteUpload">远程上传</a-button>
           <a-button type="primary" @click="loadFileList">刷新表格</a-button>
           <a-button type="danger" @click="clearFile">清空目录</a-button>
-        </div>
-        <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || "" }}</a-tag>
+
+          <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || "" }}</a-tag>
+        </a-space>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
@@ -34,11 +37,13 @@
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation" v-if="!record.isDirectory" slot-scope="text, record">
-          <a-tooltip title="需要到 节点管理中的系统管理的白名单配置中配置允许编辑的文件后缀">
-            <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
-          </a-tooltip>
-          <a-button type="primary" @click="handleDownload(record)">下载</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-space>
+            <a-tooltip title="需要到 节点管理中的系统管理的白名单配置中配置允许编辑的文件后缀">
+              <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
+            </a-tooltip>
+            <a-button type="primary" @click="handleDownload(record)">下载</a-button>
+            <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          </a-space>
         </template>
       </a-table>
       <!-- 批量上传文件 -->
@@ -607,9 +612,6 @@ export default {
 }
 .filter {
   margin: 0 0 10px;
-}
-.ant-btn {
-  margin-right: 10px;
 }
 .successTag {
   height: 32px;

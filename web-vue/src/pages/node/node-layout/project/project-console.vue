@@ -350,10 +350,6 @@ export default {
   margin: 0 0 10px;
 }
 
-.ant-btn {
-  margin-right: 10px;
-}
-
 .console {
   padding: 5px;
   color: #fff;

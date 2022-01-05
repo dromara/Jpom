@@ -1,27 +1,29 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select show-search option-filter-prop="children" v-model="listQuery.buildDataId" allowClear placeholder="请选择构建名称" class="filter-item">
-        <a-select-option v-for="build in buildList" :key="build.id">{{ build.name }}</a-select-option>
-      </a-select>
-      <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="请选择状态" class="filter-item">
-        <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
-      </a-select>
-      <a-select show-search option-filter-prop="children" v-model="listQuery.triggerBuildType" allowClear placeholder="请选择触发类型" class="filter-item">
-        <a-select-option v-for="(val, key) in triggerBuildTypeMap" :key="key">{{ val }}</a-select-option>
-      </a-select>
-      <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-tooltip>
-        <template slot="title">
-          <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
-          <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
-          <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
-        </template>
-        <a-icon type="question-circle" theme="filled" />
-      </a-tooltip>
+      <a-space>
+        <a-select show-search option-filter-prop="children" v-model="listQuery.buildDataId" allowClear placeholder="请选择构建名称" class="search-input-item">
+          <a-select-option v-for="build in buildList" :key="build.id">{{ build.name }}</a-select-option>
+        </a-select>
+        <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
+          <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
+        </a-select>
+        <a-select show-search option-filter-prop="children" v-model="listQuery.triggerBuildType" allowClear placeholder="请选择触发类型" class="search-input-item">
+          <a-select-option v-for="(val, key) in triggerBuildTypeMap" :key="key">{{ val }}</a-select-option>
+        </a-select>
+        <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-tooltip>
+          <template slot="title">
+            <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
+            <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
+            <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
+      </a-space>
       <!-- <a-button type="primary" @click="handleFilter">刷新</a-button> -->
     </div>
     <!-- 数据表格 -->
@@ -48,22 +50,24 @@
         </a-tooltip>
       </template>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="download" />日志</a-button>
-        <a-button type="primary" :disabled="!record.hashFile" @click="handleFile(record)"><a-icon type="download" />产物</a-button>
-        <a-dropdown>
-          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-            更多
-            <a-icon type="down" />
-          </a>
-          <a-menu slot="overlay">
-            <a-menu-item>
-              <a-button :disabled="!record.hashFile || record.releaseMethod === 0" type="danger" @click="handleRollback(record)">回滚 </a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-            </a-menu-item>
-          </a-menu>
-        </a-dropdown>
+        <a-space>
+          <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="download" />日志</a-button>
+          <a-button type="primary" :disabled="!record.hashFile" @click="handleFile(record)"><a-icon type="download" />产物</a-button>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button :disabled="!record.hashFile || record.releaseMethod === 0" type="danger" @click="handleRollback(record)">回滚 </a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </a-space>
       </template>
     </a-table>
     <!-- 构建日志 -->
@@ -250,12 +254,5 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-.ant-btn {
-  margin-right: 10px;
-}
-.filter-item {
-  width: 150px;
-  margin-right: 10px;
 }
 </style>

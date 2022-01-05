@@ -27,19 +27,17 @@
         </a-button>
       </a-tooltip>
       <a-menu slot="overlay">
-        <a-menu-item>
-          <a href="javascript:;" @click="handleUpdatePwd">修改密码</a>
-        </a-menu-item>
+        <a-menu-item @click="handleUpdatePwd"> 修改密码 </a-menu-item>
         <!-- <a-menu-item>
           <a href="javascript:;" @click="handleUpdateName">修改昵称</a>
         </a-menu-item> -->
-        <a-menu-item>
-          <a href="javascript:;" @click="handleUpdateUser">用户资料</a>
+        <a-menu-item @click="handleUpdateUser">
+          <a-space><a-icon type="profile" />用户资料</a-space>
         </a-menu-item>
         <a-menu-item @click="toggleGuide"> {{ this.guideStatus ? "开启导航" : "关闭导航" }} </a-menu-item>
         <a-menu-item @click="restGuide"> 重置导航</a-menu-item>
-        <a-menu-item>
-          <a href="javascript:;" @click="logOut">退出登录</a>
+        <a-menu-item @click="logOut">
+          <a-space><a-icon type="logout" />退出登录</a-space>
         </a-menu-item>
       </a-menu>
     </a-dropdown>
@@ -47,13 +45,13 @@
     <a-modal v-model="updateNameVisible" title="修改密码" @ok="handleUpdatePwdOk" :maskClosable="false">
       <a-form-model ref="pwdForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="原密码" prop="oldPwd">
-          <a-input-password v-model="temp.oldPwd" placeholder="Old password" />
+          <a-input-password v-model="temp.oldPwd" placeholder="请输入原密码" />
         </a-form-model-item>
         <a-form-model-item label="新密码" prop="newPwd">
-          <a-input-password v-model="temp.newPwd" placeholder="New password" />
+          <a-input-password v-model="temp.newPwd" placeholder="请输入新密码" />
         </a-form-model-item>
         <a-form-model-item label="确认密码" prop="confirmPwd">
-          <a-input-password v-model="temp.confirmPwd" placeholder="Confirm password" />
+          <a-input-password v-model="temp.confirmPwd" placeholder="请输入确认密码" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -106,21 +104,21 @@ export default {
       // 表单校验规则
       rules: {
         oldPwd: [
-          { required: true, message: "Please input old password", trigger: "blur" },
+          { required: true, message: "请输入原密码", trigger: "blur" },
           { max: 20, message: "密码长度为6-20", trigger: "blur" },
           { min: 6, message: "密码长度为6-20", trigger: "blur" },
         ],
         newPwd: [
-          { required: true, message: "Please input new password", trigger: "blur" },
+          { required: true, message: "请输入新密码", trigger: "blur" },
           { max: 20, message: "密码长度为6-20", trigger: "blur" },
           { min: 6, message: "密码长度为6-20", trigger: "blur" },
         ],
         confirmPwd: [
-          { required: true, message: "Please input confirmPwd password", trigger: "blur" },
+          { required: true, message: "请输入确认密码", trigger: "blur" },
           { max: 20, message: "密码长度为6-20", trigger: "blur" },
           { min: 6, message: "密码长度为6-20", trigger: "blur" },
         ],
-        email: [{ required: true, message: "Please input email", trigger: "blur" }],
+        email: [{ required: true, message: "请输入邮箱", trigger: "blur" }],
       },
     };
   },
@@ -207,6 +205,7 @@ export default {
     handleUpdatePwd() {
       this.temp = {};
       this.updateNameVisible = true;
+      this.$refs["pwdForm"] && this.$refs["pwdForm"].resetFields();
     },
     // 修改密码
     handleUpdatePwdOk() {

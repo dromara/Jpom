@@ -4,30 +4,32 @@
       <!-- <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="loadData">
         <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
       </a-select> -->
-      <a-input class="search-input-item" v-model="listQuery['%projectId%']" placeholder="项目ID" />
-      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="项目名称" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-space>
+        <a-input class="search-input-item" v-model="listQuery['%projectId%']" placeholder="项目ID" />
+        <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="项目名称" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary" @click="handleAdd">新增</a-button>
 
-      <a-dropdown>
-        <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-          批量操作
-          <a-icon type="down" />
-        </a>
-        <a-menu slot="overlay">
-          <a-menu-item>
-            <a-button type="primary" @click="batchStart">批量启动</a-button>
-          </a-menu-item>
-          <a-menu-item>
-            <a-button type="primary" @click="batchRestart">批量重启</a-button>
-          </a-menu-item>
-          <a-menu-item>
-            <a-button type="danger" @click="batchStop">批量关闭</a-button>
-          </a-menu-item>
-        </a-menu>
-      </a-dropdown>
+        <a-dropdown>
+          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+            批量操作
+            <a-icon type="down" />
+          </a>
+          <a-menu slot="overlay">
+            <a-menu-item>
+              <a-button type="primary" @click="batchStart">批量启动</a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="primary" @click="batchRestart">批量重启</a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="danger" @click="batchStop">批量关闭</a-button>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
+      </a-space>
 
       状态数据是异步获取有一定时间延迟
     </div>
@@ -57,33 +59,35 @@
         <span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleFile(record)">文件</a-button>
-        <a-tooltip :title="`${noFileModes.includes(record.runMode) ? '到控制台去管理项目状态' : 'File 类型项目不能使用控制台功能'}`">
-          <a-button type="primary" @click="handleConsole(record)" :disabled="!noFileModes.includes(record.runMode)">控制台</a-button>
-        </a-tooltip>
-        <a-dropdown>
-          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-            更多
-            <a-icon type="down" />
-          </a>
-          <a-menu slot="overlay">
-            <a-menu-item>
-              <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-button type="primary" @click="handleMonitor(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.status">监控 </a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-button type="primary" @click="handleReplica(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
-                <a-button type="danger" :disabled="record.outGivingProject">删除</a-button>
-              </a-tooltip>
-              <a-button v-else type="danger" @click="handleDelete(record)">删除</a-button>
-            </a-menu-item>
-          </a-menu>
-        </a-dropdown>
+        <a-space>
+          <a-button type="primary" @click="handleFile(record)">文件</a-button>
+          <a-tooltip :title="`${noFileModes.includes(record.runMode) ? '到控制台去管理项目状态' : 'File 类型项目不能使用控制台功能'}`">
+            <a-button type="primary" @click="handleConsole(record)" :disabled="!noFileModes.includes(record.runMode)">控制台</a-button>
+          </a-tooltip>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="primary" @click="handleMonitor(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.status">监控 </a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="primary" @click="handleReplica(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
+                  <a-button type="danger" :disabled="record.outGivingProject">删除</a-button>
+                </a-tooltip>
+                <a-button v-else type="danger" @click="handleDelete(record)">删除</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->

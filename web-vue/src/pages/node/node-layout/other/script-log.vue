@@ -1,34 +1,36 @@
 <template>
   <div class="node-full-content">
     <div ref="filter" class="filter">
-      <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
-      <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
-        <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
-      </a-select>
-      <a-range-picker
-        v-model="listQuery['createTimeMillis']"
-        allowClear
-        inputReadOnly
-        class="search-input-item"
-        :show-time="{ format: 'HH:mm:ss' }"
-        :placeholder="['执行时间开始', '执行时间结束']"
-        format="YYYY-MM-DD HH:mm:ss"
-        valueFormat="YYYY-MM-DD HH:mm:ss"
-      />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-tooltip>
-        <template slot="title">
-          <div>脚本模版是存储在节点(插件端),执行也都将在节点里面执行,服务端会定时去拉取执行日志,拉取频率为 100 条/分钟</div>
-          <div>
-            <ul>
-              <li>数据可能出现一定时间延迟</li>
-            </ul>
-          </div>
-        </template>
-        <a-icon type="question-circle" theme="filled" />
-      </a-tooltip>
+      <a-space>
+        <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+        <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
+          <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
+        </a-select>
+        <a-range-picker
+          v-model="listQuery['createTimeMillis']"
+          allowClear
+          inputReadOnly
+          class="search-input-item"
+          :show-time="{ format: 'HH:mm:ss' }"
+          :placeholder="['执行时间开始', '执行时间结束']"
+          format="YYYY-MM-DD HH:mm:ss"
+          valueFormat="YYYY-MM-DD HH:mm:ss"
+        />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-tooltip>
+          <template slot="title">
+            <div>脚本模版是存储在节点(插件端),执行也都将在节点里面执行,服务端会定时去拉取执行日志,拉取频率为 100 条/分钟</div>
+            <div>
+              <ul>
+                <li>数据可能出现一定时间延迟</li>
+              </ul>
+            </div>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
+      </a-space>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
@@ -45,9 +47,11 @@
         <span>{{ parseTime(record.createTimeMillis) }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="viewLog(record)">查看日志</a-button>
+        <a-space>
+          <a-button type="primary" @click="viewLog(record)">查看日志</a-button>
 
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
       </template>
     </a-table>
     <!-- 日志 -->

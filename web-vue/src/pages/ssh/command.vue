@@ -1,26 +1,28 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input v-model="listQuery['%name%']" placeholder="搜索命令" class="search-input-item" />
-      <a-input v-model="listQuery['%desc%']" placeholder="描述" class="search-input-item" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="getCommandData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="createCommand">新建命令</a-button>
-      <a-tooltip>
-        <template slot="title">
-          <div>命令模版是用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
+      <a-space>
+        <a-input v-model="listQuery['%name%']" placeholder="搜索命令" class="search-input-item" />
+        <a-input v-model="listQuery['%desc%']" placeholder="描述" class="search-input-item" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="getCommandData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary" @click="createCommand">新建命令</a-button>
+        <a-tooltip>
+          <template slot="title">
+            <div>命令模版是用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
 
-          <div>
-            <ul>
-              <li>命令内容支持工作空间环境变量</li>
-              <li>执行命令将自动替换为 sh 命令文件、并自动加载环境变量：/etc/profile、/etc/bashrc、~/.bashrc、~/.bash_profile</li>
-              <li>命令文件将上传至 ${user.home}/.jpom/xxxx.sh 执行完成将自动删除</li>
-            </ul>
-          </div>
-        </template>
-        <a-icon type="question-circle" theme="filled" />
-      </a-tooltip>
+            <div>
+              <ul>
+                <li>命令内容支持工作空间环境变量</li>
+                <li>执行命令将自动替换为 sh 命令文件、并自动加载环境变量：/etc/profile、/etc/bashrc、~/.bashrc、~/.bash_profile</li>
+                <li>命令文件将上传至 ${user.home}/.jpom/xxxx.sh 执行完成将自动删除</li>
+              </ul>
+            </div>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
+      </a-space>
     </div>
     <a-table :loading="loading" :data-source="commandList" :columns="columns" bordered :pagination="pagination" @change="changePage" :rowKey="(record, index) => index">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
@@ -31,9 +33,11 @@
       </a-tooltip>
 
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="primary" @click="handleExecute(record)">执行</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-space>
+          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="primary" @click="handleExecute(record)">执行</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
       </template>
     </a-table>
 
@@ -346,10 +350,6 @@ export default {
 .config-editor {
   overflow-y: scroll;
   max-height: 300px;
-}
-
-.ant-btn {
-  margin-right: 10px;
 }
 
 .params-item {

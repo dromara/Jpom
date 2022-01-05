@@ -1,15 +1,17 @@
 <template>
   <div class="node-full-content">
     <div ref="filter" class="filter">
-      <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="handleUpload">上传文件</a-button>
-      <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息并重新同步">
-        <a-icon @click="sync()" type="sync" spin />
-      </a-tooltip>
+      <a-space>
+        <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary" @click="handleAdd">新增</a-button>
+        <a-button type="primary" @click="handleUpload">上传文件</a-button>
+        <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息并重新同步">
+          <a-icon @click="sync()" type="sync" spin />
+        </a-tooltip>
+      </a-space>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
@@ -27,9 +29,11 @@
         <span>{{ parseTime(record.modifyTimeMillis) }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleExec(record)">执行</a-button>
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-space>
+          <a-button type="primary" @click="handleExec(record)">执行</a-button>
+          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->

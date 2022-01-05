@@ -1,19 +1,21 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="filter-item" @change="loadData">
-        <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
-      </a-select>
-      <a-select v-model="listQuery.outGivingId" allowClear placeholder="分发项目" class="filter-item" @change="loadData">
-        <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
-      </a-select>
-      <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="filter-item" @change="loadData">
-        <a-select-option v-for="(item, key) in dispatchStatusMap" :key="key" :value="key">{{ item }}</a-select-option>
-      </a-select>
-      <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
+      <a-space>
+        <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
+        </a-select>
+        <a-select v-model="listQuery.outGivingId" allowClear placeholder="分发项目" class="search-input-item">
+          <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
+        </a-select>
+        <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
+          <a-select-option v-for="(item, key) in dispatchStatusMap" :key="key" :value="key">{{ item }}</a-select-option>
+        </a-select>
+        <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+      </a-space>
       <!-- <a-button type="primary" @click="handleFilter">刷新</a-button> -->
     </div>
     <!-- 数据表格 -->
@@ -172,12 +174,5 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-.ant-btn {
-  margin-right: 10px;
-}
-.filter-item {
-  width: 150px;
-  margin-right: 10px;
 }
 </style>

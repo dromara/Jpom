@@ -1,12 +1,14 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input v-model="listQuery['%name%']" placeholder="工作空间名称" allowClear class="search-input-item" />
+      <a-space>
+        <a-input v-model="listQuery['%name%']" placeholder="工作空间名称" allowClear class="search-input-item" />
 
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="handleAdd">新增</a-button>
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary" @click="handleAdd">新增</a-button>
+      </a-space>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" bordered @change="changePage" :rowKey="(record, index) => index">
@@ -17,9 +19,11 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="primary" @click="viewEnvVar(record)">变量</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-space>
+          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="primary" @click="viewEnvVar(record)">变量</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -37,11 +41,13 @@
     <!-- 环境变量 -->
     <a-modal v-model="envVarListVisible" title="环境变量" width="80vw" :footer="null" :maskClosable="false">
       <div ref="filter" class="filter">
-        <a-input v-model="envVarListQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
-        <a-input v-model="envVarListQuery['%value%']" placeholder="值" allowClear class="search-input-item" />
-        <a-input v-model="envVarListQuery['%description%']" placeholder="描述" allowClear class="search-input-item" />
-        <a-button type="primary" @click="loadDataEnvVar">搜索</a-button>
-        <a-button type="primary" @click="addEnvVar">新增</a-button>
+        <a-space>
+          <a-input v-model="envVarListQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+          <a-input v-model="envVarListQuery['%value%']" placeholder="值" allowClear class="search-input-item" />
+          <a-input v-model="envVarListQuery['%description%']" placeholder="描述" allowClear class="search-input-item" />
+          <a-button type="primary" @click="loadDataEnvVar">搜索</a-button>
+          <a-button type="primary" @click="addEnvVar">新增</a-button>
+        </a-space>
       </div>
       <!-- 数据表格 -->
       <a-table :data-source="envVarList" :loading="envVarLoading" :columns="envVarColumns" :pagination="envVarPagination" @change="changeListeEnvVar" bordered :rowKey="(record, index) => index">
@@ -55,9 +61,11 @@
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
-          <a-button type="primary" @click="handleEnvEdit(record)">编辑</a-button>
+          <a-space>
+            <a-button type="primary" @click="handleEnvEdit(record)">编辑</a-button>
 
-          <a-button type="danger" @click="handleEnvDelete(record)">删除</a-button>
+            <a-button type="danger" @click="handleEnvDelete(record)">删除</a-button>
+          </a-space>
         </template>
       </a-table>
     </a-modal>
@@ -321,13 +329,5 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-
-.ant-btn {
-  margin-left: 10px;
-}
-
-.search {
-  width: 200px;
 }
 </style>

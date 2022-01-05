@@ -9,12 +9,14 @@
     <!-- 表格 -->
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
-        <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="handleUpload">上传文件</a-button>
-        <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="handleUploadZip">上传压缩文件（自动解压）</a-button>
-        <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="loadFileList()">刷新</a-button>
-        <a-button :disabled="!this.tempNode.parentDir" type="danger" @click="handleDeletePath()">删除</a-button>
-        <span v-if="this.tempNode.parentDir">当前目录:{{ this.tempNode.path }}</span
-        ><span v-if="this.tempNode.parentDir">{{ this.tempNode.parentDir }}</span>
+        <a-space>
+          <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="handleUpload">上传文件</a-button>
+          <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="handleUploadZip">上传压缩文件（自动解压）</a-button>
+          <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="loadFileList()">刷新</a-button>
+          <a-button :disabled="!this.tempNode.parentDir" type="danger" @click="handleDeletePath()">删除</a-button>
+          <span v-if="this.tempNode.parentDir">当前目录:{{ this.tempNode.path }}</span>
+          <span v-if="this.tempNode.parentDir">{{ this.tempNode.parentDir }}</span>
+        </a-space>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
@@ -27,12 +29,14 @@
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
-          <a-tooltip title="需要到 ssh 信息中配置允许编辑的文件后缀">
-            <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑 </a-button>
-          </a-tooltip>
-          <!-- <a-button type="primary" :disabled="!record.textFileEdit" @click="handlePreview(record)">跟踪</a-button> -->
-          <a-button type="primary" @click="handleDownload(record)">下载</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-space>
+            <a-tooltip title="需要到 ssh 信息中配置允许编辑的文件后缀">
+              <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑 </a-button>
+            </a-tooltip>
+            <!-- <a-button type="primary" :disabled="!record.textFileEdit" @click="handlePreview(record)">跟踪</a-button> -->
+            <a-button type="primary" @click="handleDownload(record)">下载</a-button>
+            <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          </a-space>
         </template>
       </a-table>
       <!-- 上传文件 -->
@@ -393,8 +397,5 @@ export default {
 }
 .filter {
   margin: 0 0 10px;
-}
-.ant-btn {
-  margin-right: 10px;
 }
 </style>

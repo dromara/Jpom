@@ -16,11 +16,11 @@
     </a-layout-content>
     <!-- 对话框 -->
     <a-modal v-model="visible" title="系统提示" :footer="null">
-      <div class="op-btn">
+      <a-space>
         <a-button type="danger" @click="deleteLog">删除日志文件</a-button>
         <a-button type="primary" @click="downloadLog">下载日志文件</a-button>
         <a-button @click="visible = false">取消</a-button>
-      </div>
+      </a-space>
     </a-modal>
   </a-layout>
 </template>
@@ -214,12 +214,6 @@ export default {
   background: #fff;
   height: calc(100vh - 130px);
   overflow-y: auto;
-}
-.op-btn {
-  text-align: right;
-}
-.ant-btn {
-  margin: 10px;
 }
 .console {
   padding: 5px;

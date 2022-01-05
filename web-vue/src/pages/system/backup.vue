@@ -1,15 +1,17 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input v-model="listQuery['%name%']" placeholder="请输入备份名称" class="filter-item" />
-      <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="filter-item">
-        <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
-      </a-select>
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="handleAdd">创建备份</a-button>
-      <a-button type="primary" @click="handleSqlUpload">导入备份</a-button>
+      <a-space>
+        <a-input v-model="listQuery['%name%']" placeholder="请输入备份名称" class="search-input-item" />
+        <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="search-input-item">
+          <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
+        </a-select>
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary" @click="handleAdd">创建备份</a-button>
+        <a-button type="primary" @click="handleSqlUpload">导入备份</a-button>
+      </a-space>
     </div>
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @change="changePage" :pagination="pagination">
@@ -32,9 +34,11 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleDownload(record)">下载</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-        <a-button type="danger" :disabled="record.status !== 1" @click="handleRestore(record)">还原备份</a-button>
+        <a-space>
+          <a-button type="primary" @click="handleDownload(record)">下载</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button type="danger" :disabled="record.status !== 1" @click="handleRestore(record)">还原备份</a-button>
+        </a-space>
       </template>
     </a-table>
     <!-- 创建备份信息区 -->
@@ -347,15 +351,6 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-
-.ant-btn {
-  margin-right: 10px;
-}
-
-.filter-item {
-  width: 150px;
-  margin-right: 10px;
 }
 
 .btn-add {

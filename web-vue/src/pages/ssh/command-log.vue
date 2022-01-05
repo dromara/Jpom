@@ -1,17 +1,19 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input v-model="listQuery['%commandName%']" placeholder="搜索命令名称" class="search-input-item" />
-      <a-input v-model="listQuery['%sshName%']" placeholder="搜索ssh名称" class="search-input-item" />
-      <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="search-input-item">
-        <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
-      </a-select>
-      <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
-        <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
-      </a-select>
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="getCommandLogData">搜索</a-button>
-      </a-tooltip>
+      <a-space>
+        <a-input v-model="listQuery['%commandName%']" placeholder="搜索命令名称" class="search-input-item" />
+        <a-input v-model="listQuery['%sshName%']" placeholder="搜索ssh名称" class="search-input-item" />
+        <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="search-input-item">
+          <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
+        </a-select>
+        <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
+          <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
+        </a-select>
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="getCommandLogData">搜索</a-button>
+        </a-tooltip>
+      </a-space>
     </div>
     <a-table :loading="loading" :data-source="commandList" :columns="columns" bordered :pagination="pagination" @change="changePage" :rowKey="(record, index) => index">
       <a-tooltip slot="sshName" slot-scope="text" placement="topLeft" :title="text">
@@ -28,9 +30,11 @@
       </template>
 
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" :disabled="!record.hasLog" @click="handleView(record)">查看</a-button>
-        <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="download" />日志</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-space>
+          <a-button type="primary" :disabled="!record.hasLog" @click="handleView(record)">查看</a-button>
+          <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="download" />日志</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
       </template>
     </a-table>
     <!-- 构建日志 -->

@@ -2,8 +2,10 @@
   <a-layout class="script-console-layout">
     <div>
       <div ref="filter" class="filter">
-        <a-button :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
-        <a-button :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
+        <a-space>
+          <a-button :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
+          <a-button :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
+        </a-space>
       </div>
       <!-- console -->
       <div>
@@ -150,10 +152,6 @@ export default {
 
 .filter {
   margin: 0 0 10px;
-}
-
-.ant-btn {
-  margin-right: 10px;
 }
 
 .console {

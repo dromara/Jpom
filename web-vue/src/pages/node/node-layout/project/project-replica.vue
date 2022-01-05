@@ -7,9 +7,11 @@
     <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{ x: '80vh' }" :pagination="false" bordered :rowKey="(record, index) => index">
       <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
-        <a-button type="primary" :disabled="!record.status" @click="handleMonitor(record)">监控</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-space>
+          <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
+          <a-button type="primary" :disabled="!record.status" @click="handleMonitor(record)">监控</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
       </template>
     </a-table>
     <!-- 项目控制台组件 -->
@@ -132,8 +134,5 @@ export default {
 <style scoped>
 .filter {
   margin: 0 0 10px;
-}
-.ant-btn {
-  margin-right: 10px;
 }
 </style>

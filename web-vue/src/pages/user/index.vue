@@ -1,19 +1,23 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input v-model="listQuery.id" placeholder="用户名ID" class="search-input-item" />
-      <a-input v-model="listQuery['%name%']" placeholder="用户名" class="search-input-item" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-space>
+        <a-input v-model="listQuery.id" placeholder="用户名ID" class="search-input-item" />
+        <a-input v-model="listQuery['%name%']" placeholder="用户名" class="search-input-item" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary" @click="handleAdd">新增</a-button>
+      </a-space>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="(this, pagination)" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-        <a-button type="danger" :disabled="record.pwdErrorCount === 0" @click="handleUnlock(record)">解锁</a-button>
+        <a-space>
+          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button type="danger" :disabled="record.pwdErrorCount === 0" @click="handleUnlock(record)">解锁</a-button>
+        </a-space>
       </template>
       <template slot="systemUser" slot-scope="text, record">
         <a-switch size="small" checked-children="是" un-checked-children="否" :checked="record.systemUser == 1" />
@@ -399,8 +403,5 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-.ant-btn {
-  margin-right: 10px;
 }
 </style>
