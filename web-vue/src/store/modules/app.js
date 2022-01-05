@@ -127,7 +127,7 @@ const app = {
       return state.workspaceId;
     },
     getCollapsed(state) {
-      return parseInt(state.collapsed || 1);
+      return state.collapsed;
     },
   },
 };

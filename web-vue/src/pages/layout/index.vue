@@ -55,7 +55,7 @@ export default {
   mounted() {
     this.checkSystem();
     this.introGuide();
-    this.collapsed = this.getCollapsed === 1;
+    this.collapsed = this.getCollapsed ? true : false;
   },
   methods: {
     // 页面引导

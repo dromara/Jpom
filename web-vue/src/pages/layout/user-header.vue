@@ -318,12 +318,9 @@ export default {
 }
 .user-header {
   display: inline-table;
-  width: 275px;
+  width: 240px;
   text-align: right;
   margin-right: 20px;
   cursor: pointer;
-}
-.close-all {
-  margin-right: 10px;
 }
 </style>
