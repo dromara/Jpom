@@ -92,7 +92,7 @@ export default {
       let keyList = [];
       if (this.$route.query.pId) {
         // 打开对应的父级菜单
-        keyList = [this.$route.query.pId];
+        keyList = [this.$route.query.pId, "systemConfig"];
       }
       return keyList;
     },

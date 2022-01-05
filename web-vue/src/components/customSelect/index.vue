@@ -1,7 +1,7 @@
 <template>
   <div @mousedown="setSelectOpen(true)">
-    <Select v-model="selected" :open="selectOpen" @blur="setSelectOpen(false)" @focus="setSelectOpen(true)" @change="selectChange" :placeholder="selectPlaceholder">
-      <a-icon slot="suffixIcon" type="reload" @click="refreshSelect" />
+    <Select v-model="selected" :style="selStyle" :open="selectOpen" @blur="setSelectOpen(false)" @focus="setSelectOpen(true)" @change="selectChange" :placeholder="selectPlaceholder">
+      <a-icon slot="suffixIcon" v-if="suffixIcon" :type="suffixIcon" @click="refreshSelect" />
       <div slot="dropdownRender" slot-scope="menu">
         <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
           <a-input-search
@@ -14,7 +14,7 @@
             :placeholder="inputPlaceholder"
             size="small"
           >
-            <a-tooltip slot="suffix">
+            <a-tooltip slot="suffix" v-if="$slots.inputTips">
               <template slot="title">
                 <slot name="inputTips"></slot>
               </template>
@@ -25,7 +25,7 @@
         <a-divider style="margin: 4px 0" />
         <v-nodes :vnodes="menu" />
       </div>
-      <a-select-option value="">{{ selectPlaceholder }}</a-select-option>
+      <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}</a-select-option>
       <a-select-option v-for="item in optionList" :key="item">{{ item }} </a-select-option>
     </Select>
   </div>
@@ -68,6 +68,11 @@ export default {
       type: String,
       default: "请选择",
     },
+    selStyle: { type: String, default: "" },
+    suffixIcon: {
+      type: String,
+      default: "reload",
+    },
   },
   watch: {
     value: {
@@ -92,6 +97,7 @@ export default {
     selectChange(v) {
       this.$emit("input", v);
       this.selectOpen = false;
+      this.$emit("change", v);
     },
     onSearch(v) {
       if (!v) {
@@ -105,6 +111,7 @@ export default {
       this.selected = v;
       //
       this.selectChange(v);
+      this.$emit("addOption", this.optionList);
     },
     setSelectOpen(v) {
       this.selectFocus = v;

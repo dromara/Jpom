@@ -1,23 +1,30 @@
 <template>
   <div class="node-full-content">
-    <!-- 历史监控数据 -->
-    <a-button v-show="node.cycle && node.cycle !== 0" type="primary" @click="handleHistory">历史监控图表</a-button>
-    <a-divider>图表</a-divider>
+    <a-divider>
+      图表
+      <!-- 历史监控数据 -->
+      <a-button size="small" v-show="node.cycle && node.cycle !== 0" type="primary" @click="handleHistory"><a-icon type="area-chart" />历史监控图表</a-button>
+    </a-divider>
     <!-- top 图表 -->
     <div id="top-chart">loading...</div>
     <a-divider>进程监控表格</a-divider>
     <!-- 进程表格数据 -->
     <div ref="filter" class="filter">
-      <a-select @change="loadNodeProcess" v-model="processName" allowClear placeholder="进程类型" class="filter-item">
-        <a-select-option value="java">java</a-select-option>
-        <a-select-option value="python">python</a-select-option>
-        <a-select-option value="mysql">mysql</a-select-option>
-        <a-select-option value="php">php</a-select-option>
-        <a-select-option value="docker">docker</a-select-option>
-      </a-select>
+      <custom-select
+        class="search-input-item"
+        selStyle="width: 200px !important"
+        @change="loadNodeProcess"
+        @addOption="addNodeProcess"
+        v-model="processName"
+        :data="processNames"
+        inputPlaceholder="自定义进程类型"
+        selectPlaceholder=""
+        suffixIcon=""
+      >
+      </custom-select>
       <!-- <a-button type="primary" @click="loadData">切换</a-button> -->
     </div>
-    <a-table :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="pid" class="node-table" :pagination="false">
+    <a-table :locale="tableLocale" :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="pid" class="node-table" :pagination="false">
       <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -34,18 +41,24 @@
     <!-- 历史监控 -->
     <a-modal v-model="monitorVisible" width="75%" title="历史监控图表" :footer="null" :maskClosable="false">
       <div ref="filter" class="filter">
-        <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchange" />
-        <a-button type="primary" @click="handleFilter">搜索</a-button>
+        <a-space>
+          <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchange" />
+          <a-button type="primary" @click="handleFilter">搜索</a-button>
+        </a-space>
       </div>
       <div id="history-chart">loading...</div>
     </a-modal>
   </div>
 </template>
 <script>
-import { getNodeTop, getProcessList, killPid, nodeMonitorData } from "../../../api/node";
+import { getNodeTop, getProcessList, killPid, nodeMonitorData } from "@/api/node";
 import echarts from "echarts";
+import CustomSelect from "@/components/customSelect";
 
 export default {
+  components: {
+    CustomSelect,
+  },
   props: {
     node: {
       type: Object,
@@ -56,7 +69,11 @@ export default {
       topData: {},
       topChartTimer: null,
       loading: false,
+      tableLocale: {
+        emptyText: "",
+      },
       processList: [],
+      processNames: ["java", "python", "mysql", "php", "docker"],
       monitorVisible: false,
       timeRange: "",
       historyData: [],
@@ -83,9 +100,20 @@ export default {
   destroyed() {
     clearInterval(this.topChartTimer);
   },
+  watch: {},
   methods: {
+    addNodeProcess(v) {
+      this.processNames = v;
+      this.cacheNodeProcess();
+    },
     // 初始化页面
     initData() {
+      const cacheJson = this.getCacheNodeProcess();
+      const nodeCache = cacheJson[this.node.id];
+      this.processName = nodeCache?.processName || "";
+      if (nodeCache.processNames) {
+        this.processNames = nodeCache?.processNames;
+      }
       if (this.topChartTimer == null) {
         this.loadNodeTop();
         this.loadNodeProcess();
@@ -199,7 +227,7 @@ export default {
       topChart.setOption(option);
     },
     // 加载节点进程列表
-    loadNodeProcess() {
+    loadNodeProcess(v) {
       this.loading = true;
       getProcessList({
         nodeId: this.node.id,
@@ -210,8 +238,12 @@ export default {
         } else {
           this.processList = [];
         }
+        this.tableLocale.emptyText = res.msg;
         this.loading = false;
       });
+      if (v) {
+        this.cacheNodeProcess();
+      }
     },
     // kill pid
     kill(record) {
@@ -273,6 +305,24 @@ export default {
       const historyChart = echarts.init(historyChartDom);
       historyChart.setOption(option);
     },
+    cacheNodeProcess() {
+      const cacheJson = this.getCacheNodeProcess();
+      console.log(this.processNames);
+      cacheJson[this.node.id].processNames = this.processNames;
+      cacheJson[this.node.id].processName = this.processName;
+      localStorage.setItem("node-process-name", JSON.stringify(cacheJson));
+    },
+    getCacheNodeProcess() {
+      const str = localStorage.getItem("node-process-name") || "";
+      let cacheJson;
+      try {
+        cacheJson = JSON.parse(str);
+      } catch (e) {
+        cacheJson = {};
+      }
+      cacheJson[this.node.id] = cacheJson[this.node.id] || {};
+      return cacheJson;
+    },
   },
 };
 </script>
@@ -285,8 +335,8 @@ export default {
   margin-bottom: 10px;
 }
 
-.filter-item {
-  width: 150px;
+.search-input-item {
+  width: 200px !important;
   margin-right: 10px;
 }
 

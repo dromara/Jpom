@@ -27,15 +27,21 @@
         </a-button>
       </a-tooltip>
       <a-menu slot="overlay">
-        <a-menu-item @click="handleUpdatePwd"> 修改密码 </a-menu-item>
+        <a-menu-item @click="handleUpdatePwd">
+          <a-space><a-icon type="lock" />修改密码</a-space>
+        </a-menu-item>
         <!-- <a-menu-item>
           <a href="javascript:;" @click="handleUpdateName">修改昵称</a>
         </a-menu-item> -->
         <a-menu-item @click="handleUpdateUser">
           <a-space><a-icon type="profile" />用户资料</a-space>
         </a-menu-item>
-        <a-menu-item @click="toggleGuide"> {{ this.guideStatus ? "开启导航" : "关闭导航" }} </a-menu-item>
-        <a-menu-item @click="restGuide"> 重置导航</a-menu-item>
+        <a-menu-item @click="toggleGuide">
+          <a-space> <a-icon :type="`${this.guideStatus ? 'question-circle' : 'issues-close'}`" /> {{ this.guideStatus ? "开启导航" : "关闭导航" }} </a-space>
+        </a-menu-item>
+        <a-menu-item @click="restGuide">
+          <a-space><a-icon type="rest" /> 重置导航</a-space>
+        </a-menu-item>
         <a-menu-item @click="logOut">
           <a-space><a-icon type="logout" />退出登录</a-space>
         </a-menu-item>
