@@ -18,7 +18,7 @@
           <a-icon class="icon-btn" style="padding-left: 0" type="close-circle" @click="closeTabs" />
         </a-tooltip>
         <content-tab />
-        <user-header />
+        <!-- <user-header /> -->
       </a-layout-header>
       <a-layout-content class="layout-content">
         <keep-alive>
@@ -31,14 +31,14 @@
 <script>
 import { mapGetters } from "vuex";
 import SideMenu from "./side-menu";
-import UserHeader from "./user-header";
+// import UserHeader from "./user-header";
 import ContentTab from "./content-tab";
 import { checkSystem } from "@/api/install";
 
 export default {
   components: {
     SideMenu,
-    UserHeader,
+    // UserHeader,
     ContentTab,
   },
   data() {
