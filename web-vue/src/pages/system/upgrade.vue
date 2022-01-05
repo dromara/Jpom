@@ -5,30 +5,31 @@
       <a-tab-pane key="2" tab="所有节点(插件端)" force-render>
         <div class="header">
           <div class="left">
-            <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
-            <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
-            <a-button type="primary" @click="refresh">搜索</a-button>
-            |
-            <a-select v-model="temp.protocol" placeholder="升级协议" class="search-input-item">
-              <a-select-option value="WebSocket">WebSocket</a-select-option>
-              <a-select-option value="Http">Http</a-select-option>
-            </a-select>
-            <a-button type="primary" @click="batchUpdate">批量更新</a-button>
-          </div>
-          <div class="right">
-            <div class="title">
-              Agent版本：{{ agentVersion | version }}
-              <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} </a-tag>
-            </div>
-            <div class="version">打包时间：{{ agentTimeStamp | version }}</div>
-            <div class="action">
-              <a-upload name="file" accept=".jar,.zip" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
-                <a-button type="primary">
-                  <a-icon type="upload" />
-                  上传新版本
-                </a-button>
-              </a-upload>
-            </div>
+            <a-space>
+              <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
+              <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
+              <a-button type="primary" @click="refresh">搜索</a-button>
+              |
+              <a-select v-model="temp.protocol" placeholder="升级协议" class="search-input-item">
+                <a-select-option value="WebSocket">WebSocket</a-select-option>
+                <a-select-option value="Http">Http</a-select-option>
+              </a-select>
+              <a-button type="primary" @click="batchUpdate">批量更新</a-button>
+
+              <div class="title">
+                Agent版本：{{ agentVersion | version }}
+                <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} </a-tag>
+              </div>
+              <div class="version">打包时间：{{ agentTimeStamp | version }}</div>
+              <div class="action">
+                <a-upload name="file" accept=".jar,.zip" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+                  <a-button type="primary">
+                    <a-icon type="upload" />
+                    上传新版本
+                  </a-button>
+                </a-upload>
+              </div>
+            </a-space>
           </div>
         </div>
         <div class="table-div">
@@ -326,6 +327,7 @@ export default {
         if (res.code === 200) {
           this.$notification.success({ message: res.msg });
           this.getAgentVersion();
+          this.checkAgentFileVersion();
         } else {
           //this.$notification.error({ message: res.msg });
         }
@@ -397,9 +399,5 @@ export default {
       }
     }
   }
-}
-
-.ant-select, .ant-btn {
-  margin-right 20px
 }
 </style>

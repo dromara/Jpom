@@ -1,12 +1,14 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
-      <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-space>
+        <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
+        <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary" @click="handleAdd">新增</a-button>
+      </a-space>
       关联节点数据是异步获取有一定时间延迟
     </div>
     <!-- 数据表格 -->
@@ -30,27 +32,29 @@
         </a-tooltip>
       </template>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleTerminal(record)">终端</a-button>
-        <a-tooltip placement="topLeft" title="如果按钮不可用,请去 ssh 编辑中添加允许管理的授权文件夹">
-          <a-button type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
-        </a-tooltip>
-        <a-dropdown>
-          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-            更多
-            <a-icon type="down" />
-          </a>
-          <a-menu slot="overlay">
-            <a-menu-item>
-              <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-button type="primary" @click="handleViewLog(record)">终端日志</a-button>
-            </a-menu-item>
-          </a-menu>
-        </a-dropdown>
+        <a-space>
+          <a-button type="primary" @click="handleTerminal(record)">终端</a-button>
+          <a-tooltip placement="topLeft" title="如果按钮不可用,请去 ssh 编辑中添加允许管理的授权文件夹">
+            <a-button type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
+          </a-tooltip>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="primary" @click="handleViewLog(record)">终端日志</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -196,12 +200,14 @@
     <!-- 操作日志 -->
     <a-modal v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
       <div ref="filter" class="filter">
-        <a-input class="search-input-item" v-model="viewOperationLogListQuery['modifyUser']" placeholder="操作人" />
-        <a-input class="search-input-item" v-model="viewOperationLogListQuery['name']" placeholder="ssh name" />
-        <a-input class="search-input-item" v-model="viewOperationLogListQuery['ip']" placeholder="ip" />
-        <a-input class="search-input-item" v-model="viewOperationLogListQuery['%commands%']" placeholder="执行命令" />
-        <a-range-picker class="filter-item search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
-        <a-button type="primary" @click="handleListLog">搜索</a-button>
+        <a-space>
+          <a-input class="search-input-item" v-model="viewOperationLogListQuery['modifyUser']" placeholder="操作人" />
+          <a-input class="search-input-item" v-model="viewOperationLogListQuery['name']" placeholder="ssh name" />
+          <a-input class="search-input-item" v-model="viewOperationLogListQuery['ip']" placeholder="ip" />
+          <a-input class="search-input-item" v-model="viewOperationLogListQuery['%commands%']" placeholder="执行命令" />
+          <a-range-picker class="filter-item search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
+          <a-button type="primary" @click="handleListLog">搜索</a-button>
+        </a-space>
       </div>
       <!-- 数据表格 -->
       <a-table
@@ -317,7 +323,7 @@ export default {
           dataIndex: "nodeId",
           scopedSlots: { customRender: "nodeId" },
           width: 120,
-          ellipsis: true,
+          // ellipsis: true,
         },
         {
           title: "修改时间",
@@ -333,7 +339,7 @@ export default {
           title: "操作",
           dataIndex: "operation",
           scopedSlots: { customRender: "operation" },
-          width: 240,
+          width: 250,
           fixed: "right",
           // ellipsis: true,
         },
@@ -617,9 +623,5 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-
-.ant-btn {
-  margin-right: 10px;
 }
 </style>

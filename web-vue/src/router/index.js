@@ -104,7 +104,7 @@ const children = [
   {
     path: "/operation/log",
     name: "operation-log",
-    component: () => import("../pages/operation-log"),
+    component: () => import("../pages/user/operation-log"),
   },
   {
     path: "/system/mail",

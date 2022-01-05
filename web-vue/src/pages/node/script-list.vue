@@ -1,14 +1,15 @@
 <template>
   <div class="node-full-content">
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
-        <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
-      </a-select>
-      <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
       <a-space>
+        <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
+        </a-select>
+        <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+
         <a-tooltip>
           <template slot="title">
             <div>脚本模版是存储在节点中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
@@ -48,9 +49,11 @@
         <span>{{ parseTime(record.modifyTimeMillis) }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleExec(record)">执行</a-button>
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-space>
+          <a-button type="primary" @click="handleExec(record)">执行</a-button>
+          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -271,11 +274,5 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-.ant-btn {
-  margin-right: 10px;
-}
-.node-table {
-  overflow-x: auto;
 }
 </style>

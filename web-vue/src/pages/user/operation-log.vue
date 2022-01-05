@@ -1,22 +1,24 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select show-search option-filter-prop="children" v-model="listQuery.userId" allowClear placeholder="请选择操作者" class="filter-item">
-        <a-select-option v-for="item in userList" :key="item.id">{{ item.name }}</a-select-option>
-      </a-select>
-      <a-select show-search option-filter-prop="children" v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="filter-item">
-        <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
-      </a-select>
-      <a-select show-search option-filter-prop="children" v-model="listQuery.classFeature" allowClear placeholder="请选择功能" class="filter-item">
-        <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
-      </a-select>
-      <a-select show-search option-filter-prop="children" v-model="listQuery.methodFeature" allowClear placeholder="请选择操作" class="filter-item">
-        <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
-      </a-select>
-      <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
+      <a-space>
+        <a-select show-search option-filter-prop="children" v-model="listQuery.userId" allowClear placeholder="请选择操作者" class="search-input-item">
+          <a-select-option v-for="item in userList" :key="item.id">{{ item.name }}</a-select-option>
+        </a-select>
+        <a-select show-search option-filter-prop="children" v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
+        </a-select>
+        <a-select show-search option-filter-prop="children" v-model="listQuery.classFeature" allowClear placeholder="请选择功能" class="search-input-item">
+          <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
+        </a-select>
+        <a-select show-search option-filter-prop="children" v-model="listQuery.methodFeature" allowClear placeholder="请选择操作" class="search-input-item">
+          <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
+        </a-select>
+        <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+      </a-space>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="pagination" bordered :rowKey="(record, index) => index" @change="change">
@@ -175,7 +177,7 @@ export default {
     },
     // 选择时间
     onchangeTime(value, dateString) {
-      this.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`;
+      this.listQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`;
     },
     // 查看详情
     handleDetail(record) {
@@ -202,12 +204,5 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-.ant-btn {
-  margin-right: 10px;
-}
-.filter-item {
-  width: 150px;
-  margin-right: 10px;
 }
 </style>

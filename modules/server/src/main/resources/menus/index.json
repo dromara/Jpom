@@ -40,6 +40,7 @@
   {
     "title": "节点分发",
     "icon_v3": "apartment",
+    "id": "outgiving",
     "childs": [
       {
         "id": "outgiving",
@@ -58,6 +59,7 @@
   {
     "title": "监控管理",
     "icon_v3": "monitor",
+    "id": "monitor",
     "childs": [
       {
         "id": "monitor",
@@ -76,6 +78,7 @@
   {
     "title": "在线构建",
     "icon_v3": "build",
+    "id": "build",
     "childs": [
       {
         "id": "repository",
@@ -94,6 +97,7 @@
   {
     "title": "用户管理",
     "icon_v3": "user",
+    "id": "user",
     "childs": [
       {
         "id": "user",
@@ -111,6 +115,7 @@
     "title": "系统管理",
     "icon_v3": "setting",
     "role": "sys",
+    "id": "setting",
     "childs": [
       {
         "id": "workspace",

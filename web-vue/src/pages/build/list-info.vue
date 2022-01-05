@@ -2,18 +2,20 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input allowClear class="search-input-item" v-model="listQuery['%name%']" placeholder="构建名称" />
-      <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="filter-item">
-        <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
-      </a-select>
-      <a-select show-search option-filter-prop="children" v-model="listQuery.releaseMethod" allowClear placeholder="发布方式" class="filter-item">
-        <a-select-option v-for="(val, key) in releaseMethodMap" :key="key">{{ val }}</a-select-option>
-      </a-select>
-      <a-input allowClear class="search-input-item" v-model="listQuery['%resultDirFile%']" placeholder="产物目录" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-space>
+        <a-input allowClear class="search-input-item" v-model="listQuery['%name%']" placeholder="构建名称" />
+        <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="search-input-item">
+          <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
+        </a-select>
+        <a-select show-search option-filter-prop="children" v-model="listQuery.releaseMethod" allowClear placeholder="发布方式" class="search-input-item">
+          <a-select-option v-for="(val, key) in releaseMethodMap" :key="key">{{ val }}</a-select-option>
+        </a-select>
+        <a-input allowClear class="search-input-item" v-model="listQuery['%resultDirFile%']" placeholder="产物目录" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary" @click="handleAdd">新增</a-button>
+      </a-space>
     </div>
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
@@ -50,30 +52,32 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
-        <a-button type="primary" v-else @click="handleStartBuild(record)">构建</a-button>
-        <a-dropdown>
-          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-            更多
-            <a-icon type="down" />
-          </a>
-          <a-menu slot="overlay">
-            <a-menu-item>
-              <a-button type="primary" @click="handleTrigger(record)">触发器</a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-tooltip
-                title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
-              >
-                <a-button type="danger" :disabled="!record.sourceDirExist" @click="handleClear(record)">清除代码 </a-button>
-              </a-tooltip>
-            </a-menu-item>
-          </a-menu>
-        </a-dropdown>
+        <a-space>
+          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
+          <a-button type="primary" v-else @click="handleStartBuild(record)">构建</a-button>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" @click="handleTrigger(record)">触发器</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-tooltip
+                  title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
+                >
+                  <a-button type="danger" :disabled="!record.sourceDirExist" @click="handleClear(record)">清除代码 </a-button>
+                </a-tooltip>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -774,15 +778,6 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-
-.ant-btn {
-  margin-right: 10px;
-}
-
-.filter-item {
-  width: 150px;
-  margin-right: 10px;
 }
 
 .btn-add {

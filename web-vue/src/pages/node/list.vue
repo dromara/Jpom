@@ -1,27 +1,29 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input class="search-input-item" v-model="listQuery['%id%']" placeholder="节点ID" />
-      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
-      <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary jpom-node-manage-add" @click="handleAdd">新增</a-button>
-      <a-tooltip>
-        <template slot="title">
-          <div>点击节点管理进入节点管理页面</div>
+      <a-space>
+        <a-input v-model="listQuery['%id%']" placeholder="节点ID" />
+        <a-input v-model="listQuery['%name%']" placeholder="节点名称" />
+        <a-input v-model="listQuery['%url%']" placeholder="节点地址" />
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary jpom-node-manage-add" @click="handleAdd">新增</a-button>
+        <a-tooltip>
+          <template slot="title">
+            <div>点击节点管理进入节点管理页面</div>
 
-          <div>
-            <ul>
-              <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
-              <li>节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件）</li>
-              <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
-            </ul>
-          </div>
-        </template>
-        <a-icon type="question-circle" theme="filled" />
-      </a-tooltip>
+            <div>
+              <ul>
+                <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
+                <li>节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件）</li>
+                <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
+              </ul>
+            </div>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
+      </a-space>
     </div>
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="(this, pagination)" @change="changePage">
@@ -29,13 +31,15 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button v-if="record.unLockType" type="primary" @click="unlock(record)">解锁节点</a-button>
-        <a-button v-else class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1">节点管理</a-button>
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
-          <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>
-        </a-tooltip>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-space>
+          <a-button v-if="record.unLockType" type="primary" @click="unlock(record)">解锁节点</a-button>
+          <a-button v-else class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1">节点管理</a-button>
+          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
+            <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>
+          </a-tooltip>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
       </template>
       <!-- 嵌套表格 -->
       <a-table slot="expandedRowRender" slot-scope="text" :loading="childLoading" :columns="childColumns" :data-source="text.children" :pagination="false" :rowKey="(record, index) => text.id + index">
@@ -510,10 +514,6 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-
-.ant-btn {
-  margin-right: 10px;
 }
 
 .filter-item {

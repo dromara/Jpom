@@ -17,9 +17,11 @@
     <!-- 对话框 -->
     <a-modal v-model="visible" title="系统提示" :footer="null">
       <div class="op-btn">
-        <a-button type="danger" @click="deleteLog">删除日志文件</a-button>
-        <a-button type="primary" @click="downloadLog">下载日志文件</a-button>
-        <a-button @click="visible = false">取消</a-button>
+        <a-space>
+          <a-button type="danger" @click="deleteLog">删除日志文件</a-button>
+          <a-button type="primary" @click="downloadLog">下载日志文件</a-button>
+          <a-button @click="visible = false">取消</a-button>
+        </a-space>
       </div>
     </a-modal>
   </a-layout>
@@ -199,9 +201,6 @@ export default {
 }
 .op-btn {
   text-align: right;
-}
-.ant-btn {
-  margin: 10px;
 }
 .console {
   padding: 5px;

@@ -1,19 +1,20 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
-        <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
-      </a-select>
-      <a-input v-model="listQuery['%name%']" placeholder="搜索项目" class="search-input-item" />
-
-      <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
-        <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
-      </a-select>
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="getNodeProjectData">搜索</a-button>
-      </a-tooltip>
-      <span>| </span>
       <a-space>
+        <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
+        </a-select>
+        <a-input v-model="listQuery['%name%']" placeholder="搜索项目" class="search-input-item" />
+
+        <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
+          <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
+        </a-select>
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="getNodeProjectData">搜索</a-button>
+        </a-tooltip>
+        <span>| </span>
+
         <a-dropdown>
           <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
             批量操作
@@ -71,8 +72,10 @@
         <span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleFile(record)">文件</a-button>
-        <a-button type="primary" @click="handleConsole(record)" v-show="noFileModes.includes(record.runMode)">控制台</a-button>
+        <a-space>
+          <a-button type="primary" @click="handleFile(record)">文件</a-button>
+          <a-button type="primary" @click="handleConsole(record)" v-show="noFileModes.includes(record.runMode)">控制台</a-button>
+        </a-space>
       </template>
     </a-table>
     <!-- 项目文件组件 -->

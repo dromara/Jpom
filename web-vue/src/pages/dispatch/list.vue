@@ -1,33 +1,35 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input class="search-input-item" v-model="listQuery['%id%']" placeholder="id" />
-      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="名称" />
-      <a-select v-model="listQuery.outGivingProject" allowClear placeholder="分发类型" class="search-input-item">
-        <a-select-option :value="1">独立</a-select-option>
-        <a-select-option :value="0">关联</a-select-option>
-      </a-select>
-      <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
-        <a-select-option v-for="(name, key) in statusMap" :key="key">{{ name }}</a-select-option>
-      </a-select>
-      <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-        <a-button type="primary" @click="loadData">搜索</a-button>
-      </a-tooltip>
-      <a-button type="primary" @click="handleLink">添加关联项目</a-button>
-      <a-button type="primary" @click="handleAdd">创建分发项目</a-button>
-      <a-tooltip>
-        <template slot="title">
-          <div>节点分发是指,一个项目运行需要在多个节点(服务器)中运行,使用节点分发来统一管理这个项目(可以实现分布式项目管理功能)</div>
+      <a-space>
+        <a-input class="search-input-item" v-model="listQuery['%id%']" placeholder="id" />
+        <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="名称" />
+        <a-select v-model="listQuery.outGivingProject" allowClear placeholder="分发类型" class="search-input-item">
+          <a-select-option :value="1">独立</a-select-option>
+          <a-select-option :value="0">关联</a-select-option>
+        </a-select>
+        <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
+          <a-select-option v-for="(name, key) in statusMap" :key="key">{{ name }}</a-select-option>
+        </a-select>
+        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-button type="primary" @click="loadData">搜索</a-button>
+        </a-tooltip>
+        <a-button type="primary" @click="handleLink">添加关联项目</a-button>
+        <a-button type="primary" @click="handleAdd">创建分发项目</a-button>
+        <a-tooltip>
+          <template slot="title">
+            <div>节点分发是指,一个项目运行需要在多个节点(服务器)中运行,使用节点分发来统一管理这个项目(可以实现分布式项目管理功能)</div>
 
-          <div>
-            <ul>
-              <li>添加关联项目是指,将已经在节点中创建好的项目关联为节点分发项目来实现统一管理</li>
-              <li>创建分发项目是指,全新创建一个属于节点分发到项目,创建成功后项目信息将自动同步到对应的节点中,修改节点分发信息也自动同步到对应的节点中</li>
-            </ul>
-          </div>
-        </template>
-        <a-icon type="question-circle" theme="filled" />
-      </a-tooltip>
+            <div>
+              <ul>
+                <li>添加关联项目是指,将已经在节点中创建好的项目关联为节点分发项目来实现统一管理</li>
+                <li>创建分发项目是指,全新创建一个属于节点分发到项目,创建成功后项目信息将自动同步到对应的节点中,修改节点分发信息也自动同步到对应的节点中</li>
+              </ul>
+            </div>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
+      </a-space>
     </div>
     <!-- 表格 :scroll="{x: 740, y: tableHeight - 60}" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="this.pagination" @change="changePage">
@@ -46,11 +48,13 @@
         <span v-else>关联</span>
       </template>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" v-if="list_expanded[record.id]" @click="handleReload(record)">刷新</a-button>
-        <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
-        <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
-        <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
-        <a-button type="danger" v-if="!list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
+        <a-space>
+          <a-button type="primary" v-if="list_expanded[record.id]" @click="handleReload(record)">刷新</a-button>
+          <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
+          <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
+          <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
+          <a-button type="danger" v-if="!list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
+        </a-space>
       </template>
       <!-- 嵌套表格 -->
       <a-table
@@ -79,8 +83,10 @@
         </template>
 
         <template slot="child-operation" slot-scope="text, record">
-          <a-button :disabled="!record.projectName" type="primary" @click="handleFile(record)">文件</a-button>
-          <a-button :disabled="!record.projectName" type="primary" @click="handleConsole(record)">控制台</a-button>
+          <a-space>
+            <a-button :disabled="!record.projectName" type="primary" @click="handleFile(record)">文件</a-button>
+            <a-button :disabled="!record.projectName" type="primary" @click="handleConsole(record)">控制台</a-button>
+          </a-space>
         </template>
       </a-table>
     </a-table>
@@ -1127,9 +1133,6 @@ export default {
 <style scoped>
 .filter {
   margin-bottom: 10px;
-}
-.ant-btn {
-  margin-right: 10px;
 }
 .replica-area {
   width: 300px;
