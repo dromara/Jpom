@@ -30,16 +30,16 @@ import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.build.BuildInfoManage;
+import io.jpom.cron.CronUtils;
+import io.jpom.cron.ICron;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
-import io.jpom.cron.ICron;
 import io.jpom.service.IStatusRecover;
-import io.jpom.service.h2db.BaseWorkspaceService;
-import io.jpom.cron.CronUtils;
+import io.jpom.service.h2db.BaseGroupService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -53,7 +53,7 @@ import java.util.Objects;
  * @date 2021-08-10
  **/
 @Service
-public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> implements ICron, IStatusRecover {
+public class BuildInfoService extends BaseGroupService<BuildInfoModel> implements ICron, IStatusRecover {
 
 	private final RepositoryService repositoryService;
 

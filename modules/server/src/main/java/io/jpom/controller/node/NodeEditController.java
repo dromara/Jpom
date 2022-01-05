@@ -71,8 +71,19 @@ public class NodeEditController extends BaseServerController {
 		return JsonMessage.getString(200, "", list);
 	}
 
+	/**
+	 * 查询所有的分组
+	 *
+	 * @return list
+	 */
+	@GetMapping(value = "list_group_all.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String listGroupAll() {
+		List<String> listGroup = nodeService.listGroup(getRequest());
+		return JsonMessage.getString(200, "", listGroup);
+	}
+
 	@RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String nodeStatus() {
 		long timeMillis = System.currentTimeMillis();

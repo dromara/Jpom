@@ -25,7 +25,7 @@ package io.jpom.model.data;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.model.BaseGroupModel;
 import io.jpom.service.h2db.TableName;
 
 /**
@@ -35,7 +35,7 @@ import io.jpom.service.h2db.TableName;
  * @date 2019/4/16
  */
 @TableName(value = "NODE_INFO", name = "节点信息")
-public class NodeModel extends BaseWorkspaceModel {
+public class NodeModel extends BaseGroupModel {
 
 	private String url;
 	private String loginName;
@@ -58,11 +58,6 @@ public class NodeModel extends BaseWorkspaceModel {
 	 * 绑定的sshId
 	 */
 	private String sshId;
-
-//	/**
-//	 * 节点分组
-//	 */
-//	private String group;
 
 	/**
 	 * 锁定类型

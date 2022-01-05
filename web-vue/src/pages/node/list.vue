@@ -5,6 +5,9 @@
         <a-input v-model="listQuery['%id%']" placeholder="节点ID" />
         <a-input v-model="listQuery['%name%']" placeholder="节点名称" />
         <a-input v-model="listQuery['%url%']" placeholder="节点地址" />
+        <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+          <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+        </a-select>
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
           <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
@@ -95,6 +98,9 @@
         </a-form-model-item> -->
         <a-form-model-item label="节点名称" prop="name">
           <a-input v-model="temp.name" placeholder="节点名称" />
+        </a-form-model-item>
+        <a-form-model-item label="分组名称" prop="group">
+          <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder=""> </custom-select>
         </a-form-model-item>
         <a-form-model-item label="绑定 SSH " prop="sshId">
           <a-select show-search option-filter-prop="children" v-model="temp.sshId" placeholder="请选择SSH">
@@ -195,7 +201,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWorkspace, nodeMonitorCycle } from "@/api/node";
+import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWorkspace, nodeMonitorCycle, getNodeGroupAll } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
@@ -203,10 +209,13 @@ import Terminal from "@/pages/ssh/terminal";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
+import CustomSelect from "@/components/customSelect";
+
 export default {
   components: {
     NodeLayout,
     Terminal,
+    CustomSelect,
   },
   data() {
     return {
@@ -216,6 +225,7 @@ export default {
       nodeMonitorCycle: nodeMonitorCycle,
       sshList: [],
       list: [],
+      groupList: [],
       temp: {
         timeOut: 0,
       },
@@ -287,6 +297,7 @@ export default {
   watch: {},
   created() {
     this.loadData();
+    this.loadGroupList();
   },
   methods: {
     // 页面引导
@@ -326,7 +337,14 @@ export default {
         },
       });
     },
-
+    // 获取所有的分组
+    loadGroupList() {
+      getNodeGroupAll().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
+      });
+    },
     // 加载 SSH 列表
     loadSshList() {
       getSshListAll().then((res) => {
@@ -426,6 +444,7 @@ export default {
             this.$refs["editNodeForm"].resetFields();
             this.editNodeVisible = false;
             this.loadData();
+            this.loadGroupList();
           }
         });
       });

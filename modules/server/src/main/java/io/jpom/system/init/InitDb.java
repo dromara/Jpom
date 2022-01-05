@@ -39,6 +39,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
 import io.jpom.model.data.UserModel;
+import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.system.ConfigBean;
@@ -191,6 +192,11 @@ public class InitDb implements DisposableBean, InitializingBean {
 		Map<String, BaseNodeService> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeService.class);
 		for (BaseNodeService<?> value : beansOfType.values()) {
 			value.syncAllNode();
+		}
+		//
+		Map<String, BaseGroupService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseGroupService.class);
+		for (BaseGroupService<?> value : groupServiceMap.values()) {
+			value.repairGroupFiled();
 		}
 	}
 

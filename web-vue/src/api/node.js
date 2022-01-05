@@ -17,6 +17,14 @@ export function getNodeListAll() {
   });
 }
 
+// node group all
+export function getNodeGroupAll() {
+  return axios({
+    url: "/node/list_group_all.json",
+    method: "get",
+  });
+}
+
 // 节点和版本信息
 export function getNodeListWithVersion(params) {
   return axios({

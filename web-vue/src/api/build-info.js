@@ -28,6 +28,16 @@ export function getBuildListAll() {
 }
 
 /**
+ * 构建分组
+ */
+export function getBuildGroupAll() {
+  return axios({
+    url: "/build/list_group_all",
+    method: "get",
+  });
+}
+
+/**
  * 获取仓库分支信息
  * @param {
  *  repositoryId: 仓库id
