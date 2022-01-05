@@ -49,7 +49,7 @@ import java.util.List;
  */
 public class NodeMonitor implements Task {
 
-	private static final String CRON_ID = "NodeMonitor";
+	private static final String CRON_ID = "node_monitor";
 
 	private static DbSystemMonitorLogService dbSystemMonitorLogService;
 
