@@ -38,6 +38,7 @@ import java.util.function.Consumer;
  */
 public class PageResultDto<T> implements Serializable {
 
+	@SuppressWarnings({"rawtypes"})
 	public static final PageResultDto EMPTY = new PageResultDto<>(1, 10, 0);
 
 	/**

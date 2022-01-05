@@ -481,8 +481,9 @@ public abstract class AbstractProjectCommander {
 		if (ipPort.isEmpty()) {
 			return null;
 		}
-		if ("0.0.0.0".equals(ipPort.get(0)) || ipPort.size() == 1) {
-			// 0.0.0.0:8084  || :::18000
+		String anObject = ipPort.get(0);
+		if (StrUtil.equalsAny(anObject, "0.0.0.0", "*") || ipPort.size() == 1) {
+			// 0.0.0.0:8084  || :::18000 || *:2123
 			return ipPort.get(ipPort.size() - 1);
 		}
 		return null;

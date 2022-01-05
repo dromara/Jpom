@@ -109,7 +109,7 @@ public class WelcomeController extends AbstractController {
 	@RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String kill(int pid) {
 		long jpomAgentId = JpomManifest.getInstance().getPid();
-		Assert.state(StrUtil.equals(StrUtil.toString(jpomAgentId), StrUtil.toString(pid)), "不支持在线关闭 Jpom Agent 进程");
+		Assert.state(!StrUtil.equals(StrUtil.toString(jpomAgentId), StrUtil.toString(pid)), "不支持在线关闭 Agent 进程");
 		String result = AbstractSystemCommander.getInstance().kill(null, pid);
 		if (StrUtil.isEmpty(result)) {
 			result = "成功kill";
