@@ -11,7 +11,7 @@
           <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
         </a-select>
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="getNodeProjectData">搜索</a-button>
+          <a-button :loading="loading" type="primary" @click="getNodeProjectData">搜索</a-button>
         </a-tooltip>
         <span>| </span>
 
@@ -122,6 +122,7 @@ export default {
       noFileModes: noFileModes,
       nodeMap: {},
       drawerTitle: "",
+      loading: true,
       temp: {},
       drawerFileVisible: false,
       drawerConsoleVisible: false,
@@ -197,6 +198,7 @@ export default {
   },
   methods: {
     getNodeProjectData(pointerEvent) {
+      this.loading = true;
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       getProjectList(this.listQuery).then((res) => {
         if (res.code === 200) {
@@ -211,6 +213,7 @@ export default {
           let nodeProjects = itemGroupBy(this.projList, "nodeId");
           this.getRuningProjectInfo(nodeProjects, 0);
         }
+        this.loading = false;
       });
     },
     getRuningProjectInfo(nodeProjects, i) {

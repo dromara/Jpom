@@ -458,7 +458,7 @@ public class SshFileController extends BaseServerController {
 
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("ssh上传文件异常", e);
-			return JsonMessage.getString(400, "上传失败");
+			return JsonMessage.getString(400, "上传失败:" + e.getMessage());
 		} finally {
 			JschUtil.close(channel);
 			JschUtil.close(session);
