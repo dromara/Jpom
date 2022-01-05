@@ -6,6 +6,11 @@ server:
       cookie:
         name: JPOMID-SERVER
       timeout: 1H
+  compression:
+    # gzip 压缩
+    enabled: true
+    #mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,image/png
+    min-response-size: 2048
 spring:
   application:
     name: jpomServer
