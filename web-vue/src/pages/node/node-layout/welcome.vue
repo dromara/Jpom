@@ -10,19 +10,26 @@
     <a-divider>进程监控表格</a-divider>
     <!-- 进程表格数据 -->
     <div ref="filter" class="filter">
-      <custom-select
-        class="search-input-item"
-        selStyle="width: 200px !important"
-        @change="loadNodeProcess"
-        @addOption="addNodeProcess"
-        v-model="processName"
-        :data="processNames"
-        inputPlaceholder="自定义进程类型"
-        selectPlaceholder=""
-        suffixIcon=""
-      >
-      </custom-select>
-      <!-- <a-button type="primary" @click="loadData">切换</a-button> -->
+      <a-space>
+        <custom-select
+          class="search-input-item"
+          selStyle="width: 200px !important"
+          @change="loadNodeProcess"
+          @addOption="addNodeProcess"
+          v-model="processName"
+          :data="processNames"
+          inputPlaceholder="自定义进程类型"
+          selectPlaceholder=""
+          suffixIcon=""
+        >
+          <template slot="suffixIcon"> <a-icon type="down" /></template>
+        </custom-select>
+        <div>
+          <a-tooltip title="重置自定义的进程名信息">
+            <a-icon type="rest" @click="restProcessNames" />
+          </a-tooltip>
+        </div>
+      </a-space>
     </div>
     <a-table :locale="tableLocale" :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="pid" class="node-table" :pagination="false">
       <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
@@ -73,7 +80,8 @@ export default {
         emptyText: "",
       },
       processList: [],
-      processNames: ["java", "python", "mysql", "php", "docker"],
+      delfatulProcessNames: ["java", "python", "mysql", "php", "docker"],
+      processNames: [],
       monitorVisible: false,
       timeRange: "",
       historyData: [],
@@ -95,6 +103,7 @@ export default {
     };
   },
   mounted() {
+    this.processNames = Object.assign([], this.delfatulProcessNames);
     this.initData();
   },
   destroyed() {
@@ -106,14 +115,18 @@ export default {
       this.processNames = v;
       this.cacheNodeProcess();
     },
+    restProcessNames() {
+      this.processName = this.delfatulProcessNames[0];
+      this.processNames = this.delfatulProcessNames;
+      this.cacheNodeProcess();
+      this.loadNodeProcess();
+    },
     // 初始化页面
     initData() {
       const cacheJson = this.getCacheNodeProcess();
       const nodeCache = cacheJson[this.node.id];
-      this.processName = nodeCache?.processName || "";
-      if (nodeCache.processNames) {
-        this.processNames = nodeCache?.processNames;
-      }
+      this.processName = nodeCache?.processName || this.processName;
+      this.processNames = nodeCache?.processNames || this.processNames;
       if (this.topChartTimer == null) {
         this.loadNodeTop();
         this.loadNodeProcess();
@@ -307,7 +320,7 @@ export default {
     },
     cacheNodeProcess() {
       const cacheJson = this.getCacheNodeProcess();
-      console.log(this.processNames);
+      //console.log(this.processNames);
       cacheJson[this.node.id].processNames = this.processNames;
       cacheJson[this.node.id].processName = this.processName;
       localStorage.setItem("node-process-name", JSON.stringify(cacheJson));

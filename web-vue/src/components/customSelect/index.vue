@@ -1,7 +1,10 @@
 <template>
   <div @mousedown="setSelectOpen(true)">
-    <Select v-model="selected" :style="selStyle" :open="selectOpen" @blur="setSelectOpen(false)" @focus="setSelectOpen(true)" @change="selectChange" :placeholder="selectPlaceholder">
+    <Select v-model="selected" :style="selStyle" :open="selectOpen" @blur="setSelectOpen(false)" showSearch @focus="setSelectOpen(true)" @change="selectChange" :placeholder="selectPlaceholder">
       <a-icon slot="suffixIcon" v-if="suffixIcon" :type="suffixIcon" @click="refreshSelect" />
+      <template v-if="$slots.suffixIcon && !suffixIcon" slot="suffixIcon">
+        <slot name="suffixIcon"></slot>
+      </template>
       <div slot="dropdownRender" slot-scope="menu">
         <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
           <a-input-search
