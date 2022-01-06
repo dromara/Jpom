@@ -58,9 +58,7 @@ export default {
         return this.getActiveTabKey;
       },
       set(value) {
-        const index = this.getTabList.findIndex((ele) => ele.key === value);
-        const activeTab = this.getTabList[index];
-        this.$router.push(activeTab.path);
+        this.activeTab(value);
       },
     },
   },
@@ -76,28 +74,30 @@ export default {
           return;
         }
         this.$store.dispatch("removeTab", key).then(() => {
-          const index = this.getTabList.findIndex((ele) => ele.key === this.activeKey);
-          const activeTab = this.getTabList[index];
-          this.$router.push(activeTab.path);
+          this.activeTab();
         });
       }
     },
     // 改变 Tab
-    changeTab(activekey) {
-      const index = this.getTabList.findIndex((ele) => ele.key === activekey);
-      const currentTab = this.getTabList[index];
-      this.$store.dispatch("activeMenu", currentTab.id);
-    },
+    changeTab() {},
     // 关闭 tabs
     closeTabs(data) {
       this.$notification.success({
         message: "操作成功",
       });
       this.$store.dispatch("clearTabs", data).then(() => {
-        const index = this.getTabList.findIndex((ele) => ele.key === this.activeKey);
-        const activeTab = this.getTabList[index];
-        this.$router.push(activeTab.path);
+        this.activeTab();
       });
+    },
+    activeTab(key) {
+      key = key || this.activeKey;
+      const index = this.getTabList.findIndex((ele) => ele.key === key);
+      const activeTab = this.getTabList[index];
+      this.$router.push({ query: { ...this.$route.query, sPid: activeTab.parentId, sId: activeTab.id }, path: activeTab.path });
+      //
+      this.$store.dispatch("activeMenu", activeTab.id);
+      this.$store.dispatch("menuOpenKeys", activeTab.parentId);
+      return activeTab;
     },
   },
 };

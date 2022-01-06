@@ -1,5 +1,5 @@
 <template>
-  <a-menu theme="dark" mode="inline" v-model="selectedKeys" :default-open-keys="defaultOpenKey">
+  <a-menu theme="dark" mode="inline" v-model="selectedKeys" @openChange="openChange" :openKeys="getMenuOpenKeys">
     <a-sub-menu v-for="menu in getMenus" :key="menu.id">
       <span slot="title">
         <a-icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
@@ -15,29 +15,27 @@
 import { mapGetters } from "vuex";
 export default {
   data() {
-    return {
-      selectedKeys: [],
-      // timer: null,
-    };
+    return {};
   },
   computed: {
-    ...mapGetters(["getMenus", "getActiveMenuKey"]),
-    defaultOpenKey() {
-      return [this.$route.query.sPid || "", this.$route.query.sId || ""];
+    ...mapGetters(["getMenus", "getActiveMenuKey", "getMenuOpenKeys"]),
+    selectedKeys: {
+      get() {
+        return [this.getActiveMenuKey];
+      },
+      set() {},
     },
   },
   created() {
-    this.activeMenu();
+    this.$store.dispatch("menuOpenKeys", this.$route.query.sPid || "");
   },
-  beforeDestroy() {
-    // if (this.timer) {
-    //   clearInterval(this.timer);
-    // }
-  },
+  beforeDestroy() {},
   methods: {
+    openChange(keys) {
+      this.$store.dispatch("menuOpenKeys", keys);
+    },
     // 点击菜单
     handleClick(subMenu) {
-      // console.log(sub);
       // 如果路由不存在
       if (!subMenu.path) {
         this.$notification.error({
@@ -58,10 +56,6 @@ export default {
         path: subMenu.path,
       });
       // this.$router.push()
-    },
-    // 自动激活当前菜单
-    activeMenu() {
-      this.selectedKeys = [this.getActiveMenuKey];
     },
   },
 };
