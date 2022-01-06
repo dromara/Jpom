@@ -36,6 +36,16 @@ Vue.prototype.$setLoading = function (props) {
   } else if (Object.prototype.toString.call(props) !== "[object Object]") {
     props = {};
   }
+  // 计数
+  const loadingCount = this.$app.globalLoadingProps.loadingCount || 0;
+  if (props.spinning) {
+    props.loadingCount = loadingCount + 1;
+  } else {
+    props.loadingCount = loadingCount - 1;
+    props.loadingCount = Math.max(props.loadingCount, 0);
+    props.spinning = props.loadingCount > 0;
+  }
+  //console.log(props);
   props.wrapperClassName = props.spinning ? "globalLoading" : "";
   this.$app.globalLoadingProps = { ...this.$app.globalLoadingProps, ...props };
 };
