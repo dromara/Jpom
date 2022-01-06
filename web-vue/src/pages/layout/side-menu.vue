@@ -1,5 +1,5 @@
 <template>
-  <a-menu theme="dark" mode="inline" v-model="selectedKeys" @openChange="openChange" :openKeys="getMenuOpenKeys">
+  <a-menu theme="dark" mode="inline" v-model="selectedKeys" @openChange="openChange" :openKeys="getMenuOpenKeys2">
     <a-sub-menu v-for="menu in getMenus" :key="menu.id">
       <span slot="title">
         <a-icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
@@ -15,15 +15,25 @@
 import { mapGetters } from "vuex";
 export default {
   data() {
-    return {};
+    return {
+      menuOpenKeys: [],
+    };
   },
   computed: {
-    ...mapGetters(["getMenus", "getActiveMenuKey", "getMenuOpenKeys"]),
+    ...mapGetters(["getMenus", "getActiveMenuKey", "getMenuOpenKeys", "getCollapsed"]),
     selectedKeys: {
       get() {
         return [this.getActiveMenuKey];
       },
       set() {},
+    },
+    getMenuOpenKeys2() {
+      if (this.getCollapsed) {
+        // 折叠的时候使用，用户点击的菜单
+        return this.menuOpenKeys;
+      }
+      // 时候全局缓存的菜单
+      return this.getMenuOpenKeys;
     },
   },
   created() {
@@ -32,6 +42,7 @@ export default {
   beforeDestroy() {},
   methods: {
     openChange(keys) {
+      this.menuOpenKeys = keys;
       this.$store.dispatch("menuOpenKeys", keys);
     },
     // 点击菜单
