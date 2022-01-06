@@ -1,8 +1,8 @@
 <template>
   <a-layout id="app-layout">
     <a-layout-sider v-model="collapsed" :trigger="null" collapsible class="sider">
-      <a-tooltip placement="right" title="点击可以切换开启操作引导">
-        <div class="logo" @click="toggleGuide()">
+      <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
+        <div class="logo" @click="changeCollapsed()">
           <img :src="logoUrl" />
           {{ this.subTitle }}
         </div>
@@ -11,12 +11,12 @@
     </a-layout-sider>
     <a-layout>
       <a-layout-header class="app-header">
-        <a-tooltip placement="right" title="折叠左侧菜单栏">
+        <!-- <a-tooltip placement="right" title="折叠左侧菜单栏">
           <a-icon class="icon-btn" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="changeCollapsed" />
-        </a-tooltip>
-        <a-tooltip placement="right" v-if="getTabList.length > 1" title="关闭其他标签，只保留当前的 Tab">
+        </a-tooltip> -->
+        <!-- <a-tooltip placement="right" v-if="getTabList.length > 1" title="关闭其他标签，只保留当前的 Tab">
           <a-icon class="icon-btn" style="padding-left: 0" type="close-circle" @click="closeTabs" />
-        </a-tooltip>
+        </a-tooltip> -->
         <content-tab />
         <!-- <user-header /> -->
       </a-layout-header>
@@ -49,7 +49,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getTabList", "getCollapsed"]),
+    ...mapGetters(["getCollapsed"]),
   },
   watch: {},
   mounted() {
@@ -68,17 +68,20 @@ export default {
           steps: [
             {
               title: "导航助手",
-              intro: "<p>不要慌，这是新版本的页面导航系统，如果您不想看到，可以点击<b>空白处</b>直接关闭。</p><p>另外，可以使用键盘<b>左右方向键</b>切换上一步或者下一步哦</p>",
+              intro:
+                "<p>不要慌，这是页面导航系统,介绍界面上的一些基本信息.</br>" +
+                '<span style="color:red;"><b>第一次使用本系统强烈建议您简单看看引导</b></span></br>' +
+                "如果您不想看到，可以点击<b>空白处</b>直接关闭。</p><p>另外，可以使用键盘<b>左右方向键</b>切换上一步或者下一步哦</p>",
             },
             {
               title: "导航助手",
               element: document.querySelector(".logo"),
-              intro: "点击这里可以切换是否开启导航",
+              intro: "点击这里可以折叠切换左侧菜单栏",
             },
             {
               title: "导航助手",
               element: document.querySelector(".side-menu"),
-              intro: "这里是侧边栏菜单区域",
+              intro: "这里是侧边栏菜单区域，温馨提醒系统中还存在【节点管理】导航哟，期待您挖掘",
             },
             {
               title: "导航助手",
@@ -87,18 +90,18 @@ export default {
             },
             {
               title: "导航助手",
+              element: document.querySelector(".jpom-user-operation"),
+              intro: "这里可以设置当前管理员的邮箱或者其他信息，开启关闭导航，重置导航等，当然还有退出登录",
+            },
+            {
+              title: "导航助手",
               element: document.querySelector(".app-header"),
               intro: "这是页面头部，会出现多个 Tab 标签页，以及个人信息等操作按钮",
             },
             {
               title: "导航助手",
-              element: document.querySelector(".jpom-close-tabs"),
-              intro: "这里的关闭 Tab 按钮只会保留当前激活的 Tab",
-            },
-            {
-              title: "导航助手",
-              element: document.querySelector(".jpom-user-operation"),
-              intro: "这里可以设置当前管理员的邮箱或者其他信息，当然还有退出登录",
+              element: document.querySelector(".ant-tabs-nav-wrap"),
+              intro: "这里是打开的选项卡，选项卡支持右键菜单哟",
             },
             {
               title: "导航助手",
@@ -108,24 +111,10 @@ export default {
             {
               title: "导航助手",
               element: document.querySelector(".jpom-node-manage-add"),
-              intro: "如果还没有节点 可以点击【新增】按钮新增节点",
+              intro: "如果节点列表中还没有节点 可以点击【新增】按钮新增节点",
             },
           ],
         },
-      });
-    },
-    // 切换引导
-    toggleGuide() {
-      this.$store.dispatch("toggleGuideFlag").then((flag) => {
-        if (flag) {
-          this.$notification.success({
-            message: "关闭页面操作引导、导航",
-          });
-        } else {
-          this.$notification.success({
-            message: "开启页面操作引导、导航",
-          });
-        }
       });
     },
     // 检查是否需要初始化
@@ -149,13 +138,6 @@ export default {
           this.$router.push("/install");
         }
       });
-    },
-    // 关闭 tabs
-    closeTabs() {
-      this.$notification.success({
-        message: "操作成功",
-      });
-      this.$store.dispatch("clearTabs");
     },
     changeCollapsed() {
       this.collapsed = !this.collapsed;
@@ -200,7 +182,7 @@ export default {
 .app-header {
   display: flex;
   background: #fff;
-  padding: 0;
+  padding: 0 10px;
 }
 .sider {
   min-height: 100vh;

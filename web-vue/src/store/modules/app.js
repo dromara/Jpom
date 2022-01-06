@@ -90,11 +90,18 @@ const app = {
       });
     },
     // 清除 tabs
-    clearTabs({ commit, state }) {
+    clearTabs({ commit, state }, position) {
       let tabList = state.tabList;
+
       const index = tabList.findIndex((ele) => ele.key === state.activeTabKey);
       const currentTab = tabList[index];
-      tabList = [currentTab];
+      if (position === "left") {
+        tabList = tabList.slice(index, tabList.length);
+      } else if (position === "right") {
+        tabList = tabList.slice(0, index - 1);
+      } else {
+        tabList = [currentTab];
+      }
       commit("setTabList", tabList);
       localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
     },
@@ -127,7 +134,10 @@ const app = {
       return state.workspaceId;
     },
     getCollapsed(state) {
-      return state.collapsed;
+      if (state.collapsed === undefined || state.collapsed === null) {
+        return 0;
+      }
+      return parseInt(state.collapsed);
     },
   },
 };

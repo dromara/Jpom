@@ -318,7 +318,7 @@ export default {
 }
 .user-header {
   display: inline-table;
-  width: 240px;
+  /* width: 240px; */
   text-align: right;
   margin-right: 20px;
   cursor: pointer;
