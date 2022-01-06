@@ -13,6 +13,7 @@ const app = {
     workspaceId: localStorage.getItem(CACHE_WORKSPACE_ID),
     // 菜单折叠
     collapsed: localStorage.getItem("collapsed"),
+    menuOpenKeys: [],
   },
   mutations: {
     setActiveTabKey(state, activeKey) {
@@ -27,49 +28,53 @@ const app = {
     setWorkspace(state, workspaceId) {
       state.workspaceId = workspaceId;
     },
-    collapsed(state, collapsed) {
+    setCollapsed(state, collapsed) {
       state.collapsed = collapsed;
+    },
+    setMenuOpenKeys(state, keys) {
+      state.menuOpenKeys = keys;
     },
   },
   actions: {
     // 添加 tab
-    addTab({ commit, state, rootGetters }, tab) {
+    addTab({ commit, state, rootGetters, dispatch }, tab) {
       return new Promise((resolve) => {
         // 从 store 里面拿到 menus 匹配 path 得到当前的菜单，设置 tab 的标题
         const menus = rootGetters.getMenus;
-        let currentMenu = {};
+        let currentMenu = null;
         menus.forEach((menu) => {
           menu.childs.forEach((subMenu) => {
             if (subMenu.path === tab.path) {
               currentMenu = subMenu;
+              currentMenu.parent = menu;
             }
           });
         });
+        if (!currentMenu) {
+          return;
+        }
         tab.title = currentMenu.title;
         tab.id = currentMenu.id;
+        tab.parentId = currentMenu.parent.id;
         let tabList = state.tabList || [];
         // 获取下标 -1 表示可以添加 否则就是已经存在
         const index = tabList.findIndex((ele) => ele.key === tab.key);
         if (index > -1) {
           // 设置 activeTabKey
-          commit("setActiveTabKey", tab.key);
-          localStorage.setItem(ACTIVE_TAB_KEY, tab.key);
         } else {
           // 新增
           tabList.push(tab);
           commit("setTabList", tabList);
-          commit("setActiveTabKey", tab.key);
-          localStorage.setItem(ACTIVE_TAB_KEY, tab.key);
           localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
         }
         // 设置当前选择的菜单
-        commit("setActiveMenuKey", tab.id);
-        localStorage.setItem(ACTIVE_MENU_KEY, tab.id);
+        dispatch("activeTabKey", tab.key);
+        dispatch("activeMenu", tab.id);
         resolve();
       });
     },
     // 删除 tab
-    removeTab({ commit, state }, key) {
+    removeTab({ commit, state, dispatch }, key) {
       return new Promise((resolve) => {
         let tabList = state.tabList;
         const index = tabList.findIndex((ele) => ele.key === key);
@@ -83,21 +88,21 @@ const app = {
           const tempTab = tabList[Math.min(index, 0)];
           // 如果还是原来激活的 tab 就不用更新
           if (state.activeTabKey !== tempTab.key) {
-            commit("setActiveTabKey", tempTab.key);
-            localStorage.setItem(ACTIVE_TAB_KEY, tempTab.key);
+            dispatch("activeTabKey", tempTab.key);
             resolve();
           }
         }
       });
     },
     // 清除 tabs
-    clearTabs({ commit, state }, { key, position }) {
+    clearTabs({ commit, state, dispatch }, { key, position }) {
       return new Promise((resolve) => {
         let tabList = state.tabList;
         key = key || state.activeTabKey;
 
         // 找到当前 index
         const index = tabList.findIndex((ele) => ele.key === key);
+        const currentTab = tabList[index];
         //console.log(index, key, state.activeTabKey, position);
         if (position === "left") {
           // 关闭左侧
@@ -107,18 +112,20 @@ const app = {
           tabList = tabList.slice(0, index + 1);
         } else {
           // 只保留当前
-          const currentTab = tabList[index];
           tabList = [currentTab];
         }
         commit("setTabList", tabList);
         localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
         //
         if (state.activeTabKey !== key) {
-          commit("setActiveTabKey", key);
-          localStorage.setItem(ACTIVE_TAB_KEY, key);
+          dispatch("activeTabKey", key);
           resolve(key);
         }
       });
+    },
+    activeTabKey({ commit }, key) {
+      commit("setActiveTabKey", key);
+      localStorage.setItem(ACTIVE_TAB_KEY, key);
     },
     // 选中当前菜单
     activeMenu({ commit }, activeMenuKey) {
@@ -131,8 +138,20 @@ const app = {
       localStorage.setItem(CACHE_WORKSPACE_ID, workspaceId);
     },
     collapsed({ commit }, collapsed) {
-      commit("collapsed", collapsed);
+      commit("setCollapsed", collapsed);
       localStorage.setItem("collapsed", collapsed);
+    },
+    // 打开的菜单
+    menuOpenKeys({ commit, state }, keys) {
+      if (Array.isArray(keys)) {
+        commit("setMenuOpenKeys", keys);
+      } else if (typeof keys == "string") {
+        const nowKeys = state.menuOpenKeys;
+        if (!nowKeys.includes(keys)) {
+          nowKeys.push(keys);
+          commit("setMenuOpenKeys", nowKeys);
+        }
+      }
     },
   },
   getters: {
@@ -153,6 +172,9 @@ const app = {
         return 0;
       }
       return parseInt(state.collapsed);
+    },
+    getMenuOpenKeys(state) {
+      return state.menuOpenKeys;
     },
   },
 };

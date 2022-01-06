@@ -33,33 +33,40 @@
       <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <template slot="name" slot-scope="text, record">
+        <a-tooltip title="我在这里" :visible="showOptVisible[record.id]">
+          <span>{{ text }}</span>
+        </a-tooltip>
+      </template>
       <a-tooltip slot="cycle" slot-scope="text" placement="topLeft" :title="nodeMonitorCycle[text]">
         <span>{{ nodeMonitorCycle[text] }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-space>
-          <a-button v-if="record.unLockType" type="primary" @click="unlock(record)">解锁节点</a-button>
-          <a-button v-else class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />节点管理</a-button>
+        <a-tooltip title="我在这里" :visible="showOptVisible[record.id]">
+          <a-space>
+            <a-button v-if="record.unLockType" type="primary" @click="unlock(record)">解锁节点</a-button>
+            <a-button v-else class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />节点管理</a-button>
 
-          <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
-            <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
-          </a-tooltip>
-          <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-              更多
-              <a-icon type="down" />
-            </a>
-            <a-menu slot="overlay">
-              <a-menu-item>
-                <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-              </a-menu-item>
+            <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
+              <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
+            </a-tooltip>
+            <a-dropdown>
+              <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+                更多
+                <a-icon type="down" />
+              </a>
+              <a-menu slot="overlay">
+                <a-menu-item>
+                  <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+                </a-menu-item>
 
-              <a-menu-item>
-                <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
-        </a-space>
+                <a-menu-item>
+                  <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
+          </a-space>
+        </a-tooltip>
       </template>
       <!-- 嵌套表格 -->
       <a-table slot="expandedRowRender" slot-scope="text" :loading="childLoading" :columns="childColumns" :data-source="text.children" :pagination="false" :rowKey="(record, index) => text.id + index">
@@ -226,6 +233,7 @@ export default {
       sshList: [],
       list: [],
       groupList: [],
+      showOptVisible: {},
       temp: {
         timeOut: 0,
       },
@@ -294,7 +302,23 @@ export default {
       };
     },
   },
-  watch: {},
+  watch: {
+    $route() {
+      if (this.$route.query.tipNodeId) {
+        this.showOptVisible[this.$route.query.tipNodeId] = true;
+        this.showOptVisible = { ...this.showOptVisible };
+        setTimeout(() => {
+          this.showOptVisible[this.$route.query.tipNodeId] = false;
+          this.showOptVisible = { ...this.showOptVisible };
+          let query = Object.assign({}, this.$route.query);
+          delete query.tipNodeId;
+          this.$router.replace({
+            query: query,
+          });
+        }, 10000);
+      }
+    },
+  },
   created() {
     this.loadData();
     this.loadGroupList();

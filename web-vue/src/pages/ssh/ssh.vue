@@ -539,7 +539,8 @@ export default {
       this.$router.push({
         path: "/node/list",
         query: {
-          nodeId: nodeId,
+          ...this.$route.query,
+          tipNodeId: nodeId,
         },
       });
     },
