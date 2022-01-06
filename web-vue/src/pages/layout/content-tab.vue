@@ -1,17 +1,37 @@
 <template>
   <a-tabs v-model="activeKey" class="my-tabs" hide-add type="editable-card" @edit="onEdit" @change="changeTab">
-    <a-tab-pane v-for="(tab, index) in getTabList" :key="tab.key" :closeable="tab.closeable">
+    <a-tab-pane v-for="(tab, index) in getTabList" :key="tab.key" :closable="getTabList.length > 1">
       <template slot="tab">
         <a-dropdown :trigger="['contextmenu']">
           <span style="display: inline-table">{{ tab.title }}</span>
           <a-menu slot="overlay">
-            <a-menu-item @click="closeTabs">
+            <a-menu-item
+              @click="
+                closeTabs({
+                  key: tab.key,
+                })
+              "
+            >
               <a-button type="link" :disabled="getTabList.length <= 1">关闭其他</a-button>
             </a-menu-item>
-            <a-menu-item @click="closeTabs('left')">
+            <a-menu-item
+              @click="
+                closeTabs({
+                  key: tab.key,
+                  position: 'left',
+                })
+              "
+            >
               <a-button type="link" :disabled="getTabList.length <= 1 || index === 0">关闭左侧</a-button>
             </a-menu-item>
-            <a-menu-item @click="closeTabs('right')">
+            <a-menu-item
+              @click="
+                closeTabs({
+                  key: tab.key,
+                  position: 'right',
+                })
+              "
+            >
               <a-button type="link" :disabled="getTabList.length <= 1 || index === getTabList.length - 1">关闭右侧</a-button>
             </a-menu-item>
           </a-menu>
@@ -44,6 +64,7 @@ export default {
       },
     },
   },
+  created() {},
   methods: {
     // 编辑 Tab
     onEdit(key, action) {
@@ -68,11 +89,15 @@ export default {
       this.$store.dispatch("activeMenu", currentTab.id);
     },
     // 关闭 tabs
-    closeTabs(position) {
+    closeTabs(data) {
       this.$notification.success({
         message: "操作成功",
       });
-      this.$store.dispatch("clearTabs", position);
+      this.$store.dispatch("clearTabs", data).then(() => {
+        const index = this.getTabList.findIndex((ele) => ele.key === this.activeKey);
+        const activeTab = this.getTabList[index];
+        this.$router.push(activeTab.path);
+      });
     },
   },
 };
