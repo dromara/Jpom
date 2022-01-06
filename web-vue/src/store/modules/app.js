@@ -74,6 +74,9 @@ const app = {
         let tabList = state.tabList;
         const index = tabList.findIndex((ele) => ele.key === key);
         tabList.splice(index, 1);
+
+        commit("setTabList", tabList);
+        localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
         // 如果删除的是 activeTabKey
         if (state.activeTabKey === key) {
           // 寻找下一个
@@ -82,28 +85,40 @@ const app = {
           if (state.activeTabKey !== tempTab.key) {
             commit("setActiveTabKey", tempTab.key);
             localStorage.setItem(ACTIVE_TAB_KEY, tempTab.key);
+            resolve();
           }
         }
-        commit("setTabList", tabList);
-        localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
-        resolve();
       });
     },
     // 清除 tabs
-    clearTabs({ commit, state }, position) {
-      let tabList = state.tabList;
+    clearTabs({ commit, state }, { key, position }) {
+      return new Promise((resolve) => {
+        let tabList = state.tabList;
+        key = key || state.activeTabKey;
 
-      const index = tabList.findIndex((ele) => ele.key === state.activeTabKey);
-      const currentTab = tabList[index];
-      if (position === "left") {
-        tabList = tabList.slice(index, tabList.length);
-      } else if (position === "right") {
-        tabList = tabList.slice(0, index - 1);
-      } else {
-        tabList = [currentTab];
-      }
-      commit("setTabList", tabList);
-      localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
+        // 找到当前 index
+        const index = tabList.findIndex((ele) => ele.key === key);
+        //console.log(index, key, state.activeTabKey, position);
+        if (position === "left") {
+          // 关闭左侧
+          tabList = tabList.slice(index, tabList.length);
+        } else if (position === "right") {
+          // 关闭右侧
+          tabList = tabList.slice(0, index + 1);
+        } else {
+          // 只保留当前
+          const currentTab = tabList[index];
+          tabList = [currentTab];
+        }
+        commit("setTabList", tabList);
+        localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
+        //
+        if (state.activeTabKey !== key) {
+          commit("setActiveTabKey", key);
+          localStorage.setItem(ACTIVE_TAB_KEY, key);
+          resolve(key);
+        }
+      });
     },
     // 选中当前菜单
     activeMenu({ commit }, activeMenuKey) {
