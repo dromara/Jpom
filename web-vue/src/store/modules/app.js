@@ -99,7 +99,12 @@ const app = {
       return new Promise((resolve) => {
         let tabList = state.tabList;
         key = key || state.activeTabKey;
-
+        if (key === "all") {
+          // 清空全部
+          commit("setTabList", []);
+          dispatch("activeTabKey", "");
+          return;
+        }
         // 找到当前 index
         const index = tabList.findIndex((ele) => ele.key === key);
         const currentTab = tabList[index];
