@@ -3,6 +3,7 @@ package io.jpom.controller.node.script;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -14,10 +15,13 @@ import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.node.script.ScriptExecuteLogServer;
 import io.jpom.service.node.script.ScriptServer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 脚本管理
@@ -32,9 +36,12 @@ import org.springframework.web.bind.annotation.*;
 public class ScriptController extends BaseServerController {
 
 	private final ScriptServer scriptServer;
+	private final ScriptExecuteLogServer scriptExecuteLogServer;
 
-	public ScriptController(ScriptServer scriptServer) {
+	public ScriptController(ScriptServer scriptServer,
+							ScriptExecuteLogServer scriptExecuteLogServer) {
 		this.scriptServer = scriptServer;
+		this.scriptExecuteLogServer = scriptExecuteLogServer;
 	}
 
 	/**
@@ -87,13 +94,16 @@ public class ScriptController extends BaseServerController {
 
 	@RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
-	public String del() {
+	public String del(@ValidatorItem String id) {
 		NodeModel node = getNode();
-		JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.Script_Del);
-		if (request.getCode() == HttpStatus.OK.value()) {
+		HttpServletRequest request = getRequest();
+		JsonMessage<Object> requestData = NodeForward.request(node, request, NodeUrl.Script_Del);
+		if (requestData.getCode() == HttpStatus.OK.value()) {
 			scriptServer.syncNode(node);
+			// 删除日志
+			scriptExecuteLogServer.delCache(id, node.getId(), request);
 		}
-		return request.toString();
+		return requestData.toString();
 	}
 
 	/**

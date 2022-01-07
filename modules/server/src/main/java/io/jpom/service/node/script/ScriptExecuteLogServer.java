@@ -57,6 +57,7 @@ public class ScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLogMode
 		for (Object o : jsonArray) {
 			JSONObject jsonObject = (JSONObject) o;
 			jsonObject.put("nodeId", nodeModel.getId());
+			// 自动
 			jsonObject.put("triggerExecType", 1);
 		}
 		return jsonArray;

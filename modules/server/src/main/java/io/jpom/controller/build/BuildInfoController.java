@@ -58,6 +58,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
@@ -349,20 +350,20 @@ public class BuildInfoController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
 		// 查询构建信息
-		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
+		HttpServletRequest request = getRequest();
+		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
 		//
 		String e = buildInfoService.checkStatus(buildInfoModel.getStatus());
 		Assert.isNull(e, () -> e);
-		dbBuildHistoryLogService.delByBuildId(buildInfoModel.getId());
-
+		// 删除构建历史
+		dbBuildHistoryLogService.delByWorkspace(request, entity -> entity.set("buildDataId", buildInfoModel.getId()));
 		// 删除构建信息文件
 		File file = BuildUtil.getBuildDataFile(buildInfoModel.getId());
 		// 快速删除
 		boolean fastDel = CommandUtil.systemFastDel(file);
 		//
 		Assert.state(!fastDel, "清理历史构建产物失败,已经重新尝试");
-
 		// 删除构建信息数据
 		buildInfoService.delByKey(buildInfoModel.getId());
 		return JsonMessage.getString(200, "清理历史构建产物成功");

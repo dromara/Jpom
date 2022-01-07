@@ -339,10 +339,13 @@ public abstract class BaseDbCommonService<T> {
 			return 0;
 		}
 		Entity where = new Entity(tableName);
-		where.set(key, keyValue);
+		if (keyValue != null) {
+			where.set(key, keyValue);
+		}
 		if (consumer != null) {
 			consumer.accept(where);
 		}
+		Assert.state(where.size() > 0, "没有添加任何参数:-1");
 		return del(where);
 	}
 

@@ -76,11 +76,11 @@ public class ScriptExecuteLogModel extends BaseNodeModel {
 
 	@Override
 	public String dataId() {
-		throw new IllegalStateException("NO implements");
+		return getScriptId();
 	}
 
 	@Override
 	public void dataId(String id) {
-		throw new IllegalStateException("NO implements");
+		setScriptId(id);
 	}
 }

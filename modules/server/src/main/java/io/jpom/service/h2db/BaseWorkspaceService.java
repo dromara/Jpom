@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 工作空间 通用 service
@@ -129,6 +130,23 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	public int delByKey(String keyValue, HttpServletRequest request) {
 		String workspace = this.getCheckUserWorkspace(request);
 		return super.delByKey(keyValue, entity -> entity.set("workspaceId", workspace));
+	}
+
+	/**
+	 * 删除,根据工作空间删除
+	 *
+	 * @param consumer 回调
+	 * @param request  请求信息
+	 * @return 影响行数
+	 */
+	public int delByWorkspace(HttpServletRequest request, Consumer<Entity> consumer) {
+		String workspace = this.getCheckUserWorkspace(request);
+		return super.delByKey(null, entity -> {
+			entity.set("workspaceId", workspace);
+			consumer.accept(entity);
+			int size = entity.size();
+			Assert.state(size > 1, "没有添加任何参数");
+		});
 	}
 
 	/**

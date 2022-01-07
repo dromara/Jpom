@@ -25,7 +25,6 @@ package io.jpom.service.dblog;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -52,17 +51,6 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
 
 	public DbBuildHistoryLogService(BuildInfoService buildService) {
 		this.buildService = buildService;
-	}
-
-	/**
-	 * 根据 构建ID 删除构建历史
-	 *
-	 * @param buildDataId 构建ID
-	 */
-	public void delByBuildId(String buildDataId) {
-		Entity where = new Entity(getTableName());
-		where.set("buildDataId", buildDataId);
-		super.del(where);
 	}
 
 	/**
