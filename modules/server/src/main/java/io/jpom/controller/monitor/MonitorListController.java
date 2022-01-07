@@ -24,7 +24,6 @@ package io.jpom.controller.monitor;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -49,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -102,12 +102,11 @@ public class MonitorListController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) throws SQLException {
 		//
-		int delByKey = monitorService.delByKey(id, getRequest());
+		HttpServletRequest request = getRequest();
+		int delByKey = monitorService.delByKey(id, request);
 		if (delByKey > 0) {
 			// 删除日志
-			Entity where = new Entity();
-			where.set("monitorId", id);
-			dbMonitorNotifyLogService.del(where);
+			dbMonitorNotifyLogService.delByWorkspace(request, entity -> entity.set("monitorId", id));
 		}
 		return JsonMessage.getString(200, "删除成功");
 	}

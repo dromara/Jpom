@@ -269,6 +269,24 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 	}
 
 	/**
+	 * 删除节点 工作空间缓存
+	 *
+	 * @param dataId  数据ID
+	 * @param nodeId  节点
+	 * @param request 请求
+	 * @return 影响行数
+	 */
+	public int delCache(String dataId, String nodeId, HttpServletRequest request) {
+		String checkUserWorkspace = this.getCheckUserWorkspace(request);
+		T data = ReflectUtil.newInstance(this.tClass);
+		data.setNodeId(nodeId);
+		data.dataId(dataId);
+		data.setWorkspaceId(checkUserWorkspace);
+		Entity entity = super.dataBeanToEntity(data);
+		return super.del(entity);
+	}
+
+	/**
 	 * 根据 节点和数据ID查询数据
 	 *
 	 * @param nodeId 节点ID

@@ -13,6 +13,7 @@ import io.jpom.model.data.CommandModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.node.command.CommandExecLogService;
 import io.jpom.service.node.command.CommandService;
 import io.jpom.util.CommandUtil;
 import org.springframework.http.MediaType;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -38,9 +40,12 @@ import java.util.List;
 public class CommandInfoController extends BaseServerController {
 
 	private final CommandService commandService;
+	private final CommandExecLogService commandExecLogService;
 
-	public CommandInfoController(CommandService commandService) {
+	public CommandInfoController(CommandService commandService,
+								 CommandExecLogService commandExecLogService) {
 		this.commandService = commandService;
+		this.commandExecLogService = commandExecLogService;
 	}
 
 	/**
@@ -120,7 +125,9 @@ public class CommandInfoController extends BaseServerController {
 		boolean fastDel = CommandUtil.systemFastDel(logFileDir);
 		Assert.state(!fastDel, "清理日志文件失败");
 		//
-		commandService.delByKey(id);
+		HttpServletRequest request = getRequest();
+		commandService.delByKey(id, request);
+		commandExecLogService.delByWorkspace(request, entity -> entity.set("commandId", id));
 		return JsonMessage.getString(200, "操作成功");
 	}
 
