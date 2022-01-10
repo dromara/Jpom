@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="node-full-content">
     <div ref="filter" class="filter">
       <a-space>
         <a-button type="primary" @click="exportStack">导出堆栈信息</a-button>
@@ -31,7 +31,7 @@
   </div>
 </template>
 <script>
-import { getInternalData, exportStack, exportRam, getThreadInfo } from "../../../../api/node-project";
+import { getInternalData, exportStack, exportRam, getThreadInfo } from "@/api/node-project";
 export default {
   props: {
     node: {
@@ -107,7 +107,7 @@ export default {
       this.loading = true;
       const params = {
         nodeId: this.node.id,
-        tag: this.project.id,
+        tag: this.project.projectId,
         copyId: this.copyId,
       };
       getInternalData(params).then((res) => {

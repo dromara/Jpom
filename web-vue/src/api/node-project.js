@@ -80,6 +80,23 @@ export function getRuningProjectInfo(params) {
 }
 
 /**
+ *  获取副本 端口信息
+ * @param {*} params
+ * @returns
+ */
+export function getRuningProjectCopyInfo(params) {
+  return axios({
+    url: "/node/manage/getProjectCopyPort",
+    method: "post",
+    data: params,
+    timeout: 0,
+    headers: {
+      loading: "no",
+    },
+  });
+}
+
+/**
  * 获取单个项目信息
  * @param {
  *  nodeId: 节点 ID

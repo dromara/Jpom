@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div class="node-full-content">
     <div ref="filter" class="filter">
       <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{ x: '80vh' }" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
       <template slot="operation" slot-scope="text, record">
         <a-space>
@@ -27,7 +27,7 @@
 <script>
 import Console from "./project-console";
 import Monitor from "./project-monitor";
-import { getProjectReplicaList, deleteProject } from "../../../../api/node-project";
+import { getProjectReplicaList, deleteProject, getRuningProjectCopyInfo } from "@/api/node-project";
 export default {
   props: {
     node: {
@@ -74,8 +74,30 @@ export default {
       getProjectReplicaList(params).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
+          this.getRuningProjectCopyInfo();
         }
         this.loading = false;
+      });
+    },
+    getRuningProjectCopyInfo() {
+      const ids = this.list.map((item) => item.id);
+      const tempParams = {
+        nodeId: this.node.id,
+        id: this.project.projectId,
+        copyIds: JSON.stringify(ids),
+      };
+    
+      getRuningProjectCopyInfo(tempParams).then((res) => {
+        if (res.code === 200) {
+          this.list = this.list.map((element) => {
+            if (res.data[element.id]) {
+              element.port = res.data[element.id].port;
+              element.pid = res.data[element.id].pid;
+              element.status = true;
+            }
+            return element;
+          });
+        }
       });
     },
     // 筛选

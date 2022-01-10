@@ -2,20 +2,24 @@
   <div>
     <div ref="filter" class="filter">
       <template v-if="copyId">
-        <a-button :disabled="replicaStatus" type="primary" @click="start">启动</a-button>
-        <a-button :disabled="!replicaStatus" type="danger" @click="restart">重启</a-button>
-        <a-button :disabled="!replicaStatus" type="danger" @click="stop">停止</a-button>
-        <a-button type="primary" @click="handleDownload">导出日志</a-button>
-        <a-tag color="#87d068">文件大小: {{ project.logSize }}</a-tag>
+        <a-space>
+          <a-button :disabled="replicaStatus" type="primary" @click="start">启动</a-button>
+          <a-button :disabled="!replicaStatus" type="danger" @click="restart">重启</a-button>
+          <a-button :disabled="!replicaStatus" type="danger" @click="stop">停止</a-button>
+          <a-button type="primary" @click="handleDownload">导出日志</a-button>
+          <a-tag color="#87d068">文件大小: {{ project.logSize }}</a-tag>
+        </a-space>
       </template>
       <template v-else>
-        <a-button :disabled="project.status" type="primary" @click="start">启动</a-button>
-        <a-button :disabled="!project.status" type="danger" @click="restart">重启</a-button>
-        <a-button :disabled="!project.status" type="danger" @click="stop">停止</a-button>
-        <a-button type="primary" @click="handleDownload">导出日志</a-button>
-        <a-button type="primary" @click="handleLogBack">备份列表</a-button>
-        <a-button type="primary" @click="goFile">文件管理</a-button>
-        <a-tag color="#87d068">文件大小: {{ project.logSize }}</a-tag>
+        <a-space>
+          <a-button :disabled="project.status" type="primary" @click="start">启动</a-button>
+          <a-button :disabled="!project.status" type="danger" @click="restart">重启</a-button>
+          <a-button :disabled="!project.status" type="danger" @click="stop">停止</a-button>
+          <a-button type="primary" @click="handleDownload">导出日志</a-button>
+          <a-button type="primary" @click="handleLogBack">备份列表</a-button>
+          <a-button type="primary" @click="goFile">文件管理</a-button>
+          <a-tag color="#87d068">文件大小: {{ project.logSize }}</a-tag>
+        </a-space>
       </template>
     </div>
     <!-- console -->
