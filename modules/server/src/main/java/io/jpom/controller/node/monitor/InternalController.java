@@ -1,8 +1,5 @@
 package io.jpom.controller.node.monitor;
 
-import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.JsonMessage;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -23,17 +20,18 @@ public class InternalController extends BaseServerController {
 
 
 	/**
-	 * @return
-	 * @author Hotstrip
-	 * get InternalData
 	 * 获取内存信息接口
+	 * get InternalData
+	 *
+	 * @return json
+	 * @author Hotstrip
 	 */
 	@RequestMapping(value = "getInternalData", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String getInternalData() {
-		JSONObject data = NodeForward.requestData(getNode(), NodeUrl.Manage_internal_data, getRequest(), JSONObject.class);
-		DefaultSystemLog.getLog().info("data: {}", data == null ? "" : data.toString());
-		return JsonMessage.getString(200, "success", data);
+		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_internal_data).toString();
+		//DefaultSystemLog.getLog().info("data: {}", data == null ? "" : data.toString());
+//		return JsonMessage.getString(200, "success", data);
 	}
 
 	/**

@@ -27,9 +27,13 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
+import io.jpom.model.system.NetstatModel;
+import io.jpom.model.system.ProcessModel;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.util.CommandUtil;
 import org.springframework.http.MediaType;
@@ -40,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.List;
 
 /**
  * 内存查看
@@ -59,21 +64,21 @@ public class InternalController extends BaseAgentController {
 	 */
 	@RequestMapping(value = "internal_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getInternal(String tag, String copyId) throws Exception {
-//        String tagId = ProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
-//        int pid = AbstractProjectCommander.getInstance().getPid(tagId);
-//        if (pid <= 0) {
-//            return JsonMessage.getString(400, "");
-//        }
-//        JSONObject jsonObject = new JSONObject();
-//        ProcessModel item = AbstractSystemCommander.getInstance().getPidInfo(pid);
-//        jsonObject.put("process", item);
-//        JSONObject beanMem = getBeanMem(tagId);
-//        jsonObject.put("beanMem", beanMem);
-//        //获取端口信息
-//        List<NetstatModel> netstatModels = AbstractProjectCommander.getInstance().listNetstat(pid, false);
-//        jsonObject.put("netstat", netstatModels);
-//        return JsonMessage.getString(200, "", jsonObject);
-		return JsonMessage.getString(404, "功能已经下架");
+		String tagId = NodeProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
+		int pid = AbstractProjectCommander.getInstance().getPid(tagId);
+		if (pid <= 0) {
+			return JsonMessage.getString(400, "");
+		}
+		JSONObject jsonObject = new JSONObject();
+		ProcessModel item = AbstractSystemCommander.getInstance().getPidInfo(pid);
+		jsonObject.put("process", item);
+		//JSONObject beanMem = getBeanMem(tagId);
+		//jsonObject.put("beanMem", beanMem);
+		//获取端口信息
+		List<NetstatModel> netstatModels = AbstractProjectCommander.getInstance().listNetstat(pid, false);
+		jsonObject.put("netstat", netstatModels);
+		return JsonMessage.getString(200, "", jsonObject);
+//		return JsonMessage.getString(404, "功能已经下架");
 	}
 
 	/**

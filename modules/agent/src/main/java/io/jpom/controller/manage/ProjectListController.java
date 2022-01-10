@@ -24,8 +24,6 @@ package io.jpom.controller.manage;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
@@ -92,13 +90,13 @@ public class ProjectListController extends BaseAgentController {
 
 		List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
 		Assert.notEmpty(javaCopyItemList, "对应项目没有副本集");
-		JSONArray array = new JSONArray();
-		for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-			JSONObject object = javaCopyItem.toJson();
-			boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, javaCopyItem);
-			object.put("status", run);
-			array.add(object);
-		}
-		return JsonMessage.getString(200, "", array);
+		//		JSONArray array = new JSONArray();
+		//		for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+		//			JSONObject object = javaCopyItem.toJson();
+		//			boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, javaCopyItem);
+		//			object.put("status", run);
+		//			array.add(object);
+		//		}
+		return JsonMessage.getString(200, "", javaCopyItemList);
 	}
 }
