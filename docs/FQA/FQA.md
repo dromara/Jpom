@@ -58,11 +58,6 @@ vim filename（文件名）
 
 > 请修改文件编码为当前系统默认的编码（windows中默认为GB2312）、检查文件内容换行符
 
-### 启动Jpom提示
-![jpom](../images/error/jdk-error.png)
-
-Jpom需要Jdk1.8以上，请检查jdk版本
-
 ###  Jpom使用Nginx代理推荐配置
 
 [查看>>](../辅助配置/nginx-config.md)
@@ -79,18 +74,6 @@ Jpom需要Jdk1.8以上，请检查jdk版本
 
 针对以上两个问题，Jpom目前采用略过这些进程的解决办法，请更新到2.3.1以上。 
 
-
-### windows 环境 com.sun.tools.attach.AttachNotSupportedException: no providers installed 之类异常
-
-> 问题原因${JAVA_HOME}/jre/bin/attach.dll 文件没有找到，检查当前Jdk环境是否安装完整
-
-### windows 环境 java.util.ServiceConfigurationError: com.sun.tools.attach.spi.AttachProvider: Provider sun.tools.attach.WindowsAttachProvider could not be instantiated
-
-> 问题原因${JAVA_HOME}/jre/bin/attach.dll 文件没有找到，将这个文件复制到${JAVA_HOME}/bin/目录下即可；前提是${JAVA_HOME}/bin/目录已经加入到操作系统的path环境变量下；
->
->或者
->
-> 解决方法：将jdk原路径下的jre/bin路径添加到环境变量path下。
 
 ### 查看控制台日志中文乱码
 
