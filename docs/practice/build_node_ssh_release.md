@@ -18,9 +18,7 @@
 
 # 操作步骤
 
-## 第一步
-
-安装 Jpom 服务端
+## 第一步：安装 Jpom 服务端
 
 > 目前安装 Jpom 服务端的方式有：一键安装、下载安装、编译打包安装、docker 安装，建议按照自己熟悉的方式来安装
 > 
@@ -39,7 +37,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 ![install3](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install3.png)
 ![install4](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install4.png)
 
-## 第二步
+## 第二步：安装 node 环境
 
 > 安装 node 环境、这里演示中我们使用 node 16.13.1 版本（项目实际依赖版本请根据业务情况调整）
 >
@@ -65,7 +63,7 @@ echo 'export PATH=$NODE_HOME/bin:$PATH'>>/etc/profile
 source /etc/profile
 ```
 
-## 第三步
+## 第三步：重启服务器端
 
 > 重启服务器端，由于在启动服务端后安装端 node 环境，所以需要重启服务端让 node 环境在服务端中生效
 
@@ -73,9 +71,7 @@ source /etc/profile
 sh /home/jpom/server/Server.sh restart
 ```
 
-## 第四步
-
-在 ssh 所在到服务器安装 nginx 环境
+## 第四步：在 ssh 所在到服务器安装 nginx 环境
 
 教程中使用 centos7 rpm 方式安装，实际中可以根据环境情况安装(如果是编译安装则需要)
 
@@ -97,11 +93,9 @@ vim /etc/nginx/nginx.conf
 systemctl start nginx
 ```
 
-## 第五步
+## 第五步：初始化 Jpom 服务端和配置 ssh 信息
 
-初始化 Jpom 服务端和配置 ssh 信息
-
-服务：http://IP:2122 这里 ip 请更换为您服务器中第实际 ip
+访问：http://IP:2122 这里 ip 请更换为您服务器中第实际 ip
 
 如果无法访问请优先检查 Jpom 访问是否正常运行、服务端防火墙、云服务器的安全组规则等网络原因
 
@@ -120,9 +114,7 @@ systemctl start nginx
 
 注意这里一定要配置：文件目录，文件目录为授权允许在 Jpom 管理的文件夹，这里为后面构建发布会使用到
 
-## 第六步
-
-创建构建仓库、创建构建信息
+## 第六步：创建构建仓库、创建构建信息
 
 1. 添加仓库
    1. ![repository-list](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/repository-list.png)
@@ -141,9 +133,7 @@ systemctl start nginx
    2. 构建中请注意执行构建命令过程中是否发生错误信息影响到没有达到预期到构建结果（没有对应到构建产物）
    3. ![build-release-ssh](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/build-release-ssh.png)
 
-## 第七步
-
-配置 nginx 访问
+## 第七步：配置 nginx 访问
 
 1. 查看文件是否上传成功 `/home/web/testvue`
    2. ![ssh-view](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/ssh-view.png)
@@ -151,9 +141,7 @@ systemctl start nginx
    1. `vim /etc/nginx/conf.d/default.conf` 实际中请根据业务配置来变更配置路径和方式
    2. ![ssh-edit-nginx](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/ssh-edit-nginx.png)
 
-## 第八步
-
-愉快的使用前端项目
+## 第八步：愉快的使用前端项目
 
 ![use](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/use.png)
 

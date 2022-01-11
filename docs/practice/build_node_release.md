@@ -20,9 +20,7 @@
 
 # 操作步骤
 
-## 第一步
-
-安装 Jpom 服务端
+## 第一步：安装 Jpom 服务端
 
 > 目前安装 Jpom 服务端的方式有：一键安装、下载安装、编译打包安装、docker 安装，建议按照自己熟悉的方式来安装
 > 
@@ -41,7 +39,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 ![install3](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install3.png)
 ![install4](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install4.png)
 
-## 第二步
+## 第二步：安装 node 环境
 
 > 安装 node 环境、这里演示中我们使用 node 16.13.1 版本（项目实际依赖版本请根据业务情况调整）
 >
@@ -67,7 +65,7 @@ echo 'export PATH=$NODE_HOME/bin:$PATH'>>/etc/profile
 source /etc/profile
 ```
 
-## 第三步
+## 第三步：重启服务器端
 
 > 重启服务器端，由于在启动服务端后安装端 node 环境，所以需要重启服务端让 node 环境在服务端中生效
 
@@ -75,9 +73,7 @@ source /etc/profile
 sh /home/jpom/server/Server.sh restart
 ```
 
-## 第四步
- 
-安装 Jpom 插件端
+## 第四步：安装 Jpom 插件端
 
 > 目前安装 Jpom 插件端的方式有：一键安装、下载安装、编译打包安装，建议按照自己熟悉的方式来安装
 >
@@ -94,9 +90,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 图 2 中圈出来第为插件端的账号密码
 
-## 第五步
-
-安装 nginx 环境
+## 第五步：安装 nginx 环境
 
 教程中使用 centos7 rpm 方式安装，实际中可以根据环境情况安装(如果是编译安装则需要)
 
@@ -118,11 +112,9 @@ vim /etc/nginx/nginx.conf
 systemctl start nginx
 ```
 
-## 第六步
+## 第六步：初始化 Jpom 服务端和插件端
 
-初始化 Jpom 服务端和插件端
-
-服务：http://IP:2122 这里 ip 请更换为您服务器中第实际 ip
+访问：http://IP:2122 这里 ip 请更换为您服务器中第实际 ip
 
 如果无法访问请优先检查 Jpom 访问是否正常运行、服务端防火墙、云服务器的安全组规则等网络原因
 
@@ -145,9 +137,7 @@ systemctl start nginx
 
 图 3 中的节点密码为上面步骤中第四步中安装并启动插件端后控制台输出第账号和密码
 
-## 第七步
-
-配置节点信息、创建节点项目
+## 第七步：配置节点信息、创建节点项目
 
 1. 进入节点管理
    1. ![node-list2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/node-list2.png)
@@ -161,9 +151,7 @@ systemctl start nginx
 4. 创建 `File 类型项目`
    1. ![project-add](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/project-add.png)
 
-## 第八步
-
-创建构建仓库、创建构建信息
+## 第八步：创建构建仓库、创建构建信息
 
 1. 添加仓库
    1. ![repository-list](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/repository-list.png)
@@ -180,9 +168,7 @@ systemctl start nginx
    2. 构建中请注意执行构建命令过程中是否发生错误信息影响到没有达到预期到构建结果（没有对应到构建产物）
    3. ![build-release](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/build-release.png)
 
-## 第九步
-
-检查项目文件夹是否正确、配置 nginx 访问
+## 第九步：检查项目文件夹是否正确、配置 nginx 访问
 
 1. 查看项目文件夹里面的文件
    1. 当前项目文件夹 `/home/test/vue` 由所选的项目路径+添加的文件路径组成
@@ -191,9 +177,7 @@ systemctl start nginx
    1. ![nginx-list](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/nginx-list.png)
    2. ![nginx-edit](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/nginx-edit.png)
 
-## 第十步
-
-愉快的使用前端项目
+## 第十步：愉快的使用前端项目
 
 ![use](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/use.png)
 
