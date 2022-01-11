@@ -172,7 +172,7 @@
           <template slot="label">
             清空发布
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件现删除后再保存新文件 </template>
+              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件 </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
@@ -250,7 +250,7 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          
+
         </a-form-model-item> -->
         <a-form-model-item v-show="filePath !== ''" label="项目完整目录">
           <a-alert :message="filePath" type="success" />
@@ -306,7 +306,7 @@
           <template slot="label">
             清空发布
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件现删除后再保存新文件 </template>
+              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件 </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
@@ -411,7 +411,7 @@
           <template slot="label">
             清空发布
             <a-tooltip>
-              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件现删除后再保存新文件 </template>
+              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件 </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
