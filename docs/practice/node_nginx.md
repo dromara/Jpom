@@ -142,7 +142,7 @@ make install
 
 ## 第六步：愉快第使用 Jpom 在线编辑、管理 nginx
 
-## 说明
+# 说明
 
 - linux 系统中如果使用 yum 安装或者配置了服务，在配置 nginx 服务名称中则配置对应的服务名称，默认为 nginx
 - windows 系统中则需要为 nginx 配置服务才能正常监控 nginx 状态，建议使用 [winsw](https://github.com/winsw/winsw) 来配置
