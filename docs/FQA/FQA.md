@@ -79,6 +79,28 @@ vim filename（文件名）
 
 > 由于目前采用自动识别文件编码格式，可能不准确，如果明确日志文件编码格式。可以在外部文件【extConfig.yml】中指定
 
+### 启动很慢
+
+在 linux 中出现如下日志：`Please verify your network configuration.`
+```
+WARN [main] o.s.b.StartupInfoLogger [StartupInfoLogger.java:117]- x:() InetAddress.getLocalHost().getHostName() took 10084 milliseconds to respond. Please verify your network configuration.
+```
+
+解决方法：
+1. 查看主机名
+```
+hostname
+```
+假设输出：`myhostname`
+2. 在/etc/hosts上加上主机名
+```
+127.0.0.1   localhost myhostname
+::1         localhost myhostname
+```
+
+注意：myhostname 请修改为第一步执行结果
+
+
 ### 常见问题未知问题
 
 https://github.com/alibaba/arthas/issues/347
