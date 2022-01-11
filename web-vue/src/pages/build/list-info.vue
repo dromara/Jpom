@@ -238,7 +238,7 @@
           <template slot="label">
             清空发布
             <a-tooltip v-show="!temp.id">
-              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件现删除后再保存新文件 </template>
+              <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件 </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
