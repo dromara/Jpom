@@ -318,7 +318,7 @@ public class NginxController extends BaseAgentController {
 	public String close() {
 		String name = nginxService.getServiceName();
 		String result = AbstractSystemCommander.getInstance().stopService(name);
-		return JsonMessage.getString(200, result);
+		return JsonMessage.getString(200, "nginx服务已停止 " + result);
 	}
 
 	/**
