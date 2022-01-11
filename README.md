@@ -35,7 +35,7 @@
 
 #### 您为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
 
-> Java 项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
+>  大部分项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
 
 > 此方法不足的是：
 > 1. 需要每次登录服务器（专业软件）
@@ -54,17 +54,20 @@
 
 #### 项目主要功能及特点
 
-1. 创建、修改、删除项目、Jar包管理
+1. 创建、修改、删除项目、Jar包管理、在线修改文本文件
 2. 实时查看控制台日志、备份日志、删除日志、导出日志
-3. 在线构建项目发布项目一键搞定
-4. 多节点管理、多节点自动分发
-5. 在线  SSH 终端，并且有终端日志和禁用命令
-6. 实时监控项目状态异常自动报警
-7. ~~cpu、ram 监控、(已经取消该功能)~~ 导出堆栈信息、查看项目进程端口、服务器状态监控
-8. 多用户管理，用户项目权限独立(上传、删除权限可控制),完善的操作日志
-9. 系统路径白名单模式，杜绝用户误操作系统文件
-10. 在线管理 Nginx 配置文件、ssl 证书文件
-11. ~~Tomcat状态、文件、war包在线实时管理 (不再长期维护)~~
+3. 节点脚本模版功能、定时执行脚本模版
+4. 在线构建项目发布项目一键搞定、仓库统一管理
+5. 多节点管理、多节点自动分发
+6. 在线 SSH 终端，并且有终端日志和禁用命令、在线修改文本文件、定时脚本、自动解压缩包
+7. 在线 SSH 轻量的实现了简单的堡垒机功能
+8. 实时监控项目状态异常自动报警、自动尝试重启
+9. ~~cpu、ram 监控、(已经取消该功能)~~ 导出堆栈信息、查看项目进程端口、服务器状态监控
+10. 多用户管理，用户项目权限独立(上传、删除权限可控制),完善的操作日志,使用工作空间隔离权限
+11. 系统路径白名单模式，杜绝用户误操作系统文件
+12. 在线管理 Nginx 配置文件、ssl 证书文件
+13. ~~Tomcat状态、文件、war包在线实时管理 (不再长期维护)~~
+14. 升级 Jpom 版本方便：手动上传文件、在线上传文件、远程下载更新
 
 > 特别提醒：
 > 1. 在 Windows 服务器中可能有部分功能因为系统特性造成兼容性问题，建议在实际使用中充分测试。Linux 目前兼容良好
@@ -84,6 +87,7 @@
 ### 一键安装（Linux）（推荐）
 
 #### 插件端
+
 > 如果服务端也需要被管理，在服务端上也需要安装插件端
 >
 > 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) ）
@@ -133,6 +137,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 >
 > 如无法访问，检查下是否开启了防火墙`systemctl status firewalld`，如状态显示为绿色`Active: active (running)`可临时关闭防火墙`systemctl stop firewalld`，然后重启防火墙`firewall-cmd --reload`（建议仅测试环境下使用，生产环境下慎用）
 > 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中检查安全组规则(关闭防火墙)
+> 注意 linux 系统中防火墙可能存在多种：Firewall、Iptables，再检查防火墙配置时候需要都检查一下
 
 ### 容器化安装
 
@@ -147,19 +152,6 @@ docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:r
 >
 > 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档[https://jpom.io/docs/](https://jpom.io/docs/)
 
-
-### docker-compose 一键启动
-
-- 无需安装任何环境,自动编译构建
-
-> 需要注意修改 `.env` 文件中的 token 值
-
-```shell
-git clone https://gitee.com/dromara/Jpom.git
-cd Jpom
-docker-compose up -d
-```
-
 ### 下载安装
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
@@ -169,12 +161,12 @@ docker-compose up -d
 3. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
    1. agent-x.x.x-release 目录为插件端的全部安装文件
    2. 上传到对应服务器
-   3. 命令运行（Agent.sh、Agent.bat）
+   3. 命令运行（Agent.sh、Agent.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
    4. 默认运行端口：`2123`
 4. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
    1. server-x.x.x-release 目录为服务端的全部安装文件
    2. 上传到对应服务器
-   3. 命令运行（Server.sh、Server.bat）
+   3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
    4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
 ### 编译安装
@@ -188,15 +180,28 @@ docker-compose up -d
 5. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
    1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
    2. 打包上传服务器运行
-   3. 命令运行（Agent.sh、Agent.bat）
+   3. 命令运行（Agent.sh、Agent.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
    4. 默认运行端口：`2123`
 6. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
    1. 查看插件端安装包 modules/server/target/server-x.x.x-release
    2. 打包上传服务器运行
-   3. 命令运行（Server.sh、Server.bat）
+   3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
    4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
 > 也可以使用 `script/release.bat` `script/release.sh` 快速打包
+
+
+### 一键启动 docker-compose
+
+- 无需安装任何环境,自动编译构建
+
+> 需要注意修改 `.env` 文件中的 token 值
+
+```shell
+git clone https://gitee.com/dromara/Jpom.git
+cd Jpom
+docker-compose up
+```
 
 ### 编译运行
 
@@ -225,7 +230,7 @@ Server.bat     启动管理面板(按照面板提示输入操作)
 Agent.bat     启动管理面板(按照面板提示输入操作)
 ```
 
-> windows 中执行启动后需要根据日志取跟进启动的状态
+> windows 中执行启动后需要根据日志取跟进启动的状态、如果出现乱码请检查或者修改编码格式，windows 中 bat 编码格式推荐为 `GB2312`
 
 2. linux 中 Agent.sh 、Server.sh
 
@@ -266,7 +271,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 ```   
 账号：demo
-密码：demo123
+密码：jpom123
 ```    
 
 > 演示系统有部分功能做了限制，完整功能请自行部署体验
