@@ -31,7 +31,7 @@
 > 使用一键安装的命令安装服务端
 
 ```
-# 这里我们选择快速安装 jdk 和 maven ,事件中请根据自己情况选择
+# 这里我们选择快速安装 jdk 和 maven ,实际中请根据自己情况选择
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk+mvn
 ```
 
