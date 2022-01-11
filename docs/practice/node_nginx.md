@@ -131,7 +131,7 @@ make install
    1. ![nginx-config1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-config1.png)
 2. 配置 nginx 服务
    1. ![edit-nginx-name1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-edit-name1.png)
-   2. ![edit-nginx-name2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node-nginx/nginx-edit-name2.png)
+   2. ![edit-nginx-name2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-edit-name2.png)
    3. 填写的 `/usr/local/nginx/sbin/nginx` 为 nginx 执行文件绝对路径
 3. 启动 nginx 服务
    1. ![nginx-start1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-start1.png)
