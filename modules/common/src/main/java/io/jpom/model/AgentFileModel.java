@@ -31,6 +31,10 @@ public class AgentFileModel extends BaseModel {
 	 * 保存Agent文件
 	 */
 	public static final String ID = "AGENT_FILE";
+	/**
+	 * 默认空版本信息
+	 */
+	public static final AgentFileModel EMPTY = new AgentFileModel();
 
 	/**
 	 * 文件大小
@@ -80,4 +84,14 @@ public class AgentFileModel extends BaseModel {
 	public void setVersion(String version) {
 		this.version = version;
 	}
+
+	public AgentFileModel() {
+	}
+
+	public AgentFileModel(boolean empty) {
+		if (empty) {
+			this.setVersion("0");
+		}
+	}
+
 }
