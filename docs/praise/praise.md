@@ -1,3 +1,10 @@
+# 为 Jpom 赞赏
+
+1. 码云捐赠赞赏
+   1. [在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
+2. 微信二维码赞赏
+   1. [点击查看二维码](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_praise_small.png)
+
 # 赞赏公示
 
 | 日期         | 渠道    | 金额   | 昵称          | 备注  |
