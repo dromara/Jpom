@@ -1,6 +1,6 @@
 ![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.png)
 
-#  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
+##  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
 
 ## 前言
 
@@ -18,9 +18,9 @@
 2. 服务端所在服务器需要 node 环境
 3. 插件端所在服务器需要 nginx 环境
 
-## 操作步骤
+# 操作步骤
 
-### 第一步
+## 第一步
 
 安装 Jpom 服务端
 
@@ -34,14 +34,14 @@ mkdir -p /home/jpom/server && cd /home/jpom/server
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
 ```
 
-#### 执行命令后控制台输出如下
+### 执行命令后控制台输出如下
 
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install1.png)
 ![install2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install2.png)
 ![install3](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install3.png)
 ![install4](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install4.png)
 
-### 第二步
+## 第二步
 
 > 安装 node 环境、这里演示中我们使用 node 16.13.1 版本（项目实际依赖版本请根据业务情况调整）
 >
@@ -67,7 +67,7 @@ echo 'export PATH=$NODE_HOME/bin:$PATH'>>/etc/profile
 source /etc/profile
 ```
 
-### 第三步
+## 第三步
 
 > 重启服务器端，由于在启动服务端后安装端 node 环境，所以需要重启服务端让 node 环境在服务端中生效
 
@@ -75,7 +75,7 @@ source /etc/profile
 sh /home/jpom/server/Server.sh restart
 ```
 
-### 第四步
+## 第四步
  
 安装 Jpom 插件端
 
@@ -94,7 +94,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 图 2 中圈出来第为插件端的账号密码
 
-### 第五步
+## 第五步
 
 安装 nginx 环境
 
@@ -118,7 +118,7 @@ vim /etc/nginx/nginx.conf
 systemctl start nginx
 ```
 
-### 第六步
+## 第六步
 
 初始化 Jpom 服务端和插件端
 
@@ -126,14 +126,14 @@ systemctl start nginx
 
 如果无法访问请优先检查 Jpom 访问是否正常运行、服务端防火墙、云服务器的安全组规则等网络原因
 
-#### 初始化系统管理员
+### 初始化系统管理员
 
 第一次使用系统需要设置一个系统管理员账号（系统管理员账号密码有强度要求，请安装提示设置。同时也请您牢记系统管理员账号）
 
 ![install-user1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install-user1.png)
 ![install-user2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install-user2.png)
 
-#### 添加 Jpom 节点
+### 添加 Jpom 节点
 
 节点列表还没有任何节点，我们需要将我们之前安装等插件端添加到服务端中来
 
@@ -145,7 +145,7 @@ systemctl start nginx
 
 图 3 中的节点密码为上面步骤中第四步中安装并启动插件端后控制台输出第账号和密码
 
-### 第七步
+## 第七步
 
 配置节点信息、创建节点项目
 
@@ -161,7 +161,7 @@ systemctl start nginx
 4. 创建 `File 类型项目`
    1. ![project-add](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/project-add.png)
 
-### 第八步
+## 第八步
 
 创建构建仓库、创建构建信息
 
@@ -180,7 +180,7 @@ systemctl start nginx
    2. 构建中请注意执行构建命令过程中是否发生错误信息影响到没有达到预期到构建结果（没有对应到构建产物）
    3. ![build-release](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/build-release.png)
 
-### 第九步
+## 第九步
 
 检查项目文件夹是否正确、配置 nginx 访问
 
@@ -191,7 +191,7 @@ systemctl start nginx
    1. ![nginx-list](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/nginx-list.png)
    2. ![nginx-edit](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/nginx-edit.png)
 
-### 第十步
+## 第十步
 
 愉快的使用前端项目
 
