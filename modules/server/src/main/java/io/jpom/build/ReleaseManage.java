@@ -256,7 +256,9 @@ public class ReleaseManage extends BaseBuild {
 					try {
 						sftp.delDir(this.buildExtraModule.getReleasePath());
 					} catch (Exception e) {
-						this.pubLog("清除构建产物失败", e);
+						if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
+							this.pubLog("清除构建产物失败", e);
+						}
 					}
 				}
 				String prefix = "";
