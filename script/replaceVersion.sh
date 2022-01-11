@@ -40,5 +40,8 @@ sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/agent/Dockerfile
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../script/docker.sh
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/server/DockerfileRelease
 
+# vue version
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../web-vue/package.json
+
 # 保留新版本号
 echo "$new_version" > $pwd/../docs/version.txt
