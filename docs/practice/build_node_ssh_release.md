@@ -141,7 +141,7 @@ systemctl start nginx
    1. `vim /etc/nginx/conf.d/default.conf` 实际中请根据业务配置来变更配置路径和方式
    2. ![ssh-edit-nginx](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/ssh-edit-nginx.png)
 
-## 第八步：愉快的使用前端项目
+## 第八步：愉快地使用前端项目
 
 ![use](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/use.png)
 

@@ -177,7 +177,7 @@ systemctl start nginx
    1. ![nginx-list](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/nginx-list.png)
    2. ![nginx-edit](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/nginx-edit.png)
 
-## 第十步：愉快的使用前端项目
+## 第十步：愉快地使用前端项目
 
 ![use](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/use.png)
 
