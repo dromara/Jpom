@@ -215,6 +215,8 @@ export default {
             this.temp = { ...this.temp, upgrade: upgrade, newVersion: res.data.tagName };
             // this.temp.upgrade = upgrade;
             // this.temp.newVersion = ;
+          } else {
+            this.temp = { ...this.temp, upgrade: false };
           }
         }
       });
@@ -333,7 +335,7 @@ export default {
       uploadAgentFile(formData).then(({ code, msg }) => {
         if (code === 200) {
           this.$notification.success({ message: msg });
-          this.getAgentVersion();
+          this.refresh();
         } else {
           //this.$notification.error({ message: msg });
         }
@@ -345,8 +347,7 @@ export default {
       downloadRemote().then((res) => {
         if (res.code === 200) {
           this.$notification.success({ message: res.msg });
-          this.getAgentVersion();
-          this.checkAgentFileVersion();
+          this.refresh();
         } else {
           //this.$notification.error({ message: res.msg });
         }

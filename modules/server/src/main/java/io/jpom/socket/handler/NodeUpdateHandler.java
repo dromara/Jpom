@@ -321,10 +321,12 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	 * @return json
 	 */
 	private String getAgentVersion() {
-		AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class);
-		if (agentFileModel == null) {
-			return null;
-		}
+		AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class, agentFileModel1 -> {
+			if (agentFileModel1 == null || !FileUtil.exist(agentFileModel1.getSavePath())) {
+				return AgentFileModel.EMPTY;
+			}
+			return agentFileModel1;
+		});
 		return JSONObject.toJSONString(agentFileModel);
 	}
 }

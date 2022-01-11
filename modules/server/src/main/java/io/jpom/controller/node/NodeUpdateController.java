@@ -17,10 +17,12 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.system.SystemParametersServer;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +53,8 @@ public class NodeUpdateController extends BaseServerController {
 	@GetMapping(value = "download_remote.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.REMOTE_DOWNLOAD)
 	public String downloadRemote() throws IOException {
-		Tuple download = RemoteVersion.download(ConfigBean.getInstance().getTempPath().getAbsolutePath(), Type.Agent, false);
+		String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();
+		Tuple download = RemoteVersion.download(saveDir, Type.Agent, false);
 		// 保存文件
 		this.saveAgentFile(download);
 		return JsonMessage.getString(200, "下载成功");
@@ -67,7 +70,12 @@ public class NodeUpdateController extends BaseServerController {
 	@GetMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String checkVersion() {
 		RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
-		AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class);
+		AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class, agentFileModel1 -> {
+			if (agentFileModel1 == null || !FileUtil.exist(agentFileModel1.getSavePath())) {
+				return null;
+			}
+			return agentFileModel1;
+		});
 		JSONObject jsonObject = new JSONObject();
 		if (remoteVersion == null) {
 			jsonObject.put("upgrade", false);

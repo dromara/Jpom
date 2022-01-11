@@ -28,6 +28,8 @@ import io.jpom.model.data.SystemParametersModel;
 import io.jpom.service.h2db.BaseDbService;
 import org.springframework.stereotype.Service;
 
+import java.util.function.Function;
+
 /**
  * @author bwcx_jzy
  * @since 2021/12/2
@@ -60,11 +62,28 @@ public class SystemParametersServer extends BaseDbService<SystemParametersModel>
 	 * @return data
 	 */
 	public <T> T getConfig(String name, Class<T> cls) {
+		return this.getConfig(name, cls, null);
+	}
+
+	/**
+	 * 查询 系统参数 值
+	 *
+	 * @param name  参数名称
+	 * @param cls   类
+	 * @param mapTo 回调
+	 * @param <T>   泛型
+	 * @return data
+	 */
+	public <T> T getConfig(String name, Class<T> cls, Function<T, T> mapTo) {
 		SystemParametersModel parametersModel = super.getByKey(name);
 		if (parametersModel == null) {
 			return null;
 		}
-		return parametersModel.jsonToBean(cls);
+		T jsonToBean = parametersModel.jsonToBean(cls);
+		if (mapTo == null) {
+			return jsonToBean;
+		}
+		return mapTo.apply(jsonToBean);
 	}
 
 	/**
