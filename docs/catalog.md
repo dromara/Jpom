@@ -3,6 +3,7 @@
     * [名词解释](FQA/名词解释.md)
     * [更新记录](CHANGELOG)
     * [开发计划](PLANS)
+    * [赞赏记录](praise)
 * 实践案例
     * [在线构建 + SSH 发布 java 项目](practice/ssh_release.md)
     * [在线构建 + 项目发布 node 项目](practice/build_node_release.md)
