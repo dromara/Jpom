@@ -95,7 +95,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 教程中使用 centos7 rpm 方式安装，实际中可以根据环境情况安装(如果是编译安装则需要)
 
 ```
-rpm -ivh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+rpm -ivh https://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
 yum install -y nginx
 ```
 
