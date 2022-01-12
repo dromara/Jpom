@@ -119,7 +119,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 			if (error.getCode() != HttpStatus.HTTP_OK) {
 				return error.getMsg();
 			}
-			JpomManifest.releaseJar(filePath, uploadFile.getVersion(), true);
+			JpomManifest.releaseJar(filePath, uploadFile.getVersion());
 			JpomApplication.restart();
 		} catch (Exception e) {
 			result = "重启失败" + e.getMessage();
