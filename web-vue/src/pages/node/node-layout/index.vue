@@ -1,5 +1,5 @@
 <template>
-  <a-layout class="node-layout">
+  <a-layout class="node-layout" ref="nodeLayout" id="nodeLayout">
     <!-- 侧边栏 节点管理菜单 -->
     <a-layout-sider theme="light" class="node-sider jpom-node-sider">
       <a-menu theme="light" mode="inline" :default-selected-keys="selectedKeys" :default-open-keys="defaultOpenKey">
@@ -40,21 +40,21 @@
   </a-layout>
 </template>
 <script>
-import { getNodeMenu } from "../../../api/menu";
-import Welcome from "./welcome";
-import ProjectList from "./project/project-list";
-import JdkList from "./project/jdk-list";
-import Recover from "./project/recover-list";
-import Tomcat from "./other/tomcat-list";
+import { getNodeMenu } from "@/api/menu";
+import Welcome from "@/pages/node/node-layout/welcome";
+import ProjectList from "@/pages/node/node-layout/project/project-list";
+import JdkList from "@/pages/node/node-layout/project/jdk-list";
+import Recover from "@/pages/node/node-layout/project/recover-list";
+import Tomcat from "@/pages/node/node-layout/other/tomcat-list";
 import ScriptTemplate from "@/pages/node/node-layout/other/script-list";
 import ScriptLog from "@/pages/node/node-layout/other/script-log";
-import NginxList from "./nginx/list";
-import Cert from "./nginx/cert";
-import WhiteList from "./system/white-list.vue";
-import Cache from "./system/cache";
-import Log from "./system/log.vue";
-import Upgrade from "./system/upgrade.vue";
-import ConfigFile from "./system/config-file.vue";
+import NginxList from "@/pages/node/node-layout/nginx/list";
+import Cert from "@/pages/node/node-layout/nginx/cert";
+import WhiteList from "@/pages/node/node-layout/system/white-list.vue";
+import Cache from "@/pages/node/node-layout/system/cache";
+import Log from "@/pages/node/node-layout/system/log.vue";
+import Upgrade from "@/pages/node/node-layout/system/upgrade.vue";
+import ConfigFile from "@/pages/node/node-layout/system/config-file.vue";
 
 export default {
   components: {
@@ -168,7 +168,8 @@ export default {
 </script>
 <style scoped>
 .node-sider {
-  height: calc(100vh - 75px);
+  /* height: calc(100vh - 75px); */
+  min-height: calc(100vh);
   overflow-y: auto;
 }
 .layout-content {
