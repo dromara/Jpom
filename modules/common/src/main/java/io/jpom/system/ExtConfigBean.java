@@ -88,6 +88,11 @@ public class ExtConfigBean {
 	@Value("${system.timerMatchSecond:false}")
 	private Boolean timerMatchSecond;
 	/**
+	 * 旧包文件保留个数
+	 */
+	@Value("${system.oldJarsCount:2}")
+	private Integer oldJarsCount;
+	/**
 	 *
 	 */
 	private Charset logFileCharsets;
@@ -202,5 +207,14 @@ public class ExtConfigBean {
 
 	public boolean getTimerMatchSecond() {
 		return ObjectUtil.defaultIfNull(timerMatchSecond, false);
+	}
+
+	/**
+	 * 旧包文件保留个数
+	 *
+	 * @return 默认 2 个，0 保留所有
+	 */
+	public int getOldJarsCount() {
+		return Math.max(oldJarsCount, 0);
 	}
 }

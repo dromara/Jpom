@@ -22,6 +22,7 @@
  */
 package io.jpom.common;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Console;
@@ -158,6 +159,9 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 		Console.log("Jpom[{}] Current data path：{} External configuration file path：{}", JpomManifest.getInstance().getVersion(), path, extConfigPath);
 	}
 
+	/**
+	 * 检查更新包文件状态
+	 */
 	private static void checkUpdate() {
 		File runFile = JpomManifest.getRunPath().getParentFile();
 		String upgrade = FileUtil.file(runFile, ConfigBean.UPGRADE).getAbsolutePath();
@@ -166,20 +170,19 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 			jsonObject = (JSONObject) JsonFileUtil.readJson(upgrade);
 		} catch (FileNotFoundException ignored) {
 		}
-		if (jsonObject == null) {
-			return;
+		if (jsonObject != null) {
+			String beforeJar = jsonObject.getString("beforeJar");
+			if (StrUtil.isNotEmpty(beforeJar)) {
+				File beforeJarFile = FileUtil.file(runFile, beforeJar);
+				if (beforeJarFile.exists()) {
+					File oldJars = JpomManifest.getOldJarsPath();
+					FileUtil.mkdir(oldJars);
+					FileUtil.move(beforeJarFile, oldJars, true);
+					DefaultSystemLog.getLog().info("备份旧程序包：" + beforeJar);
+				}
+			}
 		}
-		String beforeJar = jsonObject.getString("beforeJar");
-		if (StrUtil.isEmpty(beforeJar)) {
-			return;
-		}
-		File beforeJarFile = FileUtil.file(runFile, beforeJar);
-		if (beforeJarFile.exists()) {
-			File oldJars = JpomManifest.getOldJarsPath();
-			FileUtil.mkdir(oldJars);
-			FileUtil.move(beforeJarFile, oldJars, true);
-			DefaultSystemLog.getLog().info("备份旧程序包：" + beforeJar);
-		}
+		clearOldJar();
 		// windows 备份日志
 		//        if (SystemUtil.getOsInfo().isWindows()) {
 		//            boolean logBack = jsonObject.getBooleanValue("logBack");
@@ -193,6 +196,21 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 		//                }
 		//            }
 		//        }
+	}
+
+	private static void clearOldJar() {
+		File oldJars = JpomManifest.getOldJarsPath();
+		List<File> files = FileUtil.loopFiles(oldJars, 1, file -> StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true));
+		if (CollUtil.isEmpty(files)) {
+			return;
+		}
+		// 排序
+		files.sort((o1, o2) -> FileUtil.lastModifiedTime(o2).compareTo(FileUtil.lastModifiedTime(o1)));
+		// 截取
+		int size = CollUtil.size(files);
+		files = CollUtil.sub(files, ExtConfigBean.getInstance().getOldJarsCount(), size);
+		// 删除文件
+		files.forEach(FileUtil::del);
 	}
 
 }
