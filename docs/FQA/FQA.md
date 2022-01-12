@@ -88,17 +88,32 @@ WARN [main] o.s.b.StartupInfoLogger [StartupInfoLogger.java:117]- x:() InetAddre
 
 解决方法：
 1. 查看主机名
+
 ```
 hostname
 ```
+
 假设输出：`myhostname`
+
 2. 在/etc/hosts上加上主机名
+
 ```
 127.0.0.1   localhost myhostname
 ::1         localhost myhostname
 ```
 
 注意：myhostname 请修改为第一步执行结果
+
+# 升级 Jpom 版本
+
+目前支持的升级方式有：
+
+1. 手动替换 jar 
+2. 在线上传 jar 包
+3. 远程检查版本并更新
+4. 批量升级插件端
+
+升级可能出现启动失败的情况，失败请检查控制台日志
 
 # 开发计划
 

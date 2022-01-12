@@ -146,3 +146,16 @@ make install
 
 - linux 系统中如果使用 yum 安装或者配置了服务，在配置 nginx 服务名称中则配置对应的服务名称，默认为 nginx
 - windows 系统中则需要为 nginx 配置服务才能正常监控 nginx 状态，建议使用 [winsw](https://github.com/winsw/winsw) 来配置
+
+
+# Jpom 链接
+
+官网：`https://jpom.io`
+
+Gitee: `https://gitee.com/dromara/Jpom`
+
+Github: `https://github.com/dromara/Jpom`
+
+常见问题：`https://jpom-site.keepbx.cn/docs/#/FQA/FQA`
+
+ ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_qrcode.jpg)

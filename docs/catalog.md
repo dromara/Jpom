@@ -4,7 +4,7 @@
 * [更新记录](CHANGELOG)
 * [赞赏记录](praise)
 * 实践案例
-    * [在线构建 + SSH 发布 java 项目](practice/ssh_release.md)
+    * [在线构建 + SSH 发布 java 项目](practice/build_java_ssh_release.md)
     * [在线构建 + 项目发布 node 项目](practice/build_node_release.md)
     * [在线构建 + SSH 发布 node 项目](practice/build_node_ssh_release.md)
     * [管理编译安装的 nginx](practice/node_nginx.md)

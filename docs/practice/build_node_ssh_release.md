@@ -146,7 +146,7 @@ systemctl start nginx
 ![use](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/use.png)
 
 
-## Jpom 链接
+# Jpom 链接
 
 官网：`https://jpom.io`
 
@@ -156,6 +156,6 @@ Github: `https://github.com/dromara/Jpom`
 
 常见问题：`https://jpom-site.keepbx.cn/docs/#/FQA/FQA`
 
->> ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_qrcode.jpg)
+ ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_qrcode.jpg)
 
 
