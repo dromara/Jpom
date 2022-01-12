@@ -25,6 +25,7 @@ package io.jpom.service.h2db;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.PageUtil;
 import cn.hutool.core.util.StrUtil;
@@ -38,6 +39,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.PageResultDto;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.db.DbConfig;
+import org.h2.jdbc.JdbcSQLNonTransientException;
 import org.springframework.util.Assert;
 
 import java.sql.SQLException;
@@ -119,8 +121,8 @@ public abstract class BaseDbCommonService<T> {
 		try {
 			Entity entity = this.dataBeanToEntity(t);
 			db.insert(entity);
-		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+		} catch (Exception e) {
+			throw warpException(e);
 		}
 	}
 
@@ -143,8 +145,8 @@ public abstract class BaseDbCommonService<T> {
 		try {
 			List<Entity> entities = t.stream().map(this::dataBeanToEntity).collect(Collectors.toList());
 			db.insert(entities);
-		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+		} catch (Exception e) {
+			throw warpException(e);
 		}
 	}
 
@@ -179,8 +181,8 @@ public abstract class BaseDbCommonService<T> {
 		entity.setTableName(tableName);
 		try {
 			return db.insert(entity);
-		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+		} catch (Exception e) {
+			throw warpException(e);
 		}
 	}
 
@@ -216,8 +218,8 @@ public abstract class BaseDbCommonService<T> {
 		where.setTableName(tableName);
 		try {
 			return db.update(entity, where);
-		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+		} catch (Exception e) {
+			throw warpException(e);
 		}
 	}
 
@@ -266,8 +268,8 @@ public abstract class BaseDbCommonService<T> {
 		Entity entity;
 		try {
 			entity = db.get(where);
-		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+		} catch (Exception e) {
+			throw warpException(e);
 		}
 		T entityToBean = this.entityToBean(entity, this.tClass);
 		if (fill) {
@@ -369,8 +371,8 @@ public abstract class BaseDbCommonService<T> {
 		db.setWrapper((Character) null);
 		try {
 			return db.del(where);
-		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+		} catch (Exception e) {
+			throw warpException(e);
 		}
 	}
 
@@ -413,8 +415,8 @@ public abstract class BaseDbCommonService<T> {
 		db.setWrapper((Character) null);
 		try {
 			return db.count(where);
-		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+		} catch (Exception e) {
+			throw warpException(e);
 		}
 	}
 
@@ -446,8 +448,8 @@ public abstract class BaseDbCommonService<T> {
 		db.setWrapper((Character) null);
 		try {
 			return db.find(where);
-		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+		} catch (Exception e) {
+			throw warpException(e);
 		}
 	}
 
@@ -531,8 +533,8 @@ public abstract class BaseDbCommonService<T> {
 		}
 		try {
 			return Db.use().query(sql, params);
-		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+		} catch (Exception e) {
+			throw warpException(e);
 		}
 	}
 
@@ -551,8 +553,8 @@ public abstract class BaseDbCommonService<T> {
 		}
 		try {
 			return Db.use().execute(sql, params);
-		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+		} catch (Exception e) {
+			throw warpException(e);
 		}
 	}
 
@@ -619,5 +621,17 @@ public abstract class BaseDbCommonService<T> {
 	 * @param data 数据
 	 */
 	protected void fillSelectResult(T data) {
+	}
+
+	/**
+	 * 包裹异常
+	 *
+	 * @param e 异常
+	 */
+	protected JpomRuntimeException warpException(Exception e) {
+		if (ExceptionUtil.isCausedBy(e, JdbcSQLNonTransientException.class)) {
+			return new JpomRuntimeException("数据库异常,可能数据库文件已经损坏,需要重新初始化：" + e.getMessage(), e);
+		}
+		return new JpomRuntimeException("数据库异常", e);
 	}
 }

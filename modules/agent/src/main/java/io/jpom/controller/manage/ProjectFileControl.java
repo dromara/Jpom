@@ -288,9 +288,14 @@ public class ProjectFileControl extends BaseAgentController {
 	@RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String deleteFile(String filename, String type, String levelName) {
 		NodeProjectInfoModel pim = getProjectInfoModel();
+		File file;
+		if (StrUtil.isEmpty(levelName)) {
+			file = FileUtil.file(pim.allLib());
+		} else {
+			file = FileUtil.file(pim.allLib(), levelName);
+		}
 		if ("clear".equalsIgnoreCase(type)) {
 			// 清空文件
-			File file = new File(pim.allLib());
 			if (FileUtil.clean(file)) {
 				return JsonMessage.getString(200, "清除成功");
 			}
@@ -300,13 +305,8 @@ public class ProjectFileControl extends BaseAgentController {
 		} else {
 			// 删除文件
 			Assert.hasText(filename, "请选择要删除的文件");
+			file = FileUtil.file(file, filename);
 
-			File file;
-			if (StrUtil.isEmpty(levelName)) {
-				file = FileUtil.file(pim.allLib(), filename);
-			} else {
-				file = FileUtil.file(pim.allLib(), levelName, filename);
-			}
 			if (file.exists()) {
 				if (FileUtil.del(file)) {
 					return JsonMessage.getString(200, "删除成功");

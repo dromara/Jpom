@@ -302,11 +302,19 @@ export default {
       });
     },
     updateNode() {
-      this.sendMsg("updateNode", {
-        ids: this.tableSelections,
-        protocol: this.temp.protocol,
+      this.$confirm({
+        title: "系统提示",
+        content: "确认要升级到最新版本吗？,升级前请阅读更新日志里面的说明和注意事项并且请注意备份数据防止数据丢失！！",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          this.sendMsg("updateNode", {
+            ids: this.tableSelections,
+            protocol: this.temp.protocol,
+          });
+          this.tableSelections = [];
+        },
       });
-      this.tableSelections = [];
     },
     updateNodeResult(data, nodeId) {
       const { completeSize, size } = data;
@@ -341,13 +349,21 @@ export default {
     },
     // 下载远程最新文件
     downloadRemoteEvent() {
-      downloadRemote().then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({ message: res.msg });
-          this.refresh();
-        } else {
-          //this.$notification.error({ message: res.msg });
-        }
+      this.$confirm({
+        title: "系统提示",
+        content: "确认要下载最新版本吗？,下载前请阅读更新日志里面的说明和注意事项并且请注意备份数据防止数据丢失！！",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          downloadRemote().then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({ message: res.msg });
+              this.refresh();
+            } else {
+              //this.$notification.error({ message: res.msg });
+            }
+          });
+        },
       });
     },
     // 分页、排序、筛选变化时触发
