@@ -55,8 +55,11 @@ import java.net.URL;
 @PreLoadClass
 public class AutoRegSeverNode {
 
+	/**
+	 * 向服务端注册插件端
+	 */
 	@PreLoadMethod
-	private static void reg() throws FileNotFoundException {
+	private static void reg() {
 		AgentExtConfigBean instance = AgentExtConfigBean.getInstance();
 		String agentId = instance.getAgentId();
 		String serverUrl = instance.getServerUrl();
@@ -68,7 +71,11 @@ public class AutoRegSeverNode {
 		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), AgentConfigBean.SERVER_ID);
 		JSONObject serverJson = null;
 		if (file.exists()) {
-			serverJson = (JSONObject) JsonFileUtil.readJson(file.getAbsolutePath());
+			try {
+				serverJson = (JSONObject) JsonFileUtil.readJson(file.getAbsolutePath());
+			} catch (FileNotFoundException e) {
+				serverJson = new JSONObject();
+			}
 			oldInstallId = serverJson.getString("installId");
 		}
 		HttpRequest installRequest = instance.createServerRequest(ServerOpenApi.INSTALL_ID);

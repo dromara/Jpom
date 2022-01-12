@@ -120,6 +120,22 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 	}
 
 	/**
+	 * 获取 ssh 中的 Java 版本
+	 *
+	 * @param sshModel ssh
+	 * @return true 存在运行中的
+	 * @throws IOException   IO
+	 * @throws JSchException jsch
+	 */
+	public String getSshJavaVersion(SshModel sshModel) throws IOException, JSchException {
+		// 检查 java 环境
+		String javaVersion = "java -version";
+		List<String> command = this.execCommand(sshModel, javaVersion);
+		String join = CollUtil.join(command, StrUtil.COMMA);
+		return ReUtil.getGroup0("\"(.*?)\"", join);
+	}
+
+	/**
 	 * 检查是否存在正在运行的进程
 	 *
 	 * @param sshModel ssh
@@ -130,28 +146,12 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 	 */
 	public Integer checkSshRunPid(SshModel sshModel, String tag) throws IOException, JSchException {
 		String ps = StrUtil.format("ps -ef | grep -v 'grep' | egrep {}", tag);
-		Session session = null;
-		ChannelExec channel = null;
-		try {
-			session = getSessionByModel(sshModel);
-			channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
-			channel.setCommand(ps);
-			InputStream inputStream = channel.getInputStream();
-			InputStream errStream = channel.getErrStream();
-			channel.connect();
-			Charset charset = sshModel.getCharsetT();
-			// 运行中
-			List<String> result = new ArrayList<>();
-			IoUtil.readLines(inputStream, charset, (LineHandler) result::add);
-			IoUtil.readLines(errStream, charset, (LineHandler) result::add);
-			return result.stream().map(s -> {
-				List<String> split = StrUtil.splitTrim(s, StrUtil.SPACE);
-				return Convert.toInt(CollUtil.get(split, 1));
-			}).filter(Objects::nonNull).findAny().orElse(null);
-		} finally {
-			JschUtil.close(channel);
-			JschUtil.close(session);
-		}
+		// 运行中
+		List<String> result = this.execCommand(sshModel, ps);
+		return result.stream().map(s -> {
+			List<String> split = StrUtil.splitTrim(s, StrUtil.SPACE);
+			return Convert.toInt(CollUtil.get(split, 1));
+		}).filter(Objects::nonNull).findAny().orElse(null);
 	}
 
 	/**
@@ -270,6 +270,29 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 			return result + error;
 		} finally {
 			JschUtil.close(channel);
+		}
+	}
+
+	private List<String> execCommand(SshModel sshModel, String command) throws IOException, JSchException {
+		Session session = null;
+		ChannelExec channel = null;
+		try {
+			session = getSessionByModel(sshModel);
+			channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
+			// 添加环境变量
+			channel.setCommand(ServerExtConfigBean.getInstance().getSshInitEnv() + " && " + command);
+			InputStream inputStream = channel.getInputStream();
+			InputStream errStream = channel.getErrStream();
+			channel.connect();
+			Charset charset = sshModel.getCharsetT();
+			// 运行中
+			List<String> result = new ArrayList<>();
+			IoUtil.readLines(inputStream, charset, (LineHandler) result::add);
+			IoUtil.readLines(errStream, charset, (LineHandler) result::add);
+			return result;
+		} finally {
+			JschUtil.close(channel);
+			JschUtil.close(session);
 		}
 	}
 

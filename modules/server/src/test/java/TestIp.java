@@ -20,8 +20,13 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.net.NetUtil;
 import org.junit.Test;
+
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.util.LinkedHashSet;
 
 /**
  * @author bwcx_jzy
@@ -32,7 +37,19 @@ public class TestIp {
 	@Test
 	public void test() {
 		System.out.println(NetUtil.getLocalhostStr());
-		System.out.println(NetUtil.getLocalhost().getHostAddress());
+//		System.out.println(NetUtil.getLocalhost().getHostAddress());
+		System.out.println("------");
+		final LinkedHashSet<InetAddress> localAddressList = NetUtil.localAddressList(address -> {
+			// 非loopback地址，指127.*.*.*的地址
+			return !address.isLoopbackAddress()
+					// 需为IPV4地址
+					&& address instanceof Inet4Address;
+		});
+		for (InetAddress inetAddress : localAddressList) {
+			System.out.println(inetAddress.getHostAddress());
+			//System.out.println(((Inet4Address) inetAddress).toString());
+			//System.out.println("-");
+		}
 	}
 
 	@Test
