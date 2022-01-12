@@ -22,15 +22,29 @@
  */
 package cn;
 
+import cn.hutool.core.collection.CollUtil;
+import org.junit.Test;
+
 import java.time.Duration;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * @author bwcx_jzy
  * @date 2019/9/4
  */
 public class TestT {
-    public static void main(String[] args) {
-        Duration parse = Duration.parse("1H");
-        System.out.println(parse.getSeconds());
-    }
+	public static void main(String[] args) {
+		Duration parse = Duration.parse("1H");
+		System.out.println(parse.getSeconds());
+	}
+
+	@Test
+	public void testList() {
+		List<Integer> list = CollUtil.newArrayList(1, 2, 3, 4, 5, 6);
+		list.sort(Comparator.reverseOrder());
+		int size = CollUtil.size(list);
+		list = CollUtil.sub(list, 2, size);
+		System.out.println(list);
+	}
 }

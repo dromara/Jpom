@@ -14,15 +14,6 @@
                   <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
                 </a-select>
                 <a-button type="primary" @click="refresh">搜索</a-button>
-
-                <div class="action">
-                  <a-upload name="file" accept=".jar,.zip" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
-                    <a-button type="primary">
-                      <a-icon type="upload" />
-                      新版本
-                    </a-button>
-                  </a-upload>
-                </div>
               </a-space>
             </div>
           </a-row>
@@ -46,6 +37,12 @@
                 </a-select>
                 <a-button type="primary" @click="batchUpdate">批量更新</a-button>
                 |
+                <a-upload name="file" accept=".jar,.zip" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+                  <a-button type="primary">
+                    <a-icon type="upload" />
+                    新版本
+                  </a-button>
+                </a-upload>
                 <div>
                   Agent版本：{{ agentVersion | version }}
                   <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} </a-tag>

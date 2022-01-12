@@ -25,11 +25,15 @@ package io.jpom.system.init;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
+import io.jpom.JpomApplication;
+import io.jpom.common.JpomManifest;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.util.JvmUtil;
 import org.springframework.http.HttpMethod;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,7 +57,17 @@ public class CheckPath {
 	 */
 	@PreLoadMethod(2)
 	private static void checkDuplicateRun() {
-		CheckDuplicateRun.check();
+		try {
+			Class<?> appClass = JpomApplication.getAppClass();
+			String pid = String.valueOf(JpomManifest.getInstance().getPid());
+			Integer mainClassPid = JvmUtil.findMainClassPid(appClass.getName());
+			if (mainClassPid == null || pid.equals(ObjectUtil.toString(mainClassPid))) {
+				return;
+			}
+			DefaultSystemLog.getLog().warn("The Jpom program recommends that only one corresponding program be run on a machine：" + JpomApplication.getAppType() + "  pid:" + mainClassPid);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("检查异常", e);
+		}
 	}
 
 	@PreLoadMethod(3)

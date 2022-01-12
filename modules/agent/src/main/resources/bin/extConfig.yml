@@ -45,3 +45,5 @@ project:
 system:
   # cron 定时器是否开启匹配秒
   timerMatchSecond: false
+  # 旧包文件保留个数
+  oldJarsCount: 2

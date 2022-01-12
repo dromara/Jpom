@@ -458,7 +458,7 @@ public class NodeForward {
 		String body = response.body();
 		if (status != HttpStatus.HTTP_OK) {
 			DefaultSystemLog.getLog().warn("{} 响应异常 状态码错误：{} {}", nodeModel.getName(), status, body);
-			throw new AgentException(nodeModel.getName() + " 节点响应异常：" + status);
+			throw new AgentException(nodeModel.getName() + " 节点响应异常,状态码错误：" + status);
 		}
 		return toJsonMessage(body);
 	}
