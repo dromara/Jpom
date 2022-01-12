@@ -53,6 +53,18 @@ public class ScriptModel extends BaseNodeModel {
 	 * 默认参数
 	 */
 	private String defArgs;
+	/**
+	 * 描述
+	 */
+	private String description;
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 	public String getDefArgs() {
 		return defArgs;
