@@ -32,10 +32,7 @@ import cn.hutool.core.io.ManifestUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.ClassUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.ZipUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.http.GlobalHeaders;
 import cn.hutool.http.Header;
 import cn.hutool.system.SystemUtil;
@@ -102,6 +99,10 @@ public class JpomManifest {
 	 */
 	private String dataPath;
 	/**
+	 * jar 运行路径
+	 */
+	private String jarFile;
+	/**
 	 * 系统名称
 	 */
 	private final String osName = SystemUtil.getOsInfo().getName();
@@ -117,6 +118,7 @@ public class JpomManifest {
 						JPOM_MANIFEST.setVersion(jarVersion.get(0));
 						JPOM_MANIFEST.setTimeStamp(jarVersion.get(1));
 					}
+					JPOM_MANIFEST.setJarFile(FileUtil.getAbsolutePath(jarFile));
 				}
 				String jpomTag = StrUtil.format("Jpom {}/{}", JPOM_MANIFEST.getType(), JPOM_MANIFEST.getVersion());
 				GlobalHeaders.INSTANCE.header(Header.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36 " + jpomTag, true);
@@ -195,6 +197,14 @@ public class JpomManifest {
 		if (StrUtil.isNotEmpty(version)) {
 			this.version = version;
 		}
+	}
+
+	public String getJarFile() {
+		return jarFile;
+	}
+
+	public void setJarFile(String jarFile) {
+		this.jarFile = jarFile;
 	}
 
 	public String getTimeStamp() {
@@ -368,10 +378,6 @@ public class JpomManifest {
 	 * @param version 新版本号
 	 */
 	public static void releaseJar(String path, String version) {
-		releaseJar(path, version, false);
-	}
-
-	public static void releaseJar(String path, String version, boolean override) {
 		File runFile = getRunPath();
 		File runPath = runFile.getParentFile();
 		if (!runPath.isDirectory()) {
@@ -391,11 +397,18 @@ public class JpomManifest {
 		if (StrUtil.equals(version, JpomManifest.getInstance().getVersion())) {
 			version = StrUtil.format("{}_{}", version, System.currentTimeMillis());
 		}
-		String newFile = JpomApplication.getAppType().name() + "-" + version + FileUtil.JAR_FILE_EXT;
-		File to = FileUtil.file(runPath, newFile);
-		if (to.exists() && !override) {
-			throw new JpomRuntimeException(newFile + " 已经存在啦");
+		String newFile;
+		File to;
+		while (true) {
+			newFile = JpomApplication.getAppType().name() + "-" + version + FileUtil.JAR_FILE_EXT;
+			to = FileUtil.file(runPath, newFile);
+			if (FileUtil.equals(to, runFile)) {
+				version = StrUtil.format("{}_{}", version, RandomUtil.randomInt(1, 100));
+				continue;
+			}
+			break;
 		}
+		//
 		FileUtil.move(new File(path), to, true);
 		jsonObject.put("newJar", newFile);
 		jsonObject.put("updateTime", new DateTime().toString());
@@ -407,15 +420,16 @@ public class JpomManifest {
 		final boolean[] logBack = {true};
 		File scriptFile = getScriptFile();
 		Charset charset = ExtConfigBean.getInstance().getConsoleLogCharset();
+		String finalNewFile = newFile;
 		FileUtil.readLines(scriptFile, charset, (LineHandler) line -> {
 			if (!line.startsWith(String.valueOf(StrUtil.C_TAB)) &&
 					!line.startsWith(String.valueOf(StrUtil.C_SPACE))) {
 				if (StrUtil.containsAny(line, "RUNJAR=")) {
 					// jar 包
 					if ("sh".equals(CommandUtil.SUFFIX)) {
-						newData.add(StrUtil.format("RUNJAR=\"{}\"", newFile));
+						newData.add(StrUtil.format("RUNJAR=\"{}\"", finalNewFile));
 					} else if ("bat".equals(CommandUtil.SUFFIX)) {
-						newData.add(StrUtil.format("set RUNJAR={}", newFile));
+						newData.add(StrUtil.format("set RUNJAR={}", finalNewFile));
 					} else {
 						newData.add(line);
 					}

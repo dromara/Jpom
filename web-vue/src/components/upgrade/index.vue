@@ -32,9 +32,14 @@
         <a-alert message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除" type="warning" />
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote"
-          >数据存储目录： <a-tag>{{ temp.dataPath }}</a-tag></span
-        >
+        <span class="layui-elem-quote">
+          数据存储目录：
+          <a-tag>{{ temp.dataPath }}</a-tag>
+        </span>
+        <span class="layui-elem-quote" v-if="temp.jarFile">
+          运行的Jar包：
+          <a-tag>{{ temp.jarFile }}</a-tag>
+        </span>
       </a-timeline-item>
     </a-timeline>
     <a-spin v-if="!temp.debug" :spinning="spinning">
