@@ -36,12 +36,12 @@
         <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <template slot="operation" v-if="!record.isDirectory" slot-scope="text, record">
+        <template slot="operation" slot-scope="text, record">
           <a-space>
-            <a-tooltip title="需要到 节点管理中的系统管理的白名单配置中配置允许编辑的文件后缀">
+            <a-tooltip v-if="!record.isDirectory" title="需要到 节点管理中的系统管理的白名单配置中配置允许编辑的文件后缀">
               <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
             </a-tooltip>
-            <a-button type="primary" @click="handleDownload(record)">下载</a-button>
+            <a-button v-if="!record.isDirectory" type="primary" @click="handleDownload(record)">下载</a-button>
             <a-button type="danger" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
@@ -508,9 +508,10 @@ export default {
     },
     // 清空文件
     clearFile() {
+      const msg = this.uploadPath ? "真的要清空 【" + this.uploadPath + "】目录和文件么？" : "真的要清空项目目录和文件么？";
       this.$confirm({
         title: "系统提示",
-        content: "真的要清空项目目录和文件么？",
+        content: msg,
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -519,6 +520,7 @@ export default {
             nodeId: this.nodeId,
             id: this.projectId,
             type: "clear",
+            levelName: this.uploadPath,
           };
           // 删除
           deleteProjectFile(params).then((res) => {
@@ -557,9 +559,10 @@ export default {
     },
     // 删除
     handleDelete(record) {
+      const msg = record.isDirectory ? "真的要删除【" + record.filename + "】文件夹么？" : "真的要删除【" + record.filename + "】文件么？";
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除文件么？",
+        content: msg,
         okText: "确认",
         cancelText: "取消",
         onOk: () => {

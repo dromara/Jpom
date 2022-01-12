@@ -42,12 +42,12 @@
         </span>
       </a-timeline-item>
     </a-timeline>
-    <a-spin v-if="!temp.debug" :spinning="spinning">
-      <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".jar,.zip">
-        <a-button><a-icon type="upload" />选择升级文件</a-button>
-      </a-upload>
-      <a-button type="primary" class="upload-btn" :disabled="fileList.length === 0" @click="startUpload">上传升级文件</a-button>
-    </a-spin>
+
+    <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".jar,.zip">
+      <a-button><a-icon type="upload" />选择升级文件</a-button>
+    </a-upload>
+    <a-button type="primary" class="upload-btn" :disabled="fileList.length === 0" @click="startUpload">上传升级文件</a-button>
+
     <a-divider dashed />
     <markdown-it-vue class="md-body" :content="changelog" :options="markdownOptions" />
   </div>
@@ -73,7 +73,7 @@ export default {
   data() {
     return {
       temp: {},
-      spinning: false,
+
       checkCount: 0,
       fileList: [],
       timer: null,
@@ -139,7 +139,6 @@ export default {
     },
     // 开始上传文件
     startUpload() {
-      this.spinning = true;
       const formData = new FormData();
       formData.append("file", this.fileList[0]);
       formData.append("nodeId", this.nodeId);
@@ -152,7 +151,6 @@ export default {
 
           this.startCheckUpgradeStatus(res.msg);
         }
-        this.spinning = false;
       });
       this.fileList = [];
     },
@@ -237,8 +235,7 @@ export default {
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
-          // 重新发布
-          this.spinning = true;
+          //
           remoteUpgrade(this.nodeId).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
@@ -247,7 +244,6 @@ export default {
 
               this.startCheckUpgradeStatus(res.msg);
             }
-            this.spinning = false;
           });
         },
       });
