@@ -200,19 +200,22 @@ public class SshController extends BaseServerController {
 			List<NodeModel> nodeBySshId = nodeService.getNodeBySshId(sshModel.getId());
 			JSONObject data = new JSONObject();
 			NodeModel nodeModel = CollUtil.getFirst(nodeBySshId);
-			if (nodeModel == null) {
-				try {
-					SshModel model = sshService.getByKey(sshModel.getId(), false);
+			SshModel model = sshService.getByKey(sshModel.getId(), false);
+			try {
+				if (nodeModel == null) {
 					Integer pid = sshService.checkSshRunPid(model, Type.Agent.getTag());
 					data.put("pid", ObjectUtil.defaultIfNull(pid, 0));
 					data.put("ok", true);
-				} catch (Exception e) {
-					DefaultSystemLog.getLog().error("检查运行状态异常:{}", e.getMessage());
-					data.put("error", e.getMessage());
+				} else {
+					data.put("nodeId", nodeModel.getId());
+					data.put("nodeName", nodeModel.getName());
 				}
-			} else {
-				data.put("nodeId", nodeModel.getId());
-				data.put("nodeName", nodeModel.getName());
+				//
+				String javaVersion = sshService.getSshJavaVersion(model);
+				data.put("javaVersion", javaVersion);
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("检查运行状态异常:{}", e.getMessage());
+				data.put("error", e.getMessage());
 			}
 			result.put(sshModel.getId(), data);
 		}

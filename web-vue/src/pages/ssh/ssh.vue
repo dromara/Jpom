@@ -8,28 +8,50 @@
           <a-button type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary" @click="handleAdd">新增</a-button>
+
+        <a-tooltip>
+          <template slot="title">
+            <div>
+              <ul>
+                <li>关联节点数据是异步获取有一定时间延迟</li>
+                <li>关联节点会自动识别服务器中是否存在 java 环境,如果没有 Java 环境不能快速安装节点</li>
+                <li>关联节点如果服务器存在 java 环境,但是插件端未运行则会显示快速安装按钮</li>
+              </ul>
+            </div>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
       </a-space>
-      关联节点数据是异步获取有一定时间延迟
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="nodeId" slot-scope="text, record">
         <!-- <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button> -->
-        <a-tooltip v-if="sshAgentInfo[record.id] && sshAgentInfo[record.id].nodeId" placement="topLeft" :title="`${sshAgentInfo[record.id].nodeName}`">
-          <a-button style="width: 90px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" type="" @click="toNode(sshAgentInfo[record.id].nodeId)">
-            {{ sshAgentInfo[record.id].nodeName }}
-          </a-button>
-        </a-tooltip>
-        <a-tooltip v-if="sshAgentInfo[record.id] && sshAgentInfo[record.id].error" placement="topLeft" :title="`${sshAgentInfo[record.id].error}`">
-          {{ sshAgentInfo[record.id].error }}
-        </a-tooltip>
-        <a-tooltip
-          v-if="sshAgentInfo[record.id] && sshAgentInfo[record.id].ok"
-          placement="topLeft"
-          :title="`${sshAgentInfo[record.id].pid > 0 ? 'ssh 中已经运行了插件端进程ID：' + sshAgentInfo[record.id].pid : '点击快速安装插件端'}`"
-        >
-          <a-button type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">安装节点</a-button>
-        </a-tooltip>
+        <div v-if="sshAgentInfo[record.id]">
+          <div v-if="sshAgentInfo[record.id].javaVersion">
+            <a-tooltip v-if="sshAgentInfo[record.id].nodeId" placement="topLeft" :title="`节点名称：${sshAgentInfo[record.id].nodeName}   java version:${sshAgentInfo[record.id].javaVersion}`">
+              <a-button style="width: 90px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" type="" @click="toNode(sshAgentInfo[record.id].nodeId)">
+                {{ sshAgentInfo[record.id].nodeName }}
+              </a-button>
+            </a-tooltip>
+            <a-tooltip v-if="sshAgentInfo[record.id].error" placement="topLeft" :title="`${sshAgentInfo[record.id].error}`">
+              {{ sshAgentInfo[record.id].error }}
+            </a-tooltip>
+            <a-tooltip
+              v-if="sshAgentInfo[record.id].ok"
+              placement="topLeft"
+              :title="`${
+                sshAgentInfo[record.id].pid > 0
+                  ? 'ssh 中已经运行了插件端进程ID：' + sshAgentInfo[record.id].pid + ',java version:' + sshAgentInfo[record.id].javaVersion
+                  : '点击快速安装插件端,java version:' + sshAgentInfo[record.id].javaVersion
+              }`"
+            >
+              <a-button type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">安装节点</a-button>
+            </a-tooltip>
+          </div>
+          <div v-else><a-tag>没有Java环境</a-tag></div>
+        </div>
+        <div v-else>-</div>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
