@@ -113,7 +113,7 @@ if [[ "$temp_result" != "" ]]; then
 	echo "开始检查 mvn"
 	installMvnFn
 fi
-exit 1
+
 # 判断
 if [[ -z "${TYPE}" ]] ; then
     TYPE="Server";
