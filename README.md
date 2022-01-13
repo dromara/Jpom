@@ -69,7 +69,7 @@
 13. ~~Tomcat状态、文件、war包在线实时管理 (不再长期维护)~~
 14. 升级 Jpom 版本方便：手动上传文件、在线上传文件、远程下载更新
 
-> 特别提醒：
+### 特别提醒
 > 1. 在 Windows 服务器中可能有部分功能因为系统特性造成兼容性问题，建议在实际使用中充分测试。Linux 目前兼容良好
 > 2. 服务端和插件端请安装到不同目录中，切勿安装到同一目录中
 > 3. 卸载 Jpom 插件端或者服务端，先停止对应服务，删除对应的程序文件、日志文件夹、数据目录文件夹即可
@@ -86,30 +86,11 @@
 
 ### 一键安装（Linux）（推荐）
 
-#### 插件端
-
-> 如果服务端也需要被管理，在服务端上也需要安装插件端
-> 
-> 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) ）
-
-```
-yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent
-
-备用地址
-
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Agent
-
-支持自动安装jdk环境
-
-yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
-
-```
-
-启动成功后,插件端的端口为 `2123`
-
 #### 服务端
 
 > 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml) ）
+> 
+> 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
 > 
 > 如果需要修改数据、日志存储路径请参照 `extConfig.yml` 文件中 `jpom.path` 配置属性
 
@@ -133,11 +114,36 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 启动成功后,服务端的端口为 `2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
+> 
+> 如无法访问，检查下是否开启了防火墙`systemctl status firewalld`，如状态显示为绿色`Active: active (running)`可临时关闭防火墙`systemctl stop firewalld`，然后重启防火墙`firewall-cmd --reload`（建议仅测试环境下使用，生产环境下慎用建议使用规则放行）
+> 
+> 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中检查安全组规则(关闭防火墙)
+> 
+> 注意： linux 系统中防火墙可能存在多种：Firewall、Iptables，再检查防火墙配置时候需要都检查一下
+
+#### 插件端
+
+> 如果服务端也需要被管理，在服务端上也需要安装插件端（同一个服务器中可以安装服务端和插件端）
+>
 > 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
 > 
-> 如无法访问，检查下是否开启了防火墙`systemctl status firewalld`，如状态显示为绿色`Active: active (running)`可临时关闭防火墙`systemctl stop firewalld`，然后重启防火墙`firewall-cmd --reload`（建议仅测试环境下使用，生产环境下慎用）
-> 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中检查安全组规则(关闭防火墙)
-> 注意 linux 系统中防火墙可能存在多种：Firewall、Iptables，再检查防火墙配置时候需要都检查一下
+> 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) ）
+
+```
+yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent
+
+备用地址
+
+yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Agent
+
+支持自动安装jdk环境
+
+yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
+
+```
+
+启动成功后,插件端的端口为 `2123`
+
 
 ### 容器化安装
 
