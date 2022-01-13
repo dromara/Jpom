@@ -146,4 +146,4 @@ rm -f install.sh
 # 添加权限
 chmod 755 ${TYPE}.sh
 # 启动
-sh ${TYPE}.sh start $@
+bash ${TYPE}.sh start $@
