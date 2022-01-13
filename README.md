@@ -35,7 +35,9 @@
 
 ## 您为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
 
->  大部分项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
+> 大部分项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
+> 
+> 在中小团队中或者没有专业运维的公司（开发代替运维），暂时不能引入复杂的 CI/CD 工具时使用 Jpom 轻量化、无侵入的过度
 
 ### 此方法不足的是
 1. 需要每次登录服务器（专业软件）
@@ -63,7 +65,7 @@
 8. 用户操作监控，监控指定用户指定操作以邮件形式通知
 9. 节点脚本模版+定时执行
 
-#### 项目主要功能及特点
+## 项目主要功能及特点
 
 1. 创建、修改、删除项目、Jar包管理、在线修改文本文件
 2. 实时查看控制台日志、备份日志、删除日志、导出日志
@@ -95,7 +97,7 @@
 
 升级前必看：[CHANGELOG.md](https://gitee.com/dromara/Jpom/blob/master/CHANGELOG.md)
 
-### 一键安装（Linux）（推荐）
+## 一键安装（Linux）（推荐）
 
 #### 服务端
 
@@ -302,7 +304,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 3. [SpringBoot案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
 4. [node vue(antdv)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/antdv)
 
-### 常见问题、操作说明
+## 常见问题、操作说明
 
 [https://jpom-site.keepbx.cn/docs/](https://jpom-site.keepbx.cn/docs/)
 
