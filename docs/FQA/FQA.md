@@ -123,6 +123,17 @@ hostname
 
 升级可能出现启动失败的情况，失败请检查控制台日志
 
+# Ubuntu/Debian 执行脚本错误
+
+> Syntax error: "(" unexpected
+
+代码对于标准bash而言没有错，因为`Ubuntu/Debian`为了加快开机速度，用`dash`代替了传统的`bash`，是`dash`在捣鬼。
+
+解决方法:
+1. 就是取消`dash`
+   1. `sudo dpkg-reconfigure dash` 在选择项中选No，搞定了！
+2. 通过 `bash ./Agent.sh`、`bash ./Server.sh`执行
+
 # 开发计划
 
 [开发计划](https://cdn.jsdelivr.net/gh/dromara/Jpom/PLANS.md)
