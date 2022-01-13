@@ -33,24 +33,35 @@
 	<a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
-#### 您为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
+## 您为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
 
 >  大部分项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
 
-> 此方法不足的是：
-> 1. 需要每次登录服务器（专业软件）
-> 2. 多个项目有多个管理命令（不易记、易混淆）
-> 3. 查看项目运行状态需要再次使用命令
-> 4. 同时面对多个运维都需要知道服务器密码（安全性低）
-> 5. 集群项目需要挨个操作项目步骤
+### 此方法不足的是
+1. 需要每次登录服务器（专业软件）
+2. 多个项目有多个管理命令（不易记、易混淆）
+3. 查看项目运行状态需要再次使用命令
+4. 同时面对多个运维都需要知道服务器密码（安全性低）
+5. 集群项目需要挨个操作项目步骤
 
-> 在使用Jpom后：
-> 1. 使用浏览器登录方便快捷管理项目
-> 2. 界面形式实时查看项目运行状态以及控制台日志
-> 3. 运维有对应的账号密码不需要知道服务器密码（并且有操作日志）
-> 4. 集群项目使用项目分发一键搞定多机部署
-> 5. 项目状态监控异常自动报警
-> 6. 在线构建不用手动上传项目包
+### 在使用Jpom后
+1. 使用浏览器登录方便快捷管理项目
+2. 界面形式实时查看项目运行状态以及控制台日志
+3. 在线 SSH 终端,让您在没有 Xshell、FianlShell 等软件也能轻松管理服务器
+   1. 运维登录 Jpom 系统不需要知道服务器密码
+   2. 并且能自动执行命令日志
+   3. 能指定 ssh 禁止执行命令，避免执行搞风险命令
+   4. SSH 命令模版在线执行脚本还能定时执行
+4. 集群项目使用项目分发一键搞定多机部署
+5. 项目状态监控异常自动报警、并且能自动尝试重启
+6. 在线构建不用手动上传项目包
+   1. 支持拉取 GIT、SVN 仓库
+   2. 支持 ssh 方式发布
+   3. 支持定时构建
+   4. 支持 webhook 形式触发构建
+7. 通过 Jpom 快速编辑 nginx 配置文件并自动 reload
+8. 用户操作监控，监控指定用户指定操作以邮件形式通知
+9. 节点脚本模版+定时执行
 
 #### 项目主要功能及特点
 
@@ -80,9 +91,9 @@
 > 
 > [2.6.x "稳定版" 分支](https://gitee.com/dromara/Jpom/tree/2.6.x/)
 
-#### 版本更新日志
+#### [版本更新日志](https://gitee.com/dromara/Jpom/blob/master/CHANGELOG.md)
 
-[CHANGELOG.md](https://gitee.com/dromara/Jpom/blob/master/CHANGELOG.md)
+升级前必看：[CHANGELOG.md](https://gitee.com/dromara/Jpom/blob/master/CHANGELOG.md)
 
 ### 一键安装（Linux）（推荐）
 
@@ -258,6 +269,8 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 ### linux 服务方式管理
 
+> 这里安装服务仅供参考，实际中可以根据需求自定义配置
+
 > 在使用 `Server.sh create`/`Agent.sh create` 成功后
 > 
 > service jpom-server {status | start | stop}
@@ -287,6 +300,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 1. [Jboot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
 2. [SpringBoot案例代码(ClassPath)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
 3. [SpringBoot案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
+4. [node vue(antdv)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/antdv)
 
 ### 常见问题、操作说明
 
