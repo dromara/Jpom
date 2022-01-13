@@ -39,6 +39,7 @@ sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/server/Dockerfile
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/agent/Dockerfile
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../script/docker.sh
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/server/DockerfileRelease
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../.github/workflows/docker-image.yml
 
 # vue version
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../web-vue/package.json
