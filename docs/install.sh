@@ -27,6 +27,20 @@ PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin:$(
 export PATH
 LANG=en_US.UTF-8
 
+# loading env
+if [ -f /etc/profile ]; then
+  . /etc/profile
+fi
+if [ -f /etc/bashrc ]; then
+  . /etc/bashrc
+fi
+if [ -f ~/.bashrc ]; then
+  . ~/.bashrc
+fi
+if [ -f ~/.bash_profile ]; then
+  . ~/.bash_profile
+fi
+
 # 安装 jdk
 function installJdkFn() {
 	if [[ ! -x "${JAVA_HOME}/bin/java" ]]; then
