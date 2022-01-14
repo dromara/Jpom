@@ -300,18 +300,18 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 > 如果出现登录不上，请联系我们，联系方式在最底部
 
-1. [Jboot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
-2. [SpringBoot案例代码(ClassPath)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
-3. [SpringBoot案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
-4. [node vue(antdv)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/antdv)
+1. [Jboot 案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
+2. [SpringBoot 案例代码(ClassPath)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
+3. [SpringBoot 案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
+4. [node vue 案例代码(antdv)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/antdv)
 
 ## 常见问题、操作说明
 
-[https://jpom-site.keepbx.cn/docs/](https://jpom-site.keepbx.cn/docs/)
+[https://jpom.io/docs/](https://jpom-site.keepbx.cn/docs/)
 
-[https://jpom-site.keepbx.cn/docs/#/FQA/FQA](https://jpom-site.keepbx.cn/docs/#/FQA/FQA)
+[https://jpom.io/docs/#/FQA/FQA](https://jpom-site.keepbx.cn/docs/#/FQA/FQA)
 
-[Jpom 插件开发](https://gitee.com/keepbx/Jpom-Plugin)
+[名词解释](https://jpom.io/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
 
 ### 交流讨论 、提供bug反馈或建议
 
