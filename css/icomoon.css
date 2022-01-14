@@ -1,10 +1,10 @@
 @font-face {
 	font-family: 'icomoon';
-	src:url('../fonts/icomoon/icomoon.eot?qtatmt');
-	src:url('../fonts/icomoon/icomoon.eot?qtatmt#iefix') format('embedded-opentype'),
-		url('../fonts/icomoon/icomoon.ttf?qtatmt') format('truetype'),
-		url('../fonts/icomoon/icomoon.woff?qtatmt') format('woff'),
-		url('../fonts/icomoon/icomoon.svg?qtatmt#icomoon') format('svg');
+	src:url('https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/fonts/icomoon/icomoon.eot?qtatmt');
+	src:url('https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/fonts/icomoon/icomoon.eot?qtatmt#iefix') format('embedded-opentype'),
+		url('https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/fonts/icomoon/icomoon.ttf?qtatmt') format('truetype'),
+		url('https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/fonts/icomoon/icomoon.woff?qtatmt') format('woff'),
+		url('https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/fonts/icomoon/icomoon.svg?qtatmt#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
