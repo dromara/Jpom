@@ -37,12 +37,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.SshModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -184,6 +186,8 @@ public class BuildInfoController extends BaseServerController {
 			Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
 		}
 		if (StrUtil.isNotEmpty(autoBuildCron)) {
+			UserModel user = getUser();
+			Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
 			try {
 				new CronPattern(autoBuildCron);
 			} catch (Exception e) {

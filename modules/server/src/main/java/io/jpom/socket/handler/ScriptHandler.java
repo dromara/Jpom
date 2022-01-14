@@ -26,6 +26,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ScriptExecuteLogModel;
 import io.jpom.model.data.ScriptModel;
@@ -59,16 +60,21 @@ public class ScriptHandler extends BaseProxyHandler {
 	}
 
 	@Override
-	protected void handleTextMessage(Map<String, Object> attributes, ProxySession proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) {
+	protected String handleTextMessage(Map<String, Object> attributes, ProxySession proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) {
 		if (consoleCommandOp != ConsoleCommandOp.heart) {
 			super.logOpt(attributes, json);
 		}
 		if (consoleCommandOp == ConsoleCommandOp.start) {
+			UserModel userModel = (UserModel) attributes.get("userInfo");
+			if (userModel.isDemoUser()) {
+				return PermissionInterceptor.DEMO_TIP;
+			}
 			// 开始执行
 			String executeId = this.createLog(attributes);
 			json.put("executeId", executeId);
 		}
 		proxySession.send(json.toString());
+		return null;
 	}
 
 	/**

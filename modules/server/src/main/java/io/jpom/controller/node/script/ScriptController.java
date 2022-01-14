@@ -7,9 +7,11 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ScriptModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.permission.NodeDataPermission;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
@@ -19,6 +21,7 @@ import io.jpom.service.node.script.ScriptExecuteLogServer;
 import io.jpom.service.node.script.ScriptServer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -83,8 +86,12 @@ public class ScriptController extends BaseServerController {
 	 */
 	@RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
-	public String save() {
+	public String save(String autoExecCron) {
 		NodeModel node = getNode();
+		if (StrUtil.isNotEmpty(autoExecCron)) {
+			UserModel user = getUser();
+			Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
+		}
 		JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.Script_Save);
 		if (request.getCode() == HttpStatus.OK.value()) {
 			scriptServer.syncNode(node);

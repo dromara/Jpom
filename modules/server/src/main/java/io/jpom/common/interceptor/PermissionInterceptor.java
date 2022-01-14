@@ -59,6 +59,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 
 	private NodeService nodeService;
 	private UserBindWorkspaceService userBindWorkspaceService;
+	public static final String DEMO_TIP = "演示系统不能使用该功能,如果完整体验请部署后使用";
 	/**
 	 * demo 账号不能使用的功能
 	 */
@@ -118,7 +119,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 		}
 		MethodFeature method = feature.method();
 		if (ArrayUtil.contains(DEMO, method) && userModel.isDemoUser()) {
-			this.errorMsg(response, "演示系统不能使用该功能,如果完整体验请部署后使用");
+			this.errorMsg(response, DEMO_TIP);
 			return false;
 		}
 		// 判断功能权限

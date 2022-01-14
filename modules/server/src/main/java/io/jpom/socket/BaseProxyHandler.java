@@ -112,7 +112,10 @@ public abstract class BaseProxyHandler extends BaseHandler {
 		String op = json.getString("op");
 		ConsoleCommandOp consoleCommandOp = StrUtil.isNotEmpty(op) ? ConsoleCommandOp.valueOf(op) : null;
 		if (proxySession != null) {
-			this.handleTextMessage(attributes, proxySession, json, consoleCommandOp);
+			String textMessage = this.handleTextMessage(attributes, proxySession, json, consoleCommandOp);
+			if (textMessage != null) {
+				session.sendMessage(new TextMessage(textMessage));
+			}
 		} else {
 			this.handleTextMessage(attributes, session, json, consoleCommandOp);
 		}
@@ -140,10 +143,11 @@ public abstract class BaseProxyHandler extends BaseHandler {
 	 * @param json             数据
 	 * @param consoleCommandOp 操作类型
 	 */
-	protected void handleTextMessage(Map<String, Object> attributes,
-									 ProxySession proxySession,
-									 JSONObject json,
-									 ConsoleCommandOp consoleCommandOp) {
+	protected String handleTextMessage(Map<String, Object> attributes,
+									   ProxySession proxySession,
+									   JSONObject json,
+									   ConsoleCommandOp consoleCommandOp) {
+		return null;
 	}
 
 	public static void logOpt(Class<?> cls, Map<String, Object> attributes,
