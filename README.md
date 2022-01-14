@@ -37,7 +37,7 @@
 
 > 大部分项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
 > 
-> 在中小团队中或者没有专业运维的公司（开发代替运维），暂时不能引入复杂的 CI/CD 工具时使用 Jpom 轻量化、无侵入的过度
+> 在中小团队中或者没有专业运维的公司（开发兼运维工作），暂时不能引入复杂的 CI/CD 工具时使用 Jpom 轻量化、无侵入的过度
 
 ### 此方法不足的是
 1. 需要每次登录服务器（专业软件）
@@ -55,13 +55,14 @@
    3. 能指定 ssh 禁止执行命令，避免执行搞风险命令
    4. SSH 命令模版在线执行脚本还能定时执行
 4. 集群项目使用项目分发一键搞定多机部署
-5. 项目状态监控异常自动报警、并且能自动尝试重启
-6. 在线构建不用手动上传项目包
+5. 在线构建不用手动上传项目包
    1. 支持拉取 GIT、SVN 仓库
    2. 支持 ssh 方式发布
    3. 支持定时构建
    4. 支持 webhook 形式触发构建
-7. 通过 Jpom 快速编辑 nginx 配置文件并自动 reload
+6. 通过 Jpom 快速编辑 nginx 配置文件并自动 reload
+7. 项目状态监控异常自动报警、并且能自动尝试重启
+   1. 支持邮件+钉钉群+微信群通知
 8. 用户操作监控，监控指定用户指定操作以邮件形式通知
 9. 节点脚本模版+定时执行
 
@@ -93,7 +94,7 @@
 > 
 > [2.6.x "稳定版" 分支](https://gitee.com/dromara/Jpom/tree/2.6.x/)
 
-#### [版本更新日志](https://gitee.com/dromara/Jpom/blob/master/CHANGELOG.md)
+### [版本更新日志](https://gitee.com/dromara/Jpom/blob/master/CHANGELOG.md)
 
 升级前必看：[CHANGELOG.md](https://gitee.com/dromara/Jpom/blob/master/CHANGELOG.md)
 
@@ -286,7 +287,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 1. 插件端示例：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml)
 2. 服务端示例：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
 
-### 演示项目
+## 演示项目
 
 [https://jpom.keepbx.cn](https://jpom.keepbx.cn)
 
