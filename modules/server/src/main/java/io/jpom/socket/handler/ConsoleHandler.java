@@ -57,13 +57,14 @@ public class ConsoleHandler extends BaseProxyHandler {
 	}
 
 	@Override
-	protected void handleTextMessage(Map<String, Object> attributes,
-									 ProxySession proxySession,
-									 JSONObject json,
-									 ConsoleCommandOp consoleCommandOp) {
+	protected String handleTextMessage(Map<String, Object> attributes,
+									   ProxySession proxySession,
+									   JSONObject json,
+									   ConsoleCommandOp consoleCommandOp) {
 		if (consoleCommandOp != ConsoleCommandOp.heart) {
 			super.logOpt(attributes, json);
 		}
 		proxySession.send(json.toString());
+		return null;
 	}
 }
