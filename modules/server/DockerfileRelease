@@ -29,7 +29,7 @@ ENV JPOM_PKG	server-2.8.4-release.tar.gz
 WORKDIR $JPOM_HOME
 
 RUN mkdir -p $JPOM_HOME && \
-    curl -LfsSo $JPOM_HOME/$JPOM_PKG https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/$JPOM_PKG && \
+    curl -LfSo $JPOM_HOME/$JPOM_PKG https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/$JPOM_PKG && \
     tar -zxvf $JPOM_HOME/$JPOM_PKG -C $JPOM_HOME && \
     rm -rf $JPOM_HOME/$JPOM_PKG
 
