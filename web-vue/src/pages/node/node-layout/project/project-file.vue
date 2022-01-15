@@ -54,8 +54,10 @@
         <br />
         <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
         <br />
-        <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">开始上传</a-button>
-        <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
+        <a-space>
+          <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">开始上传</a-button>
+          <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
+        </a-space>
       </a-modal>
       <!-- 上传压缩文件 -->
       <a-modal v-model="uploadZipFileVisible" width="300px" title="上传压缩文件" :footer="null" :maskClosable="true">
@@ -67,8 +69,10 @@
         <br />
         <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
         <br />
-        <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
-        <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
+        <a-space>
+          <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
+          <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
+        </a-space>
       </a-modal>
 
       <a-modal v-model="editFileVisible" width="80vw" title="编辑文件" cancelText="关闭" :maskClosable="true" @ok="updateFileData" @cancel="handleCloseModal">

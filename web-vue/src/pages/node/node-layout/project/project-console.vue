@@ -41,8 +41,10 @@
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
-          <a-button type="primary" @click="handleDownloadLogback(record)">下载</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-space>
+            <a-button type="primary" @click="handleDownloadLogback(record)">下载</a-button>
+            <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          </a-space>
         </template>
       </a-table>
     </a-modal>
