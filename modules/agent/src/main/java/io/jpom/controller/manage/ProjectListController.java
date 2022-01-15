@@ -26,6 +26,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.model.RunMode;
 import io.jpom.model.data.NodeProjectInfoModel;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -56,9 +57,12 @@ public class ProjectListController extends BaseAgentController {
 	public String getProjectItem(String id) {
 		NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(id);
 		if (nodeProjectInfoModel != null) {
-			// 返回实际执行的命令
-			String command = AbstractProjectCommander.getInstance().buildCommand(nodeProjectInfoModel, null);
-			nodeProjectInfoModel.setRunCommand(command);
+			RunMode runMode = nodeProjectInfoModel.getRunMode();
+			if (runMode != RunMode.Dsl && runMode != RunMode.File) {
+				// 返回实际执行的命令
+				String command = AbstractProjectCommander.getInstance().buildJavaCommand(nodeProjectInfoModel, null);
+				nodeProjectInfoModel.setRunCommand(command);
+			}
 		}
 		return JsonMessage.getString(200, "", nodeProjectInfoModel);
 	}

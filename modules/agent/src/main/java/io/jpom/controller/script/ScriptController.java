@@ -43,7 +43,7 @@ import io.jpom.model.data.NodeScriptExecLogModel;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.service.script.NodeScriptExecLogServer;
 import io.jpom.service.script.NodeScriptServer;
-import io.jpom.socket.ScriptProcessBuilder;
+import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;

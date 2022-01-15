@@ -36,6 +36,7 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.common.Const;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.RunMode;
+import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.JdkInfoModel;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.WhitelistDirectoryService;
@@ -80,7 +81,6 @@ public class ManageEditProjectController extends BaseAgentController {
 	 */
 	private void checkParameter(NodeProjectInfoModel projectInfo, String whitelistDirectory, boolean previewData) {
 		String id = projectInfo.getId();
-		//		Assert.state(!StrUtil.isEmptyOrUndefined(id), "项目id不能为空");
 		String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
 		Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "项目id 长度范围2-20（英文字母 、数字和下划线）");
 		Assert.state(!JpomApplication.SYSTEM_ID.equals(id), "项目id " + JpomApplication.SYSTEM_ID + " 关键词被系统占用");
@@ -149,7 +149,7 @@ public class ManageEditProjectController extends BaseAgentController {
 					//
 					NodeProjectInfoModel.JavaCopyItem javaCopyItem = new NodeProjectInfoModel.JavaCopyItem();
 					javaCopyItem.setId(copyId);
-					javaCopyItem.setParendId(id);
+					javaCopyItem.setParentId(id);
 					javaCopyItem.setModifyTime(DateUtil.now());
 					javaCopyItem.setJvm(StrUtil.emptyToDefault(jvm, StrUtil.EMPTY));
 					javaCopyItem.setArgs(StrUtil.emptyToDefault(args, StrUtil.EMPTY));
@@ -206,7 +206,19 @@ public class ManageEditProjectController extends BaseAgentController {
 			JdkInfoModel item = jdkInfoService.getItem(jdkId);
 			Assert.notNull(item, "jdk 信息错误");
 		}
+		// 判断 yml
+		this.checkDslYml(projectInfo);
+		//
 		return save(projectInfo, previewData);
+	}
+
+	private void checkDslYml(NodeProjectInfoModel projectInfo) {
+		if (projectInfo.getRunMode() == RunMode.Dsl) {
+			String dslContent = projectInfo.getDslContent();
+			Assert.hasText(dslContent, "请配置 dsl 内容");
+			DslYmlDto build = DslYmlDto.build(dslContent);
+			//System.out.println(build);
+		}
 	}
 
 	/**

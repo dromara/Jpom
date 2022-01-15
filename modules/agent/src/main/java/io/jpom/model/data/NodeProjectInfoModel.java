@@ -24,6 +24,7 @@ package io.jpom.model.data;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HtmlUtil;
@@ -515,11 +516,41 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 		}
 	}
 
+	/**
+	 * 获取 dsl 流程信息
+	 *
+	 * @param opt 操作
+	 * @return 结果
+	 */
+	public Tuple getDslProcess(String opt) {
+		String dslContent = this.getDslContent();
+		if (StrUtil.isEmpty(dslContent)) {
+			return new Tuple("yml 还未配置", null);
+		}
+		DslYmlDto build = DslYmlDto.build(dslContent);
+		DslYmlDto.Run run = build.getRun();
+		if (run == null) {
+			return new Tuple("yml 未配置 运行管理", null);
+		}
+		switch (opt) {
+			case "start":
+				return new Tuple(null, run.getStart());
+			case "stop":
+				return new Tuple(null, run.getStop());
+			case "status":
+				return new Tuple(null, run.getStatus());
+			default:
+				return new Tuple("不支持的类型", null);
+		}
+	}
+
 	public static class JavaCopyItem extends BaseJsonModel {
 		/**
 		 * 父级项目id
 		 */
+		@Deprecated
 		private String parendId;
+		private String parentId;
 		/**
 		 * id
 		 */
@@ -545,15 +576,15 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 		}
 
 		public String getTagId() {
-			return getTagId(parendId, id);
+			return getTagId(this.getParentId(), id);
 		}
 
 		/**
 		 * 创建进程标记
 		 *
-		 * @param id
-		 * @param copyId
-		 * @return
+		 * @param id     父级项目ID
+		 * @param copyId 副本ID
+		 * @return 运行ID
 		 */
 		public static String getTagId(String id, String copyId) {
 			if (StrUtil.isEmpty(copyId)) {
@@ -570,12 +601,23 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 			this.modifyTime = modifyTime;
 		}
 
+		@Deprecated
 		public String getParendId() {
 			return parendId;
 		}
 
-		public void setParendId(String parendId) {
-			this.parendId = parendId;
+		@Deprecated
+		public void setParendId(String parentId) {
+			this.parendId = parentId;
+			this.parentId = parentId;
+		}
+
+		public String getParentId() {
+			return StrUtil.emptyToDefault(this.parentId, this.parendId);
+		}
+
+		public void setParentId(String parentId) {
+			this.parentId = parentId;
 		}
 
 		public String getJvm() {

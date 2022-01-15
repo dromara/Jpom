@@ -23,7 +23,6 @@
 package io.jpom.common.commander;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.util.CommandUtil;
@@ -41,7 +40,7 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
 
 
 	@Override
-	public String buildCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+	public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
 		String path = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
 		if (StrUtil.isBlank(path)) {
 			return null;
@@ -59,22 +58,15 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
 	}
 
 	@Override
-	public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-		Tuple tuple = super.stopBefore(nodeProjectInfoModel, javaCopyItem);
-		String result = tuple.get(1);
-		String webHook = tuple.get(0);
-		int pid = parsePid(result);
-		if (pid > 0) {
-			File file = FileUtil.file(nodeProjectInfoModel.allLib());
-			String kill = AbstractSystemCommander.getInstance().kill(file, pid);
-			if (this.loopCheckRun(nodeProjectInfoModel.getId(), false)) {
-				// 强制杀进程
-				String cmd = String.format("kill -9 %s", pid);
-				CommandUtil.asyncExeLocalCommand(file, cmd);
-			}
-			String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
-			result = status(tag) + StrUtil.SPACE + kill;
+	public String stopJava(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int pid) throws Exception {
+		File file = FileUtil.file(nodeProjectInfoModel.allLib());
+		String kill = AbstractSystemCommander.getInstance().kill(file, pid);
+		if (this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false)) {
+			// 强制杀进程
+			String cmd = String.format("kill -9 %s", pid);
+			CommandUtil.asyncExeLocalCommand(file, cmd);
 		}
-		return StrUtil.format("{}  {}", result, webHook);
+		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+		return status(tag) + StrUtil.SPACE + kill;
 	}
 }

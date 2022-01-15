@@ -112,11 +112,15 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 	}
 
 	public File getFile(boolean get) {
+		return this.scriptFile(StrUtil.EMPTY);
+	}
+
+	public File scriptFile(String child) {
 		if (StrUtil.isEmpty(getId())) {
 			throw new IllegalArgumentException("id 为空");
 		}
 		File path = AgentConfigBean.getInstance().getScriptPath();
-		return FileUtil.file(path, getId(), "script." + CommandUtil.SUFFIX);
+		return FileUtil.file(path, getId(), StrUtil.format("script{}.{}", child, CommandUtil.SUFFIX));
 	}
 
 	public File logFile(String executeId) {
@@ -128,7 +132,7 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 	}
 
 	public void saveFile() {
-		File file = getFile(true);
+		File file = this.getFile(true);
 		FileUtil.writeString(getContext(), file, ExtConfigBean.getInstance().getConsoleLogCharset());
 //        // 添加权限
 //        if (SystemUtil.getOsInfo().isLinux()) {
@@ -140,7 +144,7 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 	 * 读取文件信息
 	 */
 	public void readFileTime() {
-		File file = getFile(true);
+		File file = this.getFile(true);
 		long lastModified = file.lastModified();
 		setModifyTime(DateUtil.date(lastModified).toString());
 

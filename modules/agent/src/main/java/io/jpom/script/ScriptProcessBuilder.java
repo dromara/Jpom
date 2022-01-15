@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.socket;
+package io.jpom.script;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
@@ -35,6 +35,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.NodeScriptModel;
+import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.SocketSessionUtil;
@@ -52,7 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author jiangzeyin
  * @date 2019/4/25
  */
-public class ScriptProcessBuilder implements Runnable {
+public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
 	/**
 	 * 执行中的缓存
 	 */
@@ -61,14 +62,15 @@ public class ScriptProcessBuilder implements Runnable {
 	private final ProcessBuilder processBuilder;
 	private final Set<Session> sessions = new HashSet<>();
 	private final String executeId;
-	private final File logFile;
+
 	private Process process;
 	private InputStream inputStream;
 
 
 	private ScriptProcessBuilder(NodeScriptModel nodeScriptModel, String executeId, String args) {
+		super(nodeScriptModel.logFile(executeId));
 		this.executeId = executeId;
-		this.logFile = nodeScriptModel.logFile(executeId);
+
 		File scriptFile = nodeScriptModel.getFile(true);
 		//
 		String script = FileUtil.getAbsolutePath(scriptFile);
@@ -78,7 +80,7 @@ public class ScriptProcessBuilder implements Runnable {
 		if (SystemUtil.getOsInfo().isLinux() || SystemUtil.getOsInfo().isMac()) {
 			command.add(0, CommandUtil.SUFFIX);
 		}
-		DefaultSystemLog.getLog().info(CollUtil.join(command, StrUtil.SPACE));
+		DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
 		processBuilder.redirectErrorStream(true);
 		processBuilder.command(command);
 	}
@@ -185,7 +187,8 @@ public class ScriptProcessBuilder implements Runnable {
 	 *
 	 * @param msg 响应的消息
 	 */
-	private void end(String msg) {
+	@Override
+	protected void end(String msg) {
 		if (this.process != null) {
 			// windows 中不能正常关闭
 			IoUtil.close(inputStream);
@@ -209,11 +212,10 @@ public class ScriptProcessBuilder implements Runnable {
 	 *
 	 * @param line 信息
 	 */
-	private void handle(String line) {
-		// 写入文件
-		List<String> fileLine = new ArrayList<>();
-		fileLine.add(line);
-		FileUtil.appendLines(fileLine, logFile, CharsetUtil.CHARSET_UTF_8);
+	@Override
+	protected void handle(String line) {
+		super.handle(line);
+		//
 		Iterator<Session> iterator = sessions.iterator();
 		while (iterator.hasNext()) {
 			Session session = iterator.next();
