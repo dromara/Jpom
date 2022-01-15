@@ -51,6 +51,7 @@ import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.util.CompressionFileUtil;
 import io.jpom.util.FileUtils;
+import io.jpom.util.ProjectCommanderUtil;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -272,7 +273,7 @@ public class ProjectFileControl extends BaseAgentController {
 	private boolean restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, AfterOpt afterOpt) {
 		try {
 			String result = consoleService.execCommand(ConsoleCommandOp.restart, nodeProjectInfoModel, javaCopyItem);
-			int pid = AbstractProjectCommander.parsePid(result);
+			int pid = ProjectCommanderUtil.parsePid(result);
 			if (pid <= 0) {
 				// 完整重启，不再继续剩余的节点项目
 				return afterOpt != AfterOpt.Order_Must_Restart;

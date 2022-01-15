@@ -72,7 +72,7 @@ public class ProjectStatusController extends BaseAgentController {
 		Assert.notNull(nodeProjectInfoModel, "项目id不存在");
 		int pid = 0;
 		try {
-			pid = AbstractProjectCommander.getInstance().getPid(id);
+			pid = AbstractProjectCommander.getInstance().getPid(nodeProjectInfoModel, null);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("获取项目pid 失败", e);
 		}
@@ -115,7 +115,8 @@ public class ProjectStatusController extends BaseAgentController {
 			String item = object.toString();
 			int pid;
 			try {
-				pid = AbstractProjectCommander.getInstance().getPid(item);
+				NodeProjectInfoModel projectInfoServiceItem = projectInfoService.getItem(item);
+				pid = AbstractProjectCommander.getInstance().getPid(projectInfoServiceItem, null);
 			} catch (Exception e) {
 				DefaultSystemLog.getLog().error("获取端口错误", e);
 				continue;
@@ -156,7 +157,7 @@ public class ProjectStatusController extends BaseAgentController {
 			NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(item);
 			int pid;
 			try {
-				pid = AbstractProjectCommander.getInstance().getPid(copyItem.getTagId());
+				pid = AbstractProjectCommander.getInstance().getPid(nodeProjectInfoModel, copyItem);
 				if (pid <= 0) {
 					Assert.state(JvmUtil.jpsNormal, "当前服务器 jps 命令异常,请检查 jdk 是否完整,以及 java 环境变量是否配置正确");
 					continue;

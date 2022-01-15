@@ -23,7 +23,6 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
@@ -44,7 +43,7 @@ import java.util.List;
 public class WindowsProjectCommander extends AbstractProjectCommander {
 
 	@Override
-	public String buildCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+	public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
 		String classPath = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
 		if (StrUtil.isBlank(classPath)) {
 			return null;
@@ -62,19 +61,12 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
 	}
 
 	@Override
-	public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-		Tuple tuple = super.stopBefore(nodeProjectInfoModel, javaCopyItem);
-		String webHook = tuple.get(0);
-		String result = tuple.get(1);
+	public String stopJava(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int pid) throws Exception {
 		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
-		// 查询状态，如果正在运行，则执行杀进程命令
-		int pid = parsePid(result);
-		if (pid > 0) {
-			String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
-			loopCheckRun(nodeProjectInfoModel.getId(), false);
-			result = status(tag) + StrUtil.SPACE + kill;
-		}
-		return StrUtil.format("{}  {}", result, webHook);
+		// 如果正在运行，则执行杀进程命令
+		String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
+		this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false);
+		return status(tag) + StrUtil.SPACE + kill;
 	}
 
 	@Override
