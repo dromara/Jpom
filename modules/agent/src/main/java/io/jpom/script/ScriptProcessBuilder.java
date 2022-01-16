@@ -43,7 +43,6 @@ import io.jpom.util.SocketSessionUtil;
 import javax.websocket.Session;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -62,10 +61,6 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
 	private final ProcessBuilder processBuilder;
 	private final Set<Session> sessions = new HashSet<>();
 	private final String executeId;
-
-	private Process process;
-	private InputStream inputStream;
-
 
 	private ScriptProcessBuilder(NodeScriptModel nodeScriptModel, String executeId, String args) {
 		super(nodeScriptModel.logFile(executeId));
@@ -179,6 +174,8 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("执行异常", e);
 			this.end("执行异常：" + e.getMessage());
+		} finally {
+			this.close();
 		}
 	}
 
@@ -189,11 +186,6 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
 	 */
 	@Override
 	protected void end(String msg) {
-		if (this.process != null) {
-			// windows 中不能正常关闭
-			IoUtil.close(inputStream);
-			this.process.destroy();
-		}
 		Iterator<Session> iterator = sessions.iterator();
 		while (iterator.hasNext()) {
 			Session session = iterator.next();

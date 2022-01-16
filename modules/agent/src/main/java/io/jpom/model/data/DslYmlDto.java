@@ -137,7 +137,7 @@ public class DslYmlDto extends BaseJsonModel {
 		/**
 		 * 执行参数
 		 */
-		private String scriptArg;
+		private String scriptArgs;
 
 		public String getScriptId() {
 			return scriptId;
@@ -147,12 +147,12 @@ public class DslYmlDto extends BaseJsonModel {
 			this.scriptId = scriptId;
 		}
 
-		public String getScriptArg() {
-			return scriptArg;
+		public String getScriptArgs() {
+			return scriptArgs;
 		}
 
-		public void setScriptArg(String scriptArg) {
-			this.scriptArg = scriptArg;
+		public void setScriptArgs(String scriptArgs) {
+			this.scriptArgs = scriptArgs;
 		}
 
 		/**

@@ -568,7 +568,7 @@ export function stopProject(params) {
 /**
  * 所有的运行模式
  */
-export const runModeList = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File", "Dsl"];
+export const runModeList = ["Dsl", "ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"];
 
 /**
  * java 项目的运行模式

@@ -23,9 +23,11 @@
 package io.jpom.script;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,12 +37,15 @@ import java.util.List;
  * @author bwcx_jzy
  * @since 2022/1/15
  */
-public abstract class BaseRunScript {
+public abstract class BaseRunScript implements AutoCloseable {
 
 	/**
 	 * 日志文件
 	 */
 	protected final File logFile;
+
+	protected Process process;
+	protected InputStream inputStream;
 
 	protected BaseRunScript(File logFile) {
 		this.logFile = logFile;
@@ -64,4 +69,13 @@ public abstract class BaseRunScript {
 	 * @param msg 异常方法
 	 */
 	protected abstract void end(String msg);
+
+	@Override
+	public void close() {
+		if (this.process != null) {
+			// windows 中不能正常关闭
+			IoUtil.close(inputStream);
+			this.process.destroy();
+		}
+	}
 }
