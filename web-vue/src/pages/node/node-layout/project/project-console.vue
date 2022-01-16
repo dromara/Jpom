@@ -3,18 +3,18 @@
     <div ref="filter" class="filter">
       <template v-if="copyId">
         <a-space>
-          <a-button :disabled="replicaStatus" type="primary" @click="start">启动</a-button>
-          <a-button :disabled="!replicaStatus" type="danger" @click="restart">重启</a-button>
-          <a-button :disabled="!replicaStatus" type="danger" @click="stop">停止</a-button>
+          <a-button :disabled="replicaStatus" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
+          <a-button :disabled="!replicaStatus" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
+          <a-button :disabled="!replicaStatus" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
           <a-button type="primary" @click="handleDownload">导出日志</a-button>
           <a-tag color="#87d068">文件大小: {{ project.logSize }}</a-tag>
         </a-space>
       </template>
       <template v-else>
         <a-space>
-          <a-button :disabled="project.status" type="primary" @click="start">启动</a-button>
-          <a-button :disabled="!project.status" type="danger" @click="restart">重启</a-button>
-          <a-button :disabled="!project.status" type="danger" @click="stop">停止</a-button>
+          <a-button :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
+          <a-button :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
+          <a-button :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
           <a-button type="primary" @click="handleDownload">导出日志</a-button>
           <a-button type="primary" @click="handleLogBack">备份列表</a-button>
           <a-button type="primary" @click="goFile">文件管理</a-button>
@@ -76,6 +76,7 @@ export default {
     return {
       replicaStatus: this.replace?.status,
       project: {},
+      optButtonLoading: false,
       loading: false,
       socket: null,
       // 日志内容
@@ -145,6 +146,9 @@ export default {
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf("code") > -1 && msg.data.indexOf("msg") > -1) {
           const res = JSON.parse(msg.data);
+          if (res.op === "stop" || res.op === "start" || res.op === "restart") {
+            this.optButtonLoading = false;
+          }
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
@@ -210,6 +214,9 @@ export default {
         copyId: this.copyId,
       };
       this.socket.send(JSON.stringify(data));
+      if (op === "stop" || op === "start" || op === "restart") {
+        this.optButtonLoading = true;
+      }
     },
     // 加载日志文件大小
     loadFileSize() {
