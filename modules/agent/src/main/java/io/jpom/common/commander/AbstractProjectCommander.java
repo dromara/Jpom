@@ -235,7 +235,7 @@ public abstract class AbstractProjectCommander {
 					return DslScriptBuilder.run(process, nodeProjectInfoModel, log);
 				});
 				boolean checkRun = this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false);
-				result = StrUtil.emptyToDefault(startDsl, checkRun ? "stop done" : "stop done,but unsuccessful");
+				result = StrUtil.emptyToDefault(startDsl, checkRun ? "stop done,but unsuccessful" : "stop done");
 			} else {
 				//
 				result = this.stopJava(nodeProjectInfoModel, javaCopyItem, pid);
