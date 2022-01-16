@@ -105,6 +105,7 @@
             <a-tooltip v-show="temp.type !== 'edit'">
               <template slot="title">
                 <ul>
+                  <li><b>Dsl</b> 配合脚本模版实现自定义项目管理</li>
                   <li><b>ClassPath</b> java -classpath xxx 运行项目</li>
                   <li><b>Jar</b> java -jar xxx 运行项目</li>
                   <li><b>JarWar</b> java -jar Springboot war 运行项目</li>
@@ -156,7 +157,33 @@
         <a-form-model-item v-show="filePath !== ''" label="项目完整目录">
           <a-alert :message="filePath" type="success" />
         </a-form-model-item>
-        <a-form-model-item v-show="temp.runMode === 'Dsl'" label="DSL 内容" prop="dslContent">
+        <a-form-model-item v-show="temp.runMode === 'Dsl'" prop="dslContent">
+          <template slot="label">
+            DSL 内容
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+                <p>以 yaml/yml 格式配置,scriptId 为脚本模版ID，可以到脚本模版编辑弹窗中查看 scriptId</p>
+                <p>配置示例：</p>
+                <code>
+                  <ol>
+                    <li>description: 测试</li>
+                    <li>run:</li>
+                    <li>&nbsp;&nbsp;start:</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptId: eb16f693147b43a1b06f9eb96aed1bc7</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptArgs: start</li>
+                    <li>&nbsp;&nbsp;status:</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptId: eb16f693147b43a1b06f9eb96aed1bc7</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptArgs: status</li>
+                    <li>&nbsp;&nbsp;stop:</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptId: eb16f693147b43a1b06f9eb96aed1bc7</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptArgs: stop</li>
+                  </ol>
+                </code>
+                <ul></ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <div style="height: 40vh; overflow-y: scroll">
             <code-editor v-model="temp.dslContent" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
@@ -180,7 +207,14 @@
           </a-select>
         </a-form-model-item>
 
-        <a-form-model-item label="JDK" prop="jdkId" v-show="javaModes.includes(temp.runMode)" class="jpom-node-project-jdk">
+        <a-form-model-item prop="jdkId" v-show="javaModes.includes(temp.runMode)" class="jpom-node-project-jdk">
+          <template slot="label">
+            JDK
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title"> JDK 需要在侧边栏菜单里手动添加，并非直接读取节点服务器里面的 JDK。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
             <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
           </a-select>
@@ -422,16 +456,6 @@ export default {
               title: "导航助手",
               element: document.querySelector(".jpom-node-project-whitelist"),
               intro: "这里是选择节点设置的白名单目录，白名单的设置在侧边栏菜单<b>系统管理</b>里面。",
-            },
-            {
-              title: "导航助手",
-              element: document.querySelector(".jpom-node-project-jdk"),
-              intro: " JDK，JDK 需要在侧边栏菜单里手动添加，并非直接读取节点服务器里面的 JDK。",
-            },
-            {
-              title: "导航助手",
-              element: document.querySelector(".jpom-node-project-token"),
-              intro: "WebHooks 可以理解为当程序停止时会给这个地址发送一个 HTTP GET 请求。",
             },
           ],
         },

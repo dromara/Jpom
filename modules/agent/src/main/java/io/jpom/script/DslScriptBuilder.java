@@ -40,7 +40,6 @@ import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,8 +55,6 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 	private final String args;
 	private final NodeProjectInfoModel nodeProjectInfoModel;
 
-	private Process process;
-	private InputStream inputStream;
 
 	private DslScriptBuilder(NodeScriptModel scriptModel, NodeProjectInfoModel nodeProjectInfoModel, String args, String log) {
 		super(FileUtil.file(log));
@@ -93,7 +90,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 		if (SystemUtil.getOsInfo().isLinux() || SystemUtil.getOsInfo().isMac()) {
 			command.add(0, CommandUtil.SUFFIX);
 		}
-		DefaultSystemLog.getLog().info(CollUtil.join(command, StrUtil.SPACE));
+		DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
 		processBuilder.redirectErrorStream(true);
 		processBuilder.command(command);
 		return processBuilder;
@@ -143,19 +140,15 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 			return CollUtil.join(result, StrUtil.CRLF);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("执行异常", e);
-			String msg = "执行异常：" + e.getMessage();
-			this.end(msg);
-			return msg;
+			return "执行异常：" + e.getMessage();
+		} finally {
+			this.close();
 		}
 	}
 
 	@Override
 	protected void end(String msg) {
-		if (this.process != null) {
-			// windows 中不能正常关闭
-			IoUtil.close(inputStream);
-			this.process.destroy();
-		}
+
 	}
 
 	/**
@@ -171,7 +164,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 		if (item == null) {
 			return "脚本模版不存在";
 		}
-		DslScriptBuilder builder = new DslScriptBuilder(item, nodeProjectInfoModel, scriptProcess.getScriptArg(), log);
+		DslScriptBuilder builder = new DslScriptBuilder(item, nodeProjectInfoModel, scriptProcess.getScriptArgs(), log);
 		builder.execute();
 		return null;
 	}
@@ -188,7 +181,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 		if (item == null) {
 			return "脚本模版不存在";
 		}
-		DslScriptBuilder builder = new DslScriptBuilder(item, nodeProjectInfoModel, scriptProcess.getScriptArg());
+		DslScriptBuilder builder = new DslScriptBuilder(item, nodeProjectInfoModel, scriptProcess.getScriptArgs());
 		return builder.syncExecute();
 	}
 }
