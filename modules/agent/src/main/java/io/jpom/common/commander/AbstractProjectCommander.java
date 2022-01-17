@@ -636,7 +636,8 @@ public abstract class AbstractProjectCommander {
 	public boolean isRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
 		//String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
 		String result = this.status(nodeProjectInfoModel, javaCopyItem);
-		return result.contains(AbstractProjectCommander.RUNNING_TAG);
+		int parsePid = ProjectCommanderUtil.parsePid(result);
+		return parsePid > 0;
 	}
 
 	/***
