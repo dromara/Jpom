@@ -73,7 +73,11 @@ public class ServerExtConfigBean implements DisposableBean {
 	 */
 	@Value("${db.logStorageCount:10000}")
 	private int h2DbLogStorageCount;
-
+	/**
+	 * 数据库 url
+	 */
+	@Value("${db.url:}")
+	private String dbUrl;
 	/**
 	 * 数据库账号、默认为 jpom
 	 */
@@ -335,6 +339,10 @@ public class ServerExtConfigBean implements DisposableBean {
 
 	public Integer getDbMinIdle() {
 		return dbMinIdle;
+	}
+
+	public String getDbUrl() {
+		return dbUrl;
 	}
 
 	public String getUserDemoTip() {
