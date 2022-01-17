@@ -300,6 +300,12 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 3. [SpringBoot 案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
 4. [node vue 案例代码(antdv)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/antdv)
 
+> nodejs 编译指定目录 :
+>     yarn --cwd xxxx/ install
+>     yarn --cwd xxxx/ build
+> maven  编译指定目录:
+>     mvn -f xxxx/pom.xml clean package
+
 ## 常见问题、操作说明
 
 [https://jpom.io/docs/](https://jpom-site.keepbx.cn/docs/)
