@@ -27,6 +27,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.socket.BaseProxyHandler;
@@ -65,7 +66,8 @@ public class ConsoleHandler extends BaseProxyHandler {
 									   JSONObject json,
 									   ConsoleCommandOp consoleCommandOp) {
 		ProjectInfoModel dataItem = (ProjectInfoModel) attributes.get("dataItem");
-		if (RunMode.Dsl.name().equals(dataItem.getRunMode())) {
+		UserModel userModel = (UserModel) attributes.get("userInfo");
+		if (RunMode.Dsl.name().equals(dataItem.getRunMode()) && userModel.isDemoUser()) {
 			if (consoleCommandOp == ConsoleCommandOp.stop || consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
 				return PermissionInterceptor.DEMO_TIP;
 			}
