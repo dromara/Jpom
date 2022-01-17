@@ -233,9 +233,12 @@ public class ManageEditProjectController extends BaseAgentController {
 		NodeProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
 		try {
 			this.checkPath(projectInfo);
+			RunMode runMode = projectInfo.getRunMode();
 			if (exits == null) {
 				// 检查运行中的tag 是否被占用
-				Assert.state(!AbstractProjectCommander.getInstance().isRun(projectInfo, null), "当前项目id已经被正在运行的程序占用");
+				if (runMode != RunMode.File && runMode != RunMode.Dsl) {
+					Assert.state(!AbstractProjectCommander.getInstance().isRun(projectInfo, null), "当前项目id已经被正在运行的程序占用");
+				}
 				if (previewData) {
 					// 预检查数据
 					return JsonMessage.getString(200, "检查通过");
@@ -259,7 +262,7 @@ public class ManageEditProjectController extends BaseAgentController {
 				exits.setArgs(projectInfo.getArgs());
 				exits.setWorkspaceId(this.getWorkspaceId());
 				exits.setOutGivingProject(projectInfo.isOutGivingProject());
-				exits.setRunMode(projectInfo.getRunMode());
+				exits.setRunMode(runMode);
 				exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
 				exits.setToken(projectInfo.getToken());
 				exits.setDslContent(projectInfo.getDslContent());
@@ -280,7 +283,7 @@ public class ManageEditProjectController extends BaseAgentController {
 			}
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error(e.getMessage(), e);
-			return JsonMessage.getString(500, "保存数据异常");
+			return JsonMessage.getString(500, "保存数据异常:" + e.getMessage());
 		}
 	}
 
