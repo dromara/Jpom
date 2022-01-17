@@ -25,7 +25,6 @@ package io.jpom.service;
 import cn.hutool.core.util.ClassUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.BaseDataService;
 import io.jpom.model.BaseModel;
 import io.jpom.util.JsonFileUtil;
 

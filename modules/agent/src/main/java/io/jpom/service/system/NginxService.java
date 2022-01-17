@@ -33,7 +33,7 @@ import com.github.odiszapc.nginxparser.NgxBlock;
 import com.github.odiszapc.nginxparser.NgxConfig;
 import com.github.odiszapc.nginxparser.NgxEntry;
 import com.github.odiszapc.nginxparser.NgxParam;
-import io.jpom.common.BaseDataService;
+import io.jpom.service.BaseDataService;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.system.AgentConfigBean;
