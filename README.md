@@ -299,6 +299,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 2. [SpringBoot 案例代码(ClassPath)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
 3. [SpringBoot 案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
 4. [node vue 案例代码(antdv)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/antdv)
+5. [python 案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/python)
 
 > nodejs 编译指定目录：
 ```

@@ -77,7 +77,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 	private String token;
 
 	private String createTime;
-	private String modifyTime;
+
 	private String jdkId;
 	/**
 	 * lib 目录当前文件状态
@@ -87,10 +87,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 	 * 当前运行lib 状态
 	 */
 	private String runLibDesc;
-	/**
-	 * 最后修改人
-	 */
-	private String modifyUser;
 
 	private RunMode runMode;
 	/**
@@ -168,17 +164,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 		this.runMode = runMode;
 	}
 
-	public String getModifyUser() {
-		if (StrUtil.isEmpty(modifyUser)) {
-			return StrUtil.DASHED;
-		}
-		return modifyUser;
-	}
-
-	public void setModifyUser(String modifyUser) {
-		this.modifyUser = modifyUser;
-	}
-
 //	public void setStatus(boolean status) {
 //		this.status = status;
 //	}
@@ -199,18 +184,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 		this.useLibDesc = useLibDesc;
 	}
 
-	public String getModifyTime() {
-		return modifyTime;
-	}
-
-	/**
-	 * 修改时间
-	 *
-	 * @param modifyTime time
-	 */
-	public void setModifyTime(String modifyTime) {
-		this.modifyTime = modifyTime;
-	}
 
 	public String getJvm() {
 		String s = StrUtil.emptyToDefault(jvm, StrUtil.EMPTY);

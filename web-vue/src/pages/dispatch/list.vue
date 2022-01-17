@@ -289,14 +289,14 @@
             <code-editor v-model="temp.dslContent" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
         </a-form-model-item>
-        <a-form-model-item v-show="javaModes.includes(temp.runMode)">
+        <a-form-model-item v-show="noFileModes.includes(temp.runMode)">
           <template slot="label">
             日志目录
             <a-tooltip v-show="temp.type !== 'edit'">
               <template slot="title">
                 <ul>
                   <li>日志目录是指控制台日志存储目录</li>
-                  <li>默认是和项目文件夹父级</li>
+                  <li>默认是在项目文件夹父级</li>
                   <li>可选择的列表和项目白名单目录是一致的，即相同配置</li>
                 </ul>
               </template>
@@ -304,6 +304,7 @@
             </a-tooltip>
           </template>
           <a-select v-model="temp.logPath" placeholder="请选择日志目录">
+            <a-select-option key="" value="">默认是在项目文件夹父级</a-select-option>
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
         </a-form-model-item>

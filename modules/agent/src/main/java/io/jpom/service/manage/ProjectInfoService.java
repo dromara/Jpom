@@ -24,11 +24,10 @@ package io.jpom.service.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import io.jpom.common.BaseAgentController;
-import io.jpom.common.BaseOperService;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.data.ProjectRecoverModel;
+import io.jpom.service.BaseWorkspaceOptService;
 import io.jpom.system.AgentConfigBean;
 import org.springframework.stereotype.Service;
 
@@ -41,13 +40,13 @@ import java.io.File;
  * @author jiangzeyin
  */
 @Service
-public class ProjectInfoService extends BaseOperService<NodeProjectInfoModel> {
-    @Resource
-    private ProjectRecoverService projectRecoverService;
+public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoModel> {
+	@Resource
+	private ProjectRecoverService projectRecoverService;
 
-    public ProjectInfoService() {
-        super(AgentConfigBean.PROJECT);
-    }
+	public ProjectInfoService() {
+		super(AgentConfigBean.PROJECT);
+	}
 
 //    public HashSet<String> getAllGroup() {
 //        //获取所有分组
@@ -63,62 +62,48 @@ public class ProjectInfoService extends BaseOperService<NodeProjectInfoModel> {
 //    }
 
 
-    /**
-     * 删除项目
-     *
-     * @param id 项目
-     */
-    @Override
-    public void deleteItem(String id) {
-        NodeProjectInfoModel projectInfo = getItem(id);
-        String userId = BaseAgentController.getNowUserName();
-        super.deleteItem(id);
-        // 添加回收记录
-        ProjectRecoverModel projectRecoverModel = new ProjectRecoverModel(projectInfo);
-        projectRecoverModel.setDelUser(userId);
-        projectRecoverService.addItem(projectRecoverModel);
-    }
+	/**
+	 * 删除项目
+	 *
+	 * @param id 项目
+	 */
+	@Override
+	public void deleteItem(String id) {
+		NodeProjectInfoModel projectInfo = getItem(id);
+		String userId = BaseAgentController.getNowUserName();
+		super.deleteItem(id);
+		// 添加回收记录
+		ProjectRecoverModel projectRecoverModel = new ProjectRecoverModel(projectInfo);
+		projectRecoverModel.setDelUser(userId);
+		projectRecoverService.addItem(projectRecoverModel);
+	}
 
-    /**
-     * 修改项目信息
-     *
-     * @param projectInfo 项目信息
-     */
-    @Override
-    public void updateItem(NodeProjectInfoModel projectInfo) {
-        projectInfo.setModifyTime(DateUtil.now());
-        String userName = BaseAgentController.getNowUserName();
-        if (!StrUtil.DASHED.equals(userName)) {
-            projectInfo.setModifyUser(userName);
-        }
-        super.updateItem(projectInfo);
-    }
 
-    @Override
-    public void addItem(NodeProjectInfoModel nodeProjectInfoModel) {
-        nodeProjectInfoModel.setCreateTime(DateUtil.now());
-        super.addItem(nodeProjectInfoModel);
-    }
+	@Override
+	public void addItem(NodeProjectInfoModel nodeProjectInfoModel) {
+		nodeProjectInfoModel.setCreateTime(DateUtil.now());
+		super.addItem(nodeProjectInfoModel);
+	}
 
-    /**
-     * 查看项目控制台日志文件大小
-     *
-     * @param nodeProjectInfoModel 项目
-     * @param copyItem  副本
-     * @return 文件大小
-     */
-    public String getLogSize(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) {
-        if (nodeProjectInfoModel == null) {
-            return null;
-        }
-        File file = copyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(copyItem);
-        if (file.exists()) {
-            long fileSize = file.length();
-            if (fileSize <= 0) {
-                return null;
-            }
-            return FileUtil.readableFileSize(fileSize);
-        }
-        return null;
-    }
+	/**
+	 * 查看项目控制台日志文件大小
+	 *
+	 * @param nodeProjectInfoModel 项目
+	 * @param copyItem             副本
+	 * @return 文件大小
+	 */
+	public String getLogSize(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) {
+		if (nodeProjectInfoModel == null) {
+			return null;
+		}
+		File file = copyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(copyItem);
+		if (file.exists()) {
+			long fileSize = file.length();
+			if (fileSize <= 0) {
+				return null;
+			}
+			return FileUtil.readableFileSize(fileSize);
+		}
+		return null;
+	}
 }

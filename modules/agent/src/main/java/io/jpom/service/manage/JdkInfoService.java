@@ -27,7 +27,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.JavaInfo;
 import cn.hutool.system.JavaRuntimeInfo;
-import io.jpom.common.BaseOperService;
+import io.jpom.service.BaseOperService;
 import io.jpom.model.data.JdkInfoModel;
 import io.jpom.system.AgentConfigBean;
 import org.springframework.stereotype.Service;
