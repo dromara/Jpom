@@ -163,6 +163,8 @@
             <a-tooltip v-show="temp.type !== 'edit'">
               <template slot="title">
                 <p>以 yaml/yml 格式配置,scriptId 为脚本模版ID，可以到脚本模版编辑弹窗中查看 scriptId</p>
+                <p>脚本里面支持的变量有：#{PROJECT_ID}、#{PROJECT_NAME}、#{PROJECT_PATH}</p>
+                <p><b>status</b> 流程执行完脚本后，输出的内容最后一行必须为：running:$pid <b>$pid 为当前项目实际的进程ID</b>。如果输出最后一行不是预期格式项目状态将是未运行</p>
                 <p>配置示例：</p>
                 <code>
                   <ol>
