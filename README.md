@@ -334,6 +334,8 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 | Sa-Token      | [https://gitee.com/dromara/sa-token](https://gitee.com/dromara/sa-token)   | 这可能是史上功能最全的 Java 权限认证框架！                      |
 | Erupt         | [https://gitee.com/erupt/erupt](https://gitee.com/erupt/erupt)             | 零前端代码，纯注解开发 admin 管理后台                        |
 
-### giteye
+## Star-Jpom
 
 [![Giteye chart](https://chart.giteye.net/gitee/dromara/Jpom/N4VGB7ZB.png)](https://giteye.net/chart/N4VGB7ZB)
+
+[![Stargazers over time](https://starchart.cc/dromara/Jpom.svg)](https://starchart.cc/dromara/Jpom)
