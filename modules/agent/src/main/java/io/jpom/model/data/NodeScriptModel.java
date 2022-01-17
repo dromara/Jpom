@@ -43,10 +43,6 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 	 */
 	private String lastRunUser;
 	/**
-	 * 最后修改时间
-	 */
-	private String modifyTime;
-	/**
 	 * 脚本内容
 	 */
 	private String context;
@@ -93,14 +89,6 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 
 	public void setLastRunUser(String lastRunUser) {
 		this.lastRunUser = lastRunUser;
-	}
-
-	public String getModifyTime() {
-		return modifyTime;
-	}
-
-	public void setModifyTime(String modifyTime) {
-		this.modifyTime = modifyTime;
 	}
 
 	public String getContext() {

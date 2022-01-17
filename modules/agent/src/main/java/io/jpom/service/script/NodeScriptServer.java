@@ -28,12 +28,12 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import io.jpom.common.BaseOperService;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
 import io.jpom.model.data.NodeScriptExecLogModel;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.script.ScriptProcessBuilder;
+import io.jpom.service.BaseWorkspaceOptService;
 import io.jpom.system.AgentConfigBean;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +46,7 @@ import java.util.List;
  * @date 2019/4/24
  */
 @Service
-public class NodeScriptServer extends BaseOperService<NodeScriptModel> implements ICron {
+public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> implements ICron {
 
 	public NodeScriptServer() {
 		super(AgentConfigBean.SCRIPT);

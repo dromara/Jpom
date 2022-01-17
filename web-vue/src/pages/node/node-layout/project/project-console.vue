@@ -15,10 +15,21 @@
           <a-button :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
           <a-button :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
           <a-button :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
-          <a-button type="primary" @click="handleDownload">导出日志</a-button>
-          <a-button type="primary" @click="handleLogBack">备份列表</a-button>
+
           <a-button type="primary" @click="goFile">文件管理</a-button>
-          <a-tag color="#87d068">文件大小: {{ project.logSize }}</a-tag>
+          |
+          <a-tag> 文件大小: {{ project.logSize }}</a-tag>
+          <a-dropdown>
+            <a class="ant-dropdown-link"> 更多<a-icon type="down" /> </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" :disabled="!project.logSize" @click="handleDownload">导出日志</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="primary" @click="handleLogBack">备份列表</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
     </div>
@@ -29,6 +40,7 @@
     <!-- 日志备份 -->
     <a-modal v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
       <div ref="model-filter" class="filter">
+        <a-tag>控制台日志只是启动项目输出的日志信息,并非项目日志。可以关闭控制台日志备份功能：<b>log.autoBackConsoleCron: none</b></a-tag>
         <a-tag color="orange">控制台日志路径: {{ project.log }}</a-tag>
         <a-tag color="orange">控制台日志备份路径: {{ project.logBack }}</a-tag>
       </div>

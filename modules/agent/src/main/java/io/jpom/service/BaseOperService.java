@@ -20,11 +20,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.common;
+package io.jpom.service;
 
 import cn.hutool.core.util.ClassUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.BaseDataService;
 import io.jpom.model.BaseModel;
 import io.jpom.util.JsonFileUtil;
 

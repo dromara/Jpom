@@ -36,6 +36,37 @@ public abstract class BaseWorkspaceModel extends BaseModel {
 
 	private String workspaceId;
 
+	/**
+	 * 最后修改人
+	 */
+	private String modifyUser;
+
+	private String modifyTime;
+
+	public String getModifyUser() {
+		if (StrUtil.isEmpty(modifyUser)) {
+			return StrUtil.DASHED;
+		}
+		return modifyUser;
+	}
+
+	public String getModifyTime() {
+		return modifyTime;
+	}
+
+	/**
+	 * 修改时间
+	 *
+	 * @param modifyTime time
+	 */
+	public void setModifyTime(String modifyTime) {
+		this.modifyTime = modifyTime;
+	}
+
+	public void setModifyUser(String modifyUser) {
+		this.modifyUser = modifyUser;
+	}
+
 	public String getWorkspaceId() {
 		return StrUtil.emptyToDefault(workspaceId, Const.WORKSPACE_DEFAULT_ID);
 	}
