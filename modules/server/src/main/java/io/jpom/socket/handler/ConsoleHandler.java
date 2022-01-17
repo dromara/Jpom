@@ -24,6 +24,9 @@ package io.jpom.socket.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.common.interceptor.PermissionInterceptor;
+import io.jpom.model.RunMode;
+import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.socket.BaseProxyHandler;
@@ -61,6 +64,12 @@ public class ConsoleHandler extends BaseProxyHandler {
 									   ProxySession proxySession,
 									   JSONObject json,
 									   ConsoleCommandOp consoleCommandOp) {
+		ProjectInfoModel dataItem = (ProjectInfoModel) attributes.get("dataItem");
+		if (RunMode.Dsl.name().equals(dataItem.getRunMode())) {
+			if (consoleCommandOp == ConsoleCommandOp.stop || consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
+				return PermissionInterceptor.DEMO_TIP;
+			}
+		}
 		if (consoleCommandOp != ConsoleCommandOp.heart) {
 			super.logOpt(attributes, json);
 		}
