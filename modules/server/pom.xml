@@ -44,8 +44,9 @@
 
 		<!--   数据库-->
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
+			<groupId>io.jpom.plugins</groupId>
+			<artifactId>db-h2</artifactId>
+			<version>${pom.version}</version>
 		</dependency>
 
 		<dependency>
