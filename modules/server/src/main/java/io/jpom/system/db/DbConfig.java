@@ -22,17 +22,23 @@
  */
 package io.jpom.system.db;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.ds.DSFactory;
 import io.jpom.JpomApplication;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerExtConfigBean;
+import org.h2.store.FileLister;
+import org.h2.tools.Recover;
 
 import java.io.File;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * 数据库配置
@@ -55,6 +61,11 @@ public class DbConfig {
 	 * 是否初始化成功
 	 */
 	private volatile boolean init;
+
+	/**
+	 * 恢复 sql 文件
+	 */
+	private File recoverSqlFile;
 
 	/**
 	 * 单利模式
@@ -97,9 +108,13 @@ public class DbConfig {
 		if (StrUtil.isNotEmpty(dbUrl)) {
 			return dbUrl;
 		}
-		File file = FileUtil.file(DbConfig.getInstance().dbLocalPath(), JpomApplication.getAppType().name());
+		File file = FileUtil.file(this.dbLocalPath(), this.getDbName());
 		String path = FileUtil.getAbsolutePath(file);
 		return StrUtil.format("jdbc:h2:{};CACHE_SIZE={};MODE=MYSQL", path, instance.getCacheSize().toKilobytes());
+	}
+
+	public String getDbName() {
+		return JpomApplication.getAppType().name();
 	}
 
 	/**
@@ -127,6 +142,50 @@ public class DbConfig {
 		File localPath = this.dbLocalPath();
 		File file = FileUtil.file(localPath, "execute.init.sql.log");
 		FileUtil.del(file);
+	}
+
+	/**
+	 * 恢复数据库
+	 */
+	public void executeRecoverDbSql(DSFactory dsFactory) throws Exception {
+		if (!FileUtil.isFile(this.recoverSqlFile)) {
+			return;
+		}
+		//
+		IPlugin plugin = PluginFactory.getPlugin("db-h2");
+		Map<String, Object> map = new HashMap<>(10);
+		map.put("backupSqlPath", FileUtil.getAbsolutePath(this.recoverSqlFile));
+		map.put("dataSource", dsFactory.getDataSource());
+		plugin.execute("restoreBackupSql", map);
+	}
+
+	/**
+	 * 恢复数据库
+	 */
+	public void recoverDb() throws SQLException {
+		File dbLocalPathFile = this.dbLocalPath();
+		if (!FileUtil.exist(dbLocalPathFile)) {
+			return;
+		}
+		String dbName = this.getDbName();
+		String dbLocalPath = FileUtil.getAbsolutePath(dbLocalPathFile);
+		ArrayList<String> list = FileLister.getDatabaseFiles(dbLocalPath, dbName, true);
+		if (CollUtil.isEmpty(list)) {
+			return;
+		}
+		File recoverBackup = FileUtil.file(dbLocalPath, "recover_backup", DateTime.now().toString());
+		FileUtil.mkdir(recoverBackup);
+		// 备份数据
+		for (String s : list) {
+			FileUtil.move(FileUtil.file(s), recoverBackup, true);
+		}
+		// 恢复数据
+		Recover recover = new Recover();
+		recover.runTool("-dir", FileUtil.getAbsolutePath(recoverBackup), "-db", dbName);
+		// 清空记录
+		this.clearExecuteSqlLog();
+		// 记录恢复的 sql
+		this.recoverSqlFile = FileUtil.file(recoverBackup, dbName + ".h2.sql");
 	}
 
 	/**
