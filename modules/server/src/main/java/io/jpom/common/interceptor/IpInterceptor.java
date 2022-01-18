@@ -22,8 +22,8 @@
  */
 package io.jpom.common.interceptor;
 
+import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.core.net.NetUtil;
-import cn.hutool.core.util.CharUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -96,12 +96,27 @@ public class IpInterceptor extends BaseJpomInterceptor {
 				// 开放所有
 				return true;
 			}
-			if (StrUtil.contains(itemIp, CharUtil.SLASH)) {
+			if (StrUtil.contains(itemIp, Ipv4Util.IP_MASK_SPLIT_MARK)) {
 				// ip段
-				String[] itemIps = StrUtil.splitToArray(itemIp, StrUtil.SLASH);
-				long aBegin = NetUtil.ipv4ToLong(itemIps[0]);
-				long aEnd = NetUtil.ipv4ToLong(itemIps[1]);
-				check = (ipNum >= aBegin) && (ipNum <= aEnd);
+				String[] itemIps = StrUtil.splitToArray(itemIp, Ipv4Util.IP_MASK_SPLIT_MARK);
+				int count1 = StrUtil.count(itemIps[0], StrUtil.DOT);
+				int count2 = StrUtil.count(itemIps[1], StrUtil.DOT);
+				if (count1 == 3 && count2 == 3) {
+					//192.168.1.0/192.168.1.200
+					long aBegin = NetUtil.ipv4ToLong(itemIps[0]);
+					long aEnd = NetUtil.ipv4ToLong(itemIps[1]);
+					check = (ipNum >= aBegin) && (ipNum <= aEnd);
+				} else if (count1 == 3 && count2 == 0) {
+					//192.168.1.0/24
+					String startIp = Ipv4Util.getBeginIpStr(itemIps[0], Integer.parseInt(itemIps[1]));
+					String endIp = Ipv4Util.getEndIpStr(itemIps[0], Integer.parseInt(itemIps[1]));
+					long aBegin = NetUtil.ipv4ToLong(startIp);
+					long aEnd = NetUtil.ipv4ToLong(endIp);
+					check = (ipNum >= aBegin) && (ipNum <= aEnd);
+				} else {
+					check = false;
+				}
+
 			} else {
 				check = StrUtil.equals(itemIp, ip);
 			}

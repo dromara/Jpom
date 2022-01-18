@@ -19,10 +19,10 @@
       <a-alert message="如果配置错误需要重新服务端并添加命令行参数 --rest:ip_config 将恢复默认配置" style="margin-top: 10px" banner />
       <a-form-model style="margin-top: 10px" ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="IP白名单" prop="content">
-          <a-input v-model="ipTemp.allowed" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开发所有IP,支持配置IP段 192.168.1.1/192.168.1.254" />
+          <a-input v-model="ipTemp.allowed" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开发所有IP,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24" />
         </a-form-model-item>
         <a-form-model-item label="IP黑名单" prop="content">
-          <a-input v-model="ipTemp.prohibited" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254" />
+          <a-input v-model="ipTemp.prohibited" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24" />
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ offset: 10 }" class="ip-config-button">
           <a-button type="primary" class="btn" :disabled="submitIpAble" @click="onSubmitIp()">保存</a-button>
