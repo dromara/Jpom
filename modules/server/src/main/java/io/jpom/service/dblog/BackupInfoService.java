@@ -39,8 +39,9 @@ import io.jpom.common.Const;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.enums.BackupStatusEnum;
 import io.jpom.model.enums.BackupTypeEnum;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseDbService;
-import io.jpom.service.h2db.H2BackupService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -63,12 +66,6 @@ import java.util.stream.Stream;
  **/
 @Service
 public class BackupInfoService extends BaseDbService<BackupInfoModel> {
-
-	private final H2BackupService h2BackupService;
-
-	public BackupInfoService(H2BackupService h2BackupService) {
-		this.h2BackupService = h2BackupService;
-	}
 
 	/**
 	 * 检查数据库备份
@@ -176,18 +173,25 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 			BackupInfoModel backupInfo = new BackupInfoModel();
 			BeanUtil.copyProperties(backupInfoModel, backupInfo);
 			try {
-				DefaultSystemLog.getLog().info("start a new Thread to execute H2 Database backup...start");
-				h2BackupService.backupSql(url, user, pass, backupSqlPath, tableNameList);
+				DefaultSystemLog.getLog().debug("start a new Thread to execute H2 Database backup...start");
+				IPlugin plugin = PluginFactory.getPlugin("db-h2");
+				Map<String, Object> map = new HashMap<>(10);
+				map.put("url", url);
+				map.put("user", user);
+				map.put("pass", pass);
+				map.put("backupSqlPath", backupSqlPath);
+				map.put("tableNameList", tableNameList);
+				plugin.execute("backupSql", map);
+				//h2BackupService.backupSql(url, user, pass, backupSqlPath, tableNameList);
 				// 修改备份任务执行完成
 				backupInfo.setFileSize(FileUtil.size(file));
 				backupInfo.setSha1Sum(SecureUtil.sha1(file));
 				backupInfo.setStatus(BackupStatusEnum.SUCCESS.getCode());
 				update(backupInfo);
-				DefaultSystemLog.getLog().info("start a new Thread to execute H2 Database backup...success");
+				DefaultSystemLog.getLog().debug("start a new Thread to execute H2 Database backup...success");
 			} catch (Exception e) {
 				// 记录错误日志信息，修改备份任务执行失败
-				DefaultSystemLog.getLog().error("start a new Thread to execute H2 Database backup...catch exception...message: {}, cause: {}",
-						e.getMessage(), e.getCause());
+				DefaultSystemLog.getLog().error("start a new Thread to execute H2 Database backup...catch exception...", e);
 				backupInfo.setStatus(BackupStatusEnum.FAILED.getCode());
 				update(backupInfo);
 			}
@@ -203,10 +207,13 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 	public boolean restoreWithSql(String backupSqlPath) {
 		try {
 			long startTs = System.currentTimeMillis();
-			h2BackupService.restoreBackupSql(backupSqlPath);
+			IPlugin plugin = PluginFactory.getPlugin("db-h2");
+			Map<String, Object> map = new HashMap<>(10);
+			map.put("backupSqlPath", backupSqlPath);
+			plugin.execute("restoreBackupSql", map);
+			// h2BackupService.restoreBackupSql(backupSqlPath);
 			long endTs = System.currentTimeMillis();
-			DefaultSystemLog.getLog().info("restore H2 Database backup...success...cast {} ms",
-					endTs - startTs);
+			DefaultSystemLog.getLog().debug("restore H2 Database backup...success...cast {} ms", endTs - startTs);
 			return true;
 		} catch (Exception e) {
 			// 记录错误日志信息，返回数据库备份还原执行失败

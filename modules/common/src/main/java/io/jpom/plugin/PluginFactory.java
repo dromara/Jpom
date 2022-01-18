@@ -91,6 +91,16 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
 	}
 
 	/**
+	 * 判断是否包含某个插件
+	 *
+	 * @param name 插件名
+	 * @return true 包含
+	 */
+	public static boolean contains(String name) {
+		return PLUGIN_MAP.containsKey(name);
+	}
+
+	/**
 	 * 插件数量
 	 *
 	 * @return 当前加载的插件数量
