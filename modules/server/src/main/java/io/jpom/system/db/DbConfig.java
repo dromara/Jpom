@@ -146,6 +146,8 @@ public class DbConfig {
 
 	/**
 	 * 恢复数据库
+	 *
+	 * @param dsFactory 数据库连接
 	 */
 	public void executeRecoverDbSql(DSFactory dsFactory) throws Exception {
 		if (!FileUtil.isFile(this.recoverSqlFile)) {
