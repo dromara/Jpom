@@ -99,7 +99,7 @@ public class DbConfig {
 		}
 		File file = FileUtil.file(DbConfig.getInstance().dbLocalPath(), JpomApplication.getAppType().name());
 		String path = FileUtil.getAbsolutePath(file);
-		return StrUtil.format("jdbc:h2:{};CACHE_SIZE={}", path, instance.getCacheSize().toKilobytes());
+		return StrUtil.format("jdbc:h2:{};CACHE_SIZE={};MODE=MYSQL", path, instance.getCacheSize().toKilobytes());
 	}
 
 	/**
