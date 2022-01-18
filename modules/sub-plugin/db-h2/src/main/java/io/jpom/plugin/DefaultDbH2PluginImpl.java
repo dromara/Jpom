@@ -131,8 +131,8 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
 		// 执行 SQL 备份脚本
 		Shell shell = new Shell();
 
-		/**
-		 * url 表示 h2 数据库的 jdbc url
+		/*
+		  url 表示 h2 数据库的 jdbc url
 		 * user 表示登录的用户名
 		 * password 表示登录密码
 		 * driver 是 jdbc 驱动
