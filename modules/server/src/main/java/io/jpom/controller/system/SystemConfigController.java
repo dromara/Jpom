@@ -25,6 +25,8 @@ package io.jpom.controller.system;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.lang.Validator;
+import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -159,10 +161,49 @@ public class SystemConfigController extends BaseServerController {
 	@Feature(cls = ClassFeature.SYSTEM_CONFIG_IP, method = MethodFeature.EDIT)
 	public String saveIpConfig(String allowed, String prohibited) {
 		SystemIpConfigModel systemIpConfigModel = new SystemIpConfigModel();
-		systemIpConfigModel.setAllowed(StrUtil.emptyToDefault(allowed, StrUtil.EMPTY));
-		systemIpConfigModel.setProhibited(StrUtil.emptyToDefault(prohibited, StrUtil.EMPTY));
+		String allowed1 = StrUtil.emptyToDefault(allowed, StrUtil.EMPTY);
+		this.checkIpV4(allowed1);
+		systemIpConfigModel.setAllowed(allowed1);
+		//
+		String prohibited1 = StrUtil.emptyToDefault(prohibited, StrUtil.EMPTY);
+		systemIpConfigModel.setProhibited(prohibited1);
+		this.checkIpV4(prohibited1);
 		systemParametersServer.upsert(SystemIpConfigModel.ID, systemIpConfigModel, SystemIpConfigModel.ID);
 		//
 		return JsonMessage.getString(200, "修改成功");
+	}
+
+	private void checkIpV4(String ips) {
+		if (StrUtil.isEmpty(ips)) {
+			return;
+		}
+		String[] split = StrUtil.splitToArray(ips, StrUtil.LF);
+		for (String itemIp : split) {
+			itemIp = itemIp.trim();
+			if (itemIp.startsWith("#")) {
+				continue;
+			}
+			if (StrUtil.equals(itemIp, "0.0.0.0")) {
+				// 开放所有
+				continue;
+			}
+			if (StrUtil.contains(itemIp, Ipv4Util.IP_MASK_SPLIT_MARK)) {
+				String[] param = StrUtil.splitToArray(itemIp, Ipv4Util.IP_MASK_SPLIT_MARK);
+				int count1 = StrUtil.count(param[0], StrUtil.DOT);
+				int count2 = StrUtil.count(param[1], StrUtil.DOT);
+				if (count1 == 3 && count2 == 3) {
+					//192.168.1.0/192.168.1.200
+					continue;
+				}
+				if (count1 == 3 && count2 == 0) {
+					//192.168.1.0/24
+					return;
+				}
+				continue;
+			}
+			boolean ipv4 = Validator.isIpv4(itemIp);
+			Assert.state(ipv4, "请填写 ipv4 地址：" + itemIp);
+		}
+
 	}
 }
