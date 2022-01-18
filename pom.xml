@@ -36,7 +36,7 @@
 		<spring-boot.version>2.6.1</spring-boot.version>
 
 		<common-boot.version>[2.2.0,2.2.99]</common-boot.version>
-
+		<h2.version>1.4.200</h2.version>
 		<!-- 跳过测试 -->
 		<skipTests>true</skipTests>
 		<maven.test.skip>true</maven.test.skip>

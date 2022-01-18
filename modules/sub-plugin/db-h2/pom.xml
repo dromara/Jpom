@@ -16,8 +16,6 @@
 	<properties>
 		<maven.compiler.source>8</maven.compiler.source>
 		<maven.compiler.target>8</maven.compiler.target>
-
-		<h2.version>1.4.200</h2.version>
 	</properties>
 
 	<dependencies>
