@@ -27,6 +27,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.net.Ipv4Util;
+import cn.hutool.core.net.MaskBit;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -189,17 +190,21 @@ public class SystemConfigController extends BaseServerController {
 			}
 			if (StrUtil.contains(itemIp, Ipv4Util.IP_MASK_SPLIT_MARK)) {
 				String[] param = StrUtil.splitToArray(itemIp, Ipv4Util.IP_MASK_SPLIT_MARK);
+				Assert.state(Validator.isIpv4(param[0]), "请填写 ipv4 地址：" + itemIp);
 				int count1 = StrUtil.count(param[0], StrUtil.DOT);
 				int count2 = StrUtil.count(param[1], StrUtil.DOT);
 				if (count1 == 3 && count2 == 3) {
 					//192.168.1.0/192.168.1.200
+					Assert.state(Validator.isIpv4(param[1]), "请填写 ipv4 地址：" + itemIp);
 					continue;
 				}
 				if (count1 == 3 && count2 == 0) {
 					//192.168.1.0/24
-					return;
+					int maskBit = Convert.toInt(param[1], 0);
+					String s = MaskBit.get(maskBit);
+					Assert.hasText(s, "子掩码不正确：" + itemIp);
+					continue;
 				}
-				continue;
 			}
 			boolean ipv4 = Validator.isIpv4(itemIp);
 			Assert.state(ipv4, "请填写 ipv4 地址：" + itemIp);
