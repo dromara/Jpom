@@ -22,19 +22,26 @@
  */
 package io.jpom.plugin;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.ds.DSFactory;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import org.h2.store.FileLister;
+import org.h2.tools.Recover;
 import org.h2.tools.RunScript;
 import org.h2.tools.Shell;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,10 +70,43 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
 				dataSource = DSFactory.get();
 			}
 			this.restoreBackupSql(backupSqlPath, dataSource);
+		} else if (StrUtil.equals("recoverToSql", method)) {
+			File dbPath = (File) parameter.get("dbPath");
+			String dbName = (String) parameter.get("dbName");
+			File recoverBackup = (File) parameter.get("recoverBackup");
+			return this.recover(dbPath, dbName, recoverBackup);
 		} else {
 			throw new IllegalArgumentException("不支持的类型");
 		}
 		return "done";
+	}
+
+	/**
+	 * 恢复
+	 *
+	 * @param dbPath        数据库路径
+	 * @param dbName        数据库名
+	 * @param recoverBackup 恢复到哪个路径
+	 * @return 返回恢复到 sql 文件
+	 * @throws SQLException sql
+	 */
+	private File recover(File dbPath, String dbName, File recoverBackup) throws SQLException {
+		String dbLocalPath = FileUtil.getAbsolutePath(dbPath);
+		ArrayList<String> list = FileLister.getDatabaseFiles(dbLocalPath, dbName, true);
+		if (CollUtil.isEmpty(list)) {
+			return null;
+		}
+		FileUtil.mkdir(recoverBackup);
+		// 备份数据
+		for (String s : list) {
+			FileUtil.move(FileUtil.file(s), recoverBackup, true);
+		}
+		String absolutePath = FileUtil.getAbsolutePath(recoverBackup);
+		Console.log("h2 db recover backup path,{}", absolutePath);
+		// 恢复数据
+		Recover recover = new Recover();
+		recover.runTool("-dir", absolutePath, "-db", dbName);
+		return FileUtil.file(recoverBackup, dbName + ".h2.sql");
 	}
 
 	/**
