@@ -6,10 +6,12 @@
 1. 文件管理支持备份 
 2. 文件管理备份
 3. ~~ssh 批量执行命令~~
-4. 自定义检查项目状态 `for /f "tokens=1 delims= " %i in ('jps -l ^| findstr "JpomServer"') do @echo %i`
-5. 自定义启动项目脚本
+4. ~~自定义检查项目状态~~
+   1. `for /f "tokens=1 delims= " %i in ('jps -l ^| findstr "JpomServer"') do @echo %i`
+5. ~~自定义启动项目脚本~~
 6. 快速安装导入插件端
 7. 支持 mysql 数据库
+8. h2 数据库升级 2.0
 
 
 ----
