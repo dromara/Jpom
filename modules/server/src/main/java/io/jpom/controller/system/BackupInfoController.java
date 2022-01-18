@@ -22,7 +22,10 @@
  */
 package io.jpom.controller.system;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ClassUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -31,16 +34,19 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.enums.BackupStatusEnum;
+import io.jpom.model.enums.BackupTypeEnum;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BackupInfoService;
+import io.jpom.service.h2db.TableName;
 import io.jpom.system.db.DbConfig;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,6 +58,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 数据库备份 controller
@@ -179,7 +187,7 @@ public class BackupInfoController extends BaseServerController {
 
 //		backupInfoModel.setId(IdUtil.fastSimpleUUID());
 		backupInfoModel.setName(file.getName());
-		backupInfoModel.setBackupType(2);
+		backupInfoModel.setBackupType(BackupTypeEnum.IMPORT.getCode());
 		backupInfoModel.setStatus(BackupStatusEnum.SUCCESS.getCode());
 		backupInfoModel.setFileSize(FileUtil.size(file));
 
@@ -222,7 +230,21 @@ public class BackupInfoController extends BaseServerController {
 	@Feature(method = MethodFeature.LIST)
 	public Object loadTableNameList() {
 		List<String> tableNameList = backupInfoService.h2TableNameList();
-		return JsonMessage.toJson(200, "获取成功", tableNameList);
+		Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("io.jpom", TableName.class);
+		Map<String, String> map = CollStreamUtil.toMap(classes, aClass -> {
+			TableName tableName = aClass.getAnnotation(TableName.class);
+			return tableName.value();
+		}, aClass -> {
+			TableName tableName = aClass.getAnnotation(TableName.class);
+			return tableName.name();
+		});
+		List<JSONObject> list = tableNameList.stream().map(s -> {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("tableName", s);
+			jsonObject.put("tableDesc", StrUtil.emptyToDefault(map.get(s), s));
+			return jsonObject;
+		}).collect(Collectors.toList());
+		return JsonMessage.toJson(200, "", list);
 	}
 
 }
