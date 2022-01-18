@@ -91,6 +91,27 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
 	}
 
 	/**
+	 * 执行插件方法
+	 *
+	 * @param name       插件名
+	 * @param main       主参数
+	 * @param parameters 其他参数
+	 * @return 结果
+	 * @throws Exception 异常
+	 */
+	public static Object execute(String name, Object main, Object... parameters) throws Exception {
+		IPlugin plugin = getPlugin(name);
+		// 处理参数
+		int length = parameters.length;
+		Map<String, Object> map = new HashMap<>(length / 2);
+		for (int i = 0; i < length; i += 2) {
+			map.put(parameters[i].toString(), parameters[i + 1]);
+		}
+		// 执行
+		return plugin.execute(main, map);
+	}
+
+	/**
 	 * 判断是否包含某个插件
 	 *
 	 * @param name 插件名
