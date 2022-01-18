@@ -46,7 +46,7 @@
       <a-form-model ref="editBackupForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="备份类型" prop="backupType">
           <a-radio-group v-model="temp.backupType" name="backupType">
-            <a-radio v-for="item in backupTypeList" :disabled="item.disabled" :key="item.key" :value="item.key">{{ item.value }}</a-radio>
+            <a-radio v-for="item in backupTypeList" v-show="!item.disabled" :key="item.key" :value="item.key">{{ item.value }}</a-radio>
           </a-radio-group>
         </a-form-model-item>
         <!-- 部分备份 -->
@@ -69,8 +69,10 @@
       <br />
       <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
       <br />
-      <a-button type="primary" :disabled="fileUploadDisabled" @click="startSqlUpload">开始上传</a-button>
-      <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
+      <a-space>
+        <a-button type="primary" :disabled="fileUploadDisabled" @click="startSqlUpload">开始上传</a-button>
+        <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
+      </a-space>
     </a-modal>
   </div>
 </template>
@@ -201,7 +203,7 @@ export default {
       getTableNameList().then((res) => {
         if (res.code === 200) {
           res.data.forEach((element) => {
-            this.tableNameList.push({ key: element, title: element });
+            this.tableNameList.push({ key: element.tableName, title: element.tableDesc });
           });
         }
       });

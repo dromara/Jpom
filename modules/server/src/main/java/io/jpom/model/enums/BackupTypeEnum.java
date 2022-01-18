@@ -36,6 +36,8 @@ public enum BackupTypeEnum implements BaseEnum {
 	 */
 	ALL(0, "全量备份"),
 	PART(1, "部分备份"),
+	IMPORT(2, "导入备份"),
+	AUTO(3, "自动备份"),
 	;
 
 	BackupTypeEnum(int code, String desc) {
@@ -43,8 +45,8 @@ public enum BackupTypeEnum implements BaseEnum {
 		this.desc = desc;
 	}
 
-	int code;
-	String desc;
+	final int code;
+	final String desc;
 
 	@Override
 	public int getCode() {

@@ -121,7 +121,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 				}
 			}
 			// 执行数据库备份
-			this.backupToSql(null, 3);
+			this.backupToSql(null, BackupTypeEnum.AUTO);
 		}
 	}
 
@@ -132,9 +132,9 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 	 */
 	public void backupToSql(final List<String> tableNameList) {
 		// 判断备份类型
-		int backupType = BackupTypeEnum.ALL.getCode();
+		BackupTypeEnum backupType = BackupTypeEnum.ALL;
 		if (!CollectionUtils.isEmpty(tableNameList)) {
-			backupType = BackupTypeEnum.PART.getCode();
+			backupType = BackupTypeEnum.PART;
 		}
 		this.backupToSql(tableNameList, backupType);
 	}
@@ -144,7 +144,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 	 *
 	 * @param tableNameList 需要备份的表名称列表，如果是全库备份，则不需要
 	 */
-	public void backupToSql(final List<String> tableNameList, int backupType) {
+	private void backupToSql(final List<String> tableNameList, BackupTypeEnum backupType) {
 		final String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
 
 		// 设置默认备份 SQL 的文件地址
@@ -163,7 +163,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 		backupInfoModel.setId(IdUtil.fastSimpleUUID());
 		backupInfoModel.setName(fileName);
 
-		backupInfoModel.setBackupType(backupType);
+		backupInfoModel.setBackupType(backupType.getCode());
 		backupInfoModel.setFilePath(backupSqlPath);
 		insert(backupInfoModel);
 
