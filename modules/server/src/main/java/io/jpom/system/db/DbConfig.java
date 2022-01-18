@@ -22,10 +22,8 @@
  */
 package io.jpom.system.db;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.ds.DSFactory;
@@ -34,11 +32,8 @@ import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerExtConfigBean;
-import org.h2.store.FileLister;
-import org.h2.tools.Recover;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -165,32 +160,24 @@ public class DbConfig {
 	/**
 	 * 恢复数据库
 	 */
-	public void recoverDb() throws SQLException {
+	public void recoverDb() throws Exception {
 		File dbLocalPathFile = this.dbLocalPath();
 		if (!FileUtil.exist(dbLocalPathFile)) {
 			return;
 		}
 		String dbName = this.getDbName();
-		String dbLocalPath = FileUtil.getAbsolutePath(dbLocalPathFile);
-		ArrayList<String> list = FileLister.getDatabaseFiles(dbLocalPath, dbName, true);
-		if (CollUtil.isEmpty(list)) {
-			return;
-		}
-		File recoverBackup = FileUtil.file(dbLocalPath, "recover_backup", DateTime.now().toString());
-		FileUtil.mkdir(recoverBackup);
-		// 备份数据
-		for (String s : list) {
-			FileUtil.move(FileUtil.file(s), recoverBackup, true);
-		}
-		String absolutePath = FileUtil.getAbsolutePath(recoverBackup);
-		Console.log("h2 db recover backup path,{}", absolutePath);
-		// 恢复数据
-		Recover recover = new Recover();
-		recover.runTool("-dir", absolutePath, "-db", dbName);
+		File recoverBackup = FileUtil.file(dbLocalPathFile, "recover_backup", DateTime.now().toString());
+		//
+		IPlugin plugin = PluginFactory.getPlugin("db-h2");
+		Map<String, Object> map = new HashMap<>(10);
+		map.put("dbName", dbName);
+		map.put("dbPath", dbLocalPathFile);
+		map.put("recoverBackup", recoverBackup);
+		File backupSql = (File) plugin.execute("recoverToSql", map);
 		// 清空记录
 		this.clearExecuteSqlLog();
 		// 记录恢复的 sql
-		this.recoverSqlFile = FileUtil.file(recoverBackup, dbName + ".h2.sql");
+		this.recoverSqlFile = backupSql;
 	}
 
 	/**

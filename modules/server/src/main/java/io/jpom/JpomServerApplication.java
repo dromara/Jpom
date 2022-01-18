@@ -56,9 +56,9 @@ public class JpomServerApplication implements ApplicationEventLoad {
 	/**
 	 * 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
 	 */
-	private static boolean load_init_db = false;
+	private static boolean loadInitDb = false;
 	/**
-	 * 恢复数据库
+	 * 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
 	 */
 	private static boolean recoverH2Db = false;
 
@@ -75,7 +75,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
 	public static void main(String[] args) throws Exception {
 		long time = SystemClock.now();
 		if (ArrayUtil.containsIgnoreCase(args, "--rest:load_init_db")) {
-			load_init_db = true;
+			loadInitDb = true;
 		}
 		if (ArrayUtil.containsIgnoreCase(args, "--recover:h2db")) {
 			recoverH2Db = true;
@@ -113,7 +113,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
 	@Override
 	public void applicationLoad() {
 		DbConfig instance = DbConfig.getInstance();
-		if (load_init_db) {
+		if (loadInitDb) {
 			instance.clearExecuteSqlLog();
 		}
 		if (recoverH2Db) {
