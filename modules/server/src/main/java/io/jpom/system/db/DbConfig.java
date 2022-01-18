@@ -25,6 +25,7 @@ package io.jpom.system.db;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.ds.DSFactory;
@@ -181,9 +182,11 @@ public class DbConfig {
 		for (String s : list) {
 			FileUtil.move(FileUtil.file(s), recoverBackup, true);
 		}
+		String absolutePath = FileUtil.getAbsolutePath(recoverBackup);
+		Console.log("h2 db recover backup path,{}", absolutePath);
 		// 恢复数据
 		Recover recover = new Recover();
-		recover.runTool("-dir", FileUtil.getAbsolutePath(recoverBackup), "-db", dbName);
+		recover.runTool("-dir", absolutePath, "-db", dbName);
 		// 清空记录
 		this.clearExecuteSqlLog();
 		// 记录恢复的 sql
