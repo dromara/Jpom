@@ -57,12 +57,17 @@ public class JpomServerApplication implements ApplicationEventLoad {
 	 * 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
 	 */
 	private static boolean load_init_db = false;
+	/**
+	 * 恢复数据库
+	 */
+	private static boolean recoverH2Db = false;
 
 	/**
 	 * 启动执行
 	 * --rest:ip_config 重置 IP 白名单配置
 	 * --rest:load_init_db 重新加载数据库初始化操作
 	 * --rest:super_user_pwd 重置超级管理员密码
+	 * --recover:h2db 当 h2 数据出现奔溃无法启动需要执行恢复逻辑
 	 *
 	 * @param args 参数
 	 * @throws Exception 异常
@@ -71,6 +76,9 @@ public class JpomServerApplication implements ApplicationEventLoad {
 		long time = SystemClock.now();
 		if (ArrayUtil.containsIgnoreCase(args, "--rest:load_init_db")) {
 			load_init_db = true;
+		}
+		if (ArrayUtil.containsIgnoreCase(args, "--recover:h2db")) {
+			recoverH2Db = true;
 		}
 		//
 		JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
@@ -104,8 +112,17 @@ public class JpomServerApplication implements ApplicationEventLoad {
 
 	@Override
 	public void applicationLoad() {
+		DbConfig instance = DbConfig.getInstance();
 		if (load_init_db) {
-			DbConfig.getInstance().clearExecuteSqlLog();
+			instance.clearExecuteSqlLog();
+		}
+		if (recoverH2Db) {
+			try {
+				instance.recoverDb();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(-2);
+			}
 		}
 	}
 }

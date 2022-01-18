@@ -110,7 +110,9 @@ public class DefaultEmailPluginImpl implements IDefaultPlugin {
 		mailAccount.setSslEnable(sslEnable);
 		//Integer socketFactoryPort = data.getInteger("socketFactoryPort");
 //			if (socketFactoryPort != null) {
-		mailAccount.setSocketFactoryPort(port);
+		if (sslEnable) {
+			mailAccount.setSocketFactoryPort(port);
+		}
 //			}
 		mailAccount.setAuth(true);
 		return mailAccount;

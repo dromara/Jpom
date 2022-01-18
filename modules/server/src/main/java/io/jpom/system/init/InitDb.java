@@ -103,6 +103,8 @@ public class InitDb implements DisposableBean, InitializingBean {
 		try {
 			// 创建连接
 			DSFactory dsFactory = DSFactory.create(setting);
+			// 先执行恢复数据
+			instance.executeRecoverDbSql(dsFactory);
 			/*
 			  @author Hotstrip
 			  add another sql init file, if there are more sql file,

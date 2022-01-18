@@ -31,7 +31,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -58,7 +57,12 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
 			this.backupSql(url, user, password, backupSqlPath, tableNameList);
 		} else if (StrUtil.equals("restoreBackupSql", method)) {
 			String backupSqlPath = (String) parameter.get("backupSqlPath");
-			this.restoreBackupSql(backupSqlPath);
+			DataSource dataSource = (DataSource) parameter.get("dataSource");
+			if (dataSource == null) {
+				// 加载数据源
+				dataSource = DSFactory.get();
+			}
+			this.restoreBackupSql(backupSqlPath, dataSource);
 		} else {
 			throw new IllegalArgumentException("不支持的类型");
 		}
@@ -83,9 +87,7 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
 			String tableNames = StrUtil.join(StrUtil.COMMA, tableNameList.toArray());
 			sql = StrUtil.format("{} TABLE {}", sql, tableNames);
 		}
-
-		DefaultSystemLog.getLog().info("backup SQL is: {}", sql);
-
+		DefaultSystemLog.getLog().debug("backup SQL is: {}", sql);
 		// 执行 SQL 备份脚本
 		Shell shell = new Shell();
 
@@ -114,12 +116,10 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
 	 * 还原备份 SQL
 	 *
 	 * @param backupSqlPath backup SQL file path, absolute path
-	 * @throws SQLException          SQLException
-	 * @throws FileNotFoundException FileNotFoundException
+	 * @throws SQLException SQLException
+	 * @throws IOException  FileNotFoundException
 	 */
-	private void restoreBackupSql(String backupSqlPath) throws SQLException, IOException {
-		// 加载数据源
-		DataSource dataSource = DSFactory.get();
+	private void restoreBackupSql(String backupSqlPath, DataSource dataSource) throws SQLException, IOException {
 		Assert.notNull(dataSource, "Restore Backup sql error...H2 DataSource not null");
 		try (Connection connection = dataSource.getConnection()) {
 			// 读取数据库备份文件，执行还原
