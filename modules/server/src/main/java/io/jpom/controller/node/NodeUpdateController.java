@@ -1,17 +1,22 @@
 package io.jpom.controller.node;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.JpomManifest;
-import io.jpom.common.RemoteVersion;
-import io.jpom.common.Type;
+import io.jpom.common.*;
+import io.jpom.common.interceptor.BaseJpomInterceptor;
+import io.jpom.controller.openapi.NodeInfoController;
 import io.jpom.model.AgentFileModel;
+import io.jpom.model.data.NodeModel;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -19,6 +24,7 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,7 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -135,4 +145,59 @@ public class NodeUpdateController extends BaseServerController {
 			FileUtil.del(file1);
 		}
 	}
+
+	@GetMapping(value = "fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String fastInstall() {
+		InputStream inputStream = ResourceUtil.getStream("classpath:/fast-install-info.json");
+		String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
+		JSONObject jsonObject = new JSONObject();
+		JpomManifest instance = JpomManifest.getInstance();
+		jsonObject.put("token", instance.randomIdSign());
+		jsonObject.put("key", ServerOpenApi.PUSH_NODE_KEY);
+		//
+		JSONArray jsonArray = JSONArray.parseArray(json);
+		jsonObject.put("shUrls", jsonArray);
+		//
+		String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+		String url = String.format("/%s/%s", contextPath, ServerOpenApi.RECEIVE_PUSH);
+		jsonObject.put("url", FileUtil.normalize(url));
+		return JsonMessage.getString(200, "", jsonObject);
+	}
+
+	@GetMapping(value = "pull_fast_install_result.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String pullFastInstallResult(String removeId) {
+		Collection<JSONObject> jsonObjects = NodeInfoController.listReceiveCache(removeId);
+		jsonObjects = jsonObjects.stream().map(jsonObject -> {
+			JSONObject clone = jsonObject.clone();
+			clone.remove("canUseNode");
+			return clone;
+		}).collect(Collectors.toList());
+		return JsonMessage.getString(200, "", jsonObjects);
+	}
+
+	@GetMapping(value = "confirm_fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String confirmFastInstall(@ValidatorItem String id, @ValidatorItem String ip, int port) {
+		JSONObject receiveCache = NodeInfoController.getReceiveCache(id);
+		Assert.notNull(receiveCache, "没有对应的缓存信息");
+		JSONArray jsonArray = receiveCache.getJSONArray("canUseNode");
+		Assert.notEmpty(jsonArray, "没有对应的缓存信息：-1");
+		Optional<NodeModel> any = jsonArray.stream().map(o -> {
+			if (o instanceof NodeModel) {
+				return (NodeModel) o;
+			}
+			JSONObject jsonObject = (JSONObject) o;
+			return jsonObject.toJavaObject(NodeModel.class);
+		}).filter(nodeModel -> StrUtil.equals(nodeModel.getUrl(), StrUtil.format("{}:{}", ip, port))).findAny();
+		Assert.state(any.isPresent(), "ip 地址信息不正确");
+		NodeModel nodeModel = any.get();
+		// 插入
+		boolean exists = nodeService.existsByUrl(nodeModel.getUrl(), nodeModel.getWorkspaceId(), null);
+		Assert.state(!exists, "对应的节点已经存在拉：" + nodeModel.getUrl());
+		nodeService.insert(nodeModel);
+		// 更新结果
+		receiveCache.put("type", "success");
+		return JsonMessage.getString(200, "安装成功", NodeInfoController.listReceiveCache(null));
+	}
+
+
 }

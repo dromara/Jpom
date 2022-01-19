@@ -5,6 +5,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -54,6 +55,33 @@ public class NodeService extends BaseGroupService<NodeModel> implements ICron {
 	}
 
 	/**
+	 * 测试节点是否可以访问
+	 *
+	 * @param nodeModel 节点信息
+	 */
+	public void testNode(NodeModel nodeModel) {
+		//
+		int timeOut = ObjectUtil.defaultIfNull(nodeModel.getTimeOut(), 0);
+		// 检查是否可用默认为5秒，避免太长时间无法连接一直等待
+		nodeModel.setTimeOut(5);
+		//
+		JsonMessage<Object> objectJsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Info, "nodeId", nodeModel.getId());
+		JpomManifest jpomManifest = objectJsonMessage.getData(JpomManifest.class);
+		Assert.notNull(jpomManifest, "节点连接失败，请检查节点是否在线");
+		//
+		nodeModel.setTimeOut(timeOut);
+	}
+
+	public boolean existsByUrl(String url, String workspaceId, String id) {
+		NodeModel nodeModel1 = new NodeModel();
+		nodeModel1.setUrl(url);
+		nodeModel1.setWorkspaceId(workspaceId);
+		List<NodeModel> nodeModels = ObjectUtil.defaultIfNull(super.listByBean(nodeModel1), Collections.EMPTY_LIST);
+		Optional<NodeModel> any = nodeModels.stream().filter(nodeModel2 -> !StrUtil.equals(id, nodeModel2.getId())).findAny();
+		return any.isPresent();
+	}
+
+	/**
 	 * 修改 节点
 	 *
 	 * @param request 请求对象
@@ -94,12 +122,8 @@ public class NodeService extends BaseGroupService<NodeModel> implements ICron {
 		//		Assert.state(!exists, "对应的节点已经存在啦");
 		//nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
 		{// 节点地址 重复
-			NodeModel nodeModel1 = new NodeModel();
-			nodeModel1.setUrl(nodeModel.getUrl());
-			nodeModel1.setWorkspaceId(workspaceId);
-			List<NodeModel> nodeModels = ObjectUtil.defaultIfNull(super.listByBean(nodeModel1), Collections.EMPTY_LIST);
-			Optional<NodeModel> any = nodeModels.stream().filter(nodeModel2 -> !StrUtil.equals(id, nodeModel2.getId())).findAny();
-			Assert.state(!any.isPresent(), "对应的节点已经存在啦");
+			boolean exists = this.existsByUrl(nodeModel.getUrl(), nodeModel.getWorkspaceId(), id);
+			Assert.state(!exists, "对应的节点已经存在啦");
 		}
 		// 判断 ssh
 		String sshId = nodeModel.getSshId();
@@ -114,13 +138,7 @@ public class NodeService extends BaseGroupService<NodeModel> implements ICron {
 		if (nodeModel.isOpenStatus()) {
 			//
 			this.checkLockType(existsNode);
-			//
-			int timeOut = ObjectUtil.defaultIfNull(nodeModel.getTimeOut(), 0);
-			// 检查是否可用默认为5秒，避免太长时间无法连接一直等待
-			nodeModel.setTimeOut(5);
-			JpomManifest jpomManifest = NodeForward.requestData(nodeModel, NodeUrl.Info, request, JpomManifest.class);
-			Assert.notNull(jpomManifest, "节点连接失败，请检查节点是否在线");
-			nodeModel.setTimeOut(timeOut);
+			this.testNode(nodeModel);
 		}
 		try {
 			if (autoReg) {
@@ -200,6 +218,11 @@ public class NodeService extends BaseGroupService<NodeModel> implements ICron {
 		}
 	}
 
+	/**
+	 * 填充默认字段
+	 *
+	 * @param nodeModel 节点
+	 */
 	private void fillNodeInfo(NodeModel nodeModel) {
 		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
 		nodeModel.setCycle(ObjectUtil.defaultIfNull(nodeModel.getCycle(), Cycle.none.getCode()));

@@ -12,6 +12,15 @@
           <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary jpom-node-manage-add" @click="handleAdd">新增</a-button>
+        <a-dropdown>
+          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+          <a-menu slot="overlay">
+            <a-menu-item>
+              <a-button type="primary" @click="fastInstall">快速安装</a-button>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
+
         <a-tooltip>
           <template slot="title">
             <div>点击节点管理进入节点管理页面</div>
@@ -204,11 +213,92 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 快速安装插件端 -->
+    <a-modal v-model="fastInstallNode" width="80%" title="快速安装插件端" :footer="null" :maskClosable="false" @cancel="cancelFastInstall">
+      <div v-if="fastInstallInfo">
+        <a-space direction="vertical">
+          <a-alert message="温馨提示" type="warning">
+            <template slot="description">
+              <ul>
+                <li>复制下面任意一条命令到还未安装插件端的服务器中去执行,执行前需要放行防火墙端口,安全组规则等网络端口限制</li>
+                <li>插件端运行端口默认使用：2123</li>
+                <li>执行前需要检查命令中的地址在对应的服务器中是否可以访问,如果无法访问将不能自动绑定节点</li>
+                <li>插件端安装并启动成功后将主动上报节点信息,如果上报的 IP+PROP 能正常通讯将添加节点信息</li>
+                <li>如果上报的节点信息包含多个 IP 地址需要用户确认使用具体的 IP 地址信息</li>
+                <li>添加的节点(插件端)将自动绑定到当前工作空间,如果需要在其他工作空间需要提前切换生成命令</li>
+                <li>下面命令将在重启服务端后失效,重启服务端需要重新获取</li>
+              </ul>
+            </template>
+          </a-alert>
+          <a-tabs :default-active-key="0">
+            <a-tab-pane v-for="(item, index) in fastInstallInfo.shUrls" :tab="item.name" :key="index">
+              <div
+                v-clipboard:copy="item.allText"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({
+                      message: '复制成功',
+                    });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({
+                      message: '复制失败',
+                    });
+                  }
+                "
+              >
+                <a-alert type="info" :message="`命令内容(点击可以复制)`">
+                  <template slot="description">
+                    <span>{{ item.allText }} </span>
+                    <a-icon type="copy" />
+                  </template>
+                </a-alert>
+              </div>
+            </a-tab-pane>
+          </a-tabs>
+          <div>
+            <a-divider>执行结果</a-divider>
+
+            <div v-if="!pullFastInstallResultData || !pullFastInstallResultData.length">还没有任何结果</div>
+            <a-alert
+              :message="`第 ${index + 1} 个结果`"
+              :type="`${item.type === 'success' ? 'success' : item.type === 'exists' ? 'error' : 'warning'}`"
+              v-for="(item, index) in pullFastInstallResultData"
+              :key="`${index}-${new Date().getTime()}`"
+              closable
+              @close="clearPullFastInstallResult(item.id)"
+            >
+              <template slot="description">
+                <a-space direction="vertical">
+                  <div v-if="item.type === 'canUseIpEmpty'"><a-tag color="orange">不能和节点正常通讯</a-tag></div>
+                  <div v-if="item.type === 'multiIp'"><a-tag color="green">多IP可以使用</a-tag></div>
+                  <div v-if="item.type === 'exists'"><a-tag color="orange">节点已经存在</a-tag></div>
+                  <div v-if="item.type === 'success'"><a-tag color="orange">绑定成功</a-tag></div>
+                  <div>
+                    所有的IP：<a-tag v-for="(itemIp, indexIp) in item.allIp" :key="indexIp">{{ itemIp }}:{{ item.port }}</a-tag>
+                  </div>
+                  <div v-if="item.type === 'multiIp'">
+                    能通讯的IP:
+                    <a-tag @click="confirmFastInstall(item.id, itemIp, item.port)" v-for="(itemIp, indexIp) in item.canUseIp" :key="indexIp">{{ itemIp }}:{{ item.port }}<a-icon type="api" /></a-tag>
+                  </div>
+                  <div v-if="item.type === 'success' || item.type === 'exists'">
+                    节点的IP: <a-tag v-for="(itemIp, indexIp) in item.canUseIp" :key="indexIp">{{ itemIp }}:{{ item.port }}</a-tag>
+                  </div>
+                </a-space>
+              </template>
+            </a-alert>
+          </div>
+        </a-space>
+      </div>
+      <div v-else>loading....</div>
+    </a-modal>
   </div>
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWorkspace, nodeMonitorCycle, getNodeGroupAll } from "@/api/node";
+import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWorkspace, nodeMonitorCycle, getNodeGroupAll, fastInstall, pullFastInstallResult, confirmFastInstall } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
@@ -217,6 +307,7 @@ import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import CustomSelect from "@/components/customSelect";
+import Vue from "vue";
 
 export default {
   components: {
@@ -237,10 +328,15 @@ export default {
       temp: {
         timeOut: 0,
       },
+      fastInstallInfo: null,
+      tempVue: null,
+      pullFastInstallResultTime: null,
+      pullFastInstallResultData: [],
       editNodeVisible: false,
       drawerVisible: false,
       terminalVisible: false,
       unlockNode: false,
+      fastInstallNode: false,
       drawerTitle: "",
       columns: [
         // { title: "节点 ID", dataIndex: "id", sorter: true, key: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
@@ -288,7 +384,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getCollapsed"]),
+    ...mapGetters(["getCollapsed", "getWorkspaceId"]),
     pagination() {
       return {
         total: this.listQuery.total || 0,
@@ -322,6 +418,11 @@ export default {
   created() {
     this.loadData();
     this.loadGroupList();
+  },
+  destroyed() {
+    if (this.pullFastInstallResultTime) {
+      clearInterval(this.pullFastInstallResultTime);
+    }
   },
   methods: {
     // 页面引导
@@ -590,6 +691,61 @@ export default {
         },
       });
     },
+    // 关闭弹窗,关闭定时轮询
+    cancelFastInstall() {
+      if (this.pullFastInstallResultTime) {
+        clearInterval(this.pullFastInstallResultTime);
+      }
+      this.loadData();
+    },
+    // 快速安装弹窗
+    fastInstall() {
+      fastInstall().then((res) => {
+        if (res.code === 200) {
+          this.fastInstallNode = true;
+          this.fastInstallInfo = res.data;
+          this.tempVue = Vue;
+          this.fastInstallInfo.host = `${location.protocol}//${location.host}${res.data.url}?token=${res.data.token}&workspaceId=${this.getWorkspaceId}`;
+          this.fastInstallInfo.shUrls = res.data.shUrls.map((item) => {
+            item.allText = `${item.url} ${this.fastInstallInfo.key} ${this.fastInstallInfo.host}`;
+            return item;
+          });
+          // 轮询 结果
+          this.pullFastInstallResultTime = setInterval(() => {
+            pullFastInstallResult().then((res) => {
+              if (res.code === 200) {
+                this.pullFastInstallResultData = res.data;
+              }
+            });
+          }, 2000);
+        }
+      });
+    },
+    // 清除快速安装节点缓存
+    clearPullFastInstallResult(id) {
+      pullFastInstallResult({
+        removeId: id,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.pullFastInstallResultData = res.data;
+        }
+      });
+    },
+    // 安装确认
+    confirmFastInstall(id, ip, port) {
+      confirmFastInstall({
+        id: id,
+        ip: ip,
+        port: port,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.pullFastInstallResultData = res.data;
+        }
+      });
+    },
   },
 };
 </script>
@@ -597,14 +753,14 @@ export default {
 .filter {
   margin-bottom: 10px;
 }
-
+/* 
 .filter-item {
   width: 150px;
   margin-right: 10px;
-}
-
+} */
+/* 
 .btn-add {
   margin-left: 10px;
   margin-right: 0;
-}
+} */
 </style>

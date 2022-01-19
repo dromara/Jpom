@@ -89,15 +89,6 @@ public class SystemMailConfigController extends BaseServerController {
 		IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.Email);
 		boolean checkInfo = plugin.check("checkInfo", JSONObject.toJSON(mailAccountModel), null);
 		Assert.state(checkInfo, "验证邮箱信息失败，请检查配置的邮箱信息。端口号、授权码等。");
-//		try {
-//			MailAccount account = EmailUtil.getAccount(mailAccountModel);
-//			Session session = MailUtil.getSession(account, false);
-//			Transport transport = session.getTransport("smtp");
-//			transport.connect();
-//			transport.close();
-//		} catch (Exception e) {
-//			return JsonMessage.getString(406, "验证邮箱信息失败，请检查配置的邮箱信息。端口号、授权码等。" + e.getMessage());
-//		}
 		systemParametersServer.upsert(MailAccountModel.ID, mailAccountModel, MailAccountModel.ID);
 		//
 		EmailUtil.refreshConfig();

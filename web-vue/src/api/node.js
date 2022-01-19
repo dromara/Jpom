@@ -228,6 +228,47 @@ export function checkVersion() {
 }
 
 /**
+ * 快速安装
+ * @returns1
+ */
+export function fastInstall() {
+  return axios({
+    url: "/node/fast_install.json",
+    method: "get",
+    data: {},
+  });
+}
+
+/**
+ * 拉取结果
+ * @param {JSON} params
+ * @returns
+ */
+export function pullFastInstallResult(params) {
+  return axios({
+    url: "/node/pull_fast_install_result.json",
+    method: "get",
+    params: params,
+    headers: {
+      loading: "no",
+    },
+  });
+}
+
+/**
+ * 安装确认
+ * @param {Json} params
+ * @returns
+ */
+export function confirmFastInstall(params) {
+  return axios({
+    url: "/node/confirm_fast_install.json",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
  * 下载远程文件
  * @returns json
  */

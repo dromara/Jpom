@@ -22,13 +22,18 @@
  */
 package io.jpom.system.init;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Console;
+import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpStatus;
+import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
@@ -44,7 +49,12 @@ import io.jpom.util.JsonFileUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.URL;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 自动注册server 节点
@@ -97,8 +107,9 @@ public class AutoRegSeverNode {
 		serverRequest.form("openStatus", 1);
 		serverRequest.form("protocol", protocol);
 		serverRequest.form("url", url.getHost() + CharPool.COLON + url.getPort());
-		serverRequest.form("loginName", AgentAuthorize.getInstance().getAgentName());
-		serverRequest.form("loginPwd", AgentAuthorize.getInstance().getAgentPwd());
+		AgentAuthorize agentAuthorize = AgentAuthorize.getInstance();
+		serverRequest.form("loginName", agentAuthorize.getAgentName());
+		serverRequest.form("loginPwd", agentAuthorize.getAgentPwd());
 		serverRequest.form("type", eqInstall ? "update" : "add");
 		String body = serverRequest.execute().body();
 		DefaultSystemLog.getLog().info("自动注册Server:" + body);
@@ -118,4 +129,36 @@ public class AutoRegSeverNode {
 			DefaultSystemLog.getLog().error("自动注册插件端失败：{}", body);
 		}
 	}
+
+	/**
+	 * 自动推送插件端信息到服务端
+	 *
+	 * @param url 服务端url
+	 */
+	public static void autoPushToServer(String url) {
+		UrlBuilder urlBuilder = UrlBuilder.ofHttp(url);
+		//
+		LinkedHashSet<InetAddress> localAddressList = NetUtil.localAddressList(address -> {
+			// 非loopback地址，指127.*.*.*的地址
+			return !address.isLoopbackAddress()
+					// 需为IPV4地址
+					&& address instanceof Inet4Address;
+		});
+		Set<String> ips = localAddressList.stream()
+				.map(InetAddress::getHostAddress)
+				.filter(StrUtil::isNotEmpty)
+				.collect(Collectors.toSet());
+		urlBuilder.addQuery("ips", CollUtil.join(ips, StrUtil.COMMA));
+		AgentAuthorize agentAuthorize = AgentAuthorize.getInstance();
+		urlBuilder.addQuery("loginName", agentAuthorize.getAgentName());
+		urlBuilder.addQuery("loginPwd", agentAuthorize.getAgentPwd());
+		int port = ConfigBean.getInstance().getPort();
+		urlBuilder.addQuery("port", port + "");
+		//
+		String build = urlBuilder.build();
+		String body = HttpUtil.createGet(build).execute().body();
+		Console.log("push result:" + body);
+	}
+
+
 }

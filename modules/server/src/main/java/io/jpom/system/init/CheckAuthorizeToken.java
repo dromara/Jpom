@@ -39,20 +39,20 @@ import io.jpom.util.CheckPassword;
 @PreLoadClass
 public class CheckAuthorizeToken {
 
-    @PreLoadMethod
-    private static void check() {
-        String authorizeToken = ServerExtConfigBean.getInstance().getAuthorizeToken();
-        if (StrUtil.isEmpty(authorizeToken)) {
-            return;
-        }
-        if (authorizeToken.length() < 6) {
-            DefaultSystemLog.getLog().error("", new JpomRuntimeException("配置的授权token长度小于六位不生效"));
-            System.exit(-1);
-        }
-        int password = CheckPassword.checkPassword(authorizeToken);
-        if (password != 2) {
-            DefaultSystemLog.getLog().error("", new JpomRuntimeException("配置的授权token 需要包含数字，字母，符号的组合"));
-            System.exit(-1);
-        }
-    }
+	@PreLoadMethod
+	private static void check() {
+		String authorizeToken = ServerExtConfigBean.getInstance().getAuthorizeToken();
+		if (StrUtil.isEmpty(authorizeToken)) {
+			return;
+		}
+		if (authorizeToken.length() < 6) {
+			DefaultSystemLog.getLog().error("配置的授权token长度小于六位不生效", new JpomRuntimeException("配置的授权token长度小于六位不生效"));
+			System.exit(-1);
+		}
+		int strength = CheckPassword.checkPasswordStrength(authorizeToken);
+		if (strength != 2) {
+			DefaultSystemLog.getLog().error("配置的授权token 需要包含数字，字母，符号的组合", new JpomRuntimeException("配置的授权token 需要包含数字，字母，符号的组合"));
+			System.exit(-1);
+		}
+	}
 }

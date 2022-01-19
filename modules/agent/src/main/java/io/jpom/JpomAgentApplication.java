@@ -26,9 +26,13 @@ import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.lang.Console;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.EnableCommonBoot;
+import io.jpom.common.ServerOpenApi;
 import io.jpom.common.Type;
 import io.jpom.common.interceptor.AuthorizeInterceptor;
+import io.jpom.system.init.AutoRegSeverNode;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
@@ -58,7 +62,27 @@ public class JpomAgentApplication {
 				// 添加 参数 url 解码
 				//				.addHandlerMethodArgumentResolver(UrlDecodeHandlerMethodArgumentResolver.class)
 				.run(args);
+		// 自动向服务端推送
+		autoPushToServer(args);
 		Console.log("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
+	}
+
+	/**
+	 * 自动推送 插件端信息到服务端
+	 *
+	 * @param args 参数
+	 */
+	private static void autoPushToServer(String[] args) {
+		int i = ArrayUtil.indexOf(args, ServerOpenApi.PUSH_NODE_KEY);
+		if (i == ArrayUtil.INDEX_NOT_FOUND) {
+			return;
+		}
+		String arg = ArrayUtil.get(args, i + 1);
+		if (StrUtil.isEmpty(arg)) {
+			Console.error("not found auto-push-to-server url");
+			return;
+		}
+		AutoRegSeverNode.autoPushToServer(arg);
 	}
 
 }

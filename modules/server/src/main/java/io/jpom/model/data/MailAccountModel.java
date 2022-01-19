@@ -65,6 +65,11 @@ public class MailAccountModel extends BaseJsonModel {
 	@Deprecated
 	private Integer socketFactoryPort;
 
+	/**
+	 * 超时时间
+	 */
+	private Integer timeout;
+
 	public String getHost() {
 		return host;
 	}
@@ -129,5 +134,13 @@ public class MailAccountModel extends BaseJsonModel {
 
 	public void setSocketFactoryPort(Integer socketFactoryPort) {
 		this.socketFactoryPort = socketFactoryPort;
+	}
+
+	public Integer getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(Integer timeout) {
+		this.timeout = timeout;
 	}
 }
