@@ -28,8 +28,8 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ScriptExecuteLogModel;
-import io.jpom.model.data.ScriptModel;
+import io.jpom.model.data.ScriptExecuteLogCacheModel;
+import io.jpom.model.data.ScriptCacheModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -86,26 +86,26 @@ public class ScriptHandler extends BaseProxyHandler {
 	private String createLog(Map<String, Object> attributes) {
 		NodeModel nodeInfo = (NodeModel) attributes.get("nodeInfo");
 		UserModel userModel = (UserModel) attributes.get("userInfo");
-		ScriptModel dataItem = (ScriptModel) attributes.get("dataItem");
+		ScriptCacheModel dataItem = (ScriptCacheModel) attributes.get("dataItem");
 		ScriptExecuteLogServer logServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
 		ScriptServer scriptServer = SpringUtil.getBean(ScriptServer.class);
 		//
 		try {
 			BaseServerController.resetInfo(userModel);
 			//
-			ScriptModel scriptModel = new ScriptModel();
-			scriptModel.setId(dataItem.getId());
-			scriptModel.setLastRunUser(userModel.getId());
-			scriptServer.update(scriptModel);
+			ScriptCacheModel scriptCacheModel = new ScriptCacheModel();
+			scriptCacheModel.setId(dataItem.getId());
+			scriptCacheModel.setLastRunUser(userModel.getId());
+			scriptServer.update(scriptCacheModel);
 			//
-			ScriptExecuteLogModel scriptExecuteLogModel = new ScriptExecuteLogModel();
-			scriptExecuteLogModel.setScriptId(dataItem.getScriptId());
-			scriptExecuteLogModel.setNodeId(nodeInfo.getId());
-			scriptExecuteLogModel.setScriptName(dataItem.getName());
-			scriptExecuteLogModel.setTriggerExecType(0);
-			scriptExecuteLogModel.setWorkspaceId(nodeInfo.getWorkspaceId());
-			logServer.insert(scriptExecuteLogModel);
-			return scriptExecuteLogModel.getId();
+			ScriptExecuteLogCacheModel scriptExecuteLogCacheModel = new ScriptExecuteLogCacheModel();
+			scriptExecuteLogCacheModel.setScriptId(dataItem.getScriptId());
+			scriptExecuteLogCacheModel.setNodeId(nodeInfo.getId());
+			scriptExecuteLogCacheModel.setScriptName(dataItem.getName());
+			scriptExecuteLogCacheModel.setTriggerExecType(0);
+			scriptExecuteLogCacheModel.setWorkspaceId(nodeInfo.getWorkspaceId());
+			logServer.insert(scriptExecuteLogCacheModel);
+			return scriptExecuteLogCacheModel.getId();
 		} finally {
 			BaseServerController.removeAll();
 		}

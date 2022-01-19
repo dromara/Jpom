@@ -9,8 +9,8 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ProjectInfoModel;
-import io.jpom.model.data.ScriptModel;
+import io.jpom.model.data.ProjectInfoCacheModel;
+import io.jpom.model.data.ScriptCacheModel;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -125,18 +125,18 @@ public class NodeEditController extends BaseServerController {
 		Assert.state(!checkNode2, "该节点存在构建项，不能删除");
 		//
 		{
-			ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-			projectInfoModel.setNodeId(id);
-			projectInfoModel.setWorkspaceId(projectInfoCacheService.getCheckUserWorkspace(request));
-			boolean exists = projectInfoCacheService.exists(projectInfoModel);
+			ProjectInfoCacheModel projectInfoCacheModel = new ProjectInfoCacheModel();
+			projectInfoCacheModel.setNodeId(id);
+			projectInfoCacheModel.setWorkspaceId(projectInfoCacheService.getCheckUserWorkspace(request));
+			boolean exists = projectInfoCacheService.exists(projectInfoCacheModel);
 			Assert.state(!exists, "该节点下还存在项目，不能删除");
 		}
 		//
 		{
-			ScriptModel scriptModel = new ScriptModel();
-			scriptModel.setNodeId(id);
-			scriptModel.setWorkspaceId(scriptServer.getCheckUserWorkspace(request));
-			boolean exists = scriptServer.exists(scriptModel);
+			ScriptCacheModel scriptCacheModel = new ScriptCacheModel();
+			scriptCacheModel.setNodeId(id);
+			scriptCacheModel.setWorkspaceId(scriptServer.getCheckUserWorkspace(request));
+			boolean exists = scriptServer.exists(scriptCacheModel);
 			Assert.state(!exists, "该节点下还存在脚本模版，不能删除");
 		}
 
