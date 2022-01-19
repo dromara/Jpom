@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @since 2021/12/12
  */
 @Service
-public class ScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLogModel> {
+public class ScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLogCacheModel> {
 
 	public ScriptExecuteLogServer(NodeService nodeService,
 								  WorkspaceService workspaceService) {
@@ -88,7 +88,7 @@ public class ScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLogMode
 				return null;
 			}
 			//
-			List<ScriptExecuteLogModel> models = jsonArray.toJavaList(this.tClass).stream()
+			List<ScriptExecuteLogCacheModel> models = jsonArray.toJavaList(this.tClass).stream()
 					.filter(item -> {
 						// 检查对应的工作空间 是否存在
 						return workspaceService.exists(new WorkspaceModel(item.getWorkspaceId()));

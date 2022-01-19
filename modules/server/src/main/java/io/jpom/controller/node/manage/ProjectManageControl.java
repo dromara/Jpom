@@ -10,7 +10,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.ProjectInfoCacheModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.permission.NodeDataPermission;
 import io.jpom.plugin.ClassFeature;
@@ -93,7 +93,7 @@ public class ProjectManageControl extends BaseServerController {
 	@PostMapping(value = "get_project_info", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String getProjectInfo() {
-		PageResultDto<ProjectInfoModel> modelPageResultDto = projectInfoCacheService.listPage(getRequest());
+		PageResultDto<ProjectInfoCacheModel> modelPageResultDto = projectInfoCacheService.listPage(getRequest());
 //		JSONArray jsonArray = projectInfoService.listAll(nodeModel, getRequest());
 		return JsonMessage.getString(200, "", modelPageResultDto);
 	}

@@ -38,7 +38,6 @@ import io.jpom.common.Const;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.node.NodeService;
@@ -174,7 +173,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
 			models.forEach(BaseNodeService.super::upsert);
 			// 删除项目
 			Set<String> strings = cacheIds.stream()
-					.map(s -> ProjectInfoModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), s))
+					.map(s -> BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), s))
 					.collect(Collectors.toSet());
 			if (CollUtil.isNotEmpty(strings)) {
 				super.delByKey(strings, null);

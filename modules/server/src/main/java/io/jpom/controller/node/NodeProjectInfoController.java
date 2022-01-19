@@ -6,7 +6,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.ProjectInfoCacheModel;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -46,7 +46,7 @@ public class NodeProjectInfoController extends BaseServerController {
 	 */
 	@PostMapping(value = "node_project_list", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String nodeProjectList() {
-		PageResultDto<ProjectInfoModel> resultDto = projectInfoCacheService.listPageNode(getRequest());
+		PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPageNode(getRequest());
 		return JsonMessage.getString(200, "success", resultDto);
 	}
 
@@ -60,7 +60,7 @@ public class NodeProjectInfoController extends BaseServerController {
 	 */
 	@PostMapping(value = "project_list", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String projectList() {
-		PageResultDto<ProjectInfoModel> resultDto = projectInfoCacheService.listPage(getRequest());
+		PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(getRequest());
 		return JsonMessage.getString(200, "success", resultDto);
 	}
 
@@ -73,8 +73,8 @@ public class NodeProjectInfoController extends BaseServerController {
 	 */
 	@GetMapping(value = "project_list_all", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String projectListAll() {
-		List<ProjectInfoModel> projectInfoModels = projectInfoCacheService.listByWorkspace(getRequest());
-		return JsonMessage.getString(200, "", projectInfoModels);
+		List<ProjectInfoCacheModel> projectInfoCacheModels = projectInfoCacheService.listByWorkspace(getRequest());
+		return JsonMessage.getString(200, "", projectInfoCacheModels);
 	}
 
 	/**

@@ -10,7 +10,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ScriptModel;
+import io.jpom.model.data.ScriptCacheModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.permission.NodeDataPermission;
 import io.jpom.permission.SystemPermission;
@@ -55,7 +55,7 @@ public class ScriptController extends BaseServerController {
 	 */
 	@RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String scriptList() {
-		PageResultDto<ScriptModel> pageResultDto = scriptServer.listPageNode(getRequest());
+		PageResultDto<ScriptCacheModel> pageResultDto = scriptServer.listPageNode(getRequest());
 		return JsonMessage.getString(200, "success", pageResultDto);
 	}
 
@@ -68,7 +68,7 @@ public class ScriptController extends BaseServerController {
 	 */
 	@PostMapping(value = "list_all", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String listAll() {
-		PageResultDto<ScriptModel> modelPageResultDto = scriptServer.listPage(getRequest());
+		PageResultDto<ScriptCacheModel> modelPageResultDto = scriptServer.listPage(getRequest());
 		return JsonMessage.getString(200, "", modelPageResultDto);
 	}
 

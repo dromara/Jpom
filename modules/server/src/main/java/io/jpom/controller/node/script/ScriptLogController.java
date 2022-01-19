@@ -7,7 +7,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ScriptExecuteLogModel;
+import io.jpom.model.data.ScriptExecuteLogCacheModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -41,7 +41,7 @@ public class ScriptLogController extends BaseServerController {
 	 */
 	@RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String scriptList() {
-		PageResultDto<ScriptExecuteLogModel> pageResultDto = scriptExecuteLogServer.listPageNode(getRequest());
+		PageResultDto<ScriptExecuteLogCacheModel> pageResultDto = scriptExecuteLogServer.listPageNode(getRequest());
 		return JsonMessage.getString(200, "", pageResultDto);
 	}
 
@@ -68,11 +68,11 @@ public class ScriptLogController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String del(@ValidatorItem String id, String executeId) {
 		NodeModel node = getNode();
-		ScriptExecuteLogModel scriptExecuteLogModel = new ScriptExecuteLogModel();
-		scriptExecuteLogModel.setId(executeId);
-		scriptExecuteLogModel.setScriptId(id);
-		scriptExecuteLogModel.setNodeId(node.getId());
-		ScriptExecuteLogModel executeLogModel = scriptExecuteLogServer.queryByBean(scriptExecuteLogModel);
+		ScriptExecuteLogCacheModel scriptExecuteLogCacheModel = new ScriptExecuteLogCacheModel();
+		scriptExecuteLogCacheModel.setId(executeId);
+		scriptExecuteLogCacheModel.setScriptId(id);
+		scriptExecuteLogCacheModel.setNodeId(node.getId());
+		ScriptExecuteLogCacheModel executeLogModel = scriptExecuteLogServer.queryByBean(scriptExecuteLogCacheModel);
 		Assert.notNull(executeLogModel, "没有对应的执行日志");
 		JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.SCRIPT_DEL_LOG);
 		if (request.getCode() == HttpStatus.OK.value()) {

@@ -23,7 +23,7 @@
 package io.jpom.model;
 
 import cn.hutool.crypto.SecureUtil;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.ProjectInfoCacheModel;
 import org.springframework.util.Assert;
 
 /**
@@ -56,7 +56,7 @@ public abstract class BaseNodeModel extends BaseWorkspaceModel {
 
 		String dataId = this.dataId();
 
-		return ProjectInfoModel.fullId(workspaceId, nodeId, dataId);
+		return BaseNodeModel.fullId(workspaceId, nodeId, dataId);
 	}
 
 	public static String fullId(String workspaceId, String nodeId, String dataId) {

@@ -30,7 +30,7 @@ import io.jpom.service.h2db.TableName;
  * @since 2021/12/5
  */
 @TableName(value = "PROJECT_INFO", name = "项目信息")
-public class ProjectInfoModel extends BaseNodeModel {
+public class ProjectInfoCacheModel extends BaseNodeModel {
 
 	private String projectId;
 

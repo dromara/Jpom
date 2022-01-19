@@ -26,60 +26,44 @@ import io.jpom.model.BaseNodeModel;
 import io.jpom.service.h2db.TableName;
 
 /**
- * 脚本模版实体
- *
  * @author bwcx_jzy
- * @date 2021/12/12
- **/
-@TableName(value = "SCRIPT_INFO", name = "脚本模版")
-public class ScriptModel extends BaseNodeModel {
+ * @since 2021/12/12
+ */
+@TableName(value = "SCRIPT_EXECUTE_LOG", name = "脚本模版执行记录")
+public class ScriptExecuteLogCacheModel extends BaseNodeModel {
+
 	/**
 	 * 脚本ID
 	 */
 	private String scriptId;
 	/**
-	 * 模版名称
+	 * 脚本名称
 	 */
-	private String name;
+	private String scriptName;
 	/**
-	 * 最后执行人员
+	 * 触发类型 {0，手动，1 自动触发}
 	 */
-	private String lastRunUser;
-	/**
-	 * 定时执行
-	 */
-	private String autoExecCron;
-	/**
-	 * 默认参数
-	 */
-	private String defArgs;
-	/**
-	 * 描述
-	 */
-	private String description;
+	private Integer triggerExecType;
 
-	public String getDescription() {
-		return description;
+	@Override
+	public String fullId() {
+		throw new IllegalStateException("NO implements");
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public Integer getTriggerExecType() {
+		return triggerExecType;
 	}
 
-	public String getDefArgs() {
-		return defArgs;
+	public void setTriggerExecType(Integer triggerExecType) {
+		this.triggerExecType = triggerExecType;
 	}
 
-	public void setDefArgs(String defArgs) {
-		this.defArgs = defArgs;
+	public String getScriptName() {
+		return scriptName;
 	}
 
-	public String getAutoExecCron() {
-		return autoExecCron;
-	}
-
-	public void setAutoExecCron(String autoExecCron) {
-		this.autoExecCron = autoExecCron;
+	public void setScriptName(String scriptName) {
+		this.scriptName = scriptName;
 	}
 
 	public String getScriptId() {
@@ -88,22 +72,6 @@ public class ScriptModel extends BaseNodeModel {
 
 	public void setScriptId(String scriptId) {
 		this.scriptId = scriptId;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getLastRunUser() {
-		return lastRunUser;
-	}
-
-	public void setLastRunUser(String lastRunUser) {
-		this.lastRunUser = lastRunUser;
 	}
 
 	@Override

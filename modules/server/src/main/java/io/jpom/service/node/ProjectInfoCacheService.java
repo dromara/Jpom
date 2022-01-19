@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.ProjectInfoCacheModel;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * @since 2021/12/5
  */
 @Service
-public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoModel> {
+public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheModel> {
 
 
 	public ProjectInfoCacheService(NodeService nodeService,
@@ -36,11 +36,11 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoModel> {
 	}
 
 	public boolean exists(String workspaceId, String nodeId, String id) {
-		ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-		projectInfoModel.setWorkspaceId(workspaceId);
-		projectInfoModel.setNodeId(nodeId);
-		projectInfoModel.setProjectId(id);
-		return super.exists(projectInfoModel);
+		ProjectInfoCacheModel projectInfoCacheModel = new ProjectInfoCacheModel();
+		projectInfoCacheModel.setWorkspaceId(workspaceId);
+		projectInfoCacheModel.setNodeId(nodeId);
+		projectInfoCacheModel.setProjectId(id);
+		return super.exists(projectInfoCacheModel);
 	}
 
 	public boolean exists(String nodeId, String id) {
