@@ -336,7 +336,7 @@
             </template>
           </a-alert>
           <a-alert
-            v-clipboard:copy="temp.triggerBuildUrl"
+            v-clipboard:copy="temp.batchTriggerBuildUrl"
             v-clipboard:success="
               () => {
                 tempVue.prototype.$notification.success({ message: '复制成功' });
