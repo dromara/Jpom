@@ -190,12 +190,11 @@ public class OutGivingProjectEditController extends BaseServerController {
 		List<Tuple> success = new ArrayList<>();
 		boolean fail = false;
 		try {
-			JsonMessage<String> jsonMessage;
 			for (Tuple tuple : tuples) {
 				NodeModel nodeModel = tuple.get(0);
 				JSONObject data = tuple.get(1);
-
-				jsonMessage = sendData(nodeModel, userModel, data, true);
+				//
+				JsonMessage<String> jsonMessage = this.sendData(nodeModel, userModel, data, true);
 				if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
 					if (!edit) {
 						fail = true;
@@ -415,7 +414,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 			for (OutGivingNodeProject outGivingNodeProject1 : deleteNodeProject) {
 				NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject1.getNodeId());
 				//outGivingNodeProject1.getNodeData(true);
-				jsonMessage = deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
+				jsonMessage = this.deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
 				Assert.state(jsonMessage.getCode() == HttpStatus.HTTP_OK, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
 			}
 		}
