@@ -82,6 +82,11 @@ public class BuildInfoTriggerController extends BaseServerController {
 			item.setTriggerToken(this.createTriggerUrl());
 			buildInfoService.update(item);
 		}
+		Map<String, String> map = this.getBuildToken(item);
+		return JsonMessage.getString(200, "ok", map);
+	}
+
+	private Map<String, String> getBuildToken(BuildInfoModel item) {
 		String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
 		String url = ServerOpenApi.BUILD_TRIGGER_BUILD2.
 				replace("{id}", item.getId()).
@@ -89,7 +94,9 @@ public class BuildInfoTriggerController extends BaseServerController {
 		String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
 		Map<String, String> map = new HashMap<>(10);
 		map.put("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
-		return JsonMessage.getString(200, "ok", map);
+		String batchTriggerBuildUrl = String.format("/%s/%s", contextPath, ServerOpenApi.BUILD_TRIGGER_BUILD_BATCH);
+		map.put("batchTriggerBuildUrl", FileUtil.normalize(batchTriggerBuildUrl));
+		return map;
 	}
 
 
@@ -106,7 +113,8 @@ public class BuildInfoTriggerController extends BaseServerController {
 		// new trigger url
 		item.setTriggerToken(this.createTriggerUrl());
 		buildInfoService.update(item);
-		return JsonMessage.getString(200, "ok");
+		Map<String, String> map = this.getBuildToken(item);
+		return JsonMessage.getString(200, "重置成功", map);
 	}
 
 	private String createTriggerUrl() {

@@ -302,18 +302,66 @@
       </a-form-model>
     </a-modal>
     <!-- 触发器 -->
-    <a-modal v-model="triggerVisible" title="触发器" :footer="null" :maskClosable="false">
+    <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
       <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
-        <a-form-model-item label="触发器地址" prop="triggerBuildUrl">
-          <a-input v-model="temp.triggerBuildUrl" type="textarea" readOnly :rows="3" style="resize: none" placeholder="触发器地址" />
-        </a-form-model-item>
-        <a-row>
-          <a-col :span="6"></a-col>
-          <a-col :span="16">
-            <a-button type="primary" class="btn-add" @click="resetTrigger">重置</a-button>
-          </a-col>
-        </a-row>
-        可以添加 delay=x 参数来延迟执行构建
+        <a-space style="display: block" direction="vertical" align="baseline">
+          <a-alert message="温馨提示" type="warning">
+            <template slot="description">
+              <ul>
+                <li>可以添加 delay=x 参数来延迟执行构建</li>
+                <li>批量构建参数 BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]</li>
+                <li>单个构建地址中：第一个随机字符串为构建ID、第个随机字符串为 token</li>
+                <li>重置为重新生成触发地址,重置成功后之前的触发器地址将失效</li>
+              </ul>
+            </template>
+          </a-alert>
+          <a-alert
+            v-clipboard:copy="temp.triggerBuildUrl"
+            v-clipboard:success="
+              () => {
+                tempVue.prototype.$notification.success({ message: '复制成功' });
+              }
+            "
+            v-clipboard:error="
+              () => {
+                tempVue.prototype.$notification.error({ message: '复制失败' });
+              }
+            "
+            type="info"
+            :message="`单个触发器地址(点击可以复制)`"
+          >
+            <template slot="description">
+              <a-tag>GET</a-tag> <span>{{ temp.triggerBuildUrl }} </span>
+              <a-icon type="copy" />
+            </template>
+          </a-alert>
+          <a-alert
+            v-clipboard:copy="temp.triggerBuildUrl"
+            v-clipboard:success="
+              () => {
+                tempVue.prototype.$notification.success({ message: '复制成功' });
+              }
+            "
+            v-clipboard:error="
+              () => {
+                tempVue.prototype.$notification.error({ message: '复制失败' });
+              }
+            "
+            type="info"
+            :message="`批量触发器地址(点击可以复制)`"
+          >
+            <template slot="description">
+              <a-tag>POST</a-tag> <span>{{ temp.batchTriggerBuildUrl }} </span>
+              <a-icon type="copy" />
+            </template>
+          </a-alert>
+
+          <a-row type="flex" justify="center">
+            <a-col :span="2">
+              <a-button type="primary" class="btn-add" @click="resetTrigger">重置</a-button>
+            </a-col>
+          </a-row>
+        </a-space>
       </a-form-model>
     </a-modal>
     <!-- 构建日志 -->
@@ -346,6 +394,7 @@ import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { itemGroupBy, parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
+import Vue from "vue";
 
 export default {
   components: {
@@ -364,6 +413,7 @@ export default {
       list: [],
       statusMap: statusMap,
       repositoryList: [],
+      tempVue: null,
       // 当前仓库信息
       tempRepository: {},
       // 当前构建信息的 extraData 属性
@@ -708,9 +758,10 @@ export default {
     // 触发器
     handleTrigger(record) {
       this.temp = Object.assign(record);
+      this.tempVue = Vue;
       getTriggerUrl(record.id).then((res) => {
         if (res.code === 200) {
-          this.temp.triggerBuildUrl = `${location.protocol}//${location.host}${res.data.triggerBuildUrl}`;
+          this.fillTriggerResult(res);
           this.triggerVisible = true;
         }
       });
@@ -722,10 +773,14 @@ export default {
           this.$notification.success({
             message: res.msg,
           });
-          this.triggerVisible = false;
-          this.handleTrigger(this.temp);
+          this.fillTriggerResult(res);
         }
       });
+    },
+    fillTriggerResult(res) {
+      this.temp.triggerBuildUrl = `${location.protocol}//${location.host}${res.data.triggerBuildUrl}`;
+      this.temp.batchTriggerBuildUrl = `${location.protocol}//${location.host}${res.data.batchTriggerBuildUrl}`;
+      this.temp = { ...this.temp };
     },
     // 清除构建
     handleClear(record) {
