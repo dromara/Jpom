@@ -23,6 +23,8 @@
 # https://github.com/AdoptOpenJDK/openjdk-docker/blob/master/8/jdk/centos/Dockerfile.hotspot.releases.full
 # https://github.com/carlossg/docker-maven/blob/master/openjdk-8/Dockerfile
 
+JPOM_TYPE="$1"
+
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin:$(cd `dirname $0`; pwd)
 export PATH
 LANG=en_US.UTF-8
@@ -110,7 +112,7 @@ if [[ ! -f "/usr/bin/unzip" ]];then
 	#rm -f /etc/yum.repos.d/epel.repo
 	yum install unzip -y
 fi
-JPOM_TYPE="$1"
+
 
 module="$2"
 
