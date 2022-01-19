@@ -22,6 +22,7 @@
  */
 package io.jpom.email;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.mail.MailAccount;
 import cn.hutool.extra.mail.MailUtil;
@@ -103,8 +104,11 @@ public class DefaultEmailPluginImpl implements IDefaultPlugin {
 		mailAccount.setPort(port);
 		mailAccount.setHost(host);
 		//
-		mailAccount.setTimeout(10 * 1000);
-		mailAccount.setConnectionTimeout(10 * 1000);
+		Integer timeout = data.getInteger("timeout");
+		timeout = ObjectUtil.defaultIfNull(timeout, 10);
+		timeout = Math.max(3, timeout);
+		mailAccount.setTimeout(timeout * 1000);
+		mailAccount.setConnectionTimeout(timeout * 1000);
 		boolean sslEnable = data.getBooleanValue("sslEnable");
 		//
 		mailAccount.setSslEnable(sslEnable);

@@ -45,6 +45,10 @@
         <a-switch v-model="temp.sslEnable" checked-children="启用" un-checked-children="停用" />
         <!-- <a-input v-show="temp.sslEnable" v-model="temp.socketFactoryPort" type="text" placeholder="SSL 端口" /> -->
       </a-form-model-item>
+      <a-form-model-item label="超时时间" prop="timeout">
+        <a-input-number style="width: 100%" :min="3" v-model="temp.timeout" type="text" placeholder="单位秒，默认 10 秒,最小 3 秒" />
+      </a-form-model-item>
+
       <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit">提交</a-button>
       </a-form-model-item>

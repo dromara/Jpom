@@ -43,37 +43,39 @@ import javax.servlet.http.HttpServletResponse;
 @InterceptorPattens(value = "/api/**")
 public class OpenApiInterceptor extends BaseInterceptor {
 
-    @Override
-    protected boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+	@Override
+	protected boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
-        NotLogin methodAnnotation = handlerMethod.getMethodAnnotation(NotLogin.class);
-        if (methodAnnotation == null) {
-            if (handlerMethod.getBeanType().isAnnotationPresent(NotLogin.class)) {
-                return true;
-            }
-        } else {
-            return true;
-        }
-        return checkOpenApi(request, response);
-    }
+		NotLogin methodAnnotation = handlerMethod.getMethodAnnotation(NotLogin.class);
+		if (methodAnnotation == null) {
+			if (handlerMethod.getBeanType().isAnnotationPresent(NotLogin.class)) {
+				return true;
+			}
+		} else {
+			return true;
+		}
+		String checkOpenApi = this.checkOpenApi(request);
+		if (checkOpenApi == null) {
+			return true;
+		}
+		ServletUtil.write(response, checkOpenApi, MediaType.APPLICATION_JSON_VALUE);
+		return false;
+	}
 
-    private boolean checkOpenApi(HttpServletRequest request, HttpServletResponse response) {
-        String header = request.getHeader(ServerOpenApi.HEAD);
-        if (StrUtil.isEmpty(header)) {
-            ServletUtil.write(response, JsonMessage.getString(300, "token empty"), MediaType.APPLICATION_JSON_VALUE);
-            return false;
-        }
-        String authorizeToken = ServerExtConfigBean.getInstance().getAuthorizeToken();
-        if (StrUtil.isEmpty(authorizeToken)) {
-            ServletUtil.write(response, JsonMessage.getString(300, "not config token"), MediaType.APPLICATION_JSON_VALUE);
-            return false;
-        }
-        String md5 = SecureUtil.md5(authorizeToken);
-        md5 = SecureUtil.sha1(md5 + ServerOpenApi.HEAD);
-        if (!StrUtil.equals(header, md5)) {
-            ServletUtil.write(response, JsonMessage.getString(300, "not config token"), MediaType.APPLICATION_JSON_VALUE);
-            return false;
-        }
-        return true;
-    }
+	private String checkOpenApi(HttpServletRequest request) {
+		String header = request.getHeader(ServerOpenApi.HEAD);
+		if (StrUtil.isEmpty(header)) {
+			return JsonMessage.getString(300, "token empty");
+		}
+		String authorizeToken = ServerExtConfigBean.getInstance().getAuthorizeToken();
+		if (StrUtil.isEmpty(authorizeToken)) {
+			return JsonMessage.getString(300, "not config token");
+		}
+		String md5 = SecureUtil.md5(authorizeToken);
+		md5 = SecureUtil.sha1(md5 + ServerOpenApi.HEAD);
+		if (!StrUtil.equals(header, md5)) {
+			return JsonMessage.getString(300, "not config token");
+		}
+		return null;
+	}
 }

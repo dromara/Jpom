@@ -45,7 +45,7 @@ public class CheckPassword {
 	 * @param passwordStr 密码字符串
 	 * @return 0 弱  1 中  2强
 	 */
-	public static int checkPassword(String passwordStr) {
+	public static int checkPasswordStrength(String passwordStr) {
 		if (passwordStr.matches(REGEX_Z)) {
 			return 0;
 		}

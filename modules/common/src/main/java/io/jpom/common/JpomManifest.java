@@ -33,6 +33,7 @@ import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.*;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.GlobalHeaders;
 import cn.hutool.http.Header;
 import cn.hutool.system.SystemUtil;
@@ -95,6 +96,10 @@ public class JpomManifest {
 	 */
 	private int port;
 	/**
+	 * 随机ID
+	 */
+	private String randomId;
+	/**
 	 * Jpom 的数据目录
 	 */
 	private String dataPath;
@@ -119,6 +124,8 @@ public class JpomManifest {
 						JPOM_MANIFEST.setTimeStamp(jarVersion.get(1));
 					}
 					JPOM_MANIFEST.setJarFile(FileUtil.getAbsolutePath(jarFile));
+					//
+					JPOM_MANIFEST.randomId = IdUtil.fastSimpleUUID();
 				}
 				String jpomTag = StrUtil.format("Jpom {}/{}", JPOM_MANIFEST.getType(), JPOM_MANIFEST.getVersion());
 				GlobalHeaders.INSTANCE.header(Header.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36 " + jpomTag, true);
@@ -172,6 +179,10 @@ public class JpomManifest {
 
 	public void setPid(int pid) {
 		this.pid = pid;
+	}
+
+	public String randomIdSign() {
+		return SecureUtil.sha1(this.getPid() + this.randomId);
 	}
 
 	/**

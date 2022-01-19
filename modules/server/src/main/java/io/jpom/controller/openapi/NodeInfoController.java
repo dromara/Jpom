@@ -22,14 +22,31 @@
  */
 package io.jpom.controller.openapi;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.jiangzeyin.controller.base.AbstractController;
+import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.JpomManifest;
 import io.jpom.common.ServerOpenApi;
+import io.jpom.common.interceptor.NotLogin;
+import io.jpom.model.data.NodeModel;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.node.NodeService;
+import io.jpom.service.system.WorkspaceService;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 节点管理
@@ -40,11 +57,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class NodeInfoController extends AbstractController {
 
+	private static final Map<String, JSONObject> CACHE_RECEIVE_PUSH = new HashMap<>();
 
 	private final NodeService nodeService;
+	private final WorkspaceService workspaceService;
 
-	public NodeInfoController(NodeService nodeService) {
+	public NodeInfoController(NodeService nodeService,
+							  WorkspaceService workspaceService) {
 		this.nodeService = nodeService;
+		this.workspaceService = workspaceService;
 	}
 
 	/**
@@ -56,5 +77,107 @@ public class NodeInfoController extends AbstractController {
 	public String update() {
 		nodeService.update(getRequest(), true);
 		return JsonMessage.getString(200, "操作成功");
+	}
+
+	/**
+	 * 接收节点推送的信息
+	 * <p>
+	 * yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
+	 * --auto-push-to-server http://127.0.0.1:3000/api/node/receive_push?token=462a47b8fba8da1f824370bb9fcdc01aa1a0fe20&workspaceId=DEFAULT
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = ServerOpenApi.RECEIVE_PUSH, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@NotLogin
+	public String receivePush(@ValidatorItem String token,
+							  @ValidatorItem String ips,
+							  @ValidatorItem String loginName,
+							  @ValidatorItem String loginPwd,
+							  @ValidatorItem String workspaceId,
+							  @ValidatorItem(ValidatorRule.NUMBERS) int port) {
+		Assert.state(StrUtil.equals(token, JpomManifest.getInstance().randomIdSign()), "token error");
+		boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
+		Assert.state(exists, "workspaceId error");
+		String sha1Id = SecureUtil.sha1(ips);
+		//
+		List<String> ipsList = StrUtil.split(ips, StrUtil.COMMA);
+		String clientIp = getClientIP();
+		if (!ipsList.contains(clientIp)) {
+			ipsList.add(clientIp);
+		}
+		List<String> canUseIps = ipsList.stream().filter(NodeInfoController.this::testIpProt).collect(Collectors.toList());
+		List<NodeModel> canUseNode = canUseIps.stream().map(s -> {
+			NodeModel model = NodeInfoController.this.createModel(s, loginName, loginPwd, port, workspaceId);
+			try {
+				nodeService.testNode(model);
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().warn("测试结果：{} {}", model.getUrl(), e.getMessage());
+				return null;
+			}
+			return model;
+		}).filter(Objects::nonNull).collect(Collectors.toList());
+		int size1 = CollUtil.size(canUseNode);
+		//
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("allIp", ipsList);
+		jsonObject.put("canUseIp", canUseIps);
+		jsonObject.put("port", port);
+		jsonObject.put("id", sha1Id);
+		jsonObject.put("canUseNode", canUseNode);
+		//
+		exists = false;
+		for (NodeModel nodeModel : canUseNode) {
+			if (nodeService.existsByUrl(nodeModel.getUrl(), nodeModel.getWorkspaceId(), null)) {
+				// 存在
+				jsonObject.put("type", "exists");
+				exists = true;
+				break;
+			}
+		}
+		if (!exists) {
+			if (size1 == 1) {
+				// 只有一个 ip 可以使用
+				// 添加插件端
+				NodeModel first = CollUtil.getFirst(canUseNode);
+				nodeService.insertNotFill(first);
+				jsonObject.put("type", "success");
+			} else {
+				jsonObject.put("type", size1 == 0 ? "canUseIpEmpty" : "multiIp");
+			}
+		}
+		CACHE_RECEIVE_PUSH.put(sha1Id, jsonObject);
+		return JsonMessage.getString(200, "done", jsonObject);
+	}
+
+	/**
+	 * 查询所有缓存
+	 *
+	 * @return list
+	 */
+	public static Collection<JSONObject> listReceiveCache(String removeId) {
+		if (StrUtil.isNotEmpty(removeId)) {
+			CACHE_RECEIVE_PUSH.remove(removeId);
+		}
+		return CACHE_RECEIVE_PUSH.values();
+	}
+
+	public static JSONObject getReceiveCache(String id) {
+		return CACHE_RECEIVE_PUSH.get(id);
+	}
+
+	private boolean testIpProt(String ip) {
+		return NetUtil.ping(ip, 5);
+	}
+
+	private NodeModel createModel(String ip, String loginName, String loginPwd, int port, String workspaceId) {
+		NodeModel nodeModel = new NodeModel();
+		nodeModel.setWorkspaceId(workspaceId);
+		nodeModel.setName(ip);
+		nodeModel.setOpenStatus(1);
+		nodeModel.setLoginName(loginName);
+		nodeModel.setLoginPwd(loginPwd);
+		nodeModel.setUrl(ip + StrUtil.COLON + port);
+		nodeModel.setProtocol("http");
+		return nodeModel;
 	}
 }

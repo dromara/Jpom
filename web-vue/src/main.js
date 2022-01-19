@@ -12,6 +12,7 @@ import "@/assets/intro-custom-themes.css";
 import router from "./router";
 import store from "./store";
 import "./router/auth";
+import VueClipBoard from 'vue-clipboard2'
 
 // debug routerBase
 window.routerBase = window.routerBase === "<routerBase>" ? "" : window.routerBase;
@@ -49,6 +50,8 @@ Vue.prototype.$setLoading = function (props) {
   props.wrapperClassName = props.spinning ? "globalLoading" : "";
   this.$app.globalLoadingProps = { ...this.$app.globalLoadingProps, ...props };
 };
+
+Vue.use(VueClipBoard);
 
 new Vue({
   router,

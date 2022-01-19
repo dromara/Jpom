@@ -24,6 +24,7 @@ package io.jpom.system.init;
 
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import io.jpom.common.JpomManifest;
@@ -43,10 +44,13 @@ public class ConsoleStartSuccess {
 	@PreLoadMethod(value = Integer.MAX_VALUE)
 	private static void success() {
 		Type type = JpomManifest.getInstance().getType();
+		int port = ConfigBean.getInstance().getPort();
+		String localhostStr = NetUtil.getLocalhostStr();
+		String url = StrUtil.format("http://{}:{}", localhostStr, port);
 		if (type == Type.Server) {
-			Console.log(type + "Successfully started,Can use happily => http://{}:{} 【The current address is for reference only】", NetUtil.getLocalhostStr(), ConfigBean.getInstance().getPort());
+			Console.log("{} Successfully started,Can use happily => {} 【The current address is for reference only】", type, url);
 		} else if (type == Type.Agent) {
-			Console.log(type + "Successfully started,Please go to the server to configure and use,Current node address => http://{}:{} 【The current address is for reference only】", NetUtil.getLocalhostStr(), ConfigBean.getInstance().getPort());
+			Console.log("{} Successfully started,Please go to the server to configure and use,Current node address => {} 【The current address is for reference only】", type, url);
 		}
 	}
 }
