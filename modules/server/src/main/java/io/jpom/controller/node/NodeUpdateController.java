@@ -7,6 +7,7 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
@@ -190,6 +191,12 @@ public class NodeUpdateController extends BaseServerController {
 		}).filter(nodeModel -> StrUtil.equals(nodeModel.getUrl(), StrUtil.format("{}:{}", ip, port))).findAny();
 		Assert.state(any.isPresent(), "ip 地址信息不正确");
 		NodeModel nodeModel = any.get();
+		try {
+			nodeService.testNode(nodeModel);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().warn("测试结果：{} {}", nodeModel.getUrl(), e.getMessage());
+			return JsonMessage.getString(500, "节点连接失败：" + e.getMessage());
+		}
 		// 插入
 		boolean exists = nodeService.existsByUrl(nodeModel.getUrl(), nodeModel.getWorkspaceId(), null);
 		Assert.state(!exists, "对应的节点已经存在拉：" + nodeModel.getUrl());

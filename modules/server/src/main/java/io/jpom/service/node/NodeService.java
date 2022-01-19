@@ -73,6 +73,15 @@ public class NodeService extends BaseGroupService<NodeModel> implements ICron {
 	}
 
 	public boolean existsByUrl(String url, String workspaceId, String id) {
+		//		Entity entity = Entity.create();
+		//		entity.set("url", nodeModel.getUrl());
+		//		entity.set("workspaceId", workspaceId);
+		//		if (StrUtil.isNotEmpty(id)) {
+		//			entity.set("id", StrUtil.format(" <> {}", id));
+		//		}
+		//		boolean exists = super.exists(entity);
+		//		Assert.state(!exists, "对应的节点已经存在啦");
+		// 可能出现错误
 		NodeModel nodeModel1 = new NodeModel();
 		nodeModel1.setUrl(url);
 		nodeModel1.setWorkspaceId(workspaceId);
@@ -112,14 +121,7 @@ public class NodeService extends BaseGroupService<NodeModel> implements ICron {
 			workspaceId = this.getCheckUserWorkspace(request);
 		}
 		nodeModel.setWorkspaceId(workspaceId);
-		//		Entity entity = Entity.create();
-		//		entity.set("url", nodeModel.getUrl());
-		//		entity.set("workspaceId", workspaceId);
-		//		if (StrUtil.isNotEmpty(id)) {
-		//			entity.set("id", StrUtil.format(" <> {}", id));
-		//		}
-		//		boolean exists = super.exists(entity);
-		//		Assert.state(!exists, "对应的节点已经存在啦");
+
 		//nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
 		{// 节点地址 重复
 			boolean exists = this.existsByUrl(nodeModel.getUrl(), nodeModel.getWorkspaceId(), id);
