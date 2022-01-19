@@ -11,10 +11,6 @@
       {
         "title": "项目列表",
         "id": "projectSearch"
-      },
-      {
-        "title": "脚本列表",
-        "id": "scriptAllList"
       }
     ]
   },
@@ -34,6 +30,17 @@
       {
         "title": "命令执行记录",
         "id": "commandLogList"
+      }
+    ]
+  },
+  {
+    "title": "脚本管理",
+    "icon_v3": "file-text",
+    "id": "scriptManager",
+    "childs": [
+      {
+        "title": "节点脚本列表",
+        "id": "scriptAllList"
       }
     ]
   },
