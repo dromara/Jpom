@@ -110,7 +110,7 @@ if [[ ! -f "/usr/bin/unzip" ]];then
 	#rm -f /etc/yum.repos.d/epel.repo
 	yum install unzip -y
 fi
-TYPE="$1"
+JPOM_TYPE="$1"
 
 module="$2"
 
@@ -129,21 +129,22 @@ if [[ "$temp_result" != "" ]]; then
 fi
 
 # 判断
-if [[ -z "${TYPE}" ]] ; then
+if [[ -z "${JPOM_TYPE}" ]] ; then
     TYPE="Server";
 fi
+echo "开始安装：${JPOM_TYPE}"
 # 判断是否在文件
-if [[ ! -f "${TYPE}.zip" ]]; then
+if [[ ! -f "${JPOM_TYPE}.zip" ]]; then
   # 下载
-  wget -O ${TYPE}.zip https://1232788122276831.cn-beijing.fc.aliyuncs.com/2016-08-15/proxy/jpom/jpom-releases/?type=${TYPE}
+  wget -O ${JPOM_TYPE}.zip https://1232788122276831.cn-beijing.fc.aliyuncs.com/2016-08-15/proxy/jpom/jpom-releases/?type=${JPOM_TYPE}
 fi
 # 解压
-unzip -o ${TYPE}.zip
+unzip -o ${JPOM_TYPE}.zip
 # 删除安装包
-rm -f ${TYPE}.zip
+rm -f ${JPOM_TYPE}.zip
 # 删除安装命令
 rm -f install.sh
 # 添加权限
-chmod 755 ${TYPE}.sh
+chmod 755 ${JPOM_TYPE}.sh
 # 启动
-bash ${TYPE}.sh start $@
+bash ${JPOM_TYPE}.sh start $@
