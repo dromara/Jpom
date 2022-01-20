@@ -30,6 +30,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
@@ -121,6 +122,7 @@ public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements I
 		@Override
 		public void execute() {
 			try {
+				BaseServerController.resetInfo(UserModel.EMPTY);
 				ScriptServer nodeScriptServer = SpringUtil.getBean(ScriptServer.class);
 				ScriptModel scriptServerItem = nodeScriptServer.getByKey(id);
 				if (scriptServerItem == null) {
