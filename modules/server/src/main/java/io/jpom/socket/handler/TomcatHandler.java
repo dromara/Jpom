@@ -61,12 +61,12 @@ public class TomcatHandler extends BaseProxyHandler {
 	}
 
 	@Override
-	protected void handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
+	protected String handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
 		String tomcatId = (String) attributes.get("tomcatId");
 		String fileName = json.getString("fileName");
 		if (!JpomApplication.SYSTEM_ID.equals(tomcatId) && consoleCommandOp == ConsoleCommandOp.heart) {
 			// 服务端心跳
-			return;
+			return null;
 		}
 		super.logOpt(attributes, json);
 		//
@@ -88,6 +88,7 @@ public class TomcatHandler extends BaseProxyHandler {
 				SocketSessionUtil.send(session, io.getMessage());
 			}
 		}
+		return null;
 	}
 
 	@Override

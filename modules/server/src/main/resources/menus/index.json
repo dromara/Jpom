@@ -41,6 +41,14 @@
       {
         "title": "节点脚本列表",
         "id": "scriptAllList"
+      },
+      {
+        "title": "脚本列表",
+        "id": "serverScriptList"
+      },
+      {
+        "title": "脚本执行记录",
+        "id": "serverScriptLogList"
       }
     ]
   },

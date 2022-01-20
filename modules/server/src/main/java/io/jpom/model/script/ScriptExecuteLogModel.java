@@ -20,34 +20,52 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-//package io.jpom.model.vo;
-//
-//import io.jpom.build.BuildUtil;
-//import io.jpom.model.data.BuildModel;
-//
-//import java.io.File;
-//
-///**
-// * vo
-// *
-// * @author bwcx_jzy
-// * @date 2019/8/14
-// */
-//@Deprecated
-//public class BuildModelVo extends BuildModel {
-//
-//	/**
-//	 * 代码是否存在
-//	 */
-//	private boolean sourceExist;
-//
-//	public boolean isSourceExist() {
-//		File source = BuildUtil.getSource(this);
-//		sourceExist = source.exists();
-//		return sourceExist;
-//	}
-//
-//	public void setSourceExist(boolean sourceExist) {
-//		this.sourceExist = sourceExist;
-//	}
-//}
+package io.jpom.model.script;
+
+import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.service.h2db.TableName;
+
+/**
+ * @author bwcx_jzy
+ * @since 2022/1/19
+ */
+@TableName(value = "SERVER_SCRIPT_EXECUTE_LOG", name = "脚本模版执行记录")
+public class ScriptExecuteLogModel extends BaseWorkspaceModel {
+
+	/**
+	 * 脚本ID
+	 */
+	private String scriptId;
+	/**
+	 * 脚本名称
+	 */
+	private String scriptName;
+	/**
+	 * 触发类型 {0，手动，1 自动触发}
+	 */
+	private Integer triggerExecType;
+
+	public String getScriptId() {
+		return scriptId;
+	}
+
+	public void setScriptId(String scriptId) {
+		this.scriptId = scriptId;
+	}
+
+	public String getScriptName() {
+		return scriptName;
+	}
+
+	public void setScriptName(String scriptName) {
+		this.scriptName = scriptName;
+	}
+
+	public Integer getTriggerExecType() {
+		return triggerExecType;
+	}
+
+	public void setTriggerExecType(Integer triggerExecType) {
+		this.triggerExecType = triggerExecType;
+	}
+}

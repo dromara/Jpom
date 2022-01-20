@@ -44,8 +44,8 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
 		// 控制台
 		registry.addHandler(new ConsoleHandler(), "/console")
 				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-		// 脚本模板
-		registry.addHandler(new ScriptHandler(), "/script_run")
+		// 节点脚本模板
+		registry.addHandler(new NodeScriptHandler(), "/node/script_run")
 				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
 		// tomcat
 		registry.addHandler(new TomcatHandler(), "/tomcat_log")
@@ -55,6 +55,9 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
 				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
 		// 节点升级
 		registry.addHandler(new NodeUpdateHandler(), "/node_update")
+				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+		// 脚本模板
+		registry.addHandler(new ServerScriptHandler(), "/script_run")
 				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
 	}
 }

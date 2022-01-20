@@ -28,7 +28,6 @@ import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import io.jpom.common.JpomManifest;
 import io.jpom.system.AgentAuthorize;
-import io.jpom.system.AgentConfigBean;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JvmUtil;
@@ -65,11 +64,11 @@ public class CheckAuthorize {
 				return;
 			}
 		}
-		File oldDir = FileUtil.file(ExtConfigBean.getInstance().getPath(), AgentConfigBean.SCRIPT_DIRECTORY);
+		File oldDir = FileUtil.file(ExtConfigBean.getInstance().getPath(), ConfigBean.SCRIPT_DIRECTORY);
 		if (!oldDir.exists()) {
 			return;
 		}
-		File newDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), AgentConfigBean.SCRIPT_DIRECTORY);
+		File newDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), ConfigBean.SCRIPT_DIRECTORY);
 		FileUtil.move(oldDir, newDir, true);
 	}
 }

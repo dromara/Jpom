@@ -28,9 +28,20 @@ const children = [
   },
   {
     path: "/node/script-all",
-    name: "script-list-all",
+    name: "node-script-list-all",
     component: () => import("../pages/node/script-list"),
   },
+  {
+    path: "/script/script-list",
+    name: "script-list-all",
+    component: () => import("../pages/script/script-list"),
+  },
+  {
+    path: "/script/script-log",
+    name: "script-log",
+    component: () => import("../pages/script/script-log"),
+  },
+
   {
     path: "/ssh",
     name: "node-ssh",

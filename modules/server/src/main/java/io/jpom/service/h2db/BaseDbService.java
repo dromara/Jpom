@@ -120,7 +120,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	protected void fillInsert(T t) {
 		// def create time
 		t.setCreateTimeMillis(ObjectUtil.defaultIfNull(t.getCreateTimeMillis(), SystemClock.now()));
-		t.setId(ObjectUtil.defaultIfNull(t.getId(), IdUtil.fastSimpleUUID()));
+		t.setId(StrUtil.emptyToDefault(t.getId(), IdUtil.fastSimpleUUID()));
 		if (t instanceof BaseUserModifyDbModel) {
 			// 获取数据修改人
 			BaseUserModifyDbModel modifyDbModel = (BaseUserModifyDbModel) t;
@@ -137,10 +137,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	/**
 	 * update by id with data
 	 *
-	 * @param info data
+	 * @param info          data
+	 * @param whereConsumer 查询条件回调
 	 * @return 影响的行数
 	 */
-	public int updateById(T info) {
+	public int updateById(T info, Consumer<Entity> whereConsumer) {
 		// check id
 		String id = info.getId();
 		Assert.hasText(id, "不能执行：error");
@@ -164,10 +165,23 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		//
 		Entity where = new Entity();
 		where.set(Const.ID_STR, id);
+		if (whereConsumer != null) {
+			whereConsumer.accept(where);
+		}
 		int update = super.update(entity, where);
 		// backtrack
 		info.setCreateTimeMillis(createTimeMillis);
 		return update;
+	}
+
+	/**
+	 * update by id with data
+	 *
+	 * @param info data
+	 * @return 影响的行数
+	 */
+	public int updateById(T info) {
+		return this.updateById(info, null);
 	}
 
 	@Override

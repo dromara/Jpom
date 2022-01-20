@@ -25,7 +25,7 @@ package io.jpom.model.data;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.system.AgentConfigBean;
+import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 
@@ -107,7 +107,7 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 		if (StrUtil.isEmpty(getId())) {
 			throw new IllegalArgumentException("id 为空");
 		}
-		File path = AgentConfigBean.getInstance().getScriptPath();
+		File path = ConfigBean.getInstance().getScriptPath();
 		return FileUtil.file(path, getId(), StrUtil.format("script{}.{}", child, CommandUtil.SUFFIX));
 	}
 
@@ -115,7 +115,7 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 		if (StrUtil.isEmpty(getId())) {
 			throw new IllegalArgumentException("id 为空");
 		}
-		File path = AgentConfigBean.getInstance().getScriptPath();
+		File path = ConfigBean.getInstance().getScriptPath();
 		return FileUtil.file(path, getId(), "log", executeId + ".log");
 	}
 

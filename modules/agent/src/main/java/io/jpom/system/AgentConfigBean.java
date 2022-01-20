@@ -64,10 +64,6 @@ public class AgentConfigBean {
 	 * 脚本管理执行记录数据文件
 	 */
 	public static final String SCRIPT_LOG = "script_log.json";
-	/**
-	 * 脚本模板存放路径
-	 */
-	public static final String SCRIPT_DIRECTORY = "script";
 
 	/**
 	 * Server 端的信息
@@ -122,14 +118,5 @@ public class AgentConfigBean {
 		file = FileUtil.file(file, userName);
 		FileUtil.mkdir(file);
 		return file;
-	}
-
-	/**
-	 * 获取脚本模板路径
-	 *
-	 * @return file
-	 */
-	public File getScriptPath() {
-		return FileUtil.file(ConfigBean.getInstance().getDataPath(), SCRIPT_DIRECTORY);
 	}
 }

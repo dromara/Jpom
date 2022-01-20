@@ -34,6 +34,7 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.system.init.OperateLogController;
+import io.jpom.util.SocketSessionUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.TextMessage;
@@ -76,18 +77,25 @@ public abstract class BaseProxyHandler extends BaseHandler {
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		this.init(session);
+		Map<String, Object> attributes = session.getAttributes();
+		this.init(session, attributes);
 	}
 
-	private void init(WebSocketSession session) throws URISyntaxException, IOException {
-		Map<String, Object> attributes = session.getAttributes();
+	/**
+	 * 连接成功 初始化
+	 *
+	 * @param session    会话
+	 * @param attributes 属性
+	 * @throws URISyntaxException 异常
+	 * @throws IOException        IO
+	 */
+	protected void init(WebSocketSession session, Map<String, Object> attributes) throws URISyntaxException, IOException {
 		boolean init = (boolean) attributes.getOrDefault("init", false);
 		if (init) {
 			return;
 		}
 		NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
 		UserModel userInfo = (UserModel) attributes.get("userInfo");
-
 
 		if (nodeModel != null) {
 			Object[] parameters = this.getParameters(attributes);
@@ -97,27 +105,36 @@ public abstract class BaseProxyHandler extends BaseHandler {
 			session.getAttributes().put("proxySession", proxySession);
 		}
 		if (this.showHelloMsg()) {
-			session.sendMessage(new TextMessage(StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId())));
+			String payload = StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId());
+			this.sendMsg(session, payload);
 		}
 		attributes.put("init", true);
 	}
 
+	protected void sendMsg(WebSocketSession session, String msg) {
+		try {
+			SocketSessionUtil.send(session, msg);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("发送消息失败", e);
+		}
+	}
+
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-		this.init(session);
 		String msg = message.getPayload();
 		Map<String, Object> attributes = session.getAttributes();
 		ProxySession proxySession = (ProxySession) attributes.get("proxySession");
 		JSONObject json = JSONObject.parseObject(msg);
 		String op = json.getString("op");
 		ConsoleCommandOp consoleCommandOp = StrUtil.isNotEmpty(op) ? ConsoleCommandOp.valueOf(op) : null;
+		String textMessage;
 		if (proxySession != null) {
-			String textMessage = this.handleTextMessage(attributes, proxySession, json, consoleCommandOp);
-			if (textMessage != null) {
-				session.sendMessage(new TextMessage(textMessage));
-			}
+			textMessage = this.handleTextMessage(attributes, proxySession, json, consoleCommandOp);
 		} else {
-			this.handleTextMessage(attributes, session, json, consoleCommandOp);
+			textMessage = this.handleTextMessage(attributes, session, json, consoleCommandOp);
+		}
+		if (textMessage != null) {
+			this.sendMsg(session, textMessage);
 		}
 	}
 
@@ -129,10 +146,11 @@ public abstract class BaseProxyHandler extends BaseHandler {
 	 * @param json             数据
 	 * @param consoleCommandOp 操作类型
 	 */
-	protected void handleTextMessage(Map<String, Object> attributes,
-									 WebSocketSession session,
-									 JSONObject json,
-									 ConsoleCommandOp consoleCommandOp) throws IOException {
+	protected String handleTextMessage(Map<String, Object> attributes,
+									   WebSocketSession session,
+									   JSONObject json,
+									   ConsoleCommandOp consoleCommandOp) throws IOException {
+		return null;
 	}
 
 	/**

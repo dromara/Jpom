@@ -27,10 +27,6 @@ import { mapGetters } from "vuex";
 
 export default {
   props: {
-    nodeId: { type: String },
-    scriptId: {
-      type: String,
-    },
     id: {
       type: String,
     },
@@ -55,8 +51,8 @@ export default {
     socketUrl() {
       const protocol = location.protocol === "https:" ? "wss://" : "ws://";
       const domain = window.routerBase;
-      const url = (domain + "/node/script_run").replace(new RegExp("//", "gm"), "/");
-      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=nodeScript`;
+      const url = (domain + "/script_run").replace(new RegExp("//", "gm"), "/");
+      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&id=${this.id}&type=script&nodeId=system`;
     },
   },
   mounted() {
@@ -127,7 +123,7 @@ export default {
     sendMsg(op) {
       const data = {
         op: op,
-        scriptId: this.scriptId,
+        id: this.id,
         args: this.temp.args,
         executeId: this.temp.executeId,
       };

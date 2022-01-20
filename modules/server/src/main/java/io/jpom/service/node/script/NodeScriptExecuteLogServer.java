@@ -12,6 +12,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.BaseDbModel;
 import io.jpom.model.data.*;
+import io.jpom.model.node.ScriptExecuteLogCacheModel;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.WorkspaceService;
@@ -28,10 +29,10 @@ import java.util.stream.Collectors;
  * @since 2021/12/12
  */
 @Service
-public class ScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLogCacheModel> {
+public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLogCacheModel> {
 
-	public ScriptExecuteLogServer(NodeService nodeService,
-								  WorkspaceService workspaceService) {
+	public NodeScriptExecuteLogServer(NodeService nodeService,
+									  WorkspaceService workspaceService) {
 		super(nodeService, workspaceService, "脚本模版日志");
 	}
 
@@ -101,7 +102,7 @@ public class ScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLogCach
 			// 设置 临时缓存，便于放行检查
 			BaseServerController.resetInfo(UserModel.EMPTY);
 			//
-			models.forEach(ScriptExecuteLogServer.super::upsert);
+			models.forEach(NodeScriptExecuteLogServer.super::upsert);
 			String format = StrUtil.format(
 					"{} 节点拉取到 {} 个执行记录,更新 {} 个执行记录",
 					nodeModelName, CollUtil.size(jsonArray),

@@ -23,7 +23,6 @@
 package io.jpom.model;
 
 import cn.hutool.crypto.SecureUtil;
-import io.jpom.model.data.ProjectInfoCacheModel;
 import org.springframework.util.Assert;
 
 /**

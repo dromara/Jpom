@@ -22,11 +22,8 @@
  */
 package io.jpom.controller.build;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -46,7 +43,7 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
-import io.jpom.util.LimitQueue;
+import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -173,27 +170,13 @@ public class BuildInfoManageController extends BaseServerController {
 			}
 			return JsonMessage.getString(300, "日志文件不存在");
 		}
-		JSONObject data = new JSONObject();
+		JSONObject data = FileUtils.readLogFile(file, line);
 		// 运行中
 		Integer status = queryByBean.getStatus();
 		data.put("run", status == BuildStatus.Ing.getCode() || status == BuildStatus.PubIng.getCode());
 		// 构建中
 		data.put("buildRun", status == BuildStatus.Ing.getCode());
-		// 读取文件
-		int linesInt = Convert.toInt(line, 1);
-		LimitQueue<String> lines = new LimitQueue<>(500);
-		final int[] readCount = {0};
-		FileUtil.readLines(file, CharsetUtil.CHARSET_UTF_8, (LineHandler) line1 -> {
-			readCount[0]++;
-			if (readCount[0] < linesInt) {
-				return;
-			}
-			lines.add(line1);
-		});
-		// 下次应该获取的行数
-		data.put("line", readCount[0] + 1);
-		data.put("getLine", linesInt);
-		data.put("dataLines", lines);
+
 		return JsonMessage.getString(200, "ok", data);
 	}
 }

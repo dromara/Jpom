@@ -10,15 +10,15 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ScriptCacheModel;
+import io.jpom.model.node.ScriptCacheModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.permission.NodeDataPermission;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.node.script.ScriptExecuteLogServer;
-import io.jpom.service.node.script.ScriptServer;
+import io.jpom.service.node.script.NodeScriptExecuteLogServer;
+import io.jpom.service.node.script.NodeScriptServer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -35,16 +35,16 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping(value = "/node/script")
 @Feature(cls = ClassFeature.NODE_SCRIPT)
-@NodeDataPermission(cls = ScriptServer.class)
-public class ScriptController extends BaseServerController {
+@NodeDataPermission(cls = NodeScriptServer.class)
+public class NodeScriptController extends BaseServerController {
 
-	private final ScriptServer scriptServer;
-	private final ScriptExecuteLogServer scriptExecuteLogServer;
+	private final NodeScriptServer nodeScriptServer;
+	private final NodeScriptExecuteLogServer nodeScriptExecuteLogServer;
 
-	public ScriptController(ScriptServer scriptServer,
-							ScriptExecuteLogServer scriptExecuteLogServer) {
-		this.scriptServer = scriptServer;
-		this.scriptExecuteLogServer = scriptExecuteLogServer;
+	public NodeScriptController(NodeScriptServer nodeScriptServer,
+								NodeScriptExecuteLogServer nodeScriptExecuteLogServer) {
+		this.nodeScriptServer = nodeScriptServer;
+		this.nodeScriptExecuteLogServer = nodeScriptExecuteLogServer;
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class ScriptController extends BaseServerController {
 	 */
 	@RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String scriptList() {
-		PageResultDto<ScriptCacheModel> pageResultDto = scriptServer.listPageNode(getRequest());
+		PageResultDto<ScriptCacheModel> pageResultDto = nodeScriptServer.listPageNode(getRequest());
 		return JsonMessage.getString(200, "success", pageResultDto);
 	}
 
@@ -68,7 +68,7 @@ public class ScriptController extends BaseServerController {
 	 */
 	@PostMapping(value = "list_all", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String listAll() {
-		PageResultDto<ScriptCacheModel> modelPageResultDto = scriptServer.listPage(getRequest());
+		PageResultDto<ScriptCacheModel> modelPageResultDto = nodeScriptServer.listPage(getRequest());
 		return JsonMessage.getString(200, "", modelPageResultDto);
 	}
 
@@ -94,7 +94,7 @@ public class ScriptController extends BaseServerController {
 		}
 		JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.Script_Save);
 		if (request.getCode() == HttpStatus.OK.value()) {
-			scriptServer.syncNode(node);
+			nodeScriptServer.syncNode(node);
 		}
 		return request.toString();
 	}
@@ -106,9 +106,9 @@ public class ScriptController extends BaseServerController {
 		HttpServletRequest request = getRequest();
 		JsonMessage<Object> requestData = NodeForward.request(node, request, NodeUrl.Script_Del);
 		if (requestData.getCode() == HttpStatus.OK.value()) {
-			scriptServer.syncNode(node);
+			nodeScriptServer.syncNode(node);
 			// 删除日志
-			scriptExecuteLogServer.delCache(id, node.getId(), request);
+			nodeScriptExecuteLogServer.delCache(id, node.getId(), request);
 		}
 		return requestData.toString();
 	}
@@ -124,7 +124,7 @@ public class ScriptController extends BaseServerController {
 		NodeModel node = getNode();
 		JsonMessage<String> stringJsonMessage = NodeForward.requestMultipart(node, getMultiRequest(), NodeUrl.Script_Upload);
 		if (stringJsonMessage.getCode() == HttpStatus.OK.value()) {
-			scriptServer.syncNode(node);
+			nodeScriptServer.syncNode(node);
 		}
 		return stringJsonMessage.toString();
 	}
@@ -139,8 +139,8 @@ public class ScriptController extends BaseServerController {
 	public String syncProject() {
 		//
 		NodeModel node = getNode();
-		int cache = scriptServer.delCache(node.getId(), getRequest());
-		String msg = scriptServer.syncExecuteNode(node);
+		int cache = nodeScriptServer.delCache(node.getId(), getRequest());
+		String msg = nodeScriptServer.syncExecuteNode(node);
 		return JsonMessage.getString(200, "主动清除 " + cache + StrUtil.SPACE + msg);
 	}
 
@@ -155,7 +155,7 @@ public class ScriptController extends BaseServerController {
 	public String clearAll() {
 		Entity where = Entity.create();
 		where.set("id", " <> id");
-		int del = scriptServer.del(where);
+		int del = nodeScriptServer.del(where);
 		return JsonMessage.getString(200, "成功删除" + del + "条脚本模版缓存");
 	}
 

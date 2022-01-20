@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ScriptCacheModel;
+import io.jpom.model.node.ScriptCacheModel;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.WorkspaceService;
@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
  * @date 2019/8/16
  */
 @Service
-public class ScriptServer extends BaseNodeService<ScriptCacheModel> {
+public class NodeScriptServer extends BaseNodeService<ScriptCacheModel> {
 
 
-	public ScriptServer(NodeService nodeService,
-						WorkspaceService workspaceService) {
+	public NodeScriptServer(NodeService nodeService,
+							WorkspaceService workspaceService) {
 		super(nodeService, workspaceService, "脚本模版");
 	}
 

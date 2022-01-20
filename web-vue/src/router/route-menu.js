@@ -17,6 +17,8 @@ const routeMenuMap = {
   repository: "/repository/list",
   buildListOld: "/build/list",
   scriptAllList: "/node/script-all",
+  serverScriptList: "/script/script-list",
+  serverScriptLogList: "/script/script-log",
   /**
    * new build list page
    */

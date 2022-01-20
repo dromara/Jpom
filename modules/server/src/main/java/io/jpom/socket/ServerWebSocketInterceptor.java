@@ -94,6 +94,17 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 					attributes.put("dataItem", dataItem);
 					break;
 				}
+
+				case nodeScript: {
+					// 节点脚本模板
+					Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
+					if (dataItem == null) {
+						return false;
+					}
+					attributes.put("dataItem", dataItem);
+					attributes.put("scriptId", BeanUtil.getProperty(dataItem, "scriptId"));
+					break;
+				}
 				case script: {
 					// 脚本模板
 					Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
@@ -101,7 +112,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 						return false;
 					}
 					attributes.put("dataItem", dataItem);
-					attributes.put("scriptId", BeanUtil.getProperty(dataItem, "scriptId"));
+					attributes.put("scriptId", BeanUtil.getProperty(dataItem, "id"));
 					break;
 				}
 				case tomcat:
