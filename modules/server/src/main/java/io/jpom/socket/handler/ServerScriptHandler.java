@@ -127,7 +127,7 @@ public class ServerScriptHandler extends BaseProxyHandler {
 			scriptCacheModel.setLastRunUser(userModel.getId());
 			nodeScriptServer.update(scriptCacheModel);
 			//
-			ScriptExecuteLogModel scriptExecuteLogCacheModel = logServer.create(scriptCacheModel, 0);
+			ScriptExecuteLogModel scriptExecuteLogCacheModel = logServer.create(scriptModel, 0);
 			return scriptExecuteLogCacheModel.getId();
 		} finally {
 			BaseServerController.removeAll();
