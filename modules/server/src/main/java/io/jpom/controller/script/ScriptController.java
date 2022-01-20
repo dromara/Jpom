@@ -126,8 +126,8 @@ public class ScriptController extends BaseServerController {
 	}
 
 	private void syncNodeScript(ScriptModel scriptModel, String oldNode) {
-		List<String> oldNodeIds = StrUtil.split(oldNode, StrUtil.COMMA);
-		List<String> newNodeIds = StrUtil.split(scriptModel.getNodeIds(), StrUtil.COMMA);
+		List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
+		List<String> newNodeIds = StrUtil.splitTrim(scriptModel.getNodeIds(), StrUtil.COMMA);
 		Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
 		UserModel user = getUser();
 		// 删除
