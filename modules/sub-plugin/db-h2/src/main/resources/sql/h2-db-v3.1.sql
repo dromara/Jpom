@@ -36,3 +36,9 @@ ALTER TABLE NODE_INFO
 
 ALTER TABLE SCRIPT_INFO
 	ADD IF NOT EXISTS description varchar(255) comment '描述';
+
+ALTER TABLE SCRIPT_INFO
+	ADD IF NOT EXISTS scriptType varchar(100) comment '脚本类型';
+
+ALTER TABLE SERVER_SCRIPT_INFO
+	ADD IF NOT EXISTS nodeIds CLOB comment '绑定的节点 id';

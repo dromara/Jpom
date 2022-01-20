@@ -16,6 +16,7 @@
               <ul>
                 <li>执行时候默认不加载全部环境变量、需要脚本里面自行加载</li>
                 <li>命令文件将在 ${数据目录}/script/xxxx.sh、bat 执行</li>
+                <li>分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本,一般用户节点分发功能中的 DSL 模式</li>
               </ul>
             </div>
           </template>
@@ -52,6 +53,9 @@
     <!-- 编辑区 -->
     <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
       <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
+        <a-form-model-item v-if="temp.id" label="ScriptId" prop="id">
+          <a-input v-model="temp.id" disabled readonly />
+        </a-form-model-item>
         <a-form-model-item label="Script 名称" prop="name">
           <a-input v-model="temp.name" placeholder="名称" />
         </a-form-model-item>
@@ -78,6 +82,20 @@
         <a-form-model-item label="描述" prop="description">
           <a-input v-model="temp.description" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
         </a-form-model-item>
+        <a-form-model-item>
+          <template slot="label">
+            分发节点
+            <a-tooltip v-show="!temp.id">
+              <template slot="title"> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-select show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="temp.chooseNode">
+            <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 脚本控制台组件 -->
@@ -89,6 +107,7 @@
 <script>
 import { getScriptListAll, editScript, deleteScript } from "@/api/server-script";
 import codeEditor from "@/components/codeEditor";
+import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/script/script-console";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
 import { parseTime } from "@/utils/time";
@@ -105,7 +124,7 @@ export default {
       cronDataSource: CRON_DATA_SOURCE,
       list: [],
       temp: {},
-
+      nodeList: [],
       editScriptVisible: false,
       drawerTitle: "",
       drawerConsoleVisible: false,
@@ -159,15 +178,25 @@ export default {
     parseTime(v) {
       return parseTime(v);
     },
+    // 获取所有节点
+    getAllNodeList() {
+      getNodeListAll().then((res) => {
+        this.nodeList = res.data || [];
+      });
+    },
     createScript() {
       this.temp = {};
       this.editScriptVisible = true;
+      this.getAllNodeList();
     },
     // 修改
     handleEdit(record) {
       this.temp = record;
       //
+      // this.temp.;
+      this.temp = { ...this.temp, chooseNode: record.nodeIds ? record.nodeIds.split(",") : [] };
       this.editScriptVisible = true;
+      this.getAllNodeList();
     },
     // 提交 Script 数据
     handleEditScriptOk() {
@@ -177,6 +206,7 @@ export default {
           return false;
         }
         // 提交数据
+        this.temp.nodeIds = this.temp?.chooseNode?.join(",");
         editScript(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功

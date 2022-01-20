@@ -58,6 +58,18 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 	 * 描述
 	 */
 	private String description;
+	/**
+	 * 脚本类型
+	 */
+	private String scriptType;
+
+	public String getScriptType() {
+		return scriptType;
+	}
+
+	public void setScriptType(String scriptType) {
+		this.scriptType = scriptType;
+	}
 
 	public String getDescription() {
 		return description;
