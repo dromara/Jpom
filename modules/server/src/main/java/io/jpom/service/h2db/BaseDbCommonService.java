@@ -26,7 +26,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.PageUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.TypeUtil;
@@ -332,9 +331,9 @@ public abstract class BaseDbCommonService<T> {
 	 * @return 影响行数
 	 */
 	public int delByKey(Object keyValue, Consumer<Entity> consumer) {
-		if (ObjectUtil.isEmpty(keyValue)) {
-			return 0;
-		}
+		//		if (ObjectUtil.isEmpty(keyValue)) {
+		//			return 0;
+		//		}
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
 			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
