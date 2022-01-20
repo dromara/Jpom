@@ -9,15 +9,12 @@
 4. ~~自定义检查项目状态~~
    1. `for /f "tokens=1 delims= " %i in ('jps -l ^| findstr "JpomServer"') do @echo %i`
 5. ~~自定义启动项目脚本~~
-6. 快速安装导入插件端
+6. ~~快速安装导入插件端~~
 7. 支持 mysql 数据库
 8. h2 数据库升级 2.0
 9. 容器构建
-
-
-----
-1. docker ui
-2. 节点大屏
+10. docker ui
+11. 节点大屏
 
 # 2.7.x
 

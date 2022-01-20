@@ -630,7 +630,7 @@ public abstract class BaseDbCommonService<T> {
 	 */
 	protected JpomRuntimeException warpException(Exception e) {
 		if (ExceptionUtil.isCausedBy(e, JdbcSQLNonTransientException.class)) {
-			return new JpomRuntimeException("数据库异常,可能数据库文件已经损坏,需要重新初始化。可以尝试在启动参数里面添加 --recover:h2db 来自动恢复,：" + e.getMessage(), e);
+			return new JpomRuntimeException("数据库异常,可能数据库文件已经损坏(可能丢失部分数据),需要重新初始化。可以尝试在启动参数里面添加 --recover:h2db 来自动恢复,：" + e.getMessage(), e);
 		}
 		return new JpomRuntimeException("数据库异常", e);
 	}
