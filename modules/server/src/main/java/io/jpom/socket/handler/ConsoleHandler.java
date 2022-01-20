@@ -26,7 +26,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.RunMode;
-import io.jpom.model.data.ProjectInfoCacheModel;
+import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;

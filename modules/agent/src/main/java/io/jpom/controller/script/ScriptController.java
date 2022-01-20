@@ -23,10 +23,7 @@
 package io.jpom.controller.script;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.LineHandler;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.pattern.CronPattern;
@@ -41,13 +38,13 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.model.data.NodeScriptExecLogModel;
 import io.jpom.model.data.NodeScriptModel;
+import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.service.script.NodeScriptExecLogServer;
 import io.jpom.service.script.NodeScriptServer;
-import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
-import io.jpom.util.LimitQueue;
+import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -180,24 +177,9 @@ public class ScriptController extends BaseAgentController {
 		File logFile = item.logFile(executeId);
 		Assert.state(FileUtil.isFile(logFile), "日志文件错误");
 
-		JSONObject data = new JSONObject();
+		JSONObject data = FileUtils.readLogFile(logFile, line);
 		// 运行中
 		data.put("run", ScriptProcessBuilder.isRun(executeId));
-		// 读取文件
-		int linesInt = Convert.toInt(line, 1);
-		LimitQueue<String> lines = new LimitQueue<>(1000);
-		final int[] readCount = {0};
-		FileUtil.readLines(logFile, CharsetUtil.CHARSET_UTF_8, (LineHandler) line1 -> {
-			readCount[0]++;
-			if (readCount[0] < linesInt) {
-				return;
-			}
-			lines.add(line1);
-		});
-		// 下次应该获取的行数
-		data.put("line", readCount[0] + 1);
-		data.put("getLine", linesInt);
-		data.put("dataLines", lines);
 		return JsonMessage.getString(200, "ok", data);
 	}
 

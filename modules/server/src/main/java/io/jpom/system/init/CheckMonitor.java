@@ -40,8 +40,8 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.node.NodeService;
-import io.jpom.service.node.script.ScriptExecuteLogServer;
-import io.jpom.service.node.script.ScriptServer;
+import io.jpom.service.node.script.NodeScriptExecuteLogServer;
+import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.system.ConfigBean;
 
 import java.util.Collection;
@@ -78,8 +78,8 @@ public class CheckMonitor {
 		// 拉取 脚本模版日志
 		CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
 			NodeService nodeService = SpringUtil.getBean(NodeService.class);
-			ScriptServer scriptServer = SpringUtil.getBean(ScriptServer.class);
-			List<String> nodeIds = scriptServer.hasScriptNode();
+			NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
+			List<String> nodeIds = nodeScriptServer.hasScriptNode();
 			if (nodeIds == null) {
 				return;
 			}
@@ -102,8 +102,8 @@ public class CheckMonitor {
 	 */
 	private static void pullScriptLogItem(NodeModel nodeModel) {
 		try {
-			ScriptExecuteLogServer scriptExecuteLogServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
-			Collection<String> strings = scriptExecuteLogServer.syncExecuteNodeInc(nodeModel);
+			NodeScriptExecuteLogServer nodeScriptExecuteLogServer = SpringUtil.getBean(NodeScriptExecuteLogServer.class);
+			Collection<String> strings = nodeScriptExecuteLogServer.syncExecuteNodeInc(nodeModel);
 			if (strings == null) {
 				return;
 			}

@@ -2,31 +2,24 @@
   <div class="node-full-content">
     <div ref="filter" class="filter">
       <a-space>
-        <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
-          <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
-        </a-select>
         <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
           <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
+        <a-button type="primary" @click="createScript">新建脚本</a-button>
 
         <a-tooltip>
           <template slot="title">
-            <div>节点脚本模版是存储在节点中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
+            <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
 
             <div>
               <ul>
                 <li>执行时候默认不加载全部环境变量、需要脚本里面自行加载</li>
-                <li>命令文件将在 ${插件端数据目录}/script/xxxx.sh 、bat 执行</li>
-                <li>添加脚本模版需要到节点管理中去添加</li>
+                <li>命令文件将在 ${数据目录}/script/xxxx.sh、bat 执行</li>
               </ul>
             </div>
           </template>
           <a-icon type="question-circle" theme="filled" />
-        </a-tooltip>
-
-        <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息, 需要重新同步">
-          <a-icon @click="delAll()" type="delete" />
         </a-tooltip>
       </a-space>
     </div>
@@ -89,15 +82,14 @@
     </a-modal>
     <!-- 脚本控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <script-console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :defArgs="temp.defArgs" :id="temp.id" :scriptId="temp.scriptId" />
+      <script-console v-if="drawerConsoleVisible" :defArgs="temp.defArgs" :id="temp.id" />
     </a-drawer>
   </div>
 </template>
 <script>
-import { getScriptListAll, editScript, deleteScript, itemScript, delAllCache } from "@/api/node-other";
+import { getScriptListAll, editScript, deleteScript } from "@/api/server-script";
 import codeEditor from "@/components/codeEditor";
-import { getNodeListAll } from "@/api/node";
-import ScriptConsole from "@/pages/node/node-layout/other/script-console";
+import ScriptConsole from "@/pages/script/script-console";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
 import { parseTime } from "@/utils/time";
 export default {
@@ -113,15 +105,15 @@ export default {
       cronDataSource: CRON_DATA_SOURCE,
       list: [],
       temp: {},
-      nodeMap: {},
+
       editScriptVisible: false,
       drawerTitle: "",
       drawerConsoleVisible: false,
       columns: [
-        // { title: "Script ID", dataIndex: "id", width: 200, ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
-        { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
+        { title: "描述", dataIndex: "description", ellipsis: true, scopedSlots: { customRender: "description" } },
+        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, scopedSlots: { customRender: "autoExecCron" } },
+        { title: "修改时间", dataIndex: "modifyTimeMillis", sorter: true, width: 170, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 260 },
@@ -149,14 +141,7 @@ export default {
   mounted() {
     // this.calcTableHeight();
 
-    getNodeListAll().then((res) => {
-      if (res.code === 200) {
-        res.data.forEach((item) => {
-          this.nodeMap[item.id] = item.name;
-        });
-      }
-      this.loadData();
-    });
+    this.loadData();
   },
   methods: {
     // 加载数据
@@ -174,17 +159,15 @@ export default {
     parseTime(v) {
       return parseTime(v);
     },
+    createScript() {
+      this.temp = {};
+      this.editScriptVisible = true;
+    },
     // 修改
     handleEdit(record) {
-      itemScript({
-        id: record.scriptId,
-        nodeId: record.nodeId,
-      }).then((res) => {
-        this.temp = Object.assign(res.data);
-        this.temp.nodeId = record.nodeId;
-        //
-        this.editScriptVisible = true;
-      });
+      this.temp = record;
+      //
+      this.editScriptVisible = true;
     },
     // 提交 Script 数据
     handleEditScriptOk() {
@@ -217,8 +200,7 @@ export default {
         onOk: () => {
           // 组装参数
           const params = {
-            nodeId: record.nodeId,
-            id: record.scriptId,
+            id: record.id,
           };
           // 删除
           deleteScript(params).then((res) => {
@@ -241,25 +223,6 @@ export default {
     // 关闭 console
     onConsoleClose() {
       this.drawerConsoleVisible = false;
-    },
-    delAll() {
-      this.$confirm({
-        title: "系统提示",
-        content: "确定要清除服务端所有的脚步模版缓存信息吗？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 删除
-          delAllCache().then((res) => {
-            if (res.code == 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
-            }
-          });
-        },
-      });
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {

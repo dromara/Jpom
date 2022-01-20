@@ -1,8 +1,6 @@
 package io.jpom.controller.node.ssh;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.LineHandler;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -16,7 +14,7 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.command.CommandExecLogService;
 import io.jpom.util.CommandUtil;
-import io.jpom.util.LimitQueue;
+import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -110,25 +108,11 @@ public class CommandLogController extends BaseServerController {
 		}
 		Assert.state(FileUtil.isFile(file), "日志文件错误");
 
-		JSONObject data = new JSONObject();
+		JSONObject data = FileUtils.readLogFile(file, line);
 		// 运行中
 		Integer status = item.getStatus();
 		data.put("run", status != null && status == CommandExecLogModel.Status.ING.getCode());
-		// 读取文件
-		int linesInt = Math.max(line, 1);
-		LimitQueue<String> lines = new LimitQueue<>(1000);
-		final int[] readCount = {0};
-		FileUtil.readLines(file, CharsetUtil.CHARSET_UTF_8, (LineHandler) line1 -> {
-			readCount[0]++;
-			if (readCount[0] < linesInt) {
-				return;
-			}
-			lines.add(line1);
-		});
-		// 下次应该获取的行数
-		data.put("line", readCount[0] + 1);
-		data.put("getLine", linesInt);
-		data.put("dataLines", lines);
+
 		return JsonMessage.getString(200, "", data);
 	}
 

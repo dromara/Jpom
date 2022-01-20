@@ -28,13 +28,13 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ScriptExecuteLogCacheModel;
-import io.jpom.model.data.ScriptCacheModel;
+import io.jpom.model.node.ScriptExecuteLogCacheModel;
+import io.jpom.model.node.ScriptCacheModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
-import io.jpom.service.node.script.ScriptExecuteLogServer;
-import io.jpom.service.node.script.ScriptServer;
+import io.jpom.service.node.script.NodeScriptExecuteLogServer;
+import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.ProxySession;
@@ -48,9 +48,9 @@ import java.util.Map;
  * @date 2019/4/24
  */
 @Feature(cls = ClassFeature.NODE_SCRIPT)
-public class ScriptHandler extends BaseProxyHandler {
+public class NodeScriptHandler extends BaseProxyHandler {
 
-	public ScriptHandler() {
+	public NodeScriptHandler() {
 		super(NodeUrl.Script_Run);
 	}
 
@@ -87,8 +87,8 @@ public class ScriptHandler extends BaseProxyHandler {
 		NodeModel nodeInfo = (NodeModel) attributes.get("nodeInfo");
 		UserModel userModel = (UserModel) attributes.get("userInfo");
 		ScriptCacheModel dataItem = (ScriptCacheModel) attributes.get("dataItem");
-		ScriptExecuteLogServer logServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
-		ScriptServer scriptServer = SpringUtil.getBean(ScriptServer.class);
+		NodeScriptExecuteLogServer logServer = SpringUtil.getBean(NodeScriptExecuteLogServer.class);
+		NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
 		//
 		try {
 			BaseServerController.resetInfo(userModel);
@@ -96,7 +96,7 @@ public class ScriptHandler extends BaseProxyHandler {
 			ScriptCacheModel scriptCacheModel = new ScriptCacheModel();
 			scriptCacheModel.setId(dataItem.getId());
 			scriptCacheModel.setLastRunUser(userModel.getId());
-			scriptServer.update(scriptCacheModel);
+			nodeScriptServer.update(scriptCacheModel);
 			//
 			ScriptExecuteLogCacheModel scriptExecuteLogCacheModel = new ScriptExecuteLogCacheModel();
 			scriptExecuteLogCacheModel.setScriptId(dataItem.getScriptId());

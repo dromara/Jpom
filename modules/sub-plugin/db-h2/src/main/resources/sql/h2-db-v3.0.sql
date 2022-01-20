@@ -234,7 +234,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.SCRIPT_INFO
 	lastRunUser      varchar(50) comment '最后执行人',
 	CONSTRAINT SCRIPT_INFO_PK PRIMARY KEY (id)
 );
-comment on table SCRIPT_INFO is '脚本模版';
+comment on table SCRIPT_INFO is '节点脚本模版';
 
 
 -- 脚本模版-执行记录
@@ -250,7 +250,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.SCRIPT_EXECUTE_LOG
 	scriptId         varchar(50) not null comment '脚本ID',
 	CONSTRAINT SCRIPT_EXECUTE_LOG_PK PRIMARY KEY (id)
 );
-comment on table SCRIPT_EXECUTE_LOG is '脚本模版执行记录';
+comment on table SCRIPT_EXECUTE_LOG is '节点脚本模版执行记录';
 
 
 -- 命令行信息
@@ -291,6 +291,43 @@ CREATE TABLE IF NOT EXISTS PUBLIC.COMMAND_EXEC_LOG
 	CONSTRAINT COMMAND_EXEC_LOG_PK PRIMARY KEY (ID)
 );
 comment on table COMMAND_EXEC_LOG is '命令执行记录';
+
+
+-- 脚本模版
+CREATE TABLE IF NOT EXISTS PUBLIC.SERVER_SCRIPT_INFO
+(
+	id               VARCHAR(50) not null comment 'id',
+	createTimeMillis BIGINT COMMENT '数据创建时间',
+	modifyTimeMillis BIGINT COMMENT '数据修改时间',
+	modifyUser       VARCHAR(50) comment '修改人',
+	strike           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId      varchar(50) not null comment '所属工作空间',
+	`name`           VARCHAR(50) not null comment '名称',
+	lastRunUser      varchar(50) comment '最后执行人',
+	autoExecCron     VARCHAR(100) comment '自动执行表达式',
+	defArgs          VARCHAR(100) comment '默认参数',
+	context          CLOB comment '内容',
+	description      varchar(255) comment '描述',
+	CONSTRAINT SERVER_SCRIPT_INFO_PK PRIMARY KEY (id)
+);
+comment on table SERVER_SCRIPT_INFO is '脚本模版';
+
+
+-- 脚本模版-执行记录
+CREATE TABLE IF NOT EXISTS PUBLIC.SERVER_SCRIPT_EXECUTE_LOG
+(
+	id               VARCHAR(50) not null comment 'id',
+	createTimeMillis BIGINT COMMENT '数据创建时间',
+	modifyTimeMillis BIGINT COMMENT '数据修改时间',
+	modifyUser       VARCHAR(50) comment '修改人',
+	strike           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId      varchar(50) not null comment '所属工作空间',
+	scriptId         varchar(50) not null comment '脚本ID',
+	scriptName       VARCHAR(100) comment '脚本名称',
+	triggerExecType  int DEFAULT 0 comment '触发类型{0，手动，1 自动触发}',
+	CONSTRAINT SERVER_SCRIPT_EXECUTE_LOG_PK PRIMARY KEY (id)
+);
+comment on table SERVER_SCRIPT_EXECUTE_LOG is '脚本模版执行记录';
 
 
 

@@ -140,8 +140,8 @@ public class RepositoryController extends BaseServerController {
 			repositoryService.insert(repositoryModelReq);
 		} else {
 			// update data
-			repositoryModelReq.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
-			repositoryService.updateById(repositoryModelReq);
+			//repositoryModelReq.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
+			repositoryService.updateById(repositoryModelReq, getRequest());
 		}
 
 		return JsonMessage.toJson(200, "操作成功");

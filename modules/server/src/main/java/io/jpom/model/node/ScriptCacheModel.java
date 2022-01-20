@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.model.data;
+package io.jpom.model.node;
 
 import io.jpom.model.BaseNodeModel;
 import io.jpom.service.h2db.TableName;
@@ -31,7 +31,7 @@ import io.jpom.service.h2db.TableName;
  * @author bwcx_jzy
  * @date 2021/12/12
  **/
-@TableName(value = "SCRIPT_INFO", name = "脚本模版")
+@TableName(value = "SCRIPT_INFO", name = "节点脚本模版")
 public class ScriptCacheModel extends BaseNodeModel {
 	/**
 	 * 脚本ID

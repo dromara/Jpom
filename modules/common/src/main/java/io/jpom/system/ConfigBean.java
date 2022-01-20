@@ -54,7 +54,10 @@ public class ConfigBean {
 	public static final String DATA = "data";
 
 	public static final int AUTHORIZE_ERROR = 900;
-
+	/**
+	 * 脚本模板存放路径
+	 */
+	public static final String SCRIPT_DIRECTORY = "script";
 	/**
 	 * 授权信息
 	 */
@@ -193,6 +196,15 @@ public class ConfigBean {
 		long size = FileUtil.size(FileUtil.file(dataPath));
 		dataSizeCache = size;
 		return size;
+	}
+
+	/**
+	 * 获取脚本模板路径
+	 *
+	 * @return file
+	 */
+	public File getScriptPath() {
+		return FileUtil.file(this.getDataPath(), SCRIPT_DIRECTORY);
 	}
 
 	public long getDataSizeCache() {

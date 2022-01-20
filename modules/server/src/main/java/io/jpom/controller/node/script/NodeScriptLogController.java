@@ -7,11 +7,11 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ScriptExecuteLogCacheModel;
+import io.jpom.model.node.ScriptExecuteLogCacheModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.node.script.ScriptExecuteLogServer;
+import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -26,12 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/node/script_log")
 @Feature(cls = ClassFeature.NODE_SCRIPT_LOG)
-public class ScriptLogController extends BaseServerController {
+public class NodeScriptLogController extends BaseServerController {
 
-	private final ScriptExecuteLogServer scriptExecuteLogServer;
+	private final NodeScriptExecuteLogServer nodeScriptExecuteLogServer;
 
-	public ScriptLogController(ScriptExecuteLogServer scriptExecuteLogServer) {
-		this.scriptExecuteLogServer = scriptExecuteLogServer;
+	public NodeScriptLogController(NodeScriptExecuteLogServer nodeScriptExecuteLogServer) {
+		this.nodeScriptExecuteLogServer = nodeScriptExecuteLogServer;
 	}
 
 	/**
@@ -41,7 +41,7 @@ public class ScriptLogController extends BaseServerController {
 	 */
 	@RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String scriptList() {
-		PageResultDto<ScriptExecuteLogCacheModel> pageResultDto = scriptExecuteLogServer.listPageNode(getRequest());
+		PageResultDto<ScriptExecuteLogCacheModel> pageResultDto = nodeScriptExecuteLogServer.listPageNode(getRequest());
 		return JsonMessage.getString(200, "", pageResultDto);
 	}
 
@@ -72,11 +72,11 @@ public class ScriptLogController extends BaseServerController {
 		scriptExecuteLogCacheModel.setId(executeId);
 		scriptExecuteLogCacheModel.setScriptId(id);
 		scriptExecuteLogCacheModel.setNodeId(node.getId());
-		ScriptExecuteLogCacheModel executeLogModel = scriptExecuteLogServer.queryByBean(scriptExecuteLogCacheModel);
+		ScriptExecuteLogCacheModel executeLogModel = nodeScriptExecuteLogServer.queryByBean(scriptExecuteLogCacheModel);
 		Assert.notNull(executeLogModel, "没有对应的执行日志");
 		JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.SCRIPT_DEL_LOG);
 		if (request.getCode() == HttpStatus.OK.value()) {
-			scriptExecuteLogServer.delByKey(executeId);
+			nodeScriptExecuteLogServer.delByKey(executeId);
 		}
 		return request.toString();
 	}

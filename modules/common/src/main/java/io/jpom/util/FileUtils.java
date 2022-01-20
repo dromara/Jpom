@@ -24,6 +24,8 @@ package io.jpom.util;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -146,5 +148,32 @@ public class FileUtils {
 			return null;
 		}
 		return strings[1];
+	}
+
+	/**
+	 * 读取 日志文件
+	 *
+	 * @param logFile 日志文件
+	 * @param line    开始行数
+	 * @return data
+	 */
+	public static JSONObject readLogFile(File logFile, int line) {
+		JSONObject data = new JSONObject();
+		// 读取文件
+		//int linesInt = Convert.toInt(line, 1);
+		LimitQueue<String> lines = new LimitQueue<>(1000);
+		final int[] readCount = {0};
+		FileUtil.readLines(logFile, CharsetUtil.CHARSET_UTF_8, (LineHandler) line1 -> {
+			readCount[0]++;
+			if (readCount[0] < line) {
+				return;
+			}
+			lines.add(line1);
+		});
+		// 下次应该获取的行数
+		data.put("line", readCount[0] + 1);
+		data.put("getLine", line);
+		data.put("dataLines", lines);
+		return data;
 	}
 }

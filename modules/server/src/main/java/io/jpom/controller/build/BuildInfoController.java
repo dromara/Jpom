@@ -239,7 +239,7 @@ public class BuildInfoController extends BaseServerController {
 			return JsonMessage.getString(200, "添加成功");
 		}
 
-		buildInfoService.update(buildInfoModel);
+		buildInfoService.updateById(buildInfoModel, getRequest());
 		return JsonMessage.getString(200, "修改成功");
 	}
 

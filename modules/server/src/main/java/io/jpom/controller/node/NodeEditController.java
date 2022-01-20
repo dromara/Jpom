@@ -9,8 +9,8 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ProjectInfoCacheModel;
-import io.jpom.model.data.ScriptCacheModel;
+import io.jpom.model.node.ProjectInfoCacheModel;
+import io.jpom.model.node.ScriptCacheModel;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -19,7 +19,7 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
-import io.jpom.service.node.script.ScriptServer;
+import io.jpom.service.node.script.NodeScriptServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -42,18 +42,18 @@ public class NodeEditController extends BaseServerController {
 	private final MonitorService monitorService;
 	private final BuildInfoService buildService;
 	private final ProjectInfoCacheService projectInfoCacheService;
-	private final ScriptServer scriptServer;
+	private final NodeScriptServer nodeScriptServer;
 
 	public NodeEditController(OutGivingServer outGivingServer,
 							  MonitorService monitorService,
 							  BuildInfoService buildService,
 							  ProjectInfoCacheService projectInfoCacheService,
-							  ScriptServer scriptServer) {
+							  NodeScriptServer nodeScriptServer) {
 		this.outGivingServer = outGivingServer;
 		this.monitorService = monitorService;
 		this.buildService = buildService;
 		this.projectInfoCacheService = projectInfoCacheService;
-		this.scriptServer = scriptServer;
+		this.nodeScriptServer = nodeScriptServer;
 	}
 
 
@@ -135,8 +135,8 @@ public class NodeEditController extends BaseServerController {
 		{
 			ScriptCacheModel scriptCacheModel = new ScriptCacheModel();
 			scriptCacheModel.setNodeId(id);
-			scriptCacheModel.setWorkspaceId(scriptServer.getCheckUserWorkspace(request));
-			boolean exists = scriptServer.exists(scriptCacheModel);
+			scriptCacheModel.setWorkspaceId(nodeScriptServer.getCheckUserWorkspace(request));
+			boolean exists = nodeScriptServer.exists(scriptCacheModel);
 			Assert.state(!exists, "该节点下还存在脚本模版，不能删除");
 		}
 

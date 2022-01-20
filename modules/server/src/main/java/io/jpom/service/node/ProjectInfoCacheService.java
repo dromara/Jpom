@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.ProjectInfoCacheModel;
+import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;

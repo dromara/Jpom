@@ -196,7 +196,19 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 
 
 	public List<T> listById(Collection<String> ids, HttpServletRequest request) {
-		String checkUserWorkspace = this.getCheckUserWorkspace(request);
-		return super.listById(ids, entity -> entity.set("workspaceId", checkUserWorkspace));
+		String workspaceId = this.getCheckUserWorkspace(request);
+		return super.listById(ids, entity -> entity.set("workspaceId", workspaceId));
+	}
+
+	/**
+	 * 更新数据,根据ID+工作空间ID
+	 *
+	 * @param info    更新的数据
+	 * @param request 请求
+	 * @return 影响行数
+	 */
+	public int updateById(T info, HttpServletRequest request) {
+		String workspaceId = this.getCheckUserWorkspace(request);
+		return super.updateById(info, entity -> entity.set("workspaceId", workspaceId));
 	}
 }

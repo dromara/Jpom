@@ -50,12 +50,12 @@ import io.jpom.service.system.SystemParametersServer;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.client.NodeClient;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +82,9 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 		super(null);
 	}
 
-	private void init(Map<String, Object> attributes) {
+	@Override
+	protected void init(WebSocketSession session, Map<String, Object> attributes) throws URISyntaxException, IOException {
+		super.init(session, attributes);
 		systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
 		nodeService = SpringUtil.getBean(NodeService.class);
 	}
@@ -136,9 +138,8 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	}
 
 	@Override
-	protected void handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
+	protected String handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
 		WebSocketMessageModel model = WebSocketMessageModel.getInstance(json.toString());
-		this.init(attributes);
 		String ids = null;
 		String command = model.getCommand();
 		switch (command) {
@@ -158,13 +159,13 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 			}
 			break;
 		}
-
-		if (model.getData() != null) {
-			this.sendMsg(model, session);
-		}
 		if (StrUtil.isNotEmpty(ids)) {
 			pullNodeList(session, ids);
 		}
+		if (model.getData() != null) {
+			return model.toString();
+		}
+		return null;
 	}
 
 	private void onError(WebSocketSession session, String msg) {
@@ -306,13 +307,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	}
 
 	private void sendMsg(WebSocketMessageModel model, WebSocketSession session) {
-		try {
-			synchronized (session.getId()) {
-				session.sendMessage(new TextMessage(model.toString()));
-			}
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("发送消息失败", e);
-		}
+		super.sendMsg(session, model.toString());
 	}
 
 	/**

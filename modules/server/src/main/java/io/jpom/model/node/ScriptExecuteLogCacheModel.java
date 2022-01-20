@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.model.data;
+package io.jpom.model.node;
 
 import io.jpom.model.BaseNodeModel;
 import io.jpom.service.h2db.TableName;
@@ -29,7 +29,7 @@ import io.jpom.service.h2db.TableName;
  * @author bwcx_jzy
  * @since 2021/12/12
  */
-@TableName(value = "SCRIPT_EXECUTE_LOG", name = "脚本模版执行记录")
+@TableName(value = "SCRIPT_EXECUTE_LOG", name = "节点脚本模版执行记录")
 public class ScriptExecuteLogCacheModel extends BaseNodeModel {
 
 	/**
