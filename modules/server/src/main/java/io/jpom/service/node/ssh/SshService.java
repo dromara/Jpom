@@ -120,19 +120,17 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 	}
 
 	/**
-	 * 获取 ssh 中的 Java 版本
+	 * 获取 ssh 中的 环境 版本
 	 *
 	 * @param sshModel ssh
-	 * @return true 存在运行中的
+	 * @return 返回
 	 * @throws IOException   IO
 	 * @throws JSchException jsch
 	 */
-	public String getSshJavaVersion(SshModel sshModel) throws IOException, JSchException {
-		// 检查 java 环境
-		String javaVersion = "java -version";
-		List<String> command = this.execCommand(sshModel, javaVersion);
-		String join = CollUtil.join(command, StrUtil.COMMA);
-		return ReUtil.getGroup0("\"(.*?)\"", join);
+	public String checkCommand(SshModel sshModel, String command) throws IOException, JSchException {
+		// 检查  环境
+		List<String> commandResult = this.execCommand(sshModel, "command -v " + command);
+		return CollUtil.join(commandResult, StrUtil.COMMA);
 	}
 
 	/**

@@ -211,7 +211,7 @@ public class SshController extends BaseServerController {
 					data.put("nodeName", nodeModel.getName());
 				}
 				//
-				String javaVersion = sshService.getSshJavaVersion(model);
+				String javaVersion = sshService.checkCommand(model, "java");
 				data.put("javaVersion", javaVersion);
 			} catch (Exception e) {
 				DefaultSystemLog.getLog().error("检查运行状态异常:{}", e.getMessage());
