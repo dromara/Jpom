@@ -41,6 +41,7 @@ import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
@@ -66,6 +67,12 @@ import java.util.Objects;
 @Feature(cls = ClassFeature.SYSTEM_UPGRADE)
 @SystemPermission(superUser = true)
 public class SystemUpdateController extends BaseServerController {
+
+	private final BackupInfoService backupInfoService;
+
+	public SystemUpdateController(BackupInfoService backupInfoService) {
+		this.backupInfoService = backupInfoService;
+	}
 
 	@PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
@@ -133,6 +140,8 @@ public class SystemUpdateController extends BaseServerController {
 		String version = data.get(0);
 		JpomManifest.releaseJar(path, version);
 		//
+		backupInfoService.autoBackup();
+		//
 		JpomApplication.restart();
 		return JsonMessage.getString(200, Const.UPGRADE_MSG);
 	}
@@ -166,7 +175,7 @@ public class SystemUpdateController extends BaseServerController {
 		if (nodeModel != null) {
 			return NodeForward.request(getNode(), getRequest(), NodeUrl.REMOTE_UPGRADE).toString();
 		}
-		RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath());
+		RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath(), objects -> backupInfoService.autoBackup());
 		return JsonMessage.getString(200, Const.UPGRADE_MSG);
 	}
 }

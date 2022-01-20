@@ -120,9 +120,16 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 					return;
 				}
 			}
-			// 执行数据库备份
-			this.backupToSql(null, BackupTypeEnum.AUTO);
+			this.autoBackup();
 		}
+	}
+
+	/**
+	 * 自动备份
+	 */
+	public void autoBackup() {
+		// 执行数据库备份
+		this.backupToSql(null, BackupTypeEnum.AUTO);
 	}
 
 	/**
