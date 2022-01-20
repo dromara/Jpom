@@ -40,6 +40,7 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * 远程的版本信息
@@ -315,6 +316,17 @@ public class RemoteVersion {
 	 * @throws IOException 异常
 	 */
 	public static void upgrade(String savePath) throws IOException {
+		upgrade(savePath, null);
+	}
+
+	/**
+	 * 升级
+	 *
+	 * @param savePath 下载文件保存路径
+	 * @param consumer 执行申请前回调
+	 * @throws IOException 异常
+	 */
+	public static void upgrade(String savePath, Consumer<Tuple> consumer) throws IOException {
 		Type type = JpomManifest.getInstance().getType();
 		// 下载
 		Tuple data = download(savePath, type);
@@ -324,6 +336,9 @@ public class RemoteVersion {
 		String version = data.get(0);
 		JpomManifest.releaseJar(path, version);
 		//
+		if (consumer != null) {
+			consumer.accept(data);
+		}
 		JpomApplication.restart();
 	}
 
