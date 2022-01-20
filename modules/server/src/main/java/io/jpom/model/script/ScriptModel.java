@@ -60,6 +60,18 @@ public class ScriptModel extends BaseWorkspaceModel {
 	private String description;
 
 	private String context;
+	/**
+	 * 节点ID
+	 */
+	private String nodeIds;
+
+	public String getNodeIds() {
+		return nodeIds;
+	}
+
+	public void setNodeIds(String nodeIds) {
+		this.nodeIds = nodeIds;
+	}
 
 	public String getContext() {
 		return context;

@@ -51,7 +51,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button type="primary" @click="handleExec(record)">执行</a-button>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button>
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
@@ -59,6 +59,7 @@
     <!-- 编辑区 -->
     <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
       <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
+        <a-alert v-if="this.temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
         <a-form-model-item label="Script 名称" prop="name">
           <a-input v-model="temp.name" placeholder="名称" />
         </a-form-model-item>
@@ -121,6 +122,7 @@ export default {
         // { title: "Script ID", dataIndex: "id", width: 200, ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, scopedSlots: { customRender: "autoExecCron" } },
         { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
@@ -188,6 +190,12 @@ export default {
     },
     // 提交 Script 数据
     handleEditScriptOk() {
+      if (this.temp.scriptType === "server-sync") {
+        this.$notification.warning({
+          message: "服务端同步的脚本不能在此修改",
+        });
+        return;
+      }
       // 检验表单
       this.$refs["editScriptForm"].validate((valid) => {
         if (!valid) {

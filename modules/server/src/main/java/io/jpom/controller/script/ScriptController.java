@@ -22,18 +22,24 @@
  */
 package io.jpom.controller.script;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.pattern.CronPattern;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.forward.NodeForward;
+import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.PageResultDto;
+import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
+import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.service.script.ScriptServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -41,7 +47,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author bwcx_jzy
@@ -53,9 +62,12 @@ import java.io.File;
 public class ScriptController extends BaseServerController {
 
 	private final ScriptServer scriptServer;
+	private final NodeScriptServer nodeScriptServer;
 
-	public ScriptController(ScriptServer scriptServer) {
+	public ScriptController(ScriptServer scriptServer,
+							NodeScriptServer nodeScriptServer) {
 		this.scriptServer = scriptServer;
+		this.nodeScriptServer = nodeScriptServer;
 	}
 
 	/**
@@ -75,11 +87,12 @@ public class ScriptController extends BaseServerController {
 					   @ValidatorItem String name,
 					   String autoExecCron,
 					   String defArgs,
-					   String description) {
+					   String description, String nodeIds) {
 		ScriptModel scriptModel = new ScriptModel();
 		scriptModel.setId(id);
 		scriptModel.setContext(context);
 		scriptModel.setName(name);
+		scriptModel.setNodeIds(nodeIds);
 		scriptModel.setDescription(description);
 		scriptModel.setDefArgs(defArgs);
 
@@ -98,12 +111,50 @@ public class ScriptController extends BaseServerController {
 			scriptModel.setAutoExecCron(StrUtil.EMPTY);
 		}
 		//
+		String oldNodeIds = null;
 		if (StrUtil.isEmpty(id)) {
 			scriptServer.insert(scriptModel);
-			return JsonMessage.getString(200, "添加成功");
+		} else {
+			HttpServletRequest request = getRequest();
+			ScriptModel byKey = scriptServer.getByKey(id, request);
+			Assert.notNull(byKey, "没有对应的数据");
+			oldNodeIds = byKey.getNodeIds();
+			scriptServer.updateById(scriptModel, request);
 		}
-		scriptServer.updateById(scriptModel, getRequest());
+		this.syncNodeScript(scriptModel, oldNodeIds);
 		return JsonMessage.getString(200, "修改成功");
+	}
+
+	private void syncNodeScript(ScriptModel scriptModel, String oldNode) {
+		List<String> oldNodeIds = StrUtil.split(oldNode, StrUtil.COMMA);
+		List<String> newNodeIds = StrUtil.split(scriptModel.getNodeIds(), StrUtil.COMMA);
+		Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
+		UserModel user = getUser();
+		// 删除
+		for (String s : delNode) {
+			NodeModel byKey = nodeService.getByKey(s, getRequest());
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("id", scriptModel.getId());
+			JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Del, user, jsonObject);
+			Assert.state(request.getCode() == 200, "处理 " + byKey.getName() + " 节点删除脚本失败" + request.getMsg());
+			nodeScriptServer.syncNode(byKey);
+		}
+		// 更新
+		for (String newNodeId : newNodeIds) {
+			NodeModel byKey = nodeService.getByKey(newNodeId, getRequest());
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("id", scriptModel.getId());
+			jsonObject.put("type", "sync");
+			jsonObject.put("context", scriptModel.getContext());
+			jsonObject.put("autoExecCron", scriptModel.getAutoExecCron());
+			jsonObject.put("defArgs", scriptModel.getDefArgs());
+			jsonObject.put("description", scriptModel.getDescription());
+			jsonObject.put("name", scriptModel.getName());
+			jsonObject.put("workspaceId", scriptModel.getWorkspaceId());
+			JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Save, user, jsonObject);
+			Assert.state(request.getCode() == 200, "处理 " + byKey.getName() + " 节点同步脚本失败" + request.getMsg());
+			nodeScriptServer.syncNode(byKey);
+		}
 	}
 
 	@RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

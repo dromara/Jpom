@@ -22,14 +22,120 @@
  */
 package io.jpom.service.script;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.task.Task;
+import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.spring.SpringUtil;
+import io.jpom.common.BaseServerController;
+import io.jpom.cron.CronUtils;
+import io.jpom.cron.ICron;
+import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.socket.ScriptProcessBuilder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author bwcx_jzy
  * @since 2022/1/19
  */
 @Service
-public class ScriptServer extends BaseWorkspaceService<ScriptModel> {
+public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements ICron {
+
+	@Override
+	public int startCron() {
+		String sql = "select * from " + super.getTableName() + " where autoExecCron is not null and autoExecCron <> ''";
+		List<ScriptModel> models = super.queryList(sql);
+		if (models == null) {
+			return 0;
+		}
+		for (ScriptModel item : models) {
+			this.checkCron(item);
+		}
+		return CollUtil.size(models);
+	}
+
+	@Override
+	public void insert(ScriptModel scriptModel) {
+		super.insert(scriptModel);
+		this.checkCron(scriptModel);
+	}
+
+	@Override
+	public int updateById(ScriptModel info) {
+		int i = super.updateById(info);
+		if (i > 0) {
+			this.checkCron(info);
+		}
+		return i;
+	}
+
+	@Override
+	public int update(ScriptModel scriptModel) {
+		int update = super.update(scriptModel);
+		if (update > 0) {
+			this.checkCron(scriptModel);
+		}
+		return update;
+	}
+
+	@Override
+	public int delByKey(String keyValue) {
+		int delByKey = super.delByKey(keyValue);
+		if (delByKey > 0) {
+			String taskId = "server_script:" + keyValue;
+			CronUtils.remove(taskId);
+		}
+		return delByKey;
+	}
+
+	/**
+	 * 检查定时任务 状态
+	 *
+	 * @param scriptModel 构建信息
+	 */
+	private void checkCron(ScriptModel scriptModel) {
+		String id = scriptModel.getId();
+		String taskId = "server_script:" + id;
+		String autoExecCron = scriptModel.getAutoExecCron();
+		if (StrUtil.isEmpty(autoExecCron)) {
+			CronUtils.remove(taskId);
+			return;
+		}
+		DefaultSystemLog.getLog().debug("start script cron {} {} {}", id, scriptModel.getName(), autoExecCron);
+		CronUtils.upsert(taskId, autoExecCron, new CronTask(id));
+	}
+
+
+	private static class CronTask implements Task {
+
+		private final String id;
+
+		public CronTask(String id) {
+			this.id = id;
+		}
+
+		@Override
+		public void execute() {
+			try {
+				ScriptServer nodeScriptServer = SpringUtil.getBean(ScriptServer.class);
+				ScriptModel scriptServerItem = nodeScriptServer.getByKey(id);
+				if (scriptServerItem == null) {
+					return;
+				}
+				// 创建记录
+				ScriptExecuteLogServer execLogServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
+				ScriptExecuteLogModel nodeScriptExecLogModel = execLogServer.create(scriptServerItem, 1);
+				// 执行
+				ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs());
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("触发自动执行命令模版异常", e);
+			} finally {
+				BaseServerController.removeEmpty();
+			}
+		}
+	}
 }

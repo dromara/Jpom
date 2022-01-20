@@ -103,6 +103,7 @@ public class ScriptController extends BaseAgentController {
 		//
 		nodeScriptModel.setContext(HtmlUtil.unescape(nodeScriptModel.getContext()));
 		NodeScriptModel eModel = nodeScriptServer.getItem(nodeScriptModel.getId());
+		boolean needCreate = false;
 		if ("add".equalsIgnoreCase(type)) {
 			Assert.isNull(eModel, "id已经存在啦");
 
@@ -113,6 +114,13 @@ public class ScriptController extends BaseAgentController {
 			}
 			nodeScriptServer.addItem(nodeScriptModel);
 			return JsonMessage.getString(200, "添加成功");
+		} else if ("sync".equalsIgnoreCase(type)) {
+			if (eModel == null) {
+				eModel = new NodeScriptModel();
+				eModel.setId(nodeScriptModel.getId());
+				needCreate = true;
+			}
+			eModel.setScriptType("server-sync");
 		}
 		Assert.notNull(eModel, "对应数据不存在");
 		eModel.setName(nodeScriptModel.getName());
@@ -120,7 +128,11 @@ public class ScriptController extends BaseAgentController {
 		eModel.setDescription(nodeScriptModel.getDescription());
 		eModel.setContext(nodeScriptModel.getContext());
 		eModel.setDefArgs(nodeScriptModel.getDefArgs());
-		nodeScriptServer.updateItem(eModel);
+		if (needCreate) {
+			nodeScriptServer.addItem(eModel);
+		} else {
+			nodeScriptServer.updateItem(eModel);
+		}
 		return JsonMessage.getString(200, "修改成功");
 	}
 

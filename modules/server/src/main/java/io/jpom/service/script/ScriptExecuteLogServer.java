@@ -23,6 +23,7 @@
 package io.jpom.service.script;
 
 import io.jpom.model.script.ScriptExecuteLogModel;
+import io.jpom.model.script.ScriptModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
@@ -32,4 +33,21 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ScriptExecuteLogServer extends BaseWorkspaceService<ScriptExecuteLogModel> {
+
+	/**
+	 * 创建执行记录
+	 *
+	 * @param scriptModel 脚本
+	 * @param type        执行类型
+	 * @return 对象
+	 */
+	public ScriptExecuteLogModel create(ScriptModel scriptModel, int type) {
+		ScriptExecuteLogModel scriptExecuteLogModel = new ScriptExecuteLogModel();
+		scriptExecuteLogModel.setScriptId(scriptModel.getId());
+		scriptExecuteLogModel.setScriptName(scriptModel.getName());
+		scriptExecuteLogModel.setTriggerExecType(type);
+		scriptExecuteLogModel.setWorkspaceId(scriptModel.getWorkspaceId());
+		super.insert(scriptExecuteLogModel);
+		return scriptExecuteLogModel;
+	}
 }
