@@ -216,51 +216,79 @@
     <!-- 快速安装插件端 -->
     <a-modal v-model="fastInstallNode" width="80%" title="快速安装插件端" :footer="null" :maskClosable="false" @cancel="cancelFastInstall">
       <div v-if="fastInstallInfo">
-        <a-space direction="vertical">
-          <a-alert message="温馨提示" type="warning">
-            <template slot="description">
-              <ul>
-                <li>复制下面任意一条命令到还未安装插件端的服务器中去执行,执行前需要放行防火墙端口,安全组规则等网络端口限制</li>
-                <li>插件端运行端口默认使用：2123</li>
-                <li>执行前需要检查命令中的地址在对应的服务器中是否可以访问,如果无法访问将不能自动绑定节点</li>
-                <li>插件端安装并启动成功后将主动上报节点信息,如果上报的 IP+PROP 能正常通讯将添加节点信息</li>
-                <li>如果上报的节点信息包含多个 IP 地址需要用户确认使用具体的 IP 地址信息</li>
-                <li>添加的节点(插件端)将自动绑定到当前工作空间,如果需要在其他工作空间需要提前切换生成命令</li>
-                <li>下面命令将在重启服务端后失效,重启服务端需要重新获取</li>
-              </ul>
-            </template>
-          </a-alert>
-          <a-tabs :default-active-key="0">
-            <a-tab-pane v-for="(item, index) in fastInstallInfo.shUrls" :tab="item.name" :key="index">
-              <div
-                v-clipboard:copy="item.allText"
-                v-clipboard:success="
-                  () => {
-                    tempVue.prototype.$notification.success({
-                      message: '复制成功',
-                    });
-                  }
-                "
-                v-clipboard:error="
-                  () => {
-                    tempVue.prototype.$notification.error({
-                      message: '复制失败',
-                    });
-                  }
-                "
-              >
-                <a-alert type="info" :message="`命令内容(点击可以复制)`">
-                  <template slot="description">
-                    <span>{{ item.allText }} </span>
-                    <a-icon type="copy" />
-                  </template>
-                </a-alert>
-              </div>
-            </a-tab-pane>
-          </a-tabs>
-          <div>
-            <a-divider>执行结果</a-divider>
-
+        <a-collapse v-model="fastInstallActiveKey">
+          <a-collapse-panel key="1" header="温馨提示">
+            <a-alert message="温馨提示" type="warning">
+              <template slot="description">
+                <ul>
+                  <li>复制下面任意一条命令到还未安装插件端的服务器中去执行,执行前需要放行防火墙端口,安全组规则等网络端口限制</li>
+                  <li>插件端运行端口默认使用：2123</li>
+                  <li>执行前需要检查命令中的地址在对应的服务器中是否可以访问,如果无法访问将不能自动绑定节点</li>
+                  <li>插件端安装并启动成功后将主动上报节点信息,如果上报的 IP+PROP 能正常通讯将添加节点信息</li>
+                  <li>如果上报的节点信息包含多个 IP 地址需要用户确认使用具体的 IP 地址信息</li>
+                  <li>添加的节点(插件端)将自动绑定到当前工作空间,如果需要在其他工作空间需要提前切换生成命令</li>
+                  <li>下面命令将在重启服务端后失效,重启服务端需要重新获取</li>
+                </ul>
+              </template>
+            </a-alert>
+          </a-collapse-panel>
+          <a-collapse-panel key="2" header="快速安装">
+            <a-tabs :default-active-key="0">
+              <a-tab-pane v-for="(item, index) in fastInstallInfo.shUrls" :tab="item.name" :key="index">
+                <div
+                  v-clipboard:copy="item.allText"
+                  v-clipboard:success="
+                    () => {
+                      tempVue.prototype.$notification.success({
+                        message: '复制成功',
+                      });
+                    }
+                  "
+                  v-clipboard:error="
+                    () => {
+                      tempVue.prototype.$notification.error({
+                        message: '复制失败',
+                      });
+                    }
+                  "
+                >
+                  <a-alert type="info" :message="`命令内容(点击可以复制)`">
+                    <template slot="description">
+                      <span>{{ item.allText }} </span>
+                      <a-icon type="copy" />
+                    </template>
+                  </a-alert>
+                </div>
+              </a-tab-pane>
+            </a-tabs>
+          </a-collapse-panel>
+          <a-collapse-panel key="3" header="快速绑定">
+            <a-alert
+              v-clipboard:copy="fastInstallInfo.bindCommand"
+              v-clipboard:success="
+                () => {
+                  tempVue.prototype.$notification.success({
+                    message: '复制成功',
+                  });
+                }
+              "
+              v-clipboard:error="
+                () => {
+                  tempVue.prototype.$notification.error({
+                    message: '复制失败',
+                  });
+                }
+              "
+              type="info"
+              :message="`命令内容(点击可以复制、命令路径请修改为您的服务器中的实际路径)`"
+            >
+              <template slot="description">
+                <span>{{ fastInstallInfo.bindCommand }} </span>
+                <a-icon type="copy" />
+              </template>
+            </a-alert>
+          </a-collapse-panel>
+          <a-collapse-panel key="4" header="执行结果">
             <div v-if="!pullFastInstallResultData || !pullFastInstallResultData.length">还没有任何结果</div>
             <a-alert
               :message="`第 ${index + 1} 个结果`"
@@ -289,8 +317,8 @@
                 </a-space>
               </template>
             </a-alert>
-          </div>
-        </a-space>
+          </a-collapse-panel>
+        </a-collapse>
       </div>
       <div v-else>loading....</div>
     </a-modal>
@@ -328,6 +356,7 @@ export default {
       temp: {
         timeOut: 0,
       },
+      fastInstallActiveKey: ["1", "2", "4"],
       fastInstallInfo: null,
       tempVue: null,
       pullFastInstallResultTime: null,
@@ -710,6 +739,7 @@ export default {
             item.allText = `${item.url} ${this.fastInstallInfo.key} ${this.fastInstallInfo.host}`;
             return item;
           });
+          this.fastInstallInfo.bindCommand = `sh /xxxx/Agent.sh restart ${this.fastInstallInfo.key} ${this.fastInstallInfo.host}`;
           // 轮询 结果
           this.pullFastInstallResultTime = setInterval(() => {
             pullFastInstallResult().then((res) => {
