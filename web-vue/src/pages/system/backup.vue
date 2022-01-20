@@ -3,41 +3,62 @@
     <div ref="filter" class="filter">
       <a-space>
         <a-input v-model="listQuery['%name%']" placeholder="请输入备份名称" class="search-input-item" />
+        <a-input v-model="listQuery['%version%']" placeholder="请输入版本" class="search-input-item" />
         <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="search-input-item">
           <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
         </a-select>
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="loadData">搜索</a-button>
+          <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary" @click="handleAdd">创建备份</a-button>
         <a-button type="primary" @click="handleSqlUpload">导入备份</a-button>
       </a-space>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @change="changePage" :pagination="pagination">
+    <a-table :columns="columns" :data-source="list" bordered rowKey="id" @change="changePage" :pagination="pagination">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="backupType" slot-scope="text" placement="topleft" :title="text">
         <span>{{ backupTypeMap[text] }}</span>
       </template>
-      <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="`${renderSizeFormat(text)}`">
+      <a-tooltip slot="baleTimeStamp" slot-scope="text" placement="topLeft" :title="`${parseTime(text)}`"> {{ parseTime(text) }} </a-tooltip>
+      <a-tooltip slot="status" slot-scope="text, reocrd" placement="topLeft" :title="`${backupStatusMap[text]} 点击复制文件路径`">
+        <div
+          v-clipboard:copy="reocrd.filePath"
+          v-clipboard:success="
+            () => {
+              tempVue.prototype.$notification.success({
+                message: '复制成功',
+              });
+            }
+          "
+          v-clipboard:error="
+            () => {
+              tempVue.prototype.$notification.error({
+                message: '复制失败',
+              });
+            }
+          "
+        >
+          {{ backupStatusMap[text] }}
+          <a-icon type="copy" />
+        </div>
+      </a-tooltip>
+      <a-tooltip slot="fileSize" slot-scope="text, reocrd" placement="topLeft" :title="renderSizeFormat(text) + ' ' + reocrd.sha1Sum">
         <a-tag color="#108ee9">{{ renderSizeFormat(text) }}</a-tag>
       </a-tooltip>
-      <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="backupStatusMap[text]">
-        <span>{{ backupStatusMap[text] }}</span>
-      </a-tooltip>
-      <a-tooltip slot="sha1Sum" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip slot="filePath" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
+      <!-- <a-tooltip slot="filePath" slot-scope="text, record" placement="topLeft" :title="text + ' ' + (record.sha1Sum || '')">
+        <span
+         
+          >{{ text }}
+        </span>
+      </a-tooltip> -->
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button type="primary" @click="handleDownload(record)">下载</a-button>
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-          <a-button type="danger" :disabled="record.status !== 1" @click="handleRestore(record)">还原备份</a-button>
+          <a-button type="danger" :disabled="record.status !== 1" @click="handleRestore(record)">还原</a-button>
         </a-space>
       </template>
     </a-table>
@@ -80,6 +101,7 @@
 import { getBackupList, getTableNameList, createBackup, downloadBackupFile, deleteBackup, restoreBackup, uploadBackupFile, backupTypeMap, backupTypeArray, backupStatusMap } from "@/api/backup-info";
 import { parseTime, renderSize } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import Vue from "vue";
 
 export default {
   components: {},
@@ -104,7 +126,22 @@ export default {
       backupType: 0,
       successSize: 0,
       columns: [
-        { title: "备份名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "备份名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        {
+          title: "打包时间",
+          width: 170,
+          dataIndex: "baleTimeStamp",
+          ellipsis: true,
+          sorter: true,
+          scopedSlots: { customRender: "baleTimeStamp" },
+        },
+        {
+          title: "版本",
+          dataIndex: "version",
+          width: 100,
+          // ellipsis: true,
+          scopedSlots: { customRender: "version" },
+        },
         { title: "备份类型", dataIndex: "backupType", width: 100, ellipsis: true, scopedSlots: { customRender: "backupType" } },
         {
           title: "文件大小",
@@ -113,36 +150,30 @@ export default {
           // ellipsis: true,
           scopedSlots: { customRender: "fileSize" },
         },
-        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        {
-          title: "SHA1",
-          dataIndex: "sha1Sum",
-          // width: 80,
-          ellipsis: true,
-          scopedSlots: { customRender: "sha1Sum" },
-        },
-        {
-          title: "文件地址",
-          dataIndex: "filePath",
-          // width: 150,
-          ellipsis: true,
-          scopedSlots: { customRender: "filePath" },
-        },
+        { title: "状态", dataIndex: "status", width: 120, scopedSlots: { customRender: "status" } },
+        // {
+        //   title: "文件地址",
+        //   dataIndex: "filePath",
+        //   // width: 150,
+        //   ellipsis: true,
+        //   scopedSlots: { customRender: "filePath" },
+        // },
         {
           title: "备份时间",
           dataIndex: "createTimeMillis",
+          sorter: true,
           customRender: (text) => {
             if (!text) {
               return "";
             }
             return parseTime(text);
           },
-          width: 180,
+          width: 170,
         },
         {
           title: "操作",
           dataIndex: "operation",
-          width: 280,
+          width: 250,
           scopedSlots: { customRender: "operation" },
           align: "left",
           fixed: "right",
@@ -154,6 +185,7 @@ export default {
         resultDirFile: [{ required: true, message: "Please input build target path", trigger: "blur" }],
         releasePath: [{ required: true, message: "Please input release path", trigger: "blur" }],
       },
+      tempVue: Vue,
     };
   },
   computed: {
@@ -184,6 +216,7 @@ export default {
     renderSizeFormat(value) {
       return renderSize(value);
     },
+    parseTime: parseTime,
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;
@@ -273,11 +306,19 @@ export default {
     },
     // 还原备份
     handleRestore(record) {
+      const html =
+        "真的要还原备份信息么？<ul style='color:red;'>" +
+        "<li>建议还原和当前版本一致的文件或者临近版本的文件</li>" +
+        "<li>如果版本相差大需要重新初始化数据来保证和当前程序里面字段一致</li>" +
+        "<li>重置初始化在启动时候传人参数 <b> --rest:load_init_db </b> </li>" +
+        " </ul>还原过程中不能操作哦...";
+      const h = this.$createElement;
       this.$confirm({
         title: "系统提示",
-        content: "真的要还原备份信息么？还原过程中不能操作哦...",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okText: "确认",
         cancelText: "取消",
+        width: 600,
         onOk: () => {
           // 还原
           restoreBackup(record.id).then((res) => {
