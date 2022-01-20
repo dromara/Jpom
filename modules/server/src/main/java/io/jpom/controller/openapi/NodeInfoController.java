@@ -89,12 +89,12 @@ public class NodeInfoController extends AbstractController {
 	 */
 	@RequestMapping(value = ServerOpenApi.RECEIVE_PUSH, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	@NotLogin
-	public String receivePush(@ValidatorItem String token,
-							  @ValidatorItem String ips,
-							  @ValidatorItem String loginName,
-							  @ValidatorItem String loginPwd,
-							  @ValidatorItem String workspaceId,
-							  @ValidatorItem(ValidatorRule.NUMBERS) int port) {
+	public String receivePush(@ValidatorItem(msg = "token empty") String token,
+							  @ValidatorItem(msg = "ips empty") String ips,
+							  @ValidatorItem(msg = "loginName empty") String loginName,
+							  @ValidatorItem(msg = "loginPwd empty") String loginPwd,
+							  @ValidatorItem(msg = "workspaceId empty") String workspaceId,
+							  @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "port error") int port) {
 		Assert.state(StrUtil.equals(token, JpomManifest.getInstance().randomIdSign()), "token error");
 		boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
 		Assert.state(exists, "workspaceId error");
