@@ -26,14 +26,13 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.RunMode;
-import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.ProxySession;
-import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Map;
 
@@ -53,11 +52,6 @@ public class ConsoleHandler extends BaseProxyHandler {
 	@Override
 	protected Object[] getParameters(Map<String, Object> attributes) {
 		return new Object[]{"projectId", attributes.get("projectId"), "copyId", attributes.get("copyId")};
-	}
-
-	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-
 	}
 
 	@Override

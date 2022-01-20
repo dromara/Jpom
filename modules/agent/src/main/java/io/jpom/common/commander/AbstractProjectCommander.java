@@ -637,6 +637,9 @@ public abstract class AbstractProjectCommander {
 		//String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
 		String result = this.status(nodeProjectInfoModel, javaCopyItem);
 		int parsePid = ProjectCommanderUtil.parsePid(result);
+		if (parsePid > 0) {
+			PID_JPOM_NAME.put(parsePid, nodeProjectInfoModel.getName());
+		}
 		return parsePid > 0;
 	}
 

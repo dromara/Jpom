@@ -67,7 +67,7 @@
         :rowKey="(record, index) => record.nodeId + record.projectId + index"
       >
         <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
+          <span>{{ nodeNameMap[text] || text }}</span>
         </a-tooltip>
         <a-tooltip slot="projectName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
@@ -589,6 +589,7 @@ export default {
   watch: {},
   created() {
     this.loadData();
+    this.loadNodeList();
   },
   methods: {
     // 页面引导

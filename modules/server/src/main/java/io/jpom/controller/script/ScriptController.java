@@ -125,12 +125,7 @@ public class ScriptController extends BaseServerController {
 		return JsonMessage.getString(200, "修改成功");
 	}
 
-	private void syncNodeScript(ScriptModel scriptModel, String oldNode) {
-		List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
-		List<String> newNodeIds = StrUtil.splitTrim(scriptModel.getNodeIds(), StrUtil.COMMA);
-		Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
-		UserModel user = getUser();
-		// 删除
+	private void syncDelNodeScript(ScriptModel scriptModel, UserModel user, Collection<String> delNode) {
 		for (String s : delNode) {
 			NodeModel byKey = nodeService.getByKey(s, getRequest());
 			JSONObject jsonObject = new JSONObject();
@@ -139,6 +134,15 @@ public class ScriptController extends BaseServerController {
 			Assert.state(request.getCode() == 200, "处理 " + byKey.getName() + " 节点删除脚本失败" + request.getMsg());
 			nodeScriptServer.syncNode(byKey);
 		}
+	}
+
+	private void syncNodeScript(ScriptModel scriptModel, String oldNode) {
+		List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
+		List<String> newNodeIds = StrUtil.splitTrim(scriptModel.getNodeIds(), StrUtil.COMMA);
+		Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
+		UserModel user = getUser();
+		// 删除
+		this.syncDelNodeScript(scriptModel, user, delNode);
 		// 更新
 		for (String newNodeId : newNodeIds) {
 			NodeModel byKey = nodeService.getByKey(newNodeId, getRequest());
@@ -164,6 +168,10 @@ public class ScriptController extends BaseServerController {
 			File file = server.scriptPath();
 			boolean del = FileUtil.del(file);
 			Assert.state(del, "清理脚本文件失败");
+			// 删除节点中的脚本
+			String nodeIds = server.getNodeIds();
+			List<String> delNode = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
+			this.syncDelNodeScript(server, getUser(), delNode);
 			scriptServer.delByKey(id);
 		}
 		return JsonMessage.getString(200, "删除成功");
