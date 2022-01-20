@@ -58,7 +58,7 @@ public abstract class BaseGroupService<T extends BaseGroupModel> extends BaseWor
 	}
 
 	/**
-	 * 修护字段
+	 * 恢复字段
 	 */
 	public void repairGroupFiled() {
 		String sql = "update " + getTableName() + " set `GROUP`=? where `GROUP` is null or `GROUP`=''";

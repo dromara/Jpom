@@ -53,9 +53,9 @@
 
 ## changelog 更新规范
 
-> 在新加功能、修护bug、优化功能在完成时候都需要在 [CHANGELOG.md](./CHANGELOG.md) 记录
+> 在新加功能、恢复bug、优化功能在完成时候都需要在 [CHANGELOG.md](./CHANGELOG.md) 记录
 
-1. 如果是使用者反馈的bug，在修护后需要备注反馈人的昵称
+1. 如果是使用者反馈的bug，在恢复后需要备注反馈人的昵称
 2. 如果是 issue 需要备注 issue 地址以及平台（Gitee、GitHub）
 3. 如果是 pr 需要备注 pr 地址以及平台（Gitee、GitHub）
 4. 根据变动情况确定影响范围：如果影响 只：`agent`、`server` 其中一个，就使用【agent】、【server】开头，如果都影响就不用
