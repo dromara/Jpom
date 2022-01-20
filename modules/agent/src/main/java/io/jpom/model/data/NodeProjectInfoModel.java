@@ -244,7 +244,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 	public String getWhitelistDirectory() {
 		this.repairWhitelist();
 		if (StrUtil.isEmpty(whitelistDirectory)) {
-			throw new JpomRuntimeException("修护白名单数据异常");
+			throw new JpomRuntimeException("恢复白名单数据异常");
 		}
 		return whitelistDirectory;
 	}

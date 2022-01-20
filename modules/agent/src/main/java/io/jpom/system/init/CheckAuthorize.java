@@ -55,7 +55,7 @@ public class CheckAuthorize {
 	}
 
 	/**
-	 * 修护脚本模板路径
+	 * 恢复脚本模板路径
 	 */
 	@PreLoadMethod
 	private static void repairScriptPath() {
