@@ -24,3 +24,9 @@ ALTER TABLE REPOSITORY
 
 ALTER TABLE BUILD_INFO
 	ADD IF NOT EXISTS autoBuildCron VARCHAR(100) comment '自动构建表达式';
+
+--
+ALTER TABLE BACKUP_INFO
+	ADD IF NOT EXISTS baleTimeStamp BIGINT comment '打包时间';
+ALTER TABLE BACKUP_INFO
+	ADD IF NOT EXISTS version varchar(255) comment '服务版本';

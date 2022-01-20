@@ -24,18 +24,16 @@ package io.jpom.service.dblog;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.date.*;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.common.Const;
+import io.jpom.common.JpomManifest;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.enums.BackupStatusEnum;
 import io.jpom.model.enums.BackupTypeEnum;
@@ -165,14 +163,20 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 		final String user = serverExtConfigBean.getDbUserName();
 		final String pass = serverExtConfigBean.getDbUserPwd();
 
+		JpomManifest instance = JpomManifest.getInstance();
 		// 先构造备份信息插入数据库
 		BackupInfoModel backupInfoModel = new BackupInfoModel();
-		backupInfoModel.setId(IdUtil.fastSimpleUUID());
+		String timeStamp = instance.getTimeStamp();
+		try {
+			DateTime parse = DateUtil.parse(timeStamp);
+			backupInfoModel.setBaleTimeStamp(parse.getTime());
+		} catch (Exception ignored) {
+		}
 		backupInfoModel.setName(fileName);
-
+		backupInfoModel.setVersion(instance.getVersion());
 		backupInfoModel.setBackupType(backupType.getCode());
 		backupInfoModel.setFilePath(backupSqlPath);
-		insert(backupInfoModel);
+		this.insert(backupInfoModel);
 
 		// 开启一个子线程去执行任务，任务完成之后修改对应的数据库备份信息
 		ThreadUtil.execute(() -> {
@@ -194,13 +198,13 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 				backupInfo.setFileSize(FileUtil.size(file));
 				backupInfo.setSha1Sum(SecureUtil.sha1(file));
 				backupInfo.setStatus(BackupStatusEnum.SUCCESS.getCode());
-				update(backupInfo);
+				this.update(backupInfo);
 				DefaultSystemLog.getLog().debug("start a new Thread to execute H2 Database backup...success");
 			} catch (Exception e) {
 				// 记录错误日志信息，修改备份任务执行失败
 				DefaultSystemLog.getLog().error("start a new Thread to execute H2 Database backup...catch exception...", e);
 				backupInfo.setStatus(BackupStatusEnum.FAILED.getCode());
-				update(backupInfo);
+				this.update(backupInfo);
 			}
 		});
 	}

@@ -59,6 +59,32 @@ public class BackupInfoModel extends BaseDbModel {
 	 */
 	private Integer status;
 
+	/**
+	 * 服务端版本
+	 */
+	private String version;
+
+	/**
+	 * 打包时间
+	 */
+	private Long baleTimeStamp;
+
+	public Long getBaleTimeStamp() {
+		return baleTimeStamp;
+	}
+
+	public void setBaleTimeStamp(Long baleTimeStamp) {
+		this.baleTimeStamp = baleTimeStamp;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
 	public String getName() {
 		return name;
 	}
