@@ -232,7 +232,7 @@ export default {
               this.project = { ...this.project, status: false };
               // }
             }
-            return;
+            // return;
           }
         }
         this.logContextArray.push(msg.data);
