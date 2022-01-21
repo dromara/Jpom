@@ -1,24 +1,33 @@
 <template>
   <div>
     <div ref="filter" class="filter">
-      <template v-if="copyId">
+      <!-- <template v-if="copyId">
         <a-space>
           <a-button :disabled="replicaStatus" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
           <a-button :disabled="!replicaStatus" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
           <a-button :disabled="!replicaStatus" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
           <a-button type="primary" @click="handleDownload">导出日志</a-button>
           <a-tag color="#87d068">文件大小: {{ project.logSize }}</a-tag>
+          <a-switch checked-children="自动滚动" un-checked-children="关闭滚动" v-model="logScroll" />
         </a-space>
-      </template>
-      <template v-else>
+      </template> -->
+      <template>
         <a-space>
           <a-button :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
           <a-button :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
           <a-button :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
 
-          <a-button type="primary" @click="goFile">文件管理</a-button>
+          <a-button v-if="!copyId" type="primary" @click="goFile">文件管理</a-button>
           |
           <a-tag> 文件大小: {{ project.logSize }}</a-tag>
+          <!-- <a-switch checked-children="自动滚动" un-checked-children="关闭滚动" v-model="logScroll" /> -->
+          <a-input-group compact style="width: 200px">
+            <a-select v-model="logScroll">
+              <a-select-option value="true"> 自动滚动 </a-select-option>
+              <a-select-option value="false"> 关闭滚动 </a-select-option>
+            </a-select>
+            <a-input style="width: 50%" v-model="logShowLine" placeholder="显示行数" />
+          </a-input-group>
           <a-dropdown>
             <a class="ant-dropdown-link"> 更多<a-icon type="down" /> </a>
             <a-menu slot="overlay">
@@ -34,15 +43,19 @@
       </template>
     </div>
     <!-- console -->
-    <div>
-      <a-input class="console" id="project-console" v-model="logContext" readOnly type="textarea" style="resize: none" />
-    </div>
+    <pre class="console" id="project-console">
+      <!-- <a-input v-model="logContext" readOnly type="textarea" style="resize: none" /> -->
+      loading context...
+    </pre>
     <!-- 日志备份 -->
     <a-modal v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
       <div ref="model-filter" class="filter">
-        <a-tag>控制台日志只是启动项目输出的日志信息,并非项目日志。可以关闭控制台日志备份功能：<b>log.autoBackConsoleCron: none</b></a-tag>
-        <a-tag color="orange">控制台日志路径: {{ project.log }}</a-tag>
-        <a-tag color="orange">控制台日志备份路径: {{ project.logBack }}</a-tag>
+        <a-space direction="vertical">
+          <a-tag>控制台日志只是启动项目输出的日志信息,并非项目日志。可以关闭控制台日志备份功能：<b>log.autoBackConsoleCron: none</b></a-tag>
+
+          <a-tag color="orange">控制台日志路径: {{ project.log }}</a-tag>
+          <a-tag color="orange">控制台日志备份路径: {{ project.logBack }}</a-tag>
+        </a-space>
       </div>
       <!-- 数据表格 -->
       <a-table :data-source="logBackList" :loading="loading" :columns="columns" :scroll="{ y: 400 }" :pagination="false" bordered :rowKey="(record, index) => index">
@@ -77,22 +90,22 @@ export default {
     id: {
       type: String,
     },
-    replica: {
-      type: Object,
-    },
     copyId: {
       type: String,
     },
   },
   data() {
     return {
-      replicaStatus: this.replace?.status,
       project: {},
-      optButtonLoading: false,
+      optButtonLoading: true,
       loading: false,
       socket: null,
+      // logContext: "",
       // 日志内容
-      logContext: "choose file loading context...",
+      logContextArray: [],
+      logScroll: "true",
+      logShowLine: 500,
+      defLogShowLine: 500,
       lobbackVisible: false,
       logBackList: [],
       columns: [
@@ -133,6 +146,22 @@ export default {
       getProjectData(params).then((res) => {
         if (res.code === 200) {
           this.project = res.data;
+          if (this.copyId) {
+            if (this.project.javaCopyItemList) {
+              const finds = this.project.javaCopyItemList.filter((item) => item.id === this.copyId);
+              if (finds.length) {
+                this.project = { ...this.project, log: finds[0].log, logBack: finds[0].logBack };
+              } else {
+                this.$notification.error({
+                  message: "没有找到副本",
+                });
+              }
+            } else {
+              this.$notification.error({
+                message: "没有副本",
+              });
+            }
+          }
           // 加载日志文件大小
           this.loadFileSize();
         }
@@ -140,7 +169,7 @@ export default {
     },
     // 初始化
     initWebSocket() {
-      this.logContext = "";
+      //this.logContext = "";
       if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
         this.socket = new WebSocket(this.socketUrl);
       }
@@ -156,60 +185,75 @@ export default {
         });
       };
       this.socket.onmessage = (msg) => {
-        if (msg.data.indexOf("code") > -1 && msg.data.indexOf("msg") > -1) {
+        if (msg.data.indexOf("JPOM_MSG") > -1 && msg.data.indexOf("op") > -1) {
+          // console.log(msg.data);
           const res = JSON.parse(msg.data);
-          if (res.op === "stop" || res.op === "start" || res.op === "restart") {
+          if (res.op === "stop" || res.op === "start" || res.op === "restart" || res.op === "status") {
             this.optButtonLoading = false;
-          }
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg,
-              duration: 3,
-            });
-            // 如果操作是启动或者停止
-            if (res.op === "stop") {
-              if (this.copyId) {
-                this.replicaStatus = false;
-              } else {
-                this.project.status = false;
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              // 如果操作是启动或者停止
+              if (res.op === "stop") {
+                // if (this.copyId) {
+                //   this.replicaStatus = false;
+                // } else {
+                // this.project.status = false;
+                this.project = { ...this.project, status: false };
+                // }
               }
-            }
-            if (res.op === "start") {
-              if (this.copyId) {
-                this.replicaStatus = true;
-              } else {
-                this.project.status = true;
+              if (res.op === "start") {
+                // if (this.copyId) {
+                //   this.replicaStatus = true;
+                // } else {
+                // this.project.status = true;
+                this.project = { ...this.project, status: true };
+                // }
               }
-            }
-            // 如果是 status
-            if (res.op === "status") {
-              if (this.copyId) {
-                this.replicaStatus = true;
-              } else {
-                this.project.status = true;
+              // 如果是 status
+              if (res.op === "status") {
+                // if (this.copyId) {
+                //   this.replicaStatus = true;
+                // } else {
+                // this.project.status = true;
+                this.project = { ...this.project, status: true };
+                // }
               }
-            }
-          } else {
-            this.$notification.error({
-              message: res.msg,
-            });
-            // 设置未启动
-            if (this.copyId) {
-              this.replicaStatus = false;
             } else {
-              this.project.status = false;
+              this.$notification.error({
+                message: res.msg,
+              });
+              // 设置未启动
+              // if (this.copyId) {
+              //   this.replicaStatus = false;
+              // } else {
+              // this.project.status = false;
+              this.project = { ...this.project, status: false };
+              // }
             }
+            return;
           }
         }
-        this.logContext += `${msg.data}\r\n`;
+        this.logContextArray.push(msg.data);
+        let logShowLineTemp = parseInt(this.logShowLine);
+        logShowLineTemp = isNaN(logShowLineTemp) ? this.defLogShowLine : logShowLineTemp;
+        logShowLineTemp = logShowLineTemp > 0 ? logShowLineTemp : 1;
+        if (this.logScroll === "true") {
+          this.logContextArray = this.logContextArray.slice(-logShowLineTemp);
+        }
 
         // 自动滚动到底部
         this.$nextTick(() => {
-          setTimeout(() => {
-            const projectConsole = document.getElementById("project-console");
-            projectConsole.scrollTop = projectConsole.scrollHeight;
-          }, 100);
+          const projectConsole = document.getElementById("project-console");
+          projectConsole.innerHTML = this.logContextArray.join("</br>");
+          if (this.logScroll === "true") {
+            setTimeout(() => {
+              projectConsole.scrollTop = projectConsole.scrollHeight;
+            }, 100);
+          }
         });
+
         clearInterval(this.heart);
         // 创建心跳，防止掉线
         this.heart = setInterval(() => {
@@ -239,7 +283,7 @@ export default {
       };
       getProjectLogSize(params).then((res) => {
         if (res.code === 200) {
-          this.project.logSize = res.data.logSize;
+          this.project = { ...this.project, logSize: res.data.logSize };
         }
       });
     },
@@ -289,9 +333,9 @@ export default {
         link.style.display = "none";
         link.href = url;
         if (this.copyId) {
-          link.setAttribute("download", `${this.copyId}.log`);
+          link.setAttribute("download", `${this.projectId}-${this.copyId}.log`);
         } else {
-          link.setAttribute("download", this.project.log);
+          link.setAttribute("download", `${this.projectId}.log`);
         }
         document.body.appendChild(link);
         link.click();
@@ -306,6 +350,7 @@ export default {
       const params = {
         nodeId: this.nodeId,
         id: this.projectId,
+        copyId: this.copyId,
       };
       getLogBackList(params).then((res) => {
         if (res.code === 200) {

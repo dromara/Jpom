@@ -138,7 +138,6 @@ export default {
     exportStack() {
       this.$notification.info({
         message: "正在下载，请稍等...",
-        duration: 3,
       });
       // 请求参数
       const params = {
@@ -162,7 +161,6 @@ export default {
     exportMem() {
       this.$notification.info({
         message: "正在下载，请稍等...",
-        duration: 3,
       });
       // 请求参数
       const params = {
