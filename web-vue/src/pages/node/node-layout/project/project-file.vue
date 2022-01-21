@@ -27,8 +27,15 @@
         </a-space>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
-        <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
+        <a-tooltip slot="filename" slot-scope="text, record" placement="topLeft" :title="text">
+          <a-dropdown :trigger="['contextmenu']">
+            <span>{{ text }}</span>
+            <a-menu slot="overlay">
+              <a-menu-item key="1">
+                <a-button icon="bars" @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link"> 阅读文件 </a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-tooltip>
         <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text ? "目录" : "文件" }}</span>
@@ -592,6 +599,10 @@ export default {
     },
     goConsole() {
       this.$emit("goConsole");
+    },
+    goReadFile(record) {
+      // const filePath = this.uploadPath + record.filename;
+      this.$emit("goReadFile", this.uploadPath, record.filename);
     },
   },
 };

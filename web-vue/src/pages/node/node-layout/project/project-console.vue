@@ -28,6 +28,8 @@
             </a-select>
             <a-input style="width: 50%" v-model="logShowLine" placeholder="显示行数" />
           </a-input-group>
+          <a-icon type="delete" @click="clearLogCache" />
+          <div></div>
           <a-dropdown>
             <a class="ant-dropdown-link"> 更多<a-icon type="down" /> </a>
             <a-menu slot="overlay">
@@ -273,6 +275,13 @@ export default {
       if (op === "stop" || op === "start" || op === "restart") {
         this.optButtonLoading = true;
       }
+    },
+    clearLogCache() {
+      this.logContextArray = [];
+      this.$nextTick(() => {
+        const projectConsole = document.getElementById("project-console");
+        projectConsole.innerHTML = "loading context...";
+      });
     },
     // 加载日志文件大小
     loadFileSize() {
