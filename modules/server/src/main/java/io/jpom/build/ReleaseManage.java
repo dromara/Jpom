@@ -251,24 +251,30 @@ public class ReleaseManage extends BaseBuild {
 		}
 		Session session = SshService.getSessionByModel(item);
 		try {
-			try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
-				if (this.buildExtraModule.isClearOld() && StrUtil.isNotEmpty(this.buildExtraModule.getReleasePath())) {
-					try {
-						sftp.delDir(this.buildExtraModule.getReleasePath());
-					} catch (Exception e) {
-						if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
-							this.pubLog("清除构建产物失败", e);
+			String releasePath = this.buildExtraModule.getReleasePath();
+			if (StrUtil.isEmpty(releasePath)) {
+				this.log("发布目录为空");
+			} else {
+				try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
+					String prefix = "";
+					if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
+						prefix = sftp.pwd();
+					}
+					String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
+					if (this.buildExtraModule.isClearOld()) {
+						try {
+							sftp.delDir(normalizePath);
+						} catch (Exception e) {
+							if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
+								this.pubLog("清除构建产物失败", e);
+							}
 						}
 					}
+					sftp.syncUpload(this.resultFile, normalizePath);
+					this.log("ssh ftp upload done");
+				} catch (Exception e) {
+					this.pubLog("执行ssh发布异常", e);
 				}
-				String prefix = "";
-				if (!StrUtil.startWith(this.buildExtraModule.getReleasePath(), StrUtil.SLASH)) {
-					prefix = sftp.pwd();
-				}
-				String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + this.buildExtraModule.getReleasePath());
-				sftp.syncUpload(this.resultFile, normalizePath);
-			} catch (Exception e) {
-				this.pubLog("执行ssh发布异常", e);
 			}
 		} finally {
 			JschUtil.close(session);
