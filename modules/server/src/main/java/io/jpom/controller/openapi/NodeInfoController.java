@@ -166,7 +166,7 @@ public class NodeInfoController extends AbstractController {
 	}
 
 	private boolean testIpProt(String ip) {
-		return NetUtil.ping(ip, 5);
+		return NetUtil.ping(ip, 5 * 1000);
 	}
 
 	private NodeModel createModel(String ip, String loginName, String loginPwd, int port, String workspaceId) {

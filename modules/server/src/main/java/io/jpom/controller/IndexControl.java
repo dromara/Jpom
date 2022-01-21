@@ -151,10 +151,11 @@ public class IndexControl extends BaseServerController {
 		data.put("name", instance.getName());
 		data.put("subTitle", instance.getSubTitle());
 		data.put("loginTitle", instance.getLoginTitle());
+		data.put("disabledGuide", instance.getDisabledGuide());
 		if (userService.canUse()) {
 			return JsonMessage.getString(200, "success", data);
 		}
-		return JsonMessage.getString(500, "需要初始化系统", data);
+		return JsonMessage.getString(222, "需要初始化系统", data);
 	}
 
 	@RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -54,7 +54,7 @@ export default {
   watch: {},
   mounted() {
     this.checkSystem();
-    this.introGuide();
+
     this.collapsed = this.getCollapsed ? true : false;
   },
   methods: {
@@ -126,15 +126,20 @@ export default {
             this.subTitle = res.data.subTitle;
           }
           this.logoUrl = ((res.data.routerBase || "") + "/logo_image").replace(new RegExp("//", "gm"), "/");
-        }
 
-        if (res.code === 999) {
-          //
-          this.$router.push("/system/ipAccess");
-        } else if (res.code !== 200) {
+          // 禁用导航
+          this.$store.dispatch("disabledGuide", res.data.disabledGuide);
+        }
+        if (res.code !== 200) {
           this.$notification.warn({
             message: res.msg,
           });
+        } else {
+          this.introGuide();
+        }
+        if (res.code === 999) {
+          this.$router.push("/system/ipAccess");
+        } else if (res.code === 222) {
           this.$router.push("/install");
         }
       });

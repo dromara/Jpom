@@ -62,12 +62,14 @@ export default {
     // 检查是否需要初始化
     checkSystem() {
       checkSystem().then((res) => {
-        if (res.code === 999) {
-          this.$router.push("/system/ipAccess");
-        } else if (res.code !== 200) {
+        if (res.code !== 200) {
           this.$notification.warn({
             message: res.msg,
           });
+        }
+        if (res.code === 999) {
+          this.$router.push("/system/ipAccess");
+        } else if (res.code === 222) {
           this.$router.push("/install");
         }
         if (res.data?.loginTitle) {
