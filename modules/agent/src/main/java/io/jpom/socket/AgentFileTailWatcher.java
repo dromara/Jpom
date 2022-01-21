@@ -40,107 +40,108 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2019/3/16
  */
 public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
-    private static final ConcurrentHashMap<File, AgentFileTailWatcher<Session>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<File, AgentFileTailWatcher<Session>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
 
-    private AgentFileTailWatcher(File logFile) throws IOException {
-        super(logFile);
-    }
+	private AgentFileTailWatcher(File logFile) throws IOException {
+		super(logFile);
+	}
 
-    public static int getOneLineCount() {
-        return CONCURRENT_HASH_MAP.size();
-    }
+	public static int getOneLineCount() {
+		return CONCURRENT_HASH_MAP.size();
+	}
 
-    /**
-     * 添加文件监听
-     *
-     * @param file    文件
-     * @param session 会话
-     * @throws IOException 异常
-     */
-    public static void addWatcher(File file, Session session) throws IOException {
-        if (!file.exists() || file.isDirectory()) {
-            DefaultSystemLog.getLog().warn("文件不存在或者是目录:" + file.getPath());
-            return;
-        }
-        AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
-            try {
-                return new AgentFileTailWatcher<>(file);
-            } catch (Exception e) {
-                DefaultSystemLog.getLog().error("创建文件监听失败", e);
-                return null;
-            }
-        });
-        if (agentFileTailWatcher == null) {
-            throw new IOException("加载文件失败:" + file.getPath());
-        }
-        agentFileTailWatcher.add(session, FileUtil.getName(file));
-        agentFileTailWatcher.tailWatcherRun.start();
-    }
+	/**
+	 * 添加文件监听
+	 *
+	 * @param file    文件
+	 * @param session 会话
+	 * @throws IOException 异常
+	 */
+	public static boolean addWatcher(File file, Session session) throws IOException {
+		if (!FileUtil.isFile(file)) {
+			DefaultSystemLog.getLog().warn("文件不存在或者是目录:" + file.getPath());
+			return false;
+		}
+		AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
+			try {
+				return new AgentFileTailWatcher<>(file);
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("创建文件监听失败", e);
+				return null;
+			}
+		});
+		if (agentFileTailWatcher == null) {
+			throw new IOException("加载文件失败:" + file.getPath());
+		}
+		agentFileTailWatcher.add(session, FileUtil.getName(file));
+		agentFileTailWatcher.tailWatcherRun.start();
+		return true;
+	}
 
-    /**
-     * 有客户端离线
-     *
-     * @param session 会话
-     */
-    public static void offline(Session session) {
-        Collection<AgentFileTailWatcher<Session>> collection = CONCURRENT_HASH_MAP.values();
-        for (AgentFileTailWatcher<Session> agentFileTailWatcher : collection) {
-            agentFileTailWatcher.socketSessions.removeIf(session::equals);
-            if (agentFileTailWatcher.socketSessions.isEmpty()) {
-                agentFileTailWatcher.close();
-            }
-        }
-    }
+	/**
+	 * 有客户端离线
+	 *
+	 * @param session 会话
+	 */
+	public static void offline(Session session) {
+		Collection<AgentFileTailWatcher<Session>> collection = CONCURRENT_HASH_MAP.values();
+		for (AgentFileTailWatcher<Session> agentFileTailWatcher : collection) {
+			agentFileTailWatcher.socketSessions.removeIf(session::equals);
+			if (agentFileTailWatcher.socketSessions.isEmpty()) {
+				agentFileTailWatcher.close();
+			}
+		}
+	}
 
-    /**
-     * 关闭文件读取流
-     *
-     * @param fileName 文件名
-     */
-    public static void offlineFile(File fileName) {
-        AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
-        if (null == agentFileTailWatcher) {
-            return;
-        }
-        Set<Session> socketSessions = agentFileTailWatcher.socketSessions;
-        for (Session socketSession : socketSessions) {
-            offline(socketSession);
-        }
-        agentFileTailWatcher.close();
-    }
+	/**
+	 * 关闭文件读取流
+	 *
+	 * @param fileName 文件名
+	 */
+	public static void offlineFile(File fileName) {
+		AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
+		if (null == agentFileTailWatcher) {
+			return;
+		}
+		Set<Session> socketSessions = agentFileTailWatcher.socketSessions;
+		for (Session socketSession : socketSessions) {
+			offline(socketSession);
+		}
+		agentFileTailWatcher.close();
+	}
 
-    /**
-     * 关闭文件读取流
-     *
-     * @param fileName 文件名
-     */
-    static void offlineFile(File fileName, Session session) {
-        AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
-        if (null == agentFileTailWatcher) {
-            return;
-        }
-        Set<Session> socketSessions = agentFileTailWatcher.socketSessions;
-        for (Session socketSession : socketSessions) {
-            if (socketSession.equals(session)) {
-                offline(socketSession);
-                break;
-            }
-        }
-        if (agentFileTailWatcher.socketSessions.isEmpty()) {
-            agentFileTailWatcher.close();
-        }
+	/**
+	 * 关闭文件读取流
+	 *
+	 * @param fileName 文件名
+	 */
+	static void offlineFile(File fileName, Session session) {
+		AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
+		if (null == agentFileTailWatcher) {
+			return;
+		}
+		Set<Session> socketSessions = agentFileTailWatcher.socketSessions;
+		for (Session socketSession : socketSessions) {
+			if (socketSession.equals(session)) {
+				offline(socketSession);
+				break;
+			}
+		}
+		if (agentFileTailWatcher.socketSessions.isEmpty()) {
+			agentFileTailWatcher.close();
+		}
 
-    }
+	}
 
 
-    /**
-     * 关闭
-     */
-    @Override
-    protected void close() {
-        super.close();
-        // 清理线程记录
-        CONCURRENT_HASH_MAP.remove(this.logFile);
-    }
+	/**
+	 * 关闭
+	 */
+	@Override
+	protected void close() {
+		super.close();
+		// 清理线程记录
+		CONCURRENT_HASH_MAP.remove(this.logFile);
+	}
 }

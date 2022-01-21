@@ -23,6 +23,7 @@
 package io.jpom.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -180,9 +181,18 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 				case showlog: {
 					// 进入管理页面后需要实时加载日志
 					//        日志文件路径
-					File file = copyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(copyItem);
+					String fileName = reqJson.getString("fileName");
+					File file;
+					if (StrUtil.isEmpty(fileName)) {
+						file = copyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(copyItem);
+					} else {
+						file = FileUtil.file(nodeProjectInfoModel.allLib(), fileName);
+					}
 					try {
-						AgentFileTailWatcher.addWatcher(file, session);
+						boolean watcher = AgentFileTailWatcher.addWatcher(file, session);
+						if (!watcher) {
+							SocketSessionUtil.send(session, "监听文件失败,可能文件不存在");
+						}
 					} catch (IOException io) {
 						DefaultSystemLog.getLog().error("监听日志变化", io);
 						SocketSessionUtil.send(session, io.getMessage());
@@ -220,6 +230,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 	@OnClose
 	public void onClose(Session session) {
 		super.onClose(session);
+		AgentFileTailWatcher.offline(session);
 	}
 
 	@OnError
