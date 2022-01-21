@@ -33,6 +33,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
@@ -40,7 +41,10 @@ import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SystemIpConfigModel;
+import io.jpom.model.data.UserModel;
+import io.jpom.model.node.NodeAgentWhitelist;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -52,13 +56,16 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * 系统配置
@@ -104,7 +111,7 @@ public class SystemConfigController extends BaseServerController {
 		return JsonMessage.getString(200, "", jsonObject);
 	}
 
-	@RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "save_config.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
 	@SystemPermission(superUser = true)
 	public String saveConfig(String nodeId, String content, String restart) {
@@ -137,7 +144,6 @@ public class SystemConfigController extends BaseServerController {
 		}
 		return JsonMessage.getString(200, "修改成功");
 	}
-
 
 	/**
 	 * 加载服务端的 ip 白名单配置
@@ -174,6 +180,11 @@ public class SystemConfigController extends BaseServerController {
 		return JsonMessage.getString(200, "修改成功");
 	}
 
+	/**
+	 * 检查是否为 ipv4
+	 *
+	 * @param ips ip
+	 */
 	private void checkIpV4(String ips) {
 		if (StrUtil.isEmpty(ips)) {
 			return;
@@ -209,6 +220,93 @@ public class SystemConfigController extends BaseServerController {
 			boolean ipv4 = Validator.isIpv4(itemIp);
 			Assert.state(ipv4, "请填写 ipv4 地址：" + itemIp);
 		}
+	}
 
+	/**
+	 * 加载白名单配置
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "get_whitelist", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(cls = ClassFeature.SYSTEM_NODE_WHITELIST, method = MethodFeature.LIST)
+	public String getWhitelist() {
+		String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
+		NodeAgentWhitelist config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("node_whitelist_{}", workspaceId), NodeAgentWhitelist.class);
+		return JsonMessage.getString(200, "加载成功", config);
+	}
+
+	/**
+	 * 保存白名单配置
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "save_whitelist", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(cls = ClassFeature.SYSTEM_NODE_WHITELIST, method = MethodFeature.EDIT)
+	public String saveWhitelist(@ValidatorItem(msg = "请选择分发的节点") String nodeIds,
+								String project,
+								String certificate,
+								String nginx,
+								String allowEditSuffix,
+								String allowRemoteDownloadHost) {
+		HttpServletRequest httpServletRequest = getRequest();
+		String workspaceId = nodeService.getCheckUserWorkspace(httpServletRequest);
+		NodeAgentWhitelist agentWhitelist = new NodeAgentWhitelist();
+		agentWhitelist.setNodeIds(nodeIds);
+		agentWhitelist.setProject(project);
+		agentWhitelist.setCertificate(certificate);
+		agentWhitelist.setNginx(nginx);
+		agentWhitelist.setAllowEditSuffix(allowEditSuffix);
+		agentWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHost);
+		String format = StrUtil.format("node_whitelist_{}", workspaceId);
+		systemParametersServer.upsert(format, agentWhitelist, format);
+		//
+		List<String> nodeIdsStr = StrUtil.splitTrim(nodeIds, StrUtil.LF);
+		UserModel user = getUser();
+		for (String s : nodeIdsStr) {
+			NodeModel byKey = nodeService.getByKey(s, httpServletRequest);
+			JSONObject jsonObject = (JSONObject) JSONObject.toJSON(agentWhitelist);
+			JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.WhitelistDirectory_Submit, user, jsonObject);
+			Assert.state(request.getCode() == 200, "分发 " + byKey.getName() + " 节点配置失败" + request.getMsg());
+		}
+		return JsonMessage.getString(200, "保存成功");
+	}
+
+	/**
+	 * 加载节点配置
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "get_node_config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String getNodeConfig() {
+		String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
+		JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("node_config_{}", workspaceId), JSONObject.class);
+		return JsonMessage.getString(200, "", config);
+	}
+
+	@PostMapping(value = "save_node_config.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EDIT)
+	@SystemPermission(superUser = true)
+	public String saveNodeConfig(@ValidatorItem(msg = "请选择分发的节点") String nodeIds, String templateNodeId, String content, String restart) {
+		Assert.hasText(content, "内容不能为空");
+		HttpServletRequest httpServletRequest = getRequest();
+		String workspaceId = nodeService.getCheckUserWorkspace(httpServletRequest);
+		String id = StrUtil.format("node_config_{}", workspaceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("templateNodeId", templateNodeId);
+		jsonObject.put("nodeIds", nodeIds);
+		systemParametersServer.upsert(id, jsonObject, id);
+		//
+		List<String> nodeIdsStr = StrUtil.splitTrim(nodeIds, StrUtil.LF);
+		UserModel user = getUser();
+		for (String s : nodeIdsStr) {
+			NodeModel byKey = nodeService.getByKey(s, httpServletRequest);
+			JSONObject reqData = new JSONObject();
+			reqData.put("content", content);
+			reqData.put("restart", restart);
+			JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.SystemSaveConfig, user, reqData);
+			Assert.state(request.getCode() == 200, "分发 " + byKey.getName() + " 节点配置失败" + request.getMsg());
+		}
+		return JsonMessage.getString(200, "修改成功");
 	}
 }

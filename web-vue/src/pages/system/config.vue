@@ -1,41 +1,145 @@
 <template>
-  <a-tabs default-active-key="1">
-    <a-tab-pane key="1" tab="系统配置">
+  <a-tabs default-active-key="1" @change="tabChange">
+    <a-tab-pane key="1" tab="服务端系统配置">
       <a-alert v-if="temp.file" :message="`配置文件路径:${temp.file}`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model ref="editForm" :model="temp">
         <a-form-model-item class="config-editor">
           <code-editor v-model="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
-          <!-- <a-input v-model="temp.content" type="textarea" :rows="25" class="content-config" placeholder="请输入配置内容，参考项目的配置文件" /> -->
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 14, offset: 2 }">
-          <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>
-          <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(true)">保存并重启</a-button>
+          <a-space>
+            <a-button type="primary" class="btn" @click="onSubmit(false)">保存</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit(true)">保存并重启</a-button>
+          </a-space>
         </a-form-model-item>
       </a-form-model>
     </a-tab-pane>
-    <a-tab-pane key="2" tab="IP白名单配置" class="ip-config-panel">
+    <a-tab-pane key="2" tab="服务端IP白名单配置" class="ip-config-panel">
       <a-alert :message="`当前访问IP：${ipTemp.ip}`" type="success" />
       <a-alert message="请仔细确认后配置，ip配置后立即生效。配置时需要保证当前ip能访问！127.0.0.1 该IP不受访问限制" style="margin-top: 10px" banner />
       <a-alert message="如果配置错误需要重新服务端并添加命令行参数 --rest:ip_config 将恢复默认配置" style="margin-top: 10px" banner />
       <a-form-model style="margin-top: 10px" ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="IP白名单" prop="content">
-          <a-input v-model="ipTemp.allowed" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开发所有IP,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24" />
+          <a-input
+            v-model="ipTemp.allowed"
+            type="textarea"
+            :rows="8"
+            class="ip-list-config"
+            placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开发所有IP,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24"
+          />
         </a-form-model-item>
         <a-form-model-item label="IP黑名单" prop="content">
           <a-input v-model="ipTemp.prohibited" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24" />
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ offset: 10 }" class="ip-config-button">
-          <a-button type="primary" class="btn" :disabled="submitIpAble" @click="onSubmitIp()">保存</a-button>
+          <a-button type="primary" class="btn" @click="onSubmitIp()">保存</a-button>
         </a-form-model-item>
+      </a-form-model>
+    </a-tab-pane>
+    <a-tab-pane key="3" tab="节点白名单分发">
+      <a-alert :message="`一键分发同步多个节点的白名单配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`" style="margin-top: 10px; margin-bottom: 20px" banner />
+      <a-form-model ref="editWhiteForm" :model="tempWhite" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item label="分发节点">
+          <a-select show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="tempWhite.chooseNode">
+            <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item label="项目路径" prop="project">
+          <a-input v-model="tempWhite.project" type="textarea" :rows="5" style="resize: none" placeholder="请输入项目存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径" />
+        </a-form-model-item>
+        <a-form-model-item label="证书路径" prop="certificate">
+          <a-input
+            v-model="tempWhite.certificate"
+            type="textarea"
+            :rows="5"
+            style="resize: none"
+            placeholder="请输入证书存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
+          />
+        </a-form-model-item>
+        <a-form-model-item label="Nginx 路径" prop="nginx">
+          <a-input
+            v-model="tempWhite.nginx"
+            type="textarea"
+            :rows="5"
+            style="resize: none"
+            placeholder="请输入 nginx 存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
+          />
+        </a-form-model-item>
+        <a-form-model-item label="远程下载安全HOST" prop="allowRemoteDownloadHost">
+          <a-input
+            v-model="tempWhite.allowRemoteDownloadHost"
+            type="textarea"
+            :rows="5"
+            style="resize: none"
+            placeholder="请输入远程下载安全HOST，回车支持输入多个路径，示例 https://www.test.com 等"
+          />
+        </a-form-model-item>
+        <a-form-model-item label="文件后缀" prop="allowEditSuffix">
+          <a-input
+            v-model="tempWhite.allowEditSuffix"
+            type="textarea"
+            :rows="5"
+            style="resize: none"
+            placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，示例：设置编码：txt@utf-8， 不设置编码：txt"
+          />
+        </a-form-model-item>
+        <a-form-model-item>
+          <a-row type="flex" justify="center">
+            <a-button type="primary" :disabled="this.nodeList.length <= 0" @click="onSubmitWhitelist">提交</a-button>
+          </a-row>
+        </a-form-model-item>
+      </a-form-model>
+    </a-tab-pane>
+    <a-tab-pane key="4" tab="节点系统配置分发">
+      <a-alert :message="`一键分发同步多个节点的系统配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`" style="margin-top: 10px; margin-bottom: 20px" banner />
+      <a-form-model layout="inline" ref="editNodeConfigForm" :model="tempNodeConfig">
+        <a-row type="flex" justify="center">
+          <a-col :span="12">
+            <a-row type="flex" justify="center">
+              <a-form-model-item label="模版节点">
+                <a-select style="width: 30vw" show-search @change="changeTemplateNode" option-filter-prop="children" placeholder="请选择模版节点" v-model="tempNodeConfig.templateNodeId">
+                  <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
+                    {{ item.name }}
+                  </a-select-option>
+                </a-select>
+              </a-form-model-item>
+            </a-row>
+          </a-col>
+          <a-col :span="12">
+            <a-row type="flex" justify="center">
+              <a-form-model-item label="分发节点">
+                <a-select style="width: 30vw" show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="tempNodeConfig.chooseNode">
+                  <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
+                    {{ item.name }}
+                  </a-select-option>
+                </a-select>
+              </a-form-model-item>
+            </a-row>
+          </a-col>
+        </a-row>
+        <a-form-model-item class="config-editor">
+          <code-editor v-model="tempNodeConfig.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
+        </a-form-model-item>
+        <a-row type="flex" justify="center" :offset="6">
+          <a-form-model-item>
+            <a-space>
+              <a-button type="primary" :disabled="this.nodeList.length <= 0 || !tempNodeConfig.content" @click="onNodeSubmit(false)">保存</a-button>
+              <a-button type="primary" :disabled="this.nodeList.length <= 0 || !tempNodeConfig.content" @click="onNodeSubmit(true)">保存并重启</a-button>
+            </a-space>
+          </a-form-model-item>
+        </a-row>
       </a-form-model>
     </a-tab-pane>
   </a-tabs>
 </template>
 <script>
-import { getConfigData, editConfig, getIpConfigData, editIpConfig, systemInfo } from "@/api/system";
+import { getConfigData, editConfig, getIpConfigData, getNodeConfig, saveNodeConfig, editIpConfig, systemInfo, getWhitelist, saveWhitelist } from "@/api/system";
 import codeEditor from "@/components/codeEditor";
 import { RESTART_UPGRADE_WAIT_TIME_COUNT } from "@/utils/const";
 import Vue from "vue";
+import { getNodeListAll } from "@/api/node";
 
 export default {
   components: {
@@ -50,24 +154,27 @@ export default {
         allowed: "",
         prohibited: "",
       },
-      submitAble: false,
-      submitIpAble: false,
-
+      tempWhite: {},
+      tempNodeConfig: {},
+      nodeList: [],
       checkCount: 0,
     };
   },
   mounted() {
-    this.loadData();
+    this.tabChange("1");
   },
   methods: {
     // load data
-    loadData() {
+    loadConfitData() {
       getConfigData().then((res) => {
         if (res.code === 200) {
           this.temp.content = res.data.content;
           this.temp.file = res.data.file;
         }
       });
+    },
+    // 加载 ip 白名单配置
+    loadIpConfigData() {
       getIpConfigData().then((res) => {
         if (res.code === 200) {
           if (res.data) {
@@ -76,24 +183,46 @@ export default {
         }
       });
     },
+    // 加载节点白名单分发配置
+    loadWhitelistData() {
+      getWhitelist().then((res) => {
+        if (res.code === 200) {
+          this.tempWhite = res.data;
+          this.tempWhite = { ...this.tempWhite, chooseNode: res.data.nodeIds ? res.data.nodeIds.split(",") : [] };
+        }
+      });
+    },
+    // 加载节点系统配置分发
+    loadNodeConfig() {
+      getNodeConfig().then((res) => {
+        this.tempNodeConfig = { ...this.tempNodeConfig, chooseNode: res.data.nodeIds ? res.data.nodeIds.split(",") : [], templateNodeId: res.data.templateNodeId };
+        if (this.tempNodeConfig.templateNodeId) {
+          this.changeTemplateNode(this.tempNodeConfig.templateNodeId);
+        }
+      });
+    },
     // submit
     onSubmit(restart) {
-      // disabled submit button
-      this.submitAble = true;
-      this.temp.restart = restart;
-      editConfig(this.temp).then((res) => {
-        if (res.code === 200) {
-          // 成功
-          this.$notification.success({
-            message: res.msg,
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要保存当前配置吗？如果配置有勿,可能无法启动服务需要手动还原奥！！！",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          this.temp.restart = restart;
+          editConfig(this.temp).then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg,
+              });
+              if (this.temp.restart) {
+                this.startCheckRestartStatus(res.msg);
+              }
+              //
+            }
           });
-          if (this.temp.restart) {
-            this.startCheckRestartStatus(res.msg);
-          }
-          //
-        }
-        // button recover
-        this.submitAble = false;
+        },
       });
     },
     startCheckRestartStatus(msg) {
@@ -143,8 +272,6 @@ export default {
     },
     // submit ip config
     onSubmitIp() {
-      // disabled submit button
-      this.submitIpAble = true;
       editIpConfig(this.ipTemp).then((res) => {
         if (res.code === 200) {
           // 成功
@@ -152,9 +279,71 @@ export default {
             message: res.msg,
           });
         }
-        // button recover
-        this.submitIpAble = false;
       });
+    },
+    onSubmitWhitelist() {
+      this.tempWhite.nodeIds = this.tempWhite?.chooseNode?.join(",");
+      saveWhitelist(this.tempWhite).then((res) => {
+        if (res.code === 200) {
+          // 成功
+          this.$notification.success({
+            message: res.msg,
+          });
+        }
+      });
+    },
+    // 获取所有节点
+    getAllNodeList() {
+      getNodeListAll().then((res) => {
+        this.nodeList = res.data || [];
+      });
+    },
+    // 修改模版节点
+    changeTemplateNode(nodeId) {
+      getConfigData({
+        nodeId: nodeId,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.tempNodeConfig = { ...this.tempNodeConfig, content: res.data.content };
+        }
+      });
+    },
+    // submit
+    onNodeSubmit(restart) {
+      this.$confirm({
+        title: "系统提示",
+        content: restart
+          ? "真的要保存当前配置吗？如果配置有勿,可能无法启动服务需要手动还原奥！！！ 保存成功后请及时关注重启状态！！"
+          : "真的要保存当前配置吗？如果配置有勿,可能无法启动服务需要手动还原奥！！！",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          this.tempNodeConfig.restart = restart;
+          this.tempNodeConfig.nodeIds = this.tempNodeConfig?.chooseNode?.join(",");
+          saveNodeConfig(this.tempNodeConfig).then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg,
+              });
+            }
+          });
+        },
+      });
+    },
+    // 切换
+    tabChange(activeKey) {
+      if (activeKey === "1") {
+        this.loadConfitData();
+      } else if (activeKey === "2") {
+        this.loadIpConfigData();
+      } else if (activeKey === "3") {
+        this.getAllNodeList();
+        this.loadWhitelistData();
+      } else if (activeKey === "4") {
+        this.loadNodeConfig();
+        this.getAllNodeList();
+      }
     },
   },
 };
@@ -169,9 +358,6 @@ export default {
 }
 textarea {
   resize: none;
-}
-.btn {
-  margin-left: 20px;
 }
 .config-editor {
   height: calc(100vh - 300px);

@@ -23,6 +23,7 @@
 package io.jpom.service.system;
 
 import cn.hutool.core.util.ReflectUtil;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.model.data.SystemParametersModel;
 import io.jpom.service.h2db.BaseDbService;
@@ -49,6 +50,21 @@ public class SystemParametersServer extends BaseDbService<SystemParametersModel>
 		SystemParametersModel systemParametersModel = new SystemParametersModel();
 		systemParametersModel.setId(name);
 		systemParametersModel.setValue(jsonModel.toString());
+		systemParametersModel.setDescription(desc);
+		super.upsert(systemParametersModel);
+	}
+
+	/**
+	 * 先尝试更新，更新失败尝试插入
+	 *
+	 * @param name 参数名称
+	 * @param data 参数值
+	 * @param desc 描述
+	 */
+	public void upsert(String name, Object data, String desc) {
+		SystemParametersModel systemParametersModel = new SystemParametersModel();
+		systemParametersModel.setId(name);
+		systemParametersModel.setValue(JSONObject.toJSONString(data));
 		systemParametersModel.setDescription(desc);
 		super.upsert(systemParametersModel);
 	}

@@ -24,7 +24,6 @@ package io.jpom.controller.system;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.RegexPool;
-import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
@@ -35,6 +34,7 @@ import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.system.AgentExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,11 +60,8 @@ public class WhitelistDirectoryController extends BaseJpomController {
 	}
 
 
-	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "whitelistDirectory_submit", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String whitelistDirectorySubmit(String project, String certificate, String nginx, String allowEditSuffix, String allowRemoteDownloadHost) {
-		if (StrUtil.isEmpty(project)) {
-			return JsonMessage.getString(401, "项目路径白名单不能为空");
-		}
 		List<String> list = AgentWhitelist.parseToList(project, true, "项目路径白名单不能为空");
 		//
 		List<String> certificateList = AgentWhitelist.parseToList(certificate, "证书路径白名单不能为空");
