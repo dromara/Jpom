@@ -1,6 +1,10 @@
 <template>
   <a-tabs default-active-key="1" @change="tabChange">
-    <a-tab-pane key="1" tab="服务端系统配置">
+    <a-tab-pane key="1">
+      <span slot="tab">
+        <a-icon type="setting" />
+        服务端系统配置
+      </span>
       <a-alert v-if="temp.file" :message="`配置文件路径:${temp.file}`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model ref="editForm" :model="temp">
         <a-form-model-item class="config-editor">
@@ -14,29 +18,60 @@
         </a-form-model-item>
       </a-form-model>
     </a-tab-pane>
-    <a-tab-pane key="2" tab="服务端IP白名单配置" class="ip-config-panel">
+    <a-tab-pane key="2" class="ip-config-panel">
+      <span slot="tab">
+        <a-icon type="lock" />
+        服务端IP白名单配置
+      </span>
       <a-alert :message="`当前访问IP：${ipTemp.ip}`" type="success" />
-      <a-alert message="请仔细确认后配置，ip配置后立即生效。配置时需要保证当前ip能访问！127.0.0.1 该IP不受访问限制" style="margin-top: 10px" banner />
+      <a-alert
+        message="请仔细确认后配置，ip配置后立即生效。配置时需要保证当前ip能访问！127.0.0.1 该IP不受访问限制.支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24"
+        style="margin-top: 10px"
+        banner
+      />
       <a-alert message="如果配置错误需要重新服务端并添加命令行参数 --rest:ip_config 将恢复默认配置" style="margin-top: 10px" banner />
-      <a-form-model style="margin-top: 10px" ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
-        <a-form-model-item label="IP白名单" prop="content">
+      <a-form-model style="margin-top: 10px" ref="editIpConfigForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
+        <a-form-model-item prop="content">
+          <template slot="label">
+            <a-space align="center">
+              <a-tooltip>
+                <template slot="title">禁止访问的 IP 地址 </template>
+                <a-icon type="stop" theme="twoTone" />
+                IP黑名单
+              </a-tooltip>
+            </a-space>
+          </template>
+          <a-input v-model="ipTemp.prohibited" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24" />
+        </a-form-model-item>
+        <a-form-model-item prop="content">
+          <template slot="label">
+            <a-space align="center">
+              <a-tooltip>
+                <template slot="title"> 只允许访问的 IP 地址 </template>
+                <a-icon type="check-circle" theme="twoTone" />
+                IP白名单
+              </a-tooltip>
+            </a-space>
+          </template>
           <a-input
             v-model="ipTemp.allowed"
             type="textarea"
             :rows="8"
             class="ip-list-config"
-            placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开发所有IP,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24"
+            placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开放所有IP,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24"
           />
         </a-form-model-item>
-        <a-form-model-item label="IP黑名单" prop="content">
-          <a-input v-model="ipTemp.prohibited" type="textarea" :rows="8" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24" />
-        </a-form-model-item>
+
         <a-form-model-item :wrapper-col="{ offset: 10 }" class="ip-config-button">
           <a-button type="primary" class="btn" @click="onSubmitIp()">保存</a-button>
         </a-form-model-item>
       </a-form-model>
     </a-tab-pane>
-    <a-tab-pane key="3" tab="节点白名单分发">
+    <a-tab-pane key="3">
+      <span slot="tab">
+        <a-icon type="folder" />
+        节点白名单分发
+      </span>
       <a-alert :message="`一键分发同步多个节点的白名单配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model ref="editWhiteForm" :model="tempWhite" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="分发节点">
@@ -92,11 +127,15 @@
         </a-form-model-item>
       </a-form-model>
     </a-tab-pane>
-    <a-tab-pane key="4" tab="节点系统配置分发">
+    <a-tab-pane key="4">
+      <span slot="tab">
+        <a-icon type="gateway" />
+        节点系统配置分发
+      </span>
       <a-alert :message="`一键分发同步多个节点的系统配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model layout="inline" ref="editNodeConfigForm" :model="tempNodeConfig">
         <a-row type="flex" justify="center">
-          <a-col :span="12">
+          <a-col :span="11">
             <a-row type="flex" justify="center">
               <a-form-model-item label="模版节点">
                 <a-select style="width: 30vw" show-search @change="changeTemplateNode" option-filter-prop="children" placeholder="请选择模版节点" v-model="tempNodeConfig.templateNodeId">
@@ -107,7 +146,10 @@
               </a-form-model-item>
             </a-row>
           </a-col>
-          <a-col :span="12">
+          <a-col :span="2" style="text-align: center; line-height: 39.9999px">
+            <a-icon type="arrow-right" />
+          </a-col>
+          <a-col :span="11">
             <a-row type="flex" justify="center">
               <a-form-model-item label="分发节点">
                 <a-select style="width: 30vw" show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="tempNodeConfig.chooseNode">
@@ -119,9 +161,13 @@
             </a-row>
           </a-col>
         </a-row>
-        <a-form-model-item class="config-editor">
-          <code-editor v-model="tempNodeConfig.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
-        </a-form-model-item>
+        <a-row type="flex" justify="center">
+          <a-col :span="24">
+            <a-form-model-item class="config-editor" :wrapper-col="{ span: 24 }">
+              <code-editor v-model="tempNodeConfig.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
+            </a-form-model-item>
+          </a-col>
+        </a-row>
         <a-row type="flex" justify="center" :offset="6">
           <a-form-model-item>
             <a-space>
@@ -272,13 +318,21 @@ export default {
     },
     // submit ip config
     onSubmitIp() {
-      editIpConfig(this.ipTemp).then((res) => {
-        if (res.code === 200) {
-          // 成功
-          this.$notification.success({
-            message: res.msg,
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要保存当前配置吗？IP 白名单请慎重配置奥( 白名单是指只允许访问的 IP ),配置后立马生效 如果配置错误将出现无法访问的情况,需要手动恢复奥！！！",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          editIpConfig(this.ipTemp).then((res) => {
+            if (res.code === 200) {
+              // 成功
+              this.$notification.success({
+                message: res.msg,
+              });
+            }
           });
-        }
+        },
       });
     },
     onSubmitWhitelist() {
@@ -349,13 +403,6 @@ export default {
 };
 </script>
 <style scoped>
-.ant-tabs-tabpane-active {
-  height: calc(100vh - 150px);
-  overflow-y: scroll;
-}
-.ip-list-config {
-  max-height: calc((100vh - 320px) / 2);
-}
 textarea {
   resize: none;
 }
@@ -364,12 +411,4 @@ textarea {
   width: 100%;
   overflow-y: scroll;
 }
-.ip-config-panel {
-  /* height: calc(100vh - 240px); */
-  /* overflow-y: scroll; */
-}
-/* .ip-config-button {
-  position: fixed;
-  bottom: 10px;
-} */
 </style>
