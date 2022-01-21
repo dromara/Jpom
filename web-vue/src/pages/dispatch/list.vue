@@ -816,6 +816,7 @@ export default {
                 whitelistDirectory: res.data.whitelistDirectory,
                 lib: res.data.lib,
                 logPath: res.data.logPath,
+                dslContent: res.data.dslContent,
                 nodeIdList: [],
                 intervalTime: record.intervalTime,
                 clearOld: record.clearOld,

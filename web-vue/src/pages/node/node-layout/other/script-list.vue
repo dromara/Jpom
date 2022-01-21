@@ -32,7 +32,7 @@
         <a-space>
           <a-button type="primary" @click="handleExec(record)">执行</a-button>
           <a-button :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
