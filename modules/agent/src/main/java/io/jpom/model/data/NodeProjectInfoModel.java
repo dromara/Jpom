@@ -540,6 +540,16 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 
 		private String modifyTime;
 
+		/**
+		 * 日志
+		 */
+		private String log;
+
+		/**
+		 * 日志备份
+		 */
+		private String logBack;
+
 		public String getId() {
 			return id;
 		}
@@ -621,6 +631,22 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 			} else {
 				this.args = args;
 			}
+		}
+
+		public String getLog() {
+			return log;
+		}
+
+		public void setLog(String log) {
+			this.log = log;
+		}
+
+		public String getLogBack() {
+			return logBack;
+		}
+
+		public void setLogBack(String logback) {
+			this.logBack = logback;
 		}
 
 		@Override

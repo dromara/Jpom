@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.manage;
 
+import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseAgentController;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -63,7 +65,19 @@ public class ProjectListController extends BaseAgentController {
 				String command = AbstractProjectCommander.getInstance().buildJavaCommand(nodeProjectInfoModel, null);
 				nodeProjectInfoModel.setRunCommand(command);
 			}
+			//
+			List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
+			if (javaCopyItemList != null) {
+				for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+					File logBack = nodeProjectInfoModel.getLogBack(javaCopyItem);
+					File log = nodeProjectInfoModel.getLog(javaCopyItem);
+					javaCopyItem.setLogBack(FileUtil.getAbsolutePath(logBack));
+					javaCopyItem.setLog(FileUtil.getAbsolutePath(log));
+				}
+			}
 		}
+
+
 		return JsonMessage.getString(200, "", nodeProjectInfoModel);
 	}
 

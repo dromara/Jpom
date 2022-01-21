@@ -210,6 +210,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 		// 返回数据
 		if (resultData != null) {
 			reqJson.putAll(resultData);
+			reqJson.put("JPOM_MSG", "JPOM_MSG");
 			DefaultSystemLog.getLog().info(reqJson.toString());
 			SocketSessionUtil.send(session, reqJson.toString());
 		}
