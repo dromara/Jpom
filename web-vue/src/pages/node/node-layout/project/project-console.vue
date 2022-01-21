@@ -19,7 +19,7 @@
 
           <a-button v-if="!copyId" type="primary" @click="goFile">文件管理</a-button>
           |
-          <a-tag> 文件大小: {{ project.logSize }}</a-tag>
+
           <!-- <a-switch checked-children="自动滚动" un-checked-children="关闭滚动" v-model="logScroll" /> -->
           <a-input-group compact style="width: 200px">
             <a-select v-model="logScroll">
@@ -28,8 +28,10 @@
             </a-select>
             <a-input style="width: 50%" v-model="logShowLine" placeholder="显示行数" />
           </a-input-group>
-          <a-icon type="delete" @click="clearLogCache" />
-          <div></div>
+
+          <a-input-search placeholder="搜索关键词" style="width: 200px" @search="onSearch" />
+          <a-button type="link" @click="clearLogCache" icon="delete"> 清空 </a-button>
+          <a-tag> 文件大小: {{ project.logSize }}</a-tag>
           <a-dropdown>
             <a class="ant-dropdown-link"> 更多<a-icon type="down" /> </a>
             <a-menu slot="overlay">
@@ -102,7 +104,8 @@ export default {
       optButtonLoading: true,
       loading: false,
       socket: null,
-      // logContext: "",
+      regReplaceText: "<b style='color:red;'>$1</b>",
+      searchReg: null,
       // 日志内容
       logContextArray: [],
       logScroll: "true",
@@ -198,46 +201,27 @@ export default {
               });
               // 如果操作是启动或者停止
               if (res.op === "stop") {
-                // if (this.copyId) {
-                //   this.replicaStatus = false;
-                // } else {
-                // this.project.status = false;
                 this.project = { ...this.project, status: false };
-                // }
-              }
-              if (res.op === "start") {
-                // if (this.copyId) {
-                //   this.replicaStatus = true;
-                // } else {
-                // this.project.status = true;
+              } else if (res.op === "start") {
                 this.project = { ...this.project, status: true };
-                // }
-              }
-              // 如果是 status
-              if (res.op === "status") {
-                // if (this.copyId) {
-                //   this.replicaStatus = true;
-                // } else {
-                // this.project.status = true;
+              } else if (res.op === "status") {
+                // 如果是 status
                 this.project = { ...this.project, status: true };
-                // }
               }
             } else {
               this.$notification.error({
                 message: res.msg,
               });
-              // 设置未启动
-              // if (this.copyId) {
-              //   this.replicaStatus = false;
-              // } else {
-              // this.project.status = false;
               this.project = { ...this.project, status: false };
-              // }
             }
             // return;
           }
         }
-        this.logContextArray.push(msg.data);
+        if (this.searchReg) {
+          this.logContextArray.push(msg.data.replace(this.searchReg, this.regReplaceText));
+        } else {
+          this.logContextArray.push(msg.data);
+        }
         let logShowLineTemp = parseInt(this.logShowLine);
         logShowLineTemp = isNaN(logShowLineTemp) ? this.defLogShowLine : logShowLineTemp;
         logShowLineTemp = logShowLineTemp > 0 ? logShowLineTemp : 1;
@@ -281,6 +265,22 @@ export default {
       this.$nextTick(() => {
         const projectConsole = document.getElementById("project-console");
         projectConsole.innerHTML = "loading context...";
+      });
+    },
+    // 搜索
+    onSearch(value) {
+      this.searchReg = value ? new RegExp("(" + value + ")", "ig") : null;
+
+      this.logContextArray = this.logContextArray.map((item) => {
+        item = item.replace(/<b[^>]*>([^>]*)<\/b[^>]*>/gi, "$1");
+        if (this.searchReg) {
+          item = item.replace(this.searchReg, this.regReplaceText);
+        }
+        return item;
+      });
+      this.$nextTick(() => {
+        const projectConsole = document.getElementById("project-console");
+        projectConsole.innerHTML = this.logContextArray.join("</br>");
       });
     },
     // 加载日志文件大小
