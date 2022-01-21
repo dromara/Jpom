@@ -60,8 +60,9 @@ public enum ClassFeature {
 	SYSTEM_CACHE("系统缓存"),
 	SYSTEM_LOG("系统日志"),
 	SYSTEM_UPGRADE("在线升级"),
-	SYSTEM_CONFIG("系统配置"),
+	SYSTEM_CONFIG("服务端系统配置"),
 	SYSTEM_CONFIG_IP("系统配置IP白名单"),
+	SYSTEM_NODE_WHITELIST("节点白名单分发"),
 	SYSTEM_BACKUP("数据库备份"),
 	SYSTEM_WORKSPACE("工作空间"),
 
