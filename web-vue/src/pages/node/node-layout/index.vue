@@ -166,15 +166,15 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style scoped lang="stylus">
 .node-sider {
-  /* height: calc(100vh - 75px); */
-  min-height: calc(100vh);
+  /* height: calc(100vh - 80px); */
+  min-height: calc(100vh - 85px);
   overflow-y: auto;
 }
 .layout-content {
-  /* min-height: calc(100vh); */
-  /* overflow-y: auto; */
+  min-height: calc(100vh - 85px);
+  overflow-y: auto;
 }
 /* .node-layout {
   padding: 10px;

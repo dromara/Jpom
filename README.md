@@ -315,6 +315,10 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 [名词解释](https://jpom.io/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
 
+## 整体架构
+
+![jpom-func-arch](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom-func-arch.jpg)
+
 ### 交流讨论 、提供bug反馈或建议
 
 1. 微信群二维码（添加小助手：备注Jpom 进群）
