@@ -284,6 +284,9 @@ public class OutGivingProjectEditController extends BaseServerController {
 		if (runMode1 == RunMode.JavaExtDirsCp) {
 			defData.put("javaExtDirsCp", getParameter("javaExtDirsCp"));
 		}
+		if (runMode1 == RunMode.Dsl) {
+			defData.put("dslContent", getParameter("dslContent"));
+		}
 		String whitelistDirectory = getParameter("whitelistDirectory");
 		ServerWhitelist configDeNewInstance = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
 		List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
