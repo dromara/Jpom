@@ -339,6 +339,7 @@ export default {
 .code-mirror-div {
   height: 100%;
   line-height: 24px;
+  border: 1px solid #d9d9d9;
 }
 .tool-bar {
   display: flex;
