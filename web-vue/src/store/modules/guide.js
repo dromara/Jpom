@@ -10,11 +10,15 @@ const app = {
   state: {
     // 引导缓存
     guideCache: localStorage.getItem(key),
+    disabledGuide: false,
   },
   mutations: {
     setGuideCache(state, guideCache) {
       state.guideCache = JSON.stringify(guideCache);
       localStorage.setItem(key, state.guideCache);
+    },
+    setDisabledGuide(state, disabledGuide) {
+      state.disabledGuide = disabledGuide;
     },
   },
   actions: {
@@ -27,11 +31,14 @@ const app = {
         resolve(cache.close);
       });
     },
+    disabledGuide({ commit }) {
+      commit("setDisabledGuide", true);
+    },
     // 尝试打开引导
     tryOpenGuide({ commit, rootGetters }, { key, beforeKey, options }) {
       return new Promise((resolve) => {
         const cache = rootGetters.getGuideCache;
-        if (cache.close) {
+        if (cache.close || rootGetters.getDisabledGuide) {
           // 全局关闭
           return;
         }
@@ -72,6 +79,9 @@ const app = {
         cahce = {};
       }
       return cahce;
+    },
+    getDisabledGuide(state) {
+      return state.disabledGuide;
     },
   },
 };

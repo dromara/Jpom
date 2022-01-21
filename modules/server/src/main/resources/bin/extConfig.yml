@@ -20,6 +20,8 @@ jpom:
   loginTitle:
   # logo 文件路径（绝对路径） jpg、png、gif
   logoFile:
+  # 禁用页面引导导航
+  disabledGuide: false
 user:
   # 最多能创建多少个用户
   maxCount: 10

@@ -29,22 +29,30 @@
       </a-tooltip>
       <a-menu slot="overlay">
         <a-menu-item @click="handleUpdatePwd">
-          <a-space><a-icon type="lock" />修改密码</a-space>
+          <a-button type="link">
+            <a-space><a-icon type="lock" />修改密码</a-space>
+          </a-button>
         </a-menu-item>
         <!-- <a-menu-item>
           <a href="javascript:;" @click="handleUpdateName">修改昵称</a>
         </a-menu-item> -->
         <a-menu-item @click="handleUpdateUser">
-          <a-space><a-icon type="profile" />用户资料</a-space>
+          <a-button type="link">
+            <a-space><a-icon type="profile" />用户资料</a-space>
+          </a-button>
         </a-menu-item>
-        <a-menu-item @click="toggleGuide">
-          <a-space> <a-icon :type="`${this.guideStatus ? 'question-circle' : 'issues-close'}`" /> {{ this.guideStatus ? "开启导航" : "关闭导航" }} </a-space>
+        <a-menu-item>
+          <a-button type="link" @click="toggleGuide" :disabled="this.getDisabledGuide">
+            <a-space> <a-icon :type="`${this.guideStatus ? 'question-circle' : 'issues-close'}`" /> {{ this.guideStatus ? "开启导航" : "关闭导航" }} </a-space>
+          </a-button>
         </a-menu-item>
-        <a-menu-item @click="restGuide">
-          <a-space><a-icon type="rest" /> 重置导航</a-space>
+        <a-menu-item>
+          <a-button @click="restGuide" type="link" :disabled="this.getDisabledGuide">
+            <a-space><a-icon type="rest" /> 重置导航</a-space>
+          </a-button>
         </a-menu-item>
         <a-menu-item @click="logOut">
-          <a-space><a-icon type="logout" />退出登录</a-space>
+          <a-button type="link" icon="logout"> 退出登录 </a-button>
         </a-menu-item>
       </a-menu>
     </a-dropdown>
@@ -130,7 +138,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getToken", "getUserInfo", "getWorkspaceId", "getGuideCache"]),
+    ...mapGetters(["getToken", "getUserInfo", "getWorkspaceId", "getGuideCache", "getDisabledGuide"]),
     // 处理展示的名称 中文 3 个字 其他 4 个字符
     avatarName() {
       const reg = new RegExp("[\u4E00-\u9FA5]+");

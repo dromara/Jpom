@@ -214,6 +214,12 @@ public class ServerExtConfigBean implements DisposableBean {
 	private String logoFile;
 
 	/**
+	 * 禁用页面引导导航
+	 */
+	@Value("${jpom.disabledGuide:false}")
+	private Boolean disabledGuide;
+
+	/**
 	 * 获取上传文件超时时间
 	 *
 	 * @return 返回毫秒
@@ -347,6 +353,10 @@ public class ServerExtConfigBean implements DisposableBean {
 
 	public String getUserDemoTip() {
 		return userDemoTip;
+	}
+
+	public boolean getDisabledGuide() {
+		return Convert.toBool(disabledGuide, false);
 	}
 
 	/**
