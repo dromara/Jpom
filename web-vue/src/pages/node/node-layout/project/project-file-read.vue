@@ -5,7 +5,7 @@
         <a-space>
           <a-button type="primary" @click="goFile">文件管理</a-button>
           |
-          <a-tag> 文件: {{ this.readFilePath }}</a-tag>
+
           <a-input-group compact style="width: 200px">
             <a-select v-model="logScroll">
               <a-select-option value="true"> 自动滚动 </a-select-option>
@@ -13,13 +13,14 @@
             </a-select>
             <a-input style="width: 50%" v-model="logShowLine" placeholder="显示行数" />
           </a-input-group>
-          <a-icon type="delete" @click="clearLogCache" />
-          <div></div>
+          <a-tag> 文件: {{ this.readFilePath }}</a-tag>
+          <a-button type="link" @click="clearLogCache" icon="delete"> 清空 </a-button>
+          <a-input-search placeholder="搜索关键词" style="width: 200px" @search="onSearch" />
         </a-space>
       </template>
     </div>
     <!-- console -->
-    <pre class="console" id="project-console">
+    <pre class="console" id="logScrollArea">
       loading context...
     </pre>
   </div>
@@ -49,7 +50,8 @@ export default {
       optButtonLoading: true,
       loading: false,
       socket: null,
-      // logContext: "",
+      searchReg: null,
+      regReplaceText: "<b style='color:red;'>$1</b>",
       // 日志内容
       logContextArray: [],
       logScroll: "true",
@@ -64,7 +66,7 @@ export default {
       const protocol = location.protocol === "https:" ? "wss://" : "ws://";
       const domain = window.routerBase;
       const url = (domain + "/console").replace(new RegExp("//", "gm"), "/");
-      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId || ""}`;
+      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&id=${this.id}&nodeId=${this.nodeId}&type=console&copyId=`;
     },
   },
   mounted() {
@@ -95,7 +97,12 @@ export default {
         });
       };
       this.socket.onmessage = (msg) => {
-        this.logContextArray.push(msg.data);
+        if (this.searchReg) {
+          this.logContextArray.push(msg.data.replace(this.searchReg, this.regReplaceText));
+        } else {
+          this.logContextArray.push(msg.data);
+        }
+
         let logShowLineTemp = parseInt(this.logShowLine);
         logShowLineTemp = isNaN(logShowLineTemp) ? this.defLogShowLine : logShowLineTemp;
         logShowLineTemp = logShowLineTemp > 0 ? logShowLineTemp : 1;
@@ -105,7 +112,7 @@ export default {
 
         // 自动滚动到底部
         this.$nextTick(() => {
-          const projectConsole = document.getElementById("project-console");
+          const projectConsole = document.getElementById("logScrollArea");
           projectConsole.innerHTML = this.logContextArray.join("</br>");
           if (this.logScroll === "true") {
             setTimeout(() => {
@@ -122,6 +129,22 @@ export default {
         }, 5000);
       };
     },
+    // 搜索
+    onSearch(value) {
+      this.searchReg = value ? new RegExp("(" + value + ")", "ig") : null;
+
+      this.logContextArray = this.logContextArray.map((item) => {
+        item = item.replace(/<b[^>]*>([^>]*)<\/b[^>]*>/gi, "$1");
+        if (this.searchReg) {
+          item = item.replace(this.searchReg, this.regReplaceText);
+        }
+        return item;
+      });
+      this.$nextTick(() => {
+        const projectConsole = document.getElementById("logScrollArea");
+        projectConsole.innerHTML = this.logContextArray.join("</br>");
+      });
+    },
     // 发送消息
     sendMsg(op) {
       const data = {
@@ -134,7 +157,7 @@ export default {
     clearLogCache() {
       this.logContextArray = [];
       this.$nextTick(() => {
-        const projectConsole = document.getElementById("project-console");
+        const projectConsole = document.getElementById("logScrollArea");
         projectConsole.innerHTML = "loading context...";
       });
     },
