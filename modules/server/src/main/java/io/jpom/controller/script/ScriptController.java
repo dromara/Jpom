@@ -40,6 +40,7 @@ import io.jpom.model.script.ScriptModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.service.node.script.NodeScriptServer;
+import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -63,11 +64,14 @@ public class ScriptController extends BaseServerController {
 
 	private final ScriptServer scriptServer;
 	private final NodeScriptServer nodeScriptServer;
+	private final ScriptExecuteLogServer scriptExecuteLogServer;
 
 	public ScriptController(ScriptServer scriptServer,
-							NodeScriptServer nodeScriptServer) {
+							NodeScriptServer nodeScriptServer,
+							ScriptExecuteLogServer scriptExecuteLogServer) {
 		this.scriptServer = scriptServer;
 		this.nodeScriptServer = nodeScriptServer;
+		this.scriptExecuteLogServer = scriptExecuteLogServer;
 	}
 
 	/**
@@ -163,7 +167,7 @@ public class ScriptController extends BaseServerController {
 
 	@RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String del(String id) {
-		ScriptModel server = scriptServer.getByKey(id);
+		ScriptModel server = scriptServer.getByKey(id, getRequest());
 		if (server != null) {
 			File file = server.scriptPath();
 			boolean del = FileUtil.del(file);
@@ -173,6 +177,8 @@ public class ScriptController extends BaseServerController {
 			List<String> delNode = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
 			this.syncDelNodeScript(server, getUser(), delNode);
 			scriptServer.delByKey(id);
+			//
+			scriptExecuteLogServer.delByWorkspace(getRequest(), entity -> entity.set("scriptId", id));
 		}
 		return JsonMessage.getString(200, "删除成功");
 	}
