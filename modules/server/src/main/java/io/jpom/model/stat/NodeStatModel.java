@@ -29,6 +29,7 @@ import io.jpom.service.h2db.TableName;
 /**
  * @author bwcx_jzy
  * @see SystemMonitorLog
+ * @see io.jpom.model.data.NodeModel
  * @since 2022/1/22
  */
 @TableName(value = "NODE_STAT", name = "节点统计")
@@ -70,11 +71,6 @@ public class NodeStatModel extends BaseWorkspaceModel {
 	 * 状态{1，无法连接，0 正常, 2 授权信息错误, 3 状态码错误}
 	 */
 	private Integer status;
-	/**
-	 * 开启状态，如果关闭状态就暂停使用节点
-	 */
-	private Integer openStatus;
-
 	/**
 	 * 错误消息
 	 */
@@ -184,13 +180,5 @@ public class NodeStatModel extends BaseWorkspaceModel {
 
 	public void setStatus(Integer status) {
 		this.status = status;
-	}
-
-	public Integer getOpenStatus() {
-		return openStatus;
-	}
-
-	public void setOpenStatus(Integer openStatus) {
-		this.openStatus = openStatus;
 	}
 }

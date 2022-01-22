@@ -47,7 +47,7 @@ public class NodeModel extends BaseGroupModel {
 	 */
 	private String protocol;
 	/**
-	 * 开启状态，如果关闭状态就暂停使用节点
+	 * 开启状态，如果关闭状态就暂停使用节点 1 启用
 	 */
 	private Integer openStatus;
 	/**

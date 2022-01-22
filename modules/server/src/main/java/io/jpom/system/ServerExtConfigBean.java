@@ -24,6 +24,7 @@ package io.jpom.system;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Console;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.script.ScriptUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -218,6 +219,11 @@ public class ServerExtConfigBean implements DisposableBean {
 	 */
 	@Value("${jpom.disabledGuide:false}")
 	private Boolean disabledGuide;
+	/**
+	 * 检查节点心跳间隔时间
+	 */
+	@Value("${system.nodeHeartSecond:30}")
+	private Integer nodeHeartSecond;
 
 	/**
 	 * 获取上传文件超时时间
@@ -357,6 +363,14 @@ public class ServerExtConfigBean implements DisposableBean {
 
 	public boolean getDisabledGuide() {
 		return Convert.toBool(disabledGuide, false);
+	}
+
+	public int getNodeHeartSecond() {
+		int integer = ObjectUtil.defaultIfNull(nodeHeartSecond, 30);
+		if (integer <= 0) {
+			return integer;
+		}
+		return integer;
 	}
 
 	/**

@@ -1,9 +1,9 @@
 package io.jpom.controller.node;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -16,28 +16,20 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.model.BaseEnum;
-import io.jpom.model.Cycle;
-import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.log.SystemMonitorLog;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.DbSystemMonitorLogService;
-import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 欢迎页
@@ -54,86 +46,55 @@ public class NodeWelcomeController extends BaseServerController {
 		this.dbSystemMonitorLogService = dbSystemMonitorLogService;
 	}
 
-	private Cycle getCycle() {
-		NodeModel node = getNode();
-		Integer cycle = node.getCycle();
-		if (cycle == null) {
-			return null;
-		}
-		return BaseEnum.getEnum(Cycle.class, cycle);
-	}
-
-	private long getCycleMillis() {
-		Cycle cycle = getCycle();
-		long millis = cycle == null ? TimeUnit.SECONDS.toMillis(30) : cycle.getMillis();
-		if (millis <= 0) {
-			millis = TimeUnit.SECONDS.toMillis(30);
-		}
-		return millis;
-	}
-
-	@RequestMapping(value = "nodeMonitor_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public String nodeMonitorJson(String time) {
-		JSONObject object = getData(time);
+	@PostMapping(value = "nodeMonitor_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String nodeMonitorJson() {
+		JSONObject object = getData();
 		return JsonMessage.getString(200, "ok", object);
 	}
 
-	private PageResultDto<SystemMonitorLog> getList(String time, long millis) {
-		long endTime = System.currentTimeMillis();
-		long startTime = endTime - TimeUnit.MINUTES.toMillis(30);
-		if (StrUtil.isNotEmpty(time)) {
-			//  处理时间
-			List<String> list = StrSplitter.splitTrim(time, "~", true);
-			DateTime startDate = DateUtil.parseDateTime(list.get(0));
-			startTime = startDate.getTime();
-			DateTime endDate = DateUtil.parseDateTime(list.get(1));
-			if (startDate.equals(endDate) || StrUtil.equalsAny("00:00:00", endDate.toString(DatePattern.NORM_TIME_FORMAT), startDate.toString(DatePattern.NORM_TIME_FORMAT))) {
-				endDate = DateUtil.endOfDay(endDate);
-			}
-			endTime = endDate.getTime();
-		}
-		int count = (int) ((endTime - startTime) / millis);
+	private List<SystemMonitorLog> getList() {
 		NodeModel node = getNode();
+		String startDateStr = getParameter("time[0]");
+		String endDateStr = getParameter("time[1]");
+		if (StrUtil.hasEmpty(startDateStr, endDateStr)) {
+			SystemMonitorLog systemMonitorLog = new SystemMonitorLog();
+			systemMonitorLog.setNodeId(node.getId());
+			return dbSystemMonitorLogService.queryList(systemMonitorLog, 100, new Order("monitorTime", Direction.DESC));
+		}
+		//  处理时间
+		DateTime startDate = DateUtil.parse(startDateStr);
+		long startTime = startDate.getTime();
+		DateTime endDate = DateUtil.parse(endDateStr);
+		if (startDate.equals(endDate)) {
+			// 时间相等
+			endDate = DateUtil.endOfDay(endDate);
+		}
+		long endTime = endDate.getTime();
+
 		// 开启了节点信息采集
-		Page pageObj = new Page(1, count);
+		Page pageObj = new Page(1, 2000);
 		pageObj.addOrder(new Order("monitorTime", Direction.DESC));
 		Entity entity = Entity.create();
 		entity.set("nodeId", node.getId());
-
 		entity.set(" MONITORTIME", ">= " + startTime);
 		entity.set("MONITORTIME", "<= " + endTime);
-		return dbSystemMonitorLogService.listPage(entity, pageObj);
+		return dbSystemMonitorLogService.listPageOnlyResult(entity, pageObj);
 	}
 
-	private JSONObject getData(String selTime) {
-		long millis = getCycleMillis();
-		PageResultDto<SystemMonitorLog> pageResult = getList(selTime, millis);
+	private JSONObject getData() {
+		List<SystemMonitorLog> list = getList();
+		Assert.notEmpty(list, "没有查询到任何数据");
 		List<JSONObject> series = new ArrayList<>();
 		List<String> scale = new ArrayList<>();
-		for (int i = pageResult.getTotal() - 1; i >= 0; i--) {
-			SystemMonitorLog systemMonitorLog = pageResult.get(i);
-			if (StrUtil.isEmpty(selTime)) {
-				scale.add(DateUtil.formatTime(new Date(systemMonitorLog.getMonitorTime())));
-			} else {
-				scale.add(new DateTime(systemMonitorLog.getMonitorTime()).toString(DatePattern.NORM_DATETIME_PATTERN));
-			}
+		for (int i = list.size() - 1; i >= 0; i--) {
+			SystemMonitorLog systemMonitorLog = list.get(i);
+			scale.add(new DateTime(systemMonitorLog.getMonitorTime()).toString(DatePattern.NORM_DATETIME_PATTERN));
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("cpu", systemMonitorLog.getOccupyCpu());
 			jsonObject.put("memory", systemMonitorLog.getOccupyMemory());
 			jsonObject.put("memoryUsed", systemMonitorLog.getOccupyMemoryUsed());
 			jsonObject.put("disk", systemMonitorLog.getOccupyDisk());
 			series.add(jsonObject);
-		}
-		//
-		int minSize = 12;
-		while (scale.size() <= minSize) {
-			if (scale.size() == 0) {
-				scale.add(DateUtil.formatTime(DateUtil.date()));
-			}
-			String time = scale.get(scale.size() - 1);
-			String newTime = StringUtil.getNextScaleTime(time, millis);
-			scale.add(newTime);
 		}
 
 		JSONObject object = new JSONObject();
@@ -142,29 +103,21 @@ public class NodeWelcomeController extends BaseServerController {
 		return object;
 	}
 
-	@RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@PostMapping(value = "getTop", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getTop() {
-		Cycle cycle = getCycle();
-		NodeModel node = getNode();
-		if (cycle == null || cycle == Cycle.none) {
-			// 未开启、直接查询
-			return NodeForward.request(node, getRequest(), NodeUrl.GetTop).toString();
-		}
-		JSONObject object = getData(null);
+		JSONObject object = getData();
 		return JsonMessage.getString(200, "ok", object);
 	}
 
 	@RequestMapping(value = "exportTop")
 	public void exportTop(String time) throws UnsupportedEncodingException {
-		PageResultDto<SystemMonitorLog> monitorData = getList(time, getCycleMillis());
-		if (monitorData.getTotal() <= 0) {
+		List<SystemMonitorLog> result = getList();
+		if (CollUtil.isEmpty(result)) {
 			//            NodeForward.requestDownload(node, getRequest(), getResponse(), NodeUrl.exportTop);
 		} else {
 			NodeModel node = getNode();
 			StringBuilder buf = new StringBuilder();
 			buf.append("监控时间").append(",占用cpu").append(",占用内存").append(",占用磁盘").append("\r\n");
-			List<SystemMonitorLog> result = monitorData.getResult();
 			for (SystemMonitorLog log : result) {
 				long monitorTime = log.getMonitorTime();
 				buf.append(DateUtil.date(monitorTime)).append(StrUtil.COMMA)
