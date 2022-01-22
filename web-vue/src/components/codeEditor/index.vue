@@ -345,8 +345,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin-top: -10px;
-  margin-bottom: 10px;
+  margin: 5px 5px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #d9d9d9;
   /* 20px 0 0; */
 }
 .CodeMirror {

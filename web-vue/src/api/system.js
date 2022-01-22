@@ -268,7 +268,7 @@ export function getNodeConfig() {
 }
 
 /**
- * 保健 节点系统配置
+ * 保存 节点系统配置
  */
 export function saveNodeConfig(data) {
   return axios({
@@ -277,3 +277,27 @@ export function saveNodeConfig(data) {
     data: data,
   });
 }
+
+/**
+ * 加载 菜单配置信息
+ */
+export function getMenusConfig() {
+  return axios({
+    url: "/system/get_menus_config",
+    method: "post",
+    data: {},
+  });
+}
+
+
+/**
+ * 保存菜单配置信息
+ */
+ export function saveMenusConfig(data) {
+  return axios({
+    url: "/system/save_menus_config.json",
+    method: "post",
+    data: data,
+  });
+}
+

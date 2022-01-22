@@ -22,6 +22,7 @@
  */
 package io.jpom.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -41,12 +42,14 @@ import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -70,11 +73,14 @@ public class IndexControl extends BaseServerController {
 
 	private final UserService userService;
 	private final UserBindWorkspaceService userBindWorkspaceService;
+	private final SystemParametersServer systemParametersServer;
 
 	public IndexControl(UserService userService,
-						UserBindWorkspaceService userBindWorkspaceService) {
+						UserBindWorkspaceService userBindWorkspaceService,
+						SystemParametersServer systemParametersServer) {
 		this.userService = userService;
 		this.userBindWorkspaceService = userBindWorkspaceService;
+		this.systemParametersServer = systemParametersServer;
 	}
 
 	/**
@@ -162,26 +168,31 @@ public class IndexControl extends BaseServerController {
 	public String menusData() {
 		NodeModel nodeModel = tryGetNode();
 		UserModel userModel = getUserModel();
+		String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
+		JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
 		// 菜单
 		InputStream inputStream;
+		JSONArray showArray;
 		if (nodeModel == null) {
 			inputStream = ResourceUtil.getStream("classpath:/menus/index.json");
+			showArray = config.getJSONArray("serverMenuKeys");
 		} else {
 			inputStream = ResourceUtil.getStream("classpath:/menus/node-index.json");
+			showArray = config.getJSONArray("nodeMenuKeys");
 		}
 
 		String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
 		JSONArray jsonArray = JSONArray.parseArray(json);
 		List<Object> collect1 = jsonArray.stream().filter(o -> {
 			JSONObject jsonObject = (JSONObject) o;
-			if (!testMenus(jsonObject, userModel, nodeModel)) {
+			if (!testMenus(jsonObject, userModel, nodeModel, showArray)) {
 				return false;
 			}
 			JSONArray childs = jsonObject.getJSONArray("childs");
 			if (childs != null) {
 				List<Object> collect = childs.stream().filter(o1 -> {
 					JSONObject jsonObject1 = (JSONObject) o1;
-					return testMenus(jsonObject1, userModel, nodeModel);
+					return testMenus(jsonObject1, userModel, nodeModel, showArray);
 				}).collect(Collectors.toList());
 				if (collect.isEmpty()) {
 					return false;
@@ -190,10 +201,11 @@ public class IndexControl extends BaseServerController {
 			}
 			return true;
 		}).collect(Collectors.toList());
+		Assert.notEmpty(jsonArray, "没有任何菜单,请联系管理员");
 		return JsonMessage.getString(200, "", collect1);
 	}
 
-	private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel) {
+	private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel, JSONArray showArray) {
 		String active = jsonObject.getString("active");
 		if (StrUtil.isNotEmpty(active)) {
 			String active1 = ConfigBean.getInstance().getActive();
@@ -206,9 +218,21 @@ public class IndexControl extends BaseServerController {
 			// 超级理员权限
 			return false;
 		}
+		// 判断菜单显示
+		if (CollUtil.isNotEmpty(showArray) && !userModel.isSuperSystemUser()) {
+			String id = jsonObject.getString("id");
+			if (!CollUtil.contains(showArray, id)) {
+				boolean present = showArray.stream().anyMatch(o -> {
+					String str = StrUtil.toString(o);
+					return StrUtil.startWith(str, id + StrUtil.COLON) || StrUtil.endWith(str, StrUtil.COLON + id);
+				});
+				if (!present) {
+					return false;
+				}
+			}
+		}
 		// 系统管理员权限
 		boolean system = StrUtil.equals(role, "system");
-
 		if (system) {
 			if (nodeModel == null) {
 				return userModel.isSystemUser();

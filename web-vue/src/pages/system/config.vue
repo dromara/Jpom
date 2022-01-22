@@ -178,10 +178,48 @@
         </a-row>
       </a-form-model>
     </a-tab-pane>
+    <a-tab-pane key="5">
+      <span slot="tab">
+        <a-icon type="menu" />
+        菜单配置
+      </span>
+      <a-alert :message="`菜单配置只对非超级管理员生效`" style="margin-top: 10px; margin-bottom: 20px" banner />
+      <a-form-model ref="editWhiteForm" :model="menusConfigData">
+        <a-row type="flex" justify="center">
+          <a-col :span="12">
+            <a-card title="服务端菜单" :bordered="false">
+              <a-tree show-icon v-if="menusConfigData.serverMenus" checkable :tree-data="menusConfigData.serverMenus" :replaceFields="replaceFields" v-model="menusConfigData.serverMenuKeys">
+                <a-icon slot="switcherIcon" type="down" />
+
+                <template slot="custom" slot-scope="{ dataRef }">
+                  <a-icon :type="dataRef.icon_v3" />
+                </template>
+              </a-tree>
+            </a-card>
+          </a-col>
+          <a-col :span="12">
+            <a-card title="节点菜单" :bordered="false">
+              <a-tree show-icon v-if="menusConfigData.nodeMenus" checkable :tree-data="menusConfigData.nodeMenus" :replaceFields="replaceFields" v-model="menusConfigData.nodeMenuKeys">
+                <a-icon slot="switcherIcon" type="down" />
+
+                <template slot="custom" slot-scope="{ dataRef }">
+                  <a-icon :type="dataRef.icon_v3" />
+                </template>
+              </a-tree>
+            </a-card>
+          </a-col>
+        </a-row>
+        <a-form-model-item>
+          <a-row type="flex" justify="center">
+            <a-button type="primary" @click="onSubmitMenus">保存</a-button>
+          </a-row>
+        </a-form-model-item>
+      </a-form-model>
+    </a-tab-pane>
   </a-tabs>
 </template>
 <script>
-import { getConfigData, editConfig, getIpConfigData, getNodeConfig, saveNodeConfig, editIpConfig, systemInfo, getWhitelist, saveWhitelist } from "@/api/system";
+import { getConfigData, editConfig, getIpConfigData, getNodeConfig, getMenusConfig, saveMenusConfig, saveNodeConfig, editIpConfig, systemInfo, getWhitelist, saveWhitelist } from "@/api/system";
 import codeEditor from "@/components/codeEditor";
 import { RESTART_UPGRADE_WAIT_TIME_COUNT } from "@/utils/const";
 import Vue from "vue";
@@ -204,6 +242,8 @@ export default {
       tempNodeConfig: {},
       nodeList: [],
       checkCount: 0,
+      menusConfigData: {},
+      replaceFields: { children: "childs", title: "title", key: "id" },
     };
   },
   mounted() {
@@ -244,6 +284,59 @@ export default {
         this.tempNodeConfig = { ...this.tempNodeConfig, chooseNode: res.data.nodeIds ? res.data.nodeIds.split(",") : [], templateNodeId: res.data.templateNodeId };
         if (this.tempNodeConfig.templateNodeId) {
           this.changeTemplateNode(this.tempNodeConfig.templateNodeId);
+        }
+      });
+    },
+    // 加载菜单配置信息
+    loadMenusConfig() {
+      getMenusConfig().then((res) => {
+        if (res.code !== 200) {
+          return;
+        }
+        this.menusConfigData = res.data;
+
+        this.menusConfigData.serverMenus = this.menusConfigData?.serverMenus.map((item) => {
+          item.scopedSlots = { icon: "custom" };
+          item.childs?.map((item2) => {
+            item2.id = item.id + ":" + item2.id;
+            return item2;
+          });
+          return item;
+        });
+        this.menusConfigData.nodeMenus = this.menusConfigData?.nodeMenus.map((item) => {
+          item.scopedSlots = { icon: "custom" };
+          item.childs?.map((item2) => {
+            item2.id = item.id + ":" + item2.id;
+            return item2;
+          });
+          return item;
+        });
+        if (!this.menusConfigData?.serverMenuKeys) {
+          //
+          const serverMenuKeys = [];
+          this.menusConfigData.serverMenus.forEach((item) => {
+            serverMenuKeys.push(item.id);
+            if (item.childs) {
+              item.childs.forEach((item2) => {
+                serverMenuKeys.push(item2.id);
+              });
+            }
+          });
+          this.menusConfigData = { ...this.menusConfigData, serverMenuKeys: serverMenuKeys };
+        }
+
+        if (!this.menusConfigData?.nodeMenuKeys) {
+          //
+          const nodeMenuKeys = [];
+          this.menusConfigData.nodeMenus.forEach((item) => {
+            nodeMenuKeys.push(item.id);
+            if (item.childs) {
+              item.childs.forEach((item2) => {
+                nodeMenuKeys.push(item2.id);
+              });
+            }
+          });
+          this.menusConfigData = { ...this.menusConfigData, nodeMenuKeys: nodeMenuKeys };
         }
       });
     },
@@ -385,6 +478,19 @@ export default {
         },
       });
     },
+    onSubmitMenus() {
+      saveMenusConfig({
+        serverMenuKeys: this.menusConfigData.serverMenuKeys.join(","),
+        nodeMenuKeys: this.menusConfigData.nodeMenuKeys.join(","),
+      }).then((res) => {
+        if (res.code === 200) {
+          // 成功
+          this.$notification.success({
+            message: res.msg,
+          });
+        }
+      });
+    },
     // 切换
     tabChange(activeKey) {
       if (activeKey === "1") {
@@ -397,6 +503,8 @@ export default {
       } else if (activeKey === "4") {
         this.loadNodeConfig();
         this.getAllNodeList();
+      } else if (activeKey === "5") {
+        this.loadMenusConfig();
       }
     },
   },
@@ -410,5 +518,6 @@ textarea {
   height: calc(100vh - 300px);
   width: 100%;
   overflow-y: scroll;
+  border: 1px solid #d9d9d9;
 }
 </style>

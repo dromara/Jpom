@@ -32,7 +32,8 @@
 import { login, demoInfo } from "@/api/user";
 import { checkSystem } from "@/api/install";
 import sha1 from "sha1";
-import defaultBg from "../../assets/images/bg.jpeg";
+import defaultBg from "@/assets/images/bg.jpeg";
+import { mapGetters } from "vuex";
 export default {
   data() {
     return {
@@ -57,6 +58,9 @@ export default {
     this.getBg();
     this.changeCode();
     this.getDemoInfo();
+  },
+  computed: {
+    ...mapGetters(["getWorkspaceId"]),
   },
   methods: {
     // 检查是否需要初始化
@@ -126,13 +130,24 @@ export default {
             this.$notification.success({
               message: res.msg,
             });
-            // 调用 store action 存储当前登录的用户名和 token
-            this.$store.dispatch("login", { token: res.data.token, longTermToken: res.data.longTermToken }).then(() => {
-              // 跳转主页面
-              this.$router.push({ path: "/" });
-            });
+            if (!this.getWorkspaceId) {
+              // 还没有选择工作空间，默认选中第一个 用户加载菜单
+              let firstWorkspace = res.data.bindWorkspaceModels[0];
+              this.$store.dispatch("changeWorkspace", firstWorkspace.id).then(() => {
+                this.dispatchLogin(res.data);
+              });
+            } else {
+              this.dispatchLogin(res.data);
+            }
           }
         });
+      });
+    },
+    dispatchLogin(data) {
+      // 调用 store action 存储当前登录的用户名和 token
+      this.$store.dispatch("login", { token: data.token, longTermToken: data.longTermToken }).then(() => {
+        // 跳转主页面
+        this.$router.push({ path: "/" });
       });
     },
   },

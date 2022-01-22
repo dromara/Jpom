@@ -69,8 +69,12 @@
                 <a-button type="primary" @click="handleTrigger(record)">触发器</a-button>
               </a-menu-item>
               <a-menu-item>
+                <a-button type="primary" @click="copyItem(record)">复制</a-button>
+              </a-menu-item>
+              <a-menu-item>
                 <a-button type="danger" @click="handleDelete(record)">删除</a-button>
               </a-menu-item>
+
               <a-menu-item>
                 <a-tooltip
                   title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
@@ -642,6 +646,13 @@ export default {
           this.introGuide();
         }, 500);
       });
+    },
+    // 复制
+    copyItem(record) {
+      const temp = Object.assign({}, record);
+      delete temp.id;
+      temp.name = temp.name + "副本";
+      this.handleEdit(temp);
     },
     // 修改
     handleEdit(record) {

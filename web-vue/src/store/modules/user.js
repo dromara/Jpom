@@ -8,15 +8,13 @@
 import { TOKEN_KEY, USER_INFO_KEY, MENU_KEY, LONG_TERM_TOKEN } from "@/utils/const";
 
 import { getUserInfo, loginOut } from "@/api/user";
-import { getSystemMenu } from "@/api/menu";
-import routeMenuMap from "@/router/route-menu";
 
 const user = {
   state: {
     token: localStorage.getItem(TOKEN_KEY),
     longTermToken: localStorage.getItem(LONG_TERM_TOKEN),
     userInfo: JSON.parse(localStorage.getItem(USER_INFO_KEY)),
-    menus: JSON.parse(localStorage.getItem(MENU_KEY)),
+    
   },
   mutations: {
     setToken(state, data) {
@@ -35,10 +33,7 @@ const user = {
     },
     setUserInfo(state, userInfo) {
       state.userInfo = userInfo;
-    },
-    setMenus(state, menus) {
-      state.menus = menus;
-    },
+    }
   },
   actions: {
     // 登录 data = {token: 'xxx', userName: 'name'}
@@ -53,36 +48,11 @@ const user = {
             localStorage.setItem(USER_INFO_KEY, JSON.stringify(res.data));
           }
         });
+
         // 加载系统菜单 这里需要等待 action 执行完毕返回 promise, 否则第一次登录可能会从 store 里面获取不到 menus 数据而报错
         dispatch("loadSystemMenus").then(() => {
           resolve();
         });
-      });
-    },
-    // 加载系统菜单 action
-    loadSystemMenus({ commit }) {
-      return new Promise((resolve, reject) => {
-        // 加载系统菜单
-        getSystemMenu()
-          .then((res) => {
-            res.data.forEach((element) => {
-              if (element.childs.length > 0) {
-                const childs = element.childs.map((child) => {
-                  return {
-                    ...child,
-                    path: routeMenuMap[child.id],
-                  };
-                });
-                element.childs = childs;
-              }
-            });
-            commit("setMenus", res.data);
-            localStorage.setItem(MENU_KEY, JSON.stringify(res.data));
-            resolve();
-          })
-          .catch((error) => {
-            reject(error);
-          });
       });
     },
     // 退出登录 移除对应的 store
@@ -108,9 +78,6 @@ const user = {
     },
     getUserInfo(state) {
       return state.userInfo;
-    },
-    getMenus(state) {
-      return state.menus;
     },
   },
 };
