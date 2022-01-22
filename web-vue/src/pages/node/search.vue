@@ -80,11 +80,15 @@
     </a-table>
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" @goConsole="goConsole" />
+      <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" @goConsole="goConsole" @goReadFile="goReadFile" />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
       <console v-if="drawerConsoleVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goFile="goFile" />
+    </a-drawer>
+    <!-- 项目阅读文件组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReadFileVisible" @close="onReadFileClose">
+      <file-read v-if="drawerReadFileVisible" :nodeId="temp.nodeId" :readFilePath="temp.readFilePath" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
     <!-- 批量操作状态 -->
     <a-modal v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
@@ -104,14 +108,16 @@
 <script>
 import { getProjectList, delAllProjectCache, getNodeListAll } from "@/api/node";
 import { restartProject, startProject, stopProject, getRuningProjectInfo, runModeList, noFileModes } from "@/api/node-project";
-import File from "../node/node-layout/project/project-file";
+import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { parseTime, itemGroupBy } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import FileRead from "@/pages/node/node-layout/project/project-file-read";
 export default {
   components: {
     File,
     Console,
+    FileRead,
   },
   data() {
     return {
@@ -126,6 +132,7 @@ export default {
       temp: {},
       drawerFileVisible: false,
       drawerConsoleVisible: false,
+      drawerReadFileVisible: false,
       batchVisible: false,
       batchTitle: "",
       columns: [
@@ -272,6 +279,7 @@ export default {
     goFile() {
       // 关闭控制台
       this.onConsoleClose();
+      this.onReadFileClose();
       this.handleFile(this.temp);
     },
     //前往控制台
@@ -279,6 +287,16 @@ export default {
       //关闭文件
       this.onFileClose();
       this.handleConsole(this.temp);
+    },
+    // 阅读文件
+    goReadFile(path, filename) {
+      this.onFileClose();
+      this.drawerReadFileVisible = true;
+      this.temp.readFilePath = (path + "/" + filename).replace(new RegExp("//", "gm"), "/");
+      this.drawerTitle = `阅读文件(${filename})`;
+    },
+    onReadFileClose() {
+      this.drawerReadFileVisible = false;
     },
     //选中项目
     onSelectChange(selectedRowKeys) {

@@ -58,7 +58,7 @@
     "id": "outgiving",
     "childs": [
       {
-        "id": "outgiving",
+        "id": "outgivingList",
         "title": "分发列表"
       },
       {
@@ -77,7 +77,7 @@
     "id": "monitor",
     "childs": [
       {
-        "id": "monitor",
+        "id": "monitorList",
         "title": "监控列表"
       },
       {
@@ -115,7 +115,7 @@
     "id": "user",
     "childs": [
       {
-        "id": "user",
+        "id": "userList",
         "title": "用户列表",
         "role": "system"
       },

@@ -186,6 +186,7 @@ public class LoginControl extends BaseServerController {
 					this.ipSuccess();
 					String jwtId = userService.getUserJwtId(userName);
 					UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
+					userLoginDto.setBindWorkspaceModels(bindWorkspaceModels);
 					return JsonMessage.getString(200, "登录成功", userLoginDto);
 				} else {
 					userModel.errorLock();

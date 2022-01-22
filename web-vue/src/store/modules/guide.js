@@ -31,8 +31,8 @@ const app = {
         resolve(cache.close);
       });
     },
-    disabledGuide({ commit }) {
-      commit("setDisabledGuide", true);
+    disabledGuide({ commit }, value) {
+      commit("setDisabledGuide", value);
     },
     // 尝试打开引导
     tryOpenGuide({ commit, rootGetters }, { key, beforeKey, options }) {
