@@ -16,7 +16,6 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Type;
-import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.system.AgentAutoUser;
@@ -199,7 +198,7 @@ public class SshInstallAgentController extends BaseServerController {
 		Assert.hasText(nodeModel.getName(), "输入节点名称");
 
 		Assert.hasText(nodeModel.getUrl(), "请输入节点地址");
-		nodeModel.setCycle(Cycle.one.getCode());
+		//nodeModel.setCycle(Cycle.one.getCode());
 		//
 		//nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
 		//

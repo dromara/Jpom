@@ -330,4 +330,31 @@ CREATE TABLE IF NOT EXISTS PUBLIC.SERVER_SCRIPT_EXECUTE_LOG
 comment on table SERVER_SCRIPT_EXECUTE_LOG is '脚本模版执行记录';
 
 
+-- 节点统计
+CREATE TABLE IF NOT EXISTS PUBLIC.NODE_STAT
+(
+	id               VARCHAR(50) not null comment 'id',
+	createTimeMillis BIGINT COMMENT '数据创建时间',
+	modifyTimeMillis BIGINT COMMENT '数据修改时间',
+	modifyUser       VARCHAR(50) comment '修改人',
+	strike           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId      varchar(50) not null comment '所属工作空间',
+	occupyMemoryUsed DOUBLE comment '占用cpu',
+	occupyCpu        DOUBLE comment '占用cpu',
+	occupyMemory     DOUBLE comment '占用内存',
+	occupyDisk       DOUBLE comment '占用磁盘',
+	networkTime      int DEFAULT 0 comment '网络耗时',
+	upTimeStr        varchar(50) comment '运行时长',
+	osName           varchar(100) comment '所属工作空间',
+	jpomVersion      varchar(50) comment 'jpom 版本',
+	status           int DEFAULT 0 comment '状态{1，无法连接，0 正常, 2 授权信息错误}',
+	openStatus       int DEFAULT 0 comment '启用状态{1，启用，0 未启用)}',
+	failureMsg       VARCHAR(255) comment '错误消息',
+	url              VARCHAR(255) comment '节点地址',
+	name             VARCHAR(255) comment '节点名称',
+	CONSTRAINT NODE_STAT_PK PRIMARY KEY (id)
+);
+comment on table NODE_STAT is '节点统计';
+
+
 

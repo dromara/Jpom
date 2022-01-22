@@ -2,16 +2,36 @@
   <div class="code-mirror-div">
     <div class="tool-bar" ref="toolBar" v-if="showTool">
       <slot name="tool_before" />
-      皮肤：
-      <a-select v-model="cmOptions.theme" @select="handleSelectTheme" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
-        <a-select-option v-for="item in cmThemeOptions" :key="item">{{ item }}</a-select-option>
-      </a-select>
-      <div style="margin-left: 30px">
-        语言：
-        <a-select v-model="cmOptions.mode" @select="handleSelectMode" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
-          <a-select-option v-for="item in cmEditorModeOptions" :key="item">{{ item }}</a-select-option>
-        </a-select>
-      </div>
+      <a-space>
+        <div>
+          皮肤：
+          <a-select v-model="cmOptions.theme" @select="handleSelectTheme" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
+            <a-select-option v-for="item in cmThemeOptions" :key="item">{{ item }}</a-select-option>
+          </a-select>
+        </div>
+        <div>
+          语言：
+          <a-select v-model="cmOptions.mode" @select="handleSelectMode" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
+            <a-select-option v-for="item in cmEditorModeOptions" :key="item">{{ item }}</a-select-option>
+          </a-select>
+        </div>
+
+        <a-tooltip>
+          <template slot="title">
+            <ul>
+              <li>Ctrl-F / Cmd-F Start searching</li>
+              <li>Ctrl-G / Cmd-G Find next</li>
+              <li>Shift-Ctrl-G / Shift-Cmd-G Find previous</li>
+              <li>Shift-Ctrl-F / Cmd-Option-F Replace</li>
+              <li>Shift-Ctrl-R / Shift-Cmd-Option-F Replace all</li>
+              <li>Alt-F Persistent search (dialog doesn't autoclose, enter to find next, Shift-Enter to find previous)</li>
+              <li>Alt-G Jump to line</li>
+            </ul>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
+      </a-space>
+
       <slot name="tool_after" />
     </div>
     <div :style="{ height: codeMirrorHeight }">

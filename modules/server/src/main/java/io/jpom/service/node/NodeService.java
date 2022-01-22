@@ -5,6 +5,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
@@ -12,13 +13,11 @@ import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.cron.ICron;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
-import io.jpom.monitor.NodeMonitor;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceService;
@@ -26,17 +25,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
  * @since 2021/12/4
  */
 @Service
-public class NodeService extends BaseGroupService<NodeModel> implements ICron {
+public class NodeService extends BaseGroupService<NodeModel> {
 
 	private final SshService sshService;
 	private final WorkspaceService workspaceService;
@@ -203,10 +202,7 @@ public class NodeService extends BaseGroupService<NodeModel> implements ICron {
 	public void insert(NodeModel nodeModel) {
 		this.fillNodeInfo(nodeModel);
 		super.insert(nodeModel);
-		Integer cycle = nodeModel.getCycle();
-		if (nodeModel.isOpenStatus() && cycle != null && cycle != Cycle.none.getCode()) {
-			NodeMonitor.start();
-		}
+		this.updateDuplicateNode(nodeModel);
 	}
 
 	@Override
@@ -214,10 +210,7 @@ public class NodeService extends BaseGroupService<NodeModel> implements ICron {
 		nodeModel.setWorkspaceId(Const.WORKSPACE_DEFAULT_ID);
 		this.fillNodeInfo(nodeModel);
 		super.insertNotFill(nodeModel);
-		Integer cycle = nodeModel.getCycle();
-		if (nodeModel.isOpenStatus() && cycle != null && cycle != Cycle.none.getCode()) {
-			NodeMonitor.start();
-		}
+		this.updateDuplicateNode(nodeModel);
 	}
 
 	/**
@@ -242,49 +235,47 @@ public class NodeService extends BaseGroupService<NodeModel> implements ICron {
 	}
 
 	@Override
-	public int update(NodeModel nodeModel) {
-		int update = super.update(nodeModel);
-		this.startCron();
-		return update;
-	}
-
-	@Override
 	public int updateById(NodeModel info) {
 		int updateById = super.updateById(info);
-		this.startCron();
+		if (updateById > 0) {
+			this.updateDuplicateNode(info);
+		}
 		return updateById;
 	}
 
-	@Override
-	public int startCron() {
-		// 关闭监听
-		Entity entity = Entity.create();
-		entity.set("openStatus", 1);
-		entity.set("cycle", StrUtil.format(" <> {}", Cycle.none.getCode()));
-		long count = super.count(entity);
-		if (count <= 0) {
-			NodeMonitor.stop();
-		} else {
-			NodeMonitor.start();
+	/**
+	 * 更新相同节点对 授权信息
+	 *
+	 * @param info 节点信息
+	 */
+	private void updateDuplicateNode(NodeModel info) {
+		if (StrUtil.hasEmpty(info.getUrl(), info.getLoginName(), info.getLoginPwd())) {
+			return;
 		}
-		return (int) count;
+		NodeModel update = new NodeModel();
+		update.setLoginName(info.getLoginName());
+		update.setLoginPwd(info.getLoginPwd());
+		//
+		NodeModel where = new NodeModel();
+		where.setUrl(info.getUrl());
+		int updateCount = super.update(super.dataBeanToEntity(update), super.dataBeanToEntity(where));
+		if (updateCount > 1) {
+			DefaultSystemLog.getLog().debug("update duplicate node {} {}", info.getUrl(), updateCount);
+		}
 	}
 
 	/**
-	 * 根据周期获取list
+	 * 根据 url 去重
 	 *
-	 * @param cycle 周期
 	 * @return list
 	 */
-	public List<NodeModel> listByCycle(Cycle cycle) {
-		NodeModel nodeModel = new NodeModel();
-		nodeModel.setCycle(cycle.getCode());
-		nodeModel.setOpenStatus(1);
-		List<NodeModel> list = this.listByBean(nodeModel);
-		if (list == null) {
-			return new ArrayList<>();
+	public List<NodeModel> listDeDuplicationByUrl() {
+		String sql = "select url,max(loginName) as loginName,max(loginPwd) as loginPwd,max(protocol) as protocol from " + super.getTableName() + "  group  by url";
+		List<Entity> query = this.query(sql);
+		if (query != null) {
+			return query.stream().map((entity -> this.entityToBean(entity, this.tClass))).collect(Collectors.toList());
 		}
-		return list;
+		return null;
 	}
 
 	public List<NodeModel> getNodeBySshId(String sshId) {

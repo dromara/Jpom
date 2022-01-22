@@ -124,11 +124,11 @@
             <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{ ssh.name }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="监控周期" prop="cycle">
+        <!-- <a-form-model-item label="监控周期" prop="cycle">
           <a-select v-model="temp.cycle" defaultValue="0" placeholder="监控周期">
             <a-select-option v-for="(name, key) in nodeMonitorCycle" :key="parseInt(key)">{{ name }}</a-select-option>
           </a-select>
-        </a-form-model-item>
+        </a-form-model-item> -->
 
         <a-form-model-item label="节点状态" prop="openStatus">
           <a-switch
@@ -326,7 +326,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWorkspace, nodeMonitorCycle, getNodeGroupAll, fastInstall, pullFastInstallResult, confirmFastInstall } from "@/api/node";
+import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWorkspace, getNodeGroupAll, fastInstall, pullFastInstallResult, confirmFastInstall } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
@@ -348,7 +348,7 @@ export default {
       loading: false,
       childLoading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      nodeMonitorCycle: nodeMonitorCycle,
+      // nodeMonitorCycle: nodeMonitorCycle,
       sshList: [],
       list: [],
       groupList: [],
@@ -374,7 +374,7 @@ export default {
         { title: "节点协议", dataIndex: "protocol", sorter: true, key: "protocol", width: 100, ellipsis: true, scopedSlots: { customRender: "protocol" } },
         { title: "节点地址", dataIndex: "url", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
         { title: "账号", dataIndex: "loginName", sorter: true, key: "loginName", ellipsis: true, scopedSlots: { customRender: "loginName" } },
-        { title: "监控周期", dataIndex: "cycle", sorter: true, key: "cycle", ellipsis: true, scopedSlots: { customRender: "cycle" } },
+        // { title: "监控周期", dataIndex: "cycle", sorter: true, key: "cycle", ellipsis: true, scopedSlots: { customRender: "cycle" } },
         { title: "超时时间", dataIndex: "timeOut", sorter: true, key: "timeOut", width: 100, ellipsis: true },
         {
           title: "修改时间",

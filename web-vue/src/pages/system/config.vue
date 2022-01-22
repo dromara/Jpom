@@ -183,7 +183,7 @@
         <a-icon type="menu" />
         菜单配置
       </span>
-      <a-alert :message="`菜单配置只对非超级管理员生效`" style="margin-top: 10px; margin-bottom: 20px" banner />
+      <a-alert :message="`菜单配置只对非超级管理员生效,当前配置对当前工作空间生效,其他工作空间请切换后配置`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model ref="editWhiteForm" :model="menusConfigData">
         <a-row type="flex" justify="center">
           <a-col :span="12">

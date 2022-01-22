@@ -22,6 +22,7 @@
  */
 package io.jpom.common.commander.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.CharPool;
@@ -207,12 +208,13 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 	 * @param info cpu信息
 	 * @return cpu信息
 	 */
-	private static String getLinuxCpu(String info) {
-		if (StrUtil.isEmpty(info)) {
+	public static String getLinuxCpu(String info) {
+		List<String> strings = StrUtil.splitTrim(info, StrUtil.COLON);
+		String last = CollUtil.getLast(strings);
+		List<String> list = StrUtil.splitTrim(last, StrUtil.COMMA);
+		if (CollUtil.isEmpty(list)) {
 			return null;
 		}
-		int i = info.indexOf(CharPool.COLON);
-		String[] split = info.substring(i + 1).split(StrUtil.COMMA);
 //            1.3% us — 用户空间占用CPU的百分比。
 //            1.0% sy — 内核空间占用CPU的百分比。
 //            0.0% ni — 改变过优先级的进程占用CPU的百分比
@@ -220,17 +222,12 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 //            0.0% wa — IO等待占用CPU的百分比
 //            0.3% hi — 硬中断（Hardware IRQ）占用CPU的百分比
 //            0.0% si — 软中断（Software Interrupts）占用CPU的百分比
-		for (String str : split) {
-			str = str.trim();
-			String value = str.substring(0, str.length() - 2).trim();
-			String tag = str.substring(str.length() - 2);
-			if ("id".equalsIgnoreCase(tag)) {
-				value = value.replace("%", "");
-				double val = Convert.toDouble(value, 0.0);
-				return String.format("%.2f", 100.00 - val);
-			}
+		String value = list.stream().filter(s -> StrUtil.endWithIgnoreCase(s, "id")).map(s -> StrUtil.removeSuffixIgnoreCase(s, "id")).findAny().orElse(null);
+		Double val = Convert.toDouble(value);
+		if (val == null) {
+			return null;
 		}
-		return "0";
+		return String.format("%.2f", 100.00 - val);
 	}
 
 	@Override

@@ -9,6 +9,10 @@
         "id": "nodeList"
       },
       {
+        "title": "节点统计",
+        "id": "nodeStat"
+      },
+      {
         "title": "项目列表",
         "id": "projectSearch"
       }
@@ -129,7 +133,6 @@
   {
     "title": "系统管理",
     "icon_v3": "setting",
-    "role": "sys",
     "id": "setting",
     "childs": [
       {

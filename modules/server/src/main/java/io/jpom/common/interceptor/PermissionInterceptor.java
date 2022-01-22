@@ -127,7 +127,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 			String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
 			boolean exists = userBindWorkspaceService.exists(userModel.getId(), workspaceId + StrUtil.DASHED + method.name());
 			if (!exists) {
-				this.errorMsg(response, "您没有对应功能管理权限:" + method.getName());
+				this.errorMsg(response, "您没有对应功能【" + feature.cls().getName() + "】管理权限:" + method.getName());
 				return false;
 			}
 		}

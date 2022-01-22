@@ -34,6 +34,7 @@ public enum ClassFeature {
 	 */
 	NULL(""),
 	NODE("节点管理"),
+	NODE_STAT("节点统计"),
 	UPGRADE_NODE_LIST("节点升级"),
 	SEARCH_PROJECT("搜索项目"),
 	SSH("SSH管理"),
