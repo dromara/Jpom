@@ -61,7 +61,6 @@
     "id": "systemConfig",
     "title": "系统管理",
     "icon_v3": "setting",
-    "role": "sys",
     "childs": [
       {
         "id": "whitelistDirectory",

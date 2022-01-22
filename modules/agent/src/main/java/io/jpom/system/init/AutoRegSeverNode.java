@@ -136,6 +136,8 @@ public class AutoRegSeverNode {
 	 * @param url 服务端url
 	 */
 	public static void autoPushToServer(String url) {
+		url = StrUtil.removeSuffix(url, CharPool.SINGLE_QUOTE + "");
+		url = StrUtil.removePrefix(url, CharPool.SINGLE_QUOTE + "");
 		UrlBuilder urlBuilder = UrlBuilder.ofHttp(url);
 		//
 		LinkedHashSet<InetAddress> localAddressList = NetUtil.localAddressList(address -> {

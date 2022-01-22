@@ -69,6 +69,7 @@ public class NodeModel extends BaseGroupModel {
 	 *
 	 * @see io.jpom.model.Cycle
 	 */
+	@Deprecated
 	private Integer cycle;
 
 	public String getName() {
@@ -79,6 +80,7 @@ public class NodeModel extends BaseGroupModel {
 		this.name = name;
 	}
 
+	@Deprecated
 	public Integer getCycle() {
 		return cycle;
 	}
@@ -87,6 +89,7 @@ public class NodeModel extends BaseGroupModel {
 	 * @param cycle 监控频率
 	 * @see io.jpom.model.Cycle
 	 */
+	@Deprecated
 	public void setCycle(Integer cycle) {
 		this.cycle = cycle;
 	}

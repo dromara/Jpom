@@ -37,6 +37,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
 import io.jpom.model.data.NodeModel;
+import io.jpom.monitor.NodeMonitor;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.node.NodeService;
@@ -141,6 +142,8 @@ public class CheckMonitor {
 					DefaultSystemLog.getLog().debug("{} Recover bad data {}", name, count);
 				}
 			});
+			// 节点监控
+			NodeMonitor.start();
 			//
 			RemoteVersion.loadRemoteInfo();
 		});

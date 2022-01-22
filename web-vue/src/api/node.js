@@ -281,12 +281,3 @@ export function downloadRemote() {
     data: {},
   });
 }
-
-export const nodeMonitorCycle = {
-  0: "不开启",
-  "-30": "30 秒",
-  1: "1 分钟",
-  5: "5 分钟",
-  10: "10 分钟",
-  30: "30 分钟",
-};

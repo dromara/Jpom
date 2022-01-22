@@ -285,7 +285,7 @@ public abstract class BaseDbCommonService<T> {
 	 * @param <R>    乏型
 	 * @return data
 	 */
-	private <R> R entityToBean(Entity entity, Class<R> rClass) {
+	protected  <R> R entityToBean(Entity entity, Class<R> rClass) {
 		if (entity == null) {
 			return null;
 		}
