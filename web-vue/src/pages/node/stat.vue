@@ -8,13 +8,23 @@
           </a-row>
         </template> -->
         <a-row>
-          <a-col :span="4">
+          <a-col :span="3">
             <a-statistic title="节点总数" :value="nodeCount"> </a-statistic>
           </a-col>
-          <a-col :span="4" v-for="(desc, key) in statusMap" :key="key">
-            <a-statistic :title="desc" :value="statusStatMap[key]"> </a-statistic>
+          <a-col :span="3" v-for="(desc, key) in statusMap" :key="key">
+            <a-statistic :title="desc" :value="statusStatMap[key]">
+              <template #suffix>
+                <!-- <a-icon type="question-circle" /> -->
+              </template>
+            </a-statistic>
           </a-col>
-          <a-col :span="2"> <a-statistic-countdown format="s 秒" title="刷新倒计时" :value="deadline" @finish="onFinish" /> </a-col>
+          <a-col :span="3">
+            <a-statistic title="启用" :value="openStatusMap['1']"> </a-statistic>
+          </a-col>
+          <a-col :span="3">
+            <a-statistic title="关闭" :value="openStatusMap['0']"> </a-statistic>
+          </a-col>
+          <a-col :span="3"> <a-statistic-countdown format="s 秒" title="刷新倒计时" :value="deadline" @finish="onFinish" /> </a-col>
         </a-row>
       </a-card>
 
@@ -35,16 +45,25 @@
         <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
+
+        <a-tooltip slot="tooltipStatus" slot-scope="text, record" placement="topLeft" :title="text">
+          <span v-if="record.status === 0">{{ text }}</span>
+          <span v-else>-</span>
+        </a-tooltip>
         <template slot="status" slot-scope="text, record">
           <a-tooltip v-if="text !== 0" placement="topLeft" :title="record.failureMsg">
             <span>{{ statusMap[text] }}</span>
           </a-tooltip>
           <span v-else>{{ statusMap[text] }}</span>
         </template>
+        <a-tooltip slot="modifyTimeMillis" slot-scope="text" :title="parseTime(text)">
+          <span>{{ parseTime(text, "{m}-{d} {h}:{i}:{s}") }}</span>
+        </a-tooltip>
 
-        <template slot="progress" slot-scope="text">
-          <a-tooltip placement="topLeft" :title="`${text}%`">
+        <template slot="progress" slot-scope="text, record">
+          <a-tooltip v-if="record.status === 0" placement="topLeft" :title="`${text}%`">
             <a-progress
+              @click="handleHistory(record)"
               :percent="text"
               :stroke-color="{
                 from: '#87d068',
@@ -55,18 +74,24 @@
               :showInfo="false"
             />
           </a-tooltip>
+          <span v-else>-</span>
         </template>
       </a-table>
     </a-space>
+    <!-- 历史监控 -->
+    <a-modal v-model="monitorVisible" width="75%" :title="`${this.temp.name}历史监控图表`" :footer="null" :maskClosable="false">
+      <node-top v-if="monitorVisible" :nodeId="this.temp.id"></node-top>
+    </a-modal>
   </div>
 </template>
 <script>
 import { getStatist, status, statusStat } from "@/api/node-stat";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import NodeTop from "@/pages/node/node-layout/node-top";
 
 export default {
-  components: {},
+  components: { NodeTop },
   data() {
     return {
       loading: false,
@@ -74,8 +99,9 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       statusStatMap: {},
+      openStatusMap: {},
       nodeCount: 0,
-      // nodeMonitorCycle: nodeMonitorCycle,
+      monitorVisible: false,
       deadline: 0,
       temp: {},
       columns: [
@@ -85,17 +111,16 @@ export default {
         { title: "disk", dataIndex: "occupyDisk", sorter: true, key: "occupyDisk", ellipsis: true, scopedSlots: { customRender: "progress" } },
         { title: "memory", dataIndex: "occupyMemory", sorter: true, key: "occupyMemory", ellipsis: true, scopedSlots: { customRender: "progress" } },
         { title: "memoryUsed", dataIndex: "occupyMemoryUsed", sorter: true, key: "occupyMemoryUsed", ellipsis: true, scopedSlots: { customRender: "progress" } },
-        { title: "运行时间", dataIndex: "upTimeStr", sorter: true, key: "upTimeStr", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "状态", dataIndex: "status", sorter: true, key: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "延迟(ms)", width: 100, dataIndex: "networkTime", sorter: true, key: "networkTime", ellipsis: true, scopedSlots: { customRender: "tooltipStatus" } },
+        { title: "运行时间", dataIndex: "upTimeStr", sorter: true, key: "upTimeStr", ellipsis: true, scopedSlots: { customRender: "tooltipStatus" } },
+        { title: "状态", width: 100, dataIndex: "status", sorter: true, key: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
         {
           title: "更新时间",
           dataIndex: "modifyTimeMillis",
           ellipsis: true,
           sorter: true,
-          customRender: (text) => {
-            return parseTime(text);
-          },
-          width: 170,
+          scopedSlots: { customRender: "modifyTimeMillis" },
+          width: 140,
         },
       ],
     };
@@ -138,14 +163,16 @@ export default {
       });
       statusStat().then((res) => {
         if (res.data) {
-          this.statusStatMap = res.data;
+          this.statusStatMap = res.data.status;
           let nodeCount2 = 0;
           // console.log(this.statusStatMap);
           Object.values(this.statusStatMap).forEach((element) => {
             nodeCount2 += element;
           });
           this.nodeCount = nodeCount2;
-          this.deadline = Date.now() + 30 * 1000;
+          this.deadline = Date.now() + res.data.heartSecond * 1000;
+          //
+          this.openStatusMap = res.data.openStatus;
         }
       });
     },
@@ -161,6 +188,13 @@ export default {
     },
     onFinish() {
       this.loadData();
+    },
+    parseTime: parseTime,
+    // 历史图表
+    handleHistory(record) {
+      this.monitorVisible = true;
+      this.temp = record;
+      // { ...this.temp, record };
     },
   },
 };

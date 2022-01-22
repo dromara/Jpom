@@ -27,9 +27,6 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.cron.CronUtil;
-import cn.hutool.cron.pattern.CronPattern;
-import cn.hutool.cron.task.Task;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -37,8 +34,6 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.cron.CronUtils;
-import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.SystemMonitorLog;
@@ -47,8 +42,12 @@ import io.jpom.service.dblog.DbSystemMonitorLogService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.stat.NodeStatService;
 import io.jpom.system.AuthorizeException;
+import io.jpom.system.ServerExtConfigBean;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -57,9 +56,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @date 2019/9/17
  */
-public class NodeMonitor implements Task {
-
-	private static final String CRON_ID = "node_monitor";
+public class NodeMonitor {
 
 	private static DbSystemMonitorLogService dbSystemMonitorLogService;
 	private static NodeStatService nodeStatService;
@@ -69,11 +66,10 @@ public class NodeMonitor implements Task {
 	 * 开启调度
 	 */
 	public static void start() {
-		Task task = CronUtil.getScheduler().getTask(CRON_ID);
-		if (task == null) {
-			CronPattern cronPattern = Cycle.seconds30.getCronPattern();
-			CronUtils.upsert(CRON_ID, cronPattern.toString(), new NodeMonitor());
-		}
+		final NodeMonitor monitor = new NodeMonitor();
+		int heartSecond = ServerExtConfigBean.getInstance().getNodeHeartSecond();
+		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "Jpom Node Monitor"));
+		scheduler.scheduleAtFixedRate(monitor::execute, 10, heartSecond, TimeUnit.SECONDS);
 	}
 
 	private void init() {
@@ -88,17 +84,17 @@ public class NodeMonitor implements Task {
 		}
 	}
 
-	public static void stop() {
-		CronUtil.remove(CRON_ID);
-	}
 
-	@Override
-	public void execute() {
-		this.init();
-		NodeService nodeService = SpringUtil.getBean(NodeService.class);
-		List<NodeModel> nodeModels = nodeService.listDeDuplicationByUrl();
-		//
-		this.checkList(nodeModels);
+	private void execute() {
+		try {
+			this.init();
+			NodeService nodeService = SpringUtil.getBean(NodeService.class);
+			List<NodeModel> nodeModels = nodeService.listDeDuplicationByUrl();
+			//
+			this.checkList(nodeModels);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("节点心跳检测异常", e);
+		}
 	}
 
 	private List<NodeModel> getListByUrl(String url) {
@@ -220,7 +216,6 @@ public class NodeMonitor implements Task {
 			} else {
 				nodeStatModel.setStatus(0);
 			}
-			nodeStatModel.setOpenStatus(nodeStatModel.getOpenStatus());
 			nodeStatService.upsert(nodeStatModel);
 		}
 	}

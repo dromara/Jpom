@@ -47,24 +47,21 @@
     </a-table>
     <!-- 历史监控 -->
     <a-modal v-model="monitorVisible" width="75%" title="历史监控图表" :footer="null" :maskClosable="false">
-      <div ref="filter" class="filter">
-        <a-space>
-          <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchange" />
-          <a-button type="primary" @click="handleFilter">搜索</a-button>
-        </a-space>
-      </div>
-      <div id="history-chart">loading...</div>
+      <node-top v-if="monitorVisible" :nodeId="this.node.id"></node-top>
     </a-modal>
   </div>
 </template>
 <script>
-import { getNodeTop, getProcessList, killPid, nodeMonitorData } from "@/api/node";
+import { getNodeTop, getProcessList, killPid } from "@/api/node";
 import echarts from "echarts";
 import CustomSelect from "@/components/customSelect";
+import NodeTop from "@/pages/node/node-layout/node-top";
+import { generateChart } from "@/api/node-stat";
 
 export default {
   components: {
     CustomSelect,
+    NodeTop,
   },
   props: {
     node: {
@@ -73,7 +70,6 @@ export default {
   },
   data() {
     return {
-      topData: {},
       topChartTimer: null,
       loading: false,
       tableLocale: {
@@ -143,98 +139,18 @@ export default {
     loadNodeTop() {
       getNodeTop(this.node.id).then((res) => {
         if (res.code === 200) {
-          this.topData = res.data;
-          this.drawTopChart();
+          this.drawTopChart(res.data);
         }
       });
     },
-    generateChart(data) {
-      let cpuItem = {
-        name: "cpu占用",
-        type: "line",
-        data: [],
-        showSymbol: false,
-        // 设置折线为曲线
-        smooth: true,
-      };
-      let diskItem = {
-        name: "磁盘占用",
-        type: "line",
-        data: [],
-        showSymbol: false,
-        smooth: true,
-      };
-      let memoryItem = {
-        name: "内存占用(累计)",
-        type: "line",
-        data: [],
-        showSymbol: false,
-        smooth: true,
-      };
-      let memoryUsedItem = {
-        name: "内存占用",
-        type: "line",
-        data: [],
-        showSymbol: false,
-        smooth: true,
-      };
-      data.series.forEach((item) => {
-        cpuItem.data.push(parseFloat(item.cpu));
-        diskItem.data.push(parseFloat(item.disk));
-        memoryItem.data.push(parseFloat(item.memory));
-        if (item.memoryUsed) {
-          memoryUsedItem.data.push(parseFloat(item.memoryUsed));
-        }
-      });
-      let series = [cpuItem, memoryItem, diskItem];
-      if (memoryUsedItem.data.length > 0) {
-        series.push(memoryUsedItem);
-      }
-      let legends = series.map((data) => {
-        return data.name;
-      });
-      // 指定图表的配置项和数据
-      return {
-        title: {
-          text: "系统 Top 监控",
-        },
-        tooltip: {
-          trigger: "axis",
-        },
-        legend: {
-          data: legends,
-        },
-        grid: {
-          left: "1%",
-          right: "2%",
-          bottom: "1%",
-          containLabel: true,
-        },
-        xAxis: {
-          type: "category",
-          boundaryGap: false,
-          data: data.scales,
-        },
-        calculable: true,
-        yAxis: {
-          type: "value",
-          axisLabel: {
-            // 设置y轴数值为%
-            formatter: "{value} %",
-          },
-          max: 100,
-        },
-        dataZoom: [{ type: "inside" }, { type: "slider" }],
-        series: series,
-      };
-    },
+
     // 绘制 top 图表
-    drawTopChart() {
+    drawTopChart(topData) {
       let topChartDom = document.getElementById("top-chart");
       if (!topChartDom) {
         return;
       }
-      let option = this.generateChart(this.topData);
+      let option = generateChart(topData);
       // 绘制图表
       const topChart = echarts.init(topChartDom);
       topChart.setOption(option);
@@ -285,38 +201,6 @@ export default {
     // 历史图表
     handleHistory() {
       this.monitorVisible = true;
-      this.$nextTick(() => {
-        this.handleFilter();
-      });
-    },
-    // 刷新
-    handleFilter() {
-      const params = {
-        nodeId: this.node.id,
-        time: this.timeRange,
-      };
-      // 加载数据
-      nodeMonitorData(params).then((res) => {
-        if (res.code === 200) {
-          this.historyData = res.data;
-          this.drawHistoryChart();
-        }
-      });
-    },
-    // 选择时间
-    onchange(value, dateString) {
-      this.timeRange = `${dateString[0]} ~ ${dateString[1]}`;
-    },
-    // 画历史图表
-    drawHistoryChart() {
-      let historyChartDom = document.getElementById("history-chart");
-      if (!historyChartDom) {
-        return;
-      }
-      let option = this.generateChart(this.historyData);
-      // 绘制图表
-      const historyChart = echarts.init(historyChartDom);
-      historyChart.setOption(option);
     },
     cacheNodeProcess() {
       const cacheJson = this.getCacheNodeProcess();

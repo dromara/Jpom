@@ -222,12 +222,13 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 //            0.0% wa — IO等待占用CPU的百分比
 //            0.3% hi — 硬中断（Hardware IRQ）占用CPU的百分比
 //            0.0% si — 软中断（Software Interrupts）占用CPU的百分比
-		String value = list.stream().filter(s -> StrUtil.endWithIgnoreCase(s, "id")).map(s -> StrUtil.removeSuffixIgnoreCase(s, "id")).findAny().orElse(null);
+		String value = list.stream().filter(s -> StrUtil.endWithIgnoreCase(s, "us")).map(s -> StrUtil.removeSuffixIgnoreCase(s, "us")).findAny().orElse(null);
 		Double val = Convert.toDouble(value);
 		if (val == null) {
 			return null;
 		}
-		return String.format("%.2f", 100.00 - val);
+		// return String.format("%.2f", 100.00 - val);
+		return String.format("%.2f", val);
 	}
 
 	@Override

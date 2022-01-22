@@ -348,7 +348,6 @@ CREATE TABLE IF NOT EXISTS PUBLIC.NODE_STAT
 	osName           varchar(100) comment '所属工作空间',
 	jpomVersion      varchar(50) comment 'jpom 版本',
 	status           int DEFAULT 0 comment '状态{1，无法连接，0 正常, 2 授权信息错误}',
-	openStatus       int DEFAULT 0 comment '启用状态{1，启用，0 未启用)}',
 	failureMsg       VARCHAR(255) comment '错误消息',
 	url              VARCHAR(255) comment '节点地址',
 	name             VARCHAR(255) comment '节点名称',
