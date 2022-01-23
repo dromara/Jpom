@@ -38,6 +38,7 @@ import java.util.List;
  */
 @TableName(value = "MONITOR_INFO", name = "监控信息")
 public class MonitorModel extends BaseWorkspaceModel {
+
 	private String name;
 	/**
 	 * 监控的项目
@@ -54,6 +55,7 @@ public class MonitorModel extends BaseWorkspaceModel {
 	/**
 	 * 监控周期
 	 */
+	@Deprecated
 	private Integer cycle;
 
 	/**
@@ -73,11 +75,12 @@ public class MonitorModel extends BaseWorkspaceModel {
 		this.name = name;
 	}
 
-
+	@Deprecated
 	public Integer getCycle() {
 		return cycle;
 	}
 
+	@Deprecated
 	public void setCycle(Integer cycle) {
 		this.cycle = cycle;
 	}

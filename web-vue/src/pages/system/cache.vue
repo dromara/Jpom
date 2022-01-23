@@ -28,33 +28,94 @@
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote">运行中的定时任务</span>
-        <a-list v-if="taskList && taskList.length" bordered :data-source="taskList">
-          <a-list-item slot="renderItem" slot-scope="item">
-            <a-list-item-meta :description="item.taskId">
-              <a slot="title"> {{ item.id }}</a>
-            </a-list-item-meta>
-            <div>
-              {{ item.cron }}
-            </div>
-          </a-list-item>
-        </a-list>
+        <a-table rowKey="taskId" :columns="taskColumns" :data-source="taskList" :pagination="false">
+          <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+          <a-tooltip slot="time" slot-scope="text" placement="topLeft" :title="parseTime(text)">
+            <span>{{ parseTime(text) }}</span>
+          </a-tooltip>
+        </a-table>
       </a-timeline-item>
     </a-timeline>
   </div>
 </template>
 <script>
 import { getServerCache, clearCache } from "@/api/system";
+import { parseTime } from "@/utils/time";
 export default {
   data() {
     return {
       temp: {},
       taskList: [],
+      taskColumns: [
+        {
+          title: "任务ID",
+          dataIndex: "taskId",
+          defaultSortOrder: "descend",
+          sorter: (a, b) => a.localeCompare(b, "zh-CN"),
+          scopedSlots: { customRender: "tooltip" },
+          ellipsis: true,
+          filters: [
+            {
+              text: "构建",
+              value: "build",
+            },
+            {
+              text: "节点脚本",
+              value: "script",
+            },
+            {
+              text: "服务端脚本",
+              value: "server_script",
+            },
+            {
+              text: "ssh 脚本",
+              value: "ssh_command",
+            },
+          ],
+          onFilter: (value, record) => record.taskId.indexOf(value) === 0,
+        },
+        {
+          title: "cron",
+          dataIndex: "cron",
+          sorter: (a, b) => a.localeCompare(b, "zh-CN"),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: "执行次数",
+          dataIndex: "executeCount",
+          sortDirections: ["descend", "ascend"],
+          sorter: (a, b) => a.executeCount || 0 - b.executeCount || 0,
+        },
+        {
+          title: "成功次数",
+          dataIndex: "succeedCount",
+          sortDirections: ["descend", "ascend"],
+          sorter: (a, b) => a.succeedCount || 0 - b.succeedCount || 0,
+        },
+        {
+          title: "失败次数",
+          dataIndex: "failedCount",
+          sortDirections: ["descend", "ascend"],
+          sorter: (a, b) => a.failedCount || 0 - b.failedCount || 0,
+        },
+        {
+          title: "最后一次执行时间",
+          dataIndex: "lastExecuteTime",
+          sortDirections: ["descend", "ascend"],
+          sorter: (a, b) => a.lastExecuteTime || 0 - b.lastExecuteTime || 0,
+          scopedSlots: { customRender: "time" },
+        },
+      ],
     };
   },
   mounted() {
     this.loadData();
+    // console.log(Comparator);
   },
   methods: {
+    parseTime: parseTime,
     // load data
     loadData() {
       getServerCache().then((res) => {

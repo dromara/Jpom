@@ -22,14 +22,20 @@
  */
 package io.jpom.cron;
 
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
+import cn.hutool.cron.TaskExecutor;
 import cn.hutool.cron.TaskTable;
+import cn.hutool.cron.listener.TaskListener;
 import cn.hutool.cron.task.Task;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.system.ExtConfigBean;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -38,6 +44,30 @@ import java.util.stream.Collectors;
  * @date 2019/7/12
  **/
 public class CronUtils {
+
+	private static final Map<String, TaskStat> TASK_STAT = new ConcurrentHashMap<>(50);
+
+	/**
+	 * 任务统计
+	 */
+	private static class TaskStat {
+		/**
+		 * 执行次数
+		 */
+		private int executeCount;
+		/**
+		 * 失败次数
+		 */
+		private int failedCount;
+		/**
+		 * 成功次数
+		 */
+		private int succeedCount;
+		/**
+		 * 最后执行时间
+		 */
+		private Long lastExecuteTime;
+	}
 
 	/**
 	 * 开始
@@ -50,6 +80,27 @@ public class CronUtils {
 		Scheduler scheduler = CronUtil.getScheduler();
 		if (!scheduler.isStarted()) {
 			CronUtil.start();
+			scheduler.addListener(new TaskListener() {
+				@Override
+				public void onStart(TaskExecutor executor) {
+					TaskStat taskStat = TASK_STAT.computeIfAbsent(executor.getCronTask().getId(), s -> new TaskStat());
+					taskStat.lastExecuteTime = SystemClock.now();
+					taskStat.executeCount++;
+				}
+
+				@Override
+				public void onSucceeded(TaskExecutor executor) {
+					TaskStat taskStat = TASK_STAT.computeIfAbsent(executor.getCronTask().getId(), s -> new TaskStat());
+					taskStat.succeedCount++;
+				}
+
+				@Override
+				public void onFailed(TaskExecutor executor, Throwable exception) {
+					TaskStat taskStat = TASK_STAT.computeIfAbsent(executor.getCronTask().getId(), s -> new TaskStat());
+					taskStat.failedCount++;
+					DefaultSystemLog.getLog().error("定时任务异常", exception);
+				}
+			});
 		}
 	}
 
@@ -63,9 +114,16 @@ public class CronUtils {
 		TaskTable taskTable = scheduler.getTaskTable();
 		List<String> ids = taskTable.getIds();
 		return ids.stream().map(s -> {
+			TaskStat taskStat = TASK_STAT.get(s);
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("taskId", s);
 			jsonObject.put("cron", scheduler.getPattern(s).toString());
+			if (taskStat != null) {
+				jsonObject.put("executeCount", taskStat.executeCount);
+				jsonObject.put("failedCount", taskStat.failedCount);
+				jsonObject.put("succeedCount", taskStat.succeedCount);
+				jsonObject.put("lastExecuteTime", taskStat.lastExecuteTime);
+			}
 			return jsonObject;
 		}).collect(Collectors.toList());
 	}
