@@ -29,7 +29,7 @@
 	<img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
 </p>
 <p align="center">
-	👉 <a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://demo.jpom.io/">https://demo.jpom.io/</a>👈
+	👉 <a target="_blank" href="https://jpom.io/">https://jpom.io/</a> | <a target="_blank" href="https://demo.jpom.io/">https://demo.jpom.io/</a>👈
 </p>
 <p align="center">
 	备用地址：<a target="_blank" href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a target="_blank" href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
