@@ -212,7 +212,7 @@ export default {
             {
               title: "导航助手",
               element: document.querySelector(".jpom-userWorkspace"),
-              intro: "如果这里面没有您想要的工作空间信息，您需要先去添加一个工作空间。",
+              intro: "如果这里面没有您想要的工作空间信息，您需要先去添加一个工作空间。选择工作空间后还可以展开选择绑定的权限奥,默认只有查看权限",
             },
           ],
         },

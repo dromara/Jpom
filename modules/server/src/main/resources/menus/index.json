@@ -91,6 +91,11 @@
       {
         "id": "userOptLog",
         "title": "操作监控"
+      },
+      {
+        "id": "monitorConfigEmail",
+        "title": "邮箱配置",
+        "role": "system"
       }
     ]
   },
@@ -138,11 +143,6 @@
       {
         "id": "workspace",
         "title": "工作空间",
-        "role": "system"
-      },
-      {
-        "id": "monitorConfigEmail",
-        "title": "邮箱配置",
         "role": "system"
       },
       {

@@ -302,9 +302,18 @@ export default {
       });
     },
     updateNode() {
+      const len = this.tableSelections.length;
+      const html =
+        "确认要将选中的 " +
+        len +
+        " 个节点升级到最新版本吗？<ul style='color:red;'>" +
+        "<li>升级前请阅读更新日志里面的说明和注意事项并且<b>请注意备份数据防止数据丢失！！</b></li>" +
+        "<li>如果升级失败需要手动恢复奥</li>" +
+        " </ul>";
+      const h = this.$createElement;
       this.$confirm({
         title: "系统提示",
-        content: "确认要升级到最新版本吗？,升级前请阅读更新日志里面的说明和注意事项并且请注意备份数据防止数据丢失！！",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -335,23 +344,45 @@ export default {
       });
     },
     beforeUpload(file) {
-      const formData = new FormData();
-      formData.append("file", file);
-      uploadAgentFile(formData).then(({ code, msg }) => {
-        if (code === 200) {
-          this.$notification.success({ message: msg });
-          this.refresh();
-        } else {
-          //this.$notification.error({ message: msg });
-        }
+      const html =
+        "确认要上传最新的插件包吗？<ul style='color:red;'>" +
+        "<li>上传前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>" +
+        "<li>上传前请检查包是否完整,或者可能出现更新后无法正常启动的情况！！</li>" +
+        " </ul>";
+      const h = this.$createElement;
+      this.$confirm({
+        title: "系统提示",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          const formData = new FormData();
+          formData.append("file", file);
+          uploadAgentFile(formData).then(({ code, msg }) => {
+            if (code === 200) {
+              this.$notification.success({ message: msg });
+              this.refresh();
+            } else {
+              //this.$notification.error({ message: msg });
+            }
+          });
+        },
       });
       return false;
     },
     // 下载远程最新文件
     downloadRemoteEvent() {
+      const html =
+        "确认要下载最新版本吗？<ul style='color:red;'>" +
+        "<li>下载速度根据网速来确定,网络不佳下载会较慢</li>" +
+        "<li>下载前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>" +
+        "<li>下载完成后需要手动选择更新到节点才能完成节点更新奥</li>" +
+        "<li>如果升级失败需要手动恢复奥</li>" +
+        " </ul>";
+      const h = this.$createElement;
       this.$confirm({
         title: "系统提示",
-        content: "确认要下载最新版本吗？,下载前请阅读更新日志里面的说明和注意事项并且请注意备份数据防止数据丢失！！",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
