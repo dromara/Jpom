@@ -15,13 +15,13 @@
         </a-select>
         <a-input allowClear class="search-input-item" v-model="listQuery['%resultDirFile%']" placeholder="产物目录" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="loadData">搜索</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary" @click="handleAdd">新增</a-button>
       </a-space>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
+    <a-table :columns="columns" :data-source="list" bordered rowKey="id" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" @change="changePage">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>

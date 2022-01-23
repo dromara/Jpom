@@ -6,7 +6,7 @@
         <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
         <a-input class="search-input-item" v-model="listQuery['%user%']" placeholder="用户名" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="loadData">搜索</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary" @click="handleAdd">新增</a-button>
 
@@ -25,7 +25,14 @@
       </a-space>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" @change="changePage" bordered :rowKey="(record, index) => index">
+    <a-table
+      :data-source="list"
+      :columns="columns"
+      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+      @change="changePage"
+      bordered
+      :rowKey="(record, index) => index"
+    >
       <template slot="nodeId" slot-scope="text, record">
         <!-- <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button> -->
         <div v-if="sshAgentInfo[record.id]">

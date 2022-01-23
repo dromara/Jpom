@@ -38,7 +38,15 @@
       </a-space>
     </div>
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
-    <a-table :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="(this, pagination)" @change="changePage">
+    <a-table
+      :columns="columns"
+      :data-source="list"
+      bordered
+      rowKey="id"
+      @expand="expand"
+      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+      @change="changePage"
+    >
       <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>

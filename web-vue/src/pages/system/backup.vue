@@ -15,7 +15,7 @@
       </a-space>
     </div>
     <!-- 表格 -->
-    <a-table :columns="columns" :data-source="list" bordered rowKey="id" @change="changePage" :pagination="pagination">
+    <a-table :columns="columns" :data-source="list" bordered rowKey="id" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
