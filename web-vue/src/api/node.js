@@ -144,17 +144,17 @@ export function deleteNode(id) {
   });
 }
 
-// 节点 top 命令
-export function getNodeTop(nodeId) {
-  return axios({
-    url: "/node/getTop",
-    method: "post",
-    data: { nodeId },
-    headers: {
-      loading: "no",
-    },
-  });
-}
+// // 节点 top 命令
+// export function getNodeTop(nodeId) {
+//   return axios({
+//     url: "/node/getTop",
+//     method: "post",
+//     data: { nodeId },
+//     headers: {
+//       loading: "no",
+//     },
+//   });
+// }
 
 // 获取进程列表
 export function getProcessList(data) {
@@ -189,7 +189,7 @@ export function killPid(params) {
  */
 export function nodeMonitorData(params) {
   return axios({
-    url: "/node/nodeMonitor_data.json",
+    url: "/node/node_monitor_data.json",
     method: "post",
     data: params,
   });

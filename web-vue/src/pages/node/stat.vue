@@ -60,27 +60,37 @@
           <span>{{ parseTime(text, "{m}-{d} {h}:{i}:{s}") }}</span>
         </a-tooltip>
 
-        <template slot="progress" slot-scope="text, record">
-          <a-tooltip v-if="record.status === 0" placement="topLeft" :title="`${text}%`">
-            <a-progress
-              @click="handleHistory(record)"
-              :percent="text"
-              :stroke-color="{
-                from: '#87d068',
-                to: '#108ee9',
-              }"
-              size="small"
-              status="active"
-              :showInfo="false"
-            />
+        <template slot="networkTime" slot-scope="text, record">
+          <a-tooltip @click="handleHistory(record, 'networkTime')" v-if="record.status === 0" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
           </a-tooltip>
           <span v-else>-</span>
+        </template>
+
+        <template slot="progress" slot-scope="text, record">
+          <div v-if="parseFloat(text) >= 0">
+            <a-tooltip v-if="record.status === 0" placement="topLeft" :title="`当前值：${text}% 点击查看历史值`">
+              <a-progress
+                @click="handleHistory(record, 'nodeTop')"
+                :percent="text"
+                :stroke-color="{
+                  '0%': '#87d068',
+                  '30%': '#87d068',
+                  '100%': '#108ee9',
+                }"
+                size="small"
+                status="active"
+              />
+            </a-tooltip>
+            <span v-else>-</span>
+          </div>
+          <div v-else>-</div>
         </template>
       </a-table>
     </a-space>
     <!-- 历史监控 -->
     <a-modal v-model="monitorVisible" width="75%" :title="`${this.temp.name}历史监控图表`" :footer="null" :maskClosable="false">
-      <node-top v-if="monitorVisible" :nodeId="this.temp.id"></node-top>
+      <node-top v-if="monitorVisible" :type="this.temp.type" :nodeId="this.temp.id"></node-top>
     </a-modal>
   </div>
 </template>
@@ -113,11 +123,11 @@ export default {
       columns: [
         { title: "节点名称", dataIndex: "name", sorter: true, key: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点地址", dataIndex: "url", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "cpu", dataIndex: "occupyCpu", sorter: true, key: "occupyCpu", ellipsis: true, scopedSlots: { customRender: "progress" } },
-        { title: "disk", dataIndex: "occupyDisk", sorter: true, key: "occupyDisk", ellipsis: true, scopedSlots: { customRender: "progress" } },
-        { title: "memory", dataIndex: "occupyMemory", sorter: true, key: "occupyMemory", ellipsis: true, scopedSlots: { customRender: "progress" } },
-        { title: "memoryUsed", dataIndex: "occupyMemoryUsed", sorter: true, key: "occupyMemoryUsed", ellipsis: true, scopedSlots: { customRender: "progress" } },
-        { title: "延迟(ms)", width: 100, dataIndex: "networkTime", defaultSortOrder: "descend", sorter: true, key: "networkTime", ellipsis: true, scopedSlots: { customRender: "tooltipStatus" } },
+        { title: "cpu", dataIndex: "occupyCpu", sorter: true, key: "occupyCpu", scopedSlots: { customRender: "progress" } },
+        { title: "disk", dataIndex: "occupyDisk", sorter: true, key: "occupyDisk", scopedSlots: { customRender: "progress" } },
+        { title: "memory", dataIndex: "occupyMemory", sorter: true, key: "occupyMemory", scopedSlots: { customRender: "progress" } },
+        { title: "memoryUsed", dataIndex: "occupyMemoryUsed", sorter: true, key: "occupyMemoryUsed", scopedSlots: { customRender: "progress" } },
+        { title: "延迟(ms)", width: 100, dataIndex: "networkTime", defaultSortOrder: "descend", sorter: true, key: "networkTime", ellipsis: true, scopedSlots: { customRender: "networkTime" } },
         { title: "运行时间", dataIndex: "upTimeStr", sorter: true, key: "upTimeStr", ellipsis: true, scopedSlots: { customRender: "tooltipStatus" } },
         { title: "状态", width: 100, dataIndex: "status", sorter: true, key: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
         {
@@ -157,7 +167,7 @@ export default {
   methods: {
     // 加载数据
     loadData(pointerEvent) {
-      this.list = [];
+      //this.list = [];
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
       getStatist(this.listQuery).then((res) => {
@@ -195,12 +205,12 @@ export default {
     onFinish() {
       this.loadData();
     },
-    parseTime: parseTime,
+    parseTime,
     // 历史图表
-    handleHistory(record) {
+    handleHistory(record, type) {
       this.monitorVisible = true;
       this.temp = record;
-      // { ...this.temp, record };
+      this.temp = { ...this.temp, type };
     },
   },
 };
