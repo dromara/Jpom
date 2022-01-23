@@ -3,6 +3,10 @@
     <div ref="filter" class="filter">
       <a-space>
         <a-input v-model="listQuery['%name%']" placeholder="监控名称" class="search-input-item" />
+        <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
+          <a-select-option :value="1">开启</a-select-option>
+          <a-select-option :value="0">关闭</a-select-option>
+        </a-select>
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
           <a-button type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>

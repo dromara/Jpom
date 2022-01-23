@@ -54,10 +54,15 @@ public class MonitorModel extends BaseWorkspaceModel {
 	private Boolean autoRestart;
 	/**
 	 * 监控周期
+	 *
+	 * @see io.jpom.model.Cycle
 	 */
 	@Deprecated
 	private Integer cycle;
-
+	/**
+	 * 监控定时周期
+	 */
+	private String execCron;
 	/**
 	 * 监控开启状态
 	 */
@@ -66,6 +71,20 @@ public class MonitorModel extends BaseWorkspaceModel {
 	 * 报警状态
 	 */
 	private Boolean alarm;
+
+	public String getExecCron() {
+		if (execCron == null) {
+			// 兼容旧版本
+			if (cycle != null) {
+				return String.format("0 0/%s * * * ?", cycle);
+			}
+		}
+		return execCron;
+	}
+
+	public void setExecCron(String execCron) {
+		this.execCron = execCron;
+	}
 
 	public String getName() {
 		return name;
@@ -101,7 +120,11 @@ public class MonitorModel extends BaseWorkspaceModel {
 		return status;
 	}
 
-
+	/**
+	 * 开启状态
+	 *
+	 * @return true 启用
+	 */
 	public boolean status() {
 		return status != null && status;
 	}
