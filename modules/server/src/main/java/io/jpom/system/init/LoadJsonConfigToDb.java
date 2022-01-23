@@ -33,6 +33,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.Const;
 import io.jpom.model.data.*;
 import io.jpom.model.log.MonitorNotifyLog;
 import io.jpom.service.dblog.DbMonitorNotifyLogService;
@@ -132,7 +133,8 @@ public class LoadJsonConfigToDb {
 				return;
 			}
 			SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
-			parametersServer.upsert(ServerWhitelist.ID, serverWhitelist, ServerWhitelist.ID);
+			String id = ServerWhitelist.workspaceId(Const.WORKSPACE_DEFAULT_ID);
+			parametersServer.upsert(id, serverWhitelist, id);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));

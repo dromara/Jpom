@@ -50,7 +50,6 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
-import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.StringUtil;
@@ -81,14 +80,14 @@ public class OutGivingProjectController extends BaseServerController {
 
 	private final OutGivingServer outGivingServer;
 	private final ProjectInfoCacheService projectInfoCacheService;
-	private final SystemParametersServer systemParametersServer;
+	private final OutGivingWhitelistService outGivingWhitelistService;
 
 	public OutGivingProjectController(OutGivingServer outGivingServer,
 									  ProjectInfoCacheService projectInfoCacheService,
-									  SystemParametersServer systemParametersServer) {
+									  OutGivingWhitelistService outGivingWhitelistService) {
 		this.outGivingServer = outGivingServer;
 		this.projectInfoCacheService = projectInfoCacheService;
-		this.systemParametersServer = systemParametersServer;
+		this.outGivingWhitelistService = outGivingWhitelistService;
 	}
 
 	@RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -213,6 +212,7 @@ public class OutGivingProjectController extends BaseServerController {
 		return outGivingModel;
 	}
 
+
 	/**
 	 * 远程下载节点分发文件
 	 *
@@ -227,7 +227,7 @@ public class OutGivingProjectController extends BaseServerController {
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
 		Assert.notNull(afterOpt1, "请选择分发后的操作");
 		// 验证远程 地址
-		ServerWhitelist whitelist = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
+		ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(getRequest());
 		Set<String> allowRemoteDownloadHost = whitelist.getAllowRemoteDownloadHost();
 		Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
 		List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());

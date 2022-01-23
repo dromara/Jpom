@@ -171,8 +171,18 @@
         <a-row type="flex" justify="center" :offset="6">
           <a-form-model-item>
             <a-space>
-              <a-button type="primary" :disabled="this.nodeList.length <= 0 || !tempNodeConfig.content" @click="onNodeSubmit(false)">保存</a-button>
-              <a-button type="primary" :disabled="this.nodeList.length <= 0 || !tempNodeConfig.content" @click="onNodeSubmit(true)">保存并重启</a-button>
+              <a-button
+                type="primary"
+                :disabled="this.nodeList.length <= 0 || !tempNodeConfig.content || !tempNodeConfig.templateNodeId || tempNodeConfig.chooseNode.length <= 0"
+                @click="onNodeSubmit(false)"
+                >保存</a-button
+              >
+              <a-button
+                type="primary"
+                :disabled="this.nodeList.length <= 0 || !tempNodeConfig.content || !tempNodeConfig.templateNodeId || tempNodeConfig.chooseNode.length <= 0"
+                @click="onNodeSubmit(true)"
+                >保存并重启</a-button
+              >
             </a-space>
           </a-form-model-item>
         </a-row>
