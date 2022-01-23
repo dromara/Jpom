@@ -78,6 +78,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
 		DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
 		processBuilder.redirectErrorStream(true);
 		processBuilder.command(command);
+		processBuilder.directory(scriptFile.getParentFile());
 	}
 
 	/**
