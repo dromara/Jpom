@@ -25,7 +25,7 @@
             bordered
             rowKey="id"
             class="table"
-            :pagination="this.pagination"
+            :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
             @change="changePage"
             :row-selection="rowSelection"
           >

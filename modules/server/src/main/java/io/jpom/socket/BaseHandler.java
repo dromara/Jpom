@@ -62,7 +62,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
 
 	private void showHelloMsg(Map<String, Object> attributes, WebSocketSession session) {
 		UserModel userInfo = (UserModel) attributes.get("userInfo");
-		String payload = StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId() + StrUtil.CR);
+		String payload = StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId() + StrUtil.CRLF);
 		this.sendMsg(session, payload);
 	}
 

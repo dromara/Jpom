@@ -29,6 +29,7 @@ import io.jpom.cron.CronUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -87,6 +88,16 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
 	@Override
 	public int delByKey(String keyValue) {
 		int delByKey = super.delByKey(keyValue);
+		if (delByKey > 0) {
+			String taskId = "ssh_command:" + keyValue;
+			CronUtils.remove(taskId);
+		}
+		return delByKey;
+	}
+
+	@Override
+	public int delByKey(String keyValue, HttpServletRequest request) {
+		int delByKey = super.delByKey(keyValue, request);
 		if (delByKey > 0) {
 			String taskId = "ssh_command:" + keyValue;
 			CronUtils.remove(taskId);
