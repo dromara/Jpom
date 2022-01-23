@@ -32,7 +32,7 @@
 	👉 <a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://demo.jpom.io/">https://demo.jpom.io/</a>👈
 </p>
 <p align="center">
-	备用地址：<a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
+	备用地址：<a target="_blank" href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a target="_blank" href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
 ## 您为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
