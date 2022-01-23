@@ -16,6 +16,7 @@
               <ul>
                 <li>命令内容支持工作空间环境变量</li>
                 <li>执行命令将自动替换为 sh 命令文件、并自动加载环境变量：/etc/profile、/etc/bashrc、~/.bashrc、~/.bash_profile</li>
+                <li>执行命令包含：<b>#disabled-template-auto-evn</b> 将取消自动加载环境变量(注意是整行不能包含空格)</li>
                 <li>命令文件将上传至 ${user.home}/.jpom/xxxx.sh 执行完成将自动删除</li>
               </ul>
             </div>

@@ -196,8 +196,13 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 		try {
 			String tempId = SecureUtil.sha1(sshModel.getId() + ArrayUtil.join(command, StrUtil.COMMA));
 			File buildSsh = FileUtil.file(ConfigBean.getInstance().getTempPath(), "ssh_temp", tempId + ".sh");
-			sshExecTemplateInputStream = ResourceUtil.getStream("classpath:/bin/execTemplate.sh");
-			String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
+			String sshExecTemplate;
+			if (ArrayUtil.contains(command, "#disabled-template-auto-evn")) {
+				sshExecTemplate = StrUtil.EMPTY;
+			} else {
+				sshExecTemplateInputStream = ResourceUtil.getStream("classpath:/bin/execTemplate.sh");
+				sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
+			}
 			StringBuilder stringBuilder = new StringBuilder(sshExecTemplate);
 			for (String s : command) {
 				stringBuilder.append(s).append(StrUtil.LF);

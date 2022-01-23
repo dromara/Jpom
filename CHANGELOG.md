@@ -23,6 +23,8 @@
 8. 【server】邮箱配置菜单移动到监控管理
 9. 【server】节点分发白名单配置区分工作空间（不同工作空间不能配置）
 10. 【server】升级 SpringBoot 版本 2.6.2
+11. 脚本模版执行目录修改为脚本所在目录
+12. 【server】SSH 命令模版支持取消默认加载环境变量：`#disabled-template-auto-evn`
 
 ------
 
