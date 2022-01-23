@@ -66,7 +66,15 @@
         </a-space>
       </div>
       <!-- 数据表格 -->
-      <a-table :data-source="envVarList" :loading="envVarLoading" :columns="envVarColumns" :pagination="envVarPagination" @change="changeListeEnvVar" bordered :rowKey="(record, index) => index">
+      <a-table
+        :data-source="envVarList"
+        :loading="envVarLoading"
+        :columns="envVarColumns"
+        :pagination="this.envVarListQuery.total / this.envVarListQuery.limit > 1 ? (this, envVarPagination) : false"
+        @change="changeListeEnvVar"
+        bordered
+        :rowKey="(record, index) => index"
+      >
         <a-tooltip slot="value" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>

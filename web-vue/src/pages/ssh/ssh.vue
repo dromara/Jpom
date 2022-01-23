@@ -246,7 +246,7 @@
         :data-source="viewOperationLogList"
         :loading="viewOperationLoading"
         :columns="viewOperationLogColumns"
-        :pagination="viewOperationLogPagination"
+        :pagination="viewOperationLogListQuery.total / viewOperationLogListQuery.limit > 1 ? (this, viewOperationLogPagination) : false"
         @change="changeListLog"
         bordered
         :rowKey="(record, index) => index"
