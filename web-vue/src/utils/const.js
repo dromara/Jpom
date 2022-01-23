@@ -85,6 +85,10 @@ export const CRON_DATA_SOURCE = [
         value: "0 0/1 * * * ?",
       },
       {
+        title: "5分钟",
+        value: "0 0/5 * * * ?",
+      },
+      {
         title: "10分钟",
         value: "0 0/10 * * * ?",
       },
@@ -126,6 +130,10 @@ export const CRON_DATA_SOURCE = [
       {
         title: "10秒一次",
         value: "0/10 * * * * ?",
+      },
+      {
+        title: "30秒一次",
+        value: "0/30 * * * * ?",
       },
     ],
   },

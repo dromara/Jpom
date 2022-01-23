@@ -22,7 +22,6 @@
  */
 package io.jpom.controller.monitor;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
@@ -45,7 +44,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -84,7 +82,6 @@ public class MonitorListController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String getMonitorList() {
 		PageResultDto<MonitorModel> pageResultDto = monitorService.listPage(getRequest());
@@ -98,7 +95,6 @@ public class MonitorListController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.DEL)
 	public String deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) throws SQLException {
 		//
@@ -121,7 +117,6 @@ public class MonitorListController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EDIT)
 	public String updateMonitor(String id,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name,
@@ -170,33 +165,32 @@ public class MonitorListController extends BaseServerController {
 		return JsonMessage.getString(200, "修改成功");
 	}
 
-	/**
-	 * 开启或关闭监控
-	 *
-	 * @param id     id
-	 * @param status 状态
-	 * @param type   类型
-	 * @return json
-	 */
-	@RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.EDIT)
-	public String changeStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空")) String id,
-							   String status, String type) {
-		MonitorModel monitorModel = monitorService.getByKey(id);
-		Assert.notNull(monitorModel, "不存在监控项啦");
-
-		boolean bStatus = Convert.toBool(status, false);
-		if ("status".equalsIgnoreCase(type)) {
-			monitorModel.setStatus(bStatus);
-		} else if ("restart".equalsIgnoreCase(type)) {
-			monitorModel.setAutoRestart(bStatus);
-		} else {
-			return JsonMessage.getString(405, "type不正确");
-		}
-		monitorService.updateById(monitorModel);
-		return JsonMessage.getString(200, "修改成功");
-	}
+//	/**
+//	 * 开启或关闭监控
+//	 *
+//	 * @param id     id
+//	 * @param status 状态
+//	 * @param type   类型
+//	 * @return json
+//	 */
+//	@RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+//	@Feature(method = MethodFeature.EDIT)
+//	public String changeStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空")) String id,
+//							   String status, String type) {
+//		MonitorModel monitorModel = monitorService.getByKey(id);
+//		Assert.notNull(monitorModel, "不存在监控项啦");
+//
+//		boolean bStatus = Convert.toBool(status, false);
+//		if ("status".equalsIgnoreCase(type)) {
+//			monitorModel.setStatus(bStatus);
+//		} else if ("restart".equalsIgnoreCase(type)) {
+//			monitorModel.setAutoRestart(bStatus);
+//		} else {
+//			return JsonMessage.getString(405, "type不正确");
+//		}
+//		monitorService.updateById(monitorModel);
+//		return JsonMessage.getString(200, "修改成功");
+//	}
 
 
 }

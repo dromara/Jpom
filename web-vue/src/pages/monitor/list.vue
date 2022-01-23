@@ -14,8 +14,8 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-switch slot="status" slot-scope="text" :checked="text" checked-children="开启" un-checked-children="关闭" />
-      <a-switch slot="autoRestart" slot-scope="text" :checked="text" checked-children="是" un-checked-children="否" />
+      <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开启" un-checked-children="关闭" />
+      <a-switch slot="autoRestart" slot-scope="text" :checked="text" disabled checked-children="是" un-checked-children="否" />
       <a-switch slot="alarm" slot-scope="text" :checked="text" disabled checked-children="报警中" un-checked-children="未报警" />
       <a-tooltip slot="parent" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -33,12 +33,21 @@
         <a-form-model-item label="监控名称" prop="name">
           <a-input v-model="temp.name" placeholder="监控名称" />
         </a-form-model-item>
+
         <a-form-model-item label="开启状态" prop="status">
-          <a-switch v-model="temp.status" checked-children="开" un-checked-children="关" />
+          <a-space size="large">
+            <a-switch v-model="temp.status" checked-children="开" un-checked-children="关" />
+            <div>
+              自动重启:
+              <a-switch v-model="temp.autoRestart" checked-children="开" un-checked-children="关" />
+            </div>
+          </a-space>
         </a-form-model-item>
-        <a-form-model-item label="自动重启" prop="autoRestart">
-          <a-switch v-model="temp.autoRestart" checked-children="开" un-checked-children="关" />
-        </a-form-model-item>
+
+        <!-- <a-form-model-item label="自动重启" prop="autoRestart">
+           
+          </a-form-model-item> -->
+
         <a-form-model-item label="监控周期" prop="cycle">
           <a-radio-group v-model="temp.cycle" name="cycle">
             <a-radio :value="1">1 分钟</a-radio>
@@ -54,7 +63,7 @@
         </a-form-model-item>
         <a-form-model-item prop="notifyUser" class="jpom-notify">
           <template slot="label">
-            报警联系人
+            联系人
             <a-tooltip v-show="!temp.id">
               <template slot="title"> 如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。 </template>
               <a-icon type="question-circle" theme="filled" />
@@ -337,7 +346,4 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
-  margin-bottom: 10px;
-}
 </style>

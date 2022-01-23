@@ -96,7 +96,13 @@ export default {
     return {
       loading: false,
       statusMap: status,
-      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      listQuery: Object.assign(
+        {
+          order: "descend",
+          order_field: "networkTime",
+        },
+        PAGE_DEFAULT_LIST_QUERY
+      ),
       list: [],
       statusStatMap: {},
       openStatusMap: {},
@@ -111,7 +117,7 @@ export default {
         { title: "disk", dataIndex: "occupyDisk", sorter: true, key: "occupyDisk", ellipsis: true, scopedSlots: { customRender: "progress" } },
         { title: "memory", dataIndex: "occupyMemory", sorter: true, key: "occupyMemory", ellipsis: true, scopedSlots: { customRender: "progress" } },
         { title: "memoryUsed", dataIndex: "occupyMemoryUsed", sorter: true, key: "occupyMemoryUsed", ellipsis: true, scopedSlots: { customRender: "progress" } },
-        { title: "延迟(ms)", width: 100, dataIndex: "networkTime", sorter: true, key: "networkTime", ellipsis: true, scopedSlots: { customRender: "tooltipStatus" } },
+        { title: "延迟(ms)", width: 100, dataIndex: "networkTime", defaultSortOrder: "descend", sorter: true, key: "networkTime", ellipsis: true, scopedSlots: { customRender: "tooltipStatus" } },
         { title: "运行时间", dataIndex: "upTimeStr", sorter: true, key: "upTimeStr", ellipsis: true, scopedSlots: { customRender: "tooltipStatus" } },
         { title: "状态", width: 100, dataIndex: "status", sorter: true, key: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
         {
