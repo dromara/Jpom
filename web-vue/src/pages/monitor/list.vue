@@ -40,7 +40,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editMonitorVisible" width="600px" title="编辑监控" @ok="handleEditMonitorOk" :maskClosable="false">
+    <a-modal v-model="editMonitorVisible" width="60%" title="编辑监控" @ok="handleEditMonitorOk" :maskClosable="false">
       <a-form-model ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="监控名称" prop="name">
           <a-input v-model="temp.name" placeholder="监控名称" />
@@ -99,6 +99,9 @@
             :lazy="false"
             :titles="['待选择', '已选择']"
             show-search
+            :list-style="{
+              width: '18vw',
+            }"
             :filter-option="filterOption"
             :target-keys="targetKeys"
             :render="(item) => item.name"

@@ -126,7 +126,8 @@ public class BackupInfoController extends BaseServerController {
 		if (!FileUtil.exist(file)) {
 			return JsonMessage.toJson(400, "备份文件不存在");
 		}
-
+		// 清空 sql 加载记录
+		DbConfig.getInstance().clearExecuteSqlLog();
 		// 还原备份文件
 		boolean flag = backupInfoService.restoreWithSql(backupInfoModel.getFilePath());
 		if (flag) {

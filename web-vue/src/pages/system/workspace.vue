@@ -8,6 +8,15 @@
           <a-button type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary" @click="handleAdd">新增</a-button>
+        <a-tooltip>
+          <template slot="title">
+            <ul>
+              <li>工作空间用于隔离数据,工作空间下面可以有不同数据,不同权限,不同菜单等来实现权限控制</li>
+              <li>工作空间环境变量用于构建命令相关</li>
+            </ul>
+          </template>
+          <a-icon type="question-circle" theme="filled" />
+        </a-tooltip>
       </a-space>
     </div>
     <!-- 数据表格 -->

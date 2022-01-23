@@ -139,20 +139,35 @@ export default {
     },
     // 开始上传文件
     startUpload() {
-      const formData = new FormData();
-      formData.append("file", this.fileList[0]);
-      formData.append("nodeId", this.nodeId);
-      // 上传文件
-      uploadUpgradeFile(formData).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
-          });
+      const html =
+        "确认要上传文件更新到最新版本吗？<ul style='color:red;'>" +
+        "<li>上传更新前请阅读更新日志里面的说明和注意事项并且<b>请注意备份数据防止数据丢失！！</b></li>" +
+        "<li>上传前请检查包是否完整,或者可能出现更新后无法正常启动的情况！！</li>" +
+        "<li>如果升级失败需要手动恢复奥</li>" +
+        " </ul>";
+      const h = this.$createElement;
+      this.$confirm({
+        title: "系统提示",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          const formData = new FormData();
+          formData.append("file", this.fileList[0]);
+          formData.append("nodeId", this.nodeId);
+          // 上传文件
+          uploadUpgradeFile(formData).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
 
-          this.startCheckUpgradeStatus(res.msg);
-        }
+              this.startCheckUpgradeStatus(res.msg);
+            }
+          });
+          this.fileList = [];
+        },
       });
-      this.fileList = [];
     },
     startCheckUpgradeStatus(msg) {
       this.checkCount = 0;
@@ -229,9 +244,17 @@ export default {
     },
     // 升级
     upgrageVerion() {
+      // "确认要升级到最新版本吗？,升级前请阅读更新日志里面的说明和注意事项并且请注意备份数据防止数据丢失！！"
+      const html =
+        "确认要下载更新最新版本吗？<ul style='color:red;'>" +
+        "<li>下载速度根据网速来确定,网络不佳下载会较慢</li>" +
+        "<li>下载前请阅读更新日志里面的说明和注意事项并且<b>请注意备份数据防止数据丢失！！</b></li>" +
+        "<li>如果升级失败需要手动恢复奥</li>" +
+        " </ul>";
+      const h = this.$createElement;
       this.$confirm({
         title: "系统提示",
-        content: "确认要升级到最新版本吗？,升级前请阅读更新日志里面的说明和注意事项并且请注意备份数据防止数据丢失！！",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
