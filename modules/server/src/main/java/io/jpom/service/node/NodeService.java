@@ -13,7 +13,6 @@ import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
@@ -220,7 +219,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
 	 */
 	private void fillNodeInfo(NodeModel nodeModel) {
 		nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
-		nodeModel.setCycle(ObjectUtil.defaultIfNull(nodeModel.getCycle(), Cycle.none.getCode()));
+		nodeModel.setCycle(0);
 		nodeModel.setOpenStatus(ObjectUtil.defaultIfNull(nodeModel.getOpenStatus(), 0));
 	}
 

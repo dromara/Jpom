@@ -50,6 +50,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * 监控执行器
+ *
  * @author bwcx_jzy
  * @since 2021/12/14
  */
@@ -61,12 +63,12 @@ public class MonitorItem implements Runnable {
 	private final MonitorService monitorService;
 	private final NodeService nodeService;
 
-	public MonitorItem(MonitorModel monitorModel) {
-		this.monitorModel = monitorModel;
+	public MonitorItem(String id) {
 		this.dbMonitorNotifyLogService = SpringUtil.getBean(DbMonitorNotifyLogService.class);
 		this.userService = SpringUtil.getBean(UserService.class);
 		this.monitorService = SpringUtil.getBean(MonitorService.class);
 		this.nodeService = SpringUtil.getBean(NodeService.class);
+		this.monitorModel = monitorService.getByKey(id);
 	}
 
 	@Override

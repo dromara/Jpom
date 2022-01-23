@@ -4,6 +4,7 @@
       <a-space>
         <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
         <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
+        <a-input class="search-input-item" v-model="listQuery['%user%']" placeholder="用户名" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
           <a-button type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
@@ -90,7 +91,7 @@
         <a-form-model-item label="认证方式" prop="connectType">
           <a-radio-group v-model="temp.connectType" :options="options" />
         </a-form-model-item>
-        <a-form-model-item label="User" prop="user">
+        <a-form-model-item label="用户名" prop="user">
           <a-input v-model="temp.user" placeholder="用户" />
         </a-form-model-item>
         <!-- 新增时需要填写 -->
@@ -334,7 +335,7 @@ export default {
 
         { title: "Host", dataIndex: "host", sorter: true, ellipsis: true },
         { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true },
-        { title: "User", dataIndex: "user", sorter: true, width: 120, ellipsis: true },
+        { title: "用户名", dataIndex: "user", sorter: true, width: 120, ellipsis: true },
         { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true },
         {
           title: "关联节点",

@@ -22,15 +22,17 @@
  */
 package io.jpom.service.monitor;
 
-import cn.hutool.core.util.ObjectUtil;
-import io.jpom.model.Cycle;
-import io.jpom.model.data.MonitorModel;
-import io.jpom.monitor.MonitorTask;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.task.Task;
+import cn.jiangzeyin.common.DefaultSystemLog;
+import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
+import io.jpom.model.data.MonitorModel;
+import io.jpom.monitor.MonitorItem;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,15 +46,16 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
 	@Override
 	public void insert(MonitorModel monitorModel) {
 		super.insert(monitorModel);
-		if (monitorModel.status()) {
-			MonitorTask.start();
-		}
+		this.checkCron(monitorModel);
 	}
 
 	@Override
 	public int delByKey(String keyValue) {
 		int byKey = super.delByKey(keyValue);
-		this.startCron();
+		if (byKey > 0) {
+			String taskId = "monitor:" + keyValue;
+			CronUtils.remove(taskId);
+		}
 		return byKey;
 	}
 
@@ -61,36 +64,71 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
 		// 关闭监听
 		MonitorModel monitorModel = new MonitorModel();
 		monitorModel.setStatus(true);
-		long count = super.count(super.dataBeanToEntity(monitorModel));
-		if (count > 0) {
-			MonitorTask.start();
-		} else {
-			MonitorTask.stop();
+		List<MonitorModel> monitorModels = super.listByBean(monitorModel);
+		int size = CollUtil.size(monitorModels);
+		if (size > 0) {
+			monitorModels.forEach(this::checkCron);
 		}
-		return (int) count;
+		return size;
 	}
 
 	@Override
 	public int updateById(MonitorModel info) {
 		int updateById = super.updateById(info);
-		this.startCron();
+		if (updateById > 0) {
+			this.checkCron(info);
+		}
 		return updateById;
 	}
 
-
 	/**
-	 * 根据周期获取list
+	 * 检查定时任务 状态
 	 *
-	 * @param cycle 周期
-	 * @return list
+	 * @param monitorModel 监控信息
 	 */
-	public List<MonitorModel> listRunByCycle(Cycle cycle) {
-		MonitorModel monitorModel = new MonitorModel();
-		monitorModel.setCycle(cycle.getCode());
-		monitorModel.setStatus(true);
-		List<MonitorModel> monitorModels = this.listByBean(monitorModel);
-		return ObjectUtil.defaultIfNull(monitorModels, Collections.EMPTY_LIST);
+	private void checkCron(MonitorModel monitorModel) {
+		String id = monitorModel.getId();
+		String taskId = "monitor:" + id;
+		String autoExecCron = monitorModel.getExecCron();
+		if (StrUtil.isEmpty(autoExecCron)) {
+			// 忽略没有关键字段更新
+			return;
+		}
+		if (!monitorModel.status()) {
+			CronUtils.remove(taskId);
+			return;
+		}
+		DefaultSystemLog.getLog().debug("start monitor cron {} {} {}", id, monitorModel.getName(), autoExecCron);
+		CronUtils.upsert(taskId, autoExecCron, new MonitorService.CronTask(id));
 	}
+
+	private static class CronTask implements Task {
+
+		private final String id;
+
+		public CronTask(String id) {
+			this.id = id;
+		}
+
+		@Override
+		public void execute() {
+			new MonitorItem(id).run();
+		}
+	}
+
+//	/**
+//	 * 根据周期获取list
+//	 *
+//	 * @param cycle 周期
+//	 * @return list
+//	 */
+//	public List<MonitorModel> listRunByCycle(Cycle cycle) {
+//		MonitorModel monitorModel = new MonitorModel();
+//		monitorModel.setCycle(cycle.getCode());
+//		monitorModel.setStatus(true);
+//		List<MonitorModel> monitorModels = this.listByBean(monitorModel);
+//		return ObjectUtil.defaultIfNull(monitorModels, Collections.EMPTY_LIST);
+//	}
 
 	/**
 	 * 设置报警状态

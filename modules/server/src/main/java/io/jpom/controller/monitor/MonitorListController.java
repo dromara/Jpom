@@ -23,13 +23,13 @@
 package io.jpom.controller.monitor;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.pattern.CronPattern;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseServerController;
-import io.jpom.model.Cycle;
+import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.UserModel;
@@ -119,9 +119,18 @@ public class MonitorListController extends BaseServerController {
 	@RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
 	public String updateMonitor(String id,
-								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name,
+								@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
+								@ValidatorItem(msg = "请配置监控周期") String execCron,
 								String notifyUser) {
-		int cycle = getParameterInt("cycle", Cycle.five.getCode());
+
+		UserModel user = getUser();
+		Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
+		try {
+			new CronPattern(execCron);
+		} catch (Exception e) {
+			throw new IllegalArgumentException("定时构建表达式格式不正确");
+		}
+
 		String status = getParameter("status");
 		String autoRestart = getParameter("autoRestart");
 
@@ -150,7 +159,7 @@ public class MonitorListController extends BaseServerController {
 			monitorModel = new MonitorModel();
 		}
 		monitorModel.setAutoRestart("on".equalsIgnoreCase(autoRestart));
-		monitorModel.setCycle(cycle);
+		monitorModel.setExecCron(execCron);
 		monitorModel.projects(nodeProjects);
 		monitorModel.setStatus(start);
 		monitorModel.notifyUser(notifyUserList);

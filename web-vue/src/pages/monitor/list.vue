@@ -3,6 +3,18 @@
     <div ref="filter" class="filter">
       <a-space>
         <a-input v-model="listQuery['%name%']" placeholder="监控名称" class="search-input-item" />
+        <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
+          <a-select-option :value="1">开启</a-select-option>
+          <a-select-option :value="0">关闭</a-select-option>
+        </a-select>
+        <a-select v-model="listQuery.autoRestart" allowClear placeholder="自动重启" class="search-input-item">
+          <a-select-option :value="1">是</a-select-option>
+          <a-select-option :value="0">否</a-select-option>
+        </a-select>
+        <a-select v-model="listQuery.alarm" allowClear placeholder="报警状态" class="search-input-item">
+          <a-select-option :value="1">报警中</a-select-option>
+          <a-select-option :value="0">未报警</a-select-option>
+        </a-select>
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
           <a-button type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
@@ -48,13 +60,26 @@
            
           </a-form-model-item> -->
 
-        <a-form-model-item label="监控周期" prop="cycle">
+        <!-- <a-form-model-item label="监控周期" prop="cycle">
           <a-radio-group v-model="temp.cycle" name="cycle">
             <a-radio :value="1">1 分钟</a-radio>
             <a-radio :value="5">5 分钟</a-radio>
             <a-radio :value="10">10 分钟</a-radio>
             <a-radio :value="30">30 分钟</a-radio>
           </a-radio-group>
+        </a-form-model-item> -->
+
+        <a-form-model-item label="监控周期" prop="execCron">
+          <a-auto-complete v-model="temp.execCron" placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）" option-label-prop="value">
+            <template slot="dataSource">
+              <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
+                <span slot="label">
+                  {{ group.title }}
+                </span>
+                <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} {{ opt.value }} </a-select-option>
+              </a-select-opt-group>
+            </template>
+          </a-auto-complete>
         </a-form-model-item>
         <a-form-model-item label="监控项目" prop="projects">
           <a-select v-model="projectKeys" mode="multiple" show-search option-filter-prop="children">
@@ -89,12 +114,13 @@ import { getMonitorList, editMonitor, deleteMonitor } from "@/api/monitor";
 import { getUserListAll } from "@/api/user";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { parseTime, itemGroupBy } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
 export default {
   data() {
     return {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      cronDataSource: CRON_DATA_SOURCE,
       list: [],
       userList: [],
       nodeProjectList: [],
@@ -105,10 +131,11 @@ export default {
       temp: {},
       editMonitorVisible: false,
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" }, width: 150 },
-        { title: "开启状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" }, width: 150 },
-        { title: "自动重启", dataIndex: "autoRestart", ellipsis: true, scopedSlots: { customRender: "autoRestart" }, width: 150 },
-        { title: "报警状态", dataIndex: "alarm", ellipsis: true, scopedSlots: { customRender: "alarm" }, width: 150 },
+        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "监控周期", dataIndex: "execCron", ellipsis: true, scopedSlots: { customRender: "execCron" } },
+        { title: "开启状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" }, width: 120 },
+        { title: "自动重启", dataIndex: "autoRestart", ellipsis: true, scopedSlots: { customRender: "autoRestart" }, width: 120 },
+        { title: "报警状态", dataIndex: "alarm", ellipsis: true, scopedSlots: { customRender: "alarm" }, width: 120 },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         {
           title: "修改时间",
@@ -345,5 +372,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-</style>
+<style scoped></style>
