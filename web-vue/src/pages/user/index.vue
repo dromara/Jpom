@@ -5,13 +5,20 @@
         <a-input v-model="listQuery.id" placeholder="用户名ID" class="search-input-item" />
         <a-input v-model="listQuery['%name%']" placeholder="用户名" class="search-input-item" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="loadData">搜索</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary" @click="handleAdd">新增</a-button>
       </a-space>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="(this, pagination)" @change="changePage" bordered :rowKey="(record, index) => index">
+    <a-table
+      :data-source="list"
+      :columns="columns"
+      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+      @change="changePage"
+      bordered
+      :rowKey="(record, index) => index"
+    >
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button type="primary" @click="handleEdit(record)">编辑</a-button>

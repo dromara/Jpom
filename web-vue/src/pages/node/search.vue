@@ -50,7 +50,15 @@
         </a-tooltip>
       </a-space>
     </div>
-    <a-table :data-source="projList" :columns="columns" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
+    <a-table
+      :data-source="projList"
+      :columns="columns"
+      bordered
+      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+      @change="changePage"
+      :row-selection="rowSelection"
+      :rowKey="(record, index) => index"
+    >
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>

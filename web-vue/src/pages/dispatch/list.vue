@@ -12,7 +12,7 @@
           <a-select-option v-for="(name, key) in statusMap" :key="key">{{ name }}</a-select-option>
         </a-select>
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="loadData">搜索</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary" @click="handleLink">添加关联项目</a-button>
         <a-button type="primary" @click="handleAdd">创建分发项目</a-button>
@@ -32,7 +32,15 @@
       </a-space>
     </div>
     <!-- 表格 :scroll="{x: 740, y: tableHeight - 60}" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
-    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="this.pagination" @change="changePage">
+    <a-table
+      :columns="columns"
+      :data-source="list"
+      bordered
+      rowKey="id"
+      @expand="expand"
+      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+      @change="changePage"
+    >
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>

@@ -41,7 +41,7 @@
         </a-space>
       </div>
       <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
-      <a-table :columns="columns" :data-source="list" bordered rowKey="id" :pagination="(this, pagination)" @change="changePage">
+      <a-table :columns="columns" :data-source="list" bordered rowKey="id" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" @change="changePage">
         <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
@@ -61,7 +61,7 @@
         </a-tooltip>
 
         <template slot="networkTime" slot-scope="text, record">
-          <a-tooltip @click="handleHistory(record, 'networkTime')" v-if="record.status === 0" placement="topLeft" :title="text">
+          <a-tooltip @click="handleHistory(record, 'networkTime')" v-if="record.status === 0" placement="topLeft" :title="`当前值：${text}ms 点击查看历史值`">
             <span>{{ text }}</span>
           </a-tooltip>
           <span v-else>-</span>

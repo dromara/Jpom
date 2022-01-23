@@ -8,7 +8,7 @@
         <a-input class="search-input-item" v-model="listQuery['%projectId%']" placeholder="项目ID" />
         <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="项目名称" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="loadData">搜索</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary" @click="handleAdd">新增</a-button>
 
@@ -34,7 +34,15 @@
       状态数据是异步获取有一定时间延迟
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="pagination" @change="changePage" :row-selection="rowSelection" bordered :rowKey="(record, index) => index">
+    <a-table
+      :data-source="list"
+      :columns="columns"
+      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+      @change="changePage"
+      :row-selection="rowSelection"
+      bordered
+      :rowKey="(record, index) => index"
+    >
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="`名称：${text}`">
         <span>{{ text }}</span>
       </a-tooltip>

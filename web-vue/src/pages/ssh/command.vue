@@ -5,7 +5,7 @@
         <a-input v-model="listQuery['%name%']" placeholder="搜索命令" class="search-input-item" />
         <a-input v-model="listQuery['%desc%']" placeholder="描述" class="search-input-item" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="getCommandData">搜索</a-button>
+          <a-button type="primary" :loading="loading" @click="getCommandData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary" @click="createCommand">新建命令</a-button>
         <a-tooltip>
@@ -24,7 +24,14 @@
         </a-tooltip>
       </a-space>
     </div>
-    <a-table :loading="loading" :data-source="commandList" :columns="columns" bordered :pagination="pagination" @change="changePage" :rowKey="(record, index) => index">
+    <a-table
+      :data-source="commandList"
+      :columns="columns"
+      bordered
+      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+      @change="changePage"
+      :rowKey="(record, index) => index"
+    >
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>

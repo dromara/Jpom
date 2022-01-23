@@ -16,12 +16,19 @@
         </a-select>
         <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" @click="loadData">搜索</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
         </a-tooltip>
       </a-space>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="pagination" bordered :rowKey="(record, index) => index" @change="change">
+    <a-table
+      :data-source="list"
+      :columns="columns"
+      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+      bordered
+      :rowKey="(record, index) => index"
+      @change="change"
+    >
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="nodeMap[text]">
         <span>{{ nodeMap[text] }}</span>
       </a-tooltip>
