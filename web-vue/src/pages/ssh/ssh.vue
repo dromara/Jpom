@@ -137,7 +137,13 @@
           <template slot="label">
             禁止命令
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title"> 限制禁止在在线终端执行的命令 </template>
+              <template slot="title">
+                限制禁止在在线终端执行的命令
+                <ul>
+                  <li>超级管理员没有任何限制</li>
+                  <li>其他用户可以配置权限解除限制</li>
+                </ul>
+              </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>

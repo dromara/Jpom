@@ -26,13 +26,13 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.node.ScriptExecuteLogCacheModel;
-import io.jpom.model.node.ScriptCacheModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.node.ScriptCacheModel;
+import io.jpom.model.node.ScriptExecuteLogCacheModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.socket.BaseProxyHandler;
@@ -47,7 +47,7 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/24
  */
-@Feature(cls = ClassFeature.NODE_SCRIPT)
+@Feature(cls = ClassFeature.NODE_SCRIPT, method = MethodFeature.EXECUTE)
 public class NodeScriptHandler extends BaseProxyHandler {
 
 	public NodeScriptHandler() {
@@ -62,13 +62,13 @@ public class NodeScriptHandler extends BaseProxyHandler {
 	@Override
 	protected String handleTextMessage(Map<String, Object> attributes, ProxySession proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) {
 		if (consoleCommandOp != ConsoleCommandOp.heart) {
-			super.logOpt(attributes, json);
+			super.logOpt(this.getClass(), attributes, json);
 		}
 		if (consoleCommandOp == ConsoleCommandOp.start) {
-			UserModel userModel = (UserModel) attributes.get("userInfo");
-			if (userModel.isDemoUser()) {
-				return PermissionInterceptor.DEMO_TIP;
-			}
+			//			UserModel userModel = (UserModel) attributes.get("userInfo");
+			//			if (userModel.isDemoUser()) {
+			//				return PermissionInterceptor.DEMO_TIP;
+			//			}
 			// 开始执行
 			String executeId = this.createLog(attributes);
 			json.put("executeId", executeId);

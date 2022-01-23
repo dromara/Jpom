@@ -24,12 +24,9 @@ package io.jpom.socket.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.PermissionInterceptor;
-import io.jpom.model.RunMode;
-import io.jpom.model.data.UserModel;
-import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.ProxySession;
@@ -42,7 +39,7 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/19
  */
-@Feature(cls = ClassFeature.PROJECT_CONSOLE)
+@Feature(cls = ClassFeature.PROJECT_CONSOLE, method = MethodFeature.EXECUTE)
 public class ConsoleHandler extends BaseProxyHandler {
 
 	public ConsoleHandler() {
@@ -59,15 +56,16 @@ public class ConsoleHandler extends BaseProxyHandler {
 									   ProxySession proxySession,
 									   JSONObject json,
 									   ConsoleCommandOp consoleCommandOp) {
-		ProjectInfoCacheModel dataItem = (ProjectInfoCacheModel) attributes.get("dataItem");
-		UserModel userModel = (UserModel) attributes.get("userInfo");
-		if (RunMode.Dsl.name().equals(dataItem.getRunMode()) && userModel.isDemoUser()) {
-			if (consoleCommandOp == ConsoleCommandOp.stop || consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
-				return PermissionInterceptor.DEMO_TIP;
-			}
-		}
+		//ProjectInfoCacheModel dataItem = (ProjectInfoCacheModel) attributes.get("dataItem");
+//		UserModel userModel = (UserModel) attributes.get("userInfo");
+//		if (RunMode.Dsl.name().equals(dataItem.getRunMode()) && userModel.isDemoUser()) {
+//			if (consoleCommandOp == ConsoleCommandOp.stop || consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
+//				return PermissionInterceptor.DEMO_TIP;
+//			}
+//		}
 		if (consoleCommandOp != ConsoleCommandOp.heart) {
-			super.logOpt(attributes, json);
+			super.logOpt(this.getClass(), attributes, json);
+
 		}
 		proxySession.send(json.toString());
 		return null;

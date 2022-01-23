@@ -40,10 +40,11 @@ import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
+import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.socket.BaseHandler;
-import io.jpom.socket.BaseProxyHandler;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
@@ -63,17 +64,28 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author bwcx_jzy
  * @date 2019/8/9
  */
-@Feature(cls = ClassFeature.SSH_TERMINAL)
+@Feature(cls = ClassFeature.SSH_TERMINAL, method = MethodFeature.EXECUTE)
 public class SshHandler extends BaseHandler {
 
 	private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
-	private SshTerminalExecuteLogService sshTerminalExecuteLogService;
+	private static SshTerminalExecuteLogService sshTerminalExecuteLogService;
+	private static UserBindWorkspaceService userBindWorkspaceService;
+
+	private static void init() {
+		if (sshTerminalExecuteLogService == null) {
+			sshTerminalExecuteLogService = SpringUtil.getBean(SshTerminalExecuteLogService.class);
+		}
+		if (userBindWorkspaceService == null) {
+			userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
+		}
+	}
 
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+	public void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
 		Map<String, Object> attributes = session.getAttributes();
 		SshModel sshItem = (SshModel) attributes.get("dataItem");
-		BaseProxyHandler.logOpt(this.getClass(), attributes, attributes);
+
+		super.logOpt(this.getClass(), attributes, attributes);
 		//
 		HandlerItem handlerItem;
 		try {
@@ -113,16 +125,22 @@ public class SshHandler extends BaseHandler {
 				return;
 			}
 		}
+		init();
+		Map<String, Object> attributes = session.getAttributes();
+		UserModel userInfo = (UserModel) attributes.get("userInfo");
+		// 判断是没有任何限制
+		String workspaceId = handlerItem.sshItem.getWorkspaceId();
+		boolean sshCommandNotLimited = userBindWorkspaceService.exists(userInfo.getId(), workspaceId + UserBindWorkspaceService.SSH_COMMAND_NOT_LIMITED);
 		try {
-			this.sendCommand(handlerItem, payload);
+			this.sendCommand(handlerItem, payload, userInfo, sshCommandNotLimited);
 		} catch (Exception e) {
 			sendBinary(session, "Failure:" + e.getMessage());
 			DefaultSystemLog.getLog().error("执行命令异常", e);
 		}
 	}
 
-	private void sendCommand(HandlerItem handlerItem, String data) throws Exception {
-		if (handlerItem.checkInput(data)) {
+	private void sendCommand(HandlerItem handlerItem, String data, UserModel userInfo, boolean sshCommandNotLimited) throws Exception {
+		if (handlerItem.checkInput(data, userInfo, sshCommandNotLimited)) {
 			handlerItem.outputStream.write(data.getBytes());
 		} else {
 			handlerItem.outputStream.write("没有执行相关命令权限".getBytes());
@@ -140,9 +158,6 @@ public class SshHandler extends BaseHandler {
 	 * @param refuse  是否拒绝
 	 */
 	private void logCommands(WebSocketSession session, String command, boolean refuse) {
-		if (sshTerminalExecuteLogService == null) {
-			sshTerminalExecuteLogService = SpringUtil.getBean(SshTerminalExecuteLogService.class);
-		}
 		List<String> split = StrUtil.split(command, StrUtil.CR);
 		// 最后一个是否为回车
 		boolean all = StrUtil.endWith(command, StrUtil.CR);
@@ -217,18 +232,31 @@ public class SshHandler extends BaseHandler {
 			return nowLineInput.toString();
 		}
 
-		public boolean checkInput(String msg) {
+		/**
+		 * 检查输入是否包含禁止命令，记录执行记录
+		 *
+		 * @param msg                  输入
+		 * @param userInfo             用户
+		 * @param sshCommandNotLimited 是否解除限制
+		 * @return true 没有任何限制
+		 */
+		public boolean checkInput(String msg, UserModel userInfo, boolean sshCommandNotLimited) {
 			String allCommand = this.append(msg);
 			boolean refuse;
-			if (StrUtil.equalsAny(msg, StrUtil.CR, StrUtil.TAB)) {
-				String join = nowLineInput.toString();
-				if (StrUtil.equals(msg, StrUtil.CR)) {
-					nowLineInput.setLength(0);
-				}
-				refuse = SshModel.checkInputItem(sshItem, join);
+			if (userInfo.isSuperSystemUser() || sshCommandNotLimited) {
+				// 超级管理员不限制,有权限都不限制
+				refuse = true;
 			} else {
-				// 复制输出
-				refuse = SshModel.checkInputItem(sshItem, msg);
+				if (StrUtil.equalsAny(msg, StrUtil.CR, StrUtil.TAB)) {
+					String join = nowLineInput.toString();
+					if (StrUtil.equals(msg, StrUtil.CR)) {
+						nowLineInput.setLength(0);
+					}
+					refuse = SshModel.checkInputItem(sshItem, join);
+				} else {
+					// 复制输出
+					refuse = SshModel.checkInputItem(sshItem, msg);
+				}
 			}
 			// 执行命令行记录
 			logCommands(session, allCommand, refuse);

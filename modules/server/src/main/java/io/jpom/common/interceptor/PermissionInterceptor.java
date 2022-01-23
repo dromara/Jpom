@@ -59,7 +59,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 
 	private NodeService nodeService;
 	private UserBindWorkspaceService userBindWorkspaceService;
-	public static final String DEMO_TIP = "演示系统不能使用该功能,如果完整体验请部署后使用";
+	public static final String DEMO_TIP = "演示账号不能使用该功能";
 	/**
 	 * demo 账号不能使用的功能
 	 */
@@ -127,7 +127,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 			String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
 			boolean exists = userBindWorkspaceService.exists(userModel.getId(), workspaceId + StrUtil.DASHED + method.name());
 			if (!exists) {
-				this.errorMsg(response, "您没有对应功能【" + feature.cls().getName() + "】管理权限:" + method.getName());
+				this.errorMsg(response, "您没有对应功能【" + feature.cls().getName() + StrUtil.DASHED + method.getName() + "】管理权限");
 				return false;
 			}
 		}

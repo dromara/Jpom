@@ -45,6 +45,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.socket.BaseProxyHandler;
@@ -67,8 +68,8 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author lf
  */
-@SystemPermission
-@Feature(cls = ClassFeature.UPGRADE_NODE_LIST)
+@SystemPermission(superUser = true)
+@Feature(cls = ClassFeature.UPGRADE_NODE_LIST, method = MethodFeature.EXECUTE)
 public class NodeUpdateHandler extends BaseProxyHandler {
 
 	private final ConcurrentMap<String, NodeClient> clientMap = new ConcurrentHashMap<>();
@@ -87,11 +88,6 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 		super.init(session, attributes);
 		systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
 		nodeService = SpringUtil.getBean(NodeService.class);
-	}
-
-	@Override
-	protected boolean showHelloMsg() {
-		return false;
 	}
 
 	@Override
@@ -147,7 +143,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 				model.setData(getAgentVersion());
 				break;
 			case "updateNode":
-				super.logOpt(attributes, json);
+				super.logOpt(this.getClass(), attributes, json);
 				updateNode(model, session);
 				break;
 			case "heart":

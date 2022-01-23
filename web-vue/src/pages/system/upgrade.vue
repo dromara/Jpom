@@ -189,7 +189,12 @@ export default {
         this.init(ids);
       };
       this.socket.onmessage = ({ data: socketData }) => {
-        const msgObj = JSON.parse(socketData);
+        let msgObj;
+        try {
+          msgObj = JSON.parse(socketData);
+        } catch (e) {
+          console.error(e);
+        }
         if (msgObj) {
           const { command, data, nodeId } = msgObj;
           this[`${command}Result`] && this[`${command}Result`](data, nodeId);

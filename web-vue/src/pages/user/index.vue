@@ -257,6 +257,7 @@ export default {
               return { key: element.id + "-" + item.value, title: item.title + "权限" };
             });
             children.push({ key: element.id + "-systemUser", title: "节点管理员" });
+            children.push({ key: element.id + "-sshCommandNotLimited", title: "SSH 终端命令无限制" });
             this.workspaceList.push({
               key: element.id,
               title: element.name,

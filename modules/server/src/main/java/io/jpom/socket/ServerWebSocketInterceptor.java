@@ -24,15 +24,22 @@ package io.jpom.socket;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
+import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.NodeService;
+import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
@@ -52,6 +59,31 @@ import java.util.Map;
  */
 public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 
+	private boolean checkNode(HttpServletRequest httpServletRequest, Map<String, Object> attributes, UserModel userModel) {
+		// 验证 node 权限
+		String nodeId = httpServletRequest.getParameter("nodeId");
+		if (!JpomApplication.SYSTEM_ID.equals(nodeId)) {
+			NodeService nodeService = SpringUtil.getBean(NodeService.class);
+			NodeModel nodeModel = nodeService.getByKey(nodeId, userModel);
+			if (nodeModel == null) {
+				return false;
+			}
+			//
+			attributes.put("nodeInfo", nodeModel);
+		}
+		return true;
+	}
+
+	private HandlerType fromType(HttpServletRequest httpServletRequest) {
+		// 判断拦截类型
+		String type = httpServletRequest.getParameter("type");
+		HandlerType handlerType = EnumUtil.fromString(HandlerType.class, type, null);
+		if (handlerType == null) {
+			DefaultSystemLog.getLog().warn("传入的类型错误：{}", type);
+		}
+		return handlerType;
+	}
+
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 		if (request instanceof ServletServerHttpRequest) {
@@ -64,22 +96,9 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 			if (userModel == null) {
 				return false;
 			}
-			// 验证 node 权限
-			String nodeId = httpServletRequest.getParameter("nodeId");
-			if (!JpomApplication.SYSTEM_ID.equals(nodeId)) {
-				NodeService nodeService = SpringUtil.getBean(NodeService.class);
-				NodeModel nodeModel = nodeService.getByKey(nodeId, userModel);
-				if (nodeModel == null) {
-					return false;
-				}
-				//
-				attributes.put("nodeInfo", nodeModel);
-			}
-			// 判断拦截类型
-			String type = httpServletRequest.getParameter("type");
-			HandlerType handlerType = EnumUtil.fromString(HandlerType.class, type, null);
-			if (handlerType == null) {
-				DefaultSystemLog.getLog().warn("传入的类型错误：{}", type);
+			boolean checkNode = this.checkNode(httpServletRequest, attributes, userModel);
+			HandlerType handlerType = this.fromType(httpServletRequest);
+			if (!checkNode || handlerType == null) {
 				return false;
 			}
 			switch (handlerType) {
@@ -94,7 +113,6 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 					attributes.put("dataItem", dataItem);
 					break;
 				}
-
 				case nodeScript: {
 					// 节点脚本模板
 					Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
@@ -129,13 +147,12 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 					break;
 				}
 				case nodeUpdate:
-					if (!userModel.isSuperSystemUser()) {
-						return false;
-					}
 					break;
 				default:
 					return false;
 			}
+			String permissionMsg = this.checkPermission(userModel, attributes, handlerType);
+			attributes.put("permissionMsg", permissionMsg);
 			//
 			String ip = ServletUtil.getClientIP(httpServletRequest);
 			attributes.put("ip", ip);
@@ -146,6 +163,48 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 检查权限
+	 *
+	 * @param userInfo    用户
+	 * @param attributes  属性
+	 * @param handlerType 功能类型
+	 * @return 错误消息
+	 */
+	private String checkPermission(UserModel userInfo, Map<String, Object> attributes, HandlerType handlerType) {
+		if (userInfo.isSuperSystemUser()) {
+			return StrUtil.EMPTY;
+		}
+		if (userInfo.isDemoUser()) {
+			return PermissionInterceptor.DEMO_TIP;
+		}
+		if (handlerType == HandlerType.nodeUpdate) {
+			return "您没有对应功能【" + ClassFeature.NODE_UPGRADE.getName() + "】管理权限";
+		}
+		Object dataItem = attributes.get("dataItem");
+		Object nodeInfo = attributes.get("nodeInfo");
+		String workspaceId = BeanUtil.getProperty(dataItem == null ? nodeInfo : dataItem, "workspaceId");
+		//?  : BeanUtil.getProperty(dataItem, "workspaceId");
+		//
+		attributes.put("workspaceId", workspaceId);
+		Class<?> handlerClass = handlerType.getHandlerClass();
+		SystemPermission systemPermission = handlerClass.getAnnotation(SystemPermission.class);
+		if (systemPermission != null) {
+			if (!userInfo.isSuperSystemUser()) {
+				return "您没有对应功能【" + ClassFeature.NODE_UPGRADE.getName() + "】管理权限";
+			}
+		}
+		Feature feature = handlerClass.getAnnotation(Feature.class);
+		MethodFeature method = feature.method();
+		ClassFeature cls = feature.cls();
+		UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
+		boolean exists = userBindWorkspaceService.exists(userInfo.getId(), workspaceId + StrUtil.DASHED + method.name());
+		if (exists) {
+			return StrUtil.EMPTY;
+		}
+		return "您没有对应功能【" + cls.getName() + "-" + method.getName() + "】管理权限";
 	}
 
 	private BaseWorkspaceModel checkData(HandlerType handlerType, UserModel userModel, HttpServletRequest httpServletRequest) {

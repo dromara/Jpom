@@ -22,16 +22,53 @@
  */
 package io.jpom.socket;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.spring.SpringUtil;
+import com.alibaba.fastjson.JSONObject;
+import io.jpom.model.data.NodeModel;
+import io.jpom.model.data.UserModel;
+import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
+import io.jpom.system.init.OperateLogController;
+import io.jpom.util.SocketSessionUtil;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
  * @date 2019/8/9
  */
 public abstract class BaseHandler extends TextWebSocketHandler {
+
+	@Override
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		Map<String, Object> attributes = session.getAttributes();
+		//
+		this.showHelloMsg(attributes, session);
+		//
+		String permissionMsg = (String) attributes.get("permissionMsg");
+		if (StrUtil.isNotEmpty(permissionMsg)) {
+			this.sendMsg(session, permissionMsg);
+			this.destroy(session);
+			return;
+		}
+		this.afterConnectionEstablishedImpl(session);
+	}
+
+	private void showHelloMsg(Map<String, Object> attributes, WebSocketSession session) {
+		UserModel userInfo = (UserModel) attributes.get("userInfo");
+		String payload = StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId() + StrUtil.CR);
+		this.sendMsg(session, payload);
+	}
+
+	protected void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
+
+	}
 
 	@Override
 	public void handleTransportError(WebSocketSession session, Throwable exception) {
@@ -50,4 +87,58 @@ public abstract class BaseHandler extends TextWebSocketHandler {
 	 * @param session session
 	 */
 	public abstract void destroy(WebSocketSession session);
+
+	protected void sendMsg(WebSocketSession session, String msg) {
+		try {
+			SocketSessionUtil.send(session, msg);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("发送消息失败", e);
+		}
+	}
+
+	/**
+	 * 操作 websocket 日志
+	 *
+	 * @param cls        class
+	 * @param attributes 属性
+	 * @param reqData    请求数据
+	 */
+	protected void logOpt(Class<?> cls, Map<String, Object> attributes, Object reqData) {
+		String ip = (String) attributes.get("ip");
+		NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
+		// 记录操作日志
+		UserModel userInfo = (UserModel) attributes.get("userInfo");
+		String workspaceId = (String) attributes.get("workspaceId");
+		OperateLogController.CacheInfo cacheInfo = new OperateLogController.CacheInfo();
+		cacheInfo.setIp(ip);
+		Feature feature = cls.getAnnotation(Feature.class);
+		MethodFeature method = feature.method();
+//		Assert.state(feature != null && feature, "权限功能没有配置正确");
+		cacheInfo.setClassFeature(feature.cls());
+		cacheInfo.setWorkspaceId(workspaceId);
+		cacheInfo.setMethodFeature(method);
+
+		cacheInfo.setNodeModel(nodeModel);
+		cacheInfo.setDataId(null);
+		String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
+		cacheInfo.setUserAgent(userAgent);
+		cacheInfo.setReqData(JSONObject.toJSONString(reqData));
+
+		//cacheInfo.setMethodFeature(execute);
+		Object proxySession = attributes.get("proxySession");
+		try {
+			attributes.remove("proxySession");
+			attributes.put("use_type", "WebSocket");
+			attributes.put("class_type", cls.getName());
+			OperateLogController operateLogController = SpringUtil.getBean(OperateLogController.class);
+			operateLogController.log(userInfo, JSONObject.toJSONString(attributes), cacheInfo);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("记录操作日志异常", e);
+		} finally {
+			if (proxySession != null) {
+				attributes.put("proxySession", proxySession);
+			}
+		}
+	}
+
 }

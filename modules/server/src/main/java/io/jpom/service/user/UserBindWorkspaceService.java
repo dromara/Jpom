@@ -46,7 +46,14 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 
 	private final WorkspaceService workspaceService;
 
+	/**
+	 * 节点管理员
+	 */
 	public static final String SYSTEM_USER = "-systemUser";
+	/**
+	 * ssh 终端没有任何限制
+	 */
+	public static final String SSH_COMMAND_NOT_LIMITED = "-sshCommandNotLimited";
 
 	public UserBindWorkspaceService(WorkspaceService workspaceService) {
 		this.workspaceService = workspaceService;
@@ -64,6 +71,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 				// 过滤
 				.filter(s -> {
 					s = StrUtil.removeSuffix(s, SYSTEM_USER);
+					s = StrUtil.removeSuffix(s, SSH_COMMAND_NOT_LIMITED);
 					MethodFeature[] values = MethodFeature.values();
 					for (MethodFeature value : values) {
 						s = StrUtil.removeSuffix(s, StrUtil.DASHED + value.name());
