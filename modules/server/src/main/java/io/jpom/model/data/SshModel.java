@@ -218,9 +218,9 @@ public class SshModel extends BaseWorkspaceModel {
 		if (StrUtil.isEmpty(notAllowedCommand)) {
 			return true;
 		}
-		List<String> split = StrUtil.split(notAllowedCommand, StrUtil.COMMA);
+		List<String> split = StrUtil.splitTrim(notAllowedCommand, StrUtil.COMMA);
 		inputItem = inputItem.toLowerCase();
-		List<String> commands = StrUtil.split(inputItem, StrUtil.CR);
+		List<String> commands = StrUtil.splitTrim(inputItem, StrUtil.CR);
 		commands.addAll(StrUtil.split(inputItem, "&"));
 		for (String s : split) {
 			//

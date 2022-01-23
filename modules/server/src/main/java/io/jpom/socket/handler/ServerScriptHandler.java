@@ -26,12 +26,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.socket.BaseProxyHandler;
@@ -48,7 +48,7 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2022/1/19
  */
-@Feature(cls = ClassFeature.SCRIPT)
+@Feature(cls = ClassFeature.SCRIPT, method = MethodFeature.EXECUTE)
 public class ServerScriptHandler extends BaseProxyHandler {
 
 
@@ -78,13 +78,10 @@ public class ServerScriptHandler extends BaseProxyHandler {
 	protected String handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
 		ScriptModel scriptModel = (ScriptModel) attributes.get("dataItem");
 		if (consoleCommandOp != ConsoleCommandOp.heart) {
-			super.logOpt(attributes, json);
+			super.logOpt(this.getClass(), attributes, json);
 			switch (consoleCommandOp) {
 				case start: {
-					UserModel userModel = (UserModel) attributes.get("userInfo");
-					if (userModel.isDemoUser()) {
-						return PermissionInterceptor.DEMO_TIP;
-					}
+
 					String args = json.getString("args");
 					String executeId = this.createLog(attributes, scriptModel);
 					json.put("executeId", executeId);

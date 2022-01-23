@@ -23,20 +23,11 @@
 package io.jpom.socket;
 
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.plugin.ClassFeature;
-import io.jpom.plugin.Feature;
-import io.jpom.plugin.MethodFeature;
-import io.jpom.system.init.OperateLogController;
-import io.jpom.util.SocketSessionUtil;
-import org.springframework.http.HttpHeaders;
-import org.springframework.util.Assert;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -66,17 +57,8 @@ public abstract class BaseProxyHandler extends BaseHandler {
 	 */
 	protected abstract Object[] getParameters(Map<String, Object> attributes);
 
-	/**
-	 * 是否输出连接成功 消息
-	 *
-	 * @return true 输出
-	 */
-	protected boolean showHelloMsg() {
-		return true;
-	}
-
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+	public void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
 		Map<String, Object> attributes = session.getAttributes();
 		this.init(session, attributes);
 	}
@@ -104,20 +86,10 @@ public abstract class BaseProxyHandler extends BaseHandler {
 			ProxySession proxySession = new ProxySession(url, session);
 			session.getAttributes().put("proxySession", proxySession);
 		}
-		if (this.showHelloMsg()) {
-			String payload = StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId());
-			this.sendMsg(session, payload);
-		}
+
 		attributes.put("init", true);
 	}
 
-	protected void sendMsg(WebSocketSession session, String msg) {
-		try {
-			SocketSessionUtil.send(session, msg);
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("发送消息失败", e);
-		}
-	}
 
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
@@ -168,45 +140,6 @@ public abstract class BaseProxyHandler extends BaseHandler {
 		return null;
 	}
 
-	public static void logOpt(Class<?> cls, Map<String, Object> attributes,
-							  Object reqData) {
-		String ip = (String) attributes.get("ip");
-		NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
-		OperateLogController.CacheInfo cacheInfo = new OperateLogController.CacheInfo();
-		cacheInfo.setIp(ip);
-		Feature feature = cls.getAnnotation(Feature.class);
-		Assert.state(feature != null && feature.cls() != ClassFeature.NULL, "权限功能没有配置正确");
-		cacheInfo.setClassFeature(feature.cls());
-		cacheInfo.setMethodFeature(MethodFeature.EXECUTE);
-		cacheInfo.setNodeModel(nodeModel);
-		cacheInfo.setDataId(null);
-		String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
-		cacheInfo.setUserAgent(userAgent);
-		cacheInfo.setReqData(JSONObject.toJSONString(reqData));
-
-		// 记录操作日志
-		UserModel userInfo = (UserModel) attributes.get("userInfo");
-		cacheInfo.setMethodFeature(MethodFeature.EXECUTE);
-		Object proxySession = attributes.get("proxySession");
-		try {
-			attributes.remove("proxySession");
-			attributes.put("use_type", "WebSocket");
-			attributes.put("class_type", cls.getName());
-			OperateLogController operateLogController = SpringUtil.getBean(OperateLogController.class);
-			operateLogController.log(userInfo, JSONObject.toJSONString(attributes), cacheInfo);
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("记录操作日志异常", e);
-		} finally {
-			if (proxySession != null) {
-				attributes.put("proxySession", proxySession);
-			}
-		}
-	}
-
-	protected void logOpt(Map<String, Object> attributes,
-						  JSONObject json) {
-		logOpt(this.getClass(), attributes, json);
-	}
 
 	@Override
 	public void destroy(WebSocketSession session) {
