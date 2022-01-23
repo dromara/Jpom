@@ -158,8 +158,8 @@ public class SshHandler extends BaseHandler {
 	 * @param refuse  是否拒绝
 	 */
 	private void logCommands(WebSocketSession session, String command, boolean refuse) {
-		List<String> split = StrUtil.split(command, StrUtil.CR);
-		// 最后一个是否为回车
+		List<String> split = StrUtil.splitTrim(command, StrUtil.CR);
+		// 最后一个是否为回车, 最后一个不是回车表示还未提交，还在缓存去待确认
 		boolean all = StrUtil.endWith(command, StrUtil.CR);
 		int size = split.size();
 		split = CollUtil.sub(split, 0, all ? size : size - 1);
@@ -243,24 +243,21 @@ public class SshHandler extends BaseHandler {
 		public boolean checkInput(String msg, UserModel userInfo, boolean sshCommandNotLimited) {
 			String allCommand = this.append(msg);
 			boolean refuse;
-			if (userInfo.isSuperSystemUser() || sshCommandNotLimited) {
-				// 超级管理员不限制,有权限都不限制
-				refuse = true;
-			} else {
-				if (StrUtil.equalsAny(msg, StrUtil.CR, StrUtil.TAB)) {
-					String join = nowLineInput.toString();
-					if (StrUtil.equals(msg, StrUtil.CR)) {
-						nowLineInput.setLength(0);
-					}
-					refuse = SshModel.checkInputItem(sshItem, join);
-				} else {
-					// 复制输出
-					refuse = SshModel.checkInputItem(sshItem, msg);
+			// 超级管理员不限制,有权限都不限制
+			boolean systemUser = userInfo.isSuperSystemUser() || sshCommandNotLimited;
+			if (StrUtil.equalsAny(msg, StrUtil.CR, StrUtil.TAB)) {
+				String join = nowLineInput.toString();
+				if (StrUtil.equals(msg, StrUtil.CR)) {
+					nowLineInput.setLength(0);
 				}
+				refuse = SshModel.checkInputItem(sshItem, join);
+			} else {
+				// 复制输出
+				refuse = SshModel.checkInputItem(sshItem, msg);
 			}
 			// 执行命令行记录
 			logCommands(session, allCommand, refuse);
-			return refuse;
+			return systemUser || refuse;
 		}
 
 

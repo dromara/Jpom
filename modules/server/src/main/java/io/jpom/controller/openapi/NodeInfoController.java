@@ -23,6 +23,7 @@
 package io.jpom.controller.openapi;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -94,7 +95,8 @@ public class NodeInfoController extends AbstractController {
 							  @ValidatorItem(msg = "loginName empty") String loginName,
 							  @ValidatorItem(msg = "loginPwd empty") String loginPwd,
 							  @ValidatorItem(msg = "workspaceId empty") String workspaceId,
-							  @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "port error") int port) {
+							  @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "port error") int port,
+							  String ping) {
 		Assert.state(StrUtil.equals(token, JpomManifest.getInstance().randomIdSign()), "token error");
 		boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
 		Assert.state(exists, "workspaceId error");
@@ -105,7 +107,7 @@ public class NodeInfoController extends AbstractController {
 		if (!ipsList.contains(clientIp)) {
 			ipsList.add(clientIp);
 		}
-		List<String> canUseIps = ipsList.stream().filter(NodeInfoController.this::testIpProt).collect(Collectors.toList());
+		List<String> canUseIps = ipsList.stream().filter(s -> this.testIpProt(s, ping)).collect(Collectors.toList());
 		List<NodeModel> canUseNode = canUseIps.stream().map(s -> {
 			NodeModel model = NodeInfoController.this.createModel(s, loginName, loginPwd, port, workspaceId);
 			try {
@@ -116,6 +118,8 @@ public class NodeInfoController extends AbstractController {
 			}
 			return model;
 		}).filter(Objects::nonNull).collect(Collectors.toList());
+		// 只返回能通的 IP
+		canUseIps = canUseNode.stream().map(NodeModel::getName).collect(Collectors.toList());
 		int size1 = CollUtil.size(canUseNode);
 		//
 		JSONObject jsonObject = new JSONObject();
@@ -165,8 +169,19 @@ public class NodeInfoController extends AbstractController {
 		return CACHE_RECEIVE_PUSH.get(id);
 	}
 
-	private boolean testIpProt(String ip) {
-		return NetUtil.ping(ip, 5 * 1000);
+	/**
+	 * 尝试 ping
+	 *
+	 * @param ip   ip 地址
+	 * @param ping ping 时间
+	 * @return true
+	 */
+	private boolean testIpProt(String ip, String ping) {
+		int pingTime = Convert.toInt(ping, 5);
+		if (pingTime <= 0) {
+			return true;
+		}
+		return NetUtil.ping(ip, pingTime * 1000);
 	}
 
 	private NodeModel createModel(String ip, String loginName, String loginPwd, int port, String workspaceId) {
