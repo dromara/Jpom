@@ -33,6 +33,7 @@ import io.jpom.monitor.MonitorItem;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -57,6 +58,16 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
 			CronUtils.remove(taskId);
 		}
 		return byKey;
+	}
+
+	@Override
+	public int delByKey(String keyValue, HttpServletRequest request) {
+		int i = super.delByKey(keyValue, request);
+		if (i > 0) {
+			String taskId = "monitor:" + keyValue;
+			CronUtils.remove(taskId);
+		}
+		return i;
 	}
 
 	@Override
