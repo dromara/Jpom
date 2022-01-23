@@ -114,6 +114,7 @@ public class NodeMonitor {
 			boolean match = modelList.stream().allMatch(NodeModel::isOpenStatus);
 			if (!match) {
 				// 节点都关闭
+				this.save(modelList, 4, "节点禁用中");
 				return;
 			}
 			nodeModel.setOpenStatus(1);
@@ -181,7 +182,7 @@ public class NodeMonitor {
 	private void save(List<NodeModel> modelList, int satus, String msg) {
 		for (NodeModel nodeModel : modelList) {
 			NodeStatModel nodeStatModel = this.create(nodeModel);
-			nodeStatModel.setFailureMsg(StrUtil.maxLength(msg, 240));
+			nodeStatModel.setFailureMsg(msg);
 			nodeStatModel.setStatus(satus);
 			nodeStatService.upsert(nodeStatModel);
 		}
@@ -199,24 +200,29 @@ public class NodeMonitor {
 		//
 		for (NodeModel nodeModel : modelList) {
 			NodeStatModel nodeStatModel = this.create(nodeModel);
-			if (systemMonitor != null) {
-				nodeStatModel.setOccupyMemory(ObjectUtil.defaultIfNull(systemMonitor.getDouble("memory"), -1D));
-				nodeStatModel.setOccupyMemoryUsed(ObjectUtil.defaultIfNull(systemMonitor.getDouble("memoryUsed"), -1D));
-				nodeStatModel.setOccupyDisk(ObjectUtil.defaultIfNull(systemMonitor.getDouble("disk"), -1D));
-				nodeStatModel.setOccupyCpu(ObjectUtil.defaultIfNull(systemMonitor.getDouble("cpu"), -1D));
-			}
-			//
-			nodeStatModel.setNetworkTime(statusData.getIntValue("networkTime"));
-			nodeStatModel.setJpomVersion(statusData.getString("jpomVersion"));
-			nodeStatModel.setOsName(statusData.getString("osName"));
-			nodeStatModel.setUpTimeStr(statusData.getString("runTime"));
-			nodeStatModel.setFailureMsg(StrUtil.emptyToDefault(statusData.getString("failureMsg"), StrUtil.EMPTY));
-			//
-			Integer statusInteger = statusData.getInteger("status");
-			if (statusInteger != null) {
-				nodeStatModel.setStatus(statusInteger);
+			if (nodeModel.isOpenStatus()) {
+				if (systemMonitor != null) {
+					nodeStatModel.setOccupyMemory(ObjectUtil.defaultIfNull(systemMonitor.getDouble("memory"), -1D));
+					nodeStatModel.setOccupyMemoryUsed(ObjectUtil.defaultIfNull(systemMonitor.getDouble("memoryUsed"), -1D));
+					nodeStatModel.setOccupyDisk(ObjectUtil.defaultIfNull(systemMonitor.getDouble("disk"), -1D));
+					nodeStatModel.setOccupyCpu(ObjectUtil.defaultIfNull(systemMonitor.getDouble("cpu"), -1D));
+				}
+				//
+				nodeStatModel.setNetworkTime(statusData.getIntValue("networkTime"));
+				nodeStatModel.setJpomVersion(statusData.getString("jpomVersion"));
+				nodeStatModel.setOsName(statusData.getString("osName"));
+				nodeStatModel.setUpTimeStr(statusData.getString("runTime"));
+				nodeStatModel.setFailureMsg(StrUtil.emptyToDefault(statusData.getString("failureMsg"), StrUtil.EMPTY));
+				//
+				Integer statusInteger = statusData.getInteger("status");
+				if (statusInteger != null) {
+					nodeStatModel.setStatus(statusInteger);
+				} else {
+					nodeStatModel.setStatus(0);
+				}
 			} else {
-				nodeStatModel.setStatus(0);
+				nodeStatModel.setStatus(4);
+				nodeStatModel.setFailureMsg("节点禁用中");
 			}
 			nodeStatService.upsert(nodeStatModel);
 		}
@@ -228,6 +234,13 @@ public class NodeMonitor {
 		nodeStatModel.setWorkspaceId(model.getWorkspaceId());
 		nodeStatModel.setName(model.getName());
 		nodeStatModel.setUrl(model.getUrl());
+		//
+		nodeStatModel.setOccupyMemory(-1D);
+		nodeStatModel.setOccupyMemoryUsed(-1D);
+		nodeStatModel.setOccupyDisk(-1D);
+		nodeStatModel.setOccupyCpu(-1D);
+		nodeStatModel.setNetworkTime(-1);
+		nodeStatModel.setUpTimeStr(StrUtil.EMPTY);
 		return nodeStatModel;
 	}
 

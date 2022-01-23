@@ -101,7 +101,7 @@ export default {
             {
               title: "导航助手",
               element: document.querySelector(".ant-tabs-nav-wrap"),
-              intro: "这里是打开的选项卡，选项卡支持右键菜单哟",
+              intro: "这里是打开的选项卡，选项卡支持右键菜单哟(关闭其他,关闭左侧,关闭右侧)",
             },
             {
               title: "导航助手",

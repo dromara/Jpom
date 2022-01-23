@@ -74,10 +74,46 @@
     <a-modal v-model="updateUserVisible" title="修改用户资料" @ok="handleUpdateUserOk" :maskClosable="false">
       <a-form-model ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="临时token" prop="token">
-          <a-input v-model="temp.token" placeholder="Token" />
+          <a-input disabled v-model="temp.token" placeholder="Token">
+            <a-tooltip
+              slot="suffix"
+              title="复制"
+              v-clipboard:copy="temp.token"
+              v-clipboard:success="
+                () => {
+                  tempVue.prototype.$notification.success({ message: '复制成功' });
+                }
+              "
+              v-clipboard:error="
+                () => {
+                  tempVue.prototype.$notification.error({ message: '复制失败' });
+                }
+              "
+            >
+              <a-icon type="copy" />
+            </a-tooltip>
+          </a-input>
         </a-form-model-item>
         <a-form-model-item label="长期token" prop="md5Token">
-          <a-input v-model="temp.md5Token" placeholder="Token" />
+          <a-input disabled v-model="temp.md5Token" placeholder="Token">
+            <a-tooltip
+              slot="suffix"
+              title="复制"
+              v-clipboard:copy="temp.md5Token"
+              v-clipboard:success="
+                () => {
+                  tempVue.prototype.$notification.success({ message: '复制成功' });
+                }
+              "
+              v-clipboard:error="
+                () => {
+                  tempVue.prototype.$notification.error({ message: '复制失败' });
+                }
+              "
+            >
+              <a-icon type="copy" />
+            </a-tooltip>
+          </a-input>
         </a-form-model-item>
         <a-form-model-item label="邮箱地址" prop="email">
           <a-input v-model="temp.email" placeholder="邮箱地址" />
@@ -106,6 +142,7 @@
 import { mapGetters } from "vuex";
 import { updatePwd, sendEmailCode, editUserInfo, getUserInfo, myWorkspace } from "@/api/user";
 import sha1 from "sha1";
+import Vue from "vue";
 export default {
   data() {
     return {
@@ -114,6 +151,7 @@ export default {
       updateNameVisible: false,
       updateUserVisible: false,
       temp: {},
+      tempVue: null,
       myWorkspaceList: [],
       selectWorkspace: "",
       // 表单校验规则
@@ -265,6 +303,7 @@ export default {
           this.temp.token = this.getToken;
           //this.temp.md5Token = res.data.md5Token;
           this.updateUserVisible = true;
+          this.tempVue = Vue;
         }
       });
     },
@@ -291,7 +330,9 @@ export default {
         if (!valid) {
           return false;
         }
-        editUserInfo(this.temp).then((res) => {
+        const tempData = Object.assign({}, this.temp);
+        delete tempData.token, delete tempData.md5Token;
+        editUserInfo(tempData).then((res) => {
           // 修改成功
           if (res.code === 200) {
             this.$notification.success({

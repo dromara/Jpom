@@ -22,6 +22,7 @@
  */
 package io.jpom.model.stat;
 
+import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.log.SystemMonitorLog;
 import io.jpom.service.h2db.TableName;
@@ -68,7 +69,7 @@ public class NodeStatModel extends BaseWorkspaceModel {
 	private String jpomVersion;
 
 	/**
-	 * 状态{1，无法连接，0 正常, 2 授权信息错误, 3 状态码错误}
+	 * 状态{1，无法连接，0 正常, 2 授权信息错误, 3 状态码错误, 4 节点关闭}
 	 */
 	private Integer status;
 	/**
@@ -107,7 +108,7 @@ public class NodeStatModel extends BaseWorkspaceModel {
 	}
 
 	public void setFailureMsg(String failureMsg) {
-		this.failureMsg = failureMsg;
+		this.failureMsg = StrUtil.maxLength(failureMsg, 240);
 	}
 
 	public Double getOccupyCpu() {

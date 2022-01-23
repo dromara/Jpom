@@ -58,13 +58,13 @@ public class NodeStatController extends BaseServerController {
 			Map<String, Integer> map = CollStreamUtil.toMap(list, entity -> entity.getStr("status"), entity -> entity.getInt("cunt"));
 			jsonObject.put("status", map);
 		}
-		{
-			// 启用状态
-			String sql = "select `openStatus`,count(1) as cunt from " + nodeService.getTableName() + " where workspaceId=? group by `openStatus`";
-			List<Entity> list = nodeStatService.query(sql, workspaceId);
-			Map<String, Integer> map = CollStreamUtil.toMap(list, entity -> entity.getStr("openStatus"), entity -> entity.getInt("cunt"));
-			jsonObject.put("openStatus", map);
-		}
+//		{
+//			// 启用状态
+//			String sql = "select `openStatus`,count(1) as cunt from " + nodeService.getTableName() + " where workspaceId=? group by `openStatus`";
+//			List<Entity> list = nodeStatService.query(sql, workspaceId);
+//			Map<String, Integer> map = CollStreamUtil.toMap(list, entity -> entity.getStr("openStatus"), entity -> entity.getInt("cunt"));
+//			jsonObject.put("openStatus", map);
+//		}
 		return JsonMessage.getString(200, "", jsonObject);
 	}
 }
