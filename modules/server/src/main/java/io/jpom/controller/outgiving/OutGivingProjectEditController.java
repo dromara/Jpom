@@ -47,7 +47,6 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
-import io.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,16 +68,16 @@ import java.util.List;
 @Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingProjectEditController extends BaseServerController {
 
-	private final SystemParametersServer systemParametersServer;
+	private final OutGivingWhitelistService outGivingWhitelistService;
 	private final OutGivingServer outGivingServer;
 	private final ProjectInfoCacheService projectInfoCacheService;
 	private final BuildInfoService buildService;
 
-	public OutGivingProjectEditController(SystemParametersServer systemParametersServer,
+	public OutGivingProjectEditController(OutGivingWhitelistService outGivingWhitelistService,
 										  OutGivingServer outGivingServer,
 										  ProjectInfoCacheService projectInfoCacheService,
 										  BuildInfoService buildService) {
-		this.systemParametersServer = systemParametersServer;
+		this.outGivingWhitelistService = outGivingWhitelistService;
 		this.outGivingServer = outGivingServer;
 		this.projectInfoCacheService = projectInfoCacheService;
 		this.buildService = buildService;
@@ -288,7 +287,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 			defData.put("dslContent", getParameter("dslContent"));
 		}
 		String whitelistDirectory = getParameter("whitelistDirectory");
-		ServerWhitelist configDeNewInstance = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
+		ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(getRequest());
 		List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
 		Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, whitelistDirectory), "请选择正确的项目路径,或者还没有配置白名单");
 

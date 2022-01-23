@@ -42,12 +42,23 @@
     </a-table>
 
     <a-modal v-model="editCommandVisible" width="80vw" title="编辑 命令" @ok="handleEditCommandOk" :maskClosable="false">
-      <a-form-model ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form-model ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="命令名称" prop="name">
           <a-input v-model="temp.name" placeholder="命令名称" />
         </a-form-model-item>
 
-        <a-form-model-item label="命令内容" prop="command">
+        <a-form-model-item prop="command">
+          <template slot="label">
+            命令内容
+            <a-tooltip v-show="!temp.id">
+              <template slot="title">
+                <ul>
+                  <li>可以引用工作空间的环境变量 变量占位符 #{xxxx} xxxx 为变量名称</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <div style="height: 40vh; overflow-y: scroll">
             <code-editor v-model="temp.command" :options="{ mode: 'shell', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>

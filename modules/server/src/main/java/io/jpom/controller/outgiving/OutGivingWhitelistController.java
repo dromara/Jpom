@@ -35,11 +35,10 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -53,15 +52,18 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/22
  */
-@Controller
+@RestController
 @RequestMapping(value = "/outgiving")
 @Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingWhitelistController extends BaseServerController {
 
 	private final SystemParametersServer systemParametersServer;
+	private final OutGivingWhitelistService outGivingWhitelistService;
 
-	public OutGivingWhitelistController(SystemParametersServer systemParametersServer) {
+	public OutGivingWhitelistController(SystemParametersServer systemParametersServer,
+										OutGivingWhitelistService outGivingWhitelistService) {
 		this.systemParametersServer = systemParametersServer;
+		this.outGivingWhitelistService = outGivingWhitelistService;
 	}
 
 
@@ -73,9 +75,8 @@ public class OutGivingWhitelistController extends BaseServerController {
 	 * @author Hotstrip
 	 */
 	@RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String whiteList() {
-		ServerWhitelist serverWhitelist = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
+		ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(getRequest());
 		Field[] fields = ReflectUtil.getFields(ServerWhitelist.class);
 		Map<String, Object> map = new HashMap<>(8);
 		for (Field field : fields) {
@@ -89,6 +90,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 		return JsonMessage.getString(200, "ok", map);
 	}
 
+
 	/**
 	 * 保存节点白名单
 	 *
@@ -96,13 +98,12 @@ public class OutGivingWhitelistController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@SystemPermission
 	public String whitelistDirectorySubmit(String outGiving, String allowRemoteDownloadHost) {
 		List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");
 		list = AgentWhitelist.covertToArray(list, "项目路径白名单不能位于Jpom目录下");
 
-		ServerWhitelist serverWhitelist = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
+		ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(getRequest());
 		serverWhitelist.setOutGiving(list);
 		//
 		List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
@@ -113,7 +114,10 @@ public class OutGivingWhitelistController extends BaseServerController {
 			}
 		}
 		serverWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHostList == null ? null : CollUtil.newHashSet(allowRemoteDownloadHostList));
-		systemParametersServer.upsert(ServerWhitelist.ID, serverWhitelist, ServerWhitelist.ID);
+		//
+		String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
+		String id = ServerWhitelist.workspaceId(workspaceId);
+		systemParametersServer.upsert(id, serverWhitelist, id);
 
 		String resultData = AgentWhitelist.convertToLine(list);
 		return JsonMessage.getString(200, "保存成功", resultData);

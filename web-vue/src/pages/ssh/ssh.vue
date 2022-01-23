@@ -41,7 +41,7 @@
             <a-tooltip
               v-if="sshAgentInfo[record.id].ok"
               placement="topLeft"
-              :title="`${sshAgentInfo[record.id].pid > 0 ? 'ssh 中已经运行了插件端进程ID：' + sshAgentInfo[record.id].pid : '点击快速安装插件端,java version:' + sshAgentInfo[record.id].javaVersion}`"
+              :title="`${sshAgentInfo[record.id].pid > 0 ? 'ssh 中已经运行了插件端进程ID：' + sshAgentInfo[record.id].pid : '点击快速安装插件端,java :' + sshAgentInfo[record.id].javaVersion}`"
             >
               <a-button type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">安装节点</a-button>
             </a-tooltip>

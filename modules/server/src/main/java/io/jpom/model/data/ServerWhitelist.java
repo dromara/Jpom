@@ -22,6 +22,7 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseJsonModel;
 
 import java.util.List;
@@ -36,6 +37,16 @@ import java.util.Set;
 public class ServerWhitelist extends BaseJsonModel {
 
 	public static final String ID = "OUTGIVING_WHITELIST";
+
+	/**
+	 * 不同工作空间的 ID
+	 *
+	 * @param workspaceId 工作空间ID
+	 * @return id
+	 */
+	public static String workspaceId(String workspaceId) {
+		return ServerWhitelist.ID + StrUtil.DASHED + workspaceId;
+	}
 
 	/**
 	 * 项目的白名单

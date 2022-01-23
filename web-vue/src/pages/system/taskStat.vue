@@ -17,9 +17,7 @@ export default {
   props: {
     taskList: {
       type: Array,
-      default: function () {
-        return [];
-      },
+      default: () => [],
     },
   },
   data() {
