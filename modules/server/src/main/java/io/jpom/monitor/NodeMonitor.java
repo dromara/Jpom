@@ -130,16 +130,17 @@ public class NodeMonitor {
 					JSONObject jsonObject;
 					if (jsonMessage.getCode() == 200) {
 						jsonObject = jsonMessage.getData(JSONObject.class);
-						jsonObject.put("networkTime", networkTime);
-						this.save(modelList, nodeTopInfo, jsonObject);
 					} else {
 						// 状态码错
 						jsonObject = new JSONObject();
 						jsonObject.put("status", 3);
 						jsonObject.put("failureMsg", jsonMessage.toString());
-						jsonObject.put("networkTime", networkTime);
-						this.save(modelList, nodeTopInfo, jsonObject);
 					}
+					jsonObject.put("networkTime", networkTime);
+					if (nodeTopInfo != null) {
+						nodeTopInfo.put("networkTime", networkTime);
+					}
+					this.save(modelList, nodeTopInfo, jsonObject);
 				} catch (AuthorizeException agentException) {
 					this.save(modelList, 2, agentException.getMessage());
 				} catch (Exception e) {
@@ -161,6 +162,7 @@ public class NodeMonitor {
 				log.setOccupyDisk(systemMonitor.getDouble("disk"));
 				log.setOccupyCpu(systemMonitor.getDouble("cpu"));
 				log.setMonitorTime(systemMonitor.getLongValue("time"));
+				log.setNetworkTime(systemMonitor.getIntValue("networkTime"));
 				log.setNodeId(nodeModel.getId());
 				return log;
 			}).collect(Collectors.toList());

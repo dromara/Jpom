@@ -40,6 +40,7 @@ public class SystemMonitorLog extends BaseDbModel {
 	private String nodeId;
 	/**
 	 * 监控时间
+	 * 插件端返回的时间
 	 */
 	private Long monitorTime;
 	/**
@@ -58,6 +59,18 @@ public class SystemMonitorLog extends BaseDbModel {
 	 * 占用磁盘
 	 */
 	private Double occupyDisk;
+	/**
+	 * 网络时间
+	 */
+	private Integer networkTime;
+
+	public Integer getNetworkTime() {
+		return networkTime;
+	}
+
+	public void setNetworkTime(Integer networkTime) {
+		this.networkTime = networkTime;
+	}
 
 	public String getNodeId() {
 		return nodeId;

@@ -52,11 +52,11 @@
   </div>
 </template>
 <script>
-import { getNodeTop, getProcessList, killPid } from "@/api/node";
-import echarts from "echarts";
+import { nodeMonitorData, getProcessList, killPid } from "@/api/node";
+
 import CustomSelect from "@/components/customSelect";
 import NodeTop from "@/pages/node/node-layout/node-top";
-import { generateChart } from "@/api/node-stat";
+import { generateNodeTopChart, drawChart } from "@/api/node-stat";
 
 export default {
   components: {
@@ -137,23 +137,11 @@ export default {
     },
     // 请求 top 命令绘制图表
     loadNodeTop() {
-      getNodeTop(this.node.id).then((res) => {
+      nodeMonitorData({ nodeId: this.node.id }).then((res) => {
         if (res.code === 200) {
-          this.drawTopChart(res.data);
+          drawChart(res.data, "top-chart", generateNodeTopChart);
         }
       });
-    },
-
-    // 绘制 top 图表
-    drawTopChart(topData) {
-      let topChartDom = document.getElementById("top-chart");
-      if (!topChartDom) {
-        return;
-      }
-      let option = generateChart(topData);
-      // 绘制图表
-      const topChart = echarts.init(topChartDom);
-      topChart.setOption(option);
     },
     // 加载节点进程列表
     loadNodeProcess(v) {
