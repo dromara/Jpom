@@ -114,7 +114,12 @@ public class NodeMonitor {
 			boolean match = modelList.stream().allMatch(NodeModel::isOpenStatus);
 			if (!match) {
 				// 节点都关闭
-				this.save(modelList, 4, "节点禁用中");
+				try {
+					BaseServerController.resetInfo(UserModel.EMPTY);
+					this.save(modelList, 4, "节点禁用中");
+				} finally {
+					BaseServerController.removeEmpty();
+				}
 				return;
 			}
 			nodeModel.setOpenStatus(1);
