@@ -22,16 +22,43 @@
  */
 package io.jpom.cron;
 
+import io.jpom.model.BaseIdModel;
+
+import java.util.List;
+
 /**
+ * 需要启动定时任务的 服务接口
+ *
  * @author bwcx_jzy
  * @since 2021/12/23
  */
-public interface ICron {
+public interface ICron<T extends BaseIdModel> {
+
+	/**
+	 * 查询启动中的 所有定时任务 列表
+	 *
+	 * @return list
+	 */
+	List<T> queryStartingList();
 
 	/**
 	 * 启动所有的定时任务
 	 *
 	 * @return 启动成功的任务数
 	 */
-	int startCron();
+	default int startCron() {
+		List<T> startingList = this.queryStartingList();
+		if (startingList == null) {
+			return 0;
+		}
+		return (int) startingList.stream().map(ICron.this::checkCron).filter(aBoolean -> aBoolean).count();
+	}
+
+	/**
+	 * 检查是否启动定时
+	 *
+	 * @param data bean
+	 * @return true 开启定时、false 关闭定时
+	 */
+	boolean checkCron(T data);
 }

@@ -26,17 +26,19 @@ package io.jpom.model;
  * 基础实体（带id）
  *
  * @author jiangzeyin
- * @date 2019/3/14
+ * @date 2022/01/24
  */
-public abstract class BaseModel extends BaseIdModel {
+public abstract class BaseIdModel extends BaseJsonModel {
+	/**
+	 * 主键
+	 */
+	private String id;
 
-	private String name;
-
-	public String getName() {
-		return name;
+	public String getId() {
+		return id;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setId(String id) {
+		this.id = id;
 	}
 }

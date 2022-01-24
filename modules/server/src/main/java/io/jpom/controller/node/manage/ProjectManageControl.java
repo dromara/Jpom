@@ -8,10 +8,11 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
+import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
-import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.model.enums.BuildReleaseMethod;
+import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.permission.NodeDataPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -23,8 +24,12 @@ import io.jpom.service.node.ProjectInfoCacheService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -108,24 +113,33 @@ public class ProjectManageControl extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, String copyId) {
 		NodeModel nodeModel = getNode();
+		HttpServletRequest servletRequest = getRequest();
 		if (StrUtil.isEmpty(copyId)) {
 			// 检查节点分发
-			List<OutGivingModel> outGivingModels = outGivingServer.list();
+			List<OutGivingModel> outGivingModels = outGivingServer.listByWorkspace(servletRequest);
 			if (outGivingModels != null) {
-				for (OutGivingModel outGivingModel : outGivingModels) {
-					if (outGivingModel.checkContains(nodeModel.getId(), id)) {
-						return JsonMessage.getString(405, "当前项目存在节点分发，不能直接删除");
-					}
-				}
+				boolean match = outGivingModels.stream().anyMatch(outGivingModel -> outGivingModel.checkContains(nodeModel.getId(), id));
+				Assert.state(!match, "当前项目存在节点分发，不能直接删除");
+//				for (OutGivingModel outGivingModel : outGivingModels) {
+//					if (outGivingModel.checkContains(nodeModel.getId(), id)) {
+//						return JsonMessage.getString(405, "当前项目存在节点分发，不能直接删除");
+//					}
+//				}
 			}
 			//
-			if (monitorService.checkProject(nodeModel.getId(), id)) {
-				return JsonMessage.getString(405, "当前项目存在监控项，不能直接删除");
+			List<MonitorModel> monitorModels = monitorService.listByWorkspace(servletRequest);
+			if (monitorModels != null) {
+				boolean match = monitorModels.stream().anyMatch(monitorModel -> monitorModel.checkNodeProject(nodeModel.getId(), id));
+//				if (monitorService.checkProject(nodeModel.getId(), id)) {
+//					return JsonMessage.getString(405, );
+//				}
+				Assert.state(!match, "当前项目存在监控项，不能直接删除");
 			}
+
 			boolean releaseMethod = buildService.checkReleaseMethod(nodeModel.getId() + StrUtil.COLON + id, BuildReleaseMethod.Project);
 			Assert.state(!releaseMethod, "当前项目存在构建项，不能直接删除");
 		}
-		JsonMessage<Object> request = NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_DeleteProject);
+		JsonMessage<Object> request = NodeForward.request(nodeModel, servletRequest, NodeUrl.Manage_DeleteProject);
 		if (request.getCode() == HttpStatus.OK.value()) {
 			//
 			projectInfoCacheService.syncNode(nodeModel);

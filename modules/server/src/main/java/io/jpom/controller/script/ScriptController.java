@@ -167,7 +167,8 @@ public class ScriptController extends BaseServerController {
 
 	@RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String del(String id) {
-		ScriptModel server = scriptServer.getByKey(id, getRequest());
+		HttpServletRequest request = getRequest();
+		ScriptModel server = scriptServer.getByKey(id, request);
 		if (server != null) {
 			File file = server.scriptPath();
 			boolean del = FileUtil.del(file);
@@ -176,9 +177,9 @@ public class ScriptController extends BaseServerController {
 			String nodeIds = server.getNodeIds();
 			List<String> delNode = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
 			this.syncDelNodeScript(server, getUser(), delNode);
-			scriptServer.delByKey(id);
+			scriptServer.delByKey(id, request);
 			//
-			scriptExecuteLogServer.delByWorkspace(getRequest(), entity -> entity.set("scriptId", id));
+			scriptExecuteLogServer.delByWorkspace(request, entity -> entity.set("scriptId", id));
 		}
 		return JsonMessage.getString(200, "删除成功");
 	}
