@@ -22,23 +22,20 @@
  */
 package io.jpom.model;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * 带最后修改人字段 数据表实体
  *
  * @author bwcx_jzy
  * @since 2021/8/24
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public abstract class BaseUserModifyDbModel extends BaseDbModel {
 	/**
 	 * 修改人
 	 */
 	private String modifyUser;
-
-	public String getModifyUser() {
-		return modifyUser;
-	}
-
-	public void setModifyUser(String modifyUser) {
-		this.modifyUser = modifyUser;
-	}
 }

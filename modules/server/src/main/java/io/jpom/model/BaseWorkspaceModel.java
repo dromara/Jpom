@@ -22,12 +22,17 @@
  */
 package io.jpom.model;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * 工作空间 数据
  *
  * @author bwcx_jzy
  * @since 2021/12/04
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public abstract class BaseWorkspaceModel extends BaseStrikeDbModel {
 
 	/**
@@ -37,12 +42,4 @@ public abstract class BaseWorkspaceModel extends BaseStrikeDbModel {
 	 * @see io.jpom.common.Const#WORKSPACEID_REQ_HEADER
 	 */
 	private String workspaceId;
-
-	public String getWorkspaceId() {
-		return workspaceId;
-	}
-
-	public void setWorkspaceId(String workspaceId) {
-		this.workspaceId = workspaceId;
-	}
 }
