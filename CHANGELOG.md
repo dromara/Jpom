@@ -10,7 +10,7 @@
 4. 【server】新增节点统计功能，快速了解当前所有节点状态
 5. 【server】新增节点心跳检测配置`system.nodeHeartSecond`
 6. 新增缓存管理查看定时任务执行统计
-7. 【server】新增接触 SSH 终端禁止命令权限（感谢@ooooooam）
+7. 【server】新增解除 SSH 终端禁止命令权限（感谢@ooooooam）
 
 ### 🐞 解决BUG、优化功能
 
