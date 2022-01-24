@@ -155,7 +155,7 @@ export default {
         {
           title: "创建时间",
           dataIndex: "createTimeMillis",
-
+          sorter: true,
           ellipsis: true,
           customRender: (text) => {
             return parseTime(text);

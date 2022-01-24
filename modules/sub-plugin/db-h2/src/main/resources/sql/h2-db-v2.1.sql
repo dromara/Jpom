@@ -30,3 +30,5 @@ ALTER TABLE BACKUP_INFO
 	ADD IF NOT EXISTS baleTimeStamp BIGINT comment '打包时间';
 ALTER TABLE BACKUP_INFO
 	ADD IF NOT EXISTS version varchar(255) comment '服务版本';
+ALTER TABLE BACKUP_INFO
+	ADD IF NOT EXISTS modifyUser VARCHAR(50) comment '操作人';

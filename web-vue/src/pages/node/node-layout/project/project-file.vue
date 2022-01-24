@@ -17,13 +17,24 @@
       <div ref="filter" class="filter">
         <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
         <a-space>
-          <a-button type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleUpload">批量上传文件</a-button>
-          <a-button type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleZipUpload">上传文件（自动解压）</a-button>
-          <a-button type="primary" @click="openRemoteUpload">远程上传</a-button>
-          <a-button type="primary" @click="loadFileList">刷新表格</a-button>
-          <a-button type="danger" @click="clearFile">清空目录</a-button>
+          <a-tooltip title="上传文件">
+            <a-button type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleUpload"><a-icon type="upload" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="上传压缩包并自动解压">
+            <a-button type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleZipUpload"><a-icon type="upload" /><a-icon type="file-zip" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="通过 URL 下载远程文件到项目文件夹,需要到节点系统配置->白名单配置中配置允许的 HOST 白名单">
+            <a-button type="primary" @click="openRemoteUpload"><a-icon type="cloud-download" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="刷新文件表格">
+            <a-button type="primary" @click="loadFileList"><a-icon type="reload" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="清空当前目录文件">
+            <a-button type="danger" @click="clearFile"><a-icon type="delete" /></a-button>
+          </a-tooltip>
 
           <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || "" }}</a-tag>
+          <div>文件名栏支持右键菜单</div>
         </a-space>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
@@ -45,10 +56,20 @@
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
           <a-space>
-            <a-tooltip v-if="!record.isDirectory" title="需要到 节点管理中的系统管理的白名单配置中配置允许编辑的文件后缀">
-              <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
-            </a-tooltip>
-            <a-button v-if="!record.isDirectory" type="primary" @click="handleDownload(record)">下载</a-button>
+            <template v-if="record.isDirectory">
+              <a-tooltip title="目录不能编辑">
+                <a-button type="primary" :disabled="true">编辑</a-button>
+              </a-tooltip>
+              <a-tooltip title="还不能下载目录">
+                <a-button type="primary" :disabled="true">下载</a-button>
+              </a-tooltip>
+            </template>
+            <template v-else>
+              <a-tooltip title="需要到 节点管理中的系统管理的白名单配置中配置允许编辑的文件后缀">
+                <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
+              </a-tooltip>
+              <a-button type="primary" @click="handleDownload(record)">下载</a-button>
+            </template>
             <a-button type="danger" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
@@ -171,7 +192,7 @@ export default {
         { title: "文件类型", dataIndex: "isDirectory", width: 100, ellipsis: true, scopedSlots: { customRender: "isDirectory" } },
         { title: "文件大小", dataIndex: "fileSize", width: 120, ellipsis: true, scopedSlots: { customRender: "fileSize" } },
         { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true },
-        { title: "操作", dataIndex: "operation", width: 260, scopedSlots: { customRender: "operation" } },
+        { title: "操作", dataIndex: "operation", width: 240, align: "center", scopedSlots: { customRender: "operation" } },
       ],
       rules: {
         url: [{ required: true, message: "远程下载Url不为空", trigger: "change" }],

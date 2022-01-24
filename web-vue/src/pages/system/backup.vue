@@ -22,7 +22,9 @@
       <template slot="backupType" slot-scope="text" placement="topleft" :title="text">
         <span>{{ backupTypeMap[text] }}</span>
       </template>
-      <a-tooltip slot="baleTimeStamp" slot-scope="text" placement="topLeft" :title="`${parseTime(text)}`"> {{ parseTime(text) }} </a-tooltip>
+      <template slot="baleTimeStamp" slot-scope="text, reocrd">
+        <a-tooltip placement="topLeft" :title="`${parseTime(text)}`"> {{ parseTime(text) }} {{ reocrd.version }} </a-tooltip>
+      </template>
       <a-tooltip slot="status" slot-scope="text, reocrd" placement="topLeft" :title="`${backupStatusMap[text]} 点击复制文件路径`">
         <div
           v-clipboard:copy="reocrd.filePath"
@@ -131,17 +133,17 @@ export default {
           title: "打包时间",
           width: 170,
           dataIndex: "baleTimeStamp",
-          ellipsis: true,
+          // ellipsis: true,
           sorter: true,
           scopedSlots: { customRender: "baleTimeStamp" },
         },
-        {
-          title: "版本",
-          dataIndex: "version",
-          width: 100,
-          // ellipsis: true,
-          scopedSlots: { customRender: "version" },
-        },
+        // {
+        //   title: "版本",
+        //   dataIndex: "version",
+        //   width: 100,
+        //   // ellipsis: true,
+        //   scopedSlots: { customRender: "version" },
+        // },
         { title: "备份类型", dataIndex: "backupType", width: 100, ellipsis: true, scopedSlots: { customRender: "backupType" } },
         {
           title: "文件大小",
@@ -158,6 +160,7 @@ export default {
         //   ellipsis: true,
         //   scopedSlots: { customRender: "filePath" },
         // },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         {
           title: "备份时间",
           dataIndex: "createTimeMillis",

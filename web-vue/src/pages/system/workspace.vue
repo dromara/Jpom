@@ -130,6 +130,17 @@ export default {
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "描述", dataIndex: "description", ellipsis: true, scopedSlots: { customRender: "description" } },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
+        {
+          title: "创建时间",
+          dataIndex: "createTimeMillis",
+          sorter: true,
+          ellipsis: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+          width: 170,
+        },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
@@ -143,7 +154,7 @@ export default {
           sorter: true,
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "300px" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 250 },
       ],
       envVarColumns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },

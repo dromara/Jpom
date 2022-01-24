@@ -78,7 +78,7 @@ export default {
         {
           title: "执行时间",
           dataIndex: "createTimeMillis",
-
+          sorter: true,
           ellipsis: true,
           customRender: (text) => {
             return parseTime(text);
@@ -88,6 +88,7 @@ export default {
         {
           title: "结束时间",
           dataIndex: "modifyTimeMillis",
+          sorter: true,
           ellipsis: true,
           customRender: (text) => {
             return parseTime(text);

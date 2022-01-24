@@ -3,6 +3,8 @@
     <div ref="filter" class="filter">
       <a-space>
         <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+        <a-input v-model="listQuery['%description%']" placeholder="描述" class="search-input-item" />
+        <a-input v-model="listQuery['%autoExecCron%']" placeholder="定时执行" class="search-input-item" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
           <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
         </a-tooltip>
