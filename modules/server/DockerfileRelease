@@ -24,7 +24,7 @@
 FROM maven:3.8.4-jdk-8
 
 ENV JPOM_HOME	/usr/local/jpom-server
-ENV JPOM_PKG	server-2.8.6-release.tar.gz
+ENV JPOM_PKG	server-2.8.7-release.tar.gz
 
 WORKDIR $JPOM_HOME
 
