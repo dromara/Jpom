@@ -3,8 +3,8 @@
     <div>
       <div ref="filter" class="filter">
         <a-space>
-          <a-button :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
-          <a-button :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
+          <a-button :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
+          <a-button :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
         </a-space>
       </div>
       <!-- console -->
@@ -44,6 +44,7 @@ export default {
       },
       // 日志内容
       logContext: "loading ...",
+      btnLoading: true,
     };
   },
   computed: {
@@ -75,12 +76,23 @@ export default {
       // 连接成功后
       this.socket.onopen = () => {
         // this.logContext = "connect success......\r\n";
+        this.btnLoading = false;
       };
       this.socket.onerror = (err) => {
         console.error(err);
         this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理,或者没有对应的权限",
+          message: "web socket 错误,请检查是否开启 ws 代理",
         });
+        this.btnLoading = true;
+      };
+      this.socket.onclose = (err) => {
+        //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
+        console.error(err);
+        this.$notification.error({
+          message: "会话已经关闭",
+        });
+        clearInterval(this.heart);
+        this.btnLoading = true;
       };
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf("code") > -1 && msg.data.indexOf("msg") > -1) {

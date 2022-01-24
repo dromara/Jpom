@@ -30,8 +30,8 @@
           </a-input-group>
 
           <a-input-search placeholder="搜索关键词" style="width: 200px" @search="onSearch" />
+          <a-tag v-if="project.logSize"> 文件大小: {{ project.logSize }}</a-tag>
           <a-button type="link" @click="clearLogCache" icon="delete"> 清空 </a-button>
-          <a-tag> 文件大小: {{ project.logSize }}</a-tag>
           <a-dropdown>
             <a class="ant-dropdown-link"> 更多<a-icon type="down" /> </a>
             <a-menu slot="overlay">
@@ -186,8 +186,17 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err);
         this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理,或者没有对应的权限",
+          message: "web socket 错误,请检查是否开启 ws 代理",
         });
+        clearInterval(this.heart);
+      };
+      this.socket.onclose = (err) => {
+        //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
+        console.error(err);
+        this.$notification.error({
+          message: "会话已经关闭",
+        });
+        clearInterval(this.heart);
       };
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf("JPOM_MSG") > -1 && msg.data.indexOf("op") > -1) {

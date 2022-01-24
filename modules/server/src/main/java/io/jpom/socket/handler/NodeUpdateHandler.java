@@ -95,6 +95,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 		return new Object[]{};
 	}
 
+	@Override
+	protected void showHelloMsg(Map<String, Object> attributes, WebSocketSession session) {
+
+	}
+
 	private void pullNodeList(WebSocketSession session, String ids) {
 		List<String> split = StrUtil.split(ids, StrUtil.COMMA);
 		List<NodeModel> nodeModelList = nodeService.listById(split);

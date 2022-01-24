@@ -120,8 +120,16 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err);
         this.$notification.error({
-          message: "web socket 错误,请检查是否开启 ws 代理,或者没有对应的权限",
+          message: "web socket 错误,请检查是否开启 ws 代理",
         });
+      };
+      this.socket.onclose = (err) => {
+        //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
+        console.error(err);
+        this.$notification.error({
+          message: "会话已经关闭",
+        });
+        // clearInterval(this.heart);
       };
     },
     // 右键点击
