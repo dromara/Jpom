@@ -13,13 +13,12 @@
                 <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
                   <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
                 </a-select>
-                <a-button type="primary" @click="refresh">搜索</a-button>
+                <a-button :loading="loading" type="primary" @click="refresh">搜索</a-button>
               </a-space>
             </div>
           </a-row>
 
           <a-table
-            :loading="loading"
             :columns="columns"
             :data-source="listComputed"
             bordered
@@ -170,6 +169,7 @@ export default {
   beforeDestroy() {
     this.socket && this.socket.close();
     clearInterval(this.heart);
+    this.socket = null;
   },
   methods: {
     // 获取所有的分组
