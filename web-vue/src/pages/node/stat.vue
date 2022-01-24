@@ -34,12 +34,27 @@
             <a-select v-model="listQuery['order_field']" allowClear placeholder="请选择排序字段" class="search-input-item">
               <a-select-option value="networkTime">网络延迟</a-select-option>
               <a-select-option value="occupyCpu">cpu</a-select-option>
-              <a-select-option value="occupyDisk">disk</a-select-option>
-              <a-select-option value="occupyMemoryUsed">memoryUsed</a-select-option>
-              <a-select-option value="occupyMemory">memory</a-select-option>
+              <a-select-option value="occupyDisk">硬盘</a-select-option>
+              <a-select-option value="occupyMemoryUsed">内存Used</a-select-option>
+              <a-select-option value="occupyMemory">内存</a-select-option>
             </a-select>
             <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
               <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+            </a-tooltip>
+            <a-tooltip placement="bottom">
+              <template slot="title">
+                <div>
+                  <ul>
+                    <li>监控数据目前采用原生命令获取,和真实情况有一定差异可以当做参考依据</li>
+                    <li>监控频率可以到服务端配置文件中修改</li>
+                    <li>悬停到仪表盘上显示具体含义</li>
+                    <li>点击仪表盘查看监控历史数据</li>
+                    <li>点击延迟可以查看对应节点网络延迟历史数据</li>
+                    <li>只有 linux 系统才有内存Used 值</li>
+                  </ul>
+                </div>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </a-space>
         </div>
@@ -51,7 +66,11 @@
               <template slot="title">
                 <a-row :gutter="[4, 0]">
                   <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
-                    <a-tooltip :title="`${item.name}  ${item.url}`">
+                    <a-tooltip>
+                      <template slot="title">
+                        <div>节点名称：{{ item.name }}</div>
+                        <div>节点地址：{{ item.url }}</div>
+                      </template>
                       {{ item.name }}
                     </a-tooltip>
                   </a-col>
@@ -63,8 +82,8 @@
                 </a-row>
               </template>
 
-              <div>
-                <a-space>
+              <a-row :gutter="[16, 0]" style="margin-left: -16px">
+                <a-col :span="8">
                   <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
                     <a-progress
                       type="circle"
@@ -79,6 +98,8 @@
                       :percent="item.occupyCpu"
                     />
                   </a-tooltip>
+                </a-col>
+                <a-col :span="8">
                   <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
                     <a-progress
                       type="circle"
@@ -93,6 +114,8 @@
                       :percent="item.occupyDisk"
                     />
                   </a-tooltip>
+                </a-col>
+                <a-col :span="8">
                   <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')" :title="`内存占用率：${item.occupyDisk}%`">
                     <a-progress
                       :width="80"
@@ -107,16 +130,16 @@
                       :percent="item.occupyMemoryUsed && item.occupyMemoryUsed !== -1 ? item.occupyMemoryUsed : item.occupyMemory"
                     />
                   </a-tooltip>
-                </a-space>
-              </div>
+                </a-col>
+              </a-row>
               <a-space direction="vertical"> <div></div></a-space>
-              <a-row :gutter="[16, 8]">
+              <a-row :gutter="[16, 8]" style="text-align: center; margin-left: -16px">
                 <a-col :span="8">
-                  <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'networkTime')" :title="`${item.status === 4 ? '' : '延迟' + item.networkTime + 'ms 点击查看历史趋势'}`">
+                  <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'networkTime')" :title="`${item.status === 4 ? '-' : '延迟' + item.networkTime + 'ms 点击查看历史趋势'}`">
                     <a-statistic
                       title="延迟"
                       :value="item.networkTime"
-                      valueStyle="font-size: 14px;"
+                      valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
                       :formatter="
                         (v) => {
                           return item.networkTime === -1 ? '-' : item.networkTime + 'ms';
@@ -125,17 +148,31 @@
                     />
                   </a-tooltip>
                 </a-col>
-                <a-col :span="16">
-                  <a-statistic
-                    title="运行时间"
-                    :value="item.networkTime"
-                    valueStyle="font-size: 14px;"
-                    :formatter="
-                      (v) => {
-                        return item.upTimeStr || '-';
-                      }
-                    "
-                  />
+                <a-col :span="8">
+                  <a-tooltip :title="formatDuration(item.upTimeStr) || '-'">
+                    <a-statistic
+                      title="运行时间"
+                      valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+                      :formatter="
+                        (v) => {
+                          return formatDuration(item.upTimeStr, '', 1) || '-';
+                        }
+                      "
+                    />
+                  </a-tooltip>
+                </a-col>
+                <a-col :span="8">
+                  <a-tooltip :title="`${item.status === 4 ? '-' : parseTime(item.modifyTimeMillis)}`">
+                    <a-statistic
+                      title="更新时间"
+                      valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+                      :formatter="
+                        (v) => {
+                          return item.status === 4 ? '-' : parseTime(item.modifyTimeMillis, '{h}:{i}:{s}');
+                        }
+                      "
+                    />
+                  </a-tooltip>
                 </a-col>
               </a-row>
             </a-card>
@@ -177,7 +214,7 @@
 </template>
 <script>
 import { getStatist, status, statusStat } from "@/api/node-stat";
-import { parseTime } from "@/utils/time";
+import { parseTime, formatDuration } from "@/utils/time";
 import { PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import NodeTop from "@/pages/node/node-layout/node-top";
 
@@ -212,7 +249,8 @@ export default {
   },
   methods: {
     PAGE_DEFAULT_SHOW_TOTAL,
-
+    parseTime,
+    formatDuration,
     // 加载数据
     loadData(pointerEvent) {
       //this.list = [];
@@ -244,7 +282,7 @@ export default {
     onFinish() {
       this.loadData();
     },
-    parseTime,
+
     // 历史图表
     handleHistory(record, type) {
       this.monitorVisible = true;

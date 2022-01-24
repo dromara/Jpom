@@ -251,7 +251,24 @@
         bordered
         :rowKey="(record, index) => index"
       >
-        <a-tooltip slot="commands" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip
+          slot="commands"
+          slot-scope="text"
+          placement="topLeft"
+          :title="text"
+          v-clipboard:copy="text"
+          v-clipboard:success="
+            () => {
+              tempVue.prototype.$notification.success({ message: '复制成功' });
+            }
+          "
+          v-clipboard:error="
+            () => {
+              tempVue.prototype.$notification.error({ message: '复制失败' });
+            }
+          "
+        >
+          <a-icon type="copy" />
           <span>{{ text }}</span>
         </a-tooltip>
         <a-tooltip slot="modifyUser" slot-scope="text, item" placement="topLeft" :title="item.modifyUser || item.userId">
@@ -261,9 +278,9 @@
         <a-tooltip slot="userAgent" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="refuse" slot-scope="text" placement="topLeft" :title="text">
+        <template slot="refuse" slot-scope="text">
           <span>{{ text ? "成功" : "拒绝" }}</span>
-        </a-tooltip>
+        </template>
       </a-table>
     </a-modal>
   </div>
@@ -274,6 +291,7 @@ import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import Vue from "vue";
 
 export default {
   components: {
@@ -312,6 +330,7 @@ export default {
           title: "执行命令",
           dataIndex: "commands",
           width: 200,
+          ellipsis: true,
           scopedSlots: { customRender: "commands" },
         },
         {
@@ -337,12 +356,8 @@ export default {
           } /*width: 180*/,
         },
       ],
-      viewOperationLogTotal: 0,
-      viewOperationLogListQuery: {
-        page: 1,
-        limit: 10,
-        total: 0,
-      },
+
+      viewOperationLogListQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, ellipsis: true },
 
@@ -400,6 +415,7 @@ export default {
         url: [{ required: true, message: "Please input url", trigger: "blur" }],
         path: [{ required: true, message: "Please input path", trigger: "blur" }],
       },
+      tempVue: null,
     };
   },
   computed: {
@@ -511,6 +527,10 @@ export default {
       this.temp = Object.assign(record);
       this.viewOperationLogListQuery.sshId = this.temp.id;
       this.viewOperationLog = true;
+      this.viewOperationLogList = [];
+      this.viewOperationLogListQuery.total = 0;
+      this.viewOperationLogListQuery.page = 1;
+      this.tempVue = Vue;
       this.handleListLog();
     },
     handleListLog() {

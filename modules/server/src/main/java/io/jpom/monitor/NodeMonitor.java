@@ -216,7 +216,10 @@ public class NodeMonitor {
 				nodeStatModel.setNetworkTime(statusData.getIntValue("networkTime"));
 				nodeStatModel.setJpomVersion(statusData.getString("jpomVersion"));
 				nodeStatModel.setOsName(statusData.getString("osName"));
-				nodeStatModel.setUpTimeStr(statusData.getString("runTime"));
+				String runTime = statusData.getString("runTime");
+				String runTimeLong = statusData.getString("runTimeLong");
+				// 兼容数据
+				nodeStatModel.setUpTimeStr(StrUtil.emptyToDefault(runTimeLong, runTime));
 				nodeStatModel.setFailureMsg(StrUtil.emptyToDefault(statusData.getString("failureMsg"), StrUtil.EMPTY));
 				//
 				Integer statusInteger = statusData.getInteger("status");

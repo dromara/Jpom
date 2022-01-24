@@ -263,9 +263,13 @@ public class JpomManifest {
 		this.dataPath = dataPath;
 	}
 
-	public String getUpTime() {
+	public String getUpTimeStr() {
 		long uptime = SystemUtil.getRuntimeMXBean().getUptime();
 		return DateUtil.formatBetween(uptime, BetweenFormatter.Level.SECOND);
+	}
+
+	public long getUpTime() {
+		return SystemUtil.getRuntimeMXBean().getUptime();
 	}
 
 	public String getOsName() {

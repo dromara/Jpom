@@ -367,10 +367,7 @@ public class ServerExtConfigBean implements DisposableBean {
 
 	public int getNodeHeartSecond() {
 		int integer = ObjectUtil.defaultIfNull(nodeHeartSecond, 30);
-		if (integer <= 0) {
-			return integer;
-		}
-		return integer;
+		return Math.max(integer, 5);
 	}
 
 	/**

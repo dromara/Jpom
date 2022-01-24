@@ -227,7 +227,10 @@ public class SshController extends BaseServerController {
 	public String del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
 		boolean checkSsh = buildInfoService.checkReleaseMethod(id, BuildReleaseMethod.Ssh);
 		Assert.state(!checkSsh, "当前ssh存在构建项，不能删除");
-		sshService.delByKey(id, getRequest());
+		HttpServletRequest request = getRequest();
+		sshService.delByKey(id, request);
+		//
+		int logCount = sshTerminalExecuteLogService.delByWorkspace(request, entity -> entity.set("sshId", id));
 		return JsonMessage.getString(200, "操作成功");
 	}
 

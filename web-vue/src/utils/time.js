@@ -84,3 +84,31 @@ export function itemGroupBy(arr, groupKey, key, dataKey) {
   }
   return newArr;
 }
+
+/**
+ * 格式化时长
+ * @param {String} ms
+ * @param {String} seg 分割符
+ * @param {String} levelCount 格式化个数
+ * @returns
+ */
+export function formatDuration(ms, seg, levelCount) {
+  if (isNaN(new Number(ms))) {
+    return ms;
+  }
+  seg = seg || "";
+  levelCount = levelCount || 5;
+  if (ms < 0) ms = -ms;
+  const time = {
+    天: Math.floor(ms / 86400000),
+    小时: Math.floor(ms / 3600000) % 24,
+    分钟: Math.floor(ms / 60000) % 60,
+    秒: Math.floor(ms / 1000) % 60,
+    毫秒: Math.floor(ms) % 1000,
+  };
+  return Object.entries(time)
+    .filter((val) => val[1] !== 0)
+    .map(([key, val]) => `${val}${key}`)
+    .splice(0, levelCount)
+    .join(seg);
+}
