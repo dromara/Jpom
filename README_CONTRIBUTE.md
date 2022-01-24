@@ -10,6 +10,7 @@
    ├── agent 		=> 插件端代码
    ├── commone 		=> 这个项目的公共模块（插件端、服务端都依赖该模块）
    ├── server 		=> 服务端代码
+   ├── sub-plugin 	=> 插件模块
 ├── script    		=> 一些通用脚本
 ├── web-vue   		=> 前端 vue 目录
    ├── .editorconfig 	=> 前端（vue）代码格式配置
@@ -62,6 +63,11 @@
 5. 可以视情况添加其他说明：如提交记录
 6. emoji 表情参考：[https://emojixd.com/](https://emojixd.com/)
 
+## 分支说明
+
+1. 新功能都提交到 dev 分支, 不能直接提交到 master 分支
+2. PR 只接收 dev 分支
+3. 一般功能开发可以直接提交到 dev 分支，较大功能开发建议新开发分支提交
 
 ## 需要的小组
 
