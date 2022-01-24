@@ -4,6 +4,7 @@
       <a-space>
         <a-input v-model="listQuery['%name%']" placeholder="搜索命令" class="search-input-item" />
         <a-input v-model="listQuery['%desc%']" placeholder="描述" class="search-input-item" />
+        <a-input v-model="listQuery['%autoExecCron%']" placeholder="定时执行" class="search-input-item" />
         <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
           <a-button type="primary" :loading="loading" @click="getCommandData">搜索</a-button>
         </a-tooltip>
@@ -175,16 +176,26 @@ export default {
       columns: [
         { title: "命令名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "命令描述", dataIndex: "desc", ellipsis: true, scopedSlots: { customRender: "desc" } },
-
+        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, scopedSlots: { customRender: "autoExecCron" } },
         {
           title: "创建时间",
           dataIndex: "createTimeMillis",
-
           ellipsis: true,
+          sorter: true,
           customRender: (text) => {
             return parseTime(text);
           },
           width: 170,
+        },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          width: 170,
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
         },
         {
           title: "最后操作人",
@@ -193,7 +204,7 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "modifyUser" },
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 300 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 250 },
       ],
     };
   },

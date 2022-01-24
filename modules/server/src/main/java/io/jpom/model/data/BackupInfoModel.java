@@ -22,7 +22,7 @@
  */
 package io.jpom.model.data;
 
-import io.jpom.model.BaseDbModel;
+import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.service.h2db.TableName;
 
 /**
@@ -31,7 +31,7 @@ import io.jpom.service.h2db.TableName;
  * Backup info with H2 database
  */
 @TableName(value = "BACKUP_INFO", name = "数据备份")
-public class BackupInfoModel extends BaseDbModel {
+public class BackupInfoModel extends BaseUserModifyDbModel {
 
 	/**
 	 * 备份名称

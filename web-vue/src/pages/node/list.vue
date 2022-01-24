@@ -62,8 +62,10 @@
         <a-tooltip title="我在这里" :visible="showOptVisible[record.id]">
           <a-space>
             <a-button v-if="record.unLockType" type="primary" @click="unlock(record)">解锁节点</a-button>
-            <a-button v-else class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />节点管理</a-button>
 
+            <a-tooltip v-else title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
+              <a-button class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />节点管理</a-button>
+            </a-tooltip>
             <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
               <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
             </a-tooltip>

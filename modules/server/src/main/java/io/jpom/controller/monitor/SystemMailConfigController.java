@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.controller.system;
+package io.jpom.controller.monitor;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -33,8 +33,8 @@ import io.jpom.plugin.*;
 import io.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -62,7 +62,7 @@ public class SystemMailConfigController extends BaseServerController {
 	 * @return json
 	 * @author Hotstrip
 	 */
-	@RequestMapping(value = "mail-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "mail-config-data", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String mailConfigData() {
 		MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
@@ -72,8 +72,9 @@ public class SystemMailConfigController extends BaseServerController {
 		return JsonMessage.getString(200, "success", item);
 	}
 
-	@RequestMapping(value = "mailConfig_save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "mailConfig_save.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
+	@SystemPermission(superUser = true)
 	public String listData(MailAccountModel mailAccountModel) {
 		Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");
 		Assert.hasText(mailAccountModel.getHost(), "请填写host");

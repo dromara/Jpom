@@ -74,10 +74,10 @@ export default {
       logVisible: false,
       columns: [
         { title: "名称", dataIndex: "scriptName", ellipsis: true, scopedSlots: { customRender: "scriptName" } },
-        { title: "执行时间", dataIndex: "createTimeMillis", ellipsis: true, scopedSlots: { customRender: "createTimeMillis" } },
+        { title: "执行时间", dataIndex: "createTimeMillis", sorter: true, ellipsis: true, scopedSlots: { customRender: "createTimeMillis" } },
         { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
         { title: "执行人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 220 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 200 },
       ],
     };
   },
