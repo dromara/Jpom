@@ -20,6 +20,9 @@
     <a target="_blank" href="https://gitee.com/dromara/Jpom">
         <img src='https://img.shields.io/badge/JDK-1.8.0_40+-green.svg' alt='jdk'/>
     </a>
+</p>
+
+<p align="center">
     <a target="_blank" href="https://travis-ci.org/dromara/Jpom">
         <img src='https://travis-ci.org/dromara/Jpom.svg?branch=master' alt='travis'/>
     </a>
@@ -28,6 +31,7 @@
     </a>
 	<img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
 </p>
+
 <p align="center">
 	👉 <a target="_blank" href="https://jpom.io/">https://jpom.io/</a> | <a target="_blank" href="https://demo.jpom.io/">https://demo.jpom.io/</a>👈
 </p>
@@ -126,7 +130,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 >
 > 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中检查安全组规则(关闭防火墙)
 >
-> ⚠️  注意： linux 系统中防火墙可能存在多种：Firewall、Iptables，再检查防火墙配置时候需要都检查一下
+> ⚠️ 注意： linux 系统中防火墙可能存在多种：Firewall、Iptables，再检查防火墙配置时候需要都检查一下
 
 #### 插件端
 
@@ -153,7 +157,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ### 容器化安装
 
-> ⚠️  注意：容器化安装方式需要先安装docker
+> ⚠️ 注意：容器化安装方式需要先安装docker
 
 ```
 docker pull jpomdocker/jpom
