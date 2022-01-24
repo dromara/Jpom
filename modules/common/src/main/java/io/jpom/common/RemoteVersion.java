@@ -34,7 +34,10 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
+import io.jpom.model.BaseJsonModel;
 import io.jpom.system.ConfigBean;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -58,7 +61,9 @@ import java.util.function.Consumer;
  * @author bwcx_jzy
  * @since 2021/9/19
  */
-public class RemoteVersion {
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class RemoteVersion extends BaseJsonModel {
 
 	/**
 	 * 主 url 用于拉取远程版本信息
@@ -99,65 +104,9 @@ public class RemoteVersion {
 	 */
 	private Boolean upgrade;
 
-	public Boolean getUpgrade() {
-		return upgrade;
-	}
-
-	public void setUpgrade(Boolean upgrade) {
-		this.upgrade = upgrade;
-	}
-
-	public String getTagName() {
-		return tagName;
-	}
-
-	public void setTagName(String tagName) {
-		this.tagName = tagName;
-	}
-
-	public String getAgentUrl() {
-		return agentUrl;
-	}
-
-	public void setAgentUrl(String agentUrl) {
-		this.agentUrl = agentUrl;
-	}
-
-	public String getServerUrl() {
-		return serverUrl;
-	}
-
-	public void setServerUrl(String serverUrl) {
-		this.serverUrl = serverUrl;
-	}
-
-	public String getChangelog() {
-		return changelog;
-	}
-
-	public void setChangelog(String changelog) {
-		this.changelog = changelog;
-	}
-
-	public Long getLastTime() {
-		return lastTime;
-	}
-
-	public void setLastTime(Long lastTime) {
-		this.lastTime = lastTime;
-	}
-
-	public String getChangelogUrl() {
-		return changelogUrl;
-	}
-
-	public void setChangelogUrl(String changelogUrl) {
-		this.changelogUrl = changelogUrl;
-	}
-
 	@Override
 	public String toString() {
-		return JSONObject.toJSONString(this);
+		return super.toString();
 	}
 
 	/**

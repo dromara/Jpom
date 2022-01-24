@@ -37,4 +37,10 @@ public abstract class BaseGroupModel extends BaseWorkspaceModel {
 	 * 节点分组
 	 */
 	private String group;
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
+
 }

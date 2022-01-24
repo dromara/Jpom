@@ -47,4 +47,9 @@ public abstract class BaseDbModel extends BaseIdModel {
 	 * 数据修改时间
 	 */
 	private Long modifyTimeMillis;
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
 }

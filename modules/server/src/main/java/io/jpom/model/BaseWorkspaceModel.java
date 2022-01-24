@@ -42,4 +42,10 @@ public abstract class BaseWorkspaceModel extends BaseStrikeDbModel {
 	 * @see io.jpom.common.Const#WORKSPACEID_REQ_HEADER
 	 */
 	private String workspaceId;
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
+
 }

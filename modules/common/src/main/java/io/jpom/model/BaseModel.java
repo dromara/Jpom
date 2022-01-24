@@ -22,21 +22,23 @@
  */
 package io.jpom.model;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * 基础实体（带id）
  *
  * @author jiangzeyin
  * @date 2019/3/14
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public abstract class BaseModel extends BaseIdModel {
 
 	private String name;
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
+	@Override
+	public String toString() {
+		return super.toString();
 	}
 }

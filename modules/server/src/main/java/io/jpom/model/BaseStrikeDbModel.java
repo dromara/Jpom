@@ -39,4 +39,9 @@ public abstract class BaseStrikeDbModel extends BaseUserModifyDbModel {
 	 * 逻辑删除  1 删除  0 未删除
 	 */
 	private Integer strike;
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
 }

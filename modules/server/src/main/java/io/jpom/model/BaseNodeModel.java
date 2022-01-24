@@ -44,6 +44,11 @@ public abstract class BaseNodeModel extends BaseWorkspaceModel {
 	 */
 	private String nodeId;
 
+	@Override
+	public String toString() {
+		return super.toString();
+	}
+
 	public String fullId() {
 		String workspaceId = this.getWorkspaceId();
 
