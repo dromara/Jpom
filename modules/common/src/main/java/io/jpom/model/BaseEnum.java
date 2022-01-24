@@ -44,6 +44,7 @@ public interface BaseEnum {
 	 */
 	class Cache {
 		private static final Map<Class<? extends BaseEnum>, Map<Integer, BaseEnum>> CLASS_MAP_MAP = new HashMap<>();
+		@SuppressWarnings("rawtypes")
 		private static final Map<Class<? extends Enum>, JSONArray> JSON_ARRAY_MAP = new HashMap<>();
 	}
 
@@ -105,6 +106,7 @@ public interface BaseEnum {
 	 * @param <T>  泛型
 	 * @return 对应的枚举
 	 */
+	@SuppressWarnings("unchecked")
 	static <T extends BaseEnum> T getEnum(Class<? extends BaseEnum> t, Integer code, T def) {
 		if (code == null) {
 			return def;
@@ -139,8 +141,9 @@ public interface BaseEnum {
 	 * @throws InvocationTargetException e
 	 * @throws IllegalAccessException    e
 	 */
+	@SuppressWarnings("rawtypes")
 	static JSONObject toJSONObject(Enum baseEnum) throws InvocationTargetException, IllegalAccessException {
-		Class itemCls = baseEnum.getClass();
+		Class<?> itemCls = baseEnum.getClass();
 		Method[] methods = itemCls.getMethods();
 		JSONObject jsonObject = new JSONObject();
 		for (Method method : methods) {
@@ -167,7 +170,8 @@ public interface BaseEnum {
 	 * @param cls cls
 	 * @return array
 	 */
-	static JSONArray toJSONArray(Class<? extends Enum> cls) {
+	@SuppressWarnings("rawtypes")
+	static JSONArray toJSONArray(Class<? extends Enum<?>> cls) {
 		if (!cls.isEnum()) {
 			throw new IllegalArgumentException("不是枚举");
 		}

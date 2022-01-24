@@ -22,12 +22,17 @@
  */
 package io.jpom.model;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * 基础实体（带id）
  *
  * @author jiangzeyin
  * @date 2022/01/24
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public abstract class BaseIdModel extends BaseJsonModel {
 	/**
 	 * 主键

@@ -23,6 +23,8 @@
 package io.jpom.model;
 
 import cn.hutool.crypto.SecureUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.util.Assert;
 
 /**
@@ -31,6 +33,8 @@ import org.springframework.util.Assert;
  * @author bwcx_jzy
  * @since 2021/12/05
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public abstract class BaseNodeModel extends BaseWorkspaceModel {
 
 	/**
@@ -39,14 +43,6 @@ public abstract class BaseNodeModel extends BaseWorkspaceModel {
 	 * @see io.jpom.model.data.NodeModel
 	 */
 	private String nodeId;
-
-	public String getNodeId() {
-		return nodeId;
-	}
-
-	public void setNodeId(String nodeId) {
-		this.nodeId = nodeId;
-	}
 
 	public String fullId() {
 		String workspaceId = this.getWorkspaceId();

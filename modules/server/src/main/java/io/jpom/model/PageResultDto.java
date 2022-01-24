@@ -25,6 +25,7 @@ package io.jpom.model;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.PageUtil;
 import cn.hutool.db.PageResult;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
@@ -36,6 +37,7 @@ import java.util.function.Consumer;
  * @author bwcx_jzy
  * @since 2021/12/3
  */
+@Data
 public class PageResultDto<T> implements Serializable {
 
 	@SuppressWarnings({"rawtypes"})
@@ -83,51 +85,11 @@ public class PageResultDto<T> implements Serializable {
 		this.setTotal(total);
 	}
 
-	public List<T> getResult() {
-		return result;
-	}
-
 	public void each(Consumer<T> consumer) {
 		if (result == null) {
 			return;
 		}
 		result.forEach(consumer);
-	}
-
-	public void setResult(List<T> result) {
-		this.result = result;
-	}
-
-	public Integer getPage() {
-		return page;
-	}
-
-	public void setPage(Integer page) {
-		this.page = page;
-	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
-
-	public Integer getTotalPage() {
-		return totalPage;
-	}
-
-	public void setTotalPage(Integer totalPage) {
-		this.totalPage = totalPage;
-	}
-
-	public Integer getTotal() {
-		return total;
-	}
-
-	public void setTotal(Integer total) {
-		this.total = total;
 	}
 
 	public boolean isEmpty() {
