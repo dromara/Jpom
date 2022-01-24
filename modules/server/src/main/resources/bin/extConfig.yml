@@ -80,7 +80,7 @@ node:
 system:
   # cron 定时器是否开启匹配秒
   timerMatchSecond: false
-  # 节点心跳监控时间 （需要大于零） 单位秒
+  # 节点心跳监控时间 （需要大于零） 单位秒 最小配置 5秒
   nodeHeartSecond: 30
   # 旧包文件保留个数
   oldJarsCount: 2

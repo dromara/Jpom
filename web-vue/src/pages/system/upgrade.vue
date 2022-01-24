@@ -181,12 +181,16 @@ export default {
       });
     },
     initWebsocket(ids) {
-      if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
-        this.socket = new WebSocket(this.socketUrl);
+      if (this.socket) {
+        this.initHeart(ids);
+        return;
       }
+      // if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
+      this.socket = new WebSocket(this.socketUrl);
+      // }
 
       this.socket.onopen = () => {
-        this.init(ids);
+        this.initHeart(ids);
       };
       this.socket.onmessage = ({ data: socketData }) => {
         let msgObj;
@@ -231,7 +235,7 @@ export default {
         }
       });
     },
-    init(ids) {
+    initHeart(ids) {
       this.sendMsg("getNodeList:" + ids.join(","));
       this.getAgentVersion();
       // 创建心跳，防止掉线
@@ -241,11 +245,11 @@ export default {
       }, 2000);
     },
     refresh() {
-      if (this.socket) {
-        this.socket.close();
-      }
-      this.nodeStatus = {};
-      this.nodeVersion = {};
+      // if (this.socket) {
+      //   this.socket.close();
+      // }
+      //this.nodeStatus = {};
+      //this.nodeVersion = {};
       this.getNodeList();
     },
     batchUpdate() {

@@ -20,7 +20,7 @@ whitelistDirectory:
   # 白名单目录是否验证包含关系
   checkStartsWith: true
 log:
-  # 自动备份控制台日志，防止日志文件过大，目前暂只支持linux 不停服备份
+  # 自动备份控制台日志，防止日志文件过大，目前暂只支持linux 不停服备份,配置为 none 则不备份避免占用硬盘空间
   autoBackConsoleCron: 0 0/10 * * * ?
   # 当文件多大时自动备份
   autoBackSize: 50MB

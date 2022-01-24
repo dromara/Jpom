@@ -92,8 +92,9 @@ public class IndexController extends BaseAgentController {
 		List<NodeScriptModel> list = nodeScriptServer.list();
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
-		jsonObject.put("osName", JpomManifest.getInstance().getOsName());
-		jsonObject.put("jpomVersion", JpomManifest.getInstance().getVersion());
+		JpomManifest instance = JpomManifest.getInstance();
+		jsonObject.put("osName", instance.getOsName());
+		jsonObject.put("jpomVersion", instance.getVersion());
 		jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
 		//  获取JVM中内存总大小
 		long totalMemory = SystemUtil.getTotalMemory();
@@ -105,7 +106,8 @@ public class IndexController extends BaseAgentController {
 		jsonObject.put("count", CollUtil.size(nodeProjectInfoModels));
 		jsonObject.put("scriptCount", CollUtil.size(list));
 		// 运行时间
-		jsonObject.put("runTime", JpomManifest.getInstance().getUpTime());
+		jsonObject.put("runTime", instance.getUpTimeStr());
+		jsonObject.put("runTimeLong", instance.getUpTime());
 		return JsonMessage.getString(200, "", jsonObject);
 	}
 }
