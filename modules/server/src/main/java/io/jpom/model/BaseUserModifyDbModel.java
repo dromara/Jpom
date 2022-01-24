@@ -38,4 +38,9 @@ public abstract class BaseUserModifyDbModel extends BaseDbModel {
 	 * 修改人
 	 */
 	private String modifyUser;
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
 }

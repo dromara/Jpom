@@ -29,7 +29,7 @@ import com.alibaba.fastjson.JSONObject;
  *
  * @author lf
  */
-public class WebSocketMessageModel {
+public class WebSocketMessageModel extends BaseJsonModel {
 
 	private String command;
 	private String nodeId;
@@ -88,11 +88,6 @@ public class WebSocketMessageModel {
 
 	@Override
 	public String toString() {
-		JSONObject result = new JSONObject();
-		result.put("command", this.command);
-		result.put("nodeId", this.nodeId);
-		result.put("params", this.params);
-		result.put("data", this.data);
-		return result.toJSONString();
+		return super.toString();
 	}
 }

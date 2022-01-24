@@ -22,8 +22,7 @@
  */
 package io.jpom.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 /**
  * 基础实体（带id）
@@ -39,11 +38,8 @@ public abstract class BaseIdModel extends BaseJsonModel {
 	 */
 	private String id;
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
+	@Override
+	public String toString() {
+		return super.toString();
 	}
 }
