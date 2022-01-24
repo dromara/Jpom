@@ -78,6 +78,7 @@ public class AutoStartProject {
 	}
 
 	@PreLoadMethod
+	@SuppressWarnings("rawtypes")
 	private static void starCron() {
 		// 加载定时器
 		Map<String, ICron> cronMap = SpringUtil.getApplicationContext().getBeansOfType(ICron.class);

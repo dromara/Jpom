@@ -46,7 +46,7 @@ import java.util.List;
  * @date 2019/4/24
  */
 @Service
-public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> implements ICron {
+public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> implements ICron<NodeScriptModel> {
 
 	public NodeScriptServer() {
 		super(AgentConfigBean.SCRIPT);
@@ -97,7 +97,8 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
 		CronUtils.remove(taskId);
 	}
 
-	private boolean checkCron(NodeScriptModel nodeScriptModel) {
+	@Override
+	public boolean checkCron(NodeScriptModel nodeScriptModel) {
 		String id = "script:" + nodeScriptModel.getId();
 		if (StrUtil.isEmpty(nodeScriptModel.getAutoExecCron())) {
 			CronUtils.remove(id);
@@ -109,12 +110,8 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
 	}
 
 	@Override
-	public int startCron() {
-		List<NodeScriptModel> list = list();
-		if (list == null) {
-			return 0;
-		}
-		return (int) list.stream().map(NodeScriptServer.this::checkCron).filter(aBoolean -> aBoolean).count();
+	public List<NodeScriptModel> queryStartingList() {
+		return this.list();
 	}
 
 	private static class CronTask implements Task {

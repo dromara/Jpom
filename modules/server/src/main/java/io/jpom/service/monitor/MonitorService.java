@@ -22,9 +22,6 @@
  */
 package io.jpom.service.monitor;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.cron.task.Task;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
@@ -42,22 +39,12 @@ import java.util.List;
  * @author Arno
  */
 @Service
-public class MonitorService extends BaseWorkspaceService<MonitorModel> implements ICron {
+public class MonitorService extends BaseWorkspaceService<MonitorModel> implements ICron<MonitorModel> {
 
 	@Override
 	public void insert(MonitorModel monitorModel) {
 		super.insert(monitorModel);
 		this.checkCron(monitorModel);
-	}
-
-	@Override
-	public int delByKey(String keyValue) {
-		int byKey = super.delByKey(keyValue);
-		if (byKey > 0) {
-			String taskId = "monitor:" + keyValue;
-			CronUtils.remove(taskId);
-		}
-		return byKey;
 	}
 
 	@Override
@@ -71,25 +58,20 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
 	}
 
 	@Override
-	public int startCron() {
-		// 关闭监听
-		MonitorModel monitorModel = new MonitorModel();
-		monitorModel.setStatus(true);
-		List<MonitorModel> monitorModels = super.listByBean(monitorModel);
-		int size = CollUtil.size(monitorModels);
-		if (size > 0) {
-			monitorModels.forEach(this::checkCron);
+	public int updateById(MonitorModel info, HttpServletRequest request) {
+		int update = super.updateById(info, request);
+		if (update > 0) {
+			this.checkCron(info);
 		}
-		return size;
+		return update;
 	}
 
 	@Override
-	public int updateById(MonitorModel info) {
-		int updateById = super.updateById(info);
-		if (updateById > 0) {
-			this.checkCron(info);
-		}
-		return updateById;
+	public List<MonitorModel> queryStartingList() {
+		// 关闭监听
+		MonitorModel monitorModel = new MonitorModel();
+		monitorModel.setStatus(true);
+		return super.listByBean(monitorModel);
 	}
 
 	/**
@@ -97,49 +79,19 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
 	 *
 	 * @param monitorModel 监控信息
 	 */
-	private void checkCron(MonitorModel monitorModel) {
+	@Override
+	public boolean checkCron(MonitorModel monitorModel) {
 		String id = monitorModel.getId();
 		String taskId = "monitor:" + id;
 		String autoExecCron = monitorModel.getExecCron();
-		if (StrUtil.isEmpty(autoExecCron)) {
-			// 忽略没有关键字段更新
-			return;
-		}
 		if (!monitorModel.status()) {
 			CronUtils.remove(taskId);
-			return;
+			return false;
 		}
 		DefaultSystemLog.getLog().debug("start monitor cron {} {} {}", id, monitorModel.getName(), autoExecCron);
-		CronUtils.upsert(taskId, autoExecCron, new MonitorService.CronTask(id));
+		CronUtils.upsert(taskId, autoExecCron, new MonitorItem(id));
+		return true;
 	}
-
-	private static class CronTask implements Task {
-
-		private final String id;
-
-		public CronTask(String id) {
-			this.id = id;
-		}
-
-		@Override
-		public void execute() {
-			new MonitorItem(id).run();
-		}
-	}
-
-//	/**
-//	 * 根据周期获取list
-//	 *
-//	 * @param cycle 周期
-//	 * @return list
-//	 */
-//	public List<MonitorModel> listRunByCycle(Cycle cycle) {
-//		MonitorModel monitorModel = new MonitorModel();
-//		monitorModel.setCycle(cycle.getCode());
-//		monitorModel.setStatus(true);
-//		List<MonitorModel> monitorModels = this.listByBean(monitorModel);
-//		return ObjectUtil.defaultIfNull(monitorModels, Collections.EMPTY_LIST);
-//	}
 
 	/**
 	 * 设置报警状态
@@ -179,7 +131,7 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
 	}
 
 
-	public boolean checkProject(String nodeId, String projectId) {
+	/*public boolean checkProject(String nodeId, String projectId) {
 		List<MonitorModel> list = list();
 		if (list == null || list.isEmpty()) {
 			return false;
@@ -198,5 +150,5 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
 			}
 		}
 		return false;
-	}
+	}*/
 }

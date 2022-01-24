@@ -22,6 +22,7 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseJsonModel;
@@ -126,7 +127,7 @@ public class MonitorModel extends BaseWorkspaceModel {
 	 * @return true 启用
 	 */
 	public boolean status() {
-		return status != null && status;
+		return status != null && status && StrUtil.isNotEmpty(getExecCron());
 	}
 
 	public void setStatus(Boolean status) {
@@ -267,7 +268,13 @@ public class MonitorModel extends BaseWorkspaceModel {
 	}
 
 	public static class NodeProject extends BaseJsonModel {
+		/**
+		 * 节点 ID
+		 */
 		private String node;
+		/**
+		 * 被监控的项目ID
+		 */
 		private List<String> projects;
 
 		public String getNode() {

@@ -1,6 +1,5 @@
 package io.jpom.service.node.command;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -17,15 +16,15 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.ChannelExec;
 import io.jpom.common.BaseServerController;
+import io.jpom.cron.CronUtils;
+import io.jpom.cron.ICron;
 import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.model.data.CommandModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.cron.ICron;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
-import io.jpom.cron.CronUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -45,7 +44,7 @@ import java.util.stream.Collectors;
  * @since : 2021/12/6 22:11
  */
 @Service
-public class CommandService extends BaseWorkspaceService<CommandModel> implements ICron {
+public class CommandService extends BaseWorkspaceService<CommandModel> implements ICron<CommandModel> {
 
 	private final SshService sshService;
 	private final CommandExecLogService commandExecLogService;
@@ -68,31 +67,12 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
 	}
 
 	@Override
-	public int update(CommandModel commandModel) {
-		int update = super.update(commandModel);
-		if (update > 0) {
-			this.checkCron(commandModel);
-		}
-		return update;
-	}
-
-	@Override
-	public int updateById(CommandModel info) {
-		int update = super.updateById(info);
+	public int updateById(CommandModel info, HttpServletRequest request) {
+		int update = super.updateById(info, request);
 		if (update > 0) {
 			this.checkCron(info);
 		}
 		return update;
-	}
-
-	@Override
-	public int delByKey(String keyValue) {
-		int delByKey = super.delByKey(keyValue);
-		if (delByKey > 0) {
-			String taskId = "ssh_command:" + keyValue;
-			CronUtils.remove(taskId);
-		}
-		return delByKey;
 	}
 
 	@Override
@@ -110,32 +90,27 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
 	 *
 	 * @param buildInfoModel 构建信息
 	 */
-	private void checkCron(CommandModel buildInfoModel) {
+	@Override
+	public boolean checkCron(CommandModel buildInfoModel) {
 		String id = buildInfoModel.getId();
 		String taskId = "ssh_command:" + id;
 		String autoExecCron = buildInfoModel.getAutoExecCron();
 		if (StrUtil.isEmpty(autoExecCron)) {
 			CronUtils.remove(taskId);
-			return;
+			return false;
 		}
 		DefaultSystemLog.getLog().debug("start ssh command cron {} {} {}", id, buildInfoModel.getName(), autoExecCron);
 		CronUtils.upsert(taskId, autoExecCron, new CommandService.CronTask(id));
+		return true;
 	}
 
 	/**
 	 * 开启定时构建任务
 	 */
 	@Override
-	public int startCron() {
+	public List<CommandModel> queryStartingList() {
 		String sql = "select * from " + super.getTableName() + " where autoExecCron is not null and autoExecCron <> ''";
-		List<CommandModel> models = super.queryList(sql);
-		if (models == null) {
-			return 0;
-		}
-		for (CommandModel buildInfoModel : models) {
-			this.checkCron(buildInfoModel);
-		}
-		return CollUtil.size(models);
+		return super.queryList(sql);
 	}
 
 	private class CronTask implements Task {

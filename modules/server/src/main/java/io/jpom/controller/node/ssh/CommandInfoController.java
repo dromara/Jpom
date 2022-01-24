@@ -107,7 +107,7 @@ public class CommandInfoController extends BaseServerController {
 			commandService.insert(commandModel);
 		} else {
 			commandModel.setId(id);
-			commandService.updateById(commandModel);
+			commandService.updateById(commandModel, getRequest());
 		}
 		return JsonMessage.getString(200, "操作成功");
 	}

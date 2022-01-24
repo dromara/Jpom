@@ -22,7 +22,6 @@
  */
 package io.jpom.service.script;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -37,6 +36,7 @@ import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.socket.ScriptProcessBuilder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -44,19 +44,12 @@ import java.util.List;
  * @since 2022/1/19
  */
 @Service
-public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements ICron {
+public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements ICron<ScriptModel> {
 
 	@Override
-	public int startCron() {
+	public List<ScriptModel> queryStartingList() {
 		String sql = "select * from " + super.getTableName() + " where autoExecCron is not null and autoExecCron <> ''";
-		List<ScriptModel> models = super.queryList(sql);
-		if (models == null) {
-			return 0;
-		}
-		for (ScriptModel item : models) {
-			this.checkCron(item);
-		}
-		return CollUtil.size(models);
+		return super.queryList(sql);
 	}
 
 	@Override
@@ -66,26 +59,17 @@ public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements I
 	}
 
 	@Override
-	public int updateById(ScriptModel info) {
-		int i = super.updateById(info);
-		if (i > 0) {
-			this.checkCron(info);
-		}
-		return i;
-	}
-
-	@Override
-	public int update(ScriptModel scriptModel) {
-		int update = super.update(scriptModel);
+	public int updateById(ScriptModel info, HttpServletRequest request) {
+		int update = super.updateById(info, request);
 		if (update > 0) {
-			this.checkCron(scriptModel);
+			this.checkCron(info);
 		}
 		return update;
 	}
 
 	@Override
-	public int delByKey(String keyValue) {
-		int delByKey = super.delByKey(keyValue);
+	public int delByKey(String keyValue, HttpServletRequest request) {
+		int delByKey = super.delByKey(keyValue, request);
 		if (delByKey > 0) {
 			String taskId = "server_script:" + keyValue;
 			CronUtils.remove(taskId);
@@ -98,16 +82,18 @@ public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements I
 	 *
 	 * @param scriptModel 构建信息
 	 */
-	private void checkCron(ScriptModel scriptModel) {
+	@Override
+	public boolean checkCron(ScriptModel scriptModel) {
 		String id = scriptModel.getId();
 		String taskId = "server_script:" + id;
 		String autoExecCron = scriptModel.getAutoExecCron();
 		if (StrUtil.isEmpty(autoExecCron)) {
 			CronUtils.remove(taskId);
-			return;
+			return false;
 		}
 		DefaultSystemLog.getLog().debug("start script cron {} {} {}", id, scriptModel.getName(), autoExecCron);
 		CronUtils.upsert(taskId, autoExecCron, new CronTask(id));
+		return true;
 	}
 
 

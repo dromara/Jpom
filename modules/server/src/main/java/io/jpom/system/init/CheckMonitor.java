@@ -122,6 +122,7 @@ public class CheckMonitor {
 	/**
 	 * 异步初始化
 	 */
+	@SuppressWarnings("rawtypes")
 	private static void asyncLoad() {
 		ThreadUtil.execute(() -> {
 			BuildUtil.reloadCacheSize();

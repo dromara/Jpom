@@ -27,6 +27,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.task.Task;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.http.HttpStatus;
@@ -55,24 +56,27 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2021/12/14
  */
-public class MonitorItem implements Runnable {
+public class MonitorItem implements Task {
 
-	private final MonitorModel monitorModel;
+
 	private final DbMonitorNotifyLogService dbMonitorNotifyLogService;
 	private final UserService userService;
 	private final MonitorService monitorService;
 	private final NodeService nodeService;
+	private final String monitorId;
+	private MonitorModel monitorModel;
 
 	public MonitorItem(String id) {
 		this.dbMonitorNotifyLogService = SpringUtil.getBean(DbMonitorNotifyLogService.class);
 		this.userService = SpringUtil.getBean(UserService.class);
 		this.monitorService = SpringUtil.getBean(MonitorService.class);
 		this.nodeService = SpringUtil.getBean(NodeService.class);
-		this.monitorModel = monitorService.getByKey(id);
+		this.monitorId = id;
 	}
 
 	@Override
-	public void run() {
+	public void execute() {
+		this.monitorModel = monitorService.getByKey(monitorId);
 		List<MonitorModel.NodeProject> nodeProjects = monitorModel.projects();
 		//
 		List<Boolean> collect = nodeProjects.stream().map(nodeProject -> {
