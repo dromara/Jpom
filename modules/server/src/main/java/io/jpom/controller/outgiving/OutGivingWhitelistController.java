@@ -33,6 +33,7 @@ import io.jpom.model.data.ServerWhitelist;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -54,7 +55,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping(value = "/outgiving")
-@Feature(cls = ClassFeature.OUTGIVING)
+@Feature(cls = ClassFeature.OUTGIVING_CONFIG_WHITELIST)
 public class OutGivingWhitelistController extends BaseServerController {
 
 	private final SystemParametersServer systemParametersServer;
@@ -99,6 +100,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 	 */
 	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@SystemPermission
+	@Feature(method = MethodFeature.EDIT)
 	public String whitelistDirectorySubmit(String outGiving, String allowRemoteDownloadHost) {
 		List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");
 		list = AgentWhitelist.covertToArray(list, "项目路径白名单不能位于Jpom目录下");
