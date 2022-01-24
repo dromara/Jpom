@@ -60,12 +60,18 @@ public abstract class BaseHandler extends TextWebSocketHandler {
 		this.afterConnectionEstablishedImpl(session);
 	}
 
-	private void showHelloMsg(Map<String, Object> attributes, WebSocketSession session) {
+	protected void showHelloMsg(Map<String, Object> attributes, WebSocketSession session) {
 		UserModel userInfo = (UserModel) attributes.get("userInfo");
 		String payload = StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId() + StrUtil.CRLF);
 		this.sendMsg(session, payload);
 	}
 
+	/**
+	 * 建立会话后
+	 *
+	 * @param session 会话
+	 * @throws Exception 异常
+	 */
 	protected void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
 
 	}

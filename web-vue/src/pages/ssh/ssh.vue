@@ -226,7 +226,7 @@
       <ssh-file v-if="drawerVisible" :ssh="temp" />
     </a-drawer>
     <!-- Terminal -->
-    <a-modal v-model="terminalVisible" width="1300px" :title="temp.name" :footer="null" :maskClosable="false">
+    <a-modal v-model="terminalVisible" width="80vw" :title="temp.name" :footer="null" :maskClosable="false">
       <terminal v-if="terminalVisible" :sshId="temp.id" />
     </a-modal>
     <!-- 操作日志 -->
