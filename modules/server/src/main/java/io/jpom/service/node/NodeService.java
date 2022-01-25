@@ -277,6 +277,20 @@ public class NodeService extends BaseGroupService<NodeModel> {
 		return null;
 	}
 
+	/**
+	 * 根据 url 去重
+	 *
+	 * @return list
+	 */
+	public List<String> getDeDuplicationByUrl() {
+		String sql = "select url from " + super.getTableName() + "  group  by url";
+		List<Entity> query = this.query(sql);
+		if (query != null) {
+			return query.stream().map((entity -> entity.getStr("url"))).collect(Collectors.toList());
+		}
+		return null;
+	}
+
 	public List<NodeModel> getNodeBySshId(String sshId) {
 		NodeModel nodeModel = new NodeModel();
 		nodeModel.setSshId(sshId);
