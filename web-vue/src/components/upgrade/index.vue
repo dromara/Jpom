@@ -17,7 +17,7 @@
         </template>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">已经运行时间：{{ temp.upTime }}</span>
+        <span class="layui-elem-quote">已经运行时间：{{ temp.upTimeStr }}</span>
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote"

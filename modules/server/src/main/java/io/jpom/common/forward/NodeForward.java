@@ -53,6 +53,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 节点请求转发
@@ -186,6 +187,14 @@ public class NodeForward {
 		httpRequest.form(pName, pVal, val);
 		//
 		if (jsonData != null) {
+			// 参数 URL 编码，避免 特殊符号 不生效
+			Set<Map.Entry<String, Object>> entries = jsonData.entrySet();
+			for (Map.Entry<String, Object> entry : entries) {
+				Object value = entry.getValue();
+				if (value instanceof String) {
+					entry.setValue(URLUtil.encodeAll((String) value));
+				}
+			}
 			httpRequest.form(jsonData);
 		}
 		HttpResponse response;
