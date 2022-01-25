@@ -1,55 +1,6 @@
 <template>
   <div class="full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
-          <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
-        </a-select>
-        <a-input v-model="listQuery['%name%']" placeholder="搜索项目" class="search-input-item" />
-
-        <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
-          <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
-        </a-select>
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button :loading="loading" type="primary" @click="getNodeProjectData">搜索</a-button>
-        </a-tooltip>
-        <span>| </span>
-
-        <a-dropdown>
-          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-            批量操作
-            <a-icon type="down" />
-          </a>
-          <a-menu slot="overlay">
-            <a-menu-item>
-              <a-button type="primary" @click="batchStart">批量启动</a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-button type="primary" @click="batchRestart">批量重启</a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-button type="danger" @click="batchStop">批量关闭</a-button>
-            </a-menu-item>
-          </a-menu>
-        </a-dropdown>
-
-        <a-tooltip>
-          <template slot="title">
-            <div>
-              <ul>
-                <li>项目是存储在节点中的、创建需要到节点管理里面去操作</li>
-                <li>状态数据是异步获取有一定时间延迟</li>
-              </ul>
-            </div>
-          </template>
-          <a-icon type="question-circle" theme="filled" />
-        </a-tooltip>
-
-        <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的项目信息, 需要重新同步">
-          <a-icon @click="delAll()" type="delete" />
-        </a-tooltip>
-      </a-space>
-    </div>
+    <!-- <div ref="filter" class="filter"></div> -->
     <a-table
       :data-source="projList"
       :columns="columns"
@@ -59,6 +10,56 @@
       :row-selection="rowSelection"
       :rowKey="(record, index) => index"
     >
+      <template slot="title">
+        <a-space>
+          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+            <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
+          </a-select>
+          <a-input v-model="listQuery['%name%']" placeholder="搜索项目" class="search-input-item" />
+
+          <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
+            <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
+          </a-select>
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button :loading="loading" type="primary" @click="getNodeProjectData">搜索</a-button>
+          </a-tooltip>
+          <span>| </span>
+
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              批量操作
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" @click="batchStart">批量启动</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="primary" @click="batchRestart">批量重启</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="danger" @click="batchStop">批量关闭</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+
+          <a-tooltip>
+            <template slot="title">
+              <div>
+                <ul>
+                  <li>项目是存储在节点中的、创建需要到节点管理里面去操作</li>
+                  <li>状态数据是异步获取有一定时间延迟</li>
+                </ul>
+              </div>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip>
+
+          <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的项目信息, 需要重新同步">
+            <a-icon @click="delAll()" type="delete" />
+          </a-tooltip>
+        </a-space>
+      </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -494,7 +495,7 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
+/* .filter {
   margin-bottom: 10px;
 }
 
@@ -514,6 +515,6 @@ export default {
 }
 
 .lib-exist {
-  color: #faad14;
-}
+  color: #faad14; 
+}*/
 </style>

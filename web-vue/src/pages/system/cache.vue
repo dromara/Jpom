@@ -7,7 +7,7 @@
           <a-timeline-item>
             <span class="layui-elem-quote">数据目录占用空间：{{ temp.dataSize }} (10分钟刷新一次)</span>
           </a-timeline-item>
-          <a-timeline-item>
+          <a-timeline-item v-if="temp.cacheFileSize">
             <a-space>
               <span class="layui-elem-quote">临时文件占用空间：{{ temp.cacheFileSize }} (10分钟刷新一次)</span>
               <a-button type="primary" v-if="temp.cacheFileSize !== '0'" class="btn" @click="clear('serviceCacheFileSize')">清空</a-button>
@@ -25,7 +25,7 @@
           <a-timeline-item>
             <span class="layui-elem-quote">在线构建文件占用空间：{{ temp.cacheBuildFileSize }} (10分钟刷新一次)</span>
           </a-timeline-item>
-          <a-timeline-item>
+          <a-timeline-item v-if="temp.oldJarsSize">
             <a-space>
               <span class="layui-elem-quote">旧版程序包占有空间：{{ temp.oldJarsSize }}</span>
               <a-button v-if="temp.oldJarsSize !== '0'" type="primary" class="btn" @click="clear('serviceOldJarsSize')">清空</a-button>
@@ -36,7 +36,7 @@
           </a-timeline-item>
         </a-timeline>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="运行中的定时任务" force-render> <task-stat :taskList="taskList" /></a-tab-pane>
+      <a-tab-pane key="2" tab="运行中的定时任务" force-render> <task-stat :taskList="taskList" @refresh="loadData" /></a-tab-pane>
     </a-tabs>
   </div>
 </template>

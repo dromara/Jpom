@@ -1,42 +1,6 @@
 <template>
   <div class="full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input v-model="listQuery['%id%']" placeholder="节点ID" />
-        <a-input v-model="listQuery['%name%']" placeholder="节点名称" />
-        <a-input v-model="listQuery['%url%']" placeholder="节点地址" />
-        <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
-          <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
-        </a-select>
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-button type="primary jpom-node-manage-add" @click="handleAdd">新增</a-button>
-        <a-dropdown>
-          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-          <a-menu slot="overlay">
-            <a-menu-item>
-              <a-button type="primary" @click="fastInstall">快速安装</a-button>
-            </a-menu-item>
-          </a-menu>
-        </a-dropdown>
-
-        <a-tooltip>
-          <template slot="title">
-            <div>点击节点管理进入节点管理页面</div>
-
-            <div>
-              <ul>
-                <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
-                <li>节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件）</li>
-                <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
-              </ul>
-            </div>
-          </template>
-          <a-icon type="question-circle" theme="filled" />
-        </a-tooltip>
-      </a-space>
-    </div>
+    <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
     <a-table
       :columns="columns"
@@ -47,6 +11,42 @@
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       @change="changePage"
     >
+      <template slot="title">
+        <a-space>
+          <a-input v-model="listQuery['%id%']" placeholder="节点ID" />
+          <a-input v-model="listQuery['%name%']" placeholder="节点名称" />
+          <a-input v-model="listQuery['%url%']" placeholder="节点地址" />
+          <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+            <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+          </a-select>
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary jpom-node-manage-add" @click="handleAdd">新增</a-button>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" @click="fastInstall">快速安装</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+
+          <a-tooltip>
+            <template slot="title">
+              <div>点击节点管理进入节点管理页面</div>
+
+              <div>
+                <ul>
+                  <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
+                  <li>节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件）</li>
+                  <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
+                </ul>
+              </div>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip> </a-space
+      ></template>
       <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -790,9 +790,9 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
+/* .filter {
   margin-bottom: 10px;
-}
+} */
 /* 
 .filter-item {
   width: 150px;
