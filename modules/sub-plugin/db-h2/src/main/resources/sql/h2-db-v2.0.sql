@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BUILD_INFO
 	buildId             int comment '构建 id',
 	`group`             VARCHAR(50) comment '分组名称',
 	branchName          VARCHAR(50) comment '分支',
-	script              VARCHAR(200) comment '构建命令',
+	script              CLOB comment '构建命令',
 	resultDirFile       VARCHAR(50) comment '构建产物目录',
 	releaseMethod       int comment '发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}',
 	modifyUser          VARCHAR(50) comment '修改人',
@@ -103,7 +103,7 @@ ALTER TABLE BUILD_INFO
 
 -- @author hjk 增加字段长度，200->500
 ALTER TABLE BUILD_INFO
-	ALTER COLUMN script VARCHAR(500) comment '构建命令';
+	ALTER COLUMN script CLOB comment '构建命令';
 
 -- 备份数据库信息表 @author Hotstrip
 CREATE TABLE IF NOT EXISTS PUBLIC.BACKUP_INFO

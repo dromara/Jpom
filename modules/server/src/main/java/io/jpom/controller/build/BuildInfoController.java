@@ -27,6 +27,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.pattern.CronPattern;
 import cn.jiangzeyin.common.JsonMessage;
@@ -36,6 +37,7 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
+import io.jpom.build.DockerYmlDsl;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.AfterOpt;
@@ -155,13 +157,14 @@ public class BuildInfoController extends BaseServerController {
 	@RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
 	public String updateMonitor(String id,
-								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空")) String name,
-								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库信息不能为空")) String repositoryId,
-								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200")) String resultDirFile,
-								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
+								@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空") String name,
+								@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库信息不能为空") String repositoryId,
+								@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200") String resultDirFile,
+								@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空") String script,
 								@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
 								String branchName, String branchTagName, String webhook, String autoBuildCron,
-								String extraData, String group) {
+								String extraData, String group,
+								@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "构建方式不正确") int buildMode) {
 		// 根据 repositoryId 查询仓库信息
 		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, getRequest());
 		Assert.notNull(repositoryModel, "无效的仓库信息");
@@ -172,15 +175,19 @@ public class BuildInfoController extends BaseServerController {
 			// 如果是 SVN
 			branchName = "trunk";
 		}
+		//
+		Assert.state(buildMode == 0 || buildMode == 1, "请选择正确的构建方式");
+		if (buildMode == 1) {
+			// 验证 dsl 内容
+			DockerYmlDsl.build(script).check();
+		}
 		if (ServerExtConfigBean.getInstance().getBuildCheckDeleteCommand()) {
 			// 判断删除命令
 			Assert.state(!CommandUtil.checkContainsDel(script), "不能包含删除命令");
 		}
 		// 查询构建信息
 		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
-		if (null == buildInfoModel) {
-			buildInfoModel = new BuildInfoModel();
-		}
+		buildInfoModel = ObjectUtil.defaultIfNull(buildInfoModel, new BuildInfoModel());
 		// 设置参数
 		if (StrUtil.isNotEmpty(webhook)) {
 			Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
@@ -202,8 +209,8 @@ public class BuildInfoController extends BaseServerController {
 		buildInfoModel.setBranchTagName(branchTagName);
 		buildInfoModel.setResultDirFile(resultDirFile);
 		buildInfoModel.setScript(script);
-		// 设置修改人
 		buildInfoModel.setGroup(group);
+		buildInfoModel.setBuildMode(buildMode);
 		// 发布方式
 		BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
 		Assert.notNull(releaseMethod1, "发布方法不正确");

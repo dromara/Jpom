@@ -28,9 +28,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.ListImagesCmd;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -66,7 +64,8 @@ public class Test {
 	public void before() {
 		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
 				// .withDockerHost("tcp://192.168.163.11:2376").build();
-				.withDockerHost("tcp://127.0.0.1:2375").build();
+//				.withApiVersion()
+				.withDockerHost("tcp://127.0.0.2:2375").build();
 
 		DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
 				.dockerHost(config.getDockerHost())
@@ -76,6 +75,8 @@ public class Test {
 //				.responseTimeout(Duration.ofSeconds(45))
 				.build();
 		this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
+		dockerClient.pingCmd().exec();
+
 		//
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -84,11 +85,21 @@ public class Test {
 
 	@After
 	public void after() {
+		if (containerId == null) {
+			return;
+		}
 		// 清除容器
 		this.dockerClient.removeContainerCmd(containerId)
 				.withRemoveVolumes(true)
 				.withForce(true)
 				.exec();
+	}
+
+	@org.junit.Test
+	public void testInfo() {
+		PingCmd pingCmd = dockerClient.pingCmd();
+		pingCmd.exec();
+		System.out.println(pingCmd);
 	}
 
 	@org.junit.Test
@@ -121,12 +132,12 @@ public class Test {
 
 
 		List<Bind> bindList = new ArrayList<>();
-		bindList.add(new Bind(absolutePath, new Volume(workingDir), AccessMode.rw));
-		bindList.add(new Bind("/Users/user/.m2", new Volume("/root/.m2"), AccessMode.rw));
+		bindList.add(new Bind(absolutePath, new Volume(workingDir)));
+		bindList.add(new Bind("/Users/user/.m2", new Volume("/root/.m2")));
 		//
 		//
 		HostConfig hostConfig = HostConfig.newHostConfig().withBinds(bindList);
-		//.withMounts(mounts);
+//		.withMounts(mounts);
 		createContainerCmd.withHostConfig(hostConfig);
 
 		String[] entrypoint = {"/bin/sh", "-c"};
