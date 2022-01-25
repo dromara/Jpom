@@ -32,3 +32,7 @@ ALTER TABLE BACKUP_INFO
 	ADD IF NOT EXISTS version varchar(255) comment '服务版本';
 ALTER TABLE BACKUP_INFO
 	ADD IF NOT EXISTS modifyUser VARCHAR(50) comment '操作人';
+
+ALTER TABLE BUILD_INFO
+	ADD IF NOT EXISTS buildMode int comment '构建方式 {0 本地构建, 1 docker 构建Ï}';
+

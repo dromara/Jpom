@@ -26,12 +26,20 @@ import cn.hutool.core.annotation.PropIgnore;
 import io.jpom.model.BaseGroupModel;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.h2db.TableName;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Tolerate;
 
 /**
- * @author Hotstrip
  * new BuildModel class, for replace old BuildModel
+ *
+ * @author Hotstrip
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "BUILD_INFO", name = "构建信息")
+@Data
+@Builder
 public class BuildInfoModel extends BaseGroupModel {
 
 	/**
@@ -99,128 +107,16 @@ public class BuildInfoModel extends BaseGroupModel {
 	 */
 	@PropIgnore
 	private Boolean sourceDirExist;
+	/**
+	 * 构建方式 0 本地构建 1 docker 构建
+	 */
+	private Integer buildMode;
 
-	public String getAutoBuildCron() {
-		return autoBuildCron;
-	}
-
-	public void setAutoBuildCron(String autoBuildCron) {
-		this.autoBuildCron = autoBuildCron;
-	}
-
-	public String getRepositoryId() {
-		return repositoryId;
-	}
-
-	public void setRepositoryId(String repositoryId) {
-		this.repositoryId = repositoryId;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Integer getBuildId() {
-		return buildId;
-	}
-
-	public void setBuildId(Integer buildId) {
-		this.buildId = buildId;
-	}
-
-	public String getWebhook() {
-		return webhook;
-	}
-
-	public void setWebhook(String webhook) {
-		this.webhook = webhook;
-	}
-
-	public String getBranchName() {
-		return branchName;
-	}
-
-	public void setBranchName(String branchName) {
-		this.branchName = branchName;
-	}
-
-	public String getScript() {
-		return script;
-	}
-
-	public void setScript(String script) {
-		this.script = script;
-	}
-
-	public String getResultDirFile() {
-		return resultDirFile;
-	}
-
-	public void setResultDirFile(String resultDirFile) {
-		this.resultDirFile = resultDirFile;
-	}
-
-	public Integer getReleaseMethod() {
-		return releaseMethod;
-	}
-
-	public void setReleaseMethod(Integer releaseMethod) {
-		this.releaseMethod = releaseMethod;
-	}
-
-	public Integer getStatus() {
-		return status;
-	}
-
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
-
-	public String getTriggerToken() {
-		return triggerToken;
-	}
-
-	public void setTriggerToken(String triggerToken) {
-		this.triggerToken = triggerToken;
-	}
-
-	public String getExtraData() {
-		return extraData;
-	}
-
-	public void setExtraData(String extraData) {
-		this.extraData = extraData;
-	}
-
-	public String getReleaseMethodDataId() {
-		return releaseMethodDataId;
-	}
-
-	public void setReleaseMethodDataId(String releaseMethodDataId) {
-		this.releaseMethodDataId = releaseMethodDataId;
+	@Tolerate
+	public BuildInfoModel() {
 	}
 
 	public static String getBuildIdStr(int buildId) {
 		return String.format("#%s", buildId);
-	}
-
-	public String getBranchTagName() {
-		return branchTagName;
-	}
-
-	public void setBranchTagName(String branchTagName) {
-		this.branchTagName = branchTagName;
-	}
-
-	public void setSourceDirExist(Boolean sourceDirExist) {
-		this.sourceDirExist = sourceDirExist;
-	}
-
-	public Boolean getSourceDirExist() {
-		return sourceDirExist;
 	}
 }
