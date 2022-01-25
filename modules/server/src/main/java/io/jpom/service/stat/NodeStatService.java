@@ -22,9 +22,13 @@
  */
 package io.jpom.service.stat;
 
+import cn.hutool.db.Entity;
 import io.jpom.model.stat.NodeStatModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -32,4 +36,18 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class NodeStatService extends BaseWorkspaceService<NodeStatModel> {
+
+	/**
+	 * 根据 url 去重
+	 *
+	 * @return list
+	 */
+	public List<String> getDeDuplicationByUrl() {
+		String sql = "select url from " + super.getTableName() + "  group  by url";
+		List<Entity> query = this.query(sql);
+		if (query != null) {
+			return query.stream().map((entity -> entity.getStr("url"))).collect(Collectors.toList());
+		}
+		return null;
+	}
 }
