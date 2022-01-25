@@ -20,7 +20,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -36,15 +41,14 @@ import com.github.dockerjava.transport.DockerHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
+import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,20 +60,35 @@ import java.util.List;
 public class Test {
 
 	private DockerClient dockerClient;
+	private String containerId;
 
 	@Before
 	public void before() {
 		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
 				// .withDockerHost("tcp://192.168.163.11:2376").build();
 				.withDockerHost("tcp://127.0.0.1:2375").build();
+
 		DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
 				.dockerHost(config.getDockerHost())
 				.sslConfig(config.getSSLConfig())
 				.maxConnections(100)
-				.connectionTimeout(Duration.ofSeconds(30))
-				.responseTimeout(Duration.ofSeconds(45))
+//				.connectionTimeout(Duration.ofSeconds(30))
+//				.responseTimeout(Duration.ofSeconds(45))
 				.build();
 		this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
+		//
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+		logger.setLevel(Level.INFO);
+	}
+
+	@After
+	public void after() {
+		// 清除容器
+		this.dockerClient.removeContainerCmd(containerId)
+				.withRemoveVolumes(true)
+				.withForce(true)
+				.exec();
 	}
 
 	@org.junit.Test
@@ -85,23 +104,39 @@ public class Test {
 	public void createImage() {
 		File file = FileUtil.file("");
 		file = FileUtil.getParent(file, 5);
-		String absolutePath = FileUtil.getAbsolutePath(file);
+		String absolutePath = "/Users/user/IdeaProjects/Jpom-demo-case";
 		System.out.println(absolutePath);
 		String image = "maven:3.8.4-jdk-8";
-		String workingDir = "jpom";
+		String workingDir = "/jpom/";
 		CreateContainerCmd containerCmd = dockerClient.createContainerCmd(image);
 		String name = "jpom-test";
 		containerCmd.withName(name);
 		CreateContainerCmd createContainerCmd = containerCmd.withWorkingDir(workingDir);
 		//
-		List<Mount> mounts = new ArrayList<>();
-		mounts.add(new Mount()
-				.withType(MountType.VOLUME)
-				.withSource(absolutePath)
-				.withTarget(workingDir));
+//		List<Mount> mounts = new ArrayList<>();
+//		mounts.add(new Mount()
+//				.withType(MountType.VOLUME)
+//				.withSource(absolutePath)
+//				.withTarget(workingDir));
+
+
+		List<Bind> bindList = new ArrayList<>();
+		bindList.add(new Bind(absolutePath, new Volume(workingDir), AccessMode.rw));
+		bindList.add(new Bind("/Users/user/.m2", new Volume("/root/.m2"), AccessMode.rw));
 		//
-		HostConfig hostConfig = HostConfig.newHostConfig().withMounts(mounts);
+		//
+		HostConfig hostConfig = HostConfig.newHostConfig().withBinds(bindList);
+		//.withMounts(mounts);
 		createContainerCmd.withHostConfig(hostConfig);
+
+		String[] entrypoint = {"/bin/sh", "-c"};
+		String[] cmd = {"echo mvn clean package | /bin/sh"};
+//		String[] cmd = {""};
+		createContainerCmd.withEntrypoint(entrypoint);
+
+
+		createContainerCmd.withCmd(cmd);
+
 		//
 		// 检查镜像是否存在本地
 		boolean imagePull = false;
@@ -140,16 +175,18 @@ public class Test {
 			log.error("无法创建容器", e);
 			return;
 		}
+//		String containerId =;
+		this.containerId = containerResponse.getId();
 		// 启动容器
 		try {
-			this.dockerClient.startContainerCmd(containerResponse.getId()).exec();
+			this.dockerClient.startContainerCmd(containerId).exec();
 		} catch (RuntimeException e) {
 			log.error("容器启动失败:", e);
 			return;
 		}
 		// 获取日志
 		try {
-			this.dockerClient.logContainerCmd(containerResponse.getId())
+			this.dockerClient.logContainerCmd(containerId)
 					.withStdOut(true)
 					.withStdErr(true)
 					.withTailAll()
@@ -158,7 +195,7 @@ public class Test {
 						@Override
 						public void onNext(Frame object) {
 							String s = new String(object.getPayload(), StandardCharsets.UTF_8);
-							System.out.println(s);
+							System.out.print(s);
 						}
 					}).awaitCompletion();
 		} catch (InterruptedException e) {
@@ -172,7 +209,7 @@ public class Test {
 		}
 		// 等待容器执行结果
 		try {
-			this.dockerClient.waitContainerCmd(containerResponse.getId()).exec(new ResultCallback.Adapter<WaitResponse>() {
+			this.dockerClient.waitContainerCmd(containerId).exec(new ResultCallback.Adapter<WaitResponse>() {
 				@Override
 				public void onNext(WaitResponse object) {
 					log.info("dockerTask status code is: {}", object.getStatusCode());
@@ -187,32 +224,51 @@ public class Test {
 			Thread.currentThread().interrupt();
 		}
 		// 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
-		String resultFile = null;
-		String re = "modules/server/target/server-2.8.7-release.zip";
-
+//		String resultFile = null;
+		String re = "springboot-test-jar/target/";
+		String resultFile = FileUtil.file(workingDir, re).getAbsolutePath();
 		try (
-				InputStream stream = this.dockerClient.copyArchiveFromContainerCmd(containerResponse.getId(), re).exec();
+				InputStream stream = this.dockerClient.copyArchiveFromContainerCmd(containerId, resultFile).exec();
 				TarArchiveInputStream tarStream = new TarArchiveInputStream(stream);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(tarStream, StandardCharsets.UTF_8))
+				//BufferedReader reader = new BufferedReader(new InputStreamReader(tarStream, StandardCharsets.UTF_8))
 		) {
-			TarArchiveEntry tarArchiveEntry = tarStream.getNextTarEntry();
-			if (!tarStream.canReadEntryData(tarArchiveEntry)) {
-				log.info("不能读取tarArchiveEntry");
+//			tarStream.getNextTarEntry()
+			TarArchiveEntry tarArchiveEntry;
+			File file1 = FileUtil.file(file, re);
+			FileUtil.del(file1);
+
+			while ((tarArchiveEntry = tarStream.getNextTarEntry()) != null) {
+				if (!tarStream.canReadEntryData(tarArchiveEntry)) {
+					log.info("不能读取tarArchiveEntry");
+				}
+				if (tarArchiveEntry.isDirectory()) {
+					continue;
+				}
+				log.info("tarArchiveEntry's name: {}", tarArchiveEntry.getName());
+				File currentFile = FileUtil.file(file, re, tarArchiveEntry.getName());
+				FileUtil.mkParentDirs(currentFile);
+				IoUtil.copy(tarStream, new FileOutputStream(currentFile));
+//			resultFile = IOUtils.toString(reader);
+				// 将文件写出到解压的目录
+				//IOUtils.copy(fin, new FileOutputStream(curfile));
 			}
-			if (!tarArchiveEntry.isFile()) {
-				log.info("执行结果文件必须是文件类型, 不支持目录或其他类型");
-			}
-			log.info("tarArchiveEntry's name: {}", tarArchiveEntry.getName());
-			resultFile = IOUtils.toString(reader);
+
+//			CompressionFileUtil
+//			if (!tarArchiveEntry.isFile()) {
+//				log.info("执行结果文件必须是文件类型, 不支持目录或其他类型");
+//			}
+
+
+			//FileUtil.del(file1);
+			//Extractor extractor = CompressUtil.createExtractor(StandardCharsets.UTF_8, tarStream);
+			//extractor.extract(file1);
+			//IoUtil.copy(reader, new FileWriter(file1));
+//			resultFile = IOUtils.toString(reader);
 			log.info("结果文件内容: {}", resultFile);
 		} catch (Exception e) {
 			log.warn("无法获取容器执行结果文件: {}", e.getMessage());
 		}
 
-		// 清除容器
-		this.dockerClient.removeContainerCmd(containerResponse.getId())
-				.withRemoveVolumes(true)
-				.withForce(true)
-				.exec();
+
 	}
 }
