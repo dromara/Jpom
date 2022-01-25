@@ -1,6 +1,9 @@
 <template>
   <div>
-    <a-table rowKey="taskId" :columns="taskColumns" :data-source="taskList" :pagination="false">
+    <a-table rowKey="taskId" :columns="taskColumns" bordered :data-source="taskList" :pagination="false">
+      <template slot="title">
+        <a-button type="primary" @click="refresh"> <a-icon type="reload" /> </a-button>
+      </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -94,6 +97,9 @@ export default {
   mounted() {},
   methods: {
     parseTime: parseTime,
+    refresh() {
+      this.$emit("refresh");
+    },
   },
 };
 </script>

@@ -231,16 +231,7 @@
     </a-modal>
     <!-- 操作日志 -->
     <a-modal v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
-      <div ref="filter" class="filter">
-        <a-space>
-          <a-input class="search-input-item" v-model="viewOperationLogListQuery['modifyUser']" placeholder="操作人" />
-          <a-input class="search-input-item" v-model="viewOperationLogListQuery['name']" placeholder="ssh name" />
-          <a-input class="search-input-item" v-model="viewOperationLogListQuery['ip']" placeholder="ip" />
-          <a-input class="search-input-item" v-model="viewOperationLogListQuery['%commands%']" placeholder="执行命令" />
-          <a-range-picker class="filter-item search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
-          <a-button type="primary" @click="handleListLog">搜索</a-button>
-        </a-space>
-      </div>
+      <!-- <div ref="filter" class="filter"></div> -->
       <!-- 数据表格 -->
       <a-table
         :data-source="viewOperationLogList"
@@ -249,8 +240,19 @@
         :pagination="viewOperationLogListQuery.total / viewOperationLogListQuery.limit > 1 ? (this, viewOperationLogPagination) : false"
         @change="changeListLog"
         bordered
+        size="middle"
         :rowKey="(record, index) => index"
       >
+        <template slot="title">
+          <a-space>
+            <a-input class="search-input-item" v-model="viewOperationLogListQuery['modifyUser']" placeholder="操作人" />
+            <a-input class="search-input-item" v-model="viewOperationLogListQuery['name']" placeholder="ssh name" />
+            <a-input class="search-input-item" v-model="viewOperationLogListQuery['ip']" placeholder="ip" />
+            <a-input class="search-input-item" v-model="viewOperationLogListQuery['%commands%']" placeholder="执行命令" />
+            <a-range-picker class="filter-item search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
+            <a-button type="primary" @click="handleListLog">搜索</a-button>
+          </a-space>
+        </template>
         <a-tooltip
           slot="commands"
           slot-scope="text"
@@ -268,8 +270,7 @@
             }
           "
         >
-          <a-icon type="copy" />
-          <span>{{ text }}</span>
+          <a-input disabled :value="text"><a-icon slot="suffix" type="copy" /></a-input>
         </a-tooltip>
         <a-tooltip slot="modifyUser" slot-scope="text, item" placement="topLeft" :title="item.modifyUser || item.userId">
           <span>{{ item.modifyUser || item.userId }}</span>

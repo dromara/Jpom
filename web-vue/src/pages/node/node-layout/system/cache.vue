@@ -7,7 +7,7 @@
           <a-timeline-item>
             <span class="layui-elem-quote">数据目录占用空间：{{ temp.dataSize }}</span>
           </a-timeline-item>
-          <a-timeline-item>
+          <a-timeline-item v-if="temp.fileSize">
             <a-space>
               <span class="layui-elem-quote">临时文件占用空间：{{ temp.fileSize }}</span>
               <a-button type="primary" v-if="temp.fileSize !== '0'" class="btn" @click="clear('fileSize')">清空</a-button>
@@ -43,7 +43,7 @@
           </a-timeline-item>
         </a-timeline>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="运行中的定时任务"> <task-stat :taskList="taskList" /></a-tab-pane>
+      <a-tab-pane key="2" tab="运行中的定时任务"> <task-stat :taskList="taskList" @refresh="loadData" /></a-tab-pane>
     </a-tabs>
   </div>
 </template>
