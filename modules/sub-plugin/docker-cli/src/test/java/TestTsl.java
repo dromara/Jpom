@@ -14,30 +14,40 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author bwcx_jzy
- * @since 2022/1/25
+ * @since 2022/1/26
  */
-public class TestLoacl {
-	private DockerClient dockerClient;
+public class TestTsl {
 
 	@Test
 	public void test() {
+
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
 		logger.setLevel(Level.INFO);
 
+
 		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
 				// .withDockerHost("tcp://192.168.163.11:2376").build();
-//				.withApiVersion()
-				.withDockerHost("tcp://127.0.0.1:2375").build();
+				.withDockerTlsVerify(true)
+//				.withApiVersion(RemoteApiVersion.VERSION_1_16)
+//				.withCustomSslConfig(new SSLConfig() {
+//					@Override
+//					public SSLContext getSSLContext() throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+//						return SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
+//					}
+//				})
+				.withDockerCertPath("/Users/user/fsdownload/docker-ca")
+				.withDockerHost("tcp://172.19.106.253:2375").build();
 
 		DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+
 				.dockerHost(config.getDockerHost())
 				.sslConfig(config.getSSLConfig())
 				.maxConnections(100)
 //				.connectionTimeout(Duration.ofSeconds(30))
 //				.responseTimeout(Duration.ofSeconds(45))
 				.build();
-		this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
+		DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient);
 		dockerClient.pingCmd().exec();
 		VersionCmd versionCmd = dockerClient.versionCmd();
 		Version exec = versionCmd.exec();

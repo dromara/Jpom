@@ -7,3 +7,23 @@
 
 
 https://www.cnblogs.com/xiaoqi/p/docker-java.html
+
+https://www.cnblogs.com/boshen-hzb/p/10714414.html
+
+https://blog.csdn.net/qq_40321119/article/details/107951712
+
+https://blog.csdn.net/u012946310/article/details/82315302
+
+vim /usr/lib/systemd/system/docker.service
+
+systemctl daemon-reload && systemctl restart docker
+
+systemctl status docker.service
+
+```
+--tlsverify \
+--tlscacert=/home/docker-ca/ca.pem \
+--tlscert=/home/docker-ca/server-cert.pem \
+--tlskey=/home/docker-ca/server-key.pem \
+-H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375
+```
