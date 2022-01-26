@@ -29,7 +29,7 @@ import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.build.BuildInfoManage;
+import io.jpom.build.BuildExecuteService;
 import io.jpom.build.BuildUtil;
 import io.jpom.build.ReleaseManage;
 import io.jpom.common.BaseServerController;
@@ -67,11 +67,14 @@ public class BuildInfoManageController extends BaseServerController {
 
 	private final BuildInfoService buildInfoService;
 	private final DbBuildHistoryLogService dbBuildHistoryLogService;
+	private final BuildExecuteService buildExecuteService;
 
 	public BuildInfoManageController(BuildInfoService buildInfoService,
-									 DbBuildHistoryLogService dbBuildHistoryLogService) {
+									 DbBuildHistoryLogService dbBuildHistoryLogService,
+									 BuildExecuteService buildExecuteService) {
 		this.buildInfoService = buildInfoService;
 		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+		this.buildExecuteService = buildExecuteService;
 	}
 
 	/**
@@ -107,10 +110,12 @@ public class BuildInfoManageController extends BaseServerController {
 		if (BuildStatus.Ing != nowStatus && BuildStatus.PubIng != nowStatus) {
 			return JsonMessage.getString(501, "当前状态不在进行中");
 		}
-		boolean status = BuildInfoManage.cancel(item.getId());
+		boolean status = buildExecuteService.cancelTask(item.getId());
 		if (!status) {
-			item.setStatus(BuildStatus.Cancel.getCode());
-			buildInfoService.update(item);
+			BuildInfoModel buildInfoModel = new BuildInfoModel();
+			buildInfoModel.setId(id);
+			buildInfoModel.setStatus(BuildStatus.Cancel.getCode());
+			buildInfoService.update(buildInfoModel);
 		}
 		return JsonMessage.getString(200, "取消成功");
 	}

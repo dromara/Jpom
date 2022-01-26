@@ -28,7 +28,7 @@ import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import io.jpom.build.BuildInfoManage;
+import io.jpom.build.BuildExecuteService;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
 import io.jpom.model.BaseEnum;
@@ -56,9 +56,12 @@ import java.util.Objects;
 public class BuildInfoService extends BaseGroupService<BuildInfoModel> implements ICron<BuildInfoModel>, IStatusRecover {
 
     private final RepositoryService repositoryService;
+    private final BuildExecuteService buildExecuteService;
 
-    public BuildInfoService(RepositoryService repositoryService) {
+    public BuildInfoService(RepositoryService repositoryService,
+                            BuildExecuteService buildExecuteService) {
         this.repositoryService = repositoryService;
+        this.buildExecuteService = buildExecuteService;
     }
 
     @Override
@@ -165,7 +168,13 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
             // load repository
             RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
             Assert.notNull(repositoryModel, "仓库信息不存在");
-            BuildInfoManage.create(buildInfoModel, repositoryModel, userModel, delay, triggerBuildType);
+            BuildExecuteService.Task.TaskBuilder taskBuilder = BuildExecuteService.Task.builder()
+                    .buildInfoModel(buildInfoModel)
+                    .repositoryModel(repositoryModel)
+                    .userModel(userModel)
+                    .delay(delay)
+                    .triggerBuildType(triggerBuildType);
+            buildExecuteService.runTask(taskBuilder.build());
             String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
             return new JsonMessage<>(200, msg, buildInfoModel.getBuildId());
         }

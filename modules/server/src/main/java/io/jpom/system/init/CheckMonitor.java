@@ -22,7 +22,6 @@
  */
 package io.jpom.system.init;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -37,14 +36,11 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.cron.CronUtils;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.stat.NodeStatModel;
-import io.jpom.monitor.NodeMonitor;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
-import io.jpom.service.stat.NodeStatService;
 import io.jpom.system.ConfigBean;
 
 import java.util.Collection;
@@ -137,29 +133,8 @@ public class CheckMonitor {
 					DefaultSystemLog.getLog().debug("{} Recover bad data {}", name, count);
 				}
 			});
-			// 节点监控
-			NodeMonitor.start();
 			//
 			RemoteVersion.loadRemoteInfo();
-			//
-			cleanUpTrashNodeStat();
 		});
-	}
-
-	/**
-	 * 清理 错误的节点统计数据
-	 */
-	private static void cleanUpTrashNodeStat() {
-		NodeService nodeService = SpringUtil.getBean(NodeService.class);
-		NodeStatService nodeStatService = SpringUtil.getBean(NodeStatService.class);
-		List<String> duplicationByUrl = nodeService.getDeDuplicationByUrl();
-		List<String> statUrl = nodeStatService.getDeDuplicationByUrl();
-		Collection<String> subtract = CollUtil.subtract(statUrl, duplicationByUrl);
-		//
-		for (String s : subtract) {
-			NodeStatModel statModel = new NodeStatModel();
-			statModel.setUrl(s);
-			nodeStatService.del(nodeStatService.dataBeanToEntity(statModel));
-		}
 	}
 }
