@@ -10,11 +10,12 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.EnumUtil;
-import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
+import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
@@ -27,8 +28,8 @@ import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
+import io.jpom.service.dblog.RepositoryService;
 import io.jpom.system.ExtConfigBean;
-import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
 import io.jpom.util.StringUtil;
@@ -64,33 +65,101 @@ public class BuildExecuteService {
 	private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
 	private final BuildInfoService buildService;
+	private final DbBuildHistoryLogService dbBuildHistoryLogService;
+	private final RepositoryService repositoryService;
 
-	public BuildExecuteService(BuildInfoService buildService) {
+	public BuildExecuteService(BuildInfoService buildService,
+							   DbBuildHistoryLogService dbBuildHistoryLogService,
+							   RepositoryService repositoryService) {
 		this.buildService = buildService;
+		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+		this.repositoryService = repositoryService;
+	}
+
+	/**
+	 * check status
+	 *
+	 * @param status 状态吗
+	 * @return 错误消息
+	 */
+	public String checkStatus(Integer status) {
+		if (status == null) {
+			return null;
+		}
+		BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, status);
+		Objects.requireNonNull(nowStatus);
+		if (BuildStatus.Ing == nowStatus ||
+				BuildStatus.PubIng == nowStatus) {
+			return "当前还在：" + nowStatus.getDesc();
+		}
+		return null;
+	}
+
+
+	/**
+	 * start build
+	 *
+	 * @param buildInfoId      构建Id
+	 * @param userModel        用户信息
+	 * @param delay            延迟的时间
+	 * @param triggerBuildType 触发构建类型
+	 * @return json
+	 */
+	public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType) {
+		synchronized (buildInfoId.intern()) {
+			BuildInfoModel buildInfoModel = buildService.getByKey(buildInfoId);
+			String e = this.checkStatus(buildInfoModel.getStatus());
+			Assert.isNull(e, () -> e);
+			// set buildId field
+			int buildId = ObjectUtil.defaultIfNull(buildInfoModel.getBuildId(), 0);
+			{
+				BuildInfoModel buildInfoModel1 = new BuildInfoModel();
+				buildInfoModel1.setBuildId(buildId + 1);
+				buildInfoModel1.setId(buildInfoId);
+				buildInfoModel.setBuildId(buildInfoModel1.getBuildId());
+				buildService.update(buildInfoModel1);
+			}
+			// load repository
+			RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
+			Assert.notNull(repositoryModel, "仓库信息不存在");
+			BuildExecuteService.TaskData.TaskDataBuilder taskBuilder = BuildExecuteService.TaskData.builder()
+					.buildInfoModel(buildInfoModel)
+					.repositoryModel(repositoryModel)
+					.userModel(userModel)
+					.delay(delay)
+					.triggerBuildType(triggerBuildType);
+			this.runTask(taskBuilder.build());
+			String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
+			return new JsonMessage<>(200, msg, buildInfoModel.getBuildId());
+		}
 	}
 
 	/**
 	 * 创建构建
 	 *
-	 * @param task 任务
-	 * @return this
+	 * @param taskData 任务
 	 */
-	public BuildInfoManage runTask(Task task) {
-		BuildInfoModel buildInfoModel = task.buildInfoModel;
-		RepositoryModel repositoryModel = task.repositoryModel;
-		UserModel userModel = task.userModel;
-		Integer delay = task.delay;
-		int triggerBuildType = task.triggerBuildType;
-		if (BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId())) {
-			throw new JpomRuntimeException("当前构建还在进行中");
-		}
-		BuildInfoManage manage = new BuildInfoManage(buildInfoModel, repositoryModel, userModel, delay, triggerBuildType);
-		BUILD_MANAGE_MAP.put(buildInfoModel.getId(), manage);
+	private void runTask(TaskData taskData) {
+		BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+		boolean containsKey = BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId());
+		Assert.state(!containsKey, "当前构建还在进行中");
 		//
-		ThreadUtil.execute(manage);
-		return manage;
+		BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildInfoModel.getExtraData(), BuildExtraModule.class);
+		Assert.notNull(buildExtraModule, "构建信息缺失");
+		String logId = this.insertLog(buildExtraModule, taskData);
+		//
+		BuildInfoManage.BuildInfoManageBuilder builder = BuildInfoManage.builder()
+				.taskData(taskData)
+				.logId(logId)
+				.buildExtraModule(buildExtraModule)
+				.dbBuildHistoryLogService(dbBuildHistoryLogService)
+				.buildExecuteService(this);
+		BuildInfoManage build = builder.build();
+		//BuildInfoManage manage = new BuildInfoManage(taskData);
+		BUILD_MANAGE_MAP.put(buildInfoModel.getId(), build);
+		//
+		ThreadUtil.execute(build);
 	}
-
 
 	/**
 	 * 取消构建
@@ -109,31 +178,58 @@ public class BuildExecuteService {
 			} catch (Exception ignored) {
 			}
 		}
-		buildInfoManage.updateStatus(BuildStatus.Cancel);
+		this.updateStatus(buildInfoManage.taskData.buildInfoModel.getId(), buildInfoManage.logId, BuildStatus.Cancel);
 		BUILD_MANAGE_MAP.remove(id);
 		return true;
 	}
 
-	@Builder
-	public static class Task {
-		private final BuildInfoModel buildInfoModel;
-		private final RepositoryModel repositoryModel;
-		private final UserModel userModel;
-		private final Integer delay;
-		private final int triggerBuildType;
+
+	/**
+	 * 插入记录
+	 */
+	private String insertLog(BuildExtraModule buildExtraModule, TaskData taskData) {
+		BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+		buildExtraModule.updateValue(buildInfoModel);
+		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
+		// 更新其他配置字段
+		buildHistoryLog.fillLogValue(buildExtraModule);
+		buildHistoryLog.setTriggerBuildType(taskData.triggerBuildType);
+		//
+		buildHistoryLog.setBuildNumberId(buildInfoModel.getBuildId());
+		buildHistoryLog.setBuildName(buildInfoModel.getName());
+		buildHistoryLog.setBuildDataId(buildInfoModel.getId());
+		buildHistoryLog.setWorkspaceId(buildInfoModel.getWorkspaceId());
+		buildHistoryLog.setResultDirFile(buildInfoModel.getResultDirFile());
+		buildHistoryLog.setReleaseMethod(buildExtraModule.getReleaseMethod());
+		//
+		buildHistoryLog.setStatus(BuildStatus.Ing.getCode());
+		buildHistoryLog.setStartTime(SystemClock.now());
+		dbBuildHistoryLogService.insert(buildHistoryLog);
+		//
+		buildService.updateStatus(buildHistoryLog.getBuildDataId(), BuildStatus.Ing);
+		return buildHistoryLog.getId();
 	}
 
+	/**
+	 * 更新状态
+	 *
+	 * @param buildId     构建ID
+	 * @param logId       记录ID
+	 * @param buildStatus to status
+	 */
+	public void updateStatus(String buildId, String logId, BuildStatus buildStatus) {
+		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
+		buildHistoryLog.setId(logId);
+		buildHistoryLog.setStatus(buildStatus.getCode());
+		dbBuildHistoryLogService.update(buildHistoryLog);
+		buildService.updateStatus(buildId, buildStatus);
+	}
 
-	private static class BuildInfoManage extends BaseBuild implements Runnable {
-
-
+	@Builder
+	public static class TaskData {
 		private final BuildInfoModel buildInfoModel;
 		private final RepositoryModel repositoryModel;
-		private final File gitFile;
-		private Process process;
-		private String logId;
 		private final UserModel userModel;
-		private final BuildExtraModule buildExtraModule;
 		/**
 		 * 延迟执行的时间（单位秒）
 		 */
@@ -142,87 +238,49 @@ public class BuildExecuteService {
 		 * 触发类型
 		 */
 		private final int triggerBuildType;
-
-		private BuildInfoManage(final BuildInfoModel buildInfoModel,
-								final RepositoryModel repositoryModel,
-								final UserModel userModel,
-								Integer delay,
-								int triggerBuildType) {
-			super(BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId()),
-					buildInfoModel.getId());
-			this.buildInfoModel = buildInfoModel;
-			this.repositoryModel = repositoryModel;
-			this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
-			this.userModel = userModel;
-			this.triggerBuildType = triggerBuildType;
-			this.delay = delay;
-			// 解析 其他配置信息
-			BuildExtraModule buildExtraModule = StringUtil.jsonConvert(this.buildInfoModel.getExtraData(), BuildExtraModule.class);
-			Assert.notNull(buildExtraModule, "构建信息缺失");
-			// update value
-			buildExtraModule.updateValue(this.buildInfoModel);
-			this.buildExtraModule = buildExtraModule;
-		}
+	}
 
 
-		@Override
-		protected boolean updateStatus(BuildStatus status) {
-			try {
-				//super.updateStatus(status);
-				BuildInfoService buildService = SpringUtil.getBean(BuildInfoService.class);
-				BuildInfoModel item = buildService.getByKey(this.buildModelId);
-				item.setStatus(status.getCode());
-				buildService.update(item);
-				//
-				if (status == BuildStatus.Ing) {
-					this.insertLog();
-				} else {
-					DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
-					dbBuildHistoryLogService.updateLog(this.logId, status);
-				}
-				return true;
-			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("构建状态变更失败", e);
-				return false;
-			}
-		}
+	@Builder
+	private static class BuildInfoManage implements Runnable {
+
+		private final TaskData taskData;
+		private final BuildExtraModule buildExtraModule;
+		private final String logId;
+		private final BuildExecuteService buildExecuteService;
+		private final DbBuildHistoryLogService dbBuildHistoryLogService;
+		//
+		private Process process;
+		private LogRecorder logRecorder;
+		private File gitFile;
+
+//		private BuildInfoManage(final TaskData taskData) {
+//			this.taskData = taskData;
+//			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+//			File logFile = BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
+//			this.logRecorder = LogRecorder.builder().file(logFile).build();
+//			this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
+//
+//			// 解析 其他配置信息
+//			BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildInfoModel.getExtraData(), BuildExtraModule.class);
+//			Assert.notNull(buildExtraModule, "构建信息缺失");
+//			// update value
+
+//			this.buildExtraModule = buildExtraModule;
+//		}
 
 
-		/**
-		 * 插入记录
-		 */
-		private void insertLog() {
-			this.logId = IdUtil.fastSimpleUUID();
-			BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
-			// 更新其他配置字段
-			buildExtraModule.fillLogValue(buildHistoryLog);
-//		buildHistoryLog.setResultDirFile(buildExtraModule.getResultDirFile());
-//		buildHistoryLog.setReleaseMethod(buildExtraModule.getReleaseMethod());
-//		buildHistoryLog.setReleaseMethodDataId(buildExtraModule.getReleaseMethodDataId());
-//		buildHistoryLog.setAfterOpt(buildExtraModule.getAfterOpt());
-//		buildHistoryLog.setReleasePath(buildExtraModule.getReleasePath());
-//		buildHistoryLog.setReleaseCommand(buildExtraModule.getReleaseCommand());
-//		buildHistoryLog.setClearOld(buildExtraModule.isClearOld());
-
-			buildHistoryLog.setTriggerBuildType(triggerBuildType);
-			buildHistoryLog.setBuildNumberId(buildInfoModel.getBuildId());
-			buildHistoryLog.setBuildName(buildInfoModel.getName());
-			buildHistoryLog.setBuildDataId(buildInfoModel.getId());
-
-			//
-			buildHistoryLog.setWorkspaceId(this.buildInfoModel.getWorkspaceId());
-			buildHistoryLog.setId(this.logId);
-			buildHistoryLog.setStatus(BuildStatus.Ing.getCode());
-			buildHistoryLog.setStartTime(SystemClock.now());
-			DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
-			dbBuildHistoryLogService.insert(buildHistoryLog);
-		}
+		//		@Override
+//		private void updateStatus(BuildStatus status) {
+//
+//		}
 
 		/**
 		 * 打包构建产物
 		 */
 		private boolean packageFile() {
 			ThreadUtil.sleep(2, TimeUnit.SECONDS);
+			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
 			String resultDirFile = buildInfoModel.getResultDirFile();
 			File rootFile = this.gitFile;
 			boolean updateDirFile = false;
@@ -254,17 +312,17 @@ public class BuildExecuteService {
 				});
 				String first = CollUtil.getFirst(paths);
 				if (StrUtil.isEmpty(first)) {
-					this.log(resultDirFile + " 没有匹配到任何文件");
+					logRecorder.log(resultDirFile + " 没有匹配到任何文件");
 					return false;
 				}
 				// 切换到匹配到到文件
-				this.log(StrUtil.format("match {} {}", resultDirFile, first));
+				logRecorder.log(StrUtil.format("match {} {}", resultDirFile, first));
 				resultDirFile = first;
 				updateDirFile = true;
 			}
 			File file = FileUtil.file(this.gitFile, resultDirFile);
 			if (!file.exists()) {
-				this.log(resultDirFile + "不存在，处理构建产物失败");
+				logRecorder.log(resultDirFile + "不存在，处理构建产物失败");
 				return false;
 			}
 			File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
@@ -274,13 +332,12 @@ public class BuildExecuteService {
 					.setCopyAttributes(true)
 					.setCopyFilter(file1 -> !file1.isHidden())
 					.copy();
-			this.log(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
+			logRecorder.log(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
 			// 修改构建产物目录
 			if (updateDirFile) {
-				DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
 				dbBuildHistoryLogService.updateResultDirFile(this.logId, resultDirFile);
 				//
-				this.buildInfoModel.setResultDirFile(resultDirFile);
+				buildInfoModel.setResultDirFile(resultDirFile);
 				this.buildExtraModule.setResultDirFile(resultDirFile);
 			}
 			return true;
@@ -292,14 +349,16 @@ public class BuildExecuteService {
 		 * @return false 执行异常需要结束
 		 */
 		private boolean startReady() {
-			if (!updateStatus(BuildStatus.Ing)) {
-				BuildInfoManage.this.log("初始化构建记录失败,异常结束");
-				return false;
-			}
-			this.log("#" + this.buildInfoModel.getBuildId() + " start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
+			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+			File logFile = BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
+			this.logRecorder = LogRecorder.builder().file(logFile).build();
+			this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
+
+			Integer delay = taskData.delay;
+			logRecorder.log("#" + buildInfoModel.getBuildId() + " start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
 			if (delay != null && delay > 0) {
 				// 延迟执行
-				this.log("Execution delayed by " + delay + " seconds");
+				logRecorder.log("Execution delayed by " + delay + " seconds");
 				ThreadUtil.sleep(delay, TimeUnit.SECONDS);
 			}
 			return true;
@@ -311,6 +370,8 @@ public class BuildExecuteService {
 		 * @return false 执行异常需要结束
 		 */
 		private boolean pull() {
+			RepositoryModel repositoryModel = taskData.repositoryModel;
+			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
 			try {
 				String msg = "error";
 				Integer repoTypeCode = repositoryModel.getRepoType();
@@ -324,8 +385,8 @@ public class BuildExecuteService {
 					// 模糊匹配分支
 					String newBranchName = GitUtil.fuzzyMatch(tuple.get(0), branchName);
 					if (StrUtil.isEmpty(newBranchName)) {
-						BuildInfoManage.this.log(branchName + " Did not match the corresponding branch");
-						BuildInfoManage.this.updateStatus(BuildStatus.Error);
+						logRecorder.log(branchName + " Did not match the corresponding branch");
+						buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
 						return false;
 					}
 					// 模糊匹配 标签
@@ -333,17 +394,17 @@ public class BuildExecuteService {
 					if (StrUtil.isNotEmpty(branchTagName)) {
 						String newBranchTagName = GitUtil.fuzzyMatch(tuple.get(1), branchTagName);
 						if (StrUtil.isEmpty(newBranchTagName)) {
-							BuildInfoManage.this.log(branchTagName + " Did not match the corresponding tag");
-							BuildInfoManage.this.updateStatus(BuildStatus.Error);
+							logRecorder.log(branchTagName + " Did not match the corresponding tag");
+							buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
 							return false;
 						}
 						// 标签拉取模式
-						BuildInfoManage.this.log("repository [" + branchName + "] [" + branchTagName + "] clone pull from " + newBranchName + "  " + newBranchTagName);
-						msg = GitUtil.checkoutPullTag(repositoryModel, gitFile, newBranchName, newBranchTagName, BuildInfoManage.this.getPrintWriter());
+						logRecorder.log("repository [" + branchName + "] [" + branchTagName + "] clone pull from " + newBranchName + "  " + newBranchTagName);
+						msg = GitUtil.checkoutPullTag(repositoryModel, gitFile, newBranchName, newBranchTagName, logRecorder.getPrintWriter());
 					} else {
 						// 分支模式
-						BuildInfoManage.this.log("repository [" + branchName + "] clone pull from " + newBranchName);
-						msg = GitUtil.checkoutPull(repositoryModel, gitFile, newBranchName, BuildInfoManage.this.getPrintWriter());
+						logRecorder.log("repository [" + branchName + "] clone pull from " + newBranchName);
+						msg = GitUtil.checkoutPull(repositoryModel, gitFile, newBranchName, logRecorder.getPrintWriter());
 					}
 				} else if (repoType == RepositoryModel.RepoType.Svn) {
 					// svn
@@ -359,7 +420,7 @@ public class BuildExecuteService {
 					//msg = SvnKitUtil.checkOut(repositoryModel, gitFile);
 					msg = StrUtil.toString(result);
 				}
-				BuildInfoManage.this.log(msg);
+				logRecorder.log(msg);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -372,24 +433,26 @@ public class BuildExecuteService {
 		 * @return false 执行异常需要结束
 		 */
 		private boolean executeCommand() {
-			Integer buildMode = this.buildInfoModel.getBuildMode();
+			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+			Integer buildMode = buildInfoModel.getBuildMode();
 			if (buildMode != null && buildMode == 1) {
 				// 容器构建
+
 			}
 			String[] commands = CharSequenceUtil.splitToArray(buildInfoModel.getScript(), StrUtil.LF);
 			if (commands == null || commands.length <= 0) {
-				this.log("没有需要执行的命令");
-				this.updateStatus(BuildStatus.Error);
+				logRecorder.log("没有需要执行的命令");
+				this.buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
 				return false;
 			}
 			for (String item : commands) {
 				try {
 					boolean s = runCommand(item);
 					if (!s) {
-						this.log("命令执行存在error");
+						logRecorder.log("命令执行存在error");
 					}
 				} catch (Exception e) {
-					this.log(item + " 执行异常", e);
+					logRecorder.log(item + " 执行异常", e);
 					return false;
 				}
 			}
@@ -402,13 +465,22 @@ public class BuildExecuteService {
 		 * @return false 执行需要结束
 		 */
 		private boolean packageRelease() {
+			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+			UserModel userModel = taskData.userModel;
 			boolean status = packageFile();
 			if (status && buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
 				// 发布文件
-				new ReleaseManage(buildExtraModule, this.userModel, this, buildInfoModel.getBuildId()).start();
+				ReleaseManage releaseManage = ReleaseManage.builder()
+						.buildId(buildInfoModel.getBuildId())
+						.buildExtraModule(buildExtraModule)
+						.userModel(userModel)
+						.logId(logId)
+						.buildExecuteService(buildExecuteService)
+						.logRecorder(logRecorder).build();
+				releaseManage.start();
 			} else {
 				//
-				updateStatus(BuildStatus.Success);
+				buildExecuteService.updateStatus(buildInfoModel.getId(), logId, BuildStatus.Success);
 			}
 			return true;
 		}
@@ -423,11 +495,11 @@ public class BuildExecuteService {
 			suppliers.put("release", BuildInfoManage.this::packageRelease);
 			// 依次执行流程，发生异常结束整个流程
 			String processName = StrUtil.EMPTY;
-			if (this.triggerBuildType == 2) {
+			if (taskData.triggerBuildType == 2) {
 				// 系统触发构建
 				BaseServerController.resetInfo(UserModel.EMPTY);
 			} else {
-				BaseServerController.resetInfo(this.userModel);
+				BaseServerController.resetInfo(taskData.userModel);
 			}
 			try {
 				for (Map.Entry<String, Supplier<Boolean>> stringSupplierEntry : suppliers.entrySet()) {
@@ -445,21 +517,21 @@ public class BuildExecuteService {
 				this.asyncWebHooks("success");
 			} catch (RuntimeException runtimeException) {
 				Throwable cause = runtimeException.getCause();
-				this.log("构建失败:" + processName, cause == null ? runtimeException : cause);
+				logRecorder.log("构建失败:" + processName, cause == null ? runtimeException : cause);
 				this.asyncWebHooks(processName, "error", runtimeException.getMessage());
 			} catch (Exception e) {
-				this.log("构建失败:" + processName, e);
+				logRecorder.log("构建失败:" + processName, e);
 				this.asyncWebHooks(processName, "error", e.getMessage());
 			} finally {
-				BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
+				BUILD_MANAGE_MAP.remove(taskData.buildInfoModel.getId());
 				BaseServerController.removeAll();
 				this.asyncWebHooks("done");
 			}
 		}
 
-		private void log(String title, Throwable throwable) {
-			log(title, throwable, BuildStatus.Error);
-		}
+//		private void log(String title, Throwable throwable) {
+//			log(title, throwable, BuildStatus.Error);
+//		}
 
 		/**
 		 * 执行命令
@@ -469,7 +541,7 @@ public class BuildExecuteService {
 		 * @throws IOException IO
 		 */
 		private boolean runCommand(String command) throws IOException, InterruptedException {
-			this.log(command);
+			logRecorder.log(command);
 			//
 			ProcessBuilder processBuilder = new ProcessBuilder();
 			processBuilder.directory(this.gitFile);
@@ -482,11 +554,11 @@ public class BuildExecuteService {
 			//
 			InputStream inputStream = process.getInputStream();
 			IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) line -> {
-				log(line);
+				logRecorder.log(line);
 				status[0] = true;
 			});
 			int waitFor = process.waitFor();
-			log("process result " + waitFor);
+			logRecorder.log("process result " + waitFor);
 			return status[0];
 		}
 
@@ -497,14 +569,15 @@ public class BuildExecuteService {
 		 * @param other 其他参数
 		 */
 		private void asyncWebHooks(String type, Object... other) {
-			String webhook = this.buildInfoModel.getWebhook();
+			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+			String webhook = buildInfoModel.getWebhook();
 			IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.WebHook);
 			Map<String, Object> map = new HashMap<>(10);
 			long triggerTime = SystemClock.now();
-			map.put("buildId", this.buildInfoModel.getId());
-			map.put("buildName", this.buildInfoModel.getName());
+			map.put("buildId", buildInfoModel.getId());
+			map.put("buildName", buildInfoModel.getName());
 			map.put("type", type);
-			map.put("triggerBuildType", this.triggerBuildType);
+			map.put("triggerBuildType", taskData.triggerBuildType);
 			map.put("triggerTime", triggerTime);
 			//
 			for (int i = 0; i < other.length; i += 2) {
@@ -520,5 +593,4 @@ public class BuildExecuteService {
 
 		}
 	}
-
 }

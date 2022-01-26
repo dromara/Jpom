@@ -30,6 +30,7 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildExecuteService;
+import io.jpom.build.BuildExtraModule;
 import io.jpom.build.BuildUtil;
 import io.jpom.build.ReleaseManage;
 import io.jpom.common.BaseServerController;
@@ -91,7 +92,7 @@ public class BuildInfoManageController extends BaseServerController {
 		// userModel
 		UserModel userModel = getUser();
 		// 执行构建
-		return buildInfoService.start(item.getId(), userModel, null, 0).toString();
+		return buildExecuteService.start(item.getId(), userModel, null, 0).toString();
 	}
 
 	/**
@@ -112,10 +113,10 @@ public class BuildInfoManageController extends BaseServerController {
 		}
 		boolean status = buildExecuteService.cancelTask(item.getId());
 		if (!status) {
-			BuildInfoModel buildInfoModel = new BuildInfoModel();
+			/*BuildInfoModel buildInfoModel = new BuildInfoModel();
 			buildInfoModel.setId(id);
-			buildInfoModel.setStatus(BuildStatus.Cancel.getCode());
-			buildInfoService.update(buildInfoModel);
+			buildInfoModel.setStatus(BuildStatus.Cancel.getCode());*/
+			buildInfoService.updateStatus(id, BuildStatus.Cancel);
 		}
 		return JsonMessage.getString(200, "取消成功");
 	}
@@ -133,13 +134,22 @@ public class BuildInfoManageController extends BaseServerController {
 		Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
 		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
 		Objects.requireNonNull(item, "没有对应数据");
-		String e = buildInfoService.checkStatus(item.getStatus());
+		String e = buildExecuteService.checkStatus(item.getStatus());
 		Assert.isNull(e, () -> e);
 		UserModel userModel = getUser();
-		ReleaseManage releaseManage = new ReleaseManage(buildHistoryLog, userModel);
+		BuildExtraModule buildExtraModule = new BuildExtraModule();
+		buildExtraModule.updateValue(buildHistoryLog);
+		ReleaseManage manage = ReleaseManage.builder()
+				.buildExtraModule(buildExtraModule)
+				.logId(buildHistoryLog.getId())
+				.userModel(userModel)
+				.buildId(buildHistoryLog.getBuildNumberId())
+				.buildExecuteService(buildExecuteService)
+				.build();
+		//ReleaseManage releaseManage = new ReleaseManage(buildHistoryLog, userModel);
 		// 标记发布中
-		releaseManage.updateStatus(BuildStatus.PubIng);
-		ThreadUtil.execute(releaseManage::start2);
+		//releaseManage.updateStatus(BuildStatus.PubIng);
+		ThreadUtil.execute(manage);
 		return JsonMessage.getString(200, "重新发布中");
 	}
 

@@ -31,6 +31,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.build.BuildExecuteService;
 import io.jpom.common.BaseJpomController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
@@ -59,12 +60,14 @@ import java.util.stream.Collectors;
 public class BuildTriggerApiController extends BaseJpomController {
 
 	private final BuildInfoService buildInfoService;
-
+	private final BuildExecuteService buildExecuteService;
 	private final UserService userService;
 
 	public BuildTriggerApiController(BuildInfoService buildInfoService,
+									 BuildExecuteService buildExecuteService,
 									 UserService userService) {
 		this.buildInfoService = buildInfoService;
+		this.buildExecuteService = buildExecuteService;
 		this.userService = userService;
 	}
 
@@ -115,7 +118,7 @@ public class BuildTriggerApiController extends BaseJpomController {
 
 		Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
 
-		JsonMessage<Integer> start = buildInfoService.start(id, userModel, Convert.toInt(delay, 0), 1);
+		JsonMessage<Integer> start = buildExecuteService.start(id, userModel, Convert.toInt(delay, 0), 1);
 		return start.toString();
 	}
 
@@ -167,7 +170,7 @@ public class BuildTriggerApiController extends BaseJpomController {
 					jsonObject.put("msg", "触发token错误,或者已经失效");
 					return;
 				}
-				JsonMessage<Integer> start = buildInfoService.start(id, userModel, delay, 1);
+				JsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1);
 				jsonObject.put("msg", start.getMsg());
 				jsonObject.put("buildId", start.getData());
 			}).collect(Collectors.toList());
