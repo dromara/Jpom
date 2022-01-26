@@ -22,6 +22,11 @@ const children = [
     component: () => import("../pages/node/list"),
   },
   {
+    path: "/docker/list",
+    name: "docker-list",
+    component: () => import("../pages/docker/list"),
+  },
+  {
     path: "/node/stat",
     name: "node-stat",
     component: () => import("../pages/node/stat"),

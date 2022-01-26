@@ -4,13 +4,12 @@ import ch.qos.logback.classic.LoggerContext;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.VersionCmd;
 import com.github.dockerjava.api.model.Version;
-import com.github.dockerjava.core.DefaultDockerClientConfig;
-import com.github.dockerjava.core.DockerClientConfig;
-import com.github.dockerjava.core.DockerClientImpl;
-import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
-import com.github.dockerjava.transport.DockerHttpClient;
+import io.jpom.DockerUtil;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -25,29 +24,13 @@ public class TestTsl {
 		Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
 		logger.setLevel(Level.INFO);
 
+		String dockerHost = "tcp://172.19.106.253:2375";
+		String dockerCertPath = "/Users/user/fsdownload/docker-ca";
+		Map<String, Object> map = new HashMap<>();
+		map.put("dockerHost", dockerHost);
+		map.put("dockerCertPath", dockerCertPath);
+		DockerClient dockerClient = DockerUtil.build(map, 1, 5);
 
-		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-				// .withDockerHost("tcp://192.168.163.11:2376").build();
-				.withDockerTlsVerify(true)
-//				.withApiVersion(RemoteApiVersion.VERSION_1_16)
-//				.withCustomSslConfig(new SSLConfig() {
-//					@Override
-//					public SSLContext getSSLContext() throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
-//						return SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
-//					}
-//				})
-				.withDockerCertPath("/Users/user/fsdownload/docker-ca")
-				.withDockerHost("tcp://172.19.106.253:2375").build();
-
-		DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
-
-				.dockerHost(config.getDockerHost())
-				.sslConfig(config.getSSLConfig())
-				.maxConnections(100)
-//				.connectionTimeout(Duration.ofSeconds(30))
-//				.responseTimeout(Duration.ofSeconds(45))
-				.build();
-		DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient);
 		dockerClient.pingCmd().exec();
 		VersionCmd versionCmd = dockerClient.versionCmd();
 		Version exec = versionCmd.exec();

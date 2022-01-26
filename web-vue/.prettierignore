@@ -8,7 +8,7 @@ package.json
 .eslintignore
 *.png
 *.toml
-docker
+# docker
 .editorconfig
 Dockerfile*
 .gitignore

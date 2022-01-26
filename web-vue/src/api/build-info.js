@@ -269,5 +269,5 @@ export const triggerBuildTypeMap = {
 
 export const buildModeMap = {
   0: "本地构建",
-  // 1: "容器构建",
+  1: "容器构建",
 };
