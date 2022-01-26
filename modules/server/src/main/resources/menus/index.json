@@ -15,6 +15,10 @@
       {
         "title": "项目列表",
         "id": "projectSearch"
+      },
+      {
+        "title": "容器管理",
+        "id": "dockerList"
       }
     ]
   },

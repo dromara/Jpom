@@ -22,7 +22,8 @@
  */
 package io.jpom.model;
 
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 基础实体（带id）

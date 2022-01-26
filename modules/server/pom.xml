@@ -20,19 +20,19 @@
 		<dependency>
 			<groupId>io.jpom</groupId>
 			<artifactId>common</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.jpom.plugins</groupId>
 			<artifactId>webhook</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.jpom.plugins</groupId>
 			<artifactId>auto-charset-jchardet</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!--websocket作为客户端-->
@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>io.jpom.plugins</groupId>
 			<artifactId>db-h2</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
@@ -64,14 +64,20 @@
 		<dependency>
 			<groupId>io.jpom.plugins</groupId>
 			<artifactId>svn-clone</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jpom.plugins</groupId>
+			<artifactId>docker-cli</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!--邮件-->
 		<dependency>
 			<groupId>io.jpom.plugins</groupId>
 			<artifactId>email</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>

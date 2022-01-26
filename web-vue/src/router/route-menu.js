@@ -6,6 +6,7 @@
 const routeMenuMap = {
   nodeList: "/node/list",
   nodeStat: "/node/stat",
+  dockerList: "/docker/list",
   sshList: "/ssh",
   commandList: "/ssh/command",
   commandLogList: "/ssh/command-log",

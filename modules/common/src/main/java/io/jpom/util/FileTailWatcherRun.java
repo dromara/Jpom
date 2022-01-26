@@ -65,7 +65,7 @@ public class FileTailWatcherRun implements Runnable {
 		Charset detSet = ExtConfigBean.getInstance().getLogFileCharset();
 		if (detSet == null) {
 			try {
-				String charsetName = (String) PluginFactory.getPlugin("charset-detector").execute(file, null);
+				String charsetName = (String) PluginFactory.getPlugin("charset-detector").execute(file, (Object) null);
 				detSet = CharsetUtil.charset(charsetName);
 			} catch (Exception e) {
 				DefaultSystemLog.getLog().warn("自动识别文件编码格式错误：{}", e.getMessage());

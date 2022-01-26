@@ -1,4 +1,4 @@
-package io.jpom.controller.node.ssh;
+package io.jpom.controller.ssh;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;

@@ -1,4 +1,4 @@
-package io.jpom.controller.node.ssh;
+package io.jpom.controller.ssh;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
@@ -34,7 +34,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
@@ -63,7 +62,6 @@ public class SshFileController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "download.html", method = RequestMethod.GET)
-	@ResponseBody
 	@Feature(method = MethodFeature.DOWNLOAD)
 	public void download(String id, String path, String name) throws IOException {
 		HttpServletResponse response = getResponse();
@@ -99,7 +97,6 @@ public class SshFileController extends BaseServerController {
 	 * @since for dev 3.x
 	 */
 	@RequestMapping(value = "root_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String rootFileList(String id) {
 		SshModel sshModel = sshService.getByKey(id, false);
