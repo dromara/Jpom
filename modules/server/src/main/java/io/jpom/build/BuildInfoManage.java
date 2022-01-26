@@ -374,6 +374,10 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	 * @return false 执行异常需要结束
 	 */
 	private boolean executeCommand() {
+		Integer buildMode = this.buildInfoModel.getBuildMode();
+		if (buildMode != null && buildMode == 1) {
+			// 容器构建
+		}
 		String[] commands = CharSequenceUtil.splitToArray(buildInfoModel.getScript(), StrUtil.LF);
 		if (commands == null || commands.length <= 0) {
 			this.log("没有需要执行的命令");

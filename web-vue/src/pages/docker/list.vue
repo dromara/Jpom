@@ -28,6 +28,13 @@
       <a-tooltip slot="tlsVerify" slot-scope="text, record" placement="topLeft" :title="record.tlsVerify ? '开启 TLS 认证' : '关闭 TLS 认证'">
         <a-switch v-model="record.tlsVerify" :disabled="true" checked-children="开" un-checked-children="关" />
       </a-tooltip>
+
+      <template slot="status" slot-scope="text, record">
+        <a-switch :checked="parseInt(record.status) === 1" :disabled="true">
+          <a-icon slot="checkedChildren" type="check-circle" />
+          <a-icon slot="unCheckedChildren" type="warning" />
+        </a-switch>
+      </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -55,12 +62,21 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="TLS 认证" prop="tlsVerify">
-          <a-switch v-model="temp.tlsVerify" checked-children="开" un-checked-children="关" />
+          <a-row>
+            <a-col :span="4">
+              <a-switch v-model="temp.tlsVerify" checked-children="开" un-checked-children="关" />
+            </a-col>
+            <a-col :span="10">
+              证书文件:
+              <a-upload v-if="temp.tlsVerify" :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.zip'">
+                <a-button><a-icon type="upload" />选择文件</a-button>
+              </a-upload>
+            </a-col>
+          </a-row>
         </a-form-model-item>
-        <a-form-model-item v-if="temp.tlsVerify" label="证书文件" prop="file">
-          <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.zip'">
-            <a-button><a-icon type="upload" />选择文件</a-button>
-          </a-upload>
+
+        <a-form-model-item label="心跳超时" prop="heartbeatTimeout">
+          <a-input-number style="width: 100%" v-model="temp.heartbeatTimeout" placeholder="心跳超时 单位秒" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -86,6 +102,7 @@ export default {
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "host", dataIndex: "host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "TLS 认证", dataIndex: "tlsVerify", width: 100, ellipsis: true, scopedSlots: { customRender: "tlsVerify" } },
         { title: "证书状态", dataIndex: "certExist", width: 100, ellipsis: true, scopedSlots: { customRender: "certExist" } },
         { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -186,6 +203,7 @@ export default {
           formData.append("tlsVerify", this.temp.tlsVerify || "");
           formData.append("host", this.temp.host || "");
           formData.append("apiVersion", this.temp.apiVersion || "");
+          formData.append("heartbeatTimeout", this.temp.heartbeatTimeout || "");
           // 提交数据
           editDockerByFile(formData).then((res) => {
             if (res.code === 200) {

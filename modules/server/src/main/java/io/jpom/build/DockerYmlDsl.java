@@ -25,19 +25,13 @@ import java.util.Map;
 public class DockerYmlDsl extends BaseJsonModel {
 
 	/**
+	 * 容器ID
+	 */
+	private String dokcerId;
+	/**
 	 * 镜像 from
 	 */
 	private String image;
-	/**
-	 * tcp://127.0.0.1:2375
-	 * <p>
-	 * 主机地址
-	 */
-	private String dockerHost;
-	/**
-	 * docker api
-	 */
-	private String apiVersion;
 	/**
 	 * bind mounts 将宿主机上的任意位置的文件或者目录挂在到容器 （--mount type=bind,src=源目录,dst=目标目录）
 	 */
@@ -59,7 +53,7 @@ public class DockerYmlDsl extends BaseJsonModel {
 		Assert.hasText(getImage(), "请填写镜像名称");
 		//
 		Assert.notEmpty(getEntrypoints(), "请填写entrypoint");
-		Assert.hasText(getDockerHost(), "请填写 docker host");
+		Assert.hasText(getDokcerId(), "请填写 docker Id");
 	}
 
 	/**

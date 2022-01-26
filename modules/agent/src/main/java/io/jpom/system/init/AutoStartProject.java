@@ -29,12 +29,10 @@ import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
-import io.jpom.cron.ICron;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ProjectInfoService;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -73,19 +71,6 @@ public class AutoStartProject {
 				} catch (Exception e) {
 					DefaultSystemLog.getLog().warn("自动启动项目失败：{} {}", nodeProjectInfoModel.getId(), e.getMessage());
 				}
-			}
-		});
-	}
-
-	@PreLoadMethod
-	@SuppressWarnings("rawtypes")
-	private static void starCron() {
-		// 加载定时器
-		Map<String, ICron> cronMap = SpringUtil.getApplicationContext().getBeansOfType(ICron.class);
-		cronMap.forEach((name, iCron) -> {
-			int startCron = iCron.startCron();
-			if (startCron > 0) {
-				DefaultSystemLog.getLog().debug("{} scheduling has been started:{}", name, startCron);
 			}
 		});
 	}

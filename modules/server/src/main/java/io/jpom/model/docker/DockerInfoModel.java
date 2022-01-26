@@ -3,6 +3,7 @@ package io.jpom.model.docker;
 import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
 import io.jpom.system.ConfigBean;
@@ -13,6 +14,8 @@ import lombok.experimental.Tolerate;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -80,10 +83,26 @@ public class DockerInfoModel extends BaseWorkspaceModel {
 	 */
 	public String generateCertPath() {
 		String dataPath = ConfigBean.getInstance().getDataPath();
-		String id = this.getId();
-		Assert.hasText(id, "ID empty");
-		File docker = FileUtil.file(dataPath, "docker", "tls-cert", id);
+		String host = this.getHost();
+		Assert.hasText(host, "host empty");
+		host = SecureUtil.sha1(host);
+		File docker = FileUtil.file(dataPath, "docker", "tls-cert", host);
 		return FileUtil.getAbsolutePath(docker);
+	}
+
+	/**
+	 * 插件 插件参数 map
+	 *
+	 * @return 插件需要使用到到参数
+	 */
+	public Map<String, Object> toParameter() {
+		Map<String, Object> parameter = new HashMap<>(10);
+		parameter.put("dockerHost", this.getHost());
+		parameter.put("apiVersion", this.getApiVersion());
+		if (this.getTlsVerify()) {
+			parameter.put("dockerCertPath", this.generateCertPath());
+		}
+		return parameter;
 	}
 
 }
