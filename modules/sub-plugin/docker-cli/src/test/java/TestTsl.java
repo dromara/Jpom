@@ -29,7 +29,7 @@ public class TestTsl {
 		Map<String, Object> map = new HashMap<>();
 		map.put("dockerHost", dockerHost);
 		map.put("dockerCertPath", dockerCertPath);
-		DockerClient dockerClient = DockerUtil.build(map, 1, 5);
+		DockerClient dockerClient = DockerUtil.build(map, 1);
 
 		dockerClient.pingCmd().exec();
 		VersionCmd versionCmd = dockerClient.versionCmd();

@@ -49,7 +49,7 @@ public class DockerInfoController extends BaseServerController {
 	@GetMapping(value = "api-versions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String apiVersions() throws Exception {
-		IPlugin plugin = PluginFactory.getPlugin("docker-cli:check");
+		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
 		List<JSONObject> data = (List<JSONObject>) plugin.execute("apiVersions");
 		return JsonMessage.getString(200, "", data);
 	}
@@ -62,11 +62,16 @@ public class DockerInfoController extends BaseServerController {
 	public String list() {
 		// load list with page
 		PageResultDto<DockerInfoModel> resultDto = dockerInfoService.listPage(getRequest());
-//		IPlugin plugin = PluginFactory.getPlugin("docker-cli:check");
 		resultDto.each(this::checkcertPath);
 		return JsonMessage.getString(200, "", resultDto);
 	}
 
+	/**
+	 * 验证 证书文件是否存在
+	 *
+	 * @param dockerInfoModel docker
+	 * @return true 证书文件存在
+	 */
 	private boolean checkcertPath(DockerInfoModel dockerInfoModel) {
 		if (dockerInfoModel == null) {
 			return false;
@@ -75,7 +80,7 @@ public class DockerInfoController extends BaseServerController {
 			return true;
 		}
 		String certPath = dockerInfoModel.generateCertPath();
-		IPlugin plugin = PluginFactory.getPlugin("docker-cli:check");
+		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
 		try {
 			boolean execute = (boolean) plugin.execute("certPath", "certPath", certPath);
 			dockerInfoModel.setCertExist(execute);
@@ -86,14 +91,22 @@ public class DockerInfoController extends BaseServerController {
 		}
 	}
 
+	/**
+	 * 接收前端参数
+	 *
+	 * @param certPathFile 证书保存临时文件夹
+	 * @return model
+	 * @throws Exception 异常
+	 */
 	private DockerInfoModel takeOverModel(File certPathFile) throws Exception {
-		IPlugin plugin = PluginFactory.getPlugin("docker-cli:check");
+		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
 		String name = getParameter("name");
 		Assert.hasText(name, "请填写 名称");
 		String host = getParameter("host");
 		String id = getParameter("id");
 		String tlsVerifyStr = getParameter("tlsVerify");
 		String apiVersion = getParameter("apiVersion");
+		int heartbeatTimeout = getParameterInt("heartbeatTimeout", -1);
 		boolean tlsVerify = Convert.toBool(tlsVerifyStr, false);
 		//
 		boolean certExist = false;
@@ -120,7 +133,7 @@ public class DockerInfoController extends BaseServerController {
 			}
 		}
 		boolean ok = (boolean) plugin.execute("host", "host", host);
-		Assert.state(ok, "请填写正确到 host");
+		Assert.state(ok, "请填写正确的 host");
 		// 验证重复
 		String workspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
 		Entity entity = Entity.create();
@@ -133,7 +146,8 @@ public class DockerInfoController extends BaseServerController {
 		Assert.state(!exists, "对应的 docker 已经存在啦");
 		//
 		DockerInfoModel.DockerInfoModelBuilder builder = DockerInfoModel.builder();
-		builder.apiVersion(apiVersion).host(host).name(name).tlsVerify(tlsVerify).certExist(certExist);
+		builder.heartbeatTimeout(heartbeatTimeout).apiVersion(apiVersion).host(host).name(name)
+				.tlsVerify(tlsVerify).certExist(certExist);
 		//
 		DockerInfoModel build = builder.build();
 		build.setId(id);
@@ -164,6 +178,10 @@ public class DockerInfoController extends BaseServerController {
 				FileUtil.move(savePath, FileUtil.file(generateCertPath), true);
 			}
 		}
+		//
+		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+		boolean ok = (boolean) plugin.execute("ping", dockerInfoModel.toParameter());
+		Assert.state(ok, "无法连接 docker 请检查 host 或者 TLS 证书");
 		return JsonMessage.getString(200, "操作成功");
 	}
 }

@@ -1,5 +1,6 @@
 package io.jpom;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -21,10 +22,9 @@ public class DockerUtil {
 	 *
 	 * @param parameter      参数
 	 * @param maxConnections 最新连接
-	 * @param timeout        超时时间
 	 * @return DockerClient
 	 */
-	public static DockerClient build(Map<String, Object> parameter, int maxConnections, int timeout) {
+	public static DockerClient build(Map<String, Object> parameter, int maxConnections) {
 		String host = (String) parameter.get("dockerHost");
 		String apiVersion = (String) parameter.get("apiVersion");
 		String dockerCertPath = (String) parameter.get("dockerCertPath");
@@ -40,6 +40,7 @@ public class DockerUtil {
 				.sslConfig(config.getSSLConfig())
 				.maxConnections(maxConnections);
 		//
+		int timeout = Convert.toInt(parameter.get("timeout"), 0);
 		if (timeout > 0) {
 			builder.connectionTimeout(Duration.ofSeconds(timeout));
 			builder.responseTimeout(Duration.ofSeconds(timeout));

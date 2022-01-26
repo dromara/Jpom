@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ReflectUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.Version;
 import com.github.dockerjava.core.RemoteApiVersion;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
@@ -41,10 +42,24 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
 				return this.checkUrl(parameter);
 			case "ping":
 				return this.checkPing(parameter);
+			case "pullVersion":
+				return this.pullVersion(parameter);
 			default:
 				break;
 		}
 		return null;
+	}
+
+	/**
+	 * 获取版本信息
+	 *
+	 * @param parameter 参数
+	 * @return true 可以通讯
+	 */
+	private Version pullVersion(Map<String, Object> parameter) {
+		parameter.putIfAbsent("timeout", 5);
+		DockerClient dockerClient = DockerUtil.build(parameter, 1);
+		return dockerClient.versionCmd().exec();
 	}
 
 	/**
@@ -55,7 +70,8 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
 	 */
 	private boolean checkPing(Map<String, Object> parameter) {
 		try {
-			DockerClient dockerClient = DockerUtil.build(parameter, 1, 5);
+			parameter.putIfAbsent("timeout", 5);
+			DockerClient dockerClient = DockerUtil.build(parameter, 1);
 			dockerClient.pingCmd().exec();
 			return true;
 		} catch (Exception e) {

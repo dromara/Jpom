@@ -47,6 +47,7 @@ import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -54,6 +55,7 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.dblog.RepositoryService;
+import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.CommandUtil;
@@ -83,15 +85,18 @@ public class BuildInfoController extends BaseServerController {
 	private final SshService sshService;
 	private final BuildInfoService buildInfoService;
 	private final RepositoryService repositoryService;
+	private final DockerInfoService dockerInfoService;
 
 	public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
 							   SshService sshService,
 							   BuildInfoService buildInfoService,
-							   RepositoryService repositoryService) {
+							   RepositoryService repositoryService,
+							   DockerInfoService dockerInfoService) {
 		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
 		this.sshService = sshService;
 		this.buildInfoService = buildInfoService;
 		this.repositoryService = repositoryService;
+		this.dockerInfoService = dockerInfoService;
 	}
 
 	/**
@@ -179,7 +184,7 @@ public class BuildInfoController extends BaseServerController {
 		Assert.state(buildMode == 0 || buildMode == 1, "请选择正确的构建方式");
 		if (buildMode == 1) {
 			// 验证 dsl 内容
-			DockerYmlDsl.build(script).check();
+			this.checkDocker(script);
 		}
 		if (ServerExtConfigBean.getInstance().getBuildCheckDeleteCommand()) {
 			// 判断删除命令
@@ -248,6 +253,14 @@ public class BuildInfoController extends BaseServerController {
 
 		buildInfoService.updateById(buildInfoModel, getRequest());
 		return JsonMessage.getString(200, "修改成功");
+	}
+
+	private void checkDocker(String script) {
+		DockerYmlDsl build = DockerYmlDsl.build(script);
+		build.check();
+		// 检查容器是否存在
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(build.getDokcerId(), getRequest());
+		Assert.notNull(dockerInfoModel, "对应的容器不存在,请检查 docker id 是否正确");
 	}
 
 	/**

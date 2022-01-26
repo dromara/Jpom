@@ -36,7 +36,6 @@ import io.jpom.common.RemoteVersion;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.cron.CronUtils;
-import io.jpom.cron.ICron;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.stat.NodeStatModel;
 import io.jpom.monitor.NodeMonitor;
@@ -125,19 +124,11 @@ public class CheckMonitor {
 	/**
 	 * 异步初始化
 	 */
-	@SuppressWarnings("rawtypes")
 	private static void asyncLoad() {
 		ThreadUtil.execute(() -> {
 			BuildUtil.reloadCacheSize();
 			ConfigBean.getInstance().dataSize();
-			// 加载定时器
-			Map<String, ICron> cronMap = SpringUtil.getApplicationContext().getBeansOfType(ICron.class);
-			cronMap.forEach((name, iCron) -> {
-				int startCron = iCron.startCron();
-				if (startCron > 0) {
-					DefaultSystemLog.getLog().debug("{} scheduling has been started:{}", name, startCron);
-				}
-			});
+
 			// 状态恢复的数据
 			Map<String, IStatusRecover> statusRecoverMap = SpringUtil.getApplicationContext().getBeansOfType(IStatusRecover.class);
 			statusRecoverMap.forEach((name, iCron) -> {

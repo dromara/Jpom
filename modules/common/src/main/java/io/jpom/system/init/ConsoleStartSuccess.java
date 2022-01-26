@@ -24,12 +24,19 @@ package io.jpom.system.init;
 
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
+import io.jpom.cron.IAsyncLoad;
+import io.jpom.cron.ICron;
 import io.jpom.system.ConfigBean;
+
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -37,6 +44,25 @@ import io.jpom.system.ConfigBean;
  */
 @PreLoadClass(value = Integer.MAX_VALUE)
 public class ConsoleStartSuccess {
+
+
+	@PreLoadMethod(value = Integer.MAX_VALUE - 1)
+	@SuppressWarnings("rawtypes")
+	private static void statLoad() {
+		ThreadUtil.execute(() -> {
+			// 加载定时器
+			Map<String, ICron> cronMap = SpringUtil.getApplicationContext().getBeansOfType(ICron.class);
+			cronMap.forEach((name, iCron) -> {
+				int startCron = iCron.startCron();
+				if (startCron > 0) {
+					DefaultSystemLog.getLog().debug("{} scheduling has been started:{}", name, startCron);
+				}
+			});
+			Map<String, IAsyncLoad> asyncLoadMap = SpringUtil.getApplicationContext().getBeansOfType(IAsyncLoad.class);
+			asyncLoadMap.forEach((name, asyncLoad) -> asyncLoad.startLoad());
+			//
+		});
+	}
 
 	/**
 	 * 输出启动成功的 日志
