@@ -36,6 +36,7 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.build.BuildExecuteService;
 import io.jpom.build.BuildUtil;
 import io.jpom.build.DockerYmlDsl;
 import io.jpom.common.BaseServerController;
@@ -86,17 +87,20 @@ public class BuildInfoController extends BaseServerController {
 	private final BuildInfoService buildInfoService;
 	private final RepositoryService repositoryService;
 	private final DockerInfoService dockerInfoService;
+	private final BuildExecuteService buildExecuteService;
 
 	public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
 							   SshService sshService,
 							   BuildInfoService buildInfoService,
 							   RepositoryService repositoryService,
-							   DockerInfoService dockerInfoService) {
+							   DockerInfoService dockerInfoService,
+							   BuildExecuteService buildExecuteService) {
 		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
 		this.sshService = sshService;
 		this.buildInfoService = buildInfoService;
 		this.repositoryService = repositoryService;
 		this.dockerInfoService = dockerInfoService;
+		this.buildExecuteService = buildExecuteService;
 	}
 
 	/**
@@ -378,7 +382,7 @@ public class BuildInfoController extends BaseServerController {
 		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
 		//
-		String e = buildInfoService.checkStatus(buildInfoModel.getStatus());
+		String e = buildExecuteService.checkStatus(buildInfoModel.getStatus());
 		Assert.isNull(e, () -> e);
 		// 删除构建历史
 		dbBuildHistoryLogService.delByWorkspace(request, entity -> entity.set("buildDataId", buildInfoModel.getId()));

@@ -23,12 +23,16 @@
 package io.jpom.model.log;
 
 import cn.hutool.core.annotation.PropIgnore;
+import cn.hutool.core.util.ObjectUtil;
 import io.jpom.build.BuildExtraModule;
+import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.h2db.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 构建历史记录
@@ -37,7 +41,9 @@ import io.jpom.service.h2db.TableName;
  * @date 2019/7/17
  * @see BuildExtraModule
  **/
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "BUILDHISTORYLOG", name = "构建历史")
+@Data
 public class BuildHistoryLog extends BaseWorkspaceModel {
 	/**
 	 * 发布方式
@@ -125,141 +131,16 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	@PropIgnore
 	private Boolean hasLog;
 
+	public void fillLogValue(BuildExtraModule buildExtraModule) {
+		//
+		this.setAfterOpt(ObjectUtil.defaultIfNull(buildExtraModule.getAfterOpt(), AfterOpt.No.getCode()));
+		this.setReleaseMethod(buildExtraModule.getReleaseMethod());
+		this.setReleaseCommand(buildExtraModule.getReleaseCommand());
+		this.setReleasePath(buildExtraModule.getReleasePath());
+		this.setReleaseMethodDataId(buildExtraModule.getReleaseMethodDataId());
+		this.setClearOld(buildExtraModule.isClearOld());
+		this.setResultDirFile(buildExtraModule.getResultDirFile());
+		this.setDiffSync(buildExtraModule.isDiffSync());
 
-	public Integer getTriggerBuildType() {
-		return triggerBuildType;
-	}
-
-	public void setTriggerBuildType(Integer triggerBuildType) {
-		this.triggerBuildType = triggerBuildType;
-	}
-
-	public Boolean getHashFile() {
-		return hashFile;
-	}
-
-	public void setHashFile(Boolean hashFile) {
-		this.hashFile = hashFile;
-	}
-
-	public Boolean getHasLog() {
-		return hasLog;
-	}
-
-	public Boolean getDiffSync() {
-		return diffSync;
-	}
-
-	public void setDiffSync(Boolean diffSync) {
-		this.diffSync = diffSync;
-	}
-
-	public void setHasLog(Boolean hasLog) {
-		this.hasLog = hasLog;
-	}
-
-	public Integer getReleaseMethod() {
-		return releaseMethod;
-	}
-
-	public void setReleaseMethod(Integer releaseMethod) {
-		this.releaseMethod = releaseMethod;
-	}
-
-	public String getReleaseMethodDataId() {
-		return releaseMethodDataId;
-	}
-
-	public void setReleaseMethodDataId(String releaseMethodDataId) {
-		this.releaseMethodDataId = releaseMethodDataId;
-	}
-
-	public Integer getAfterOpt() {
-		return afterOpt;
-	}
-
-	public void setAfterOpt(Integer afterOpt) {
-		this.afterOpt = afterOpt;
-	}
-
-	public Boolean getClearOld() {
-		return clearOld;
-	}
-
-	public void setClearOld(Boolean clearOld) {
-		this.clearOld = clearOld;
-	}
-
-	public String getResultDirFile() {
-		return resultDirFile;
-	}
-
-	public void setResultDirFile(String resultDirFile) {
-		this.resultDirFile = resultDirFile;
-	}
-
-	public String getReleaseCommand() {
-		return releaseCommand;
-	}
-
-	public void setReleaseCommand(String releaseCommand) {
-		this.releaseCommand = releaseCommand;
-	}
-
-	public String getReleasePath() {
-		return releasePath;
-	}
-
-	public void setReleasePath(String releasePath) {
-		this.releasePath = releasePath;
-	}
-
-
-	public String getBuildDataId() {
-		return buildDataId;
-	}
-
-	public void setBuildDataId(String buildDataId) {
-		this.buildDataId = buildDataId;
-	}
-
-	public Integer getBuildNumberId() {
-		return buildNumberId;
-	}
-
-	public void setBuildNumberId(Integer buildNumberId) {
-		this.buildNumberId = buildNumberId;
-	}
-
-	public Integer getStatus() {
-		return status;
-	}
-
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
-
-	public Long getStartTime() {
-		return startTime;
-	}
-
-	public void setStartTime(Long startTime) {
-		this.startTime = startTime;
-	}
-
-	public Long getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(Long endTime) {
-		this.endTime = endTime;
-	}
-
-	public String getBuildName() {
-		return buildName;
-	}
-
-	public void setBuildName(String buildName) {
-		this.buildName = buildName;
 	}
 }

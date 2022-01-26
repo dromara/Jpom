@@ -51,7 +51,6 @@ import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
-import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
@@ -60,6 +59,7 @@ import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.StringUtil;
+import lombok.Builder;
 
 import java.io.File;
 import java.io.InputStream;
@@ -73,101 +73,101 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @date 2019/7/19
  */
-public class ReleaseManage extends BaseBuild {
+@Builder
+public class ReleaseManage implements Runnable {
 
 	private final UserModel userModel;
 	private final int buildId;
 	private final BuildExtraModule buildExtraModule;
-	private final File resultFile;
-	private BaseBuild baseBuild;
+	private final String logId;
+	private final BuildExecuteService buildExecuteService;
 
-	/**
-	 * new ReleaseManage constructor
-	 *
-	 * @param buildModel 构建信息
-	 * @param userModel  用户信息
-	 * @param baseBuild  基础构建
-	 * @param buildId    构建序号ID
-	 */
-	ReleaseManage(BuildExtraModule buildModel, UserModel userModel, BaseBuild baseBuild, int buildId) {
-		super(BuildUtil.getLogFile(buildModel.getId(), buildId),
-				buildModel.getId());
-		this.buildExtraModule = buildModel;
-		this.buildId = buildId;
-		this.userModel = userModel;
-		this.baseBuild = baseBuild;
-		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildModel.getResultDirFile());
-	}
+	private LogRecorder logRecorder;
+	private File resultFile;
 
-	/**
-	 * 重新发布
-	 *
-	 * @param buildHistoryLog 构建历史
-	 * @param userModel       用户
-	 */
-	public ReleaseManage(BuildHistoryLog buildHistoryLog, UserModel userModel) {
-		super(BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId()),
-				buildHistoryLog.getBuildDataId());
-		this.buildExtraModule = new BuildExtraModule();
-		this.buildExtraModule.updateValue(buildHistoryLog);
-
-		this.buildId = buildHistoryLog.getBuildNumberId();
-		this.userModel = userModel;
-		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildHistoryLog.getResultDirFile());
-	}
-
-
-	@Override
-	public boolean updateStatus(BuildStatus status) {
-		if (baseBuild == null) {
-			return super.updateStatus(status);
-		} else {
-			return baseBuild.updateStatus(status);
+	private void init() {
+		if (this.logRecorder == null) {
+			File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), buildId);
+			this.logRecorder = LogRecorder.builder().file(logFile).build();
 		}
+		this.resultFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildId, buildExtraModule.getResultDirFile());
+	}
+
+//	/**
+//	 * new ReleaseManage constructor
+//	 *
+//	 * @param buildModel 构建信息
+//	 * @param userModel  用户信息
+//	 * @param baseBuild  基础构建
+//	 * @param buildId    构建序号ID
+//	 */
+//	ReleaseManage(BuildExtraModule buildModel, UserModel userModel, int buildId) {
+//
+//
+//		this.buildExtraModule = buildModel;
+//		this.buildId = buildId;
+//		this.userModel = userModel;
+//
+//	}
+
+//	/**
+//	 * 重新发布
+//	 *
+//	 * @param buildHistoryLog 构建历史
+//	 * @param userModel       用户
+//	 */
+//	public ReleaseManage(BuildHistoryLog buildHistoryLog, UserModel userModel) {
+//		super(BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId()),
+//				buildHistoryLog.getBuildDataId());
+//		this.buildExtraModule = new BuildExtraModule();
+//		this.buildExtraModule.updateValue(buildHistoryLog);
+//
+//		this.buildId = buildHistoryLog.getBuildNumberId();
+//		this.userModel = userModel;
+//		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildHistoryLog.getResultDirFile());
+//	}
+
+
+	public void updateStatus(BuildStatus status) {
+		buildExecuteService.updateStatus(this.buildExtraModule.getId(), this.logId, status);
 	}
 
 	/**
 	 * 不修改为发布中状态
 	 */
-	public void start2() {
-		this.log("start release：" + FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
+	public void start() {
+		init();
+		updateStatus(BuildStatus.PubIng);
+		logRecorder.log("start release：" + FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
 		if (!this.resultFile.exists()) {
-			this.log("不存在构建产物");
+			logRecorder.log("不存在构建产物");
 			updateStatus(BuildStatus.PubError);
 			return;
 		}
 		long time = SystemClock.now();
 		int releaseMethod = this.buildExtraModule.getReleaseMethod();
-		this.log("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
+		logRecorder.log("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
 		try {
 			if (releaseMethod == BuildReleaseMethod.Outgiving.getCode()) {
 				//
 				this.doOutGiving();
 			} else if (releaseMethod == BuildReleaseMethod.Project.getCode()) {
-				AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.buildExtraModule.getAfterOpt(), AfterOpt.No);
-				this.doProject(afterOpt, this.buildExtraModule.isClearOld(), this.buildExtraModule.isDiffSync());
+				this.doProject();
 			} else if (releaseMethod == BuildReleaseMethod.Ssh.getCode()) {
 				this.doSsh();
 			} else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
 				this.localCommand();
 			} else {
-				this.log(" 没有实现的发布分发:" + releaseMethod);
+				logRecorder.log(" 没有实现的发布分发:" + releaseMethod);
 			}
 		} catch (Exception e) {
 			this.pubLog("发布异常", e);
 			return;
 		}
-		this.log("release complete : " + DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
+		logRecorder.log("release complete : " + DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
 		updateStatus(BuildStatus.PubSuccess);
 	}
 
-	/**
-	 * 修改为发布中状态
-	 */
-	public void start() {
-		updateStatus(BuildStatus.PubIng);
-		this.start2();
-	}
 
 	/**
 	 * 格式化命令模版
@@ -191,7 +191,7 @@ public class ReleaseManage extends BaseBuild {
 	 * @return 格式化后
 	 */
 	private String formatCommandItem(String command) {
-		String replace = StrUtil.replace(command, "#{BUILD_ID}", this.buildModelId);
+		String replace = StrUtil.replace(command, "#{BUILD_ID}", this.buildExtraModule.getId());
 		replace = StrUtil.replace(replace, "#{BUILD_NAME}", this.buildExtraModule.getName());
 		replace = StrUtil.replace(replace, "#{BUILD_RESULT_FILE}", FileUtil.getAbsolutePath(this.resultFile));
 		replace = StrUtil.replace(replace, "#{BUILD_NUMBER_ID}", this.buildId + StrUtil.EMPTY);
@@ -205,16 +205,16 @@ public class ReleaseManage extends BaseBuild {
 		// 执行命令
 		String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
 		if (ArrayUtil.isEmpty(commands)) {
-			this.log("没有需要执行的ssh命令");
+			logRecorder.log("没有需要执行的ssh命令");
 			return;
 		}
 		String command = StrUtil.EMPTY;
-		this.log(DateUtil.now() + " start exec");
+		logRecorder.log(DateUtil.now() + " start exec");
 		InputStream templateInputStream = null;
 		try {
 			templateInputStream = ResourceUtil.getStream("classpath:/bin/execTemplate." + CommandUtil.SUFFIX);
 			if (templateInputStream == null) {
-				this.log("系统中没有命令模版");
+				logRecorder.log("系统中没有命令模版");
 				return;
 			}
 			String sshExecTemplate = IoUtil.readUtf8(templateInputStream);
@@ -224,13 +224,13 @@ public class ReleaseManage extends BaseBuild {
 			//
 			stringBuilder.append(ArrayUtil.join(commands, StrUtil.LF));
 			File tempPath = ConfigBean.getInstance().getTempPath();
-			File commandFile = FileUtil.file(tempPath, "build", this.buildModelId + StrUtil.DOT + CommandUtil.SUFFIX);
+			File commandFile = FileUtil.file(tempPath, "build", this.buildExtraModule.getId() + StrUtil.DOT + CommandUtil.SUFFIX);
 			FileUtil.writeUtf8String(stringBuilder.toString(), commandFile);
 			//
 			command = SystemUtil.getOsInfo().isWindows() ? StrUtil.EMPTY : CommandUtil.SUFFIX;
 			command += " " + FileUtil.getAbsolutePath(commandFile);
 			String result = CommandUtil.execSystemCommand(command);
-			this.log(result);
+			logRecorder.log(result);
 		} catch (Exception e) {
 			this.pubLog("执行本地命令异常：" + command, e);
 		} finally {
@@ -246,14 +246,14 @@ public class ReleaseManage extends BaseBuild {
 		SshService sshService = SpringUtil.getBean(SshService.class);
 		SshModel item = sshService.getByKey(releaseMethodDataId, false);
 		if (item == null) {
-			this.log("没有找到对应的ssh项：" + releaseMethodDataId);
+			logRecorder.log("没有找到对应的ssh项：" + releaseMethodDataId);
 			return;
 		}
 		Session session = SshService.getSessionByModel(item);
 		try {
 			String releasePath = this.buildExtraModule.getReleasePath();
 			if (StrUtil.isEmpty(releasePath)) {
-				this.log("发布目录为空");
+				logRecorder.log("发布目录为空");
 			} else {
 				try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
 					String prefix = "";
@@ -271,7 +271,7 @@ public class ReleaseManage extends BaseBuild {
 						}
 					}
 					sftp.syncUpload(this.resultFile, normalizePath);
-					this.log("ssh ftp upload done");
+					logRecorder.log("ssh ftp upload done");
 				} catch (Exception e) {
 					this.pubLog("执行ssh发布异常", e);
 				}
@@ -279,20 +279,20 @@ public class ReleaseManage extends BaseBuild {
 		} finally {
 			JschUtil.close(session);
 		}
-		this.log("");
+		logRecorder.log("");
 		// 执行命令
 		String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
 		if (commands == null || commands.length <= 0) {
-			this.log("没有需要执行的ssh命令");
+			logRecorder.log("没有需要执行的ssh命令");
 			return;
 		}
 		// 替换变量
 		this.formatCommand(commands);
 		//
-		this.log(DateUtil.now() + " start exec");
+		logRecorder.log(DateUtil.now() + " start exec");
 		try {
 			String s = sshService.exec(item, commands);
-			this.log(s);
+			logRecorder.log(s);
 		} catch (Exception e) {
 			this.pubLog("执行异常", e);
 		}
@@ -332,9 +332,9 @@ public class ReleaseManage extends BaseBuild {
 		int delSize = CollUtil.size(del);
 		int diffSize = CollUtil.size(diff);
 		if (clearOld) {
-			this.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize));
+			logRecorder.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize));
 		} else {
-			this.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff)));
+			logRecorder.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff)));
 		}
 		// 清空发布才先执行删除
 		if (delSize > 0 && clearOld) {
@@ -359,17 +359,19 @@ public class ReleaseManage extends BaseBuild {
 			}
 			if (last) {
 				// 最后一个
-				this.log("发布项目包成功：" + jsonMessage);
+				logRecorder.log("发布项目包成功：" + jsonMessage);
 			}
 		}
 	}
 
 	/**
 	 * 发布项目
-	 *
-	 * @param afterOpt 后续操作
 	 */
-	private void doProject(AfterOpt afterOpt, boolean clearOld, boolean diffSync) {
+	private void doProject() {
+//		AfterOpt afterOpt, boolean clearOld, boolean diffSync
+		AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.buildExtraModule.getAfterOpt(), AfterOpt.No);
+		boolean clearOld = this.buildExtraModule.isClearOld();
+		boolean diffSync = this.buildExtraModule.isDiffSync();
 		String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
 		String[] strings = StrUtil.splitToArray(releaseMethodDataId, CharPool.COLON);
 		if (ArrayUtil.length(strings) != 2) {
@@ -395,7 +397,7 @@ public class ReleaseManage extends BaseBuild {
 				afterOpt,
 				nodeModel, this.userModel, clearOld);
 		if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
-			this.log("发布项目包成功：" + jsonMessage);
+			logRecorder.log("发布项目包成功：" + jsonMessage);
 		} else {
 			throw new JpomRuntimeException("发布项目包失败：" + jsonMessage);
 		}
@@ -413,7 +415,7 @@ public class ReleaseManage extends BaseBuild {
 			unZip = false;
 		}
 		OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip);
-		this.log("开始执行分发包啦,请到分发中查看当前状态");
+		logRecorder.log("开始执行分发包啦,请到分发中查看当前状态");
 	}
 
 
@@ -424,6 +426,12 @@ public class ReleaseManage extends BaseBuild {
 	 * @param throwable 异常
 	 */
 	private void pubLog(String title, Throwable throwable) {
-		log(title, throwable, BuildStatus.PubError);
+		logRecorder.log(title, throwable);
+		this.updateStatus(BuildStatus.PubError);
+	}
+
+	@Override
+	public void run() {
+		this.start();
 	}
 }

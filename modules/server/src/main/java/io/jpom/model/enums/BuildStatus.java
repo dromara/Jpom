@@ -36,7 +36,7 @@ public enum BuildStatus implements BaseEnum {
 
 	Ing(1, "构建中"),
 
-	Success(2, "构建完成"),
+	Success(2, "构建结束"),
 
 	Error(3, "构建失败"),
 
