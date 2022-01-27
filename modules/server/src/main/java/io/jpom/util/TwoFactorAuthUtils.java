@@ -7,11 +7,9 @@ package io.jpom.util;
 import cn.hutool.core.codec.Base32;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.HMac;
-
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
 
 public class TwoFactorAuthUtils {
 
@@ -34,11 +32,7 @@ public class TwoFactorAuthUtils {
 	 * @return 两步验证码
 	 */
 	public static String generateTFACode(String tfaKey) {
-		try {
-			return TimeBasedOneTimePasswordUtil.generateCurrentNumberString(tfaKey);
-		} catch (GeneralSecurityException e) {
-			throw new RuntimeException("两步验证码生成异常");
-		}
+		return TimeBasedOneTimePasswordUtil.generateCurrentNumberString(tfaKey);
 	}
 
 	/**
@@ -65,14 +59,7 @@ public class TwoFactorAuthUtils {
 
 	private static class TimeBasedOneTimePasswordUtil {
 		public static final int DEFAULT_TIME_STEP_SECONDS = 30;
-		private static final String BLOCK_OF_ZEROS;
 		private static final int NUM_DIGITS_OUTPUT = 6;
-
-		static {
-			char[] chars = new char[NUM_DIGITS_OUTPUT];
-			Arrays.fill(chars, '0');
-			BLOCK_OF_ZEROS = new String(chars);
-		}
 
 		public static String generateBase32Secret(int length) {
 			return RandomUtil.randomString(RandomUtil.BASE_CHAR, length).toUpperCase();
@@ -104,15 +91,14 @@ public class TwoFactorAuthUtils {
 			return false;
 		}
 
-		public static String generateCurrentNumberString(String base32Secret)
-				throws GeneralSecurityException {
-			return generateNumberString(base32Secret, System.currentTimeMillis(),
-					DEFAULT_TIME_STEP_SECONDS);
+		public static String generateCurrentNumberString(String base32Secret) {
+			return generateNumberString(base32Secret, System.currentTimeMillis(), DEFAULT_TIME_STEP_SECONDS);
 		}
 
 		public static String generateNumberString(String base32Secret, long timeMillis, int timeStepSeconds) {
 			int number = generateNumber(base32Secret, timeMillis, timeStepSeconds);
-			return zeroPrepend(number);
+			String numStr = Integer.toString(number);
+			return StrUtil.fillBefore(numStr, '0', TimeBasedOneTimePasswordUtil.NUM_DIGITS_OUTPUT);
 		}
 
 		public static int generateNumber(String base32Secret, long timeMillis, int timeStepSeconds) {
@@ -150,19 +136,6 @@ public class TwoFactorAuthUtils {
 		public static String generateOtpAuthUrl(String keyId, String secret) {
 			//			addOtpAuthPart(keyId, secret, sb);
 			return "otpauth://totp/" + keyId + "?secret=" + secret;
-		}
-
-		static String zeroPrepend(int num) {
-			String numStr = Integer.toString(num);
-			if (numStr.length() >= TimeBasedOneTimePasswordUtil.NUM_DIGITS_OUTPUT) {
-				return numStr;
-			} else {
-				StringBuilder sb = new StringBuilder(TimeBasedOneTimePasswordUtil.NUM_DIGITS_OUTPUT);
-				int zeroCount = TimeBasedOneTimePasswordUtil.NUM_DIGITS_OUTPUT - numStr.length();
-				sb.append(BLOCK_OF_ZEROS, 0, zeroCount);
-				sb.append(numStr);
-				return sb.toString();
-			}
 		}
 	}
 }

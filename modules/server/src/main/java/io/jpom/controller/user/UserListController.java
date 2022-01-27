@@ -213,8 +213,7 @@ public class UserListController extends BaseServerController {
 	public String unlock(String id) {
 		UserModel userModel = userService.getByKey(id);
 		Assert.notNull(userModel, "修改失败:-1");
-		userModel.unLock();
-		userService.update(userModel);
+		userService.update(userModel.unLock());
 		return JsonMessage.getString(200, "解锁成功");
 	}
 

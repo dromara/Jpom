@@ -108,18 +108,6 @@ public class UserService extends BaseDbService<UserModel> {
 	}
 
 	/**
-	 * 是否返回系统管理员信息
-	 *
-	 * @param hiddenSystem 隐藏系统管理员
-	 * @return list
-	 */
-	public List<UserModel> list(boolean hiddenSystem) {
-		UserModel userModel = new UserModel();
-		userModel.setSystemUser(hiddenSystem ? 0 : 1);
-		return super.listByBean(userModel);
-	}
-
-	/**
 	 * 当前系统中的系统管理员的数量
 	 *
 	 * @return int
@@ -142,7 +130,7 @@ public class UserService extends BaseDbService<UserModel> {
 		userModel.setId(id);
 		userModel.setSalt(salt);
 		userModel.setPassword(SecureUtil.sha1(newPwd + salt));
-		userModel.unLock();
+		UserModel.unLock(userModel);
 		super.update(userModel);
 	}
 

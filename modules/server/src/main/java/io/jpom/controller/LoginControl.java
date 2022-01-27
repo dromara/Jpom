@@ -168,17 +168,18 @@ public class LoginControl extends BaseServerController {
 			String sCode = getSessionAttribute(LOGIN_CODE);
 			Assert.state(StrUtil.equalsIgnoreCase(code, sCode), "请输入正确的验证码");
 			removeSessionAttribute(LOGIN_CODE);
+			UserModel updateModel = null;
 			try {
 				long lockTime = userModel.overLockTime();
 				if (lockTime > 0) {
 					String msg = DateUtil.formatBetween(lockTime * 1000, BetweenFormatter.Level.SECOND);
-					userModel.errorLock();
+					updateModel = userModel.errorLock();
 					this.ipError();
 					return JsonMessage.getString(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
 				}
 				// 验证
 				if (userService.simpleLogin(userName, userPwd) != null) {
-					userModel.unLock();
+					updateModel = userModel.unLock();
 					// 判断工作空间
 					List<WorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspaceInfo(userModel);
 					Assert.notEmpty(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
@@ -189,12 +190,14 @@ public class LoginControl extends BaseServerController {
 					userLoginDto.setBindWorkspaceModels(bindWorkspaceModels);
 					return JsonMessage.getString(200, "登录成功", userLoginDto);
 				} else {
-					userModel.errorLock();
+					updateModel = userModel.errorLock();
 					this.ipError();
 					return JsonMessage.getString(501, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
 				}
 			} finally {
-				userService.update(userModel);
+				if (updateModel != null) {
+					userService.update(updateModel);
+				}
 			}
 		}
 	}

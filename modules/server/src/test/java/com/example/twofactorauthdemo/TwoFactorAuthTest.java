@@ -15,9 +15,10 @@ public class TwoFactorAuthTest {
 	public void test() {
 		String tfaKey = TwoFactorAuthUtils.generateTFAKey();
 		System.out.println(tfaKey);
-		String tfaCode = TwoFactorAuthUtils.generateTFACode(tfaKey);
-		String generateOtpAuthUrl = TwoFactorAuthUtils.generateOtpAuthUrl("adin", tfaKey);
+		String generateOtpAuthUrl = TwoFactorAuthUtils.generateOtpAuthUrl("jpom@jpom.com", tfaKey);
 		System.out.println(generateOtpAuthUrl);
+
+		String tfaCode = TwoFactorAuthUtils.generateTFACode(tfaKey);
 
 		boolean validateTFACode = TwoFactorAuthUtils.validateTFACode(tfaKey, tfaCode);
 		System.out.println(tfaCode);
