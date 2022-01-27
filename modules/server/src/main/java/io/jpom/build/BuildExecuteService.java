@@ -23,6 +23,8 @@
 package io.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -307,9 +309,19 @@ public class BuildExecuteService {
 		 * 打包构建产物
 		 */
 		private boolean packageFile() {
-			ThreadUtil.sleep(2, TimeUnit.SECONDS);
 			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+			Integer buildMode = taskData.buildInfoModel.getBuildMode();
 			String resultDirFile = buildInfoModel.getResultDirFile();
+			if (buildMode != null && buildMode == 1) {
+				// 容器构建直接下载到 结果目录
+				File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
+				if (!FileUtil.exist(toFile)) {
+					logRecorder.info(resultDirFile + "不存在，处理构建产物失败");
+					return false;
+				}
+				return true;
+			}
+			ThreadUtil.sleep(2, TimeUnit.SECONDS);
 			File rootFile = this.gitFile;
 			boolean updateDirFile = false;
 			if (ANT_PATH_MATCHER.isPattern(resultDirFile)) {
@@ -459,8 +471,8 @@ public class BuildExecuteService {
 			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
 			String script = buildInfoModel.getScript();
 			DockerYmlDsl dockerYmlDsl = DockerYmlDsl.build(script);
-			String dokcerId = dockerYmlDsl.getDokcerId();
-			DockerInfoModel dockerInfoModel = buildExecuteService.dockerInfoService.getByKey(dokcerId);
+			String dockerId = dockerYmlDsl.getDockerId();
+			DockerInfoModel dockerInfoModel = buildExecuteService.dockerInfoService.getByKey(dockerId);
 			Assert.notNull(dockerInfoModel, "对应的容器不存在");
 			String workingDir = "/home/jpom/";
 			Map<String, Object> map = dockerInfoModel.toParameter();
@@ -470,16 +482,25 @@ public class BuildExecuteService {
 			map.put("logFile", FileUtil.getAbsolutePath(logRecorder.getFile()));
 			// 将构建目录挂载到容器
 			List<String> binds = ObjectUtil.defaultIfNull(dockerYmlDsl.getBinds(), new ArrayList<>());
-			binds.add(FileUtil.getAbsolutePath(this.gitFile) + ":" + workingDir);
 			map.put("binds", binds);
+			//
+			List<String> copy = new ArrayList<>();
+			copy.add(FileUtil.getAbsolutePath(this.gitFile) + StrUtil.COLON + workingDir + StrUtil.COLON + "true");
+			map.put("copy", copy);
 			map.put("entrypoints", dockerYmlDsl.getEntrypoints());
 			map.put("cmds", dockerYmlDsl.getCmds());
 			map.put("env", dockerYmlDsl.getEnv());
 			// 构建产物
-			//String resultDirFile = buildInfoModel.getResultDirFile();
-			//map.put("resultFile", FileUtil.normalize(workingDir + StrUtil.SLASH + resultDirFile));
-			//File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
-			//map.put("resultFileOut", FileUtil.getAbsolutePath(toFile));
+			String resultDirFile = buildInfoModel.getResultDirFile();
+			String resultFile = FileUtil.normalize(workingDir + StrUtil.SLASH + resultDirFile);
+			map.put("resultFile", resultFile);
+			File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
+
+			// 下载文件包含一级文件名 所以需要向上切换
+			//int toParent = StrUtil.equals(workingDir, resultFile) ? 0 : 1;
+			//FileUtil.getParent(resultFileOut, 1);
+//			FileUtil.getParent(toFile, toParent)
+			map.put("resultFileOut", FileUtil.getAbsolutePath(toFile));
 			IPlugin plugin = PluginFactory.getPlugin("docker-cli");
 			try {
 				Object build = plugin.execute("build", map);
@@ -558,6 +579,7 @@ public class BuildExecuteService {
 			suppliers.put("release", BuildInfoManage.this::packageRelease);
 			// 依次执行流程，发生异常结束整个流程
 			String processName = StrUtil.EMPTY;
+			long startTime = SystemClock.now();
 			if (taskData.triggerBuildType == 2) {
 				// 系统触发构建
 				BaseServerController.resetInfo(UserModel.EMPTY);
@@ -574,9 +596,12 @@ public class BuildExecuteService {
 					if (!aBoolean) {
 						// 有条件结束构建流程
 						this.asyncWebHooks("stop", "process", processName);
+						buildExecuteService.updateStatus(taskData.buildInfoModel.getId(), this.logId, BuildStatus.Error);
 						break;
 					}
 				}
+				long allTime = SystemClock.now() - startTime;
+				logRecorder.info("构建完成 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
 				this.asyncWebHooks("success");
 			} catch (RuntimeException runtimeException) {
 				buildExecuteService.updateStatus(taskData.buildInfoModel.getId(), this.logId, BuildStatus.Error);

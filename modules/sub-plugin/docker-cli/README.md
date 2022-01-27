@@ -27,3 +27,7 @@ systemctl status docker.service
 --tlskey=/home/docker-ca/server-key.pem \
 -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375
 ```
+
+```
+--tlsverify --tlscacert=/home/docker-ca/ca.pem --tlscert=/home/docker-ca/server-cert.pem --tlskey=/home/docker-ca/server-key.pem -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375
+```

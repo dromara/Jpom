@@ -263,7 +263,7 @@ public class BuildInfoController extends BaseServerController {
 		DockerYmlDsl build = DockerYmlDsl.build(script);
 		build.check();
 		// 检查容器是否存在
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(build.getDokcerId(), getRequest());
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(build.getDockerId(), getRequest());
 		Assert.notNull(dockerInfoModel, "对应的容器不存在,请检查 docker id 是否正确");
 	}
 
