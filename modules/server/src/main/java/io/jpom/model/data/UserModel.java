@@ -28,6 +28,8 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseStrikeDbModel;
 import io.jpom.service.h2db.TableName;
 import io.jpom.system.ServerExtConfigBean;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +39,9 @@ import java.util.concurrent.TimeUnit;
  * @author jiangzeyin
  * @date 2019/1/16
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "USER_INFO", name = "用户账号")
+@Data
 public class UserModel extends BaseStrikeDbModel {
 	/**
 	 * 系统管理员
@@ -71,7 +75,14 @@ public class UserModel extends BaseStrikeDbModel {
 	 * 密码
 	 */
 	private String password;
+	/**
+	 * 密码盐值
+	 */
 	private String salt;
+	/**
+	 * 两步验证 key
+	 */
+	private String twoFactorAuthKey;
 	/**
 	 * 创建此用户的人
 	 */
@@ -112,85 +123,26 @@ public class UserModel extends BaseStrikeDbModel {
 	public UserModel() {
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getSalt() {
-		return salt;
-	}
-
-	public void setSalt(String salt) {
-		this.salt = salt;
-	}
-
-	public Integer getSystemUser() {
-		return systemUser;
-	}
-
 	public void setSystemUser(Integer systemUser) {
 		this.systemUser = ObjectUtil.defaultIfNull(systemUser, 0) == 1 ? systemUser : 0;
-	}
-
-	public Long getLockTime() {
-		return lockTime;
-	}
-
-	public Long getLastPwdErrorTime() {
-		return lastPwdErrorTime;
-	}
-
-	public void setLastPwdErrorTime(Long lastPwdErrorTime) {
-		this.lastPwdErrorTime = lastPwdErrorTime;
-	}
-
-	public void setLockTime(long lockTime) {
-		this.lockTime = lockTime;
-	}
-
-	public Integer getPwdErrorCount() {
-		return pwdErrorCount;
-	}
-
-	public void setPwdErrorCount(int pwdErrorCount) {
-		this.pwdErrorCount = pwdErrorCount;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getDingDing() {
-		return dingDing;
-	}
-
-	public void setDingDing(String dingDing) {
-		this.dingDing = dingDing;
-	}
-
-	public String getWorkWx() {
-		return workWx;
-	}
-
-	public void setWorkWx(String workWx) {
-		this.workWx = workWx;
 	}
 
 	/**
 	 * 解锁
 	 */
-	public void unLock() {
-		setPwdErrorCount(0);
-		setLockTime(0);
-		setLastPwdErrorTime(0L);
+	public UserModel unLock() {
+		UserModel newModel = new UserModel(this.getId());
+		return UserModel.unLock(newModel);
+	}
+
+	/**
+	 * 解锁
+	 */
+	public static UserModel unLock(UserModel newModel) {
+		newModel.setPwdErrorCount(0);
+		newModel.setLockTime(0L);
+		newModel.setLastPwdErrorTime(0L);
+		return newModel;
 	}
 
 	/**
@@ -230,53 +182,37 @@ public class UserModel extends BaseStrikeDbModel {
 	/**
 	 * 登录失败，重新计算锁定时间
 	 */
-	public void errorLock() {
+	public UserModel errorLock() {
 		// 未开启锁定功能
 		int userAlwaysLoginError = ServerExtConfigBean.getInstance().userAlwaysLoginError;
 		if (userAlwaysLoginError <= 0) {
-			return;
+			return null;
 		}
-		setPwdErrorCount(getPwdErrorCount() + 1);
-		int count = getPwdErrorCount();
+		UserModel newModel = new UserModel(this.getId());
+		newModel.setPwdErrorCount(ObjectUtil.defaultIfNull(this.getPwdErrorCount(), 0) + 1);
+		int count = newModel.getPwdErrorCount();
 		// 记录错误时间
-		setLastPwdErrorTime(DateUtil.currentSeconds());
+		newModel.setLastPwdErrorTime(DateUtil.currentSeconds());
 		if (count < userAlwaysLoginError) {
 			// 还未达到锁定条件
-			return;
+			return newModel;
 		}
 		int level = count / userAlwaysLoginError;
 		switch (level) {
 			case 1:
 				// 在错误倍数 为1 锁定 30分钟
-				setLockTime(TimeUnit.MINUTES.toSeconds(30));
+				newModel.setLockTime(TimeUnit.MINUTES.toSeconds(30));
 				break;
 			case 2:
 				// 在错误倍数 为2 锁定 1小时
-				setLockTime(TimeUnit.HOURS.toSeconds(1));
+				newModel.setLockTime(TimeUnit.HOURS.toSeconds(1));
 				break;
 			default:
 				// 其他情况 10小时
-				setLockTime(TimeUnit.HOURS.toSeconds(10));
+				newModel.setLockTime(TimeUnit.HOURS.toSeconds(10));
 				break;
 		}
-	}
-
-	public String getParent() {
-		return parent;
-	}
-
-	public void setParent(String parent) {
-		this.parent = parent;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-		// 记录修改时间，如果在线用户线退出
-		//this.setModifyTime(DateUtil.current());
+		return newModel;
 	}
 
 	public boolean isSystemUser() {
