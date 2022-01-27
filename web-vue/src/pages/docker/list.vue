@@ -7,6 +7,8 @@
     <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="listQuery.total / listQuery.limit > 1 ? pagination : false" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
+          <a-input v-model="listQuery['%name%']" placeholder="名称" class="search-input-item" />
+          <a-input v-model="listQuery['%host%']" placeholder="host" class="search-input-item" />
           <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
@@ -83,8 +85,7 @@
   </div>
 </template>
 <script>
-import { deleteCert, downloadCert } from "@/api/node-nginx";
-import { dockerList, apiVersions, editDocker, editDockerByFile } from "@/api/docker-api";
+import { dockerList, apiVersions, editDocker, editDockerByFile, deleteDcoker } from "@/api/docker-api";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { parseTime } from "@/utils/time";
 export default {
@@ -240,10 +241,9 @@ export default {
         onOk: () => {
           // 组装参数
           const params = {
-            nodeId: this.node.id,
             id: record.id,
           };
-          deleteCert(params).then((res) => {
+          deleteDcoker(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -254,32 +254,32 @@ export default {
         },
       });
     },
-    // 下载证书文件
-    handleDownload(record) {
-      this.$notification.info({
-        message: "正在下载，请稍等...",
-      });
-      // 请求参数
-      const params = {
-        nodeId: this.node.id,
-        id: record.id,
-      };
-      // 请求接口拿到 blob
-      downloadCert(params).then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.style.display = "none";
-        link.href = url;
-        link.setAttribute("download", record.domain + ".zip");
-        document.body.appendChild(link);
-        link.click();
-      });
-    },
-    // 显示模板
-    handleTemplate(record) {
-      this.temp = Object.assign(record);
-      this.templateVisible = true;
-    },
+    // // 下载证书文件
+    // handleDownload(record) {
+    //   this.$notification.info({
+    //     message: "正在下载，请稍等...",
+    //   });
+    //   // 请求参数
+    //   const params = {
+    //     nodeId: this.node.id,
+    //     id: record.id,
+    //   };
+    //   // 请求接口拿到 blob
+    //   downloadCert(params).then((blob) => {
+    //     const url = window.URL.createObjectURL(blob);
+    //     let link = document.createElement("a");
+    //     link.style.display = "none";
+    //     link.href = url;
+    //     link.setAttribute("download", record.domain + ".zip");
+    //     document.body.appendChild(link);
+    //     link.click();
+    //   });
+    // },
+    // // 显示模板
+    // handleTemplate(record) {
+    //   this.temp = Object.assign(record);
+    //   this.templateVisible = true;
+    // },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery.page = pagination.current;

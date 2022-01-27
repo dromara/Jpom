@@ -19,6 +19,7 @@ import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.enums.GitProtocolEnum;
@@ -29,9 +30,11 @@ import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.dblog.RepositoryService;
+import io.jpom.service.docker.DockerInfoService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
+import io.jpom.util.LogRecorder;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
 import org.springframework.stereotype.Service;
@@ -67,13 +70,16 @@ public class BuildExecuteService {
 	private final BuildInfoService buildService;
 	private final DbBuildHistoryLogService dbBuildHistoryLogService;
 	private final RepositoryService repositoryService;
+	private final DockerInfoService dockerInfoService;
 
 	public BuildExecuteService(BuildInfoService buildService,
 							   DbBuildHistoryLogService dbBuildHistoryLogService,
-							   RepositoryService repositoryService) {
+							   RepositoryService repositoryService,
+							   DockerInfoService dockerInfoService) {
 		this.buildService = buildService;
 		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
 		this.repositoryService = repositoryService;
+		this.dockerInfoService = dockerInfoService;
 	}
 
 	/**
@@ -312,17 +318,17 @@ public class BuildExecuteService {
 				});
 				String first = CollUtil.getFirst(paths);
 				if (StrUtil.isEmpty(first)) {
-					logRecorder.log(resultDirFile + " 没有匹配到任何文件");
+					logRecorder.info(resultDirFile + " 没有匹配到任何文件");
 					return false;
 				}
 				// 切换到匹配到到文件
-				logRecorder.log(StrUtil.format("match {} {}", resultDirFile, first));
+				logRecorder.info(StrUtil.format("match {} {}", resultDirFile, first));
 				resultDirFile = first;
 				updateDirFile = true;
 			}
 			File file = FileUtil.file(this.gitFile, resultDirFile);
 			if (!file.exists()) {
-				logRecorder.log(resultDirFile + "不存在，处理构建产物失败");
+				logRecorder.info(resultDirFile + "不存在，处理构建产物失败");
 				return false;
 			}
 			File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
@@ -332,7 +338,7 @@ public class BuildExecuteService {
 					.setCopyAttributes(true)
 					.setCopyFilter(file1 -> !file1.isHidden())
 					.copy();
-			logRecorder.log(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
+			logRecorder.info(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
 			// 修改构建产物目录
 			if (updateDirFile) {
 				dbBuildHistoryLogService.updateResultDirFile(this.logId, resultDirFile);
@@ -355,10 +361,10 @@ public class BuildExecuteService {
 			this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
 
 			Integer delay = taskData.delay;
-			logRecorder.log("#" + buildInfoModel.getBuildId() + " start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
+			logRecorder.info("#" + buildInfoModel.getBuildId() + " start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
 			if (delay != null && delay > 0) {
 				// 延迟执行
-				logRecorder.log("Execution delayed by " + delay + " seconds");
+				logRecorder.info("Execution delayed by " + delay + " seconds");
 				ThreadUtil.sleep(delay, TimeUnit.SECONDS);
 			}
 			return true;
@@ -385,7 +391,7 @@ public class BuildExecuteService {
 					// 模糊匹配分支
 					String newBranchName = GitUtil.fuzzyMatch(tuple.get(0), branchName);
 					if (StrUtil.isEmpty(newBranchName)) {
-						logRecorder.log(branchName + " Did not match the corresponding branch");
+						logRecorder.info(branchName + " Did not match the corresponding branch");
 						buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
 						return false;
 					}
@@ -394,16 +400,16 @@ public class BuildExecuteService {
 					if (StrUtil.isNotEmpty(branchTagName)) {
 						String newBranchTagName = GitUtil.fuzzyMatch(tuple.get(1), branchTagName);
 						if (StrUtil.isEmpty(newBranchTagName)) {
-							logRecorder.log(branchTagName + " Did not match the corresponding tag");
+							logRecorder.info(branchTagName + " Did not match the corresponding tag");
 							buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
 							return false;
 						}
 						// 标签拉取模式
-						logRecorder.log("repository [" + branchName + "] [" + branchTagName + "] clone pull from " + newBranchName + "  " + newBranchTagName);
+						logRecorder.info("repository [" + branchName + "] [" + branchTagName + "] clone pull from " + newBranchName + "  " + newBranchTagName);
 						msg = GitUtil.checkoutPullTag(repositoryModel, gitFile, newBranchName, newBranchTagName, logRecorder.getPrintWriter());
 					} else {
 						// 分支模式
-						logRecorder.log("repository [" + branchName + "] clone pull from " + newBranchName);
+						logRecorder.info("repository [" + branchName + "] clone pull from " + newBranchName);
 						msg = GitUtil.checkoutPull(repositoryModel, gitFile, newBranchName, logRecorder.getPrintWriter());
 					}
 				} else if (repoType == RepositoryModel.RepoType.Svn) {
@@ -420,9 +426,44 @@ public class BuildExecuteService {
 					//msg = SvnKitUtil.checkOut(repositoryModel, gitFile);
 					msg = StrUtil.toString(result);
 				}
-				logRecorder.log(msg);
+				logRecorder.info(msg);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
+			}
+			return true;
+		}
+
+		private boolean dockerCommand() {
+			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+			String script = buildInfoModel.getScript();
+			DockerYmlDsl dockerYmlDsl = DockerYmlDsl.build(script);
+			String dokcerId = dockerYmlDsl.getDokcerId();
+			DockerInfoModel dockerInfoModel = buildExecuteService.dockerInfoService.getByKey(dokcerId);
+			Assert.notNull(dockerInfoModel, "对应的容器不存在");
+			String workingDir = "/home/jpom/";
+			Map<String, Object> map = dockerInfoModel.toParameter();
+			map.put("image", dockerYmlDsl.getImage());
+			map.put("workingDir", workingDir);
+			map.put("dockerName", "jpom-build-" + buildInfoModel.getId());
+			map.put("logFile", FileUtil.getAbsolutePath(logRecorder.getFile()));
+			// 将构建目录挂载到容器
+			List<String> binds = ObjectUtil.defaultIfNull(dockerYmlDsl.getBinds(), new ArrayList<>());
+			binds.add(FileUtil.getAbsolutePath(this.gitFile) + ":" + workingDir);
+			map.put("binds", binds);
+			map.put("entrypoints", dockerYmlDsl.getEntrypoints());
+			map.put("cmds", dockerYmlDsl.getCmds());
+			map.put("env", dockerYmlDsl.getEnv());
+			// 构建产物
+			//String resultDirFile = buildInfoModel.getResultDirFile();
+			//map.put("resultFile", FileUtil.normalize(workingDir + StrUtil.SLASH + resultDirFile));
+			//File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
+			//map.put("resultFileOut", FileUtil.getAbsolutePath(toFile));
+			IPlugin plugin = PluginFactory.getPlugin("docker-cli");
+			try {
+				Object build = plugin.execute("build", map);
+			} catch (Exception e) {
+				logRecorder.error("调用容器异常", e);
+				return false;
 			}
 			return true;
 		}
@@ -437,11 +478,11 @@ public class BuildExecuteService {
 			Integer buildMode = buildInfoModel.getBuildMode();
 			if (buildMode != null && buildMode == 1) {
 				// 容器构建
-
+				return this.dockerCommand();
 			}
 			String[] commands = CharSequenceUtil.splitToArray(buildInfoModel.getScript(), StrUtil.LF);
 			if (commands == null || commands.length <= 0) {
-				logRecorder.log("没有需要执行的命令");
+				logRecorder.info("没有需要执行的命令");
 				this.buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
 				return false;
 			}
@@ -449,10 +490,10 @@ public class BuildExecuteService {
 				try {
 					boolean s = runCommand(item);
 					if (!s) {
-						logRecorder.log("命令执行存在error");
+						logRecorder.info("命令执行存在error");
 					}
 				} catch (Exception e) {
-					logRecorder.log(item + " 执行异常", e);
+					logRecorder.error(item + " 执行异常", e);
 					return false;
 				}
 			}
@@ -516,11 +557,13 @@ public class BuildExecuteService {
 				}
 				this.asyncWebHooks("success");
 			} catch (RuntimeException runtimeException) {
+				buildExecuteService.updateStatus(taskData.buildInfoModel.getId(), this.logId, BuildStatus.Error);
 				Throwable cause = runtimeException.getCause();
-				logRecorder.log("构建失败:" + processName, cause == null ? runtimeException : cause);
+				logRecorder.error("构建失败:" + processName, cause == null ? runtimeException : cause);
 				this.asyncWebHooks(processName, "error", runtimeException.getMessage());
 			} catch (Exception e) {
-				logRecorder.log("构建失败:" + processName, e);
+				buildExecuteService.updateStatus(taskData.buildInfoModel.getId(), this.logId, BuildStatus.Error);
+				logRecorder.error("构建失败:" + processName, e);
 				this.asyncWebHooks(processName, "error", e.getMessage());
 			} finally {
 				BUILD_MANAGE_MAP.remove(taskData.buildInfoModel.getId());
@@ -541,7 +584,7 @@ public class BuildExecuteService {
 		 * @throws IOException IO
 		 */
 		private boolean runCommand(String command) throws IOException, InterruptedException {
-			logRecorder.log(command);
+			logRecorder.info(command);
 			//
 			ProcessBuilder processBuilder = new ProcessBuilder();
 			processBuilder.directory(this.gitFile);
@@ -554,11 +597,11 @@ public class BuildExecuteService {
 			//
 			InputStream inputStream = process.getInputStream();
 			IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) line -> {
-				logRecorder.log(line);
+				logRecorder.info(line);
 				status[0] = true;
 			});
 			int waitFor = process.waitFor();
-			logRecorder.log("process result " + waitFor);
+			logRecorder.info("process result " + waitFor);
 			return status[0];
 		}
 

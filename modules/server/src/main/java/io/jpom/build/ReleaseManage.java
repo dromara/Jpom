@@ -58,6 +58,7 @@ import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.LogRecorder;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
 
@@ -138,15 +139,15 @@ public class ReleaseManage implements Runnable {
 	public void start() {
 		init();
 		updateStatus(BuildStatus.PubIng);
-		logRecorder.log("start release：" + FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
+		logRecorder.info("start release：" + FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
 		if (!this.resultFile.exists()) {
-			logRecorder.log("不存在构建产物");
+			logRecorder.info("不存在构建产物");
 			updateStatus(BuildStatus.PubError);
 			return;
 		}
 		long time = SystemClock.now();
 		int releaseMethod = this.buildExtraModule.getReleaseMethod();
-		logRecorder.log("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
+		logRecorder.info("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
 		try {
 			if (releaseMethod == BuildReleaseMethod.Outgiving.getCode()) {
 				//
@@ -158,13 +159,13 @@ public class ReleaseManage implements Runnable {
 			} else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
 				this.localCommand();
 			} else {
-				logRecorder.log(" 没有实现的发布分发:" + releaseMethod);
+				logRecorder.info(" 没有实现的发布分发:" + releaseMethod);
 			}
 		} catch (Exception e) {
 			this.pubLog("发布异常", e);
 			return;
 		}
-		logRecorder.log("release complete : " + DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
+		logRecorder.info("release complete : " + DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
 		updateStatus(BuildStatus.PubSuccess);
 	}
 
@@ -205,16 +206,16 @@ public class ReleaseManage implements Runnable {
 		// 执行命令
 		String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
 		if (ArrayUtil.isEmpty(commands)) {
-			logRecorder.log("没有需要执行的ssh命令");
+			logRecorder.info("没有需要执行的ssh命令");
 			return;
 		}
 		String command = StrUtil.EMPTY;
-		logRecorder.log(DateUtil.now() + " start exec");
+		logRecorder.info(DateUtil.now() + " start exec");
 		InputStream templateInputStream = null;
 		try {
 			templateInputStream = ResourceUtil.getStream("classpath:/bin/execTemplate." + CommandUtil.SUFFIX);
 			if (templateInputStream == null) {
-				logRecorder.log("系统中没有命令模版");
+				logRecorder.info("系统中没有命令模版");
 				return;
 			}
 			String sshExecTemplate = IoUtil.readUtf8(templateInputStream);
@@ -230,7 +231,7 @@ public class ReleaseManage implements Runnable {
 			command = SystemUtil.getOsInfo().isWindows() ? StrUtil.EMPTY : CommandUtil.SUFFIX;
 			command += " " + FileUtil.getAbsolutePath(commandFile);
 			String result = CommandUtil.execSystemCommand(command);
-			logRecorder.log(result);
+			logRecorder.info(result);
 		} catch (Exception e) {
 			this.pubLog("执行本地命令异常：" + command, e);
 		} finally {
@@ -246,14 +247,14 @@ public class ReleaseManage implements Runnable {
 		SshService sshService = SpringUtil.getBean(SshService.class);
 		SshModel item = sshService.getByKey(releaseMethodDataId, false);
 		if (item == null) {
-			logRecorder.log("没有找到对应的ssh项：" + releaseMethodDataId);
+			logRecorder.info("没有找到对应的ssh项：" + releaseMethodDataId);
 			return;
 		}
 		Session session = SshService.getSessionByModel(item);
 		try {
 			String releasePath = this.buildExtraModule.getReleasePath();
 			if (StrUtil.isEmpty(releasePath)) {
-				logRecorder.log("发布目录为空");
+				logRecorder.info("发布目录为空");
 			} else {
 				try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
 					String prefix = "";
@@ -271,7 +272,7 @@ public class ReleaseManage implements Runnable {
 						}
 					}
 					sftp.syncUpload(this.resultFile, normalizePath);
-					logRecorder.log("ssh ftp upload done");
+					logRecorder.info("ssh ftp upload done");
 				} catch (Exception e) {
 					this.pubLog("执行ssh发布异常", e);
 				}
@@ -279,20 +280,20 @@ public class ReleaseManage implements Runnable {
 		} finally {
 			JschUtil.close(session);
 		}
-		logRecorder.log("");
+		logRecorder.info("");
 		// 执行命令
 		String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
 		if (commands == null || commands.length <= 0) {
-			logRecorder.log("没有需要执行的ssh命令");
+			logRecorder.info("没有需要执行的ssh命令");
 			return;
 		}
 		// 替换变量
 		this.formatCommand(commands);
 		//
-		logRecorder.log(DateUtil.now() + " start exec");
+		logRecorder.info(DateUtil.now() + " start exec");
 		try {
 			String s = sshService.exec(item, commands);
-			logRecorder.log(s);
+			logRecorder.info(s);
 		} catch (Exception e) {
 			this.pubLog("执行异常", e);
 		}
@@ -332,9 +333,9 @@ public class ReleaseManage implements Runnable {
 		int delSize = CollUtil.size(del);
 		int diffSize = CollUtil.size(diff);
 		if (clearOld) {
-			logRecorder.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize));
+			logRecorder.info(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize));
 		} else {
-			logRecorder.log(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff)));
+			logRecorder.info(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff)));
 		}
 		// 清空发布才先执行删除
 		if (delSize > 0 && clearOld) {
@@ -359,7 +360,7 @@ public class ReleaseManage implements Runnable {
 			}
 			if (last) {
 				// 最后一个
-				logRecorder.log("发布项目包成功：" + jsonMessage);
+				logRecorder.info("发布项目包成功：" + jsonMessage);
 			}
 		}
 	}
@@ -397,7 +398,7 @@ public class ReleaseManage implements Runnable {
 				afterOpt,
 				nodeModel, this.userModel, clearOld);
 		if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
-			logRecorder.log("发布项目包成功：" + jsonMessage);
+			logRecorder.info("发布项目包成功：" + jsonMessage);
 		} else {
 			throw new JpomRuntimeException("发布项目包失败：" + jsonMessage);
 		}
@@ -415,7 +416,7 @@ public class ReleaseManage implements Runnable {
 			unZip = false;
 		}
 		OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip);
-		logRecorder.log("开始执行分发包啦,请到分发中查看当前状态");
+		logRecorder.info("开始执行分发包啦,请到分发中查看当前状态");
 	}
 
 
@@ -426,7 +427,7 @@ public class ReleaseManage implements Runnable {
 	 * @param throwable 异常
 	 */
 	private void pubLog(String title, Throwable throwable) {
-		logRecorder.log(title, throwable);
+		logRecorder.error(title, throwable);
 		this.updateStatus(BuildStatus.PubError);
 	}
 
