@@ -65,12 +65,12 @@
         </a-form-model-item>
         <a-form-model-item label="TLS 认证" prop="tlsVerify">
           <a-row>
-            <a-col :span="4">
+            <a-col :span="5">
               <a-switch v-model="temp.tlsVerify" checked-children="开" un-checked-children="关" />
             </a-col>
-            <a-col :span="10">
+            <a-col :span="16" v-if="temp.tlsVerify">
               证书文件:
-              <a-upload v-if="temp.tlsVerify" :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.zip'">
+              <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.zip'">
                 <a-button><a-icon type="upload" />选择文件</a-button>
               </a-upload>
             </a-col>

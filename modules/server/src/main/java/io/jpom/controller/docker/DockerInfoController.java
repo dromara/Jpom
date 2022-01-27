@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 Code Technology Studio
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.controller.docker;
 
 import cn.hutool.core.convert.Convert;
@@ -168,10 +190,17 @@ public class DockerInfoController extends BaseServerController {
 			if (dockerInfoModel.getTlsVerify()) {
 				Assert.state(certExist, "请上传证书文件");
 			}
+			this.check(dockerInfoModel, certExist, savePath);
 			dockerInfoService.insert(dockerInfoModel);
 		} else {
+			this.check(dockerInfoModel, certExist, savePath);
 			dockerInfoService.updateById(dockerInfoModel, getRequest());
 		}
+		//
+		return JsonMessage.getString(200, "操作成功");
+	}
+
+	private void check(DockerInfoModel dockerInfoModel, boolean certExist, File savePath) throws Exception {
 		// 移动证书
 		if (certExist) {
 			if (FileUtil.isDirectory(savePath) && FileUtil.isNotEmpty(savePath)) {
@@ -179,11 +208,9 @@ public class DockerInfoController extends BaseServerController {
 				FileUtil.move(savePath, FileUtil.file(generateCertPath), true);
 			}
 		}
-		//
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
 		boolean ok = (boolean) plugin.execute("ping", dockerInfoModel.toParameter());
 		Assert.state(ok, "无法连接 docker 请检查 host 或者 TLS 证书");
-		return JsonMessage.getString(200, "操作成功");
 	}
 
 
