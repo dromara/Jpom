@@ -49,7 +49,7 @@ public class DockerYmlDsl extends BaseJsonModel {
 	/**
 	 * 容器ID
 	 */
-	private String dokcerId;
+	private String dockerId;
 	/**
 	 * 镜像 from
 	 */
@@ -77,7 +77,7 @@ public class DockerYmlDsl extends BaseJsonModel {
 		Assert.hasText(getImage(), "请填写镜像名称");
 		//
 		Assert.notEmpty(getEntrypoints(), "请填写entrypoint");
-		Assert.hasText(getDokcerId(), "请填写 docker Id");
+		Assert.hasText(getDockerId(), "请填写 docker Id");
 	}
 
 	/**

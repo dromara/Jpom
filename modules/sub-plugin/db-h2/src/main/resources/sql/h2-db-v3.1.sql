@@ -50,6 +50,6 @@ ALTER TABLE USER_BIND_WORKSPACE
 	ALTER COLUMN workspaceId VARCHAR(100) comment '工作空间ID';
 
 ALTER TABLE USER_INFO
-	ALTER COLUMN twoFactorAuthKey VARCHAR(100) comment '两步验证';
+	ADD IF NOT EXISTS twoFactorAuthKey VARCHAR(100) comment '两步验证';
 
 
