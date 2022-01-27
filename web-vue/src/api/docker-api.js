@@ -43,3 +43,17 @@ export function editDocker(data) {
     data: data,
   });
 }
+
+/**
+ * 删除 docker
+ * @param {
+ *  id: docker ID
+ * } params
+ */
+export function deleteDcoker(params) {
+  return axios({
+    url: "/docker/del",
+    method: "get",
+    params,
+  });
+}

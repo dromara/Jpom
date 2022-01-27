@@ -22,14 +22,11 @@
  */
 package io.jpom.script;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.CharsetUtil;
+import io.jpom.util.LogRecorder;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 脚本模版执行父类
@@ -42,13 +39,14 @@ public abstract class BaseRunScript implements AutoCloseable {
 	/**
 	 * 日志文件
 	 */
+	protected final LogRecorder logRecorder;
 	protected final File logFile;
-
 	protected Process process;
 	protected InputStream inputStream;
 
 	protected BaseRunScript(File logFile) {
 		this.logFile = logFile;
+		this.logRecorder = LogRecorder.builder().file(logFile).build();
 	}
 
 	/**
@@ -57,10 +55,7 @@ public abstract class BaseRunScript implements AutoCloseable {
 	 * @param line 信息
 	 */
 	protected void handle(String line) {
-		// 写入文件
-		List<String> fileLine = new ArrayList<>();
-		fileLine.add(line);
-		FileUtil.appendLines(fileLine, logFile, CharsetUtil.CHARSET_UTF_8);
+		logRecorder.info(line);
 	}
 
 	/**

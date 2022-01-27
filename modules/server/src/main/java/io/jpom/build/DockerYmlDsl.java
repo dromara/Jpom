@@ -34,6 +34,8 @@ public class DockerYmlDsl extends BaseJsonModel {
 	private String image;
 	/**
 	 * bind mounts 将宿主机上的任意位置的文件或者目录挂在到容器 （--mount type=bind,src=源目录,dst=目标目录）
+	 * <p>
+	 * <host path>:<container path>:<access mode>
 	 */
 	private List<String> binds;
 	/**

@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
@@ -183,5 +184,24 @@ public class DockerInfoController extends BaseServerController {
 		boolean ok = (boolean) plugin.execute("ping", dockerInfoModel.toParameter());
 		Assert.state(ok, "无法连接 docker 请检查 host 或者 TLS 证书");
 		return JsonMessage.getString(200, "操作成功");
+	}
+
+
+	@GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DEL)
+	public String del(@ValidatorItem String id) throws Exception {
+		DockerInfoModel infoModel = dockerInfoService.getByKey(id, getRequest());
+		if (infoModel != null) {
+			// 检查是否为最后一个 docker 需要删除证书文件
+			DockerInfoModel dockerInfoModel = new DockerInfoModel();
+			dockerInfoModel.setHost(infoModel.getHost());
+			long count = dockerInfoService.count(dockerInfoService.dataBeanToEntity(dockerInfoModel));
+			if (count <= 1) {
+				// 删除文件
+				FileUtil.del(infoModel.generateCertPath());
+			}
+			dockerInfoService.delByKey(id);
+		}
+		return JsonMessage.getString(200, "删除成功");
 	}
 }
