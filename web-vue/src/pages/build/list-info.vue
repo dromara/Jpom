@@ -23,7 +23,8 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" @click="handleEdit(record)" :title="text">
+        <a-icon type="edit" theme="twoTone" />
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="branchName" slot-scope="text" placement="topLeft" :title="text">
@@ -169,7 +170,7 @@
               </a-row>
             </a-form-model-item>
             <a-form-model-item v-if="temp.buildMode === 0" label="构建命令" prop="script">
-              <a-auto-complete option-label-prop="value">
+              <a-auto-complete option-label-prop="value" v-model="temp.script">
                 <template slot="dataSource">
                   <a-select-opt-group v-for="group in buildScipts" :key="group.title">
                     <span slot="label">
@@ -210,9 +211,18 @@
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
-              <div style="height: 40vh; overflow-y: scroll">
-                <code-editor v-model="temp.script" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"></code-editor>
-              </div>
+              <a-tabs>
+                <a-tab-pane key="1" tab="DSL 配置">
+                  <div style="height: 40vh; overflow-y: scroll">
+                    <code-editor v-model="temp.script" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"></code-editor>
+                  </div>
+                </a-tab-pane>
+                <a-tab-pane key="2" tab="配置示例">
+                  <div style="height: 40vh; overflow-y: scroll">
+                    <code-editor v-model="dslDefault" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef', readOnly: true }"></code-editor>
+                  </div>
+                </a-tab-pane>
+              </a-tabs>
             </a-form-model-item>
             <a-form-model-item v-if="temp.buildMode !== undefined" prop="resultDirFile" class="jpom-target-dir">
               <template slot="label">
@@ -637,6 +647,17 @@ export default {
         releasePath: [{ required: true, message: "请填写发布目录", trigger: "blur" }],
         repositoryId: [{ required: true, message: "请填选择构建的仓库", trigger: "blur" }],
       },
+      dslDefault:
+        "dockerId: 03f583360dd14b15b663d8514961dfd1\r\n" +
+        "image: maven:3.8.4-jdk-8\r\n" +
+        "copy:\r\n" +
+        "	- /Users/user/.m2/settings.xml:/root/.m2/:false\r\n" +
+        "entrypoints:\r\n" +
+        "	- /bin/sh\r\n" +
+        "  - -c\r\n" +
+        "  - mkdir -p /root/.m2/\r\n" +
+        "cmds:\r\n" +
+        "	- echo mvn clean package | /bin/sh\r\n",
     };
   },
   computed: {
