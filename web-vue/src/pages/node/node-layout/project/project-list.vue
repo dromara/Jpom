@@ -426,7 +426,7 @@ export default {
         },
         { title: "运行状态", dataIndex: "status", width: 50, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 50, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 120 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 110 },
       ],
       rules: {
         id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
@@ -701,7 +701,7 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除项目么？",
+        content: "真的要删除项目么？删除项目不会删除项目相关文件奥,建议先清理项目相关文件再删除项目",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
