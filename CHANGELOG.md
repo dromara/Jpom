@@ -20,6 +20,7 @@
 6. 升级 SpringBoot 到 2.6.3 (感谢@💎ℳ๓₯㎕斌💎💘)
 7. 【server】解除 SSH 终端禁止命令权限保存失败（感谢@Alex）
 8. 【server】本地构建模式模糊匹配支持匹配多个结果
+9. 【server】修复节点分发不能删除节点问题（感谢@a19920714liou [Gitee issues I4SHSP](https://gitee.com/dromara/Jpom/issues/I4SHSP) ）
 
 ------
 

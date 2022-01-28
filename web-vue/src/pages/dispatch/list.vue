@@ -537,7 +537,7 @@ export default {
       projectList: [],
       afterOptList: afterOptList,
       targetKeys: [],
-      reqId: "",
+      // reqId: "",
       temp: {},
       fileList: [],
       runModeList: runModeList,
@@ -895,30 +895,41 @@ export default {
         if (!valid) {
           return false;
         }
+        const tempData = Object.assign({}, this.temp);
         // 检查
-        if (this.temp.nodeIdList.length < 2) {
+        if (tempData.nodeIdList.length < 2) {
           this.$notification.warn({
             message: "请至少选择 2 个节点",
           });
           return false;
         }
         // 设置 reqId
-        this.temp.reqId = this.reqId;
+        // this.temp.reqId = this.reqId;
+        this.nodeList.forEach((item) => {
+          //console.log(item);
+          //delete this.temp[`add_${item.id}`];
+          delete tempData[`${item.id}}_javaCopyIds`];
+        });
         // 设置节点
-        this.temp.nodeIdList.forEach((key) => {
-          this.temp[`add_${key}`] = key;
+        tempData.nodeIdList.forEach((key) => {
+          // this.temp[`add_${key}`] = key;
           // 设置副本
-          this.temp[`${key}_javaCopyIds`] = "";
-          this.temp[`${key}_javaCopyItemList`]?.forEach((element) => {
-            this.temp[`${key}_javaCopyIds`] += `${element.id},`;
-            this.temp[`${key}_jvm_${element.id}`] = element.jvm;
-            this.temp[`${key}_args_${element.id}`] = element.args;
+          tempData[`${key}_javaCopyIds`] = "";
+          const copyIds = [];
+          tempData[`${key}_javaCopyItemList`]?.forEach((element) => {
+            //this.temp[`${key}_javaCopyIds`] += `${element.id},`;
+            copyIds.push(element.id);
+            tempData[`${key}_jvm_${element.id}`] = element.jvm;
+            tempData[`${key}_args_${element.id}`] = element.args;
           });
           // 移除多余的后缀 ,
-          this.temp[`${key}_javaCopyIds`] = this.temp[`${key}_javaCopyIds`].substring(0, this.temp[`${key}_javaCopyIds`].length - 1);
+          tempData[`${key}_javaCopyIds`] = copyIds.join(",");
+          //  this.temp[`${key}_javaCopyIds`].substring(0, this.temp[`${key}_javaCopyIds`].length - 1);
         });
+        tempData.nodeIds = tempData.nodeIdList.join(",");
+        delete tempData.nodeIdList;
         // 提交
-        editDispatchProject(this.temp).then((res) => {
+        editDispatchProject(tempData).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
