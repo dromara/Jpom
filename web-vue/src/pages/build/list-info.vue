@@ -539,6 +539,10 @@ export default {
           title: "Java 项目",
           children: [
             {
+              title: "跳过测试类打包 mvn clean package -Dmaven.test.skip=true",
+              value: "mvn clean package -Dmaven.test.skip=true",
+            },
+            {
               title: "mvn clean package",
               value: "mvn clean package",
             },
@@ -556,12 +560,12 @@ export default {
               value: "npm run build",
             },
             {
-              title: " yarn build",
-              value: " yarn build",
+              title: "yarn build",
+              value: "yarn build",
             },
             {
-              title: " 指定目录打包 yarn --cwd xxxx/ build",
-              value: " yarn --cwd xxxx/ build",
+              title: "指定目录打包 yarn --cwd xxxx/build",
+              value: "yarn --cwd xxxx/build",
             },
           ],
         },
