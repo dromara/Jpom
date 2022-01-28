@@ -138,6 +138,9 @@ hostname
 
 [开发计划](https://cdn.jsdelivr.net/gh/dromara/Jpom/PLANS.md)
 
+# 数据库异常
+
+字段没有找到
 
 ### 常见问题未知问题
 
