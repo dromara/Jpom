@@ -8,7 +8,8 @@
 2. 【server】节点脚本列表新增快速查看日志入口（感谢@ʟᴊx💎💎）
 3. 【server】构建新增备注字段,可以用于记录版本日志或者本次构建备注（感谢@Alex）
 4. 【server】新增解绑节点、节点分发功能 用于服务器过期或者已经确定不在使用直接删除节点相关数据（感谢@🐠）
-5. 【server】构建命令新增预设命令提示输入,减少用户输入（感谢 [Gitee issues I4SHC9](https://gitee.com/dromara/Jpom/issues/I4SHC9) ）
+5. 【server】构建命令新增预设命令提示输入,减少用户输入（感谢@hjk2008 [Gitee issues I4SHC9](https://gitee.com/dromara/Jpom/issues/I4SHC9) ）
+6. 【server】批量构建支持指定部分参数使构建更灵活（感谢@hjk2008 [Gitee issues I4SHB4](https://gitee.com/dromara/Jpom/issues/I4SHB4) ）
 
 ### 🐞 解决BUG、优化功能
 
