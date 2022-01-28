@@ -407,9 +407,15 @@
             <template slot="description">
               <ul>
                 <li>可以添加 delay=x 参数来延迟执行构建</li>
-                <li>批量构建参数 BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]</li>
                 <li>单个触发器地址中：第一个随机字符串为构建ID，第二个随机字符串为 token</li>
                 <li>重置为重新生成触发地址,重置成功后之前的触发器地址将失效</li>
+                <li>批量构建参数 BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]</li>
+                <li>批量构建参数还支持指定参数, branchName（分支名）、branchTagName（标签）、script（构建脚本）、resultDirFile（构建产物）、webhook（通知 webhook）</li>
+                <li>
+                  批量构建全部参数举例 BODY json： [ { "id":"1", "token":"a", "delay":"0","branchName":"test","branchTagName":"1.*","script":"mvn clean
+                  package","resultDirFile":"/target/","webhook":"http://test.com/webhook" } ]
+                </li>
+                <li>批量构建传人其他参数将同步执行修改</li>
               </ul>
             </template>
           </a-alert>

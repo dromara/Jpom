@@ -20,9 +20,11 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.controller.openapi.build;
+package io.jpom.controller.openapi;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.lang.RegexPool;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -171,6 +173,13 @@ public class BuildTriggerApiController extends BaseJpomController {
 					jsonObject.put("msg", "触发token错误,或者已经失效");
 					return;
 				}
+				// 更新字段
+				String updateItemErrorMsg = this.updateItem(jsonObject);
+				if (updateItemErrorMsg != null) {
+					jsonObject.put("msg", updateItemErrorMsg);
+					return;
+				}
+				//
 				JsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1, buildRemark);
 				jsonObject.put("msg", start.getMsg());
 				jsonObject.put("buildId", start.getData());
@@ -180,5 +189,45 @@ public class BuildTriggerApiController extends BaseJpomController {
 			DefaultSystemLog.getLog().error("构建触发批量触发异常", e);
 			return JsonMessage.getString(500, "触发异常", e.getMessage());
 		}
+	}
+
+	/**
+	 * 接收参数,修改
+	 *
+	 * @param jsonObject 参数
+	 * @return 错误消息
+	 */
+	private String updateItem(JSONObject jsonObject) {
+		String id = jsonObject.getString("id");
+		String branchName = jsonObject.getString("branchName");
+		String branchTagName = jsonObject.getString("branchTagName");
+		String script = jsonObject.getString("script");
+		String resultDirFile = jsonObject.getString("resultDirFile");
+		String webhook = jsonObject.getString("webhook");
+		//
+		BuildInfoModel item = new BuildInfoModel();
+		if (StrUtil.isNotEmpty(branchName)) {
+			item.setBranchName(branchName);
+		}
+		if (StrUtil.isNotEmpty(branchTagName)) {
+			item.setBranchTagName(branchTagName);
+		}
+		if (StrUtil.isNotEmpty(script)) {
+			item.setScript(script);
+		}
+		if (StrUtil.isNotEmpty(resultDirFile)) {
+			item.setResultDirFile(resultDirFile);
+		}
+		if (StrUtil.isNotEmpty(webhook)) {
+			if (!Validator.isMatchRegex(RegexPool.URL_HTTP, webhook)) {
+				return "WebHooks 地址不合法";
+			}
+			item.setWebhook(webhook);
+		}
+		if (ObjectUtil.isNotEmpty(item)) {
+			item.setId(id);
+			buildInfoService.update(item);
+		}
+		return null;
 	}
 }
