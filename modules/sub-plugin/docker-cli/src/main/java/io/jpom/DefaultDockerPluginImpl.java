@@ -59,11 +59,16 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 	@Override
 	public Object execute(Object main, Map<String, Object> parameter) throws Exception {
 		String type = main.toString();
-		if (StrUtil.equals(type, "build")) {
-			this.build(parameter);
-			return null;
+		switch (type) {
+			case "remove":
+				this.removeContainerCmd(parameter);
+				return null;
+			case "build":
+				this.build(parameter);
+				return null;
+			default:
+				throw new IllegalArgumentException("不支持的类型");
 		}
-		throw new IllegalArgumentException("不支持的类型");
 	}
 
 	public void build(Map<String, Object> parameter) {
@@ -242,9 +247,20 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			dockerClient.copyArchiveToContainerCmd(containerId)
 					.withHostResource(split.get(0))
 					.withRemotePath(split.get(1))
-					.withDirChildrenOnly(Convert.toBool(split.get(2), false))
+					.withDirChildrenOnly(Convert.toBool(CollUtil.get(split, 2), true))
 					.exec();
 		}
+	}
+
+	/**
+	 * 删除容器
+	 *
+	 * @param parameter 参数
+	 */
+	private void removeContainerCmd(Map<String, Object> parameter) {
+		String containerId = (String) parameter.get("containerId");
+		DockerClient dockerClient = DockerUtil.build(parameter, 10);
+		removeContainerCmd(dockerClient, containerId);
 	}
 
 	/**

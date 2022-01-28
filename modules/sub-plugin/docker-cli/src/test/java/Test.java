@@ -20,14 +20,21 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
-import com.github.dockerjava.api.command.*;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.ListImagesCmd;
+import com.github.dockerjava.api.command.PingCmd;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -61,10 +68,16 @@ public class Test {
 
 	@Before
 	public void before() {
+
+		//
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+		logger.setLevel(Level.INFO);
+
 		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
 				// .withDockerHost("tcp://192.168.163.11:2376").build();
 //				.withApiVersion()
-				.withDockerHost("tcp://127.0.0.2:2375").build();
+				.withDockerHost("tcp://127.0.0.1:2375").build();
 
 		DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
 				.dockerHost(config.getDockerHost())
@@ -76,10 +89,7 @@ public class Test {
 		this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
 		dockerClient.pingCmd().exec();
 
-		//
-		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-		Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
-		logger.setLevel(Level.INFO);
+
 	}
 
 	@After
@@ -88,10 +98,10 @@ public class Test {
 			return;
 		}
 		// 清除容器
-		this.dockerClient.removeContainerCmd(containerId)
-				.withRemoveVolumes(true)
-				.withForce(true)
-				.exec();
+//		this.dockerClient.removeContainerCmd(containerId)
+//				.withRemoveVolumes(true)
+//				.withForce(true)
+//				.exec();
 	}
 
 	@org.junit.Test
@@ -132,7 +142,7 @@ public class Test {
 
 		List<Bind> bindList = new ArrayList<>();
 		bindList.add(new Bind(absolutePath, new Volume(workingDir)));
-		bindList.add(new Bind("/Users/user/.m2", new Volume("/root/.m2")));
+		//bindList.add(new Bind("/Users/user/.m2", new Volume("/root/.m2")));
 		//
 		//
 		HostConfig hostConfig = HostConfig.newHostConfig().withBinds(bindList);
@@ -140,7 +150,7 @@ public class Test {
 		createContainerCmd.withHostConfig(hostConfig);
 
 		String[] entrypoint = {"/bin/sh", "-c"};
-		String[] cmd = {"echo mvn clean package | /bin/sh"};
+		String[] cmd = { "mkdir -p /root/.m2/ && ln -s /root/settings.xml /root/.m2/settings.xml && mvn clean package"};
 //		String[] cmd = {""};
 		createContainerCmd.withEntrypoint(entrypoint);
 
@@ -187,6 +197,15 @@ public class Test {
 		}
 //		String containerId =;
 		this.containerId = containerResponse.getId();
+
+		List<String> split = StrUtil.split("/Users/user/.m2/settings.xml:/root/:false", StrUtil.COLON);
+		dockerClient.copyArchiveToContainerCmd(containerId)
+				.withHostResource(split.get(0))
+				.withRemotePath(split.get(1))
+				.withNoOverwriteDirNonDir(true)
+				.withDirChildrenOnly(Convert.toBool(CollUtil.get(split, 2), true))
+				.exec();
+
 		// 启动容器
 		try {
 			this.dockerClient.startContainerCmd(containerId).exec();
