@@ -91,6 +91,35 @@ export function installAgentNode(formData) {
   return axios({
     url: "/node/ssh/installAgentSubmit.json",
     headers: {
+      // "Content-Type": "multipart/form-data;charset=UTF-8",
+    },
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData,
+  });
+}
+/**
+ *  获取插件端信息
+ * @returns json
+ */
+export function getAgent() {
+  return axios({
+    url: "/node/ssh/get_agent.json",
+    headers: {},
+    method: "get",
+  });
+}
+
+/**
+ * 上传插件包
+ * @param {form} formData
+ * @returns
+ */
+export function uploadAgent(formData) {
+  return axios({
+    url: "/node/ssh/upload_agent.json",
+    headers: {
       "Content-Type": "multipart/form-data;charset=UTF-8",
     },
     method: "post",

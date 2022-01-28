@@ -22,9 +22,14 @@
  */
 package io.jpom.model;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * @author lf
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class AgentFileModel extends BaseModel {
 
 	/**
@@ -32,14 +37,17 @@ public class AgentFileModel extends BaseModel {
 	 */
 	public static final String ID = "AGENT_FILE";
 	/**
+	 * 最新插件端包的文件名
+	 */
+	public static final String ZIP_NAME = "agent.zip";
+	/**
 	 * 默认空版本信息
 	 */
 	public static final AgentFileModel EMPTY = new AgentFileModel();
-
 	/**
 	 * 文件大小
 	 */
-	private long size = 0;
+	private Long size = 0L;
 	/**
 	 * 保存路径
 	 */
@@ -52,46 +60,4 @@ public class AgentFileModel extends BaseModel {
 	 * jar 打包时间
 	 */
 	private String timeStamp;
-
-	public String getTimeStamp() {
-		return timeStamp;
-	}
-
-	public void setTimeStamp(String timeStamp) {
-		this.timeStamp = timeStamp;
-	}
-
-	public long getSize() {
-		return size;
-	}
-
-	public void setSize(long size) {
-		this.size = size;
-	}
-
-	public String getSavePath() {
-		return savePath;
-	}
-
-	public void setSavePath(String savePath) {
-		this.savePath = savePath;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
-
-	public AgentFileModel() {
-	}
-
-	public AgentFileModel(boolean empty) {
-		if (empty) {
-			this.setVersion("0");
-		}
-	}
-
 }
