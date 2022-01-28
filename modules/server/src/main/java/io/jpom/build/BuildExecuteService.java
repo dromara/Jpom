@@ -383,7 +383,9 @@ public class BuildExecuteService {
 					String subBefore = StrUtil.subBefore(resultDirFile, "*", false);
 					subBefore = StrUtil.subBefore(subBefore, StrUtil.SLASH, true);
 					subBefore = StrUtil.emptyToDefault(subBefore, StrUtil.SLASH);
-					resultDirFile = subBefore, copyFile = false, updateDirFile = true;
+					resultDirFile = subBefore;
+					copyFile = false;
+					updateDirFile = true;
 					for (String path : paths) {
 						File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), subBefore);
 						FileCopier.create(FileUtil.file(this.gitFile, path), FileUtil.file(toFile, path))
