@@ -14,7 +14,7 @@
           <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
         </a-tooltip>
         <a-button type="primary" @click="handleAdd">新增</a-button>
-        <a-button type="primary" @click="handleAddGitee">导入仓库</a-button>
+        <a-button type="primary" @click="handleAddGitee">通过私人令牌导入仓库</a-button>
       </a-space>
     </div>
     <!-- 表格 -->
@@ -131,14 +131,25 @@
     </a-modal>
     <a-modal v-model="giteeImportVisible" title="导入仓库" width="80%" :footer="null" :maskClosable="false">
       <a-form-model :label-col="{ span: 4 }" :rules="giteeImportFormRules" :model="giteeImportForm" ref="giteeImportForm" :wrapper-col="{ span: 20 }">
-        <a-form-model-item label="私人令牌" prop="token">
+        <a-form-model-item prop="token">
+          <template slot="label">
+            私人令牌
+            <a-tooltip>
+              <template slot="title">
+                <ul>
+                  <li>使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-input-group compact>
-            <a-select v-model="giteeImportForm.type">
+            <a-select v-model="giteeImportForm.type" @change="importTypeChange">
               <a-select-option value="gitee"> gitee </a-select-option>
               <a-select-option value="github"> github </a-select-option>
               <a-select-option value="gitlab"> gitlab </a-select-option>
             </a-select>
-            <a-input-search style="width: 50%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" placeholder="请输入私人令牌" />
+            <a-input-search style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" :placeholder="importTypePlaceholder" />
           </a-input-group>
         </a-form-model-item>
       </a-form-model>
@@ -185,6 +196,7 @@ export default {
       giteeImportVisible: false,
       repos: [],
       username: null,
+      importTypePlaceholder: '在 设置-->安全设置-->私人令牌 中获取',
       columns: [
         { title: "仓库名称", dataIndex: "name", sorter: true, width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         {
@@ -444,6 +456,17 @@ export default {
         this.listQuery.order_field = sorter.field;
       }
       this.loadData();
+    },
+    importTypeChange(val) {
+      if (val === 'gitee') {
+        this.importTypePlaceholder = '在 设置-->安全设置-->私人令牌 中获取';
+      } else if (val === 'github') {
+        this.importTypePlaceholder = '在 Settings-->Developer settings-->Personal access tokens 中获取';
+      } else if (val === 'gitlab') {
+        this.importTypePlaceholder = '在 preferences-->Access Tokens 中获取';
+      } else {
+        this.importTypePlaceholder = '请输入私人令牌';
+      }
     },
   },
 };
