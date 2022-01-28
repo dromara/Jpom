@@ -19,6 +19,7 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
+import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.service.stat.NodeStatService;
 import org.springframework.http.MediaType;
@@ -45,19 +46,22 @@ public class NodeEditController extends BaseServerController {
 	private final ProjectInfoCacheService projectInfoCacheService;
 	private final NodeScriptServer nodeScriptServer;
 	private final NodeStatService nodeStatService;
+	private final NodeScriptExecuteLogServer nodeScriptExecuteLogServer;
 
 	public NodeEditController(OutGivingServer outGivingServer,
 							  MonitorService monitorService,
 							  BuildInfoService buildService,
 							  ProjectInfoCacheService projectInfoCacheService,
 							  NodeScriptServer nodeScriptServer,
-							  NodeStatService nodeStatService) {
+							  NodeStatService nodeStatService,
+							  NodeScriptExecuteLogServer nodeScriptExecuteLogServer) {
 		this.outGivingServer = outGivingServer;
 		this.monitorService = monitorService;
 		this.buildService = buildService;
 		this.projectInfoCacheService = projectInfoCacheService;
 		this.nodeScriptServer = nodeScriptServer;
 		this.nodeStatService = nodeStatService;
+		this.nodeScriptExecuteLogServer = nodeScriptExecuteLogServer;
 	}
 
 
@@ -137,11 +141,7 @@ public class NodeEditController extends BaseServerController {
 			Assert.state(!exists, "该节点下还存在脚本模版，不能删除");
 		}
 		//
-		int i = nodeService.delByKey(id, request);
-		if (i > 0) {
-			// 删除节点统计数据
-			nodeStatService.delByKey(id);
-		}
+		this.delNodeData(id, request);
 		return JsonMessage.getString(200, "操作成功");
 	}
 
@@ -154,6 +154,16 @@ public class NodeEditController extends BaseServerController {
 		Assert.state(!checkNode1, "该节点存在监控项，不能删除");
 		boolean checkNode2 = buildService.checkNode(id, request);
 		Assert.state(!checkNode2, "该节点存在构建项，不能删除");
+	}
+
+	private void delNodeData(String id, HttpServletRequest request) {
+		//
+		int i = nodeService.delByKey(id, request);
+		if (i > 0) {
+			// 删除节点统计数据
+			nodeStatService.delByKey(id);
+		}
+		nodeScriptExecuteLogServer.delCache(id, request);
 	}
 
 	/**
@@ -170,12 +180,7 @@ public class NodeEditController extends BaseServerController {
 		//
 		projectInfoCacheService.delCache(id, request);
 		nodeScriptServer.delCache(id, request);
-		//
-		int i = nodeService.delByKey(id, request);
-		if (i > 0) {
-			// 删除节点统计数据
-			nodeStatService.delByKey(id);
-		}
+		this.delNodeData(id, request);
 		return JsonMessage.getString(200, "操作成功");
 	}
 
