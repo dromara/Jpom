@@ -144,6 +144,15 @@ export function deleteNode(id) {
   });
 }
 
+// 解绑 node
+export function unbind(id) {
+  return axios({
+    url: "/node/unbind.json",
+    method: "get",
+    params: { id },
+  });
+}
+
 // // 节点 top 命令
 // export function getNodeTop(nodeId) {
 //   return axios({

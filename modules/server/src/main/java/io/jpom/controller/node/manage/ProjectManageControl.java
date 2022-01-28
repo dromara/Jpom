@@ -136,7 +136,7 @@ public class ProjectManageControl extends BaseServerController {
 				Assert.state(!match, "当前项目存在监控项，不能直接删除");
 			}
 
-			boolean releaseMethod = buildService.checkReleaseMethod(nodeModel.getId() + StrUtil.COLON + id, BuildReleaseMethod.Project);
+			boolean releaseMethod = buildService.checkReleaseMethod(nodeModel.getId() + StrUtil.COLON + id, servletRequest, BuildReleaseMethod.Project);
 			Assert.state(!releaseMethod, "当前项目存在构建项，不能直接删除");
 		}
 		JsonMessage<Object> request = NodeForward.request(nodeModel, servletRequest, NodeUrl.Manage_DeleteProject);

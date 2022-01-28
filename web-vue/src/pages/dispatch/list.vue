@@ -61,7 +61,20 @@
           <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
           <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
           <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
-          <a-button type="danger" v-if="!list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="danger" v-if="!list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="danger" @click="handleUnbind(record)">解绑</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
       <!-- 嵌套表格 -->
@@ -483,8 +496,8 @@
   </div>
 </template>
 <script>
-import File from "../node/node-layout/project/project-file";
-import Console from "../node/node-layout/project/project-console";
+import File from "@/pages/node/node-layout/project/project-file";
+import Console from "@/pages/node/node-layout/project/project-console";
 import codeEditor from "@/components/codeEditor";
 import {
   getDishPatchList,
@@ -498,6 +511,7 @@ import {
   remoteDownload,
   afterOptList,
   statusMap,
+  unbindOutgiving,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, runModeList, javaModes, noFileModes } from "@/api/node-project";
@@ -553,7 +567,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 300, align: "left" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 250, align: "left" },
       ],
       childColumns: [
         { title: "节点名称", dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
@@ -1041,6 +1055,26 @@ export default {
         onOk: () => {
           // 删除
           releaseDelDisPatch(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
+    // 解绑
+    handleUnbind(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要解绑节点么？解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          unbindOutgiving(record.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,

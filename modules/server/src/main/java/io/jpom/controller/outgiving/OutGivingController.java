@@ -219,10 +219,12 @@ public class OutGivingController extends BaseServerController {
 	@RequestMapping(value = "release_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
 	public String releaseDel(String id) {
+		HttpServletRequest request = getRequest();
 		// 判断构建
-		boolean releaseMethod = buildService.checkReleaseMethod(id, BuildReleaseMethod.Outgiving);
+		boolean releaseMethod = buildService.checkReleaseMethod(id, request, BuildReleaseMethod.Outgiving);
 		Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
-		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, getRequest());
+
+		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
 
 		UserModel userModel = getUser();
 		// 解除项目分发独立分发属性
@@ -236,7 +238,33 @@ public class OutGivingController extends BaseServerController {
 			});
 		}
 
-		int byKey = outGivingServer.delByKey(id, getRequest());
+		int byKey = outGivingServer.delByKey(id, request);
+		if (byKey > 0) {
+			// 删除日志
+			Entity where = new Entity();
+			where.set("outGivingId", id);
+			dbOutGivingLogService.del(where);
+		}
+		return JsonMessage.getString(200, "操作成功");
+	}
+
+	/**
+	 * 解绑
+	 *
+	 * @param id 分发id
+	 * @return json
+	 */
+	@GetMapping(value = "unbind.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DEL)
+	public String unbind(String id) {
+		HttpServletRequest request = getRequest();
+		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
+		Assert.notNull(outGivingServerItem, "对应的分发不存在");
+		// 判断构建
+		boolean releaseMethod = buildService.checkReleaseMethod(id, request, BuildReleaseMethod.Outgiving);
+		Assert.state(!releaseMethod, "当前分发存在构建项，不能解绑");
+
+		int byKey = outGivingServer.delByKey(id, request);
 		if (byKey > 0) {
 			// 删除日志
 			Entity where = new Entity();

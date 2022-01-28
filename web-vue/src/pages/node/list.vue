@@ -61,10 +61,10 @@
       <template slot="operation" slot-scope="text, record">
         <a-tooltip title="我在这里" :visible="showOptVisible[record.id]">
           <a-space>
-            <a-button v-if="record.unLockType" type="primary" @click="unlock(record)">解锁节点</a-button>
+            <a-button v-if="record.unLockType" type="primary" @click="unlock(record)"><a-icon type="unlock" />解锁</a-button>
 
             <a-tooltip v-else title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
-              <a-button class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />节点管理</a-button>
+              <a-button class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />管理</a-button>
             </a-tooltip>
             <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
               <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
@@ -80,7 +80,14 @@
                 </a-menu-item>
 
                 <a-menu-item>
-                  <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+                  <a-tooltip title="删除会检查数据关联性,并且节点不存在项目或者脚本">
+                    <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+                  </a-tooltip>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-tooltip title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用">
+                    <a-button type="danger" @click="handleUnbind(record)">解绑</a-button>
+                  </a-tooltip>
                 </a-menu-item>
               </a-menu>
             </a-dropdown>
@@ -336,7 +343,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeList, getNodeStatus, editNode, deleteNode, syncProject, unLockWorkspace, getNodeGroupAll, fastInstall, pullFastInstallResult, confirmFastInstall } from "@/api/node";
+import { getNodeList, getNodeStatus, editNode, unbind, deleteNode, syncProject, unLockWorkspace, getNodeGroupAll, fastInstall, pullFastInstallResult, confirmFastInstall } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
@@ -396,7 +403,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", key: "operation", width: 300, scopedSlots: { customRender: "operation" }, align: "left" },
+        { title: "操作", dataIndex: "operation", key: "operation", width: 270, scopedSlots: { customRender: "operation" }, align: "left" },
       ],
       childColumns: [
         { title: "系统名", dataIndex: "osName", key: "osName", width: 100, ellipsis: true, scopedSlots: { customRender: "osName" } },
@@ -616,12 +623,32 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除节点么？",
+        content: "真的要删除节点么？删除会检查数据关联性,并且节点不存在项目或者脚本",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
           // 删除
           deleteNode(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
+    // 解绑
+    handleUnbind(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要解绑节点么？解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          unbind(record.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,

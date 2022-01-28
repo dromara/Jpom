@@ -146,6 +146,18 @@ export function delDisPatchProject(id) {
 }
 
 /**
+ * 解绑分发
+ * @param {*} id 分发 ID
+ */
+export function unbindOutgiving(id) {
+  return axios({
+    url: "/outgiving/unbind.json",
+    method: "get",
+    params: { id },
+  });
+}
+
+/**
  * 分发日志
  * @param {
  *  nodeId: 节点 ID
