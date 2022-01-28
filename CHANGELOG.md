@@ -21,6 +21,7 @@
 7. 【server】解除 SSH 终端禁止命令权限保存失败（感谢@Alex）
 8. 【server】本地构建模式模糊匹配支持匹配多个结果
 9. 【server】修复节点分发不能删除节点问题（感谢@a19920714liou [Gitee issues I4SHSP](https://gitee.com/dromara/Jpom/issues/I4SHSP) ）
+10. 【server】ssh 快捷安装插件端保存安装包避免多次上传 （感谢@a19920714liou [Gitee issues I4SHJC](https://gitee.com/dromara/Jpom/issues/I4SHJC) ）
 
 ------
 

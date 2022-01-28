@@ -25,6 +25,7 @@ package io.jpom.system;
 import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.model.AgentFileModel;
 import io.jpom.model.data.UserModel;
 import org.springframework.context.annotation.Configuration;
 
@@ -168,6 +169,17 @@ public class ServerConfigBean {
 		File file = new File(ConfigBean.getInstance().getDataPath());
 		file = new File(file.getPath() + "/agent/");
 		FileUtil.mkdir(file);
+		return file;
+	}
+
+	/**
+	 * 获取保存 agent zip 包目录和文件名
+	 *
+	 * @return 数据目录下的 agent 目录
+	 */
+	public File getAgentZipPath() {
+		File file = FileUtil.file(getAgentPath(), AgentFileModel.ZIP_NAME);
+		FileUtil.mkParentDirs(file);
 		return file;
 	}
 }

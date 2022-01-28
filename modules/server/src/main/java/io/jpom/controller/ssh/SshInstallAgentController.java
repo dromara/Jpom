@@ -24,6 +24,7 @@ package io.jpom.controller.ssh;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
@@ -37,10 +38,12 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.system.AgentAutoUser;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -49,11 +52,13 @@ import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerConfigBean;
+import io.jpom.util.StringUtil;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -86,8 +91,98 @@ public class SshInstallAgentController extends BaseServerController {
 		this.nodeService = nodeService;
 	}
 
+
+	private JSONObject getAgentFile() throws IOException {
+		ServerConfigBean instance = ServerConfigBean.getInstance();
+		File agentZipPath = instance.getAgentZipPath();
+		Assert.state(FileUtil.exist(agentZipPath), "插件包文件不存在,需要重新上传");
+		String tempFilePath = instance.getUserTempPath().getAbsolutePath();
+		//
+		File tempAgent = FileUtil.file(tempFilePath, "temp_agent");
+		FileUtil.del(tempAgent);
+		try {
+			// 解析压缩包
+			File jarFile = JpomManifest.zipFileFind(FileUtil.getAbsolutePath(agentZipPath), Type.Agent, FileUtil.getAbsolutePath(tempAgent));
+			// 获取包内容
+			JsonMessage<Tuple> tupleJsonMessage = JpomManifest.checkJpomJar(FileUtil.getAbsolutePath(jarFile), Type.Agent, false);
+
+			Assert.state(tupleJsonMessage.getCode() == 200, tupleJsonMessage::getMsg);
+			Tuple data = tupleJsonMessage.getData();
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("version", data.get(0));
+			jsonObject.put("timeStamp", data.get(1));
+			jsonObject.put("path", FileUtil.getAbsolutePath(agentZipPath));
+			return jsonObject;
+		} finally {
+			FileUtil.del(tempAgent);
+		}
+	}
+
+	@GetMapping(value = "get_agent.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@SystemPermission
+	public String getAgent() throws IOException {
+		JSONObject agentFile = this.getAgentFile();
+		return JsonMessage.getString(200, "", agentFile);
+	}
+
+	@RequestMapping(value = "upload_agent.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EXECUTE)
+	@SystemPermission
+	public String uploadAgent() throws Exception {
+		ServerConfigBean instance = ServerConfigBean.getInstance();
+		String tempFilePath = instance.getUserTempPath().getAbsolutePath();
+		MultipartFileBuilder multipartFileBuilder = createMultipart()
+				.setFileExt("zip")
+				.addFieldName("file")
+				.setSavePath(tempFilePath);
+		String filePath = multipartFileBuilder.save();
+		File tempAgent = FileUtil.file(tempFilePath, "temp_agent");
+		FileUtil.del(tempAgent);
+		// 解析压缩包
+		File jarFile = JpomManifest.zipFileFind(filePath, Type.Agent, FileUtil.getAbsolutePath(tempAgent));
+		// 验证文件是否正确
+		JsonMessage<Tuple> tupleJsonMessage = JpomManifest.checkJpomJar(FileUtil.getAbsolutePath(jarFile), Type.Agent, false);
+		Assert.state(tupleJsonMessage.getCode() == 200, tupleJsonMessage::getMsg);
+		//
+		File outFle = FileUtil.file(tempFilePath, Type.Agent.name() + "_" + IdUtil.fastSimpleUUID());
+		try {
+			this.unZipGetTag(filePath, outFle);
+			// 保存插件包
+			File agentZipPath = instance.getAgentZipPath();
+			FileUtil.copy(FileUtil.file(filePath), agentZipPath, true);
+			return JsonMessage.getString(200, "上传成功");
+		} finally {
+			FileUtil.del(filePath);
+			FileUtil.del(jarFile);
+		}
+	}
+
+	private String unZipGetTag(String filePath, File outFle) throws IOException {
+		try (ZipFile zipFile = new ZipFile(filePath)) {
+			// 判断文件是否正确
+			ZipEntry sh = zipFile.getEntry(Type.Agent.name() + ".sh");
+			ZipEntry lib = zipFile.getEntry("lib" + StrUtil.SLASH);
+			Assert.state(sh != null && lib != null && lib.isDirectory(), "不是 Jpom 插件包");
+			ZipUtil.unzip(zipFile, outFle);
+		}
+		// 获取上传的tag
+		File shFile = FileUtil.file(outFle, Type.Agent.name() + ".sh");
+		List<String> lines = FileUtil.readLines(shFile, CharsetUtil.CHARSET_UTF_8);
+		String tag = null;
+		for (String line : lines) {
+			line = line.trim();
+			if (StrUtil.startWith(line, "Tag=\"") && StrUtil.endWith(line, "\"")) {
+				tag = line.substring(5, line.length() - 1);
+				break;
+			}
+		}
+		Assert.hasText(tag, "管理命令中不存在tag");
+		return tag;
+	}
+
 	@RequestMapping(value = "installAgentSubmit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
+	@SystemPermission
 	public String installAgentSubmit(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "节点数据") String nodeData,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "安装路径") String path) throws Exception {
@@ -97,31 +192,14 @@ public class SshInstallAgentController extends BaseServerController {
 		// 判断输入的节点信息
 		NodeModel nodeModel = this.getNodeModel(nodeData, sshModel);
 		//
-		String tempFilePath = ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath();
-		MultipartFileBuilder cert = createMultipart().addFieldName("file").setSavePath(tempFilePath);
-		String filePath = cert.save();
+		ServerConfigBean instance = ServerConfigBean.getInstance();
+		String tempFilePath = instance.getUserTempPath().getAbsolutePath();
+		JSONObject agentFile = this.getAgentFile();
+		String filePath = agentFile.getString("path");
 		//
 		File outFle = FileUtil.file(tempFilePath, Type.Agent.name() + "_" + IdUtil.fastSimpleUUID());
 		try {
-			try (ZipFile zipFile = new ZipFile(filePath)) {
-				// 判断文件是否正确
-				ZipEntry sh = zipFile.getEntry(Type.Agent.name() + ".sh");
-				ZipEntry lib = zipFile.getEntry("lib" + StrUtil.SLASH);
-				Assert.state(sh != null && lib != null && lib.isDirectory(), "不是 Jpom 插件包");
-				ZipUtil.unzip(zipFile, outFle);
-			}
-			// 获取上传的tag
-			File shFile = FileUtil.file(outFle, Type.Agent.name() + ".sh");
-			List<String> lines = FileUtil.readLines(shFile, CharsetUtil.CHARSET_UTF_8);
-			String tag = null;
-			for (String line : lines) {
-				line = line.trim();
-				if (StrUtil.startWith(line, "Tag=\"") && StrUtil.endWith(line, "\"")) {
-					tag = line.substring(5, line.length() - 1);
-					break;
-				}
-			}
-			Assert.hasText(tag, "管理命令中不存在tag");
+			String tag = this.unZipGetTag(filePath, outFle);
 			//
 			this.readNodeAuthorize(outFle, nodeModel);
 			// 查询远程是否运行
@@ -149,7 +227,6 @@ public class SshInstallAgentController extends BaseServerController {
 			return JsonMessage.getString(200, "操作成功:" + result);
 		} finally {
 			// 清理资源
-			FileUtil.del(filePath);
 			FileUtil.del(outFle);
 		}
 	}
@@ -215,7 +292,9 @@ public class SshInstallAgentController extends BaseServerController {
 	}
 
 	private NodeModel getNodeModel(String data, SshModel sshModel) {
-		NodeModel nodeModel = JSONObject.toJavaObject(JSONObject.parseObject(data), NodeModel.class);
+		NodeModel nodeModel = StringUtil.jsonConvert(data, NodeModel.class);
+		Assert.notNull(nodeModel, "请填写节点信息");
+		//JSONObject.toJavaObject(JSONObject.parseObject(data), NodeModel.class);
 
 		Assert.hasText(nodeModel.getName(), "输入节点名称");
 
