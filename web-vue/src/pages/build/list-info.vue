@@ -57,15 +57,17 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-button type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
-          <a-button type="primary" v-else @click="handleStartBuild(record)">构建</a-button>
+          <a-button type="primary" v-else @click="handleConfirmStartBuild(record)">构建</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
               <a-icon type="down" />
             </a>
             <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+              </a-menu-item>
               <a-menu-item>
                 <a-button type="primary" @click="handleTrigger(record)">触发器</a-button>
               </a-menu-item>
@@ -443,6 +445,22 @@
     <a-modal width="80vw" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
       <build-log v-if="buildLogVisible" :temp="temp" />
     </a-modal>
+    <a-modal width="40vw" v-model="buildConfirmVisible" title="构建确认弹窗" @ok="handleStartBuild" :maskClosable="false">
+      <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+        <a-form-model-item label="名称" prop="name">
+          <a-input readonly disabled v-model="temp.name" />
+        </a-form-model-item>
+        <a-form-model-item label="分支" prop="branchName">
+          <a-input readonly disabled v-model="temp.branchName" />
+        </a-form-model-item>
+        <a-form-model-item v-if="temp.branchTagName" label="标签(TAG)" prop="branchTagName">
+          <a-input readonly disabled v-model="temp.branchTagName" />
+        </a-form-model-item>
+        <a-form-model-item label="构建备注" prop="buildRemark">
+          <a-textarea v-model="temp.buildRemark" :maxLength="240" placeholder="请输入构建备注,长度小于 240" :auto-size="{ minRows: 3, maxRows: 5 }" />
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -506,6 +524,7 @@ export default {
       triggerVisible: false,
       buildLogVisible: false,
       afterOptList: afterOptList,
+      buildConfirmVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         // { title: "分组", dataIndex: "group", key: "group%", sorter: true, width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
@@ -562,7 +581,7 @@ export default {
         {
           title: "操作",
           dataIndex: "operation",
-          width: 240,
+          width: 150,
           scopedSlots: { customRender: "operation" },
           align: "left",
           fixed: "right",
@@ -887,28 +906,35 @@ export default {
       });
     },
     // 开始构建
-    handleStartBuild(record) {
-      this.$confirm({
-        title: "系统提示",
-        content: "确定要开始构建 【名称：" + record.name + "】 【分支：" + record.branchName + "】 吗？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          this.temp = Object.assign(record);
-          startBuild(this.temp.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.handleFilter();
-              // 自动打开构建日志
-              this.handleBuildLog({
-                id: this.temp.id,
-                buildId: res.data,
-              });
-            }
+    handleConfirmStartBuild(record) {
+      this.temp = Object.assign(record);
+      this.buildConfirmVisible = true;
+      // this.$confirm({
+      //   title: "系统提示",
+      //   content: "确定要开始构建 【名称：" + record.name + "】 【分支：" + record.branchName + "】 吗？",
+      //   okText: "确认",
+      //   cancelText: "取消",
+      //   onOk: () => {
+
+      // });
+    },
+    handleStartBuild() {
+      this.buildConfirmVisible = false;
+      startBuild({
+        id: this.temp.id,
+        buildRemark: this.temp.buildRemark,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
           });
-        },
+          this.handleFilter();
+          // 自动打开构建日志
+          this.handleBuildLog({
+            id: this.temp.id,
+            buildId: res.data,
+          });
+        }
       });
     },
     // 停止构建

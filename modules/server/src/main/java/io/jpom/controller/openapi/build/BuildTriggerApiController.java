@@ -109,7 +109,7 @@ public class BuildTriggerApiController extends BaseJpomController {
 	 * @return json
 	 */
 	@RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD2, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String trigger2(@PathVariable String id, @PathVariable String token, String delay) {
+	public String trigger2(@PathVariable String id, @PathVariable String token, String delay, String buildRemark) {
 		BuildInfoModel item = buildInfoService.getByKey(id);
 		Assert.notNull(item, "没有对应数据");
 		UserModel userModel = this.getByUrlToken(token);
@@ -118,7 +118,7 @@ public class BuildTriggerApiController extends BaseJpomController {
 
 		Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
 
-		JsonMessage<Integer> start = buildExecuteService.start(id, userModel, Convert.toInt(delay, 0), 1);
+		JsonMessage<Integer> start = buildExecuteService.start(id, userModel, Convert.toInt(delay, 0), 1, buildRemark);
 		return start.toString();
 	}
 
@@ -155,6 +155,7 @@ public class BuildTriggerApiController extends BaseJpomController {
 				String id = jsonObject.getString("id");
 				String token = jsonObject.getString("token");
 				Integer delay = jsonObject.getInteger("delay");
+				String buildRemark = jsonObject.getString("buildRemark");
 				BuildInfoModel item = buildInfoService.getByKey(id);
 				if (item == null) {
 					jsonObject.put("msg", "没有对应数据");
@@ -170,7 +171,7 @@ public class BuildTriggerApiController extends BaseJpomController {
 					jsonObject.put("msg", "触发token错误,或者已经失效");
 					return;
 				}
-				JsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1);
+				JsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1, buildRemark);
 				jsonObject.put("msg", start.getMsg());
 				jsonObject.put("buildId", start.getData());
 			}).collect(Collectors.toList());

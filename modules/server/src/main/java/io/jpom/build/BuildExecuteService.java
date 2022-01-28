@@ -135,7 +135,7 @@ public class BuildExecuteService {
 	 * @param triggerBuildType 触发构建类型
 	 * @return json
 	 */
-	public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType) {
+	public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType, String buildRemark) {
 		synchronized (buildInfoId.intern()) {
 			BuildInfoModel buildInfoModel = buildService.getByKey(buildInfoId);
 			String e = this.checkStatus(buildInfoModel.getStatus());
@@ -156,6 +156,7 @@ public class BuildExecuteService {
 					.buildInfoModel(buildInfoModel)
 					.repositoryModel(repositoryModel)
 					.userModel(userModel)
+					.buildRemark(buildRemark)
 					.delay(delay)
 					.triggerBuildType(triggerBuildType);
 			this.runTask(taskBuilder.build());
@@ -234,6 +235,7 @@ public class BuildExecuteService {
 		//
 		buildHistoryLog.setStatus(BuildStatus.Ing.getCode());
 		buildHistoryLog.setStartTime(SystemClock.now());
+		buildHistoryLog.setBuildRemark(taskData.buildRemark);
 		dbBuildHistoryLogService.insert(buildHistoryLog);
 		//
 		buildService.updateStatus(buildHistoryLog.getBuildDataId(), BuildStatus.Ing);
@@ -251,6 +253,10 @@ public class BuildExecuteService {
 		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
 		buildHistoryLog.setId(logId);
 		buildHistoryLog.setStatus(buildStatus.getCode());
+		if (buildStatus != BuildStatus.PubIng) {
+			// 结束
+			buildHistoryLog.setEndTime(SystemClock.now());
+		}
 		dbBuildHistoryLogService.update(buildHistoryLog);
 		buildService.updateStatus(buildId, buildStatus);
 	}
@@ -268,6 +274,10 @@ public class BuildExecuteService {
 		 * 触发类型
 		 */
 		private final int triggerBuildType;
+		/**
+		 * 构建备注
+		 */
+		private String buildRemark;
 	}
 
 

@@ -53,13 +53,20 @@
 
       <template slot="startTime" slot-scope="text, record" placement="topLeft">
         <a-tooltip :title="`开始时间：${parseTime(record.startTime)}，${record.endTime ? '结束时间：' + parseTime(record.endTime) : ''}`">
-          <span>{{ parseTime(record.startTime) }}</span>
+          <div>{{ parseTime(record.startTime) }}</div>
+          <div>{{ parseTime(record.endTime) }}</div>
         </a-tooltip>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="download" />日志</a-button>
-          <a-button type="primary" :disabled="!record.hashFile" @click="handleFile(record)"><a-icon type="download" />产物</a-button>
+          <a-tooltip title="下载构建日志,如果按钮不可用表示日志文件不存在,一般是构建历史相关文件被删除">
+            <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="read" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="下载构建产物,如果按钮不可用表示产物文件不存在,一般是构建没有产生对应的文件或者构建历史相关文件被删除">
+            <a-button type="primary" :disabled="!record.hashFile" @click="handleFile(record)">
+              <a-icon type="file-zip" />
+            </a-button>
+          </a-tooltip>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
@@ -108,6 +115,8 @@ export default {
       columns: [
         { title: "构建名称", dataIndex: "buildName", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "buildName" } },
         { title: "构建 ID", dataIndex: "buildNumberId", width: 100, ellipsis: true, scopedSlots: { customRender: "buildNumberId" } },
+        { title: "备注", dataIndex: "buildRemark", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "buildRemark" } },
+
         { title: "状态", dataIndex: "status", width: 120, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "触发类型", dataIndex: "triggerBuildType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerBuildType" } },
         {
@@ -128,7 +137,7 @@ export default {
         // },
         { title: "发布方式", dataIndex: "releaseMethod", width: 100, ellipsis: true, scopedSlots: { customRender: "releaseMethod" } },
         { title: "构建人", dataIndex: "modifyUser", width: 150, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 280, fixed: "right" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 190, fixed: "right" },
       ],
     };
   },

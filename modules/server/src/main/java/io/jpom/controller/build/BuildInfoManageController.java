@@ -86,13 +86,13 @@ public class BuildInfoManageController extends BaseServerController {
 	 */
 	@RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
-	public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
+	public String start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id, String buildRemark) {
 		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
 		Assert.notNull(item, "没有对应数据");
 		// userModel
 		UserModel userModel = getUser();
 		// 执行构建
-		return buildExecuteService.start(item.getId(), userModel, null, 0).toString();
+		return buildExecuteService.start(item.getId(), userModel, null, 0, buildRemark).toString();
 	}
 
 	/**

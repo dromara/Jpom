@@ -24,6 +24,7 @@ package io.jpom.model.log;
 
 import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import io.jpom.build.BuildExtraModule;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseWorkspaceModel;
@@ -121,6 +122,10 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	 */
 	private Long endTime;
 	/**
+	 * 构建备注
+	 */
+	private String buildRemark;
+	/**
 	 * 是否存在构建产物
 	 */
 	@PropIgnore
@@ -130,6 +135,10 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	 */
 	@PropIgnore
 	private Boolean hasLog;
+
+	public void setBuildRemark(String buildRemark) {
+		this.buildRemark = StrUtil.maxLength(buildRemark, 240);
+	}
 
 	public void fillLogValue(BuildExtraModule buildExtraModule) {
 		//
