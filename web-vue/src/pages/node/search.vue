@@ -173,7 +173,7 @@ export default {
         },
         { title: "运行状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 200 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 180 },
       ],
     };
   },

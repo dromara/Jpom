@@ -146,9 +146,11 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
      * @param nodeId 节点ID
      * @return true 关联
      */
-    public boolean checkNode(String nodeId) {
+    public boolean checkNode(String nodeId, HttpServletRequest request) {
         Entity entity = new Entity();
         entity.set("releaseMethod", BuildReleaseMethod.Project.getCode());
+        String workspaceId = this.getCheckUserWorkspace(request);
+        entity.set("workspaceId", workspaceId);
         entity.set("releaseMethodDataId", StrUtil.format(" like '{}:%'", nodeId));
         return super.exists(entity);
     }
@@ -159,8 +161,10 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
      * @param dataId 数据ID
      * @return true 关联
      */
-    public boolean checkReleaseMethod(String dataId, BuildReleaseMethod releaseMethod) {
+    public boolean checkReleaseMethod(String dataId, HttpServletRequest request, BuildReleaseMethod releaseMethod) {
         BuildInfoModel buildInfoModel = new BuildInfoModel();
+        String workspaceId = this.getCheckUserWorkspace(request);
+        buildInfoModel.setWorkspaceId(workspaceId);
         buildInfoModel.setReleaseMethodDataId(dataId);
         buildInfoModel.setReleaseMethod(releaseMethod.getCode());
         return super.exists(buildInfoModel);

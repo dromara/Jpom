@@ -1,31 +1,9 @@
 <template>
   <div class="full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-select show-search option-filter-prop="children" v-model="listQuery.buildDataId" allowClear placeholder="请选择构建名称" class="search-input-item">
-          <a-select-option v-for="build in buildList" :key="build.id">{{ build.name }}</a-select-option>
-        </a-select>
-        <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
-          <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
-        </a-select>
-        <a-select show-search option-filter-prop="children" v-model="listQuery.triggerBuildType" allowClear placeholder="请选择触发类型" class="search-input-item">
-          <a-select-option v-for="(val, key) in triggerBuildTypeMap" :key="key">{{ val }}</a-select-option>
-        </a-select>
-        <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-tooltip>
-          <template slot="title">
-            <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
-            <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
-            <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
-          </template>
-          <a-icon type="question-circle" theme="filled" />
-        </a-tooltip>
-      </a-space>
-      <!-- <a-button type="primary" @click="handleFilter">刷新</a-button> -->
-    </div>
+    <!-- <div ref="filter" class="filter">
+     
+      <a-button type="primary" @click="handleFilter">刷新</a-button> 
+    </div> -->
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
@@ -35,7 +13,32 @@
       :rowKey="(record, index) => index"
       @change="change"
     >
-      <a-tooltip slot="buildName" slot-scope="text" placement="topLeft" :title="text">
+      <template slot="title">
+        <a-space>
+          <a-select show-search option-filter-prop="children" v-model="listQuery.buildDataId" allowClear placeholder="请选择构建名称" class="search-input-item">
+            <a-select-option v-for="build in buildList" :key="build.id">{{ build.name }}</a-select-option>
+          </a-select>
+          <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
+            <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
+          </a-select>
+          <a-select show-search option-filter-prop="children" v-model="listQuery.triggerBuildType" allowClear placeholder="请选择触发类型" class="search-input-item">
+            <a-select-option v-for="(val, key) in triggerBuildTypeMap" :key="key">{{ val }}</a-select-option>
+          </a-select>
+          <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-tooltip>
+            <template slot="title">
+              <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
+              <div>如果不需要保留较多构建历史信息可以到服务端修改构建相关配置参数</div>
+              <div>构建历史可能占有较多硬盘空间,建议根据实际情况配置保留个数</div>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip>
+        </a-space>
+      </template>
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="buildNumberId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
@@ -113,9 +116,9 @@ export default {
       temp: {},
       buildLogVisible: false,
       columns: [
-        { title: "构建名称", dataIndex: "buildName", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "buildName" } },
-        { title: "构建 ID", dataIndex: "buildNumberId", width: 100, ellipsis: true, scopedSlots: { customRender: "buildNumberId" } },
-        { title: "备注", dataIndex: "buildRemark", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "buildRemark" } },
+        { title: "构建名称", dataIndex: "buildName", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "构建 ID", dataIndex: "buildNumberId", width: 90, ellipsis: true, scopedSlots: { customRender: "buildNumberId" } },
+        { title: "备注", dataIndex: "buildRemark", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
         { title: "状态", dataIndex: "status", width: 120, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "触发类型", dataIndex: "triggerBuildType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerBuildType" } },
@@ -268,7 +271,4 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
-  margin-bottom: 10px;
-}
 </style>

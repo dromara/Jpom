@@ -118,15 +118,8 @@ public class NodeEditController extends BaseServerController {
 	@PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
 	public String del(@ValidatorItem String id) {
-		//  判断分发
 		HttpServletRequest request = getRequest();
-		boolean checkNode = outGivingServer.checkNode(id, request);
-		Assert.state(!checkNode, "该节点存在分发项目，不能删除");
-		// 监控
-		boolean checkNode1 = monitorService.checkNode(id);
-		Assert.state(!checkNode1, "该节点存在监控项，不能删除");
-		boolean checkNode2 = buildService.checkNode(id);
-		Assert.state(!checkNode2, "该节点存在构建项，不能删除");
+		this.checkDataBind(id, request);
 		//
 		{
 			ProjectInfoCacheModel projectInfoCacheModel = new ProjectInfoCacheModel();
@@ -143,6 +136,40 @@ public class NodeEditController extends BaseServerController {
 			boolean exists = nodeScriptServer.exists(scriptCacheModel);
 			Assert.state(!exists, "该节点下还存在脚本模版，不能删除");
 		}
+		//
+		int i = nodeService.delByKey(id, request);
+		if (i > 0) {
+			// 删除节点统计数据
+			nodeStatService.delByKey(id);
+		}
+		return JsonMessage.getString(200, "操作成功");
+	}
+
+	private void checkDataBind(String id, HttpServletRequest request) {
+		//  判断分发
+		boolean checkNode = outGivingServer.checkNode(id, request);
+		Assert.state(!checkNode, "该节点存在分发项目，不能删除");
+		// 监控
+		boolean checkNode1 = monitorService.checkNode(id);
+		Assert.state(!checkNode1, "该节点存在监控项，不能删除");
+		boolean checkNode2 = buildService.checkNode(id, request);
+		Assert.state(!checkNode2, "该节点存在构建项，不能删除");
+	}
+
+	/**
+	 * 解绑
+	 *
+	 * @param id 分发id
+	 * @return json
+	 */
+	@GetMapping(value = "unbind.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DEL)
+	public String unbind(String id) {
+		HttpServletRequest request = getRequest();
+		this.checkDataBind(id, request);
+		//
+		projectInfoCacheService.delCache(id, request);
+		nodeScriptServer.delCache(id, request);
 		//
 		int i = nodeService.delByKey(id, request);
 		if (i > 0) {

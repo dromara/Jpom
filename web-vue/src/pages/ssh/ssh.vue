@@ -1,29 +1,8 @@
 <template>
   <div class="full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
-        <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
-        <a-input class="search-input-item" v-model="listQuery['%user%']" placeholder="用户名" />
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-button type="primary" @click="handleAdd">新增</a-button>
-
-        <a-tooltip>
-          <template slot="title">
-            <div>
-              <ul>
-                <li>关联节点数据是异步获取有一定时间延迟</li>
-                <li>关联节点会自动识别服务器中是否存在 java 环境,如果没有 Java 环境不能快速安装节点</li>
-                <li>关联节点如果服务器存在 java 环境,但是插件端未运行则会显示快速安装按钮</li>
-              </ul>
-            </div>
-          </template>
-          <a-icon type="question-circle" theme="filled" />
-        </a-tooltip>
-      </a-space>
-    </div>
+    <!-- <div ref="filter" class="filter">
+     
+    </div> -->
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
@@ -33,6 +12,31 @@
       bordered
       :rowKey="(record, index) => index"
     >
+      <template slot="title">
+        <a-space>
+          <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
+          <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
+          <a-input class="search-input-item" v-model="listQuery['%user%']" placeholder="用户名" />
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleAdd">新增</a-button>
+
+          <a-tooltip>
+            <template slot="title">
+              <div>
+                <ul>
+                  <li>关联节点数据是异步获取有一定时间延迟</li>
+                  <li>关联节点会自动识别服务器中是否存在 java 环境,如果没有 Java 环境不能快速安装节点</li>
+                  <li>关联节点如果服务器存在 java 环境,但是插件端未运行则会显示快速安装按钮</li>
+                </ul>
+              </div>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip>
+        </a-space>
+      </template>
+      <a-tooltip slot="tooltip" slot-scope="text" :title="text"> {{ text }}</a-tooltip>
       <template slot="nodeId" slot-scope="text, record">
         <!-- <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button> -->
         <div v-if="sshAgentInfo[record.id]">
@@ -360,12 +364,12 @@ export default {
 
       viewOperationLogListQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
-        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true },
+        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
-        { title: "Host", dataIndex: "host", sorter: true, ellipsis: true },
-        { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true },
-        { title: "用户名", dataIndex: "user", sorter: true, width: 120, ellipsis: true },
-        { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true },
+        { title: "Host", dataIndex: "host", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "用户名", dataIndex: "user", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "关联节点",
           dataIndex: "nodeId",
@@ -387,7 +391,7 @@ export default {
           title: "操作",
           dataIndex: "operation",
           scopedSlots: { customRender: "operation" },
-          width: 250,
+          width: 230,
           fixed: "right",
           // ellipsis: true,
         },
@@ -674,8 +678,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-.filter {
-  margin-bottom: 10px;
-}
-</style>
+<style scoped></style>
