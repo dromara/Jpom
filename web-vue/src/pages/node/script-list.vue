@@ -104,6 +104,7 @@
     >
       <script-console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :defArgs="temp.defArgs" :id="temp.id" :scriptId="temp.scriptId" />
     </a-drawer>
+    <!-- 脚本日志 -->
     <a-modal :title="drawerTitle" width="85vw" v-model="drawerLogVisible" :footer="null" :maskClosable="false">
       <script-log v-if="drawerLogVisible" :scriptId="temp.scriptId" :nodeId="temp.nodeId" />
     </a-modal>

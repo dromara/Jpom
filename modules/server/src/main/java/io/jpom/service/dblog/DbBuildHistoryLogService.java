@@ -22,7 +22,6 @@
  */
 package io.jpom.service.dblog;
 
-import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
@@ -30,7 +29,6 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.build.BuildUtil;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ServerExtConfigBean;
@@ -53,25 +51,25 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
 		this.buildService = buildService;
 	}
 
-	/**
-	 * 更新状态
-	 *
-	 * @param logId  记录id
-	 * @param status 状态
-	 */
-	public void updateLog(String logId, BuildStatus status) {
-		if (logId == null) {
-			return;
-		}
-		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
-		buildHistoryLog.setId(logId);
-		buildHistoryLog.setStatus(status.getCode());
-		if (status != BuildStatus.PubIng) {
-			// 结束
-			buildHistoryLog.setEndTime(SystemClock.now());
-		}
-		this.update(buildHistoryLog);
-	}
+//	/**
+//	 * 更新状态
+//	 *
+//	 * @param logId  记录id
+//	 * @param status 状态
+//	 */
+//	public void updateLog(String logId, BuildStatus status) {
+//		if (logId == null) {
+//			return;
+//		}
+//		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
+//		buildHistoryLog.setId(logId);
+//		buildHistoryLog.setStatus(status.getCode());
+//		if (status != BuildStatus.PubIng) {
+//			// 结束
+//			buildHistoryLog.setEndTime(SystemClock.now());
+//		}
+//		this.update(buildHistoryLog);
+//	}
 
 	/**
 	 * 更新状态

@@ -118,22 +118,24 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
             return false;
         }
         DefaultSystemLog.getLog().debug("start build cron {} {} {}", id, buildInfoModel.getName(), autoBuildCron);
-        CronUtils.upsert(taskId, autoBuildCron, new CronTask(id));
+        CronUtils.upsert(taskId, autoBuildCron, new CronTask(id, autoBuildCron));
         return true;
     }
 
     private static class CronTask implements Task {
 
         private final String buildId;
+        private final String autoBuildCron;
 
-        public CronTask(String buildId) {
+        public CronTask(String buildId, String autoBuildCron) {
             this.buildId = buildId;
+            this.autoBuildCron = autoBuildCron;
         }
 
         @Override
         public void execute() {
             BuildExecuteService buildExecuteService = SpringUtil.getBean(BuildExecuteService.class);
-            buildExecuteService.start(this.buildId, null, null, 2);
+            buildExecuteService.start(this.buildId, null, null, 2, "auto build:" + this.autoBuildCron);
         }
     }
 

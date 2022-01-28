@@ -167,11 +167,11 @@ export function loadBuildLog(params) {
  * 开始构建
  * @param {*} id
  */
-export function startBuild(id) {
+export function startBuild(data) {
   return axios({
     url: "/build/manage/start",
     method: "post",
-    data: { id },
+    data: data,
   });
 }
 
