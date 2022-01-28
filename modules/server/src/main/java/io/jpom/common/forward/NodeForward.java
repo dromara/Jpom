@@ -187,15 +187,16 @@ public class NodeForward {
 		httpRequest.form(pName, pVal, val);
 		//
 		if (jsonData != null) {
+			JSONObject clone = jsonData.clone();
 			// 参数 URL 编码，避免 特殊符号 不生效
-			Set<Map.Entry<String, Object>> entries = jsonData.entrySet();
+			Set<Map.Entry<String, Object>> entries = clone.entrySet();
 			for (Map.Entry<String, Object> entry : entries) {
 				Object value = entry.getValue();
 				if (value instanceof String) {
 					entry.setValue(URLUtil.encodeAll((String) value));
 				}
 			}
-			httpRequest.form(jsonData);
+			httpRequest.form(clone);
 		}
 		HttpResponse response;
 		try {

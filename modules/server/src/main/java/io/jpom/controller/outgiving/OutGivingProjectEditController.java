@@ -55,7 +55,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -324,8 +323,10 @@ public class OutGivingProjectEditController extends BaseServerController {
 		outGivingModel.setIntervalTime(intervalTime);
 		outGivingModel.setClearOld(Convert.toBool(getParameter("clearOld"), false));
 		//
-		List<NodeModel> nodeModelList = nodeService.listByWorkspace(getRequest());
-		Assert.notEmpty(nodeModelList, "没有任何节点信息");
+		String nodeIdsStr = getParameter("nodeIds");
+		List<String> nodeIds = StrUtil.splitTrim(nodeIdsStr, StrUtil.COMMA);
+		//List<NodeModel> nodeModelList = nodeService.listByWorkspace(getRequest());
+		Assert.notEmpty(nodeIds, "没有任何节点信息");
 
 		//
 		String afterOpt = getParameter("afterOpt");
@@ -340,17 +341,19 @@ public class OutGivingProjectEditController extends BaseServerController {
 		List<OutGivingNodeProject> outGivingNodeProjects = new ArrayList<>();
 		OutGivingNodeProject outGivingNodeProject;
 		//
-		Iterator<NodeModel> iterator = nodeModelList.iterator();
+		//Iterator<NodeModel> iterator = nodeModelList.iterator();
 
 
 		List<Tuple> tuples = new ArrayList<>();
-		while (iterator.hasNext()) {
-			NodeModel nodeModel = iterator.next();
-			String add = getParameter("add_" + nodeModel.getId());
-			if (!nodeModel.getId().equals(add)) {
-				iterator.remove();
-				continue;
-			}
+
+		for (String nodeId : nodeIds) {
+			NodeModel nodeModel = nodeService.getByKey(nodeId);
+			Assert.notNull(nodeModel, "对应的节点不存在");
+			//String add = getParameter("add_" + nodeModel.getId());
+//			if (!nodeModel.getId().equals(add)) {
+//				iterator.remove();
+//				continue;
+//			}
 			// 判断项目是否已经被使用过啦
 			if (outGivingModels != null) {
 				for (OutGivingModel outGivingModel1 : outGivingModels) {
