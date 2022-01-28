@@ -154,7 +154,7 @@
                     :data="branchTagList"
                     @onRefreshSelect="loadBranchList"
                     inputPlaceholder="自定义标签通配表达式"
-                    selectPlaceholder="请选择构建对应标签,可以不选择"
+                    selectPlaceholder="选择构建的标签,不选为最新提交"
                   >
                     <div slot="inputTips">
                       支持通配符(AntPathMatcher)
