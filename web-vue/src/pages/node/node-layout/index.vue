@@ -28,7 +28,7 @@
       <recover v-if="currentId === 'projectRecover'" :node="node" />
       <tomcat v-if="currentId === 'tomcatManage'" :node="node" />
       <script-template v-if="currentId === 'script'" :node="node" />
-      <script-log v-if="currentId === 'script-log'" :node="node" />
+      <script-log v-if="currentId === 'script-log'" :nodeId="node.id" />
       <nginx-list v-if="currentId === 'nginxList'" :node="node" />
       <cert v-if="currentId === 'certificate'" :node="node" />
       <white-list v-if="currentId === 'whitelistDirectory'" :node="node" />

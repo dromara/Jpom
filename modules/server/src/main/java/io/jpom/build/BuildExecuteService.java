@@ -484,7 +484,8 @@ public class BuildExecuteService {
 			List<String> binds = ObjectUtil.defaultIfNull(dockerYmlDsl.getBinds(), new ArrayList<>());
 			map.put("binds", binds);
 			//
-			List<String> copy = new ArrayList<>();
+			List<String> copy = ObjectUtil.defaultIfNull(dockerYmlDsl.getCopy(), new ArrayList<>());
+			//new ArrayList<>();
 			copy.add(FileUtil.getAbsolutePath(this.gitFile) + StrUtil.COLON + workingDir + StrUtil.COLON + "true");
 			map.put("copy", copy);
 			map.put("entrypoints", dockerYmlDsl.getEntrypoints());

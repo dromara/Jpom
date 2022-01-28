@@ -22,6 +22,7 @@
  */
 package io.jpom.build;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.setting.yaml.YamlUtil;
 import io.jpom.model.BaseJsonModel;
@@ -61,6 +62,19 @@ public class DockerYmlDsl extends BaseJsonModel {
 	 */
 	private List<String> binds;
 	/**
+	 * 将本地文件复制到 容器
+	 * <p>
+	 * <host path>:<container path>:true
+	 * <p>
+	 * * If this flag is set to true, all children of the local directory will be copied to the remote without the root directory. For ex: if
+	 * * I have root/titi and root/tata and the remote path is /var/data. dirChildrenOnly = true will create /var/data/titi and /var/data/tata
+	 * * dirChildrenOnly = false will create /var/data/root/titi and /var/data/root/tata
+	 * *
+	 * * @param dirChildrenOnly
+	 * *            if root directory is ignored
+	 */
+	private List<String> copy;
+	/**
 	 * 入口点
 	 */
 	private List<String> entrypoints;
@@ -76,7 +90,9 @@ public class DockerYmlDsl extends BaseJsonModel {
 	public void check() {
 		Assert.hasText(getImage(), "请填写镜像名称");
 		//
-		Assert.notEmpty(getEntrypoints(), "请填写entrypoint");
+		List<String> entrypoints = getEntrypoints();
+		List<String> cmds = getCmds();
+		Assert.state(CollUtil.isNotEmpty(entrypoints) || CollUtil.isNotEmpty(cmds), "请填写 entrypoint 或者 cmd");
 		Assert.hasText(getDockerId(), "请填写 docker Id");
 	}
 

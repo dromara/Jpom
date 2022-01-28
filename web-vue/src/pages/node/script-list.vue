@@ -52,6 +52,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button type="primary" @click="handleExec(record)">执行</a-button>
+          <a-button type="primary" @click="handleLog(record)">日志</a-button>
           <a-button :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button>
           <a-button :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
@@ -90,9 +91,22 @@
       </a-form-model>
     </a-modal>
     <!-- 脚本控制台组件 -->
-    <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
+    <a-drawer
+      :title="drawerTitle"
+      placement="right"
+      width="85vw"
+      :visible="drawerConsoleVisible"
+      @close="
+        () => {
+          this.drawerConsoleVisible = false;
+        }
+      "
+    >
       <script-console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :defArgs="temp.defArgs" :id="temp.id" :scriptId="temp.scriptId" />
     </a-drawer>
+    <a-modal :title="drawerTitle" width="85vw" v-model="drawerLogVisible" :footer="null" :maskClosable="false">
+      <script-log v-if="drawerLogVisible" :scriptId="temp.scriptId" :nodeId="temp.nodeId" />
+    </a-modal>
   </div>
 </template>
 <script>
@@ -102,10 +116,12 @@ import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/node/node-layout/other/script-console";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
 import { parseTime } from "@/utils/time";
+import ScriptLog from "@/pages/node/node-layout/other/script-log";
 export default {
   components: {
     ScriptConsole,
     codeEditor,
+    ScriptLog,
   },
   props: {},
   data() {
@@ -119,6 +135,7 @@ export default {
       editScriptVisible: false,
       drawerTitle: "",
       drawerConsoleVisible: false,
+      drawerLogVisible: false,
       columns: [
         // { title: "Script ID", dataIndex: "id", width: 200, ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -127,7 +144,7 @@ export default {
         { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, sorter: true, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 260 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 320 },
       ],
       rules: {
         name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
@@ -247,10 +264,15 @@ export default {
       this.drawerTitle = `控制台(${this.temp.name})`;
       this.drawerConsoleVisible = true;
     },
-    // 关闭 console
-    onConsoleClose() {
-      this.drawerConsoleVisible = false;
+    handleLog(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `日志(${this.temp.name})`;
+      this.drawerLogVisible = true;
     },
+    // // 关闭 console
+    // onConsoleClose() {
+    //   this.drawerConsoleVisible = false;
+    // },
     delAll() {
       this.$confirm({
         title: "系统提示",
