@@ -23,7 +23,8 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" @click="handleEdit(record)" :title="text">
+        <a-icon type="edit" theme="twoTone" />
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="branchName" slot-scope="text" placement="topLeft" :title="text">
@@ -169,7 +170,17 @@
               </a-row>
             </a-form-model-item>
             <a-form-model-item v-if="temp.buildMode === 0" label="构建命令" prop="script">
-              <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build" />
+              <a-auto-complete option-label-prop="value" v-model="temp.script">
+                <template slot="dataSource">
+                  <a-select-opt-group v-for="group in buildScipts" :key="group.title">
+                    <span slot="label">
+                      {{ group.title }}
+                    </span>
+                    <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} </a-select-option>
+                  </a-select-opt-group>
+                </template>
+                <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build" />
+              </a-auto-complete>
             </a-form-model-item>
             <a-form-model-item v-if="temp.buildMode === 1" prop="script">
               <template slot="label">
@@ -200,9 +211,18 @@
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
-              <div style="height: 40vh; overflow-y: scroll">
-                <code-editor v-model="temp.script" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"></code-editor>
-              </div>
+              <a-tabs>
+                <a-tab-pane key="1" tab="DSL 配置">
+                  <div style="height: 40vh; overflow-y: scroll">
+                    <code-editor v-model="temp.script" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"></code-editor>
+                  </div>
+                </a-tab-pane>
+                <a-tab-pane key="2" tab="配置示例">
+                  <div style="height: 40vh; overflow-y: scroll">
+                    <code-editor v-model="dslDefault" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef', readOnly: true }"></code-editor>
+                  </div>
+                </a-tab-pane>
+              </a-tabs>
             </a-form-model-item>
             <a-form-model-item v-if="temp.buildMode !== undefined" prop="resultDirFile" class="jpom-target-dir">
               <template slot="label">
@@ -211,7 +231,8 @@
                   <template slot="title">
                     <div>可以理解为项目打包的目录。 如 Jpom 项目执行（构建命令） <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b></div>
                     <div><br /></div>
-                    <div>
+                    <!-- 只有本地构建支持 模糊匹配 -->
+                    <div v-if="temp.buildMode === 0">
                       支持通配符(AntPathMatcher)【目前只使用匹配到的第一项】
                       <ul>
                         <li>? 匹配一个字符</li>
@@ -513,6 +534,38 @@ export default {
       tempRepository: {},
       // 当前构建信息的 extraData 属性
       tempExtraData: {},
+      buildScipts: [
+        {
+          title: "Java 项目",
+          children: [
+            {
+              title: "mvn clean package",
+              value: "mvn clean package",
+            },
+            {
+              title: "指定 pom 文件打包 mvn -f xxxx/pom.xml clean package",
+              value: "mvn -f xxxx/pom.xml clean package",
+            },
+          ],
+        },
+        {
+          title: "vue 项目",
+          children: [
+            {
+              title: "npm run build",
+              value: "npm run build",
+            },
+            {
+              title: " yarn build",
+              value: " yarn build",
+            },
+            {
+              title: " 指定目录打包 yarn --cwd xxxx/ build",
+              value: " yarn --cwd xxxx/ build",
+            },
+          ],
+        },
+      ],
       branchList: [],
       branchTagList: [],
       dispatchList: [],
@@ -594,6 +647,17 @@ export default {
         releasePath: [{ required: true, message: "请填写发布目录", trigger: "blur" }],
         repositoryId: [{ required: true, message: "请填选择构建的仓库", trigger: "blur" }],
       },
+      dslDefault:
+        "dockerId: 03f583360dd14b15b663d8514961dfd1\r\n" +
+        "image: maven:3.8.4-jdk-8\r\n" +
+        "copy:\r\n" +
+        "	- /Users/user/.m2/settings.xml:/root/.m2/:false\r\n" +
+        "entrypoints:\r\n" +
+        "	- /bin/sh\r\n" +
+        "  - -c\r\n" +
+        "  - mkdir -p /root/.m2/\r\n" +
+        "cmds:\r\n" +
+        "	- echo mvn clean package | /bin/sh\r\n",
     };
   },
   computed: {
