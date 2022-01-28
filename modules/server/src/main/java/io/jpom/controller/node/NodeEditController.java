@@ -162,8 +162,9 @@ public class NodeEditController extends BaseServerController {
 		if (i > 0) {
 			// 删除节点统计数据
 			nodeStatService.delByKey(id);
+			//
+			nodeScriptExecuteLogServer.delCache(id, request);
 		}
-		nodeScriptExecuteLogServer.delCache(id, request);
 	}
 
 	/**
