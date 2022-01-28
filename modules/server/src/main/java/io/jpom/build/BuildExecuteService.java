@@ -315,6 +315,34 @@ public class BuildExecuteService {
 //
 //		}
 
+		private List<String> antPathMatcher(File rootFile, String match) {
+			String matchStr = FileUtil.normalize(StrUtil.SLASH + match);
+			List<String> paths = new ArrayList<>();
+			//
+			FileUtil.walkFiles(rootFile.toPath(), new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					return this.test(file);
+				}
+
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes exc) throws IOException {
+					return this.test(dir);
+				}
+
+				private FileVisitResult test(Path path) {
+					String subPath = FileUtil.subPath(FileUtil.getAbsolutePath(rootFile), path.toFile());
+					subPath = FileUtil.normalize(StrUtil.SLASH + subPath);
+					if (ANT_PATH_MATCHER.match(matchStr, subPath)) {
+						paths.add(subPath);
+						//return FileVisitResult.TERMINATE;
+					}
+					return FileVisitResult.CONTINUE;
+				}
+			});
+			return paths;
+		}
+
 		/**
 		 * 打包构建产物
 		 */
@@ -334,54 +362,49 @@ public class BuildExecuteService {
 			ThreadUtil.sleep(2, TimeUnit.SECONDS);
 			File rootFile = this.gitFile;
 			boolean updateDirFile = false;
+			boolean copyFile = true;
 			if (ANT_PATH_MATCHER.isPattern(resultDirFile)) {
 				// 通配模式
-				String matchStr = FileUtil.normalize(StrUtil.SLASH + resultDirFile);
-				List<String> paths = new ArrayList<>();
-				//
-				FileUtil.walkFiles(this.gitFile.toPath(), new SimpleFileVisitor<Path>() {
-					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-						return this.test(file);
-					}
-
-					@Override
-					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes exc) throws IOException {
-						return this.test(dir);
-					}
-
-					private FileVisitResult test(Path path) {
-						String subPath = FileUtil.subPath(FileUtil.getAbsolutePath(rootFile), path.toFile());
-						subPath = FileUtil.normalize(StrUtil.SLASH + subPath);
-						if (ANT_PATH_MATCHER.match(matchStr, subPath)) {
-							paths.add(subPath);
-							return FileVisitResult.TERMINATE;
-						}
-						return FileVisitResult.CONTINUE;
-					}
-				});
-				String first = CollUtil.getFirst(paths);
-				if (StrUtil.isEmpty(first)) {
+				List<String> paths = this.antPathMatcher(this.gitFile, resultDirFile);
+				int size = CollUtil.size(paths);
+				if (size <= 0) {
 					logRecorder.info(resultDirFile + " 没有匹配到任何文件");
 					return false;
 				}
-				// 切换到匹配到到文件
-				logRecorder.info(StrUtil.format("match {} {}", resultDirFile, first));
-				resultDirFile = first;
-				updateDirFile = true;
+				if (size == 1) {
+					String first = CollUtil.getFirst(paths);
+					// 切换到匹配到到文件
+					logRecorder.info(StrUtil.format("match {} {}", resultDirFile, first));
+					resultDirFile = first;
+					updateDirFile = true;
+				} else {
+					resultDirFile = FileUtil.normalize(resultDirFile);
+					logRecorder.info(StrUtil.format("match {} count {}", resultDirFile, size));
+					String subBefore = StrUtil.subBefore(resultDirFile, "*", false);
+					subBefore = StrUtil.subBefore(subBefore, StrUtil.SLASH, true);
+					subBefore = StrUtil.emptyToDefault(subBefore, StrUtil.SLASH);
+					resultDirFile = subBefore, copyFile = false, updateDirFile = true;
+					for (String path : paths) {
+						File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), subBefore);
+						FileCopier.create(FileUtil.file(this.gitFile, path), FileUtil.file(toFile, path))
+								.setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
+								.setCopyFilter(file1 -> !file1.isHidden())
+								.copy();
+					}
+				}
 			}
-			File file = FileUtil.file(this.gitFile, resultDirFile);
-			if (!file.exists()) {
-				logRecorder.info(resultDirFile + "不存在，处理构建产物失败");
-				return false;
+			if (copyFile) {
+				File file = FileUtil.file(this.gitFile, resultDirFile);
+				if (!file.exists()) {
+					logRecorder.info(resultDirFile + "不存在，处理构建产物失败");
+					return false;
+				}
+				File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
+				FileCopier.create(file, toFile)
+						.setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
+						.setCopyFilter(file1 -> !file1.isHidden())
+						.copy();
 			}
-			File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
-			FileCopier.create(file, toFile)
-					.setCopyContentIfDir(true)
-					.setOverride(true)
-					.setCopyAttributes(true)
-					.setCopyFilter(file1 -> !file1.isHidden())
-					.copy();
 			logRecorder.info(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
 			// 修改构建产物目录
 			if (updateDirFile) {
