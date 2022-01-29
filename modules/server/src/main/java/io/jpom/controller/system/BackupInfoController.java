@@ -55,10 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -71,6 +68,11 @@ import java.util.stream.Collectors;
 @Feature(cls = ClassFeature.SYSTEM_BACKUP)
 @SystemPermission
 public class BackupInfoController extends BaseServerController {
+
+	/**
+	 * 存储数据库表名称和别名的变量
+	 */
+	private static Map<String, String> TABLE_NAME_MAP = new HashMap<>();
 
 	private final BackupInfoService backupInfoService;
 
@@ -230,19 +232,23 @@ public class BackupInfoController extends BaseServerController {
 	@PostMapping(value = "/system/backup/table-name-list")
 	@Feature(method = MethodFeature.LIST)
 	public Object loadTableNameList() {
+		// 从数据库加载表名称列表
 		List<String> tableNameList = backupInfoService.h2TableNameList();
-		Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("io.jpom", TableName.class);
-		Map<String, String> map = CollStreamUtil.toMap(classes, aClass -> {
-			TableName tableName = aClass.getAnnotation(TableName.class);
-			return tableName.value();
-		}, aClass -> {
-			TableName tableName = aClass.getAnnotation(TableName.class);
-			return tableName.name();
-		});
+		// 扫描程序，拿到表名称和别名
+		if (TABLE_NAME_MAP.isEmpty()) {
+			Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("io.jpom", TableName.class);
+			TABLE_NAME_MAP = CollStreamUtil.toMap(classes, aClass -> {
+				TableName tableName = aClass.getAnnotation(TableName.class);
+				return tableName.value();
+			}, aClass -> {
+				TableName tableName = aClass.getAnnotation(TableName.class);
+				return tableName.name();
+			});
+		}
 		List<JSONObject> list = tableNameList.stream().map(s -> {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("tableName", s);
-			jsonObject.put("tableDesc", StrUtil.emptyToDefault(map.get(s), s));
+			jsonObject.put("tableDesc", StrUtil.emptyToDefault(TABLE_NAME_MAP.get(s), s));
 			return jsonObject;
 		}).collect(Collectors.toList());
 		return JsonMessage.toJson(200, "", list);
