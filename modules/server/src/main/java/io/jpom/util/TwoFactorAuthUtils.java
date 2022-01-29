@@ -20,10 +20,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/**
- * @author bwcx_jzy
- * @since 2022/1/27
- */
 package io.jpom.util;
 
 import cn.hutool.core.codec.Base32;
@@ -33,6 +29,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.HMac;
 
+/**
+ * @author bwcx_jzy
+ * @since 2022/1/27
+ */
 public class TwoFactorAuthUtils {
 
 	private static final int VALID_TFA_WINDOW_MILLIS = 60_000;
@@ -75,8 +75,9 @@ public class TwoFactorAuthUtils {
 	 * @param tfaKey   两步验证 Key
 	 * @return URL
 	 */
-	public static String generateOtpAuthUrl(final String userName, final String tfaKey) {
-		return TimeBasedOneTimePasswordUtil.generateOtpAuthUrl(userName, tfaKey);
+	public static String generateOtpAuthUrl(String userName, final String tfaKey) {
+		String jpomName = "jpom-" + userName;
+		return TimeBasedOneTimePasswordUtil.generateOtpAuthUrl(jpomName, tfaKey);
 	}
 
 	private static class TimeBasedOneTimePasswordUtil {
