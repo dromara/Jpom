@@ -1,14 +1,14 @@
-import axios from './config';
+import axios from "./config";
 
 // 检查是否需要初始化系统
 export function checkSystem() {
   return axios({
-    url: '/check-system',
-    method: 'post',
+    url: "/check-system",
+    method: "post",
     headers: {
-      loading: 'no'
-    }
-  })
+      loading: "no",
+    },
+  });
 }
 
 /**
@@ -16,12 +16,25 @@ export function checkSystem() {
  * @param {
  *  userName: 登录名
  *  userPwd: 初始密码
- * } params 
+ * } params
  */
 export function initInstall(params) {
   return axios({
-    url: '/install_submit.json',
-    method: 'post',
-    data: params
-  })
+    url: "/install_submit.json",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ *  绑定 mfa
+ * @param {JSON} params
+ * @returns
+ */
+export function bindMfa(params) {
+  return axios({
+    url: "/bind_mfa.json",
+    method: "get",
+    params: params,
+  });
 }

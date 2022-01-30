@@ -9,6 +9,19 @@ export function login(params) {
   });
 }
 
+/**
+ * 验证输入的验证码
+ * @param {JSON} params
+ * @returns
+ */
+export function mfaVerify(params) {
+  return axios({
+    url: "/mfa_verify",
+    method: "get",
+    params: params,
+  });
+}
+
 // refresh token
 export function refreshToken() {
   return axios({
@@ -157,13 +170,12 @@ export function myWorkspace() {
   });
 }
 
-
 /**
  * demo 账号信息
  *
  * @returns
  */
- export function demoInfo() {
+export function demoInfo() {
   return axios({
     url: "/user_demo_info",
     method: "get",

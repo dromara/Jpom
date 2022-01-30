@@ -23,6 +23,7 @@
 package io.jpom.model.dto;
 
 import io.jpom.model.data.WorkspaceModel;
+import lombok.Data;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ import java.util.List;
  * @author bwcx_jzy
  * @date 2020/11/2
  */
+@Data
 public class UserLoginDto {
 
 	private String token;
@@ -38,21 +40,6 @@ public class UserLoginDto {
 
 	private List<WorkspaceModel> bindWorkspaceModels;
 
-	public String getToken() {
-		return token;
-	}
-
-	public void setToken(String token) {
-		this.token = token;
-	}
-
-	public String getLongTermToken() {
-		return longTermToken;
-	}
-
-	public void setLongTermToken(String longTermToken) {
-		this.longTermToken = longTermToken;
-	}
 
 	public UserLoginDto() {
 	}
@@ -60,13 +47,5 @@ public class UserLoginDto {
 	public UserLoginDto(String token, String jwtId) {
 		this.setLongTermToken(jwtId);
 		this.setToken(token);
-	}
-
-	public List<WorkspaceModel> getBindWorkspaceModels() {
-		return bindWorkspaceModels;
-	}
-
-	public void setBindWorkspaceModels(List<WorkspaceModel> bindWorkspaceModels) {
-		this.bindWorkspaceModels = bindWorkspaceModels;
 	}
 }

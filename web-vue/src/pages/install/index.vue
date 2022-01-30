@@ -24,40 +24,149 @@
         <rect stroke="#CED4D9" x="108" y="1" width="9" height="9" rx="1"></rect>
       </g>
     </svg>
-    <a-card class="login-card" hoverable>
-      <a-card-meta title="初始化系统账户" style="textalign: center" description="您需要创建一个账户用以后续登录管理系统" />
-      <br />
-      <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin" class="init-form">
-        <a-form-item :wrapper-col="{ span: 24 }" class="init-user-name">
-          <a-input v-decorator="['userName', { rules: [{ required: true, message: '请输入账户名' }] }]" placeholder="账户名称" />
-        </a-form-item>
-        <a-form-item :wrapper-col="{ span: 24 }" class="init-user-password">
-          <a-input-password
-            v-decorator="[
-              'userPwd',
-              {
-                rules: [
-                  { required: true, message: '请输入密码' },
-                  { pattern: /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,18}$/, message: '密码必须包含数字，字母，字符，且大于6位' },
-                ],
-              },
-            ]"
-            placeholder="密码（6-18位数字、字母、符号组合）"
-          />
-        </a-form-item>
+    <a-card class="card-box" :style="`${setpCurrent === 1 ? 'width: 60vw' : 'width: 550px'}`" hoverable :bodyStyle="{ padding: '24px 0' }">
+      <template slot="title">
+        <a-steps :current="setpCurrent">
+          <a-step title="初始化系统" status="process" description="设置一个超级管理员账号">
+            <a-icon slot="icon" type="user" />
+          </a-step>
+          <a-step title="启用两步验证" description="开启两步验证使账号更安全">
+            <a-icon slot="icon" type="file-protect" />
+          </a-step>
+        </a-steps>
+      </template>
 
-        <a-button type="primary" html-type="submit" class="btn"> 创建并登录 </a-button>
-      </a-form>
+      <a-row type="flex" justify="center">
+        <a-col :span="16" v-if="setpCurrent === 0">
+          <a-card-meta title="初始化系统账户" style="textalign: center" description="您需要创建一个账户用以后续登录管理系统,请牢记超级管理员账号密码" />
+          <br />
+          <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin" class="init-form">
+            <a-form-item :wrapper-col="{ span: 24 }" class="init-user-name">
+              <a-input v-decorator="['userName', { rules: [{ required: true, message: '请输入账户名' }] }]" placeholder="账户名称" />
+            </a-form-item>
+            <a-form-item :wrapper-col="{ span: 24 }" class="init-user-password">
+              <a-input-password
+                v-decorator="[
+                  'userPwd',
+                  {
+                    rules: [
+                      { required: true, message: '请输入密码' },
+                      { pattern: /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,18}$/, message: '密码必须包含数字，字母，字符，且大于6位' },
+                    ],
+                  },
+                ]"
+                placeholder="密码（6-18位数字、字母、符号组合）"
+              />
+            </a-form-item>
+            <a-form-item>
+              <a-row type="flex" justify="center">
+                <a-col :span="4">
+                  <a-button type="primary" html-type="submit" class="btn"> 创建账号 </a-button>
+                </a-col>
+              </a-row>
+            </a-form-item>
+          </a-form>
+        </a-col>
+        <a-col :span="22" v-if="setpCurrent === 1">
+          <a-alert message="为了考虑系统安全我们强烈建议超级管理员开启两步验证来确保账号都安全性" banner />
+          <br />
+          <a-row>
+            <a-col :span="12">
+              <a-form-item>
+                <h3 id="两步验证应用">两步验证应用</h3>
+                <p><strong>【推荐】腾讯身份验证码</strong> 简单好用 <a href="https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.authenticator">Android</a></p>
+                <p>
+                  <strong>Authy</strong> 功能丰富 专为两步验证码
+                  <a href="https://authy.com/download/">iOS/Android/Windows/Mac/Linux</a>
+                  &nbsp;
+                  <a href="https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn">Chrome 扩展</a>
+                </p>
+                <p>
+                  <strong>Google Authenticator</strong> 简单易用，但不支持密钥导出备份 <a href="https://apps.apple.com/us/app/google-authenticator/id388497605">iOS</a>
+                  <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=cn">Android</a>
+                </p>
+                <p><strong>Microsoft Authenticator</strong> 使用微软全家桶的推荐 <a href="https://www.microsoft.com/zh-cn/account/authenticator">iOS/Android</a></p>
+                <p><strong>1Password</strong> 强大安全的密码管理付费应用<a href="https://1password.com/zh-cn/downloads/">iOS/Android/Windows/Mac/Linux/ChromeOS</a></p>
+              </a-form-item>
+            </a-col>
+            <a-divider type="vertical" />
+            <a-col :span="12">
+              <a-form :form="bindMfaForm" :label-col="{ span: 0 }" @submit="handleMfaSure" class="init-form">
+                <a-form-item label="二维码" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }" style="margin-bottom: 5px">
+                  <a-row>
+                    <a-col :span="14">
+                      <div class="qrcode" ref="qrCodeUrl" id="qrCodeUrl"></div>
+                    </a-col>
+                    <a-col :span="10" style="line-height: 22px; font-size: 12px; color: red"> 请使用应用扫码绑定令牌,强烈建议保存此二维码或者下面的 MFA key </a-col>
+                  </a-row>
+                </a-form-item>
+                <a-form-item label="MFA key" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
+                  <a-input
+                    v-clipboard:copy="mfaData.key"
+                    v-clipboard:success="
+                      () => {
+                        tempVue.prototype.$notification.success({ message: '复制成功' });
+                      }
+                    "
+                    v-clipboard:error="
+                      () => {
+                        tempVue.prototype.$notification.error({ message: '复制失败' });
+                      }
+                    "
+                    readonly
+                    disabled
+                    v-model="mfaData.key"
+                  >
+                    <a-icon slot="prefix" type="copy" />
+                  </a-input>
+                </a-form-item>
+
+                <a-form-item label="验证码" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
+                  <a-input
+                    v-decorator="[
+                      'twoCode',
+                      {
+                        rules: [
+                          { required: true, message: '请输入两步验证码' },
+                          { pattern: /^\d{6}$/, message: '验证码 6 为纯数字' },
+                        ],
+                      },
+                    ]"
+                    placeholder="两步验证码"
+                  />
+                </a-form-item>
+
+                <a-form-item>
+                  <a-row type="flex" justify="center">
+                    <a-col :span="10">
+                      <a-space>
+                        <a-button type="primary" html-type="submit" class="btn"> 确认绑定 </a-button>
+                        <a-button type="dashed"> 忽略 </a-button>
+                      </a-space>
+                    </a-col>
+                  </a-row>
+                </a-form-item>
+              </a-form>
+            </a-col>
+          </a-row>
+        </a-col>
+      </a-row>
     </a-card>
   </div>
 </template>
 <script>
-import { initInstall } from "../../api/install";
+import { initInstall, bindMfa } from "@/api/install";
+import QRCode from "qrcodejs2";
 import sha1 from "sha1";
+import Vue from "vue";
 export default {
   data() {
     return {
       loginForm: this.$form.createForm(this, { name: "login-form" }),
+      bindMfaForm: this.$form.createForm(this, { name: "bind-mfa-form" }),
+      setpCurrent: 0,
+      mfaData: {},
+      tempVue: Vue,
     };
   },
   computed: {},
@@ -67,9 +176,21 @@ export default {
       setTimeout(() => {
         this.introGuide();
       }, 500);
+      // this.creatQrCode();
     });
   },
   methods: {
+    creatQrCode(qrCodeDom, text) {
+      console.log(qrCodeDom);
+      new QRCode(qrCodeDom, {
+        text: text || "xxxx",
+        width: 120,
+        height: 120,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H,
+      });
+    },
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {
@@ -101,12 +222,12 @@ export default {
       this.loginForm.validateFields((err, values) => {
         if (!err) {
           //  密码强度
-          if (!this.checkPasswordStrong(values.userPwd)) {
-            this.$notification.error({
-              message: "系统管理员密码强度太低",
-            });
-            return false;
-          }
+          // if (!this.checkPasswordStrong(values.userPwd)) {
+          //   this.$notification.error({
+          //     message: "系统管理员密码强度太低",
+          //   });
+          //   return false;
+          // }
           const params = {
             ...values,
             userPwd: sha1(values.userPwd),
@@ -117,11 +238,43 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              // 调用 store action 存储当前登录的用户名和 token
-              this.$store.dispatch("login", { token: res.data.token, longTermToken: res.data.longTermToken }).then(() => {
-                // 跳转主页面
-                this.$router.push({ path: "/" });
+              const tokenData = res.data.tokenData;
+              this.mfaData = {
+                key: res.data.mfaKey,
+                url: res.data.url,
+              };
+              this.setpCurrent = 1;
+              this.$nextTick(() => {
+                const qrCodeDom = document.getElementById("qrCodeUrl");
+                this.creatQrCode(qrCodeDom, this.mfaData.url);
               });
+
+              // // 调用 store action 存储当前登录的用户名和 token
+              this.$store.dispatch("login", { token: tokenData.token, longTermToken: tokenData.longTermToken }).then(() => {
+                // 跳转主页面
+                //  this.$router.push({ path: "/" });
+              });
+            }
+          });
+        }
+      });
+    },
+    handleMfaSure(e) {
+      e.preventDefault();
+      this.bindMfaForm.validateFields((err, values) => {
+        if (!err) {
+          const params = {
+            ...values,
+            mfa: this.mfaData.key,
+          };
+
+          bindMfa(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              // 跳转主页面;
+              this.$router.push({ path: "/" });
             }
           });
         }
@@ -185,20 +338,38 @@ export default {
 .init-wrapper {
   width: 100vw;
   height: 100vh;
-  background: #f6f6f6;
+  /* background: #f6f6f6; */
+  /* height: 100vh; */
+  background: linear-gradient(#1890ff, #66a9c9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  /* color: #03e9f4; */
 }
-.login-card {
+.card-box {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   text-align: left;
-  min-width: 380px;
+  /* width: 550px; */
   border-radius: 6px;
   padding: 4px;
 }
-.btn {
+p {
+  margin-bottom: 0;
+  line-height: 30px;
+}
+.card-content {
+  /* width: 300px; */
+  /* text-align: center; */
+}
+.qrcode {
+  margin-left: 15px;
+}
+/* .btn {
   width: 100%;
   margin-top: 20px;
-}
+} */
 </style>
