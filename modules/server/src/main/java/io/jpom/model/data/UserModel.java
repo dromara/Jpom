@@ -58,11 +58,11 @@ public class UserModel extends BaseStrikeDbModel {
 	/**
 	 * 系统占用名
 	 */
-	public static String SYSTEM_OCCUPY_NAME = "系统管理员";
+	public static final String SYSTEM_OCCUPY_NAME = "系统管理员";
 	/**
 	 * 用户名限制
 	 */
-	public static int USER_NAME_MIN_LEN = 3;
+	public static final int USER_NAME_MIN_LEN = 3;
 	/**
 	 * 盐值长度
 	 */

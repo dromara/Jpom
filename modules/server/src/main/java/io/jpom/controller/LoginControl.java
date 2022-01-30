@@ -22,10 +22,13 @@
  */
 package io.jpom.controller;
 
+import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.LFUCache;
+import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.captcha.CircleCaptcha;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.jwt.JWT;
@@ -49,10 +52,7 @@ import io.jpom.util.JwtUtil;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
@@ -71,6 +71,10 @@ public class LoginControl extends BaseServerController {
 	 * ip 黑名单
 	 */
 	public static final LFUCache<String, Integer> LFU_CACHE = new LFUCache<>(1000);
+	/**
+	 * 登录需要两步验证
+	 */
+	private static final TimedCache<String, String> MFA_TOKEN = CacheUtil.newTimedCache(TimeUnit.MINUTES.toMillis(10));
 
 	private static final String LOGIN_CODE = "login_code";
 
@@ -145,7 +149,7 @@ public class LoginControl extends BaseServerController {
 	 * @param code     验证码
 	 * @return json
 	 */
-	@RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "userLogin", produces = MediaType.APPLICATION_JSON_VALUE)
 	@NotLogin
 	public String userLogin(
 			@ValidatorConfig(value = {
@@ -180,14 +184,18 @@ public class LoginControl extends BaseServerController {
 				// 验证
 				if (userService.simpleLogin(userName, userPwd) != null) {
 					updateModel = userModel.unLock();
-					// 判断工作空间
-					List<WorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspaceInfo(userModel);
-					Assert.notEmpty(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
-					setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
 					this.ipSuccess();
-					String jwtId = userService.getUserJwtId(userName);
-					UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
-					userLoginDto.setBindWorkspaceModels(bindWorkspaceModels);
+					// 判断是否开启 两步验证
+					boolean bindMfa = userService.hasBindMfa(userName);
+					if (bindMfa) {
+						//
+						JSONObject jsonObject = new JSONObject();
+						String uuid = IdUtil.fastSimpleUUID();
+						MFA_TOKEN.put(uuid, userName);
+						jsonObject.put("tempToken", uuid);
+						return JsonMessage.getString(201, "请输入两步验证码", jsonObject);
+					}
+					UserLoginDto userLoginDto = this.createToken(userModel);
 					return JsonMessage.getString(200, "登录成功", userLoginDto);
 				} else {
 					updateModel = userModel.errorLock();
@@ -200,6 +208,33 @@ public class LoginControl extends BaseServerController {
 				}
 			}
 		}
+	}
+
+	private UserLoginDto createToken(UserModel userModel) {
+		// 判断工作空间
+		List<WorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspaceInfo(userModel);
+		Assert.notEmpty(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
+		setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
+		UserLoginDto userLoginDto = userService.getUserJwtId(userModel);
+		//					UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
+		userLoginDto.setBindWorkspaceModels(bindWorkspaceModels);
+		return userLoginDto;
+	}
+
+	@GetMapping(value = "mfa_verify", produces = MediaType.APPLICATION_JSON_VALUE)
+	@NotLogin
+	public String mfaVerify(String token, String code) {
+		String userId = MFA_TOKEN.get(token);
+		if (StrUtil.isEmpty(userId)) {
+			return JsonMessage.getString(201, "登录信息已经过期请重新登录");
+		}
+		boolean mfaCode = userService.verifyMfaCode(userId, code);
+		Assert.state(mfaCode, "验证码不正确,请重新输入");
+		UserModel userModel = userService.getByKey(userId);
+		//
+		UserLoginDto userLoginDto = this.createToken(userModel);
+		MFA_TOKEN.remove(token);
+		return JsonMessage.getString(200, "登录成功", userLoginDto);
 	}
 
 	/**
@@ -237,8 +272,7 @@ public class LoginControl extends BaseServerController {
 		if (userModel == null) {
 			return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "没有对应的用户");
 		}
-		String jwtId = userService.getUserJwtId(userModel.getId());
-		UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
+		UserLoginDto userLoginDto = userService.getUserJwtId(userModel);
 		return JsonMessage.getString(200, "", userLoginDto);
 	}
 

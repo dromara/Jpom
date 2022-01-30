@@ -28,7 +28,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.dto.UserLoginDto;
 import io.jpom.service.h2db.BaseDbService;
+import io.jpom.util.JwtUtil;
+import io.jpom.util.TwoFactorAuthUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -59,6 +62,7 @@ public class UserService extends BaseDbService<UserModel> {
 		}
 		data.setSalt(null);
 		data.setPassword(null);
+		data.setTwoFactorAuthKey(null);
 	}
 
 	/**
@@ -94,17 +98,18 @@ public class UserService extends BaseDbService<UserModel> {
 	/**
 	 * 查询用户 jwt id
 	 *
-	 * @param id 用户id
+	 * @param userModel 用户
 	 * @return jwt id
 	 */
-	public String getUserJwtId(String id) {
+	public UserLoginDto getUserJwtId(UserModel userModel) {
+		String id = userModel.getId();
 		String sql = "select password from USER_INFO where id=?";
 		List<Entity> query = super.query(sql, id);
 		Entity first = CollUtil.getFirst(query);
 		Assert.notEmpty(first, "没有对应的用户信息");
 		String password = (String) first.get("password");
 		Assert.hasText(password, "没有对应的用户信息");
-		return password;
+		return new UserLoginDto(JwtUtil.builder(userModel, password), password);
 	}
 
 	/**
@@ -180,5 +185,46 @@ public class UserService extends BaseDbService<UserModel> {
 		UserModel userModel = new UserModel();
 		userModel.setId(UserModel.DEMO_USER);
 		return super.exists(userModel);
+	}
+
+	/**
+	 * 判断是否绑定 两步验证 mfa
+	 *
+	 * @param useId 用户ID
+	 * @return false 没有绑定
+	 */
+	public boolean hasBindMfa(String useId) {
+		UserModel byKey = super.getByKey(useId, false);
+		Assert.notNull(byKey, "用户不存在");
+		return !StrUtil.isEmpty(byKey.getTwoFactorAuthKey()) && !StrUtil.equals(byKey.getTwoFactorAuthKey(), "ignore");
+	}
+
+	/**
+	 * 绑定 两步验证 mfa
+	 *
+	 * @param useId 用户ID
+	 * @param mfa   mfa key
+	 */
+	public void bindMfa(String useId, String mfa) {
+		UserModel byKey = new UserModel();
+		byKey.setId(useId);
+		byKey.setTwoFactorAuthKey(mfa);
+		super.update(byKey);
+	}
+
+	/**
+	 * 判断验证码是否正确
+	 *
+	 * @param userId 用户ID
+	 * @param code   验证码
+	 * @return true 正确
+	 */
+	public boolean verifyMfaCode(String userId, String code) {
+		UserModel byKey = super.getByKey(userId, false);
+		Assert.notNull(byKey, "用户不存在");
+		if (StrUtil.isEmpty(byKey.getTwoFactorAuthKey()) || StrUtil.equals(byKey.getTwoFactorAuthKey(), "ignore")) {
+			throw new IllegalStateException("当前账号没有开启两步验证");
+		}
+		return TwoFactorAuthUtils.validateTFACode(byKey.getTwoFactorAuthKey(), code);
 	}
 }

@@ -29,20 +29,21 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.service.user.UserService;
-import io.jpom.util.JwtUtil;
+import io.jpom.util.TwoFactorAuthUtils;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 初始化程序
@@ -50,11 +51,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author jiangzeyin
  * @date 2019/2/22
  */
-@Controller
+@RestController
 public class InstallController extends BaseServerController {
 
 
 	private final UserService userService;
+	private static String mfaKey;
 
 	public InstallController(UserService userService) {
 		this.userService = userService;
@@ -67,18 +69,15 @@ public class InstallController extends BaseServerController {
 	 * @param userPwd  系统管理员的登录密码
 	 * @return json
 	 */
-	@RequestMapping(value = "install_submit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "install_submit.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@NotLogin
-	@ResponseBody
 	public String installSubmit(
 			@ValidatorConfig(value = {
 					@ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "登录名不能为空"),
-					@ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "3:20", msg = "登录名长度范围3-20"),
+					@ValidatorItem(value = ValidatorRule.NOT_BLANK, range = UserModel.USER_NAME_MIN_LEN + ":" + Const.ID_MAX_LEN, msg = "登录名长度范围" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN),
 					@ValidatorItem(value = ValidatorRule.WORD, msg = "登录名不能包含汉字并且不能包含特殊字符")
 			}) String userName,
-			@ValidatorConfig(value = {
-					@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空")
-			}) String userPwd) {
+			@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String userPwd) {
 		//
 		Assert.state(!userService.canUse(), "系统已经初始化过啦，请勿重复初始化");
 
@@ -99,10 +98,34 @@ public class InstallController extends BaseServerController {
 			DefaultSystemLog.getLog().error("初始化用户失败", e);
 			return JsonMessage.getString(400, "初始化失败");
 		}
-		// 自动登录
+		//自动登录
 		setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
-		String jwtId = userService.getUserJwtId(userName);
-		UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
-		return JsonMessage.getString(200, "初始化成功", userLoginDto);
+		UserLoginDto userLoginDto = userService.getUserJwtId(userModel);
+		// 二次验证信息
+		JSONObject jsonObject = new JSONObject();
+		String tfaKey = TwoFactorAuthUtils.generateTFAKey();
+		jsonObject.put("mfaKey", tfaKey);
+		jsonObject.put("url", TwoFactorAuthUtils.generateOtpAuthUrl(userName, tfaKey));
+		jsonObject.put("tokenData", userLoginDto);
+		// 缓存
+		InstallController.mfaKey = tfaKey;
+		return JsonMessage.getString(200, "初始化成功", jsonObject);
+	}
+
+	@GetMapping(value = "bind_mfa.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String bindMfa(String mfa, String twoCode) {
+		Assert.state(StrUtil.equals(mfa, InstallController.mfaKey), "mfa 信息已经过期");
+		//
+		UserModel user = getUser();
+		boolean bindMfa = userService.hasBindMfa(user.getId());
+		Assert.state(!bindMfa, "当前账号已经绑定 mfa 啦");
+		//
+		Assert.state(user.isSuperSystemUser(), "当前用户不支持绑定");
+		boolean tfaCode = TwoFactorAuthUtils.validateTFACode(mfa, twoCode);
+		Assert.state(tfaCode, " mfa 验证码不正确");
+		userService.bindMfa(user.getId(), mfa);
+		//
+		InstallController.mfaKey = null;
+		return JsonMessage.getString(200, "绑定成功");
 	}
 }
