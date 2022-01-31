@@ -24,6 +24,7 @@
 9. 【server】修复节点分发不能删除节点问题（感谢@a19920714liou [Gitee issues I4SHSP](https://gitee.com/dromara/Jpom/issues/I4SHSP) ）
 10. 【server】ssh 快捷安装插件端保存安装包避免多次上传 （感谢@a19920714liou [Gitee issues I4SHJC](https://gitee.com/dromara/Jpom/issues/I4SHJC) ）
 11. 【server】ssh 快捷安装插件端权限改为管理员
+12. 【server】构建 ssh 发布授权目录采用下拉模式,提升用户操作感知 (感谢@hjk2008 [Gitee issues I4SICE](https://gitee.com/dromara/Jpom/issues/I4SICE) )
 
 ------
 

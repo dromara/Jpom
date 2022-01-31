@@ -96,7 +96,7 @@ public class InstallController extends BaseServerController {
 			userService.insert(userModel);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("初始化用户失败", e);
-			return JsonMessage.getString(400, "初始化失败");
+			return JsonMessage.getString(400, "初始化失败:" + e.getMessage());
 		}
 		//自动登录
 		setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
