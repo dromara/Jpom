@@ -291,14 +291,21 @@
                 </a-select>
               </a-form-model-item>
               <!-- SSH -->
-              <a-form-model-item v-if="temp.releaseMethod === 3" label="SSH/目录：" prop="releaseMethodDataId">
-                <a-input-group compact>
-                  <a-select style="width: 30%" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
-                    <a-select-option v-for="ssh in sshList" :key="ssh.id">{{ ssh.name }}</a-select-option>
+              <template v-if="temp.releaseMethod === 3">
+                <a-form-model-item label="发布的SSH" prop="releaseMethodDataId">
+                  <a-select v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
+                    <a-select-option v-for="ssh in sshList" :disabled="!ssh.fileDirs" :key="ssh.id">{{ ssh.name }}</a-select-option>
                   </a-select>
-                  <a-input style="width: 70%" v-model="tempExtraData.releasePath" placeholder="发布目录,构建产物上传到对应目录" />
-                </a-input-group>
-              </a-form-model-item>
+                </a-form-model-item>
+                <a-form-model-item label="发布目录" prop="releaseMethodDataId">
+                  <a-input-group compact>
+                    <a-select style="width: 30%" v-model="tempExtraData.releaseSshDir" placeholder="请选择SSH">
+                      <a-select-option v-for="item in selectSshDirs" :key="item">{{ item }}</a-select-option>
+                    </a-select>
+                    <a-input style="width: 70%" v-model="tempExtraData.releasePath2" placeholder="发布目录,构建产物上传到对应目录" />
+                  </a-input-group>
+                </a-form-model-item>
+              </template>
               <a-form-model-item v-if="temp.releaseMethod === 3 || temp.releaseMethod === 4" prop="releaseCommand">
                 <!-- sshCommand LocalCommand -->
                 <template slot="label">
@@ -472,6 +479,7 @@
     <a-modal width="80vw" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
       <build-log v-if="buildLogVisible" :temp="temp" />
     </a-modal>
+    <!-- 构建确认 -->
     <a-modal width="40vw" v-model="buildConfirmVisible" title="构建确认弹窗" @ok="handleStartBuild" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="名称" prop="name">
@@ -683,6 +691,24 @@ export default {
         },
       };
     },
+    selectSshDirs() {
+      if (!this.sshList || this.sshList.length <= 0) {
+        return [];
+      }
+      const findArray = this.sshList.filter((item) => {
+        return item.id === this.tempExtraData.releaseMethodDataId_3;
+      });
+      if (findArray.length) {
+        const fileDirs = findArray[0].fileDirs;
+        if (!fileDirs) {
+          return [];
+        }
+        return JSON.parse(fileDirs).map((item) => {
+          return (item + "/").replace(new RegExp("//", "gm"), "/");
+        });
+      }
+      return [];
+    },
   },
   watch: {},
   created() {
@@ -774,11 +800,14 @@ export default {
     },
     // 加载 SSH 列表
     loadSshList() {
-      this.sshList = [];
-      getSshListAll().then((res) => {
-        if (res.code === 200) {
-          this.sshList = res.data;
-        }
+      return new Promise((resolve) => {
+        this.sshList = [];
+        getSshListAll().then((res) => {
+          if (res.code === 200) {
+            this.sshList = res.data;
+            resolve();
+          }
+        });
       });
     },
     // 筛选
@@ -856,7 +885,20 @@ export default {
       this.loadDispatchList();
 
       this.loadNodeProjectList();
-      this.loadSshList();
+      this.loadSshList().then(() => {
+        if (this.tempExtraData.releaseMethodDataId_3) {
+          //
+          const findDirs = this.selectSshDirs
+            .filter((item) => {
+              return this.tempExtraData.releasePath && this.tempExtraData.releasePath.indexOf(item) > -1;
+            })
+            .sort((item1, item2) => {
+              return item2.length - item1.length;
+            });
+          const releaseSshDir = findDirs[0] || "";
+          this.tempExtraData = { ...this.tempExtraData, releaseSshDir: releaseSshDir, releasePath2: (this.tempExtraData.releasePath || "").slice(releaseSshDir.length) };
+        }
+      });
     },
     // 获取仓库分支
     loadBranchList() {
@@ -892,6 +934,9 @@ export default {
           }
           this.tempExtraData.releaseMethodDataId_2_node = this.temp.releaseMethodDataIdList[0];
           this.tempExtraData.releaseMethodDataId_2_project = this.temp.releaseMethodDataIdList[1];
+        } else if (this.temp.releaseMethod === 3) {
+          //  (this. tempExtraData.releasePath || '').slice(releaseSshDir.length);
+          this.tempExtraData.releasePath = ((this.tempExtraData.releaseSshDir || "") + "/" + (this.tempExtraData.releasePath2 || "")).replace(new RegExp("//", "gm"), "/");
         }
 
         this.temp = {
