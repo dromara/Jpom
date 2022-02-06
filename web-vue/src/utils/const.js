@@ -144,6 +144,9 @@ export const CRON_DATA_SOURCE = [
  */
 export const ZIP_ACCEPT = ".tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz";
 
+/**
+ * mfa app 应用举例
+ */
 export const MFA_APP_TIP_ARRAY = [
   '<strong>【推荐】腾讯身份验证码</strong> 简单好用 <a href="https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.authenticator">Android</a>',
   '<strong>Authy</strong> 功能丰富 专为两步验证码 <a href="https://authy.com/download/">iOS/Android/Windows/Mac/Linux</a> &nbsp; <a href="https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn">Chrome 扩展</a>',
@@ -151,3 +154,19 @@ export const MFA_APP_TIP_ARRAY = [
   '<strong>Microsoft Authenticator</strong> 使用微软全家桶的推荐 <a href="https://www.microsoft.com/zh-cn/account/authenticator">iOS/Android</a>',
   '<strong>1Password</strong> 强大安全的密码管理付费应用<a href="https://1password.com/zh-cn/downloads/">iOS/Android/Windows/Mac/Linux/ChromeOS</a>',
 ];
+
+/**
+ * 项目 DSL 示例
+ */
+export const PROJECT_DSL_DEFATUL =
+  "description: 测试\r\n" +
+  "run:\r\n" +
+  "  start:\r\n" +
+  "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
+  "    scriptArgs: start\r\n" +
+  "  status:\r\n" +
+  "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
+  "    scriptArgs: status\r\n" +
+  "  stop:\r\n" +
+  "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
+  "    scriptArgs: stop";
