@@ -26,7 +26,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
@@ -63,6 +65,8 @@ import java.util.stream.Collectors;
 @PluginConfig(name = "docker-cli")
 public class DefaultDockerPluginImpl implements IDefaultPlugin {
 
+	private static final String[] DEPEND_PLUGIN = new String[]{"java", "maven", "node"};
+
 	@Override
 	public Object execute(Object main, Map<String, Object> parameter) throws Exception {
 		String type = main.toString();
@@ -97,9 +101,8 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 		buildRunOn(dockerClient, runsOn, image, tempDir, logRecorder);
 		List<Mount> mounts = new ArrayList<>();
 		mounts.addAll(cachePluginCheck(dockerClient, steps, buildId));
-		mounts.addAll(javaPluginCheck(dockerClient, image, steps, tempDir, logRecorder));
-		mounts.addAll(mavenPluginCheck(dockerClient, image, steps, tempDir, logRecorder));
-		mounts.addAll(nodePluginCheck(dockerClient, image, steps, tempDir, logRecorder));
+		// 添加插件到 mount
+		mounts.addAll(this.checkDependPlugin(dockerClient, image, steps, tempDir, logRecorder));
 		String containerId = this.buildNewContainer(dockerClient, parameter, mounts);
 		try {
 			String buildShell = generateBuildShell(steps, buildId);
@@ -235,122 +238,85 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 		}
 	}
 
-
 	private List<Mount> cachePluginCheck(DockerClient dockerClient, List<Map<String, Object>> steps, String buildId) {
-		List<Mount> mounts = new ArrayList<>();
-		steps.stream().filter(stringObjectMap -> stringObjectMap.containsKey("uses") && "cache".equals(String.valueOf(stringObjectMap.get("uses")))).forEach(stringObjectMap -> {
-			String name = String.format("jpom_cache_%s_%s", buildId, MD5.create().digestHex(String.valueOf(stringObjectMap.get("path"))));
-			mounts.add(new Mount().withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name));
-			try {
-				dockerClient.inspectVolumeCmd(name).exec();
-			} catch (NotFoundException e) {
-				dockerClient.createVolumeCmd().withName(name).exec();
-			}
-		});
-		return mounts;
-	}
-
-	private List<Mount> javaPluginCheck(DockerClient dockerClient, String image, List<Map<String, Object>> steps, File tempDir, LogRecorder logRecorder) {
-		List<Mount> mounts = new ArrayList<>();
-		steps.stream().filter(stringObjectMap -> stringObjectMap.containsKey("uses") && "java".equals(String.valueOf(stringObjectMap.get("uses")))).forEach(stringObjectMap -> {
-			String version = String.valueOf(stringObjectMap.get("version"));
-			String name = String.format("jpom_java_%s", version);
-			mounts.add(new Mount().withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name));
-			try {
-				dockerClient.inspectVolumeCmd(name).exec();
-			} catch (NotFoundException e) {
-				dockerClient.createVolumeCmd().withName(name).exec();
-				ArrayList<Mount> mounts2 = new ArrayList<>();
-				Mount mount = new Mount().withType(MountType.VOLUME)
-						.withSource(name)
-						.withTarget("/opt/java");
-				mounts2.add(mount);
-				HostConfig hostConfig = new HostConfig()
-						.withAutoRemove(true).withMounts(mounts2);
-				CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd(image)
-						.withHostConfig(hostConfig)
-						.withEnv("JAVA_VERSION=" + version)
-						.withEntrypoint("/bin/bash", "/tmp/install.sh").exec();
-				String containerId = createContainerResponse.getId();
-				dockerClient.copyArchiveToContainerCmd(containerId)
-						.withHostResource(DockerUtil.getResourceToFilePath("uses/java/install.sh", tempDir))
-						.withRemotePath("/tmp/")
-						.exec();
-				dockerClient.startContainerCmd(containerId).exec();
-				// 获取日志
-				this.pullLog(dockerClient, containerId, logRecorder);
-			}
-		});
-		return mounts;
-	}
-
-	private List<Mount> mavenPluginCheck(DockerClient dockerClient, String image, List<Map<String, Object>> steps, File tempDir, LogRecorder logRecorder) {
 		return steps.stream()
-				.filter(map -> map.containsKey("uses") && "maven".equals(String.valueOf(map.get("uses"))))
+				.filter(map -> map.containsKey("uses") && "cache".equals(String.valueOf(map.get("uses"))))
 				.map(stringObjectMap -> {
-					String version = String.valueOf(stringObjectMap.get("version"));
-					String name = String.format("jpom_maven_%s", version);
+					String name = String.format("jpom_cache_%s_%s", buildId, SecureUtil.md5((String) stringObjectMap.get("path")));
 
 					try {
 						dockerClient.inspectVolumeCmd(name).exec();
 					} catch (NotFoundException e) {
 						dockerClient.createVolumeCmd().withName(name).exec();
-						ArrayList<Mount> mounts2 = new ArrayList<>();
-						Mount mount = new Mount().withType(MountType.VOLUME)
-								.withSource(name)
-								.withTarget("/opt/maven");
-						mounts2.add(mount);
-						HostConfig hostConfig = new HostConfig()
-								.withAutoRemove(true).withMounts(mounts2);
-						CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd(image)
-								.withHostConfig(hostConfig)
-								.withEnv("MAVEN_VERSION=" + version)
-								.withEntrypoint("/bin/bash", "/tmp/install.sh").exec();
-						String containerId = createContainerResponse.getId();
-						dockerClient.copyArchiveToContainerCmd(containerId)
-								.withHostResource(DockerUtil.getResourceToFilePath("uses/maven/install.sh", tempDir))
-								.withRemotePath("/tmp/")
-								.exec();
-						dockerClient.startContainerCmd(containerId).exec();
-						// 获取日志
-						this.pullLog(dockerClient, containerId, logRecorder);
 					}
 					return new Mount().withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name);
 				}).collect(Collectors.toList());
 	}
 
-	private List<Mount> nodePluginCheck(DockerClient dockerClient, String image, List<Map<String, Object>> steps, File tempDir, LogRecorder logRecorder) {
-		List<Mount> mounts = new ArrayList<>();
-		steps.stream().filter(stringObjectMap -> stringObjectMap.containsKey("uses") && "node".equals(String.valueOf(stringObjectMap.get("uses")))).forEach(stringObjectMap -> {
-			String version = String.valueOf(stringObjectMap.get("version"));
-			String name = String.format("jpom_node_%s", version);
-			mounts.add(new Mount().withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name));
-			try {
-				dockerClient.inspectVolumeCmd(name).exec();
-			} catch (NotFoundException e) {
-				dockerClient.createVolumeCmd().withName(name).exec();
-				ArrayList<Mount> mounts2 = new ArrayList<>();
-				Mount mount = new Mount().withType(MountType.VOLUME)
-						.withSource(name)
-						.withTarget("/opt/node");
-				mounts2.add(mount);
-				HostConfig hostConfig = new HostConfig()
-						.withAutoRemove(true).withMounts(mounts2);
-				CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd(image)
-						.withHostConfig(hostConfig)
-						.withEnv("NODE_VERSION=" + version)
-						.withEntrypoint("/bin/bash", "/tmp/install.sh").exec();
-				String containerId = createContainerResponse.getId();
-				dockerClient.copyArchiveToContainerCmd(containerId)
-						.withHostResource(DockerUtil.getResourceToFilePath("uses/node/install.sh", tempDir))
-						.withRemotePath("/tmp/")
-						.exec();
-				dockerClient.startContainerCmd(containerId).exec();
-				// 获取日志
-				this.pullLog(dockerClient, containerId, logRecorder);
+	/**
+	 * 依赖插件检查
+	 *
+	 * @param dockerClient docker 客户端连接
+	 * @param image        执行镜像名称
+	 * @param steps        相关参数
+	 * @param tempDir      临时文件目录
+	 * @param logRecorder  日志记录器
+	 * @return list mount
+	 */
+	private List<Mount> checkDependPlugin(DockerClient dockerClient, String image, List<Map<String, Object>> steps, File tempDir, LogRecorder logRecorder) {
+		return steps.stream()
+				.filter(map -> {
+					String uses = (String) map.get("uses");
+					return ArrayUtil.contains(DEPEND_PLUGIN, uses);
+				}).map(map -> this.dependPluginCheck(dockerClient, image, map, tempDir, logRecorder)).collect(Collectors.toList());
+	}
+
+	/**
+	 * 依赖插件检查
+	 *
+	 * @param dockerClient docker 客户端连接
+	 * @param image        执行镜像名称
+	 * @param usesMap      插件相关参数
+	 * @param tempDir      临时文件目录
+	 * @param logRecorder  日志记录器
+	 * @return mount
+	 */
+	private Mount dependPluginCheck(DockerClient dockerClient, String image, Map<String, Object> usesMap, File tempDir, LogRecorder logRecorder) {
+		String pluginName = (String) usesMap.get("uses");
+		String version = String.valueOf(usesMap.get("version"));
+		String name = String.format("jpom_%s_%s", pluginName, version);
+
+		try {
+			dockerClient.inspectVolumeCmd(name).exec();
+		} catch (NotFoundException e) {
+			dockerClient.createVolumeCmd().withName(name).exec();
+
+			Mount mount = new Mount().withType(MountType.VOLUME)
+					.withSource(name)
+					.withTarget("/opt/" + pluginName);
+
+			HostConfig hostConfig = new HostConfig()
+					.withAutoRemove(true).withMounts(CollUtil.newArrayList(mount));
+			CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd(image)
+					.withHostConfig(hostConfig)
+					.withEnv(pluginName.toUpperCase() + "_VERSION=" + version)
+					.withEntrypoint("/bin/bash", "/tmp/install.sh").exec();
+			String containerId = createContainerResponse.getId();
+			// 将脚本 复制到容器
+			String pluginInstallResource = DockerUtil.getResourceToFilePath("uses/" + pluginName + "/install.sh", tempDir);
+			if (pluginInstallResource == null) {
+				throw new IllegalArgumentException("当前还不支持：" + pluginName);
 			}
-		});
-		return mounts;
+			dockerClient.copyArchiveToContainerCmd(containerId)
+					.withHostResource(pluginInstallResource)
+					.withRemotePath("/tmp/")
+					.exec();
+			//
+			dockerClient.startContainerCmd(containerId).exec();
+			// 获取日志
+			this.pullLog(dockerClient, containerId, logRecorder);
+		}
+		return new Mount().withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name);
 	}
 
 	private void pullLog(DockerClient dockerClient, String containerId, LogRecorder logRecorder) {
