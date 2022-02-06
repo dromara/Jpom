@@ -150,7 +150,7 @@ export default {
         host: [{ required: true, message: "请填写容器地址", trigger: "blur" }],
         tagInput: [
           // { required: true, message: "Please input ID", trigger: "blur" },
-          { pattern: /^\w{1,10}$/, message: "字母数字 长度 1-10", trigger: "blur" },
+          { pattern: /^\w{1,10}$/, message: "标签限制为字母数字且长度 1-10" },
         ],
       },
     };
@@ -301,7 +301,7 @@ export default {
       this.loadData();
     },
     handleClose(removedTag) {
-      this.temp.tags = this.temp.tags.filter((tag) => tag !== removedTag);
+      this.temp.tagsArray = this.temp.tagsArray.filter((tag) => tag !== removedTag);
     },
     showInput() {
       this.temp = { ...this.temp, inputVisible: true };
@@ -310,8 +310,12 @@ export default {
       });
     },
     handleInputConfirm() {
-      this.$refs["editForm"].validateField("tagInput", (err) => {
-        if (err) {
+      this.$refs["editForm"].validateField("tagInput", (errmsg) => {
+        if (errmsg) {
+          // console.log(err);
+          this.$notification.warn({
+            message: errmsg,
+          });
           return false;
         }
         const inputValue = this.temp.tagInput;
