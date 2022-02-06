@@ -110,4 +110,9 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 		dockerInfoModel.setFailureMsg(msg);
 		super.update(dockerInfoModel);
 	}
+
+	public List<DockerInfoModel> queryByTag(String tag) {
+		String sql = StrUtil.format("SELECT * FROM {} where instr(tags,?);", super.getTableName());
+		return super.queryList(sql, StrUtil.wrap(tag, StrUtil.COLON, StrUtil.COLON));
+	}
 }

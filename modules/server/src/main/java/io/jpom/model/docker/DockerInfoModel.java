@@ -89,6 +89,10 @@ public class DockerInfoModel extends BaseWorkspaceModel {
 	 * 心跳超时时间，单位 秒
 	 */
 	private Integer heartbeatTimeout;
+	/**
+	 * 标签
+	 */
+	private String tags;
 
 	public void setFailureMsg(String failureMsg) {
 		this.failureMsg = StrUtil.maxLength(failureMsg, 240);
