@@ -23,6 +23,9 @@
 package io.jpom;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.resource.Resource;
+import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -30,6 +33,8 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 
+import java.io.File;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.Map;
 
@@ -69,5 +74,39 @@ public class DockerUtil {
 		}
 		ApacheDockerHttpClient httpClient = builder.build();
 		return DockerClientImpl.getInstance(config, httpClient);
+	}
+
+	/**
+	 * 转化文件
+	 *
+	 * @param name    资源名称
+	 * @param tempDir 临时路径
+	 * @return file 无法读取或者写入返回 null
+	 */
+	public static File getResourceToFile(String name, File tempDir) {
+		try {
+			Resource resourceObj = ResourceUtil.getResourceObj(name);
+			InputStream stream = resourceObj.getStream();
+			File tempFile = FileUtil.file(tempDir, "docker-temp", name);
+			FileUtil.writeFromStream(stream, tempFile);
+			return tempFile;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	/**
+	 * 转化文件
+	 *
+	 * @param name    资源名称
+	 * @param tempDir 临时路径
+	 * @return path 无法读取或者写入返回 null
+	 */
+	public static String getResourceToFilePath(String name, File tempDir) {
+		File resourceToFile = getResourceToFile(name, tempDir);
+		if (resourceToFile == null) {
+			return null;
+		}
+		return resourceToFile.getAbsolutePath();
 	}
 }

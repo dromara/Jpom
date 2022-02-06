@@ -20,19 +20,7 @@
 			</includes>
 			<lineEnding>unix</lineEnding>
 		</fileSet>
-		<fileSet>
-			<directory>script/ubuntu-latest/</directory>
-			<outputDirectory>/ubuntu-latest/</outputDirectory>
-			<includes>
-				<include>Dockerfile</include>
-			</includes>
-			<lineEnding>unix</lineEnding>
-		</fileSet>
-		<fileSet>
-			<directory>script/uses/</directory>
-			<outputDirectory>/uses/</outputDirectory>
-			<lineEnding>unix</lineEnding>
-		</fileSet>
+
 		<fileSet>
 			<directory>script/</directory>
 			<outputDirectory>/</outputDirectory>

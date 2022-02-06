@@ -55,6 +55,7 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.service.docker.DockerInfoService;
+import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
@@ -512,6 +513,7 @@ public class BuildExecuteService {
 			Map<String, Object> map = dockerInfoModel.toParameter();
 			map.put("runsOn", dockerYmlDsl.getRunsOn());
 			map.put("workingDir", workingDir);
+			map.put("tempDir", ConfigBean.getInstance().getTempPath());
 			String buildInfoModelId = buildInfoModel.getId();
 			map.put("dockerName", "jpom-build-" + buildInfoModelId);
 			map.put("logFile", FileUtil.getAbsolutePath(logRecorder.getFile()));
@@ -521,9 +523,9 @@ public class BuildExecuteService {
 			copy.add(FileUtil.getAbsolutePath(this.gitFile) + StrUtil.COLON + workingDir + StrUtil.COLON + "true");
 			map.put("copy", copy);
 
-			Map<String, String> env = ObjectUtil.defaultIfNull(dockerYmlDsl.getEnv(),new HashMap<>());
-			env.put("JPOM_BUILD_ID",buildInfoModelId);
-			env.put("JPOM_WORKING_DIR",workingDir);
+			Map<String, String> env = ObjectUtil.defaultIfNull(dockerYmlDsl.getEnv(), new HashMap<>());
+			env.put("JPOM_BUILD_ID", buildInfoModelId);
+			env.put("JPOM_WORKING_DIR", workingDir);
 			map.put("env", env);
 			map.put("steps", dockerYmlDsl.getSteps());
 			// 构建产物
