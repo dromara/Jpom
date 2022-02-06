@@ -30,36 +30,37 @@ else
 fi
 cd /tmp
 download_url=""
+ARCH=`uname -m`
 case "${JAVA_VERSION}" in
 8)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/8/jdk/x64/linux/OpenJDK8U-jdk_x64_linux_hotspot_8u322b06.tar.gz"
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/8/jdk/${ARCH}/linux/OpenJDK8U-jdk_${ARCH}_linux_hotspot_8u322b06.tar.gz"
 	;;
 9)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/9/jdk/x64/linux/OpenJDK9U-jdk_x64_linux_hotspot_9.0.4_11.tar.gz"
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/9/jdk/${ARCH}/linux/OpenJDK9U-jdk_${ARCH}_linux_hotspot_9.0.4_11.tar.gz"
 	;;
 10)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/10/jdk/x64/linux/OpenJDK10U-jdk_x64_linux_hotspot_10.0.2_13.tar.gz"
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/10/jdk/${ARCH}/linux/OpenJDK10U-jdk_${ARCH}_linux_hotspot_10.0.2_13.tar.gz"
 	;;
 11)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/11/jdk/x64/linux/OpenJDK11U-jdk_x64_linux_hotspot_11.0.14_9.tar.gz"
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/11/jdk/${ARCH}/linux/OpenJDK11U-jdk_${ARCH}_linux_hotspot_11.0.14_9.tar.gz"
 	;;
 12)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/12/jdk/x64/linux/OpenJDK12U-jdk_x64_linux_hotspot_12.0.2_10.tar.gz"
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/12/jdk/${ARCH}/linux/OpenJDK12U-jdk_${ARCH}_linux_hotspot_12.0.2_10.tar.gz"
 	;;
 13)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/13/jdk/x64/linux/OpenJDK13U-jdk_x64_linux_hotspot_13.0.2_8.tar.gz"
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/13/jdk/${ARCH}/linux/OpenJDK13U-jdk_${ARCH}_linux_hotspot_13.0.2_8.tar.gz"
 	;;
 14)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/14/jdk/x64/linux/OpenJDK14U-jdk_x64_linux_hotspot_14.0.2_12.tar.gz"
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/14/jdk/${ARCH}/linux/OpenJDK14U-jdk_${ARCH}_linux_hotspot_14.0.2_12.tar.gz"
 	;;
 15)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/15/jdk/x64/linux/OpenJDK15U-jdk_x64_linux_hotspot_15.0.2_7.tar.gz"
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/15/jdk/${ARCH}/linux/OpenJDK15U-jdk_${ARCH}_linux_hotspot_15.0.2_7.tar.gz"
 	;;
 16)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/16/jdk/x64/linux/OpenJDK16U-jdk_x64_linux_hotspot_16.0.2_7.tar.gz"
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/16/jdk/${ARCH}/linux/OpenJDK16U-jdk_${ARCH}_linux_hotspot_16.0.2_7.tar.gz"
 	;;
 17)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/17/jdk/x64/linux/OpenJDK17U-jdk_x64_linux_hotspot_17.0.2_8.tar.gz"
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/17/jdk/${ARCH}/linux/OpenJDK17U-jdk_${ARCH}_linux_hotspot_17.0.2_8.tar.gz"
 	;;
 
 *)
