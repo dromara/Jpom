@@ -51,9 +51,9 @@
     <!-- 编辑区 -->
     <a-modal v-model="editVisible" title="编辑  Docker" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item v-if="temp.id" label="容器ID" prop="id">
+        <!-- <a-form-model-item v-if="temp.id" label="容器ID" prop="id">
           <a-input v-model="temp.id" disabled readonly />
-        </a-form-model-item>
+        </a-form-model-item> -->
         <a-form-model-item label="容器名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />
         </a-form-model-item>
@@ -81,6 +81,28 @@
 
         <a-form-model-item label="心跳超时" prop="heartbeatTimeout">
           <a-input-number style="width: 100%" v-model="temp.heartbeatTimeout" placeholder="心跳超时 单位秒" />
+        </a-form-model-item>
+        <a-form-model-item label="标签" prop="tagInput">
+          <template v-for="tag in temp.tagsArray">
+            <a-tooltip :key="tag" :title="tag">
+              <a-tag :key="tag" :closable="true" @close="() => handleClose(tag)">
+                {{ `${tag}` }}
+              </a-tag>
+            </a-tooltip>
+          </template>
+          <a-input
+            v-if="temp.inputVisible"
+            ref="tagInput"
+            type="text"
+            size="small"
+            placeholder="请输入标签名 字母数字 长度 1-10"
+            v-model="temp.tagInput"
+            @blur="handleInputConfirm"
+            @keyup.enter="handleInputConfirm"
+          />
+          <template v-else>
+            <a-tag v-if="!temp.tagsArray || temp.tagsArray.length < 10" style="background: #fff; borderstyle: dashed" @click="showInput"> <a-icon type="plus" /> 添加 </a-tag>
+          </template>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -126,6 +148,10 @@ export default {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
         name: [{ required: true, message: "请填写容器名称", trigger: "blur" }],
         host: [{ required: true, message: "请填写容器地址", trigger: "blur" }],
+        tagInput: [
+          // { required: true, message: "Please input ID", trigger: "blur" },
+          { pattern: /^\w{1,10}$/, message: "字母数字 长度 1-10", trigger: "blur" },
+        ],
       },
     };
   },
@@ -179,6 +205,10 @@ export default {
       this.temp = record;
       this.editVisible = true;
       this.uploadFileList = [];
+      let tagsArray = (record.tags || "").split(":");
+      tagsArray = tagsArray.filter((item) => item.length);
+      this.temp = { ...this.temp, tagsArray: tagsArray };
+      //.tags = (this.temp.tagsArray || []).join(",");
       this.$refs["editForm"]?.resetFields();
     },
     handleRemove() {
@@ -220,6 +250,10 @@ export default {
             }
           });
         } else {
+          this.temp.tags = (this.temp.tagsArray || []).join(",");
+          delete this.temp.tagsArray;
+          delete this.temp.inputVisible;
+          delete this.temp.tagInput;
           editDocker(this.temp).then((res) => {
             if (res.code === 200) {
               // 成功
@@ -256,32 +290,6 @@ export default {
         },
       });
     },
-    // // 下载证书文件
-    // handleDownload(record) {
-    //   this.$notification.info({
-    //     message: "正在下载，请稍等...",
-    //   });
-    //   // 请求参数
-    //   const params = {
-    //     nodeId: this.node.id,
-    //     id: record.id,
-    //   };
-    //   // 请求接口拿到 blob
-    //   downloadCert(params).then((blob) => {
-    //     const url = window.URL.createObjectURL(blob);
-    //     let link = document.createElement("a");
-    //     link.style.display = "none";
-    //     link.href = url;
-    //     link.setAttribute("download", record.domain + ".zip");
-    //     document.body.appendChild(link);
-    //     link.click();
-    //   });
-    // },
-    // // 显示模板
-    // handleTemplate(record) {
-    //   this.temp = Object.assign(record);
-    //   this.templateVisible = true;
-    // },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery.page = pagination.current;
@@ -291,6 +299,29 @@ export default {
         this.listQuery.order_field = sorter.field;
       }
       this.loadData();
+    },
+    handleClose(removedTag) {
+      this.temp.tags = this.temp.tags.filter((tag) => tag !== removedTag);
+    },
+    showInput() {
+      this.temp = { ...this.temp, inputVisible: true };
+      this.$nextTick(function () {
+        this.$refs.tagInput.focus();
+      });
+    },
+    handleInputConfirm() {
+      this.$refs["editForm"].validateField("tagInput", (err) => {
+        if (err) {
+          return false;
+        }
+        const inputValue = this.temp.tagInput;
+        let tags = this.temp.tagsArray || [];
+        if (inputValue && tags.indexOf(inputValue) === -1) {
+          tags = [...tags, inputValue];
+        }
+
+        this.temp = { ...this.temp, tagsArray: tags, tagInput: "", inputVisible: false };
+      });
     },
   },
 };

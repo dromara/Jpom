@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.docker;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -129,6 +130,7 @@ public class DockerInfoController extends BaseServerController {
 		String id = getParameter("id");
 		String tlsVerifyStr = getParameter("tlsVerify");
 		String apiVersion = getParameter("apiVersion");
+		String tagsStr = getParameter("tags", StrUtil.EMPTY);
 		int heartbeatTimeout = getParameterInt("heartbeatTimeout", -1);
 		boolean tlsVerify = Convert.toBool(tlsVerifyStr, false);
 		//
@@ -157,6 +159,9 @@ public class DockerInfoController extends BaseServerController {
 		}
 		boolean ok = (boolean) plugin.execute("host", "host", host);
 		Assert.state(ok, "请填写正确的 host");
+		//
+		List<String> tagList = StrUtil.splitTrim(tagsStr, StrUtil.COMMA);
+		String newTags = CollUtil.join(tagList, StrUtil.COLON, StrUtil.COLON, StrUtil.COLON);
 		// 验证重复
 		String workspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
 		Entity entity = Entity.create();
@@ -170,7 +175,7 @@ public class DockerInfoController extends BaseServerController {
 		//
 		DockerInfoModel.DockerInfoModelBuilder builder = DockerInfoModel.builder();
 		builder.heartbeatTimeout(heartbeatTimeout).apiVersion(apiVersion).host(host).name(name)
-				.tlsVerify(tlsVerify).certExist(certExist);
+				.tlsVerify(tlsVerify).certExist(certExist).tags(newTags);
 		//
 		DockerInfoModel build = builder.build();
 		build.setId(id);
