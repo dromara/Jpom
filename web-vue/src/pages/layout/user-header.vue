@@ -81,51 +81,79 @@
         </a-tab-pane>
         <a-tab-pane :key="2" tab="两步验证">
           <a-row>
+            <a-alert type="warning" v-if="temp.needVerify">
+              <template slot="message"> 提示 </template>
+              <template slot="description">
+                <ul style="color: red">
+                  <li>绑定成功后将不再显示,强烈建议保存此二维码或者下面的 MFA key</li>
+                  <li>请使用应用扫码绑定令牌,然后输入验证码确认绑定才生效</li>
+                </ul>
+              </template>
+            </a-alert>
             <a-col :span="12">
               <a-form-model ref="mfaForm" :model="temp" :rules="rules" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-                <a-form-model-item label="状态" prop="status">
-                  <a-switch checked-children="开" @change="mfaChange" un-checked-children="关" v-model="temp.status" />
-                </a-form-model-item>
-                <a-form-model-item label="二维码" v-if="temp.status">
-                  <a-row>
-                    <a-col :span="14">
-                      <div class="qrcode" ref="qrCodeUrl" id="qrCodeUrl"></div>
-                    </a-col>
-                    <a-col :span="10" style="line-height: 22px; font-size: 12px; color: red"> 请使用应用扫码绑定令牌,强烈建议保存此二维码或者下面的 MFA key </a-col>
-                  </a-row>
-                </a-form-model-item>
-                <a-form-model-item label="MFA key" v-if="temp.status">
-                  <a-input
-                    v-clipboard:copy="temp.mfaKey"
-                    v-clipboard:success="
-                      () => {
-                        tempVue.prototype.$notification.success({ message: '复制成功' });
-                      }
-                    "
-                    v-clipboard:error="
-                      () => {
-                        tempVue.prototype.$notification.error({ message: '复制失败' });
-                      }
-                    "
-                    readonly
-                    disabled
-                    v-model="temp.mfaKey"
-                  >
-                    <a-icon slot="prefix" type="copy" />
-                  </a-input>
+                <a-form-model-item label="当前状态" prop="status">
+                  <a-switch checked-children="开启中" disabled un-checked-children="关闭中" v-model="temp.status" />
                 </a-form-model-item>
                 <template v-if="temp.needVerify">
-                  <a-form-model-item label="验证码" prop="twoCode">
-                    <a-input v-model="temp.twoCode" placeholder="两步验证码" />
-                  </a-form-model-item>
-                  <a-form-model-item>
-                    <a-row type="flex" justify="center">
-                      <a-col :span="2">
-                        <a-button type="primary" @click="handleBindMfa">确认绑定</a-button>
+                  <a-form-model-item label="二维码">
+                    <a-row>
+                      <a-col :span="14">
+                        <div class="qrcode" ref="qrCodeUrl" id="qrCodeUrl"></div>
                       </a-col>
                     </a-row>
                   </a-form-model-item>
+                  <a-form-model-item label="MFA key">
+                    <a-input
+                      v-clipboard:copy="temp.mfaKey"
+                      v-clipboard:success="
+                        () => {
+                          tempVue.prototype.$notification.success({ message: '复制成功' });
+                        }
+                      "
+                      v-clipboard:error="
+                        () => {
+                          tempVue.prototype.$notification.error({ message: '复制失败' });
+                        }
+                      "
+                      readonly
+                      disabled
+                      v-model="temp.mfaKey"
+                    >
+                      <a-icon slot="prefix" type="copy" />
+                    </a-input>
+                  </a-form-model-item>
                 </template>
+                <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
+                <a-form-model-item v-if="temp.needVerify" label="验证码" prop="twoCode">
+                  <a-input v-model="temp.twoCode" ref="twoCode" placeholder="两步验证码" />
+                </a-form-model-item>
+                <a-form-model-item v-if="temp.needVerify">
+                  <a-row type="flex" justify="center">
+                    <a-col :span="2">
+                      <a-button type="primary" html-type="submit" @click="handleBindMfa">确认绑定</a-button>
+                    </a-col>
+                  </a-row>
+                </a-form-model-item>
+                <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
+                <a-form-model-item v-if="!temp.needVerify && temp.status" label="验证码" prop="twoCode">
+                  <a-input v-model="temp.twoCode" ref="twoCode" placeholder="两步验证码" />
+                </a-form-model-item>
+                <a-form-model-item v-if="!temp.needVerify && temp.status">
+                  <a-row type="flex" justify="center">
+                    <a-col :span="2">
+                      <a-button type="primary" html-type="submit" @click="closeMfaFn">确认关闭</a-button>
+                    </a-col>
+                  </a-row>
+                </a-form-model-item>
+
+                <a-form-model-item v-if="!temp.needVerify && !temp.status">
+                  <a-row type="flex" justify="center">
+                    <a-col :span="2">
+                      <a-button type="primary" @click="openMfaFn">开启 MFA</a-button>
+                    </a-col>
+                  </a-row>
+                </a-form-model-item>
               </a-form-model>
             </a-col>
             <a-col :span="12">
@@ -206,7 +234,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { updatePwd, sendEmailCode, editUserInfo, getUserInfo, myWorkspace, myMfa, closeMfa, generateMfa, bindMfa } from "@/api/user";
+import { updatePwd, sendEmailCode, editUserInfo, getUserInfo, myWorkspace, closeMfa, generateMfa, bindMfa } from "@/api/user";
 import QRCode from "qrcodejs2";
 import sha1 from "sha1";
 import Vue from "vue";
@@ -241,8 +269,8 @@ export default {
         ],
         email: [{ required: true, message: "请输入邮箱", trigger: "blur" }],
         twoCode: [
-          { required: true, message: "请输入两步验证码" },
-          { pattern: /^\d{6}$/, message: "验证码 6 为纯数字" },
+          { required: true, message: "请输入两步验证码", trigger: ["change", "blur"] },
+          { pattern: /^\d{6}$/, message: "验证码 6 为纯数字", trigger: ["change", "blur"] },
         ],
       },
       MFA_APP_TIP_ARRAY,
@@ -446,13 +474,12 @@ export default {
         this.temp = { tabActiveKey: key };
       } else if (key == 2) {
         this.temp = { tabActiveKey: key };
-        myMfa().then((res) => {
+        getUserInfo().then((res) => {
           if (res.code === 200) {
-            Object.assign(this.temp, res.data);
-            this.temp = { ...this.temp };
-            // {...this.temp res.data} ;
-            this.tempVue = Vue;
-            this.showQrCode();
+            this.temp = { ...this.temp, status: res.data.bindMfa };
+            this.$nextTick(() => {
+              this.$refs?.twoCode?.focus();
+            });
           }
         });
       }
@@ -462,35 +489,24 @@ export default {
       if (!this.temp.status) {
         return;
       }
+      this.tempVue = Vue;
       this.$nextTick(() => {
         const qrCodeDom = document.getElementById("qrCodeUrl");
         qrCodeDom.innerHTML = "";
         this.creatQrCode(qrCodeDom, this.temp.url);
+        this.$nextTick(function () {
+          this.$refs.twoCode.focus();
+        });
       });
     },
-    // mfa 状态切换
-    mfaChange(checked) {
-      this.temp.status = !checked;
-      if (checked) {
-        //
-        generateMfa().then((res) => {
-          if (res.code === 200) {
-            Object.assign(this.temp, {
-              status: true,
-              mfaKey: res.data.mfaKey,
-              url: res.data.url,
-              needVerify: true,
-            });
-            this.temp = { ...this.temp };
-            this.showQrCode();
-            this.$notification.info({
-              // placement: "",
-              message: "需要输入验证码,确认绑定后才生效奥",
-            });
-          }
-        });
-      } else {
-        //
+    // 关闭 mfa
+    closeMfaFn() {
+      console.log(this.$refs["mfaForm"]);
+      this.$refs["mfaForm"].validate((valid) => {
+        console.log(valid);
+        if (!valid) {
+          return false;
+        }
         this.$confirm({
           title: "系统提示",
           content: "确定要关闭两步验证吗？关闭后账号安全性将受到影响,关闭后已经存在的 mfa key 将失效",
@@ -498,7 +514,9 @@ export default {
           cancelText: "取消",
           onOk: () => {
             //
-            closeMfa().then((res) => {
+            closeMfa({
+              code: this.temp.twoCode,
+            }).then((res) => {
               if (res.code === 200) {
                 this.$notification.success({
                   message: res.msg,
@@ -507,12 +525,30 @@ export default {
               }
             });
           },
-          onCancel: () => {
-            this.temp.status = true;
-            this.showQrCode();
-          },
         });
-      }
+      });
+    },
+    // mfa 状态切换
+    openMfaFn() {
+      //
+      generateMfa().then((res) => {
+        if (res.code === 200) {
+          Object.assign(this.temp, {
+            status: true,
+            mfaKey: res.data.mfaKey,
+            url: res.data.url,
+            needVerify: true,
+            showSaveTip: true,
+            twoCode: "",
+          });
+          this.temp = { ...this.temp };
+          this.showQrCode();
+          this.$notification.info({
+            // placement: "",
+            message: "需要输入验证码,确认绑定后才生效奥",
+          });
+        }
+      });
     },
     handleBindMfa() {
       this.$refs["mfaForm"].validate((valid) => {
@@ -527,7 +563,7 @@ export default {
             this.$notification.success({
               message: res.msg,
             });
-            this.temp = { ...this.temp, needVerify: false };
+            this.temp = { ...this.temp, needVerify: false, twoCode: "" };
           }
         });
       });

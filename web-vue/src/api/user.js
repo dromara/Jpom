@@ -30,19 +30,12 @@ export function refreshToken() {
   });
 }
 
-// 获取自己的 两步验证信息
-export function myMfa() {
-  return axios({
-    url: "/user/my_mfa",
-    method: "get",
-  });
-}
-
 // 关闭 两步验证信息
-export function closeMfa() {
+export function closeMfa(params) {
   return axios({
     url: "/user/close_mfa",
     method: "get",
+    params,
   });
 }
 

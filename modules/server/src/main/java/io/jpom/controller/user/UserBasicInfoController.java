@@ -101,6 +101,8 @@ public class UserBasicInfoController extends BaseServerController {
 		map.put("dingDing", userModel.getDingDing());
 		map.put("workWx", userModel.getWorkWx());
 		map.put("md5Token", userModel.getPassword());
+		boolean bindMfa = userService.hasBindMfa(userModel.getId());
+		map.put("bindMfa", bindMfa);
 		return JsonMessage.getString(200, "success", map);
 	}
 
@@ -166,33 +168,15 @@ public class UserBasicInfoController extends BaseServerController {
 	}
 
 	/**
-	 * 查询自己的 mfa 相关信息
-	 *
-	 * @return json
-	 */
-	@GetMapping(value = "my_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String mfaInfo() {
-		UserModel user = getUser();
-		JSONObject jsonObject = new JSONObject();
-		boolean bindMfa = userService.hasBindMfa(user.getId());
-		jsonObject.put("status", bindMfa);
-		//
-		if (bindMfa) {
-			UserModel userModel = userService.getByKey(user.getId(), false);
-			jsonObject.put("mfaKey", userModel.getTwoFactorAuthKey());
-			jsonObject.put("url", TwoFactorAuthUtils.generateOtpAuthUrl(userModel.getId(), userModel.getTwoFactorAuthKey()));
-		}
-		return JsonMessage.getString(200, "", jsonObject);
-	}
-
-	/**
 	 * 关闭自己到 mfa 相关信息
 	 *
 	 * @return json
 	 */
 	@GetMapping(value = "close_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String closeMfa() {
+	public String closeMfa(@ValidatorItem String code) {
 		UserModel user = getUser();
+		boolean mfaCode = userService.verifyMfaCode(user.getId(), code);
+		Assert.state(mfaCode, "验证码不正确");
 		UserModel userModel = new UserModel(user.getId());
 		userModel.setTwoFactorAuthKey(StrUtil.EMPTY);
 		userService.update(userModel);
