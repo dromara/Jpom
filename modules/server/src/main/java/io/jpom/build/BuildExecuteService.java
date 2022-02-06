@@ -506,31 +506,31 @@ public class BuildExecuteService {
 			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
 			String script = buildInfoModel.getScript();
 			DockerYmlDsl dockerYmlDsl = DockerYmlDsl.build(script);
-			String dockerId = dockerYmlDsl.getDockerId();
-			DockerInfoModel dockerInfoModel = buildExecuteService.dockerInfoService.getByKey(dockerId);
-			Assert.notNull(dockerInfoModel, "对应的容器不存在");
+			DockerInfoModel dockerInfoModel = buildExecuteService.dockerInfoService.queryByBean(DockerInfoModel.builder().status(1).build());
+			Assert.notNull(dockerInfoModel, "没有可用的 docker server");
 			String workingDir = "/home/jpom/";
 			Map<String, Object> map = dockerInfoModel.toParameter();
-			map.put("image", dockerYmlDsl.getImage());
+			map.put("runsOn", dockerYmlDsl.getRunsOn());
 			map.put("workingDir", workingDir);
-			map.put("dockerName", "jpom-build-" + buildInfoModel.getId());
+			String buildInfoModelId = buildInfoModel.getId();
+			map.put("dockerName", "jpom-build-" + buildInfoModelId);
 			map.put("logFile", FileUtil.getAbsolutePath(logRecorder.getFile()));
-			// 将构建目录挂载到容器
-			List<String> binds = ObjectUtil.defaultIfNull(dockerYmlDsl.getBinds(), new ArrayList<>());
-			map.put("binds", binds);
 			//
 			List<String> copy = ObjectUtil.defaultIfNull(dockerYmlDsl.getCopy(), new ArrayList<>());
 			//new ArrayList<>();
 			copy.add(FileUtil.getAbsolutePath(this.gitFile) + StrUtil.COLON + workingDir + StrUtil.COLON + "true");
 			map.put("copy", copy);
-			map.put("entrypoints", dockerYmlDsl.getEntrypoints());
-			map.put("cmds", dockerYmlDsl.getCmds());
-			map.put("env", dockerYmlDsl.getEnv());
+
+			Map<String, String> env = ObjectUtil.defaultIfNull(dockerYmlDsl.getEnv(),new HashMap<>());
+			env.put("JPOM_BUILD_ID",buildInfoModelId);
+			env.put("JPOM_WORKING_DIR",workingDir);
+			map.put("env", env);
+			map.put("steps", dockerYmlDsl.getSteps());
 			// 构建产物
 			String resultDirFile = buildInfoModel.getResultDirFile();
 			String resultFile = FileUtil.normalize(workingDir + StrUtil.SLASH + resultDirFile);
 			map.put("resultFile", resultFile);
-			File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
+			File toFile = BuildUtil.getHistoryPackageFile(buildInfoModelId, buildInfoModel.getBuildId(), resultDirFile);
 
 			// 下载文件包含一级文件名 所以需要向上切换
 			//int toParent = StrUtil.equals(workingDir, resultFile) ? 0 : 1;
@@ -539,7 +539,7 @@ public class BuildExecuteService {
 			map.put("resultFileOut", FileUtil.getAbsolutePath(toFile));
 			IPlugin plugin = PluginFactory.getPlugin("docker-cli");
 			try {
-				Object build = plugin.execute("build", map);
+				plugin.execute("build", map);
 			} catch (Exception e) {
 				logRecorder.error("调用容器异常", e);
 				return false;

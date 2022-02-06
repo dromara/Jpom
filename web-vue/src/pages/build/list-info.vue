@@ -666,16 +666,19 @@ export default {
         repositoryId: [{ required: true, message: "请填选择构建的仓库", trigger: "blur" }],
       },
       dslDefault:
-        "dockerId: 03f583360dd14b15b663d8514961dfd1\r\n" +
-        "image: maven:3.8.4-jdk-8\r\n" +
-        "copy:\r\n" +
-        "	- /Users/user/.m2/settings.xml:/root/.m2/:false\r\n" +
-        "entrypoints:\r\n" +
-        "	- /bin/sh\r\n" +
-        "  - -c\r\n" +
-        "  - mkdir -p /root/.m2/\r\n" +
-        "cmds:\r\n" +
-        "	- echo mvn clean package | /bin/sh\r\n",
+        "runsOn: ubuntu-latest\n" +
+        "steps:\n" +
+        "  - uses: java\n" +
+        "    version: 8\n" +
+        "  - uses: maven\n" +
+        "    version: 3.8.4\n" +
+        "  - uses: node\n" +
+        "    version: 16.3.0\n" +
+        "  - uses: cache\n" +
+        "    path: /root/.m2\n" +
+        "  - run: npm config set registry https://registry.npmmirror.com\n" +
+        "  - run: cd  ${JPOM_WORKING_DIR}/web-vue && npm i && npm run build\n" +
+        "  - run: cd ${JPOM_WORKING_DIR} && mvn package -s script/settings.xml",
     };
   },
   computed: {
