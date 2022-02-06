@@ -483,6 +483,10 @@ export default {
             });
             this.temp = { ...this.temp };
             this.showQrCode();
+            this.$notification.info({
+              // placement: "",
+              message: "需要输入验证码,确认绑定后才生效奥",
+            });
           }
         });
       } else {
@@ -499,7 +503,7 @@ export default {
                 this.$notification.success({
                   message: res.msg,
                 });
-                this.temp.status = false;
+                this.temp = { ...this.temp, needVerify: false, status: false };
               }
             });
           },

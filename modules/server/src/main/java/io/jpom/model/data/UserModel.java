@@ -127,18 +127,19 @@ public class UserModel extends BaseStrikeDbModel {
 		this.systemUser = ObjectUtil.defaultIfNull(systemUser, 0) == 1 ? systemUser : 0;
 	}
 
-	/**
-	 * 解锁
-	 */
-	public UserModel unLock() {
-		UserModel newModel = new UserModel(this.getId());
-		return UserModel.unLock(newModel);
-	}
+//	/**
+//	 * 解锁
+//	 */
+//	public UserModel unLock() {
+//		UserModel newModel = new UserModel(this.getId());
+//		return UserModel.unLock(newModel);
+//	}
 
 	/**
 	 * 解锁
 	 */
-	public static UserModel unLock(UserModel newModel) {
+	public static UserModel unLock(String id) {
+		UserModel newModel = new UserModel(id);
 		newModel.setPwdErrorCount(0);
 		newModel.setLockTime(0L);
 		newModel.setLastPwdErrorTime(0L);

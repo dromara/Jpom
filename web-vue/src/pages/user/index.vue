@@ -1,15 +1,6 @@
 <template>
   <div class="full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input v-model="listQuery.id" placeholder="用户名ID" class="search-input-item" />
-        <a-input v-model="listQuery['%name%']" placeholder="用户名" class="search-input-item" />
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-button type="primary" @click="handleAdd">新增</a-button>
-      </a-space>
-    </div>
+    <!-- <div ref="filter" class="filter"></div> -->
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
@@ -19,16 +10,42 @@
       bordered
       :rowKey="(record, index) => index"
     >
+      <template slot="title">
+        <a-space>
+          <a-input v-model="listQuery.id" placeholder="用户名ID" class="search-input-item" />
+          <a-input v-model="listQuery['%name%']" placeholder="用户名" class="search-input-item" />
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleAdd">新增</a-button>
+        </a-space></template
+      >
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-          <a-button type="danger" :disabled="record.pwdErrorCount === 0" @click="handleUnlock(record)">解锁</a-button>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="danger" :disabled="record.parent === 'sys'" @click="handleDelete(record)">删除</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="danger" :disabled="record.pwdErrorCount === 0" @click="handleUnlock(record)">解锁</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="danger" :disabled="record.twoFactorAuthKey ? false : true" @click="handleCloseMfa(record)">关闭MFA</a-button>
+              </a-menu-item>
+            </a-menu></a-dropdown
+          >
         </a-space>
       </template>
       <template slot="systemUser" slot-scope="text, record">
         <a-switch size="small" checked-children="是" un-checked-children="否" :checked="record.systemUser == 1" />
       </template>
+      <template slot="twoFactorAuthKey" slot-scope="text, record">
+        <a-switch size="small" checked-children="开" un-checked-children="关" :checked="record.twoFactorAuthKey ? true : false" />
+      </template>
+
       <a-tooltip slot="id" slot-scope="text" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -114,7 +131,7 @@
   </div>
 </template>
 <script>
-import { getUserList, editUser, deleteUser, unlockUser, workspaceList } from "@/api/user";
+import { getUserList, editUser, deleteUser, unlockUser, closeUserMfa, workspaceList } from "@/api/user";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import { getMonitorOperateTypeList } from "@/api/monitor";
 import { parseTime } from "@/utils/time";
@@ -156,10 +173,12 @@ export default {
       editUserVisible: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
-        { title: "ID", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
+        { title: "ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "昵称", dataIndex: "name", ellipsis: true },
         { title: "管理员", dataIndex: "systemUser", ellipsis: true, width: 90, scopedSlots: { customRender: "systemUser" } },
-        { title: "邮箱", dataIndex: "email", ellipsis: true, width: 150, scopedSlots: { customRender: "email" } },
+        { title: "两步验证", dataIndex: "twoFactorAuthKey", ellipsis: true, width: 90, scopedSlots: { customRender: "twoFactorAuthKey" } },
+
+        { title: "邮箱", dataIndex: "email", ellipsis: true, scopedSlots: { customRender: "email" } },
         { title: "创建人", dataIndex: "parent", ellipsis: true, width: 150 },
         {
           title: "修改时间",
@@ -171,7 +190,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 260 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 150 },
       ],
       // 表单校验规则
       rules: {
@@ -399,6 +418,26 @@ export default {
         },
       });
     },
+    //
+    handleCloseMfa(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的关闭当前用户的两步验证么？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 解锁用户
+          closeUserMfa(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery.page = pagination.current;
@@ -413,7 +452,7 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
+/* .filter {
   margin-bottom: 10px;
-}
+} */
 </style>
