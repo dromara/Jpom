@@ -678,7 +678,9 @@ export default {
         "    path: /root/.m2\n" +
         "  - run: npm config set registry https://registry.npmmirror.com\n" +
         "  - run: cd  ${JPOM_WORKING_DIR}/web-vue && npm i && npm run build\n" +
-        "  - run: cd ${JPOM_WORKING_DIR} && mvn package -s script/settings.xml",
+        "  - run: cd ${JPOM_WORKING_DIR} && mvn package -s script/settings.xml\n" +
+        "# binds:\n" +
+        "#  - /Users/user/.m2/settings.xml:/root/.m2/\n",
     };
   },
   computed: {

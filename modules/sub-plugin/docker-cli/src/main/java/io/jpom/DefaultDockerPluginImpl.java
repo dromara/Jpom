@@ -27,6 +27,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.MD5;
@@ -45,13 +46,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -82,11 +78,12 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 		}
 	}
 
-
-	public void build(Map<String, Object> parameter) {
+	private void build(Map<String, Object> parameter) {
 		DockerClient dockerClient = DockerUtil.build(parameter, 10);
 		String logFile = (String) parameter.get("logFile");
 		File tempDir = (File) parameter.get("tempDir");
+		// 生成临时目录
+		tempDir = FileUtil.file(tempDir, "docker-temp", IdUtil.fastSimpleUUID());
 		LogRecorder logRecorder = LogRecorder.builder().filePath(logFile).build();
 		List<String> copy = (List<String>) parameter.get("copy");
 		String resultFile = (String) parameter.get("resultFile");
@@ -105,12 +102,11 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 		mounts.addAll(this.checkDependPlugin(dockerClient, image, steps, tempDir, logRecorder));
 		String containerId = this.buildNewContainer(dockerClient, parameter, mounts);
 		try {
-			String buildShell = generateBuildShell(steps, buildId);
-			Path tempDirectory = Files.createTempDirectory("build");
-			Path tempFile = Files.createFile(Paths.get(tempDirectory.toString() + File.separator + "build.sh"));
-			Files.write(tempFile, buildShell.getBytes(), StandardOpenOption.WRITE);
+			String buildShell = this.generateBuildShell(steps, buildId);
+			File tempFile = DockerUtil.createTemp("build.sh", tempDir);
+			FileUtil.writeUtf8String(buildShell, tempFile);
 			dockerClient.copyArchiveToContainerCmd(containerId)
-					.withHostResource(tempFile.toAbsolutePath().toString())
+					.withHostResource(tempFile.getAbsolutePath())
 					.withRemotePath("/tmp/")
 					.exec();
 			this.copyArchiveToContainerCmd(dockerClient, containerId, copy);
@@ -127,10 +123,10 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			this.waitContainerCmd(dockerClient, containerId, logRecorder);
 			// 获取容器执行结果文件
 			this.copyArchiveFromContainerCmd(dockerClient, containerId, logRecorder, resultFile, resultFileOut);
-		} catch (IOException e) {
-			logRecorder.error("创建临时文件异常:", e);
 		} finally {
 			this.removeContainerCmd(dockerClient, containerId);
+			// 删除临时目录
+			FileUtil.del(tempDir);
 		}
 	}
 
@@ -231,7 +227,12 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 				}
 				dockerClient.buildImageCmd(file)
 						.withTags(tags)
-						.exec(new ResultCallback.Adapter<>()).awaitCompletion();
+						.exec(new ResultCallback.Adapter<BuildResponseItem>() {
+							@Override
+							public void onNext(BuildResponseItem object) {
+								logRecorder.append(object.getStream());
+							}
+						}).awaitCompletion();
 			} catch (InterruptedException ex) {
 				logRecorder.error("构建 runsOn 镜像被中断", ex);
 			}
@@ -384,22 +385,37 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 		}
 	}
 
-
+	/**
+	 * 构建一个执行 镜像
+	 *
+	 * @param dockerClient docker 客户端连接
+	 * @param parameter    参数
+	 * @param mounts       挂载目录
+	 * @return 容器ID
+	 */
 	private String buildNewContainer(DockerClient dockerClient, Map<String, Object> parameter, List<Mount> mounts) {
 		String image = (String) parameter.get("image");
 		String workingDir = (String) parameter.get("workingDir");
 		String dockerName = (String) parameter.get("dockerName");
+		List<String> binds = (List<String>) parameter.get("binds");
 
 		Map<String, String> env = (Map<String, String>) parameter.get("env");
 		CreateContainerCmd containerCmd = dockerClient.createContainerCmd(image);
 		containerCmd.withName(dockerName).withWorkingDir(workingDir);
+		//
+		List<Bind> bindList = new ArrayList<>();
+		if (CollUtil.isNotEmpty(binds)) {
+			bindList = binds.stream().map(Bind::parse).collect(Collectors.toList());
+		}
 		HostConfig hostConfig = HostConfig.newHostConfig()
-				.withMounts(mounts);
+				.withMounts(mounts).withBinds(bindList);
 		containerCmd.withHostConfig(hostConfig);
-
-
+		// 环境变量
 		if (env != null) {
-			List<String> envList = env.entrySet().stream().map(stringStringEntry -> StrUtil.format("{}={}", stringStringEntry.getKey(), stringStringEntry.getValue())).collect(Collectors.toList());
+			List<String> envList = env.entrySet()
+					.stream()
+					.map(entry -> StrUtil.format("{}={}", entry.getKey(), entry.getValue()))
+					.collect(Collectors.toList());
 			containerCmd.withEnv(envList);
 		}
 		// 如果容器已经存在则先删除

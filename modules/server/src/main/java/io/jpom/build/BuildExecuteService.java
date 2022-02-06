@@ -507,7 +507,17 @@ public class BuildExecuteService {
 			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
 			String script = buildInfoModel.getScript();
 			DockerYmlDsl dockerYmlDsl = DockerYmlDsl.build(script);
-			DockerInfoModel dockerInfoModel = buildExecuteService.dockerInfoService.queryByBean(DockerInfoModel.builder().status(1).build());
+			String fromTag = dockerYmlDsl.getFromTag();
+
+			List<DockerInfoModel> dockerInfoModels;
+			if (StrUtil.isNotEmpty(fromTag)) {
+				// 根据 tag 查询
+				dockerInfoModels = buildExecuteService.dockerInfoService.queryByTag(fromTag, 1);
+			} else {
+				DockerInfoModel.DockerInfoModelBuilder builder = DockerInfoModel.builder();
+				dockerInfoModels = buildExecuteService.dockerInfoService.queryList(builder.status(1).build(), 1);
+			}
+			DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
 			Assert.notNull(dockerInfoModel, "没有可用的 docker server");
 			String workingDir = "/home/jpom/";
 			Map<String, Object> map = dockerInfoModel.toParameter();
@@ -519,9 +529,9 @@ public class BuildExecuteService {
 			map.put("logFile", FileUtil.getAbsolutePath(logRecorder.getFile()));
 			//
 			List<String> copy = ObjectUtil.defaultIfNull(dockerYmlDsl.getCopy(), new ArrayList<>());
-			//new ArrayList<>();
 			copy.add(FileUtil.getAbsolutePath(this.gitFile) + StrUtil.COLON + workingDir + StrUtil.COLON + "true");
 			map.put("copy", copy);
+			map.put("binds", ObjectUtil.defaultIfNull(dockerYmlDsl.getBinds(), new ArrayList<>()));
 
 			Map<String, String> env = ObjectUtil.defaultIfNull(dockerYmlDsl.getEnv(), new HashMap<>());
 			env.put("JPOM_BUILD_ID", buildInfoModelId);
@@ -532,12 +542,8 @@ public class BuildExecuteService {
 			String resultDirFile = buildInfoModel.getResultDirFile();
 			String resultFile = FileUtil.normalize(workingDir + StrUtil.SLASH + resultDirFile);
 			map.put("resultFile", resultFile);
+			// 产物输出目录
 			File toFile = BuildUtil.getHistoryPackageFile(buildInfoModelId, buildInfoModel.getBuildId(), resultDirFile);
-
-			// 下载文件包含一级文件名 所以需要向上切换
-			//int toParent = StrUtil.equals(workingDir, resultFile) ? 0 : 1;
-			//FileUtil.getParent(resultFileOut, 1);
-//			FileUtil.getParent(toFile, toParent)
 			map.put("resultFileOut", FileUtil.getAbsolutePath(toFile));
 			IPlugin plugin = PluginFactory.getPlugin("docker-cli");
 			try {
