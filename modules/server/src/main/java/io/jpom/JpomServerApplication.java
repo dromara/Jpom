@@ -68,6 +68,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
 	 * --rest:load_init_db 重新加载数据库初始化操作
 	 * --rest:super_user_pwd 重置超级管理员密码
 	 * --recover:h2db 当 h2 数据出现奔溃无法启动需要执行恢复逻辑
+	 * --close:super_user_mfa 重置超级管理员 mfa
 	 *
 	 * @param args 参数
 	 * @throws Exception 异常
@@ -89,16 +90,26 @@ public class JpomServerApplication implements ApplicationEventLoad {
 				.addInterceptor(OpenApiInterceptor.class)
 				.addInterceptor(PermissionInterceptor.class)
 				.run(args);
-		//
+		// 重置 ip 白名单配置
 		if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
-			// 重置 ip 白名单配置
 			SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
 			parametersServer.delByKey(SystemIpConfigModel.ID);
 			Console.log("Clear IP whitelist configuration successfully");
 		}
+		//  重置超级管理员密码
 		if (ArrayUtil.containsIgnoreCase(args, "--rest:super_user_pwd")) {
 			UserService userService = SpringUtil.getBean(UserService.class);
 			String restResult = userService.restSuperUserPwd();
+			if (restResult != null) {
+				Console.log(restResult);
+			} else {
+				Console.log("There is no super administrator account in the system");
+			}
+		}
+		// 关闭超级管理员 mfa
+		if (ArrayUtil.containsIgnoreCase(args, "--close:super_user_mfa")) {
+			UserService userService = SpringUtil.getBean(UserService.class);
+			String restResult = userService.closeSuperUserMfa();
 			if (restResult != null) {
 				Console.log(restResult);
 			} else {
