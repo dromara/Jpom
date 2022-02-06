@@ -1,24 +1,25 @@
 <template>
   <div class="full-content">
     <!-- 搜索区 -->
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="仓库名称" />
-        <a-input class="search-input-item" v-model="listQuery['%gitUrl%']" placeholder="仓库地址" />
-        <a-select v-model="listQuery.repoType" allowClear placeholder="仓库类型" class="search-input-item">
-          <a-select-option :value="'0'">GIT</a-select-option>
-          <a-select-option :value="'1'">SVN</a-select-option>
-        </a-select>
-
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-button type="primary" @click="handleAdd">新增</a-button>
-        <a-button type="primary" @click="handleAddGitee">通过私人令牌导入仓库</a-button>
-      </a-space>
-    </div>
+    <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
     <a-table :columns="columns" :data-source="list" bordered rowKey="id" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" @change="changePage">
+      <template slot="title">
+        <a-space>
+          <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="仓库名称" />
+          <a-input class="search-input-item" v-model="listQuery['%gitUrl%']" placeholder="仓库地址" />
+          <a-select v-model="listQuery.repoType" allowClear placeholder="仓库类型" class="search-input-item">
+            <a-select-option :value="'0'">GIT</a-select-option>
+            <a-select-option :value="'1'">SVN</a-select-option>
+          </a-select>
+
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="handleAddGitee">通过私人令牌导入仓库</a-button>
+        </a-space>
+      </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -196,7 +197,7 @@ export default {
       giteeImportVisible: false,
       repos: [],
       username: null,
-      importTypePlaceholder: '在 设置-->安全设置-->私人令牌 中获取',
+      importTypePlaceholder: "",
       columns: [
         { title: "仓库名称", dataIndex: "name", sorter: true, width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         {
@@ -332,6 +333,7 @@ export default {
     },
     handleAddGitee() {
       this.giteeImportVisible = true;
+      this.importTypeChange(this.giteeImportForm.type);
     },
     handleGiteeImportFormOk() {
       this.$refs["giteeImportForm"].validate((valid) => {
@@ -458,26 +460,26 @@ export default {
       this.loadData();
     },
     importTypeChange(val) {
-      if (val === 'gitee') {
-        this.importTypePlaceholder = '在 设置-->安全设置-->私人令牌 中获取';
-      } else if (val === 'github') {
-        this.importTypePlaceholder = '在 Settings-->Developer settings-->Personal access tokens 中获取';
-      } else if (val === 'gitlab') {
-        this.importTypePlaceholder = '在 preferences-->Access Tokens 中获取';
+      if (val === "gitee") {
+        this.importTypePlaceholder = "在 设置-->安全设置-->私人令牌 中获取";
+      } else if (val === "github") {
+        this.importTypePlaceholder = "在 Settings-->Developer settings-->Personal access tokens 中获取";
+      } else if (val === "gitlab") {
+        this.importTypePlaceholder = "在 preferences-->Access Tokens 中获取";
       } else {
-        this.importTypePlaceholder = '请输入私人令牌';
+        this.importTypePlaceholder = "请输入私人令牌";
       }
     },
   },
 };
 </script>
 <style scoped>
-.filter {
+/* .filter {
   margin-bottom: 10px;
 }
 
 .btn-add {
   margin-left: 10px;
   margin-right: 0;
-}
+} */
 </style>
