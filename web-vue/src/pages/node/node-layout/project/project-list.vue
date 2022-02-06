@@ -173,30 +173,23 @@
                 <p>以 yaml/yml 格式配置,scriptId 为脚本模版ID，可以到脚本模版编辑弹窗中查看 scriptId</p>
                 <p>脚本里面支持的变量有：#{PROJECT_ID}、#{PROJECT_NAME}、#{PROJECT_PATH}</p>
                 <p><b>status</b> 流程执行完脚本后，输出的内容最后一行必须为：running:$pid <b>$pid 为当前项目实际的进程ID</b>。如果输出最后一行不是预期格式项目状态将是未运行</p>
-                <p>配置示例：</p>
-                <code>
-                  <ol>
-                    <li>description: 测试</li>
-                    <li>run:</li>
-                    <li>&nbsp;&nbsp;start:</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptId: eb16f693147b43a1b06f9eb96aed1bc7</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptArgs: start</li>
-                    <li>&nbsp;&nbsp;status:</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptId: eb16f693147b43a1b06f9eb96aed1bc7</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptArgs: status</li>
-                    <li>&nbsp;&nbsp;stop:</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptId: eb16f693147b43a1b06f9eb96aed1bc7</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptArgs: stop</li>
-                  </ol>
-                </code>
-                <ul></ul>
+                <p>配置详情请参考配置示例</p>
               </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <div style="height: 40vh; overflow-y: scroll">
-            <code-editor v-model="temp.dslContent" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"></code-editor>
-          </div>
+          <a-tabs>
+            <a-tab-pane key="1" tab="DSL 配置">
+              <div style="height: 40vh; overflow-y: scroll">
+                <code-editor v-model="temp.dslContent" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef' }"></code-editor>
+              </div>
+            </a-tab-pane>
+            <a-tab-pane key="2" tab="配置示例">
+              <div style="height: 40vh; overflow-y: scroll">
+                <code-editor v-model="PROJECT_DSL_DEFATUL" :options="{ mode: 'yaml', tabSize: 2, theme: 'abcdef', readOnly: true }"></code-editor>
+              </div>
+            </a-tab-pane>
+          </a-tabs>
         </a-form-model-item>
         <a-form-model-item v-show="noFileModes.includes(temp.runMode)">
           <template slot="label">
@@ -354,7 +347,7 @@ import Monitor from "./project-monitor";
 import Replica from "./project-replica";
 import { parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL } from "@/utils/const";
 
 import {
   getJdkList,
@@ -396,6 +389,7 @@ export default {
       runModeList: runModeList,
       javaModes: javaModes,
       noFileModes: noFileModes,
+      PROJECT_DSL_DEFATUL,
       list: [],
       temp: {},
       editProjectVisible: false,
