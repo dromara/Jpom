@@ -189,7 +189,6 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		return this.updateById(t);
 	}
 
-
 	public List<T> list() {
 		return super.listByBean(ReflectUtil.newInstance(this.tClass));
 	}
@@ -197,7 +196,6 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	public long count() {
 		return super.count(Entity.create());
 	}
-
 
 	/**
 	 * 通用的分页查询, 使用该方法查询，数据库表字段不能保护 "page", "limit", "order_field", "order", "total"

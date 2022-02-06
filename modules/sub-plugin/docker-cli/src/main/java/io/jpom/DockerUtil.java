@@ -77,6 +77,17 @@ public class DockerUtil {
 	}
 
 	/**
+	 * 临时文件目录
+	 *
+	 * @param name    文件名
+	 * @param tempDir 临时文件目录
+	 * @return temp
+	 */
+	public static File createTemp(String name, File tempDir) {
+		return FileUtil.file(tempDir, name);
+	}
+
+	/**
 	 * 转化文件
 	 *
 	 * @param name    资源名称
@@ -87,7 +98,7 @@ public class DockerUtil {
 		try {
 			Resource resourceObj = ResourceUtil.getResourceObj(name);
 			InputStream stream = resourceObj.getStream();
-			File tempFile = FileUtil.file(tempDir, "docker-temp", name);
+			File tempFile = DockerUtil.createTemp(name, tempDir);
 			FileUtil.writeFromStream(stream, tempFile);
 			return tempFile;
 		} catch (Exception e) {

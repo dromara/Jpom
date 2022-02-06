@@ -48,4 +48,10 @@ public class DockerInfoTest {
 		List<DockerInfoModel> models = dockerInfoService.queryByTag("sdfsd");
 		System.out.println(models);
 	}
+
+	@Test
+	public void testQueryTag2() {
+		List<DockerInfoModel> models = dockerInfoService.queryByTag("sdfsd", 1);
+		System.out.println(models);
+	}
 }

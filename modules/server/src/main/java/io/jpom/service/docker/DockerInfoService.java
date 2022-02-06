@@ -27,6 +27,7 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
+import cn.hutool.db.sql.Condition;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.IAsyncLoad;
@@ -111,6 +112,31 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 		super.update(dockerInfoModel);
 	}
 
+	/**
+	 * 根据 tag 查询 容器
+	 *
+	 * @param tag    tag
+	 * @param status 状态
+	 * @return list
+	 */
+	public List<DockerInfoModel> queryByTag(String tag, Integer status) {
+		Condition condition = new Condition(" instr(tags,'" + tag + "')", "");
+		condition.setPlaceHolder(false);
+		condition.setOperator("");
+		if (status == null) {
+			return super.findByCondition(condition);
+		} else {
+			Condition statusCondition = new Condition("status", status);
+			return super.findByCondition(condition, statusCondition);
+		}
+	}
+
+	/**
+	 * 根据 tag 查询 容器
+	 *
+	 * @param tag tag
+	 * @return list
+	 */
 	public List<DockerInfoModel> queryByTag(String tag) {
 		String sql = StrUtil.format("SELECT * FROM {} where instr(tags,?);", super.getTableName());
 		return super.queryList(sql, StrUtil.wrap(tag, StrUtil.COLON, StrUtil.COLON));

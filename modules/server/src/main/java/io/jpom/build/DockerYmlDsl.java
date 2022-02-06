@@ -58,7 +58,10 @@ public class DockerYmlDsl extends BaseJsonModel {
 	 * 基础镜像
 	 */
 	private String runsOn;
-
+	/**
+	 * 使用对应到 docker tag 构建
+	 */
+	private String fromTag;
 	/**
 	 * 构建步骤
 	 */
@@ -77,7 +80,11 @@ public class DockerYmlDsl extends BaseJsonModel {
 	 * *            if root directory is ignored
 	 */
 	private List<String> copy;
-
+	/**
+	 * bind mounts 将宿主机上的任意位置的文件或者目录挂在到容器 （--mount type=bind,src=源目录,dst=目标目录）
+	 * /host:/container:ro
+	 */
+	private List<String> binds;
 	/**
 	 * 环境变量
 	 */

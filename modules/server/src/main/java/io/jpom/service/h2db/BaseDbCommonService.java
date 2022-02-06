@@ -33,6 +33,7 @@ import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
+import cn.hutool.db.sql.Condition;
 import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.PageResultDto;
@@ -285,7 +286,7 @@ public abstract class BaseDbCommonService<T> {
 	 * @param <R>    乏型
 	 * @return data
 	 */
-	protected  <R> R entityToBean(Entity entity, Class<R> rClass) {
+	protected <R> R entityToBean(Entity entity, Class<R> rClass) {
 		if (entity == null) {
 			return null;
 		}
@@ -455,6 +456,28 @@ public abstract class BaseDbCommonService<T> {
 	/**
 	 * 查询列表
 	 *
+	 * @param wheres 条件
+	 * @return List
+	 */
+	public List<T> findByCondition(Condition... wheres) {
+		if (!DbConfig.getInstance().isInit()) {
+			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
+			return null;
+		}
+		Db db = Db.use();
+		db.setWrapper((Character) null);
+		try {
+			List<Entity> entities = db.findBy(getTableName(), wheres);
+			return this.entityToBeanList(entities);
+		} catch (Exception e) {
+			throw warpException(e);
+		}
+	}
+
+	/**
+	 * 查询列表
+	 *
 	 * @param data   数据
 	 * @param count  查询数量
 	 * @param orders 排序
@@ -567,14 +590,15 @@ public abstract class BaseDbCommonService<T> {
 	 */
 	public List<T> queryList(String sql, Object... params) {
 		List<Entity> query = this.query(sql, params);
-		if (query != null) {
-			return query.stream().map((entity -> {
-				T entityToBean = this.entityToBean(entity, this.tClass);
-				this.fillSelectResult(entityToBean);
-				return entityToBean;
-			})).collect(Collectors.toList());
-		}
-		return null;
+		return this.entityToBeanList(query);
+		//		if (query != null) {
+		//			return query.stream().map((entity -> {
+		//				T entityToBean = this.entityToBean(entity, this.tClass);
+		//				this.fillSelectResult(entityToBean);
+		//				return entityToBean;
+		//			})).collect(Collectors.toList());
+		//		}
+		//		return null;
 	}
 
 	/**
