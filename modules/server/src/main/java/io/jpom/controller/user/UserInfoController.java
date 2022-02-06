@@ -26,11 +26,9 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserBindWorkspaceService;
@@ -91,23 +89,23 @@ public class UserInfoController extends BaseServerController {
 		}
 	}
 
-	/**
-	 * 修改用户昵称
-	 *
-	 * @param name 新昵称
-	 * @return json
-	 */
-	@RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String updateName(@ValidatorConfig(value = {
-			@ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "2:10", msg = "昵称长度只能是2-10")
-	}) String name) {
-		UserModel userModel = getUser();
-		userModel = userService.getByKey(userModel.getId());
-		userModel.setName(name);
-		userService.update(userModel);
-		setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
-		return JsonMessage.getString(200, "修改成功");
-	}
+//	/**
+//	 * 修改用户昵称
+//	 *
+//	 * @param name 新昵称
+//	 * @return json
+//	 */
+//	@RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+//	public String updateName(@ValidatorConfig(value = {
+//			@ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "2:10", msg = "昵称长度只能是2-10")
+//	}) String name) {
+//		UserModel userModel = getUser();
+//		userModel = userService.getByKey(userModel.getId());
+//		userModel.setName(name);
+//		userService.update(userModel);
+//		setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
+//		return JsonMessage.getString(200, "修改成功");
+//	}
 
 	/**
 	 * 查询用户工作空间

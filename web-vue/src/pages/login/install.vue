@@ -74,19 +74,7 @@
             <a-col :span="12">
               <a-form-item>
                 <h3 id="两步验证应用">两步验证应用</h3>
-                <p><strong>【推荐】腾讯身份验证码</strong> 简单好用 <a href="https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.authenticator">Android</a></p>
-                <p>
-                  <strong>Authy</strong> 功能丰富 专为两步验证码
-                  <a href="https://authy.com/download/">iOS/Android/Windows/Mac/Linux</a>
-                  &nbsp;
-                  <a href="https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn">Chrome 扩展</a>
-                </p>
-                <p>
-                  <strong>Google Authenticator</strong> 简单易用，但不支持密钥导出备份 <a href="https://apps.apple.com/us/app/google-authenticator/id388497605">iOS</a>
-                  <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=cn">Android</a>
-                </p>
-                <p><strong>Microsoft Authenticator</strong> 使用微软全家桶的推荐 <a href="https://www.microsoft.com/zh-cn/account/authenticator">iOS/Android</a></p>
-                <p><strong>1Password</strong> 强大安全的密码管理付费应用<a href="https://1password.com/zh-cn/downloads/">iOS/Android/Windows/Mac/Linux/ChromeOS</a></p>
+                <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html" />
               </a-form-item>
             </a-col>
             <a-divider type="vertical" />
@@ -141,7 +129,7 @@
                     <a-col :span="10">
                       <a-space>
                         <a-button type="primary" html-type="submit" class="btn"> 确认绑定 </a-button>
-                        <a-button type="dashed"> 忽略 </a-button>
+                        <a-button type="dashed" @click="ignoreBindMfa"> 忽略 </a-button>
                       </a-space>
                     </a-col>
                   </a-row>
@@ -155,7 +143,9 @@
   </div>
 </template>
 <script>
-import { initInstall, bindMfa } from "@/api/install";
+import { initInstall } from "@/api/install";
+import { bindMfa } from "@/api/user";
+import { MFA_APP_TIP_ARRAY } from "@/utils/const";
 import QRCode from "qrcodejs2";
 import sha1 from "sha1";
 import Vue from "vue";
@@ -167,6 +157,7 @@ export default {
       setpCurrent: 0,
       mfaData: {},
       tempVue: Vue,
+      MFA_APP_TIP_ARRAY,
     };
   },
   computed: {},
@@ -181,7 +172,7 @@ export default {
   },
   methods: {
     creatQrCode(qrCodeDom, text) {
-      console.log(qrCodeDom);
+      // console.log(qrCodeDom);
       new QRCode(qrCodeDom, {
         text: text || "xxxx",
         width: 120,
@@ -278,6 +269,18 @@ export default {
             }
           });
         }
+      });
+    },
+    // 忽略 mfa
+    ignoreBindMfa() {
+      this.$confirm({
+        title: "系统提示",
+        content: "确定要忽略绑定两步验证吗？强烈建议超级管理员开启两步验证来保证账号安全性",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          this.$router.push({ path: "/" });
+        },
       });
     },
     // /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? +]).*$/

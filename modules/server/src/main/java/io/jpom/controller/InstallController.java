@@ -41,7 +41,6 @@ import io.jpom.service.user.UserService;
 import io.jpom.util.TwoFactorAuthUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,7 +55,6 @@ public class InstallController extends BaseServerController {
 
 
 	private final UserService userService;
-	private static String mfaKey;
 
 	public InstallController(UserService userService) {
 		this.userService = userService;
@@ -107,25 +105,7 @@ public class InstallController extends BaseServerController {
 		jsonObject.put("mfaKey", tfaKey);
 		jsonObject.put("url", TwoFactorAuthUtils.generateOtpAuthUrl(userName, tfaKey));
 		jsonObject.put("tokenData", userLoginDto);
-		// 缓存
-		InstallController.mfaKey = tfaKey;
 		return JsonMessage.getString(200, "初始化成功", jsonObject);
 	}
 
-	@GetMapping(value = "bind_mfa.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String bindMfa(String mfa, String twoCode) {
-		Assert.state(StrUtil.equals(mfa, InstallController.mfaKey), "mfa 信息已经过期");
-		//
-		UserModel user = getUser();
-		boolean bindMfa = userService.hasBindMfa(user.getId());
-		Assert.state(!bindMfa, "当前账号已经绑定 mfa 啦");
-		//
-		Assert.state(user.isSuperSystemUser(), "当前用户不支持绑定");
-		boolean tfaCode = TwoFactorAuthUtils.validateTFACode(mfa, twoCode);
-		Assert.state(tfaCode, " mfa 验证码不正确");
-		userService.bindMfa(user.getId(), mfa);
-		//
-		InstallController.mfaKey = null;
-		return JsonMessage.getString(200, "绑定成功");
-	}
 }

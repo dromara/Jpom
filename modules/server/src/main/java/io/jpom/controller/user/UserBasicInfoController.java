@@ -31,8 +31,8 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
@@ -41,9 +41,13 @@ import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
+import io.jpom.util.TwoFactorAuthUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
@@ -85,7 +89,6 @@ public class UserBasicInfoController extends BaseServerController {
 	 * @author Hotstrip
 	 */
 	@RequestMapping(value = "user-basic-info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String getUserBasicInfo() {
 		UserModel userModel = getUser();
 		userModel = userService.getByKey(userModel.getId(), false);
@@ -102,11 +105,10 @@ public class UserBasicInfoController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "save_basicInfo.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String saveBasicInfo(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email,
 								String dingDing, String workWx, String code) {
-		UserModel userModel = getUser();
-		userModel = userService.getByKey(userModel.getId());
+		UserModel user = getUser();
+		UserModel userModel = userService.getByKey(user.getId());
 		// 判断是否一样
 		if (!StrUtil.equals(email, userModel.getEmail())) {
 			Integer cacheCode = CACHE.get(email);
@@ -114,18 +116,18 @@ public class UserBasicInfoController extends BaseServerController {
 				return JsonMessage.getString(405, "请输入正确验证码");
 			}
 		}
-		userModel.setEmail(email);
+		UserModel updateModel = new UserModel(user.getId());
+		updateModel.setEmail(email);
 		//
 		if (StrUtil.isNotEmpty(dingDing) && !Validator.isUrl(dingDing)) {
 			Validator.validateMatchRegex(RegexPool.URL_HTTP, dingDing, "请输入正确钉钉地址");
 		}
-		userModel.setDingDing(dingDing);
+		updateModel.setDingDing(dingDing);
 		if (StrUtil.isNotEmpty(workWx)) {
 			Validator.validateMatchRegex(RegexPool.URL_HTTP, workWx, "请输入正确企业微信地址");
 		}
-		userModel.setWorkWx(workWx);
-		userService.update(userModel);
-		setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
+		updateModel.setWorkWx(workWx);
+		userService.update(updateModel);
 		return JsonMessage.getString(200, "修改成功");
 	}
 
@@ -136,7 +138,6 @@ public class UserBasicInfoController extends BaseServerController {
 	 * @return msg
 	 */
 	@RequestMapping(value = "sendCode.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String sendCode(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email) {
 		MailAccountModel config = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
 		Assert.notNull(config, "管理员还没有配置系统邮箱,请联系管理配置发件信息");
@@ -162,5 +163,70 @@ public class UserBasicInfoController extends BaseServerController {
 		List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user);
 		Assert.notEmpty(models, "当前账号没有绑定任何工作空间，请联系管理员处理");
 		return JsonMessage.getString(200, "", models);
+	}
+
+	/**
+	 * 查询自己的 mfa 相关信息
+	 *
+	 * @return json
+	 */
+	@GetMapping(value = "my_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String mfaInfo() {
+		UserModel user = getUser();
+		JSONObject jsonObject = new JSONObject();
+		boolean bindMfa = userService.hasBindMfa(user.getId());
+		jsonObject.put("status", bindMfa);
+		//
+		if (bindMfa) {
+			UserModel userModel = userService.getByKey(user.getId(), false);
+			jsonObject.put("mfaKey", userModel.getTwoFactorAuthKey());
+			jsonObject.put("url", TwoFactorAuthUtils.generateOtpAuthUrl(userModel.getId(), userModel.getTwoFactorAuthKey()));
+		}
+		return JsonMessage.getString(200, "", jsonObject);
+	}
+
+	/**
+	 * 关闭自己到 mfa 相关信息
+	 *
+	 * @return json
+	 */
+	@GetMapping(value = "close_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String closeMfa() {
+		UserModel user = getUser();
+		UserModel userModel = new UserModel(user.getId());
+		userModel.setTwoFactorAuthKey(StrUtil.EMPTY);
+		userService.update(userModel);
+		return JsonMessage.getString(200, "关闭成功");
+	}
+
+	@GetMapping(value = "generate_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String generateMfa() {
+		UserModel user = getUser();
+		JSONObject jsonObject = new JSONObject();
+		String tfaKey = TwoFactorAuthUtils.generateTFAKey();
+		jsonObject.put("mfaKey", tfaKey);
+		jsonObject.put("url", TwoFactorAuthUtils.generateOtpAuthUrl(user.getId(), tfaKey));
+		return JsonMessage.getString(200, "", jsonObject);
+	}
+
+	/**
+	 * 绑定 mfa
+	 *
+	 * @param mfa     mfa key
+	 * @param twoCode 验证码
+	 * @return json
+	 */
+	@GetMapping(value = "bind_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String bindMfa(String mfa, String twoCode) {
+		//
+		UserModel user = getUser();
+		boolean bindMfa = userService.hasBindMfa(user.getId());
+		Assert.state(!bindMfa, "当前账号已经绑定 mfa 啦");
+		//
+		Assert.state(user.isSuperSystemUser(), "当前用户不支持绑定");
+		boolean tfaCode = TwoFactorAuthUtils.validateTFACode(mfa, twoCode);
+		Assert.state(tfaCode, " mfa 验证码不正确");
+		userService.bindMfa(user.getId(), mfa);
+		return JsonMessage.getString(200, "绑定成功");
 	}
 }
