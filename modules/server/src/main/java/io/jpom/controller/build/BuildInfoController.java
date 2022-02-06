@@ -48,7 +48,6 @@ import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -56,7 +55,6 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.dblog.RepositoryService;
-import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.CommandUtil;
@@ -86,20 +84,17 @@ public class BuildInfoController extends BaseServerController {
 	private final SshService sshService;
 	private final BuildInfoService buildInfoService;
 	private final RepositoryService repositoryService;
-	private final DockerInfoService dockerInfoService;
 	private final BuildExecuteService buildExecuteService;
 
 	public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
 							   SshService sshService,
 							   BuildInfoService buildInfoService,
 							   RepositoryService repositoryService,
-							   DockerInfoService dockerInfoService,
 							   BuildExecuteService buildExecuteService) {
 		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
 		this.sshService = sshService;
 		this.buildInfoService = buildInfoService;
 		this.repositoryService = repositoryService;
-		this.dockerInfoService = dockerInfoService;
 		this.buildExecuteService = buildExecuteService;
 	}
 
@@ -262,9 +257,6 @@ public class BuildInfoController extends BaseServerController {
 	private void checkDocker(String script) {
 		DockerYmlDsl build = DockerYmlDsl.build(script);
 		build.check();
-		// 检查容器是否存在
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(build.getDockerId(), getRequest());
-		Assert.notNull(dockerInfoModel, "对应的容器不存在,请检查 docker id 是否正确");
 	}
 
 	/**

@@ -23,7 +23,12 @@
 package io.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpStatus;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.http.Method;
 import cn.hutool.setting.yaml.YamlUtil;
 import io.jpom.model.BaseJsonModel;
 import lombok.Data;
@@ -32,8 +37,10 @@ import org.springframework.util.Assert;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * docker 构建 配置
@@ -48,19 +55,15 @@ import java.util.Map;
 public class DockerYmlDsl extends BaseJsonModel {
 
 	/**
-	 * 容器ID
+	 * 基础镜像
 	 */
-	private String dockerId;
+	private String runsOn;
+
 	/**
-	 * 镜像 from
+	 * 构建步骤
 	 */
-	private String image;
-	/**
-	 * bind mounts 将宿主机上的任意位置的文件或者目录挂在到容器 （--mount type=bind,src=源目录,dst=目标目录）
-	 * <p>
-	 * <host path>:<container path>:<access mode>
-	 */
-	private List<String> binds;
+	private List<Map<String, Object>> steps;
+
 	/**
 	 * 将本地文件复制到 容器
 	 * <p>
@@ -74,26 +77,79 @@ public class DockerYmlDsl extends BaseJsonModel {
 	 * *            if root directory is ignored
 	 */
 	private List<String> copy;
-	/**
-	 * 入口点
-	 */
-	private List<String> entrypoints;
-	/**
-	 * 执行的命令
-	 */
-	private List<String> cmds;
+
 	/**
 	 * 环境变量
 	 */
 	private Map<String, String> env;
 
 	public void check() {
-		Assert.hasText(getImage(), "请填写镜像名称");
-		//
-		List<String> entrypoints = getEntrypoints();
-		List<String> cmds = getCmds();
-		Assert.state(CollUtil.isNotEmpty(entrypoints) || CollUtil.isNotEmpty(cmds), "请填写 entrypoint 或者 cmd");
-		Assert.hasText(getDockerId(), "请填写 docker Id");
+		Assert.hasText(runsOn, "请填写runsOn。目前仅支持 ubuntu-latest.更多支持敬请期待!");
+		Assert.state(CollUtil.isNotEmpty(steps), "请填写 steps");
+		stepsCheck();
+	}
+
+	public void stepsCheck() {
+		Set<String> usesSet = new HashSet<>();
+		boolean containsRun = false;
+		for (Map<String, Object> step : steps) {
+			if (!containsRun && step.containsKey("run")) {
+				containsRun = true;
+			}
+			if (step.containsKey("env")) {
+				Assert.isInstanceOf(Map.class, step.get("env"), "env 必须是 map 类型");
+			}
+			if (step.containsKey("uses")) {
+				List<String> supportedPlugins = ListUtil.of("node", "java", "maven", "cache");
+				Assert.isInstanceOf(String.class, step.get("uses"), "uses 只支持 String 类型");
+				String uses = (String) step.get("uses");
+				Assert.isTrue(supportedPlugins.contains(uses), String.format("目前仅支持的插件: %s", supportedPlugins));
+				if ("node".equals(uses)) {
+					nodePluginCheck(step);
+				}
+				if ("java".equals(uses)) {
+					javaPluginCheck(step);
+				}
+				if ("maven".equals(uses)) {
+					mavenPluginCheck(step);
+				}
+				if ("cache".equals(uses)) {
+					cachePluginCheck(step);
+				}
+				usesSet.add(uses);
+			}
+		}
+		if (usesSet.contains("maven") && !usesSet.contains("java")) {
+			throw new IllegalArgumentException("maven 插件依赖 java , 使用 maven 插件必须优先引入 java 插件");
+		}
+		Assert.isTrue(containsRun, "steps 中没有发现任何 run , run 用于执行命令");
+	}
+
+	public void cachePluginCheck(Map<String, Object> step) {
+		Assert.notNull(step.get("path"), "cache 插件 path 不能为空");
+	}
+
+	public void mavenPluginCheck(Map<String, Object> step) {
+		Assert.notNull(step.get("version"), "maven 插件 version 不能为空");
+		String version = String.valueOf(step.get("version"));
+		String link = String.format("https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/%s/binaries/apache-maven-%s-bin.tar.gz", version, version);
+		HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
+		Assert.isTrue(httpResponse.isOk() || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 maven 版本号");
+	}
+
+	public void javaPluginCheck(Map<String, Object> step) {
+		Assert.notNull(step.get("version"), "java 插件 version 不能为空");
+		Integer version = Integer.valueOf(String.valueOf(step.get("version")));
+		List<Integer> supportedVersions = ListUtil.of(8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+		Assert.isTrue(supportedVersions.contains(version), String.format("目前java 插件支持的版本: %s", supportedVersions));
+	}
+
+	public void nodePluginCheck(Map<String, Object> step) {
+		Assert.notNull(step.get("version"), "node 插件 version 不能为空");
+		String version = String.valueOf(step.get("version"));
+		String link = String.format("https://registry.npmmirror.com/-/binary/node/v%s/node-v%s-linux-x64.tar.gz", version, version);
+		HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
+		Assert.isTrue(httpResponse.isOk() || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 node 版本号");
 	}
 
 	/**

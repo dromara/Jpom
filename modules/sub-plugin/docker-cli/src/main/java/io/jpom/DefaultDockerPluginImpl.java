@@ -27,6 +27,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.MD5;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -42,9 +43,15 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -71,18 +78,37 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 		}
 	}
 
+
 	public void build(Map<String, Object> parameter) {
 		DockerClient dockerClient = DockerUtil.build(parameter, 10);
-
 		String logFile = (String) parameter.get("logFile");
 		LogRecorder logRecorder = LogRecorder.builder().filePath(logFile).build();
-
 		List<String> copy = (List<String>) parameter.get("copy");
 		String resultFile = (String) parameter.get("resultFile");
 		String resultFileOut = (String) parameter.get("resultFileOut");
+		List<Map<String, Object>> steps = (List<Map<String, Object>>) parameter.get("steps");
+		Map<String, String> env = (Map<String, String>) parameter.get("env");
+		String buildId = env.get("JPOM_BUILD_ID");
+		String runsOn = (String) parameter.get("runsOn");
 
-		String containerId = this.buildNewContainer(dockerClient, parameter, logRecorder);
+		String image = String.format("jpomdocker/runs_%s", runsOn);
+		parameter.put("image", image);
+		buildRunOn(dockerClient, runsOn, image, logRecorder);
+		List<Mount> mounts = new ArrayList<>();
+		mounts.addAll(cachePluginCheck(dockerClient, steps, buildId));
+		mounts.addAll(javaPluginCheck(dockerClient, steps));
+		mounts.addAll(mavenPluginCheck(dockerClient, steps));
+		mounts.addAll(nodePluginCheck(dockerClient, steps));
+		String containerId = this.buildNewContainer(dockerClient, parameter, mounts);
 		try {
+			String buildShell = generateBuildShell(steps, buildId);
+			Path tempDirectory = Files.createTempDirectory("build");
+			Path tempFile = Files.createFile(Paths.get(tempDirectory.toString() + File.separator + "build.sh"));
+			Files.write(tempFile, buildShell.getBytes(), StandardOpenOption.WRITE);
+			dockerClient.copyArchiveToContainerCmd(containerId)
+					.withHostResource(tempFile.toAbsolutePath().toString())
+					.withRemotePath("/tmp/")
+					.exec();
 			this.copyArchiveToContainerCmd(dockerClient, containerId, copy);
 			// 启动容器
 			try {
@@ -97,9 +123,209 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			this.waitContainerCmd(dockerClient, containerId, logRecorder);
 			// 获取容器执行结果文件
 			this.copyArchiveFromContainerCmd(dockerClient, containerId, logRecorder, resultFile, resultFileOut);
+		} catch (IOException e) {
+			logRecorder.error("创建临时文件异常:", e);
 		} finally {
 			this.removeContainerCmd(dockerClient, containerId);
 		}
+	}
+
+	private String generateBuildShell(List<Map<String, Object>> steps, String buildId) {
+		StringBuilder stepsScript = new StringBuilder("#!/bin/bash\n");
+		stepsScript.append("echo \"<<<<<<< Build Start >>>>>>>\"\n");
+		for (Map<String, Object> step : steps) {
+			if (step.containsKey("env")) {
+				stepsScript.append("# env\n");
+				Map<String, String> env = (Map<String, String>) step.get("env");
+				for (String key : env.keySet()) {
+					stepsScript.append(String.format("echo \"export %s=%s\" >> /etc/profile\n", key, env.get(key)));
+				}
+			}
+			stepsScript.append("source /etc/profile \n");
+			if (step.containsKey("uses")) {
+				String uses = (String) step.get("uses");
+				if ("node".equals(uses)) {
+					stepsScript.append(nodeScript(step));
+				}
+				if ("java".equals(uses)) {
+					stepsScript.append(javaScript(step));
+				}
+				if ("maven".equals(uses)) {
+					stepsScript.append(mavenScript(step));
+				}
+				if ("cache".equals(uses)) {
+					stepsScript.append(cacheScript(step, buildId));
+				}
+			}
+			if (step.containsKey("run")) {
+				stepsScript.append("# run\n");
+				String run = (String) step.get("run");
+				stepsScript.append(run).append(" \n");
+			}
+		}
+		stepsScript.append("echo \"<<<<<<< Build End >>>>>>>\"\n");
+		return stepsScript.toString();
+	}
+
+	private String cacheScript(Map<String, Object> step, String buildId) {
+		String cachePath = String.valueOf(step.get("path"));
+		String path = String.format("/opt/jpom_cache_%s_%s", buildId, MD5.create().digestHex(cachePath));
+		String script = "# cacheScript\n";
+		script += String.format("ln -s %s %s \n", path, cachePath);
+		return script;
+	}
+
+	private String mavenScript(Map<String, Object> step) {
+		String version = String.valueOf(step.get("version"));
+		String path = String.format("/opt/jpom_maven_%s", version);
+		String script = "# mavenScript\n";
+		script += String.format("echo \"export MAVEN_HOME=%s\" >> /etc/profile\n", path);
+		script += String.format("echo \"export PATH=%s/bin:$PATH\" >> /etc/profile\n", path);
+		script += "source /etc/profile \n";
+		return script;
+	}
+
+	private String javaScript(Map<String, Object> step) {
+		String version = String.valueOf(step.get("version"));
+		String path = String.format("/opt/jpom_java_%s", version);
+		String script = "# javaScript\n";
+		script += String.format("echo \"export JAVA_HOME=%s\" >> /etc/profile\n", path);
+		script += String.format("echo \"export PATH=%s/bin:$PATH\" >> /etc/profile\n", path);
+		script += "source /etc/profile \n";
+		return script;
+	}
+
+	private String nodeScript(Map<String, Object> step) {
+		String version = String.valueOf(step.get("version"));
+		String path = String.format("/opt/jpom_node_%s", version);
+		String script = "# nodeScript\n";
+		script += String.format("echo \"export NODE_HOME=%s\" >> /etc/profile\n", path);
+		script += String.format("echo \"export PATH=%s/bin:$PATH\" >> /etc/profile\n", path);
+		script += "source /etc/profile \n";
+		return script;
+	}
+
+	private void buildRunOn(DockerClient dockerClient, String runsOn, String image, LogRecorder logRecorder) {
+		try {
+			dockerClient.inspectImageCmd(image).exec();
+		} catch (NotFoundException e) {
+			HashSet<String> tags = new HashSet<>();
+			tags.add(image);
+			try {
+				dockerClient.buildImageCmd(new File(runsOn + "/Dockerfile"))
+						.withTags(tags)
+						.exec(new ResultCallback.Adapter<>()).awaitCompletion();
+			} catch (InterruptedException ex) {
+				logRecorder.error("构建 runsOn 镜像被中断", ex);
+			}
+		}
+	}
+
+	private List<Mount> cachePluginCheck(DockerClient dockerClient, List<Map<String, Object>> steps, String buildId) {
+		List<Mount> mounts = new ArrayList<>();
+		steps.stream().filter(stringObjectMap -> stringObjectMap.containsKey("uses") && "cache".equals(String.valueOf(stringObjectMap.get("uses")))).forEach(stringObjectMap -> {
+			String name = String.format("jpom_cache_%s_%s", buildId, MD5.create().digestHex(String.valueOf(stringObjectMap.get("path"))));
+			mounts.add(new Mount().withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name));
+			try {
+				dockerClient.inspectVolumeCmd(name).exec();
+			} catch (NotFoundException e) {
+				dockerClient.createVolumeCmd().withName(name).exec();
+			}
+		});
+		return mounts;
+	}
+
+	private List<Mount> javaPluginCheck(DockerClient dockerClient, List<Map<String, Object>> steps) {
+		List<Mount> mounts = new ArrayList<>();
+		steps.stream().filter(stringObjectMap -> stringObjectMap.containsKey("uses") && "java".equals(String.valueOf(stringObjectMap.get("uses")))).forEach(stringObjectMap -> {
+			String version = String.valueOf(stringObjectMap.get("version"));
+			String name = String.format("jpom_java_%s", version);
+			mounts.add(new Mount().withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name));
+			try {
+				dockerClient.inspectVolumeCmd(name).exec();
+			} catch (NotFoundException e) {
+				dockerClient.createVolumeCmd().withName(name).exec();
+				ArrayList<Mount> mounts2 = new ArrayList<>();
+				Mount mount = new Mount().withType(MountType.VOLUME)
+						.withSource(name)
+						.withTarget("/opt/java");
+				mounts2.add(mount);
+				HostConfig hostConfig = new HostConfig()
+						.withAutoRemove(true).withMounts(mounts2);
+				CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd("jpomdocker/runs_ubuntu-latest")
+						.withHostConfig(hostConfig)
+						.withEnv("JAVA_VERSION=" + version)
+						.withEntrypoint("/bin/bash", "/tmp/install.sh").exec();
+				dockerClient.copyArchiveToContainerCmd(createContainerResponse.getId())
+						.withHostResource(new File("uses/java/install.sh").getAbsolutePath())
+						.withRemotePath("/tmp/")
+						.exec();
+				dockerClient.startContainerCmd(createContainerResponse.getId()).exec();
+			}
+		});
+		return mounts;
+	}
+
+	private List<Mount> mavenPluginCheck(DockerClient dockerClient, List<Map<String, Object>> steps) {
+		List<Mount> mounts = new ArrayList<>();
+		steps.stream().filter(stringObjectMap -> stringObjectMap.containsKey("uses") && "maven".equals(String.valueOf(stringObjectMap.get("uses")))).forEach(stringObjectMap -> {
+			String version = String.valueOf(stringObjectMap.get("version"));
+			String name = String.format("jpom_maven_%s", version);
+			mounts.add(new Mount().withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name));
+			try {
+				dockerClient.inspectVolumeCmd(name).exec();
+			} catch (NotFoundException e) {
+				dockerClient.createVolumeCmd().withName(name).exec();
+				ArrayList<Mount> mounts2 = new ArrayList<>();
+				Mount mount = new Mount().withType(MountType.VOLUME)
+						.withSource(name)
+						.withTarget("/opt/maven");
+				mounts2.add(mount);
+				HostConfig hostConfig = new HostConfig()
+						.withAutoRemove(true).withMounts(mounts2);
+				CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd("jpomdocker/runs_ubuntu-latest")
+						.withHostConfig(hostConfig)
+						.withEnv("MAVEN_VERSION=" + version)
+						.withEntrypoint("/bin/bash", "/tmp/install.sh").exec();
+				dockerClient.copyArchiveToContainerCmd(createContainerResponse.getId())
+						.withHostResource(new File("uses/maven/install.sh").getAbsolutePath())
+						.withRemotePath("/tmp/")
+						.exec();
+				dockerClient.startContainerCmd(createContainerResponse.getId()).exec();
+			}
+		});
+		return mounts;
+	}
+
+	private List<Mount> nodePluginCheck(DockerClient dockerClient, List<Map<String, Object>> steps) {
+		List<Mount> mounts = new ArrayList<>();
+		steps.stream().filter(stringObjectMap -> stringObjectMap.containsKey("uses") && "node".equals(String.valueOf(stringObjectMap.get("uses")))).forEach(stringObjectMap -> {
+			String version = String.valueOf(stringObjectMap.get("version"));
+			String name = String.format("jpom_node_%s", version);
+			mounts.add(new Mount().withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name));
+			try {
+				dockerClient.inspectVolumeCmd(name).exec();
+			} catch (NotFoundException e) {
+				dockerClient.createVolumeCmd().withName(name).exec();
+				ArrayList<Mount> mounts2 = new ArrayList<>();
+				Mount mount = new Mount().withType(MountType.VOLUME)
+						.withSource(name)
+						.withTarget("/opt/node");
+				mounts2.add(mount);
+				HostConfig hostConfig = new HostConfig()
+						.withAutoRemove(true).withMounts(mounts2);
+				CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd("jpomdocker/runs_ubuntu-latest")
+						.withHostConfig(hostConfig)
+						.withEnv("NODE_VERSION=" + version)
+						.withEntrypoint("/bin/bash", "/tmp/install.sh").exec();
+				dockerClient.copyArchiveToContainerCmd(createContainerResponse.getId())
+						.withHostResource(new File("uses/node/install.sh").getAbsolutePath())
+						.withRemotePath("/tmp/")
+						.exec();
+				dockerClient.startContainerCmd(createContainerResponse.getId()).exec();
+			}
+		});
+		return mounts;
 	}
 
 	private void pullLog(DockerClient dockerClient, String containerId, LogRecorder logRecorder) {
@@ -143,7 +369,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 
 	private void copyArchiveFromContainerCmd(DockerClient dockerClient, String containerId, LogRecorder logRecorder, String resultFile, String resultFileOut) {
 		try (InputStream stream = dockerClient.copyArchiveFromContainerCmd(containerId, resultFile).exec();
-			 TarArchiveInputStream tarStream = new TarArchiveInputStream(stream);) {
+			 TarArchiveInputStream tarStream = new TarArchiveInputStream(stream)) {
 			TarArchiveEntry tarArchiveEntry;
 			while ((tarArchiveEntry = tarStream.getNextTarEntry()) != null) {
 				if (!tarStream.canReadEntryData(tarArchiveEntry)) {
@@ -167,62 +393,27 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 		}
 	}
 
-	private String buildNewContainer(DockerClient dockerClient, Map<String, Object> parameter, LogRecorder logRecorder) {
+
+	private String buildNewContainer(DockerClient dockerClient, Map<String, Object> parameter, List<Mount> mounts) {
 		String image = (String) parameter.get("image");
 		String workingDir = (String) parameter.get("workingDir");
 		String dockerName = (String) parameter.get("dockerName");
-		List<String> binds = (List<String>) parameter.get("binds");
-		List<String> entrypoint = (List<String>) parameter.get("entrypoints");
-		List<String> cmds = (List<String>) parameter.get("cmds");
+
 		Map<String, String> env = (Map<String, String>) parameter.get("env");
 		CreateContainerCmd containerCmd = dockerClient.createContainerCmd(image);
 		containerCmd.withName(dockerName).withWorkingDir(workingDir);
-		//
-		List<Bind> bindList = new ArrayList<>();
-		if (CollUtil.isNotEmpty(binds)) {
-			bindList = binds.stream().map(Bind::parse).collect(Collectors.toList());
-		}
-		//
-		HostConfig hostConfig = HostConfig.newHostConfig().withBinds(bindList);
+		HostConfig hostConfig = HostConfig.newHostConfig()
+				.withMounts(mounts);
 		containerCmd.withHostConfig(hostConfig);
 
-		if (entrypoint != null) {
-			containerCmd.withEntrypoint(entrypoint);
-		}
-		if (cmds != null) {
-			containerCmd.withCmd(cmds);
-		}
+
 		if (env != null) {
 			List<String> envList = env.entrySet().stream().map(stringStringEntry -> StrUtil.format("{}={}", stringStringEntry.getKey(), stringStringEntry.getValue())).collect(Collectors.toList());
 			containerCmd.withEnv(envList);
 		}
-		//
-		// 检查镜像是否存在本地
-		boolean imagePull = false;
-		try {
-			dockerClient.inspectImageCmd(image).exec();
-		} catch (NotFoundException e) {
-			imagePull = true;
-		}
-		// 拉取镜像
-		if (imagePull) {
-			try {
-				dockerClient.pullImageCmd(image).exec(new ResultCallback.Adapter<PullResponseItem>() {
-					@Override
-					public void onNext(PullResponseItem object) {
-						logRecorder.info("{} status: {}", StrUtil.emptyToDefault(object.getId(), StrUtil.EMPTY), object.getStatus());
-					}
-				}).awaitCompletion();
-			} catch (InterruptedException | RuntimeException e) {
-				logRecorder.error("镜像下载失败:", e);
-				throw new RuntimeException(e);
-			}
-		}
-		//
 		try {
 			InspectContainerResponse exec = dockerClient.inspectContainerCmd(dockerName).exec();
-			String id = exec.getId();
-			this.removeContainerCmd(dockerClient, id);
+			this.removeContainerCmd(dockerClient, exec.getId());
 		} catch (NotFoundException ignored) {
 		}
 		// 创建容器
