@@ -46,7 +46,6 @@ export function closeMfa() {
   });
 }
 
-
 // 生成 两步验证信息
 export function generateMfa() {
   return axios({
@@ -177,8 +176,21 @@ export function sendEmailCode(email) {
 export function unlockUser(id) {
   return axios({
     url: "/user/unlock",
-    method: "post",
-    data: { id },
+    method: "get",
+    params: { id },
+  });
+}
+
+/**
+ * 关闭用户 mfa 两步验证
+ * @param {String} id 管理员 ID
+ * @returns
+ */
+export function closeUserMfa(id) {
+  return axios({
+    url: "/user/close_user_mfa",
+    method: "get",
+    params: { id },
   });
 }
 

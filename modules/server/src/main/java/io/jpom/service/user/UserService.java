@@ -131,11 +131,10 @@ public class UserService extends BaseDbService<UserModel> {
 	 */
 	public void updatePwd(String id, String newPwd) {
 		String salt = this.generateSalt();
-		UserModel userModel = new UserModel();
-		userModel.setId(id);
+		UserModel userModel = UserModel.unLock(id);
+		//		userModel.setId(id);
 		userModel.setSalt(salt);
 		userModel.setPassword(SecureUtil.sha1(newPwd + salt));
-		UserModel.unLock(userModel);
 		super.update(userModel);
 	}
 

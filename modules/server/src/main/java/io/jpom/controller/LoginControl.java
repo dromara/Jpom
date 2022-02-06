@@ -183,7 +183,7 @@ public class LoginControl extends BaseServerController {
 				}
 				// 验证
 				if (userService.simpleLogin(userName, userPwd) != null) {
-					updateModel = userModel.unLock();
+					updateModel = UserModel.unLock(userName);
 					this.ipSuccess();
 					// 判断是否开启 两步验证
 					boolean bindMfa = userService.hasBindMfa(userName);

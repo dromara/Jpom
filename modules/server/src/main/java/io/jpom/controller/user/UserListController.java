@@ -26,6 +26,7 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -40,10 +41,7 @@ import io.jpom.service.user.UserService;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -76,6 +74,12 @@ public class UserListController extends BaseServerController {
 	@Feature(method = MethodFeature.LIST)
 	public String getUserList() {
 		PageResultDto<UserModel> userModelPageResultDto = userService.listPage(getRequest());
+		userModelPageResultDto.each(userModel -> {
+			boolean bindMfa = userService.hasBindMfa(userModel.getId());
+			if (bindMfa) {
+				userModel.setTwoFactorAuthKey("true");
+			}
+		});
 		return JsonMessage.getString(200, "", userModelPageResultDto);
 	}
 
@@ -208,14 +212,27 @@ public class UserListController extends BaseServerController {
 	 * @param id id
 	 * @return json
 	 */
-	@RequestMapping(value = "unlock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "unlock", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
-	public String unlock(String id) {
-		UserModel userModel = userService.getByKey(id);
-		Assert.notNull(userModel, "修改失败:-1");
-		userService.update(userModel.unLock());
+	public String unlock(@ValidatorItem String id) {
+		UserModel update = UserModel.unLock(id);
+		userService.update(update);
 		return JsonMessage.getString(200, "解锁成功");
 	}
 
-
+	/**
+	 * 关闭用户 mfa
+	 *
+	 * @param id id
+	 * @return json
+	 */
+	@GetMapping(value = "close_user_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EDIT)
+	@SystemPermission(superUser = true)
+	public String closeMfa(@ValidatorItem String id) {
+		UserModel update = new UserModel(id);
+		update.setTwoFactorAuthKey(StrUtil.EMPTY);
+		userService.update(update);
+		return JsonMessage.getString(200, "关闭成功");
+	}
 }
