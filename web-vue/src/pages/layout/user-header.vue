@@ -30,7 +30,7 @@
       <a-menu slot="overlay">
         <a-menu-item @click="handleUpdatePwd">
           <a-button type="link">
-            <a-space><a-icon type="lock" />修改密码</a-space>
+            <a-space><a-icon type="lock" />安全管理</a-space>
           </a-button>
         </a-menu-item>
         <!-- <a-menu-item>
@@ -57,18 +57,84 @@
       </a-menu>
     </a-dropdown>
     <!-- 修改密码区 -->
-    <a-modal v-model="updateNameVisible" title="修改密码" @ok="handleUpdatePwdOk" :maskClosable="false">
-      <a-form-model ref="pwdForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-form-model-item label="原密码" prop="oldPwd">
-          <a-input-password v-model="temp.oldPwd" placeholder="请输入原密码" />
-        </a-form-model-item>
-        <a-form-model-item label="新密码" prop="newPwd">
-          <a-input-password v-model="temp.newPwd" placeholder="请输入新密码" />
-        </a-form-model-item>
-        <a-form-model-item label="确认密码" prop="confirmPwd">
-          <a-input-password v-model="temp.confirmPwd" placeholder="请输入确认密码" />
-        </a-form-model-item>
-      </a-form-model>
+    <a-modal v-model="updateNameVisible" :width="'60vw'" title="安全管理" :footer="null" :maskClosable="false">
+      <a-tabs v-model="temp.tabActiveKey" @change="tabChange">
+        <a-tab-pane :key="1" tab="修改密码">
+          <a-form-model ref="pwdForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+            <a-form-model-item label="原密码" prop="oldPwd">
+              <a-input-password v-model="temp.oldPwd" placeholder="请输入原密码" />
+            </a-form-model-item>
+            <a-form-model-item label="新密码" prop="newPwd">
+              <a-input-password v-model="temp.newPwd" placeholder="请输入新密码" />
+            </a-form-model-item>
+            <a-form-model-item label="确认密码" prop="confirmPwd">
+              <a-input-password v-model="temp.confirmPwd" placeholder="请输入确认密码" />
+            </a-form-model-item>
+            <a-form-model-item>
+              <a-row type="flex" justify="center">
+                <a-col :span="2">
+                  <a-button type="primary" @click="handleUpdatePwdOk">确认重置</a-button>
+                </a-col>
+              </a-row>
+            </a-form-model-item>
+          </a-form-model>
+        </a-tab-pane>
+        <a-tab-pane :key="2" tab="两步验证">
+          <a-row>
+            <a-col :span="12">
+              <a-form-model ref="mfaForm" :model="temp" :rules="rules" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+                <a-form-model-item label="状态" prop="status">
+                  <a-switch checked-children="开" @change="mfaChange" un-checked-children="关" v-model="temp.status" />
+                </a-form-model-item>
+                <a-form-model-item label="二维码" v-if="temp.status">
+                  <a-row>
+                    <a-col :span="14">
+                      <div class="qrcode" ref="qrCodeUrl" id="qrCodeUrl"></div>
+                    </a-col>
+                    <a-col :span="10" style="line-height: 22px; font-size: 12px; color: red"> 请使用应用扫码绑定令牌,强烈建议保存此二维码或者下面的 MFA key </a-col>
+                  </a-row>
+                </a-form-model-item>
+                <a-form-model-item label="MFA key" v-if="temp.status">
+                  <a-input
+                    v-clipboard:copy="temp.mfaKey"
+                    v-clipboard:success="
+                      () => {
+                        tempVue.prototype.$notification.success({ message: '复制成功' });
+                      }
+                    "
+                    v-clipboard:error="
+                      () => {
+                        tempVue.prototype.$notification.error({ message: '复制失败' });
+                      }
+                    "
+                    readonly
+                    disabled
+                    v-model="temp.mfaKey"
+                  >
+                    <a-icon slot="prefix" type="copy" />
+                  </a-input>
+                </a-form-model-item>
+                <template v-if="temp.needVerify">
+                  <a-form-model-item label="验证码" prop="twoCode">
+                    <a-input v-model="temp.twoCode" placeholder="两步验证码" />
+                  </a-form-model-item>
+                  <a-form-model-item>
+                    <a-row type="flex" justify="center">
+                      <a-col :span="2">
+                        <a-button type="primary" @click="handleBindMfa">确认绑定</a-button>
+                      </a-col>
+                    </a-row>
+                  </a-form-model-item>
+                </template>
+              </a-form-model>
+            </a-col>
+            <a-col :span="12">
+              <h3 id="两步验证应用">两步验证应用</h3>
+              <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html" />
+            </a-col>
+          </a-row>
+        </a-tab-pane>
+      </a-tabs>
     </a-modal>
     <!-- 修改用户资料区 -->
     <a-modal v-model="updateUserVisible" title="修改用户资料" @ok="handleUpdateUserOk" :maskClosable="false">
@@ -140,9 +206,11 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { updatePwd, sendEmailCode, editUserInfo, getUserInfo, myWorkspace } from "@/api/user";
+import { updatePwd, sendEmailCode, editUserInfo, getUserInfo, myWorkspace, myMfa, closeMfa, generateMfa, bindMfa } from "@/api/user";
+import QRCode from "qrcodejs2";
 import sha1 from "sha1";
 import Vue from "vue";
+import { MFA_APP_TIP_ARRAY } from "@/utils/const";
 export default {
   data() {
     return {
@@ -172,7 +240,12 @@ export default {
           { min: 6, message: "密码长度为6-20", trigger: "blur" },
         ],
         email: [{ required: true, message: "请输入邮箱", trigger: "blur" }],
+        twoCode: [
+          { required: true, message: "请输入两步验证码" },
+          { pattern: /^\d{6}$/, message: "验证码 6 为纯数字" },
+        ],
       },
+      MFA_APP_TIP_ARRAY,
     };
   },
   computed: {
@@ -198,6 +271,17 @@ export default {
     this.init();
   },
   methods: {
+    creatQrCode(qrCodeDom, text) {
+      // console.log(qrCodeDom);
+      new QRCode(qrCodeDom, {
+        text: text || "xxxx",
+        width: 120,
+        height: 120,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H,
+      });
+    },
     init() {
       myWorkspace().then((res) => {
         this.myWorkspaceList = res.data;
@@ -256,7 +340,9 @@ export default {
     },
     // 加载修改密码对话框
     handleUpdatePwd() {
-      this.temp = {};
+      this.temp = {
+        tabActiveKey: 1,
+      };
       this.updateNameVisible = true;
       this.$refs["pwdForm"] && this.$refs["pwdForm"].resetFields();
     },
@@ -355,9 +441,93 @@ export default {
           this.reload();
         });
     },
-    // toOldIndex() {
-    //   window.location.href = '/old.html'
-    // }
+    tabChange(key) {
+      if (key === 1) {
+        this.temp = { tabActiveKey: key };
+      } else if (key == 2) {
+        this.temp = { tabActiveKey: key };
+        myMfa().then((res) => {
+          if (res.code === 200) {
+            Object.assign(this.temp, res.data);
+            this.temp = { ...this.temp };
+            // {...this.temp res.data} ;
+            this.tempVue = Vue;
+            this.showQrCode();
+          }
+        });
+      }
+    },
+    showQrCode() {
+      // console.log(this.temp);
+      if (!this.temp.status) {
+        return;
+      }
+      this.$nextTick(() => {
+        const qrCodeDom = document.getElementById("qrCodeUrl");
+        qrCodeDom.innerHTML = "";
+        this.creatQrCode(qrCodeDom, this.temp.url);
+      });
+    },
+    // mfa 状态切换
+    mfaChange(checked) {
+      this.temp.status = !checked;
+      if (checked) {
+        //
+        generateMfa().then((res) => {
+          if (res.code === 200) {
+            Object.assign(this.temp, {
+              status: true,
+              mfaKey: res.data.mfaKey,
+              url: res.data.url,
+              needVerify: true,
+            });
+            this.temp = { ...this.temp };
+            this.showQrCode();
+          }
+        });
+      } else {
+        //
+        this.$confirm({
+          title: "系统提示",
+          content: "确定要关闭两步验证吗？关闭后账号安全性将受到影响,关闭后已经存在的 mfa key 将失效",
+          okText: "确认",
+          cancelText: "取消",
+          onOk: () => {
+            //
+            closeMfa().then((res) => {
+              if (res.code === 200) {
+                this.$notification.success({
+                  message: res.msg,
+                });
+                this.temp.status = false;
+              }
+            });
+          },
+          onCancel: () => {
+            this.temp.status = true;
+            this.showQrCode();
+          },
+        });
+      }
+    },
+    handleBindMfa() {
+      this.$refs["mfaForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        bindMfa({
+          mfa: this.temp.mfaKey,
+          twoCode: this.temp.twoCode,
+        }).then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.temp = { ...this.temp, needVerify: false };
+          }
+        });
+      });
+    },
   },
 };
 </script>
@@ -365,12 +535,5 @@ export default {
 .workspace {
   width: 100px;
   margin-right: 10px;
-}
-.user-header {
-  /* display: inline-table; */
-  /* width: 240px; */
-  /* text-align: right; */
-  /* margin-right: 20px; */
-  /* cursor: pointer; */
 }
 </style>

@@ -189,7 +189,7 @@ const router = new Router({
     {
       path: "/install",
       name: "install",
-      component: () => import("../pages/install"),
+      component: () => import("../pages/login/install"),
     },
     {
       path: "*",

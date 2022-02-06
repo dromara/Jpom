@@ -25,16 +25,3 @@ export function initInstall(params) {
     data: params,
   });
 }
-
-/**
- *  绑定 mfa
- * @param {JSON} params
- * @returns
- */
-export function bindMfa(params) {
-  return axios({
-    url: "/bind_mfa.json",
-    method: "get",
-    params: params,
-  });
-}

@@ -30,6 +30,44 @@ export function refreshToken() {
   });
 }
 
+// 获取自己的 两步验证信息
+export function myMfa() {
+  return axios({
+    url: "/user/my_mfa",
+    method: "get",
+  });
+}
+
+// 关闭 两步验证信息
+export function closeMfa() {
+  return axios({
+    url: "/user/close_mfa",
+    method: "get",
+  });
+}
+
+
+// 生成 两步验证信息
+export function generateMfa() {
+  return axios({
+    url: "/user/generate_mfa",
+    method: "get",
+  });
+}
+
+/**
+ *  绑定 mfa
+ * @param {JSON} params
+ * @returns
+ */
+export function bindMfa(params) {
+  return axios({
+    url: "/user/bind_mfa",
+    method: "get",
+    params: params,
+  });
+}
+
 // 获取用户信息
 export function getUserInfo() {
   return axios({
