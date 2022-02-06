@@ -68,7 +68,15 @@
           </a-form>
         </a-col>
         <a-col :span="22" v-if="setpCurrent === 1">
-          <a-alert message="为了考虑系统安全我们强烈建议超级管理员开启两步验证来确保账号都安全性" banner />
+          <a-alert banner>
+            <template slot="message">
+              <ul style="color: red">
+                <li>为了考虑系统安全我们强烈建议超级管理员开启两步验证来确保账号都安全性</li>
+                <li>绑定成功后将不再显示,强烈建议保存此二维码或者下面的 MFA key</li>
+                <li>请使用应用扫码绑定令牌,然后输入验证码确认绑定才生效</li>
+              </ul>
+            </template>
+          </a-alert>
           <br />
           <a-row>
             <a-col :span="12">
@@ -85,7 +93,6 @@
                     <a-col :span="14">
                       <div class="qrcode" ref="qrCodeUrl" id="qrCodeUrl"></div>
                     </a-col>
-                    <a-col :span="10" style="line-height: 22px; font-size: 12px; color: red"> 请使用应用扫码绑定令牌,强烈建议保存此二维码或者下面的 MFA key </a-col>
                   </a-row>
                 </a-form-item>
                 <a-form-item label="MFA key" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
