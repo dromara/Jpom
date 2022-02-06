@@ -177,6 +177,20 @@ public class UserService extends BaseDbService<UserModel> {
 	}
 
 	/**
+	 * 关闭超级管理账号 mfa
+	 *
+	 * @return 新密码
+	 */
+	public String closeSuperUserMfa() {
+		UserModel where = new UserModel();
+		where.setParent(UserModel.SYSTEM_ADMIN);
+		UserModel update = new UserModel();
+		update.setTwoFactorAuthKey(StrUtil.EMPTY);
+		int count = super.update(super.dataBeanToEntity(update), super.dataBeanToEntity(where));
+		return StrUtil.format("成功关闭超级管理员账号 mfa 验证：{} ", count);
+	}
+
+	/**
 	 * 是否包含 demo 账号
 	 *
 	 * @return true
