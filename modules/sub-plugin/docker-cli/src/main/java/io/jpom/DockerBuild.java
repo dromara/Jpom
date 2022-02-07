@@ -100,7 +100,7 @@ public class DockerBuild implements AutoCloseable {
 					.withHostResource(tempFile.getAbsolutePath())
 					.withRemotePath("/tmp/")
 					.exec();
-			this.copyArchiveToContainerCmd(dockerClient, containerId, copy);
+			this.copyArchiveToContainerCmd(dockerClient, containerId, copy, logRecorder);
 			// 启动容器
 			try {
 				dockerClient.startContainerCmd(containerId).exec();
@@ -174,12 +174,13 @@ public class DockerBuild implements AutoCloseable {
 	 * @param containerId  容器ID
 	 * @param copy         需要 上传到文件信息
 	 */
-	private void copyArchiveToContainerCmd(DockerClient dockerClient, String containerId, List<String> copy) {
+	private void copyArchiveToContainerCmd(DockerClient dockerClient, String containerId, List<String> copy, LogRecorder logRecorder) {
 		if (copy == null || dockerClient == null) {
 			return;
 		}
 		for (String s : copy) {
 			List<String> split = StrUtil.split(s, StrUtil.COLON);
+			logRecorder.info("send file to : {}", split.get(1));
 			dockerClient.copyArchiveToContainerCmd(containerId)
 					.withHostResource(split.get(0))
 					.withRemotePath(split.get(1))

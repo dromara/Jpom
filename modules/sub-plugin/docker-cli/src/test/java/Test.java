@@ -252,7 +252,6 @@ public class Test {
 			Thread.currentThread().interrupt();
 		}
 		// 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
-//		String resultFile = null;
 		String re = "springboot-test-jar/target/";
 		String resultFile = FileUtil.file(workingDir, re).getAbsolutePath();
 		try (

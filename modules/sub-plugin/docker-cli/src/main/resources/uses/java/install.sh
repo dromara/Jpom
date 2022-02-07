@@ -33,7 +33,7 @@ download_url=""
 ARCH_O=`uname -m`
 case "${ARCH_O}" in
    aarch64|arm64)
-	 ARCH='arm64';
+	 ARCH='aarch64';
 	 ;;
    amd64|x86_64)
 	 ARCH='x64';
