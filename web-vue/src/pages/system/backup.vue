@@ -22,8 +22,8 @@
       <template slot="backupType" slot-scope="text" placement="topleft" :title="text">
         <span>{{ backupTypeMap[text] }}</span>
       </template>
-      <template slot="baleTimeStamp" slot-scope="text, reocrd">
-        <a-tooltip placement="topLeft" :title="`${parseTime(text)}`"> {{ parseTime(text) }} {{ reocrd.version }} </a-tooltip>
+      <template slot="baleTimeStamp" slot-scope="text">
+        <a-tooltip placement="topLeft" :title="`${parseTime(text)}`"> {{ parseTime(text) }}  </a-tooltip>
       </template>
       <a-tooltip slot="status" slot-scope="text, reocrd" placement="topLeft" :title="`${backupStatusMap[text]} 点击复制文件路径`">
         <div
@@ -58,9 +58,9 @@
       </a-tooltip> -->
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleDownload(record)">下载</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-          <a-button type="danger" :disabled="record.status !== 1" @click="handleRestore(record)">还原</a-button>
+          <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="danger" :disabled="record.status !== 1" @click="handleRestore(record)">还原</a-button>
         </a-space>
       </template>
     </a-table>
@@ -137,13 +137,13 @@ export default {
           sorter: true,
           scopedSlots: { customRender: "baleTimeStamp" },
         },
-        // {
-        //   title: "版本",
-        //   dataIndex: "version",
-        //   width: 100,
-        //   // ellipsis: true,
-        //   scopedSlots: { customRender: "version" },
-        // },
+        {
+          title: "版本",
+          dataIndex: "version",
+          width: 100,
+          // ellipsis: true,
+          scopedSlots: { customRender: "version" },
+        },
         { title: "备份类型", dataIndex: "backupType", width: 100, ellipsis: true, scopedSlots: { customRender: "backupType" } },
         {
           title: "文件大小",
@@ -176,10 +176,10 @@ export default {
         {
           title: "操作",
           dataIndex: "operation",
-          width: 250,
+          width: 180,
           scopedSlots: { customRender: "operation" },
           align: "left",
-          fixed: "right",
+          // fixed: "right",
         },
       ],
       rules: {

@@ -43,7 +43,7 @@
       </template>
       <span slot="notifyStatus" slot-scope="text">{{ text ? "成功" : "失败" }}</span>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleDetail(record)">详情</a-button>
+        <a-button size="small" type="primary" @click="handleDetail(record)">详情</a-button>
       </template>
     </a-table>
     <!-- 详情区 -->
@@ -87,7 +87,7 @@ export default {
           width: 180,
         },
         { title: "通知状态", dataIndex: "notifyStatus", width: 100, ellipsis: true, scopedSlots: { customRender: "notifyStatus" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 100 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 50 },
       ],
     };
   },

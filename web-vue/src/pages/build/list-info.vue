@@ -23,9 +23,9 @@
           <a-button type="primary" @click="handleAdd">新增</a-button>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" @click="handleEdit(record)" :title="text">
-        <a-icon type="edit" theme="twoTone" />
-        <span>{{ text }}</span>
+      <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" @click="handleEdit(record)" :title="`名称：${text} 点击可以编辑`">
+        <!-- <a-icon type="edit" theme="twoTone" /> -->
+        <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
       </a-tooltip>
       <a-tooltip slot="branchName" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -33,9 +33,10 @@
       <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip> -->
-      <!-- <a-tooltip slot="script" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip> -->
+      <a-tooltip slot="buildMode" slot-scope="text" placement="topLeft" :title="text === 1 ? '容器构建' : '本地构建'">
+        <a-icon v-if="text === 1" type="cloud" />
+        <a-icon v-else type="code" />
+      </a-tooltip>
       <a-tooltip slot="releaseMethod" slot-scope="text, record">
         <template slot="title">
           <ul>
@@ -58,8 +59,8 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
-          <a-button type="primary" v-else @click="handleConfirmStartBuild(record)">构建</a-button>
+          <a-button size="small" type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
+          <a-button size="small" type="primary" v-else @click="handleConfirmStartBuild(record)">构建</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
@@ -564,6 +565,10 @@ export default {
               title: "指定 pom 文件打包 mvn -f xxxx/pom.xml clean package",
               value: "mvn -f xxxx/pom.xml clean package",
             },
+            {
+              title: "指定 settings 文件打包 mvn -s xxxxx/settings.xml clean package",
+              value: "mvn -s script/settings.xml clean package",
+            },
           ],
         },
         {
@@ -598,14 +603,14 @@ export default {
       buildConfirmVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
-        // { title: "分组", dataIndex: "group", key: "group%", sorter: true, width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
+
         {
           title: "分支",
           dataIndex: "branchName",
-
           ellipsis: true,
           scopedSlots: { customRender: "branchName" },
         },
+        { title: "方式", dataIndex: "buildMode", align: "center", width: 80, ellipsis: true, scopedSlots: { customRender: "buildMode" } },
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         {
           title: "构建 ID",
@@ -617,7 +622,7 @@ export default {
         {
           title: "修改人",
           dataIndex: "modifyUser",
-          width: 150,
+          width: 130,
           ellipsis: true,
           sorter: true,
           scopedSlots: { customRender: "modifyUser" },
@@ -652,10 +657,10 @@ export default {
         {
           title: "操作",
           dataIndex: "operation",
-          width: 150,
+          width: 130,
           scopedSlots: { customRender: "operation" },
           align: "left",
-          fixed: "right",
+          // fixed: "right",
         },
       ],
       rules: {

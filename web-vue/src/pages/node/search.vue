@@ -82,8 +82,8 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleFile(record)">文件</a-button>
-          <a-button type="primary" @click="handleConsole(record)" v-show="noFileModes.includes(record.runMode)">控制台</a-button>
+          <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
+          <a-button size="small" type="primary" @click="handleConsole(record)" v-show="noFileModes.includes(record.runMode)">控制台</a-button>
         </a-space>
       </template>
     </a-table>
@@ -173,7 +173,7 @@ export default {
         },
         { title: "运行状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 180 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 140 },
       ],
     };
   },

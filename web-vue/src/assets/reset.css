@@ -32,3 +32,7 @@ body {
 .ant-btn {
   margin-right: 10px;
 } */
+
+.ant-btn-sm {
+  font-size: 12px;
+}
