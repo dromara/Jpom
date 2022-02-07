@@ -18,7 +18,7 @@
   </a-layout>
 </template>
 <script>
-import Container from "./container.vue";
+import Container from "./container";
 export default {
   props: {
     id: {
