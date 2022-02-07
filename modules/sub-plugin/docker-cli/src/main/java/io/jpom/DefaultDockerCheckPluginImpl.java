@@ -24,6 +24,7 @@ package io.jpom;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Version;
@@ -133,24 +134,28 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
 	 */
 	private List<JSONObject> getApiVersions() {
 		Field[] fields = ReflectUtil.getFields(RemoteApiVersion.class);
-		return Arrays.stream(fields).map(field -> {
-			boolean aFinal = Modifier.isFinal(field.getModifiers());
-			boolean aStatic = Modifier.isStatic(field.getModifiers());
-			boolean aPublic = Modifier.isPublic(field.getModifiers());
-			if (!aFinal || !aStatic || !aPublic) {
-				return null;
-			}
-			Object fieldValue = ReflectUtil.getFieldValue(null, field);
-			if (fieldValue instanceof RemoteApiVersion) {
-				return (RemoteApiVersion) fieldValue;
-			}
-			return null;
-		}).filter(apiVersion -> apiVersion != null && apiVersion != RemoteApiVersion.UNKNOWN_VERSION).map(apiVersion -> {
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("webVersion", apiVersion.asWebPathPart());
-			jsonObject.put("version", apiVersion.getVersion());
-			return jsonObject;
-		}).collect(Collectors.toList());
+		return Arrays.stream(fields)
+				.map(field -> {
+					boolean aFinal = Modifier.isFinal(field.getModifiers());
+					boolean aStatic = Modifier.isStatic(field.getModifiers());
+					boolean aPublic = Modifier.isPublic(field.getModifiers());
+					if (!aFinal || !aStatic || !aPublic) {
+						return null;
+					}
+					Object fieldValue = ReflectUtil.getFieldValue(null, field);
+					if (fieldValue instanceof RemoteApiVersion) {
+						return (RemoteApiVersion) fieldValue;
+					}
+					return null;
+				})
+				.filter(apiVersion -> apiVersion != null && apiVersion != RemoteApiVersion.UNKNOWN_VERSION)
+				.sorted((o1, o2) -> StrUtil.compareVersion(o2.getVersion(), o1.getVersion())).map(apiVersion -> {
+					JSONObject jsonObject = new JSONObject();
+					jsonObject.put("webVersion", apiVersion.asWebPathPart());
+					jsonObject.put("version", apiVersion.getVersion());
+					return jsonObject;
+				})
+				.collect(Collectors.toList());
 	}
 
 	/**

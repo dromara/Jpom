@@ -41,7 +41,7 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
+          <a-button type="primary" :disabled="parseInt(record.status) !== 1" @click="handleConsole(record)">控制台</a-button>
           <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
           <!--
           <a-button type="primary" @click="handleTemplate(record)">模板</a-button> -->
