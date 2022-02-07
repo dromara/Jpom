@@ -24,16 +24,20 @@ package io.jpom;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.ListContainersCmd;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.Image;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -66,10 +70,70 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			case "restartContainer":
 				this.restartContainerCmd(parameter);
 				return null;
+			case "listImages":
+				return this.listImagesCmd(parameter);
+			case "removeImage":
+				this.removeImageCmd(parameter);
+				return null;
+			case "listVolumes":
+				return this.listVolumesCmd(parameter);
+			case "removeVolume":
+				this.removeVolumeCmd(parameter);
+				return null;
 			default:
 				throw new IllegalArgumentException("不支持的类型");
 		}
 	}
+
+	private List<JSONObject> listVolumesCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		ListVolumesCmd listVolumesCmd = dockerClient.listVolumesCmd();
+		Boolean dangling = Convert.toBool(parameter.get("dangling"), false);
+		if (dangling) {
+			listVolumesCmd.withDanglingFilter(dangling);
+		}
+		String name = (String) parameter.get("name");
+		if (StrUtil.isNotEmpty(name)) {
+			listVolumesCmd.withFilter("name", CollUtil.newArrayList(name));
+		}
+
+		ListVolumesResponse exec = listVolumesCmd.exec();
+		List<InspectVolumeResponse> volumes = exec.getVolumes();
+		volumes = ObjectUtil.defaultIfNull(volumes, new ArrayList<>());
+		return volumes.stream().map((Function<InspectVolumeResponse, Object>) inspectVolumeResponse -> {
+			InspectVolumeCmd inspectVolumeCmd = dockerClient.inspectVolumeCmd(inspectVolumeResponse.getName());
+			return inspectVolumeCmd.exec();
+		}).map(container -> (JSONObject) JSONObject.toJSON(container)).collect(Collectors.toList());
+	}
+
+	private void removeVolumeCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		String volumeName = (String) parameter.get("volumeName");
+		dockerClient.removeVolumeCmd(volumeName).exec();
+	}
+
+
+	private List<JSONObject> listImagesCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		ListImagesCmd listImagesCmd = dockerClient.listImagesCmd();
+		listImagesCmd.withShowAll(Convert.toBool(parameter.get("showAll"), true));
+		listImagesCmd.withDanglingFilter(Convert.toBool(parameter.get("dangling"), false));
+
+		String name = (String) parameter.get("name");
+		if (StrUtil.isNotEmpty(name)) {
+			listImagesCmd.withImageNameFilter(name);
+		}
+		List<Image> exec = listImagesCmd.exec();
+		exec = ObjectUtil.defaultIfNull(exec, new ArrayList<>());
+		return exec.stream().map(container -> (JSONObject) JSONObject.toJSON(container)).collect(Collectors.toList());
+	}
+
+	private void removeImageCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		String imageId = (String) parameter.get("imageId");
+		dockerClient.removeImageCmd(imageId).withForce(true).exec();
+	}
+
 
 	private List<JSONObject> listContainerCmd(Map<String, Object> parameter) {
 		DockerClient dockerClient = DockerUtil.build(parameter);
@@ -83,7 +147,12 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 		if (StrUtil.isNotEmpty(containerId)) {
 			listContainersCmd.withIdFilter(CollUtil.newArrayList(containerId));
 		}
+//		String imageId = (String) parameter.get("imageId");
+//		if (StrUtil.isNotEmpty(imageId)) {
+//			listContainersCmd.withFilter("image", CollUtil.newArrayList(imageId));
+//		}
 		List<Container> exec = listContainersCmd.exec();
+		exec = ObjectUtil.defaultIfNull(exec, new ArrayList<>());
 		return exec.stream().map(container -> (JSONObject) JSONObject.toJSON(container)).collect(Collectors.toList());
 	}
 

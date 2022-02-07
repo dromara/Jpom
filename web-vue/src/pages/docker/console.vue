@@ -5,20 +5,29 @@
         <a-menu-item key="containers">
           <span class="nav-text">容器</span>
         </a-menu-item>
-        <a-menu-item key="containers1">
-          <span class="nav-text">容器1</span>
+        <a-menu-item key="images">
+          <span class="nav-text">镜像</span>
+        </a-menu-item>
+        <a-menu-item key="volumes">
+          <span class="nav-text">卷</span>
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout :style="{ background: '#fff', padding: '0 5px' }">
       <!-- <a-layout-header :style="{ background: '#fff', padding: 0 }" /> -->
       <!-- :style="{ margin: '24px 16px 0' }" -->
-      <a-layout-content><Container v-if="menuKey === 'containers'" :id="this.id" /> </a-layout-content>
+      <a-layout-content>
+        <container v-if="menuKey === 'containers'" :id="this.id" />
+        <images v-if="menuKey === 'images'" :id="this.id" />
+        <volumes v-if="menuKey === 'volumes'" :id="this.id" />
+      </a-layout-content>
     </a-layout>
   </a-layout>
 </template>
 <script>
 import Container from "./container";
+import Images from "./images";
+import Volumes from "./volumes";
 export default {
   props: {
     id: {
@@ -27,6 +36,8 @@ export default {
   },
   components: {
     Container,
+    Images,
+    Volumes,
   },
   data() {
     return {

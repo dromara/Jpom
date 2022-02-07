@@ -117,3 +117,52 @@ export function dockerContainerStop(params) {
     params: params,
   });
 }
+
+/**
+ * 容器中的镜像列表
+ * @param {JSON} params
+ */
+export function dockerImagesList(params) {
+  return axios({
+    url: "/docker/images/list",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 删除镜像
+ * @param {JSON} params
+ */
+export function dockerImageRemove(params) {
+  return axios({
+    url: "/docker/images/remove",
+    method: "get",
+    params: params,
+  });
+}
+
+
+/**
+ * 卷
+ * @param {JSON} params
+ */
+ export function dockerVolumesList(params) {
+  return axios({
+    url: "/docker/volumes/list",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 删除卷
+ * @param {JSON} params
+ */
+export function dockerVolumesRemove(params) {
+  return axios({
+    url: "/docker/volumes/remove",
+    method: "get",
+    params: params,
+  });
+}
