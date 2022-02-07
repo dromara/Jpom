@@ -33,12 +33,12 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.monitor.EmailUtil;
 import io.jpom.service.system.SystemParametersServer;
-import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.util.TwoFactorAuthUtils;
@@ -68,16 +68,13 @@ public class UserBasicInfoController extends BaseServerController {
 	private final SystemParametersServer systemParametersServer;
 	private final UserBindWorkspaceService userBindWorkspaceService;
 	private final UserService userService;
-	private final WorkspaceService workspaceService;
 
 	public UserBasicInfoController(SystemParametersServer systemParametersServer,
 								   UserBindWorkspaceService userBindWorkspaceService,
-								   UserService userService,
-								   WorkspaceService workspaceService) {
+								   UserService userService) {
 		this.systemParametersServer = systemParametersServer;
 		this.userBindWorkspaceService = userBindWorkspaceService;
 		this.userService = userService;
-		this.workspaceService = workspaceService;
 	}
 
 
@@ -206,8 +203,9 @@ public class UserBasicInfoController extends BaseServerController {
 		UserModel user = getUser();
 		boolean bindMfa = userService.hasBindMfa(user.getId());
 		Assert.state(!bindMfa, "当前账号已经绑定 mfa 啦");
+		// demo
+		Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
 		//
-		Assert.state(user.isSuperSystemUser(), "当前用户不支持绑定");
 		boolean tfaCode = TwoFactorAuthUtils.validateTFACode(mfa, twoCode);
 		Assert.state(tfaCode, " mfa 验证码不正确");
 		userService.bindMfa(user.getId(), mfa);

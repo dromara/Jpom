@@ -25,14 +25,12 @@ package io.jpom.controller.script;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.cron.pattern.CronPattern;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
@@ -102,18 +100,7 @@ public class ScriptController extends BaseServerController {
 
 		Assert.hasText(scriptModel.getContext(), "内容为空");
 		//
-		if (StrUtil.isNotEmpty(autoExecCron)) {
-			UserModel user = getUser();
-			Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
-			try {
-				new CronPattern(autoExecCron);
-			} catch (Exception e) {
-				throw new IllegalArgumentException("定时执行表达式格式不正确");
-			}
-			scriptModel.setAutoExecCron(autoExecCron);
-		} else {
-			scriptModel.setAutoExecCron(StrUtil.EMPTY);
-		}
+		scriptModel.setAutoExecCron(this.checkCron(autoExecCron));
 		//
 		String oldNodeIds = null;
 		if (StrUtil.isEmpty(id)) {
