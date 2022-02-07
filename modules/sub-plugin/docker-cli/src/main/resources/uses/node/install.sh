@@ -20,6 +20,5 @@ case "${ARCH}" in
 	 ;;
 esac;
 cd /tmp
-wget https://registry.npmmirror.com/-/binary/node/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${BINARY_ARCH}.tar.gz
-tar -zxf node-v${NODE_VERSION}-linux-${BINARY_ARCH}.tar.gz
-cp -r node-v${NODE_VERSION}-linux-${BINARY_ARCH}/* /opt/node/
+wget https://registry.npmmirror.com/-/binary/node/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${BINARY_ARCH}.tar.gz -O node.tar.gz
+tar -zxf node.tar.gz --strip-components 1 -C /opt/node/

@@ -30,7 +30,19 @@ else
 fi
 cd /tmp
 download_url=""
-ARCH=`uname -m`
+ARCH_O=`uname -m`
+case "${ARCH_O}" in
+   aarch64|arm64)
+	 ARCH='arm64';
+	 ;;
+   amd64|x86_64)
+	 ARCH='x64';
+	 ;;
+   *)
+	 echo "Unsupported arch: ${ARCH_O}";
+	 exit 1;
+	 ;;
+esac;
 case "${JAVA_VERSION}" in
 8)
 	download_url="https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/8/jdk/${ARCH}/linux/OpenJDK8U-jdk_${ARCH}_linux_hotspot_8u322b06.tar.gz"
@@ -69,6 +81,4 @@ case "${JAVA_VERSION}" in
 	;;
 esac
 wget ${download_url} -O jdk.tar.gz
-tar -zxf jdk.tar.gz
-unzip_directory=`ls -F | grep "/$"`
-cp -r ${unzip_directory}* /opt/java/
+tar -zxf jdk.tar.gz --strip-components 1 -C /opt/java/
