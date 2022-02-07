@@ -22,8 +22,11 @@
  */
 package io.jpom.common;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.pattern.CronPattern;
 import io.jpom.common.interceptor.LoginInterceptor;
+import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.node.NodeService;
@@ -60,6 +63,25 @@ public abstract class BaseServerController extends BaseJpomController {
 			return null;
 		}
 		return nodeService.getByKey(nodeId);
+	}
+
+	/**
+	 * 验证 cron 表达式, demo 账号不能开启 cron
+	 *
+	 * @param cron cron
+	 * @return 原样返回
+	 */
+	protected String checkCron(String cron) {
+		if (StrUtil.isNotEmpty(cron)) {
+			UserModel user = getUser();
+			Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
+			try {
+				new CronPattern(cron);
+			} catch (Exception e) {
+				throw new IllegalArgumentException("cron 表达式格式不正确");
+			}
+		}
+		return ObjectUtil.defaultIfNull(cron, StrUtil.EMPTY);
 	}
 
 	@Override

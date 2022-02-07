@@ -29,7 +29,6 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.cron.pattern.CronPattern;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -40,14 +39,12 @@ import io.jpom.build.BuildExecuteService;
 import io.jpom.build.BuildUtil;
 import io.jpom.build.DockerYmlDsl;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.SshModel;
-import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -196,16 +193,7 @@ public class BuildInfoController extends BaseServerController {
 		if (StrUtil.isNotEmpty(webhook)) {
 			Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
 		}
-		if (StrUtil.isNotEmpty(autoBuildCron)) {
-			UserModel user = getUser();
-			Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
-			try {
-				new CronPattern(autoBuildCron);
-			} catch (Exception e) {
-				throw new IllegalArgumentException("定时构建表达式格式不正确");
-			}
-		}
-		buildInfoModel.setAutoBuildCron(autoBuildCron);
+		buildInfoModel.setAutoBuildCron(this.checkCron(autoBuildCron));
 		buildInfoModel.setWebhook(webhook);
 		buildInfoModel.setRepositoryId(repositoryId);
 		buildInfoModel.setName(name);
