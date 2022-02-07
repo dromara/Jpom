@@ -57,3 +57,63 @@ export function deleteDcoker(params) {
     params,
   });
 }
+
+/**
+ * 容器中的列表
+ * @param {JSON} params
+ */
+export function dockerContainerList(params) {
+  return axios({
+    url: "/docker/container/list",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 删除容器
+ * @param {JSON} params
+ */
+export function dockerContainerRemove(params) {
+  return axios({
+    url: "/docker/container/remove",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
+ * 重启容器
+ * @param {JSON} params
+ */
+export function dockerContainerRestart(params) {
+  return axios({
+    url: "/docker/container/restart",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
+ * 启动容器
+ * @param {JSON} params
+ */
+export function dockerContainerStart(params) {
+  return axios({
+    url: "/docker/container/start",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
+ * 停止容器
+ * @param {JSON} params
+ */
+export function dockerContainerStop(params) {
+  return axios({
+    url: "/docker/container/stop",
+    method: "get",
+    params: params,
+  });
+}
