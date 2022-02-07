@@ -53,6 +53,8 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 
 	public static final String DOCKER_CHECK_PLUGIN_NAME = "docker-cli:check";
 
+	public static final String DOCKER_PLUGIN_NAME = "docker-cli";
+
 	@Override
 	public void startLoad() {
 		CronUtils.add(CRON_ID, "0 0/1 * * * ?", () -> DockerInfoService.this);

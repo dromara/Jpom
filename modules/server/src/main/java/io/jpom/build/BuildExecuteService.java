@@ -204,12 +204,7 @@ public class BuildExecuteService {
 		if (buildInfoManage == null) {
 			return false;
 		}
-		if (buildInfoManage.process != null) {
-			try {
-				buildInfoManage.process.destroy();
-			} catch (Exception ignored) {
-			}
-		}
+		buildInfoManage.cancelTask();
 		this.updateStatus(buildInfoManage.taskData.buildInfoModel.getId(), buildInfoManage.logId, BuildStatus.Cancel);
 		BUILD_MANAGE_MAP.remove(id);
 		return true;
@@ -294,27 +289,20 @@ public class BuildExecuteService {
 		private Process process;
 		private LogRecorder logRecorder;
 		private File gitFile;
+		private Thread currentThread;
 
-//		private BuildInfoManage(final TaskData taskData) {
-//			this.taskData = taskData;
-//			BuildInfoModel buildInfoModel = taskData.buildInfoModel;
-//			File logFile = BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
-//			this.logRecorder = LogRecorder.builder().file(logFile).build();
-//			this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
-//
-//			// 解析 其他配置信息
-//			BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildInfoModel.getExtraData(), BuildExtraModule.class);
-//			Assert.notNull(buildExtraModule, "构建信息缺失");
-//			// update value
-
-//			this.buildExtraModule = buildExtraModule;
-//		}
-
-
-		//		@Override
-//		private void updateStatus(BuildStatus status) {
-//
-//		}
+		/**
+		 * 取消任务
+		 */
+		public void cancelTask() {
+			if (process != null) {
+				try {
+					process.destroy();
+				} catch (Exception ignored) {
+				}
+			}
+			currentThread.interrupt();
+		}
 
 		private List<String> antPathMatcher(File rootFile, String match) {
 			String matchStr = FileUtil.normalize(StrUtil.SLASH + match);
@@ -358,10 +346,10 @@ public class BuildExecuteService {
 					logRecorder.info(resultDirFile + "不存在，处理构建产物失败");
 					return false;
 				}
+				logRecorder.info(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
 				return true;
 			}
-			ThreadUtil.sleep(2, TimeUnit.SECONDS);
-			File rootFile = this.gitFile;
+			ThreadUtil.sleep(1, TimeUnit.SECONDS);
 			boolean updateDirFile = false;
 			boolean copyFile = true;
 			if (ANT_PATH_MATCHER.isPattern(resultDirFile)) {
@@ -615,6 +603,7 @@ public class BuildExecuteService {
 
 		@Override
 		public void run() {
+			currentThread = Thread.currentThread();
 			// 初始化构建流程 准备->拉取代码->执行构建命令->打包发布
 			Map<String, Supplier<Boolean>> suppliers = new LinkedHashMap<>(10);
 			suppliers.put("startReady", BuildInfoManage.this::startReady);

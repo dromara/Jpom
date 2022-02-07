@@ -5,7 +5,7 @@
 </template>
 <script>
 // import { loadBuildLog } from '../../api/build';
-import { loadBuildLog } from "../../api/build-info";
+import { loadBuildLog } from "@/api/build-info";
 export default {
   props: {
     temp: {

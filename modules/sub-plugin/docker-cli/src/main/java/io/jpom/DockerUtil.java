@@ -44,11 +44,15 @@ import java.util.Map;
  */
 public class DockerUtil {
 
+	public static DockerClient build(Map<String, Object> parameter) {
+		return build(parameter, 1);
+	}
+
 	/**
 	 * 构建 docker client 对象
 	 *
 	 * @param parameter      参数
-	 * @param maxConnections 最新连接
+	 * @param maxConnections 连接数
 	 * @return DockerClient
 	 */
 	public static DockerClient build(Map<String, Object> parameter, int maxConnections) {

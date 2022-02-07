@@ -41,8 +41,9 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
+          <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
           <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-          <!-- <a-button type="primary" @click="handleDownload(record)">导出</a-button>
+          <!--
           <a-button type="primary" @click="handleTemplate(record)">模板</a-button> -->
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
@@ -106,13 +107,21 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 控制台 -->
+    <a-modal v-model="consoleVisible" title="Docker 控制台" width="80vw" :footer="null" :maskClosable="false">
+      <console v-if="consoleVisible" :id="temp.id"></console>
+    </a-modal>
   </div>
 </template>
 <script>
 import { dockerList, apiVersions, editDocker, editDockerByFile, deleteDcoker } from "@/api/docker-api";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { parseTime } from "@/utils/time";
+import Console from "./console.vue";
 export default {
+  components: {
+    Console,
+  },
   props: {},
   data() {
     return {
@@ -124,6 +133,7 @@ export default {
       temp: {},
       editVisible: false,
       templateVisible: false,
+      consoleVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "host", dataIndex: "host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -142,7 +152,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 170 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 240 },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
@@ -199,6 +209,11 @@ export default {
       this.editVisible = true;
       this.uploadFileList = [];
       this.$refs["editForm"]?.resetFields();
+    },
+    // 控制台
+    handleConsole(record) {
+      this.temp = record;
+      this.consoleVisible = true;
     },
     // 修改
     handleEdit(record) {
