@@ -98,6 +98,8 @@ public class DockerBuild implements AutoCloseable {
 					.withHostResource(tempFile.getAbsolutePath())
 					.withRemotePath("/tmp/")
 					.exec();
+			//
+			copy = this.replaceEnv(copy, env);
 			this.copyArchiveToContainerCmd(dockerClient, containerId, copy, logRecorder);
 			// 启动容器
 			try {
@@ -117,6 +119,20 @@ public class DockerBuild implements AutoCloseable {
 			// 删除临时目录
 			FileUtil.del(tempDir);
 		}
+	}
+
+	private List<String> replaceEnv(List<String> list, Map<String, String> env) {
+		return list.stream().map(s -> {
+			// 处理变量
+			for (Map.Entry<?, ?> envEntry : env.entrySet()) {
+				String envValue = StrUtil.utf8Str(envEntry.getValue());
+				if (null == envValue) {
+					continue;
+				}
+				s = StrUtil.replace(s, "${" + envEntry.getKey() + "}", envValue);
+			}
+			return s;
+		}).collect(Collectors.toList());
 	}
 
 
@@ -140,8 +156,11 @@ public class DockerBuild implements AutoCloseable {
 		//
 		List<Bind> bindList = new ArrayList<>();
 		if (CollUtil.isNotEmpty(binds)) {
-			bindList = binds.stream().map(Bind::parse).collect(Collectors.toList());
+			bindList = this.replaceEnv(binds, env).stream()
+					.map(Bind::parse)
+					.collect(Collectors.toList());
 		}
+
 		HostConfig hostConfig = HostConfig.newHostConfig()
 				.withMounts(mounts).withBinds(bindList);
 		containerCmd.withHostConfig(hostConfig);
