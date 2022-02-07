@@ -42,6 +42,7 @@ public class DockerClientUtil {
 
 
 	public static void copyArchiveFromContainerCmd(DockerClient dockerClient, String containerId, LogRecorder logRecorder, String resultFile, String resultFileOut) {
+		logRecorder.info("download file from : {}", resultFile);
 		try (InputStream stream = dockerClient.copyArchiveFromContainerCmd(containerId, resultFile).exec();
 			 TarArchiveInputStream tarStream = new TarArchiveInputStream(stream)) {
 			TarArchiveEntry tarArchiveEntry;
