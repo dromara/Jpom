@@ -23,6 +23,7 @@
 package io.jpom;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -82,7 +83,11 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
 	private Version pullVersion(Map<String, Object> parameter) {
 		parameter.putIfAbsent("timeout", 5);
 		DockerClient dockerClient = DockerUtil.build(parameter, 1);
-		return dockerClient.versionCmd().exec();
+		try {
+			return dockerClient.versionCmd().exec();
+		} finally {
+			IoUtil.close(dockerClient);
+		}
 	}
 
 	/**
@@ -92,14 +97,17 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
 	 * @return true 可以通讯
 	 */
 	private boolean checkPing(Map<String, Object> parameter) {
+		DockerClient dockerClient = null;
 		try {
 			parameter.putIfAbsent("timeout", 5);
-			DockerClient dockerClient = DockerUtil.build(parameter, 1);
+			dockerClient = DockerUtil.build(parameter, 1);
 			dockerClient.pingCmd().exec();
 			return true;
 		} catch (Exception e) {
 			log.warn("检查 docker url 异常 {}", e.getMessage());
 			return false;
+		} finally {
+			IoUtil.close(dockerClient);
 		}
 	}
 

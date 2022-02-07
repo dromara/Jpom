@@ -507,6 +507,7 @@ public class BuildExecuteService {
 			}
 			DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
 			Assert.notNull(dockerInfoModel, "没有可用的 docker server");
+			logRecorder.info("use docker {}", dockerInfoModel.getName());
 			String workingDir = "/home/jpom/";
 			Map<String, Object> map = dockerInfoModel.toParameter();
 			map.put("runsOn", dockerYmlDsl.getRunsOn());

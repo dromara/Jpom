@@ -66,7 +66,7 @@ export default {
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "挂载点", dataIndex: "mountpoint", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "类型", dataIndex: "driver", ellipsis: true, width: 80, scopedSlots: { customRender: "tooltip" } },
-        { title: "插件时间", dataIndex: "rawValues", ellipsis: true, width: 180, scopedSlots: { customRender: "CreatedAt" } },
+        { title: "创建时间", dataIndex: "rawValues", ellipsis: true, width: 180, scopedSlots: { customRender: "CreatedAt" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
       action: {
