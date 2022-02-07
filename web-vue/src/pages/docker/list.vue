@@ -117,7 +117,7 @@
 import { dockerList, apiVersions, editDocker, editDockerByFile, deleteDcoker } from "@/api/docker-api";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { parseTime } from "@/utils/time";
-import Console from "./console.vue";
+import Console from "./console";
 export default {
   components: {
     Console,
