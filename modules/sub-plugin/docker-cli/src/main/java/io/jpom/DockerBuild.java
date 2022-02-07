@@ -343,6 +343,7 @@ public class DockerBuild {
 					.withAutoRemove(true).withMounts(CollUtil.newArrayList(mount));
 			CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd(image)
 					.withHostConfig(hostConfig)
+					.withName(name)
 					.withEnv(pluginName.toUpperCase() + "_VERSION=" + version)
 					.withLabels(MapUtil.of("jpom_build_" + buildId, buildId))
 					.withEntrypoint("/bin/bash", "/tmp/install.sh").exec();

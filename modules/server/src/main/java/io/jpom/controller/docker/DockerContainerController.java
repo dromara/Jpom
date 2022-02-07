@@ -2,6 +2,7 @@ package io.jpom.controller.docker;
 
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.plugin.*;
@@ -41,8 +42,9 @@ public class DockerContainerController extends BaseServerController {
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
 		parameter.put("name", getParameter("name"));
 		parameter.put("containerId", getParameter("containerId"));
+		parameter.put("imageId", getParameter("imageId"));
 		parameter.put("showAll", getParameter("showAll"));
-		List<Object> listContainer = (List<Object>) plugin.execute("listContainer", parameter);
+		List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listContainer", parameter);
 		return JsonMessage.getString(200, "", listContainer);
 	}
 
