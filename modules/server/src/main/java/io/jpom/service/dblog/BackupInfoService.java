@@ -32,9 +32,11 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.model.data.BackupInfoModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BackupStatusEnum;
 import io.jpom.model.enums.BackupTypeEnum;
 import io.jpom.plugin.IPlugin;
@@ -69,11 +71,16 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 	 * 检查数据库备份
 	 */
 	public void checkAutoBackup() {
-		ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
-		// 创建备份
-		this.createAutoBackup(instance);
-		// 删除历史备份
-		this.deleteAutoBackup(instance);
+		try {
+			BaseServerController.resetInfo(UserModel.EMPTY);
+			ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
+			// 创建备份
+			this.createAutoBackup(instance);
+			// 删除历史备份
+			this.deleteAutoBackup(instance);
+		} finally {
+			BaseServerController.removeEmpty();
+		}
 	}
 
 	/**
