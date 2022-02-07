@@ -5,11 +5,13 @@
 ### 🐣 新增功能
 
 1. 【server】新增容器构建(感谢@💎ℳ๓₯㎕斌💎💘)
-2. 【server】节点脚本列表新增快速查看日志入口（感谢@ʟᴊx💎💎）
-3. 【server】构建新增备注字段,可以用于记录版本日志或者本次构建备注（感谢@Alex）
-4. 【server】新增解绑节点、节点分发功能 用于服务器过期或者已经确定不在使用直接删除节点相关数据（感谢@🐠）
-5. 【server】构建命令新增预设命令提示输入,减少用户输入（感谢@hjk2008 [Gitee issues I4SHC9](https://gitee.com/dromara/Jpom/issues/I4SHC9) ）
-6. 【server】批量构建支持指定部分参数使构建更灵活（感谢@hjk2008 [Gitee issues I4SHB4](https://gitee.com/dromara/Jpom/issues/I4SHB4) ）
+2. 【server】新增容器管理基础版
+3. 【server】节点脚本列表新增快速查看日志入口（感谢@ʟᴊx💎💎）
+4. 【server】构建新增备注字段,可以用于记录版本日志或者本次构建备注（感谢@Alex）
+5. 【server】新增解绑节点、节点分发功能 用于服务器过期或者已经确定不在使用直接删除节点相关数据（感谢@🐠）
+6. 【server】构建命令新增预设命令提示输入,减少用户输入（感谢@hjk2008 [Gitee issues I4SHC9](https://gitee.com/dromara/Jpom/issues/I4SHC9) ）
+7. 【server】批量构建支持指定部分参数使构建更灵活（感谢@hjk2008 [Gitee issues I4SHB4](https://gitee.com/dromara/Jpom/issues/I4SHB4) ）
+8. 【server】用户账号新增两步验证(MFA) 提升账号安全性(感谢@💎ℳ๓₯㎕斌💎💘)
 
 ### 🐞 解决BUG、优化功能
 
@@ -25,6 +27,8 @@
 10. 【server】ssh 快捷安装插件端保存安装包避免多次上传 （感谢@a19920714liou [Gitee issues I4SHJC](https://gitee.com/dromara/Jpom/issues/I4SHJC) ）
 11. 【server】ssh 快捷安装插件端权限改为管理员
 12. 【server】构建 ssh 发布授权目录采用下拉模式,提升用户操作感知 (感谢@hjk2008 [Gitee issues I4SICE](https://gitee.com/dromara/Jpom/issues/I4SICE) )
+
+> 特别感谢：[💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) 贡献容器构建相关架构
 
 ------
 
@@ -81,7 +85,7 @@
 7. 【server】fix：恢复删除脚本模版、ssh 命令模版未删除日志数据
 8. 查看项目控制台日志优化（新增滚动和显示行数配置）
 
-> ⚠️  注意：此次更新了项目控制台日志需要更新插件端后才能正常使用项目控制台否则会出现控制台按钮不可用的情况
+> ⚠️ 注意：此次更新了项目控制台日志需要更新插件端后才能正常使用项目控制台否则会出现控制台按钮不可用的情况
 
 ------
 
@@ -161,7 +165,7 @@
 8. 【server】ssh 私钥支持配置文件和加载用户目录下的私钥文件
 9. 【server】初始化超级管理员不能使用 `demo` 关键词（感谢@A.Nevermore）
 
-> ⚠️  注意：
+> ⚠️ 注意：
 > 1. 已经添加的用户重新绑定工作空间权限（默认没有工作空间操作权限）
 
 ------
