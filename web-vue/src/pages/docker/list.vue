@@ -41,11 +41,11 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" :disabled="parseInt(record.status) !== 1" @click="handleConsole(record)">控制台</a-button>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" type="primary" :disabled="parseInt(record.status) !== 1" @click="handleConsole(record)">控制台</a-button>
+          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <!--
           <a-button type="primary" @click="handleTemplate(record)">模板</a-button> -->
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
@@ -152,7 +152,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 240 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 190 },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],

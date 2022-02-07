@@ -56,17 +56,24 @@
 
       <template slot="startTime" slot-scope="text, record" placement="topLeft">
         <a-tooltip :title="`开始时间：${parseTime(record.startTime)}，${record.endTime ? '结束时间：' + parseTime(record.endTime) : ''}`">
-          <div>{{ parseTime(record.startTime) }}</div>
-          <div>{{ parseTime(record.endTime) }}</div>
+          <span>{{ parseTime(record.startTime) }}</span>
+          <!-- <div>{{ parseTime(record.endTime) }}</div> -->
         </a-tooltip>
       </template>
+      <template slot="endTime" slot-scope="text, record" placement="topLeft">
+        <a-tooltip :title="`开始时间：${parseTime(record.startTime)}，${record.endTime ? '结束时间：' + parseTime(record.endTime) : ''}`">
+          <span v-if="record.endTime">{{ formatDuration((record.endTime || 0) - (record.startTime || 0), "", 2) }}</span>
+          <span v-else>-</span>
+        </a-tooltip>
+      </template>
+
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-tooltip title="下载构建日志,如果按钮不可用表示日志文件不存在,一般是构建历史相关文件被删除">
-            <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="read" /></a-button>
+            <a-button size="small" type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="read" /></a-button>
           </a-tooltip>
           <a-tooltip title="下载构建产物,如果按钮不可用表示产物文件不存在,一般是构建没有产生对应的文件或者构建历史相关文件被删除">
-            <a-button type="primary" :disabled="!record.hashFile" @click="handleFile(record)">
+            <a-button size="small" type="primary" :disabled="!record.hashFile" @click="handleFile(record)">
               <a-icon type="file-zip" />
             </a-button>
           </a-tooltip>
@@ -96,7 +103,7 @@
 <script>
 import BuildLog from "./log";
 import { geteBuildHistory, getBuildListAll, downloadBuildLog, rollback, deleteBuildHistory, releaseMethodMap, statusMap, downloadBuildFile, triggerBuildTypeMap } from "@/api/build-info";
-import { parseTime } from "@/utils/time";
+import { parseTime, formatDuration } from "@/utils/time";
 
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
@@ -129,18 +136,16 @@ export default {
           scopedSlots: { customRender: "startTime" },
           width: 170,
         },
-        // {
-        //   title: "结束时间",
-        //   dataIndex: "endTime",
-        //   sorter: true,
-        //   customRender: (text) => {
-        //     return parseTime(text);
-        //   },
-        //   width: 170,
-        // },
+        {
+          title: "耗时",
+          dataIndex: "endTime",
+          sorter: true,
+          scopedSlots: { customRender: "endTime" },
+          width: 120,
+        },
         { title: "发布方式", dataIndex: "releaseMethod", width: 100, ellipsis: true, scopedSlots: { customRender: "releaseMethod" } },
-        { title: "构建人", dataIndex: "modifyUser", width: 150, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 190, fixed: "right" },
+        { title: "构建人", dataIndex: "modifyUser", width: 130, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 150, fixed: "right" },
       ],
     };
   },
@@ -163,7 +168,8 @@ export default {
     this.loadData();
   },
   methods: {
-    parseTime: parseTime,
+    parseTime,
+    formatDuration,
     // 加载构建列表
     loadBuildList() {
       getBuildListAll().then((res) => {
@@ -270,5 +276,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-</style>
+<style scoped></style>

@@ -45,7 +45,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleDetail(record)">详情</a-button>
+        <a-button size="small" type="primary" @click="handleDetail(record)">详情</a-button>
       </template>
     </a-table>
     <!-- 详情区 -->
@@ -101,11 +101,13 @@ export default {
         {
           title: "操作时间",
           dataIndex: "createTimeMillis",
+          sorter: true,
           customRender: (text, item) => {
             return parseTime(text || item.optTime);
-          } /*width: 180*/,
+          },
+          width: 180,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 120, fixed: "right" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
     };
   },
