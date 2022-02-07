@@ -31,7 +31,6 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.crypto.digest.MD5;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -43,10 +42,7 @@ import io.jpom.util.LogRecorder;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -88,7 +84,9 @@ public class DockerBuild implements AutoCloseable {
 		try {
 			this.buildRunOn(dockerClient, runsOn, image, tempDir, logRecorder);
 			List<Mount> mounts = new ArrayList<>();
-			mounts.addAll(cachePluginCheck(dockerClient, steps, buildId));
+			// 缓存目录
+			List<Mount> cacheMount = this.cachePluginCheck(dockerClient, steps, buildId);
+			mounts.addAll(cacheMount);
 			// 添加插件到 mount
 			mounts.addAll(this.checkDependPlugin(dockerClient, image, steps, buildId, tempDir, logRecorder));
 			containerId = this.buildNewContainer(dockerClient, parameter, mounts);
@@ -189,9 +187,17 @@ public class DockerBuild implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * 生成执行构建的命令
+	 *
+	 * @param steps   执行步骤
+	 * @param buildId 构建ID
+	 * @return sh
+	 */
 	private String generateBuildShell(List<Map<String, Object>> steps, String buildId) {
 		StringBuilder stepsScript = new StringBuilder("#!/bin/bash\n");
 		stepsScript.append("echo \"<<<<<<< Build Start >>>>>>>\"\n");
+		//
 		for (Map<String, Object> step : steps) {
 			if (step.containsKey("env")) {
 				stepsScript.append("# env\n");
@@ -228,7 +234,7 @@ public class DockerBuild implements AutoCloseable {
 
 	private String cacheScript(Map<String, Object> step, String buildId) {
 		String cachePath = String.valueOf(step.get("path"));
-		String path = String.format("/opt/jpom_cache_%s_%s", buildId, MD5.create().digestHex(cachePath));
+		String path = String.format("/opt/jpom_cache_%s_%s", buildId, SecureUtil.md5(cachePath));
 		String script = "# cacheScript\n";
 		script += String.format("ln -s %s %s \n", path, cachePath);
 		return script;
@@ -300,19 +306,26 @@ public class DockerBuild implements AutoCloseable {
 
 	private List<Mount> cachePluginCheck(DockerClient dockerClient, List<Map<String, Object>> steps, String buildId) {
 		return steps.stream()
-				.filter(map -> map.containsKey("uses") && "cache".equals(String.valueOf(map.get("uses"))))
+				.filter(map -> {
+					String uses = (String) map.get("uses");
+					return StrUtil.equals("cache", uses);
+				})
 				.map(stringObjectMap -> {
-					String name = String.format("jpom_cache_%s_%s", buildId, SecureUtil.md5((String) stringObjectMap.get("path")));
-
+					String path = (String) stringObjectMap.get("path");
+					String name = String.format("jpom_cache_%s_%s", buildId, SecureUtil.md5(path));
 					try {
 						dockerClient.inspectVolumeCmd(name).exec();
 					} catch (NotFoundException e) {
+						HashMap<String, String> labels = MapUtil.of("jpom_build_" + buildId, buildId);
+						labels.put("jpom_build_path", path);
 						dockerClient.createVolumeCmd()
 								.withName(name)
-								.withLabels(MapUtil.of("jpom_build_" + buildId, buildId))
+								.withLabels(labels)
 								.exec();
 					}
-					return new Mount().withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name);
+					Mount mount = new Mount();
+					mount.withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name);
+					return mount;
 				}).collect(Collectors.toList());
 	}
 
