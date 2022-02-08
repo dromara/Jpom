@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  */
 public class DockerBuild implements AutoCloseable {
 
-	private static final String[] DEPEND_PLUGIN = new String[]{"java", "maven", "node"};
+	private static final String[] DEPEND_PLUGIN = new String[]{"java", "maven", "node", "go"};
 
 	private final Map<String, Object> parameter;
 	private final DockerClient dockerClient;
@@ -230,15 +230,14 @@ public class DockerBuild implements AutoCloseable {
 				String uses = (String) step.get("uses");
 				if ("node".equals(uses)) {
 					stepsScript.append(nodeScript(step));
-				}
-				if ("java".equals(uses)) {
+				} else if ("java".equals(uses)) {
 					stepsScript.append(javaScript(step));
-				}
-				if ("maven".equals(uses)) {
+				} else if ("maven".equals(uses)) {
 					stepsScript.append(mavenScript(step));
-				}
-				if ("cache".equals(uses)) {
+				} else if ("cache".equals(uses)) {
 					stepsScript.append(cacheScript(step, buildId));
+				} else if ("go".equals(uses)) {
+					stepsScript.append(goScript(step));
 				}
 			}
 			if (step.containsKey("run")) {
@@ -265,6 +264,16 @@ public class DockerBuild implements AutoCloseable {
 		String script = "# mavenScript\n";
 		script += String.format("echo \"export MAVEN_HOME=%s\" >> /etc/profile\n", path);
 		script += String.format("echo \"export PATH=%s/bin:$PATH\" >> /etc/profile\n", path);
+		script += "source /etc/profile \n";
+		return script;
+	}
+
+	private String goScript(Map<String, Object> step) {
+		String version = String.valueOf(step.get("version"));
+		String path = String.format("/opt/jpom_go_%s", version);
+		String script = "# goScript\n";
+		script += String.format("echo \"export GOROOT=%s\" >> /etc/profile\n", path);
+		script += String.format("echo \"export PATH=$PATH:%s/bin\" >> /etc/profile\n", path);
 		script += "source /etc/profile \n";
 		return script;
 	}
