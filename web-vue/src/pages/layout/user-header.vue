@@ -501,9 +501,9 @@ export default {
     },
     // 关闭 mfa
     closeMfaFn() {
-      console.log(this.$refs["mfaForm"]);
+      //console.log(this.$refs["mfaForm"]);
       this.$refs["mfaForm"].validate((valid) => {
-        console.log(valid);
+        // console.log(valid);
         if (!valid) {
           return false;
         }

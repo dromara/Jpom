@@ -308,7 +308,7 @@ export default {
     // 穿梭框 change
     handleChange(targetKeys) {
       this.targetKeys = targetKeys;
-      console.log(targetKeys);
+      //console.log(targetKeys);
     },
     // 新增用户
     handleAdd() {

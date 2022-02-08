@@ -23,7 +23,7 @@ const request = axios.create({
   responseType: "json",
 });
 
-let pro = process.env.NODE_ENV === "pro";
+const pro = process.env.NODE_ENV === "production";
 
 // 请求拦截器
 request.interceptors.request.use(

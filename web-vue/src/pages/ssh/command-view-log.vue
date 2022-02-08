@@ -108,7 +108,7 @@ export default {
               });
             }
             this.logMap = { ...this.logMap };
-            console.log(this.logMap);
+            //console.log(this.logMap);
           }
         });
       }, 2000);
