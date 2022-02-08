@@ -65,11 +65,11 @@ import java.util.stream.Collectors;
  * @author jiangzeyin
  * @date 2019/4/19
  */
-@PreLoadClass(-1)
+@PreLoadClass(value = Integer.MIN_VALUE + 1)
 @Configuration
 public class InitDb implements DisposableBean, InitializingBean {
 
-	@PreLoadMethod
+	@PreLoadMethod(value = Integer.MIN_VALUE)
 	private static void init() {
 		//
 		DbConfig instance = DbConfig.getInstance();

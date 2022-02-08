@@ -496,15 +496,10 @@ public class BuildExecuteService {
 			String script = buildInfoModel.getScript();
 			DockerYmlDsl dockerYmlDsl = DockerYmlDsl.build(script);
 			String fromTag = dockerYmlDsl.getFromTag();
-
-			List<DockerInfoModel> dockerInfoModels;
-			if (StrUtil.isNotEmpty(fromTag)) {
-				// 根据 tag 查询
-				dockerInfoModels = buildExecuteService.dockerInfoService.queryByTag(fromTag, 1);
-			} else {
-				DockerInfoModel.DockerInfoModelBuilder builder = DockerInfoModel.builder();
-				dockerInfoModels = buildExecuteService.dockerInfoService.queryList(builder.status(1).build(), 1);
-			}
+			// 根据 tag 查询
+			List<DockerInfoModel> dockerInfoModels = buildExecuteService
+					.dockerInfoService
+					.queryByTag(buildInfoModel.getWorkspaceId(), 1, fromTag);
 			DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
 			Assert.notNull(dockerInfoModel, "没有可用的 docker server");
 			logRecorder.info("use docker {}", dockerInfoModel.getName());
@@ -518,6 +513,7 @@ public class BuildExecuteService {
 			map.put("logFile", FileUtil.getAbsolutePath(logRecorder.getFile()));
 			//
 			List<String> copy = ObjectUtil.defaultIfNull(dockerYmlDsl.getCopy(), new ArrayList<>());
+			// 将仓库文件上传到容器
 			copy.add(FileUtil.getAbsolutePath(this.gitFile) + StrUtil.COLON + workingDir + StrUtil.COLON + "true");
 			map.put("copy", copy);
 			map.put("binds", ObjectUtil.defaultIfNull(dockerYmlDsl.getBinds(), new ArrayList<>()));
@@ -534,7 +530,7 @@ public class BuildExecuteService {
 			// 产物输出目录
 			File toFile = BuildUtil.getHistoryPackageFile(buildInfoModelId, buildInfoModel.getBuildId(), resultDirFile);
 			map.put("resultFileOut", FileUtil.getAbsolutePath(toFile));
-			IPlugin plugin = PluginFactory.getPlugin("docker-cli");
+			IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 			try {
 				plugin.execute("build", map);
 			} catch (Exception e) {

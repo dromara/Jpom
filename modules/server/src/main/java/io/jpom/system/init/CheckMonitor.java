@@ -53,7 +53,7 @@ import java.util.Map;
  * @author bwcx_jzy
  * @date 2019/7/14
  */
-@PreLoadClass
+@PreLoadClass(value = Integer.MAX_VALUE)
 public class CheckMonitor {
 
 	@PreLoadMethod
