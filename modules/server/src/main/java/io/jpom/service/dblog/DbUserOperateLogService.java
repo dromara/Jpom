@@ -25,10 +25,13 @@ package io.jpom.service.dblog;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import io.jpom.common.Const;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.MonitorUserOptModel;
 import io.jpom.model.data.UserModel;
@@ -48,6 +51,7 @@ import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.UserService;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -180,6 +184,17 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 				DefaultSystemLog.getLog().error("执行操作监控错误", e);
 			}
 		});
+	}
+
+	@Override
+	public String getCheckUserWorkspace(HttpServletRequest request) {
+		// 忽略检查
+		return ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+	}
+
+	@Override
+	protected void checkUserWorkspace(String workspaceId, UserModel userModel) {
+		// 忽略检查
 	}
 
 	@Override

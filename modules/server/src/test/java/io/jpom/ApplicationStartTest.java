@@ -22,6 +22,7 @@
  */
 package io.jpom;
 
+import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.system.init.InitDb;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ import javax.annotation.Resource;
  * @author Hotstrip
  * Test application start, then you can use such as service instance to test your methods
  */
-@SpringBootTest(classes = {JpomServerApplication.class, InitDb.class})
+@SpringBootTest(classes = {JpomServerApplication.class, InitDb.class, PluginFactory.class})
 @AutoConfigureMockMvc
 public class ApplicationStartTest {
 	protected static Logger logger = LoggerFactory.getLogger(ApplicationStartTest.class);
