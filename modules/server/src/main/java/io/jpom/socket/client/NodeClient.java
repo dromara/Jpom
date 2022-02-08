@@ -74,6 +74,10 @@ public class NodeClient extends WebSocketClient {
 	@Override
 	public void onOpen(ServerHandshake serverHandshake) {
 		// 连接成功后获取版本信息
+		getVersion();
+	}
+
+	public void getVersion() {
 		WebSocketMessageModel command = new WebSocketMessageModel("getVersion", this.nodeModel.getId());
 		send(command.toString());
 	}

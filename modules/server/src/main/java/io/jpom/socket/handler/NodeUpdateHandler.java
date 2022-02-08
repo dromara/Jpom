@@ -108,7 +108,10 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 			return;
 		}
 		for (NodeModel model : nodeModelList) {
-			if (clientMap.containsKey(model.getId())) {
+			NodeClient nodeClient = clientMap.get(model.getId());
+			if (nodeClient != null) {
+				//
+				nodeClient.getVersion();
 				continue;
 			}
 			Map<String, Object> attributes = session.getAttributes();
