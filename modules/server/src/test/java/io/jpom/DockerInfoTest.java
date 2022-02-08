@@ -22,6 +22,7 @@
  */
 package io.jpom;
 
+import io.jpom.common.Const;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.system.init.InitDb;
@@ -51,7 +52,7 @@ public class DockerInfoTest {
 
 	@Test
 	public void testQueryTag2() {
-		List<DockerInfoModel> models = dockerInfoService.queryByTag("sdfsd", 1);
+		List<DockerInfoModel> models = dockerInfoService.queryByTag(Const.WORKSPACE_DEFAULT_ID, 1, "sdfsd");
 		System.out.println(models);
 	}
 }

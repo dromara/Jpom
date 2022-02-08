@@ -121,15 +121,16 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 	 * @param status 状态
 	 * @return list
 	 */
-	public List<DockerInfoModel> queryByTag(String tag, Integer status) {
-		Condition condition = new Condition(" instr(tags,'" + tag + "')", "");
-		condition.setPlaceHolder(false);
-		condition.setOperator("");
-		if (status == null) {
-			return super.findByCondition(condition);
+	public List<DockerInfoModel> queryByTag(String workspaceId, Integer status, String tag) {
+		Condition workspaceIdCondition = new Condition("workspaceId", workspaceId);
+		Condition statusCondition = new Condition("status", status);
+		if (StrUtil.isEmpty(tag)) {
+			return super.findByCondition(workspaceIdCondition, statusCondition);
 		} else {
-			Condition statusCondition = new Condition("status", status);
-			return super.findByCondition(condition, statusCondition);
+			Condition tagCondition = new Condition(" instr(tags,'" + tag + "')", "");
+			tagCondition.setPlaceHolder(false);
+			tagCondition.setOperator("");
+			return super.findByCondition(workspaceIdCondition, statusCondition, tagCondition);
 		}
 	}
 
