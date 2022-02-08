@@ -107,21 +107,20 @@ public class DockerYmlDsl extends BaseJsonModel {
 				Assert.isInstanceOf(Map.class, step.get("env"), "env 必须是 map 类型");
 			}
 			if (step.containsKey("uses")) {
-				List<String> supportedPlugins = ListUtil.of("node", "java", "maven", "cache");
+				List<String> supportedPlugins = ListUtil.of("node", "java", "maven", "cache", "go");
 				Assert.isInstanceOf(String.class, step.get("uses"), "uses 只支持 String 类型");
 				String uses = (String) step.get("uses");
 				Assert.isTrue(supportedPlugins.contains(uses), String.format("目前仅支持的插件: %s", supportedPlugins));
 				if ("node".equals(uses)) {
 					nodePluginCheck(step);
-				}
-				if ("java".equals(uses)) {
+				} else if ("java".equals(uses)) {
 					javaPluginCheck(step);
-				}
-				if ("maven".equals(uses)) {
+				} else if ("maven".equals(uses)) {
 					mavenPluginCheck(step);
-				}
-				if ("cache".equals(uses)) {
+				} else if ("cache".equals(uses)) {
 					cachePluginCheck(step);
+				} else if ("go".equals(uses)) {
+					goPluginCheck(step);
 				}
 				usesSet.add(uses);
 			}
@@ -157,6 +156,16 @@ public class DockerYmlDsl extends BaseJsonModel {
 		String link = String.format("https://registry.npmmirror.com/-/binary/node/v%s/node-v%s-linux-x64.tar.gz", version, version);
 		HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
 		Assert.isTrue(httpResponse.isOk() || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 node 版本号");
+	}
+
+	public void goPluginCheck(Map<String, Object> step) {
+		Assert.notNull(step.get("version"), "go 插件 version 不能为空");
+		String version = String.valueOf(step.get("version"));
+		String link = String.format("https://studygolang.com/dl/golang/go%s.linux-amd64.tar.gz", version);
+		HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
+		Assert.isTrue(httpResponse.isOk() ||
+				httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP ||
+				httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, "请填入正确的 go 版本号");
 	}
 
 	/**
