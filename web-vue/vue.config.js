@@ -1,7 +1,7 @@
 // vue.config.js
 const IP = "127.0.0.1";
 const Timestamp = new Date().getTime();
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
   // 输出目录
   outputDir: "../modules/server/src/main/resources/dist",
@@ -67,6 +67,7 @@ module.exports = {
     config.plugin("html").tap((args) => {
       args[0].title = "Jpom项目管理系统";
       args[0].build = new Date().getTime();
+      args[0].env = process.env.NODE_ENV;
       return args;
     });
   },
