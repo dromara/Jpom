@@ -196,12 +196,12 @@ export default {
       try {
         this.temp.reqData = JSON.parse(this.temp.reqData);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
       try {
         this.temp.resultMsg = JSON.parse(this.temp.resultMsg);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
       this.detailData.push({ title: "浏览器标识", description: this.temp.userAgent });
       this.detailData.push({ title: "请求参数", json: true, value: this.temp.reqData });

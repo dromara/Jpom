@@ -104,7 +104,7 @@ export default {
               }
             })
             .catch((error) => {
-              console.log(error);
+              console.error(error);
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                 Vue.prototype.$setLoading(false);
                 this.$notification.error({
