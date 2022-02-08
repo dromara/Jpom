@@ -100,7 +100,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 			ServletRequestAttributes servletRequestAttributes = BaseServerController.tryGetRequestAttributes();
 			if (servletRequestAttributes != null) {
 				HttpServletRequest request = servletRequestAttributes.getRequest();
-				String workspaceId = getCheckUserWorkspace(request);
+				String workspaceId = this.getCheckUserWorkspace(request);
 				t.setWorkspaceId(workspaceId);
 			} else {
 				t.setWorkspaceId(Const.WORKSPACE_DEFAULT_ID);
@@ -178,7 +178,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	 *
 	 * @param workspaceId 工作空间ID
 	 */
-	private void checkUserWorkspace(String workspaceId, UserModel userModel) {
+	protected void checkUserWorkspace(String workspaceId, UserModel userModel) {
 		Assert.notNull(userModel, "没有对应的用户");
 		if (StrUtil.equals(userModel.getId(), UserModel.SYSTEM_ADMIN)) {
 			// 系统执行，发行检查
