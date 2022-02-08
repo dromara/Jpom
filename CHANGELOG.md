@@ -1,6 +1,6 @@
 # 🚀 版本日志
 
-# 2.8.8
+# 2.8.8 (2022-02-08)
 
 ### 🐣 新增功能
 
@@ -29,7 +29,7 @@
 12. 【server】构建 ssh 发布授权目录采用下拉模式,提升用户操作感知 (感谢@hjk2008 [Gitee issues I4SICE](https://gitee.com/dromara/Jpom/issues/I4SICE) )
 13. 【server】修复数据库自动备份失败问题
 
-> 特别感谢：[💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) 贡献容器构建相关架构
+> 🙏 特别感谢：[💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) 贡献容器构建相关架构
 
 ------
 
