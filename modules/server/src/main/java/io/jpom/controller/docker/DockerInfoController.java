@@ -210,7 +210,7 @@ public class DockerInfoController extends BaseServerController {
 		if (certExist) {
 			if (FileUtil.isDirectory(savePath) && FileUtil.isNotEmpty(savePath)) {
 				String generateCertPath = dockerInfoModel.generateCertPath();
-				FileUtil.move(savePath, FileUtil.file(generateCertPath), true);
+				FileUtil.moveContent(savePath, FileUtil.file(generateCertPath), true);
 			}
 		}
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
