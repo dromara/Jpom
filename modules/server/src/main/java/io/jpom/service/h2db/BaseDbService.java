@@ -257,6 +257,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 			} else if (StrUtil.startWith(stringStringEntry.getKey(), "%")) {
 				where.set(StrUtil.format("`{}`", key), StrUtil.format(" like '%{}'", value));
 			} else if (StrUtil.containsIgnoreCase(key, "time") && StrUtil.contains(value, "~")) {
+				// 时间筛选
 				String[] val = StrUtil.splitToArray(value, "~");
 				if (val.length == 2) {
 					DateTime startDateTime = DateUtil.parse(val[0], DatePattern.NORM_DATETIME_FORMAT);
@@ -270,6 +271,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 					where.set(key + " ", "<= " + endDateTime.getTime());
 				}
 			} else if (StrUtil.containsIgnoreCase(key, "time")) {
+				// 时间筛选
 				String timeKey = StrUtil.removeAny(key, "[0]", "[1]");
 				if (ignoreField.contains(timeKey)) {
 					continue;
@@ -288,6 +290,9 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 					where.set(timeKey + " ", "<= " + endDateTime.getTime());
 				}
 				ignoreField.add(timeKey);
+			} else if (StrUtil.endWith(key, ":in")) {
+				String inKey = StrUtil.removeSuffix(key, ":in");
+				where.set(StrUtil.format("`{}`", inKey), StrUtil.split(value, StrUtil.COMMA));
 			} else {
 				where.set(StrUtil.format("`{}`", key), value);
 			}

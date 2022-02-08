@@ -27,11 +27,13 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.Const;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.MonitorUserOptModel;
 import io.jpom.model.data.UserModel;
@@ -187,9 +189,19 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 	}
 
 	@Override
+	public PageResultDto<UserOperateLogV1> listPage(HttpServletRequest request) {
+		// 验证工作空间权限
+		Map<String, String> paramMap = ServletUtil.getParamMap(request);
+		String workspaceId = this.getCheckUserWorkspace(request);
+		paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + StrUtil.EMPTY);
+		return super.listPage(paramMap);
+	}
+
+	@Override
 	public String getCheckUserWorkspace(HttpServletRequest request) {
 		// 忽略检查
-		return ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+		String header = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+		return ObjectUtil.defaultIfNull(header, StrUtil.EMPTY);
 	}
 
 	@Override
