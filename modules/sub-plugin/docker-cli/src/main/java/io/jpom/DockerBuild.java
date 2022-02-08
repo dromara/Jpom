@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  */
 public class DockerBuild implements AutoCloseable {
 
-	private static final String[] DEPEND_PLUGIN = new String[]{"java", "maven", "node", "go"};
+	private static final String[] DEPEND_PLUGIN = new String[]{"java", "maven", "node", "go", "python3"};
 
 	private final Map<String, Object> parameter;
 	private final DockerClient dockerClient;
@@ -238,6 +238,8 @@ public class DockerBuild implements AutoCloseable {
 					stepsScript.append(cacheScript(step, buildId));
 				} else if ("go".equals(uses)) {
 					stepsScript.append(goScript(step));
+				} else if ("python3".equals(uses)) {
+					stepsScript.append(python3Script(step));
 				}
 			}
 			if (step.containsKey("run")) {
@@ -284,6 +286,18 @@ public class DockerBuild implements AutoCloseable {
 		String script = "# javaScript\n";
 		script += String.format("echo \"export JAVA_HOME=%s\" >> /etc/profile\n", path);
 		script += String.format("echo \"export PATH=%s/bin:$PATH\" >> /etc/profile\n", path);
+		script += "source /etc/profile \n";
+		return script;
+	}
+
+	private String python3Script(Map<String, Object> step) {
+		String version = String.valueOf(step.get("version"));
+		String path = String.format("/opt/jpom_python3_%s", version);
+		String script = "# python3Script\n";
+		script += String.format("echo \"export PYTHONPATH=%s\" >> /etc/profile\n", path);
+		script += String.format("echo \"export PATH=%s/bin:$PATH\" >> /etc/profile\n", path);
+		// pip3 `bad interpreter: no such file or directory:`
+		script += String.format("sed -i \"1c#!%s/bin/python3\" %s/bin/pip3\n", path, path);
 		script += "source /etc/profile \n";
 		return script;
 	}

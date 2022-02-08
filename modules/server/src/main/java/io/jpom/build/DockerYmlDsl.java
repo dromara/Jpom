@@ -107,7 +107,7 @@ public class DockerYmlDsl extends BaseJsonModel {
 				Assert.isInstanceOf(Map.class, step.get("env"), "env 必须是 map 类型");
 			}
 			if (step.containsKey("uses")) {
-				List<String> supportedPlugins = ListUtil.of("node", "java", "maven", "cache", "go");
+				List<String> supportedPlugins = ListUtil.of("node", "java", "maven", "cache", "go", "python3");
 				Assert.isInstanceOf(String.class, step.get("uses"), "uses 只支持 String 类型");
 				String uses = (String) step.get("uses");
 				Assert.isTrue(supportedPlugins.contains(uses), String.format("目前仅支持的插件: %s", supportedPlugins));
@@ -121,6 +121,8 @@ public class DockerYmlDsl extends BaseJsonModel {
 					cachePluginCheck(step);
 				} else if ("go".equals(uses)) {
 					goPluginCheck(step);
+				} else if ("python3".equals(uses)) {
+					python3PluginCheck(step);
 				}
 				usesSet.add(uses);
 			}
@@ -131,11 +133,11 @@ public class DockerYmlDsl extends BaseJsonModel {
 		Assert.isTrue(containsRun, "steps 中没有发现任何 run , run 用于执行命令");
 	}
 
-	public void cachePluginCheck(Map<String, Object> step) {
+	private void cachePluginCheck(Map<String, Object> step) {
 		Assert.notNull(step.get("path"), "cache 插件 path 不能为空");
 	}
 
-	public void mavenPluginCheck(Map<String, Object> step) {
+	private void mavenPluginCheck(Map<String, Object> step) {
 		Assert.notNull(step.get("version"), "maven 插件 version 不能为空");
 		String version = String.valueOf(step.get("version"));
 		String link = String.format("https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/%s/binaries/apache-maven-%s-bin.tar.gz", version, version);
@@ -143,14 +145,14 @@ public class DockerYmlDsl extends BaseJsonModel {
 		Assert.isTrue(httpResponse.isOk() || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 maven 版本号");
 	}
 
-	public void javaPluginCheck(Map<String, Object> step) {
+	private void javaPluginCheck(Map<String, Object> step) {
 		Assert.notNull(step.get("version"), "java 插件 version 不能为空");
 		Integer version = Integer.valueOf(String.valueOf(step.get("version")));
 		List<Integer> supportedVersions = ListUtil.of(8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
 		Assert.isTrue(supportedVersions.contains(version), String.format("目前java 插件支持的版本: %s", supportedVersions));
 	}
 
-	public void nodePluginCheck(Map<String, Object> step) {
+	private void nodePluginCheck(Map<String, Object> step) {
 		Assert.notNull(step.get("version"), "node 插件 version 不能为空");
 		String version = String.valueOf(step.get("version"));
 		String link = String.format("https://registry.npmmirror.com/-/binary/node/v%s/node-v%s-linux-x64.tar.gz", version, version);
@@ -158,7 +160,7 @@ public class DockerYmlDsl extends BaseJsonModel {
 		Assert.isTrue(httpResponse.isOk() || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 node 版本号");
 	}
 
-	public void goPluginCheck(Map<String, Object> step) {
+	private void goPluginCheck(Map<String, Object> step) {
 		Assert.notNull(step.get("version"), "go 插件 version 不能为空");
 		String version = String.valueOf(step.get("version"));
 		String link = String.format("https://studygolang.com/dl/golang/go%s.linux-amd64.tar.gz", version);
@@ -166,6 +168,16 @@ public class DockerYmlDsl extends BaseJsonModel {
 		Assert.isTrue(httpResponse.isOk() ||
 				httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP ||
 				httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, "请填入正确的 go 版本号");
+	}
+
+	private void python3PluginCheck(Map<String, Object> step) {
+		Assert.notNull(step.get("version"), "python3 插件 version 不能为空");
+		String version = String.valueOf(step.get("version"));
+		Assert.state(StrUtil.startWith(version, "3."), "请填入正确的 python3 版本号");
+		String link = String.format("https://repo.huaweicloud.com/python/%s/Python-%s.tar.xz", version, version);
+		HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
+		Assert.isTrue(httpResponse.isOk() ||
+				httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 python3 版本号");
 	}
 
 	/**
