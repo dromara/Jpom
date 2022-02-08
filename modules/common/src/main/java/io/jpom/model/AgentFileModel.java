@@ -60,4 +60,9 @@ public class AgentFileModel extends BaseModel {
 	 * jar 打包时间
 	 */
 	private String timeStamp;
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
 }
