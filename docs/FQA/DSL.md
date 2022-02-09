@@ -122,9 +122,11 @@ goto:eof
 goto:eof
 ```
 
-# python 程序
+# python3 程序
 
 ## linux 示例
+
+> python3 启动一个简单 httpserver
 
 ```
 #!/bin/bash
@@ -142,6 +144,83 @@ function start() {
     fi
     nohup python $Lib/simple_httpd.py $Tag > $Log 2>&1 &  
 	sleep 3
+    head -n 10 $Log
+}
+
+
+function stop() {
+    pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 " "}')
+    if [ "$pid" != "" ]; then      
+        echo -n "boot ( pid $pid) is running" 
+        echo 
+        echo -n $"Shutting down boot: "
+        pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 " "}')
+        if [ "$pid" != "" ]; then
+            echo "kill boot process"
+            kill -9 "$pid"
+        fi
+        else 
+             echo "boot is stopped" 
+        fi
+
+    status
+}
+
+function status()
+{
+    pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 " "}')
+    #echo "$pid"
+    if [ "$pid" != "" ]; then
+        echo "running:$pid"
+    else
+        echo "boot is stopped"
+    fi
+}
+
+# See how we were called.
+RETVAL="0"
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status
+        ;;
+    *)
+      usage
+      ;;
+esac
+
+exit $RETVAL
+```
+
+
+# python2 程序
+
+## linux 示例
+
+> python2 启动一个简单 httpserver
+
+```
+#!/bin/bash
+Tag="Application_#{PROJECT_ID}"
+Lib="#{PROJECT_PATH}"
+Log="#{PROJECT_PATH}/run.log"
+echo $Tag
+RETVAL="0"
+
+# See how we were called.
+function start() {
+    echo  $Log 
+    if [ ! -f $Log ]; then
+        touch $Log
+    fi
+   
+   cd $Lib && nohup python -m SimpleHTTPServer 8000 $Tag > $Log 2>&1 &  
+	sleep 5
     head -n 10 $Log
 }
 
