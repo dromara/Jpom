@@ -26,6 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.exception.NotFoundException;
 import io.jpom.util.LogRecorder;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -63,8 +64,10 @@ public class DockerClientUtil {
 				FileUtil.mkParentDirs(currentFile);
 				IoUtil.copy(tarStream, new FileOutputStream(currentFile));
 			}
+		} catch (NotFoundException notFoundException) {
+			logRecorder.info("容器中没有找到执行结果文件: {}", notFoundException.getMessage());
 		} catch (Exception e) {
-			logRecorder.error("无法获取容器执行结果文件: {}", e);
+			logRecorder.error("无法获取容器执行结果文件", e);
 		}
 	}
 

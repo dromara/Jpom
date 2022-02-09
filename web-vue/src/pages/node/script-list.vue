@@ -42,6 +42,15 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <template slot="scriptType" slot-scope="text">
+        <a-tooltip v-if="text === 'server-sync'" title="服务端分发的脚本">
+          <a-icon type="cluster" />
+        </a-tooltip>
+        <a-tooltip v-else title="本地脚本">
+          <a-icon type="file-text" />
+        </a-tooltip>
+      </template>
+
       <a-tooltip
         slot="modifyTimeMillis"
         slot-scope="text, record"
@@ -51,10 +60,10 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleExec(record)">执行</a-button>
-          <a-button type="primary" @click="handleLog(record)">日志</a-button>
-          <a-button :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button>
-          <a-button :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
+          <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
+          <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button>
+          <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
@@ -138,14 +147,14 @@ export default {
       drawerConsoleVisible: false,
       drawerLogVisible: false,
       columns: [
-        // { title: "Script ID", dataIndex: "id", width: 200, ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "类型", dataIndex: "scriptType", width: 70, align: "center", ellipsis: true, scopedSlots: { customRender: "scriptType" } },
         { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, scopedSlots: { customRender: "autoExecCron" } },
         { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, sorter: true, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 320 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 240 },
       ],
       rules: {
         name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
