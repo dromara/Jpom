@@ -68,6 +68,7 @@
 							<Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
 							<Jpom-Type>${project.artifactId}</Jpom-Type>
 							<Implementation-URL>https://gitee.com/dromara/Jpom</Implementation-URL>
+							<Jpom-Min-Version>${jpom-min-version}</Jpom-Min-Version>
 						</manifestEntries>
 					</archive>
 				</configuration>
