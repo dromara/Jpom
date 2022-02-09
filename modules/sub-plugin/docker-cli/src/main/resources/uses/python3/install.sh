@@ -9,6 +9,8 @@ fi
 
 # https://github.com/docker-library/python/blob/master/3.10/slim-bullseye/Dockerfile
 
+# https://github.com/cdrx/docker-pyinstaller/blob/master/Dockerfile-py3-amd64
+
 pythonPath=/opt/python3/
 pythonTempPath=/usr/local/python3
 
