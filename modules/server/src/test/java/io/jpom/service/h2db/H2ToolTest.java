@@ -30,8 +30,8 @@ import cn.hutool.setting.Setting;
 import io.jpom.ApplicationStartTest;
 import io.jpom.JpomApplication;
 import io.jpom.system.ExtConfigBean;
-import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.h2.tools.RunScript;
 import org.h2.tools.Shell;
 import org.junit.jupiter.api.Test;
@@ -48,11 +48,13 @@ import java.sql.SQLException;
  * @since 2021-11-01
  * 测试 H2 数据库工具类
  */
+@Slf4j
 public class H2ToolTest extends ApplicationStartTest {
 
 	/**
 	 * 备份 SQL 文件
 	 * 如果抛出了异常或者指定的备份文件不存在就表示备份不成功
+	 *
 	 * @throws SQLException
 	 */
 	@Test
@@ -60,18 +62,17 @@ public class H2ToolTest extends ApplicationStartTest {
 		// 数据源参数
 		String url = DbConfig.getInstance().getDbUrl();
 
-		ServerExtConfigBean serverExtConfigBean = ServerExtConfigBean.getInstance();
-		String user = serverExtConfigBean.getDbUserName();
-		String pass = serverExtConfigBean.getDbUserPwd();
+		String user = dbExtConfig.getUserName();
+		String pass = dbExtConfig.getUserPwd();
 
 		// 备份 SQL 的目录
 		File file = FileUtil.file(ExtConfigBean.getInstance().getPath(), "db", JpomApplication.getAppType().name());
 		String path = FileUtil.getAbsolutePath(file);
 
-		logger.info("url: {}", url);
-		logger.info("user: {}", user);
-		logger.info("pass: {}", pass);
-		logger.info("backup sql path: {}", path);
+		log.info("url: {}", url);
+		log.info("user: {}", user);
+		log.info("pass: {}", pass);
+		log.info("backup sql path: {}", path);
 
 		// 加载数据源
 		DataSource dataSource = DSFactory.get();
@@ -94,12 +95,12 @@ public class H2ToolTest extends ApplicationStartTest {
 		 * - ${fileName1} 表示备份之后的文件名
 		 * - table 表示需要备份的表名称，后面跟多个表名，用英文逗号分割
 		 */
-		String[] params = new String[] {
+		String[] params = new String[]{
 				"-url", url,
 				"-user", user,
 				"-password", pass,
 				"-driver", "org.h2.Driver",
-				"-sql", "script DROP to '"+ path +"/backup.sql' table BUILD_INFO,USEROPERATELOGV1"
+				"-sql", "script DROP to '" + path + "/backup.sql' table BUILD_INFO,USEROPERATELOGV1"
 		};
 		shell.runTool(connection, params);
 	}
@@ -131,6 +132,7 @@ public class H2ToolTest extends ApplicationStartTest {
 	/**
 	 * H2 drop all objects
 	 * 删除 H2 数据库所有数据
+	 *
 	 * @throws SQLException
 	 */
 	@Test
@@ -138,9 +140,8 @@ public class H2ToolTest extends ApplicationStartTest {
 		// 数据源参数
 		String url = DbConfig.getInstance().getDbUrl();
 
-		ServerExtConfigBean serverExtConfigBean = ServerExtConfigBean.getInstance();
-		String user = serverExtConfigBean.getDbUserName();
-		String pass = serverExtConfigBean.getDbUserPwd();
+		String user = dbExtConfig.getUserName();
+		String pass = dbExtConfig.getUserPwd();
 
 		// 加载数据源
 		DataSource dataSource = DSFactory.get();
@@ -149,7 +150,7 @@ public class H2ToolTest extends ApplicationStartTest {
 		// 执行 SQL 备份脚本
 		Shell shell = new Shell();
 
-		String[] params = new String[] {
+		String[] params = new String[]{
 				"-url", url,
 				"-user", user,
 				"-password", pass,
@@ -161,6 +162,7 @@ public class H2ToolTest extends ApplicationStartTest {
 
 	/**
 	 * 初始化数据源
+	 *
 	 * @return
 	 */
 	private DataSource initDataSource(String url, String user, String pass) {

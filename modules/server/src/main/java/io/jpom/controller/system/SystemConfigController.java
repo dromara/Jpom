@@ -53,6 +53,8 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.system.extconf.DbExtConfig;
+import io.jpom.system.init.InitDb;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -68,6 +70,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -83,9 +86,12 @@ import java.util.List;
 public class SystemConfigController extends BaseServerController {
 
 	private final SystemParametersServer systemParametersServer;
+	private final InitDb initDb;
 
-	public SystemConfigController(SystemParametersServer systemParametersServer) {
+	public SystemConfigController(SystemParametersServer systemParametersServer,
+								  InitDb initDb) {
 		this.systemParametersServer = systemParametersServer;
+		this.initDb = initDb;
 	}
 
 	/**
@@ -117,7 +123,7 @@ public class SystemConfigController extends BaseServerController {
 	@PostMapping(value = "save_config.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
 	@SystemPermission(superUser = true)
-	public String saveConfig(String nodeId, String content, String restart) {
+	public String saveConfig(String nodeId, String content, String restart) throws IOException, SQLException {
 		if (StrUtil.isNotEmpty(nodeId)) {
 			return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemSaveConfig).toString();
 		}
@@ -131,12 +137,20 @@ public class SystemConfigController extends BaseServerController {
 			DefaultSystemLog.getLog().warn("内容格式错误，请检查修正", e);
 			return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
 		}
+		boolean restartBool = Convert.toBool(restart, false);
+		// 修改数据库密码
+		DbExtConfig oldDbExtConfig = DbExtConfig.parse(ExtConfigBean.getResource().getInputStream());
+		DbExtConfig newDbExtConfig = DbExtConfig.parse(content);
+		if (!StrUtil.equals(oldDbExtConfig.getUserName(), newDbExtConfig.getUserName()) || !StrUtil.equals(oldDbExtConfig.getUserPwd(), newDbExtConfig.getUserPwd())) {
+			// 执行修改数据库账号密码
+			Assert.state(restartBool, "修改数据库密码必须重启");
+			initDb.alterUser(oldDbExtConfig.getUserName(), newDbExtConfig.getUserName(), newDbExtConfig.getUserPwd());
+		}
 		Assert.state(!JpomManifest.getInstance().isDebug(), "调试模式下不支持在线修改,请到resources目录下的bin目录修改extConfig.yml");
 
 		File resourceFile = ExtConfigBean.getResourceFile();
 		FileUtil.writeString(content, resourceFile, CharsetUtil.CHARSET_UTF_8);
 
-		boolean restartBool = Convert.toBool(restart, false);
 		if (restartBool) {
 			// 重启
 			ThreadUtil.execute(() -> {
@@ -147,6 +161,7 @@ public class SystemConfigController extends BaseServerController {
 		}
 		return JsonMessage.getString(200, "修改成功");
 	}
+
 
 	/**
 	 * 加载服务端的 ip 白名单配置

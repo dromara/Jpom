@@ -27,11 +27,12 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.ds.DSFactory;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.extconf.DbExtConfig;
 
 import java.io.File;
 import java.util.*;
@@ -99,14 +100,14 @@ public class DbConfig {
 	 * @return jdbc
 	 */
 	public String getDbUrl() {
-		ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
-		String dbUrl = instance.getDbUrl();
+		DbExtConfig dbExtConfig = SpringUtil.getBean(DbExtConfig.class);
+		String dbUrl = dbExtConfig.getUrl();
 		if (StrUtil.isNotEmpty(dbUrl)) {
 			return dbUrl;
 		}
 		File file = FileUtil.file(this.dbLocalPath(), this.getDbName());
 		String path = FileUtil.getAbsolutePath(file);
-		return StrUtil.format("jdbc:h2:{};CACHE_SIZE={};MODE=MYSQL", path, instance.getCacheSize().toKilobytes());
+		return StrUtil.format("jdbc:h2:{};CACHE_SIZE={};MODE=MYSQL", path, dbExtConfig.getCacheSize().toKilobytes());
 	}
 
 	public String getDbName() {

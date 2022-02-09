@@ -28,13 +28,13 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.script.ScriptUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import io.jpom.system.db.DbConfig;
+import io.jpom.system.extconf.DbExtConfig;
 import org.eclipse.jgit.api.Git;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.unit.DataSize;
 
+import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -68,61 +68,6 @@ public class ServerExtConfigBean implements DisposableBean {
 	 */
 	@Value("${user.demoTip:}")
 	private String userDemoTip;
-	// --------------------------------------------------------------- db start
-	/**
-	 * 日志记录最大条数
-	 */
-	@Value("${db.logStorageCount:10000}")
-	private int h2DbLogStorageCount;
-	/**
-	 * 数据库 url
-	 */
-	@Value("${db.url:}")
-	private String dbUrl;
-	/**
-	 * 数据库账号、默认为 jpom
-	 */
-	@Value("${db.userName:}")
-	private String dbUserName;
-
-	/**
-	 * 数据库密码、默认为 jpom
-	 */
-	@Value("${db.userPwd:}")
-	private String dbUserPwd;
-
-	/**
-	 * 缓存大小
-	 * <p>
-	 * http://www.h2database.com/html/features.html#cache_settings
-	 */
-	@Value("${db.cacheSize:}")
-	private DataSize cacheSize;
-
-	/**
-	 * 自动全量备份数据库间隔天数 小于等于 0，不自动备份
-	 */
-	@Value("${db.autoBackupIntervalDay:1}")
-	private Integer autoBackupIntervalDay;
-
-	/**
-	 * 自动备份保留天数 小于等于 0，不自动删除自动备份数据
-	 */
-	@Value("${db.autoBackupReserveDay:5}")
-	private Integer autoBackupReserveDay;
-
-	@Value("${db.maxActive:100}")
-	private Integer dbMaxActive;
-
-	@Value("${db.initialSize:10}")
-	private Integer dbInitialSize;
-
-	@Value("${db.maxWait:10}")
-	private Integer dbMaxWait;
-
-	@Value("${db.minIdle:1}")
-	private Integer dbMinIdle;
-	// --------------------------------------------------------------- db end
 
 	/**
 	 * author Hotstrip
@@ -225,6 +170,9 @@ public class ServerExtConfigBean implements DisposableBean {
 	@Value("${system.nodeHeartSecond:30}")
 	private Integer nodeHeartSecond;
 
+	@Resource
+	private DbExtConfig dbExtConfig;
+
 	/**
 	 * 获取上传文件超时时间
 	 *
@@ -250,10 +198,6 @@ public class ServerExtConfigBean implements DisposableBean {
 		return this.ipErrorLockTimeValue;
 	}
 
-	public int getH2DbLogStorageCount() {
-		return h2DbLogStorageCount;
-	}
-
 	public int getBuildMaxHistoryCount() {
 		return buildMaxHistoryCount;
 	}
@@ -270,14 +214,6 @@ public class ServerExtConfigBean implements DisposableBean {
 		return authorizeRenewal;
 	}
 
-	public String getDbUserName() {
-		return StrUtil.emptyToDefault(this.dbUserName, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
-	}
-
-	public String getDbUserPwd() {
-		return StrUtil.emptyToDefault(this.dbUserPwd, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
-	}
-
 	public boolean isH2ConsoleEnabled() {
 		return h2ConsoleEnabled;
 	}
@@ -286,19 +222,6 @@ public class ServerExtConfigBean implements DisposableBean {
 		return StrUtil.emptyToDefault(this.authorizeKey, "KZQfFBJTW2v6obS1").getBytes();
 	}
 
-	/**
-	 * 数据缓存大小，默认10m,
-	 * <p>
-	 * SELECT * FROM INFORMATION_SCHEMA.SETTINGS WHERE NAME = 'info.CACHE_MAX_SIZE'
-	 *
-	 * @return dataSize
-	 */
-	public DataSize getCacheSize() {
-		if (cacheSize == null) {
-			cacheSize = DataSize.ofMegabytes(10);
-		}
-		return cacheSize;
-	}
 
 	public boolean getBuildCheckDeleteCommand() {
 		return buildCheckDeleteCommand != null && buildCheckDeleteCommand;
@@ -327,34 +250,6 @@ public class ServerExtConfigBean implements DisposableBean {
 
 	public String getLogoFile() {
 		return logoFile;
-	}
-
-	public Integer getAutoBackupIntervalDay() {
-		return autoBackupIntervalDay;
-	}
-
-	public Integer getAutoBackupReserveDay() {
-		return autoBackupReserveDay;
-	}
-
-	public Integer getDbMaxActive() {
-		return dbMaxActive;
-	}
-
-	public Integer getDbInitialSize() {
-		return dbInitialSize;
-	}
-
-	public Integer getDbMaxWait() {
-		return dbMaxWait;
-	}
-
-	public Integer getDbMinIdle() {
-		return dbMinIdle;
-	}
-
-	public String getDbUrl() {
-		return dbUrl;
 	}
 
 	public String getUserDemoTip() {

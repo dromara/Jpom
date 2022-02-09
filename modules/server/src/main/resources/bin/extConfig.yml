@@ -44,10 +44,10 @@ log:
 db:
   # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
   logStorageCount: 10000
-  # 数据库账号
-  userName:
-  # 数据库密码
-  userPwd:
+  # 数据库账号 默认 jpom
+  userName: jpom
+  # 数据库密码 默认 jpom 如果自行配置请保证密码强度
+  userPwd: jpom
   # h2 数据库缓存大小  kilobyte 1KB 1,024 megabyte 1MB 1,048,576
   cacheSize:
   # 自动备份间隔天数 小于等于 0 不自动备份

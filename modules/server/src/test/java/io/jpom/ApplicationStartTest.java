@@ -22,12 +22,13 @@
  */
 package io.jpom;
 
+import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.plugin.PluginFactory;
-import io.jpom.service.dblog.BackupInfoService;
+import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.extconf.DbExtConfig;
 import io.jpom.system.init.InitDb;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,21 +42,25 @@ import javax.annotation.Resource;
  */
 @SpringBootTest(classes = {JpomServerApplication.class, InitDb.class, PluginFactory.class})
 @AutoConfigureMockMvc
+@Slf4j
 public class ApplicationStartTest {
-	protected static Logger logger = LoggerFactory.getLogger(ApplicationStartTest.class);
+
 	@Autowired
 	protected MockMvc mockMvc;
 
 	@Resource
-	private BackupInfoService backupInfoService;
+	protected DbExtConfig dbExtConfig;
+
 
 	@Test
 	public void testApplicationStart() {
-		logger.info("Jpom Server Application started.....");
+		log.info("Jpom Server Application started.....");
 	}
 
 	@Test
-	public void testBackup() {
-		backupInfoService.checkAutoBackup();
+	public void testServerExtConfigBean() {
+		ServerExtConfigBean serverExtConfigBean = SpringUtil.getBean(ServerExtConfigBean.class);
+		System.out.println(serverExtConfigBean);
 	}
+
 }
