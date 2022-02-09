@@ -14,8 +14,8 @@
 		<module>modules/sub-plugin/maven-plugin</module>
 		<module>modules/sub-plugin/auto-charset-jchardet</module>
 		<module>modules/sub-plugin/db-h2</module>
-        <module>modules/sub-plugin/docker-cli</module>
-    </modules>
+		<module>modules/sub-plugin/docker-cli</module>
+	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -33,7 +33,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
-
+		<!--当前程序兼容 jpom 最新版本号-->
+		<jpom-min-version>1.0.0</jpom-min-version>
 		<spring-boot.version>2.6.3</spring-boot.version>
 
 		<common-boot.version>[2.2.0,2.2.99]</common-boot.version>

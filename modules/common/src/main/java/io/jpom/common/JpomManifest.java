@@ -149,7 +149,8 @@ public class JpomManifest {
 				String timeStamp = attributes.getValue("Jpom-Timestamp");
 				timeStamp = parseJpomTime(timeStamp);
 				String mainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
-				return new Tuple(version, timeStamp, mainClass, jarFile);
+				String jpomMinVersion = attributes.getValue("Jpom-Min-Version");
+				return new Tuple(version, timeStamp, mainClass, jarFile, jpomMinVersion);
 			}
 		}
 		return null;
@@ -344,7 +345,6 @@ public class JpomManifest {
 	 * @see Type#getApplicationClass()
 	 */
 	public static JsonMessage<Tuple> checkJpomJar(String path, Type type, boolean checkRepeat) {
-		String version;
 		File jarFile = new File(path);
 		Tuple jarVersion = getJarVersion(jarFile);
 		if (jarVersion == null) {
@@ -369,15 +369,22 @@ public class JpomManifest {
 			if (entry == null) {
 				return new JsonMessage<>(405, "此包不是Jpom【" + type.name() + "】包");
 			}
-			version = jarVersion.get(0);
+			String version = jarVersion.get(0);
 			String timeStamp = jarVersion.get(1);
-			if (StrUtil.hasEmpty(version, timeStamp)) {
-				return new JsonMessage<>(405, "此包没有版本号或者打包时间");
+			String minVersion = jarVersion.get(4);
+			if (StrUtil.hasEmpty(version, timeStamp, minVersion)) {
+				return new JsonMessage<>(405, "此包没有版本号、打包时间、最小兼容版本");
 			}
-
-			if (checkRepeat && StrUtil.equals(version, JpomManifest.getInstance().getVersion()) &&
-					StrUtil.equals(timeStamp, JpomManifest.getInstance().getTimeStamp())) {
-				return new JsonMessage<>(405, "新包和正在运行的包一致");
+			if (checkRepeat) {
+				//
+				JpomManifest jpomManifest = JpomManifest.getInstance();
+				if (StrUtil.equals(version, jpomManifest.getVersion()) &&
+						StrUtil.equals(timeStamp, jpomManifest.getTimeStamp())) {
+					return new JsonMessage<>(405, "新包和正在运行的包一致");
+				}
+				if (StrUtil.compareVersion(jpomManifest.getVersion(), minVersion) < 0) {
+					return new JsonMessage<>(405, StrUtil.format("当前程序版本 {} 新版程序最低兼容 {} 不能直接升级", jpomManifest.getVersion(), minVersion));
+				}
 			}
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("解析jar", e);
