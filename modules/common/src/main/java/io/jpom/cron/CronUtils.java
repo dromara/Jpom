@@ -78,7 +78,16 @@ public class CronUtils {
 		CronUtil.setMatchSecond(matchSecond);
 		//
 		Scheduler scheduler = CronUtil.getScheduler();
-		if (!scheduler.isStarted()) {
+		//
+		boolean started = scheduler.isStarted();
+		if (started) {
+			return;
+		}
+		synchronized (CronUtils.class) {
+			started = scheduler.isStarted();
+			if (started) {
+				return;
+			}
 			CronUtil.start();
 			scheduler.addListener(new TaskListener() {
 				@Override

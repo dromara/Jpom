@@ -37,13 +37,14 @@ import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserModel;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.extconf.DbExtConfig;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -347,8 +348,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	 * 执行清理
 	 */
 	private void executeClear() {
-		ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
-		int h2DbLogStorageCount = instance.getH2DbLogStorageCount();
+		DbExtConfig dbExtConfig = SpringUtil.getBean(DbExtConfig.class);
+		int h2DbLogStorageCount = dbExtConfig.getLogStorageCount();
 		if (h2DbLogStorageCount <= 0) {
 			return;
 		}

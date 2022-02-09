@@ -42,8 +42,8 @@ import io.jpom.model.enums.BackupTypeEnum;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseDbService;
-import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
+import io.jpom.system.extconf.DbExtConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -67,17 +67,22 @@ import java.util.stream.Stream;
 @Service
 public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 
+	private final DbExtConfig dbExtConfig;
+
+	public BackupInfoService(DbExtConfig dbExtConfig) {
+		this.dbExtConfig = dbExtConfig;
+	}
+
 	/**
 	 * 检查数据库备份
 	 */
 	public void checkAutoBackup() {
 		try {
 			BaseServerController.resetInfo(UserModel.EMPTY);
-			ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
 			// 创建备份
-			this.createAutoBackup(instance);
+			this.createAutoBackup();
 			// 删除历史备份
-			this.deleteAutoBackup(instance);
+			this.deleteAutoBackup();
 		} finally {
 			BaseServerController.removeEmpty();
 		}
@@ -85,11 +90,9 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 
 	/**
 	 * 删除历史 自动备份信息
-	 *
-	 * @param instance 配置新
 	 */
-	private void deleteAutoBackup(ServerExtConfigBean instance) {
-		Integer autoBackupReserveDay = instance.getAutoBackupReserveDay();
+	private void deleteAutoBackup() {
+		Integer autoBackupReserveDay = dbExtConfig.getAutoBackupReserveDay();
 		if (autoBackupReserveDay != null && autoBackupReserveDay > 0) {
 			//
 			Entity entity = Entity.create();
@@ -107,12 +110,10 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 
 	/**
 	 * 创建自动备份数据
-	 *
-	 * @param instance 配置信息
 	 */
-	private void createAutoBackup(ServerExtConfigBean instance) {
+	private void createAutoBackup() {
 		// 自动备份
-		Integer autoBackupIntervalDay = instance.getAutoBackupIntervalDay();
+		Integer autoBackupIntervalDay = dbExtConfig.getAutoBackupIntervalDay();
 		if (autoBackupIntervalDay != null && autoBackupIntervalDay > 0) {
 			BackupInfoModel backupInfoModel = new BackupInfoModel();
 			backupInfoModel.setBackupType(3);
@@ -166,9 +167,8 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 		// 数据源参数
 		final String url = DbConfig.getInstance().getDbUrl();
 
-		ServerExtConfigBean serverExtConfigBean = ServerExtConfigBean.getInstance();
-		final String user = serverExtConfigBean.getDbUserName();
-		final String pass = serverExtConfigBean.getDbUserPwd();
+		final String user = dbExtConfig.getUserName();
+		final String pass = dbExtConfig.getUserPwd();
 
 		JpomManifest instance = JpomManifest.getInstance();
 		// 先构造备份信息插入数据库

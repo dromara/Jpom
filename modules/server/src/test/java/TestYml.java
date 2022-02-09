@@ -20,14 +20,23 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.setting.yaml.YamlUtil;
 import io.jpom.system.ConfigBean;
+import io.jpom.system.extconf.DbExtConfig;
 import org.junit.Test;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.FileUrlResource;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.List;
 
@@ -36,6 +45,21 @@ import java.util.List;
  * @date 2021/8/1
  */
 public class TestYml {
+
+	@Test
+	public void test2() {
+		InputStream stream = ResourceUtil.getStream("bin/extConfig.yml");
+		//String s = IoUtil.readUtf8(stream);
+		//System.out.println(s);
+		Dict dict = YamlUtil.load(stream, Dict.class);
+		Object db = dict.get("db");
+		StringWriter writer = new StringWriter();
+		YamlUtil.dump(db, writer);
+		ByteArrayInputStream inputStream = IoUtil.toStream(writer.toString(), CharsetUtil.CHARSET_UTF_8);
+		DbExtConfig dbExtConfig1 = YamlUtil.load(inputStream, DbExtConfig.class);
+		System.out.println(dbExtConfig1);
+	}
+
 
 	@Test
 	public void test() throws IOException {
