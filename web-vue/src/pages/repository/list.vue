@@ -459,6 +459,7 @@ export default {
       }
       this.loadData();
     },
+    // 在导入仓库时，选择不同的 git 平台显示不同的提示语
     importTypeChange(val) {
       if (val === "gitee") {
         this.importTypePlaceholder = "在 设置-->安全设置-->私人令牌 中获取";

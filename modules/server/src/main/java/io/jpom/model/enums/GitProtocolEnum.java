@@ -34,7 +34,7 @@ public enum GitProtocolEnum implements BaseEnum {
 	/**
 	 * http
 	 */
-	HTTP(0, "HTTP(s)"),
+	HTTP(0, "HTTP(S)"),
 	SSH(1, "SSH"),
 	;
 
