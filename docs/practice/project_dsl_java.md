@@ -79,10 +79,9 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 `Syntax error: "(" unexpected`
 代码对于标准bash而言没有错，因为 `Ubuntu/Debian` 为了加快开机速度，用dash代替了传统的bash，是dash在捣鬼。
 
-解决方法:
+解决方法: 就是取消`dash`
 
-就是取消`dash`
-`sudo dpkg-reconfigure dash` 在选择项中选No，搞定了！
+执行：`sudo dpkg-reconfigure dash` 在选择项中选No，搞定了！
 
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/add-script1.png)
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/add-script2.png)
