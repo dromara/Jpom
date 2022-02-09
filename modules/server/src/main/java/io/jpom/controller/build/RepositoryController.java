@@ -65,8 +65,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @author Hotstrip
  * Repository controller
+ *
+ * @author Hotstrip
  */
 @RestController
 @Feature(cls = ClassFeature.BUILD_REPOSITORY)
@@ -84,6 +85,10 @@ public class RepositoryController extends BaseServerController {
 	/**
 	 * load repository list
 	 *
+	 * <pre>
+	 *     此请求会分页列出数据，如需要不分页列出所有数据使用{@link #loadRepositoryListAll()}
+	 * </pre>
+	 *
 	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/list")
@@ -95,6 +100,10 @@ public class RepositoryController extends BaseServerController {
 
 	/**
 	 * load repository list
+	 *
+	 * <pre>
+	 *     此请求不进行分页列出所有数据，如需要分页使用{@link #loadRepositoryList()}
+	 * </pre>
 	 *
 	 * @return json
 	 */
@@ -353,10 +362,10 @@ public class RepositoryController extends BaseServerController {
 	 * @param repositoryModelReq 仓库信息
 	 */
 	private void checkInfo(RepositoryModel repositoryModelReq) {
-		Assert.notNull(repositoryModelReq, "请传人正确的信息");
+		Assert.notNull(repositoryModelReq, "请输入正确的信息");
 		Assert.hasText(repositoryModelReq.getName(), "请填写仓库名称");
 		Integer repoType = repositoryModelReq.getRepoType();
-		Assert.state(repoType != null && (repoType == 1 || repoType == 0), "请选择仓库类型");
+		Assert.state(repoType != null && (repoType == RepositoryModel.RepoType.Git.getCode() || repoType == RepositoryModel.RepoType.Svn.getCode()), "请选择仓库类型");
 		Assert.hasText(repositoryModelReq.getGitUrl(), "请填写仓库地址");
 		//
 		Integer protocol = repositoryModelReq.getProtocol();
