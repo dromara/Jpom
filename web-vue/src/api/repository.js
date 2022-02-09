@@ -72,19 +72,6 @@ export function deleteRepository(params) {
   });
 }
 /**
- * delete by id
- * @param {String} id
- * @returns
- */
-export function recoveryRepository(id) {
-  return axios({
-    url: "/build/repository/recovery",
-    method: "post",
-    data: { id },
-  });
-}
-
-/**
  * restHideField by id
  * @param {String} id
  * @returns
