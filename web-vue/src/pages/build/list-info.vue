@@ -33,7 +33,13 @@
       <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip> -->
-      <a-tooltip slot="buildMode" slot-scope="text" placement="topLeft" :title="text === 1 ? '容器构建' : '本地构建'">
+      <a-tooltip
+        slot="buildMode"
+        slot-scope="text, record"
+        @click="record.status === 1 || record.status === 4 ? handleStopBuild(record) : handleConfirmStartBuild(record)"
+        placement="topLeft"
+        :title="text === 1 ? '容器构建' : '本地构建'"
+      >
         <a-icon v-if="text === 1" type="cloud" />
         <a-icon v-else type="code" />
       </a-tooltip>
@@ -117,6 +123,7 @@
                     <template slot="title">
                       <ul>
                         <li>本地构建是指直接在服务端中的服务器执行构建命令</li>
+                        <li>容器构建是指使用 docker 容器执行构建,这样可以达到和宿主机环境隔离不用安装依赖环境</li>
                       </ul>
                     </template>
                     <a-icon type="question-circle" theme="filled" />
@@ -492,6 +499,9 @@
         <a-form-model-item v-if="temp.branchTagName" label="标签(TAG)" prop="branchTagName">
           <a-input readonly disabled v-model="temp.branchTagName" />
         </a-form-model-item>
+        <a-form-model-item prop="resultDirFile" label="产物目录">
+          <a-input v-model="temp.resultDirFile" placeholder="不填写则不更新" />
+        </a-form-model-item>
         <a-form-model-item label="构建备注" prop="buildRemark">
           <a-textarea v-model="temp.buildRemark" :maxLength="240" placeholder="请输入构建备注,长度小于 240" :auto-size="{ minRows: 3, maxRows: 5 }" />
         </a-form-model-item>
@@ -739,22 +749,22 @@ export default {
     this.loadGroupList();
   },
   methods: {
-    // 页面引导
-    introGuide() {
-      this.$store.dispatch("tryOpenGuide", {
-        key: "build",
-        options: {
-          hidePrev: true,
-          steps: [
-            {
-              title: "导航助手",
-              element: document.querySelector(".jpom-target-dir"),
-              intro: "可以理解为项目打包的目录。如 Jpom 项目执行 <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b>",
-            },
-          ],
-        },
-      });
-    },
+    // // 页面引导
+    // introGuide() {
+    //   this.$store.dispatch("tryOpenGuide", {
+    //     key: "build",
+    //     options: {
+    //       hidePrev: true,
+    //       steps: [
+    //         {
+    //           title: "导航助手",
+    //           element: document.querySelector(".jpom-target-dir"),
+    //           intro: "可以理解为项目打包的目录。如 Jpom 项目执行 <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b>",
+    //         },
+    //       ],
+    //     },
+    //   });
+    // },
     // 分组数据
     loadGroupList() {
       getBuildGroupAll().then((res) => {
@@ -860,11 +870,11 @@ export default {
       this.loadSshList();
       this.editBuildVisible = true;
       this.tempExtraData = {};
-      this.$nextTick(() => {
-        setTimeout(() => {
-          this.introGuide();
-        }, 500);
-      });
+      // this.$nextTick(() => {
+      //   setTimeout(() => {
+      //     this.introGuide();
+      //   }, 500);
+      // });
     },
     // 复制
     copyItem(record) {
@@ -1065,6 +1075,7 @@ export default {
       startBuild({
         id: this.temp.id,
         buildRemark: this.temp.buildRemark,
+        resultDirFile: this.temp.resultDirFile,
       }).then((res) => {
         if (res.code === 200) {
           this.$notification.success({
@@ -1081,14 +1092,22 @@ export default {
     },
     // 停止构建
     handleStopBuild(record) {
-      this.temp = Object.assign(record);
-      stopBuild(this.temp.id).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
+      this.$confirm({
+        title: "系统提示",
+        content: "确定要取消构建 【名称：" + record.name + "】 吗？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          this.temp = Object.assign(record);
+          stopBuild(this.temp.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.handleFilter();
+            }
           });
-          this.handleFilter();
-        }
+        },
       });
     },
     // 查看构建日志

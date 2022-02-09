@@ -59,7 +59,7 @@
           <a-input v-model="temp.name" placeholder="容器名称" />
         </a-form-model-item>
         <a-form-model-item label="host" prop="host">
-          <a-input v-model="temp.host" placeholder="容器地址" />
+          <a-input v-model="temp.host" placeholder="容器地址 tcp://127.0.0.1:2375" />
         </a-form-model-item>
         <a-form-model-item label="接口版本" prop="apiVersion">
           <a-select show-search option-filter-prop="children" v-model="temp.apiVersion" allowClear placeholder="接口版本">
@@ -108,7 +108,7 @@
       </a-form-model>
     </a-modal>
     <!-- 控制台 -->
-    <a-modal v-model="consoleVisible" title="Docker 控制台" width="80vw" :footer="null" :maskClosable="false">
+    <a-modal v-model="consoleVisible" :title="`${temp.name} 控制台`" width="80vw" :footer="null" :maskClosable="false">
       <console v-if="consoleVisible" :id="temp.id"></console>
     </a-modal>
   </div>

@@ -24,6 +24,7 @@ package io.jpom.controller.build;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -86,9 +87,17 @@ public class BuildInfoManageController extends BaseServerController {
 	 */
 	@RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
-	public String start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id, String buildRemark) {
+	public String start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+						String buildRemark,
+						String resultDirFile) {
 		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
 		Assert.notNull(item, "没有对应数据");
+		if (StrUtil.isNotEmpty(resultDirFile)) {
+			BuildInfoModel update = new BuildInfoModel();
+			update.setId(id);
+			update.setResultDirFile(resultDirFile);
+			buildInfoService.update(update);
+		}
 		// userModel
 		UserModel userModel = getUser();
 		// 执行构建
