@@ -5,7 +5,7 @@
 ## 前言
 
 > 本文主要介绍：
-> 如何从零开始使用 Jpom 中的 Docker 管理
+> 如何从零开始使用 Jpom 中的容器构建 java 项目并发布到节点中
 >
 > 文中使用到的依赖环境版本仅供参考，实际使用中请根据业务情况来安装对应的版本
 
@@ -13,9 +13,8 @@
 
 ## 需要准备的环境
 
-1. Jpom 服务端（安装 jpom 需要 java 环境）
+1. Jpom 服务端、Jpom 插件端（安装 jpom 需要 java 环境）
 2. 一个安装了 docker 的服务器（可以和安装 Jpom 服务端在同一个服务器）
-
 
 ## 安装服务端
 
@@ -156,8 +155,79 @@ ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
 
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/docker-cli/add-docker2.png)
 
-## Jpom 中使用
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/docker-cli/docker-constole.png)
+## 安装插件端
 
-> docker 相关更多正在努力开发中💪 敬请期待
+```
+# 提前创建好文件夹 并且切换到对应到文件夹执行命令
+mkdir -p /home/jpom/agent/
+apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
+```
+
+![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/install-agent1.png)
+![install2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/install-agent2.png)
+
+### 添加节点
+
+注意要填写端口号哟
+
+这里的节点账号密码和超级管理员账号密码是两个都行哟
+
+节点账号密码在安装启动成功后会输出到控制台，请根据输出到内容填写。如果自己修改了账号密码则填写修改后到
+
+![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/inita1.png)
+
+### 配置白名单
+
+项目白名单是为了防止随意配置目录，同时也为了保护系统目录
+
+![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/inita2.png)
+
+
+### 创建项目（jar）
+
+## 添加构建仓库
+
+这里使用 jpom 演示的仓库中的 python
+
+![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/repo1.png)
+![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/repo2.png)
+
+## 添加本地构建
+
+这里需要注意构建产物目录：是指仓库下面的相对路径
+
+发布项目需要选择节点再选择项目
+
+![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_docker_java_node_release/edit-build1.png)
+
+DSL 示例：
+```
+# 基础镜像 目前仅支持 ubuntu-latest
+runsOn: ubuntu-latest
+# 使用哪个 docker 构建,填写 docker 标签 默认查询可用的第一个,如果 tag 查询出多个也选择第一个结果
+fromTag: loacl
+steps:
+  - uses: java
+    version: 8
+  - uses: maven
+    version: 3.8.4
+# 将容器中的文件缓存到 docker 卷中
+  - uses: cache
+    path: /root/.m2
+  - run: cd ${JPOM_WORKING_DIR} && mvn package -s settings.xml
+```
+
+执行构建
+
+![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_docker_java_node_release/build1.png)
+
+![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_docker_java_node_release/build2.png)
+
+第一次构建需要较长时间，请耐心等待
+如果构建中发生非预期错误，请根据错误信息检查或者看看相关环境是否匹配
+
+
+## 查看项目
+
+![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_docker_java_node_release/project-list.png)

@@ -4,13 +4,14 @@
 * [更新记录](CHANGELOG)
 * [赞赏记录](praise)
 * 实践案例
-    * [在线构建 + SSH 发布 java 项目](practice/build_java_ssh_release.md)
-    * [在线构建 + 项目发布 node 项目](practice/build_node_release.md)
-    * [在线构建 + SSH 发布 node 项目](practice/build_node_ssh_release.md)
-    * [在线构建 + 自定义管理 python 项目](practice/project_dsl_python.md)
+    * [本地构建 + SSH 发布 java 项目](practice/build_java_ssh_release.md)
+    * [本地构建 + 项目发布 node 项目](practice/build_node_release.md)
+    * [本地构建 + SSH 发布 node 项目](practice/build_node_ssh_release.md)
+    * [本地构建 + 自定义管理 python 项目](practice/project_dsl_python.md)
     * [自定义管理 java 项目](practice/project_dsl_java.md)
     * [管理编译安装的 nginx](practice/node_nginx.md)
     * [管理 docker](practice/docker-cli.md)
+    * [容器构建 + 项目发布 java 项目](practice/build_docker_java_node_release.md)
 * 安装使用
     * [部署说明](安装使用/部署说明.md)
     * [开始安装](安装使用/开始安装.md)
