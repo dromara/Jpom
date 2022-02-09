@@ -135,6 +135,10 @@
 					<quiet>true</quiet>
 					<!--HEADER文件-->
 					<header>LICENSE</header>
+					<includes>
+						<!--取消默认排除-->
+						<include>**/node/**</include>
+					</includes>
 					<!--排除文件-->
 					<excludes>
 						<exclude>script/**</exclude>
