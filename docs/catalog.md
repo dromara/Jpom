@@ -10,6 +10,7 @@
     * [在线构建 + 自定义管理 python 项目](practice/project_dsl_python.md)
     * [自定义管理 java 项目](practice/project_dsl_java.md)
     * [管理编译安装的 nginx](practice/node_nginx.md)
+    * [管理 docker](practice/docker-cli.md)
 * 安装使用
     * [部署说明](安装使用/部署说明.md)
     * [开始安装](安装使用/开始安装.md)
