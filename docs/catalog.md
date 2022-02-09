@@ -7,6 +7,7 @@
     * [在线构建 + SSH 发布 java 项目](practice/build_java_ssh_release.md)
     * [在线构建 + 项目发布 node 项目](practice/build_node_release.md)
     * [在线构建 + SSH 发布 node 项目](practice/build_node_ssh_release.md)
+    * [自定义管理 java 项目](practice/project_dsl_java.md)
     * [管理编译安装的 nginx](practice/node_nginx.md)
 * 安装使用
     * [部署说明](安装使用/部署说明.md)
