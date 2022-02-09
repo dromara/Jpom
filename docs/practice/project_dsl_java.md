@@ -57,10 +57,18 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ### 添加节点
 
+注意要填写端口号哟
+
+这里的节点账号密码和超级管理员账号密码是两个都行哟
+
+节点账号密码在安装启动成功后会输出到控制台，请根据输出到内容填写。如果自己修改了账号密码则填写修改后到
+
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/inita1.png)
 
 
 ### 配置白名单
+
+项目白名单是为了防止随意配置目录，同时也为了保护系统目录
 
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/inita2.png)
 
