@@ -20,23 +20,45 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package com.example.twofactorauthdemo;
+
+import io.jpom.util.TwoFactorAuthUtils;
+import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.junit.ContiPerfRule;
+import org.junit.Rule;
+import org.junit.Test;
+import org.springframework.util.Assert;
+
 /**
  * @author bwcx_jzy
  * @since 2022/1/27
  */
-package com.example.twofactorauthdemo;
-
-import io.jpom.util.TwoFactorAuthUtils;
-import org.junit.Test;
-import org.springframework.util.Assert;
-
 public class TwoFactorAuthTest {
+	private String tfaKey;
 
+	@Rule
+	public ContiPerfRule i = ContiPerfRule.createDefaultRule();
+
+	//	@Before
+	public void before() {
+		//tfaKey = TwoFactorAuthUtils.generateTFAKey();
+		//System.out.println(tfaKey);
+	}
+
+	@PerfTest(invocations = 2000000, threads = 16)
+	@Test
+	public void test1() {
+		String tfaKey = TwoFactorAuthUtils.generateTFAKey();
+		String tfaCode = TwoFactorAuthUtils.generateTFACode(tfaKey);
+
+		boolean validateTFACode = TwoFactorAuthUtils.validateTFACode(tfaKey, tfaCode);
+		System.out.println(tfaKey + "  " + tfaCode + "  " + Thread.currentThread().getName());
+		Assert.state(validateTFACode, "验证失败:" + tfaCode);
+	}
 
 	@Test
 	public void test() {
-		String tfaKey = TwoFactorAuthUtils.generateTFAKey();
-		System.out.println(tfaKey);
+
 		String generateOtpAuthUrl = TwoFactorAuthUtils.generateOtpAuthUrl("jpom@jpom.com", tfaKey);
 		System.out.println(generateOtpAuthUrl);
 

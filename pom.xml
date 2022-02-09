@@ -25,7 +25,7 @@
 	<artifactId>jpom-parent</artifactId>
 	<name>Jpom Java项目在线管理</name>
 	<description>
-		一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
+		简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
 	</description>
 	<inceptionYear>2017</inceptionYear>
 	<version>2.8.8</version>
