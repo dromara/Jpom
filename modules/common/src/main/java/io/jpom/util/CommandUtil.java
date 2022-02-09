@@ -54,16 +54,18 @@ public class CommandUtil {
 	static {
 		if (SystemUtil.getOsInfo().isLinux()) {
 			//执行linux系统命令
-			COMMAND.add("/bin/sh");
+			COMMAND.add("/bin/bash");
 			COMMAND.add("-c");
 		} else if (SystemUtil.getOsInfo().isMac()) {
-			COMMAND.add("/bin/sh");
+			COMMAND.add("/bin/bash");
 			COMMAND.add("-c");
 		} else {
 			COMMAND.add("cmd");
 			COMMAND.add("/c");
 		}
-
+		/**
+		 * 文件后缀
+		 */
 		if (SystemUtil.getOsInfo().isWindows()) {
 			SUFFIX = "bat";
 		} else {
