@@ -25,7 +25,16 @@ mkdir -p /home/jpom/server/
 apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
 ```
 
+#### 添加超级管理账号
+
+> 添加一个超级管理员账号，请妥善保管此账号同时请设置安全度较强的密码
+
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/install1.png)
+
+#### 开启账号 MFA
+
+> 为了系统安全，强烈建议超级管理员账号开启 MFA 两步验证
+
 ![install2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/install2.png)
 
 
