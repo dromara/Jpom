@@ -55,6 +55,7 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.service.docker.DockerInfoService;
+import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
@@ -96,15 +97,18 @@ public class BuildExecuteService {
 	private final DbBuildHistoryLogService dbBuildHistoryLogService;
 	private final RepositoryService repositoryService;
 	private final DockerInfoService dockerInfoService;
+	private final WorkspaceEnvVarService workspaceEnvVarService;
 
 	public BuildExecuteService(BuildInfoService buildService,
 							   DbBuildHistoryLogService dbBuildHistoryLogService,
 							   RepositoryService repositoryService,
-							   DockerInfoService dockerInfoService) {
+							   DockerInfoService dockerInfoService,
+							   WorkspaceEnvVarService workspaceEnvVarService) {
 		this.buildService = buildService;
 		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
 		this.repositoryService = repositoryService;
 		this.dockerInfoService = dockerInfoService;
+		this.workspaceEnvVarService = workspaceEnvVarService;
 	}
 
 	/**
@@ -153,12 +157,13 @@ public class BuildExecuteService {
 			// load repository
 			RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
 			Assert.notNull(repositoryModel, "仓库信息不存在");
+			Map<String, String> env = workspaceEnvVarService.getEnv(buildInfoModel.getWorkspaceId());
 			BuildExecuteService.TaskData.TaskDataBuilder taskBuilder = BuildExecuteService.TaskData.builder()
 					.buildInfoModel(buildInfoModel)
 					.repositoryModel(repositoryModel)
 					.userModel(userModel)
 					.buildRemark(buildRemark)
-					.delay(delay)
+					.delay(delay).env(env)
 					.triggerBuildType(triggerBuildType);
 			this.runTask(taskBuilder.build());
 			String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
@@ -274,6 +279,10 @@ public class BuildExecuteService {
 		 * 构建备注
 		 */
 		private String buildRemark;
+		/**
+		 * 环境变量
+		 */
+		private Map<String, String> env;
 	}
 
 
@@ -518,7 +527,9 @@ public class BuildExecuteService {
 			map.put("copy", copy);
 			map.put("binds", ObjectUtil.defaultIfNull(dockerYmlDsl.getBinds(), new ArrayList<>()));
 
-			Map<String, String> env = ObjectUtil.defaultIfNull(dockerYmlDsl.getEnv(), new HashMap<>());
+			Map<String, String> dockerEnv = ObjectUtil.defaultIfNull(dockerYmlDsl.getEnv(), new HashMap<>(10));
+			Map<String, String> env = taskData.env;
+			env.putAll(dockerEnv);
 			env.put("JPOM_BUILD_ID", buildInfoModelId);
 			env.put("JPOM_WORKING_DIR", workingDir);
 			map.put("env", env);
@@ -670,6 +681,8 @@ public class BuildExecuteService {
 			processBuilder.command(commands);
 			final boolean[] status = new boolean[1];
 			processBuilder.redirectErrorStream(true);
+			Map<String, String> environment = processBuilder.environment();
+			environment.putAll(taskData.env);
 			process = processBuilder.start();
 			//
 			InputStream inputStream = process.getInputStream();
