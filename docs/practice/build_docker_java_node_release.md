@@ -218,6 +218,17 @@ steps:
   - run: cd ${JPOM_WORKING_DIR} && mvn package -s settings.xml
 ```
 
+完整示例：[✈️进入>>](/FQA/DOCKER_DSL.md)
+
+目前支持都插件有（更多插件尽情期待）：
+1. java
+   1. sdk 镜像使用：https://mirrors.tuna.tsinghua.edu.cn/
+   2. 支持版本有：8, 9, 10, 11, 12, 13, 14, 15, 16, 17
+2. maven
+   1. sdk 镜像使用：https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/
+3. node
+   1. sdk 镜像使用：https://registry.npmmirror.com/-/binary/node
+
 执行构建
 
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_docker_java_node_release/build1.png)

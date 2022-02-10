@@ -1,0 +1,32 @@
+## 完整的容器构建 dsl 示例
+
+```
+# 基础镜像 目前仅支持 ubuntu-latest
+runsOn: ubuntu-latest
+# 使用哪个 docker 构建,填写 docker 标签 默认查询可用的第一个,如果 tag 查询出多个也选择第一个结果
+fromTag: xxx
+steps:
+  - uses: java
+    version: 8
+  - uses: maven
+    version: 3.8.4
+  - uses: node
+    version: 16.3.0
+# 将容器中的文件缓存到 docker 卷中
+  - uses: cache
+    path: /root/.m2
+  - run: npm config set registry https://registry.npmmirror.com
+# 内置变量 ${JPOM_WORKING_DIR} ${JPOM_BUILD_ID}
+  - run: cd  ${JPOM_WORKING_DIR}/web-vue && npm i && npm run build
+  - run: cd ${JPOM_WORKING_DIR} && mvn package -s script/settings.xml
+# 宿主机目录和容器目录挂载 /host:/container:ro
+# binds:
+#  - /Users/user/.m2/settings.xml:/root/.m2/
+# 宿主机文件上传到容器 /host:/container:true
+# dirChildrenOnly = true will create /var/data/titi and /var/data/tata dirChildrenOnly = false will create /var/data/root/titi and /var/data/root/tata
+# copy:
+#  - /Users/user/.m2/settings.xml:/root/.m2/:false
+# 给容器添加环境变量
+env:
+  NODE_OPTIONS: --max-old-space-size=900
+```
