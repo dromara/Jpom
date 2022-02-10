@@ -1,7 +1,7 @@
 <template>
   <!-- console -->
   <div>
-    <log-view ref="logView" seg="" height="60vh" />
+    <log-view ref="logView" seg="" height="60vh" marginTop="-10px" />
   </div>
 </template>
 <script>
