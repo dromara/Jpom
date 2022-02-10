@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div ref="filter" class="filter">
-      <!-- <template v-if="copyId">
+    <!-- <div ref="filter" class="filter"> -->
+    <!-- <template v-if="copyId">
         <a-space>
           <a-button :disabled="replicaStatus" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
           <a-button :disabled="!replicaStatus" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
@@ -11,29 +11,22 @@
           <a-switch checked-children="自动滚动" un-checked-children="关闭滚动" v-model="logScroll" />
         </a-space>
       </template> -->
-      <template>
+    <!-- <template> </template> -->
+    <!-- </div> -->
+    <!-- console -->
+    <log-view :ref="`logView`" height="calc(100vh - 140px)">
+      <template slot="before">
         <a-space>
           <a-button :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
           <a-button :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
           <a-button :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
 
           <a-button v-if="!copyId" type="primary" @click="goFile">文件管理</a-button>
-          |
 
-          <!-- <a-switch checked-children="自动滚动" un-checked-children="关闭滚动" v-model="logScroll" /> -->
-          <a-input-group compact style="width: 200px">
-            <a-select v-model="logScroll">
-              <a-select-option value="true"> 自动滚动 </a-select-option>
-              <a-select-option value="false"> 关闭滚动 </a-select-option>
-            </a-select>
-            <a-input style="width: 50%" v-model="logShowLine" placeholder="显示行数" />
-          </a-input-group>
-
-          <a-input-search placeholder="搜索关键词" style="width: 200px" @search="onSearch" />
           <a-tag v-if="project.logSize"> 文件大小: {{ project.logSize }}</a-tag>
-          <a-button type="link" @click="clearLogCache" icon="delete"> 清空 </a-button>
+
           <a-dropdown>
-            <a class="ant-dropdown-link"> 更多<a-icon type="down" /> </a>
+            <a-button type="link" class="ant-dropdown-link"> 更多<a-icon type="down" /> </a-button>
             <a-menu slot="overlay">
               <a-menu-item>
                 <a-button type="primary" :disabled="!project.logSize" @click="handleDownload">导出日志</a-button>
@@ -45,12 +38,7 @@
           </a-dropdown>
         </a-space>
       </template>
-    </div>
-    <!-- console -->
-    <pre class="console" id="project-console">
-      <!-- <a-input v-model="logContext" readOnly type="textarea" style="resize: none" /> -->
-      loading context...
-    </pre>
+    </log-view>
     <!-- 日志备份 -->
     <a-modal v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
       <div ref="model-filter" class="filter">
@@ -83,7 +71,11 @@
 import { getProjectData, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from "@/api/node-project";
 import { mapGetters } from "vuex";
 import { getWebSocketUrl } from "@/utils/const";
+import LogView from "@/components/logView";
 export default {
+  components: {
+    LogView,
+  },
   props: {
     nodeId: {
       type: String,
@@ -104,13 +96,7 @@ export default {
       optButtonLoading: true,
       loading: false,
       socket: null,
-      regReplaceText: "<b style='color:red;'>$1</b>",
-      searchReg: null,
-      // 日志内容
-      logContextArray: [],
-      logScroll: "true",
-      logShowLine: 500,
-      defLogShowLine: 500,
+
       lobbackVisible: false,
       logBackList: [],
       columns: [
@@ -223,28 +209,29 @@ export default {
             // return;
           }
         }
-        if (this.searchReg) {
-          this.logContextArray.push(msg.data.replace(this.searchReg, this.regReplaceText));
-        } else {
-          this.logContextArray.push(msg.data);
-        }
-        let logShowLineTemp = parseInt(this.logShowLine);
-        logShowLineTemp = isNaN(logShowLineTemp) ? this.defLogShowLine : logShowLineTemp;
-        logShowLineTemp = logShowLineTemp > 0 ? logShowLineTemp : 1;
-        if (this.logScroll === "true") {
-          this.logContextArray = this.logContextArray.slice(-logShowLineTemp);
-        }
+        this.$refs.logView.appendLine(msg.data);
+        // if (this.searchReg) {
+        //   this.logContextArray.push(msg.data.replace(this.searchReg, this.regReplaceText));
+        // } else {
+        //   this.logContextArray.push(msg.data);
+        // }
+        // let logShowLineTemp = parseInt(this.logShowLine);
+        // logShowLineTemp = isNaN(logShowLineTemp) ? this.defLogShowLine : logShowLineTemp;
+        // logShowLineTemp = logShowLineTemp > 0 ? logShowLineTemp : 1;
+        // if (this.logScroll === "true") {
+        //   this.logContextArray = this.logContextArray.slice(-logShowLineTemp);
+        // }
 
-        // 自动滚动到底部
-        this.$nextTick(() => {
-          const projectConsole = document.getElementById("project-console");
-          projectConsole.innerHTML = this.logContextArray.join("</br>");
-          if (this.logScroll === "true") {
-            setTimeout(() => {
-              projectConsole.scrollTop = projectConsole.scrollHeight;
-            }, 100);
-          }
-        });
+        // // 自动滚动到底部
+        // this.$nextTick(() => {
+        //   const projectConsole = document.getElementById("project-console");
+        //   projectConsole.innerHTML = this.logContextArray.join("</br>");
+        //   if (this.logScroll === "true") {
+        //     setTimeout(() => {
+        //       projectConsole.scrollTop = projectConsole.scrollHeight;
+        //     }, 100);
+        //   }
+        // });
 
         clearInterval(this.heart);
         // 创建心跳，防止掉线
@@ -266,29 +253,7 @@ export default {
         this.optButtonLoading = true;
       }
     },
-    clearLogCache() {
-      this.logContextArray = [];
-      this.$nextTick(() => {
-        const projectConsole = document.getElementById("project-console");
-        projectConsole.innerHTML = "loading context...";
-      });
-    },
-    // 搜索
-    onSearch(value) {
-      this.searchReg = value ? new RegExp("(" + value + ")", "ig") : null;
 
-      this.logContextArray = this.logContextArray.map((item) => {
-        item = item.replace(/<b[^>]*>([^>]*)<\/b[^>]*>/gi, "$1");
-        if (this.searchReg) {
-          item = item.replace(this.searchReg, this.regReplaceText);
-        }
-        return item;
-      });
-      this.$nextTick(() => {
-        const projectConsole = document.getElementById("project-console");
-        projectConsole.innerHTML = this.logContextArray.join("</br>");
-      });
-    },
     // 加载日志文件大小
     loadFileSize() {
       const params = {
@@ -431,10 +396,10 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
+/* .filter {
   margin: 0 0 10px;
-}
-
+} */
+/* 
 .console {
   padding: 5px;
   color: #fff;
@@ -445,5 +410,5 @@ export default {
   overflow-y: auto;
   border: 1px solid #e2e2e2;
   border-radius: 5px 5px;
-}
+} */
 </style>

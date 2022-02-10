@@ -1,8 +1,9 @@
 <template>
   <div>
-    <div class="filter">
+    <div class="log-filter">
       <template>
         <a-space>
+          <slot name="before"></slot>
           <a-input-group compact style="width: 200px">
             <a-select v-model="logScroll">
               <a-select-option value="true"> 自动滚动 </a-select-option>
@@ -10,13 +11,13 @@
             </a-select>
             <a-input style="width: 50%" v-model="logShowLine" placeholder="显示行数" />
           </a-input-group>
-
+          <a-button type="link" @click="clearLogCache" icon="delete"> 清空 </a-button>
           <a-input-search placeholder="搜索关键词" style="width: 200px" @search="onSearch" />
         </a-space>
       </template>
     </div>
     <pre class="log-view" :id="this.id" :style="`height:${this.height}`">
-      loading context...
+loading context...
     </pre>
   </div>
 </template>
@@ -57,6 +58,20 @@ export default {
       }
       const dataArray = Array.isArray(data) ? data : [data];
       dataArray.forEach((item) => {
+        item = item.replace(/[<>"&]/g, function (match) {
+          //  pos, originalText
+          switch (match) {
+            case "<":
+              return "&lt;";
+            case ">":
+              return "&gt;";
+            case "&":
+              return "&amp;";
+            case '"':
+              return "&quot;";
+          }
+        });
+        // console.log(item);
         if (this.searchReg) {
           this.logContextArray.push(item.replace(this.searchReg, this.regReplaceText));
         } else {
@@ -104,6 +119,13 @@ export default {
         projectConsole.innerHTML = this.logContextArray.join(this.seg);
       });
     },
+    clearLogCache() {
+      this.logContextArray = [];
+      this.$nextTick(() => {
+        const projectConsole = document.getElementById(this.id);
+        projectConsole.innerHTML = "loading context...";
+      });
+    },
   },
 };
 </script>
@@ -120,8 +142,12 @@ export default {
   border: 1px solid #e2e2e2;
   border-radius: 5px 5px;
 }
-.filter {
-  margin-top: -22px;
-  margin-bottom: 10px;
+.log-filter {
+  /* margin-top: -22px; */
+  /* margin-bottom: 10px; */
+  padding: 0 10px;
+  padding-top: 0;
+  padding-bottom: 10px;
+  line-height: 0;
 }
 </style>

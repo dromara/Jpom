@@ -1,17 +1,19 @@
 <template>
-  <a-layout class="script-console-layout">
+  <div>
+    <!-- <div ref="filter" class="filter"></div> -->
+    <!-- console -->
     <div>
-      <div ref="filter" class="filter">
-        <a-space>
-          <a-button :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
-          <a-button :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
-        </a-space>
-      </div>
-      <!-- console -->
-      <div>
-        <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" />
-      </div>
+      <!-- <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" /> -->
+      <log-view ref="logView" height="calc(100vh - 140px)">
+        <template slot="before">
+          <a-space>
+            <a-button :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
+            <a-button :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
+          </a-space>
+        </template>
+      </log-view>
     </div>
+
     <!--远程下载  -->
     <a-modal v-model="editArgs" title="添加运行参数" @ok="startExecution" @cancel="this.editArgs = false" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 24 }" ref="ruleForm">
@@ -20,13 +22,17 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-  </a-layout>
+  </div>
 </template>
 <script>
 import { mapGetters } from "vuex";
 import { getWebSocketUrl } from "@/utils/const";
+import LogView from "@/components/logView";
 
 export default {
+  components: {
+    LogView,
+  },
   props: {
     id: {
       type: String,
@@ -44,7 +50,7 @@ export default {
         args: "",
       },
       // 日志内容
-      logContext: "loading ...",
+      // logContext: "loading ...",
       btnLoading: true,
     };
   },
@@ -117,7 +123,8 @@ export default {
           }
           return;
         }
-        this.logContext += `${msg.data}\r\n`;
+        // this.logContext += `${msg.data}\r\n`;
+        this.$refs.logView.appendLine(msg.data);
         clearInterval(this.heart);
         // 创建心跳，防止掉线
         this.heart = setInterval(() => {

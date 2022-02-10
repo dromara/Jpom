@@ -3,32 +3,43 @@
     <!-- 侧边栏 文件树 -->
     <a-layout-sider theme="light" class="log-sider jpom-node-log-tree" width="20%">
       <a-empty v-if="list.length === 0" />
-      <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select" @rightClick="rightClick" default-expand-all> </a-directory-tree>
+      <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select" default-expand-all> </a-directory-tree>
     </a-layout-sider>
     <!-- 单个文件内容 -->
     <a-layout-content class="log-content">
-      <div class="filter">
+      <!-- <div class="filter">
         <a-button type="primary" @click="loadData">刷新</a-button>
       </div>
       <div>
         <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" />
-      </div>
+      </div> -->
+      <log-view :ref="`logView`" height="calc(100vh - 165px)">
+        <template slot="before">
+          <a-button type="primary" @click="loadData">刷新</a-button>
+          <a-button type="danger" :disabled="!this.temp.path" @click="deleteLog">删除日志文件</a-button>
+          <a-button type="primary" :disabled="!this.temp.path" @click="downloadLog">下载日志文件</a-button>
+        </template>
+      </log-view>
     </a-layout-content>
     <!-- 对话框 -->
-    <a-modal v-model="visible" title="系统提示" :footer="null">
+    <!-- <a-modal v-model="visible" title="系统提示" :footer="null">
       <a-space>
         <a-button type="danger" @click="deleteLog">删除日志文件</a-button>
         <a-button type="primary" @click="downloadLog">下载日志文件</a-button>
         <a-button @click="visible = false">取消</a-button>
       </a-space>
-    </a-modal>
+    </a-modal> -->
   </a-layout>
 </template>
 <script>
 import { getLogList, downloadFile, deleteLog } from "@/api/system";
 import { mapGetters } from "vuex";
 import { getWebSocketUrl } from "@/utils/const";
+import LogView from "@/components/logView";
 export default {
+  components: {
+    LogView,
+  },
   props: {
     node: {
       type: Object,
@@ -124,7 +135,8 @@ export default {
         tomcatId: this.tomcatId,
         fileName: node.dataRef.path,
       };
-      this.logContext = "";
+      this.temp = node.dataRef;
+      this.$refs.logView.clearLogCache();
       if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
         this.socket = new WebSocket(this.socketUrl);
       }
@@ -133,7 +145,7 @@ export default {
         this.socket.send(JSON.stringify(data));
       };
       this.socket.onmessage = (msg) => {
-        this.logContext += `${msg.data}\r\n`;
+        this.$refs.logView.appendLine(msg.data);
       };
       this.socket.onerror = (err) => {
         console.error(err);
@@ -150,12 +162,12 @@ export default {
         // clearInterval(this.heart);
       };
     },
-    // 右键点击
-    rightClick({ node }) {
-      this.temp = node.dataRef;
-      // 弹出提示 下载还是删除
-      this.visible = true;
-    },
+    // // 右键点击
+    // rightClick({ node }) {
+    //   this.temp = node.dataRef;
+    //   // 弹出提示 下载还是删除
+    //   this.visible = true;
+    // },
     // 下载文件
     downloadLog() {
       // 请求参数
@@ -221,7 +233,7 @@ export default {
   height: calc(100vh - 130px);
   overflow-y: auto;
 }
-.console {
+/* .console {
   padding: 5px;
   color: #fff;
   font-size: 14px;
@@ -231,5 +243,5 @@ export default {
   overflow-y: auto;
   border: 1px solid #e2e2e2;
   border-radius: 5px 5px;
-}
+} */
 </style>

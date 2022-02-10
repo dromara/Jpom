@@ -1,9 +1,8 @@
 <template>
   <div>
-    <div ref="filter" class="filter">
+    <!-- <div ref="filter" class="filter">
       <template>
         <a-space>
-          <a-button type="primary" @click="goFile">文件管理</a-button>
           |
 
           <a-input-group compact style="width: 200px">
@@ -18,19 +17,23 @@
           <a-input-search placeholder="搜索关键词" style="width: 200px" @search="onSearch" />
         </a-space>
       </template>
-    </div>
+    </div> -->
     <!-- console -->
-    <pre class="console" id="logScrollArea">
-      loading context...
-    </pre>
+    <log-view :ref="`logView`" height="calc(100vh - 140px)">
+      <template slot="before"> <a-button type="primary" @click="goFile">文件管理</a-button></template>
+    </log-view>
   </div>
 </template>
 <script>
 // import { getProjectData, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from "@/api/node-project";
 import { mapGetters } from "vuex";
 import { getWebSocketUrl } from "@/utils/const";
+import LogView from "@/components/logView";
 
 export default {
+  components: {
+    LogView,
+  },
   props: {
     nodeId: {
       type: String,
@@ -51,13 +54,7 @@ export default {
       optButtonLoading: true,
       loading: false,
       socket: null,
-      searchReg: null,
-      regReplaceText: "<b style='color:red;'>$1</b>",
-      // 日志内容
-      logContextArray: [],
-      logScroll: "true",
-      logShowLine: 500,
-      defLogShowLine: 500,
+
       heart: null,
     };
   },
@@ -104,29 +101,7 @@ export default {
         clearInterval(this.heart);
       };
       this.socket.onmessage = (msg) => {
-        if (this.searchReg) {
-          this.logContextArray.push(msg.data.replace(this.searchReg, this.regReplaceText));
-        } else {
-          this.logContextArray.push(msg.data);
-        }
-
-        let logShowLineTemp = parseInt(this.logShowLine);
-        logShowLineTemp = isNaN(logShowLineTemp) ? this.defLogShowLine : logShowLineTemp;
-        logShowLineTemp = logShowLineTemp > 0 ? logShowLineTemp : 1;
-        if (this.logScroll === "true") {
-          this.logContextArray = this.logContextArray.slice(-logShowLineTemp);
-        }
-
-        // 自动滚动到底部
-        this.$nextTick(() => {
-          const projectConsole = document.getElementById("logScrollArea");
-          projectConsole.innerHTML = this.logContextArray.join("</br>");
-          if (this.logScroll === "true") {
-            setTimeout(() => {
-              projectConsole.scrollTop = projectConsole.scrollHeight;
-            }, 100);
-          }
-        });
+        this.$refs.logView.appendLine(msg.data);
 
         clearInterval(this.heart);
         // 创建心跳，防止掉线
@@ -136,22 +111,7 @@ export default {
         }, 5000);
       };
     },
-    // 搜索
-    onSearch(value) {
-      this.searchReg = value ? new RegExp("(" + value + ")", "ig") : null;
 
-      this.logContextArray = this.logContextArray.map((item) => {
-        item = item.replace(/<b[^>]*>([^>]*)<\/b[^>]*>/gi, "$1");
-        if (this.searchReg) {
-          item = item.replace(this.searchReg, this.regReplaceText);
-        }
-        return item;
-      });
-      this.$nextTick(() => {
-        const projectConsole = document.getElementById("logScrollArea");
-        projectConsole.innerHTML = this.logContextArray.join("</br>");
-      });
-    },
     // 发送消息
     sendMsg(op) {
       const data = {
@@ -160,13 +120,6 @@ export default {
         fileName: this.readFilePath,
       };
       this.socket.send(JSON.stringify(data));
-    },
-    clearLogCache() {
-      this.logContextArray = [];
-      this.$nextTick(() => {
-        const projectConsole = document.getElementById("logScrollArea");
-        projectConsole.innerHTML = "loading context...";
-      });
     },
 
     goFile() {
@@ -180,15 +133,4 @@ export default {
   margin: 0 0 10px;
 }
 
-.console {
-  padding: 5px;
-  color: #fff;
-  font-size: 14px;
-  background-color: black;
-  width: 100%;
-  height: calc(100vh - 120px);
-  overflow-y: auto;
-  border: 1px solid #e2e2e2;
-  border-radius: 5px 5px;
-}
 </style>
