@@ -111,19 +111,17 @@
 ```
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server
 
-备用地址
-
+# 备用地址
 yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Server
 
-
 支持自动安装jdk环境
-
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
 
-支持自动安装jdk和maven环境
-
+# 支持自动安装jdk和maven环境
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk+mvn
 
+# ubuntu
+apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
 ```
 
 启动成功后,服务端的端口为 `2122` 访问管理页面 例如`http://127.0.0.1:2122/`
@@ -146,14 +144,14 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 ```
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent
 
-备用地址
-
+# 备用地址
 yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Agent
 
-支持自动安装jdk环境
-
+# 支持自动安装jdk环境
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
 
+# ubuntu
+apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
 ```
 
 启动成功后,插件端的端口为 `2123`

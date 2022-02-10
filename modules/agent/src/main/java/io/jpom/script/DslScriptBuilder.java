@@ -41,7 +41,9 @@ import io.jpom.util.CommandUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * dsl 执行脚本
@@ -76,11 +78,16 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 	private ProcessBuilder init() {
 		String id = nodeProjectInfoModel.getId();
 		File scriptFile = scriptModel.scriptFile("_" + id);
+		Map<String, String> dslEnv = new HashMap<>(10);
+		dslEnv.put("PROJECT_ID", id);
+		dslEnv.put("PROJECT_NAME", nodeProjectInfoModel.getName());
+		dslEnv.put("PROJECT_PATH", nodeProjectInfoModel.allLib());
 		// 替换内容
 		String context = scriptModel.getContext();
-		context = StrUtil.replace(context, "#{PROJECT_ID}", id);
-		context = StrUtil.replace(context, "#{PROJECT_NAME}", nodeProjectInfoModel.getName());
-		context = StrUtil.replace(context, "#{PROJECT_PATH}", nodeProjectInfoModel.allLib());
+		for (Map.Entry<String, String> envEntry : dslEnv.entrySet()) {
+			String envValue = envEntry.getValue();
+			context = StrUtil.replace(context, "#{" + envEntry.getKey() + "}", envValue);
+		}
 		FileUtil.writeString(context, scriptFile, ExtConfigBean.getInstance().getConsoleLogCharset());
 		//
 		String script = FileUtil.getAbsolutePath(scriptFile);
@@ -91,6 +98,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 			command.add(0, CommandUtil.SUFFIX);
 		}
 		DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
+		processBuilder.environment().putAll(dslEnv);
 		processBuilder.redirectErrorStream(true);
 		processBuilder.command(command);
 		return processBuilder;
