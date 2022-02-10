@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -352,5 +353,28 @@ public class Test {
 			}
 		});
 		resultCallback.awaitCompletion();
+	}
+
+	@org.junit.Test
+	public void testDockerfile() throws InterruptedException {
+		File dir = FileUtil.file("/Users/user/IdeaProjects/Jpom-demo-case/springboot-test-jar/");
+		BuildImageCmd buildImageCmd = dockerClient.buildImageCmd();
+		buildImageCmd
+				.withDockerfile(FileUtil.file(dir, "Dockerfile"))
+				.withBaseDirectory(dir)
+//				.withQuiet()
+				.withTags(CollUtil.newHashSet("jpom-test2"));
+		buildImageCmd.exec(new InvocationBuilder.AsyncResultCallback<BuildResponseItem>() {
+
+
+			@Override
+			public void onNext(BuildResponseItem object) {
+				String stream = object.getStream();
+				if (stream == null) {
+					return;
+				}
+				System.out.print(stream);
+			}
+		}).awaitCompletion();
 	}
 }

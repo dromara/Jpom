@@ -35,6 +35,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildExecuteService;
 import io.jpom.common.BaseJpomController;
+import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.controller.build.BuildInfoTriggerController;
@@ -119,7 +120,7 @@ public class BuildTriggerApiController extends BaseJpomController {
 		Assert.notNull(userModel, "没有对应数据:-1");
 
 		Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
-
+		BaseServerController.resetInfo(userModel);
 		JsonMessage<Integer> start = buildExecuteService.start(id, userModel, Convert.toInt(delay, 0), 1, buildRemark);
 		return start.toString();
 	}
@@ -179,6 +180,7 @@ public class BuildTriggerApiController extends BaseJpomController {
 					jsonObject.put("msg", updateItemErrorMsg);
 					return;
 				}
+				BaseServerController.resetInfo(userModel);
 				//
 				JsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1, buildRemark);
 				jsonObject.put("msg", start.getMsg());
