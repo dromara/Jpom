@@ -11,7 +11,7 @@
             </a-select>
             <a-input style="width: 50%" v-model="logShowLine" placeholder="显示行数" />
           </a-input-group>
-          <a-button type="link" @click="clearLogCache" icon="delete"> 清空 </a-button>
+          <a-button type="link" style="padding: 0" @click="clearLogCache" icon="delete"> 清空 </a-button>
           <a-input-search placeholder="搜索关键词" style="width: 200px" @search="onSearch" />
         </a-space>
       </template>

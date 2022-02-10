@@ -37,6 +37,9 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
+          <a-tooltip title="容器是运行中可以进入终端">
+            <a-button size="small" type="link" :disabled="record.state !== 'running'" @click="handleTerminal(record)"><a-icon type="code" /></a-button>
+          </a-tooltip>
           <a-tooltip title="停止" v-if="record.state === 'running'">
             <a-button size="small" type="link" @click="doAction(record, 'stop')"><a-icon type="stop" /></a-button>
           </a-tooltip>
@@ -56,15 +59,21 @@
     <a-modal :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
       <log-view v-if="logVisible" :id="this.id" :containerId="temp.id" />
     </a-modal>
+    <!-- Terminal -->
+    <a-modal v-model="terminalVisible" width="80vw" :title="`docker cli ${(temp.names || []).join(',')}`" :footer="null" :maskClosable="false">
+      <terminal v-if="terminalVisible" :id="this.id" :containerId="temp.id" />
+    </a-modal>
   </div>
 </template>
 <script>
 import { parseTime } from "@/utils/time";
 import { dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStop } from "@/api/docker-api";
 import LogView from "@/pages/docker/log-view";
+import Terminal from "./terminal";
 export default {
   components: {
     LogView,
+    Terminal,
   },
   props: {
     id: {
@@ -78,7 +87,9 @@ export default {
       listQuery: {
         showAll: true,
       },
+      terminalVisible: false,
       logVisible: false,
+      temp: {},
       columns: [
         { title: "名称", dataIndex: "names", ellipsis: true, scopedSlots: { customRender: "names" } },
         { title: "容器ID", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
@@ -95,7 +106,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 140 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 170 },
       ],
       action: {
         remove: {
@@ -163,6 +174,11 @@ export default {
     viewLog(record) {
       this.logVisible = true;
       this.temp = record;
+    },
+    // 进入终端
+    handleTerminal(record) {
+      this.temp = Object.assign(record);
+      this.terminalVisible = true;
     },
   },
 };

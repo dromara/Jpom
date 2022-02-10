@@ -13,14 +13,10 @@ export default {
     terminal,
   },
   props: {
-    sshId: {
+    id: {
       type: String,
     },
-    nodeId: {
-      type: String,
-      default: "system",
-    },
-    tail: {
+    containerId: {
       type: String,
     },
   },
@@ -30,7 +26,7 @@ export default {
   computed: {
     ...mapGetters(["getLongTermToken"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/ssh", `userId=${this.getLongTermToken}&id=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`);
+      return getWebSocketUrl("/socket/docker_cli", `userId=${this.getLongTermToken}&id=${this.id}&nodeId=system&type=docker&containerId=${this.containerId}`);
     },
   },
   mounted() {},

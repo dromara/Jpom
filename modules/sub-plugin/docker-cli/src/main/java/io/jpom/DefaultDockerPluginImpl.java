@@ -31,10 +31,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.core.InvocationBuilder;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,8 +91,43 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			case "logContainer":
 				this.logContainerCmd(parameter);
 				return null;
+			case "exec":
+				this.execCreateCmd(parameter);
+				return null;
 			default:
 				throw new IllegalArgumentException("不支持的类型");
+		}
+	}
+
+	private void execCreateCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
+		Consumer<String> errorConsumer = (Consumer<String>) parameter.get("errorConsumer");
+		try {
+			String containerId = (String) parameter.get("containerId");
+			Charset charset = (Charset) parameter.get("charset");
+			InputStream stdin1 = (InputStream) parameter.get("stdin");
+			//
+			ExecCreateCmd execCreateCmd = dockerClient.execCreateCmd(containerId);
+			execCreateCmd.withAttachStdout(true).withAttachStdin(true).withAttachStderr(true).withTty(true).withCmd("/bin/sh");
+			ExecCreateCmdResponse exec = execCreateCmd.exec();
+			//
+			String execId = exec.getId();
+			ExecStartCmd execStartCmd = dockerClient.execStartCmd(execId);
+			execStartCmd.withDetach(false).withTty(true).withStdIn(stdin1);
+
+			execStartCmd.exec(new InvocationBuilder.AsyncResultCallback<Frame>() {
+				@Override
+				public void onNext(Frame frame) {
+					String s = new String(frame.getPayload(), charset);
+					logConsumer.accept(s);
+				}
+			}).awaitCompletion();
+		} catch (InterruptedException e) {
+			errorConsumer.accept("容器cli被中断:" + e);
+		} finally {
+			IoUtil.close(dockerClient);
+			errorConsumer.accept("exit");
 		}
 	}
 

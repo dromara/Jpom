@@ -44,9 +44,7 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.user.UserBindWorkspaceService;
-import io.jpom.socket.BaseHandler;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -65,7 +63,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2019/8/9
  */
 @Feature(cls = ClassFeature.SSH_TERMINAL, method = MethodFeature.EXECUTE)
-public class SshHandler extends BaseHandler {
+public class SshHandler extends BaseTerminalHandler {
 
 	private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 	private static SshTerminalExecuteLogService sshTerminalExecuteLogService;
@@ -291,21 +289,5 @@ public class SshHandler extends BaseHandler {
 		}
 		IoUtil.close(session);
 		HANDLER_ITEM_CONCURRENT_HASH_MAP.remove(session.getId());
-	}
-
-	private static void sendBinary(WebSocketSession session, String msg) {
-		if (!session.isOpen()) {
-			// 会话关闭不能发送消息 @author jzy 21-08-04
-			DefaultSystemLog.getLog().warn("回话已经关闭啦，不能发送消息：{}", msg);
-			return;
-		}
-		synchronized (session.getId()) {
-			BinaryMessage byteBuffer = new BinaryMessage(msg.getBytes());
-			try {
-				session.sendMessage(byteBuffer);
-			} catch (IOException e) {
-				DefaultSystemLog.getLog().error("发送消息失败:" + msg, e);
-			}
-		}
 	}
 }
