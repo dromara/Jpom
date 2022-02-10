@@ -1,6 +1,6 @@
 <template>
   <div>
-    <log-view :ref="`logView`" height="70vh" />
+    <log-view :ref="`logView`" height="70vh" marginTop="-10px" />
   </div>
 </template>
 <script>
