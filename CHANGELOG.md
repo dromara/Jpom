@@ -5,6 +5,7 @@
 ### 🐣 新增功能
 
 1. 【server】容器构建新增 go 环境支持
+2. 【server】新增查看 docker 容器日志
 
 ### 🐞 解决BUG、优化功能
 
@@ -12,6 +13,7 @@
 2. 【server】支持在线修改数据库账户密码
 3. 执行脚本文件由 `/bin/sh` 改为 `/bin/bash` 兼容 ubuntu 
 4. 【agent】项目 dsl 模式执行脚本变量支持直接引入 ${PROJECT_ID}、同时保留 #{PROJECT_ID} 引用
+5. 【server】多处日志查看弹窗新增高亮搜索
 
 ------
 

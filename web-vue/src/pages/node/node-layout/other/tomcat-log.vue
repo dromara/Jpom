@@ -27,8 +27,9 @@
   </a-layout>
 </template>
 <script>
-import { getTomcatLogList, downloadTomcatFile, deleteTomcatFile } from "../../../../api/node-other";
+import { getTomcatLogList, downloadTomcatFile, deleteTomcatFile } from "@/api/node-other";
 import { mapGetters } from "vuex";
+import { getWebSocketUrl } from "@/utils/const";
 export default {
   props: {
     nodeId: {
@@ -56,10 +57,7 @@ export default {
   computed: {
     ...mapGetters(["getLongTermToken"]),
     socketUrl() {
-      const protocol = location.protocol === "https:" ? "wss://" : "ws://";
-      const domain = window.routerBase;
-      const url = (domain + "/tomcat_log").replace(new RegExp("//", "gm"), "/");
-      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`;
+      return getWebSocketUrl("/socket/tomcat_log", `userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`);
     },
   },
   created() {

@@ -26,7 +26,9 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.exception.NotFoundException;
+import com.github.dockerjava.api.model.Frame;
 import io.jpom.util.LogRecorder;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -34,6 +36,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.function.Consumer;
 
 /**
  * @author bwcx_jzy
@@ -41,7 +45,35 @@ import java.io.InputStream;
  */
 public class DockerClientUtil {
 
+	public static void pullLog(DockerClient dockerClient, String containerId, Charset charset, Consumer<String> consumer) throws InterruptedException {
+		// 获取日志
+		dockerClient.logContainerCmd(containerId)
+				.withStdOut(true)
+				.withStdErr(true)
+				.withTailAll()
+				.withFollowStream(true)
+				.exec(new ResultCallback.Adapter<Frame>() {
+					@Override
+					public void onNext(Frame object) {
+						byte[] payload = object.getPayload();
+						if (payload == null) {
+							return;
+						}
+						String s = new String(payload, charset);
+						consumer.accept(s);
+					}
+				}).awaitCompletion();
+	}
 
+	/**
+	 * 将容器文件下载到本地
+	 *
+	 * @param dockerClient  容器连接
+	 * @param containerId   容器ID
+	 * @param logRecorder   日志记录
+	 * @param resultFile    结果文件
+	 * @param resultFileOut 保存目录
+	 */
 	public static void copyArchiveFromContainerCmd(DockerClient dockerClient, String containerId, LogRecorder logRecorder, String resultFile, String resultFileOut) {
 		logRecorder.info("download file from : {}", resultFile);
 		try (InputStream stream = dockerClient.copyArchiveFromContainerCmd(containerId, resultFile).exec();

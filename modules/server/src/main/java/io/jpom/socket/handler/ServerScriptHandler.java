@@ -45,12 +45,13 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
+ * 服务端脚本日志
+ *
  * @author bwcx_jzy
  * @since 2022/1/19
  */
 @Feature(cls = ClassFeature.SCRIPT, method = MethodFeature.EXECUTE)
 public class ServerScriptHandler extends BaseProxyHandler {
-
 
 	private ScriptExecuteLogServer logServer;
 	private ScriptServer nodeScriptServer;

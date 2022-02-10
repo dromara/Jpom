@@ -138,6 +138,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 
 					attributes.put("tomcatId", tomcatId);
 					break;
+				case docker:
 				case ssh: {
 					Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
 					if (dataItem == null) {

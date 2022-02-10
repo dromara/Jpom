@@ -24,6 +24,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
+import { getWebSocketUrl } from "@/utils/const";
 
 export default {
   props: {
@@ -50,10 +51,7 @@ export default {
   computed: {
     ...mapGetters(["getLongTermToken"]),
     socketUrl() {
-      const protocol = location.protocol === "https:" ? "wss://" : "ws://";
-      const domain = window.routerBase;
-      const url = (domain + "/script_run").replace(new RegExp("//", "gm"), "/");
-      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&id=${this.id}&type=script&nodeId=system`;
+      return getWebSocketUrl("/socket/script_run", `userId=${this.getLongTermToken}&id=${this.id}&type=script&nodeId=system`);
     },
   },
   mounted() {

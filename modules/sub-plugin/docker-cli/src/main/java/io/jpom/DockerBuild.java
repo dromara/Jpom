@@ -450,22 +450,7 @@ public class DockerBuild implements AutoCloseable {
 	private void pullLog(DockerClient dockerClient, String containerId, LogRecorder logRecorder) {
 		// 获取日志
 		try {
-			dockerClient.logContainerCmd(containerId)
-					.withStdOut(true)
-					.withStdErr(true)
-					.withTailAll()
-					.withFollowStream(true)
-					.exec(new ResultCallback.Adapter<Frame>() {
-						@Override
-						public void onNext(Frame object) {
-							byte[] payload = object.getPayload();
-							if (payload == null) {
-								return;
-							}
-							String s = new String(payload, StandardCharsets.UTF_8);
-							logRecorder.append(s);
-						}
-					}).awaitCompletion();
+			DockerClientUtil.pullLog(dockerClient, containerId, StandardCharsets.UTF_8, logRecorder::append);
 		} catch (InterruptedException e) {
 			logRecorder.error("获取容器日志操作被中断:", e);
 		} catch (RuntimeException e) {

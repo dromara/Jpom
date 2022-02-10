@@ -35,9 +35,11 @@ import com.github.dockerjava.api.model.Image;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -83,8 +85,26 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			case "removeVolume":
 				this.removeVolumeCmd(parameter);
 				return null;
+			case "logContainer":
+				this.logContainerCmd(parameter);
+				return null;
 			default:
 				throw new IllegalArgumentException("不支持的类型");
+		}
+	}
+
+	private void logContainerCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		Consumer<String> consumer = (Consumer<String>) parameter.get("consumer");
+		try {
+			String containerId = (String) parameter.get("containerId");
+			Charset charset = (Charset) parameter.get("charset");
+
+			DockerClientUtil.pullLog(dockerClient, containerId, charset, consumer);
+		} catch (InterruptedException e) {
+			consumer.accept("获取容器日志被中断:" + e);
+		} finally {
+			IoUtil.close(dockerClient);
 		}
 	}
 
