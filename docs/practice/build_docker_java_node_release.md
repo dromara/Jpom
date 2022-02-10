@@ -193,7 +193,7 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/repo1.png)
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/repo2.png)
 
-## 添加本地构建
+## 添加容器构建
 
 这里需要注意构建产物目录：是指仓库下面的相对路径
 
