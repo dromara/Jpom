@@ -41,8 +41,9 @@ public class DockerInfoTest extends ApplicationStartTest {
 
 	@Test
 	public void testQueryTag() {
-		List<DockerInfoModel> models = dockerInfoService.queryByTag("sdfsd");
-		System.out.println(models);
+		int sdfsd = dockerInfoService.countByTag(Const.WORKSPACE_DEFAULT_ID, "sdfsd");
+
+		System.out.println(sdfsd);
 	}
 
 	@Test

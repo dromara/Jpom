@@ -372,6 +372,18 @@
                   </div>
                 </a-row>
               </a-form-model-item>
+              <!-- docker -->
+              <template v-if="temp.releaseMethod === 5">
+                <a-form-model-item prop="fromTag" label="执行容器">
+                  <a-input v-model="tempExtraData.fromTag" placeholder="执行容器 标签" />
+                </a-form-model-item>
+                <a-form-model-item prop="dockerfile" label="Dockerfile">
+                  <a-input v-model="tempExtraData.dockerfile" placeholder="文件夹路径 需要在仓库里面 dockerfile" />
+                </a-form-model-item>
+                 <a-form-model-item prop="dockerTag" label="镜像 tag">
+                  <a-input v-model="tempExtraData.dockerTag" placeholder="容器标签,如：xxxx:latest 多个使用逗号隔开" />
+                </a-form-model-item>
+              </template>
             </template>
           </a-collapse-panel>
           <a-collapse-panel key="2">
