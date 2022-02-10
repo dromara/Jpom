@@ -58,19 +58,19 @@
           <a-space>
             <template v-if="record.isDirectory">
               <a-tooltip title="目录不能编辑">
-                <a-button type="primary" :disabled="true">编辑</a-button>
+                <a-button size="small" type="primary" :disabled="true">编辑</a-button>
               </a-tooltip>
               <a-tooltip title="还不能下载目录">
-                <a-button type="primary" :disabled="true">下载</a-button>
+                <a-button size="small" type="primary" :disabled="true">下载</a-button>
               </a-tooltip>
             </template>
             <template v-else>
               <a-tooltip title="需要到 节点管理中的系统管理的白名单配置中配置允许编辑的文件后缀">
-                <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
+                <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
               </a-tooltip>
-              <a-button type="primary" @click="handleDownload(record)">下载</a-button>
+              <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>
             </template>
-            <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
       </a-table>
@@ -192,7 +192,7 @@ export default {
         { title: "文件类型", dataIndex: "isDirectory", width: 100, ellipsis: true, scopedSlots: { customRender: "isDirectory" } },
         { title: "文件大小", dataIndex: "fileSize", width: 120, ellipsis: true, scopedSlots: { customRender: "fileSize" } },
         { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true },
-        { title: "操作", dataIndex: "operation", width: 240, align: "center", scopedSlots: { customRender: "operation" } },
+        { title: "操作", dataIndex: "operation", width: 180, align: "center", scopedSlots: { customRender: "operation" } },
       ],
       rules: {
         url: [{ required: true, message: "远程下载Url不为空", trigger: "change" }],
