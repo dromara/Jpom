@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -48,7 +49,7 @@ public class TestDockerFIle {
 		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
 				// .withDockerHost("tcp://192.168.163.11:2376").build();
 //				.withApiVersion()
-				.withDockerHost("tcp://127.0.0.2:2375").build();
+				.withDockerHost("tcp://127.0.0.1:2375").build();
 
 		DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
 				.dockerHost(config.getDockerHost())
@@ -69,6 +70,5 @@ public class TestDockerFIle {
 	@Test
 	public void tset() {
 		BuildImageCmd buildImageCmd = dockerClient.buildImageCmd();
-
 	}
 }

@@ -28,7 +28,7 @@ export default {
   computed: {
     ...mapGetters(["getLongTermToken"]),
     socketUrl() {
-      return getWebSocketUrl("/socket/docker", `userId=${this.getLongTermToken}&id=${this.id}&type=docker&nodeId=system`);
+      return getWebSocketUrl("/socket/docker_log", `userId=${this.getLongTermToken}&id=${this.id}&type=dockerLog&nodeId=system`);
     },
   },
   mounted() {

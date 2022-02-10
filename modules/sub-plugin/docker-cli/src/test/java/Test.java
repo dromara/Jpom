@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -27,18 +28,18 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.ListImagesCmd;
-import com.github.dockerjava.api.command.PingCmd;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.core.InvocationBuilder;
+import com.github.dockerjava.core.exec.ExecStartCmdExec;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import lombok.extern.slf4j.Slf4j;
@@ -48,12 +49,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author bwcx_jzy
@@ -149,7 +149,7 @@ public class Test {
 		createContainerCmd.withHostConfig(hostConfig);
 
 		String[] entrypoint = {"/bin/sh", "-c"};
-		String[] cmd = { "mkdir -p /root/.m2/ && ln -s /root/settings.xml /root/.m2/settings.xml && mvn clean package"};
+		String[] cmd = {"mkdir -p /root/.m2/ && ln -s /root/settings.xml /root/.m2/settings.xml && mvn clean package"};
 //		String[] cmd = {""};
 		createContainerCmd.withEntrypoint(entrypoint);
 
@@ -297,5 +297,61 @@ public class Test {
 		}
 
 
+	}
+
+
+	@org.junit.Test
+	public void test2() throws InterruptedException, IOException {
+		this.exec("ls");
+//		this.exec("cd /lib");
+//		this.exec("ls");
+	}
+
+	/**
+	 * https://blog.csdn.net/will0532/article/details/78335280
+	 *
+	 * @param cmd
+	 * @throws InterruptedException
+	 * @see ExecStartCmdExec
+	 */
+	private void exec(String cmd) throws InterruptedException, IOException {
+		ExecCreateCmd execCreateCmd = dockerClient.execCreateCmd("5848fd613ea4");
+		execCreateCmd.withAttachStdout(true).withAttachStdin(true).withAttachStderr(true).withTty(true).withCmd("/bin/sh");
+		ExecCreateCmdResponse exec = execCreateCmd.exec();
+		String execId = exec.getId();
+		ExecStartCmd execStartCmd = dockerClient.execStartCmd(execId);
+		execStartCmd.withDetach(false).withTty(true);
+
+		PipedInputStream in = new PipedInputStream();
+		PipedOutputStream out = new PipedOutputStream(in);
+//		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stringWriter);
+		//IoUtil.toStream(stringWriter.toString(), CharsetUtil.CHARSET_UTF_8);
+		execStartCmd.withStdIn(in);
+		InputStream stdin = execStartCmd.getStdin();
+		System.out.println(stdin);
+
+//		IoUtil.readLines(stdin, Charset.defaultCharset(), new LineHandler() {
+//			@Override
+//			public void handle(String line) {
+//				System.out.println(line);
+//			}
+//		});
+		ThreadUtil.execute(() -> {
+			while (true) {
+				try {
+					out.write(StrUtil.bytes("ls \n"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				ThreadUtil.sleep(2, TimeUnit.SECONDS);
+			}
+		});
+		InvocationBuilder.AsyncResultCallback<Frame> resultCallback = execStartCmd.exec(new InvocationBuilder.AsyncResultCallback<Frame>() {
+			@Override
+			public void onNext(Frame frame) {
+				System.out.println(frame);
+			}
+		});
+		resultCallback.awaitCompletion();
 	}
 }

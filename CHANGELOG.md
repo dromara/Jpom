@@ -6,6 +6,7 @@
 
 1. 【server】容器构建新增 go 环境支持
 2. 【server】新增查看 docker 容器日志
+3. 【server】新增在线进入 docker 容器终端
 
 ### 🐞 解决BUG、优化功能
 

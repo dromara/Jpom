@@ -62,6 +62,7 @@ public enum HandlerType {
 	/**
 	 * 容器
 	 */
+	dockerLog(DockerLogHandler.class, DockerInfoService.class),
 	docker(DockerLogHandler.class, DockerInfoService.class),
 	;
 	final Class<?> handlerClass;
