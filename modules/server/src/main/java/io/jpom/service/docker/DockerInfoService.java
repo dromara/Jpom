@@ -117,8 +117,9 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 	/**
 	 * 根据 tag 查询 容器
 	 *
-	 * @param tag    tag
-	 * @param status 状态
+	 * @param workspaceId 工作空间
+	 * @param tag         tag
+	 * @param status      状态
 	 * @return list
 	 */
 	public List<DockerInfoModel> queryByTag(String workspaceId, Integer status, String tag) {
@@ -137,11 +138,12 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 	/**
 	 * 根据 tag 查询 容器
 	 *
-	 * @param tag tag
-	 * @return list
+	 * @param workspaceId 工作空间
+	 * @param tag         tag
+	 * @return count
 	 */
-	public List<DockerInfoModel> queryByTag(String tag) {
-		String sql = StrUtil.format("SELECT * FROM {} where instr(tags,?);", super.getTableName());
-		return super.queryList(sql, StrUtil.wrap(tag, StrUtil.COLON, StrUtil.COLON));
+	public int countByTag(String workspaceId, String tag) {
+		String sql = StrUtil.format("SELECT * FROM {} where workspaceId=? and instr(tags,?)", super.getTableName());
+		return (int) super.count(sql, workspaceId, tag);
 	}
 }

@@ -52,6 +52,7 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.dblog.RepositoryService;
+import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.CommandUtil;
@@ -82,17 +83,20 @@ public class BuildInfoController extends BaseServerController {
 	private final BuildInfoService buildInfoService;
 	private final RepositoryService repositoryService;
 	private final BuildExecuteService buildExecuteService;
+	private final DockerInfoService dockerInfoService;
 
 	public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
 							   SshService sshService,
 							   BuildInfoService buildInfoService,
 							   RepositoryService repositoryService,
-							   BuildExecuteService buildExecuteService) {
+							   BuildExecuteService buildExecuteService,
+							   DockerInfoService dockerInfoService) {
 		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
 		this.sshService = sshService;
 		this.buildInfoService = buildInfoService;
 		this.repositoryService = repositoryService;
 		this.buildExecuteService = buildExecuteService;
+		this.dockerInfoService = dockerInfoService;
 	}
 
 	/**
@@ -222,6 +226,9 @@ public class BuildInfoController extends BaseServerController {
 		} else if (releaseMethod1 == BuildReleaseMethod.LocalCommand) {
 			this.formatLocalCommand(jsonObject);
 			jsonObject.put("releaseMethodDataId", "LocalCommand");
+		} else if (releaseMethod1 == BuildReleaseMethod.Docker) {
+			String dockerTag = this.formatDocker(jsonObject);
+			jsonObject.put("releaseMethodDataId", "Docker");
 		}
 		// 检查关联数据ID
 		buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));
@@ -245,6 +252,14 @@ public class BuildInfoController extends BaseServerController {
 	private void checkDocker(String script) {
 		DockerYmlDsl build = DockerYmlDsl.build(script);
 		build.check();
+		//
+		String fromTag = build.getFromTag();
+		if (StrUtil.isNotEmpty(fromTag)) {
+			//
+			String workspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
+			int count = dockerInfoService.countByTag(workspaceId, fromTag);
+			Assert.state(count > 0, "docker tag 填写不正确,没有找到任何docker");
+		}
 	}
 
 	/**
@@ -292,6 +307,22 @@ public class BuildInfoController extends BaseServerController {
 				Assert.state(checkInputItem, "发布命令中包含禁止执行的命令");
 			}
 		}
+	}
+
+	private String formatDocker(JSONObject jsonObject) {
+		// 发布命令
+		String dockerfile = jsonObject.getString("dockerfile");
+		Assert.hasText(dockerfile, "请填写要执行的 Dockerfile 路径");
+		String fromTag = jsonObject.getString("fromTag");
+		if (StrUtil.isNotEmpty(fromTag)) {
+			Assert.hasText(fromTag, "请填要执行 docker 标签");
+			String workspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
+			int count = dockerInfoService.countByTag(workspaceId, fromTag);
+			Assert.state(count > 0, "docker tag 填写不正确,没有找到任何docker");
+		}
+		String dockerTag = jsonObject.getString("dockerTag");
+		Assert.hasText(dockerTag, "请填写镜像标签");
+		return fromTag;
 	}
 
 	private void formatLocalCommand(JSONObject jsonObject) {

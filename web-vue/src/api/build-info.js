@@ -259,6 +259,7 @@ export const releaseMethodMap = {
   2: "项目",
   3: "SSH",
   4: "本地命令",
+  5: "Docker",
 };
 
 export const triggerBuildTypeMap = {
