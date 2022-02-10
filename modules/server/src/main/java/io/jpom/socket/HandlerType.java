@@ -60,10 +60,13 @@ public enum HandlerType {
 	 */
 	script(ServerScriptHandler.class, ScriptServer.class),
 	/**
-	 * 容器
+	 * 容器 log
 	 */
 	dockerLog(DockerLogHandler.class, DockerInfoService.class),
-	docker(DockerLogHandler.class, DockerInfoService.class),
+	/**
+	 * 容器 终端
+	 */
+	docker(DockerCliHandler.class, DockerInfoService.class),
 	;
 	final Class<?> handlerClass;
 
