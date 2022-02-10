@@ -458,7 +458,11 @@ public class DockerBuild implements AutoCloseable {
 					.exec(new ResultCallback.Adapter<Frame>() {
 						@Override
 						public void onNext(Frame object) {
-							String s = new String(object.getPayload(), StandardCharsets.UTF_8);
+							byte[] payload = object.getPayload();
+							if (payload == null) {
+								return;
+							}
+							String s = new String(payload, StandardCharsets.UTF_8);
 							logRecorder.append(s);
 						}
 					}).awaitCompletion();
