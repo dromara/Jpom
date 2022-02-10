@@ -15,6 +15,7 @@
 3. 执行脚本文件由 `/bin/sh` 改为 `/bin/bash` 兼容 ubuntu 
 4. 【agent】项目 dsl 模式执行脚本变量支持直接引入 ${PROJECT_ID}、同时保留 #{PROJECT_ID} 引用
 5. 【server】多处日志查看弹窗新增高亮搜索
+6. 【server】本地构建命令 容器构建支持引用工作空间变量
 
 ------
 
