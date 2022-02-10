@@ -140,6 +140,8 @@ ExecStart 需要添加内容
 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --tlsverify --tlscacert=/home/docker/tls-ca/ca.pem --tlscert=/home/docker/tls-ca/server-cert.pem --tlskey=/home/docker/tls-ca/server-key.pem -H tcp://0.0.0.0:2375
 ```
 
+部分情况需要删除：`-H fd://`
+
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/docker-cli/service3.png)
 
 ## 添加 docker
