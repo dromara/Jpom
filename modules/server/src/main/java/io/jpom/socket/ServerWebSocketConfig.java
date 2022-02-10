@@ -42,22 +42,25 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 		// 控制台
-		registry.addHandler(new ConsoleHandler(), "/console")
+		registry.addHandler(new ConsoleHandler(), "/socket/console")
 				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
 		// 节点脚本模板
-		registry.addHandler(new NodeScriptHandler(), "/node/script_run")
+		registry.addHandler(new NodeScriptHandler(), "/socket/node/script_run")
 				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
 		// tomcat
-		registry.addHandler(new TomcatHandler(), "/tomcat_log")
+		registry.addHandler(new TomcatHandler(), "/socket/tomcat_log")
 				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
 		// ssh
-		registry.addHandler(new SshHandler(), "/ssh")
+		registry.addHandler(new SshHandler(), "/socket/ssh")
 				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
 		// 节点升级
-		registry.addHandler(new NodeUpdateHandler(), "/node_update")
+		registry.addHandler(new NodeUpdateHandler(), "/socket/node_update")
 				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
 		// 脚本模板
-		registry.addHandler(new ServerScriptHandler(), "/script_run")
+		registry.addHandler(new ServerScriptHandler(), "/socket/script_run")
+				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+		// docker
+		registry.addHandler(new DockerLogHandler(), "/socket/docker")
 				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
 	}
 }

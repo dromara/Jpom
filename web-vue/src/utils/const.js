@@ -170,3 +170,16 @@ export const PROJECT_DSL_DEFATUL =
   "  stop:\r\n" +
   "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
   "    scriptArgs: stop";
+
+/**
+ * 获取 socket 地址
+ * @param {String} url 二级地址
+ * @param {String} parameter 参数
+ * @returns
+ */
+export function getWebSocketUrl(url, parameter) {
+  const protocol = location.protocol === "https:" ? "wss://" : "ws://";
+  const domain = window.routerBase;
+  const fullUrl = (domain + url).replace(new RegExp("//", "gm"), "/");
+  return `${protocol}${location.host}${fullUrl}?${parameter}`;
+}

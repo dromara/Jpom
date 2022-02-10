@@ -22,6 +22,7 @@
  */
 package io.jpom.socket;
 
+import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.node.script.NodeScriptServer;
@@ -58,6 +59,10 @@ public enum HandlerType {
 	 * 服务端 脚本模版
 	 */
 	script(ServerScriptHandler.class, ScriptServer.class),
+	/**
+	 * 容器
+	 */
+	docker(DockerLogHandler.class, DockerInfoService.class),
 	;
 	final Class<?> handlerClass;
 

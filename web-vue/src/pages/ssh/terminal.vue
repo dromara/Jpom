@@ -8,6 +8,7 @@ import { Terminal } from "xterm";
 // import { FitAddon } from "xterm-addon-fit";
 import { AttachAddon } from "xterm-addon-attach";
 import { mapGetters } from "vuex";
+import { getWebSocketUrl } from "@/utils/const";
 
 // https://blog.csdn.net/qq_41840688/article/details/108636267
 
@@ -41,10 +42,7 @@ export default {
   computed: {
     ...mapGetters(["getLongTermToken"]),
     socketUrl() {
-      const protocol = location.protocol === "https:" ? "wss://" : "ws://";
-      const domain = window.routerBase;
-      const url = (domain + "/ssh").replace(new RegExp("//", "gm"), "/");
-      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&id=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;
+      return getWebSocketUrl("/socket/ssh", `userId=${this.getLongTermToken}&id=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`);
     },
   },
   mounted() {

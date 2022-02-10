@@ -1,61 +1,71 @@
 <template>
-  <a-table :data-source="list" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
-    <template slot="title">
-      <a-space>
-        <a-input v-model="listQuery['name']" @keyup.enter="loadData" placeholder="名称" class="search-input-item" />
-        <a-input v-model="listQuery['containerId']" @keyup.enter="loadData" placeholder="容器id" class="search-input-item" />
-        <!-- <a-input v-model="listQuery['imageId']" @keyup.enter="loadData" placeholder="镜像id" class="search-input-item" /> -->
-        <div>
-          显示所有
-          <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['showAll']" />
-        </div>
-        <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
-      </a-space>
-    </template>
+  <div>
+    <a-table :data-source="list" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+      <template slot="title">
+        <a-space>
+          <a-input v-model="listQuery['name']" @keyup.enter="loadData" placeholder="名称" class="search-input-item" />
+          <a-input v-model="listQuery['containerId']" @keyup.enter="loadData" placeholder="容器id" class="search-input-item" />
+          <!-- <a-input v-model="listQuery['imageId']" @keyup.enter="loadData" placeholder="镜像id" class="search-input-item" /> -->
+          <div>
+            显示所有
+            <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['showAll']" />
+          </div>
+          <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+        </a-space>
+      </template>
 
-    <a-tooltip slot="names" slot-scope="text" placement="topLeft" :title="(text || []).join(',')">
-      <span>{{ (text || []).join(",") }}</span>
-    </a-tooltip>
-
-    <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
-      <span>{{ text }}</span>
-    </a-tooltip>
-
-    <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
-      <span style="display: none"> {{ (array = text.split(":")) }}</span>
-      <span>{{ array[array.length - 1].slice(0, 12) }}</span>
-    </a-tooltip>
-
-    <template slot="state" slot-scope="text, record">
-      <a-tooltip :title="record.status || ''">
-        <a-switch :checked="text === 'running'" :disabled="true">
-          <a-icon slot="checkedChildren" type="check-circle" />
-          <a-icon slot="unCheckedChildren" type="warning" />
-        </a-switch>
+      <a-tooltip slot="names" slot-scope="text" placement="topLeft" :title="(text || []).join(',')">
+        <span>{{ (text || []).join(",") }}</span>
       </a-tooltip>
-    </template>
-    <template slot="operation" slot-scope="text, record">
-      <a-space>
-        <a-tooltip title="停止" v-if="record.state === 'running'">
-          <a-button size="small" type="link" @click="doAction(record, 'stop')"><a-icon type="stop" /></a-button>
+
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+
+      <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
+        <span style="display: none"> {{ (array = text.split(":")) }}</span>
+        <span>{{ array[array.length - 1].slice(0, 12) }}</span>
+      </a-tooltip>
+
+      <template slot="state" slot-scope="text, record">
+        <a-tooltip :title="record.status || ''" @click="viewLog(record)">
+          <a-switch :checked="text === 'running'" :disabled="true">
+            <a-icon slot="checkedChildren" type="check-circle" />
+            <a-icon slot="unCheckedChildren" type="warning" />
+          </a-switch>
         </a-tooltip>
-        <a-tooltip title="启动" v-else>
-          <a-button size="small" type="link" @click="doAction(record, 'start')"> <a-icon type="play-circle" /></a-button>
-        </a-tooltip>
-        <a-tooltip title="重启">
-          <a-button size="small" type="link" :disabled="record.state !== 'running'" @click="doAction(record, 'restart')"><a-icon type="reload" /></a-button>
-        </a-tooltip>
-        <a-tooltip title="删除">
-          <a-button size="small" type="link" @click="doAction(record, 'remove')"><a-icon type="delete" /></a-button>
-        </a-tooltip>
-      </a-space>
-    </template>
-  </a-table>
+      </template>
+      <template slot="operation" slot-scope="text, record">
+        <a-space>
+          <a-tooltip title="停止" v-if="record.state === 'running'">
+            <a-button size="small" type="link" @click="doAction(record, 'stop')"><a-icon type="stop" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="启动" v-else>
+            <a-button size="small" type="link" @click="doAction(record, 'start')"> <a-icon type="play-circle" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="重启">
+            <a-button size="small" type="link" :disabled="record.state !== 'running'" @click="doAction(record, 'restart')"><a-icon type="reload" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="删除">
+            <a-button size="small" type="link" @click="doAction(record, 'remove')"><a-icon type="delete" /></a-button>
+          </a-tooltip>
+        </a-space>
+      </template>
+    </a-table>
+    <!-- 日志 -->
+    <a-modal :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
+      <log-view v-if="logVisible" :id="this.id" :containerId="temp.id" />
+    </a-modal>
+  </div>
 </template>
 <script>
 import { parseTime } from "@/utils/time";
 import { dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStop } from "@/api/docker-api";
+import LogView from "@/pages/docker/log-view";
 export default {
+  components: {
+    LogView,
+  },
   props: {
     id: {
       type: String,
@@ -68,6 +78,7 @@ export default {
       listQuery: {
         showAll: true,
       },
+      logVisible: false,
       columns: [
         { title: "名称", dataIndex: "names", ellipsis: true, scopedSlots: { customRender: "names" } },
         { title: "容器ID", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
@@ -148,6 +159,10 @@ export default {
           });
         },
       });
+    },
+    viewLog(record) {
+      this.logVisible = true;
+      this.temp = record;
     },
   },
 };

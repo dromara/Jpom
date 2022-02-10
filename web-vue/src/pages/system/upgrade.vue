@@ -74,7 +74,7 @@
 import upgrade from "@/components/upgrade";
 import { uploadAgentFile, downloadRemote, checkVersion, getNodeList, getNodeGroupAll } from "@/api/node";
 import { mapGetters } from "vuex";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { getWebSocketUrl, PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {
@@ -144,10 +144,7 @@ export default {
       };
     },
     socketUrl() {
-      const protocol = location.protocol === "https:" ? "wss://" : "ws://";
-      const domain = window.routerBase;
-      const url = (domain + "/node_update").replace(new RegExp("//", "gm"), "/");
-      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`;
+      return getWebSocketUrl("/socket/node_update", `userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`);
     },
     pagination() {
       return {
