@@ -93,7 +93,10 @@ public class BuildExtraModule extends BaseModel {
 	private String dockerfile;
 
 	private String dockerTag;
-
+	/**
+	 * 缓存构建目录
+	 */
+	private Boolean cacheBuild;
 
 	public String getResultDirFile() {
 		if (resultDirFile == null) {

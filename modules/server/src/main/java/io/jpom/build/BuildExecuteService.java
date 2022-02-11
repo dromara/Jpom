@@ -435,6 +435,12 @@ public class BuildExecuteService {
 				logRecorder.info("Execution delayed by " + delay + " seconds");
 				ThreadUtil.sleep(delay, TimeUnit.SECONDS);
 			}
+			// 删除缓存
+			Boolean cacheBuild = this.buildExtraModule.getCacheBuild();
+			if (cacheBuild != null && !cacheBuild) {
+				logRecorder.info("clear cache");
+				CommandUtil.systemFastDel(this.gitFile);
+			}
 			return true;
 		}
 

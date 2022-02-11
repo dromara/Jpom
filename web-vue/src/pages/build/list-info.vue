@@ -374,12 +374,17 @@
               </a-form-model-item>
               <!-- docker -->
               <template v-if="temp.releaseMethod === 5">
-                <a-form-model-item prop="fromTag" label="执行容器">
-                  <a-input v-model="tempExtraData.fromTag" placeholder="执行容器 标签" />
-                </a-form-model-item>
-                <a-form-model-item prop="dockerfile" label="Dockerfile">
-                  <a-input v-model="tempExtraData.dockerfile" placeholder="文件夹路径 需要在仓库里面 dockerfile" />
-                </a-form-model-item>
+                <a-tooltip title="使用哪个 docker 构建,填写 docker 标签 默认查询可用的第一个,如果 tag 查询出多个将依次构建">
+                  <a-form-model-item prop="fromTag" label="执行容器">
+                    <a-input v-model="tempExtraData.fromTag" placeholder="执行容器 标签" />
+                  </a-form-model-item>
+                </a-tooltip>
+
+                <a-tooltip title="需要在仓库里面 dockerfile,如果多文件夹查看可以指定二级目录如果 springboot-test-jar:springboot-test-jar/Dockerfile">
+                  <a-form-model-item prop="dockerfile" label="Dockerfile">
+                    <a-input v-model="tempExtraData.dockerfile" placeholder="文件夹路径 需要在仓库里面 dockerfile" />
+                  </a-form-model-item>
+                </a-tooltip>
                 <a-form-model-item prop="dockerTag" label="镜像 tag">
                   <a-input v-model="tempExtraData.dockerTag" placeholder="容器标签,如：xxxx:latest 多个使用逗号隔开" />
                 </a-form-model-item>
@@ -423,6 +428,18 @@
                 </template>
               </a-auto-complete>
             </a-form-model-item>
+            <a-tooltip title="开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存)">
+              <a-form-model-item prop="cacheBuild">
+                <template slot="label">
+                  缓存构建目录
+                  <a-tooltip v-show="!temp.id">
+                    <template slot="title"> 开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存) </template>
+                    <a-icon type="question-circle" theme="filled" />
+                  </a-tooltip>
+                </template>
+                <a-switch v-model="tempExtraData.cacheBuild" checked-children="是" un-checked-children="否" />
+              </a-form-model-item>
+            </a-tooltip>
           </a-collapse-panel>
         </a-collapse>
       </a-form-model>
@@ -885,7 +902,9 @@ export default {
       this.loadNodeProjectList();
       this.loadSshList();
       this.editBuildVisible = true;
-      this.tempExtraData = {};
+      this.tempExtraData = {
+        cacheBuild: true,
+      };
       // this.$nextTick(() => {
       //   setTimeout(() => {
       //     this.introGuide();
@@ -908,6 +927,9 @@ export default {
       if (typeof this.tempExtraData === "string") {
         this.tempExtraData = JSON.parse(this.tempExtraData);
       }
+      if (this.tempExtraData.cacheBuild === undefined) {
+        this.tempExtraData.cacheBuild = true;
+      }
       // 设置发布方式的数据
       if (this.tempExtraData.releaseMethodDataId) {
         if (record.releaseMethod === 1) {
@@ -923,6 +945,7 @@ export default {
           this.tempExtraData.releaseMethodDataId_3 = this.tempExtraData.releaseMethodDataId.split(",");
         }
       }
+      this.tempExtraData = { ...this.tempExtraData };
       this.loadRepositoryList(() => {
         // 从仓库列表里匹配对应的仓库信息
         // console.log(this.repositoryList);
