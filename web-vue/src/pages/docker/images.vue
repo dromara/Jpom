@@ -1,56 +1,114 @@
 <template>
-  <a-table :data-source="list" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
-    <template slot="title">
-      <a-space>
-        <!-- <a-input v-model="listQuery['name']" @keyup.enter="loadData" placeholder="名称" class="search-input-item" /> -->
-        <div>
-          显示所有
-          <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['showAll']" />
-        </div>
-        <div>
-          悬空
-          <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['dangling']" />
-        </div>
+  <div>
+    <a-table :data-source="list" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+      <template slot="title">
+        <a-space>
+          <!-- <a-input v-model="listQuery['name']" @keyup.enter="loadData" placeholder="名称" class="search-input-item" /> -->
+          <div>
+            显示所有
+            <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['showAll']" />
+          </div>
+          <div>
+            悬空
+            <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['dangling']" />
+          </div>
 
-        <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
-      </a-space>
-    </template>
+          <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+        </a-space>
+      </template>
 
-    <a-tooltip slot="repoTags" slot-scope="text" placement="topLeft" :title="(text || []).join(',')">
-      <span>{{ (text || []).join(",") }}</span>
-    </a-tooltip>
-    <a-tooltip slot="size" slot-scope="text, record" placement="topLeft" :title="renderSize(text) + ' ' + renderSize(record.virtualSize)">
-      <span>{{ renderSize(text) }}</span>
-    </a-tooltip>
+      <a-tooltip slot="repoTags" slot-scope="text" placement="topLeft" :title="(text || []).join(',')">
+        <span>{{ (text || []).join(",") }}</span>
+      </a-tooltip>
+      <a-tooltip slot="size" slot-scope="text, record" placement="topLeft" :title="renderSize(text) + ' ' + renderSize(record.virtualSize)">
+        <span>{{ renderSize(text) }}</span>
+      </a-tooltip>
 
-    <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
-      <span>{{ text }}</span>
-    </a-tooltip>
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
 
-    <a-tooltip slot="id" slot-scope="text" :title="text">
-      <span> {{ text.split(":")[1].slice(0, 12) }}</span>
-    </a-tooltip>
-    <template slot="operation" slot-scope="text, record">
-      <a-space>
-        <!-- <a-tooltip title="停止" v-if="record.state === 'running'">
+      <a-tooltip slot="id" slot-scope="text" :title="text">
+        <span> {{ text.split(":")[1].slice(0, 12) }}</span>
+      </a-tooltip>
+      <template slot="operation" slot-scope="text, record">
+        <a-space>
+          <!-- <a-tooltip title="停止" v-if="record.state === 'running'">
           <a-button size="small" type="link" @click="doAction(record, 'stop')"><a-icon type="stop" /></a-button>
         </a-tooltip>
         <a-tooltip title="启动" v-else>
           <a-button size="small" type="link" @click="doAction(record, 'start')"> <a-icon type="play-circle" /></a-button>
         </a-tooltip>
-        <a-tooltip title="重启">
-          <a-button size="small" type="link" :disabled="record.state !== 'running'" @click="doAction(record, 'restart')"><a-icon type="reload" /></a-button>
-        </a-tooltip> -->
-        <a-tooltip title="删除">
-          <a-button size="small" type="link" @click="doAction(record, 'remove')"><a-icon type="delete" /></a-button>
-        </a-tooltip>
-      </a-space>
-    </template>
-  </a-table>
+        -->
+          <a-tooltip title="创建镜像">
+            <a-button size="small" type="link" @click="createContainer(record)"><a-icon type="select" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="删除">
+            <a-button size="small" type="link" @click="doAction(record, 'remove')"><a-icon type="delete" /></a-button>
+          </a-tooltip>
+        </a-space>
+      </template>
+    </a-table>
+    <a-modal v-model="buildVisible" width="50vw" title="构建容器" @ok="handleBuildOk" :maskClosable="false">
+      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
+        <a-form-model-item label="基础镜像" prop="image">
+          <a-input v-model="temp.image" disabled placeholder="" />
+        </a-form-model-item>
+        <a-form-model-item label="容器名称" prop="name">
+          <a-input v-model="temp.name" placeholder="容器名称" />
+        </a-form-model-item>
+        <a-form-model-item label="端口">
+          <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
+            <a-col :span="24">
+              <a-space>
+                <a-input addon-before="宿主" v-model="item.publicPort" placeholder="宿主机端口" />
+                <a-input addon-before="容器" disabled :value="item.port + '/' + item.scheme" placeholder="容器目录" />
+              </a-space>
+            </a-col>
+          </a-row>
+        </a-form-model-item>
+
+        <a-form-model-item label="挂载卷">
+          <a-row v-for="(item, index) in temp.volumes" :key="index">
+            <a-col :span="20">
+              <a-space>
+                <a-input addon-before="宿主" v-model="item.host" placeholder="宿主机目录" />
+                <a-input addon-before="容器" v-model="item.container" placeholder="容器目录" />
+              </a-space>
+            </a-col>
+            <a-col
+              :span="2"
+              :offset="1"
+              @click="
+                () => {
+                  temp.volumes.splice(index, 1);
+                }
+              "
+            >
+              <a-icon type="minus-circle" style="color: #ff0000" />
+            </a-col>
+          </a-row>
+
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                temp.volumes.push({});
+              }
+            "
+            >添加卷</a-button
+          >
+        </a-form-model-item>
+        <a-form-model-item label="自动启动">
+          <a-switch v-model="temp.autorun" checked-children="启动" un-checked-children="不启动" />
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
+  </div>
 </template>
 <script>
 import { parseTime, renderSize } from "@/utils/time";
-import { dockerImagesList, dockerImageRemove } from "@/api/docker-api";
+import { dockerImagesList, dockerImageRemove, dockerImageInspect, dockerImageCreateContainer } from "@/api/docker-api";
 export default {
   props: {
     id: {
@@ -65,6 +123,10 @@ export default {
         showAll: false,
       },
       renderSize,
+      temp: {},
+      rules: {
+        name: [{ required: true, message: "容器名称必填", trigger: "blur" }],
+      },
       columns: [
         { title: "名称", dataIndex: "repoTags", ellipsis: true, scopedSlots: { customRender: "repoTags" } },
         { title: "镜像ID", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
@@ -77,9 +139,9 @@ export default {
           customRender: (text) => {
             return parseTime(text);
           },
-          width: 170,
+          width: 180,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 90 },
       ],
       action: {
         remove: {
@@ -87,6 +149,7 @@ export default {
           api: dockerImageRemove,
         },
       },
+      buildVisible: false,
     };
   },
   mounted() {
@@ -130,6 +193,57 @@ export default {
             }
           });
         },
+      });
+    },
+
+    // 构建镜像
+    createContainer(record) {
+      dockerImageInspect({
+        id: this.id,
+        imageId: record.id,
+      }).then((res) => {
+        this.buildVisible = true;
+        this.temp = {
+          volumes: [],
+          exposedPorts: res.data?.config?.exposedPorts || [],
+          image: (record.repoTags || []).join(","),
+          autorun: true,
+          imageId: record.id,
+        };
+      });
+    },
+    handleBuildOk() {
+      this.$refs["editForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        const temp = {
+          id: this.id,
+          autorun: this.temp.autorun,
+          imageId: this.temp.imageId,
+          name: this.temp.name,
+        };
+        temp.volumes = (this.temp.volumes || [])
+          .map((item) => {
+            return item.host + ":" + item.container;
+          })
+          .join(",");
+        temp.exposedPorts = (this.temp.exposedPorts || [])
+          .filter((item) => {
+            return item.publicPort;
+          })
+          .map((item) => {
+            return item.publicPort + ":" + item.port;
+          })
+          .join(",");
+        dockerImageCreateContainer(temp).then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.buildVisible = false;
+          }
+        });
       });
     },
   },

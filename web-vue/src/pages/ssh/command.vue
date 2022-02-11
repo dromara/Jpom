@@ -49,7 +49,7 @@
         </a-space>
       </template>
     </a-table>
-
+    <!-- 编辑命令 -->
     <a-modal v-model="editCommandVisible" width="80vw" title="编辑 命令" @ok="handleEditCommandOk" :maskClosable="false">
       <a-form-model ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="命令名称" prop="name">

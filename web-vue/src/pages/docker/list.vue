@@ -108,7 +108,7 @@
       </a-form-model>
     </a-modal>
     <!-- 控制台 -->
-    <a-modal v-model="consoleVisible" :title="`${temp.name} 控制台`" width="80vw" :footer="null" :maskClosable="false">
+    <a-modal v-model="consoleVisible" :title="`${temp.name} 控制台`" width="90vw" :footer="null" :maskClosable="false">
       <console v-if="consoleVisible" :id="temp.id"></console>
     </a-modal>
   </div>

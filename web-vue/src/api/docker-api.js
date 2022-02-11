@@ -142,12 +142,36 @@ export function dockerImageRemove(params) {
   });
 }
 
+/**
+ * inspect 镜像
+ * @param {JSON} params
+ */
+export function dockerImageInspect(params) {
+  return axios({
+    url: "/docker/images/inspect",
+    method: "get",
+    params: params,
+  });
+}
+
+
+/**
+ * 镜像 创建容器
+ * @param {JSON} params
+ */
+ export function dockerImageCreateContainer(params) {
+  return axios({
+    url: "/docker/images/create-container",
+    method: "post",
+    data: params,
+  });
+}
 
 /**
  * 卷
  * @param {JSON} params
  */
- export function dockerVolumesList(params) {
+export function dockerVolumesList(params) {
   return axios({
     url: "/docker/volumes/list",
     method: "post",

@@ -84,4 +84,36 @@ public class DockerImagesController extends BaseServerController {
 		plugin.execute("removeImage", parameter);
 		return JsonMessage.getString(200, "执行成功");
 	}
+
+	/**
+	 * @return json
+	 */
+	@GetMapping(value = "inspect", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String inspect(@ValidatorItem String id, String imageId) throws Exception {
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+		Map<String, Object> parameter = dockerInfoModel.toParameter();
+		parameter.put("imageId", imageId);
+		JSONObject inspectImage = (JSONObject) plugin.execute("inspectImage", parameter);
+		return JsonMessage.getString(200, "", inspectImage);
+	}
+
+	/**
+	 * @return json
+	 */
+	@PostMapping(value = "create-container", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EXECUTE)
+	public String createContainer(@ValidatorItem String id, @ValidatorItem String imageId, @ValidatorItem String name, String autorun, String volumes, String exposedPorts) throws Exception {
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+		Map<String, Object> parameter = dockerInfoModel.toParameter();
+		parameter.put("imageId", imageId);
+		parameter.put("autorun", autorun);
+		parameter.put("volumes", volumes);
+		parameter.put("name", name);
+		parameter.put("exposedPorts", exposedPorts);
+		plugin.execute("createContainer", parameter);
+		return JsonMessage.getString(200, "创建成功");
+	}
 }

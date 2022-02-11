@@ -402,4 +402,23 @@ public class Test {
 			}
 		}).awaitCompletion();
 	}
+
+	@org.junit.Test
+	public void testContainerCmd() {
+		CreateContainerCmd containerCmd = dockerClient.createContainerCmd("e6cf7db033e2");
+		CreateContainerCmd createContainerCmd = containerCmd.withName("jpom-build");
+
+		HostConfig hostConfig = HostConfig.newHostConfig();
+		PortBinding portBinding = PortBinding.parse("8084:8084");
+		hostConfig.withPortBindings(portBinding);
+		createContainerCmd.withHostConfig(hostConfig);
+		CreateContainerResponse exec = containerCmd.exec();
+	}
+
+	@org.junit.Test
+	public void testin() {
+		InspectImageCmd inspectImageCmd = dockerClient.inspectImageCmd("e6cf7db033e2");
+		InspectImageResponse inspectImageResponse = inspectImageCmd.exec();
+		System.out.println(inspectImageResponse);
+	}
 }

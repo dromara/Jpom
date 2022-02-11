@@ -1074,7 +1074,7 @@ export default {
     handleUnbind(record) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要解绑节点么？解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用",
+        content: "真的要解绑节点么？解绑会检查数据关联性,不会真实请求节点解绑,一般用于服务器无法连接且已经确定不再使用。如果误操作可能冗余数据",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
