@@ -61,11 +61,40 @@
           <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
             <a-col :span="24">
               <a-space>
-                <a-input addon-before="宿主" v-model="item.publicPort" placeholder="宿主机端口" />
-                <a-input addon-before="容器" disabled :value="item.port + '/' + item.scheme" placeholder="容器目录" />
+                <a-input-group>
+                  <a-row>
+                    <a-col :span="8">
+                      <a-input addon-before="IP" placeholder="宿主机ip" v-model="item.ip"> </a-input>
+                    </a-col>
+                    <a-col :span="6" :offset="1">
+                      <a-input addon-before="端口" placeholder="端口" v-model="item.publicPort"> </a-input>
+                    </a-col>
+                    <a-col :span="8" :offset="1">
+                      <a-input addon-before="容器" :disabled="item.disabled" v-model="item.port" placeholder="容器端口">
+                        <a-select slot="addonAfter" :disabled="item.disabled" v-model="item.scheme" placeholder="端口协议">
+                          <a-select-option value="tcp">tcp</a-select-option>
+                          <a-select-option value="udp">udp</a-select-option>
+                        </a-select>
+                      </a-input>
+                    </a-col>
+                  </a-row>
+                </a-input-group>
               </a-space>
             </a-col>
           </a-row>
+          <a-button
+            type="primary"
+            size="small"
+            @click="
+              () => {
+                temp.exposedPorts.push({
+                  scheme: 'tcp',
+                  ip: '0.0.0.0',
+                });
+              }
+            "
+            >添加端口</a-button
+          >
         </a-form-model-item>
 
         <a-form-model-item label="挂载卷">
@@ -73,7 +102,7 @@
             <a-col :span="20">
               <a-space>
                 <a-input addon-before="宿主" v-model="item.host" placeholder="宿主机目录" />
-                <a-input addon-before="容器" v-model="item.container" placeholder="容器目录" />
+                <a-input addon-before="容器" :disabled="item.disabled" v-model="item.container" placeholder="容器目录" />
               </a-space>
             </a-col>
             <a-col
@@ -91,6 +120,7 @@
 
           <a-button
             type="primary"
+            size="small"
             @click="
               () => {
                 temp.volumes.push({});
@@ -206,9 +236,21 @@ export default {
         imageId: record.id,
       }).then((res) => {
         this.buildVisible = true;
+        const volumesObj = {}; // res.data?.config?.volumes || {};
+        const keys = Object.keys(volumesObj);
+
         this.temp = {
-          volumes: [],
-          exposedPorts: res.data?.config?.exposedPorts || [],
+          volumes: keys.map((item) => {
+            return {
+              container: item,
+              disabled: true,
+            };
+          }),
+          exposedPorts: (res.data?.config?.exposedPorts || []).map((item) => {
+            item.disabled = true;
+            item.ip = "0.0.0.0";
+            return item;
+          }),
           image: (record.repoTags || []).join(","),
           autorun: true,
           imageId: record.id,
@@ -227,16 +269,19 @@ export default {
           name: this.temp.name,
         };
         temp.volumes = (this.temp.volumes || [])
+          .filter((item) => {
+            return item.host;
+          })
           .map((item) => {
             return item.host + ":" + item.container;
           })
           .join(",");
         temp.exposedPorts = (this.temp.exposedPorts || [])
           .filter((item) => {
-            return item.publicPort;
+            return item.publicPort && item.ip;
           })
           .map((item) => {
-            return item.publicPort + ":" + item.port;
+            return item.ip + ":" + item.publicPort + ":" + item.port;
           })
           .join(",");
         dockerImageCreateContainer(temp).then((res) => {
