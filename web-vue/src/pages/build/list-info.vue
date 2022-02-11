@@ -302,7 +302,7 @@
               <!-- SSH -->
               <template v-if="temp.releaseMethod === 3">
                 <a-form-model-item label="发布的SSH" prop="releaseMethodDataId">
-                  <a-select v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
+                  <a-select mode="multiple" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
                     <a-select-option v-for="ssh in sshList" :disabled="!ssh.fileDirs" :key="ssh.id">{{ ssh.name }}</a-select-option>
                   </a-select>
                 </a-form-model-item>
@@ -380,7 +380,7 @@
                 <a-form-model-item prop="dockerfile" label="Dockerfile">
                   <a-input v-model="tempExtraData.dockerfile" placeholder="文件夹路径 需要在仓库里面 dockerfile" />
                 </a-form-model-item>
-                 <a-form-model-item prop="dockerTag" label="镜像 tag">
+                <a-form-model-item prop="dockerTag" label="镜像 tag">
                   <a-input v-model="tempExtraData.dockerTag" placeholder="容器标签,如：xxxx:latest 多个使用逗号隔开" />
                 </a-form-model-item>
               </template>
@@ -742,6 +742,9 @@ export default {
         return [];
       }
       const findArray = this.sshList.filter((item) => {
+        if (Array.isArray(this.tempExtraData.releaseMethodDataId_3)) {
+          return this.tempExtraData.releaseMethodDataId_3[0];
+        }
         return item.id === this.tempExtraData.releaseMethodDataId_3;
       });
       if (findArray.length) {
@@ -917,7 +920,7 @@ export default {
           };
         }
         if (record.releaseMethod === 3) {
-          this.tempExtraData.releaseMethodDataId_3 = this.tempExtraData.releaseMethodDataId;
+          this.tempExtraData.releaseMethodDataId_3 = this.tempExtraData.releaseMethodDataId.split(",");
         }
       }
       this.loadRepositoryList(() => {
@@ -970,6 +973,7 @@ export default {
         if (!valid) {
           return false;
         }
+        const tempExtraData = Object.assign({}, this.tempExtraData);
         // 设置参数
         if (this.temp.releaseMethod === 2) {
           if (this.temp.releaseMethodDataIdList.length < 2) {
@@ -978,16 +982,17 @@ export default {
             });
             return false;
           }
-          this.tempExtraData.releaseMethodDataId_2_node = this.temp.releaseMethodDataIdList[0];
-          this.tempExtraData.releaseMethodDataId_2_project = this.temp.releaseMethodDataIdList[1];
+          tempExtraData.releaseMethodDataId_2_node = this.temp.releaseMethodDataIdList[0];
+          tempExtraData.releaseMethodDataId_2_project = this.temp.releaseMethodDataIdList[1];
         } else if (this.temp.releaseMethod === 3) {
           //  (this. tempExtraData.releasePath || '').slice(releaseSshDir.length);
-          this.tempExtraData.releasePath = ((this.tempExtraData.releaseSshDir || "") + "/" + (this.tempExtraData.releasePath2 || "")).replace(new RegExp("//", "gm"), "/");
+          tempExtraData.releasePath = ((tempExtraData.releaseSshDir || "") + "/" + (tempExtraData.releasePath2 || "")).replace(new RegExp("//", "gm"), "/");
+          tempExtraData.releaseMethodDataId_3 = (tempExtraData.releaseMethodDataId_3 || []).join(",");
         }
 
         this.temp = {
           ...this.temp,
-          extraData: JSON.stringify(this.tempExtraData),
+          extraData: JSON.stringify(tempExtraData),
         };
         // 提交数据
         editBuild(this.temp).then((res) => {

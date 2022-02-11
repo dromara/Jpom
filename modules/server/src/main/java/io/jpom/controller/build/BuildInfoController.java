@@ -275,38 +275,40 @@ public class BuildInfoController extends BaseServerController {
 
 		String releasePath = jsonObject.getString("releasePath");
 		Assert.hasText(releasePath, "请输入发布到ssh中的目录");
-
 		releasePath = FileUtil.normalize(releasePath);
-		SshModel sshServiceItem = sshService.getByKey(releaseMethodDataId, getRequest());
-		Assert.notNull(sshServiceItem, "没有对应的ssh项");
-		jsonObject.put("releaseMethodDataId", releaseMethodDataId);
-		//
-		if (releasePath.startsWith(StrUtil.SLASH)) {
-			// 以根路径开始
-			List<String> fileDirs = sshServiceItem.fileDirs();
-			Assert.notEmpty(fileDirs, "此ssh未授权操作此目录");
+		String releaseCommand = jsonObject.getString("releaseCommand");
+		List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
+		for (String releaseMethodDataIdItem : strings) {
+			SshModel sshServiceItem = sshService.getByKey(releaseMethodDataIdItem, getRequest());
+			Assert.notNull(sshServiceItem, "没有对应的ssh项");
+			//
+			if (releasePath.startsWith(StrUtil.SLASH)) {
+				// 以根路径开始
+				List<String> fileDirs = sshServiceItem.fileDirs();
+				Assert.notEmpty(fileDirs, sshServiceItem.getName() + "此ssh未授权操作此目录");
 
-			boolean find = false;
-			for (String fileDir : fileDirs) {
-				if (FileUtil.isSub(new File(fileDir), new File(releasePath))) {
-					find = true;
+				boolean find = false;
+				for (String fileDir : fileDirs) {
+					if (FileUtil.isSub(new File(fileDir), new File(releasePath))) {
+						find = true;
+					}
+				}
+				Assert.state(find, sshServiceItem.getName() + "此ssh未授权操作此目录");
+			}
+			// 发布命令
+			if (StrUtil.isNotEmpty(releaseCommand)) {
+				int length = releaseCommand.length();
+				Assert.state(length <= 4000, "发布命令长度限制在4000字符");
+				//return JsonMessage.getString(405, "请输入发布命令");
+				String[] commands = StrUtil.splitToArray(releaseCommand, StrUtil.LF);
+
+				for (String commandItem : commands) {
+					boolean checkInputItem = SshModel.checkInputItem(sshServiceItem, commandItem);
+					Assert.state(checkInputItem, sshServiceItem.getName() + "发布命令中包含禁止执行的命令");
 				}
 			}
-			Assert.state(find, "此ssh未授权操作此目录");
 		}
-		// 发布命令
-		String releaseCommand = jsonObject.getString("releaseCommand");
-		if (StrUtil.isNotEmpty(releaseCommand)) {
-			int length = releaseCommand.length();
-			Assert.state(length <= 4000, "发布命令长度限制在4000字符");
-			//return JsonMessage.getString(405, "请输入发布命令");
-			String[] commands = StrUtil.splitToArray(releaseCommand, StrUtil.LF);
-
-			for (String commandItem : commands) {
-				boolean checkInputItem = SshModel.checkInputItem(sshServiceItem, commandItem);
-				Assert.state(checkInputItem, "发布命令中包含禁止执行的命令");
-			}
-		}
+		jsonObject.put("releaseMethodDataId", releaseMethodDataId);
 	}
 
 	private String formatDocker(JSONObject jsonObject) {
