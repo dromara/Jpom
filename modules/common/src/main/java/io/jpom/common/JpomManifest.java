@@ -357,8 +357,7 @@ public class JpomManifest {
 			if (mainClass == null) {
 				return new JsonMessage<>(405, "清单文件中没有找到对应的MainClass属性");
 			}
-			JarClassLoader jarClassLoader = JarClassLoader.load(jarFile);
-			try {
+			try (JarClassLoader jarClassLoader = JarClassLoader.load(jarFile)) {
 				jarClassLoader.loadClass(mainClass);
 			} catch (ClassNotFoundException notFound) {
 				return new JsonMessage<>(405, "中没有找到对应的MainClass:" + mainClass);
