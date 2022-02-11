@@ -162,8 +162,12 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ```
 docker pull jpomdocker/jpom
-docker volume create jpom-server-vol
-docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:ro -v jpom-server-vol:/usr/local/jpom-server jpomdocker/jpom
+docker run -d -p 2122:2122 \
+	--name jpom-server \
+	-v /etc/localtime:/etc/localtime:ro \
+	-v /home/jpom-server/log:/usr/local/jpom-server/log \
+	-v /home/jpom-server/data:/usr/local/jpom-server/data \
+	jpomdocker/jpom
 ```
 
 > 容器化安装仅提供服务端版。由于容器和宿主机环境隔离，而导致插件端的很多功能无法正常使用，因此对插件端容器化意义不大。
