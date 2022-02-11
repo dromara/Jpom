@@ -27,8 +27,29 @@
         <span>{{ array[array.length - 1].slice(0, 12) }}</span>
       </a-tooltip>
 
+      <a-tooltip
+        slot="ports"
+        slot-scope="text"
+        placement="topLeft"
+        :title="
+          (text || [])
+            .map((item) => {
+              return item.type + ' ' + (item.ip || '') + ':' + (item.publicPort || '') + ':' + item.privatePort;
+            })
+            .join('/')
+        "
+      >
+        <span>{{
+          (text || [])
+            .map((item) => {
+              return item.type + " " + (item.publicPort || "") + ":" + item.privatePort;
+            })
+            .join("/")
+        }}</span>
+      </a-tooltip>
+
       <template slot="state" slot-scope="text, record">
-        <a-tooltip :title="record.status || ''" @click="viewLog(record)">
+        <a-tooltip :title="(record.status || '') + ' 点击查看日志'" @click="viewLog(record)">
           <a-switch :checked="text === 'running'" :disabled="true">
             <a-icon slot="checkedChildren" type="check-circle" />
             <a-icon slot="unCheckedChildren" type="warning" />
@@ -51,6 +72,9 @@
           </a-tooltip>
           <a-tooltip title="删除">
             <a-button size="small" type="link" @click="doAction(record, 'remove')"><a-icon type="delete" /></a-button>
+          </a-tooltip>
+          <a-tooltip title="点击查看日志">
+            <a-button size="small" type="link" @click="viewLog(record)"><a-icon type="message" /></a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -95,6 +119,7 @@ export default {
         { title: "容器ID", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
         { title: "镜像", dataIndex: "image", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "镜像ID", dataIndex: "imageId", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
+        { title: "端口", dataIndex: "ports", ellipsis: true, width: 150, scopedSlots: { customRender: "ports" } },
         { title: "状态", dataIndex: "state", ellipsis: true, width: 90, scopedSlots: { customRender: "state" } },
         {
           title: "创建时间",
@@ -106,7 +131,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 170 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 200 },
       ],
       action: {
         remove: {

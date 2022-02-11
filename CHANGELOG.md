@@ -9,6 +9,7 @@
 3. 【server】新增在线进入 docker 容器终端
 4. 【server】构建 ssh 发布支持发布到多个服务器（感谢@[老诗人](https://gitee.com/laoshirenggo) ）
 5. 【server】构建发布方式新增 docker 镜像
+6. 【server】容器管理新增在线镜像创建容器功能
 
 ### 🐞 解决BUG、优化功能
 

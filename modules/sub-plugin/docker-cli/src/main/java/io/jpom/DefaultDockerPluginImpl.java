@@ -30,10 +30,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
-import com.github.dockerjava.api.model.BuildResponseItem;
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.Frame;
-import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.InvocationBuilder;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
@@ -99,8 +96,65 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			case "buildImage":
 				this.buildImageCmd(parameter);
 				return null;
+			case "inspectImage":
+				return this.inspectImageCmd(parameter);
+			case "createContainer":
+				this.createContainerCmd(parameter);
+				return null;
 			default:
 				throw new IllegalArgumentException("不支持的类型");
+		}
+	}
+
+	private void createContainerCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			String imageId = (String) parameter.get("imageId");
+			String name = (String) parameter.get("name");
+			String exposedPorts = (String) parameter.get("exposedPorts");
+			String volumes = (String) parameter.get("volumes");
+			Object autorunStr = parameter.get("autorun");
+			//
+			CreateContainerCmd containerCmd = dockerClient.createContainerCmd(imageId);
+			CreateContainerCmd createContainerCmd = containerCmd.withName(name);
+
+			HostConfig hostConfig = HostConfig.newHostConfig();
+			if (StrUtil.isNotEmpty(exposedPorts)) {
+				List<PortBinding> portBindings = StrUtil.splitTrim(exposedPorts, StrUtil.COMMA)
+						.stream()
+						.map(PortBinding::parse)
+						.collect(Collectors.toList());
+				hostConfig.withPortBindings(portBindings);
+			}
+			if (StrUtil.isNotEmpty(volumes)) {
+				List<Bind> binds = StrUtil.splitTrim(volumes, StrUtil.COMMA)
+						.stream()
+						.map(Bind::parse)
+						.collect(Collectors.toList());
+				hostConfig.withBinds(binds);
+			}
+			createContainerCmd.withHostConfig(hostConfig);
+			CreateContainerResponse containerResponse = containerCmd.exec();
+			//
+			boolean autorun = Convert.toBool(autorunStr, false);
+			if (autorun) {
+				//
+				dockerClient.startContainerCmd(containerResponse.getId()).exec();
+			}
+		} finally {
+			IoUtil.close(dockerClient);
+		}
+	}
+
+	private JSONObject inspectImageCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			String imageId = (String) parameter.get("imageId");
+			InspectImageCmd inspectImageCmd = dockerClient.inspectImageCmd(imageId);
+			InspectImageResponse inspectImageResponse = inspectImageCmd.exec();
+			return (JSONObject) JSONObject.toJSON(inspectImageResponse);
+		} finally {
+			IoUtil.close(dockerClient);
 		}
 	}
 
