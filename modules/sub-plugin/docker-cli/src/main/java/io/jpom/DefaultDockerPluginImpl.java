@@ -101,10 +101,33 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			case "createContainer":
 				this.createContainerCmd(parameter);
 				return null;
+			case "pullImage":
+				this.pullImageCmd(parameter);
+				return null;
 			default:
 				throw new IllegalArgumentException("不支持的类型");
 		}
 	}
+
+	public void pullImageCmd(Map<String, Object> parameter) throws InterruptedException {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
+			String repository = (String) parameter.get("repository");
+			PullImageCmd pullImageCmd = dockerClient.pullImageCmd(repository);
+			pullImageCmd.exec(new InvocationBuilder.AsyncResultCallback<PullResponseItem>() {
+				@Override
+				public void onNext(PullResponseItem object) {
+					String responseItem = DockerUtil.parseResponseItem(object);
+					logConsumer.accept(responseItem);
+				}
+
+			}).awaitCompletion();
+		} finally {
+			IoUtil.close(dockerClient);
+		}
+	}
+
 
 	private void createContainerCmd(Map<String, Object> parameter) {
 		DockerClient dockerClient = DockerUtil.build(parameter);
@@ -172,19 +195,10 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 					.withDockerfile(dockerfile)
 					.withTags(CollUtil.newHashSet(StrUtil.splitTrim(tags, StrUtil.COMMA)));
 			buildImageCmd.exec(new InvocationBuilder.AsyncResultCallback<BuildResponseItem>() {
-
-
 				@Override
 				public void onNext(BuildResponseItem object) {
-					String stream = object.getStream();
-					if (stream == null) {
-						String status = object.getStatus();
-						if (status == null) {
-							return;
-						}
-						logConsumer.accept(StrUtil.format("{} {} {}", status, object.getId(), object.getProgressDetail()));
-					}
-					logConsumer.accept(stream);
+					String responseItem = DockerUtil.parseResponseItem(object);
+					logConsumer.accept(responseItem);
 				}
 			}).awaitCompletion();
 		} catch (InterruptedException e) {

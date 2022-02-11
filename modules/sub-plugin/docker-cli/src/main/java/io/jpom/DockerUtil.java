@@ -28,6 +28,7 @@ import cn.hutool.core.io.resource.Resource;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.ResponseItem;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
@@ -123,5 +124,21 @@ public class DockerUtil {
 			return null;
 		}
 		return resourceToFile.getAbsolutePath();
+	}
+
+	public static String parseResponseItem(ResponseItem responseItem) {
+		String stream = responseItem.getStream();
+		if (stream == null) {
+			String status = responseItem.getStatus();
+			if (status == null) {
+				return null;
+			}
+			String progress = responseItem.getProgress();
+			progress = StrUtil.emptyToDefault(progress, StrUtil.EMPTY);
+			String id = responseItem.getId();
+			id = StrUtil.emptyToDefault(id, StrUtil.EMPTY);
+			return StrUtil.format("{} {} {}", status, id, progress);
+		}
+		return stream;
 	}
 }

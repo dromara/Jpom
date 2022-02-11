@@ -3,7 +3,6 @@
     <a-table :data-source="list" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <!-- <a-input v-model="listQuery['name']" @keyup.enter="loadData" placeholder="名称" class="search-input-item" /> -->
           <div>
             显示所有
             <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['showAll']" />
@@ -12,8 +11,12 @@
             悬空
             <a-switch checked-children="是" un-checked-children="否" v-model="listQuery['dangling']" />
           </div>
-
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+        </a-space>
+        |
+        <a-space>
+          <a-input v-model="pullImageName" placeholder="镜像名称" class="search-input-item" />
+          <a-button type="primary" @click="pullImage">拉取</a-button>
         </a-space>
       </template>
 
@@ -49,7 +52,7 @@
         </a-space>
       </template>
     </a-table>
-    <a-modal v-model="buildVisible" width="50vw" title="构建容器" @ok="handleBuildOk" :maskClosable="false">
+    <a-modal v-model="buildVisible" width="60vw" title="构建容器" @ok="handleBuildOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="基础镜像" prop="image">
           <a-input v-model="temp.image" disabled placeholder="" />
@@ -59,7 +62,7 @@
         </a-form-model-item>
         <a-form-model-item label="端口">
           <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
-            <a-col :span="24">
+            <a-col :span="21">
               <a-space>
                 <a-input-group>
                   <a-row>
@@ -81,65 +84,83 @@
                 </a-input-group>
               </a-space>
             </a-col>
+            <a-col :span="2" :offset="1">
+              <a-space>
+                <a-icon
+                  type="minus-circle"
+                  @click="
+                    () => {
+                      temp.exposedPorts.splice(index, 1);
+                    }
+                  "
+                />
+
+                <a-icon
+                  type="plus-square"
+                  @click="
+                    () => {
+                      temp.exposedPorts.push({
+                        scheme: 'tcp',
+                        ip: '0.0.0.0',
+                      });
+                    }
+                  "
+                />
+              </a-space>
+            </a-col>
           </a-row>
-          <a-button
-            type="primary"
-            size="small"
-            @click="
-              () => {
-                temp.exposedPorts.push({
-                  scheme: 'tcp',
-                  ip: '0.0.0.0',
-                });
-              }
-            "
-            >添加端口</a-button
-          >
         </a-form-model-item>
 
         <a-form-model-item label="挂载卷">
           <a-row v-for="(item, index) in temp.volumes" :key="index">
-            <a-col :span="20">
+            <a-col :span="10">
+              <a-input addon-before="宿主" v-model="item.host" placeholder="宿主机目录" />
+            </a-col>
+            <a-col :span="10" :offset="1">
+              <a-input addon-before="容器" :disabled="item.disabled" v-model="item.container" placeholder="容器目录" />
+            </a-col>
+            <a-col :span="2" :offset="1">
               <a-space>
-                <a-input addon-before="宿主" v-model="item.host" placeholder="宿主机目录" />
-                <a-input addon-before="容器" :disabled="item.disabled" v-model="item.container" placeholder="容器目录" />
+                <a-icon
+                  type="minus-circle"
+                  @click="
+                    () => {
+                      temp.volumes.splice(index, 1);
+                    }
+                  "
+                />
+
+                <a-icon
+                  type="plus-square"
+                  @click="
+                    () => {
+                      temp.volumes.push({});
+                    }
+                  "
+                />
               </a-space>
             </a-col>
-            <a-col
-              :span="2"
-              :offset="1"
-              @click="
-                () => {
-                  temp.volumes.splice(index, 1);
-                }
-              "
-            >
-              <a-icon type="minus-circle" style="color: #ff0000" />
-            </a-col>
           </a-row>
-
-          <a-button
-            type="primary"
-            size="small"
-            @click="
-              () => {
-                temp.volumes.push({});
-              }
-            "
-            >添加卷</a-button
-          >
         </a-form-model-item>
         <a-form-model-item label="自动启动">
           <a-switch v-model="temp.autorun" checked-children="启动" un-checked-children="不启动" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 日志 -->
+    <a-modal :width="'80vw'" v-model="logVisible" title="pull日志" :footer="null" :maskClosable="false">
+      <pull-image-Log v-if="logVisible" :id="temp.id" />
+    </a-modal>
   </div>
 </template>
 <script>
 import { parseTime, renderSize } from "@/utils/time";
-import { dockerImagesList, dockerImageRemove, dockerImageInspect, dockerImageCreateContainer } from "@/api/docker-api";
+import { dockerImagesList, dockerImageRemove, dockerImageInspect, dockerImageCreateContainer, dockerImagePullImage } from "@/api/docker-api";
+import PullImageLog from "@/pages/docker/pull-image-log";
 export default {
+  components: {
+    PullImageLog,
+  },
   props: {
     id: {
       type: String,
@@ -152,6 +173,8 @@ export default {
       listQuery: {
         showAll: false,
       },
+      logVisible: false,
+      pullImageName: "",
       renderSize,
       temp: {},
       rules: {
@@ -236,17 +259,12 @@ export default {
         imageId: record.id,
       }).then((res) => {
         this.buildVisible = true;
-        const volumesObj = {}; // res.data?.config?.volumes || {};
-        const keys = Object.keys(volumesObj);
+        // const volumesObj = {}; // res.data?.config?.volumes || {};
+        // const keys = Object.keys(volumesObj);
 
         this.temp = {
-          volumes: keys.map((item) => {
-            return {
-              container: item,
-              disabled: true,
-            };
-          }),
-          exposedPorts: (res.data?.config?.exposedPorts || []).map((item) => {
+          volumes: [{}],
+          exposedPorts: (res.data?.config?.exposedPorts || [{}]).map((item) => {
             item.disabled = true;
             item.ip = "0.0.0.0";
             return item;
@@ -257,6 +275,7 @@ export default {
         };
       });
     },
+    // 创建容器
     handleBuildOk() {
       this.$refs["editForm"].validate((valid) => {
         if (!valid) {
@@ -276,6 +295,7 @@ export default {
             return item.host + ":" + item.container;
           })
           .join(",");
+        // 处理端口
         temp.exposedPorts = (this.temp.exposedPorts || [])
           .filter((item) => {
             return item.publicPort && item.ip;
@@ -284,6 +304,7 @@ export default {
             return item.ip + ":" + item.publicPort + ":" + item.port;
           })
           .join(",");
+        //
         dockerImageCreateContainer(temp).then((res) => {
           if (res.code === 200) {
             this.$notification.success({
@@ -292,6 +313,26 @@ export default {
             this.buildVisible = false;
           }
         });
+      });
+    },
+    // 拉取镜像
+    pullImage() {
+      if (!this.pullImageName) {
+        this.$notification.warn({
+          message: "请填写要拉取的镜像名称",
+        });
+        return;
+      }
+      dockerImagePullImage({
+        id: this.id,
+        repository: this.pullImageName,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.logVisible = true;
+          this.temp = {
+            id: res.data,
+          };
+        }
       });
     },
   },

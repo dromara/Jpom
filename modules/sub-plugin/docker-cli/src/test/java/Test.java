@@ -422,7 +422,7 @@ public class Test {
 	}
 
 	@org.junit.Test
-	public void testinPush() throws InterruptedException {
+	public void testinpull() throws InterruptedException {
 		//docker pull jpomdocker/jpom:latest
 		PullImageCmd pullImageCmd = dockerClient.pullImageCmd("jpomdocker/jpom:2.8.6");
 //		pullImageCmd.withTag();
