@@ -93,7 +93,7 @@
 import { parseTime } from "@/utils/time";
 import { dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStop } from "@/api/docker-api";
 import LogView from "@/pages/docker/log-view";
-import Terminal from "./terminal";
+import Terminal from "@/pages/docker/terminal";
 export default {
   components: {
     LogView,

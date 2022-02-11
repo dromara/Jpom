@@ -337,7 +337,8 @@ public class DockerBuild implements AutoCloseable {
 						.exec(new ResultCallback.Adapter<BuildResponseItem>() {
 							@Override
 							public void onNext(BuildResponseItem object) {
-								logRecorder.append(object.getStream());
+								String responseItem = DockerUtil.parseResponseItem(object);
+								logRecorder.append(responseItem);
 							}
 						}).awaitCompletion();
 			} catch (InterruptedException ex) {
