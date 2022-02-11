@@ -333,6 +333,19 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 [名词解释](https://jpom.io/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
 
+### 实践案例
+
+> 里面有部分图片加载可能比较慢
+
+1. [本地构建 + SSH 发布 java 项目](https://jpom.io/docs/index.html#/practice/build_java_ssh_release.md)
+2. [本地构建 + 项目发布 node 项目](https://jpom.io/docs/index.html#/practice/build_node_release.md)
+3. [本地构建 + SSH 发布 node 项目](https://jpom.io/docs/index.html#/practice/build_node_ssh_release.md)
+4. [本地构建 + 自定义管理 python 项目](https://jpom.io/docs/index.html#/practice/project_dsl_python.md)
+5. [自定义管理 java 项目](https://jpom.io/docs/index.html#/practice/project_dsl_java.md)
+6. [管理编译安装的 nginx](https://jpom.io/docs/index.html#/practice/node_nginx.md)
+7. [管理 docker](https://jpom.io/docs/index.html#/practice/docker-cli.md)
+8. [容器构建 + 项目发布 java 项目](https://jpom.io/docs/index.html#/practice/build_docker_java_node_release.md)
+
 ## 🛠️ 整体架构
 
 ![jpom-func-arch](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom-func-arch.jpg)
