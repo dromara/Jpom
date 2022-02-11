@@ -33,9 +33,11 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.script.BaseRunScript;
+import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.SocketSessionUtil;
@@ -62,9 +64,13 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
 	private final Set<WebSocketSession> sessions = new HashSet<>();
 	private final String executeId;
 
+
 	private ScriptProcessBuilder(ScriptModel nodeScriptModel, String executeId, String args) {
 		super(nodeScriptModel.logFile(executeId));
 		this.executeId = executeId;
+		//
+		WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
+		Map<String, String> env = workspaceEnvVarService.getEnv(nodeScriptModel.getWorkspaceId());
 
 		File scriptFile = nodeScriptModel.scriptFile();
 		//
@@ -78,6 +84,8 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
 		DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
 		processBuilder.redirectErrorStream(true);
 		processBuilder.command(command);
+		Map<String, String> environment = processBuilder.environment();
+		environment.putAll(env);
 		processBuilder.directory(scriptFile.getParentFile());
 	}
 
