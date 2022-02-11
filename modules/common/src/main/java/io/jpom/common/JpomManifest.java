@@ -519,9 +519,10 @@ public class JpomManifest {
 				Assert.state(first.isPresent(), "上传的压缩包不是 Jpom [" + type + "] 包");
 				//
 				ZipEntry zipEntry = first.get();
-				InputStream stream = ZipUtil.getStream(zipFile, zipEntry);
-				String name = FileUtil.getName(zipEntry.getName());
-				return FileUtil.writeFromStream(stream, FileUtil.file(savePath, name));
+				try (InputStream stream = ZipUtil.getStream(zipFile, zipEntry)) {
+					String name = FileUtil.getName(zipEntry.getName());
+					return FileUtil.writeFromStream(stream, FileUtil.file(savePath, name));
+				}
 			}
 		} else if (StrUtil.endWithIgnoreCase(extName, "jar")) {
 			return FileUtil.file(path);
