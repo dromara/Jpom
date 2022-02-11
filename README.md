@@ -110,19 +110,29 @@
 > 如果需要修改数据、日志存储路径请参照 `extConfig.yml` 文件中 `jpom.path` 配置属性
 
 ```
-yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server
+yum install -y wget && \
+	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	bash install.sh Server
 
 # 备用地址
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Server
+yum install -y wget && \
+	wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && \
+	bash install.sh Server
 
 支持自动安装jdk环境
-yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
+yum install -y wget && \
+	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	bash install.sh Server jdk
 
 # 支持自动安装jdk和maven环境
-yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk+mvn
+yum install -y wget && \
+	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	bash install.sh Server jdk+mvn
 
 # ubuntu
-apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
+apt install -y wget && \
+	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	bash install.sh Server jdk
 ```
 
 启动成功后,服务端的端口为 `2122` 访问管理页面 例如`http://127.0.0.1:2122/`
@@ -143,16 +153,24 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 > 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) ）
 
 ```
-yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent
+yum install -y wget && \
+	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	bash install.sh Agent
 
 # 备用地址
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Agent
+yum install -y wget && \
+	wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && \
+	bash install.sh Agent
 
 # 支持自动安装jdk环境
-yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
+yum install -y wget && \
+	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	bash install.sh Agent jdk
 
 # ubuntu
-apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
+apt install -y wget && \
+	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	bash install.sh Agent jdk
 ```
 
 启动成功后,插件端的端口为 `2123`
