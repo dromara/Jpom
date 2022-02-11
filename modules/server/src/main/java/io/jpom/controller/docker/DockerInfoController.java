@@ -196,6 +196,8 @@ public class DockerInfoController extends BaseServerController {
 				Assert.state(certExist, "请上传证书文件");
 			}
 			this.check(dockerInfoModel, certExist, savePath);
+			// 默认正常
+			dockerInfoModel.setStatus(1);
 			dockerInfoService.insert(dockerInfoModel);
 		} else {
 			this.check(dockerInfoModel, certExist, savePath);

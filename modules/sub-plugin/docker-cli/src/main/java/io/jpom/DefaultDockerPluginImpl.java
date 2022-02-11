@@ -30,6 +30,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
+import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.Image;
@@ -37,6 +38,7 @@ import com.github.dockerjava.core.InvocationBuilder;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 
+import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -94,8 +96,47 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			case "exec":
 				this.execCreateCmd(parameter);
 				return null;
+			case "buildImage":
+				this.buildImageCmd(parameter);
+				return null;
 			default:
 				throw new IllegalArgumentException("不支持的类型");
+		}
+	}
+
+	private void buildImageCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
+		File dockerfile = (File) parameter.get("Dockerfile");
+		File baseDirectory = (File) parameter.get("baseDirectory");
+		String tags = (String) parameter.get("tags");
+
+		try {
+			BuildImageCmd buildImageCmd = dockerClient.buildImageCmd();
+			buildImageCmd
+					.withBaseDirectory(baseDirectory)
+					.withDockerfile(dockerfile)
+					.withTags(CollUtil.newHashSet(StrUtil.splitTrim(tags, StrUtil.COMMA)));
+			buildImageCmd.exec(new InvocationBuilder.AsyncResultCallback<BuildResponseItem>() {
+
+
+				@Override
+				public void onNext(BuildResponseItem object) {
+					String stream = object.getStream();
+					if (stream == null) {
+						String status = object.getStatus();
+						if (status == null) {
+							return;
+						}
+						logConsumer.accept(StrUtil.format("{} {} {}", status, object.getId(), object.getProgressDetail()));
+					}
+					logConsumer.accept(stream);
+				}
+			}).awaitCompletion();
+		} catch (InterruptedException e) {
+			logConsumer.accept("容器 build 被中断:" + e);
+		} finally {
+			IoUtil.close(dockerClient);
 		}
 	}
 

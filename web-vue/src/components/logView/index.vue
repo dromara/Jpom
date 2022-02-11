@@ -118,7 +118,7 @@ export default {
           return;
         }
         projectConsole.innerHTML = this.logContextArray.join(this.seg);
-        if (this.logScroll === "true") {
+        if (this.temp.logScroll === "true") {
           setTimeout(() => {
             projectConsole.scrollTop = projectConsole.scrollHeight;
           }, 100);

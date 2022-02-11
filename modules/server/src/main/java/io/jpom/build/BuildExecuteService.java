@@ -96,7 +96,7 @@ public class BuildExecuteService {
 	private final BuildInfoService buildService;
 	private final DbBuildHistoryLogService dbBuildHistoryLogService;
 	private final RepositoryService repositoryService;
-	private final DockerInfoService dockerInfoService;
+	protected final DockerInfoService dockerInfoService;
 	private final WorkspaceEnvVarService workspaceEnvVarService;
 
 	public BuildExecuteService(BuildInfoService buildService,
@@ -224,7 +224,7 @@ public class BuildExecuteService {
 		buildExtraModule.updateValue(buildInfoModel);
 		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
 		// 更新其他配置字段
-		buildHistoryLog.fillLogValue(buildExtraModule);
+		//buildHistoryLog.fillLogValue(buildExtraModule);
 		buildHistoryLog.setTriggerBuildType(taskData.triggerBuildType);
 		//
 		buildHistoryLog.setBuildNumberId(buildInfoModel.getBuildId());
@@ -237,6 +237,7 @@ public class BuildExecuteService {
 		buildHistoryLog.setStatus(BuildStatus.Ing.getCode());
 		buildHistoryLog.setStartTime(SystemClock.now());
 		buildHistoryLog.setBuildRemark(taskData.buildRemark);
+		buildHistoryLog.setExtraData(buildInfoModel.getExtraData());
 		dbBuildHistoryLogService.insert(buildHistoryLog);
 		//
 		buildService.updateStatus(buildHistoryLog.getBuildDataId(), BuildStatus.Ing);

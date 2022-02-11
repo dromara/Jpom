@@ -49,9 +49,13 @@ import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.outgiving.OutGivingRun;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
+import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
@@ -65,7 +69,9 @@ import lombok.Builder;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -158,6 +164,8 @@ public class ReleaseManage implements Runnable {
 				this.doSsh();
 			} else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
 				this.localCommand();
+			} else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
+				this.doDockerImage();
 			} else {
 				logRecorder.info(" 没有实现的发布分发:" + releaseMethod);
 			}
@@ -197,6 +205,60 @@ public class ReleaseManage implements Runnable {
 		replace = StrUtil.replace(replace, "#{BUILD_RESULT_FILE}", FileUtil.getAbsolutePath(this.resultFile));
 		replace = StrUtil.replace(replace, "#{BUILD_NUMBER_ID}", this.buildId + StrUtil.EMPTY);
 		return replace;
+	}
+
+	private void doDockerImage() {
+		// 生成临时目录
+		File tempPath = FileUtil.file(ConfigBean.getInstance().getTempPath(), "build_temp", "docker_image", this.buildExtraModule.getId() + StrUtil.DASHED + this.buildId);
+		try {
+			File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
+			FileUtil.copyContent(sourceFile, tempPath, true);
+			File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildId, StrUtil.SLASH);
+			FileUtil.copyContent(historyPackageFile, tempPath, true);
+			// docker file
+			String moduleDockerfile = this.buildExtraModule.getDockerfile();
+			List<String> list = StrUtil.splitTrim(moduleDockerfile, StrUtil.COLON);
+			String dockerFile = CollUtil.getLast(list);
+			File dockerfile = FileUtil.file(tempPath, dockerFile);
+			if (!FileUtil.isFile(dockerfile)) {
+				logRecorder.info("仓库目录下没有找到 Dockerfile 文件:", dockerFile);
+				return;
+			}
+			File baseDir = FileUtil.file(tempPath, list.size() == 1 ? StrUtil.SLASH : CollUtil.get(list, 0));
+			//
+			String fromTag = this.buildExtraModule.getFromTag();
+			// 根据 tag 查询
+			List<DockerInfoModel> dockerInfoModels = buildExecuteService
+					.dockerInfoService
+					.queryByTag(this.buildExtraModule.getWorkspaceId(), 1, fromTag);
+			DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
+			if (dockerInfoModel == null) {
+				logRecorder.info("没有可用的 docker server");
+				return;
+			}
+			for (DockerInfoModel infoModel : dockerInfoModels) {
+				this.doDockerImage(infoModel, dockerfile, baseDir);
+			}
+			//
+		} finally {
+			CommandUtil.systemFastDel(tempPath);
+		}
+	}
+
+	private void doDockerImage(DockerInfoModel dockerInfoModel, File dockerfile, File baseDir) {
+		logRecorder.info("{} start build image", dockerInfoModel.getName());
+		Map<String, Object> map = dockerInfoModel.toParameter();
+		map.put("Dockerfile", dockerfile);
+		map.put("baseDirectory", baseDir);
+		map.put("tags", this.buildExtraModule.getDockerTag());
+		Consumer<String> logConsumer = s -> logRecorder.append(s);
+		map.put("logConsumer", logConsumer);
+		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+		try {
+			plugin.execute("buildImage", map);
+		} catch (Exception e) {
+			logRecorder.error("调用容器异常", e);
+		}
 	}
 
 	/**
