@@ -421,4 +421,19 @@ public class Test {
 		InspectImageResponse inspectImageResponse = inspectImageCmd.exec();
 		System.out.println(inspectImageResponse);
 	}
+
+	@org.junit.Test
+	public void testinPush() throws InterruptedException {
+		//docker pull jpomdocker/jpom:latest
+		PullImageCmd pullImageCmd = dockerClient.pullImageCmd("jpomdocker/jpom:2.8.6");
+//		pullImageCmd.withTag();
+		pullImageCmd.exec(new InvocationBuilder.AsyncResultCallback<PullResponseItem>() {
+
+			@Override
+			public void onNext(PullResponseItem object) {
+				System.out.println(object);
+			}
+
+		}).awaitCompletion();
+	}
 }
