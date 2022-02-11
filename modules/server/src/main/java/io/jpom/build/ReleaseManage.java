@@ -245,17 +245,25 @@ public class ReleaseManage implements Runnable {
 	private void doSsh() {
 		String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
 		SshService sshService = SpringUtil.getBean(SshService.class);
-		SshModel item = sshService.getByKey(releaseMethodDataId, false);
-		if (item == null) {
-			logRecorder.info("没有找到对应的ssh项：" + releaseMethodDataId);
-			return;
+		List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
+		for (String releaseMethodDataIdItem : strings) {
+			SshModel item = sshService.getByKey(releaseMethodDataIdItem, false);
+			if (item == null) {
+				logRecorder.info("没有找到对应的ssh项：" + releaseMethodDataIdItem);
+				continue;
+			}
+			this.doSsh(item, sshService);
 		}
+	}
+
+	private void doSsh(SshModel item, SshService sshService) {
 		Session session = SshService.getSessionByModel(item);
 		try {
 			String releasePath = this.buildExtraModule.getReleasePath();
 			if (StrUtil.isEmpty(releasePath)) {
 				logRecorder.info("发布目录为空");
 			} else {
+				logRecorder.info("{} {} start ftp upload", DateUtil.now(), item.getName());
 				try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
 					String prefix = "";
 					if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
@@ -272,7 +280,7 @@ public class ReleaseManage implements Runnable {
 						}
 					}
 					sftp.syncUpload(this.resultFile, normalizePath);
-					logRecorder.info("ssh ftp upload done");
+					logRecorder.info("{} ftp upload done", item.getName());
 				} catch (Exception e) {
 					this.pubLog("执行ssh发布异常", e);
 				}
@@ -290,12 +298,12 @@ public class ReleaseManage implements Runnable {
 		// 替换变量
 		this.formatCommand(commands);
 		//
-		logRecorder.info(DateUtil.now() + " start exec");
+		logRecorder.info("{} {} start exec", DateUtil.now(), item.getName());
 		try {
 			String s = sshService.exec(item, commands);
 			logRecorder.info(s);
 		} catch (Exception e) {
-			this.pubLog("执行异常", e);
+			this.pubLog(item.getName() + " 执行异常", e);
 		}
 	}
 
