@@ -10,6 +10,7 @@
 4. 【server】构建 ssh 发布支持发布到多个服务器（感谢@[老诗人](https://gitee.com/laoshirenggo) ）
 5. 【server】构建发布方式新增 docker 镜像
 6. 【server】容器管理新增在线镜像创建容器功能
+7. 【server】容器管理新增在线拉取镜像功能
 
 ### 🐞 解决BUG、优化功能
 
@@ -21,6 +22,7 @@
 6. 【server】本地构建命令 容器构建支持引用工作空间变量
 7. 【server】修复构建触发器无法执行（感谢@[老诗人](https://gitee.com/laoshirenggo) ）
 8. 【server】服务端脚本新增工作空间环境变量
+9. 修复检查 Jpom 包分发中没有释放 JarClassLoader 造成 ssh 安装节点无法正常使用问题（感谢@[大海](https://gitee.com/hasape) [Gitee issues I4T9L0](https://gitee.com/dromara/Jpom/issues/I4T9L0) ）
 
 ------
 

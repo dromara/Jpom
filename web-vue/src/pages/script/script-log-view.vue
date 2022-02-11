@@ -53,9 +53,9 @@ export default {
             clearInterval(this.logTimer);
           }
           // 更新日志
-          if (this.logText === "loading...") {
-            this.logText = "";
-          }
+          // if (this.logText === "loading...") {
+          //   this.logText = "";
+          // }
           // let lines = res.data.dataLines;
           // lines.forEach((element) => {
           //   this.logText += `${element}\r\n`;
