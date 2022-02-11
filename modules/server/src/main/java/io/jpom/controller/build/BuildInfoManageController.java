@@ -146,8 +146,9 @@ public class BuildInfoManageController extends BaseServerController {
 		String e = buildExecuteService.checkStatus(item.getStatus());
 		Assert.isNull(e, () -> e);
 		UserModel userModel = getUser();
-		BuildExtraModule buildExtraModule = new BuildExtraModule();
-		buildExtraModule.updateValue(buildHistoryLog);
+		BuildExtraModule buildExtraModule = BuildExtraModule.build(buildHistoryLog);
+		//new BuildExtraModule();
+		//buildExtraModule.updateValue(buildHistoryLog);
 		ReleaseManage manage = ReleaseManage.builder()
 				.buildExtraModule(buildExtraModule)
 				.logId(buildHistoryLog.getId())

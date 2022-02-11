@@ -29,6 +29,7 @@ import io.jpom.model.BaseModel;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.log.BuildHistoryLog;
+import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -87,6 +88,12 @@ public class BuildExtraModule extends BaseModel {
 	 */
 	private boolean diffSync;
 
+	private String fromTag;
+
+	private String dockerfile;
+
+	private String dockerTag;
+
 
 	public String getResultDirFile() {
 		if (resultDirFile == null) {
@@ -108,19 +115,25 @@ public class BuildExtraModule extends BaseModel {
 		this.setWorkspaceId(buildInfoModel.getWorkspaceId());
 	}
 
-	public void updateValue(BuildHistoryLog buildHistoryLog) {
+	public static BuildExtraModule build(BuildHistoryLog buildHistoryLog) {
+		BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildHistoryLog.getExtraData(), BuildExtraModule.class);
+		if (buildExtraModule == null) {
+			buildExtraModule = new BuildExtraModule();
+			buildExtraModule.setAfterOpt(ObjectUtil.defaultIfNull(buildHistoryLog.getAfterOpt(), AfterOpt.No.getCode()));
+
+			buildExtraModule.setReleaseCommand(buildHistoryLog.getReleaseCommand());
+			buildExtraModule.setReleasePath(buildHistoryLog.getReleasePath());
+			buildExtraModule.setReleaseMethodDataId(buildHistoryLog.getReleaseMethodDataId());
+			buildExtraModule.setClearOld(ObjectUtil.defaultIfNull(buildHistoryLog.getClearOld(), false));
+			//
+			buildExtraModule.setDiffSync(ObjectUtil.defaultIfNull(buildHistoryLog.getDiffSync(), false));
+		}
+		buildExtraModule.setId(buildHistoryLog.getBuildDataId());
+		buildExtraModule.setName(buildHistoryLog.getBuildName());
+		buildExtraModule.setReleaseMethod(buildHistoryLog.getReleaseMethod());
+		buildExtraModule.setResultDirFile(buildHistoryLog.getResultDirFile());
+		buildExtraModule.setWorkspaceId(buildHistoryLog.getWorkspaceId());
 		//
-		this.setAfterOpt(ObjectUtil.defaultIfNull(buildHistoryLog.getAfterOpt(), AfterOpt.No.getCode()));
-		this.setReleaseMethod(buildHistoryLog.getReleaseMethod());
-		this.setReleaseCommand(buildHistoryLog.getReleaseCommand());
-		this.setReleasePath(buildHistoryLog.getReleasePath());
-		this.setReleaseMethodDataId(buildHistoryLog.getReleaseMethodDataId());
-		this.setClearOld(ObjectUtil.defaultIfNull(buildHistoryLog.getClearOld(), false));
-		this.setResultDirFile(buildHistoryLog.getResultDirFile());
-		this.setName(buildHistoryLog.getBuildName());
-		//
-		this.setId(buildHistoryLog.getBuildDataId());
-		this.setWorkspaceId(buildHistoryLog.getWorkspaceId());
-		this.setDiffSync(ObjectUtil.defaultIfNull(buildHistoryLog.getDiffSync(), false));
+		return buildExtraModule;
 	}
 }

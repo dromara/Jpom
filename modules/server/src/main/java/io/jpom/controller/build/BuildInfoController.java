@@ -226,9 +226,9 @@ public class BuildInfoController extends BaseServerController {
 		} else if (releaseMethod1 == BuildReleaseMethod.LocalCommand) {
 			this.formatLocalCommand(jsonObject);
 			jsonObject.put("releaseMethodDataId", "LocalCommand");
-		} else if (releaseMethod1 == BuildReleaseMethod.Docker) {
+		} else if (releaseMethod1 == BuildReleaseMethod.DockerImage) {
 			String dockerTag = this.formatDocker(jsonObject);
-			jsonObject.put("releaseMethodDataId", "Docker");
+			jsonObject.put("releaseMethodDataId", dockerTag);
 		}
 		// 检查关联数据ID
 		buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));

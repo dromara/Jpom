@@ -23,10 +23,8 @@
 package io.jpom.model.log;
 
 import cn.hutool.core.annotation.PropIgnore;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.build.BuildExtraModule;
-import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
@@ -58,6 +56,7 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	 *
 	 * @see BuildInfoModel#getReleaseMethodDataId()
 	 */
+	@Deprecated
 	private String releaseMethodDataId;
 	/**
 	 * 分发后的操作
@@ -66,10 +65,12 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	 * @see io.jpom.model.AfterOpt
 	 * @see BuildInfoModel#getExtraData()
 	 */
+	@Deprecated
 	private Integer afterOpt;
 	/**
 	 * 是否清空旧包发布
 	 */
+	@Deprecated
 	private Boolean clearOld;
 	/**
 	 * 构建产物目录
@@ -78,10 +79,12 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	/**
 	 * 发布命令  ssh 才能用上
 	 */
+	@Deprecated
 	private String releaseCommand;
 	/**
 	 * 发布到ssh中的目录
 	 */
+	@Deprecated
 	private String releasePath;
 	/**
 	 * 触发构建类型 触发类型{0，手动，1 触发器,2 自动触发}
@@ -90,6 +93,7 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	/**
 	 * 增量同步
 	 */
+	@Deprecated
 	private Boolean diffSync;
 	/**
 	 * 关联的构建id
@@ -126,6 +130,10 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	 */
 	private String buildRemark;
 	/**
+	 * 构建其他信息
+	 */
+	private String extraData;
+	/**
 	 * 是否存在构建产物
 	 */
 	@PropIgnore
@@ -140,16 +148,15 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 		this.buildRemark = StrUtil.maxLength(buildRemark, 240);
 	}
 
-	public void fillLogValue(BuildExtraModule buildExtraModule) {
-		//
-		this.setAfterOpt(ObjectUtil.defaultIfNull(buildExtraModule.getAfterOpt(), AfterOpt.No.getCode()));
-		this.setReleaseMethod(buildExtraModule.getReleaseMethod());
-		this.setReleaseCommand(buildExtraModule.getReleaseCommand());
-		this.setReleasePath(buildExtraModule.getReleasePath());
-		this.setReleaseMethodDataId(buildExtraModule.getReleaseMethodDataId());
-		this.setClearOld(buildExtraModule.isClearOld());
-		this.setResultDirFile(buildExtraModule.getResultDirFile());
-		this.setDiffSync(buildExtraModule.isDiffSync());
-
-	}
+//	public void fillLogValue(BuildExtraModule buildExtraModule) {
+//		//
+//		this.setAfterOpt(ObjectUtil.defaultIfNull(buildExtraModule.getAfterOpt(), AfterOpt.No.getCode()));
+//		this.setReleaseMethod(buildExtraModule.getReleaseMethod());
+//		this.setReleaseCommand(buildExtraModule.getReleaseCommand());
+//		this.setReleasePath(buildExtraModule.getReleasePath());
+//		this.setReleaseMethodDataId(buildExtraModule.getReleaseMethodDataId());
+//		this.setClearOld(buildExtraModule.isClearOld());
+//		this.setResultDirFile(buildExtraModule.getResultDirFile());
+//		this.setDiffSync(buildExtraModule.isDiffSync());
+//	}
 }
