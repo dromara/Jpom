@@ -14,10 +14,11 @@
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
         </a-space>
         |
-        <a-space>
-          <a-input v-model="pullImageName" placeholder="镜像名称" class="search-input-item" />
-          <a-button type="primary" @click="pullImage">拉取</a-button>
-        </a-space>
+
+        <a-input-search v-model="pullImageName" @search="pullImage" style="width: 260px" placeholder="要拉取的镜像名称" class="search-input-item">
+          <a-button slot="enterButton"> <a-icon type="cloud-download" /> </a-button>
+        </a-input-search>
+        <!-- <a-button type="primary" @click="pullImage">拉取</a-button> -->
       </template>
 
       <a-tooltip slot="repoTags" slot-scope="text" placement="topLeft" :title="(text || []).join(',')">
