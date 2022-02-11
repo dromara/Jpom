@@ -23,7 +23,7 @@
 6. 【server】本地构建命令 容器构建支持引用工作空间变量
 7. 【server】修复构建触发器无法执行（感谢@[老诗人](https://gitee.com/laoshirenggo) ）
 8. 【server】服务端脚本新增工作空间环境变量
-9. 修复检查 Jpom 包分发中没有释放 JarClassLoader 造成 ssh 安装节点无法正常使用问题（感谢@[大海](https://gitee.com/hasape) [Gitee issues I4T9L0](https://gitee.com/dromara/Jpom/issues/I4T9L0) ）
+9. 修复检查 Jpom 包中没有释放资源（感谢@[大海](https://gitee.com/hasape) [Gitee issues I4T9L0](https://gitee.com/dromara/Jpom/issues/I4T9L0) ）
 
 ------
 
