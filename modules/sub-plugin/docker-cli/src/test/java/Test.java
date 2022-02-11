@@ -65,9 +65,8 @@ public class Test {
 	private DockerClient dockerClient;
 	private String containerId;
 
-	@Before
-	public void before() {
-
+	//	@Before
+	public void beforeLocal() {
 		//
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -87,8 +86,30 @@ public class Test {
 				.build();
 		this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
 		dockerClient.pingCmd().exec();
+	}
 
+	@Before
+	public void before1() {
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+		logger.setLevel(Level.INFO);
 
+		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
+				// .withDockerHost("tcp://192.168.163.11:2376").build();
+//				.withApiVersion()
+				.withDockerTlsVerify(true)
+				.withDockerCertPath("/Users/user/fsdownload/docker-ca")
+				.withDockerHost("tcp://172.19.106.253:2375").build();
+
+		DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+				.dockerHost(config.getDockerHost())
+				.sslConfig(config.getSSLConfig())
+				.maxConnections(100)
+//				.connectionTimeout(Duration.ofSeconds(30))
+//				.responseTimeout(Duration.ofSeconds(45))
+				.build();
+		this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
+		dockerClient.pingCmd().exec();
 	}
 
 	@After
@@ -360,8 +381,8 @@ public class Test {
 		File dir = FileUtil.file("/Users/user/IdeaProjects/Jpom-demo-case/springboot-test-jar/");
 		BuildImageCmd buildImageCmd = dockerClient.buildImageCmd();
 		buildImageCmd
+				.withBaseDirectory(FileUtil.file(dir, "target/classes"))
 				.withDockerfile(FileUtil.file(dir, "Dockerfile"))
-				.withBaseDirectory(dir)
 //				.withQuiet()
 				.withTags(CollUtil.newHashSet("jpom-test2"));
 		buildImageCmd.exec(new InvocationBuilder.AsyncResultCallback<BuildResponseItem>() {
@@ -371,7 +392,11 @@ public class Test {
 			public void onNext(BuildResponseItem object) {
 				String stream = object.getStream();
 				if (stream == null) {
-					return;
+					String status = object.getStatus();
+					if (status == null) {
+						return;
+					}
+					System.out.print(StrUtil.format("{} {} {}", status, object.getId(), object.getProgressDetail()));
 				}
 				System.out.print(stream);
 			}
