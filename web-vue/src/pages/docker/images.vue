@@ -125,7 +125,10 @@ export default {
       renderSize,
       temp: {},
       rules: {
-        name: [{ required: true, message: "容器名称必填", trigger: "blur" }],
+        name: [
+          { required: true, message: "容器名称必填", trigger: "blur" },
+          { pattern: /[a-zA-Z0-9][a-zA-Z0-9_.-]$/, message: "容器名称数字字母,且长度大于1", trigger: "blur" },
+        ],
       },
       columns: [
         { title: "名称", dataIndex: "repoTags", ellipsis: true, scopedSlots: { customRender: "repoTags" } },
