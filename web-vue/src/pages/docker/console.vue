@@ -1,7 +1,7 @@
 <template>
   <a-layout class="docker-layout">
-    <a-layout-sider  width="100px" style="min-height: calc(100vh - 85px)">
-      <a-menu theme="light" mode="vertical-right" class="docker-menu" v-model="menuKeyArray" @click="menuClick">
+    <a-layout-sider width="100px" style="min-height: calc(100vh - 85px)">
+      <a-menu theme="light" mode="inline" class="docker-menu" v-model="menuKeyArray" @click="menuClick">
         <a-menu-item key="containers">
           <span class="nav-text">容器</span>
         </a-menu-item>
@@ -13,7 +13,8 @@
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
-    <a-layout :style="{ background: '#fff', padding: '0 5px' }" class="layout-content">
+    <!-- style="{ background: '#fff', padding: '10px' }"  -->
+    <a-layout class="layout-content">
       <!-- <a-layout-header :style="{ background: '#fff', padding: 0 }" /> -->
       <!-- :style="{ margin: '24px 16px 0' }" -->
       <a-layout-content>
@@ -55,7 +56,7 @@ export default {
 </script>
 <style scoped>
 .docker-layout {
-  background-color: #fff;
+  /* background-color: #fff; */
 }
 .docker-menu {
   height: 100%;
