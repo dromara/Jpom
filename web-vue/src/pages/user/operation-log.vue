@@ -22,6 +22,7 @@
     </div>
     <!-- 数据表格 -->
     <a-table
+      size="middle"
       :data-source="list"
       :columns="columns"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
@@ -90,7 +91,7 @@ export default {
       detailVisible: false,
       detailData: [],
       columns: [
-        { title: "操作者", dataIndex: "userId", width: 100 },
+        { title: "操作者", dataIndex: "userId" },
         { title: "IP", dataIndex: "ip" /*width: 130*/ },
         { title: "节点", dataIndex: "nodeId", width: 120, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "dataId" } },
@@ -105,7 +106,7 @@ export default {
           customRender: (text, item) => {
             return parseTime(text || item.optTime);
           },
-          width: 180,
+          width: 160,
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
       ],

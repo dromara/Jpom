@@ -80,6 +80,25 @@
     ]
   },
   {
+    "title": "在线构建",
+    "icon_v3": "build",
+    "id": "build",
+    "childs": [
+      {
+        "id": "repository",
+        "title": "仓库信息"
+      },
+      {
+        "id": "buildList",
+        "title": "构建列表"
+      },
+      {
+        "id": "buildHistory",
+        "title": "构建历史"
+      }
+    ]
+  },
+  {
     "title": "监控管理",
     "icon_v3": "monitor",
     "id": "monitor",
@@ -100,25 +119,6 @@
         "id": "monitorConfigEmail",
         "title": "邮箱配置",
         "role": "system"
-      }
-    ]
-  },
-  {
-    "title": "在线构建",
-    "icon_v3": "build",
-    "id": "build",
-    "childs": [
-      {
-        "id": "repository",
-        "title": "仓库信息"
-      },
-      {
-        "id": "buildList",
-        "title": "构建列表"
-      },
-      {
-        "id": "buildHistory",
-        "title": "构建历史"
       }
     ]
   },
