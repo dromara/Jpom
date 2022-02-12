@@ -89,6 +89,7 @@
               <a-space>
                 <a-icon
                   type="minus-circle"
+                  v-if="index > 0"
                   @click="
                     () => {
                       temp.exposedPorts.splice(index, 1);
@@ -124,6 +125,7 @@
               <a-space>
                 <a-icon
                   type="minus-circle"
+                  v-if="index > 0"
                   @click="
                     () => {
                       temp.volumes.splice(index, 1);
@@ -268,8 +270,9 @@ export default {
         this.temp = {
           volumes: [{}],
           exposedPorts: (res.data?.config?.exposedPorts || [{}]).map((item) => {
-            item.disabled = true;
+            item.disabled = item.port;
             item.ip = "0.0.0.0";
+            item.scheme = item.scheme || "tcp";
             return item;
           }),
           image: (record.repoTags || []).join(","),

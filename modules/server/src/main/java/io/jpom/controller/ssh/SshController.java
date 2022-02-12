@@ -146,7 +146,7 @@ public class SshController extends BaseServerController {
 		} else {
 			List<String> list = StrSplitter.splitTrim(fileDirs, StrUtil.LF, true);
 			for (String s : list) {
-				String normalize = FileUtil.normalize(s);
+				String normalize = FileUtil.normalize(s + StrUtil.SLASH);
 				int count = StrUtil.count(normalize, StrUtil.SLASH);
 				Assert.state(count >= 2, "ssh 授权目录不能是根目录");
 			}
