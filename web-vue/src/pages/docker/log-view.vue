@@ -1,7 +1,17 @@
 <template>
   <!-- console -->
   <div>
-    <log-view ref="logView" seg="" height="60vh" marginTop="-10px" />
+    <log-view ref="logView" seg="" height="60vh" marginTop="-10px">
+      <template slot="before">
+        <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,读取日志最后多少行日志。修改后需要回车才能重新读取，小于 1 则读取所有">
+          <a-input addonBefore="读取行数" style="width: 200px" v-model="tail" placeholder="读取行数" @pressEnter="initWebSocket">
+            <template slot="addonAfter">
+              <a-icon type="reload" @click="initWebSocket" />
+            </template>
+          </a-input>
+        </a-tooltip>
+      </template>
+    </log-view>
   </div>
 </template>
 <script>
@@ -23,6 +33,7 @@ export default {
   data() {
     return {
       socket: null,
+      tail: 500,
     };
   },
   computed: {
@@ -35,21 +46,28 @@ export default {
     this.initWebSocket();
   },
   beforeDestroy() {
-    if (this.socket) {
-      this.socket.close();
-    }
-    clearInterval(this.heart);
+    this.close();
   },
   methods: {
+    close() {
+      if (this.socket) {
+        this.socket.close();
+      }
+      clearInterval(this.heart);
+    },
     // 初始化
     initWebSocket() {
-      this.logContext = "";
+      this.close();
+      this.$refs.logView.clearLogCache();
+      //
+      let tail = parseInt(this.tail);
+      this.tail = isNaN(tail) ? 500 : tail;
+      //
       if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
         this.socket = new WebSocket(this.socketUrl);
       }
       // 连接成功后
       this.socket.onopen = () => {
-        // this.logContext = "connect success......\r\n";
         this.sendMsg("showlog");
       };
       this.socket.onerror = (err) => {
@@ -94,6 +112,7 @@ export default {
       const data = {
         op: op,
         containerId: this.containerId,
+        tail: this.tail,
       };
       this.socket.send(JSON.stringify(data));
     },
