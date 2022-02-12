@@ -177,7 +177,7 @@ apt install -y wget && \
 
 ### 容器化安装
 
-> ⚠️ 注意：容器化安装方式需要先安装docker
+> ⚠️ 注意：容器化安装方式需要先安装docker，[点击跳转docker安装文档](https://jpom.io/docs/#/%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/%E5%AE%89%E8%A3%85/%E5%AE%B9%E5%99%A8%E5%8C%96%E5%AE%89%E8%A3%85)
 
 ```
 docker pull jpomdocker/jpom
