@@ -598,6 +598,14 @@ export default {
               value: "mvn clean package -Dmaven.test.skip=true",
             },
             {
+              title: "打包生产环境包 mvn clean package -Dmaven.test.skip=true -Pprod",
+              value: "mvn clean package -Dmaven.test.skip=true -Pprod",
+            },
+            {
+              title: "打包测试环境包 mvn clean package -Dmaven.test.skip=true -Ptest",
+              value: "mvn clean package -Dmaven.test.skip=true -Ptest",
+            },
+            {
               title: "不执行，但是编译测试用例 mvn clean package -DskipTests",
               value: "mvn clean package -DskipTests",
             },
@@ -606,12 +614,12 @@ export default {
               value: "mvn clean package",
             },
             {
-              title: "指定 pom 文件打包 mvn -f xxxx/pom.xml clean package",
-              value: "mvn -f xxxx/pom.xml clean package",
+              title: "指定 pom 文件打包 mvn -f xxx/pom.xml clean package",
+              value: "mvn -f xxx/pom.xml clean package",
             },
             {
-              title: "指定 settings 文件打包 mvn -s xxxxx/settings.xml clean package",
-              value: "mvn -s script/settings.xml clean package",
+              title: "指定 settings 文件打包 mvn -s xxx/settings.xml clean package",
+              value: "mvn -s xxx/settings.xml clean package",
             },
           ],
         },
@@ -623,12 +631,20 @@ export default {
               value: "npm run build",
             },
             {
+              title: "打包正式环境 npm run build:prod",
+              value: "npm run build:prod",
+            },
+            {
+              title: "打包预发布环境 npm run build:stage",
+              value: "npm run build:stage",
+            },
+            {
               title: "yarn build",
               value: "yarn build",
             },
             {
-              title: "指定目录打包 yarn --cwd xxxx/build",
-              value: "yarn --cwd xxxx/build",
+              title: "指定目录打包 yarn --cwd xxx/build",
+              value: "yarn --cwd xxx/build",
             },
           ],
         },
