@@ -22,6 +22,7 @@
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
+      size="middle"
       :columns="columns"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       bordered
@@ -74,6 +75,7 @@ export default {
       detailVisible: false,
       detailData: [],
       columns: [
+        { title: "报警标题", dataIndex: "title", ellipsis: true, scopedSlots: { customRender: "title" } },
         { title: "节点名称", dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         { title: "项目 ID", dataIndex: "projectId", width: 100, ellipsis: true, scopedSlots: { customRender: "projectId" } },
         { title: "报警状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
@@ -84,10 +86,10 @@ export default {
           customRender: (text) => {
             return parseTime(text);
           },
-          width: 180,
+          width: 170,
         },
         { title: "通知状态", dataIndex: "notifyStatus", width: 100, ellipsis: true, scopedSlots: { customRender: "notifyStatus" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 50 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
     };
   },

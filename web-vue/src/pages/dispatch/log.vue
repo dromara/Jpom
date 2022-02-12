@@ -20,6 +20,7 @@
     </div>
     <!-- 数据表格 -->
     <a-table
+      size="middle"
       :data-source="list"
       :columns="columns"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
@@ -40,7 +41,7 @@
         {{ dispatchStatusMap[text] || "未知" }}
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleDetail(record)">详情</a-button>
+        <a-button type="primary" size="small" @click="handleDetail(record)">详情</a-button>
       </template>
     </a-table>
     <!-- 详情区 -->

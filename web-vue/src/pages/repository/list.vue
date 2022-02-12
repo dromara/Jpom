@@ -3,7 +3,7 @@
     <!-- 搜索区 -->
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
-    <a-table :columns="columns" :data-source="list" bordered rowKey="id" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" @change="changePage">
+    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" @change="changePage">
       <template slot="title">
         <a-space>
           <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="仓库名称" />
@@ -39,8 +39,8 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>

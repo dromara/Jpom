@@ -3,7 +3,7 @@
   <div class="full-content">
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
-    <a-table :columns="columns" :data-source="list" bordered rowKey="id" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" @change="changePage">
+    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" @change="changePage">
       <template slot="title">
         <a-space>
           <a-input allowClear class="search-input-item" v-model="listQuery['%name%']" placeholder="构建名称" />
