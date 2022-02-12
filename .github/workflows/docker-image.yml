@@ -17,5 +17,5 @@ jobs:
       - name: Build the Docker image
         run: |
           docker buildx create --use
-          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.8 -f ./modules/server/DockerfileRelease --push .
+          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.9 -f ./modules/server/DockerfileRelease --push .
           docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
