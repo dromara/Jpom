@@ -112,6 +112,16 @@ public class NodeClient extends WebSocketClient {
 		super.send(text);
 	}
 
+
+	@Override
+	public void close() {
+		try {
+			super.close();
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("关闭异常", e);
+		}
+	}
+
 	@Override
 	public void send(ByteBuffer bytes) {
 		super.send(bytes);

@@ -111,8 +111,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 			NodeClient nodeClient = clientMap.get(model.getId());
 			if (nodeClient != null) {
 				//
-				nodeClient.getVersion();
-				continue;
+				nodeClient.close();
 			}
 			Map<String, Object> attributes = session.getAttributes();
 			String url = NodeForward.getSocketUrl(model, NodeUrl.NodeUpdate, (UserModel) attributes.get("userInfo"));
