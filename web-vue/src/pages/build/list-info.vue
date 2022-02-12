@@ -594,8 +594,12 @@ export default {
           title: "Java 项目",
           children: [
             {
-              title: "跳过测试类打包 mvn clean package -Dmaven.test.skip=true",
+              title: "不执行，也不编译测试用例 mvn clean package -Dmaven.test.skip=true",
               value: "mvn clean package -Dmaven.test.skip=true",
+            },
+            {
+              title: "不执行，但是编译测试用例 mvn clean package -DskipTests",
+              value: "mvn clean package -DskipTests",
             },
             {
               title: "mvn clean package",
