@@ -38,10 +38,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.Session;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Type;
+import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.log.SshTerminalExecuteLog;
 import io.jpom.plugin.ClassFeature;
@@ -143,6 +145,14 @@ public class SshController extends BaseServerController {
 			sshModel.fileDirs(null);
 		} else {
 			List<String> list = StrSplitter.splitTrim(fileDirs, StrUtil.LF, true);
+			for (String s : list) {
+				String normalize = FileUtil.normalize(s);
+				int count = StrUtil.count(normalize, StrUtil.SLASH);
+				Assert.state(count >= 2, "ssh 授权目录不能是根目录");
+			}
+			//
+			UserModel userModel = getUser();
+			Assert.state(!userModel.isDemoUser(), PermissionInterceptor.DEMO_TIP);
 			sshModel.fileDirs(list);
 		}
 		sshModel.setHost(host);
