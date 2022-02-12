@@ -78,13 +78,13 @@ public class NginxController extends BaseAgentController {
 	 * @return json
 	 */
 	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String list(String whitePath, String name) {
+	public String list(String whitePath, String name, String showAll) {
 		boolean checkNgxDirectory = whitelistDirectoryService.checkNgxDirectory(whitePath);
 		Assert.state(checkNgxDirectory, "文件路径错误,非白名单路径");
 		if (StrUtil.isEmpty(name)) {
 			name = StrUtil.SLASH;
 		}
-		JSONArray array = nginxService.list(whitePath, name);
+		List<JSONObject> array = nginxService.list(whitePath, name, showAll);
 		return JsonMessage.getString(200, "", array);
 	}
 
@@ -122,6 +122,11 @@ public class NginxController extends BaseAgentController {
 //            setAttribute("data", jsonObject);
 	}
 
+	private void checkName(String name) {
+		Assert.hasText(name, "请填写文件名");
+		Assert.state(name.endsWith(".conf"), "文件后缀必须为\".conf\"");
+	}
+
 	/**
 	 * 新增或修改配置
 	 *
@@ -132,8 +137,7 @@ public class NginxController extends BaseAgentController {
 	 */
 	@RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String updateNgx(String name, String whitePath, String genre, String context) {
-		Assert.hasText(name, "请填写文件名");
-		Assert.state(name.endsWith(".conf"), "文件后缀必须为\".conf\"");
+		this.checkName(name);
 		//
 		boolean ngxDirectory = whitelistDirectoryService.checkNgxDirectory(whitePath);
 		Assert.state(ngxDirectory, "请选择正确的白名单");
@@ -237,18 +241,35 @@ public class NginxController extends BaseAgentController {
 	 * @return json
 	 */
 	@RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String delete(String path, String name) {
+	public String delete(String path, String name, String type, String from) {
 		if (!whitelistDirectoryService.checkNgxDirectory(path)) {
 			return JsonMessage.getString(400, "非法操作");
 		}
-		Assert.hasText(name, "请选择文件");
-
+		Assert.hasText(name, "请填写文件名");
+		if (StrUtil.equals(from, "back")) {
+			Assert.state(name.endsWith(".conf_back"), "不能操作此文件");
+		} else {
+			Assert.state(name.endsWith(".conf"), "文件后缀必须为\".conf\"");
+		}
 		File file = FileUtil.file(path, name);
-		try {
-			FileUtil.rename(file, file.getName() + "_back", false, true);
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("删除nginx", e);
-			return JsonMessage.getString(400, "删除失败:" + e.getMessage());
+		if (StrUtil.equals(type, "real")) {
+			// 真删除
+			FileUtil.del(file);
+		} else {
+			try {
+				if (StrUtil.equals(from, "back")) {
+					// 恢复  可能出现 所以 copy Read-only file system
+					File back = FileUtil.file(path, StrUtil.removeSuffix(name, "_back"));
+					FileUtil.copy(file, back, true);
+					FileUtil.del(file);
+				} else {
+					// 假删除
+					FileUtil.rename(file, file.getName() + "_back", false, true);
+				}
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("删除nginx", e);
+				return JsonMessage.getString(400, "操作失败:" + e.getMessage());
+			}
 		}
 		String msg = this.reloadNginx();
 		return JsonMessage.getString(200, "删除成功" + msg);
