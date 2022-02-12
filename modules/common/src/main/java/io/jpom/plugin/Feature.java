@@ -35,17 +35,31 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Feature {
 
-    /**
-     * 类
-     *
-     * @return ClassFeature
-     */
-    ClassFeature cls() default ClassFeature.NULL;
+	/**
+	 * 类
+	 *
+	 * @return ClassFeature
+	 */
+	ClassFeature cls() default ClassFeature.NULL;
 
-    /**
-     * 方法
-     *
-     * @return MethodFeature
-     */
-    MethodFeature method() default MethodFeature.NULL;
+	/**
+	 * 方法
+	 *
+	 * @return MethodFeature
+	 */
+	MethodFeature method() default MethodFeature.NULL;
+
+	/**
+	 * 只记录哪些 状态码
+	 *
+	 * @return code
+	 */
+	int[] resultCode() default {};
+
+	/**
+	 * 是否记录响应 日志
+	 *
+	 * @return 默认 记录
+	 */
+	boolean logResponse() default true;
 }

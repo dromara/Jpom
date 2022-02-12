@@ -24,6 +24,7 @@ package io.jpom.system.init;
 
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -45,6 +46,7 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.DbUserOperateLogService;
 import io.jpom.system.AopLogInterface;
 import io.jpom.system.WebAopLog;
+import lombok.Data;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -74,29 +76,31 @@ public class OperateLogController implements AopLogInterface {
 	}
 
 	private CacheInfo createCacheInfo(Method method) {
-		Feature methodFeature = method.getAnnotation(Feature.class);
-		if (methodFeature == null) {
+		Feature feature = method.getAnnotation(Feature.class);
+		if (feature == null) {
 			return null;
 		}
 		Class<?> declaringClass = method.getDeclaringClass();
-		MethodFeature feature = methodFeature.method();
-		if (feature == MethodFeature.NULL) {
+		MethodFeature methodFeature = feature.method();
+		if (methodFeature == MethodFeature.NULL) {
 			DefaultSystemLog.getLog().error("权限分发配置错误：{}  {}", declaringClass, method.getName());
 			return null;
 		}
-		ClassFeature cls = methodFeature.cls();
-		if (cls == null || cls == ClassFeature.NULL) {
-			Feature classFeature = declaringClass.getAnnotation(Feature.class);
-			if (classFeature == null || classFeature.cls() == ClassFeature.NULL) {
+		ClassFeature classFeature = feature.cls();
+		if (classFeature == null || classFeature == ClassFeature.NULL) {
+			Feature feature1 = declaringClass.getAnnotation(Feature.class);
+			if (classFeature == null || feature1.cls() == ClassFeature.NULL) {
 				DefaultSystemLog.getLog().error("权限分发配置错误：{}  {} class not find", declaringClass, method.getName());
 				return null;
 			}
-			cls = classFeature.cls();
+			classFeature = feature1.cls();
 		}
 		CacheInfo cacheInfo = new CacheInfo();
-		cacheInfo.classFeature = cls;
-		cacheInfo.methodFeature = feature;
-		cacheInfo.optTime = SystemClock.now();
+		cacheInfo.setClassFeature(classFeature);
+		cacheInfo.setMethodFeature(methodFeature);
+		cacheInfo.setOptTime(SystemClock.now());
+		cacheInfo.setResultCode(feature.resultCode());
+		cacheInfo.setLogResponse(feature.logResponse());
 		return cacheInfo;
 	}
 
@@ -191,9 +195,20 @@ public class OperateLogController implements AopLogInterface {
 				userOperateLogV1.setResultMsg(json);
 				try {
 					JsonMessage<String> jsonMessage = JSONObject.parseObject(json, JsonMessage.class);
-					userOperateLogV1.setOptStatus(jsonMessage.getCode());
+					int code = jsonMessage.getCode();
+					int[] resultCode = cacheInfo.getResultCode();
+					if (ArrayUtil.isNotEmpty(resultCode) && !ArrayUtil.contains(resultCode, code)) {
+						// 忽略
+						return;
+					}
+					userOperateLogV1.setOptStatus(code);
 				} catch (Exception ignored) {
 				}
+			}
+			// 判断是否记录响应日志
+			Boolean logResponse = cacheInfo.getLogResponse();
+			if (logResponse != null && !logResponse) {
+				userOperateLogV1.setResultMsg("*****");
 			}
 		}
 		//
@@ -239,6 +254,7 @@ public class OperateLogController implements AopLogInterface {
 	/**
 	 * 临时缓存
 	 */
+	@Data
 	public static class CacheInfo {
 		private Long optTime;
 		private String workspaceId;
@@ -249,41 +265,7 @@ public class OperateLogController implements AopLogInterface {
 		private String dataId;
 		private String userAgent;
 		private String reqData;
-
-		public void setOptTime(Long optTime) {
-			this.optTime = optTime;
-		}
-
-		public void setWorkspaceId(String workspaceId) {
-			this.workspaceId = workspaceId;
-		}
-
-		public void setClassFeature(ClassFeature classFeature) {
-			this.classFeature = classFeature;
-		}
-
-		public void setMethodFeature(MethodFeature methodFeature) {
-			this.methodFeature = methodFeature;
-		}
-
-		public void setIp(String ip) {
-			this.ip = ip;
-		}
-
-		public void setNodeModel(NodeModel nodeModel) {
-			this.nodeModel = nodeModel;
-		}
-
-		public void setDataId(String dataId) {
-			this.dataId = dataId;
-		}
-
-		public void setUserAgent(String userAgent) {
-			this.userAgent = userAgent;
-		}
-
-		public void setReqData(String reqData) {
-			this.reqData = reqData;
-		}
+		private int[] resultCode;
+		private Boolean logResponse;
 	}
 }
