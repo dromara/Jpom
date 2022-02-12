@@ -55,6 +55,14 @@ export default {
           }
           this.$refs.logView.appendLine(res.data.dataLines);
           this.line = res.data.line;
+        } else if (res.code !== 201) {
+          // 201 是当前构建且没有日志
+          this.$notification.warn({
+            message: res.msg,
+          });
+          clearInterval(this.logTimer);
+          next = false;
+          this.$refs.logView.appendLine(res.msg);
         }
         // 继续拉取日志
         if (next) this.nextPull();

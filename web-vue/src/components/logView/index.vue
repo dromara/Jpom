@@ -6,21 +6,28 @@
           <a-col :span="20">
             <a-space>
               <slot name="before"></slot>
-              <!-- <a-input-group compact style="width: 200px"> -->
-
-              <!-- <a-select  style="width: 100px">
-                <a-select-option value="true"> 自动滚动 </a-select-option>
-                <a-select-option value="false"> 关闭滚动 </a-select-option>
-              </a-select> -->
-
-              <!-- </a-input-group> -->
-              <a-tooltip title="关键词高亮,支持正则(正则可能影响性能请酌情使用): 【\d】【[A-Za-z0-9]+$】【[A-Za-z0-9]】【\w+ 可能出现乱码】">
-                <a-input addonBefore="高亮" placeholder="关键词高亮,支持正则" v-model="temp.searchValue" style="width: 360px" @pressEnter="onSearch">
-                  <template slot="addonAfter">
-                    <a-icon type="search" @click="onSearch" />
-                  </template>
+              <a-popover title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
+                <template slot="content">
+                  <ul>
+                    <li><b>.</b> - 除换行符以外的所有字符。</li>
+                    <li><b>^</b> - 字符串开头。</li>
+                    <li><b>$</b> - 字符串结尾。</li>
+                    <li><b>\d,\w,\s</b> - 匹配数字、字符、空格。</li>
+                    <li><b>\D,\W,\S</b> - 匹配非数字、非字符、非空格。</li>
+                    <li><b>[abc]</b> - 匹配 a、b 或 c 中的一个字母。</li>
+                    <li><b>[a-z]</b> - 匹配 a 到 z 中的一个字母。</li>
+                    <li><b>[^abc]</b> - 匹配除了 a、b 或 c 中的其他字母。</li>
+                    <li><b>aa|bb</b> - 匹配 aa 或 bb。</li>
+                  </ul>
+                </template>
+                <a-input addonBefore="正则:/" placeholder="关键词高亮,支持正则" v-model="temp.searchValue" style="width: 360px" @pressEnter="onSearch">
+                  <a-select slot="addonAfter" :value="'/' + this.regModifier" style="width: 80px">
+                    <div @mousedown="(e) => e.preventDefault()" slot="dropdownRender" style="width: 300px; padding: 10px; cursor: pointer; background-color: #fff; border-radius: 5px">
+                      <a-checkbox-group @change="regModifierChange" :value="regModifiers" :options="modifiers"> </a-checkbox-group>
+                    </div>
+                  </a-select>
                 </a-input>
-              </a-tooltip>
+              </a-popover>
               <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,限制只显示最后多少行日志。修改后需要回车才能生效">
                 <a-input addonBefore="行数" :min="1" style="width: 200px" :disabled="!this.temp.logScroll" v-model="temp.tempLogShowLine" placeholder="显示行数" @pressEnter="onSearch">
                   <template slot="addonAfter">
@@ -46,6 +53,17 @@
 <script>
 export default {
   name: "LogView",
+  components: {
+    // VNodes: {
+    //   functional: true,
+    //   render: (h, ctx) => ctx.props.vnodes,
+    // },
+  },
+  computed: {
+    regModifier() {
+      return this.regModifiers.join("");
+    },
+  },
   props: {
     seg: {
       String,
@@ -65,6 +83,25 @@ export default {
       regReplaceText: "<b style='color:red'>$1</b>",
       regRemove: /<b[^>]*>([^>]*)<\/b[^>]*>/gi,
       searchReg: null,
+      regModifiers: ["i", "g"],
+      modifiers: [
+        {
+          label: "ignore - 不区分大小写",
+          value: "i",
+        },
+        {
+          label: "global - 全局匹配",
+          value: "g",
+        },
+        {
+          label: "multi line - 多行匹配",
+          value: "m",
+        },
+        {
+          label: "特殊字符圆点 . 中包含换行符 \n",
+          value: "s",
+        },
+      ],
       // 日志内容
       logContextArray: [],
       temp: {
@@ -81,17 +118,28 @@ export default {
   },
   mounted() {
     this.id = this.defId + new Date().getTime();
-    // let html = "<b style='color:OrangeRed;'>222</b>";
-    // console.log(html.replace(this.regRemove, "$1"));
+    // let html = "<b><b style='color:OrangeRed;'>222</b></b>";
+    // console.log(html.replace(this.regRemove, "$1").replace(this.regRemove, "$1"));
   },
   methods: {
+    regModifierChange(checkedValues) {
+      if (!checkedValues.length) {
+        this.$notification.warn({
+          message: "修饰符至少选择一个",
+        });
+        return;
+      }
+      this.regModifiers = checkedValues;
+    },
+
+    //
     appendLine(data) {
       if (!data) {
         return;
       }
       const dataArray = Array.isArray(data) ? data : [data];
       dataArray.forEach((item) => {
-        item = item.replace(/[<>"&]/g, function (match) {
+        item = item.replace(/[<>&]/g, function (match) {
           //  pos, originalText
           switch (match) {
             case "<":
@@ -134,7 +182,8 @@ export default {
       this.temp.logShowLine = logShowLineTemp;
       this.temp.tempLogShowLine = logShowLineTemp;
       //
-      this.searchReg = this.temp.searchValue ? new RegExp("(" + this.temp.searchValue + ")", "ig") : null;
+      // console.log(this.regModifier);
+      this.searchReg = this.temp.searchValue ? new RegExp("(" + this.temp.searchValue + ")", this.regModifier) : null;
       // console.log(this.searchReg);
       this.logContextArray = this.logContextArray.map((item) => this.lineFormat(item));
       this.$nextTick(() => {
@@ -155,9 +204,9 @@ export default {
       if (this.searchReg) {
         item = item.replace(this.searchReg, this.regReplaceText);
       }
-      if (item.match(/error/i) || item.match(/Exception/i)) {
+      if (item.match(/error|Exception/i)) {
         item = "<b style='color:OrangeRed'>" + item + "</b>";
-      } else if (item.match(/WARNING/i) || item.match(/failed/i)) {
+      } else if (item.match(/WARNING|failed/i)) {
         item = "<b style='color:orange'>" + item + "</b>";
       }
       // item = "<li>" + item + "</li>";
