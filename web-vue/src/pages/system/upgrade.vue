@@ -3,69 +3,62 @@
     <a-tabs type="card" default-active-key="1">
       <a-tab-pane key="1" tab="服务端"> <upgrade></upgrade></a-tab-pane>
       <a-tab-pane key="2" tab="所有节点(插件端)" force-render>
-        <a-space direction="vertical" size="middle">
-          <a-row>
-            <div>
-              <a-space>
-                <a-input class="search-input-item" v-model="listQuery['%id%']" placeholder="节点ID" />
-                <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
-                <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
-                <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
-                  <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
-                </a-select>
-                <a-button :loading="loading" type="primary" @click="refresh">搜索</a-button>
-              </a-space>
-            </div>
-          </a-row>
+        <a-table
+          :columns="columns"
+          :data-source="listComputed"
+          bordered
+          size="middle"
+          rowKey="id"
+          class="table"
+          :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+          @change="changePage"
+          :row-selection="rowSelection"
+        >
+          <template slot="title">
+            <a-space>
+              <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
+              <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
+              <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+                <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+              </a-select>
+              <a-button :loading="loading" type="primary" @click="refresh">搜索</a-button>
 
-          <a-table
-            :columns="columns"
-            :data-source="listComputed"
-            bordered
-            rowKey="id"
-            class="table"
-            :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
-            @change="changePage"
-            :row-selection="rowSelection"
-          >
-            <template slot="title">
-              <a-space>
-                <a-select v-model="temp.protocol" placeholder="升级协议" class="search-input-item">
-                  <a-select-option value="WebSocket">WebSocket</a-select-option>
-                  <a-select-option value="Http">Http</a-select-option>
-                </a-select>
-                <a-button type="primary" @click="batchUpdate">批量更新</a-button>
-                |
-                <a-upload name="file" accept=".jar,.zip" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
-                  <a-button type="primary">
-                    <a-icon type="upload" />
-                    新版本
-                  </a-button>
-                </a-upload>
-                <div>
-                  Agent版本：{{ agentVersion | version }}
-                  <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} </a-tag>
-                </div>
-                <div>打包时间：{{ agentTimeStamp | version }}</div>
-              </a-space>
-            </template>
-            <template slot="version" slot-scope="text">
-              {{ text | version }}
-            </template>
-            <template slot="status" slot-scope="text">
-              <div class="restarting" v-if="text && text.type === 'restarting'">
-                <a-tooltip :title="text.data"> {{ text.data }} </a-tooltip>
-              </div>
-              <div class="uploading" v-if="text && text.type === 'uploading'">
-                <div class="text">{{ text.percent === 100 ? "上传成功" : "正在上传文件" }}</div>
-                <a-progress :percent="text.percent" />
-              </div>
-            </template>
-            <template slot="operation" slot-scope="text, record">
-              <a-button type="primary" @click="updateNodeHandler(record)">更新</a-button>
-            </template>
-          </a-table>
-        </a-space>
+              <a-select v-model="temp.protocol" placeholder="升级协议" class="search-input-item">
+                <a-select-option value="WebSocket">WebSocket</a-select-option>
+                <a-select-option value="Http">Http</a-select-option>
+              </a-select>
+              <a-button type="primary" @click="batchUpdate">批量更新</a-button>
+              |
+              <a-upload name="file" accept=".jar,.zip" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+                <a-button type="primary">
+                  <a-icon type="upload" />
+                  新版本
+                </a-button>
+              </a-upload>
+              <a-tooltip :title="`打包时间：${agentTimeStamp || '未知'}`">
+                Agent版本：{{ agentVersion | version }}
+                <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} </a-tag>
+                <!-- </div> -->
+              </a-tooltip>
+              <!-- 打包时间：{{ agentTimeStamp | version }}</div> -->
+            </a-space>
+          </template>
+          <template slot="version" slot-scope="text">
+            {{ text | version }}
+          </template>
+          <template slot="status" slot-scope="text">
+            <div class="restarting" v-if="text && text.type === 'restarting'">
+              <a-tooltip :title="text.data"> {{ text.data }} </a-tooltip>
+            </div>
+            <div class="uploading" v-if="text && text.type === 'uploading'">
+              <div class="text">{{ text.percent === 100 ? "上传成功" : "正在上传文件" }}</div>
+              <a-progress :percent="text.percent" />
+            </div>
+          </template>
+          <template slot="operation" slot-scope="text, record">
+            <a-button type="primary" size="small" @click="updateNodeHandler(record)">更新</a-button>
+          </template>
+        </a-table>
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -106,7 +99,7 @@ export default {
         { title: "打包时间", dataIndex: "timeStamp", ellipsis: true, scopedSlots: { customRender: "timeStamp" } },
         { title: "状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
         // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true, scopedSlots: {customRender: 'autoUpdate'}},
-        { title: "操作", dataIndex: "operation", width: 120, scopedSlots: { customRender: "operation" }, align: "left" },
+        { title: "操作", dataIndex: "operation", width: 90, scopedSlots: { customRender: "operation" }, align: "center" },
       ],
       nodeVersion: {},
       nodeStatus: {},
