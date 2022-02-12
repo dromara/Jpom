@@ -27,11 +27,13 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
+import com.github.dockerjava.api.command.LogContainerCmd;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.Frame;
 import io.jpom.util.LogRecorder;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,12 +47,27 @@ import java.util.function.Consumer;
  */
 public class DockerClientUtil {
 
-	public static void pullLog(DockerClient dockerClient, String containerId, Charset charset, Consumer<String> consumer) throws InterruptedException {
+	/**
+	 * 拉取容器日志
+	 *
+	 * @param dockerClient 连接
+	 * @param containerId  容器ID
+	 * @param charset      字符编码
+	 * @param consumer     回调
+	 * @throws InterruptedException 打断异常
+	 */
+	public static void pullLog(DockerClient dockerClient, String containerId, Integer tail, Charset charset, Consumer<String> consumer) throws InterruptedException {
+		Assert.state(tail == null || tail > 0, "tail > 0");
 		// 获取日志
-		dockerClient.logContainerCmd(containerId)
+		LogContainerCmd logContainerCmd = dockerClient.logContainerCmd(containerId);
+		if (tail == null) {
+			logContainerCmd.withTailAll();
+		} else {
+			logContainerCmd.withTail(tail);
+		}
+		logContainerCmd
 				.withStdOut(true)
 				.withStdErr(true)
-				.withTailAll()
 				.withFollowStream(true)
 				.exec(new ResultCallback.Adapter<Frame>() {
 					@Override

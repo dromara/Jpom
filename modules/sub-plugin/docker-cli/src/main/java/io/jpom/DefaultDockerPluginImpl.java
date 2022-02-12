@@ -246,8 +246,8 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 		try {
 			String containerId = (String) parameter.get("containerId");
 			Charset charset = (Charset) parameter.get("charset");
-
-			DockerClientUtil.pullLog(dockerClient, containerId, charset, consumer);
+			Integer tail = (Integer) parameter.get("tail");
+			DockerClientUtil.pullLog(dockerClient, containerId, tail, charset, consumer);
 		} catch (InterruptedException e) {
 			consumer.accept("获取容器日志被中断:" + e);
 		} finally {

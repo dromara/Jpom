@@ -78,6 +78,10 @@ public class DockerLogHandler extends BaseProxyHandler {
 			String containerId = json.getString("containerId");
 			Map<String, Object> map = dockerInfoModel.toParameter();
 			map.put("containerId", containerId);
+			int tail = json.getIntValue("tail");
+			if (tail > 0) {
+				map.put("tail", tail);
+			}
 			Consumer<String> consumer = s -> {
 				try {
 					SocketSessionUtil.send(session, s);
