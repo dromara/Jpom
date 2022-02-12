@@ -44,6 +44,9 @@ import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.dto.UserLoginDto;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfigBean;
@@ -66,6 +69,7 @@ import java.util.concurrent.TimeUnit;
  * @author Administrator
  */
 @RestController
+@Feature(cls = ClassFeature.USER)
 public class LoginControl extends BaseServerController {
 	/**
 	 * ip 黑名单
@@ -151,6 +155,7 @@ public class LoginControl extends BaseServerController {
 	 */
 	@PostMapping(value = "userLogin", produces = MediaType.APPLICATION_JSON_VALUE)
 	@NotLogin
+	@Feature(method = MethodFeature.EXECUTE, resultCode = {200, 201}, logResponse = false)
 	public String userLogin(
 			@ValidatorConfig(value = {
 					@ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
@@ -206,6 +211,8 @@ public class LoginControl extends BaseServerController {
 				if (updateModel != null) {
 					userService.update(updateModel);
 				}
+				// 用于记录登录日志
+				BaseServerController.resetInfo(userModel);
 			}
 		}
 	}
