@@ -5,8 +5,8 @@
     <a-layout-sider theme="light" class="sider" width="25%">
       <div class="dir-container">
         <a-space>
-          <a-button type="primary" @click="loadData">刷新目录</a-button>
-          <a-button type="primary" v-if="showConsole" @click="goConsole" v-show="noFileModes.includes(runMode)">控制台</a-button>
+          <a-button size="small" type="primary" @click="loadData">刷新目录</a-button>
+          <a-button size="small" type="primary" v-if="showConsole" @click="goConsole" v-show="noFileModes.includes(runMode)">控制台</a-button>
         </a-space>
       </div>
 
@@ -14,30 +14,30 @@
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
-      <div ref="filter" class="filter">
-        <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
-        <a-space>
-          <a-tooltip title="上传文件">
-            <a-button type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleUpload"><a-icon type="upload" /></a-button>
-          </a-tooltip>
-          <a-tooltip title="上传压缩包并自动解压">
-            <a-button type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleZipUpload"><a-icon type="upload" /><a-icon type="file-zip" /></a-button>
-          </a-tooltip>
-          <a-tooltip title="通过 URL 下载远程文件到项目文件夹,需要到节点系统配置->白名单配置中配置允许的 HOST 白名单">
-            <a-button type="primary" @click="openRemoteUpload"><a-icon type="cloud-download" /></a-button>
-          </a-tooltip>
-          <a-tooltip title="刷新文件表格">
-            <a-button type="primary" @click="loadFileList"><a-icon type="reload" /></a-button>
-          </a-tooltip>
-          <a-tooltip title="清空当前目录文件">
-            <a-button type="danger" @click="clearFile"><a-icon type="delete" /></a-button>
-          </a-tooltip>
+      <a-table :data-source="fileList" size="middle" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+        <template slot="title">
+          <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
+          <a-space>
+            <a-tooltip title="上传文件">
+              <a-button size="small" type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleUpload"><a-icon type="upload" /></a-button>
+            </a-tooltip>
+            <a-tooltip title="上传压缩包并自动解压">
+              <a-button size="small" type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleZipUpload"><a-icon type="upload" /><a-icon type="file-zip" /></a-button>
+            </a-tooltip>
+            <a-tooltip title="通过 URL 下载远程文件到项目文件夹,需要到节点系统配置->白名单配置中配置允许的 HOST 白名单">
+              <a-button size="small" type="primary" @click="openRemoteUpload"><a-icon type="cloud-download" /></a-button>
+            </a-tooltip>
+            <a-tooltip title="刷新文件表格">
+              <a-button size="small" type="primary" @click="loadFileList"><a-icon type="reload" /></a-button>
+            </a-tooltip>
+            <a-tooltip title="清空当前目录文件">
+              <a-button size="small" type="danger" @click="clearFile"><a-icon type="delete" /></a-button>
+            </a-tooltip>
 
-          <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || "" }}</a-tag>
-          <div>文件名栏支持右键菜单</div>
-        </a-space>
-      </div>
-      <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+            <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || "" }}</a-tag>
+            <div>文件名栏支持右键菜单</div>
+          </a-space>
+        </template>
         <a-tooltip slot="filename" slot-scope="text, record" placement="topLeft" :title="text">
           <a-dropdown :trigger="['contextmenu']">
             <span>{{ text }}</span>

@@ -4,6 +4,7 @@
     <a-table
       :data-source="projList"
       :columns="columns"
+      size="middle"
       bordered
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       @change="changePage"
