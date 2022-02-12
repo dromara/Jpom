@@ -113,7 +113,7 @@
               <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPrv" placeholder="私钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
             </a-tooltip>
           </a-form-model-item>
-          <!-- 公钥暂时没用用到 -->
+          <!-- 公钥暂时没用到 -->
           <a-form-model-item label="公钥" prop="rsaPub" v-if="false">
             <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
           </a-form-model-item>

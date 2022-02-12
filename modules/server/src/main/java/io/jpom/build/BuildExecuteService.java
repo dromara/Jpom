@@ -114,7 +114,7 @@ public class BuildExecuteService {
 	/**
 	 * check status
 	 *
-	 * @param status 状态吗
+	 * @param status 状态码
 	 * @return 错误消息
 	 */
 	public String checkStatus(Integer status) {
