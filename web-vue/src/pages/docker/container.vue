@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-table :data-source="list" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" size="middle" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['name']" @keyup.enter="loadData" placeholder="名称" class="search-input-item" />
@@ -14,9 +14,15 @@
         </a-space>
       </template>
 
-      <a-tooltip slot="names" slot-scope="text" placement="topLeft" :title="(text || []).join(',')">
+      <a-popover :title="`容器名称：${(text || []).join(',')}`" slot="names" slot-scope="text, record">
+        <template slot="content">
+          <p>容器Id: {{ record.id }}</p>
+          <p>镜像：{{ record.image }}</p>
+          <p>镜像Id: {{ record.imageId }}</p>
+        </template>
+
         <span>{{ (text || []).join(",") }}</span>
-      </a-tooltip>
+      </a-popover>
 
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -115,12 +121,13 @@ export default {
       logVisible: false,
       temp: {},
       columns: [
+        { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "名称", dataIndex: "names", ellipsis: true, scopedSlots: { customRender: "names" } },
         { title: "容器ID", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
-        { title: "镜像", dataIndex: "image", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "镜像ID", dataIndex: "imageId", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
+        // { title: "镜像", dataIndex: "image", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "镜像ID", dataIndex: "imageId", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
         { title: "端口", dataIndex: "ports", ellipsis: true, width: 150, scopedSlots: { customRender: "ports" } },
-        { title: "状态", dataIndex: "state", ellipsis: true, width: 90, scopedSlots: { customRender: "state" } },
+        { title: "状态", dataIndex: "state", ellipsis: true, align: "center", width: 90, scopedSlots: { customRender: "state" } },
         {
           title: "创建时间",
           dataIndex: "created",
