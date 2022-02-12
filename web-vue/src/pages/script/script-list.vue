@@ -1,33 +1,33 @@
 <template>
   <div class="node-full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
-        <a-input v-model="listQuery['%description%']" placeholder="描述" class="search-input-item" />
-        <a-input v-model="listQuery['%autoExecCron%']" placeholder="定时执行" class="search-input-item" />
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-button type="primary" @click="createScript">新建脚本</a-button>
-
-        <a-tooltip>
-          <template slot="title">
-            <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
-
-            <div>
-              <ul>
-                <li>执行时候默认不加载全部环境变量、需要脚本里面自行加载</li>
-                <li>命令文件将在 ${数据目录}/script/xxxx.sh、bat 执行</li>
-                <li>分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本,一般用户节点分发功能中的 DSL 模式</li>
-              </ul>
-            </div>
-          </template>
-          <a-icon type="question-circle" theme="filled" />
-        </a-tooltip>
-      </a-space>
-    </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" bordered rowKey="id">
+      <template slot="title">
+        <a-space>
+          <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+          <a-input v-model="listQuery['%description%']" placeholder="描述" class="search-input-item" />
+          <a-input v-model="listQuery['%autoExecCron%']" placeholder="定时执行" class="search-input-item" />
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="createScript">新建脚本</a-button>
+
+          <a-tooltip>
+            <template slot="title">
+              <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
+
+              <div>
+                <ul>
+                  <li>执行时候默认不加载全部环境变量、需要脚本里面自行加载</li>
+                  <li>命令文件将在 ${数据目录}/script/xxxx.sh、bat 执行</li>
+                  <li>分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本,一般用户节点分发功能中的 DSL 模式</li>
+                </ul>
+              </div>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip>
+        </a-space>
+      </template>
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -270,7 +270,4 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
-  margin-bottom: 10px;
-}
 </style>

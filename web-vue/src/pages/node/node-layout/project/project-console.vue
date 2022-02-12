@@ -17,16 +17,21 @@
     <log-view :ref="`logView`" height="calc(100vh - 140px)">
       <template slot="before">
         <a-space>
-          <a-button :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
-          <a-button :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
-          <a-button :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
+          <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">启动</a-button>
+          <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="restart">重启</a-button>
+          <a-button size="small" :disabled="!project.status" :loading="optButtonLoading" type="danger" @click="stop">停止</a-button>
 
-          <a-button v-if="!copyId" type="primary" @click="goFile">文件管理</a-button>
-
-          <a-tag v-if="project.logSize"> 文件大小: {{ project.logSize }}</a-tag>
+          <a-button size="small" v-if="!copyId" type="primary" @click="goFile">文件管理</a-button>
 
           <a-dropdown>
-            <a-button type="link" class="ant-dropdown-link"> 更多<a-icon type="down" /> </a-button>
+            <!-- <a type="link" class="ant-dropdown-link"> 更多<a-icon type="down" /> </a> -->
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              <a-tag>
+                文件大小: {{ project.logSize || "-" }}
+                <!-- 更多 -->
+                <a-icon type="down" />
+              </a-tag>
+            </a>
             <a-menu slot="overlay">
               <a-menu-item>
                 <a-button type="primary" :disabled="!project.logSize" @click="handleDownload">导出日志</a-button>

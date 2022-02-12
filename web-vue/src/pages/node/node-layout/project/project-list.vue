@@ -1,41 +1,9 @@
 <template>
   <div class="node-full-content">
-    <div ref="filter" class="filter">
-      <!-- <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="loadData">
-        <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-      </a-select> -->
-      <a-space>
-        <a-input class="search-input-item" v-model="listQuery['%projectId%']" placeholder="项目ID" />
-        <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="项目名称" />
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-button type="primary" @click="handleAdd">新增</a-button>
-
-        <a-dropdown>
-          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-            批量操作
-            <a-icon type="down" />
-          </a>
-          <a-menu slot="overlay">
-            <a-menu-item>
-              <a-button type="primary" @click="batchStart">批量启动</a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-button type="primary" @click="batchRestart">批量重启</a-button>
-            </a-menu-item>
-            <a-menu-item>
-              <a-button type="danger" @click="batchStop">批量关闭</a-button>
-            </a-menu-item>
-          </a-menu>
-        </a-dropdown>
-      </a-space>
-
-      状态数据是异步获取有一定时间延迟
-    </div>
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
+      size="middle"
       :columns="columns"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       @change="changePage"
@@ -43,14 +11,47 @@
       bordered
       :rowKey="(record, index) => index"
     >
+      <template slot="title">
+        <!-- <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="loadData">
+        <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+      </a-select> -->
+        <a-space>
+          <a-input class="search-input-item" v-model="listQuery['%projectId%']" placeholder="项目ID" />
+          <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="项目名称" />
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleAdd">新增</a-button>
+
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              批量操作
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" @click="batchStart">批量启动</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="primary" @click="batchRestart">批量重启</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="danger" @click="batchStop">批量关闭</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </a-space>
+
+        状态数据是异步获取有一定时间延迟
+      </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="`名称：${text}`">
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="time" slot-scope="text, record" placement="topLeft">
         <a-tooltip :title="`创建时间：${parseTime(record.createTimeMillis)}，${record.modifyTimeMillis ? '修改时间：' + parseTime(record.modifyTimeMillis) : ''}`">
-          <span>{{ parseTime(record.modifyTimeMillis) }}</span
-          ><br />
-          <span>{{ parseTime(record.createTimeMillis) }}</span>
+          <span>{{ parseTime(record.modifyTimeMillis) }}</span>
+          <!-- <br /> -->
+          <!-- <span>{{ parseTime(record.createTimeMillis) }}</span> -->
         </a-tooltip>
       </template>
       <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
@@ -68,9 +69,9 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleFile(record)">文件</a-button>
+          <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
           <a-tooltip :title="`${noFileModes.includes(record.runMode) ? '到控制台去管理项目状态' : 'File 类型项目不能使用控制台功能'}`">
-            <a-button type="primary" @click="handleConsole(record)" :disabled="!noFileModes.includes(record.runMode)">控制台</a-button>
+            <a-button size="small" type="primary" @click="handleConsole(record)" :disabled="!noFileModes.includes(record.runMode)">控制台</a-button>
           </a-tooltip>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
@@ -407,20 +408,21 @@ export default {
       batchVisible: false,
       batchTitle: "",
       columns: [
-        { title: "项目名称", dataIndex: "name", sorter: true, width: 60, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "修改/创建时间", sorter: true, dataIndex: "modifyTimeMillis", width: 90, ellipsis: true, scopedSlots: { customRender: "time" } },
+        { title: "项目名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "运行方式", dataIndex: "runMode", sorter: true, width: 90, ellipsis: true, align: "center", scopedSlots: { customRender: "runMode" } },
+        { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: 170, ellipsis: true, scopedSlots: { customRender: "time" } },
 
         {
           title: "最后操作人",
           dataIndex: "modifyUser",
-          width: 60,
+          width: 100,
           ellipsis: true,
           sorter: true,
           scopedSlots: { customRender: "modifyUser" },
         },
-        { title: "运行状态", dataIndex: "status", width: 50, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "端口/PID", dataIndex: "port", width: 50, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 110 },
+        { title: "运行状态", dataIndex: "status", width: 80, ellipsis: true, align: "center", scopedSlots: { customRender: "status" } },
+        { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 180 },
       ],
       rules: {
         id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
@@ -450,7 +452,7 @@ export default {
     rowSelection() {
       return {
         onChange: this.onSelectChange,
-        columnWidth: "25px",
+        columnWidth: "40px",
         getCheckboxProps: this.getCheckboxProps,
         selectedRowKeys: this.selectedRowKeys,
         // hideDefaultSelections: true,
@@ -933,10 +935,6 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
-  margin-bottom: 10px;
-}
-
 .btn-add {
   margin-left: 10px;
   margin-right: 0;

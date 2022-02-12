@@ -1,28 +1,28 @@
 <template>
   <div class="node-full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
-        <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
-          <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
-        </a-select>
-        <a-range-picker
-          v-model="listQuery['createTimeMillis']"
-          allowClear
-          inputReadOnly
-          class="search-input-item"
-          :show-time="{ format: 'HH:mm:ss' }"
-          :placeholder="['执行时间开始', '执行时间结束']"
-          format="YYYY-MM-DD HH:mm:ss"
-          valueFormat="YYYY-MM-DD HH:mm:ss"
-        />
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-        </a-tooltip>
-      </a-space>
-    </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" bordered rowKey="id">
+    <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" bordered rowKey="id">
+      <template slot="title">
+        <a-space>
+          <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+          <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
+            <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
+          </a-select>
+          <a-range-picker
+            v-model="listQuery['createTimeMillis']"
+            allowClear
+            inputReadOnly
+            class="search-input-item"
+            :show-time="{ format: 'HH:mm:ss' }"
+            :placeholder="['执行时间开始', '执行时间结束']"
+            format="YYYY-MM-DD HH:mm:ss"
+            valueFormat="YYYY-MM-DD HH:mm:ss"
+          />
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          </a-tooltip>
+        </a-space>
+      </template>
       <a-tooltip slot="scriptName" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -37,9 +37,9 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="viewLog(record)">查看日志</a-button>
+          <a-button type="primary" size="small" @click="viewLog(record)">查看日志</a-button>
 
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
@@ -77,7 +77,7 @@ export default {
         { title: "执行时间", dataIndex: "createTimeMillis", sorter: true, ellipsis: true, scopedSlots: { customRender: "createTimeMillis" } },
         { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
         { title: "执行人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 200 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 150 },
       ],
     };
   },
@@ -156,8 +156,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-.filter {
-  margin-bottom: 10px;
-}
-</style>
+<style scoped></style>
