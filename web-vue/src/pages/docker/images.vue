@@ -33,7 +33,7 @@
       </a-tooltip>
 
       <a-tooltip slot="id" slot-scope="text" :title="text">
-        <span> {{ text.split(":")[1].slice(0, 12) }}</span>
+        <span> {{ text && text.split(":")[1].slice(0, 12) }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
@@ -187,7 +187,8 @@ export default {
       columns: [
         { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "名称", dataIndex: "repoTags", ellipsis: true, scopedSlots: { customRender: "repoTags" } },
-        { title: "镜像ID", dataIndex: "id", ellipsis: true, width: 150, scopedSlots: { customRender: "id" } },
+        { title: "镜像ID", dataIndex: "id", ellipsis: true, width: 140, align: "center", scopedSlots: { customRender: "id" } },
+        { title: "父级ID", dataIndex: "parentId", ellipsis: true, width: 140, align: "center", scopedSlots: { customRender: "id" } },
         { title: "占用空间", dataIndex: "size", ellipsis: true, width: 120, scopedSlots: { customRender: "size" } },
         {
           title: "创建时间",

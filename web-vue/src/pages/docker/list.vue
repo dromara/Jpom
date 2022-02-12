@@ -86,7 +86,15 @@
         <a-form-model-item label="标签" prop="tagInput">
           <template v-for="tag in temp.tagsArray">
             <a-tooltip :key="tag" :title="tag">
-              <a-tag :key="tag" :closable="true" @close="() => handleClose(tag)">
+              <a-tag
+                :key="tag"
+                :closable="true"
+                @close="
+                  () => {
+                    this.temp.tagsArray = this.temp.tagsArray.filter((tag) => tag !== removedTag);
+                  }
+                "
+              >
                 {{ `${tag}` }}
               </a-tag>
             </a-tooltip>
@@ -265,11 +273,13 @@ export default {
             }
           });
         } else {
-          this.temp.tags = (this.temp.tagsArray || []).join(",");
-          delete this.temp.tagsArray;
-          delete this.temp.inputVisible;
-          delete this.temp.tagInput;
-          editDocker(this.temp).then((res) => {
+          const temp = Object.assign({}, this.temp);
+
+          temp.tags = (temp.tagsArray || []).join(",");
+          delete temp.tagsArray;
+          delete temp.inputVisible;
+          delete temp.tagInput;
+          editDocker(temp).then((res) => {
             if (res.code === 200) {
               // 成功
               this.$notification.success({
@@ -315,9 +325,7 @@ export default {
       }
       this.loadData();
     },
-    handleClose(removedTag) {
-      this.temp.tagsArray = this.temp.tagsArray.filter((tag) => tag !== removedTag);
-    },
+    // handleClose(removedTag) {},
     showInput() {
       this.temp = { ...this.temp, inputVisible: true };
       this.$nextTick(function () {
