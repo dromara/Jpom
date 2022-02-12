@@ -6,6 +6,7 @@
       :columns="columns"
       :data-source="list"
       bordered
+      size="middle"
       rowKey="id"
       @expand="expand"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
@@ -45,29 +46,53 @@
               </div>
             </template>
             <a-icon type="question-circle" theme="filled" />
-          </a-tooltip> </a-space
-      ></template>
-      <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
+          </a-tooltip>
+        </a-space>
+      </template>
+      <a-tooltip slot="url" slot-scope="text, record" placement="topLeft" :title="text">
+        <span>{{ record.protocol }}://{{ text }}</span>
       </a-tooltip>
       <template slot="name" slot-scope="text, record">
-        <a-tooltip title="我在这里" :visible="showOptVisible[record.id]">
-          <span>{{ text }}</span>
-        </a-tooltip>
+        <template v-if="record.unLockType">
+          <a-tooltip :title="`${text}`">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="record.openStatus !== 1">
+          <a-tooltip :title="`${text}`">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else>
+          <template v-if="showOptVisible[record.id]">
+            <a-tooltip title="我在这里" :visible="showOptVisible[record.id]" @click="handleNode(record)">
+              <a-button type="link" style="padding: 0px" size="small">
+                <a-icon type="fullscreen" /><span>{{ text }}</span>
+              </a-button>
+            </a-tooltip>
+          </template>
+          <template v-else>
+            <a-tooltip :title="`${text} 点击进入节点管理`" @click="handleNode(record)">
+              <a-button type="link" style="padding: 0px" size="small">
+                <a-icon type="fullscreen" /><span>{{ text }}</span>
+              </a-button>
+            </a-tooltip>
+          </template>
+        </template>
       </template>
-      <a-tooltip slot="cycle" slot-scope="text" placement="topLeft" :title="nodeMonitorCycle[text]">
+      <!-- <a-tooltip slot="cycle" slot-scope="text" placement="topLeft" :title="nodeMonitorCycle[text]">
         <span>{{ nodeMonitorCycle[text] }}</span>
-      </a-tooltip>
+      </a-tooltip> -->
       <template slot="operation" slot-scope="text, record">
         <a-tooltip title="我在这里" :visible="showOptVisible[record.id]">
           <a-space>
-            <a-button v-if="record.unLockType" type="primary" @click="unlock(record)"><a-icon type="unlock" />解锁</a-button>
+            <a-button size="small" v-if="record.unLockType" type="primary" @click="unlock(record)"><a-icon type="unlock" />解锁</a-button>
 
             <a-tooltip v-else title="如果按钮不可用则表示当前节点已经关闭啦,需要去编辑中启用">
-              <a-button class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />管理</a-button>
+              <a-button size="small" class="jpom-node-manage-btn" type="primary" @click="handleNode(record)" :disabled="record.openStatus !== 1"><a-icon type="apartment" />管理</a-button>
             </a-tooltip>
             <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
-              <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
+              <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
             </a-tooltip>
             <a-dropdown>
               <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
@@ -95,7 +120,18 @@
         </a-tooltip>
       </template>
       <!-- 嵌套表格 -->
-      <a-table slot="expandedRowRender" slot-scope="text" :loading="childLoading" :columns="childColumns" :data-source="text.children" :pagination="false" :rowKey="(record, index) => text.id + index">
+      <!-- <template slot="expandIcon" slot-scope="text" v-if="text.record.openStatus === 1"> <a-icon type="plus" /></template> -->
+
+      <a-table
+        size="middle"
+        :loading="childLoading"
+        :columns="childColumns"
+        slot="expandedRowRender"
+        slot-scope="text"
+        :data-source="text.children"
+        :pagination="false"
+        :rowKey="(record, index) => text.id + index"
+      >
         <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
@@ -123,6 +159,7 @@
         </template>
       </a-table>
     </a-table>
+
     <!-- 编辑区 -->
     <a-modal v-model="editNodeVisible" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
       <a-form-model ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
@@ -388,9 +425,9 @@ export default {
         // { title: "节点 ID", dataIndex: "id", sorter: true, key: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "节点名称", dataIndex: "name", sorter: true, key: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
 
-        { title: "节点协议", dataIndex: "protocol", sorter: true, key: "protocol", width: 100, ellipsis: true, scopedSlots: { customRender: "protocol" } },
+        // { title: "节点协议", dataIndex: "protocol", sorter: true, key: "protocol", width: 100, ellipsis: true, scopedSlots: { customRender: "protocol" } },
         { title: "节点地址", dataIndex: "url", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
-        { title: "账号", dataIndex: "loginName", sorter: true, key: "loginName", ellipsis: true, scopedSlots: { customRender: "loginName" } },
+        { title: "账号", dataIndex: "loginName", sorter: true, width: 150, key: "loginName", ellipsis: true, scopedSlots: { customRender: "loginName" } },
         // { title: "监控周期", dataIndex: "cycle", sorter: true, key: "cycle", ellipsis: true, scopedSlots: { customRender: "cycle" } },
         { title: "超时时间", dataIndex: "timeOut", sorter: true, key: "timeOut", width: 100, ellipsis: true },
         {
@@ -403,7 +440,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", key: "operation", width: 270, scopedSlots: { customRender: "operation" }, align: "left" },
+        { title: "操作", dataIndex: "operation", key: "operation", width: 210, scopedSlots: { customRender: "operation" }, align: "center" },
       ],
       childColumns: [
         { title: "系统名", dataIndex: "osName", key: "osName", width: 100, ellipsis: true, scopedSlots: { customRender: "osName" } },

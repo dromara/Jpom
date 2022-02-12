@@ -104,7 +104,9 @@ public abstract class BaseServerController extends BaseJpomController {
 	}
 
 	protected UserModel getUser() {
-		return getUserByThreadLocal();
+		UserModel userByThreadLocal = getUserByThreadLocal();
+		Assert.notNull(userByThreadLocal, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE + StrUtil.EMPTY);
+		return userByThreadLocal;
 	}
 
 	/**
@@ -113,9 +115,7 @@ public abstract class BaseServerController extends BaseJpomController {
 	 * @return 用户
 	 */
 	public static UserModel getUserByThreadLocal() {
-		UserModel userModel = USER_MODEL_THREAD_LOCAL.get();
-		Assert.notNull(userModel, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE + StrUtil.EMPTY);
-		return userModel;
+		return USER_MODEL_THREAD_LOCAL.get();
 	}
 
 	public static void removeAll() {
