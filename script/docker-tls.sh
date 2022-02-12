@@ -6,12 +6,12 @@
 # -------------------------------------------------------------
 # 以下是配置信息
 # --[BEGIN]------------------------------
-
 NOW_PATH=$(cd `dirname $0`; pwd)"/"
 echo "当前目录：${NOW_PATH} 证书文件将保存在此文件夹下"
-read -p "请输入证书使用的IP地址或者 HOST: " HOST
+read -p "请输入证书使用的 IP 地址或者 HOST: " HOST
 #
 echo "您输入的是：${HOST} 证书只能在这个 IP 或者 HOST 下使用,证书密码和输入的一致"
+# --[INIT PARAMETER]------------------------------
 PASSWORD="$HOST"
 COUNTRY="CN"
 STATE="$HOST"
@@ -37,10 +37,11 @@ openssl x509 -req -days 365 -sha256 -in server.csr -passin "pass:$PASSWORD" -CA 
 rm -f extfile.cnf
 openssl genrsa -out "key.pem" 4096
 openssl req -subj '/CN=client' -new -key "key.pem" -out client.csr
-echo extendedKeyUsage = clientAuth >> extfile.cnf
+echo "extendedKeyUsage = clientAuth" >> extfile.cnf
 openssl x509 -req -days 365 -sha256 -in client.csr -passin "pass:$PASSWORD" -CA "ca.pem" -CAkey "ca-key.pem" -CAcreateserial -out "cert.pem" -extfile extfile.cnf
 rm -f client.csr server.csr ca.srl extfile.cnf
 
+# check
 if [ -f "${NOW_PATH}key.pem" -a -f "${NOW_PATH}ca.pem" -a -f "${NOW_PATH}ca-key.pem" -a -f "${NOW_PATH}server-cert.pem" -a -f "${NOW_PATH}server-key.pem" ]; then
 	echo "证书生成完成"
 	echo "客户端使用文件：key.pem ca.pem cert.pem"
