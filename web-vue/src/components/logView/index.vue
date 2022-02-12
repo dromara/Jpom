@@ -14,8 +14,8 @@
               </a-select> -->
 
               <!-- </a-input-group> -->
-              <a-tooltip title="关键词高亮,支持正则: 【\d】【\w】">
-                <a-input addonBefore="高亮" placeholder="关键词高亮,支持正则" v-model="temp.searchValue" style="width: 400px" @pressEnter="onSearch">
+              <a-tooltip title="关键词高亮,支持正则(正则可能影响性能请酌情使用): 【\d】【[A-Za-z0-9]+$】【[A-Za-z0-9]】【\w+ 可能出现乱码】">
+                <a-input addonBefore="高亮" placeholder="关键词高亮,支持正则" v-model="temp.searchValue" style="width: 360px" @pressEnter="onSearch">
                   <template slot="addonAfter">
                     <a-icon type="search" @click="onSearch" />
                   </template>
@@ -62,7 +62,8 @@ export default {
   },
   data() {
     return {
-      regReplaceText: "<b style='color:red;'>$1</b>",
+      regReplaceText: "<b style='color:red'>$1</b>",
+      regRemove: /<b[^>]*>([^>]*)<\/b[^>]*>/gi,
       searchReg: null,
       // 日志内容
       logContextArray: [],
@@ -80,6 +81,8 @@ export default {
   },
   mounted() {
     this.id = this.defId + new Date().getTime();
+    // let html = "<b style='color:OrangeRed;'>222</b>";
+    // console.log(html.replace(this.regRemove, "$1"));
   },
   methods: {
     appendLine(data) {
@@ -147,14 +150,15 @@ export default {
       return projectConsole;
     },
     lineFormat(item) {
-      item = item.replace(/<b[^>]*>([^>]*)<\/b[^>]*>/gi, "$1");
-      if (item.match(/error/i) || item.match(/Exception/i)) {
-        item = "<b style='color:#ff4d4f;'>" + item + "</b>";
-      } else if (item.match(/WARNING/i) || item.match(/failed/i)) {
-        item = "<b style='color:orange;'>" + item + "</b>";
-      }
+      // console.log(item.match(this.regRemove), item.replace(this.regRemove, "$1"));
+      item = item.replace(this.regRemove, "$1").replace(this.regRemove, "$1");
       if (this.searchReg) {
         item = item.replace(this.searchReg, this.regReplaceText);
+      }
+      if (item.match(/error/i) || item.match(/Exception/i)) {
+        item = "<b style='color:OrangeRed'>" + item + "</b>";
+      } else if (item.match(/WARNING/i) || item.match(/failed/i)) {
+        item = "<b style='color:orange'>" + item + "</b>";
       }
       // item = "<li>" + item + "</li>";
       // console.log(item);
