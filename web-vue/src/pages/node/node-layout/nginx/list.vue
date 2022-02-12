@@ -12,8 +12,13 @@
       <a-table size="middle" :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
         <template slot="title">
           <a-space>
-            <a-button size="small" type="primary" @click="handleAdd">新增配置</a-button>
+            <div>
+              查询：
+              <a-switch v-model="listData.showAll" checked-children="显示所有" un-checked-children="显示正常" />
+            </div>
             <a-button size="small" type="primary" @click="handleFilter">刷新</a-button>
+            <a-button size="small" type="primary" @click="handleAdd">新增配置</a-button>
+            ｜
             <a-switch v-model="nginxData.status" checked-children="运行中" un-checked-children="未运行" disabled />
             <a-dropdown>
               <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
@@ -52,9 +57,10 @@
           </a-space>
         </template>
         <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}  server 节点数 ${record.serverCount}`">
-          <div @click="handleEdit(record)" style="color: blue">
+          <div @click="handleEdit(record)" :style="`${record.name.endsWith('.conf') ? 'color: blue' : ''}`">
+            <a-icon v-if="record.name.endsWith('.conf')" type="edit" />
+            <a-icon v-else type="eye" />
             <span>{{ text }}</span>
-            <a-icon type="edit" />
           </div>
         </a-tooltip>
         <!-- <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
@@ -71,7 +77,20 @@
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
           <!-- <a-button type="primary" @click="handleEdit(record)">编辑</a-button> -->
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-popover title="删除确认" v-if="record.name.endsWith('.conf')">
+            <template slot="content">
+              <p><a-button size="small" type="danger" @click="handleDelete(record, 'temp', 'none')">临时删除</a-button></p>
+              <p><a-button size="small" type="danger" @click="handleDelete(record, 'real', 'none')">永久删除</a-button></p>
+            </template>
+            <a-button size="small" type="danger">删除</a-button>
+          </a-popover>
+          <a-popover title="还原" v-else>
+            <template slot="content">
+              <p><a-button size="small" type="danger" @click="handleDelete(record, 'temp', 'back')">还原配置</a-button></p>
+              <p><a-button size="small" type="danger" @click="handleDelete(record, 'real', 'back')">永久删除</a-button></p>
+            </template>
+            <a-button size="small" type="danger">还原</a-button>
+          </a-popover>
         </template>
       </a-table>
       <!-- 编辑区 -->
@@ -103,17 +122,7 @@
   </a-layout>
 </template>
 <script>
-import {
-  getNginxDirectoryList,
-  getNginxFileList,
-  editNginxConfig,
-  deleteNginxConfig,
-  loadNginxWhiteList,
-  loadNginxConfig,
-  loadNginxData,
-  doNginxCommand,
-  editNginxServerName,
-} from "../../../../api/node-nginx";
+import { getNginxDirectoryList, getNginxFileList, editNginxConfig, deleteNginxConfig, loadNginxWhiteList, loadNginxConfig, loadNginxData, doNginxCommand, editNginxServerName } from "@/api/node-nginx";
 
 import codeEditor from "@/components/codeEditor";
 
@@ -135,7 +144,10 @@ export default {
       nginxData: {},
       temp: {},
       tempNode: {},
-      tableHeight: "80vh",
+      listData: {
+        showAll: false,
+      },
+      // tableHeight: "80vh",
       editNginxVisible: false,
       editNginxNameVisible: false,
       defaultProps: {
@@ -227,6 +239,7 @@ export default {
         nodeId: this.node.id,
         whitePath: this.tempNode.whitePath,
         name: this.tempNode.path,
+        showAll: this.listData.showAll,
       };
       // 加载文件
       getNginxFileList(params).then((res) => {
@@ -298,10 +311,16 @@ export default {
       });
     },
     // 删除
-    handleDelete(record) {
+    handleDelete(record, type, from) {
+      let msg;
+      if (from === "back") {
+        msg = "真的要" + (type === "real" ? "永久删除文件么？" : "还原配置文件么？");
+      } else {
+        msg = "真的要" + (type === "real" ? "永久" : "临时") + "删除文件么？";
+      }
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除文件么？",
+        content: msg,
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -310,6 +329,8 @@ export default {
             nodeId: this.node.id,
             path: record.path,
             name: record.relativePath,
+            type: type,
+            from: from,
           };
           // 删除
           deleteNginxConfig(params).then((res) => {
