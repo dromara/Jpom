@@ -116,9 +116,20 @@
       </a-form-model>
     </a-modal>
     <!-- 控制台 -->
-    <a-modal v-model="consoleVisible" :title="`${temp.name} 控制台`" width="90vw" :footer="null" :maskClosable="false">
+    <!-- <a-modal v-model="consoleVisible"  width="90vw" :footer="null" :maskClosable="false"> -->
+    <a-drawer
+      :title="`${temp.name} 控制台`"
+      placement="right"
+      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
+      :visible="consoleVisible"
+      @close="
+        () => {
+          this.consoleVisible = false;
+        }
+      "
+    >
       <console v-if="consoleVisible" :id="temp.id"></console>
-    </a-modal>
+    </a-drawer>
   </div>
 </template>
 <script>
@@ -126,6 +137,7 @@ import { dockerList, apiVersions, editDocker, editDockerByFile, deleteDcoker } f
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { parseTime } from "@/utils/time";
 import Console from "./console";
+import { mapGetters } from "vuex";
 export default {
   components: {
     Console,
@@ -174,6 +186,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["getCollapsed"]),
     pagination() {
       return {
         total: this.listQuery.total,

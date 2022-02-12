@@ -44,10 +44,14 @@
           <a-button size="small" type="link" @click="doAction(record, 'start')"> <a-icon type="play-circle" /></a-button>
         </a-tooltip>
         -->
-          <a-tooltip title="创建镜像">
+          <a-tooltip title="使用当前镜像创建一个容器">
             <a-button size="small" type="link" @click="createContainer(record)"><a-icon type="select" /></a-button>
           </a-tooltip>
-          <a-tooltip title="删除">
+          <a-tooltip title="更新镜像">
+            <a-button size="small" type="link" :disabled="!record.repoTags" @click="tryPull(record)"><a-icon type="cloud-download" /></a-button>
+          </a-tooltip>
+
+          <a-tooltip title="删除镜像">
             <a-button size="small" type="link" @click="doAction(record, 'remove')"><a-icon type="delete" /></a-button>
           </a-tooltip>
         </a-space>
@@ -202,7 +206,7 @@ export default {
           },
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 90 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 120 },
       ],
       action: {
         remove: {
@@ -256,7 +260,17 @@ export default {
         },
       });
     },
-
+    tryPull(record) {
+      const repoTags = record?.repoTags[0];
+      if (!repoTags) {
+        this.$notification.error({
+          message: "镜像名称不正确 不能更新",
+        });
+        return;
+      }
+      this.pullImageName = repoTags;
+      this.pullImage();
+    },
     // 构建镜像
     createContainer(record) {
       dockerImageInspect({
