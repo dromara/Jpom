@@ -1,5 +1,5 @@
 <template>
-  <a-table :data-source="list" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+  <a-table size="middle" :data-source="list" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
     <template slot="title">
       <a-space>
         <a-input v-model="listQuery['name']" @keyup.enter="loadData" placeholder="名称" class="search-input-item" />
@@ -63,6 +63,7 @@ export default {
       },
       renderSize,
       columns: [
+        { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "挂载点", dataIndex: "mountpoint", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "类型", dataIndex: "driver", ellipsis: true, width: 80, scopedSlots: { customRender: "tooltip" } },

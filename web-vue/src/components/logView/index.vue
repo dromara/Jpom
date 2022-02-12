@@ -3,39 +3,43 @@
     <div class="log-filter">
       <template>
         <a-row type="flex">
-          <a-col :span="22">
+          <a-col :span="20">
             <a-space>
               <slot name="before"></slot>
               <!-- <a-input-group compact style="width: 200px"> -->
-              滚动方式：
-              <a-select v-model="temp.logScroll" style="width: 100px">
+
+              <!-- <a-select  style="width: 100px">
                 <a-select-option value="true"> 自动滚动 </a-select-option>
                 <a-select-option value="false"> 关闭滚动 </a-select-option>
-              </a-select>
-              <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,限制只显示最后多少行日志">
-                <a-input-number :min="1" style="width: 100px" v-model="temp.logShowLine" placeholder="显示行数" @pressEnter="onSearch">
-                  <template slot="addonAfter">
-                    <a-icon type="swap" />
-                  </template>
-                </a-input-number>
-              </a-tooltip>
+              </a-select> -->
+
               <!-- </a-input-group> -->
-              <a-tooltip title="关键词高亮,支持正则">
-                <a-input placeholder="关键词高亮" v-model="temp.searchValue" style="width: 200px" @pressEnter="onSearch">
+              <a-tooltip title="关键词高亮,支持正则: 【\d】【\w】">
+                <a-input addonBefore="高亮" placeholder="关键词高亮,支持正则" v-model="temp.searchValue" style="width: 400px" @pressEnter="onSearch">
                   <template slot="addonAfter">
-                    <a-icon type="search" />
+                    <a-icon type="search" @click="onSearch" />
+                  </template>
+                </a-input>
+              </a-tooltip>
+              <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,限制只显示最后多少行日志。修改后需要回车才能生效">
+                <a-input addonBefore="行数" :min="1" style="width: 200px" :disabled="!this.temp.logScroll" v-model="temp.tempLogShowLine" placeholder="显示行数" @pressEnter="onSearch">
+                  <template slot="addonAfter">
+                    <a-icon type="swap" @click="onSearch" />
                   </template>
                 </a-input>
               </a-tooltip>
             </a-space>
           </a-col>
-          <a-col :span="2" style="text-align: right">
-            <a-button type="link" style="padding: 0" @click="clearLogCache" icon="delete"> 清空 </a-button>
+          <a-col :span="4" style="text-align: right">
+            <a-space>
+              <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" />
+              <a-button type="link" style="padding: 0" @click="clearLogCache" icon="delete"> 清空 </a-button>
+            </a-space>
           </a-col>
         </a-row>
       </template>
     </div>
-    <pre class="log-view" :id="this.id" :style="`height:${this.height}`">{{ defText }}</pre>
+    <pre class="log-view" :id="`${this.id}`" :style="`height:${this.height}`">{{ defText }}</pre>
   </div>
 </template>
 
@@ -63,8 +67,9 @@ export default {
       // 日志内容
       logContextArray: [],
       temp: {
-        logScroll: "true",
+        logScroll: true,
         logShowLine: 500,
+        tempLogShowLine: 500,
         searchValue: "",
       },
       defLogShowLine: 500,
@@ -96,53 +101,64 @@ export default {
               return "&quot;";
           }
         });
-        // console.log(item);
-        if (this.searchReg) {
-          this.logContextArray.push(item.replace(this.searchReg, this.regReplaceText));
-        } else {
-          this.logContextArray.push(item);
-        }
+        this.logContextArray.push(this.lineFormat(item));
       });
 
-      let logShowLineTemp = parseInt(this.temp.logShowLine);
-      logShowLineTemp = isNaN(logShowLineTemp) ? this.defLogShowLine : logShowLineTemp;
-      logShowLineTemp = logShowLineTemp > 0 ? logShowLineTemp : 1;
-      if (this.temp.logScroll === "true") {
-        this.logContextArray = this.logContextArray.slice(-logShowLineTemp);
+      //console.log(this.temp.logScroll);
+      if (this.temp.logScroll) {
+        this.logContextArray = this.logContextArray.slice(-this.temp.logShowLine);
       }
 
       // 自动滚动到底部
       this.$nextTick(() => {
+        this.toHtml();
         const projectConsole = document.getElementById(this.id);
         if (!projectConsole) {
           return;
         }
-        projectConsole.innerHTML = this.logContextArray.join(this.seg);
-        if (this.temp.logScroll === "true") {
-          setTimeout(() => {
-            projectConsole.scrollTop = projectConsole.scrollHeight;
-          }, 100);
+        // console.log("111");
+        if (this.temp.logScroll) {
+          projectConsole.scrollTop = projectConsole.scrollHeight;
         }
       });
     },
     // 搜索
     onSearch() {
+      //
+      let logShowLineTemp = parseInt(this.temp.tempLogShowLine);
+      logShowLineTemp = isNaN(logShowLineTemp) ? this.defLogShowLine : logShowLineTemp;
+      logShowLineTemp = logShowLineTemp > 0 ? logShowLineTemp : 1;
+      this.temp.logShowLine = logShowLineTemp;
+      this.temp.tempLogShowLine = logShowLineTemp;
+      //
       this.searchReg = this.temp.searchValue ? new RegExp("(" + this.temp.searchValue + ")", "ig") : null;
       // console.log(this.searchReg);
-      this.logContextArray = this.logContextArray.map((item) => {
-        item = item.replace(/<b[^>]*>([^>]*)<\/b[^>]*>/gi, "$1");
-        if (this.searchReg) {
-          item = item.replace(this.searchReg, this.regReplaceText);
-        }
-        return item;
-      });
+      this.logContextArray = this.logContextArray.map((item) => this.lineFormat(item));
       this.$nextTick(() => {
-        const projectConsole = document.getElementById(this.id);
-        if (!projectConsole) {
-          return;
-        }
-        projectConsole.innerHTML = this.logContextArray.join(this.seg) || this.defText;
+        this.toHtml();
       });
+    },
+    toHtml() {
+      const projectConsole = document.getElementById(this.id);
+      if (!projectConsole) {
+        return;
+      }
+      projectConsole.innerHTML = this.logContextArray.join(this.seg) || this.defText;
+      return projectConsole;
+    },
+    lineFormat(item) {
+      item = item.replace(/<b[^>]*>([^>]*)<\/b[^>]*>/gi, "$1");
+      if (item.match(/error/i) || item.match(/Exception/i)) {
+        item = "<b style='color:#ff4d4f;'>" + item + "</b>";
+      } else if (item.match(/WARNING/i) || item.match(/failed/i)) {
+        item = "<b style='color:orange;'>" + item + "</b>";
+      }
+      if (this.searchReg) {
+        item = item.replace(this.searchReg, this.regReplaceText);
+      }
+      // item = "<li>" + item + "</li>";
+      // console.log(item);
+      return item;
     },
     clearLogCache() {
       this.logContextArray = [];

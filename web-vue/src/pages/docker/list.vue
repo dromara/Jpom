@@ -137,8 +137,8 @@ export default {
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "host", dataIndex: "host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "状态", dataIndex: "status", ellipsis: true, width: 90, scopedSlots: { customRender: "status" } },
-        { title: "TLS 认证", dataIndex: "tlsVerify", width: 90, ellipsis: true, scopedSlots: { customRender: "tlsVerify" } },
+        { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: 90, scopedSlots: { customRender: "status" } },
+        { title: "TLS 认证", dataIndex: "tlsVerify", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "tlsVerify" } },
         { title: "证书状态", dataIndex: "certExist", width: 90, ellipsis: true, scopedSlots: { customRender: "certExist" } },
         { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "最后修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
