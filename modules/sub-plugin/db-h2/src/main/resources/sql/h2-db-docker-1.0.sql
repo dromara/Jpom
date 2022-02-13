@@ -21,6 +21,34 @@ CREATE TABLE IF NOT EXISTS PUBLIC.DOCKER_INFO
 comment on table DOCKER_INFO is 'docker 信息';
 
 ALTER TABLE DOCKER_INFO
-	ADD IF NOT EXISTS tags VARCHAR(255) comment '容器标签Ï';
+	ADD IF NOT EXISTS tags VARCHAR(255) comment '容器标签';
+
+ALTER TABLE DOCKER_INFO
+	ADD IF NOT EXISTS swarmId VARCHAR(50) comment '集群ID';
+
+ALTER TABLE DOCKER_INFO
+	ADD IF NOT EXISTS swarmNodeId VARCHAR(50) comment '集群 节点ID';
+
+-- docker swarm
+CREATE TABLE IF NOT EXISTS PUBLIC.DOCKER_SWARM_INFO
+(
+	id               VARCHAR(50)  not null comment 'id',
+	createTimeMillis BIGINT COMMENT '数据创建时间',
+	modifyTimeMillis BIGINT COMMENT '数据修改时间',
+	modifyUser       VARCHAR(50) comment '修改人',
+	strike           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId      varchar(50)  not null comment '所属工作空间',
+	name             varchar(255) not null comment '名称',
+	dockerId         VARCHAR(50)  not null COMMENT 'docker Id',
+	swarmId          VARCHAR(50)  not null COMMENT 'swarm Id',
+	swarmCreatedAt   BIGINT COMMENT '数据创建时间',
+	swarmUpdatedAt   BIGINT COMMENT '数据创建时间',
+	tag              VARCHAR(255) comment '容器标签',
+	CONSTRAINT DOCKER_SWARM_INFO_PK PRIMARY KEY (id)
+);
+comment on table DOCKER_SWARM_INFO is 'docker 集群信息';
+
+ALTER TABLE DOCKER_SWARM_INFO
+	ADD IF NOT EXISTS nodeAddr VARCHAR(100) comment '集群 节点地址';
 
 

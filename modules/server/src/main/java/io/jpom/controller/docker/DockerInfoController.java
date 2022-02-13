@@ -238,4 +238,13 @@ public class DockerInfoController extends BaseServerController {
 		}
 		return JsonMessage.getString(200, "删除成功");
 	}
+
+	@GetMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String info(@ValidatorItem String id) throws Exception {
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+		JSONObject info = plugin.execute("info", dockerInfoModel.toParameter(), JSONObject.class);
+		return JsonMessage.getString(200, "", info);
+	}
 }

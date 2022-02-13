@@ -1,8 +1,5 @@
 <template>
-  <div class="node-full-content">
-    <!-- <div ref="filter" class="filter">
-     
-    </div> -->
+  <div class="full-content">
     <!-- 数据表格 -->
     <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="listQuery.total / listQuery.limit > 1 ? pagination : false" bordered :rowKey="(record, index) => index">
       <template slot="title">
@@ -12,7 +9,7 @@
           <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">添加 Docker</a-button>
+          <a-button type="primary" @click="handleAdd">添加</a-button>
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -28,12 +25,12 @@
       </template>
 
       <a-tooltip slot="tlsVerify" slot-scope="text, record" placement="topLeft" :title="record.tlsVerify ? '开启 TLS 认证' : '关闭 TLS 认证'">
-        <a-switch v-model="record.tlsVerify" :disabled="true" checked-children="开" un-checked-children="关" />
+        <a-switch size="small" v-model="record.tlsVerify" :disabled="true" checked-children="开" un-checked-children="关" />
       </a-tooltip>
 
       <template slot="status" slot-scope="text, record">
-        <a-tooltip :title="record.failureMsg || ''">
-          <a-switch :checked="parseInt(record.status) === 1" :disabled="true">
+        <a-tooltip :title="`${parseInt(record.status) === 1 ? '运行中' : record.failureMsg || ''}`">
+          <a-switch size="small" :checked="parseInt(record.status) === 1" :disabled="true">
             <a-icon slot="checkedChildren" type="check-circle" />
             <a-icon slot="unCheckedChildren" type="warning" />
           </a-switch>
@@ -42,10 +39,33 @@
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" :disabled="parseInt(record.status) !== 1" @click="handleConsole(record)">控制台</a-button>
-          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <!--
-          <a-button type="primary" @click="handleTemplate(record)">模板</a-button> -->
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+          <template v-if="!record.swarmId && parseInt(record.status) === 1">
+            <a-popover title="集群操作">
+              <template slot="content">
+                <p><a-button size="small" type="primary" @click="initSwarm(record)">创建集群</a-button></p>
+                <p><a-button size="small" type="primary" @click="joinSwarm(record)">加入集群</a-button></p>
+              </template>
+              <a-button size="small" type="primary">集群</a-button>
+            </a-popover>
+          </template>
+          <template v-else>
+            <a-tooltip>
+              <a-tooltip :title="`${parseInt(record.status) !== 1 ? '已经离线' : '已经创建过集群啦'}`">
+                <a-button size="small" disabled type="primary">集群</a-button>
+              </a-tooltip>
+            </a-tooltip>
+          </template>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+              </a-menu-item>
+            </a-menu></a-dropdown
+          >
         </a-space>
       </template>
     </a-table>
@@ -61,11 +81,11 @@
         <a-form-model-item label="host" prop="host">
           <a-input v-model="temp.host" placeholder="容器地址 tcp://127.0.0.1:2375" />
         </a-form-model-item>
-        <a-form-model-item label="接口版本" prop="apiVersion">
+        <!-- <a-form-model-item label="接口版本" prop="apiVersion">
           <a-select show-search option-filter-prop="children" v-model="temp.apiVersion" allowClear placeholder="接口版本">
             <a-select-option v-for="item in apiVersions" :key="item.version">{{ item.webVersion }}</a-select-option>
           </a-select>
-        </a-form-model-item>
+        </a-form-model-item> -->
         <a-form-model-item label="TLS 认证" prop="tlsVerify">
           <a-row>
             <a-col :span="5">
@@ -115,8 +135,54 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 创建集群 -->
+    <a-modal v-model="initSwarmVisible" title="创建 Docker 集群" @ok="handleSwarm" :maskClosable="false">
+      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+        <a-form-model-item label="集群名称" prop="name">
+          <a-input v-model="temp.name" placeholder="容器名称" />
+        </a-form-model-item>
+
+        <a-form-model-item label="标签" prop="tag"><a-input v-model="temp.tag" placeholder="关联容器标签" /> </a-form-model-item>
+      </a-form-model>
+    </a-modal>
+    <!-- 加入集群 -->
+    <a-modal v-model="joinSwarmVisible" title="加入 Docker 集群" @ok="handleSwarmJoin" :maskClosable="false">
+      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+        <a-form-model-item label="选择集群" prop="swarmId">
+          <a-select
+            show-search
+            option-filter-prop="children"
+            @change="
+              (v) => {
+                let temp = this.swarmList.filter((item) => {
+                  return item.id === v;
+                });
+                if (temp.length) {
+                  this.temp = { ...this.temp, remoteAddr: temp[0].nodeAddr };
+                } else {
+                  this.temp = { ...this.temp, remoteAddr: '' };
+                }
+              }
+            "
+            v-model="temp.swarmId"
+            allowClear
+            placeholder="加入到哪个集群"
+          >
+            <a-select-option v-for="item in swarmList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+
+        <a-form-model-item v-if="temp.remoteAddr" label="集群IP" prop="remoteAddr"><a-input v-model="temp.remoteAddr" placeholder="关联容器标签" /> </a-form-model-item>
+
+        <a-form-model-item label="角色" prop="role">
+          <a-radio-group name="role" v-model="temp.role">
+            <a-radio value="worker"> 工作节点</a-radio>
+            <a-radio value="manager"> 管理节点 </a-radio>
+          </a-radio-group>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
     <!-- 控制台 -->
-    <!-- <a-modal v-model="consoleVisible"  width="90vw" :footer="null" :maskClosable="false"> -->
     <a-drawer
       :title="`${temp.name} 控制台`"
       placement="right"
@@ -135,6 +201,7 @@
 <script>
 import { dockerList, apiVersions, editDocker, editDockerByFile, deleteDcoker } from "@/api/docker-api";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { initDockerSwarm, dockerSwarmListAll, joinDockerSwarm } from "@/api/docker-swarm";
 import { parseTime } from "@/utils/time";
 import Console from "./console";
 import { mapGetters } from "vuex";
@@ -154,14 +221,17 @@ export default {
       editVisible: false,
       templateVisible: false,
       consoleVisible: false,
+      initSwarmVisible: false,
+      joinSwarmVisible: false,
+      swarmList: [],
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "host", dataIndex: "host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: 90, scopedSlots: { customRender: "status" } },
+        { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: 80, scopedSlots: { customRender: "status" } },
         { title: "TLS 认证", dataIndex: "tlsVerify", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "tlsVerify" } },
-        { title: "证书状态", dataIndex: "certExist", width: 90, ellipsis: true, scopedSlots: { customRender: "certExist" } },
-        { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "最后修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
+        { title: "证书状态", dataIndex: "certExist", width: 90, ellipsis: true, align: "center", scopedSlots: { customRender: "certExist" } },
+        // { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "最后修改人", dataIndex: "modifyUser", width: 120, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
@@ -172,7 +242,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 190 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 190 },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
@@ -180,6 +250,19 @@ export default {
         host: [{ required: true, message: "请填写容器地址", trigger: "blur" }],
         tagInput: [
           // { required: true, message: "Please input ID", trigger: "blur" },
+          { pattern: /^\w{1,10}$/, message: "标签限制为字母数字且长度 1-10" },
+        ],
+        swarmId: [{ required: true, message: "请选择要加入到哪个集群", trigger: "blur" }],
+        role: [{ required: true, message: "请选择节点角色", trigger: "blur" }],
+        remoteAddr: [
+          { required: true, message: "请填写集群IP", trigger: "blur" },
+          {
+            pattern: /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/,
+            message: "填写正确的IP地址",
+          },
+        ],
+        tag: [
+          { required: true, message: "请填写关联容器标签", trigger: "blur" },
           { pattern: /^\w{1,10}$/, message: "标签限制为字母数字且长度 1-10" },
         ],
       },
@@ -361,6 +444,57 @@ export default {
         }
 
         this.temp = { ...this.temp, tagsArray: tags, tagInput: "", inputVisible: false };
+      });
+    },
+    // 创建集群
+    initSwarm(record) {
+      this.temp = {
+        dockerId: record.id,
+      };
+      this.initSwarmVisible = true;
+    },
+    // 加入集群
+    joinSwarm(record) {
+      dockerSwarmListAll().then((res) => {
+        this.swarmList = res.data;
+        this.temp = {
+          dockerId: record.id,
+        };
+        this.joinSwarmVisible = true;
+      });
+    },
+    handleSwarm() {
+      this.$refs["editForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        initDockerSwarm(this.temp).then((res) => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.initSwarmVisible = false;
+            this.loadData();
+          }
+        });
+      });
+    },
+    handleSwarmJoin() {
+      this.$refs["editForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        joinDockerSwarm(this.temp).then((res) => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.joinSwarmVisible = false;
+            this.loadData();
+          }
+        });
       });
     },
   },

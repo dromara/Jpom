@@ -70,7 +70,7 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 	}
 
 	private void checkList(List<DockerInfoModel> monitorModels) {
-		monitorModels.forEach(monitorModel -> ThreadUtil.execute(() -> DockerInfoService.this.monitorItem(monitorModel)));
+		monitorModels.forEach(monitorModel -> ThreadUtil.execute(() -> DockerInfoService.this.updateMonitor(monitorModel)));
 	}
 
 	/**
@@ -78,24 +78,33 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 	 *
 	 * @param dockerInfoModel docker
 	 */
-	private void monitorItem(DockerInfoModel dockerInfoModel) {
+	public boolean updateMonitor(DockerInfoModel dockerInfoModel) {
 		try {
 			IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
 			Map<String, Object> parameter = dockerInfoModel.toParameter();
 			parameter.put("timeout", dockerInfoModel.getHeartbeatTimeout());
 			//
-			JSONObject version = plugin.execute("pullVersion", parameter, JSONObject.class);
+			JSONObject info = plugin.execute("info", parameter, JSONObject.class);
 			//
 			DockerInfoModel update = new DockerInfoModel();
 			update.setId(dockerInfoModel.getId());
 			update.setStatus(1);
 			update.setLastHeartbeatTime(SystemClock.now());
-			update.setDockerVersion(version.toJSONString());
+			//
+			update.setDockerVersion(info.getString("serverVersion"));
+			JSONObject swarm = info.getJSONObject("swarm");
+			if (swarm != null) {
+				update.setSwarmNodeId(swarm.getString("nodeID"));
+			} else {
+				update.setSwarmNodeId(StrUtil.EMPTY);
+			}
 			update.setFailureMsg(StrUtil.EMPTY);
 			super.update(update);
+			return true;
 		} catch (Exception e) {
 			log.error("监控 docker 异常", e);
 			this.updateStatus(dockerInfoModel.getId(), 0, e.getMessage());
+			return false;
 		}
 	}
 

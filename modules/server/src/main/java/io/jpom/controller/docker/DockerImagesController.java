@@ -66,7 +66,7 @@ public class DockerImagesController extends BaseServerController {
 	@PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String list(@ValidatorItem String id) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
 		parameter.put("name", getParameter("name"));
@@ -83,7 +83,7 @@ public class DockerImagesController extends BaseServerController {
 	@GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
 	public String del(@ValidatorItem String id, String imageId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
 		parameter.put("imageId", imageId);
@@ -97,7 +97,7 @@ public class DockerImagesController extends BaseServerController {
 	@GetMapping(value = "inspect", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String inspect(@ValidatorItem String id, String imageId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
 		parameter.put("imageId", imageId);
@@ -111,7 +111,7 @@ public class DockerImagesController extends BaseServerController {
 	@GetMapping(value = "pull-image", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String pullImage(@ValidatorItem String id, String repository) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
 		parameter.put("repository", repository);
@@ -158,7 +158,7 @@ public class DockerImagesController extends BaseServerController {
 	@PostMapping(value = "create-container", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String createContainer(@ValidatorItem String id, @ValidatorItem String imageId, @ValidatorItem String name, String autorun, String volumes, String exposedPorts) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
 		parameter.put("imageId", imageId);

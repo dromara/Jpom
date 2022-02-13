@@ -28,6 +28,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.Info;
 import com.github.dockerjava.api.model.Version;
 import com.github.dockerjava.core.RemoteApiVersion;
 import io.jpom.plugin.IDefaultPlugin;
@@ -66,12 +67,29 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
 				return this.checkUrl(parameter);
 			case "ping":
 				return this.checkPing(parameter);
-			case "pullVersion":
-				return this.pullVersion(parameter);
+			case "info":
+				return this.infoCmd(parameter);
 			default:
 				break;
 		}
 		return null;
+	}
+
+	/**
+	 * 获取 docker info 信息
+	 *
+	 * @param parameter 参数
+	 * @return info
+	 */
+	private JSONObject infoCmd(Map<String, Object> parameter) {
+		parameter.putIfAbsent("timeout", 5);
+		DockerClient dockerClient = DockerUtil.build(parameter, 1);
+		try {
+			Info exec = dockerClient.infoCmd().exec();
+			return (JSONObject) JSONObject.toJSON(exec);
+		} finally {
+			IoUtil.close(dockerClient);
+		}
 	}
 
 	/**
