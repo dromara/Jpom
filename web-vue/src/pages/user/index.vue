@@ -22,28 +22,28 @@
       >
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button type="danger" :disabled="record.parent === 'sys'" @click="handleDelete(record)">删除</a-button>
+                <a-button type="danger" size="small" :disabled="record.parent === 'sys'" @click="handleDelete(record)">删除</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="danger" :disabled="record.pwdErrorCount === 0" @click="handleUnlock(record)">解锁</a-button>
+                <a-button type="danger" size="small" :disabled="record.pwdErrorCount === 0" @click="handleUnlock(record)">解锁</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="danger" :disabled="record.twoFactorAuthKey ? false : true" @click="handleCloseMfa(record)">关闭MFA</a-button>
+                <a-button type="danger" size="small" :disabled="record.twoFactorAuthKey ? false : true" @click="handleCloseMfa(record)">关闭MFA</a-button>
               </a-menu-item>
             </a-menu></a-dropdown
           >
         </a-space>
       </template>
       <template slot="systemUser" slot-scope="text, record">
-        <a-switch size="small" checked-children="是" un-checked-children="否" :checked="record.systemUser == 1" />
+        <a-switch size="small" checked-children="是" un-checked-children="否" disabled :checked="record.systemUser == 1" />
       </template>
       <template slot="twoFactorAuthKey" slot-scope="text, record">
-        <a-switch size="small" checked-children="开" un-checked-children="关" :checked="record.twoFactorAuthKey ? true : false" />
+        <a-switch size="small" checked-children="开" un-checked-children="关" disabled :checked="record.twoFactorAuthKey ? true : false" />
       </template>
 
       <a-tooltip slot="id" slot-scope="text" :title="text">
@@ -55,7 +55,7 @@
       </a-tooltip>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editUserVisible" width="800px" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
+    <a-modal v-model="editUserVisible" width="60vw" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
       <a-form-model ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="登录名称" prop="id">
           <a-input v-model="temp.id" placeholder="创建之后不能修改" :disabled="createOption == false" />
@@ -67,7 +67,7 @@
           <a-input v-model="temp.name" placeholder="昵称" />
         </a-form-model-item>
         <a-form-model-item label="管理员" prop="systemUser">
-          <a-tooltip title="管理员拥有：管理服务端的权限">
+          <a-tooltip title="管理员拥有：管理服务端的部分权限">
             <a-switch
               :checked="temp.systemUser == 1"
               @change="
@@ -195,8 +195,8 @@ export default {
       columns: [
         { title: "ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "昵称", dataIndex: "name", ellipsis: true },
-        { title: "管理员", dataIndex: "systemUser", ellipsis: true, width: 90, scopedSlots: { customRender: "systemUser" } },
-        { title: "两步验证", dataIndex: "twoFactorAuthKey", ellipsis: true, width: 90, scopedSlots: { customRender: "twoFactorAuthKey" } },
+        { title: "管理员", dataIndex: "systemUser", align: "center", ellipsis: true, width: 90, scopedSlots: { customRender: "systemUser" } },
+        { title: "两步验证", dataIndex: "twoFactorAuthKey", align: "center", ellipsis: true, width: 90, scopedSlots: { customRender: "twoFactorAuthKey" } },
 
         { title: "邮箱", dataIndex: "email", ellipsis: true, scopedSlots: { customRender: "email" } },
         { title: "创建人", dataIndex: "parent", ellipsis: true, width: 150 },
@@ -210,7 +210,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 150 },
+        { title: "操作", align: "center", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 130 },
       ],
       // 表单校验规则
       rules: {
@@ -252,22 +252,22 @@ export default {
     this.loadOptTypeData();
   },
   methods: {
-    // 页面引导
-    introGuide() {
-      this.$store.dispatch("tryOpenGuide", {
-        key: "user-create",
-        options: {
-          hidePrev: true,
-          steps: [
-            {
-              title: "导航助手",
-              element: document.querySelector(".jpom-userWorkspace"),
-              intro: "如果这里面没有您想要的工作空间信息，您需要先去添加一个工作空间。选择工作空间后还可以展开选择绑定的权限奥,默认只有查看权限",
-            },
-          ],
-        },
-      });
-    },
+    // // 页面引导
+    // introGuide() {
+    //   this.$store.dispatch("tryOpenGuide", {
+    //     key: "user-create",
+    //     options: {
+    //       hidePrev: true,
+    //       steps: [
+    //         {
+    //           title: "导航助手",
+    //           element: document.querySelector(".jpom-userWorkspace"),
+    //           intro: "如果这里面没有您想要的工作空间信息，您需要先去添加一个工作空间。选择工作空间后还可以展开选择绑定的权限奥,默认只有查看权限",
+    //         },
+    //       ],
+    //     },
+    //   });
+    // },
     onCheckedLeft(_, e, checkedKeys, itemSelect) {
       const { eventKey } = e.node;
       const isChecked = checkedKeys.indexOf(eventKey) !== -1;
@@ -332,9 +332,9 @@ export default {
     },
     // 新增用户
     handleAdd() {
-      setTimeout(() => {
-        this.introGuide();
-      }, 500);
+      // setTimeout(() => {
+      //   this.introGuide();
+      // }, 500);
 
       this.temp = { systemUser: 0 };
       this.createOption = true;

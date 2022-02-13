@@ -659,7 +659,7 @@ export default {
       editBuildVisible: false,
       triggerVisible: false,
       buildLogVisible: false,
-      afterOptList: afterOptList,
+      afterOptList,
       buildConfirmVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
