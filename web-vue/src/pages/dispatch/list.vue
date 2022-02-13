@@ -47,8 +47,32 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="statusMap[text]">
         <span>{{ statusMap[text] }}</span>
+      </a-tooltip>
+
+      <a-tooltip slot="clearOld" slot-scope="text"> <a-switch size="small" checked-children="是" un-checked-children="否" disabled :checked="text" /></a-tooltip>
+
+      <a-tooltip
+        slot-scope="text"
+        slot="afterOpt"
+        :title="
+          afterOptList.filter((item) => {
+            return item.value === text;
+          }).length &&
+          afterOptList.filter((item) => {
+            return item.value === text;
+          })[0].title
+        "
+      >
+        <span>{{
+          afterOptList.filter((item) => {
+            return item.value === text;
+          }).length &&
+          afterOptList.filter((item) => {
+            return item.value === text;
+          })[0].title
+        }}</span>
       </a-tooltip>
 
       <template slot="outGivingProject" slot-scope="text">
@@ -57,10 +81,12 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" v-if="list_expanded[record.id]" @click="handleReload(record)">刷新</a-button>
-          <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
-          <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
-          <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
+          <a-button size="small" type="primary" @click="handleDispatch(record)">分发文件</a-button>
+          <a-button size="small" type="primary" v-if="list_expanded[record.id]" @click="handleReload(record)">刷新</a-button>
+          <template v-else>
+            <a-button size="small" type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
+            <a-button size="small" type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
+          </template>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
@@ -105,8 +131,8 @@
 
         <template slot="child-operation" slot-scope="text, record">
           <a-space>
-            <a-button :disabled="!record.projectName" type="primary" @click="handleFile(record)">文件</a-button>
-            <a-button :disabled="!record.projectName" type="primary" @click="handleConsole(record)">控制台</a-button>
+            <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleFile(record)">文件</a-button>
+            <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleConsole(record)">控制台</a-button>
           </a-space>
         </template>
       </a-table>
@@ -529,7 +555,7 @@ export default {
       accessList: [],
       nodeList: [],
       projectList: [],
-      afterOptList: afterOptList,
+      afterOptList,
       targetKeys: [],
       // reqId: "",
       temp: {},
@@ -549,8 +575,12 @@ export default {
       columns: [
         { title: "分发 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "分发名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "类型", dataIndex: "outGivingProject", ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
-        { title: "状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "类型", dataIndex: "outGivingProject", width: 90, ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
+        { title: "分发后", dataIndex: "afterOpt", ellipsis: true, width: 100, scopedSlots: { customRender: "afterOpt" } },
+        { title: "清空发布", dataIndex: "clearOld", align: "center", ellipsis: true, width: 100, scopedSlots: { customRender: "clearOld" } },
+        { title: "间隔时间", dataIndex: "intervalTime", width: 90, ellipsis: true, scopedSlots: { customRender: "intervalTime" } },
+
+        { title: "状态", dataIndex: "status", ellipsis: true, width: 110, scopedSlots: { customRender: "status" } },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
@@ -561,7 +591,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 250, align: "left" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 210, align: "center" },
       ],
       childColumns: [
         { title: "节点名称", dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
@@ -570,7 +600,7 @@ export default {
         { title: "分发状态", dataIndex: "outGivingStatus", width: 120 },
         { title: "分发结果", dataIndex: "outGivingResult", width: 180, ellipsis: true, scopedSlots: { customRender: "outGivingResult" } },
         { title: "最后分发时间", dataIndex: "lastTime", width: 180, ellipsis: true, scopedSlots: { customRender: "lastTime" } },
-        { title: "操作", dataIndex: "child-operation", scopedSlots: { customRender: "child-operation" }, width: 200, align: "left" },
+        { title: "操作", dataIndex: "child-operation", scopedSlots: { customRender: "child-operation" }, width: 120, align: "center" },
       ],
       rules: {
         id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
