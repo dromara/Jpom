@@ -82,6 +82,10 @@ public class DockerInfoModel extends BaseWorkspaceModel {
 	 */
 	private String dockerVersion;
 	/**
+	 * 集群节点ID
+	 */
+	private String swarmNodeId;
+	/**
 	 * 最后心跳时间
 	 */
 	private Long lastHeartbeatTime;
@@ -93,6 +97,10 @@ public class DockerInfoModel extends BaseWorkspaceModel {
 	 * 标签
 	 */
 	private String tags;
+	/**
+	 * 集群ID
+	 */
+	private String swarmId;
 
 	public void setFailureMsg(String failureMsg) {
 		this.failureMsg = StrUtil.maxLength(failureMsg, 240);

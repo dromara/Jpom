@@ -59,7 +59,7 @@ public class DockerContainerController extends BaseServerController {
 	@PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String list(@ValidatorItem String id) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
 		parameter.put("name", getParameter("name"));
@@ -76,7 +76,7 @@ public class DockerContainerController extends BaseServerController {
 	@GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
 	public String del(@ValidatorItem String id, String containerId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
 		parameter.put("containerId", containerId);
@@ -105,7 +105,7 @@ public class DockerContainerController extends BaseServerController {
 	@GetMapping(value = "stop", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String stop(@ValidatorItem String id, String containerId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
 		parameter.put("containerId", containerId);
@@ -120,7 +120,7 @@ public class DockerContainerController extends BaseServerController {
 	@GetMapping(value = "restart", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String restart(@ValidatorItem String id, String containerId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
 		parameter.put("containerId", containerId);

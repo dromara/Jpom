@@ -71,6 +71,18 @@ export function dockerContainerList(params) {
 }
 
 /**
+ * 查看 docker info
+ * @param {JSON} params
+ */
+export function dockerInfo(params) {
+  return axios({
+    url: "/docker/info",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
  * 删除容器
  * @param {JSON} params
  */

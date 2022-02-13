@@ -11,6 +11,9 @@
         <a-menu-item key="volumes">
           <span class="nav-text">卷</span>
         </a-menu-item>
+        <a-menu-item key="info">
+          <span class="nav-text">信息</span>
+        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <!-- style="{ background: '#fff', padding: '10px' }"  -->
@@ -21,6 +24,7 @@
         <container v-if="menuKey === 'containers'" :id="this.id" />
         <images v-if="menuKey === 'images'" :id="this.id" />
         <volumes v-if="menuKey === 'volumes'" :id="this.id" />
+        <info v-if="menuKey === 'info'" :id="this.id" />
       </a-layout-content>
     </a-layout>
   </a-layout>
@@ -29,6 +33,7 @@
 import Container from "./container";
 import Images from "./images";
 import Volumes from "./volumes";
+import Info from "./info";
 export default {
   props: {
     id: {
@@ -39,6 +44,7 @@ export default {
     Container,
     Images,
     Volumes,
+    Info,
   },
   data() {
     return {

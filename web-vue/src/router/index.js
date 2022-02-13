@@ -27,6 +27,12 @@ const children = [
     component: () => import("../pages/docker/list"),
   },
   {
+    path: "/docker/swarm",
+    name: "docker-swarm",
+    component: () => import("../pages/docker/swarm/list"),
+  },
+
+  {
     path: "/node/stat",
     name: "node-stat",
     component: () => import("../pages/node/stat"),

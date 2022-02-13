@@ -49,7 +49,8 @@ public enum ClassFeature {
 	MONITOR("项目监控"),
 	MONITOR_LOG("监控日志"),
 	OPT_MONITOR("操作监控"),
-	DOCKER("容器管理"),
+	DOCKER("Docker管理"),
+	DOCKER_SWARM("容器集群"),
 	/**
 	 * ssh
 	 */

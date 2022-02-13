@@ -15,10 +15,6 @@
       {
         "title": "项目列表",
         "id": "projectSearch"
-      },
-      {
-        "title": "容器管理",
-        "id": "dockerList"
       }
     ]
   },
@@ -57,6 +53,21 @@
       {
         "title": "脚本执行记录",
         "id": "serverScriptLogList"
+      }
+    ]
+  },
+  {
+    "title": "Docker管理",
+    "icon_v3": "cloud-server",
+    "id": "dockerManager",
+    "childs": [
+      {
+        "title": "Docker列表",
+        "id": "dockerList"
+      },
+      {
+        "title": "集群列表",
+        "id": "dockerSwarm"
       }
     ]
   },
