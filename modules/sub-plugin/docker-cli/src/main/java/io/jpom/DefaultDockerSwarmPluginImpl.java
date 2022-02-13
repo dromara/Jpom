@@ -22,18 +22,24 @@
  */
 package io.jpom;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.JoinSwarmCmd;
+import com.github.dockerjava.api.command.LeaveSwarmCmd;
+import com.github.dockerjava.api.command.ListSwarmNodesCmd;
 import com.github.dockerjava.api.model.Swarm;
+import com.github.dockerjava.api.model.SwarmNode;
 import com.github.dockerjava.api.model.SwarmSpec;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * docker swarm
@@ -56,11 +62,71 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 			case "joinSwarm":
 				this.joinSwarmCmd(parameter);
 				return null;
+			case "listSwarmNodes":
+				return this.listSwarmNodesCmd(parameter);
+			case "leaveSwarm":
+				this.leaveSwarmCmd(parameter);
+				return null;
 			default:
 				break;
 		}
 		return null;
 	}
+
+
+	private void leaveSwarmCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			Object forceStr = parameter.get("force");
+			boolean force = Convert.toBool(forceStr, false);
+			LeaveSwarmCmd leaveSwarmCmd = dockerClient.leaveSwarmCmd();
+			if (force) {
+				leaveSwarmCmd.withForceEnabled(true);
+			}
+			leaveSwarmCmd.exec();
+		} finally {
+			IoUtil.close(dockerClient);
+		}
+	}
+
+
+//	private List<JSONObject> listSwarmNodesCmd(Map<String, Object> parameter) {
+//		DockerClient dockerClient = DockerUtil.build(parameter);
+//		try {
+//			LeaveSwarmCmd leaveSwarmCmd = dockerClient.leaveSwarmCmd();
+//			leaveSwarmCmd.withForceEnabled(true)
+//		} finally {
+//			IoUtil.close(dockerClient);
+//		}
+//	}
+
+	private List<JSONObject> listSwarmNodesCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			ListSwarmNodesCmd listSwarmNodesCmd = dockerClient.listSwarmNodesCmd();
+			String id = (String) parameter.get("id");
+			if (StrUtil.isNotEmpty(id)) {
+				listSwarmNodesCmd.withIdFilter(StrUtil.splitTrim(id, StrUtil.COMMA));
+			}
+			String role = (String) parameter.get("role");
+			if (StrUtil.isNotEmpty(role)) {
+				listSwarmNodesCmd.withRoleFilter(StrUtil.splitTrim(role, StrUtil.COMMA));
+			}
+			String name = (String) parameter.get("name");
+			if (StrUtil.isNotEmpty(name)) {
+				listSwarmNodesCmd.withNameFilter(StrUtil.splitTrim(name, StrUtil.COMMA));
+			}
+			List<SwarmNode> exec = listSwarmNodesCmd.exec();
+			return exec.stream().map(swarmNode -> {
+				JSONObject jsonObject = (JSONObject) JSONObject.toJSON(swarmNode);
+				jsonObject.remove("rawValues");
+				return jsonObject;
+			}).collect(Collectors.toList());
+		} finally {
+			IoUtil.close(dockerClient);
+		}
+	}
+
 
 	private void joinSwarmCmd(Map<String, Object> parameter) {
 		DockerClient dockerClient = DockerUtil.build(parameter);

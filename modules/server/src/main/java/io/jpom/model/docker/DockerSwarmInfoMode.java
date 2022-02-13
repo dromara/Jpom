@@ -44,6 +44,14 @@ public class DockerSwarmInfoMode extends BaseWorkspaceModel {
 	 * 节点 地址
 	 */
 	private String nodeAddr;
+	/**
+	 * 状态 0 , 异常离线 1 正常
+	 */
+	private Integer status;
+	/**
+	 * 错误消息
+	 */
+	private String failureMsg;
 
 	@Tolerate
 	public DockerSwarmInfoMode() {

@@ -27,11 +27,13 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
+import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Condition;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.IAsyncLoad;
 import io.jpom.model.docker.DockerInfoModel;
+import io.jpom.model.docker.DockerSwarmInfoMode;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseWorkspaceService;
@@ -54,6 +56,12 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 	public static final String DOCKER_CHECK_PLUGIN_NAME = "docker-cli:check";
 
 	public static final String DOCKER_PLUGIN_NAME = "docker-cli";
+
+	private final DockerSwarmInfoService dockerSwarmInfoService;
+
+	public DockerInfoService(DockerSwarmInfoService dockerSwarmInfoService) {
+		this.dockerSwarmInfoService = dockerSwarmInfoService;
+	}
 
 	@Override
 	public void startLoad() {
@@ -94,12 +102,20 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 			update.setDockerVersion(info.getString("serverVersion"));
 			JSONObject swarm = info.getJSONObject("swarm");
 			if (swarm != null) {
-				update.setSwarmNodeId(swarm.getString("nodeID"));
+				String nodeId = swarm.getString("nodeID");
+				update.setSwarmNodeId(nodeId);
+				if (StrUtil.isEmpty(nodeId)) {
+					// 集群退出
+					update.setSwarmId(StrUtil.EMPTY);
+				}
 			} else {
 				update.setSwarmNodeId(StrUtil.EMPTY);
+				update.setSwarmId(StrUtil.EMPTY);
 			}
 			update.setFailureMsg(StrUtil.EMPTY);
 			super.update(update);
+			//
+			this.updateSwarmStatus(dockerInfoModel.getId(), update.getStatus(), update.getFailureMsg());
 			return true;
 		} catch (Exception e) {
 			log.error("监控 docker 异常", e);
@@ -121,6 +137,16 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 		dockerInfoModel.setStatus(status);
 		dockerInfoModel.setFailureMsg(msg);
 		super.update(dockerInfoModel);
+		//
+		this.updateSwarmStatus(id, status, msg);
+	}
+
+	private void updateSwarmStatus(String id, int status, String msg) {
+		//
+		DockerSwarmInfoMode dockerSwarmInfoMode = new DockerSwarmInfoMode();
+		dockerSwarmInfoMode.setStatus(status);
+		dockerSwarmInfoMode.setFailureMsg(msg);
+		dockerSwarmInfoService.update(dockerSwarmInfoService.dataBeanToEntity(dockerSwarmInfoMode), Entity.create().set("dockerId", id));
 	}
 
 	/**

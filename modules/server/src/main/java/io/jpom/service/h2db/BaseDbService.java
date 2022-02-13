@@ -198,6 +198,10 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		return super.count(Entity.create());
 	}
 
+	public long count(T data) {
+		return super.count(this.dataBeanToEntity(data));
+	}
+
 	/**
 	 * 通用的分页查询, 使用该方法查询，数据库表字段不能包含 "page", "limit", "order_field", "order", "total"
 	 * <p>

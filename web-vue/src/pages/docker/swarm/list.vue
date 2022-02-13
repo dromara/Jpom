@@ -13,16 +13,25 @@
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <template slot="status" slot-scope="text, record">
+        <a-tooltip :title="`${parseInt(record.status) === 1 ? '运行中' : record.failureMsg || ''}`">
+          <a-switch size="small" :checked="parseInt(record.status) === 1" :disabled="true">
+            <a-icon slot="checkedChildren" type="check-circle" />
+            <a-icon slot="unCheckedChildren" type="warning" />
+          </a-switch>
+        </a-tooltip>
+      </template>
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
+          <a-button size="small" :disabled="parseInt(record.status) !== 1" type="primary" @click="handleNode(record)">节点</a-button>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
             <a-menu slot="overlay">
               <a-menu-item> </a-menu-item>
               <a-menu-item>
-                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+                <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
               </a-menu-item>
             </a-menu></a-dropdown
           >
@@ -39,17 +48,23 @@
         <a-form-model-item label="标签" prop="tag"><a-input v-model="temp.tag" placeholder="关联容器标签" /> </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 节点信息 -->
+    <a-modal v-model="nodeVisible" width="90vw" title="集群节点" :footer="null" :maskClosable="false">
+      <swarm-node :id="this.temp.id" />
+    </a-modal>
   </div>
 </template>
 
 <script>
-import { deleteDcoker } from "@/api/docker-api";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { editDockerSwarm, dockerSwarmList } from "@/api/docker-swarm";
+import { editDockerSwarm, dockerSwarmList, unbindSwarm } from "@/api/docker-swarm";
 import { parseTime } from "@/utils/time";
+import SwarmNode from "./node.vue";
 
 export default {
-  components: {},
+  components: {
+    SwarmNode,
+  },
   props: {},
   data() {
     return {
@@ -58,12 +73,12 @@ export default {
       list: [],
       temp: {},
       editVisible: false,
-      initSwarmVisible: false,
+      nodeVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点地址", dataIndex: "nodeAddr", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "容器标签", dataIndex: "tag", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-
+        { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: 80, scopedSlots: { customRender: "status" } },
         { title: "最后修改人", dataIndex: "modifyUser", width: 120, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
         {
           title: "修改时间",
@@ -137,8 +152,12 @@ export default {
     handleEdit(record) {
       this.temp = record;
       this.editVisible = true;
-
       this.$refs["editForm"]?.resetFields();
+    },
+    // 节点
+    handleNode(record) {
+      this.temp = record;
+      this.nodeVisible = true;
     },
     // 提交  数据
     handleEditOk() {
@@ -160,11 +179,11 @@ export default {
         });
       });
     },
-    // 删除
-    handleDelete(record) {
+    // 解绑
+    handleUnbind(record) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除该记录么？",
+        content: "真的要解绑该集群么？解绑至少删除在本系统的关联数据,不会删除容器里面数据",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -172,7 +191,7 @@ export default {
           const params = {
             id: record.id,
           };
-          deleteDcoker(params).then((res) => {
+          unbindSwarm(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,

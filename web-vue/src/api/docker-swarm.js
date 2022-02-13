@@ -43,3 +43,29 @@ export function editDockerSwarm(data) {
     data: data,
   });
 }
+
+/**
+ * 解绑 集群
+ * @param {
+ *  id: docker ID
+ * } params
+ */
+export function unbindSwarm(params) {
+  return axios({
+    url: "/docker-swarm/unbind",
+    method: "get",
+    params,
+  });
+}
+
+/**
+ * 容器集群节点列表
+ * @param {JSON} params
+ */
+export function dockerSwarmNodeList(params) {
+  return axios({
+    url: "/docker-swarm/node-list",
+    method: "post",
+    data: params,
+  });
+}

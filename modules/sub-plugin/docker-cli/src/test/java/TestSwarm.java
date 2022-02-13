@@ -25,13 +25,13 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.InfoCmd;
-import com.github.dockerjava.api.command.JoinSwarmCmd;
-import com.github.dockerjava.api.command.ListSwarmNodesCmd;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.Info;
 import com.github.dockerjava.api.model.Swarm;
 import com.github.dockerjava.api.model.SwarmNode;
@@ -39,15 +39,20 @@ import com.github.dockerjava.api.model.SwarmSpec;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.core.command.PingCmdImpl;
+import com.github.dockerjava.core.command.RemoveSwarmNodeCmdImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
+import io.jpom.DockerUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * https://blog.csdn.net/qq_36609501/article/details/93138036
@@ -67,6 +72,8 @@ public class TestSwarm {
 	private String node2 = "192.168.105.177";
 	private String node3 = "192.168.105.182";
 
+	private String nodeLt = "172.19.106.253";
+
 	@Before
 	public void beforeLocal() {
 		//
@@ -74,14 +81,18 @@ public class TestSwarm {
 		Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
 		logger.setLevel(Level.INFO);
 
-		this.dockerClient = this.client(node1);
-		dockerClient.pingCmd().exec();
+//		this.dockerClient = this.client(node1);
+//		dockerClient.pingCmd().exec();
 	}
 
-	public DockerClient client(String host) {
-
-		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-				.withDockerHost("tcp://" + host + ":2375").build();
+	private DockerClient client(String host) {
+		DefaultDockerClientConfig.Builder builder = DefaultDockerClientConfig.createDefaultConfigBuilder()
+				.withDockerHost("tcp://" + host + ":2375");
+		if (StrUtil.equals(host, nodeLt)) {
+			builder.withDockerTlsVerify(true)
+					.withDockerCertPath("/Users/user/fsdownload/docker-ca");
+		}
+		DockerClientConfig config = builder.build();
 
 		DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
 				.dockerHost(config.getDockerHost())
@@ -93,6 +104,20 @@ public class TestSwarm {
 		DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient);
 		dockerClient.pingCmd().exec();
 		return dockerClient;
+	}
+
+	private DockerCmdExecFactory client2(String host) {
+		Map<String, Object> map = new HashMap<>(10);
+		map.put("dockerHost", "tcp://" + host + ":2375");
+
+		if (StrUtil.equals(host, nodeLt)) {
+			map.put("dockerCertPath", "/Users/user/fsdownload/docker-ca");
+		}
+		DockerCmdExecFactory factory = DockerUtil.buildJersey(map, 1);
+		PingCmd.Exec pingCmdExec = factory.createPingCmdExec();
+		PingCmdImpl command = new PingCmdImpl(pingCmdExec);
+		Void exec = pingCmdExec.exec(command);
+		return factory;
 	}
 
 	@After
@@ -125,7 +150,7 @@ public class TestSwarm {
 
 	@Test
 	public void testListNodeSwarmCmd() {
-		this.dockerClient = this.client(node1);
+		this.dockerClient = this.client(nodeLt);
 		ListSwarmNodesCmd listSwarmNodesCmd = dockerClient.listSwarmNodesCmd();
 		List<SwarmNode> exec = listSwarmNodesCmd.exec();
 		JSONArray toJSON = (JSONArray) JSONObject.toJSON(exec);
@@ -139,6 +164,17 @@ public class TestSwarm {
 		Info exec = infoCmd.exec();
 		JSONObject toJSON = (JSONObject) JSONObject.toJSON(exec);
 		System.out.println(toJSON.toString(SerializerFeature.PrettyFormat));
+	}
+
+	@Test
+	public void tsetRemove() {
+		DockerClient client = this.client(nodeLt);
+		DockerCmdExecFactory dockerCmdExecFactory = (DockerCmdExecFactory) ReflectUtil.getFieldValue(client, "dockerCmdExecFactory");
+
+
+		RemoveSwarmNodeCmdImpl removeSwarmNodeCmd = new RemoveSwarmNodeCmdImpl(dockerCmdExecFactory.removeSwarmNodeCmdExec(), "hvtr4gy520x67m97h2ds8wcnu");
+
+		removeSwarmNodeCmd.exec();
 	}
 
 	@Test

@@ -59,6 +59,20 @@ export function deleteDcoker(params) {
 }
 
 /**
+ * 强制退出集群
+ * @param {
+ *  id: docker ID
+ * } params
+ */
+export function dcokerSwarmLeaveForce(params) {
+  return axios({
+    url: "/docker/swarm-leave-force",
+    method: "get",
+    params,
+  });
+}
+
+/**
  * 容器中的列表
  * @param {JSON} params
  */

@@ -35,8 +35,10 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.docker.DockerInfoModel;
+import io.jpom.model.docker.DockerSwarmInfoMode;
 import io.jpom.plugin.*;
 import io.jpom.service.docker.DockerInfoService;
+import io.jpom.service.docker.DockerSwarmInfoService;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.CompressionFileUtil;
 import io.jpom.util.StringUtil;
@@ -50,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -62,9 +65,12 @@ import java.util.List;
 public class DockerInfoController extends BaseServerController {
 
 	private final DockerInfoService dockerInfoService;
+	private final DockerSwarmInfoService dockerSwarmInfoService;
 
-	public DockerInfoController(DockerInfoService dockerInfoService) {
+	public DockerInfoController(DockerInfoService dockerInfoService,
+								DockerSwarmInfoService dockerSwarmInfoService) {
 		this.dockerInfoService = dockerInfoService;
+		this.dockerSwarmInfoService = dockerSwarmInfoService;
 	}
 
 	/**
@@ -246,5 +252,34 @@ public class DockerInfoController extends BaseServerController {
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
 		JSONObject info = plugin.execute("info", dockerInfoModel.toParameter(), JSONObject.class);
 		return JsonMessage.getString(200, "", info);
+	}
+
+	/**
+	 * 强制退出集群
+	 *
+	 * @param id 集群ID
+	 * @return json
+	 */
+	@GetMapping(value = "swarm-leave-force", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DEL)
+	public JsonMessage<String> leaveForce(@ValidatorItem String id) throws Exception {
+		//
+		DockerSwarmInfoMode dockerSwarmInfoMode = new DockerSwarmInfoMode();
+		dockerSwarmInfoMode.setDockerId(id);
+		long count = dockerSwarmInfoService.count(dockerSwarmInfoMode);
+		Assert.state(count <= 0, "需要先解绑集群才能强制退出集群");
+		//
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+		IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
+		Map<String, Object> parameter = dockerInfoModel.toParameter();
+		parameter.put("force", true);
+		plugin.execute("leaveSwarm", parameter, JSONObject.class);
+		//
+		DockerInfoModel update = new DockerInfoModel();
+		update.setId(id);
+		update.setSwarmId(StrUtil.EMPTY);
+		update.setSwarmNodeId(StrUtil.EMPTY);
+		dockerInfoService.update(update);
+		return new JsonMessage<>(200, "强制解绑成功");
 	}
 }
