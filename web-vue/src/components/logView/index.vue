@@ -3,10 +3,35 @@
     <div class="log-filter">
       <template>
         <a-row type="flex">
-          <a-col :span="20">
+          <a-col :span="19">
             <a-space>
               <slot name="before"></slot>
-              <a-popover title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
+              <a-tooltip title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
+                <a-input addonBefore="正则:/" placeholder="关键词高亮,支持正则" v-model="temp.searchValue" style="width: 360px" @pressEnter="onSearch">
+                  <a-select slot="addonAfter" :value="'/' + this.regModifier" style="width: 80px">
+                    <div @mousedown="(e) => e.preventDefault()" slot="dropdownRender" style="width: 300px; padding: 10px; cursor: pointer; background-color: #fff; border-radius: 5px">
+                      <a-checkbox-group @change="regModifierChange" :value="regModifiers" :options="modifiers"> </a-checkbox-group>
+                    </div>
+                  </a-select>
+                </a-input>
+              </a-tooltip>
+
+              <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,限制只显示最后多少行日志。修改后需要回车才能生效">
+                <a-input addonBefore="行数" :min="1" style="width: 200px" :disabled="!this.temp.logScroll" v-model="temp.tempLogShowLine" placeholder="显示行数" @pressEnter="onSearch">
+                  <template slot="addonAfter">
+                    <a-icon type="swap" @click="onSearch" />
+                  </template>
+                </a-input>
+              </a-tooltip>
+            </a-space>
+          </a-col>
+          <a-col :span="5" style="text-align: right">
+            <a-space>
+              <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" />
+              <a-tooltip title="清空当前缓冲区内容">
+                <a-button type="link" style="padding: 0" @click="clearLogCache" icon="delete"><span style="margin-left: 2px">清空</span></a-button>
+              </a-tooltip>
+              <a-popover title="正则语法参考">
                 <template slot="content">
                   <ul>
                     <li><b>.</b> - 除换行符以外的所有字符。</li>
@@ -18,29 +43,13 @@
                     <li><b>[a-z]</b> - 匹配 a 到 z 中的一个字母。</li>
                     <li><b>[^abc]</b> - 匹配除了 a、b 或 c 中的其他字母。</li>
                     <li><b>aa|bb</b> - 匹配 aa 或 bb。</li>
+                    <li><b>[^%&',;=?$\x22]+</b> - 含有^%&',;=?$\"等字符。</li>
+                    <li><b>[\u4E00-\u9FA5A-Za-z0-9_]</b> - 中文、英文、数字包括下划线。</li>
+                    <li><b>[\u4e00-\u9fa5]</b> - 汉字。</li>
                   </ul>
                 </template>
-                <a-input addonBefore="正则:/" placeholder="关键词高亮,支持正则" v-model="temp.searchValue" style="width: 360px" @pressEnter="onSearch">
-                  <a-select slot="addonAfter" :value="'/' + this.regModifier" style="width: 80px">
-                    <div @mousedown="(e) => e.preventDefault()" slot="dropdownRender" style="width: 300px; padding: 10px; cursor: pointer; background-color: #fff; border-radius: 5px">
-                      <a-checkbox-group @change="regModifierChange" :value="regModifiers" :options="modifiers"> </a-checkbox-group>
-                    </div>
-                  </a-select>
-                </a-input>
+                <a-button type="link" style="padding: 0" icon="unordered-list"><span style="margin-left: 2px">语法参考</span></a-button>
               </a-popover>
-              <a-tooltip title="为避免显示内容太多而造成浏览器卡顿,限制只显示最后多少行日志。修改后需要回车才能生效">
-                <a-input addonBefore="行数" :min="1" style="width: 200px" :disabled="!this.temp.logScroll" v-model="temp.tempLogShowLine" placeholder="显示行数" @pressEnter="onSearch">
-                  <template slot="addonAfter">
-                    <a-icon type="swap" @click="onSearch" />
-                  </template>
-                </a-input>
-              </a-tooltip>
-            </a-space>
-          </a-col>
-          <a-col :span="4" style="text-align: right">
-            <a-space>
-              <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" />
-              <a-button type="link" style="padding: 0" @click="clearLogCache" icon="delete"> 清空 </a-button>
             </a-space>
           </a-col>
         </a-row>
