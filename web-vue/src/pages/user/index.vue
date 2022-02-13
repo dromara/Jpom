@@ -83,7 +83,15 @@
         </a-form-model-item>
 
         <a-form-model-item label="工作空间" prop="feature" class="feature jpom-userWorkspace">
-          <a-transfer :show-select-all="false" :data-source="workspaceList" show-search :filter-option="filterOption" :target-keys="targetKeys" :render="(item) => item.title" @change="handleChange">
+          <a-transfer
+            :titles="['带选择区', '已选择区']"
+            :show-select-all="false"
+            :data-source="workspaceList"
+            :filter-option="filterOption"
+            :target-keys="targetKeys"
+            :render="(item) => item.title"
+            @change="handleChange"
+          >
             <template slot="children" slot-scope="{ props: { direction, selectedKeys }, on: { itemSelect } }">
               <a-tree
                 v-if="direction === 'left'"
@@ -103,7 +111,13 @@
                     onCheckedLeft(_, props, [...selectedKeys, ...targetKeys], itemSelect);
                   }
                 "
-              />
+              >
+                <template slot="title" slot-scope="item">
+                  <a-tooltip title="注意要把父级一起勾选才生效奥,勾选后还需要点击右边按钮移动到已选择区。如果移动按钮不可用表示数据没有任何变化">
+                    {{ item.title }}
+                  </a-tooltip>
+                </template>
+              </a-tree>
               <a-tree
                 v-if="direction === 'right'"
                 blockNode
@@ -122,7 +136,13 @@
                     onCheckedRight(_, props, [...selectedKeys, ...targetKeys], itemSelect);
                   }
                 "
-              />
+              >
+                <template slot="title" slot-scope="item">
+                  <a-tooltip title="注意勾选后还需要点击左边按钮移动到待选择区。如果移动按钮不可用表示数据没有任何变化">
+                    {{ item.title }}
+                  </a-tooltip>
+                </template>
+              </a-tree>
             </template>
           </a-transfer>
         </a-form-model-item>
@@ -348,6 +368,20 @@ export default {
         if (this.targetKeys.length === 0) {
           this.$notification.error({
             message: "请选择工作空间",
+          });
+          return false;
+        }
+        //
+        const checkSelKey = this.targetKeys.filter((item) => {
+          if (!item.includes("-")) {
+            return false;
+          }
+          const temp = item.split("-");
+          return !this.targetKeys.includes(temp[0]);
+        });
+        if (checkSelKey.length) {
+          this.$notification.warn({
+            message: "存在没有选择父级(工作空间)的权限",
           });
           return false;
         }
