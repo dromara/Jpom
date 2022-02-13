@@ -6,6 +6,7 @@
 
 1. nginx 删除操作新增还原配置
 2. 【server】新增用户登录日志记录
+3. 【server】log view 新增正则参考
 
 ### 🐞 解决BUG、优化功能
 
