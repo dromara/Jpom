@@ -64,8 +64,11 @@
               <a-menu-item>
                 <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
               </a-menu-item>
-            </a-menu></a-dropdown
-          >
+              <a-menu-item>
+                <a-button size="small" type="danger" @click="handleLeaveForce(record)">强制退出集群</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
     </a-table>
@@ -199,7 +202,7 @@
   </div>
 </template>
 <script>
-import { dockerList, apiVersions, editDocker, editDockerByFile, deleteDcoker } from "@/api/docker-api";
+import { dockerList, apiVersions, editDocker, editDockerByFile, deleteDcoker, dcokerSwarmLeaveForce } from "@/api/docker-api";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { initDockerSwarm, dockerSwarmListAll, joinDockerSwarm } from "@/api/docker-swarm";
 import { parseTime } from "@/utils/time";
@@ -411,6 +414,31 @@ export default {
         },
       });
     },
+    // 强制解绑
+    handleLeaveForce(record) {
+      const html = "<h1 style='color:red;'>真的要强制退出集群吗？</h1><ul style='color:red;'>" + "<li>请提前备份数据再操作奥</li>" + "<li>操作不能撤回奥</li>" + " </ul>";
+      const h = this.$createElement;
+      this.$confirm({
+        title: "系统提示",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 组装参数
+          const params = {
+            id: record.id,
+          };
+          dcokerSwarmLeaveForce(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery.page = pagination.current;
@@ -452,6 +480,7 @@ export default {
         dockerId: record.id,
       };
       this.initSwarmVisible = true;
+      this.$refs["editForm"]?.resetFields();
     },
     // 加入集群
     joinSwarm(record) {
@@ -461,6 +490,7 @@ export default {
           dockerId: record.id,
         };
         this.joinSwarmVisible = true;
+        this.$refs["editForm"]?.resetFields();
       });
     },
     handleSwarm() {
@@ -480,11 +510,13 @@ export default {
         });
       });
     },
+    // 处理加入集群
     handleSwarmJoin() {
       this.$refs["editForm"].validate((valid) => {
         if (!valid) {
           return false;
         }
+        this.temp.id = this.temp.swarmId;
         joinDockerSwarm(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
