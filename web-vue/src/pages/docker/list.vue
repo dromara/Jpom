@@ -4,8 +4,10 @@
     <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="listQuery.total / listQuery.limit > 1 ? pagination : false" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['%name%']" placeholder="名称" class="search-input-item" />
-          <a-input v-model="listQuery['%host%']" placeholder="host" class="search-input-item" />
+          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
+          <a-input v-model="listQuery['%host%']" @pressEnter="loadData" placeholder="host" class="search-input-item" />
+          <a-input v-model="listQuery['%swarmId%']" @pressEnter="loadData" placeholder="集群ID" class="search-input-item" />
+
           <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
@@ -16,16 +18,20 @@
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <template slot="certExist" slot-scope="text, record">
+      <!-- <template slot="certExist" slot-scope="text, record">
         <template v-if="record.tlsVerify">
           <a-tag v-if="record.certExist" color="green"> 存在 </a-tag>
           <a-tag v-else color="red"> 不存在 </a-tag>
         </template>
         <span v-else>-</span>
-      </template>
+      </template> -->
 
       <a-tooltip slot="tlsVerify" slot-scope="text, record" placement="topLeft" :title="record.tlsVerify ? '开启 TLS 认证' : '关闭 TLS 认证'">
-        <a-switch size="small" v-model="record.tlsVerify" :disabled="true" checked-children="开" un-checked-children="关" />
+        <template v-if="record.tlsVerify">
+          <template v-if="record.certExist"> <a-switch size="small" v-model="record.tlsVerify" :disabled="true" checked-children="开" un-checked-children="关" /> </template>
+          <a-tag v-else color="red"> 证书丢失 </a-tag>
+        </template>
+        <template v-else> <a-switch size="small" v-model="record.tlsVerify" :disabled="true" checked-children="开" un-checked-children="关" /> </template>
       </a-tooltip>
 
       <template slot="status" slot-scope="text, record">
@@ -232,7 +238,7 @@ export default {
         { title: "host", dataIndex: "host", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: 80, scopedSlots: { customRender: "status" } },
         { title: "TLS 认证", dataIndex: "tlsVerify", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "tlsVerify" } },
-        { title: "证书状态", dataIndex: "certExist", width: 90, ellipsis: true, align: "center", scopedSlots: { customRender: "certExist" } },
+        { title: "集群ID", dataIndex: "swarmId", ellipsis: true, align: "center", scopedSlots: { customRender: "tooltip" } },
         // { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "最后修改人", dataIndex: "modifyUser", width: 120, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
         {

@@ -16,7 +16,7 @@
           <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
-          <a-input v-model="listQuery['%name%']" placeholder="搜索项目" class="search-input-item" />
+          <a-input v-model="listQuery['%name%']" @pressEnter="getNodeProjectData" placeholder="搜索项目" class="search-input-item" />
 
           <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
             <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>

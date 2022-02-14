@@ -11,8 +11,8 @@
     >
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['%commandName%']" placeholder="搜索命令名称" class="search-input-item" />
-          <a-input v-model="listQuery['%sshName%']" placeholder="搜索ssh名称" class="search-input-item" />
+          <a-input v-model="listQuery['%commandName%']" @pressEnter="getCommandLogData" placeholder="搜索命令名称" class="search-input-item" />
+          <a-input v-model="listQuery['%sshName%']" @pressEnter="getCommandLogData" placeholder="搜索ssh名称" class="search-input-item" />
           <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="search-input-item">
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
           </a-select>

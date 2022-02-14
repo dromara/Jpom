@@ -10,9 +10,9 @@
     >
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['%name%']" placeholder="搜索命令" class="search-input-item" />
-          <a-input v-model="listQuery['%desc%']" placeholder="描述" class="search-input-item" />
-          <a-input v-model="listQuery['%autoExecCron%']" placeholder="定时执行" class="search-input-item" />
+          <a-input v-model="listQuery['%name%']" @pressEnter="getCommandData" placeholder="搜索命令" class="search-input-item" />
+          <a-input v-model="listQuery['%desc%']" @pressEnter="getCommandData" placeholder="描述" class="search-input-item" />
+          <a-input v-model="listQuery['%autoExecCron%']" @pressEnter="getCommandData" placeholder="定时执行" class="search-input-item" />
           <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="getCommandData">搜索</a-button>
           </a-tooltip>

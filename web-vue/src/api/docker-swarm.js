@@ -147,7 +147,7 @@ export function dockerSwarmServicesEdit(params) {
 /**
  * <!-- Note: detail description about taskState, please @see https://docs.docker.com/engine/swarm/how-swarm-mode-works/swarm-task-states/ -->
           <!-- reference Java class: com.github.dockerjava.api.model.TaskState -->
-          <a-select show-search option-filter-prop="children" v-model="listQuery['taskState']" allowClear placeholder="状态" class="search-input-item">
+          
             <!-- NEW: The task was initialized. -->
             <a-select-option key="NEW">新建状态</a-select-option>
             <a-select-option key="ALLOCATED">已分配</a-select-option>

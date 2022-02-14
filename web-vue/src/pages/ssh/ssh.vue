@@ -14,9 +14,9 @@
     >
       <template slot="title">
         <a-space>
-          <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
-          <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
-          <a-input class="search-input-item" v-model="listQuery['%user%']" placeholder="用户名" />
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="节点名称" />
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%host%']" placeholder="节点地址" />
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%user%']" placeholder="用户名" />
           <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
@@ -269,10 +269,10 @@
       >
         <template slot="title">
           <a-space>
-            <a-input class="search-input-item" v-model="viewOperationLogListQuery['modifyUser']" placeholder="操作人" />
-            <a-input class="search-input-item" v-model="viewOperationLogListQuery['name']" placeholder="ssh name" />
-            <a-input class="search-input-item" v-model="viewOperationLogListQuery['ip']" placeholder="ip" />
-            <a-input class="search-input-item" v-model="viewOperationLogListQuery['%commands%']" placeholder="执行命令" />
+            <a-input class="search-input-item" @pressEnter="handleListLog" v-model="viewOperationLogListQuery['modifyUser']" placeholder="操作人" />
+            <a-input class="search-input-item" @pressEnter="handleListLog" v-model="viewOperationLogListQuery['name']" placeholder="ssh name" />
+            <a-input class="search-input-item" @pressEnter="handleListLog" v-model="viewOperationLogListQuery['ip']" placeholder="ip" />
+            <a-input class="search-input-item" @pressEnter="handleListLog" v-model="viewOperationLogListQuery['%commands%']" placeholder="执行命令" />
             <a-range-picker class="filter-item search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
             <a-button type="primary" @click="handleListLog">搜索</a-button>
           </a-space>

@@ -3,8 +3,8 @@
     <a-table :data-source="list" size="middle" :columns="columns" bordered :pagination="false" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['serviceId']" placeholder="id" class="search-input-item" />
-          <a-input v-model="listQuery['serviceName']" placeholder="名称" class="search-input-item" />
+          <a-input v-model="listQuery['serviceId']" @pressEnter="loadData" placeholder="id" class="search-input-item" />
+          <a-input v-model="listQuery['serviceName']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
 
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           <a-button type="primary" @click="handleAdd">创建</a-button>

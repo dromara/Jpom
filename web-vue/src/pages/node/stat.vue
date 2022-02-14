@@ -21,8 +21,8 @@
         <a-space direction="vertical">
           <div ref="filter" class="filter">
             <a-space>
-              <a-input v-model="listQuery['%name%']" placeholder="节点名称" />
-              <a-input v-model="listQuery['%url%']" placeholder="节点地址" />
+              <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
+              <a-input v-model="listQuery['%url%']" @pressEnter="loadData" placeholder="节点地址" />
               <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
                 <a-select-option v-for="(desc, key) in statusMap" :key="key">{{ desc }}</a-select-option>
               </a-select>
