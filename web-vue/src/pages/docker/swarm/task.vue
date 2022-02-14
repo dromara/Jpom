@@ -56,15 +56,13 @@
         </span>
       </a-tooltip>
 
-      <!-- <template slot="operation" slot-scope="text, record">
+      <template slot="operation" slot-scope="text, record">
         <a-space>
-          <template v-if="record.managerStatus && record.managerStatus.leader"> - </template>
-          <template v-else>
-            <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
-            <a-button size="small" type="danger" @click="handleLeava(record)">剔除</a-button>
+          <template>
+            <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
           </template>
         </a-space>
-      </template> -->
+      </template>
     </a-table>
     <!-- 编辑节点 -->
     <a-modal v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
@@ -84,14 +82,19 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 查看日志 -->
+    <a-modal v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
+      <pull-log v-if="logVisible" :id="this.id" :dataId="this.temp.id" type="taks" />
+    </a-modal>
   </div>
 </template>
 
 <script>
 import { dockerSwarmServicesTaskList, dockerSwarmNodeLeave, dockerSwarmNodeUpdate, TASK_STATE } from "@/api/docker-swarm";
 import { parseTime } from "@/utils/time";
+import PullLog from "./pull-log";
 export default {
-  components: {},
+  components: { PullLog },
   props: {
     id: {
       type: String,
@@ -107,6 +110,8 @@ export default {
       temp: {},
       editVisible: false,
       initSwarmVisible: false,
+      autoUpdateTime: null,
+      logVisible: false,
       rules: {
         role: [{ required: true, message: "请选择节点角色", trigger: "blur" }],
         availability: [{ required: true, message: "请选择节点状态", trigger: "blur" }],
@@ -141,11 +146,14 @@ export default {
           defaultSortOrder: "descend",
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 120 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 80 },
       ],
     };
   },
   computed: {},
+  beforeDestroy() {
+    this.autoUpdateTime && clearTimeout(this.autoUpdateTime);
+  },
   mounted() {
     this.loadData();
   },
@@ -163,7 +171,15 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
+        this.autoUpdateTime = setTimeout(() => {
+          this.loadData();
+        }, 3000);
       });
+    },
+    // 日志
+    handleLog(record) {
+      this.logVisible = true;
+      this.temp = record;
     },
     handleEdit(record) {
       this.editVisible = true;

@@ -13,6 +13,9 @@
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <a-tooltip slot="id" slot-scope="text, item" placement="topLeft" :title="text" @click="handleLog(item)">
+        <span>{{ text }}</span>
+      </a-tooltip>
 
       <a-tooltip slot="status" slot-scope="text, item" placement="topLeft" :title="`节点状态：${text} 节点可用性：${item.spec ? item.spec.availability || '' : ''}`">
         <a-tag :color="(item.spec && item.spec.availability) === 'ACTIVE' ? 'green' : 'red'">
@@ -65,12 +68,12 @@
           <a-input v-model="temp.name" :disabled="temp.serviceId ? true : false" placeholder="服务名称" />
         </a-form-model-item>
         <a-form-model-item label="运行模式" prop="mode">
-          <a-radio-group name="mode" v-model="temp.mode">
+          <a-radio-group name="mode" v-model="temp.mode" :disabled="temp.serviceId ? true : false">
             <a-radio value="REPLICATED">副本</a-radio>
             <a-radio value="GLOBAL">独立 </a-radio>
           </a-radio-group>
           <template v-if="temp.mode === 'REPLICATED'">
-            副本数
+            副本数:
             <a-input-number v-model="temp.replicas" :min="1" />
           </template>
         </a-form-model-item>
@@ -81,7 +84,20 @@
           <a-tabs>
             <a-tab-pane key="port" tab="端口">
               <a-form-model-item label="解析模式" prop="endpointResolutionMode">
-                <a-radio-group name="endpointResolutionMode" v-model="temp.endpointResolutionMode">
+                <a-radio-group
+                  name="endpointResolutionMode"
+                  v-model="temp.endpointResolutionMode"
+                  @change="
+                    () => {
+                      temp.exposedPorts = temp.exposedPorts.map((item) => {
+                        if (temp.endpointResolutionMode === 'DNSRR') {
+                          item.publishMode = 'host';
+                        }
+                        return item;
+                      });
+                    }
+                  "
+                >
                   <a-radio value="VIP">VIP</a-radio>
                   <a-radio value="DNSRR">DNSRR </a-radio>
                 </a-radio-group>
@@ -93,8 +109,8 @@
                       <a-row>
                         <a-col :span="7">
                           <a-radio-group name="publishMode" v-model="item.publishMode">
-                            <a-radio value="host">主机级别</a-radio>
-                            <a-radio value="ingress">路由</a-radio>
+                            <a-radio value="ingress" :disabled="temp.endpointResolutionMode === 'DNSRR'">路由</a-radio>
+                            <a-radio value="host">主机</a-radio>
                           </a-radio-group>
                         </a-col>
                         <a-col :span="7">
@@ -293,14 +309,19 @@
     <a-modal v-model="taskVisible" title="查看任务" width="80vw" :footer="null" :maskClosable="false">
       <swarm-task v-if="taskVisible" :id="this.id" :serviceId="this.temp.id" />
     </a-modal>
+    <!-- 查看日志 -->
+    <a-modal v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
+      <pull-log v-if="logVisible" :id="this.id" :dataId="this.temp.id" type="service" />
+    </a-modal>
   </div>
 </template>
 
 <script>
 import { dockerSwarmServicesList, dockerSwarmServicesDel, dockerSwarmServicesEdit } from "@/api/docker-swarm";
 import SwarmTask from "./task";
+import PullLog from "./pull-log";
 export default {
-  components: { SwarmTask },
+  components: { SwarmTask, PullLog },
   props: {
     id: {
       type: String,
@@ -315,13 +336,15 @@ export default {
       editVisible: false,
       initSwarmVisible: false,
       taskVisible: false,
+      logVisible: false,
+      autoUpdateTime: null,
       rules: {
         name: [{ required: true, message: "服务名称必填", trigger: "blur" }],
         mode: [{ required: true, message: "运行模式必填", trigger: "blur" }],
         image: [{ required: true, message: "镜像名称必填", trigger: "blur" }],
       },
       columns: [
-        { title: "服务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "服务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "spec.name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "模式", dataIndex: "spec.mode.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
         { title: "副本数", dataIndex: "spec.mode.replicated.replicas", align: "center", width: 90, ellipsis: true, scopedSlots: { customRender: "replicas" } },
@@ -340,6 +363,9 @@ export default {
     };
   },
   computed: {},
+  beforeDestroy() {
+    this.autoUpdateTime && clearTimeout(this.autoUpdateTime);
+  },
   mounted() {
     this.loadData();
   },
@@ -353,11 +379,19 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
+        this.autoUpdateTime = setTimeout(() => {
+          this.loadData();
+        }, 3000);
       });
     },
     //  任务
     handleTask(record) {
       this.taskVisible = true;
+      this.temp = record;
+    },
+    // 日志
+    handleLog(record) {
+      this.logVisible = true;
       this.temp = record;
     },
     //  创建服务
