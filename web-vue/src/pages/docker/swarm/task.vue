@@ -171,6 +171,7 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
+        clearTimeout(this.autoUpdateTime);
         this.autoUpdateTime = setTimeout(() => {
           this.loadData();
         }, 3000);
