@@ -120,6 +120,7 @@ export default {
       terminalVisible: false,
       logVisible: false,
       temp: {},
+      autoUpdateTime: null,
       columns: [
         { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "名称", dataIndex: "names", ellipsis: true, scopedSlots: { customRender: "names" } },
@@ -160,6 +161,9 @@ export default {
       },
     };
   },
+  beforeDestroy() {
+    this.autoUpdateTime && clearTimeout(this.autoUpdateTime);
+  },
   mounted() {
     this.loadData();
   },
@@ -174,6 +178,9 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
+        this.autoUpdateTime = setTimeout(() => {
+          this.loadData();
+        }, 3000);
       });
     },
     doAction(record, actionKey) {

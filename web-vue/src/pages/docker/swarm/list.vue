@@ -24,7 +24,8 @@
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" :disabled="parseInt(record.status) !== 1" type="primary" @click="handleConsole(record)">控制台</a-button>
+          <a-button size="small" :disabled="parseInt(record.status) !== 1" type="primary" @click="handleConsole(record, 'server')">服务</a-button>
+          <a-button size="small" :disabled="parseInt(record.status) !== 1" type="primary" @click="handleConsole(record, 'node')">节点</a-button>
 
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
@@ -61,7 +62,7 @@
         }
       "
     >
-      <console v-if="consoleVisible" :id="temp.id"></console>
+      <console v-if="consoleVisible" :id="temp.id" :initMenu="temp.menuKey"></console>
     </a-drawer>
   </div>
 </template>
@@ -113,7 +114,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 140 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 180 },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
@@ -169,8 +170,9 @@ export default {
       this.$refs["editForm"]?.resetFields();
     },
     // 服务
-    handleConsole(record) {
+    handleConsole(record, type) {
       this.temp = record;
+      this.temp = { ...this.temp, menuKey: type };
       this.consoleVisible = true;
     },
 

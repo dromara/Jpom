@@ -32,6 +32,10 @@ export default {
     id: {
       type: String,
     },
+    initMenu: {
+      type: String,
+      default: "node",
+    },
   },
   components: {
     SwarmNode,
@@ -40,11 +44,14 @@ export default {
   },
   data() {
     return {
-      menuKeyArray: ["node"],
-      menuKey: "node",
+      menuKeyArray: [],
+      menuKey: "",
     };
   },
-  mounted() {},
+  mounted() {
+    this.menuKey = this.initMenu;
+    this.menuKeyArray = [this.initMenu];
+  },
   methods: {
     menuClick(item) {
       this.menuKey = item.key;

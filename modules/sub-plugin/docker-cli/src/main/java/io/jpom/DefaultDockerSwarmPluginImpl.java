@@ -31,6 +31,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.command.RemoveSwarmNodeCmdImpl;
@@ -39,10 +40,12 @@ import io.jpom.plugin.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -87,12 +90,59 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 			case "updateService":
 				this.updateServiceCmd(parameter);
 				return null;
+			case "logService":
+				this.logServiceCmd(parameter);
+				return null;
+			case "logTask":
+				this.logTaskCmd(parameter);
+				return null;
 			default:
 				break;
 		}
 		return null;
 	}
 
+	private void logTaskCmd(Map<String, Object> parameter) {
+		this.logServiceCmd(parameter, (String) parameter.get("taskId"), "task");
+	}
+
+	private void logServiceCmd(Map<String, Object> parameter) {
+		this.logServiceCmd(parameter, (String) parameter.get("serviceId"), "service");
+	}
+
+	private void logServiceCmd(Map<String, Object> parameter, String id, String type) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		Consumer<String> consumer = (Consumer<String>) parameter.get("consumer");
+		try {
+
+			LogSwarmObjectCmd logSwarmObjectCmd = StrUtil.equalsIgnoreCase(type, "Service") ? dockerClient.logServiceCmd(id) : dockerClient.logTaskCmd(id);
+
+			Charset charset = (Charset) parameter.get("charset");
+			Integer tail = (Integer) parameter.get("tail");
+
+			// 获取日志
+			if (tail != null && tail > 1) {
+				logSwarmObjectCmd.withTail(tail);
+			}
+			logSwarmObjectCmd.withDetails(true).withStderr(true)
+					.withFollow(true)
+					.withStdout(true).exec(new ResultCallback.Adapter<Frame>() {
+						@Override
+						public void onNext(Frame object) {
+							byte[] payload = object.getPayload();
+							if (payload == null) {
+								return;
+							}
+							String s = new String(payload, charset);
+							consumer.accept(s);
+						}
+					}).awaitCompletion();
+		} catch (InterruptedException e) {
+			consumer.accept("获取容器日志被中断:" + e);
+		} finally {
+			IoUtil.close(dockerClient);
+		}
+	}
 
 	public void updateServiceCmd(Map<String, Object> parameter) {
 		DockerClient dockerClient = DockerUtil.build(parameter);

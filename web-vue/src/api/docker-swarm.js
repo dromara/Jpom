@@ -67,6 +67,9 @@ export function dockerSwarmNodeList(params) {
     url: "/docker-swarm/node-list",
     method: "post",
     data: params,
+    headers: {
+      loading: "no",
+    },
   });
 }
 
@@ -103,6 +106,9 @@ export function dockerSwarmServicesList(params) {
     url: "/docker-swarm-service/list",
     method: "post",
     data: params,
+    headers: {
+      loading: "no",
+    },
   });
 }
 
@@ -115,6 +121,9 @@ export function dockerSwarmServicesTaskList(params) {
     url: "/docker-swarm-service/task-list",
     method: "post",
     data: params,
+    headers: {
+      loading: "no",
+    },
   });
 }
 
@@ -144,6 +153,34 @@ export function dockerSwarmServicesEdit(params) {
     },
   });
 }
+
+/**
+ * 开始拉取服务日志
+ * @param {JSON} params
+ */
+export function dockerSwarmServicesStartLog(params) {
+  return axios({
+    url: "/docker-swarm-service/start-log",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
+ * 拉取服务日志
+ * @param {JSON} params
+ */
+export function dockerSwarmServicesPullLog(params) {
+  return axios({
+    url: "/docker-swarm-service/pull-log",
+    method: "get",
+    params: params,
+    headers: {
+      loading: "no",
+    },
+  });
+}
+
 /**
  * <!-- Note: detail description about taskState, please @see https://docs.docker.com/engine/swarm/how-swarm-mode-works/swarm-task-states/ -->
           <!-- reference Java class: com.github.dockerjava.api.model.TaskState -->

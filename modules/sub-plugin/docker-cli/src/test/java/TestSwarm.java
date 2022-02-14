@@ -37,11 +37,9 @@ import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
-import com.github.dockerjava.core.command.PingCmdImpl;
 import com.github.dockerjava.core.command.RemoveSwarmNodeCmdImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
-import io.jpom.DockerUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
@@ -49,9 +47,7 @@ import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * https://blog.csdn.net/qq_36609501/article/details/93138036
@@ -107,19 +103,19 @@ public class TestSwarm {
 		return dockerClient;
 	}
 
-	private DockerCmdExecFactory client2(String host) {
-		Map<String, Object> map = new HashMap<>(10);
-		map.put("dockerHost", "tcp://" + host + ":2375");
-
-		if (StrUtil.equals(host, nodeLt)) {
-			map.put("dockerCertPath", "/Users/user/fsdownload/docker-ca");
-		}
-		DockerCmdExecFactory factory = DockerUtil.buildJersey(map, 1);
-		PingCmd.Exec pingCmdExec = factory.createPingCmdExec();
-		PingCmdImpl command = new PingCmdImpl(pingCmdExec);
-		Void exec = pingCmdExec.exec(command);
-		return factory;
-	}
+//	private DockerCmdExecFactory client2(String host) {
+//		Map<String, Object> map = new HashMap<>(10);
+//		map.put("dockerHost", "tcp://" + host + ":2375");
+//
+//		if (StrUtil.equals(host, nodeLt)) {
+//			map.put("dockerCertPath", "/Users/user/fsdownload/docker-ca");
+//		}
+//		DockerCmdExecFactory factory = DockerUtil.buildJersey(map, 1);
+//		PingCmd.Exec pingCmdExec = factory.createPingCmdExec();
+//		PingCmdImpl command = new PingCmdImpl(pingCmdExec);
+//		Void exec = pingCmdExec.exec(command);
+//		return factory;
+//	}
 
 	@After
 	public void after() {

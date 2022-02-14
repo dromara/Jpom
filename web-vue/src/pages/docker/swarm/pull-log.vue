@@ -5,20 +5,26 @@
 </template>
 <script>
 import LogView from "@/components/logView";
-import { dockerImagePullImageLog } from "@/api/docker-api";
+import { dockerSwarmServicesPullLog, dockerSwarmServicesStartLog } from "@/api/docker-swarm";
 export default {
   components: {
     LogView,
   },
   props: {
+    dataId: {
+      type: String,
+    },
     id: {
+      type: String,
+    },
+    type: {
       type: String,
     },
   },
   data() {
     return {
       logTimer: null,
-      // logText: "loading...",
+      logId: "",
       line: 1,
     };
   },
@@ -26,9 +32,24 @@ export default {
     this.logTimer && clearTimeout(this.logTimer);
   },
   mounted() {
-    this.pullLog();
+    //
+    this.init();
   },
   methods: {
+    init() {
+      dockerSwarmServicesStartLog({
+        type: this.type,
+        dataId: this.dataId,
+        id: this.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.logId = res.data;
+          this.pullLog();
+        } else {
+          this.$refs.logView.appendLine(res.msg);
+        }
+      });
+    },
     nextPull() {
       this.logTimer && clearTimeout(this.logTimer);
       // 加载构建日志
@@ -39,10 +60,10 @@ export default {
     // 加载日志内容
     pullLog() {
       const params = {
-        id: this.id,
+        id: this.logId,
         line: this.line,
       };
-      dockerImagePullImageLog(params).then((res) => {
+      dockerSwarmServicesPullLog(params).then((res) => {
         let next = true;
         if (res.code === 200) {
           // 停止请求

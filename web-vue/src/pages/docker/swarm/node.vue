@@ -116,6 +116,7 @@ export default {
         role: [{ required: true, message: "请选择节点角色", trigger: "blur" }],
         availability: [{ required: true, message: "请选择节点状态", trigger: "blur" }],
       },
+      autoUpdateTime: null,
       columns: [
         { title: "节点Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "主机名", dataIndex: "description.hostname", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -145,6 +146,9 @@ export default {
     };
   },
   computed: {},
+  beforeDestroy() {
+    this.autoUpdateTime && clearTimeout(this.autoUpdateTime);
+  },
   mounted() {
     this.loadData();
   },
@@ -159,6 +163,9 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
+        this.autoUpdateTime = setTimeout(() => {
+          this.loadData();
+        }, 3000);
       });
     },
     handleEdit(record) {

@@ -28,20 +28,16 @@ import cn.hutool.core.io.resource.Resource;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.api.model.ResponseItem;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
-import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
-import com.github.dockerjava.jaxrs.JerseyDockerHttpClient;
 
 import java.io.File;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author bwcx_jzy
@@ -53,62 +49,62 @@ public class DockerUtil {
 		return build(parameter, 1);
 	}
 
-	/**
-	 * 构建 docker client 对象
-	 *
-	 * @param parameter      参数
-	 * @param maxConnections 连接数
-	 * @return DockerClient
-	 */
-	public static DockerCmdExecFactory buildJersey(Map<String, Object> parameter, int maxConnections) {
-		JerseyDockerCmdExecFactory jerseyDockerCmdExecFactory = new JerseyDockerCmdExecFactory();
-		int timeout = Convert.toInt(parameter.get("timeout"), 0);
-		if (timeout > 0) {
-			jerseyDockerCmdExecFactory.withConnectTimeout((int) TimeUnit.SECONDS.toMillis(timeout));
-			jerseyDockerCmdExecFactory.withReadTimeout((int) TimeUnit.SECONDS.toMillis(timeout));
-			jerseyDockerCmdExecFactory.withConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(timeout));
-		}
-
-		String host = (String) parameter.get("dockerHost");
-		String apiVersion = (String) parameter.get("apiVersion");
-		String dockerCertPath = (String) parameter.get("dockerCertPath");
-		//
-
-
-		JerseyDockerHttpClient.Builder builder =new JerseyDockerHttpClient.Builder();
-
-
-		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-				.withDockerTlsVerify(StrUtil.isNotEmpty(dockerCertPath))
-				.withApiVersion(apiVersion)
-				.withDockerCertPath(dockerCertPath)
-				.withDockerHost(host).build();
-
-		builder.dockerHost(config.getDockerHost());
-		builder.sslConfig(config.getSSLConfig());
-		JerseyDockerHttpClient dockerHttpClient = builder.build();
-//		dockerHttpClient.execute()
-
-
-		//
-		jerseyDockerCmdExecFactory.withMaxTotalConnections(maxConnections);
-		jerseyDockerCmdExecFactory.init(config);
-		return jerseyDockerCmdExecFactory.getDockerCmdExecFactory();
-
-		//
-//		ApacheDockerHttpClient.Builder builder = new ApacheDockerHttpClient.Builder()
-//				.dockerHost(config.getDockerHost())
-//				.sslConfig(config.getSSLConfig())
-//				.maxConnections(maxConnections);
-//		//
+//	/**
+//	 * 构建 docker client 对象
+//	 *
+//	 * @param parameter      参数
+//	 * @param maxConnections 连接数
+//	 * @return DockerClient
+//	 */
+//	public static DockerCmdExecFactory buildJersey(Map<String, Object> parameter, int maxConnections) {
+//		JerseyDockerCmdExecFactory jerseyDockerCmdExecFactory = new JerseyDockerCmdExecFactory();
 //		int timeout = Convert.toInt(parameter.get("timeout"), 0);
 //		if (timeout > 0) {
-//			builder.connectionTimeout(Duration.ofSeconds(timeout));
-//			builder.responseTimeout(Duration.ofSeconds(timeout));
+//			jerseyDockerCmdExecFactory.withConnectTimeout((int) TimeUnit.SECONDS.toMillis(timeout));
+//			jerseyDockerCmdExecFactory.withReadTimeout((int) TimeUnit.SECONDS.toMillis(timeout));
+//			jerseyDockerCmdExecFactory.withConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(timeout));
 //		}
-//		ApacheDockerHttpClient httpClient = builder.build();
-//		return DockerClientImpl.getInstance(config, httpClient);
-	}
+//
+//		String host = (String) parameter.get("dockerHost");
+//		String apiVersion = (String) parameter.get("apiVersion");
+//		String dockerCertPath = (String) parameter.get("dockerCertPath");
+//		//
+//
+//
+//		JerseyDockerHttpClient.Builder builder =new JerseyDockerHttpClient.Builder();
+//
+//
+//		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
+//				.withDockerTlsVerify(StrUtil.isNotEmpty(dockerCertPath))
+//				.withApiVersion(apiVersion)
+//				.withDockerCertPath(dockerCertPath)
+//				.withDockerHost(host).build();
+//
+//		builder.dockerHost(config.getDockerHost());
+//		builder.sslConfig(config.getSSLConfig());
+//		JerseyDockerHttpClient dockerHttpClient = builder.build();
+////		dockerHttpClient.execute()
+//
+//
+//		//
+//		jerseyDockerCmdExecFactory.withMaxTotalConnections(maxConnections);
+//		jerseyDockerCmdExecFactory.init(config);
+//		return jerseyDockerCmdExecFactory.getDockerCmdExecFactory();
+//
+//		//
+////		ApacheDockerHttpClient.Builder builder = new ApacheDockerHttpClient.Builder()
+////				.dockerHost(config.getDockerHost())
+////				.sslConfig(config.getSSLConfig())
+////				.maxConnections(maxConnections);
+////		//
+////		int timeout = Convert.toInt(parameter.get("timeout"), 0);
+////		if (timeout > 0) {
+////			builder.connectionTimeout(Duration.ofSeconds(timeout));
+////			builder.responseTimeout(Duration.ofSeconds(timeout));
+////		}
+////		ApacheDockerHttpClient httpClient = builder.build();
+////		return DockerClientImpl.getInstance(config, httpClient);
+//	}
 
 	/**
 	 * 构建 docker client 对象

@@ -81,6 +81,9 @@ export function dockerContainerList(params) {
     url: "/docker/container/list",
     method: "post",
     data: params,
+    headers: {
+      loading: "no",
+    },
   });
 }
 
