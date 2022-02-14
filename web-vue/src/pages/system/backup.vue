@@ -2,8 +2,8 @@
   <div class="full-content">
     <div ref="filter" class="filter">
       <a-space>
-        <a-input v-model="listQuery['%name%']" placeholder="请输入备份名称" class="search-input-item" />
-        <a-input v-model="listQuery['%version%']" placeholder="请输入版本" class="search-input-item" />
+        <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="请输入备份名称" class="search-input-item" />
+        <a-input v-model="listQuery['%version%']" @pressEnter="loadData" placeholder="请输入版本" class="search-input-item" />
         <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="search-input-item">
           <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
         </a-select>
@@ -23,7 +23,7 @@
         <span>{{ backupTypeMap[text] }}</span>
       </template>
       <template slot="baleTimeStamp" slot-scope="text">
-        <a-tooltip placement="topLeft" :title="`${parseTime(text)}`"> {{ parseTime(text) }}  </a-tooltip>
+        <a-tooltip placement="topLeft" :title="`${parseTime(text)}`"> {{ parseTime(text) }} </a-tooltip>
       </template>
       <a-tooltip slot="status" slot-scope="text, reocrd" placement="topLeft" :title="`${backupStatusMap[text]} 点击复制文件路径`">
         <div

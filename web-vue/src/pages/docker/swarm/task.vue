@@ -3,10 +3,10 @@
     <a-table :data-source="list" size="middle" :columns="columns" bordered :pagination="false" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['serviceId']" v-if="!this.serviceId" placeholder="服务id" class="search-input-item" />
-          <a-input v-model="listQuery['taskName']" placeholder="任务名称" class="search-input-item" />
-          <a-input v-model="listQuery['taskId']" placeholder="任务id" class="search-input-item" />
-          <a-input v-model="listQuery['taskNode']" placeholder="节点id" class="search-input-item" />
+          <a-input v-model="listQuery['serviceId']" @pressEnter="loadData" v-if="!this.serviceId" placeholder="服务id" class="search-input-item" />
+          <a-input v-model="listQuery['taskName']" @pressEnter="loadData" placeholder="任务名称" class="search-input-item" />
+          <a-input v-model="listQuery['taskId']" @pressEnter="loadData" placeholder="任务id" class="search-input-item" />
+          <a-input v-model="listQuery['taskNode']" @pressEnter="loadData" placeholder="节点id" class="search-input-item" />
 
           <a-select show-search option-filter-prop="children" v-model="listQuery['taskState']" allowClear placeholder="状态" class="search-input-item">
             <a-select-option :key="key" v-for="(item, key) in TASK_STATE">{{ item }}- {{ key }}</a-select-option>

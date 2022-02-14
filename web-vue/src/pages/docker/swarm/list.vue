@@ -3,8 +3,8 @@
     <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="listQuery.total / listQuery.limit > 1 ? pagination : false" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['%name%']" placeholder="名称" class="search-input-item" />
-          <a-input v-model="listQuery['%tag%']" placeholder="标签" class="search-input-item" />
+          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
+          <a-input v-model="listQuery['%tag%']" @pressEnter="loadData" placeholder="标签" class="search-input-item" />
           <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
@@ -89,6 +89,7 @@ export default {
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点地址", dataIndex: "nodeAddr", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "集群ID", dataIndex: "swarmId", ellipsis: true, align: "center", scopedSlots: { customRender: "tooltip" } },
         { title: "容器标签", dataIndex: "tag", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "状态", dataIndex: "status", ellipsis: true, align: "center", width: 80, scopedSlots: { customRender: "status" } },
         { title: "最后修改人", dataIndex: "modifyUser", width: 120, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },

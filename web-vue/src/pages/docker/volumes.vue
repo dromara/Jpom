@@ -2,7 +2,7 @@
   <a-table size="middle" :data-source="list" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
     <template slot="title">
       <a-space>
-        <a-input v-model="listQuery['name']" @keyup.enter="loadData" placeholder="名称" class="search-input-item" />
+        <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
 
         <div>
           悬空

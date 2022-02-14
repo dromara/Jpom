@@ -6,8 +6,8 @@
     <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" @change="changePage">
       <template slot="title">
         <a-space>
-          <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="仓库名称" />
-          <a-input class="search-input-item" v-model="listQuery['%gitUrl%']" placeholder="仓库地址" />
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="仓库名称" />
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%gitUrl%']" placeholder="仓库地址" />
           <a-select v-model="listQuery.repoType" allowClear placeholder="仓库类型" class="search-input-item">
             <a-select-option :value="'0'">GIT</a-select-option>
             <a-select-option :value="'1'">SVN</a-select-option>

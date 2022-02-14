@@ -3,8 +3,8 @@
     <a-table :data-source="list" size="middle" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['name']" @keyup.enter="loadData" placeholder="名称" class="search-input-item" />
-          <a-input v-model="listQuery['containerId']" @keyup.enter="loadData" placeholder="容器id" class="search-input-item" />
+          <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
+          <a-input v-model="listQuery['containerId']" @pressEnter="loadData" placeholder="容器id" class="search-input-item" />
           <!-- <a-input v-model="listQuery['imageId']" @keyup.enter="loadData" placeholder="镜像id" class="search-input-item" /> -->
           <div>
             显示所有

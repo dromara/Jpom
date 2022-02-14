@@ -12,8 +12,8 @@
     >
       <template slot="title">
         <a-space>
-          <a-input class="search-input-item" v-model="listQuery['%id%']" placeholder="id" />
-          <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="名称" />
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%id%']" placeholder="id" />
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="名称" />
           <a-select v-model="listQuery.outGivingProject" allowClear placeholder="分发类型" class="search-input-item">
             <a-select-option :value="1">独立</a-select-option>
             <a-select-option :value="0">关联</a-select-option>

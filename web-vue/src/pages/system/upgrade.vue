@@ -16,8 +16,8 @@
         >
           <template slot="title">
             <a-space>
-              <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
-              <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
+              <a-input class="search-input-item" @pressEnter="refresh" v-model="listQuery['%name%']" placeholder="节点名称" />
+              <a-input class="search-input-item" @pressEnter="refresh" v-model="listQuery['%url%']" placeholder="节点地址" />
               <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>

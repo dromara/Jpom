@@ -4,7 +4,7 @@
     <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" bordered rowKey="id">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
+          <a-input v-model="listQuery['%name%']" placeholder="名称" @pressEnter="loadData" allowClear class="search-input-item" />
           <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
