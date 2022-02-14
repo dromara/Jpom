@@ -32,10 +32,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
-import com.github.dockerjava.api.model.Info;
-import com.github.dockerjava.api.model.Swarm;
-import com.github.dockerjava.api.model.SwarmNode;
-import com.github.dockerjava.api.model.SwarmSpec;
+import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
@@ -175,6 +172,28 @@ public class TestSwarm {
 		RemoveSwarmNodeCmdImpl removeSwarmNodeCmd = new RemoveSwarmNodeCmdImpl(dockerCmdExecFactory.removeSwarmNodeCmdExec(), "hvtr4gy520x67m97h2ds8wcnu");
 
 		removeSwarmNodeCmd.exec();
+	}
+
+	@Test
+	public void update() {
+		DockerClient client = this.client(node1);
+
+
+		String nodeId = "rk2gxpql2449t0s1ymtivtyoy";
+		List<SwarmNode> nodes = client.listSwarmNodesCmd().withIdFilter(CollUtil.newArrayList(nodeId)).exec();
+		System.out.println(nodes);
+		SwarmNode swarmNode = CollUtil.getFirst(nodes);
+		UpdateSwarmNodeCmd swarmNodeCmd = client.updateSwarmNodeCmd();
+
+		swarmNodeCmd.withSwarmNodeId(nodeId);
+		SwarmNodeSpec swarmNodeSpec = new SwarmNodeSpec();
+		swarmNodeSpec.withAvailability(SwarmNodeAvailability.PAUSE);
+		swarmNodeSpec.withRole(SwarmNodeRole.WORKER);
+		swarmNodeCmd.withSwarmNodeSpec(swarmNodeSpec);
+
+		swarmNodeCmd.withVersion(swarmNode.getVersion().getIndex());
+
+		swarmNodeCmd.exec();
 	}
 
 	@Test

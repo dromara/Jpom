@@ -25,6 +25,7 @@ package io.jpom.service.docker;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
@@ -40,6 +41,7 @@ import io.jpom.service.h2db.BaseWorkspaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -180,5 +182,46 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 	public int countByTag(String workspaceId, String tag) {
 		String sql = StrUtil.format("SELECT * FROM {} where workspaceId=? and instr(tags,?)", super.getTableName());
 		return (int) super.count(sql, workspaceId, tag);
+	}
+
+	/**
+	 * docker 绑定集群
+	 *
+	 * @param joinSwarmDocker docker
+	 * @param tag             标签
+	 * @param swarm           集群信息
+	 * @param swarmId         集群ID
+	 */
+	public void bindDockerSwarm(DockerInfoModel joinSwarmDocker, String tag, JSONObject swarm, String swarmId) {
+		DockerInfoModel dockerInfoModel = new DockerInfoModel();
+		dockerInfoModel.setSwarmId(swarmId);
+		//
+		if (swarm != null) {
+			String swarmNodeId = swarm.getString("nodeID");
+			dockerInfoModel.setSwarmNodeId(swarmNodeId);
+		}
+		dockerInfoModel.setId(joinSwarmDocker.getId());
+		String tags = joinSwarmDocker.getTags();
+		// 处理标签
+		List<String> allTag = StrUtil.splitTrim(tags, StrUtil.COMMA);
+		allTag = ObjectUtil.defaultIfNull(allTag, new ArrayList<>());
+		if (!allTag.contains(tag)) {
+			allTag.add(tag);
+		}
+		dockerInfoModel.setTags(CollUtil.join(allTag, StrUtil.COMMA));
+		this.update(dockerInfoModel);
+	}
+
+	/**
+	 * 解绑集群信息
+	 *
+	 * @param id docker id
+	 */
+	public void unbind(String id) {
+		DockerInfoModel update = new DockerInfoModel();
+		update.setId(id);
+		update.setSwarmId(StrUtil.EMPTY);
+		update.setSwarmNodeId(StrUtil.EMPTY);
+		this.update(update);
 	}
 }
