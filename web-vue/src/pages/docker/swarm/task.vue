@@ -67,6 +67,11 @@
         <a-icon v-if="item.managerStatus && item.managerStatus.leader" type="cloud-server" />
         {{ text }}
       </a-tooltip>
+      <a-tooltip slot="desiredState" slot-scope="text, item" placement="topLeft" :title="item.status && item.status.err">
+        <a-tag :color="`${item.status && item.status.err ? 'orange' : ''}`">
+          {{ text }}
+        </a-tag>
+      </a-tooltip>
 
       <a-tooltip slot="os" slot-scope="text, item" placement="topLeft" :title="text">
         <span>
@@ -141,7 +146,7 @@ export default {
         // { title: "副本数", dataIndex: "spec.mode.replicated.replicas", width: 90, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         // { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
         // { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true, scopedSlots: { customRender: "address" } },
-        { title: "状态", width: 140, dataIndex: "desiredState", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "状态", width: 140, dataIndex: "desiredState", ellipsis: true, scopedSlots: { customRender: "desiredState" } },
         { title: "slot", width: 50, dataIndex: "slot", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
         // { title: "系统类型", width: 140, align: "center", dataIndex: "description.platform.os", ellipsis: true, scopedSlots: { customRender: "os" } },

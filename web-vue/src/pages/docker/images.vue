@@ -82,6 +82,7 @@
                         <a-select slot="addonAfter" :disabled="item.disabled" v-model="item.scheme" placeholder="端口协议">
                           <a-select-option value="tcp">tcp</a-select-option>
                           <a-select-option value="udp">udp</a-select-option>
+                          <a-select-option value="sctp">sctp</a-select-option>
                         </a-select>
                       </a-input>
                     </a-col>
@@ -93,7 +94,7 @@
               <a-space>
                 <a-icon
                   type="minus-circle"
-                  v-if="index > 0"
+                  v-if="temp.exposedPorts && temp.exposedPorts.length > 1"
                   @click="
                     () => {
                       temp.exposedPorts.splice(index, 1);
@@ -129,7 +130,7 @@
               <a-space>
                 <a-icon
                   type="minus-circle"
-                  v-if="index > 0"
+                  v-if="temp.volumes && temp.volumes.length > 1"
                   @click="
                     () => {
                       temp.volumes.splice(index, 1);

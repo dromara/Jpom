@@ -57,6 +57,8 @@ import java.util.Map;
  * https://blog.csdn.net/qq_36609501/article/details/93138036
  * <p>
  * https://www.cnblogs.com/vinsent/p/11691562.html
+ * <p>
+ * https://www.runoob.com/docker/docker-swarm.html
  *
  * @author bwcx_jzy
  * @since 2022/2/13
@@ -220,7 +222,7 @@ public class TestSwarm {
 	@Test
 	public void testServiceInspect() {
 		DockerClient client = this.client(node1);
-		InspectServiceCmd inspectServiceCmd = client.inspectServiceCmd("esjx0f126tvvicfizymdxymxq");
+		InspectServiceCmd inspectServiceCmd = client.inspectServiceCmd("whyf2udreftogvwzwf3pnl32g");
 
 		Service exec = inspectServiceCmd.exec();
 
@@ -250,5 +252,93 @@ public class TestSwarm {
 		listTasksCmd.withServiceFilter("esjx0f126tvvicfizymdxymxq");
 		List<Task> exec = listTasksCmd.exec();
 		System.out.println(exec);
+	}
+
+	@Test
+	public void updateServiceCmd() {
+		DockerClient client = this.client(node1);
+		ServiceSpec serviceSpec = new ServiceSpec();
+
+		{
+			ServiceModeConfig serviceModeConfig = new ServiceModeConfig();
+			// 副本数
+			ServiceReplicatedModeOptions serviceReplicatedModeOptions = new ServiceReplicatedModeOptions();
+			serviceReplicatedModeOptions.withReplicas(5);
+			serviceModeConfig.withReplicated(serviceReplicatedModeOptions);
+			//
+			//			serviceModeConfig.withGlobal(new ServiceGlobalModeOptions());
+			serviceSpec.withMode(serviceModeConfig);
+		}
+		{
+			EndpointSpec endpointSpec = new EndpointSpec();
+			endpointSpec.withMode(EndpointResolutionMode.VIP);
+			PortConfig config = new PortConfig();
+			config.withName("s");
+			config.withProtocol(PortConfigProtocol.TCP);
+			config.withPublishedPort(80);
+			config.withTargetPort(80);
+			config.withPublishMode(PortConfig.PublishMode.host);
+			endpointSpec.withPorts(CollUtil.newArrayList(config));
+			serviceSpec.withEndpointSpec(endpointSpec);
+		}
+		{
+			UpdateConfig updateConfig = new UpdateConfig();
+
+			serviceSpec.withUpdateConfig(updateConfig);
+		}
+		TaskSpec taskSpec = new TaskSpec();
+		ContainerSpec containerSpec = new ContainerSpec();
+//		containerSpec.with
+		taskSpec.withContainerSpec(containerSpec);
+		serviceSpec.withTaskTemplate(taskSpec);
+		//
+//		serviceSpec.withUpdateConfig()
+		//
+		UpdateServiceCmd updateServiceCmd = client.updateServiceCmd("esjx0f126tvvicfizymdxymxq", serviceSpec);
+		updateServiceCmd.exec();
+	}
+
+	@Test
+	public void updateServiceCmd3() {
+		DockerClient client = this.client(node1);
+		RemoveServiceCmd removeServiceCmd = client.removeServiceCmd("esjx0f126tvvicfizymdxymxq");
+		removeServiceCmd.exec();
+	}
+
+	@Test
+	public void updateServiceCmd2() {
+		DockerClient client = this.client(node1);
+		ServiceSpec serviceSpec = new ServiceSpec();
+		serviceSpec.withName("helloworld");
+		{
+			ServiceModeConfig serviceModeConfig = new ServiceModeConfig();
+			ServiceReplicatedModeOptions serviceReplicatedModeOptions = new ServiceReplicatedModeOptions();
+			serviceReplicatedModeOptions.withReplicas(1);
+			serviceModeConfig.withReplicated(serviceReplicatedModeOptions);
+			//
+			//			serviceModeConfig.withGlobal(new ServiceGlobalModeOptions());
+			serviceSpec.withMode(serviceModeConfig);
+		}
+		{
+			UpdateConfig updateConfig = new UpdateConfig();
+
+			serviceSpec.withUpdateConfig(updateConfig);
+		}
+		{
+			TaskSpec taskSpec = new TaskSpec();
+			ContainerSpec containerSpec = new ContainerSpec();
+			containerSpec.withImage("alpine");
+			containerSpec.withCommand(CollUtil.newArrayList("ping docker.com"));
+
+			taskSpec.withContainerSpec(containerSpec);
+			serviceSpec.withTaskTemplate(taskSpec);
+		}
+		serviceSpec.withEndpointSpec(new EndpointSpec());
+		String serviceId = "tf2r29awevz2fcprybv6cvlm9";
+		InspectServiceCmd inspectServiceCmd = client.inspectServiceCmd(serviceId);
+		Service service = inspectServiceCmd.exec();
+		UpdateServiceCmd updateServiceCmd = client.updateServiceCmd(serviceId, serviceSpec);
+		updateServiceCmd.withVersion(service.getVersion().getIndex());
+		updateServiceCmd.exec();
 	}
 }

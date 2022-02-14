@@ -117,3 +117,30 @@ export function dockerSwarmServicesTaskList(params) {
     data: params,
   });
 }
+
+/**
+ * 容器集群节点 删除服务
+ * @param {JSON} params
+ */
+export function dockerSwarmServicesDel(params) {
+  return axios({
+    url: "/docker-swarm-service/del",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
+ * 容器集群节点 删除服务
+ * @param {JSON} params
+ */
+export function dockerSwarmServicesEdit(params) {
+  return axios({
+    url: "/docker-swarm-service/edit",
+    method: "post",
+    data: params,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}

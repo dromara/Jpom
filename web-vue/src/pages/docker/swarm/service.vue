@@ -7,6 +7,7 @@
           <a-input v-model="listQuery['serviceName']" placeholder="名称" class="search-input-item" />
 
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
+          <a-button type="primary" @click="handleAdd">创建</a-button>
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -50,33 +51,243 @@
         <a-tag>{{ text }}</a-tag>
       </a-tooltip>
 
-      <!-- <template slot="operation" slot-scope="text, record">
+      <template slot="operation" slot-scope="text, record">
         <a-space>
-          <template v-if="record.managerStatus && record.managerStatus.leader"> - </template>
-          <template v-else>
-            <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
-            <a-button size="small" type="danger" @click="handleLeava(record)">剔除</a-button>
-          </template>
+          <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
+          <a-button size="small" type="danger" @click="handleDel(record)">删除</a-button>
         </a-space>
-      </template> -->
+      </template>
     </a-table>
     <!-- 编辑节点 -->
-    <a-modal v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
-      <!-- <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="角色" prop="role">
-          <a-radio-group name="role" v-model="temp.role">
-            <a-radio value="WORKER"> 工作节点</a-radio>
-            <a-radio value="MANAGER"> 管理节点 </a-radio>
-          </a-radio-group>
+    <a-modal v-model="editVisible" title="编辑节点" width="70vw" @ok="handleEditOk" :maskClosable="false">
+      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+        <a-form-model-item label="服务名称" prop="name">
+          <a-input v-model="temp.name" :disabled="temp.serviceId ? true : false" placeholder="服务名称" />
         </a-form-model-item>
-        <a-form-model-item label="状态" prop="availability">
-          <a-radio-group name="availability" v-model="temp.availability">
-            <a-radio value="ACTIVE"> 活跃</a-radio>
-            <a-radio value="PAUSE"> 暂停 </a-radio>
-            <a-radio value="DRAIN"> 排空 </a-radio>
+        <a-form-model-item label="运行模式" prop="mode">
+          <a-radio-group name="mode" v-model="temp.mode">
+            <a-radio value="REPLICATED">副本</a-radio>
+            <a-radio value="GLOBAL">独立 </a-radio>
           </a-radio-group>
+          <template v-if="temp.mode === 'REPLICATED'">
+            副本数
+            <a-input-number v-model="temp.replicas" :min="1" />
+          </template>
         </a-form-model-item>
-      </a-form-model> -->
+        <a-form-model-item label="镜像名称" prop="image">
+          <a-input v-model="temp.image" placeholder="镜像名称" />
+        </a-form-model-item>
+        <a-form-model-item label="更多配置" prop="">
+          <a-tabs>
+            <a-tab-pane key="port" tab="端口">
+              <a-form-model-item label="解析模式" prop="endpointResolutionMode">
+                <a-radio-group name="endpointResolutionMode" v-model="temp.endpointResolutionMode">
+                  <a-radio value="VIP">VIP</a-radio>
+                  <a-radio value="DNSRR">DNSRR </a-radio>
+                </a-radio-group>
+              </a-form-model-item>
+              <a-form-model-item>
+                <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
+                  <a-col :span="21">
+                    <a-input-group>
+                      <a-row>
+                        <a-col :span="7">
+                          <a-radio-group name="publishMode" v-model="item.publishMode">
+                            <a-radio value="host">主机级别</a-radio>
+                            <a-radio value="ingress">路由</a-radio>
+                          </a-radio-group>
+                        </a-col>
+                        <a-col :span="7">
+                          <a-input addon-before="端口" placeholder="端口" v-model="item.publishedPort"> </a-input>
+                        </a-col>
+                        <a-col :span="8" :offset="1">
+                          <a-input addon-before="容器" v-model="item.targetPort" placeholder="容器端口">
+                            <a-select slot="addonAfter" v-model="item.protocol" placeholder="端口协议">
+                              <a-select-option value="TCP">TCP</a-select-option>
+                              <a-select-option value="UDP">UDP</a-select-option>
+                              <a-select-option value="SCTP">SCTP</a-select-option>
+                            </a-select>
+                          </a-input>
+                        </a-col>
+                      </a-row>
+                    </a-input-group>
+                  </a-col>
+                  <a-col :span="2" :offset="1">
+                    <a-space>
+                      <a-icon
+                        type="minus-circle"
+                        v-if="temp.exposedPorts && temp.exposedPorts.length > 1"
+                        @click="
+                          () => {
+                            temp.exposedPorts.splice(index, 1);
+                          }
+                        "
+                      />
+
+                      <a-icon
+                        type="plus-square"
+                        @click="
+                          () => {
+                            temp.exposedPorts.push({
+                              protocol: 'TCP',
+                              publishMode: 'host',
+                            });
+                          }
+                        "
+                      />
+                    </a-space>
+                  </a-col>
+                </a-row>
+              </a-form-model-item>
+            </a-tab-pane>
+
+            <a-tab-pane key="volumes" tab="挂载卷">
+              <a-form-model-item>
+                <a-row v-for="(item, index) in temp.volumes" :key="index">
+                  <a-col :span="21">
+                    <a-input-group>
+                      <a-row>
+                        <a-col :span="7">
+                          <a-radio-group name="publishMode" v-model="item.type">
+                            <a-radio value="VOLUME">VOLUME</a-radio>
+                            <a-radio value="BIND">BIND</a-radio>
+                          </a-radio-group>
+                        </a-col>
+                        <a-col :span="7">
+                          <a-input addon-before="宿主" v-model="item.source" placeholder="宿主机目录" />
+                        </a-col>
+                        <a-col :span="8" :offset="1">
+                          <a-input addon-before="容器" v-model="item.target" placeholder="容器目录" />
+                        </a-col>
+                      </a-row>
+                    </a-input-group>
+                  </a-col>
+                  <a-col :span="2" :offset="1">
+                    <a-space>
+                      <a-icon
+                        type="minus-circle"
+                        v-if="temp.volumes && temp.volumes.length > 1"
+                        @click="
+                          () => {
+                            temp.volumes.splice(index, 1);
+                          }
+                        "
+                      />
+
+                      <a-icon
+                        type="plus-square"
+                        @click="
+                          () => {
+                            temp.volumes.push({});
+                          }
+                        "
+                      />
+                    </a-space>
+                  </a-col>
+                </a-row>
+              </a-form-model-item>
+            </a-tab-pane>
+
+            <a-tab-pane key="args" tab="参数">
+              <a-form-model-item>
+                <a-row v-for="(item, index) in temp.args" :key="index">
+                  <a-col :span="20">
+                    <a-input addon-before="参数值" v-model="item.value" placeholder="填写运行参数" />
+                  </a-col>
+
+                  <a-col :span="2" :offset="1">
+                    <a-space>
+                      <a-icon
+                        type="minus-circle"
+                        v-if="temp.args && temp.args.length > 1"
+                        @click="
+                          () => {
+                            temp.args.splice(index, 1);
+                          }
+                        "
+                      />
+
+                      <a-icon
+                        type="plus-square"
+                        @click="
+                          () => {
+                            temp.args.push({});
+                          }
+                        "
+                      />
+                    </a-space>
+                  </a-col>
+                </a-row>
+              </a-form-model-item>
+            </a-tab-pane>
+            <a-tab-pane key="command" tab="命令">
+              <a-form-model-item>
+                <a-row v-for="(item, index) in temp.commands" :key="index">
+                  <a-col :span="20">
+                    <a-input addon-before="命令值" v-model="item.value" placeholder="填写运行命令" />
+                  </a-col>
+
+                  <a-col :span="2" :offset="1">
+                    <a-space>
+                      <a-icon
+                        type="minus-circle"
+                        v-if="temp.commands && temp.commands.length > 1"
+                        @click="
+                          () => {
+                            temp.commands.splice(index, 1);
+                          }
+                        "
+                      />
+                      <a-icon
+                        type="plus-square"
+                        @click="
+                          () => {
+                            temp.commands.push({});
+                          }
+                        "
+                      />
+                    </a-space>
+                  </a-col>
+                </a-row>
+              </a-form-model-item>
+            </a-tab-pane>
+            <a-tab-pane key="env" tab="环境变量">
+              <a-form-model-item>
+                <a-row v-for="(item, index) in temp.envs" :key="index">
+                  <a-col :span="10">
+                    <a-input addon-before="名称" v-model="item.name" placeholder="变量名称" />
+                  </a-col>
+                  <a-col :span="10" :offset="1">
+                    <a-input addon-before="变量值" v-model="item.value" placeholder="变量值" />
+                  </a-col>
+                  <a-col :span="2" :offset="1">
+                    <a-space>
+                      <a-icon
+                        type="minus-circle"
+                        v-if="temp.envs && temp.envs.length > 1"
+                        @click="
+                          () => {
+                            temp.envs.splice(index, 1);
+                          }
+                        "
+                      />
+
+                      <a-icon
+                        type="plus-square"
+                        @click="
+                          () => {
+                            temp.envs.push({});
+                          }
+                        "
+                      />
+                    </a-space>
+                  </a-col>
+                </a-row>
+              </a-form-model-item>
+            </a-tab-pane>
+          </a-tabs>
+        </a-form-model-item>
+      </a-form-model>
     </a-modal>
     <!-- 查看任务 -->
     <a-modal v-model="taskVisible" title="查看任务" width="80vw" :footer="null" :maskClosable="false">
@@ -86,7 +297,7 @@
 </template>
 
 <script>
-import { dockerSwarmServicesList, dockerSwarmNodeLeave, dockerSwarmNodeUpdate } from "@/api/docker-swarm";
+import { dockerSwarmServicesList, dockerSwarmServicesDel, dockerSwarmServicesEdit } from "@/api/docker-swarm";
 import SwarmTask from "./task";
 export default {
   components: { SwarmTask },
@@ -105,15 +316,16 @@ export default {
       initSwarmVisible: false,
       taskVisible: false,
       rules: {
-        role: [{ required: true, message: "请选择节点角色", trigger: "blur" }],
-        availability: [{ required: true, message: "请选择节点状态", trigger: "blur" }],
+        name: [{ required: true, message: "服务名称必填", trigger: "blur" }],
+        mode: [{ required: true, message: "运行模式必填", trigger: "blur" }],
+        image: [{ required: true, message: "镜像名称必填", trigger: "blur" }],
       },
       columns: [
         { title: "服务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "名称", dataIndex: "spec.name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "模式", dataIndex: "spec.mode.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
-        { title: "副本数", dataIndex: "spec.mode.replicated.replicas", width: 90, ellipsis: true, scopedSlots: { customRender: "replicas" } },
-        { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
+        { title: "副本数", dataIndex: "spec.mode.replicated.replicas", align: "center", width: 90, ellipsis: true, scopedSlots: { customRender: "replicas" } },
+        { title: "解析模式", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
 
         {
           title: "修改时间",
@@ -135,7 +347,6 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true;
-
       this.listQuery.id = this.id;
       dockerSwarmServicesList(this.listQuery).then((res) => {
         if (res.code === 200) {
@@ -149,13 +360,107 @@ export default {
       this.taskVisible = true;
       this.temp = record;
     },
-    handleEdit(record) {
+    //  创建服务
+    handleAdd() {
       this.editVisible = true;
       this.temp = {
-        nodeId: record.id,
-        role: record.spec.role,
-        availability: record.spec.availability,
+        mode: "REPLICATED",
+        replicas: 1,
+        endpointResolutionMode: "VIP",
+        exposedPorts: [
+          {
+            publishMode: "host",
+            protocol: "TCP",
+          },
+        ],
+        volumes: [
+          {
+            type: "VOLUME",
+          },
+        ],
+        args: [{}],
+        commands: [{}],
+        envs: [{}],
       };
+    },
+    // 编辑
+    handleEdit(record) {
+      const spec = record.spec;
+      if (!spec) {
+        this.$notification.error({
+          message: "信息不完整不能编辑",
+        });
+        return;
+      }
+      this.editVisible = true;
+      let image = spec.taskTemplate?.containerSpec?.image;
+
+      if (image && image.includes("@")) {
+        image = image.split("@")[0];
+      }
+      this.temp = {
+        serviceId: record.id,
+        name: spec.name,
+        mode: spec.mode?.mode,
+        replicas: spec.mode?.replicated?.replicas,
+        image: image,
+        version: record.version?.index,
+        endpointResolutionMode: spec.endpointSpec?.mode,
+        exposedPorts: [
+          {
+            publishMode: "host",
+            protocol: "TCP",
+          },
+        ],
+        volumes: [{ type: "VOLUME" }],
+        args: [{}],
+        commands: [{}],
+        envs: [{}],
+      };
+
+      const args = spec.taskTemplate?.containerSpec?.args;
+      const mounts = spec.taskTemplate?.containerSpec?.mounts;
+      const command = spec.taskTemplate?.containerSpec?.command;
+      const env = spec.taskTemplate?.containerSpec?.env;
+      const ports = spec.endpointSpec?.ports;
+
+      if (args) {
+        this.temp = {
+          ...this.temp,
+          args: args.map((item) => {
+            return {
+              value: item,
+            };
+          }),
+        };
+      }
+      if (command) {
+        this.temp = {
+          ...this.temp,
+          commands: command.map((item) => {
+            return {
+              value: item,
+            };
+          }),
+        };
+      }
+      if (env) {
+        this.temp = {
+          ...this.temp,
+          envs: env.map((item) => {
+            return {
+              name: item.split("=")[0],
+              value: item.split("=")[1],
+            };
+          }),
+        };
+      }
+      if (ports) {
+        this.temp = { ...this.temp, exposedPorts: ports };
+      }
+      if (ports) {
+        this.temp = { ...this.temp, volumes: mounts };
+      }
     },
     handleEditOk() {
       this.$refs["editForm"].validate((valid) => {
@@ -163,7 +468,15 @@ export default {
           return false;
         }
         this.temp.id = this.id;
-        dockerSwarmNodeUpdate(this.temp).then((res) => {
+        const temp = Object.assign({}, this.temp);
+        temp.volumes = (this.temp.volumes || []).filter((item) => {
+          return item.source && item.target;
+        });
+        // 处理端口
+        temp.exposedPorts = (this.temp.exposedPorts || []).filter((item) => {
+          return item.publishedPort && item.targetPort;
+        });
+        dockerSwarmServicesEdit(temp).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
@@ -175,20 +488,20 @@ export default {
         });
       });
     },
-    // 解绑
-    handleLeava(record) {
+    // 删除
+    handleDel(record) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要在该集群剔除此节点么？",
+        content: "真的要删除此服务么？",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
           // 组装参数
           const params = {
-            nodeId: record.id,
+            serviceId: record.id,
             id: this.id,
           };
-          dockerSwarmNodeLeave(params).then((res) => {
+          dockerSwarmServicesDel(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,

@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -38,8 +39,10 @@ import io.jpom.plugin.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -78,10 +81,162 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 				return this.listServicesCmd(parameter);
 			case "listTasks":
 				return this.listTasksCmd(parameter);
+			case "removeService":
+				this.removeServiceCmd(parameter);
+				return null;
+			case "updateService":
+				this.updateServiceCmd(parameter);
+				return null;
 			default:
 				break;
 		}
 		return null;
+	}
+
+
+	public void updateServiceCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			ServiceSpec serviceSpec = new ServiceSpec();
+			String name = (String) parameter.get("name");
+			serviceSpec.withName(name);
+			{
+				String mode = (String) parameter.get("mode");
+				ServiceMode serviceMode = EnumUtil.fromString(ServiceMode.class, mode);
+				ServiceModeConfig serviceModeConfig = new ServiceModeConfig();
+				if (serviceMode == ServiceMode.GLOBAL) {
+					serviceModeConfig.withGlobal(new ServiceGlobalModeOptions());
+				} else if (serviceMode == ServiceMode.REPLICATED) {
+					Object replicas = parameter.get("replicas");
+					ServiceReplicatedModeOptions serviceReplicatedModeOptions = new ServiceReplicatedModeOptions();
+					serviceReplicatedModeOptions.withReplicas(Convert.toInt(replicas, 1));
+					serviceModeConfig.withReplicated(serviceReplicatedModeOptions);
+				}
+				serviceSpec.withMode(serviceModeConfig);
+			}
+//			{
+//				UpdateConfig updateConfig = new UpdateConfig();
+//
+//				serviceSpec.withUpdateConfig(updateConfig);
+//			}
+			{
+				String image = (String) parameter.get("image");
+				TaskSpec taskSpec = new TaskSpec();
+				ContainerSpec containerSpec = new ContainerSpec();
+				containerSpec.withImage(image);
+				//
+				Collection<Map<String, String>> args = (Collection) parameter.get("args");
+				if (CollUtil.isNotEmpty(args)) {
+					List<String> value = args.stream()
+							.map(stringStringMap -> stringStringMap.get("value"))
+							.filter(StrUtil::isNotEmpty)
+							.collect(Collectors.toList());
+					containerSpec.withArgs(value);
+				}
+				Collection<Map<String, String>> envs = (Collection) parameter.get("envs");
+				if (CollUtil.isNotEmpty(envs)) {
+					List<String> value = envs.stream()
+							.map(stringStringMap -> {
+								String name1 = stringStringMap.get("name");
+								String value1 = stringStringMap.get("value");
+								if (StrUtil.isEmpty(name1)) {
+									return null;
+								}
+								return StrUtil.format("{}={}", name1, value1);
+							})
+							.filter(StrUtil::isNotEmpty)
+							.collect(Collectors.toList());
+					containerSpec.withEnv(value);
+				}
+				Collection<Map<String, String>> commands = (Collection) parameter.get("commands");
+				if (CollUtil.isNotEmpty(commands)) {
+					List<String> value = commands.stream()
+							.map(stringStringMap -> stringStringMap.get("value"))
+							.filter(StrUtil::isNotEmpty)
+							.collect(Collectors.toList());
+					containerSpec.withCommand(value);
+				}
+				//
+				Collection<Map<String, String>> volumes = (Collection<Map<String, String>>) parameter.get("volumes");
+				if (CollUtil.isNotEmpty(volumes)) {
+					List<Mount> value = volumes.stream()
+							.map(stringStringMap -> {
+								String source = stringStringMap.get("source");
+								String target = stringStringMap.get("target");
+								if (StrUtil.hasBlank(source, target)) {
+									return null;
+								}
+								String type = stringStringMap.get("type");
+								MountType mountType = EnumUtil.fromString(MountType.class, type);
+								Mount mount = new Mount();
+								mount.withSource(source);
+								mount.withTarget(target);
+								mount.withType(mountType);
+								return mount;
+							})
+							.filter(Objects::nonNull)
+							.collect(Collectors.toList());
+					containerSpec.withMounts(value);
+				}
+				taskSpec.withContainerSpec(containerSpec);
+				//
+				serviceSpec.withTaskTemplate(taskSpec);
+			}
+			{
+				String endpointResolutionModeStr = (String) parameter.get("endpointResolutionMode");
+				EndpointResolutionMode endpointResolutionMode = EnumUtil.fromString(EndpointResolutionMode.class, endpointResolutionModeStr);
+				EndpointSpec endpointSpec = new EndpointSpec();
+				endpointSpec.withMode(endpointResolutionMode);
+				Collection<Map<String, Object>> exposedPorts = (Collection) parameter.get("exposedPorts");
+				if (CollUtil.isNotEmpty(exposedPorts)) {
+					List<PortConfig> portConfigs = exposedPorts.stream()
+							.map(stringStringMap -> {
+								Object port = stringStringMap.get("targetPort");
+								Object publicPort = stringStringMap.get("publishedPort");
+								if (ObjectUtil.hasEmpty(port, publicPort)) {
+									return null;
+								}
+								PortConfig portConfig = new PortConfig();
+								String mode = (String) stringStringMap.get("publishMode");
+								PortConfig.PublishMode publishMode = EnumUtil.fromString(PortConfig.PublishMode.class, mode);
+								portConfig.withPublishMode(publishMode);
+								String scheme = (String) stringStringMap.get("protocol");
+								PortConfigProtocol protocol = EnumUtil.fromString(PortConfigProtocol.class, scheme);
+								portConfig.withProtocol(protocol);
+								portConfig.withTargetPort(Convert.toInt(port, 0));
+								portConfig.withPublishedPort(Convert.toInt(port, 0));
+								return portConfig;
+							})
+							.filter(Objects::nonNull)
+							.collect(Collectors.toList());
+					endpointSpec.withPorts(portConfigs);
+				}
+				serviceSpec.withEndpointSpec(endpointSpec);
+			}
+			String serviceId = (String) parameter.get("serviceId");
+			String version = (String) parameter.get("version");
+			if (StrUtil.isNotEmpty(serviceId)) {
+				UpdateServiceCmd updateServiceCmd = dockerClient.updateServiceCmd(serviceId, serviceSpec);
+				updateServiceCmd.withVersion(Convert.toLong(version, 0L));
+				updateServiceCmd.exec();
+			} else {
+				CreateServiceCmd createServiceCmd = dockerClient.createServiceCmd(serviceSpec);
+				createServiceCmd.exec();
+			}
+		} finally {
+			IoUtil.close(dockerClient);
+		}
+	}
+
+	public void removeServiceCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			String serviceId = (String) parameter.get("serviceId");
+			RemoveServiceCmd removeServiceCmd = dockerClient.removeServiceCmd(serviceId);
+			removeServiceCmd.exec();
+		} finally {
+			IoUtil.close(dockerClient);
+		}
 	}
 
 	private List<JSONObject> listTasksCmd(Map<String, Object> parameter) {
