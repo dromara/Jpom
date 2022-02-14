@@ -458,7 +458,7 @@ export default {
       if (ports) {
         this.temp = { ...this.temp, exposedPorts: ports };
       }
-      if (ports) {
+      if (mounts) {
         this.temp = { ...this.temp, volumes: mounts };
       }
     },
