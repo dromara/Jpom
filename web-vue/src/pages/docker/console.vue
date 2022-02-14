@@ -17,7 +17,7 @@
       </a-menu>
     </a-layout-sider>
     <!-- style="{ background: '#fff', padding: '10px' }"  -->
-    <a-layout class="layout-content">
+    <a-layout class="layout-content drawer-layout-content">
       <!-- <a-layout-header :style="{ background: '#fff', padding: 0 }" /> -->
       <!-- :style="{ margin: '24px 16px 0' }" -->
       <a-layout-content>

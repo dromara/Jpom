@@ -18,7 +18,7 @@
       </a-tooltip>
 
       <a-tooltip slot="status" slot-scope="text, item" placement="topLeft" :title="`节点状态：${text} 节点可用性：${item.spec ? item.spec.availability || '' : ''}`">
-        <a-tag :color="(item.spec && item.spec.availability) === 'ACTIVE' ? 'green' : 'red'">
+        <a-tag :color="(item.spec && item.spec.availability) === 'ACTIVE' && item.status && item.status.state === 'READY' ? 'green' : 'red'">
           {{ text }}
           <template v-if="item.spec">{{ item.spec.availability }}</template>
         </a-tag>

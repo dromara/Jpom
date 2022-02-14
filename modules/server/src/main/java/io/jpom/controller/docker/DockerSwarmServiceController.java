@@ -9,9 +9,7 @@ import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.docker.DockerSwarmInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -61,5 +59,28 @@ public class DockerSwarmServiceController extends BaseServerController {
 		map.put("state", taskState);
 		List<JSONObject> listSwarmNodes = (List<JSONObject>) plugin.execute("listTasks", map);
 		return new JsonMessage<>(200, "", listSwarmNodes);
+	}
+
+	@GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DEL)
+	public JsonMessage<List<JSONObject>> del(@ValidatorItem String id, @ValidatorItem String serviceId) throws Exception {
+		//
+		IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
+		Map<String, Object> map = dockerInfoService.getBySwarmPluginMap(id, getRequest());
+		map.put("serviceId", serviceId);
+		plugin.execute("removeService", map);
+		return new JsonMessage<>(200, "删除服务成功");
+	}
+
+	@PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EDIT)
+	public JsonMessage<List<JSONObject>> edit(@RequestBody JSONObject jsonObject) throws Exception {
+		//
+		String id = jsonObject.getString("id");
+		IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
+		Map<String, Object> map = dockerInfoService.getBySwarmPluginMap(id, getRequest());
+		map.putAll(jsonObject);
+		plugin.execute("updateService", map);
+		return new JsonMessage<>(200, "修改服务成功");
 	}
 }

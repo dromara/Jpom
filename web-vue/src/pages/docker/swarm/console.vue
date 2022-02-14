@@ -14,7 +14,7 @@
       </a-menu>
     </a-layout-sider>
 
-    <a-layout class="layout-content">
+    <a-layout class="layout-content drawer-layout-content">
       <a-layout-content>
         <swarm-node v-if="menuKey === 'node'" :id="this.id" />
         <swarm-service v-if="menuKey === 'server'" :id="this.id" />

@@ -200,6 +200,10 @@ export default {
   margin: 10px 10px 0;
   padding: 15px 15px 0;
   background: #fff;
-  min-height: 280px;
+  /* min-height: 280px; */
+}
+.drawer-layout-content {
+  min-height: calc(100vh - 85px);
+  overflow-y: auto;
 }
 </style>

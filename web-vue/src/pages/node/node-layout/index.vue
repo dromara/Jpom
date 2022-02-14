@@ -21,7 +21,7 @@
       </a-menu>
     </a-layout-sider>
     <!-- 节点管理的各个组件 -->
-    <a-layout-content class="layout-content jpom-node-content">
+    <a-layout-content class="layout-content jpom-node-content drawer-layout-content">
       <welcome v-if="currentId === 'welcome'" :node="node" />
       <project-list v-if="currentId === 'manageList'" :node="node" />
       <jdk-list v-if="currentId === 'jdkList'" :node="node" />
@@ -169,10 +169,6 @@ export default {
 <style scoped lang="stylus">
 .node-sider {
   /* height: calc(100vh - 80px); */
-  min-height: calc(100vh - 85px);
-  overflow-y: auto;
-}
-.layout-content {
   min-height: calc(100vh - 85px);
   overflow-y: auto;
 }
