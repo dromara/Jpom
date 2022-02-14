@@ -7,37 +7,9 @@
           <a-input v-model="listQuery['taskName']" placeholder="任务名称" class="search-input-item" />
           <a-input v-model="listQuery['taskId']" placeholder="任务id" class="search-input-item" />
           <a-input v-model="listQuery['taskNode']" placeholder="节点id" class="search-input-item" />
-          <!-- Note: detail description about taskState, please @see https://docs.docker.com/engine/swarm/how-swarm-mode-works/swarm-task-states/ -->
-          <!-- reference Java class: com.github.dockerjava.api.model.TaskState -->
+
           <a-select show-search option-filter-prop="children" v-model="listQuery['taskState']" allowClear placeholder="状态" class="search-input-item">
-            <!-- NEW: The task was initialized. -->
-            <a-select-option key="NEW">新建状态</a-select-option>
-            <a-select-option key="ALLOCATED">已分配</a-select-option>
-            <!-- PENDING: Resources for the task were allocated. -->
-            <a-select-option key="PENDING">待处理</a-select-option>
-            <!-- ASSIGNED: Docker assigned the task to nodes. -->
-            <a-select-option key="ASSIGNED">已分配</a-select-option>
-            <!-- ACCEPTED: The task was accepted by a worker node. If a worker node rejects the task, the state changes to REJECTED. -->
-            <a-select-option key="ACCEPTED">处理中</a-select-option>
-            <!-- PREPARING: Docker is preparing the task. -->
-            <a-select-option key="PREPARING">准备中</a-select-option>
-            <a-select-option key="READY">准备</a-select-option>
-            <!-- STARTING: Docker is starting the task. -->
-            <a-select-option key="STARTING">开始执行任务</a-select-option>
-            <!-- RUNNING: The task is executing. -->
-            <a-select-option key="RUNNING">执行任务中</a-select-option>
-            <!-- COMPLETE: The task exited without an error code. -->
-            <a-select-option key="COMPLETE">执行成功</a-select-option>
-            <!-- SHUTDOWN: Docker requested the task to shut down. -->
-            <a-select-option key="SHUTDOWN">停止</a-select-option>
-            <!-- FAILED: The task exited with an error code. -->
-            <a-select-option key="FAILED">执行失败</a-select-option>
-            <!-- REJECTED: The worker node rejected the task. -->
-            <a-select-option key="REJECTED">拒绝</a-select-option>
-            <!-- REMOVE: The task is not terminal but the associated service was removed or scaled down. -->
-            <a-select-option key="REMOVE">移除</a-select-option>
-            <!-- ORPHANED: The node was down for too long. -->
-            <a-select-option key="ORPHANED">已失联</a-select-option>
+            <a-select-option :key="key" v-for="(item, key) in TASK_STATE">{{ item }}- {{ key }}</a-select-option>
           </a-select>
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
         </a-space>
@@ -46,32 +18,32 @@
         <span>{{ text }}</span>
       </a-tooltip>
 
-      <a-tooltip slot="status" slot-scope="text, item" placement="topLeft" :title="`节点状态：${text} 节点可用性：${item.spec ? item.spec.availability || '' : ''}`">
-        <a-tag :color="(item.spec && item.spec.availability) === 'ACTIVE' ? 'green' : 'red'">
-          {{ text }}
-          <template v-if="item.spec">{{ item.spec.availability }}</template>
-        </a-tag>
-      </a-tooltip>
-      <!-- 角色显示 -->
-      <a-tooltip
-        slot="role"
-        slot-scope="text, item"
-        placement="topLeft"
-        :title="`角色：${text} ${item.managerStatus && item.managerStatus.reachability === 'REACHABLE' ? '管理状态：' + item.managerStatus.reachability : ''}`"
-      >
-        <a-tag :color="`${item.managerStatus && item.managerStatus.reachability === 'REACHABLE' ? 'green' : ''}`">
-          {{ text }}
-        </a-tag>
-      </a-tooltip>
       <a-tooltip slot="address" slot-scope="text, item" placement="topLeft" :title="text">
         <a-icon v-if="item.managerStatus && item.managerStatus.leader" type="cloud-server" />
         {{ text }}
       </a-tooltip>
-      <a-tooltip slot="desiredState" slot-scope="text, item" placement="topLeft" :title="item.status && item.status.err">
-        <a-tag :color="`${item.status && item.status.err ? 'orange' : ''}`">
+      <a-popover :title="`状态信息：${TASK_STATE[text]}`" slot="desiredState" slot-scope="text, item" placement="topLeft">
+        <template slot="content">
+          <p>
+            当前状态：<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
+          </p>
+          <p v-if="item.status && item.status.err">错误信息：{{ item.status.err }}</p>
+          <p v-if="item.status && item.status.state">
+            状态：<a-tag>{{ item.status.state }}</a-tag>
+          </p>
+
+          <p v-if="item.status && item.status.message">
+            信息：<a-tag>{{ item.status.message }} </a-tag>
+          </p>
+          <p v-if="item.status && item.status.timestamp">
+            更新时间：<a-tag>{{ parseTime(item.status.timestamp) }} </a-tag>
+          </p>
+        </template>
+
+        <a-tag :color="`${item.status && item.status.err ? 'orange' : text === 'RUNNING' ? 'green' : ''}`">
           {{ text }}
         </a-tag>
-      </a-tooltip>
+      </a-popover>
 
       <a-tooltip slot="os" slot-scope="text, item" placement="topLeft" :title="text">
         <span>
@@ -80,7 +52,7 @@
       </a-tooltip>
       <a-tooltip slot="updatedAt" slot-scope="text, item" placement="topLeft" :title="`修改时间：${text} 创建时间：${item.createdAt}`">
         <span>
-          {{ text }}
+          {{ parseTime(text) }}
         </span>
       </a-tooltip>
 
@@ -116,8 +88,8 @@
 </template>
 
 <script>
-import { dockerSwarmServicesTaskList, dockerSwarmNodeLeave, dockerSwarmNodeUpdate } from "@/api/docker-swarm";
-
+import { dockerSwarmServicesTaskList, dockerSwarmNodeLeave, dockerSwarmNodeUpdate, TASK_STATE } from "@/api/docker-swarm";
+import { parseTime } from "@/utils/time";
 export default {
   components: {},
   props: {
@@ -128,6 +100,7 @@ export default {
   },
   data() {
     return {
+      TASK_STATE,
       loading: false,
       listQuery: {},
       list: [],
@@ -161,9 +134,11 @@ export default {
         {
           title: "修改时间",
           dataIndex: "updatedAt",
-
+          sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
           ellipsis: true,
           scopedSlots: { customRender: "updatedAt" },
+          sortDirections: ["descend", "ascend"],
+          defaultSortOrder: "descend",
           width: 180,
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 120 },
@@ -175,6 +150,7 @@ export default {
     this.loadData();
   },
   methods: {
+    parseTime,
     // 加载数据
     loadData() {
       this.loading = true;
