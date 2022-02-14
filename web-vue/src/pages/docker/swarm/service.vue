@@ -3,12 +3,8 @@
     <a-table :data-source="list" size="middle" :columns="columns" bordered :pagination="false" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['nodeId']" placeholder="id" class="search-input-item" />
-          <a-input v-model="listQuery['nodeName']" placeholder="名称" class="search-input-item" />
-          <a-select show-search option-filter-prop="children" v-model="listQuery['nodeRole']" allowClear placeholder="角色" class="search-input-item">
-            <a-select-option key="worker">工作节点</a-select-option>
-            <a-select-option key="manager">管理节点</a-select-option>
-          </a-select>
+          <a-input v-model="listQuery['serviceId']" placeholder="id" class="search-input-item" />
+          <a-input v-model="listQuery['serviceName']" placeholder="名称" class="search-input-item" />
 
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
         </a-space>
@@ -50,32 +46,23 @@
         </span>
       </a-tooltip>
 
-      <template slot="operation" slot-scope="text, record">
+      <a-tooltip slot="replicas" slot-scope="text, record" placement="topLeft" :title="text" @click="handleTask(record)">
+        <a-tag>{{ text }}</a-tag>
+      </a-tooltip>
+
+      <!-- <template slot="operation" slot-scope="text, record">
         <a-space>
           <template v-if="record.managerStatus && record.managerStatus.leader"> - </template>
           <template v-else>
             <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
             <a-button size="small" type="danger" @click="handleLeava(record)">剔除</a-button>
           </template>
-
-          <!-- <template v-else>
-            <a-button size="small" type="danger" v-if="!item.managerStatus.leader" @click="handleLeava(record)">剔除</a-button>
-          </template> -->
-          <!-- <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-            <a-menu slot="overlay">
-              <a-menu-item> </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
-              </a-menu-item>
-            </a-menu></a-dropdown
-          > -->
         </a-space>
-      </template>
+      </template> -->
     </a-table>
     <!-- 编辑节点 -->
     <a-modal v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <!-- <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="角色" prop="role">
           <a-radio-group name="role" v-model="temp.role">
             <a-radio value="WORKER"> 工作节点</a-radio>
@@ -89,16 +76,20 @@
             <a-radio value="DRAIN"> 排空 </a-radio>
           </a-radio-group>
         </a-form-model-item>
-      </a-form-model>
+      </a-form-model> -->
+    </a-modal>
+    <!-- 查看任务 -->
+    <a-modal v-model="taskVisible" title="查看任务" width="80vw" :footer="null" :maskClosable="false">
+      <swarm-task v-if="taskVisible" :id="this.id" :serviceId="this.temp.id" />
     </a-modal>
   </div>
 </template>
 
 <script>
-import { dockerSwarmNodeList, dockerSwarmNodeLeave, dockerSwarmNodeUpdate } from "@/api/docker-swarm";
-
+import { dockerSwarmServicesList, dockerSwarmNodeLeave, dockerSwarmNodeUpdate } from "@/api/docker-swarm";
+import SwarmTask from "./task";
 export default {
-  components: {},
+  components: { SwarmTask },
   props: {
     id: {
       type: String,
@@ -112,26 +103,18 @@ export default {
       temp: {},
       editVisible: false,
       initSwarmVisible: false,
+      taskVisible: false,
       rules: {
         role: [{ required: true, message: "请选择节点角色", trigger: "blur" }],
         availability: [{ required: true, message: "请选择节点状态", trigger: "blur" }],
       },
       columns: [
-        { title: "节点Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "主机名", dataIndex: "description.hostname", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true, scopedSlots: { customRender: "address" } },
-        { title: "状态", width: 140, dataIndex: "status.state", ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "角色", width: 110, dataIndex: "spec.role", ellipsis: true, scopedSlots: { customRender: "role" } },
+        { title: "服务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "spec.name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "模式", dataIndex: "spec.mode.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
+        { title: "副本数", dataIndex: "spec.mode.replicated.replicas", width: 90, ellipsis: true, scopedSlots: { customRender: "replicas" } },
+        { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
 
-        { title: "系统类型", width: 140, align: "center", dataIndex: "description.platform.os", ellipsis: true, scopedSlots: { customRender: "os" } },
-        // {
-        //   title: "创建时间",
-        //   dataIndex: "createdAt",
-
-        //   ellipsis: true,
-        //   scopedSlots: { customRender: "tooltip" },
-        //   width: 170,
-        // },
         {
           title: "修改时间",
           dataIndex: "updatedAt",
@@ -154,12 +137,17 @@ export default {
       this.loading = true;
 
       this.listQuery.id = this.id;
-      dockerSwarmNodeList(this.listQuery).then((res) => {
+      dockerSwarmServicesList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
         this.loading = false;
       });
+    },
+    //  任务
+    handleTask(record) {
+      this.taskVisible = true;
+      this.temp = record;
     },
     handleEdit(record) {
       this.editVisible = true;

@@ -93,3 +93,27 @@ export function dockerSwarmNodeLeave(params) {
     params: params,
   });
 }
+
+/**
+ * 容器集群服务列表
+ * @param {JSON} params
+ */
+export function dockerSwarmServicesList(params) {
+  return axios({
+    url: "/docker-swarm-service/list",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 容器集群服务任务列表
+ * @param {JSON} params
+ */
+export function dockerSwarmServicesTaskList(params) {
+  return axios({
+    url: "/docker-swarm-service/task-list",
+    method: "post",
+    data: params,
+  });
+}

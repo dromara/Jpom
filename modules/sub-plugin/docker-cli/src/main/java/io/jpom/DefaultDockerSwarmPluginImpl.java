@@ -74,10 +74,65 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 			case "removeSwarmNode":
 				this.removeSwarmNodeCmd(parameter);
 				return null;
+			case "listServices":
+				return this.listServicesCmd(parameter);
+			case "listTasks":
+				return this.listTasksCmd(parameter);
 			default:
 				break;
 		}
 		return null;
+	}
+
+	private List<JSONObject> listTasksCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			ListTasksCmd listTasksCmd = dockerClient.listTasksCmd();
+			String serviceId = (String) parameter.get("serviceId");
+			String id = (String) parameter.get("id");
+			if (StrUtil.isNotEmpty(serviceId)) {
+				listTasksCmd.withServiceFilter(serviceId);
+			}
+			if (StrUtil.isNotEmpty(id)) {
+				listTasksCmd.withIdFilter(id);
+			}
+			String name = (String) parameter.get("name");
+			if (StrUtil.isNotEmpty(name)) {
+				listTasksCmd.withNameFilter(name);
+			}
+			String node = (String) parameter.get("node");
+			if (StrUtil.isNotEmpty(node)) {
+				listTasksCmd.withNodeFilter(node);
+			}
+			String state = (String) parameter.get("state");
+			if (StrUtil.isNotEmpty(state)) {
+				TaskState taskState = EnumUtil.fromString(TaskState.class, state);
+				listTasksCmd.withStateFilter(taskState);
+			}
+			List<Task> exec = listTasksCmd.exec();
+			return exec.stream().map(swarmNode -> (JSONObject) JSONObject.toJSON(swarmNode)).collect(Collectors.toList());
+		} finally {
+			IoUtil.close(dockerClient);
+		}
+	}
+
+	public List<JSONObject> listServicesCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			ListServicesCmd listServicesCmd = dockerClient.listServicesCmd();
+			String id = (String) parameter.get("id");
+			String name = (String) parameter.get("name");
+			if (StrUtil.isNotEmpty(id)) {
+				listServicesCmd.withIdFilter(CollUtil.newArrayList(id));
+			}
+			if (StrUtil.isNotEmpty(name)) {
+				listServicesCmd.withNameFilter(CollUtil.newArrayList(name));
+			}
+			List<Service> exec = listServicesCmd.exec();
+			return exec.stream().map(swarmNode -> (JSONObject) JSONObject.toJSON(swarmNode)).collect(Collectors.toList());
+		} finally {
+			IoUtil.close(dockerClient);
+		}
 	}
 
 	private void removeSwarmNodeCmd(Map<String, Object> parameter) {

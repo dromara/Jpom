@@ -31,6 +31,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -47,6 +48,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -205,4 +207,48 @@ public class TestSwarm {
 		joinSwarmCmd.exec();
 	}
 
+	@Test
+	public void testService() {
+		DockerClient client = this.client(node1);
+		ListServicesCmd listServicesCmd = client.listServicesCmd();
+
+		List<Service> exec = listServicesCmd.exec();
+		JSONArray toJSON = (JSONArray) JSONObject.toJSON(exec);
+		System.out.println(toJSON.toString());
+	}
+
+	@Test
+	public void testServiceInspect() {
+		DockerClient client = this.client(node1);
+		InspectServiceCmd inspectServiceCmd = client.inspectServiceCmd("esjx0f126tvvicfizymdxymxq");
+
+		Service exec = inspectServiceCmd.exec();
+
+		System.out.println(exec);
+	}
+
+	@Test
+	public void testServiceLog() throws InterruptedException {
+		DockerClient client = this.client(node1);
+		LogSwarmObjectCmd swarmObjectCmd = client.logServiceCmd("esjx0f126tvvicfizymdxymxq");
+		swarmObjectCmd.withDetails(true);
+		swarmObjectCmd.withStderr(true);
+		swarmObjectCmd.withStdout(true);
+		swarmObjectCmd.exec(new ResultCallback.Adapter<Frame>() {
+			@Override
+			public void onNext(Frame object) {
+				String s = new String(object.getPayload(), StandardCharsets.UTF_8);
+				System.out.print(s);
+			}
+		}).awaitCompletion();
+	}
+
+	@Test
+	public void tsetTask() {
+		DockerClient client = this.client(node1);
+		ListTasksCmd listTasksCmd = client.listTasksCmd();
+		listTasksCmd.withServiceFilter("esjx0f126tvvicfizymdxymxq");
+		List<Task> exec = listTasksCmd.exec();
+		System.out.println(exec);
+	}
 }

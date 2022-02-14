@@ -252,7 +252,7 @@ public class DockerSwarmInfoController extends BaseServerController {
 			String nodeId, String nodeName, String nodeRole) throws Exception {
 		//
 		IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> map = this.getPluginMap(id);
+		Map<String, Object> map = dockerInfoService.getBySwarmPluginMap(id, getRequest());
 		map.put("id", nodeId);
 		map.put("name", nodeName);
 		map.put("role", nodeRole);
@@ -260,15 +260,6 @@ public class DockerSwarmInfoController extends BaseServerController {
 		return new JsonMessage<>(200, "", listSwarmNodes);
 	}
 
-	private Map<String, Object> getPluginMap(String id) {
-		HttpServletRequest request = getRequest();
-		DockerSwarmInfoMode swarmInfoMode1 = dockerSwarmInfoService.getByKey(id, request);
-		Assert.notNull(swarmInfoMode1, "没有对应的集群");
-		//
-		DockerInfoModel managerSwarmDocker = dockerInfoService.getByKey(swarmInfoMode1.getDockerId(), request);
-		Assert.notNull(managerSwarmDocker, "对应的 docker 不存在");
-		return managerSwarmDocker.toParameter();
-	}
 
 	/**
 	 * 修改节点信息
@@ -281,7 +272,7 @@ public class DockerSwarmInfoController extends BaseServerController {
 	public JsonMessage<String> update(@ValidatorItem String id, @ValidatorItem String nodeId, @ValidatorItem String availability, @ValidatorItem String role) throws Exception {
 		//
 		IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> map = this.getPluginMap(id);
+		Map<String, Object> map = dockerInfoService.getBySwarmPluginMap(id, getRequest());
 		map.put("nodeId", nodeId);
 		map.put("availability", availability);
 		map.put("role", role);
@@ -313,7 +304,7 @@ public class DockerSwarmInfoController extends BaseServerController {
 			plugin.execute("leaveSwarm", parameter, JSONObject.class);
 		}
 		{
-			Map<String, Object> map = this.getPluginMap(id);
+			Map<String, Object> map = dockerInfoService.getBySwarmPluginMap(id, getRequest());
 			map.put("nodeId", nodeId);
 			plugin.execute("removeSwarmNode", map);
 		}
