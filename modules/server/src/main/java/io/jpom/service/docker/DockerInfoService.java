@@ -42,8 +42,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -201,15 +203,38 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 			dockerInfoModel.setSwarmNodeId(swarmNodeId);
 		}
 		dockerInfoModel.setId(joinSwarmDocker.getId());
-		String tags = joinSwarmDocker.getTags();
-		// 处理标签
-		List<String> allTag = StrUtil.splitTrim(tags, StrUtil.COMMA);
-		allTag = ObjectUtil.defaultIfNull(allTag, new ArrayList<>());
-		if (!allTag.contains(tag)) {
-			allTag.add(tag);
-		}
-		dockerInfoModel.setTags(CollUtil.join(allTag, StrUtil.COMMA));
 		this.update(dockerInfoModel);
+	}
+
+	/**
+	 * 更新集群 标签
+	 *
+	 * @param swarmId 集群ID
+	 * @param tag     新增标签
+	 * @param delTag  删除标签
+	 */
+	public void updateDockerSwarmTag(String swarmId, String tag, String delTag) {
+		DockerInfoModel queryWhere = new DockerInfoModel();
+		queryWhere.setSwarmId(swarmId);
+		List<DockerInfoModel> dockerInfoModels = this.listByBean(queryWhere);
+		for (DockerInfoModel dockerInfoModel : dockerInfoModels) {
+			// 处理标签
+			Collection<String> allTag = StrUtil.splitTrim(dockerInfoModel.getTags(), StrUtil.COLON);
+			allTag = ObjectUtil.defaultIfNull(allTag, new ArrayList<>());
+			if (StrUtil.isNotEmpty(delTag)) {
+				allTag.remove(delTag);
+			}
+			if (!allTag.contains(tag)) {
+				allTag.add(tag);
+			}
+			allTag = allTag.stream().filter(StrUtil::isNotEmpty).collect(Collectors.toSet());
+			String newTags = CollUtil.join(allTag, StrUtil.COLON, StrUtil.COLON, StrUtil.COLON);
+			//
+			Entity where = Entity.create().set("id", dockerInfoModel.getId());
+			Entity update = Entity.create().set("tags", newTags);
+			this.update(update, where);
+		}
+
 	}
 
 	/**

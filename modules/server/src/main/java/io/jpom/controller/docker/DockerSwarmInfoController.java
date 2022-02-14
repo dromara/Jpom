@@ -82,7 +82,8 @@ public class DockerSwarmInfoController extends BaseServerController {
 		String id = data.getString("id");
 		this.check(null, id);
 		this.updateData(data, name, tag, dockerSwarmInfoService::insert, dockerInfoModel1);
-
+		//  更新集群标签
+		dockerInfoService.updateDockerSwarmTag(id, tag, null);
 		//
 		return JsonMessage.getString(200, "集群创建成功");
 	}
@@ -137,11 +138,13 @@ public class DockerSwarmInfoController extends BaseServerController {
 		String swarmId = data.getString("id");
 
 		this.check(id, swarmId);
-
+		//
 		this.updateData(data, name, tag, dockerSwarmInfoMode -> {
 			dockerSwarmInfoMode.setId(id);
 			dockerSwarmInfoService.update(dockerSwarmInfoMode);
 		}, dockerInfoModel1);
+		// 更新集群的 tag
+		dockerInfoService.updateDockerSwarmTag(swarmId, tag, dockerSwarmInfoMode1.getTag());
 		//
 		return JsonMessage.getString(200, "修改成功");
 	}
