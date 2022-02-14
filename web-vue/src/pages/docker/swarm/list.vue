@@ -24,12 +24,12 @@
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" :disabled="parseInt(record.status) !== 1" type="primary" @click="handleNode(record)">节点</a-button>
-          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" :disabled="parseInt(record.status) !== 1" type="primary" @click="handleConsole(record)">控制台</a-button>
+
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
             <a-menu slot="overlay">
-              <a-menu-item> </a-menu-item>
+              <a-menu-item> <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button> </a-menu-item>
               <a-menu-item>
                 <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
               </a-menu-item>
@@ -48,10 +48,21 @@
         <a-form-model-item label="标签" prop="tag"><a-input v-model="temp.tag" placeholder="关联容器标签" /> </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <!-- 节点信息 -->
-    <a-modal v-model="nodeVisible" width="90vw" title="集群节点" :footer="null" :maskClosable="false">
-      <swarm-node ref="swarmNode" :id="this.temp.id" />
-    </a-modal>
+
+    <!-- 控制台 -->
+    <a-drawer
+      :title="`${temp.name} 控制台`"
+      placement="right"
+      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
+      :visible="consoleVisible"
+      @close="
+        () => {
+          this.consoleVisible = false;
+        }
+      "
+    >
+      <console v-if="consoleVisible" :id="temp.id"></console>
+    </a-drawer>
   </div>
 </template>
 
@@ -59,11 +70,12 @@
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { editDockerSwarm, dockerSwarmList, unbindSwarm } from "@/api/docker-swarm";
 import { parseTime } from "@/utils/time";
-import SwarmNode from "./node.vue";
+import { mapGetters } from "vuex";
+import Console from "./console";
 
 export default {
   components: {
-    SwarmNode,
+    Console,
   },
   props: {},
   data() {
@@ -73,7 +85,7 @@ export default {
       list: [],
       temp: {},
       editVisible: false,
-      nodeVisible: false,
+      consoleVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点地址", dataIndex: "nodeAddr", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -100,7 +112,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 190 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 140 },
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
@@ -118,6 +130,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["getCollapsed"]),
     pagination() {
       return {
         total: this.listQuery.total,
@@ -154,14 +167,12 @@ export default {
       this.editVisible = true;
       this.$refs["editForm"]?.resetFields();
     },
-    // 节点
-    handleNode(record) {
+    // 服务
+    handleConsole(record) {
       this.temp = record;
-      this.nodeVisible = true;
-      this.$nextTick(() => {
-        this.$refs.swarmNode.refreshData();
-      });
+      this.consoleVisible = true;
     },
+
     // 提交  数据
     handleEditOk() {
       // 检验表单

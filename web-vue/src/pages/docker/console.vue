@@ -61,9 +61,6 @@ export default {
 };
 </script>
 <style scoped>
-.docker-layout {
-  /* background-color: #fff; */
-}
 .docker-menu {
   height: 100%;
 }

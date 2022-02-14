@@ -40,7 +40,9 @@ import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -248,5 +250,21 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 		update.setSwarmId(StrUtil.EMPTY);
 		update.setSwarmNodeId(StrUtil.EMPTY);
 		this.update(update);
+	}
+
+	/**
+	 * 获取集群 docker 信息
+	 *
+	 * @param id      集群ID
+	 * @param request 请求对象
+	 * @return map
+	 */
+	public Map<String, Object> getBySwarmPluginMap(String id, HttpServletRequest request) {
+		DockerSwarmInfoMode swarmInfoMode1 = dockerSwarmInfoService.getByKey(id, request);
+		Assert.notNull(swarmInfoMode1, "没有对应的集群");
+		//
+		DockerInfoModel managerSwarmDocker = this.getByKey(swarmInfoMode1.getDockerId(), request);
+		Assert.notNull(managerSwarmDocker, "对应的 docker 不存在");
+		return managerSwarmDocker.toParameter();
 	}
 }

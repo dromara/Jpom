@@ -3,13 +3,27 @@
     <a-table :data-source="list" size="middle" :columns="columns" bordered :pagination="false" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery['nodeId']" placeholder="id" class="search-input-item" />
-          <a-input v-model="listQuery['nodeName']" placeholder="名称" class="search-input-item" />
-          <a-select show-search option-filter-prop="children" v-model="listQuery['nodeRole']" allowClear placeholder="角色" class="search-input-item">
-            <a-select-option key="worker">工作节点</a-select-option>
-            <a-select-option key="manager">管理节点</a-select-option>
+          <a-input v-model="listQuery['serviceId']" v-if="!this.serviceId" placeholder="服务id" class="search-input-item" />
+          <a-input v-model="listQuery['taskName']" placeholder="任务名称" class="search-input-item" />
+          <a-input v-model="listQuery['taskId']" placeholder="任务id" class="search-input-item" />
+          <a-input v-model="listQuery['taskNode']" placeholder="节点id" class="search-input-item" />
+          <a-select show-search option-filter-prop="children" v-model="listQuery['taskState']" allowClear placeholder="状态" class="search-input-item">
+            <a-select-option key="NEW">新任务</a-select-option>
+            <a-select-option key="ALLOCATED">已分配</a-select-option>
+            <a-select-option key="PENDING">未决定</a-select-option>
+            <a-select-option key="ASSIGNED">已指定</a-select-option>
+            <a-select-option key="ACCEPTED">公认</a-select-option>
+            <a-select-option key="PREPARING">准备中</a-select-option>
+            <a-select-option key="READY">准备</a-select-option>
+            <a-select-option key="STARTING">开始</a-select-option>
+            <a-select-option key="RUNNING">运行中</a-select-option>
+            <a-select-option key="COMPLETE">完成</a-select-option>
+            <a-select-option key="SHUTDOWN">关闭</a-select-option>
+            <a-select-option key="FAILED">失败</a-select-option>
+            <a-select-option key="REJECTED">拒绝</a-select-option>
+            <a-select-option key="REMOVE">消除</a-select-option>
+            <a-select-option key="ORPHANED">孤儿</a-select-option>
           </a-select>
-
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
         </a-space>
       </template>
@@ -46,32 +60,19 @@
       </a-tooltip>
       <a-tooltip slot="updatedAt" slot-scope="text, item" placement="topLeft" :title="`修改时间：${text} 创建时间：${item.createdAt}`">
         <span>
-          <a-tag>{{ text }}</a-tag>
+          {{ text }}
         </span>
       </a-tooltip>
 
-      <template slot="operation" slot-scope="text, record">
+      <!-- <template slot="operation" slot-scope="text, record">
         <a-space>
           <template v-if="record.managerStatus && record.managerStatus.leader"> - </template>
           <template v-else>
             <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
             <a-button size="small" type="danger" @click="handleLeava(record)">剔除</a-button>
           </template>
-
-          <!-- <template v-else>
-            <a-button size="small" type="danger" v-if="!item.managerStatus.leader" @click="handleLeava(record)">剔除</a-button>
-          </template> -->
-          <!-- <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-            <a-menu slot="overlay">
-              <a-menu-item> </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
-              </a-menu-item>
-            </a-menu></a-dropdown
-          > -->
         </a-space>
-      </template>
+      </template> -->
     </a-table>
     <!-- 编辑节点 -->
     <a-modal v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
@@ -95,7 +96,7 @@
 </template>
 
 <script>
-import { dockerSwarmNodeList, dockerSwarmNodeLeave, dockerSwarmNodeUpdate } from "@/api/docker-swarm";
+import { dockerSwarmServicesTaskList, dockerSwarmNodeLeave, dockerSwarmNodeUpdate } from "@/api/docker-swarm";
 
 export default {
   components: {},
@@ -103,6 +104,7 @@ export default {
     id: {
       type: String,
     },
+    serviceId: { type: String },
   },
   data() {
     return {
@@ -117,13 +119,17 @@ export default {
         availability: [{ required: true, message: "请选择节点状态", trigger: "blur" }],
       },
       columns: [
-        { title: "节点Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "主机名", dataIndex: "description.hostname", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true, scopedSlots: { customRender: "address" } },
-        { title: "状态", width: 140, dataIndex: "status.state", ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "角色", width: 110, dataIndex: "spec.role", ellipsis: true, scopedSlots: { customRender: "role" } },
+        { title: "任务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "节点Id", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "服务ID", dataIndex: "serviceId", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "镜像", dataIndex: "spec.containerSpec.image", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
+        // { title: "副本数", dataIndex: "spec.mode.replicated.replicas", width: 90, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, scopedSlots: { customRender: "tooltip" } },
+        // { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true, scopedSlots: { customRender: "address" } },
+        { title: "状态", width: 140, dataIndex: "desiredState", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "slot", width: 50, dataIndex: "slot", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
-        { title: "系统类型", width: 140, align: "center", dataIndex: "description.platform.os", ellipsis: true, scopedSlots: { customRender: "os" } },
+        // { title: "系统类型", width: 140, align: "center", dataIndex: "description.platform.os", ellipsis: true, scopedSlots: { customRender: "os" } },
         // {
         //   title: "创建时间",
         //   dataIndex: "createdAt",
@@ -138,7 +144,7 @@ export default {
 
           ellipsis: true,
           scopedSlots: { customRender: "updatedAt" },
-          width: 170,
+          width: 180,
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 120 },
       ],
@@ -152,9 +158,11 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true;
-
+      if (this.serviceId) {
+        this.listQuery.serviceId = this.serviceId;
+      }
       this.listQuery.id = this.id;
-      dockerSwarmNodeList(this.listQuery).then((res) => {
+      dockerSwarmServicesTaskList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
