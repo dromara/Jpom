@@ -114,7 +114,7 @@
                 :closable="true"
                 @close="
                   () => {
-                    this.temp.tagsArray = this.temp.tagsArray.filter((tag) => tag !== removedTag);
+                    temp.tagsArray = temp.tagsArray.filter((removedTag) => tag !== removedTag);
                   }
                 "
               >
@@ -328,6 +328,7 @@ export default {
       this.editVisible = true;
       this.uploadFileList = [];
       let tagsArray = (record.tags || "").split(":");
+      // console.log(tagsArray);
       tagsArray = tagsArray.filter((item) => item.length);
       this.temp = { ...this.temp, tagsArray: tagsArray };
       //.tags = (this.temp.tagsArray || []).join(",");
