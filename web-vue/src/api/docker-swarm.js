@@ -69,3 +69,27 @@ export function dockerSwarmNodeList(params) {
     data: params,
   });
 }
+
+/**
+ * 容器集群节点修改
+ * @param {JSON} params
+ */
+export function dockerSwarmNodeUpdate(params) {
+  return axios({
+    url: "/docker-swarm/update",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 容器集群节点剔除
+ * @param {JSON} params
+ */
+export function dockerSwarmNodeLeave(params) {
+  return axios({
+    url: "/docker-swarm/leave",
+    method: "get",
+    params: params,
+  });
+}

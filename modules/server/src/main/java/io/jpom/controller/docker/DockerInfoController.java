@@ -275,11 +275,7 @@ public class DockerInfoController extends BaseServerController {
 		parameter.put("force", true);
 		plugin.execute("leaveSwarm", parameter, JSONObject.class);
 		//
-		DockerInfoModel update = new DockerInfoModel();
-		update.setId(id);
-		update.setSwarmId(StrUtil.EMPTY);
-		update.setSwarmNodeId(StrUtil.EMPTY);
-		dockerInfoService.update(update);
+		dockerInfoService.unbind(id);
 		return new JsonMessage<>(200, "强制解绑成功");
 	}
 }

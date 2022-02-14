@@ -22,20 +22,21 @@
  */
 package io.jpom;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.JoinSwarmCmd;
-import com.github.dockerjava.api.command.LeaveSwarmCmd;
-import com.github.dockerjava.api.command.ListSwarmNodesCmd;
-import com.github.dockerjava.api.model.Swarm;
-import com.github.dockerjava.api.model.SwarmNode;
-import com.github.dockerjava.api.model.SwarmSpec;
+import com.github.dockerjava.api.command.*;
+import com.github.dockerjava.api.model.*;
+import com.github.dockerjava.core.command.RemoveSwarmNodeCmdImpl;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Map;
@@ -67,10 +68,60 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 			case "leaveSwarm":
 				this.leaveSwarmCmd(parameter);
 				return null;
+			case "updateSwarmNode":
+				this.updateSwarmNodeCmd(parameter);
+				return null;
+			case "removeSwarmNode":
+				this.removeSwarmNodeCmd(parameter);
+				return null;
 			default:
 				break;
 		}
 		return null;
+	}
+
+	private void removeSwarmNodeCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			DockerCmdExecFactory dockerCmdExecFactory = (DockerCmdExecFactory) ReflectUtil.getFieldValue(dockerClient, "dockerCmdExecFactory");
+			Assert.notNull(dockerCmdExecFactory, "当前方法不被支持，暂时不能使用");
+			String nodeId = (String) parameter.get("nodeId");
+			RemoveSwarmNodeCmdImpl removeSwarmNodeCmd = new RemoveSwarmNodeCmdImpl(
+					dockerCmdExecFactory.removeSwarmNodeCmdExec(), nodeId);
+			removeSwarmNodeCmd.withForce(true);
+			removeSwarmNodeCmd.exec();
+		} finally {
+			IoUtil.close(dockerClient);
+		}
+	}
+
+	private void updateSwarmNodeCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			String nodeId = (String) parameter.get("nodeId");
+			List<SwarmNode> nodes = dockerClient.listSwarmNodesCmd()
+					.withIdFilter(CollUtil.newArrayList(nodeId)).exec();
+			SwarmNode swarmNode = CollUtil.getFirst(nodes);
+			Assert.notNull(swarmNode, "没有对应的节点");
+			ObjectVersion version = swarmNode.getVersion();
+			Assert.notNull(version, "对应的节点信息不完整不能继续");
+			//
+			String availabilityStr = (String) parameter.get("availability");
+			String roleStr = (String) parameter.get("role");
+			//
+			SwarmNodeAvailability availability = EnumUtil.fromString(SwarmNodeAvailability.class, availabilityStr);
+			SwarmNodeRole role = EnumUtil.fromString(SwarmNodeRole.class, roleStr);
+			UpdateSwarmNodeCmd swarmNodeCmd = dockerClient.updateSwarmNodeCmd();
+			swarmNodeCmd.withSwarmNodeId(nodeId);
+			SwarmNodeSpec swarmNodeSpec = new SwarmNodeSpec();
+			swarmNodeSpec.withAvailability(availability);
+			swarmNodeSpec.withRole(role);
+			swarmNodeCmd.withSwarmNodeSpec(swarmNodeSpec);
+			swarmNodeCmd.withVersion(version.getIndex());
+			swarmNodeCmd.exec();
+		} finally {
+			IoUtil.close(dockerClient);
+		}
 	}
 
 

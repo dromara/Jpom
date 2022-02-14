@@ -2,7 +2,6 @@ package io.jpom.controller.docker;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
@@ -25,7 +24,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -104,7 +106,7 @@ public class DockerSwarmInfoController extends BaseServerController {
 		DockerSwarmInfoMode dockerSwarmInfoMode = infoModeBuilder.build();
 		consumer.accept(dockerSwarmInfoMode);
 		// 更新 docker id
-		this.bindDockerSwarm(dockerInfoModel1, tag, null, id);
+		dockerInfoService.bindDockerSwarm(dockerInfoModel1, tag, null, id);
 	}
 
 	private void check(String id, String swarmId) {
@@ -142,26 +144,6 @@ public class DockerSwarmInfoController extends BaseServerController {
 		}, dockerInfoModel1);
 		//
 		return JsonMessage.getString(200, "修改成功");
-	}
-
-	private void bindDockerSwarm(DockerInfoModel joinSwarmDocker, String tag, JSONObject swarm, String swarmId) {
-		DockerInfoModel dockerInfoModel = new DockerInfoModel();
-		dockerInfoModel.setSwarmId(swarmId);
-		//
-		if (swarm != null) {
-			String swarmNodeId = swarm.getString("nodeID");
-			dockerInfoModel.setSwarmNodeId(swarmNodeId);
-		}
-		dockerInfoModel.setId(joinSwarmDocker.getId());
-		String tags = joinSwarmDocker.getTags();
-		// 处理标签
-		List<String> allTag = StrUtil.splitTrim(tags, StrUtil.COMMA);
-		allTag = ObjectUtil.defaultIfNull(allTag, new ArrayList<>());
-		if (!allTag.contains(tag)) {
-			allTag.add(tag);
-		}
-		dockerInfoModel.setTags(CollUtil.join(allTag, StrUtil.COMMA));
-		dockerInfoService.update(dockerInfoModel);
 	}
 
 	/**
@@ -210,7 +192,7 @@ public class DockerSwarmInfoController extends BaseServerController {
 				Assert.state(optional.isPresent(), "当前 docker 已经加入到其他集群啦");
 				// 绑定数据
 				String managerId = managerSwarmInfo.getString("id");
-				this.bindDockerSwarm(joinSwarmDocker, swarmInfoMode1.getTag(), swarm, managerId);
+				dockerInfoService.bindDockerSwarm(joinSwarmDocker, swarmInfoMode1.getTag(), swarm, managerId);
 				return JsonMessage.getString(200, "集群绑定成功");
 			}
 		}
@@ -231,7 +213,7 @@ public class DockerSwarmInfoController extends BaseServerController {
 		JSONObject swarm = info.getJSONObject("swarm");
 		Assert.notNull(swarm, "获取 docker 集群信息失败:-1");
 		String managerId = managerSwarmInfo.getString("id");
-		this.bindDockerSwarm(joinSwarmDocker, swarmInfoMode1.getTag(), swarm, managerId);
+		dockerInfoService.bindDockerSwarm(joinSwarmDocker, swarmInfoMode1.getTag(), swarm, managerId);
 		return JsonMessage.getString(200, "集群创建成功");
 	}
 
@@ -265,14 +247,9 @@ public class DockerSwarmInfoController extends BaseServerController {
 	public JsonMessage<List<JSONObject>> nodeList(
 			@ValidatorItem String id,
 			String nodeId, String nodeName, String nodeRole) throws Exception {
-		HttpServletRequest request = getRequest();
-		DockerSwarmInfoMode swarmInfoMode1 = dockerSwarmInfoService.getByKey(id, request);
-		Assert.notNull(swarmInfoMode1, "没有对应的集群");
-		DockerInfoModel managerSwarmDocker = dockerInfoService.getByKey(swarmInfoMode1.getDockerId(), request);
-		Assert.notNull(managerSwarmDocker, "对应的 docker 不存在");
 		//
 		IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> map = managerSwarmDocker.toParameter();
+		Map<String, Object> map = this.getPluginMap(id);
 		map.put("id", nodeId);
 		map.put("name", nodeName);
 		map.put("role", nodeRole);
@@ -280,19 +257,65 @@ public class DockerSwarmInfoController extends BaseServerController {
 		return new JsonMessage<>(200, "", listSwarmNodes);
 	}
 
+	private Map<String, Object> getPluginMap(String id) {
+		HttpServletRequest request = getRequest();
+		DockerSwarmInfoMode swarmInfoMode1 = dockerSwarmInfoService.getByKey(id, request);
+		Assert.notNull(swarmInfoMode1, "没有对应的集群");
+		//
+		DockerInfoModel managerSwarmDocker = dockerInfoService.getByKey(swarmInfoMode1.getDockerId(), request);
+		Assert.notNull(managerSwarmDocker, "对应的 docker 不存在");
+		return managerSwarmDocker.toParameter();
+	}
 
-//	/**
-//	 * 退出集群
-//	 *
-//	 * @param id 集群ID
-//	 * @return json
-//	 */
-//	@GetMapping(value = "leave", produces = MediaType.APPLICATION_JSON_VALUE)
-//	@Feature(method = MethodFeature.DEL)
-//	public JsonMessage<String> leave(@ValidatorItem String id) {
-//		HttpServletRequest request = getRequest();
-//		DockerSwarmInfoMode swarmInfoMode1 = dockerSwarmInfoService.getByKey(id, request);
-//		Assert.notNull(swarmInfoMode1, "没有对应的集群");
-//		return new JsonMessage<>(200, "解绑成功");
-//	}
+	/**
+	 * 修改节点信息
+	 *
+	 * @param id 集群ID
+	 * @return json
+	 */
+	@PostMapping(value = "update", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.EXECUTE)
+	public JsonMessage<String> update(@ValidatorItem String id, @ValidatorItem String nodeId, @ValidatorItem String availability, @ValidatorItem String role) throws Exception {
+		//
+		IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
+		Map<String, Object> map = this.getPluginMap(id);
+		map.put("nodeId", nodeId);
+		map.put("availability", availability);
+		map.put("role", role);
+		plugin.execute("updateSwarmNode", map);
+		return new JsonMessage<>(200, "解绑成功");
+	}
+
+	/**
+	 * 退出集群
+	 *
+	 * @param id 集群ID
+	 * @return json
+	 */
+	@GetMapping(value = "leave", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DEL)
+	public JsonMessage<String> leave(@ValidatorItem String id, @ValidatorItem String nodeId) throws Exception {
+		//
+		IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
+		// 查询节点信息
+		DockerInfoModel dockerInfoModel = new DockerInfoModel();
+		dockerInfoModel.setSwarmNodeId(nodeId);
+		List<DockerInfoModel> dockerInfoModels = dockerInfoService.queryList(dockerInfoModel, 2);
+		Assert.state(CollUtil.size(dockerInfoModels) == 1, "当前节点未在系统中绑定或者绑定信息异常,不能操作");
+		//
+		{
+			DockerInfoModel dockerInfoModel1 = CollUtil.getFirst(dockerInfoModels);
+			Map<String, Object> parameter = dockerInfoModel1.toParameter();
+			parameter.put("force", true);
+			plugin.execute("leaveSwarm", parameter, JSONObject.class);
+		}
+		{
+			Map<String, Object> map = this.getPluginMap(id);
+			map.put("nodeId", nodeId);
+			plugin.execute("removeSwarmNode", map);
+		}
+		//
+		dockerInfoService.unbind(id);
+		return new JsonMessage<>(200, "剔除成功");
+	}
 }

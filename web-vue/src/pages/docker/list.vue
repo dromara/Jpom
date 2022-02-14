@@ -50,7 +50,7 @@
           </template>
           <template v-else>
             <a-tooltip>
-              <a-tooltip :title="`${parseInt(record.status) !== 1 ? '已经离线' : '已经创建过集群啦'}`">
+              <a-tooltip :title="`${parseInt(record.status) !== 1 ? '已经离线' : '已经在集群啦'}`">
                 <a-button size="small" disabled type="primary">集群</a-button>
               </a-tooltip>
             </a-tooltip>
@@ -140,7 +140,7 @@
     </a-modal>
     <!-- 创建集群 -->
     <a-modal v-model="initSwarmVisible" title="创建 Docker 集群" @ok="handleSwarm" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form-model ref="initForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="集群名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />
         </a-form-model-item>
@@ -150,7 +150,7 @@
     </a-modal>
     <!-- 加入集群 -->
     <a-modal v-model="joinSwarmVisible" title="加入 Docker 集群" @ok="handleSwarmJoin" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form-model ref="joinForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="选择集群" prop="swarmId">
           <a-select
             show-search
@@ -416,7 +416,13 @@ export default {
     },
     // 强制解绑
     handleLeaveForce(record) {
-      const html = "<h1 style='color:red;'>真的要强制退出集群吗？</h1><ul style='color:red;'>" + "<li>请提前备份数据再操作奥</li>" + "<li>操作不能撤回奥</li>" + " </ul>";
+      const html =
+        "<h1 style='color:red;'>真的要强制退出集群吗？</h1> " +
+        "<h3 style='color:red;'>如果当前集群还存在可能出现数据不一致问题奥</h3> " +
+        "<ul style='color:red;'>" +
+        "<li>请提前备份数据再操作奥</li>" +
+        "<li>操作不能撤回奥</li>" +
+        " </ul>";
       const h = this.$createElement;
       this.$confirm({
         title: "系统提示",
@@ -480,7 +486,7 @@ export default {
         dockerId: record.id,
       };
       this.initSwarmVisible = true;
-      this.$refs["editForm"]?.resetFields();
+      this.$refs["initForm"]?.resetFields();
     },
     // 加入集群
     joinSwarm(record) {
@@ -490,11 +496,11 @@ export default {
           dockerId: record.id,
         };
         this.joinSwarmVisible = true;
-        this.$refs["editForm"]?.resetFields();
+        this.$refs["joinForm"]?.resetFields();
       });
     },
     handleSwarm() {
-      this.$refs["editForm"].validate((valid) => {
+      this.$refs["initForm"].validate((valid) => {
         if (!valid) {
           return false;
         }
@@ -512,7 +518,7 @@ export default {
     },
     // 处理加入集群
     handleSwarmJoin() {
-      this.$refs["editForm"].validate((valid) => {
+      this.$refs["joinForm"].validate((valid) => {
         if (!valid) {
           return false;
         }

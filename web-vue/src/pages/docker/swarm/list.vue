@@ -50,7 +50,7 @@
     </a-modal>
     <!-- 节点信息 -->
     <a-modal v-model="nodeVisible" width="90vw" title="集群节点" :footer="null" :maskClosable="false">
-      <swarm-node :id="this.temp.id" />
+      <swarm-node ref="swarmNode" :id="this.temp.id" />
     </a-modal>
   </div>
 </template>
@@ -158,6 +158,9 @@ export default {
     handleNode(record) {
       this.temp = record;
       this.nodeVisible = true;
+      this.$nextTick(() => {
+        this.$refs.swarmNode.refreshData();
+      });
     },
     // 提交  数据
     handleEditOk() {
@@ -183,7 +186,7 @@ export default {
     handleUnbind(record) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要解绑该集群么？解绑至少删除在本系统的关联数据,不会删除容器里面数据",
+        content: "真的要解绑该集群么？解绑只删除在本系统的关联数据,不会删除容器里面数据",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
