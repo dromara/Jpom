@@ -227,8 +227,9 @@ public class BuildInfoController extends BaseServerController {
 			this.formatLocalCommand(jsonObject);
 			jsonObject.put("releaseMethodDataId", "LocalCommand");
 		} else if (releaseMethod1 == BuildReleaseMethod.DockerImage) {
-			String dockerTag = this.formatDocker(jsonObject);
-			jsonObject.put("releaseMethodDataId", "DockerImage");
+			// dockerSwarmId default
+			String dockerSwarmId = this.formatDocker(jsonObject);
+			jsonObject.put("releaseMethodDataId", dockerSwarmId);
 		}
 		// 检查关联数据ID
 		buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));
@@ -324,7 +325,14 @@ public class BuildInfoController extends BaseServerController {
 		}
 		String dockerTag = jsonObject.getString("dockerTag");
 		Assert.hasText(dockerTag, "请填写镜像标签");
-		return fromTag;
+		//
+		String dockerSwarmId = jsonObject.getString("dockerSwarmId");
+		if (StrUtil.isEmpty(dockerSwarmId)) {
+			return "DockerImage";
+		}
+		String dockerSwarmServiceName = jsonObject.getString("dockerSwarmServiceName");
+		Assert.hasText(dockerSwarmServiceName, "请填写集群中的服务名");
+		return dockerSwarmId;
 	}
 
 	private void formatLocalCommand(JSONObject jsonObject) {

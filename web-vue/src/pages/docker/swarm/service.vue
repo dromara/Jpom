@@ -305,13 +305,13 @@
             </a-tab-pane>
             <a-tab-pane key="update" tab="升级策略" v-if="temp.update">
               <a-form-model-item label="并行度" prop="parallelism">
-                <a-input-number style="width: 80%" :min="0" v-model="temp.update.parallelism" placeholder="并行度" />
+                <a-input-number style="width: 80%" :min="0" v-model="temp.update.parallelism" placeholder="并行度,同一时间升级的容器数量" />
               </a-form-model-item>
               <a-form-model-item label="延迟" prop="delay">
-                <a-input-number style="width: 80%" :min="1" v-model="temp.update.delay" placeholder="延迟" />
+                <a-input-number style="width: 80%" :min="1" v-model="temp.update.delay" placeholder="延迟,容器升级间隔时间" />
               </a-form-model-item>
               <a-form-model-item label="失败率" prop="maxFailureRatio">
-                <a-input-number style="width: 80%" :min="0" v-model="temp.update.maxFailureRatio" placeholder="失败率" />
+                <a-input-number style="width: 80%" :min="0" v-model="temp.update.maxFailureRatio" placeholder="失败率,更新期间允许的失败率" />
               </a-form-model-item>
               <a-form-model-item label="失败策略" prop="failureAction">
                 <a-radio-group name="failureAction" v-model="temp.update.failureAction">
@@ -327,18 +327,18 @@
                 </a-radio-group>
               </a-form-model-item>
               <a-form-model-item label="监控" prop="monitor">
-                <a-input-number style="width: 80%" :min="1" v-model="temp.update.monitor" placeholder="延迟" />
+                <a-input-number style="width: 80%" :min="1" v-model="temp.update.monitor" placeholder="更新完成后确实成功的时间" />
               </a-form-model-item>
             </a-tab-pane>
             <a-tab-pane key="rollback" tab="回滚策略" v-if="temp.rollback">
               <a-form-model-item label="并行度" prop="parallelism">
-                <a-input-number style="width: 80%" :min="0" v-model="temp.rollback.parallelism" placeholder="并行度" />
+                <a-input-number style="width: 80%" :min="0" v-model="temp.rollback.parallelism" placeholder="并行度,同一时间升级的容器数量" />
               </a-form-model-item>
               <a-form-model-item label="延迟" prop="delay">
                 <a-input-number style="width: 80%" :min="1" v-model="temp.rollback.delay" placeholder="延迟" />
               </a-form-model-item>
               <a-form-model-item label="失败率" prop="maxFailureRatio">
-                <a-input-number style="width: 80%" :min="0" v-model="temp.rollback.maxFailureRatio" placeholder="失败率" />
+                <a-input-number style="width: 80%" :min="0" v-model="temp.rollback.maxFailureRatio" placeholder="失败率,更新期间允许的失败率" />
               </a-form-model-item>
               <a-form-model-item label="失败策略" prop="failureAction">
                 <a-radio-group name="failureAction" v-model="temp.rollback.failureAction">
@@ -354,7 +354,7 @@
                 </a-radio-group>
               </a-form-model-item>
               <a-form-model-item label="监控" prop="monitor">
-                <a-input-number style="width: 80%" :min="1" v-model="temp.rollback.monitor" placeholder="延迟" />
+                <a-input-number style="width: 80%" :min="1" v-model="temp.rollback.monitor" placeholder="更新完成后确实成功的时间" />
               </a-form-model-item>
             </a-tab-pane>
           </a-tabs>

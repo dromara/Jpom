@@ -267,4 +267,19 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
 		Assert.notNull(managerSwarmDocker, "对应的 docker 不存在");
 		return managerSwarmDocker.toParameter();
 	}
+
+	/**
+	 * 获取集群 docker 信息
+	 *
+	 * @param id 集群ID
+	 * @return map
+	 */
+	public Map<String, Object> getBySwarmPluginMap(String id) {
+		DockerSwarmInfoMode swarmInfoMode1 = dockerSwarmInfoService.getByKey(id);
+		Assert.notNull(swarmInfoMode1, "没有对应的集群");
+		//
+		DockerInfoModel managerSwarmDocker = this.getByKey(swarmInfoMode1.getDockerId());
+		Assert.notNull(managerSwarmDocker, "对应的 docker 不存在");
+		return managerSwarmDocker.toParameter();
+	}
 }

@@ -94,6 +94,14 @@ public class BuildExtraModule extends BaseModel {
 
 	private String dockerTag;
 	/**
+	 * docker 集群ID
+	 */
+	private String dockerSwarmId;
+	/**
+	 * 集群服务名
+	 */
+	private String dockerSwarmServiceName;
+	/**
 	 * 缓存构建目录
 	 */
 	private Boolean cacheBuild;

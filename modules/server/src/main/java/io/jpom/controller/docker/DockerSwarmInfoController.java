@@ -102,7 +102,7 @@ public class DockerSwarmInfoController extends BaseServerController {
 		JSONObject data = (JSONObject) plugin.execute("tryInitializeSwarm", dockerInfoModel1.toParameter());
 
 		String id = data.getString("id");
-		this.check(null, id);
+		this.check(null, id, tag);
 		this.updateData(data, name, tag, dockerSwarmInfoService::insert, dockerInfoModel1);
 		//  更新集群标签
 		dockerInfoService.updateDockerSwarmTag(id, tag, null);
@@ -132,17 +132,29 @@ public class DockerSwarmInfoController extends BaseServerController {
 		dockerInfoService.bindDockerSwarm(dockerInfoModel1, tag, null, id);
 	}
 
-	private void check(String id, String swarmId) {
+	private void check(String id, String swarmId, String tag) {
 		// 验证重复
-		String workspaceId = dockerSwarmInfoService.getCheckUserWorkspace(getRequest());
-		Entity entity = Entity.create();
-		entity.set("swarmId", swarmId);
-		entity.set("workspaceId", workspaceId);
-		if (StrUtil.isNotEmpty(id)) {
-			entity.set("id", StrUtil.format(" <> {}", id));
+		{
+			Entity entity = Entity.create();
+			entity.set("swarmId", swarmId);
+			if (StrUtil.isNotEmpty(id)) {
+				entity.set("id", StrUtil.format(" <> {}", id));
+			}
+			boolean exists = dockerSwarmInfoService.exists(entity);
+			Assert.state(!exists, "当前 docker 集群已经存在拉,docker 不能重复绑定包括跨工作空间");
 		}
-		boolean exists = dockerSwarmInfoService.exists(entity);
-		Assert.state(!exists, "当前 docker 集群已经存在拉,docker 不能重复绑定包括跨工作空间");
+		//
+		{
+			String workspaceId = dockerSwarmInfoService.getCheckUserWorkspace(getRequest());
+			Entity entity = Entity.create();
+			entity.set("tag", tag);
+			entity.set("workspaceId", workspaceId);
+			if (StrUtil.isNotEmpty(id)) {
+				entity.set("id", StrUtil.format(" <> {}", id));
+			}
+			boolean exists = dockerSwarmInfoService.exists(entity);
+			Assert.state(!exists, "当前 tag 已经存在拉");
+		}
 	}
 
 	@PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -159,7 +171,7 @@ public class DockerSwarmInfoController extends BaseServerController {
 		JSONObject data = (JSONObject) plugin.execute("inSpectSwarm", dockerInfoModel1.toParameter());
 		String swarmId = data.getString("id");
 
-		this.check(id, swarmId);
+		this.check(id, swarmId, tag);
 		//
 		this.updateData(data, name, tag, dockerSwarmInfoMode -> {
 			dockerSwarmInfoMode.setId(id);

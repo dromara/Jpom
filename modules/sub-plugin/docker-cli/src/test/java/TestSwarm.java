@@ -348,7 +348,34 @@ public class TestSwarm {
 	}
 
 	@Test
-	public void testNetwork2(){
+	public void testUpdate() {
+//		String serviceId = "eo0l430mf2v524rlgn5550d7w";
+//		eo0l430mf2v524rlgn5550d7w
+		ServiceSpec serviceSpec = new ServiceSpec();
+		DockerClient client = this.client("172.19.106.253");
+//		TaskSpec taskSpec = new TaskSpec();
+//		ContainerSpec containerSpec = new ContainerSpec();
+//		containerSpec.withImage("jpom-test:1.0");
+//		taskSpec.withContainerSpec(containerSpec);
+//		serviceSpec.withTaskTemplate(taskSpec);
+		String name = "jpom-test";
+		serviceSpec.withName(name);
+		//
+		InspectServiceCmd inspectServiceCmd = client.inspectServiceCmd(name);
+		Service service = inspectServiceCmd.exec();
+		ServiceSpec spec = service.getSpec();
+		TaskSpec taskTemplate = spec.getTaskTemplate();
+		ContainerSpec templateContainerSpec = taskTemplate.getContainerSpec();
+		templateContainerSpec.withImage("jpom-test");
+		//
+		//
+		UpdateServiceCmd updateServiceCmd = client.updateServiceCmd(name, spec);
+		updateServiceCmd.withVersion(service.getVersion().getIndex());
+		updateServiceCmd.exec();
+	}
+
+	@Test
+	public void testNetwork2() {
 		DockerClient client = this.client("172.19.106.252");
 		InspectNetworkCmd inspectNetworkCmd = client.inspectNetworkCmd()
 				.withNetworkId("903gj9lnisp5dbf77zpzti35x");

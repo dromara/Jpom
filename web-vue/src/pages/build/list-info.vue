@@ -390,6 +390,14 @@
                     <a-input v-model="tempExtraData.dockerTag" placeholder="容器标签,如：xxxx:latest 多个使用逗号隔开" />
                   </a-tooltip>
                 </a-form-model-item>
+                <a-form-model-item label="发布集群" prop="swarmId">
+                  <a-select v-model="tempExtraData.dockerSwarmId" placeholder="请选择发布到哪个 docker 集群">
+                    <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
+                  </a-select>
+                </a-form-model-item>
+                <a-form-model-item label="服务名" prop="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
+                  <a-input v-model="tempExtraData.dockerSwarmServiceName" placeholder="请填写发布到集群的服务名" />
+                </a-form-model-item>
               </template>
             </template>
           </a-collapse-panel>
@@ -583,6 +591,7 @@ import { itemGroupBy, parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
 import Vue from "vue";
+import { dockerSwarmListAll } from "@/api/docker-swarm";
 
 export default {
   components: {
@@ -672,6 +681,7 @@ export default {
       dispatchList: [],
       cascaderList: [],
       sshList: [],
+      dockerSwarmList: [],
       temp: {},
       // 页面控制变量
       editBuildVisible: false,
@@ -821,22 +831,12 @@ export default {
     this.loadGroupList();
   },
   methods: {
-    // // 页面引导
-    // introGuide() {
-    //   this.$store.dispatch("tryOpenGuide", {
-    //     key: "build",
-    //     options: {
-    //       hidePrev: true,
-    //       steps: [
-    //         {
-    //           title: "导航助手",
-    //           element: document.querySelector(".jpom-target-dir"),
-    //           intro: "可以理解为项目打包的目录。如 Jpom 项目执行 <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b>",
-    //         },
-    //       ],
-    //     },
-    //   });
-    // },
+    // 页面引导
+    loadDockerSwarmListAll() {
+      dockerSwarmListAll().then((res) => {
+        this.dockerSwarmList = res.data;
+      });
+    },
     // 分组数据
     loadGroupList() {
       getBuildGroupAll().then((res) => {
@@ -940,6 +940,7 @@ export default {
       this.loadDispatchList();
       this.loadNodeProjectList();
       this.loadSshList();
+      this.loadDockerSwarmListAll();
       this.editBuildVisible = true;
       this.tempExtraData = {
         cacheBuild: true,
@@ -999,7 +1000,7 @@ export default {
       });
 
       this.loadDispatchList();
-
+      this.loadDockerSwarmListAll();
       this.loadNodeProjectList();
       this.loadSshList().then(() => {
         if (this.tempExtraData.releaseMethodDataId_3) {

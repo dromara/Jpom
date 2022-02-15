@@ -12,6 +12,7 @@
 6. 【server】构建新增是否保存产物配置
 7. 【server】构建 Dockerfile 镜像 tag 支持仓库目录 `.env` 环境变量文件
 8. 【server】docker 控制台新增 docker 网络信息查看
+9. 【server】构建 Dockerfile 镜像支持发布 swarm service
 
 ### 🐞 解决BUG、优化功能
 
@@ -40,7 +41,7 @@
 
 1. 在线升级新增验证兼容最小版本号
 2. 【server】支持在线修改数据库账户密码
-3. 执行脚本文件由 `/bin/sh` 改为 `/bin/bash` 兼容 ubuntu 
+3. 执行脚本文件由 `/bin/sh` 改为 `/bin/bash` 兼容 ubuntu
 4. 【agent】项目 dsl 模式执行脚本变量支持直接引入 ${PROJECT_ID}、同时保留 #{PROJECT_ID} 引用
 5. 【server】多处日志查看弹窗新增高亮搜索
 6. 【server】本地构建命令 容器构建支持引用工作空间变量
