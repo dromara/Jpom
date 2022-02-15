@@ -246,3 +246,15 @@ export function dockerVolumesRemove(params) {
     params: params,
   });
 }
+
+/**
+ * 网络
+ * @param {JSON} params
+ */
+export function dockerNetworksList(params) {
+  return axios({
+    url: "/docker/networks/list",
+    method: "post",
+    data: params,
+  });
+}

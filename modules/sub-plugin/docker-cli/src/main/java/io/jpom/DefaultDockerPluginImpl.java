@@ -104,8 +104,31 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			case "pullImage":
 				this.pullImageCmd(parameter);
 				return null;
+			case "listNetworks":
+				return this.listNetworksCmd(parameter);
 			default:
 				throw new IllegalArgumentException("不支持的类型");
+		}
+	}
+
+	private List<JSONObject> listNetworksCmd(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			ListNetworksCmd listNetworksCmd = dockerClient.listNetworksCmd();
+
+			String name = (String) parameter.get("name");
+			if (StrUtil.isNotEmpty(name)) {
+				listNetworksCmd.withNameFilter(name);
+			}
+			String id = (String) parameter.get("id");
+			if (StrUtil.isNotEmpty(id)) {
+				listNetworksCmd.withIdFilter(id);
+			}
+			List<Network> networks = listNetworksCmd.exec();
+			networks = ObjectUtil.defaultIfNull(networks, new ArrayList<>());
+			return networks.stream().map(container -> (JSONObject) JSONObject.toJSON(container)).collect(Collectors.toList());
+		} finally {
+			IoUtil.close(dockerClient);
 		}
 	}
 
