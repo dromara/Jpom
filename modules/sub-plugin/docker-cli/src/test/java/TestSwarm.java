@@ -329,6 +329,7 @@ public class TestSwarm {
 			taskSpec.withContainerSpec(containerSpec);
 			serviceSpec.withTaskTemplate(taskSpec);
 		}
+//		serviceSpec.withRollbackConfig()
 		serviceSpec.withEndpointSpec(new EndpointSpec());
 		String serviceId = "tf2r29awevz2fcprybv6cvlm9";
 		InspectServiceCmd inspectServiceCmd = client.inspectServiceCmd(serviceId);
