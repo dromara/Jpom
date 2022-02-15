@@ -27,7 +27,9 @@
           </a-col>
           <a-col :span="5" style="text-align: right">
             <a-space>
-              <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" />
+              <a-tooltip title="有新内容后是否自动滚动到底部">
+                <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" />
+              </a-tooltip>
               <a-tooltip title="清空当前缓冲区内容">
                 <a-button type="link" style="padding: 0" @click="clearLogCache" icon="delete"><span style="margin-left: 2px">清空</span></a-button>
               </a-tooltip>

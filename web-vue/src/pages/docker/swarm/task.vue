@@ -11,6 +11,7 @@
           <a-tooltip :title="TASK_STATE[listQuery['taskState']]">
             <a-select show-search option-filter-prop="children" v-model="listQuery['taskState']" allowClear placeholder="状态" class="search-input-item">
               <a-select-option :key="key" v-for="(item, key) in TASK_STATE">{{ item }}- {{ key }}</a-select-option>
+              <a-select-option value="">状态</a-select-option>
             </a-select>
           </a-tooltip>
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
