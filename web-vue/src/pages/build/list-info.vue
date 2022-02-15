@@ -7,7 +7,7 @@
       <template slot="title">
         <a-space>
           <a-input allowClear class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="构建名称" />
-          <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="search-input-item">
+          <a-select show-search allowClear option-filter-prop="children" v-model="listQuery.status" placeholder="状态" class="search-input-item">
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-select show-search option-filter-prop="children" v-model="listQuery.releaseMethod" allowClear placeholder="发布方式" class="search-input-item">
@@ -286,7 +286,7 @@
               <template v-if="temp.releaseMethod === 0"> 不发布：只执行构建流程并且保存构建历史,不执行发布流程</template>
               <!-- 节点分发 -->
               <a-form-model-item v-if="temp.releaseMethod === 1" label="分发项目" prop="releaseMethodDataId">
-                <a-select v-model="tempExtraData.releaseMethodDataId_1" placeholder="请选择分发项目">
+                <a-select show-search allowClear v-model="tempExtraData.releaseMethodDataId_1" placeholder="请选择分发项目">
                   <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }} </a-select-option>
                 </a-select>
               </a-form-model-item>
@@ -295,7 +295,7 @@
                 <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="请选择节点项目" />
               </a-form-model-item>
               <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
-                <a-select v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
+                <a-select show-search allowClear v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
                   <a-select-option v-for="opt in afterOptList" :key="opt.value">{{ opt.title }}</a-select-option>
                 </a-select>
               </a-form-model-item>
@@ -308,7 +308,7 @@
                 </a-form-model-item>
                 <a-form-model-item label="发布目录" prop="releaseMethodDataId">
                   <a-input-group compact>
-                    <a-select style="width: 30%" v-model="tempExtraData.releaseSshDir" placeholder="请选择SSH">
+                    <a-select show-search allowClear style="width: 30%" v-model="tempExtraData.releaseSshDir" placeholder="请选择SSH">
                       <a-select-option v-for="item in selectSshDirs" :key="item">{{ item }}</a-select-option>
                     </a-select>
                     <a-input style="width: 70%" v-model="tempExtraData.releasePath2" placeholder="发布目录,构建产物上传到对应目录" />
@@ -391,7 +391,8 @@
                   </a-tooltip>
                 </a-form-model-item>
                 <a-form-model-item label="发布集群" prop="swarmId">
-                  <a-select v-model="tempExtraData.dockerSwarmId" placeholder="请选择发布到哪个 docker 集群">
+                  <a-select show-search allowClear v-model="tempExtraData.dockerSwarmId" placeholder="请选择发布到哪个 docker 集群">
+                    <a-select-option value="">不发布到 docker 集群</a-select-option>
                     <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
                   </a-select>
                 </a-form-model-item>

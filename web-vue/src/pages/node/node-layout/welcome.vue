@@ -31,7 +31,7 @@
         </div>
       </a-space>
     </div>
-    <a-table :locale="tableLocale" :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="pid" class="node-table" :pagination="false">
+    <a-table size="middle" :locale="tableLocale" :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="pid" class="node-table" :pagination="false">
       <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -42,7 +42,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="kill(record)">Kill</a-button>
+        <a-button type="primary" size="small" @click="kill(record)">Kill</a-button>
       </template>
     </a-table>
     <!-- 历史监控 -->
