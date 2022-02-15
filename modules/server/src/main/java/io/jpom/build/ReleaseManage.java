@@ -28,6 +28,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.ArrayUtil;
@@ -68,6 +69,7 @@ import lombok.Builder;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -207,6 +209,25 @@ public class ReleaseManage implements Runnable {
 		return replace;
 	}
 
+	private String parseDockerTag(File envFile, String tag) {
+		if (!FileUtil.isFile(envFile)) {
+			return tag;
+		}
+		final String[] newTag = {tag};
+		FileUtil.readLines(envFile, StandardCharsets.UTF_8, (LineHandler) line -> {
+			line = StrUtil.trim(line);
+			if (StrUtil.startWith(line, "#")) {
+				return;
+			}
+			List<String> list = StrUtil.splitTrim(line, "=");
+			if (CollUtil.size(list) != 2) {
+				return;
+			}
+			newTag[0] = StrUtil.replace(newTag[0], "${" + list.get(0) + "}", list.get(1));
+		});
+		return newTag[0];
+	}
+
 	private void doDockerImage() {
 		// 生成临时目录
 		File tempPath = FileUtil.file(ConfigBean.getInstance().getTempPath(), "build_temp", "docker_image", this.buildExtraModule.getId() + StrUtil.DASHED + this.buildId);
@@ -215,6 +236,10 @@ public class ReleaseManage implements Runnable {
 			FileUtil.copyContent(sourceFile, tempPath, true);
 			File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildId, StrUtil.SLASH);
 			FileUtil.copyContent(historyPackageFile, tempPath, true);
+			// env file
+			File envFile = FileUtil.file(tempPath, ".env");
+			String dockerTag = this.buildExtraModule.getDockerTag();
+			dockerTag = this.parseDockerTag(envFile, dockerTag);
 			// docker file
 			String moduleDockerfile = this.buildExtraModule.getDockerfile();
 			List<String> list = StrUtil.splitTrim(moduleDockerfile, StrUtil.COLON);
@@ -237,7 +262,7 @@ public class ReleaseManage implements Runnable {
 				return;
 			}
 			for (DockerInfoModel infoModel : dockerInfoModels) {
-				this.doDockerImage(infoModel, dockerfile, baseDir);
+				this.doDockerImage(infoModel, dockerfile, baseDir, dockerTag);
 			}
 			//
 		} finally {
@@ -245,12 +270,13 @@ public class ReleaseManage implements Runnable {
 		}
 	}
 
-	private void doDockerImage(DockerInfoModel dockerInfoModel, File dockerfile, File baseDir) {
-		logRecorder.info("{} start build image", dockerInfoModel.getName());
+	private void doDockerImage(DockerInfoModel dockerInfoModel, File dockerfile, File baseDir, String dockerTag) {
+		logRecorder.info("{} start build image {}", dockerInfoModel.getName(), dockerTag);
 		Map<String, Object> map = dockerInfoModel.toParameter();
 		map.put("Dockerfile", dockerfile);
 		map.put("baseDirectory", baseDir);
-		map.put("tags", this.buildExtraModule.getDockerTag());
+		//
+		map.put("tags", dockerTag);
 		Consumer<String> logConsumer = s -> logRecorder.append(s);
 		map.put("logConsumer", logConsumer);
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);

@@ -386,7 +386,9 @@
                   </a-form-model-item>
                 </a-tooltip>
                 <a-form-model-item prop="dockerTag" label="镜像 tag">
-                  <a-input v-model="tempExtraData.dockerTag" placeholder="容器标签,如：xxxx:latest 多个使用逗号隔开" />
+                  <a-tooltip title="容器标签,如：xxxx:latest 多个使用逗号隔开, 支持加载仓库目录下 .env 文件环境变量 如： xxxx:${VERSION}">
+                    <a-input v-model="tempExtraData.dockerTag" placeholder="容器标签,如：xxxx:latest 多个使用逗号隔开" />
+                  </a-tooltip>
                 </a-form-model-item>
               </template>
             </template>
@@ -693,6 +695,7 @@ export default {
           dataIndex: "buildId",
           width: 90,
           ellipsis: true,
+          align: "center",
           scopedSlots: { customRender: "buildId" },
         },
         {

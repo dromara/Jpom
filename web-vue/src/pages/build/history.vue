@@ -134,7 +134,7 @@ export default {
       buildLogVisible: false,
       columns: [
         { title: "构建名称", dataIndex: "buildName", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "构建 ID", dataIndex: "buildNumberId", width: 90, ellipsis: true, scopedSlots: { customRender: "buildNumberId" } },
+        { title: "构建 ID", dataIndex: "buildNumberId", width: 90, align: "center", ellipsis: true, scopedSlots: { customRender: "buildNumberId" } },
         { title: "备注", dataIndex: "buildRemark", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
         { title: "状态", dataIndex: "status", width: 120, ellipsis: true, scopedSlots: { customRender: "status" } },
