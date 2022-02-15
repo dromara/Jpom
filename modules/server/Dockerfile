@@ -43,7 +43,7 @@ RUN set -eux; \
     esac; \
     curl -LfsSo /opt/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz https://npmmirror.com/mirrors/node/v16.13.1/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz \
     && tar -zxvf /opt/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz -C /opt/ && export PATH=/opt/node-v16.13.1-linux-${BINARY_ARCH}/bin:$PATH \
-    && npm config set registry https://registry.npm.taobao.org/ \
+    && npm config set registry https://registry.npmmirror.com/ \
     && cd web-vue && npm install && npm run build
 
 RUN mvn -B -e -T 1C clean package -pl modules/server -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
@@ -60,6 +60,5 @@ VOLUME $JPOM_HOME
 EXPOSE 2122
 
 ENTRYPOINT ["/bin/bash", "Server.sh", "start"]
-
 
 
