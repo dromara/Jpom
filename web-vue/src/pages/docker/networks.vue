@@ -84,7 +84,16 @@ export default {
         { title: "范围", dataIndex: "scope", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "IPAM", dataIndex: "ipam", ellipsis: true, scopedSlots: { customRender: "ipam" } },
         { title: "类型", dataIndex: "driver", ellipsis: true, width: 80, scopedSlots: { customRender: "tooltip" } },
-        { title: "创建时间", dataIndex: "rawValues", ellipsis: true, width: 180, scopedSlots: { customRender: "Created" } },
+        {
+          title: "创建时间",
+          dataIndex: "rawValues",
+          ellipsis: true,
+          width: 180,
+          sorter: (a, b) => new Date(a.rawValues.Created).getTime() - new Date(b.rawValues.Created).getTime(),
+          sortDirections: ["descend", "ascend"],
+          defaultSortOrder: "descend",
+          scopedSlots: { customRender: "Created" },
+        },
         // { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
       action: {

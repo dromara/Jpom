@@ -200,13 +200,16 @@ export default {
         {
           title: "创建时间",
           dataIndex: "created",
-          sorter: true,
+          sorter: (a, b) => new Number(a.created) - new Number(b.created),
+          sortDirections: ["descend", "ascend"],
+          defaultSortOrder: "descend",
           ellipsis: true,
           customRender: (text) => {
             return parseTime(text);
           },
           width: 180,
         },
+
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 120 },
       ],
       action: {

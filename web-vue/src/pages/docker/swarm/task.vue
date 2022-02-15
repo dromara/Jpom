@@ -100,6 +100,10 @@ export default {
       type: String,
     },
     serviceId: { type: String },
+    visible: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -117,6 +121,7 @@ export default {
         availability: [{ required: true, message: "请选择节点状态", trigger: "blur" }],
       },
       columns: [
+        { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "任务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点Id", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "服务ID", dataIndex: "serviceId", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -139,9 +144,9 @@ export default {
         {
           title: "修改时间",
           dataIndex: "updatedAt",
-          sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
           ellipsis: true,
           scopedSlots: { customRender: "updatedAt" },
+          sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
           sortDirections: ["descend", "ascend"],
           defaultSortOrder: "descend",
           width: 180,
@@ -161,6 +166,9 @@ export default {
     parseTime,
     // 加载数据
     loadData() {
+      if (!this.visible) {
+        return;
+      }
       this.loading = true;
       if (this.serviceId) {
         this.listQuery.serviceId = this.serviceId;
