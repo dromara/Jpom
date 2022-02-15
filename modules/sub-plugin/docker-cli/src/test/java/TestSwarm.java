@@ -337,4 +337,21 @@ public class TestSwarm {
 		updateServiceCmd.withVersion(service.getVersion().getIndex());
 		updateServiceCmd.exec();
 	}
+
+	@Test
+	public void testNetwork() {
+		DockerClient client = this.client(node1);
+		ListNetworksCmd listNetworksCmd = client.listNetworksCmd();
+		List<Network> exec = listNetworksCmd.exec();
+		System.out.println(exec);
+	}
+
+	@Test
+	public void testNetwork2(){
+		DockerClient client = this.client(node1);
+		InspectNetworkCmd inspectNetworkCmd = client.inspectNetworkCmd()
+				.withNetworkId("c52824e133f1cb855196ac42441131362d56d58a931c232e01c101b6dafb74f5");
+		Network exec = inspectNetworkCmd.exec();
+		System.out.println(exec);
+	}
 }

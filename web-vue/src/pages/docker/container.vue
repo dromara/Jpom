@@ -33,18 +33,41 @@
         <span>{{ array[array.length - 1].slice(0, 12) }}</span>
       </a-tooltip>
 
-      <a-tooltip
+      <a-popover
         slot="ports"
-        slot-scope="text"
+        slot-scope="text, record"
         placement="topLeft"
-        :title="
-          (text || [])
-            .map((item) => {
-              return item.type + ' ' + (item.ip || '') + ':' + (item.publicPort || '') + ':' + item.privatePort;
-            })
-            .join('/')
-        "
+        :title="`
+         网络信息 ${(text || [])
+           .map((item) => {
+             return item.type + ' ' + (item.ip || '') + ':' + (item.publicPort || '') + ':' + item.privatePort;
+           })
+           .join('/')}
+       `"
       >
+        <template slot="content">
+          <template v-if="record.networkSettings">
+            <template v-if="record.networkSettings.networks">
+              <template v-if="record.networkSettings.networks.bridge">
+                <p v-if="record.networkSettings.networks.bridge.ipAddress">
+                  IP: <a-tag>{{ record.networkSettings.networks.bridge.ipAddress }}</a-tag>
+                </p>
+                <p v-if="record.networkSettings.networks.bridge.macAddress">
+                  MAC: <a-tag>{{ record.networkSettings.networks.bridge.macAddress }}</a-tag>
+                </p>
+                <p v-if="record.networkSettings.networks.bridge.gateway">
+                  网关: <a-tag>{{ record.networkSettings.networks.bridge.gateway }}</a-tag>
+                </p>
+                <p v-if="record.networkSettings.networks.bridge.networkID">
+                  networkID: <a-tag>{{ record.networkSettings.networks.bridge.networkID }}</a-tag>
+                </p>
+                <p v-if="record.networkSettings.networks.bridge.endpointId">
+                  endpointId: <a-tag>{{ record.networkSettings.networks.bridge.endpointId }}</a-tag>
+                </p>
+              </template>
+            </template>
+          </template>
+        </template>
         <span>{{
           (text || [])
             .map((item) => {
@@ -52,7 +75,7 @@
             })
             .join("/")
         }}</span>
-      </a-tooltip>
+      </a-popover>
 
       <template slot="state" slot-scope="text, record">
         <a-tooltip :title="(record.status || '') + ' 点击查看日志'" @click="viewLog(record)">
