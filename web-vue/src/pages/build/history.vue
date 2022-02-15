@@ -73,11 +73,13 @@
           <a-tooltip title="下载构建日志,如果按钮不可用表示日志文件不存在,一般是构建历史相关文件被删除">
             <a-button size="small" type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="read" /></a-button>
           </a-tooltip>
+
           <a-tooltip title="下载构建产物,如果按钮不可用表示产物文件不存在,一般是构建没有产生对应的文件或者构建历史相关文件被删除">
             <a-button size="small" type="primary" :disabled="!record.hashFile" @click="handleFile(record)">
               <a-icon type="file-zip" />
             </a-button>
           </a-tooltip>
+
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
@@ -85,7 +87,14 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button :disabled="!record.hashFile || record.releaseMethod === 0" type="danger" @click="handleRollback(record)">回滚 </a-button>
+                <template v-if="record.releaseMethod !== 5">
+                  <a-button :disabled="!record.hashFile || record.releaseMethod === 0" type="danger" @click="handleRollback(record)">回滚 </a-button>
+                </template>
+                <template v-else>
+                  <a-tooltip title="Dockerfile 构建方式不支持在这里回滚">
+                    <a-button :disabled="true" type="danger">回滚 </a-button>
+                  </a-tooltip>
+                </template>
               </a-menu-item>
               <a-menu-item>
                 <a-button type="danger" @click="handleDelete(record)">删除</a-button>

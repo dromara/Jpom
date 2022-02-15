@@ -97,6 +97,10 @@ public class BuildExtraModule extends BaseModel {
 	 * 缓存构建目录
 	 */
 	private Boolean cacheBuild;
+	/**
+	 * 是否保留构建历史产物
+	 */
+	private Boolean saveBuildFile;
 
 	public String getResultDirFile() {
 		if (resultDirFile == null) {
