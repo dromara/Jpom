@@ -62,7 +62,7 @@
         }
       "
     >
-      <console v-if="consoleVisible" :id="temp.id" :initMenu="temp.menuKey"></console>
+      <console v-if="consoleVisible" :id="temp.id" :visible="consoleVisible" :initMenu="temp.menuKey"></console>
     </a-drawer>
   </div>
 </template>

@@ -203,7 +203,7 @@
         }
       "
     >
-      <console v-if="consoleVisible" :id="temp.id"></console>
+      <console v-if="consoleVisible" :visible="consoleVisible" :id="temp.id"></console>
     </a-drawer>
   </div>
 </template>

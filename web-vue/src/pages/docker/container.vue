@@ -132,6 +132,10 @@ export default {
     id: {
       type: String,
     },
+    visible: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -155,8 +159,11 @@ export default {
         {
           title: "创建时间",
           dataIndex: "created",
-          sorter: true,
+
           ellipsis: true,
+          sorter: (a, b) => new Number(a.created) - new Number(b.created),
+          sortDirections: ["descend", "ascend"],
+          defaultSortOrder: "descend",
           customRender: (text) => {
             return parseTime(text);
           },
@@ -193,6 +200,9 @@ export default {
   methods: {
     // 加载数据
     loadData() {
+      if (!this.visible) {
+        return;
+      }
       this.loading = true;
       //this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.listQuery.id = this.id;

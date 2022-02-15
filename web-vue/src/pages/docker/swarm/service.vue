@@ -326,6 +326,10 @@ export default {
     id: {
       type: String,
     },
+    visible: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -344,6 +348,7 @@ export default {
         image: [{ required: true, message: "镜像名称必填", trigger: "blur" }],
       },
       columns: [
+        { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "服务Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "spec.name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "模式", dataIndex: "spec.mode.mode", ellipsis: true, width: 120, scopedSlots: { customRender: "tooltip" } },
@@ -372,6 +377,9 @@ export default {
   methods: {
     // 加载数据
     loadData() {
+      if (!this.visible) {
+        return;
+      }
       this.loading = true;
       this.listQuery.id = this.id;
       dockerSwarmServicesList(this.listQuery).then((res) => {

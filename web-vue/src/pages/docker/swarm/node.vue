@@ -103,6 +103,10 @@ export default {
     id: {
       type: String,
     },
+    visible: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -118,6 +122,7 @@ export default {
       },
       autoUpdateTime: null,
       columns: [
+        { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
         { title: "节点Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "主机名", dataIndex: "description.hostname", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true, scopedSlots: { customRender: "address" } },
@@ -155,6 +160,9 @@ export default {
   methods: {
     // 加载数据
     loadData() {
+      if (!this.visible) {
+        return;
+      }
       this.loading = true;
 
       this.listQuery.id = this.id;

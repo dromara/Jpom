@@ -14,7 +14,7 @@
     </template>
 
     <a-tooltip slot="CreatedAt" slot-scope="text" placement="topLeft" :title="text['CreatedAt']">
-      <span>{{ text["CreatedAt"] }}</span>
+      <span>{{ parseTime(text["CreatedAt"]) }}</span>
     </a-tooltip>
     <!-- <a-tooltip slot="size" slot-scope="text, record" placement="topLeft" :title="renderSize(text) + ' ' + renderSize(record.virtualSize)">
       <span>{{ renderSize(text) }}</span>
@@ -46,7 +46,7 @@
   </a-table>
 </template>
 <script>
-import { renderSize } from "@/utils/time";
+import { renderSize, parseTime } from "@/utils/time";
 import { dockerVolumesList, dockerVolumesRemove } from "@/api/docker-api";
 export default {
   props: {
@@ -67,7 +67,16 @@ export default {
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "挂载点", dataIndex: "mountpoint", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "类型", dataIndex: "driver", ellipsis: true, width: 80, scopedSlots: { customRender: "tooltip" } },
-        { title: "创建时间", dataIndex: "rawValues", ellipsis: true, width: 180, scopedSlots: { customRender: "CreatedAt" } },
+        {
+          title: "创建时间",
+          dataIndex: "rawValues",
+          ellipsis: true,
+          width: 180,
+          sorter: (a, b) => new Date(a.rawValues.CreatedAt).getTime() - new Date(b.rawValues.CreatedAt).getTime(),
+          sortDirections: ["descend", "ascend"],
+          defaultSortOrder: "descend",
+          scopedSlots: { customRender: "CreatedAt" },
+        },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
       action: {
@@ -82,6 +91,7 @@ export default {
     this.loadData();
   },
   methods: {
+    parseTime,
     // 加载数据
     loadData() {
       this.loading = true;

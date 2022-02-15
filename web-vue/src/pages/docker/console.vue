@@ -24,11 +24,11 @@
       <!-- <a-layout-header :style="{ background: '#fff', padding: 0 }" /> -->
       <!-- :style="{ margin: '24px 16px 0' }" -->
       <a-layout-content>
-        <container v-if="menuKey === 'containers'" :id="this.id" />
-        <images v-if="menuKey === 'images'" :id="this.id" />
-        <volumes v-if="menuKey === 'volumes'" :id="this.id" />
-        <info v-if="menuKey === 'info'" :id="this.id" />
-        <networks v-if="menuKey === 'networks'" :id="this.id" />
+        <container v-if="menuKey === 'containers'" :id="this.id" :visible="this.visible" />
+        <images v-if="menuKey === 'images'" :id="this.id" :visible="this.visible" />
+        <volumes v-if="menuKey === 'volumes'" :id="this.id" :visible="this.visible" />
+        <info v-if="menuKey === 'info'" :id="this.id" :visible="this.visible" />
+        <networks v-if="menuKey === 'networks'" :id="this.id" :visible="this.visible" />
       </a-layout-content>
     </a-layout>
   </a-layout>
@@ -43,6 +43,10 @@ export default {
   props: {
     id: {
       type: String,
+    },
+    visible: {
+      type: Boolean,
+      default: false,
     },
   },
   components: {
