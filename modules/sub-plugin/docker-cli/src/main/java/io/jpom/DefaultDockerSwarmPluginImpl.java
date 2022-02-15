@@ -25,6 +25,7 @@ package io.jpom;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
@@ -164,70 +165,9 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 				}
 				serviceSpec.withMode(serviceModeConfig);
 			}
-//			{
-//				UpdateConfig updateConfig = new UpdateConfig();
-//
-//				serviceSpec.withUpdateConfig(updateConfig);
-//			}
 			{
-				String image = (String) parameter.get("image");
 				TaskSpec taskSpec = new TaskSpec();
-				ContainerSpec containerSpec = new ContainerSpec();
-				containerSpec.withImage(image);
-				//
-				Collection<Map<String, String>> args = (Collection) parameter.get("args");
-				if (CollUtil.isNotEmpty(args)) {
-					List<String> value = args.stream()
-							.map(stringStringMap -> stringStringMap.get("value"))
-							.filter(StrUtil::isNotEmpty)
-							.collect(Collectors.toList());
-					containerSpec.withArgs(value);
-				}
-				Collection<Map<String, String>> envs = (Collection) parameter.get("envs");
-				if (CollUtil.isNotEmpty(envs)) {
-					List<String> value = envs.stream()
-							.map(stringStringMap -> {
-								String name1 = stringStringMap.get("name");
-								String value1 = stringStringMap.get("value");
-								if (StrUtil.isEmpty(name1)) {
-									return null;
-								}
-								return StrUtil.format("{}={}", name1, value1);
-							})
-							.filter(StrUtil::isNotEmpty)
-							.collect(Collectors.toList());
-					containerSpec.withEnv(value);
-				}
-				Collection<Map<String, String>> commands = (Collection) parameter.get("commands");
-				if (CollUtil.isNotEmpty(commands)) {
-					List<String> value = commands.stream()
-							.map(stringStringMap -> stringStringMap.get("value"))
-							.filter(StrUtil::isNotEmpty)
-							.collect(Collectors.toList());
-					containerSpec.withCommand(value);
-				}
-				//
-				Collection<Map<String, String>> volumes = (Collection<Map<String, String>>) parameter.get("volumes");
-				if (CollUtil.isNotEmpty(volumes)) {
-					List<Mount> value = volumes.stream()
-							.map(stringStringMap -> {
-								String source = stringStringMap.get("source");
-								String target = stringStringMap.get("target");
-								if (StrUtil.hasBlank(source, target)) {
-									return null;
-								}
-								String type = stringStringMap.get("type");
-								MountType mountType = EnumUtil.fromString(MountType.class, type);
-								Mount mount = new Mount();
-								mount.withSource(source);
-								mount.withTarget(target);
-								mount.withType(mountType);
-								return mount;
-							})
-							.filter(Objects::nonNull)
-							.collect(Collectors.toList());
-					containerSpec.withMounts(value);
-				}
+				ContainerSpec containerSpec = this.buildContainerSpec(parameter);
 				taskSpec.withContainerSpec(containerSpec);
 				//
 				serviceSpec.withTaskTemplate(taskSpec);
@@ -263,6 +203,14 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 				}
 				serviceSpec.withEndpointSpec(endpointSpec);
 			}
+			{
+				Map<String, Object> update = (Map<String, Object>) parameter.get("update");
+				UpdateConfig updateConfig = this.buildUpdateConfig(update);
+				serviceSpec.withUpdateConfig(updateConfig);
+				Map<String, Object> rollback = (Map<String, Object>) parameter.get("rollback");
+				UpdateConfig rollbackConfig = this.buildUpdateConfig(rollback);
+				serviceSpec.withRollbackConfig(rollbackConfig);
+			}
 			String serviceId = (String) parameter.get("serviceId");
 			String version = (String) parameter.get("version");
 			if (StrUtil.isNotEmpty(serviceId)) {
@@ -277,6 +225,102 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 			IoUtil.close(dockerClient);
 		}
 	}
+
+	private ContainerSpec buildContainerSpec(Map<String, Object> parameter) {
+		String image = (String) parameter.get("image");
+		ContainerSpec containerSpec = new ContainerSpec();
+		containerSpec.withImage(image);
+		//
+		Collection<Map<String, String>> args = (Collection) parameter.get("args");
+		if (CollUtil.isNotEmpty(args)) {
+			List<String> value = args.stream()
+					.map(stringStringMap -> stringStringMap.get("value"))
+					.filter(StrUtil::isNotEmpty)
+					.collect(Collectors.toList());
+			containerSpec.withArgs(value);
+		}
+		Collection<Map<String, String>> envs = (Collection) parameter.get("envs");
+		if (CollUtil.isNotEmpty(envs)) {
+			List<String> value = envs.stream()
+					.map(stringStringMap -> {
+						String name1 = stringStringMap.get("name");
+						String value1 = stringStringMap.get("value");
+						if (StrUtil.isEmpty(name1)) {
+							return null;
+						}
+						return StrUtil.format("{}={}", name1, value1);
+					})
+					.filter(StrUtil::isNotEmpty)
+					.collect(Collectors.toList());
+			containerSpec.withEnv(value);
+		}
+		Collection<Map<String, String>> commands = (Collection) parameter.get("commands");
+		if (CollUtil.isNotEmpty(commands)) {
+			List<String> value = commands.stream()
+					.map(stringStringMap -> stringStringMap.get("value"))
+					.filter(StrUtil::isNotEmpty)
+					.collect(Collectors.toList());
+			containerSpec.withCommand(value);
+		}
+		//
+		Collection<Map<String, String>> volumes = (Collection<Map<String, String>>) parameter.get("volumes");
+		if (CollUtil.isNotEmpty(volumes)) {
+			List<Mount> value = volumes.stream()
+					.map(stringStringMap -> {
+						String source = stringStringMap.get("source");
+						String target = stringStringMap.get("target");
+						if (StrUtil.hasBlank(source, target)) {
+							return null;
+						}
+						String type = stringStringMap.get("type");
+						MountType mountType = EnumUtil.fromString(MountType.class, type);
+						Mount mount = new Mount();
+						mount.withSource(source);
+						mount.withTarget(target);
+						mount.withType(mountType);
+						return mount;
+					})
+					.filter(Objects::nonNull)
+					.collect(Collectors.toList());
+			containerSpec.withMounts(value);
+		}
+		return containerSpec;
+	}
+
+	private UpdateConfig buildUpdateConfig(Map<String, Object> update) {
+		if (MapUtil.isNotEmpty(update)) {
+			UpdateConfig updateConfig = new UpdateConfig();
+			String failureAction = (String) update.get("failureAction");
+			if (StrUtil.isNotEmpty(failureAction)) {
+				UpdateFailureAction updateFailureAction = EnumUtil.fromString(UpdateFailureAction.class, failureAction);
+				updateConfig.withFailureAction(updateFailureAction);
+			}
+			String order = (String) update.get("order");
+			if (StrUtil.isNotEmpty(order)) {
+				UpdateOrder updateOrder = EnumUtil.fromString(UpdateOrder.class, order);
+				updateConfig.withOrder(updateOrder);
+			}
+			Object parallelism = update.get("parallelism");
+			if (parallelism != null) {
+				updateConfig.withParallelism(Convert.toLong(parallelism));
+			}
+			Object delay = update.get("delay");
+			if (delay != null) {
+				updateConfig.withDelay(Convert.toLong(delay));
+			}
+			Object maxFailureRatio = update.get("maxFailureRatio");
+			if (maxFailureRatio != null) {
+				updateConfig.withMaxFailureRatio(Convert.toFloat(maxFailureRatio));
+			}
+			Object monitor = update.get("monitor");
+			if (monitor != null) {
+				updateConfig.withMonitor(Convert.toLong(monitor));
+			}
+			return updateConfig;
+		}
+		return null;
+	}
+
 
 	public void removeServiceCmd(Map<String, Object> parameter) {
 		DockerClient dockerClient = DockerUtil.build(parameter);

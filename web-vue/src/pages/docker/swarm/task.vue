@@ -8,9 +8,11 @@
           <a-input v-model="listQuery['taskId']" @pressEnter="loadData" placeholder="任务id" class="search-input-item" />
           <a-input v-model="listQuery['taskNode']" @pressEnter="loadData" placeholder="节点id" class="search-input-item" />
 
-          <a-select show-search option-filter-prop="children" v-model="listQuery['taskState']" allowClear placeholder="状态" class="search-input-item">
-            <a-select-option :key="key" v-for="(item, key) in TASK_STATE">{{ item }}- {{ key }}</a-select-option>
-          </a-select>
+          <a-tooltip :title="TASK_STATE[listQuery['taskState']]">
+            <a-select show-search option-filter-prop="children" v-model="listQuery['taskState']" allowClear placeholder="状态" class="search-input-item">
+              <a-select-option :key="key" v-for="(item, key) in TASK_STATE">{{ item }}- {{ key }}</a-select-option>
+            </a-select>
+          </a-tooltip>
           <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
         </a-space>
       </template>

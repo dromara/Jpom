@@ -50,7 +50,7 @@
         </span>
       </a-tooltip>
 
-      <a-tooltip slot="replicas" slot-scope="text, record" placement="topLeft" :title="text">
+      <a-tooltip slot="replicas" slot-scope="text, record" placement="topLeft" :title="`点击数字查看运行中的任务,点击图标查看关联的所有任务`">
         <a-tag @click="handleTask(record, 'RUNNING')">{{ text }}</a-tag>
 
         <a-icon type="read" @click="handleTask(record)" />
@@ -303,6 +303,60 @@
                 </a-row>
               </a-form-model-item>
             </a-tab-pane>
+            <a-tab-pane key="update" tab="升级策略" v-if="temp.update">
+              <a-form-model-item label="并行度" prop="parallelism">
+                <a-input-number style="width: 80%" :min="0" v-model="temp.update.parallelism" placeholder="并行度" />
+              </a-form-model-item>
+              <a-form-model-item label="延迟" prop="delay">
+                <a-input-number style="width: 80%" :min="1" v-model="temp.update.delay" placeholder="延迟" />
+              </a-form-model-item>
+              <a-form-model-item label="失败率" prop="maxFailureRatio">
+                <a-input-number style="width: 80%" :min="0" v-model="temp.update.maxFailureRatio" placeholder="失败率" />
+              </a-form-model-item>
+              <a-form-model-item label="失败策略" prop="failureAction">
+                <a-radio-group name="failureAction" v-model="temp.update.failureAction">
+                  <a-radio value="PAUSE">暂停</a-radio>
+                  <a-radio value="CONTINUE">继续</a-radio>
+                  <a-radio value="ROLLBACK">回滚</a-radio>
+                </a-radio-group>
+              </a-form-model-item>
+              <a-form-model-item label="执行顺序" prop="order">
+                <a-radio-group name="order" v-model="temp.update.order">
+                  <a-radio value="STOP_FIRST">先停止</a-radio>
+                  <a-radio value="START_FIRST">先启动</a-radio>
+                </a-radio-group>
+              </a-form-model-item>
+              <a-form-model-item label="监控" prop="monitor">
+                <a-input-number style="width: 80%" :min="1" v-model="temp.update.monitor" placeholder="延迟" />
+              </a-form-model-item>
+            </a-tab-pane>
+            <a-tab-pane key="rollback" tab="回滚策略" v-if="temp.rollback">
+              <a-form-model-item label="并行度" prop="parallelism">
+                <a-input-number style="width: 80%" :min="0" v-model="temp.rollback.parallelism" placeholder="并行度" />
+              </a-form-model-item>
+              <a-form-model-item label="延迟" prop="delay">
+                <a-input-number style="width: 80%" :min="1" v-model="temp.rollback.delay" placeholder="延迟" />
+              </a-form-model-item>
+              <a-form-model-item label="失败率" prop="maxFailureRatio">
+                <a-input-number style="width: 80%" :min="0" v-model="temp.rollback.maxFailureRatio" placeholder="失败率" />
+              </a-form-model-item>
+              <a-form-model-item label="失败策略" prop="failureAction">
+                <a-radio-group name="failureAction" v-model="temp.rollback.failureAction">
+                  <a-radio value="PAUSE">暂停</a-radio>
+                  <a-radio value="CONTINUE">继续</a-radio>
+                  <a-radio value="ROLLBACK">回滚</a-radio>
+                </a-radio-group>
+              </a-form-model-item>
+              <a-form-model-item label="执行顺序" prop="order">
+                <a-radio-group name="order" v-model="temp.rollback.order">
+                  <a-radio value="STOP_FIRST">先停止</a-radio>
+                  <a-radio value="START_FIRST">先启动</a-radio>
+                </a-radio-group>
+              </a-form-model-item>
+              <a-form-model-item label="监控" prop="monitor">
+                <a-input-number style="width: 80%" :min="1" v-model="temp.rollback.monitor" placeholder="延迟" />
+              </a-form-model-item>
+            </a-tab-pane>
           </a-tabs>
         </a-form-model-item>
       </a-form-model>
@@ -338,7 +392,10 @@ export default {
       loading: false,
       listQuery: {},
       list: [],
-      temp: {},
+      temp: {
+        update: {},
+        rollback: {},
+      },
       editVisible: false,
       initSwarmVisible: false,
       taskVisible: false,
@@ -427,6 +484,8 @@ export default {
         args: [{}],
         commands: [{}],
         envs: [{}],
+        update: {},
+        rollback: {},
       };
     },
     // 编辑
@@ -462,6 +521,8 @@ export default {
         args: [{}],
         commands: [{}],
         envs: [{}],
+        update: {},
+        rollback: {},
       };
 
       const args = spec.taskTemplate?.containerSpec?.args;
@@ -469,7 +530,8 @@ export default {
       const command = spec.taskTemplate?.containerSpec?.command;
       const env = spec.taskTemplate?.containerSpec?.env;
       const ports = spec.endpointSpec?.ports;
-
+      const updateConfig = spec.updateConfig;
+      const rollbackConfig = spec.rollbackConfig;
       if (args) {
         this.temp = {
           ...this.temp,
@@ -506,6 +568,12 @@ export default {
       }
       if (mounts) {
         this.temp = { ...this.temp, volumes: mounts };
+      }
+      if (updateConfig) {
+        this.temp = { ...this.temp, update: updateConfig };
+      }
+      if (rollbackConfig) {
+        this.temp = { ...this.temp, rollback: rollbackConfig };
       }
     },
     handleEditOk() {
