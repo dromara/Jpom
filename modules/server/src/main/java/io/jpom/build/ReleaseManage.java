@@ -57,6 +57,7 @@ import io.jpom.outgiving.OutGivingRun;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
+import io.jpom.service.docker.DockerSwarmInfoService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
@@ -264,9 +265,28 @@ public class ReleaseManage implements Runnable {
 			for (DockerInfoModel infoModel : dockerInfoModels) {
 				this.doDockerImage(infoModel, dockerfile, baseDir, dockerTag);
 			}
-			//
+			// 发布 docker 服务
+			this.updateSwarmService(dockerTag, this.buildExtraModule.getDockerSwarmId(), this.buildExtraModule.getDockerSwarmServiceName());
 		} finally {
 			CommandUtil.systemFastDel(tempPath);
+		}
+	}
+
+	private void updateSwarmService(String dockerTag, String swarmId, String serviceName) {
+		if (StrUtil.isEmpty(swarmId)) {
+			return;
+		}
+		List<String> splitTrim = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
+		String first = CollUtil.getFirst(splitTrim);
+		logRecorder.info("start update swarm service: {} use image {}", serviceName, first);
+		Map<String, Object> pluginMap = buildExecuteService.dockerInfoService.getBySwarmPluginMap(swarmId);
+		pluginMap.put("serviceId", serviceName);
+		pluginMap.put("image", first);
+		try {
+			IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
+			plugin.execute("updateServiceImage", pluginMap);
+		} catch (Exception e) {
+			logRecorder.error("调用容器异常", e);
 		}
 	}
 

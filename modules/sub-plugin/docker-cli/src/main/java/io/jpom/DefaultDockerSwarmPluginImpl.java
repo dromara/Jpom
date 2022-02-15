@@ -91,6 +91,9 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 			case "updateService":
 				this.updateServiceCmd(parameter);
 				return null;
+			case "updateServiceImage":
+				this.updateServiceImage(parameter);
+				return null;
 			case "logService":
 				this.logServiceCmd(parameter);
 				return null;
@@ -145,10 +148,48 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 		}
 	}
 
+	private ServiceSpec intServiceSpec(DockerClient dockerClient, String serviceId) {
+		if (StrUtil.isEmpty(serviceId)) {
+			return new ServiceSpec();
+		}
+		// 读取之前的信息-保留之前的信息-否则会全部替换
+		InspectServiceCmd inspectServiceCmd = dockerClient.inspectServiceCmd(serviceId);
+		Service service = inspectServiceCmd.exec();
+		ServiceSpec spec = service.getSpec();
+		return ObjectUtil.defaultIfNull(spec, new ServiceSpec());
+	}
+
+	public void updateServiceImage(Map<String, Object> parameter) {
+		DockerClient dockerClient = DockerUtil.build(parameter);
+		try {
+			String serviceId = (String) parameter.get("serviceId");
+			String image = (String) parameter.get("image");
+			//
+			InspectServiceCmd inspectServiceCmd = dockerClient.inspectServiceCmd(serviceId);
+			Service service = inspectServiceCmd.exec();
+			ServiceSpec spec = service.getSpec();
+			Assert.notNull(spec, "服务信息不完整不能操作");
+			TaskSpec taskTemplate = spec.getTaskTemplate();
+			Assert.notNull(taskTemplate, "服务信息不完整不能操作：-1");
+			ContainerSpec templateContainerSpec = taskTemplate.getContainerSpec();
+			Assert.notNull(templateContainerSpec, "服务信息不完整不能操作：-2");
+			templateContainerSpec.withImage(image);
+			//
+			UpdateServiceCmd updateServiceCmd = dockerClient.updateServiceCmd(serviceId, spec);
+			ResourceVersion version = service.getVersion();
+			Assert.notNull(version, "服务信息不完整不能操作：-3");
+			updateServiceCmd.withVersion(version.getIndex());
+			updateServiceCmd.exec();
+		} finally {
+			IoUtil.close(dockerClient);
+		}
+	}
+
 	public void updateServiceCmd(Map<String, Object> parameter) {
 		DockerClient dockerClient = DockerUtil.build(parameter);
 		try {
-			ServiceSpec serviceSpec = new ServiceSpec();
+			String serviceId = (String) parameter.get("serviceId");
+			ServiceSpec serviceSpec = this.intServiceSpec(dockerClient, serviceId);
 			String name = (String) parameter.get("name");
 			serviceSpec.withName(name);
 			{
@@ -166,41 +207,17 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 				serviceSpec.withMode(serviceModeConfig);
 			}
 			{
-				TaskSpec taskSpec = new TaskSpec();
-				ContainerSpec containerSpec = this.buildContainerSpec(parameter);
+				TaskSpec taskSpec = serviceSpec.getTaskTemplate();
+				taskSpec = ObjectUtil.defaultIfNull(taskSpec, new TaskSpec());
+				ContainerSpec specContainerSpec = taskSpec.getContainerSpec();
+				//
+				ContainerSpec containerSpec = this.buildContainerSpec(parameter, specContainerSpec);
 				taskSpec.withContainerSpec(containerSpec);
 				//
 				serviceSpec.withTaskTemplate(taskSpec);
 			}
 			{
-				String endpointResolutionModeStr = (String) parameter.get("endpointResolutionMode");
-				EndpointResolutionMode endpointResolutionMode = EnumUtil.fromString(EndpointResolutionMode.class, endpointResolutionModeStr);
-				EndpointSpec endpointSpec = new EndpointSpec();
-				endpointSpec.withMode(endpointResolutionMode);
-				Collection<Map<String, Object>> exposedPorts = (Collection) parameter.get("exposedPorts");
-				if (CollUtil.isNotEmpty(exposedPorts)) {
-					List<PortConfig> portConfigs = exposedPorts.stream()
-							.map(stringStringMap -> {
-								Object port = stringStringMap.get("targetPort");
-								Object publicPort = stringStringMap.get("publishedPort");
-								if (ObjectUtil.hasEmpty(port, publicPort)) {
-									return null;
-								}
-								PortConfig portConfig = new PortConfig();
-								String mode = (String) stringStringMap.get("publishMode");
-								PortConfig.PublishMode publishMode = EnumUtil.fromString(PortConfig.PublishMode.class, mode);
-								portConfig.withPublishMode(publishMode);
-								String scheme = (String) stringStringMap.get("protocol");
-								PortConfigProtocol protocol = EnumUtil.fromString(PortConfigProtocol.class, scheme);
-								portConfig.withProtocol(protocol);
-								portConfig.withTargetPort(Convert.toInt(port, 0));
-								portConfig.withPublishedPort(Convert.toInt(port, 0));
-								return portConfig;
-							})
-							.filter(Objects::nonNull)
-							.collect(Collectors.toList());
-					endpointSpec.withPorts(portConfigs);
-				}
+				EndpointSpec endpointSpec = this.buildEndpointSpec(parameter);
 				serviceSpec.withEndpointSpec(endpointSpec);
 			}
 			{
@@ -211,7 +228,6 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 				UpdateConfig rollbackConfig = this.buildUpdateConfig(rollback);
 				serviceSpec.withRollbackConfig(rollbackConfig);
 			}
-			String serviceId = (String) parameter.get("serviceId");
 			String version = (String) parameter.get("version");
 			if (StrUtil.isNotEmpty(serviceId)) {
 				UpdateServiceCmd updateServiceCmd = dockerClient.updateServiceCmd(serviceId, serviceSpec);
@@ -226,9 +242,42 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 		}
 	}
 
-	private ContainerSpec buildContainerSpec(Map<String, Object> parameter) {
+	private EndpointSpec buildEndpointSpec(Map<String, Object> parameter) {
+		String endpointResolutionModeStr = (String) parameter.get("endpointResolutionMode");
+		EndpointResolutionMode endpointResolutionMode = EnumUtil.fromString(EndpointResolutionMode.class, endpointResolutionModeStr);
+		EndpointSpec endpointSpec = new EndpointSpec();
+		endpointSpec.withMode(endpointResolutionMode);
+		Collection<Map<String, Object>> exposedPorts = (Collection) parameter.get("exposedPorts");
+		if (CollUtil.isNotEmpty(exposedPorts)) {
+			List<PortConfig> portConfigs = exposedPorts.stream()
+					.map(stringStringMap -> {
+						Object port = stringStringMap.get("targetPort");
+						Object publicPort = stringStringMap.get("publishedPort");
+						if (ObjectUtil.hasEmpty(port, publicPort)) {
+							return null;
+						}
+						PortConfig portConfig = new PortConfig();
+						String mode = (String) stringStringMap.get("publishMode");
+						PortConfig.PublishMode publishMode = EnumUtil.fromString(PortConfig.PublishMode.class, mode);
+						portConfig.withPublishMode(publishMode);
+						String scheme = (String) stringStringMap.get("protocol");
+						PortConfigProtocol protocol = EnumUtil.fromString(PortConfigProtocol.class, scheme);
+						portConfig.withProtocol(protocol);
+						portConfig.withTargetPort(Convert.toInt(port, 0));
+						portConfig.withPublishedPort(Convert.toInt(port, 0));
+						return portConfig;
+					})
+					.filter(Objects::nonNull)
+					.collect(Collectors.toList());
+			endpointSpec.withPorts(portConfigs);
+		}
+		return endpointSpec;
+	}
+
+	private ContainerSpec buildContainerSpec(Map<String, Object> parameter, ContainerSpec oldContainerSpec) {
 		String image = (String) parameter.get("image");
-		ContainerSpec containerSpec = new ContainerSpec();
+		ContainerSpec containerSpec = ObjectUtil.defaultIfNull(oldContainerSpec, new ContainerSpec());
+		//new ContainerSpec();
 		containerSpec.withImage(image);
 		//
 		Collection<Map<String, String>> args = (Collection) parameter.get("args");
