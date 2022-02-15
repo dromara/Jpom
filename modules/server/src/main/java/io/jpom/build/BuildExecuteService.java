@@ -648,6 +648,13 @@ public class BuildExecuteService {
 						break;
 					}
 				}
+				// 判断是否保留产物
+				Boolean saveBuildFile = this.buildExtraModule.getSaveBuildFile();
+				if (saveBuildFile != null && !saveBuildFile) {
+					//
+					File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), taskData.buildInfoModel.getBuildId(), StrUtil.SLASH);
+					CommandUtil.systemFastDel(historyPackageFile);
+				}
 				long allTime = SystemClock.now() - startTime;
 				logRecorder.info("构建完成 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
 				this.asyncWebHooks("success");

@@ -428,18 +428,34 @@
                 </template>
               </a-auto-complete>
             </a-form-model-item>
-            <a-tooltip title="开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存)">
-              <a-form-model-item prop="cacheBuild">
-                <template slot="label">
-                  缓存构建目录
-                  <a-tooltip v-show="!temp.id">
-                    <template slot="title"> 开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存) </template>
-                    <a-icon type="question-circle" theme="filled" />
+
+            <a-form-model-item prop="cacheBuild">
+              <template slot="label">
+                缓存构建目录
+                <a-tooltip v-show="!temp.id">
+                  <template slot="title"> 开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存) </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-row>
+                <a-col :span="4">
+                  <a-tooltip title="开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存)">
+                    <a-switch v-model="tempExtraData.cacheBuild" checked-children="是" un-checked-children="否" />
                   </a-tooltip>
-                </template>
-                <a-switch v-model="tempExtraData.cacheBuild" checked-children="是" un-checked-children="否" />
-              </a-form-model-item>
-            </a-tooltip>
+                </a-col>
+                <a-col :span="4" style="text-align: right">
+                  <a-tooltip>
+                    <template slot="title"> 保留产物是指对在构建完成后是否保留构建产物相关文件，用于回滚 </template>
+
+                    <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                    保留产物：
+                  </a-tooltip>
+                </a-col>
+                <a-col :span="10">
+                  <a-switch v-model="tempExtraData.saveBuildFile" checked-children="是" un-checked-children="否" />
+                </a-col>
+              </a-row>
+            </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
       </a-form-model>
@@ -924,6 +940,7 @@ export default {
       this.editBuildVisible = true;
       this.tempExtraData = {
         cacheBuild: true,
+        saveBuildFile: true,
       };
       // this.$nextTick(() => {
       //   setTimeout(() => {
@@ -950,6 +967,10 @@ export default {
       if (this.tempExtraData.cacheBuild === undefined) {
         this.tempExtraData.cacheBuild = true;
       }
+      if (this.tempExtraData.saveBuildFile === undefined) {
+        this.tempExtraData.saveBuildFile = true;
+      }
+
       // 设置发布方式的数据
       if (this.tempExtraData.releaseMethodDataId) {
         if (record.releaseMethod === 1) {
