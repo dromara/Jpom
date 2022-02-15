@@ -100,6 +100,9 @@ export default {
       type: String,
     },
     serviceId: { type: String },
+    taskState: {
+      type: String,
+    },
     visible: {
       type: Boolean,
       default: false,
@@ -160,6 +163,7 @@ export default {
     this.autoUpdateTime && clearTimeout(this.autoUpdateTime);
   },
   mounted() {
+    this.listQuery.taskState = this.taskState;
     this.loadData();
   },
   methods: {

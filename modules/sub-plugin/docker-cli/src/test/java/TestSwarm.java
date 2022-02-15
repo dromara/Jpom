@@ -348,9 +348,9 @@ public class TestSwarm {
 
 	@Test
 	public void testNetwork2(){
-		DockerClient client = this.client(node1);
+		DockerClient client = this.client("172.19.106.252");
 		InspectNetworkCmd inspectNetworkCmd = client.inspectNetworkCmd()
-				.withNetworkId("c52824e133f1cb855196ac42441131362d56d58a931c232e01c101b6dafb74f5");
+				.withNetworkId("903gj9lnisp5dbf77zpzti35x");
 		Network exec = inspectNetworkCmd.exec();
 		System.out.println(exec);
 	}

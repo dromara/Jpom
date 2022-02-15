@@ -49,6 +49,7 @@
           <template v-if="record.networkSettings">
             <template v-if="record.networkSettings.networks">
               <template v-if="record.networkSettings.networks.bridge">
+                桥接模式：
                 <p v-if="record.networkSettings.networks.bridge.ipAddress">
                   IP: <a-tag>{{ record.networkSettings.networks.bridge.ipAddress }}</a-tag>
                 </p>
@@ -63,6 +64,23 @@
                 </p>
                 <p v-if="record.networkSettings.networks.bridge.endpointId">
                   endpointId: <a-tag>{{ record.networkSettings.networks.bridge.endpointId }}</a-tag>
+                </p>
+              </template>
+              <template v-if="record.networkSettings.networks.ingress">
+                <p v-if="record.networkSettings.networks.ingress.ipAddress">
+                  IP: <a-tag>{{ record.networkSettings.networks.ingress.ipAddress }}</a-tag>
+                </p>
+                <p v-if="record.networkSettings.networks.ingress.macAddress">
+                  MAC: <a-tag>{{ record.networkSettings.networks.ingress.macAddress }}</a-tag>
+                </p>
+                <p v-if="record.networkSettings.networks.ingress.gateway">
+                  网关: <a-tag>{{ record.networkSettings.networks.ingress.gateway }}</a-tag>
+                </p>
+                <p v-if="record.networkSettings.networks.ingress.networkID">
+                  networkID: <a-tag>{{ record.networkSettings.networks.ingress.networkID }}</a-tag>
+                </p>
+                <p v-if="record.networkSettings.networks.ingress.endpointId">
+                  endpointId: <a-tag>{{ record.networkSettings.networks.ingress.endpointId }}</a-tag>
                 </p>
               </template>
             </template>

@@ -299,7 +299,7 @@ public class DockerSwarmInfoController extends BaseServerController {
 		map.put("availability", availability);
 		map.put("role", role);
 		plugin.execute("updateSwarmNode", map);
-		return new JsonMessage<>(200, "解绑成功");
+		return new JsonMessage<>(200, "修改成功");
 	}
 
 	/**

@@ -50,8 +50,10 @@
         </span>
       </a-tooltip>
 
-      <a-tooltip slot="replicas" slot-scope="text, record" placement="topLeft" :title="text" @click="handleTask(record)">
-        <a-tag>{{ text }}</a-tag>
+      <a-tooltip slot="replicas" slot-scope="text, record" placement="topLeft" :title="text">
+        <a-tag @click="handleTask(record, 'RUNNING')">{{ text }}</a-tag>
+
+        <a-icon type="read" @click="handleTask(record)" />
       </a-tooltip>
 
       <template slot="operation" slot-scope="text, record">
@@ -307,7 +309,7 @@
     </a-modal>
     <!-- 查看任务 -->
     <a-modal v-model="taskVisible" title="查看任务" width="80vw" :footer="null" :maskClosable="false">
-      <swarm-task v-if="taskVisible" :id="this.id" :serviceId="this.temp.id" />
+      <swarm-task v-if="taskVisible" :visible="taskVisible" :taskState="this.temp.state" :id="this.id" :serviceId="this.temp.id" />
     </a-modal>
     <!-- 查看日志 -->
     <a-modal v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
@@ -394,9 +396,10 @@ export default {
       });
     },
     //  任务
-    handleTask(record) {
+    handleTask(record, state) {
       this.taskVisible = true;
       this.temp = record;
+      this.temp = { ...this.temp, state: state || "" };
     },
     // 日志
     handleLog(record) {
