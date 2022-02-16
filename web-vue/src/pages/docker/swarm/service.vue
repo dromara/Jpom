@@ -357,6 +357,28 @@
                 <a-input-number style="width: 80%" :min="1" v-model="temp.rollback.monitor" placeholder="更新完成后确实成功的时间" />
               </a-form-model-item>
             </a-tab-pane>
+            <a-tab-pane key="resources" tab="资源" v-if="temp.resources">
+              <a-form-model-item label="预占资源">
+                <a-row>
+                  <a-col :span="8">
+                    <a-input addon-before="CPUs" v-model="temp.resources.reservations.nanoCPUs" placeholder="nanoCPUs 最小 1000000" />
+                  </a-col>
+                  <a-col :span="8" :offset="1">
+                    <a-input addon-before="memory" v-model="temp.resources.reservations.memoryBytes" placeholder="memory 最小 4M" />
+                  </a-col>
+                </a-row>
+              </a-form-model-item>
+              <a-form-model-item label="限制资源">
+                <a-row>
+                  <a-col :span="8">
+                    <a-input addon-before="CPUs" v-model="temp.resources.limits.nanoCPUs" placeholder="nanoCPUs 最小 1000000" />
+                  </a-col>
+                  <a-col :span="8" :offset="1">
+                    <a-input addon-before="memory" v-model="temp.resources.limits.memoryBytes" placeholder="memory 最小 4M" />
+                  </a-col>
+                </a-row>
+              </a-form-model-item>
+            </a-tab-pane>
           </a-tabs>
         </a-form-model-item>
       </a-form-model>
@@ -376,6 +398,7 @@
 import { dockerSwarmServicesList, dockerSwarmServicesDel, dockerSwarmServicesEdit } from "@/api/docker-swarm";
 import SwarmTask from "./task";
 import PullLog from "./pull-log";
+import { renderSize } from "@/utils/time";
 export default {
   components: { SwarmTask, PullLog },
   props: {
@@ -486,6 +509,10 @@ export default {
         envs: [{}],
         update: {},
         rollback: {},
+        resources: {
+          limits: {},
+          reservations: {},
+        },
       };
     },
     // 编辑
@@ -523,12 +550,15 @@ export default {
         envs: [{}],
         update: {},
         rollback: {},
+        resources: {},
       };
 
       const args = spec.taskTemplate?.containerSpec?.args;
       const mounts = spec.taskTemplate?.containerSpec?.mounts;
       const command = spec.taskTemplate?.containerSpec?.command;
       const env = spec.taskTemplate?.containerSpec?.env;
+      const limits = spec.taskTemplate?.resources?.limits;
+      const reservations = spec.taskTemplate?.resources?.reservations;
       const ports = spec.endpointSpec?.ports;
       const updateConfig = spec.updateConfig;
       const rollbackConfig = spec.rollbackConfig;
@@ -575,6 +605,16 @@ export default {
       if (rollbackConfig) {
         this.temp = { ...this.temp, rollback: rollbackConfig };
       }
+      let resources = { limits: {}, reservations: {} };
+      if (limits) {
+        limits.memoryBytes = renderSize(limits.memoryBytes);
+        resources = { ...resources, limits: limits };
+      }
+      if (reservations) {
+        reservations.memoryBytes = renderSize(reservations.memoryBytes);
+        resources = { ...resources, reservations: reservations };
+      }
+      this.temp = { ...this.temp, resources: resources };
     },
     handleEditOk() {
       this.$refs["editForm"].validate((valid) => {

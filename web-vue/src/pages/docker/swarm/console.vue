@@ -1,7 +1,7 @@
 <template>
   <a-layout class="docker-layout">
-    <a-layout-sider width="100px" style="min-height: calc(100vh - 85px)">
-      <a-menu theme="light" mode="inline" class="docker-menu" v-model="menuKeyArray" @click="menuClick">
+    <a-layout-header style="height: 48px; padding: 0">
+      <a-menu theme="light" mode="horizontal" class="docker-menu" v-model="menuKeyArray" @click="menuClick">
         <a-menu-item key="node">
           <span class="nav-text">集群节点</span>
         </a-menu-item>
@@ -12,7 +12,7 @@
           <span class="nav-text">集群任务</span>
         </a-menu-item>
       </a-menu>
-    </a-layout-sider>
+    </a-layout-header>
 
     <a-layout class="layout-content drawer-layout-content">
       <a-layout-content>
@@ -64,7 +64,7 @@ export default {
 };
 </script>
 <style scoped>
-.docker-menu {
-  height: 100%;
+.drawer-layout-content {
+  min-height: calc(100vh - 133px);
 }
 </style>

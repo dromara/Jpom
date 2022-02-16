@@ -25,6 +25,7 @@ package io.jpom;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.unit.DataSize;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -185,6 +186,11 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 		}
 	}
 
+	/**
+	 * 更新 服务，如果不存在 id 则创建。需要传人版本号
+	 *
+	 * @param parameter 测试
+	 */
 	public void updateServiceCmd(Map<String, Object> parameter) {
 		DockerClient dockerClient = DockerUtil.build(parameter);
 		try {
@@ -207,13 +213,29 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 				serviceSpec.withMode(serviceModeConfig);
 			}
 			{
-				TaskSpec taskSpec = serviceSpec.getTaskTemplate();
-				taskSpec = ObjectUtil.defaultIfNull(taskSpec, new TaskSpec());
-				ContainerSpec specContainerSpec = taskSpec.getContainerSpec();
+				TaskSpec taskSpec = ObjectUtil.defaultIfNull(serviceSpec.getTaskTemplate(), new TaskSpec());
 				//
-				ContainerSpec containerSpec = this.buildContainerSpec(parameter, specContainerSpec);
+				ContainerSpec containerSpec = this.buildContainerSpec(parameter, taskSpec.getContainerSpec());
 				taskSpec.withContainerSpec(containerSpec);
 				//
+				Map<String, Map<String, Object>> resources = (Map<String, Map<String, Object>>) parameter.get("resources");
+
+				if (MapUtil.isNotEmpty(resources)) {
+					ResourceRequirements resourceRequirements = new ResourceRequirements();
+					ResourceSpecs limitsResourceSpecs = this.buildResourceSpecs(resources.get("limits"));
+					if (limitsResourceSpecs != null) {
+						resourceRequirements.withLimits(limitsResourceSpecs);
+					}
+					ResourceSpecs reservationsResourceSpecs = this.buildResourceSpecs(resources.get("reservations"));
+					if (reservationsResourceSpecs != null) {
+						resourceRequirements.withReservations(reservationsResourceSpecs);
+					}
+					if (ObjectUtil.isAllEmpty(resourceRequirements.getLimits(), resourceRequirements.getReservations())) {
+						taskSpec.withResources(null);
+					} else {
+						taskSpec.withResources(resourceRequirements);
+					}
+				}
 				serviceSpec.withTaskTemplate(taskSpec);
 			}
 			{
@@ -240,6 +262,32 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 		} finally {
 			IoUtil.close(dockerClient);
 		}
+	}
+
+	private ResourceSpecs buildResourceSpecs(Map<String, Object> map) {
+		if (MapUtil.isNotEmpty(map)) {
+			ResourceSpecs resourceSpecs = new ResourceSpecs();
+			Object nanoCpus = map.get("nanoCPUs");
+			if (nanoCpus != null) {
+				String text = nanoCpus.toString();
+				if (StrUtil.isNotEmpty(text)) {
+					resourceSpecs.withNanoCPUs(Convert.toLong(nanoCpus, 1L));
+				}
+			}
+			Object memoryBytes = map.get("memoryBytes");
+			if (memoryBytes != null) {
+				String text = memoryBytes.toString();
+				if (StrUtil.isNotEmpty(text)) {
+					DataSize dataSize = DataSize.parse(text);
+					resourceSpecs.withMemoryBytes(dataSize.toBytes());
+				}
+			}
+			if (ObjectUtil.isAllEmpty(resourceSpecs.getNanoCPUs(), resourceSpecs.getMemoryBytes())) {
+				return null;
+			}
+			return resourceSpecs;
+		}
+		return null;
 	}
 
 	private EndpointSpec buildEndpointSpec(Map<String, Object> parameter) {
