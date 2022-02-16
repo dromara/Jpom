@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 操作日志
@@ -118,6 +119,10 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 		if (CollUtil.isEmpty(monitorUserOptModels)) {
 			return;
 		}
+		monitorUserOptModels = monitorUserOptModels.stream().filter(monitorUserOptModel -> {
+			List<String> monitorUser = monitorUserOptModel.monitorUser();
+			return CollUtil.contains(monitorUser, userOperateLogV1.getUserId());
+		}).collect(Collectors.toList());
 		for (MonitorUserOptModel monitorUserOptModel : monitorUserOptModels) {
 			List<String> notifyUser = monitorUserOptModel.notifyUser();
 			if (CollUtil.isEmpty(notifyUser)) {
