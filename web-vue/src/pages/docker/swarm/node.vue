@@ -17,6 +17,30 @@
         <span>{{ text }}</span>
       </a-tooltip>
 
+      <!-- <a-popover :title="`状态信息：${TASK_STATE[text]}`" slot="desiredState" slot-scope="text, item" placement="topLeft"> -->
+      <a-popover slot="hostname" slot-scope="hostname, item" placement="topLeft" :title="`主机名：${hostname}`">
+        <template slot="content">
+          <p>
+            节点Id: <a-tag>{{ item.id }}</a-tag>
+          </p>
+          <template v-if="item.description && item.description.resources">
+            <p>
+              nanoCPUs: <a-tag>{{ item.description.resources.nanoCPUs }}</a-tag>
+            </p>
+            <p>
+              memoryBytes: <a-tag>{{ item.description.resources.memoryBytes }}</a-tag>
+            </p>
+          </template>
+          <template v-if="item.description && item.description.engine">
+            <p>
+              版本: <a-tag>{{ item.description.engine.engineVersion }}</a-tag>
+            </p>
+          </template>
+        </template>
+
+        <span>{{ hostname }}</span>
+      </a-popover>
+
       <a-tooltip slot="status" slot-scope="text, item" placement="topLeft" :title="`节点状态：${text} 节点可用性：${item.spec ? item.spec.availability || '' : ''}`">
         <a-tag :color="(item.spec && item.spec.availability) === 'ACTIVE' && item.status && item.status.state === 'READY' ? 'green' : 'red'">
           {{ text }}
@@ -54,7 +78,9 @@
         <a-space>
           <template v-if="record.managerStatus && record.managerStatus.leader">
             <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
-            <a-button size="small" type="danger" :disabled="true">剔除</a-button>
+            <a-tooltip title="主节点不能直接剔除">
+              <a-button size="small" type="danger" :disabled="true">剔除</a-button>
+            </a-tooltip>
           </template>
           <template v-else>
             <a-button size="small" type="primary" @click="handleEdit(record)">修改</a-button>
@@ -126,19 +152,18 @@ export default {
       autoUpdateTime: null,
       columns: [
         { title: "序号", width: 80, ellipsis: true, align: "center", customRender: (text, record, index) => `${index + 1}` },
-        { title: "节点Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "主机名", dataIndex: "description.hostname", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        // { title: "节点Id", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "主机名", dataIndex: "description.hostname", ellipsis: true, scopedSlots: { customRender: "hostname" } },
         { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true, scopedSlots: { customRender: "address" } },
         { title: "状态", width: 140, dataIndex: "status.state", ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "角色", width: 110, dataIndex: "spec.role", ellipsis: true, scopedSlots: { customRender: "role" } },
 
         { title: "系统类型", width: 140, align: "center", dataIndex: "description.platform.os", ellipsis: true, scopedSlots: { customRender: "os" } },
         // {
-        //   title: "创建时间",
-        //   dataIndex: "createdAt",
-
+        //   title: "资源",
+        //   dataIndex: "description.resources",
         //   ellipsis: true,
-        //   scopedSlots: { customRender: "tooltip" },
+        //   scopedSlots: { customRender: "resources" },
         //   width: 170,
         // },
         {
