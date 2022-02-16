@@ -46,11 +46,14 @@ import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import io.jpom.system.extconf.DbExtConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,7 +72,8 @@ import java.util.stream.Collectors;
  */
 @PreLoadClass(value = Integer.MIN_VALUE + 1)
 @Configuration
-public class InitDb implements DisposableBean, InitializingBean {
+@Slf4j
+public class InitDb implements DisposableBean, InitializingBean, SignalHandler {
 
 	@PreLoadMethod(value = Integer.MIN_VALUE)
 	private static void init() {
@@ -139,7 +143,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 				}
 			}
 			instance.saveExecuteSqlLog(executeSqlLog);
-			DSFactory.setCurrentDSFactory(dsFactory);
+			GlobalDSFactory.set(dsFactory);
 			//
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("初始化数据库失败 {}", sqlFileNow, e);
@@ -224,16 +228,40 @@ public class InitDb implements DisposableBean, InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-
+		String[] signalArray = new String[]{"TERM"};
+		for (String s : signalArray) {
+			this.silenceSignalHandle(s);
+		}
 	}
 
 	@Override
 	public void destroy() throws Exception {
+		this.silenceDestroy();
+	}
+
+	private void silenceSignalHandle(String name) {
+		try {
+			Signal.handle(new Signal(name), this);
+			log.debug("{} signal handle success", name);
+		} catch (Exception e) {
+			log.debug("{} signal handle fail:{}", name, e.getMessage());
+		}
+	}
+
+	private void silenceDestroy() {
+		DbConfig.getInstance().close();
 		try {
 			DSFactory dsFactory = GlobalDSFactory.get();
+			GlobalDSFactory.set(null);
 			dsFactory.destroy();
 			Console.log("h2 db destroy");
 		} catch (Throwable ignored) {
+            System.err.println(ignored.getMessage());
 		}
+	}
+
+	@Override
+	public void handle(Signal signal) {
+		this.silenceDestroy();
 	}
 }

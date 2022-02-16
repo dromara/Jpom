@@ -80,6 +80,10 @@ public class DbConfig {
 		init = true;
 	}
 
+	public void close() {
+		init = false;
+	}
+
 	public boolean isInit() {
 		return init;
 	}
