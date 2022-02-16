@@ -235,7 +235,8 @@ public class UserModel extends BaseStrikeDbModel {
 	 * @return true
 	 */
 	public boolean isDemoUser() {
-		return UserModel.DEMO_USER.equals(getId());
+		// demo 账号 和他创建的账号都是 demo
+		return UserModel.DEMO_USER.equals(getId()) || UserModel.DEMO_USER.equals(getParent());
 	}
 
 //	/**

@@ -121,10 +121,7 @@ public class UserListController extends BaseServerController {
 			}
 			UserModel optUser = getUser();
 			if (StrUtil.equals(model.getId(), optUser.getId())) {
-				Assert.state(model.isSystemUser() == optUser.isSystemUser(), "不能修改自己的管理员权限");
-			}
-			if (model.isSuperSystemUser()) {
-				Assert.state(optUser.isSuperSystemUser(), "超级管理员才能修改超级管理员的信息");
+				Assert.state(optUser.isSuperSystemUser(), "不能修改自己的信息");
 			}
 			userService.update(userModel);
 		}
