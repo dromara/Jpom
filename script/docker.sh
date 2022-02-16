@@ -6,12 +6,12 @@
 # https://hub.docker.com/r/jpomdocker/jpom
 
 # 服务端
-docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.9 -f ./modules/server/DockerfileRelease --push .
+docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.10 -f ./modules/server/DockerfileRelease --push .
 #
 docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
 
 # docker logs --tail="100" jpom-server
-# docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:ro -v jpom-server-vol:/usr/local/jpom-server jpomdocker/jpom:mac-arm-2.8.9
+# docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:ro -v jpom-server-vol:/usr/local/jpom-server jpomdocker/jpom:mac-arm-2.8.10
 # docker stop jpom-server
 # docker rm jpom-server
 # docker exec -it jpom-server /bin/bash
