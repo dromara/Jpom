@@ -28,9 +28,11 @@ import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.build.BuildExecuteService;
+import io.jpom.common.BaseServerController;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
 import io.jpom.model.data.BuildInfoModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.IStatusRecover;
@@ -135,7 +137,12 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
         @Override
         public void execute() {
             BuildExecuteService buildExecuteService = SpringUtil.getBean(BuildExecuteService.class);
-            buildExecuteService.start(this.buildId, null, null, 2, "auto build:" + this.autoBuildCron);
+            try {
+                BaseServerController.resetInfo(UserModel.EMPTY);
+                buildExecuteService.start(this.buildId, null, null, 2, "auto build:" + this.autoBuildCron);
+            } finally {
+                BaseServerController.removeEmpty();
+            }
         }
     }
 
