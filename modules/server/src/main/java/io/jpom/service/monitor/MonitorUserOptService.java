@@ -40,20 +40,33 @@ import java.util.stream.Collectors;
 @Service
 public class MonitorUserOptService extends BaseWorkspaceService<MonitorUserOptModel> {
 
-	public List<MonitorUserOptModel> listByType(String workspaceId, ClassFeature classFeature, MethodFeature methodFeature) {
-		MonitorUserOptModel where = new MonitorUserOptModel();
-		where.setWorkspaceId(workspaceId);
-		where.setStatus(true);
-		List<MonitorUserOptModel> list = super.listByBean(where);
-		if (CollUtil.isEmpty(list)) {
-			return null;
-		}
-		return list.stream().filter(monitorUserOptModel -> {
-			List<ClassFeature> classFeatures = monitorUserOptModel.monitorFeature();
-			List<MethodFeature> methodFeatures = monitorUserOptModel.monitorOpt();
-			return CollUtil.contains(classFeatures, classFeature) && CollUtil.contains(methodFeatures, methodFeature);
-		}).collect(Collectors.toList());
-	}
+    /**
+     * 查询 对应操作的监控信息
+     *
+     * @param workspaceId   工作空间ID
+     * @param classFeature  功能
+     * @param methodFeature 操作
+     * @return list
+     */
+    public List<MonitorUserOptModel> listByType(String workspaceId, ClassFeature classFeature, MethodFeature methodFeature, String userId) {
+        MonitorUserOptModel where = new MonitorUserOptModel();
+        where.setWorkspaceId(workspaceId);
+        where.setStatus(true);
+        List<MonitorUserOptModel> list = super.listByBean(where);
+        if (CollUtil.isEmpty(list)) {
+            return null;
+        }
+        return list.stream().filter(monitorUserOptModel -> {
+            List<ClassFeature> classFeatures = monitorUserOptModel.monitorFeature();
+            List<MethodFeature> methodFeatures = monitorUserOptModel.monitorOpt();
+            boolean b = CollUtil.contains(classFeatures, classFeature) && CollUtil.contains(methodFeatures, methodFeature);
+            if (b) {
+                List<String> monitorUser = monitorUserOptModel.monitorUser();
+                return CollUtil.contains(monitorUser, userId);
+            }
+            return false;
+        }).collect(Collectors.toList());
+    }
 
 //    public List<MonitorUserOptModel> listByType(UserOperateLogV1.OptType optType, String userId) {
 //        List<MonitorUserOptModel> userOptModels = this.listByType(optType);
