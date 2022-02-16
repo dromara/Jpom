@@ -255,8 +255,8 @@ public class InitDb implements DisposableBean, InitializingBean, SignalHandler {
 			GlobalDSFactory.set(null);
 			dsFactory.destroy();
 			Console.log("h2 db destroy");
-		} catch (Throwable ignored) {
-            System.err.println(ignored.getMessage());
+		} catch (Throwable throwable) {
+            System.err.println(throwable.getMessage());
 		}
 	}
 
