@@ -25,7 +25,6 @@ package io.jpom.service.h2db;
 import cn.hutool.db.Entity;
 import io.jpom.common.Const;
 import io.jpom.model.BaseGroupModel;
-import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -52,9 +51,7 @@ public abstract class BaseGroupService<T extends BaseGroupModel> extends BaseWor
         String sql = "select `GROUP` from " + getTableName() + " where workspaceId=? group by `GROUP`";
         List<Entity> list = super.query(sql, workspaceId);
         // 筛选字段
-        return list.stream()
-                .filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.GROUP_STR))))
-                .flatMap(entity -> {
+        return list.stream().flatMap(entity -> {
                     Object obj = entity.get(Const.GROUP_STR);
                     if (obj == null) {
                         return null;
