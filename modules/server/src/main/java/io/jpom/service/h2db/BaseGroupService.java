@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,27 +42,33 @@ import java.util.stream.Stream;
 public abstract class BaseGroupService<T extends BaseGroupModel> extends BaseWorkspaceService<T> {
 
 
-	/**
-	 * load date group by group name
-	 *
-	 * @return list
-	 */
-	public List<String> listGroup(HttpServletRequest request) {
-		String workspaceId = getCheckUserWorkspace(request);
-		String sql = "select `GROUP` from " + getTableName() + " where workspaceId=? group by `GROUP`";
-		List<Entity> list = super.query(sql, workspaceId);
-		// 筛选字段
-		return list.stream()
-				.filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.GROUP_STR))))
-				.flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.GROUP_STR))))
-				.distinct().collect(Collectors.toList());
-	}
+    /**
+     * load date group by group name
+     *
+     * @return list
+     */
+    public List<String> listGroup(HttpServletRequest request) {
+        String workspaceId = getCheckUserWorkspace(request);
+        String sql = "select `GROUP` from " + getTableName() + " where workspaceId=? group by `GROUP`";
+        List<Entity> list = super.query(sql, workspaceId);
+        // 筛选字段
+        return list.stream()
+                .filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.GROUP_STR))))
+                .flatMap(entity -> {
+                    Object obj = entity.get(Const.GROUP_STR);
+                    if (obj == null) {
+                        return null;
+                    }
+                    return Stream.of(String.valueOf(obj));
+                }).filter(Objects::nonNull)
+                .distinct().collect(Collectors.toList());
+    }
 
-	/**
-	 * 恢复字段
-	 */
-	public void repairGroupFiled() {
-		String sql = "update " + getTableName() + " set `GROUP`=? where `GROUP` is null or `GROUP`=''";
-		super.execute(sql, "默认");
-	}
+    /**
+     * 恢复字段
+     */
+    public void repairGroupFiled() {
+        String sql = "update " + getTableName() + " set `GROUP`=? where `GROUP` is null or `GROUP`=''";
+        super.execute(sql, "默认");
+    }
 }
