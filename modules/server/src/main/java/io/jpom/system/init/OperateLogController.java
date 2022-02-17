@@ -87,9 +87,9 @@ public class OperateLogController implements AopLogInterface {
 			return null;
 		}
 		ClassFeature classFeature = feature.cls();
-		if (classFeature == null || classFeature == ClassFeature.NULL) {
+		if (classFeature == ClassFeature.NULL) {
 			Feature feature1 = declaringClass.getAnnotation(Feature.class);
-			if (classFeature == null || feature1.cls() == ClassFeature.NULL) {
+			if (feature1 == null || feature1.cls() == ClassFeature.NULL) {
 				DefaultSystemLog.getLog().error("权限分发配置错误：{}  {} class not find", declaringClass, method.getName());
 				return null;
 			}

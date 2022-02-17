@@ -36,6 +36,7 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.permission.NodeDataPermission;
 import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.h2db.BaseNodeService;
@@ -122,12 +123,19 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 			this.errorMsg(response, DEMO_TIP);
 			return false;
 		}
+        ClassFeature classFeature = feature.cls();
+        if (classFeature == ClassFeature.NULL) {
+            Feature feature1 = handlerMethod.getBeanType().getAnnotation(Feature.class);
+            if (feature1 != null && feature1.cls() != ClassFeature.NULL) {
+                classFeature = feature1.cls();
+            }
+        }
 		// 判断功能权限
 		if (method != MethodFeature.LIST) {
 			String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
 			boolean exists = userBindWorkspaceService.exists(userModel.getId(), workspaceId + StrUtil.DASHED + method.name());
 			if (!exists) {
-				this.errorMsg(response, "您没有对应功能【" + feature.cls().getName() + StrUtil.DASHED + method.getName() + "】管理权限");
+				this.errorMsg(response, "您没有对应功能【" + classFeature.getName() + StrUtil.DASHED + method.getName() + "】管理权限");
 				return false;
 			}
 		}
