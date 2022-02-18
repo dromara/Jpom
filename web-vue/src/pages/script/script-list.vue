@@ -1,5 +1,5 @@
 <template>
-  <div class="node-full-content">
+  <div class="full-content">
     <!-- 数据表格 -->
     <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" bordered rowKey="id">
       <template slot="title">

@@ -41,14 +41,19 @@
             <a-space><a-icon type="profile" />用户资料</a-space>
           </a-button>
         </a-menu-item>
-        <a-menu-item>
+        <!-- <a-menu-item>
           <a-button type="link" @click="toggleGuide" :disabled="this.getDisabledGuide">
             <a-space> <a-icon :type="`${this.guideStatus ? 'question-circle' : 'issues-close'}`" /> {{ this.guideStatus ? "开启导航" : "关闭导航" }} </a-space>
           </a-button>
-        </a-menu-item>
-        <a-menu-item>
+        </a-menu-item> -->
+        <!-- <a-menu-item>
           <a-button @click="restGuide" type="link" :disabled="this.getDisabledGuide">
             <a-space><a-icon type="rest" /> 重置导航</a-space>
+          </a-button>
+        </a-menu-item> -->
+        <a-menu-item>
+          <a-button @click="customize" type="link">
+            <a-space><a-icon type="skin" /> 个性配置</a-space>
           </a-button>
         </a-menu-item>
         <a-menu-item @click="logOut">
@@ -230,6 +235,36 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 个性配置区 -->
+    <a-modal v-model="customizeVisible" title="个性配置区" :footer="null" :maskClosable="false">
+      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-alert banner>
+          <template slot="message"> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
+        </a-alert>
+        <a-form-model-item label="页面导航" prop="token">
+          <a-space>
+            <a-switch checked-children="开" @click="toggleGuide" :checked="!this.guideStatus" :disabled="this.getDisabledGuide" un-checked-children="关" />
+
+            <div v-if="!this.guideStatus">
+              重置导航
+              <a-icon type="rest" @click="restGuide" />
+            </div>
+          </a-space>
+        </a-form-model-item>
+        <a-form-model-item label="菜单配置" prop="token">
+          <a-space>
+            同时展开多个：
+            <a-switch checked-children="是" @click="toggleMenuMultiple" :checked="this.menuMultipleFlag" un-checked-children="否" />
+          </a-space>
+        </a-form-model-item>
+        <a-form-model-item label="页面配置" prop="token">
+          <a-space>
+            自动撑开：
+            <a-switch checked-children="是" @click="toggleFullScreenFlag" :checked="this.fullScreenFlag" un-checked-children="否" />
+          </a-space>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -250,6 +285,7 @@ export default {
       tempVue: null,
       myWorkspaceList: [],
       selectWorkspace: "",
+      customizeVisible: false,
       // 表单校验规则
       rules: {
         oldPwd: [
@@ -293,12 +329,21 @@ export default {
     guideStatus() {
       return this.getGuideCache.close;
     },
+    menuMultipleFlag() {
+      return this.getGuideCache.menuMultipleFlag === undefined ? true : this.getGuideCache.menuMultipleFlag;
+    },
+    fullScreenFlag() {
+      return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag;
+    },
   },
   inject: ["reload"],
   created() {
     this.init();
   },
   methods: {
+    customize() {
+      this.customizeVisible = true;
+    },
     creatQrCode(qrCodeDom, text) {
       // console.log(qrCodeDom);
       new QRCode(qrCodeDom, {
@@ -334,6 +379,34 @@ export default {
         } else {
           this.$notification.success({
             message: "开启页面操作引导、导航",
+          });
+        }
+      });
+    },
+    // 切换菜单打开
+    toggleMenuMultiple() {
+      this.$store.dispatch("toggleMenuFlag").then((flag) => {
+        if (flag) {
+          this.$notification.success({
+            message: "可以同时展开多个菜单",
+          });
+        } else {
+          this.$notification.success({
+            message: "同时只能展开一个菜单",
+          });
+        }
+      });
+    },
+    // 页面全屏
+    toggleFullScreenFlag() {
+      this.$store.dispatch("toggleFullScreenFlag").then((flag) => {
+        if (flag) {
+          this.$notification.success({
+            message: "页面全屏，高度 100%",
+          });
+        } else {
+          this.$notification.success({
+            message: "页面内容自动撑开出现滚动条",
           });
         }
       });

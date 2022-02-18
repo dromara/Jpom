@@ -1,6 +1,6 @@
 <template>
   <a-layout id="app-layout">
-    <a-layout-sider v-model="collapsed" :trigger="null" collapsible class="sider">
+    <a-layout-sider v-model="collapsed" :trigger="null" collapsible :class="`${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`">
       <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
         <div class="logo" @click="changeCollapsed()">
           <img :src="logoUrl" />
@@ -20,7 +20,8 @@
         <content-tab />
         <!-- <user-header /> -->
       </a-layout-header>
-      <a-layout-content class="layout-content">
+      <!-- class="layout-content" -->
+      <a-layout-content :class="`layout-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'}`">
         <keep-alive>
           <router-view />
         </keep-alive>
@@ -49,7 +50,10 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getCollapsed"]),
+    ...mapGetters(["getCollapsed", "getGuideCache"]),
+    fullScreenFlag() {
+      return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag;
+    },
   },
   watch: {},
   mounted() {
@@ -151,7 +155,7 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style scoped lang="stylus">
 #app-layout {
   min-height: 100vh;
 }
@@ -189,9 +193,21 @@ export default {
   background: #fff;
   padding: 0 10px;
 }
-.sider {
+.sider-scroll {
   min-height: 100vh;
   overflow-y: auto;
+}
+.sider-full-screen {
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+.layout-content-scroll {
+  overflow-y: auto;
+}
+.layout-content-full-screen {
+  height calc(100vh - 120px);
+  overflow-y: scroll;
 }
 </style>
 

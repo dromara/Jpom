@@ -1,8 +1,8 @@
 <template>
   <a-layout class="node-layout" ref="nodeLayout" id="nodeLayout">
     <!-- 侧边栏 节点管理菜单 -->
-    <a-layout-sider theme="light" class="node-sider jpom-node-sider">
-      <a-menu theme="light" mode="inline" :default-selected-keys="selectedKeys" :default-open-keys="defaultOpenKey">
+    <a-layout-sider theme="light" :class="`node-sider jpom-node-sider ${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`">
+      <a-menu theme="light" mode="inline" @openChange="openChange" :default-selected-keys="selectedKeys" :openKeys="openKey">
         <template v-for="menu in nodeMenuList">
           <a-sub-menu v-if="menu.childs" :key="menu.id" :class="menu.id">
             <span slot="title">
@@ -21,7 +21,8 @@
       </a-menu>
     </a-layout-sider>
     <!-- 节点管理的各个组件 -->
-    <a-layout-content class="layout-content jpom-node-content drawer-layout-content">
+    <!-- class="layout-content jpom-node-content drawer-layout-content" -->
+    <a-layout-content :class="`layout-content jpom-node-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'}`">
       <welcome v-if="currentId === 'welcome'" :node="node" />
       <project-list v-if="currentId === 'manageList'" :node="node" />
       <jdk-list v-if="currentId === 'jdkList'" :node="node" />
@@ -55,7 +56,7 @@ import Cache from "@/pages/node/node-layout/system/cache";
 import Log from "@/pages/node/node-layout/system/log.vue";
 import Upgrade from "@/pages/node/node-layout/system/upgrade.vue";
 import ConfigFile from "@/pages/node/node-layout/system/config-file.vue";
-
+import { mapGetters } from "vuex";
 export default {
   components: {
     Welcome,
@@ -82,23 +83,29 @@ export default {
     return {
       nodeMenuList: [],
       selectedKeys: [this.$route.query.id || "welcome"],
+      openKey: [],
     };
   },
   computed: {
+    ...mapGetters(["getGuideCache"]),
+    fullScreenFlag() {
+      return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag;
+    },
     currentId() {
       return this.selectedKeys[0];
     },
-    defaultOpenKey() {
-      let keyList = [];
-      if (this.$route.query.pId) {
-        // 打开对应的父级菜单
-        keyList = [this.$route.query.pId, "systemConfig"];
-      }
-      return keyList;
+    menuMultipleFlag() {
+      return this.getGuideCache.menuMultipleFlag === undefined ? true : this.getGuideCache.menuMultipleFlag;
     },
   },
   watch: {},
   created() {
+    let keyList = [];
+    if (this.$route.query.pId) {
+      // 打开对应的父级菜单
+      keyList = [this.$route.query.pId, "systemConfig"];
+    }
+    this.openKey = keyList;
     this.loadNodeMenu();
     setTimeout(() => {
       this.introGuide();
@@ -163,16 +170,33 @@ export default {
         },
       });
     },
+    openChange(keys) {
+      if (keys.length && !this.menuMultipleFlag) {
+        // 保留一个打开
+        keys = [keys[keys.length - 1]];
+      }
+      this.openKey = keys;
+    },
   },
 };
 </script>
 <style scoped lang="stylus">
-.node-sider {
-  /* height: calc(100vh - 80px); */
-  min-height: calc(100vh - 85px);
+
+.sider-scroll {
+  min-height: calc(100vh - 133px);
   overflow-y: auto;
 }
-/* .node-layout {
-  padding: 10px;
-} */
+.sider-full-screen {
+  height: calc(100vh - 75px);
+  overflow-y: scroll;
+}
+
+.layout-content-scroll {
+  min-height: calc(100vh - 133px)
+  overflow-y: auto;
+}
+.layout-content-full-screen {
+ height: calc(100vh - 85px);
+  overflow-y: scroll;
+}
 </style>
