@@ -20,7 +20,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getMenus", "getActiveMenuKey", "getMenuOpenKeys", "getCollapsed"]),
+    ...mapGetters(["getMenus", "getActiveMenuKey", "getMenuOpenKeys", "getCollapsed", "getGuideCache"]),
     selectedKeys: {
       get() {
         return [this.getActiveMenuKey];
@@ -35,6 +35,9 @@ export default {
       // 时候全局缓存的菜单
       return this.getMenuOpenKeys;
     },
+    menuMultipleFlag() {
+      return this.getGuideCache.menuMultipleFlag === undefined ? true : this.getGuideCache.menuMultipleFlag;
+    },
   },
   created() {
     this.$store.dispatch("menuOpenKeys", this.$route.query.sPid || "");
@@ -42,6 +45,10 @@ export default {
   beforeDestroy() {},
   methods: {
     openChange(keys) {
+      if (keys.length && !this.menuMultipleFlag) {
+        // 保留一个打开
+        keys = [keys[keys.length - 1]];
+      }
       this.menuOpenKeys = keys;
       this.$store.dispatch("menuOpenKeys", keys);
     },

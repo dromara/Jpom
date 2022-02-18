@@ -22,6 +22,24 @@ const app = {
     },
   },
   actions: {
+    // 页面全屏开关
+    toggleFullScreenFlag({ commit, rootGetters }) {
+      return new Promise((resolve) => {
+        const cache = rootGetters.getGuideCache;
+        cache.fullScreenFlag = !(cache.fullScreenFlag === undefined ? true : cache.fullScreenFlag);
+        commit("setGuideCache", cache);
+        resolve(cache.menuMultipleFlag);
+      });
+    },
+    // 打开多菜单开关
+    toggleMenuFlag({ commit, rootGetters }) {
+      return new Promise((resolve) => {
+        const cache = rootGetters.getGuideCache;
+        cache.menuMultipleFlag = !(cache.menuMultipleFlag === undefined ? true : cache.menuMultipleFlag);
+        commit("setGuideCache", cache);
+        resolve(cache.menuMultipleFlag);
+      });
+    },
     // 切换引导开关
     toggleGuideFlag({ commit, rootGetters }) {
       return new Promise((resolve) => {
