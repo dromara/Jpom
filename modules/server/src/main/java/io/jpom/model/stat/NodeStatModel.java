@@ -23,7 +23,7 @@
 package io.jpom.model.stat;
 
 import cn.hutool.core.util.StrUtil;
-import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.model.BaseGroupModel;
 import io.jpom.model.log.SystemMonitorLog;
 import io.jpom.service.h2db.TableName;
 
@@ -34,152 +34,152 @@ import io.jpom.service.h2db.TableName;
  * @since 2022/1/22
  */
 @TableName(value = "NODE_STAT", name = "节点统计")
-public class NodeStatModel extends BaseWorkspaceModel {
-	/**
-	 * 占用cpu
-	 */
-	private Double occupyCpu;
-	/**
-	 * 占用内存 （总共）
-	 */
-	private Double occupyMemory;
-	/**
-	 * 占用内存 (使用) @author jzy
-	 */
-	private Double occupyMemoryUsed;
-	/**
-	 * 占用磁盘
-	 */
-	private Double occupyDisk;
-	/**
-	 * 网络耗时
-	 */
-	private Integer networkTime;
-	/**
-	 * 运行时间
-	 */
-	private String upTimeStr;
-	/**
-	 * 系统名称
-	 */
-	private String osName;
-	/**
-	 * jpom 版本
-	 */
-	private String jpomVersion;
+public class NodeStatModel extends BaseGroupModel {
+    /**
+     * 占用cpu
+     */
+    private Double occupyCpu;
+    /**
+     * 占用内存 （总共）
+     */
+    private Double occupyMemory;
+    /**
+     * 占用内存 (使用) @author jzy
+     */
+    private Double occupyMemoryUsed;
+    /**
+     * 占用磁盘
+     */
+    private Double occupyDisk;
+    /**
+     * 网络耗时
+     */
+    private Integer networkTime;
+    /**
+     * 运行时间
+     */
+    private String upTimeStr;
+    /**
+     * 系统名称
+     */
+    private String osName;
+    /**
+     * jpom 版本
+     */
+    private String jpomVersion;
 
-	/**
-	 * 状态{1，无法连接，0 正常, 2 授权信息错误, 3 状态码错误, 4 节点关闭}
-	 */
-	private Integer status;
-	/**
-	 * 错误消息
-	 */
-	private String failureMsg;
+    /**
+     * 状态{1，无法连接，0 正常, 2 授权信息错误, 3 状态码错误, 4 节点关闭}
+     */
+    private Integer status;
+    /**
+     * 错误消息
+     */
+    private String failureMsg;
 
-	/**
-	 * 节点地址
-	 */
-	private String url;
+    /**
+     * 节点地址
+     */
+    private String url;
 
-	/**
-	 * 节点名称
-	 */
-	private String name;
+    /**
+     * 节点名称
+     */
+    private String name;
 
-	public String getUrl() {
-		return url;
-	}
+    public String getUrl() {
+        return url;
+    }
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getFailureMsg() {
-		return failureMsg;
-	}
+    public String getFailureMsg() {
+        return failureMsg;
+    }
 
-	public void setFailureMsg(String failureMsg) {
-		this.failureMsg = StrUtil.maxLength(failureMsg, 240);
-	}
+    public void setFailureMsg(String failureMsg) {
+        this.failureMsg = StrUtil.maxLength(failureMsg, 240);
+    }
 
-	public Double getOccupyCpu() {
-		return occupyCpu;
-	}
+    public Double getOccupyCpu() {
+        return occupyCpu;
+    }
 
-	public void setOccupyCpu(Double occupyCpu) {
-		this.occupyCpu = occupyCpu;
-	}
+    public void setOccupyCpu(Double occupyCpu) {
+        this.occupyCpu = occupyCpu;
+    }
 
-	public Double getOccupyMemory() {
-		return occupyMemory;
-	}
+    public Double getOccupyMemory() {
+        return occupyMemory;
+    }
 
-	public void setOccupyMemory(Double occupyMemory) {
-		this.occupyMemory = occupyMemory;
-	}
+    public void setOccupyMemory(Double occupyMemory) {
+        this.occupyMemory = occupyMemory;
+    }
 
-	public Double getOccupyMemoryUsed() {
-		return occupyMemoryUsed;
-	}
+    public Double getOccupyMemoryUsed() {
+        return occupyMemoryUsed;
+    }
 
-	public void setOccupyMemoryUsed(Double occupyMemoryUsed) {
-		this.occupyMemoryUsed = occupyMemoryUsed;
-	}
+    public void setOccupyMemoryUsed(Double occupyMemoryUsed) {
+        this.occupyMemoryUsed = occupyMemoryUsed;
+    }
 
-	public Double getOccupyDisk() {
-		return occupyDisk;
-	}
+    public Double getOccupyDisk() {
+        return occupyDisk;
+    }
 
-	public void setOccupyDisk(Double occupyDisk) {
-		this.occupyDisk = occupyDisk;
-	}
+    public void setOccupyDisk(Double occupyDisk) {
+        this.occupyDisk = occupyDisk;
+    }
 
-	public Integer getNetworkTime() {
-		return networkTime;
-	}
+    public Integer getNetworkTime() {
+        return networkTime;
+    }
 
-	public void setNetworkTime(Integer networkTime) {
-		this.networkTime = networkTime;
-	}
+    public void setNetworkTime(Integer networkTime) {
+        this.networkTime = networkTime;
+    }
 
-	public String getUpTimeStr() {
-		return upTimeStr;
-	}
+    public String getUpTimeStr() {
+        return upTimeStr;
+    }
 
-	public void setUpTimeStr(String upTimeStr) {
-		this.upTimeStr = upTimeStr;
-	}
+    public void setUpTimeStr(String upTimeStr) {
+        this.upTimeStr = upTimeStr;
+    }
 
-	public String getOsName() {
-		return osName;
-	}
+    public String getOsName() {
+        return osName;
+    }
 
-	public void setOsName(String osName) {
-		this.osName = osName;
-	}
+    public void setOsName(String osName) {
+        this.osName = osName;
+    }
 
-	public String getJpomVersion() {
-		return jpomVersion;
-	}
+    public String getJpomVersion() {
+        return jpomVersion;
+    }
 
-	public void setJpomVersion(String jpomVersion) {
-		this.jpomVersion = jpomVersion;
-	}
+    public void setJpomVersion(String jpomVersion) {
+        this.jpomVersion = jpomVersion;
+    }
 
-	public Integer getStatus() {
-		return status;
-	}
+    public Integer getStatus() {
+        return status;
+    }
 
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
 }
