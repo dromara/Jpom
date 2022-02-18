@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-        run: cd web-vue && npm i && npm run build
+      - run: cd web-vue && npm i && npm run build
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
