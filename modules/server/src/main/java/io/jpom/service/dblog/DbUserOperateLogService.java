@@ -114,7 +114,8 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 		String optTypeMsg = StrUtil.format(" 【{}】->【{}】", classFeature.getName(), methodFeature.getName());
 		List<MonitorUserOptModel> monitorUserOptModels = monitorUserOptService.listByType(userOperateLogV1.getWorkspaceId(),
 				classFeature,
-				methodFeature);
+				methodFeature,
+				userOperateLogV1.getUserId());
 		if (CollUtil.isEmpty(monitorUserOptModels)) {
 			return;
 		}

@@ -80,7 +80,7 @@ export default {
       mfaData: {},
       action: "login",
       randCode: "randCode.png",
-      dynamicBg: localStorage.getItem("dynamicBg") === "false" ? false : true,
+      dynamicBg: localStorage.getItem("dynamicBg") === "true",
       loginTitle: "登录JPOM",
       rules: {
         userName: [{ required: true, message: "请输入用户名" }],

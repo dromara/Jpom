@@ -14,7 +14,6 @@ const user = {
     token: localStorage.getItem(TOKEN_KEY),
     longTermToken: localStorage.getItem(LONG_TERM_TOKEN),
     userInfo: JSON.parse(localStorage.getItem(USER_INFO_KEY)),
-    
   },
   mutations: {
     setToken(state, data) {
@@ -33,7 +32,7 @@ const user = {
     },
     setUserInfo(state, userInfo) {
       state.userInfo = userInfo;
-    }
+    },
   },
   actions: {
     // 登录 data = {token: 'xxx', userName: 'name'}
@@ -60,6 +59,7 @@ const user = {
       return new Promise((resolve) => {
         commit("setToken", {});
         commit("setMenus", "");
+        dispatch("changeWorkspace", "");
         localStorage.removeItem(MENU_KEY);
         // 调用其他 action
         dispatch("clearTabs", { key: "all" });

@@ -354,7 +354,7 @@ export default {
       const html =
         "确认要上传最新的插件包吗？<ul style='color:red;'>" +
         "<li>上传前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>" +
-        "<li>上传前请检查包是否完整,或者可能出现更新后无法正常启动的情况！！</li>" +
+        "<li>上传前请检查包是否完整,否则可能出现更新后无法正常启动的情况！！</li>" +
         " </ul>";
       const h = this.$createElement;
       this.$confirm({
