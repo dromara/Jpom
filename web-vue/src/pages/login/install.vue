@@ -252,6 +252,8 @@ export default {
                 // 跳转主页面
                 //  this.$router.push({ path: "/" });
               });
+              const firstWorkspace = tokenData.bindWorkspaceModels[0];
+              this.$store.dispatch("changeWorkspace", firstWorkspace.id).then(() => {});
             }
           });
         }
