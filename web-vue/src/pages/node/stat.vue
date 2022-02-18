@@ -26,6 +26,9 @@
               <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
                 <a-select-option v-for="(desc, key) in statusMap" :key="key">{{ desc }}</a-select-option>
               </a-select>
+              <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+                <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+              </a-select>
               <a-select v-model="listQuery['order_field']" allowClear placeholder="请选择排序字段" class="search-input-item">
                 <a-select-option value="networkTime">网络延迟</a-select-option>
                 <a-select-option value="occupyCpu">cpu</a-select-option>
@@ -213,6 +216,7 @@ import { getStatist, status, statusStat } from "@/api/node-stat";
 import { parseTime, formatDuration } from "@/utils/time";
 import { PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import NodeTop from "@/pages/node/node-layout/node-top";
+import { getNodeGroupAll } from "@/api/node";
 
 export default {
   components: { NodeTop },
@@ -231,12 +235,14 @@ export default {
       monitorVisible: false,
       deadline: 0,
       temp: {},
+      groupList: [],
     };
   },
   computed: {},
   watch: {},
   created() {
     this.loadData();
+    this.loadGroupList();
   },
   destroyed() {
     if (this.pullFastInstallResultTime) {
@@ -284,6 +290,14 @@ export default {
       this.monitorVisible = true;
       this.temp = record;
       this.temp = { ...this.temp, type };
+    },
+    // 获取所有的分组
+    loadGroupList() {
+      getNodeGroupAll().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
+      });
     },
   },
 };

@@ -229,6 +229,7 @@ export function remoteUpgrade(nodeId) {
   return axios({
     url: "/system/remote_upgrade.json",
     method: "get",
+    timeout: 0,
     headers: {},
     data: { nodeId },
   });
@@ -289,15 +290,13 @@ export function getMenusConfig() {
   });
 }
 
-
 /**
  * 保存菜单配置信息
  */
- export function saveMenusConfig(data) {
+export function saveMenusConfig(data) {
   return axios({
     url: "/system/save_menus_config.json",
     method: "post",
     data: data,
   });
 }
-

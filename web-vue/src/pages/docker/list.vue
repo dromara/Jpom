@@ -84,6 +84,19 @@
         <!-- <a-form-model-item v-if="temp.id" label="容器ID" prop="id">
           <a-input v-model="temp.id" disabled readonly />
         </a-form-model-item> -->
+        <a-space direction="vertical">
+          <a-alert banner>
+            <template slot="message">
+              系统使用 docker http 接口实现和 docker 通讯和管理，但是默认<b style="color: red">没有开启任何认证</b> 这样使得 <b style="color: red">docker 极不安全</b>，如果端口暴露到公网很<b
+                style="color: red"
+              >
+                容易出现挖矿情况
+              </b>
+              所以这里 我们<b style="color: red">强烈建议您使用 TLS 证书</b>（证书生成方式可以参考文档）来连接 docker 提升安全性（如果端口<b style="color: red">保证在内网中使用可以忽略 TLS 证书</b>）
+            </template>
+          </a-alert>
+          <div></div>
+        </a-space>
         <a-form-model-item label="容器名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />
         </a-form-model-item>
