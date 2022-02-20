@@ -23,13 +23,13 @@
 package io.jpom.service.system;
 
 import cn.hutool.core.collection.CollStreamUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,29 +41,29 @@ import java.util.Set;
 @Service
 public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVarModel> {
 
-	public Map<String, String> getEnv(String workspaceId) {
-		WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceEnvVarModel();
-		workspaceEnvVarModel.setWorkspaceId(workspaceId);
-		List<WorkspaceEnvVarModel> list = super.listByBean(workspaceEnvVarModel);
-		Map<String, String> map = CollStreamUtil.toMap(list, WorkspaceEnvVarModel::getName, WorkspaceEnvVarModel::getValue);
-		return ObjectUtil.defaultIfNull(map, MapUtil.empty());
-	}
+    public Map<String, String> getEnv(String workspaceId) {
+        WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceEnvVarModel();
+        workspaceEnvVarModel.setWorkspaceId(workspaceId);
+        List<WorkspaceEnvVarModel> list = super.listByBean(workspaceEnvVarModel);
+        Map<String, String> map = CollStreamUtil.toMap(list, WorkspaceEnvVarModel::getName, WorkspaceEnvVarModel::getValue);
+        return ObjectUtil.defaultIfNull(map, new HashMap<>());
+    }
 
-	public void formatCommand(String workspaceId, String[] commands) {
-		WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceEnvVarModel();
-		workspaceEnvVarModel.setWorkspaceId(workspaceId);
-		Map<String, String> evn = this.getEnv(workspaceId);
-		for (int i = 0; i < commands.length; i++) {
-			commands[i] = this.formatCommandItem(commands[i], evn);
-		}
-	}
+    public void formatCommand(String workspaceId, String[] commands) {
+        WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceEnvVarModel();
+        workspaceEnvVarModel.setWorkspaceId(workspaceId);
+        Map<String, String> evn = this.getEnv(workspaceId);
+        for (int i = 0; i < commands.length; i++) {
+            commands[i] = this.formatCommandItem(commands[i], evn);
+        }
+    }
 
-	private String formatCommandItem(String command, Map<String, String> evn) {
-		String replace = command;
-		Set<Map.Entry<String, String>> entries = evn.entrySet();
-		for (Map.Entry<String, String> entry : entries) {
-			replace = StrUtil.replace(replace, StrUtil.format("#{{}}", entry.getKey()), entry.getValue());
-		}
-		return replace;
-	}
+    private String formatCommandItem(String command, Map<String, String> evn) {
+        String replace = command;
+        Set<Map.Entry<String, String>> entries = evn.entrySet();
+        for (Map.Entry<String, String> entry : entries) {
+            replace = StrUtil.replace(replace, StrUtil.format("#{{}}", entry.getKey()), entry.getValue());
+        }
+        return replace;
+    }
 }
