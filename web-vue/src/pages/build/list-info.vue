@@ -755,6 +755,7 @@ export default {
       ],
       rules: {
         name: [{ required: true, message: "请填写构建名称", trigger: "blur" }],
+        branchName: [{ required: true, message: "请选择分支", trigger: "blur" }],
         script: [{ required: true, message: "请填写构建命令", trigger: "blur" }],
         resultDirFile: [{ required: true, message: "请填写产物目录", trigger: "blur" }],
         releasePath: [{ required: true, message: "请填写发布目录", trigger: "blur" }],
