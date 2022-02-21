@@ -308,9 +308,11 @@
                 </a-form-model-item>
                 <a-form-model-item label="发布目录" prop="releaseMethodDataId">
                   <a-input-group compact>
-                    <a-select show-search allowClear style="width: 30%" v-model="tempExtraData.releaseSshDir" placeholder="请选择SSH">
-                      <a-select-option v-for="item in selectSshDirs" :key="item">{{ item }}</a-select-option>
-                    </a-select>
+                    <a-tooltip title="如果多选 ssh 下面目录只显示选项中的第一项，但是授权目录需要保证每项都配置对应目录">
+                      <a-select show-search allowClear style="width: 30%" v-model="tempExtraData.releaseSshDir" placeholder="请选择SSH">
+                        <a-select-option v-for="item in selectSshDirs" :key="item">{{ item }}</a-select-option>
+                      </a-select>
+                    </a-tooltip>
                     <a-input style="width: 70%" v-model="tempExtraData.releasePath2" placeholder="发布目录,构建产物上传到对应目录" />
                   </a-input-group>
                 </a-form-model-item>
@@ -811,7 +813,7 @@ export default {
       }
       const findArray = this.sshList.filter((item) => {
         if (Array.isArray(this.tempExtraData.releaseMethodDataId_3)) {
-          return this.tempExtraData.releaseMethodDataId_3[0];
+          return item.id === this.tempExtraData.releaseMethodDataId_3[0];
         }
         return item.id === this.tempExtraData.releaseMethodDataId_3;
       });
