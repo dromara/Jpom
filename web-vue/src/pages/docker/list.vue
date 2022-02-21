@@ -82,7 +82,7 @@
     <a-modal v-model="editVisible" title="编辑  Docker" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <!-- <a-form-model-item v-if="temp.id" label="容器ID" prop="id">
-          <a-input v-model="temp.id" disabled readonly />
+          <a-input v-model="temp.id" disabled readOnly />
         </a-form-model-item> -->
         <a-space direction="vertical">
           <a-alert banner>

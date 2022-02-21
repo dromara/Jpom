@@ -108,7 +108,7 @@
                         tempVue.prototype.$notification.error({ message: '复制失败' });
                       }
                     "
-                    readonly
+                    readOnly
                     disabled
                     v-model="mfaData.key"
                   >
