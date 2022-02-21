@@ -1,35 +1,36 @@
 <template>
   <div class="full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="监控名称" class="search-input-item" />
-        <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
-          <a-select-option :value="1">开启</a-select-option>
-          <a-select-option :value="0">关闭</a-select-option>
-        </a-select>
-        <a-select v-model="listQuery.autoRestart" allowClear placeholder="自动重启" class="search-input-item">
-          <a-select-option :value="1">是</a-select-option>
-          <a-select-option :value="0">否</a-select-option>
-        </a-select>
-        <a-select v-model="listQuery.alarm" allowClear placeholder="报警状态" class="search-input-item">
-          <a-select-option :value="1">报警中</a-select-option>
-          <a-select-option :value="0">未报警</a-select-option>
-        </a-select>
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-button type="primary" @click="handleAdd">新增</a-button>
-      </a-space>
-    </div>
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
+      size="middle"
       :columns="columns"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       @change="changePage"
       bordered
       :rowKey="(record, index) => index"
     >
+      <template slot="title">
+        <a-space>
+          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="监控名称" class="search-input-item" />
+          <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
+            <a-select-option :value="1">开启</a-select-option>
+            <a-select-option :value="0">关闭</a-select-option>
+          </a-select>
+          <a-select v-model="listQuery.autoRestart" allowClear placeholder="自动重启" class="search-input-item">
+            <a-select-option :value="1">是</a-select-option>
+            <a-select-option :value="0">否</a-select-option>
+          </a-select>
+          <a-select v-model="listQuery.alarm" allowClear placeholder="报警状态" class="search-input-item">
+            <a-select-option :value="1">报警中</a-select-option>
+            <a-select-option :value="0">未报警</a-select-option>
+          </a-select>
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleAdd">新增</a-button>
+        </a-space>
+      </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -41,8 +42,8 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
