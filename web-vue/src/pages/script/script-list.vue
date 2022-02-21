@@ -56,7 +56,7 @@
     <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
       <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-form-model-item v-if="temp.id" label="ScriptId" prop="id">
-          <a-input v-model="temp.id" disabled readonly />
+          <a-input v-model="temp.id" disabled readOnly />
         </a-form-model-item>
         <a-form-model-item label="Script 名称" prop="name">
           <a-input v-model="temp.name" placeholder="名称" />

@@ -178,18 +178,22 @@
                 </a-col>
               </a-row>
             </a-form-model-item>
+
             <a-form-model-item v-if="temp.buildMode === 0" label="构建命令" prop="script">
-              <a-auto-complete option-label-prop="value" v-model="temp.script">
-                <template slot="dataSource">
-                  <a-select-opt-group v-for="group in buildScipts" :key="group.title">
-                    <span slot="label">
-                      {{ group.title }}
-                    </span>
-                    <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} </a-select-option>
-                  </a-select-opt-group>
+              <a-popover title="命令示例">
+                <template slot="content">
+                  <p
+                    @click="
+                      () => {
+                        this.viewScriptTemplVisible = true;
+                      }
+                    "
+                  >
+                    <a-button type="link"> 点击查看 <a-icon type="fullscreen" /> </a-button>
+                  </p>
                 </template>
                 <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build" />
-              </a-auto-complete>
+              </a-popover>
             </a-form-model-item>
             <a-form-model-item v-if="temp.buildMode === 1" prop="script">
               <template slot="label">
@@ -550,13 +554,13 @@
     <a-modal width="40vw" v-model="buildConfirmVisible" title="构建确认弹窗" @ok="handleStartBuild" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="名称" prop="name">
-          <a-input readonly disabled v-model="temp.name" />
+          <a-input readOnly disabled v-model="temp.name" />
         </a-form-model-item>
         <a-form-model-item label="分支" prop="branchName">
-          <a-input readonly disabled v-model="temp.branchName" />
+          <a-input readOnly disabled v-model="temp.branchName" />
         </a-form-model-item>
         <a-form-model-item v-if="temp.branchTagName" label="标签(TAG)" prop="branchTagName">
-          <a-input readonly disabled v-model="temp.branchTagName" />
+          <a-input readOnly disabled v-model="temp.branchTagName" />
         </a-form-model-item>
         <a-form-model-item prop="resultDirFile" label="产物目录">
           <a-input v-model="temp.resultDirFile" placeholder="不填写则不更新" />
@@ -565,6 +569,38 @@
           <a-textarea v-model="temp.buildRemark" :maxLength="240" placeholder="请输入构建备注,长度小于 240" :auto-size="{ minRows: 3, maxRows: 5 }" />
         </a-form-model-item>
       </a-form-model>
+    </a-modal>
+    <!-- 查看命令示例 -->
+    <a-modal width="50vw" v-model="viewScriptTemplVisible" title="构建命令示例" :footer="null" :maskClosable="false">
+      <a-collapse
+        :activeKey="
+          buildScipts.map((item, index) => {
+            return index + '';
+          })
+        "
+      >
+        <a-collapse-panel v-for="(group, index) in buildScipts" :key="`${index}`" :header="group.title">
+          <a-list size="small" bordered :data-source="group.children">
+            <a-list-item
+              v-clipboard:copy="opt.value"
+              v-clipboard:success="
+                () => {
+                  tempVue.prototype.$notification.success({ message: '复制成功' });
+                }
+              "
+              v-clipboard:error="
+                () => {
+                  tempVue.prototype.$notification.error({ message: '复制失败' });
+                }
+              "
+              slot="renderItem"
+              slot-scope="opt"
+            >
+              {{ opt.title }}<a-icon type="copy" />
+            </a-list-item>
+          </a-list>
+        </a-collapse-panel>
+      </a-collapse>
     </a-modal>
   </div>
 </template>
@@ -614,11 +650,12 @@ export default {
       list: [],
       statusMap: statusMap,
       repositoryList: [],
-      tempVue: null,
+      tempVue: Vue,
       // 当前仓库信息
       tempRepository: {},
       // 当前构建信息的 extraData 属性
       tempExtraData: {},
+      viewScriptTemplVisible: false,
       buildScipts: [
         {
           title: "Java 项目",
@@ -1104,7 +1141,7 @@ export default {
     // 触发器
     handleTrigger(record) {
       this.temp = Object.assign(record);
-      this.tempVue = Vue;
+
       getTriggerUrl(record.id).then((res) => {
         if (res.code === 200) {
           this.fillTriggerResult(res);
