@@ -100,7 +100,8 @@ export default {
   data() {
     return {
       regReplaceText: "<b style='color:red'>$1</b>",
-      regRemove: /<b[^>]*>([^>]*)<\/b[^>]*>/gi,
+      regRemove: /<b[^>]*>([^>]*)<\/b[^>]*>/g,
+      regRemoveSpan: /<span[^>]*>([^>]*)<\/span[^>]*>/g,
       searchReg: null,
       regModifiers: ["i", "g"],
       modifiers: [
@@ -137,8 +138,8 @@ export default {
   },
   mounted() {
     this.id = this.defId + new Date().getTime();
-    // let html = "<b><b style='color:OrangeRed;'>222</b></b>";
-    // console.log(html.replace(this.regRemove, "$1").replace(this.regRemove, "$1"));
+    //let html = "<span><b><b style='color:OrangeRed;'>222</b></b></span>";
+    //console.log(html.replace(this.regRemove, "$1").replace(this.regRemove, "$1").replace(this.regRemoveSpan, "$1"));
   },
   methods: {
     regModifierChange(checkedValues) {
@@ -214,12 +215,13 @@ export default {
       if (!projectConsole) {
         return;
       }
-      projectConsole.innerHTML = this.logContextArray.join(this.seg) || this.defText;
+      projectConsole.innerHTML = this.logContextArray.join("") || this.defText;
       return projectConsole;
     },
     lineFormat(item) {
       // console.log(item.match(this.regRemove), item.replace(this.regRemove, "$1"));
-      item = item.replace(this.regRemove, "$1").replace(this.regRemove, "$1");
+      item = item.replace(this.regRemove, "$1").replace(this.regRemove, "$1").replace(this.regRemoveSpan, "$1");
+      // console.log(item);
       if (this.searchReg) {
         item = item.replace(this.searchReg, this.regReplaceText);
       }
@@ -228,7 +230,7 @@ export default {
       } else if (item.match(/WARNING|failed/i)) {
         item = "<b style='color:orange'>" + item + "</b>";
       }
-      // item = "<li>" + item + "</li>";
+      item = "<span>" + item + "</span>";
       // console.log(item);
       return item;
     },
@@ -262,5 +264,18 @@ export default {
   padding-top: 0;
   padding-bottom: 10px;
   line-height: 0;
+}
+</style>
+
+<style>
+.log-view span {
+  display: block;
+  counter-increment: line;
+}
+.log-view span:before {
+  content: counter(line);
+  /* display: inline-block; */
+  padding: 0 5px;
+  color: #888;
 }
 </style>
