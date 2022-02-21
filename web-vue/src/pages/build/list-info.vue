@@ -581,22 +581,19 @@
       >
         <a-collapse-panel v-for="(group, index) in buildScipts" :key="`${index}`" :header="group.title">
           <a-list size="small" bordered :data-source="group.children">
-            <a-list-item
-              v-clipboard:copy="opt.value"
-              v-clipboard:success="
-                () => {
-                  tempVue.prototype.$notification.success({ message: '复制成功' });
-                }
-              "
-              v-clipboard:error="
-                () => {
-                  tempVue.prototype.$notification.error({ message: '复制失败' });
-                }
-              "
-              slot="renderItem"
-              slot-scope="opt"
-            >
-              {{ opt.title }}<a-icon type="copy" />
+            <a-list-item slot="renderItem" slot-scope="opt">
+              <a-space>
+                {{ opt.title }}
+                <a-icon
+                  type="swap"
+                  @click="
+                    () => {
+                      temp.script = opt.value;
+                      viewScriptTemplVisible = false;
+                    }
+                  "
+                />
+              </a-space>
             </a-list-item>
           </a-list>
         </a-collapse-panel>
@@ -650,7 +647,7 @@ export default {
       list: [],
       statusMap: statusMap,
       repositoryList: [],
-      tempVue: Vue,
+      tempVue: null,
       // 当前仓库信息
       tempRepository: {},
       // 当前构建信息的 extraData 属性
@@ -1141,7 +1138,7 @@ export default {
     // 触发器
     handleTrigger(record) {
       this.temp = Object.assign(record);
-
+      this.tempVue = Vue;
       getTriggerUrl(record.id).then((res) => {
         if (res.code === 200) {
           this.fillTriggerResult(res);
