@@ -15,7 +15,8 @@
 		<module>modules/sub-plugin/auto-charset-jchardet</module>
 		<module>modules/sub-plugin/db-h2</module>
 		<module>modules/sub-plugin/docker-cli</module>
-	</modules>
+        <module>modules/sub-plugin/git-clone</module>
+    </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -37,13 +38,13 @@
 		<jpom-min-version>1.0.0</jpom-min-version>
 		<spring-boot.version>2.6.3</spring-boot.version>
 
-		<common-boot.version>[2.2.0,2.2.99]</common-boot.version>
+		<common-boot.version>2.2.3</common-boot.version>
 		<h2.version>1.4.200</h2.version>
 		<!-- 跳过测试 -->
 		<skipTests>true</skipTests>
 		<maven.test.skip>true</maven.test.skip>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
-		<hutool-all.version>5.7.19</hutool-all.version>
+		<hutool-all.version>5.7.21</hutool-all.version>
 	</properties>
 	<dependencies>
 		<dependency>
