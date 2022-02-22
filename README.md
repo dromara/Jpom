@@ -375,6 +375,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 3. [码云赞赏： 在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
 4. 微信公众号：[CodeGzh](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 5. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
+6. 邀请您一起贡献教程文档 [文档仓库地址](https://gitee.com/keepbx/Jpom-site)
 
 ![wx-qrcode-praise.png](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx-qrcode-praise.png)
 
