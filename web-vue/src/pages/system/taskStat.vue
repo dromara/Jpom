@@ -1,8 +1,8 @@
 <template>
   <div>
-    <a-table rowKey="taskId" :columns="taskColumns" bordered :data-source="taskList" :pagination="false">
+    <a-table size="middle" rowKey="taskId" :columns="taskColumns" bordered :data-source="taskList" :pagination="false">
       <template slot="title">
-        <a-button type="primary" @click="refresh"> <a-icon type="reload" /> </a-button>
+        <a-button size="small" type="primary" @click="refresh"> <a-icon type="reload" /> </a-button>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
