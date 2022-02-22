@@ -36,41 +36,41 @@ import java.io.InputStream;
  */
 public abstract class BaseRunScript implements AutoCloseable {
 
-	/**
-	 * 日志文件
-	 */
-	protected final LogRecorder logRecorder;
-	protected final File logFile;
-	protected Process process;
-	protected InputStream inputStream;
+    /**
+     * 日志文件
+     */
+    protected final LogRecorder logRecorder;
+    protected final File logFile;
+    protected Process process;
+    protected InputStream inputStream;
 
-	protected BaseRunScript(File logFile) {
-		this.logFile = logFile;
-		this.logRecorder = LogRecorder.builder().file(logFile).build();
-	}
+    protected BaseRunScript(File logFile) {
+        this.logFile = logFile;
+        this.logRecorder = LogRecorder.builder().file(logFile).build();
+    }
 
-	/**
-	 * 响应
-	 *
-	 * @param line 信息
-	 */
-	protected void handle(String line) {
-		logRecorder.info(line);
-	}
+    /**
+     * 响应
+     *
+     * @param line 信息
+     */
+    protected void handle(String line) {
+        logRecorder.info(line);
+    }
 
-	/**
-	 * 结束执行
-	 *
-	 * @param msg 异常方法
-	 */
-	protected abstract void end(String msg);
+    /**
+     * 结束执行
+     *
+     * @param msg 异常方法
+     */
+    protected abstract void end(String msg);
 
-	@Override
-	public void close() {
-		if (this.process != null) {
-			// windows 中不能正常关闭
-			IoUtil.close(inputStream);
-			this.process.destroy();
-		}
-	}
+    @Override
+    public void close() {
+        if (this.process != null) {
+            // windows 中不能正常关闭
+            IoUtil.close(inputStream);
+            this.process.destroy();
+        }
+    }
 }
