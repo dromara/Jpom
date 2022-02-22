@@ -23,7 +23,7 @@
 package io.jpom.service.system;
 
 import cn.hutool.core.collection.CollStreamUtil;
-import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
@@ -46,7 +46,10 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
         workspaceEnvVarModel.setWorkspaceId(workspaceId);
         List<WorkspaceEnvVarModel> list = super.listByBean(workspaceEnvVarModel);
         Map<String, String> map = CollStreamUtil.toMap(list, WorkspaceEnvVarModel::getName, WorkspaceEnvVarModel::getValue);
-        return ObjectUtil.defaultIfNull(map, new HashMap<>());
+        // java.lang.UnsupportedOperationException
+        HashMap<String, String> hashMap = new HashMap<>(CollUtil.size(list) + 10);
+        hashMap.putAll(map);
+        return hashMap;
     }
 
     public void formatCommand(String workspaceId, String[] commands) {
