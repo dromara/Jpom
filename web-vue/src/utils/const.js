@@ -159,15 +159,19 @@ export const MFA_APP_TIP_ARRAY = [
  * 项目 DSL 示例
  */
 export const PROJECT_DSL_DEFATUL =
+  "# scriptId 可以是项目路径下脚本文件名或者系统中的脚本模版ID\r\n" +
   "description: 测试\r\n" +
   "run:\r\n" +
   "  start:\r\n" +
+  "#    scriptId: project.sh\r\n" +
   "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
   "    scriptArgs: start\r\n" +
   "  status:\r\n" +
+  "#    scriptId: project.sh\r\n" +
   "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
   "    scriptArgs: status\r\n" +
   "  stop:\r\n" +
+  "#    scriptId: project.sh\r\n" +
   "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
   "    scriptArgs: stop";
 

@@ -38,6 +38,7 @@ import io.jpom.model.data.NodeScriptModel;
 import io.jpom.service.script.NodeScriptServer;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
+import lombok.Setter;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -51,145 +52,166 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2022/1/15
  */
+@Setter
 public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
-	private final NodeScriptModel scriptModel;
-	private final String args;
-	private final NodeProjectInfoModel nodeProjectInfoModel;
 
+    private final String args;
+    private File scriptFile;
+    private Map<String, String> environment;
 
-	private DslScriptBuilder(NodeScriptModel scriptModel, NodeProjectInfoModel nodeProjectInfoModel, String args, String log) {
-		super(FileUtil.file(log));
-		this.scriptModel = scriptModel;
-		this.nodeProjectInfoModel = nodeProjectInfoModel;
-		this.args = args;
-	}
+    private DslScriptBuilder(String args, String log) {
+        super(FileUtil.file(log));
+        this.args = args;
+    }
 
-	private DslScriptBuilder(NodeScriptModel scriptModel, NodeProjectInfoModel nodeProjectInfoModel, String args) {
-		super(null);
-		this.scriptModel = scriptModel;
-		this.nodeProjectInfoModel = nodeProjectInfoModel;
-		this.args = args;
-	}
+    /**
+     * 初始化
+     */
+    private ProcessBuilder init() {
 
-	/**
-	 * 初始化
-	 */
-	private ProcessBuilder init() {
-		String id = nodeProjectInfoModel.getId();
-		File scriptFile = scriptModel.scriptFile("_" + id);
-		Map<String, String> dslEnv = new HashMap<>(10);
-		dslEnv.put("PROJECT_ID", id);
-		dslEnv.put("PROJECT_NAME", nodeProjectInfoModel.getName());
-		dslEnv.put("PROJECT_PATH", nodeProjectInfoModel.allLib());
-		// 替换内容
-		String context = scriptModel.getContext();
-		for (Map.Entry<String, String> envEntry : dslEnv.entrySet()) {
-			String envValue = envEntry.getValue();
-			context = StrUtil.replace(context, "#{" + envEntry.getKey() + "}", envValue);
-		}
-		FileUtil.writeString(context, scriptFile, ExtConfigBean.getInstance().getConsoleLogCharset());
-		//
-		String script = FileUtil.getAbsolutePath(scriptFile);
-		ProcessBuilder processBuilder = new ProcessBuilder();
-		List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
-		command.add(0, script);
-		if (SystemUtil.getOsInfo().isLinux() || SystemUtil.getOsInfo().isMac()) {
-			command.add(0, CommandUtil.SUFFIX);
-		}
-		DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
-		processBuilder.environment().putAll(dslEnv);
-		processBuilder.redirectErrorStream(true);
-		processBuilder.command(command);
-		return processBuilder;
-	}
+        //
+        String script = FileUtil.getAbsolutePath(scriptFile);
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
+        command.add(0, script);
+        if (SystemUtil.getOsInfo().isLinux() || SystemUtil.getOsInfo().isMac()) {
+            command.add(0, CommandUtil.SUFFIX);
+        }
+        DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
+        if (environment != null) {
+            processBuilder.environment().putAll(environment);
+        }
+        processBuilder.directory(FileUtil.getParent(scriptFile, 1));
+        processBuilder.redirectErrorStream(true);
+        processBuilder.command(command);
+        return processBuilder;
+    }
 
-	@Override
-	public void run() {
-		try {
-			ProcessBuilder processBuilder = this.init();
-			//
-			process = processBuilder.start();
-			inputStream = process.getInputStream();
-			IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) DslScriptBuilder.this::handle);
-			//
-			int waitFor = process.waitFor();
-			//
-			this.handle("execute done:" + waitFor + " time:" + DateUtil.now());
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("执行异常", e);
-			String msg = "执行异常：" + e.getMessage();
-			this.end(msg);
-		}
-	}
+    @Override
+    public void run() {
+        try {
+            ProcessBuilder processBuilder = this.init();
+            //
+            process = processBuilder.start();
+            inputStream = process.getInputStream();
+            IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) DslScriptBuilder.this::handle);
+            //
+            int waitFor = process.waitFor();
+            //
+            this.handle("execute done:" + waitFor + " time:" + DateUtil.now());
+        } catch (Exception e) {
+            DefaultSystemLog.getLog().error("执行异常", e);
+            String msg = "执行异常：" + e.getMessage();
+            this.end(msg);
+        }
+    }
 
-	/**
-	 * 执行
-	 */
-	public void execute() {
-		ThreadUtil.execute(this);
-	}
+    /**
+     * 执行
+     */
+    public void execute() {
+        ThreadUtil.execute(this);
+    }
 
-	/**
-	 * 执行
-	 */
-	public String syncExecute() {
-		ProcessBuilder processBuilder = this.init();
-		try {
-			//
-			process = processBuilder.start();
-			inputStream = process.getInputStream();
-			List<String> result = new ArrayList<>();
-			IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) result::add);
-			//
-			int waitFor = process.waitFor();
-			//
-			result.add(0, "" + waitFor);
-			return CollUtil.join(result, StrUtil.CRLF);
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("执行异常", e);
-			return "执行异常：" + e.getMessage();
-		} finally {
-			this.close();
-		}
-	}
+    /**
+     * 执行
+     */
+    public String syncExecute() {
+        ProcessBuilder processBuilder = this.init();
+        try {
+            //
+            process = processBuilder.start();
+            inputStream = process.getInputStream();
+            List<String> result = new ArrayList<>();
+            IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) result::add);
+            //
+            int waitFor = process.waitFor();
+            //
+            result.add(0, "" + waitFor);
+            return CollUtil.join(result, StrUtil.CRLF);
+        } catch (Exception e) {
+            DefaultSystemLog.getLog().error("执行异常", e);
+            return "执行异常：" + e.getMessage();
+        } finally {
+            this.close();
+        }
+    }
 
-	@Override
-	protected void end(String msg) {
+    @Override
+    protected void end(String msg) {
 
-	}
+    }
 
-	/**
-	 * 执行
-	 *
-	 * @param scriptProcess 脚本流程
-	 * @param log           日志
-	 */
-	public static String run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String log) {
-		NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
-		String scriptId = scriptProcess.getScriptId();
-		NodeScriptModel item = nodeScriptServer.getItem(scriptId);
-		if (item == null) {
-			return "脚本模版不存在";
-		}
-		DslScriptBuilder builder = new DslScriptBuilder(item, nodeProjectInfoModel, scriptProcess.getScriptArgs(), log);
-		builder.execute();
-		return null;
-	}
+    /**
+     * 异步执行
+     *
+     * @param scriptProcess 脚本流程
+     * @param log           日志
+     */
+    public static String run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String log) {
+        DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, log);
+        if (builder == null) {
+            return "脚本模版不存在";
+        }
+        builder.execute();
+        return null;
+    }
 
-	/**
-	 * 执行
-	 *
-	 * @param scriptProcess 脚本流程
-	 */
-	public static String syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel) {
-		NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
-		String scriptId = scriptProcess.getScriptId();
-		NodeScriptModel item = nodeScriptServer.getItem(scriptId);
-		if (item == null) {
-			return "脚本模版不存在";
-		}
-		DslScriptBuilder builder = new DslScriptBuilder(item, nodeProjectInfoModel, scriptProcess.getScriptArgs());
-		return builder.syncExecute();
-	}
+    /**
+     * 同步执行
+     *
+     * @param scriptProcess 脚本流程
+     */
+    public static String syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel) {
+        DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, null);
+        if (builder == null) {
+            return "脚本模版不存在";
+        }
+        return builder.syncExecute();
+    }
+
+    private static DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String log) {
+        NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
+        String scriptId = scriptProcess.getScriptId();
+        NodeScriptModel item = nodeScriptServer.getItem(scriptId);
+        File scriptFile;
+        if (item == null) {
+            scriptFile = FileUtil.file(nodeProjectInfoModel.allLib(), scriptId);
+            if (!FileUtil.isFile(scriptFile)) {
+                return null;
+            }
+        } else {
+            scriptFile = DslScriptBuilder.initScriptFile(item, nodeProjectInfoModel);
+        }
+        DslScriptBuilder builder = new DslScriptBuilder(scriptProcess.getScriptArgs(), log);
+        builder.setEnvironment(DslScriptBuilder.environment(nodeProjectInfoModel));
+        builder.setScriptFile(scriptFile);
+        return builder;
+    }
+
+    private static File initScriptFile(NodeScriptModel scriptModel, NodeProjectInfoModel nodeProjectInfoModel) {
+        String id = nodeProjectInfoModel.getId();
+        File scriptFile = scriptModel.scriptFile("_" + id);
+        Map<String, String> dslEnv = new HashMap<>(10);
+        dslEnv.put("PROJECT_ID", id);
+        dslEnv.put("PROJECT_NAME", nodeProjectInfoModel.getName());
+        dslEnv.put("PROJECT_PATH", nodeProjectInfoModel.allLib());
+        // 替换内容
+        String context = scriptModel.getContext();
+        for (Map.Entry<String, String> envEntry : dslEnv.entrySet()) {
+            String envValue = envEntry.getValue();
+            context = StrUtil.replace(context, "#{" + envEntry.getKey() + "}", envValue);
+        }
+        FileUtil.writeString(context, scriptFile, ExtConfigBean.getInstance().getConsoleLogCharset());
+        return scriptFile;
+    }
+
+    private static Map<String, String> environment(NodeProjectInfoModel nodeProjectInfoModel) {
+        Map<String, String> dslEnv = new HashMap<>(10);
+        dslEnv.put("PROJECT_ID", nodeProjectInfoModel.getId());
+        dslEnv.put("PROJECT_NAME", nodeProjectInfoModel.getName());
+        dslEnv.put("PROJECT_PATH", nodeProjectInfoModel.allLib());
+        return dslEnv;
+    }
 }

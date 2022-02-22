@@ -274,8 +274,9 @@ export default {
 }
 .log-view span:before {
   content: counter(line);
-  /* display: inline-block; */
+  display: inline-block;
   padding: 0 5px;
+  /* border-right: 1px solid #e2e2e2; */
   color: #888;
 }
 </style>

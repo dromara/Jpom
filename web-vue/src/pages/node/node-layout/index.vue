@@ -183,18 +183,20 @@ export default {
 <style scoped lang="stylus">
 
 .sider-scroll {
-  min-height: calc(100vh - 133px);
+  min-height: calc(100vh -85px);
   overflow-y: auto;
 }
+
+.layout-content-scroll {
+  min-height: calc(100vh - 85px)
+  overflow-y: auto;
+}
+  
 .sider-full-screen {
   height: calc(100vh - 75px);
   overflow-y: scroll;
 }
 
-.layout-content-scroll {
-  min-height: calc(100vh - 133px)
-  overflow-y: auto;
-}
 .layout-content-full-screen {
  height: calc(100vh - 85px);
   overflow-y: scroll;
