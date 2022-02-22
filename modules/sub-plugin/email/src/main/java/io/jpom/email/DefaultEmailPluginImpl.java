@@ -28,7 +28,6 @@ import cn.hutool.extra.mail.MailAccount;
 import cn.hutool.extra.mail.MailUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.plugin.DefaultPlugin;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 
@@ -41,7 +40,7 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2021/12/22
  */
-@PluginConfig(plugin = DefaultPlugin.Email)
+@PluginConfig(name = "email")
 public class DefaultEmailPluginImpl implements IDefaultPlugin {
 
     @Override

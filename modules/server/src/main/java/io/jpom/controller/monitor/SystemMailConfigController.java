@@ -90,7 +90,7 @@ public class SystemMailConfigController extends BaseServerController {
         } else {
             Assert.hasText(mailAccountModel.getPass(), "请填写pass");
         }
-        IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.Email);
+        IPlugin plugin = PluginFactory.getPlugin("email");
         Object json = JSONObject.toJSON(mailAccountModel);
         Map<String, Object> map = new HashMap<>(1);
         map.put("data", json);

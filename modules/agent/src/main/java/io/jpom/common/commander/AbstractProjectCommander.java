@@ -44,7 +44,6 @@ import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.JdkInfoModel;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
-import io.jpom.plugin.DefaultPlugin;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.script.DslScriptBuilder;
@@ -311,7 +310,7 @@ public abstract class AbstractProjectCommander {
                             NodeProjectInfoModel.JavaCopyItem javaCopyItem,
                             String type, Object... other) throws Exception {
         String token = nodeProjectInfoModel.getToken();
-        IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.WebHook);
+        IPlugin plugin = PluginFactory.getPlugin("webhook");
         Map<String, Object> map = new HashMap<>(10);
         map.put("projectId", nodeProjectInfoModel.getId());
         map.put("projectName", nodeProjectInfoModel.getName());
