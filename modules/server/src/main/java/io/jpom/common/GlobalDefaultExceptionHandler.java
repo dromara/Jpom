@@ -32,7 +32,6 @@ import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.ServerConfigBean;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -103,18 +102,18 @@ public class GlobalDefaultExceptionHandler {
 		ServletUtil.write(response, JsonMessage.getString(405, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
 	}
 
-	/**
-	 * git 仓库操作相关异常
-	 *
-	 * @param request  请求
-	 * @param response 响应
-	 * @param e        异常
-	 */
-	@ExceptionHandler({GitAPIException.class})
-	public void gitExceptionHandler(HttpServletRequest request, HttpServletResponse response, GitAPIException e) {
-		DefaultSystemLog.getLog().warn("GitAPIException: " + request.getRequestURI(), e);
-		ServletUtil.write(response, JsonMessage.getString(405, "git 仓库操作异常:" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
-	}
+//	/**
+//	 * git 仓库操作相关异常
+//	 *
+//	 * @param request  请求
+//	 * @param response 响应
+//	 * @param e        异常
+//	 */
+//	@ExceptionHandler({GitAPIException.class})
+//	public void gitExceptionHandler(HttpServletRequest request, HttpServletResponse response, GitAPIException e) {
+//		DefaultSystemLog.getLog().warn("GitAPIException: " + request.getRequestURI(), e);
+//		ServletUtil.write(response, JsonMessage.getString(405, "git 仓库操作异常:" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+//	}
 
 	/**
 	 * 声明要捕获的异常 (参数，状态，验证异常)

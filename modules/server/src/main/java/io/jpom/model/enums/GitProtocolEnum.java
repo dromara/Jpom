@@ -31,29 +31,29 @@ import io.jpom.model.BaseEnum;
  * @since 2021-08-26
  */
 public enum GitProtocolEnum implements BaseEnum {
-	/**
-	 * http
-	 */
-	HTTP(0, "HTTP(S)"),
-	SSH(1, "SSH"),
-	;
+    /**
+     * http
+     */
+    HTTP(0, "HTTP(S)"),
+    SSH(1, "SSH"),
+    ;
 
-	GitProtocolEnum(int code, String desc) {
-		this.code = code;
-		this.desc = desc;
-	}
+    GitProtocolEnum(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
 
-	int code;
-	String desc;
+    final int code;
+    final String desc;
 
-	@Override
-	public int getCode() {
-		return code;
-	}
+    @Override
+    public int getCode() {
+        return code;
+    }
 
-	@Override
-	public String getDesc() {
-		return desc;
-	}
+    @Override
+    public String getDesc() {
+        return desc;
+    }
 
 }

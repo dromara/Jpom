@@ -28,6 +28,5 @@ package io.jpom.plugin;
  * @author bwcx_jzy
  * @since 2021/12/22
  */
-public interface IDefaultPlugin extends IPlugin {
-
+public interface IDefaultPlugin extends IPlugin, AutoCloseable {
 }
