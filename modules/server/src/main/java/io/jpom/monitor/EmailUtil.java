@@ -26,7 +26,6 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.MonitorModel;
-import io.jpom.plugin.DefaultPlugin;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.system.SystemParametersServer;
@@ -41,51 +40,51 @@ import java.util.Map;
  */
 public class EmailUtil implements INotify {
 
-	private static SystemParametersServer systemParametersServer;
-	private static MailAccountModel config;
+    private static SystemParametersServer systemParametersServer;
+    private static MailAccountModel config;
 
-	@Override
-	public void send(MonitorModel.Notify notify, String title, String context) throws Exception {
-		String value = notify.getValue();
-		EmailUtil.send(value, title, context);
-	}
+    @Override
+    public void send(MonitorModel.Notify notify, String title, String context) throws Exception {
+        String value = notify.getValue();
+        EmailUtil.send(value, title, context);
+    }
 
-	private static void init() {
-		if (systemParametersServer == null) {
-			systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
-		}
-	}
+    private static void init() {
+        if (systemParametersServer == null) {
+            systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
+        }
+    }
 
-	/**
-	 * 加载配置信息
-	 */
-	public static void refreshConfig() {
-		if (config == null) {
-			init();
-		}
-		config = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
-	}
+    /**
+     * 加载配置信息
+     */
+    public static void refreshConfig() {
+        if (config == null) {
+            init();
+        }
+        config = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
+    }
 
 
-	/**
-	 * 发送邮箱
-	 *
-	 * @param email   收件人
-	 * @param title   标题
-	 * @param context 内容
-	 */
-	public static void send(String email, String title, String context) throws Exception {
-		if (config == null) {
-			// 没有数据才加载
-			refreshConfig();
-		}
-		//
-		Map<String, Object> mailMap = new HashMap<>(10);
-		mailMap.put("toEmail", email);
-		mailMap.put("title", title);
-		mailMap.put("context", context);
-		//
-		IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.Email);
-		plugin.execute(JSONObject.toJSON(config), mailMap);
-	}
+    /**
+     * 发送邮箱
+     *
+     * @param email   收件人
+     * @param title   标题
+     * @param context 内容
+     */
+    public static void send(String email, String title, String context) throws Exception {
+        if (config == null) {
+            // 没有数据才加载
+            refreshConfig();
+        }
+        //
+        Map<String, Object> mailMap = new HashMap<>(10);
+        mailMap.put("toEmail", email);
+        mailMap.put("title", title);
+        mailMap.put("context", context);
+        //
+        IPlugin plugin = PluginFactory.getPlugin("email");
+        plugin.execute(JSONObject.toJSON(config), mailMap);
+    }
 }

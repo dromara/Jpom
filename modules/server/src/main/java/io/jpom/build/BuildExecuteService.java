@@ -48,7 +48,6 @@ import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.model.log.BuildHistoryLog;
-import io.jpom.plugin.DefaultPlugin;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.BuildInfoService;
@@ -727,7 +726,7 @@ public class BuildExecuteService {
         private void asyncWebHooks(String type, Object... other) {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             String webhook = buildInfoModel.getWebhook();
-            IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.WebHook);
+            IPlugin plugin = PluginFactory.getPlugin("webhook");
             Map<String, Object> map = new HashMap<>(10);
             long triggerTime = SystemClock.now();
             map.put("buildId", buildInfoModel.getId());

@@ -73,16 +73,6 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
     /**
      * 获取插件端
      *
-     * @param plugin 插件
-     * @return 插件对象
-     */
-    public static IPlugin getPlugin(DefaultPlugin plugin) {
-        return getPlugin(plugin.getName());
-    }
-
-    /**
-     * 获取插件端
-     *
      * @param name 插件名
      * @return 插件对象
      */

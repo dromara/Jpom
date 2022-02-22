@@ -27,7 +27,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import io.jpom.plugin.DefaultPlugin;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 
@@ -39,24 +38,24 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2021/12/22
  */
-@PluginConfig(plugin = DefaultPlugin.WebHook)
+@PluginConfig(name = "webhook")
 public class DefaultWebhookPluginImpl implements IDefaultPlugin {
 
-	@Override
-	public Object execute(Object main, Map<String, Object> parameter) {
-		String webhook = StrUtil.toString(main);
-		if (StrUtil.isEmpty(webhook)) {
-			return null;
-		}
-		try {
-			HttpRequest httpRequest = HttpUtil.createGet(webhook);
-			httpRequest.form(parameter);
-			String body = httpRequest.execute().body();
-			DefaultSystemLog.getLog().info(webhook + CharPool.COLON + body);
-			return body;
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
-			return "WebHooks error:" + e.getMessage();
-		}
-	}
+    @Override
+    public Object execute(Object main, Map<String, Object> parameter) {
+        String webhook = StrUtil.toString(main);
+        if (StrUtil.isEmpty(webhook)) {
+            return null;
+        }
+        try {
+            HttpRequest httpRequest = HttpUtil.createGet(webhook);
+            httpRequest.form(parameter);
+            String body = httpRequest.execute().body();
+            DefaultSystemLog.getLog().info(webhook + CharPool.COLON + body);
+            return body;
+        } catch (Exception e) {
+            DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
+            return "WebHooks error:" + e.getMessage();
+        }
+    }
 }
