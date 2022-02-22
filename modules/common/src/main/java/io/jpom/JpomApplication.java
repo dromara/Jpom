@@ -44,6 +44,7 @@ import io.jpom.common.Type;
 import io.jpom.common.interceptor.PluginFeatureInterceptor;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.util.CommandUtil;
+import org.springframework.boot.SpringApplication;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -62,83 +63,86 @@ import java.util.concurrent.TimeUnit;
  */
 public class JpomApplication extends ApplicationBuilder {
 
-	/**
-	 *
-	 */
-	public static final String SYSTEM_ID = "system";
+    /**
+     *
+     */
+    public static final String SYSTEM_ID = "system";
 
-	protected static String[] args;
-	/**
-	 * 应用类型
-	 */
-	private static Type appType;
-	private static Charset charset;
+    protected static String[] args;
+    /**
+     * 应用类型
+     */
+    private static Type appType;
+    private static Charset charset;
 
-	private static Class<?> appClass;
+    private static Class<?> appClass;
 
-	/**
-	 * 获取程序命令行参数
-	 *
-	 * @return 数组
-	 */
-	public static String[] getArgs() {
-		return args;
-	}
+    /**
+     * 获取程序命令行参数
+     *
+     * @return 数组
+     */
+    public static String[] getArgs() {
+        return args;
+    }
 
-	public JpomApplication(Type appType, Class<?> appClass, String[] args) throws Exception {
-		super(appClass);
-		//
-		checkEvent(args);
-		JpomApplication.appType = appType;
-		JpomApplication.appClass = appClass;
-		JpomApplication.args = args;
-		// 检查 type 中的 applicationClass 配置是否正确
-		String applicationClass = appType.getApplicationClass();
-		Assert.state(StrUtil.equals(applicationClass, appClass.getName()), "The currently allowed classes are inconsistent with the configured class names：io.jpom.common.Type#getApplicationClass()");
+    public JpomApplication(Type appType, Class<?> appClass, String[] args) throws Exception {
+        super(appClass);
+        //
+        checkEvent(args);
+        JpomApplication.appType = appType;
+        JpomApplication.appClass = appClass;
+        JpomApplication.args = args;
+        // 检查 type 中的 applicationClass 配置是否正确
+        String applicationClass = appType.getApplicationClass();
+        Assert.state(StrUtil.equals(applicationClass, appClass.getName()), "The currently allowed classes are inconsistent with the configured class names：io.jpom.common.Type#getApplicationClass()");
 
-		addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8));
+        addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8));
 
-		//
-		ObjectMapper build = createJackson();
-		addHttpMessageConverter(new MappingJackson2HttpMessageConverter(build));
+        //
+        ObjectMapper build = createJackson();
+        addHttpMessageConverter(new MappingJackson2HttpMessageConverter(build));
 
-		// 参数拦截器
-		addInterceptor(ParameterInterceptor.class);
-		addInterceptor(PluginFeatureInterceptor.class);
-		//
-		addApplicationEventClient(new JpomApplicationEvent());
-		// 添加初始化监听
-		this.application().addInitializers(new PluginFactory());
-	}
+        // 参数拦截器
+        addInterceptor(ParameterInterceptor.class);
+        addInterceptor(PluginFeatureInterceptor.class);
+        //
+        addApplicationEventClient(new JpomApplicationEvent());
+        // 添加初始化监听
+        PluginFactory pluginFactory = new PluginFactory();
+        SpringApplication application = this.application();
+        application.addListeners(pluginFactory);
+        application.addInitializers(pluginFactory);
+    }
 
-	/**
-	 * jackson 配置
-	 *
-	 * @return mapper
-	 */
-	private static ObjectMapper createJackson() {
-		Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder = Jackson2ObjectMapperBuilder.json();
-		jackson2ObjectMapperBuilder.simpleDateFormat(DatePattern.NORM_DATETIME_PATTERN);
-		ObjectMapper build = jackson2ObjectMapperBuilder.build();
-		// 忽略空
-		build.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		// 驼峰转下划线
-		//        build.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
-		// long to String
-		SimpleModule simpleModule = new SimpleModule();
-		simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
-		simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
-		build.registerModule(simpleModule);
-		//
-		build.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+    /**
+     * jackson 配置
+     *
+     * @return mapper
+     */
+    private static ObjectMapper createJackson() {
+        Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder = Jackson2ObjectMapperBuilder.json();
+        jackson2ObjectMapperBuilder.simpleDateFormat(DatePattern.NORM_DATETIME_PATTERN);
+        ObjectMapper build = jackson2ObjectMapperBuilder.build();
+        // 忽略空
+        build.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        // 驼峰转下划线
+        //        build.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
+        // long to String
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
+        simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
+        build.registerModule(simpleModule);
+        //
+        build.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
 //        build.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_ARRAY);
 
-		return build;
-	}
+        return build;
+    }
 
-	private void checkEvent(String[] args) throws Exception {
-		new JpomClose().main(args);
-	}
+    private void checkEvent(String[] args) throws Exception {
+        new JpomClose().main(args);
+    }
 
 //	/**
 //	 * 获取当前系统编码
@@ -158,51 +162,51 @@ public class JpomApplication extends ApplicationBuilder {
 //		return charset;
 //	}
 
-	/**
-	 * 获取当前程序的类型
-	 *
-	 * @return Agent 或者 Server
-	 */
-	public static Type getAppType() {
-		if (appType == null) {
-			// 从配置文件中获取
-			Environment environment = JpomApplication.getEnvironment();
-			String property = environment.getProperty(Const.APPLICATION_NAME);
-			property = StrUtil.removeAll(property, "jpom");
-			Assert.hasLength(property, "Please configure the program type：" + Const.APPLICATION_NAME);
-			appType = Type.valueOf(property);
-		}
-		return appType;
-	}
+    /**
+     * 获取当前程序的类型
+     *
+     * @return Agent 或者 Server
+     */
+    public static Type getAppType() {
+        if (appType == null) {
+            // 从配置文件中获取
+            Environment environment = JpomApplication.getEnvironment();
+            String property = environment.getProperty(Const.APPLICATION_NAME);
+            property = StrUtil.removeAll(property, "jpom");
+            Assert.hasLength(property, "Please configure the program type：" + Const.APPLICATION_NAME);
+            appType = Type.valueOf(property);
+        }
+        return appType;
+    }
 
-	public static Class<?> getAppClass() {
-		if (appClass == null) {
-			return JpomApplication.class;
-		}
-		return appClass;
-	}
+    public static Class<?> getAppClass() {
+        if (appClass == null) {
+            return JpomApplication.class;
+        }
+        return appClass;
+    }
 
-	/**
-	 * 重启自身
-	 * 分发会延迟2秒执行正式升级 重启命令
-	 */
-	public static void restart() {
-		File scriptFile = JpomManifest.getScriptFile();
-		ThreadUtil.execute(() -> {
-			// Waiting for method caller,For example, the interface response
-			ThreadUtil.sleep(2, TimeUnit.SECONDS);
-			try {
-				String command = SystemUtil.getOsInfo().isWindows() ? StrUtil.EMPTY : CommandUtil.SUFFIX;
+    /**
+     * 重启自身
+     * 分发会延迟2秒执行正式升级 重启命令
+     */
+    public static void restart() {
+        File scriptFile = JpomManifest.getScriptFile();
+        ThreadUtil.execute(() -> {
+            // Waiting for method caller,For example, the interface response
+            ThreadUtil.sleep(2, TimeUnit.SECONDS);
+            try {
+                String command = SystemUtil.getOsInfo().isWindows() ? StrUtil.EMPTY : CommandUtil.SUFFIX;
 
-				command += " " + FileUtil.getAbsolutePath(scriptFile) + " restart upgrade";
-				if (SystemUtil.getOsInfo().isWindows()) {
-					CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
-				} else {
-					CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), command);
-				}
-			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("重启自身异常", e);
-			}
-		});
-	}
+                command += " " + FileUtil.getAbsolutePath(scriptFile) + " restart upgrade";
+                if (SystemUtil.getOsInfo().isWindows()) {
+                    CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
+                } else {
+                    CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), command);
+                }
+            } catch (Exception e) {
+                DefaultSystemLog.getLog().error("重启自身异常", e);
+            }
+        });
+    }
 }

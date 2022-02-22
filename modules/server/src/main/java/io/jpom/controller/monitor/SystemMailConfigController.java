@@ -37,6 +37,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 监控邮箱配置
  *
@@ -49,50 +52,53 @@ import org.springframework.web.bind.annotation.RestController;
 @SystemPermission
 public class SystemMailConfigController extends BaseServerController {
 
-	private final SystemParametersServer systemParametersServer;
+    private final SystemParametersServer systemParametersServer;
 
-	public SystemMailConfigController(SystemParametersServer systemParametersServer) {
-		this.systemParametersServer = systemParametersServer;
-	}
+    public SystemMailConfigController(SystemParametersServer systemParametersServer) {
+        this.systemParametersServer = systemParametersServer;
+    }
 
-	/**
-	 * load mail config data
-	 * 加载邮件配置
-	 *
-	 * @return json
-	 * @author Hotstrip
-	 */
-	@PostMapping(value = "mail-config-data", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String mailConfigData() {
-		MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
-		if (item != null) {
-			item.setPass(null);
-		}
-		return JsonMessage.getString(200, "success", item);
-	}
+    /**
+     * load mail config data
+     * 加载邮件配置
+     *
+     * @return json
+     * @author Hotstrip
+     */
+    @PostMapping(value = "mail-config-data", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String mailConfigData() {
+        MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
+        if (item != null) {
+            item.setPass(null);
+        }
+        return JsonMessage.getString(200, "success", item);
+    }
 
-	@PostMapping(value = "mailConfig_save.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EDIT)
-	@SystemPermission(superUser = true)
-	public String listData(MailAccountModel mailAccountModel) {
-		Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");
-		Assert.hasText(mailAccountModel.getHost(), "请填写host");
-		Assert.hasText(mailAccountModel.getUser(), "请填写user");
-		Assert.hasText(mailAccountModel.getFrom(), "请填写from");
-		// 验证是否正确
-		MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
-		if (item != null) {
-			mailAccountModel.setPass(StrUtil.emptyToDefault(mailAccountModel.getPass(), item.getPass()));
-		} else {
-			Assert.hasText(mailAccountModel.getPass(), "请填写pass");
-		}
-		IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.Email);
-		boolean checkInfo = plugin.check("checkInfo", JSONObject.toJSON(mailAccountModel), null);
-		Assert.state(checkInfo, "验证邮箱信息失败，请检查配置的邮箱信息。端口号、授权码等。");
-		systemParametersServer.upsert(MailAccountModel.ID, mailAccountModel, MailAccountModel.ID);
-		//
-		EmailUtil.refreshConfig();
-		return JsonMessage.getString(200, "保存成功");
-	}
+    @PostMapping(value = "mailConfig_save.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    @SystemPermission(superUser = true)
+    public String listData(MailAccountModel mailAccountModel) throws Exception {
+        Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");
+        Assert.hasText(mailAccountModel.getHost(), "请填写host");
+        Assert.hasText(mailAccountModel.getUser(), "请填写user");
+        Assert.hasText(mailAccountModel.getFrom(), "请填写from");
+        // 验证是否正确
+        MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
+        if (item != null) {
+            mailAccountModel.setPass(StrUtil.emptyToDefault(mailAccountModel.getPass(), item.getPass()));
+        } else {
+            Assert.hasText(mailAccountModel.getPass(), "请填写pass");
+        }
+        IPlugin plugin = PluginFactory.getPlugin(DefaultPlugin.Email);
+        Object json = JSONObject.toJSON(mailAccountModel);
+        Map<String, Object> map = new HashMap<>(1);
+        map.put("data", json);
+        boolean checkInfo = plugin.execute("checkInfo", map, Boolean.class);
+        Assert.state(checkInfo, "验证邮箱信息失败，请检查配置的邮箱信息。端口号、授权码等。");
+        systemParametersServer.upsert(MailAccountModel.ID, mailAccountModel, MailAccountModel.ID);
+        //
+        EmailUtil.refreshConfig();
+        return JsonMessage.getString(200, "保存成功");
+    }
 }

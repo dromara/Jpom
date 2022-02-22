@@ -44,81 +44,79 @@ import java.util.Map;
 @PluginConfig(plugin = DefaultPlugin.Email)
 public class DefaultEmailPluginImpl implements IDefaultPlugin {
 
-	@Override
-	public Object execute(Object main, Map<String, Object> parameter) throws Exception {
-		MailAccount mailAccount = getAccount(main);
-		//
-		String toEmail = (String) parameter.get("toEmail");
-		String title = (String) parameter.get("title");
-		String context = (String) parameter.get("context");
-		List<String> list = StrUtil.split(toEmail, StrUtil.COMMA, true, true);
-		try {
-			return MailUtil.send(mailAccount, list, title, context, false);
-		} catch (cn.hutool.extra.mail.MailException mailException) {
-			Exception cause = (Exception) mailException.getCause();
-			if (cause != null) {
-				throw cause;
-			}
-			throw mailException;
-		}
-	}
+    @Override
+    public Object execute(Object main, Map<String, Object> parameter) throws Exception {
+        if (main instanceof JSONObject) {
+            MailAccount mailAccount = getAccount(main);
+            //
+            String toEmail = (String) parameter.get("toEmail");
+            String title = (String) parameter.get("title");
+            String context = (String) parameter.get("context");
+            List<String> list = StrUtil.split(toEmail, StrUtil.COMMA, true, true);
+            try {
+                return MailUtil.send(mailAccount, list, title, context, false);
+            } catch (cn.hutool.extra.mail.MailException mailException) {
+                Exception cause = (Exception) mailException.getCause();
+                if (cause != null) {
+                    throw cause;
+                }
+                throw mailException;
+            }
+        } else if (main instanceof String && StrUtil.equals("checkInfo", main.toString())) {
+            try {
+                Object data = parameter.get("data");
+                MailAccount account = this.getAccount(data);
+                Session session = MailUtil.getSession(account, false);
+                Transport transport = session.getTransport("smtp");
+                transport.connect();
+                transport.close();
+                return true;
+            } catch (Exception e) {
+                DefaultSystemLog.getLog().warn("检查邮箱信息错误：{}", e.getMessage());
+                return false;
+            }
+        }
+        throw new IllegalArgumentException("不支持的类型：" + main);
+    }
 
-	@Override
-	public boolean check(String type, Object main, Map<String, Object> parameter) {
-		if (StrUtil.equals("checkInfo", type)) {
-			try {
-				MailAccount account = this.getAccount(main);
-				Session session = MailUtil.getSession(account, false);
-				Transport transport = session.getTransport("smtp");
-				transport.connect();
-				transport.close();
-				return true;
-			} catch (Exception e) {
-				DefaultSystemLog.getLog().warn("检查邮箱信息错误：{}", e.getMessage());
-				return false;
-			}
-		}
-		throw new IllegalArgumentException("不支持的类型：" + type);
-	}
-
-	/**
-	 * 创建邮件对象
-	 *
-	 * @param main 传人参数
-	 * @return MailAccount
-	 */
-	private MailAccount getAccount(Object main) {
-		if (!(main instanceof JSONObject)) {
-			throw new IllegalArgumentException("插件端使用参数不正确");
-		}
-		JSONObject data = (JSONObject) main;
-		MailAccount mailAccount = new MailAccount();
-		String user = data.getString("user");
-		String pass = data.getString("pass");
-		String from = data.getString("from");
-		Integer port = data.getInteger("port");
-		String host = data.getString("host");
-		mailAccount.setUser(user);
-		mailAccount.setPass(pass);
-		mailAccount.setFrom(from);
-		mailAccount.setPort(port);
-		mailAccount.setHost(host);
-		//
-		Integer timeout = data.getInteger("timeout");
-		timeout = ObjectUtil.defaultIfNull(timeout, 10);
-		timeout = Math.max(3, timeout);
-		mailAccount.setTimeout(timeout * 1000);
-		mailAccount.setConnectionTimeout(timeout * 1000);
-		boolean sslEnable = data.getBooleanValue("sslEnable");
-		//
-		mailAccount.setSslEnable(sslEnable);
-		//Integer socketFactoryPort = data.getInteger("socketFactoryPort");
+    /**
+     * 创建邮件对象
+     *
+     * @param main 传人参数
+     * @return MailAccount
+     */
+    private MailAccount getAccount(Object main) {
+        if (!(main instanceof JSONObject)) {
+            throw new IllegalArgumentException("插件端使用参数不正确");
+        }
+        JSONObject data = (JSONObject) main;
+        MailAccount mailAccount = new MailAccount();
+        String user = data.getString("user");
+        String pass = data.getString("pass");
+        String from = data.getString("from");
+        Integer port = data.getInteger("port");
+        String host = data.getString("host");
+        mailAccount.setUser(user);
+        mailAccount.setPass(pass);
+        mailAccount.setFrom(from);
+        mailAccount.setPort(port);
+        mailAccount.setHost(host);
+        //
+        Integer timeout = data.getInteger("timeout");
+        timeout = ObjectUtil.defaultIfNull(timeout, 10);
+        timeout = Math.max(3, timeout);
+        mailAccount.setTimeout(timeout * 1000);
+        mailAccount.setConnectionTimeout(timeout * 1000);
+        boolean sslEnable = data.getBooleanValue("sslEnable");
+        //
+        mailAccount.setSslEnable(sslEnable);
+        //Integer socketFactoryPort = data.getInteger("socketFactoryPort");
 //			if (socketFactoryPort != null) {
-		if (sslEnable) {
-			mailAccount.setSocketFactoryPort(port);
-		}
+        if (sslEnable) {
+            mailAccount.setSocketFactoryPort(port);
+        }
 //			}
-		mailAccount.setAuth(true);
-		return mailAccount;
-	}
+        mailAccount.setAuth(true);
+        return mailAccount;
+    }
 }
