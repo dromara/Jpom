@@ -522,7 +522,7 @@ public class GitUtil {
 	 * @return 描述
 	 * @throws IOException IO
 	 */
-	public static String getLastCommitMsg(File file, String desc, ObjectId objectId) throws IOException {
+	private static String getLastCommitMsg(File file, String desc, ObjectId objectId) throws IOException {
 		try (Git git = Git.open(file)) {
 			RevWalk walk = new RevWalk(git.getRepository());
 			RevCommit revCommit = walk.parseCommit(objectId);
