@@ -10,25 +10,25 @@
           <a-timeline-item v-if="temp.fileSize">
             <a-space>
               <span class="layui-elem-quote">临时文件占用空间：{{ temp.fileSize }}</span>
-              <a-button type="primary" v-if="temp.fileSize !== '0'" class="btn" @click="clear('fileSize')">清空</a-button>
+              <a-button size="small" type="primary" v-if="temp.fileSize !== '0'" class="btn" @click="clear('fileSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item v-if="temp.oldJarsSize">
             <a-space>
               <span class="layui-elem-quote">旧版程序包占有空间：{{ temp.oldJarsSize }}</span>
-              <a-button type="primary" v-if="temp.oldJarsSize !== '0'" class="btn" @click="clear('oldJarsSize')">清空</a-button>
+              <a-button size="small" type="primary" v-if="temp.oldJarsSize !== '0'" class="btn" @click="clear('oldJarsSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
             <a-space>
               <span class="layui-elem-quote">进程名缓存：{{ temp.pidName }}</span>
-              <a-button type="primary" v-if="temp.pidName" class="btn" @click="clear('pidName')">清空</a-button>
+              <a-button size="small" type="primary" v-if="temp.pidName" class="btn" @click="clear('pidName')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
             <a-space>
               <span class="layui-elem-quote">进程端口缓存：{{ temp.pidPort }}</span>
-              <a-button v-if="temp.pidPort" type="primary" class="btn" @click="clear('pidPort')">清空</a-button>
+              <a-button size="small" v-if="temp.pidPort" type="primary" class="btn" @click="clear('pidPort')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <!-- <a-timeline-item>
