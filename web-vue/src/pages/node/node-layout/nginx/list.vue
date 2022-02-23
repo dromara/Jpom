@@ -404,7 +404,7 @@ export default {
 .file-content {
   /* height: calc(100vh - 150px); */
   /* overflow-y: hidden; */
-  margin: 10px 10px 0;
+  /* margin: 10px 10px 0; */
   padding: 10px;
   background-color: #fff;
 }

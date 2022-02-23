@@ -1,24 +1,15 @@
 <template>
   <div class="node-full-content">
-    <a-alert message="tomcat 管理功能暂时没有计划维护,如需要使用到该功能请多多测试后再使用" style="margin-top: 10px; margin-bottom: 40px" banner />
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-button type="primary" @click="handleAdd">新增</a-button>
-        <a-button type="primary" @click="handleFilter">刷新</a-button>
-      </a-space>
-    </div>
+    <!-- <div ref="filter" class="filter"></div> -->
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      :loading="loading"
-      :columns="columns"
-      :pagination="false"
-      bordered
-      rowKey="id"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ y: tableHeight - 60 }"
-      @expand="expand"
-    >
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered rowKey="id" @expand="expand">
+      <template slot="title">
+        <a-alert message="tomcat 管理功能暂时没有计划维护,如需要使用到该功能请多多测试后再使用" style="margin-top: 10px; margin-bottom: 40px" banner />
+        <a-space>
+          <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="handleFilter">刷新</a-button>
+        </a-space>
+      </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -128,7 +119,7 @@ export default {
     return {
       childLoading: false,
       loading: false,
-      tableHeight: "70vh",
+      // tableHeight: "70vh",
       list: [],
       temp: {},
       editTomcatVisible: false,
@@ -140,8 +131,8 @@ export default {
       uploadFileList: [],
       uploadFileVisible: false,
       columns: [
-        { title: "Tomcat 名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "Tomcat 路径", dataIndex: "path", width: 150, ellipsis: true, scopedSlots: { customRender: "path" } },
+        { title: "Tomcat 名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "Tomcat 路径", dataIndex: "path", ellipsis: true, scopedSlots: { customRender: "path" } },
         { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
         { title: "最后操作人", dataIndex: "modifyUser", width: 150, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 620 },
@@ -161,16 +152,16 @@ export default {
     };
   },
   mounted() {
-    this.calcTableHeight();
+    // this.calcTableHeight();
     this.handleFilter();
   },
   methods: {
     // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 155;
-      });
-    },
+    // calcTableHeight() {
+    //   this.$nextTick(() => {
+    //     this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 155;
+    //   });
+    // },
     // 加载数据
     loadData() {
       this.list = [];
