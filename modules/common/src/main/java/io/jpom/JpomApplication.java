@@ -196,9 +196,7 @@ public class JpomApplication extends ApplicationBuilder {
             // Waiting for method caller,For example, the interface response
             ThreadUtil.sleep(2, TimeUnit.SECONDS);
             try {
-                String command = SystemUtil.getOsInfo().isWindows() ? StrUtil.EMPTY : CommandUtil.SUFFIX;
-
-                command += " " + FileUtil.getAbsolutePath(scriptFile) + " restart upgrade";
+                String command = CommandUtil.EXECUTE_PREFIX + StrUtil.SPACE + FileUtil.getAbsolutePath(scriptFile) + " restart upgrade";
                 if (SystemUtil.getOsInfo().isWindows()) {
                     CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
                 } else {

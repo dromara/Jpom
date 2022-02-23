@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" bordered rowKey="id">
+    <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" bordered rowKey="id">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" placeholder="名称" @pressEnter="loadData" allowClear class="search-input-item" />
@@ -46,9 +46,9 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleExec(record)">执行</a-button>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
+          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
@@ -137,7 +137,7 @@ export default {
         { title: "修改时间", dataIndex: "modifyTimeMillis", sorter: true, width: 170, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 260 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 180 },
       ],
       rules: {
         name: [{ required: true, message: "Please input Script name", trigger: "blur" }],

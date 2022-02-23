@@ -14,6 +14,7 @@
 3. 【server】在线构建 ssh 发布选择授权目录切换不生效问题（感谢@天天）
 4. 【server】在线构建本地构建命令不能换行问题（感谢@华仔）
 5. 【server】日志弹窗新增行号
+6. 【server】在线升级执行脚本、脚本模版等兼容 `debian` （感谢@wxyShine [Gitee issues I4UQBD](https://gitee.com/dromara/Jpom/issues/I4UQBD) ）
 
 ------
 
