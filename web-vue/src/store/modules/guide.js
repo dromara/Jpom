@@ -31,6 +31,15 @@ const app = {
         resolve(cache.fullScreenFlag);
       });
     },
+    // 页面滚动条
+    toggleScrollbarFlag({ commit, rootGetters }) {
+      return new Promise((resolve) => {
+        const cache = rootGetters.getGuideCache;
+        cache.scrollbarFlag = !(cache.scrollbarFlag === undefined ? true : cache.scrollbarFlag);
+        commit("setGuideCache", cache);
+        resolve(cache.scrollbarFlag);
+      });
+    },
     // 打开多菜单开关
     toggleMenuFlag({ commit, rootGetters }) {
       return new Promise((resolve) => {

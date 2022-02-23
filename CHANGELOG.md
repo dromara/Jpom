@@ -1,6 +1,5 @@
 # 🚀 版本日志
 
-
 # 2.8.13
 
 ### 🐣 新增功能
@@ -16,7 +15,6 @@
 5. 【server】日志弹窗新增行号
 6. 【server】在线升级执行脚本、脚本模版等兼容 `debian` （感谢@wxyShine [Gitee issues I4UQBD](https://gitee.com/dromara/Jpom/issues/I4UQBD) ）
 7. 【agent】修复 windows 环境，节点首页进程列表切换不生效问题（感谢@neoch [Gitee issues I4UZA7](https://gitee.com/dromara/Jpom/issues/I4UZA7) ）
-
 
 ------
 
@@ -93,7 +91,8 @@
 6. 【server】本地构建命令 容器构建支持引用工作空间变量
 7. 【server】修复构建触发器无法执行（感谢@[老诗人](https://gitee.com/laoshirenggo) ）
 8. 【server】服务端脚本新增工作空间环境变量
-9. 修复检查 Jpom 包中没有释放资源（感谢@[大海](https://gitee.com/hasape) [Gitee issues I4T9L0](https://gitee.com/dromara/Jpom/issues/I4T9L0) ）
+9. 修复检查 Jpom
+   包中没有释放资源（感谢@[大海](https://gitee.com/hasape) [Gitee issues I4T9L0](https://gitee.com/dromara/Jpom/issues/I4T9L0) ）
 
 ------
 
@@ -121,9 +120,11 @@
 7. 【server】解除 SSH 终端禁止命令权限保存失败（感谢@Alex）
 8. 【server】本地构建模式模糊匹配支持匹配多个结果
 9. 【server】修复节点分发不能删除节点问题（感谢@a19920714liou [Gitee issues I4SHSP](https://gitee.com/dromara/Jpom/issues/I4SHSP) ）
-10. 【server】ssh 快捷安装插件端保存安装包避免多次上传 （感谢@a19920714liou [Gitee issues I4SHJC](https://gitee.com/dromara/Jpom/issues/I4SHJC) ）
+10. 【server】ssh 快捷安装插件端保存安装包避免多次上传 （感谢@a19920714liou [Gitee issues I4SHJC](https://gitee.com/dromara/Jpom/issues/I4SHJC)
+    ）
 11. 【server】ssh 快捷安装插件端权限改为管理员
-12. 【server】构建 ssh 发布授权目录采用下拉模式,提升用户操作感知 (感谢@hjk2008 [Gitee issues I4SICE](https://gitee.com/dromara/Jpom/issues/I4SICE) )
+12. 【server】构建 ssh 发布授权目录采用下拉模式,提升用户操作感知 (
+    感谢@hjk2008 [Gitee issues I4SICE](https://gitee.com/dromara/Jpom/issues/I4SICE) )
 13. 【server】修复数据库自动备份失败问题
 
 > 🙏 特别感谢：[💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) 贡献容器构建相关架构
@@ -311,7 +312,8 @@
 9. 【server】发布命令（SSH发布命令、本地命令）支持变量替换：`#{BUILD_ID}`、`#{BUILD_NAME}`、`#{BUILD_RESULT_FILE}`、`#{BUILD_NUMBER_ID}`
 10. 【server】新增自动备份全量数据配置 `db.autoBackupIntervalDay` 默认一天备份一次,执行备份时间 凌晨0点或者中午12点
 11. 【agent】项目的 webhook 新增项目启动成功后通知，并且参数新增 `type` 指包括：`beforeStop`,`start`,`stop`,`beforeRestart`
-12. 【agent】项目新增自启动配置项,在 agent 启动时候检查对应项目是否启动，未启动执行启动逻辑 [Gitee issues I4IJFK](https://gitee.com/dromara/Jpom/issues/I4IJFK)
+12. 【agent】项目新增自启动配置项,在 agent
+    启动时候检查对应项目是否启动，未启动执行启动逻辑 [Gitee issues I4IJFK](https://gitee.com/dromara/Jpom/issues/I4IJFK)
 13. 【server】构建新增 webhook，实时通知构建进度
 14. 【server】节点分发新增分发间隔时间配置
 15. 新增控制台日志配置数据 `consoleLog.charset` 避免部分服务器执行命令响应乱码 （感谢@……）
@@ -439,7 +441,8 @@
 18. 【server】节点分发支持下载远程文件 （感谢@落泪归枫 [Gitee issues I1LM27](https://gitee.com/dromara/Jpom/issues/I1LM27) ）
 19. 【server】节点分发支持 file 类型项目
 20. 【agent】项目新增配置日志文件输出到指定目录
-21. 【server】构建产物目录支持通配符`AntPathMatcher`模式 （感谢@saysay [Gitee issues I455FM](https://gitee.com/dromara/Jpom/issues/I455FM) ）
+21. 【server】构建产物目录支持通配符`AntPathMatcher`模式 （感谢@saysay [Gitee issues I455FM](https://gitee.com/dromara/Jpom/issues/I455FM)
+    ）
 22. 【server】新增 h2 数据库缓存大小配置 [CACHE_SIZE](http://www.h2database.com/html/features.html#cache_settings) `db.cacheSize
 23. 【server】构建触发器新增延迟执行参数（感谢@Steve.Liu）
 24. 【server】增加全局项目搜索功能
@@ -567,7 +570,8 @@
 11. 【server】项目控制台新增心跳消息，避免超过一定时间后无法操作的情况
 12. 【server】ssh 新增心跳消息，避免超过一定时间后无法操作的情况
 13. 【server】系统缓存中的文件占用空间大小调整为定时更新（10分钟）
-14. 【server】修复 bug：分发列表页面点击【创建分发项目】按钮之后不能正常显示【分发节点】感谢 @xingenhi [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/bd38528fbd3067d220b7569f08449d7796e07c74) [@Hotstrip](https://gitee.com/hotstrip)
+14. 【server】修复 bug：分发列表页面点击【创建分发项目】按钮之后不能正常显示【分发节点】感谢
+    @xingenhi [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/bd38528fbd3067d220b7569f08449d7796e07c74) [@Hotstrip](https://gitee.com/hotstrip)
 15. 【server】fix: 编辑管理员时用户名不可修改
 16. 【server】折叠显示部分列表操作按钮（减少误操作）
 
