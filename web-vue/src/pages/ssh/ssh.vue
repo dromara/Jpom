@@ -7,6 +7,7 @@
     <a-table
       :data-source="list"
       :columns="columns"
+      size="middle"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       @change="changePage"
       bordered
@@ -42,7 +43,7 @@
         <div v-if="sshAgentInfo[record.id]">
           <div v-if="sshAgentInfo[record.id].javaVersion">
             <a-tooltip v-if="sshAgentInfo[record.id].nodeId" placement="topLeft" :title="`节点名称：${sshAgentInfo[record.id].nodeName}`">
-              <a-button style="width: 90px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" type="" @click="toNode(sshAgentInfo[record.id].nodeId)">
+              <a-button size="small" style="width: 90px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" type="" @click="toNode(sshAgentInfo[record.id].nodeId)">
                 {{ sshAgentInfo[record.id].nodeName }}
               </a-button>
             </a-tooltip>
@@ -54,7 +55,7 @@
               placement="topLeft"
               :title="`${sshAgentInfo[record.id].pid > 0 ? 'ssh 中已经运行了插件端进程ID：' + sshAgentInfo[record.id].pid : '点击快速安装插件端,java :' + sshAgentInfo[record.id].javaVersion}`"
             >
-              <a-button type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">安装节点</a-button>
+              <a-button size="small" type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">安装节点</a-button>
             </a-tooltip>
           </div>
           <div v-else><a-tag>没有Java环境</a-tag></div>
@@ -63,9 +64,9 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleTerminal(record)">终端</a-button>
+          <a-button size="small" type="primary" @click="handleTerminal(record)">终端</a-button>
           <a-tooltip placement="topLeft" title="如果按钮不可用,请去 ssh 编辑中添加允许管理的授权文件夹">
-            <a-button type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
+            <a-button size="small" type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
           </a-tooltip>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
@@ -412,8 +413,8 @@ export default {
           title: "操作",
           dataIndex: "operation",
           scopedSlots: { customRender: "operation" },
-          width: 230,
-          fixed: "right",
+          width: 180,
+          align: "center",
           // ellipsis: true,
         },
       ],

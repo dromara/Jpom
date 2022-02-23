@@ -29,7 +29,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.model.data.DslYmlDto;
@@ -75,9 +74,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         ProcessBuilder processBuilder = new ProcessBuilder();
         List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
         command.add(0, script);
-        if (SystemUtil.getOsInfo().isLinux() || SystemUtil.getOsInfo().isMac()) {
-            command.add(0, CommandUtil.SUFFIX);
-        }
+        command.add(0, CommandUtil.EXECUTE_PREFIX);
         DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
         if (environment != null) {
             processBuilder.environment().putAll(environment);

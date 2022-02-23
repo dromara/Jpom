@@ -3,6 +3,7 @@
     <a-table
       :data-source="commandList"
       :columns="columns"
+      size="middle"
       bordered
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       @change="changePage"
@@ -43,9 +44,9 @@
 
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button type="primary" @click="handleExecute(record)">执行</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" type="primary" @click="handleExecute(record)">执行</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
@@ -204,7 +205,7 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "modifyUser" },
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 250 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 180 },
       ],
     };
   },
