@@ -1,20 +1,8 @@
 <template>
-  <div>
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="监控名称" class="search-input-item" />
-        <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
-          <a-select-option :value="1">开启</a-select-option>
-          <a-select-option :value="0">关闭</a-select-option>
-        </a-select>
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-button type="primary" @click="handleAdd">新增</a-button>
-      </a-space>
-    </div>
+  <div class="full-content">
     <!-- 数据表格 -->
     <a-table
+      size="middle"
       :data-source="list"
       :columns="columns"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
@@ -22,6 +10,19 @@
       bordered
       :rowKey="(record, index) => index"
     >
+      <template slot="title">
+        <a-space>
+          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="监控名称" class="search-input-item" />
+          <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
+            <a-select-option :value="1">开启</a-select-option>
+            <a-select-option :value="0">关闭</a-select-option>
+          </a-select>
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleAdd">新增</a-button>
+        </a-space>
+      </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -33,14 +34,14 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editOperateMonitorVisible" width="600px" title="编辑监控" @ok="handleEditOperateMonitorOk" :maskClosable="false">
-      <a-form-model ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+    <a-modal v-model="editOperateMonitorVisible" width="50vw" title="编辑监控" @ok="handleEditOperateMonitorOk" :maskClosable="false">
+      <a-form-model ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 17 }">
         <a-form-model-item label="监控名称" prop="name">
           <a-input v-model="temp.name" placeholder="监控名称" />
         </a-form-model-item>
@@ -117,9 +118,9 @@ export default {
       methodFeatureKeys: [],
       editOperateMonitorVisible: false,
       columns: [
-        { title: "名称", dataIndex: "name", scopedSlots: { customRender: "name" }, width: 150 },
-        { title: "开启状态", dataIndex: "status", scopedSlots: { customRender: "status" }, width: 150 },
-        { title: "修改人", dataIndex: "modifyUser", scopedSlots: { customRender: "modifyUser" }, width: 120 },
+        { title: "名称", dataIndex: "name", scopedSlots: { customRender: "name" } },
+        { title: "开启状态", dataIndex: "status", scopedSlots: { customRender: "status" } },
+        { title: "修改人", dataIndex: "modifyUser", scopedSlots: { customRender: "modifyUser" } },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
@@ -132,7 +133,7 @@ export default {
           },
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 200 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 120 },
       ],
       rules: {
         name: [{ required: true, message: "Please input monitor name", trigger: "blur" }],
@@ -354,8 +355,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-.filter {
-  margin-bottom: 10px;
-}
-</style>
+<style scoped></style>

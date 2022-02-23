@@ -402,11 +402,11 @@ export default {
       this.$store.dispatch("toggleFullScreenFlag").then((flag) => {
         if (flag) {
           this.$notification.success({
-            message: "页面全屏，高度 100%",
+            message: "页面内容自动撑开出现滚动条",
           });
         } else {
           this.$notification.success({
-            message: "页面内容自动撑开出现滚动条",
+            message: "页面全屏，高度 100%",
           });
         }
       });
