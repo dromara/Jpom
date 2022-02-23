@@ -15,6 +15,8 @@
 4. 【server】在线构建本地构建命令不能换行问题（感谢@华仔）
 5. 【server】日志弹窗新增行号
 6. 【server】在线升级执行脚本、脚本模版等兼容 `debian` （感谢@wxyShine [Gitee issues I4UQBD](https://gitee.com/dromara/Jpom/issues/I4UQBD) ）
+7. 【agent】修复 windows 环境，节点首页进程列表切换不生效问题（感谢@neoch [Gitee issues I4UZA7](https://gitee.com/dromara/Jpom/issues/I4UZA7) ）
+
 
 ------
 
