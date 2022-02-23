@@ -28,7 +28,7 @@ const app = {
         const cache = rootGetters.getGuideCache;
         cache.fullScreenFlag = !(cache.fullScreenFlag === undefined ? true : cache.fullScreenFlag);
         commit("setGuideCache", cache);
-        resolve(cache.menuMultipleFlag);
+        resolve(cache.fullScreenFlag);
       });
     },
     // 打开多菜单开关

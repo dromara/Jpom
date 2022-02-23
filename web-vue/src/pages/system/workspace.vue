@@ -1,33 +1,34 @@
 <template>
   <div class="full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="工作空间名称" allowClear class="search-input-item" />
-
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-button type="primary" @click="handleAdd">新增</a-button>
-        <a-tooltip>
-          <template slot="title">
-            <ul>
-              <li>工作空间用于隔离数据,工作空间下面可以有不同数据,不同权限,不同菜单等来实现权限控制</li>
-              <li>工作空间环境变量用于构建命令相关</li>
-            </ul>
-          </template>
-          <a-icon type="question-circle" theme="filled" />
-        </a-tooltip>
-      </a-space>
-    </div>
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
       :columns="columns"
+      size="middle"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       bordered
       @change="changePage"
       :rowKey="(record, index) => index"
     >
+      <template slot="title">
+        <a-space>
+          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="工作空间名称" allowClear class="search-input-item" />
+
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-tooltip>
+            <template slot="title">
+              <ul>
+                <li>工作空间用于隔离数据,工作空间下面可以有不同数据,不同权限,不同菜单等来实现权限控制</li>
+                <li>工作空间环境变量用于构建命令相关</li>
+              </ul>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip>
+        </a-space>
+      </template>
       <a-tooltip slot="description" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -36,9 +37,9 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button type="primary" @click="viewEnvVar(record)">变量</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" type="primary" @click="viewEnvVar(record)">变量</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
@@ -68,6 +69,7 @@
       <!-- 数据表格 -->
       <a-table
         :data-source="envVarList"
+        size="middle"
         :loading="envVarLoading"
         :columns="envVarColumns"
         :pagination="this.envVarListQuery.total / this.envVarListQuery.limit > 1 ? (this, envVarPagination) : false"
@@ -86,9 +88,8 @@
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
           <a-space>
-            <a-button type="primary" @click="handleEnvEdit(record)">编辑</a-button>
-
-            <a-button type="danger" @click="handleEnvDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" @click="handleEnvEdit(record)">编辑</a-button>
+            <a-button size="small" type="danger" @click="handleEnvDelete(record)">删除</a-button>
           </a-space>
         </template>
       </a-table>
@@ -154,7 +155,7 @@ export default {
           sorter: true,
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 250 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 180 },
       ],
       envVarColumns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -173,7 +174,7 @@ export default {
           sorter: true,
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 200 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 120 },
       ],
       // 表单校验规则
       rules: {
@@ -361,8 +362,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-.filter {
-  margin-bottom: 10px;
-}
-</style>
+<style scoped></style>

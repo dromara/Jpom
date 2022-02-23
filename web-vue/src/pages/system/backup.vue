@@ -1,21 +1,21 @@
 <template>
   <div class="full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="请输入备份名称" class="search-input-item" />
-        <a-input v-model="listQuery['%version%']" @pressEnter="loadData" placeholder="请输入版本" class="search-input-item" />
-        <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="search-input-item">
-          <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
-        </a-select>
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
-        </a-tooltip>
-        <a-button type="primary" @click="handleAdd">创建备份</a-button>
-        <a-button type="primary" @click="handleSqlUpload">导入备份</a-button>
-      </a-space>
-    </div>
     <!-- 表格 -->
-    <a-table :columns="columns" :data-source="list" bordered rowKey="id" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false">
+    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false">
+      <template slot="title">
+        <a-space>
+          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="请输入备份名称" class="search-input-item" />
+          <a-input v-model="listQuery['%version%']" @pressEnter="loadData" placeholder="请输入版本" class="search-input-item" />
+          <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="search-input-item">
+            <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
+          </a-select>
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleAdd">创建备份</a-button>
+          <a-button type="primary" @click="handleSqlUpload">导入备份</a-button>
+        </a-space>
+      </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -178,7 +178,7 @@ export default {
           dataIndex: "operation",
           width: 180,
           scopedSlots: { customRender: "operation" },
-          align: "left",
+          align: "center",
           // fixed: "right",
         },
       ],
@@ -394,18 +394,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-.filter {
-  margin-bottom: 10px;
-}
-
-.btn-add {
-  margin-left: 10px;
-  margin-right: 0;
-}
-
-.successTag {
-  height: 32px;
-  line-height: 30px;
-}
-</style>
+<style scoped></style>

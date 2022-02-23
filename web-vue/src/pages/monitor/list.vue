@@ -34,9 +34,9 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开启" un-checked-children="关闭" />
-      <a-switch slot="autoRestart" slot-scope="text" :checked="text" disabled checked-children="是" un-checked-children="否" />
-      <a-switch slot="alarm" slot-scope="text" :checked="text" disabled checked-children="报警中" un-checked-children="未报警" />
+      <a-switch slot="status" size="small" slot-scope="text" :checked="text" disabled checked-children="开启" un-checked-children="关闭" />
+      <a-switch slot="autoRestart" size="small" slot-scope="text" :checked="text" disabled checked-children="是" un-checked-children="否" />
+      <a-switch slot="alarm" size="small" slot-scope="text" :checked="text" disabled checked-children="报警中" un-checked-children="未报警" />
       <a-tooltip slot="parent" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -160,7 +160,7 @@ export default {
           },
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", ellipsis: true, scopedSlots: { customRender: "operation" }, width: 200 },
+        { title: "操作", dataIndex: "operation", ellipsis: true, scopedSlots: { customRender: "operation" }, width: 120 },
       ],
       rules: {
         name: [{ required: true, message: "Please input monitor name", trigger: "blur" }],

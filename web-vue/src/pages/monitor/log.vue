@@ -1,24 +1,6 @@
 <template>
   <div class="full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
-          <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
-        </a-select>
-        <a-select v-model="listQuery.status" allowClear placeholder="报警状态" class="search-input-item">
-          <a-select-option :value="1">正常</a-select-option>
-          <a-select-option :value="0">异常</a-select-option>
-        </a-select>
-        <a-select v-model="listQuery.notifyStatus" allowClear placeholder="请选择通知状态" class="search-input-item">
-          <a-select-option :value="1">成功</a-select-option>
-          <a-select-option :value="0">失败</a-select-option>
-        </a-select>
-        <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-        <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
-          <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
-        </a-tooltip>
-      </a-space>
-    </div>
+    <!-- <div ref="filter" class="filter"></div> -->
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
@@ -29,6 +11,25 @@
       :rowKey="(record, index) => index"
       @change="change"
     >
+      <template slot="title">
+        <a-space>
+          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+            <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
+          </a-select>
+          <a-select v-model="listQuery.status" allowClear placeholder="报警状态" class="search-input-item">
+            <a-select-option :value="1">正常</a-select-option>
+            <a-select-option :value="0">异常</a-select-option>
+          </a-select>
+          <a-select v-model="listQuery.notifyStatus" allowClear placeholder="请选择通知状态" class="search-input-item">
+            <a-select-option :value="1">成功</a-select-option>
+            <a-select-option :value="0">失败</a-select-option>
+          </a-select>
+          <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
+          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+          </a-tooltip>
+        </a-space>
+      </template>
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ nodeMap[text] }}</span>
       </a-tooltip>
@@ -172,8 +173,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-.filter {
-  margin-bottom: 10px;
-}
-</style>
+<style scoped></style>

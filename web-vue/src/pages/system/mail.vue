@@ -33,13 +33,22 @@
       </a-form-model-item>
       <a-form-model-item label="邮箱账号" prop="from">
         <!-- <a-input v-model="temp.from" type="text" placeholder="发送方邮箱账号" /> -->
-        <a-auto-complete v-model="temp.from" placeholder="发送方邮箱账号" option-label-prop="value" @search="handleFromSearch">
-          <template slot="dataSource">
-            <a-select-option v-for="email in fromResult" :key="email">
-              {{ email }}
-            </a-select-option>
+        <a-tooltip>
+          <template slot="title">
+            支持配置发送方：遵循RFC-822标准 发件人可以是以下形式：
+            <ul>
+              <li>1. user@xxx.xx</li>
+              <li>2. name &lt;user@xxx.xx&gt;</li>
+            </ul>
           </template>
-        </a-auto-complete>
+          <a-auto-complete v-model="temp.from" placeholder="发送方邮箱账号" option-label-prop="value" @search="handleFromSearch">
+            <template slot="dataSource">
+              <a-select-option v-for="email in fromResult" :key="email">
+                {{ email }}
+              </a-select-option>
+            </template>
+          </a-auto-complete>
+        </a-tooltip>
       </a-form-model-item>
       <a-form-model-item label="SSL 连接" prop="sslEnable">
         <a-switch v-model="temp.sslEnable" checked-children="启用" un-checked-children="停用" />
