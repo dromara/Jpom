@@ -263,6 +263,12 @@
             <a-switch checked-children="是" @click="toggleFullScreenFlag" :checked="this.fullScreenFlag" un-checked-children="否" />
           </a-space>
         </a-form-model-item>
+        <a-form-model-item label="滚动条显示" prop="token">
+          <a-space>
+            全局配置：
+            <a-switch checked-children="显示" @click="toggleScrollbarFlag" :checked="this.scrollbarFlag" un-checked-children="不显示" />
+          </a-space>
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
   </div>
@@ -334,6 +340,9 @@ export default {
     },
     fullScreenFlag() {
       return this.getGuideCache.fullScreenFlag === undefined ? true : this.getGuideCache.fullScreenFlag;
+    },
+    scrollbarFlag() {
+      return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
     },
   },
   inject: ["reload"],
@@ -407,6 +416,20 @@ export default {
         } else {
           this.$notification.success({
             message: "页面全屏，高度 100%",
+          });
+        }
+      });
+    },
+    // 切换滚动条是否显示
+    toggleScrollbarFlag() {
+      this.$store.dispatch("toggleScrollbarFlag").then((flag) => {
+        if (flag) {
+          this.$notification.success({
+            message: "页面内容会出现滚动条",
+          });
+        } else {
+          this.$notification.success({
+            message: "隐藏滚动条。纵向滚动方式提醒：滚轮，横行滚动方式：Shift+滚轮",
           });
         }
       });

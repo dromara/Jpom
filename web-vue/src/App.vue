@@ -1,6 +1,6 @@
 <template>
   <a-config-provider :locale="locale">
-    <div id="app">
+    <div id="app" :class="`${this.scrollbarFlag ? '' : 'hide-scrollbar'}`">
       <router-view v-if="routerActivation" />
       <template>
         <a-back-top />
@@ -15,6 +15,7 @@
 <script>
 import zhCN from "ant-design-vue/lib/locale-provider/zh_CN";
 import Vue from "vue";
+import { mapGetters } from "vuex";
 
 export default {
   name: "App",
@@ -36,6 +37,12 @@ export default {
     };
   },
   components: {},
+  computed: {
+    ...mapGetters(["getGuideCache"]),
+    scrollbarFlag() {
+      return this.getGuideCache.scrollbarFlag === undefined ? true : this.getGuideCache.scrollbarFlag;
+    },
+  },
   created() {
     this.$notification.config({
       top: "100px",
@@ -91,5 +98,27 @@ export default {
 }
 .ant-spin-text{
   text-shadow: 0 0 black !important;
+}
+</style>
+
+<style>
+.hide-scrollbar *::-webkit-scrollbar {
+  width: 0 !important;
+  display: none;
+}
+
+.hide-scrollbar * {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar pre::-webkit-scrollbar {
+  width: 0 !important;
+  display: none;
+}
+
+.hide-scrollbar pre {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>
