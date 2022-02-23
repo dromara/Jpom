@@ -33,7 +33,7 @@
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ nodeMap[text] }}</span>
       </a-tooltip>
-      <a-tooltip slot="projectId" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <span slot="status" slot-scope="text">{{ text ? "正常" : "异常" }}</span>
@@ -76,9 +76,9 @@ export default {
       detailVisible: false,
       detailData: [],
       columns: [
-        { title: "报警标题", dataIndex: "title", ellipsis: true, scopedSlots: { customRender: "title" } },
+        { title: "报警标题", dataIndex: "title", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点名称", dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
-        { title: "项目 ID", dataIndex: "projectId", width: 100, ellipsis: true, scopedSlots: { customRender: "projectId" } },
+        { title: "项目 ID", dataIndex: "projectId", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "报警状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "报警方式", dataIndex: "notifyStyle", width: 100, ellipsis: true, scopedSlots: { customRender: "notifyStyle" } },
         {
