@@ -1,13 +1,13 @@
 <template>
   <div class="node-full-content">
-    <div ref="filter" class="filter">
-      <a-space>
-        <a-button type="primary" @click="handleAdd">导入证书</a-button>
-        <a-button type="primary" @click="loadData">刷新</a-button>
-      </a-space>
-    </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+      <template slot="title">
+        <a-space>
+          <a-button type="primary" @click="handleAdd">导入证书</a-button>
+          <a-button type="primary" @click="loadData">刷新</a-button>
+        </a-space>
+      </template>
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -119,17 +119,17 @@ export default {
     };
   },
   mounted() {
-    this.calcTableHeight();
+    // this.calcTableHeight();
     this.loadData();
     this.loadCertWhiteList();
   },
   methods: {
     // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 155;
-      });
-    },
+    // calcTableHeight() {
+    //   this.$nextTick(() => {
+    //     this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 155;
+    //   });
+    // },
     // 加载数据
     loadData() {
       this.loading = true;
@@ -263,9 +263,6 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
-  margin-bottom: 10px;
-}
 .config {
   background-color: black;
   color: #fff;

@@ -191,7 +191,8 @@ export default {
 .app-header {
   display: flex;
   background: #fff;
-  padding: 0 10px;
+  padding: 10px 10px 0;
+  height: auto;
 }
 .sider-scroll {
   min-height: 100vh;
@@ -213,7 +214,7 @@ export default {
 
 <style>
 .layout-content {
-  margin: 10px 10px 0;
+  margin: 0;
   padding: 15px 15px 0;
   background: #fff;
   /* min-height: 280px; */
