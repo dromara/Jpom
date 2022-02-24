@@ -29,42 +29,35 @@ import io.jpom.model.BaseEnum;
  * @since 2021/8/27
  */
 public enum BuildStatus implements BaseEnum {
-	/**
-	 *
-	 */
-	No(0, "未构建"),
+    /**
+     *
+     */
+    No(0, "未构建"),
+    Ing(1, "构建中"),
+    Success(2, "构建结束"),
+    Error(3, "构建失败"),
+    PubIng(4, "发布中"),
+    PubSuccess(5, "发布成功"),
+    PubError(6, "发布失败"),
+    Cancel(7, "取消构建"),
+    ;
 
-	Ing(1, "构建中"),
+    private final int code;
+    private final String desc;
 
-	Success(2, "构建结束"),
+    BuildStatus(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
 
-	Error(3, "构建失败"),
+    @Override
+    public int getCode() {
+        return code;
+    }
 
-	PubIng(4, "发布中"),
-
-	PubSuccess(5, "发布成功"),
-
-	PubError(6, "发布失败"),
-
-	Cancel(7, "取消构建"),
-	;
-
-	private final int code;
-	private final String desc;
-
-	BuildStatus(int code, String desc) {
-		this.code = code;
-		this.desc = desc;
-	}
-
-	@Override
-	public int getCode() {
-		return code;
-	}
-
-	@Override
-	public String getDesc() {
-		return desc;
-	}
+    @Override
+    public String getDesc() {
+        return desc;
+    }
 
 }

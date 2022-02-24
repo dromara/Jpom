@@ -4,6 +4,7 @@
     <!-- 数据表格 -->
     <a-table
       :data-source="list"
+      size="middle"
       :columns="columns"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       @change="changePage"
