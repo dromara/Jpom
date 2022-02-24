@@ -67,151 +67,151 @@ import java.util.Map;
 @Service
 public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLogV1> {
 
-	private static final Map<ClassFeature, Class<? extends BaseDbCommonService<?>>> CLASS_FEATURE_SERVICE = new HashMap<>();
+    private static final Map<ClassFeature, Class<? extends BaseDbCommonService<?>>> CLASS_FEATURE_SERVICE = new HashMap<>();
 
-	static {
-		CLASS_FEATURE_SERVICE.put(ClassFeature.NODE, NodeService.class);
-		CLASS_FEATURE_SERVICE.put(ClassFeature.SSH, SshService.class);
-		CLASS_FEATURE_SERVICE.put(ClassFeature.OUTGIVING, SshService.class);
-		CLASS_FEATURE_SERVICE.put(ClassFeature.MONITOR, MonitorService.class);
-		CLASS_FEATURE_SERVICE.put(ClassFeature.OPT_MONITOR, MonitorUserOptService.class);
-		CLASS_FEATURE_SERVICE.put(ClassFeature.PROJECT, ProjectInfoCacheService.class);
-		CLASS_FEATURE_SERVICE.put(ClassFeature.BUILD_REPOSITORY, RepositoryService.class);
-		CLASS_FEATURE_SERVICE.put(ClassFeature.BUILD, BuildInfoService.class);
-	}
+    static {
+        CLASS_FEATURE_SERVICE.put(ClassFeature.NODE, NodeService.class);
+        CLASS_FEATURE_SERVICE.put(ClassFeature.SSH, SshService.class);
+        CLASS_FEATURE_SERVICE.put(ClassFeature.OUTGIVING, SshService.class);
+        CLASS_FEATURE_SERVICE.put(ClassFeature.MONITOR, MonitorService.class);
+        CLASS_FEATURE_SERVICE.put(ClassFeature.OPT_MONITOR, MonitorUserOptService.class);
+        CLASS_FEATURE_SERVICE.put(ClassFeature.PROJECT, ProjectInfoCacheService.class);
+        CLASS_FEATURE_SERVICE.put(ClassFeature.BUILD_REPOSITORY, RepositoryService.class);
+        CLASS_FEATURE_SERVICE.put(ClassFeature.BUILD, BuildInfoService.class);
+    }
 
-	private final MonitorUserOptService monitorUserOptService;
-	private final UserService userService;
-	private final WorkspaceService workspaceService;
+    private final MonitorUserOptService monitorUserOptService;
+    private final UserService userService;
+    private final WorkspaceService workspaceService;
 
-	public DbUserOperateLogService(MonitorUserOptService monitorUserOptService,
-								   UserService userService,
-								   WorkspaceService workspaceService) {
-		this.monitorUserOptService = monitorUserOptService;
-		this.userService = userService;
-		this.workspaceService = workspaceService;
-	}
+    public DbUserOperateLogService(MonitorUserOptService monitorUserOptService,
+                                   UserService userService,
+                                   WorkspaceService workspaceService) {
+        this.monitorUserOptService = monitorUserOptService;
+        this.userService = userService;
+        this.workspaceService = workspaceService;
+    }
 
-	private void checkMonitor(UserOperateLogV1 userOperateLogV1) {
-		ClassFeature classFeature = EnumUtil.fromString(ClassFeature.class, userOperateLogV1.getClassFeature(), null);
-		MethodFeature methodFeature = EnumUtil.fromString(MethodFeature.class, userOperateLogV1.getMethodFeature(), null);
-		UserModel optUserItem = userService.getByKey(userOperateLogV1.getUserId());
-		if (classFeature == null || methodFeature == null || optUserItem == null) {
-			return;
-		}
-		String otherMsg = "";
-		Class<? extends BaseDbCommonService<?>> aClass = CLASS_FEATURE_SERVICE.get(classFeature);
-		if (aClass != null) {
-			BaseDbCommonService<?> baseDbCommonService = SpringUtil.getBean(aClass);
-			Object data = baseDbCommonService.getByKey(userOperateLogV1.getNodeId());
-			if (data != null) {
-				Object name = BeanUtil.getProperty(data, "name");
-				otherMsg = name == null ? StrUtil.EMPTY : StrUtil.format("操作的数据名称：{}\n", name);
-			}
-		}
-		WorkspaceModel workspaceModel = workspaceService.getByKey(userOperateLogV1.getWorkspaceId());
+    private void checkMonitor(UserOperateLogV1 userOperateLogV1) {
+        ClassFeature classFeature = EnumUtil.fromString(ClassFeature.class, userOperateLogV1.getClassFeature(), null);
+        MethodFeature methodFeature = EnumUtil.fromString(MethodFeature.class, userOperateLogV1.getMethodFeature(), null);
+        UserModel optUserItem = userService.getByKey(userOperateLogV1.getUserId());
+        if (classFeature == null || methodFeature == null || optUserItem == null) {
+            return;
+        }
+        String otherMsg = "";
+        Class<? extends BaseDbCommonService<?>> aClass = CLASS_FEATURE_SERVICE.get(classFeature);
+        if (aClass != null) {
+            BaseDbCommonService<?> baseDbCommonService = SpringUtil.getBean(aClass);
+            Object data = baseDbCommonService.getByKey(userOperateLogV1.getNodeId());
+            if (data != null) {
+                Object name = BeanUtil.getProperty(data, "name");
+                otherMsg = name == null ? StrUtil.EMPTY : StrUtil.format("操作的数据名称：{}\n", name);
+            }
+        }
+        WorkspaceModel workspaceModel = workspaceService.getByKey(userOperateLogV1.getWorkspaceId());
 
-		String optTypeMsg = StrUtil.format(" 【{}】->【{}】", classFeature.getName(), methodFeature.getName());
-		List<MonitorUserOptModel> monitorUserOptModels = monitorUserOptService.listByType(userOperateLogV1.getWorkspaceId(),
-				classFeature,
-				methodFeature,
-				userOperateLogV1.getUserId());
-		if (CollUtil.isEmpty(monitorUserOptModels)) {
-			return;
-		}
-		for (MonitorUserOptModel monitorUserOptModel : monitorUserOptModels) {
-			List<String> notifyUser = monitorUserOptModel.notifyUser();
-			if (CollUtil.isEmpty(notifyUser)) {
-				continue;
-			}
-			for (String userId : notifyUser) {
-				UserModel item = userService.getByKey(userId);
-				if (item == null) {
-					continue;
-				}
-				//
-				String context = StrUtil.format("操作用户：{}\n操作状态：{}\n操作类型：{}\n所属工作空间：{}\n操作节点：{}\n 操作数据id: {}\n操作IP: {}\n{}",
-						optUserItem.getName(),
-						userOperateLogV1.getOptStatusMsg(),
-						optTypeMsg,
-						workspaceModel.getName(),
-						userOperateLogV1.getNodeId(), userOperateLogV1.getDataId(), userOperateLogV1.getIp(), otherMsg);
-				// 邮箱
-				String email = item.getEmail();
-				if (StrUtil.isNotEmpty(email)) {
-					MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.mail, email);
-					ThreadUtil.execute(() -> {
-						try {
-							NotifyUtil.send(notify1, "用户操作报警", context);
-						} catch (Exception e) {
-							DefaultSystemLog.getLog().error("发送报警信息错误", e);
-						}
-					});
+        String optTypeMsg = StrUtil.format(" 【{}】->【{}】", classFeature.getName(), methodFeature.getName());
+        List<MonitorUserOptModel> monitorUserOptModels = monitorUserOptService.listByType(userOperateLogV1.getWorkspaceId(),
+                classFeature,
+                methodFeature,
+                userOperateLogV1.getUserId());
+        if (CollUtil.isEmpty(monitorUserOptModels)) {
+            return;
+        }
+        for (MonitorUserOptModel monitorUserOptModel : monitorUserOptModels) {
+            List<String> notifyUser = monitorUserOptModel.notifyUser();
+            if (CollUtil.isEmpty(notifyUser)) {
+                continue;
+            }
+            for (String userId : notifyUser) {
+                UserModel item = userService.getByKey(userId);
+                if (item == null) {
+                    continue;
+                }
+                //
+                String context = StrUtil.format("操作用户：{}\n操作状态：{}\n操作类型：{}\n所属工作空间：{}\n操作节点：{}\n 操作数据id: {}\n操作IP: {}\n{}",
+                        optUserItem.getName(),
+                        userOperateLogV1.getOptStatusMsg(),
+                        optTypeMsg,
+                        workspaceModel == null ? StrUtil.EMPTY : workspaceModel.getName(),
+                        userOperateLogV1.getNodeId(), userOperateLogV1.getDataId(), userOperateLogV1.getIp(), otherMsg);
+                // 邮箱
+                String email = item.getEmail();
+                if (StrUtil.isNotEmpty(email)) {
+                    MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.mail, email);
+                    ThreadUtil.execute(() -> {
+                        try {
+                            NotifyUtil.send(notify1, "用户操作报警", context);
+                        } catch (Exception e) {
+                            DefaultSystemLog.getLog().error("发送报警信息错误", e);
+                        }
+                    });
 
-				}
-				// dingding
-				String dingDing = item.getDingDing();
-				if (StrUtil.isNotEmpty(dingDing)) {
-					MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.dingding, dingDing);
-					ThreadUtil.execute(() -> {
-						try {
-							NotifyUtil.send(notify1, "用户操作报警", context);
-						} catch (Exception e) {
-							DefaultSystemLog.getLog().error("发送报警信息错误", e);
-						}
-					});
-				}
-				// 企业微信
-				String workWx = item.getWorkWx();
-				if (StrUtil.isNotEmpty(workWx)) {
-					MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.workWx, workWx);
-					ThreadUtil.execute(() -> {
-						try {
-							NotifyUtil.send(notify1, "用户操作报警", context);
-						} catch (Exception e) {
-							DefaultSystemLog.getLog().error("发送报警信息错误", e);
-						}
-					});
-				}
-			}
-		}
-	}
+                }
+                // dingding
+                String dingDing = item.getDingDing();
+                if (StrUtil.isNotEmpty(dingDing)) {
+                    MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.dingding, dingDing);
+                    ThreadUtil.execute(() -> {
+                        try {
+                            NotifyUtil.send(notify1, "用户操作报警", context);
+                        } catch (Exception e) {
+                            DefaultSystemLog.getLog().error("发送报警信息错误", e);
+                        }
+                    });
+                }
+                // 企业微信
+                String workWx = item.getWorkWx();
+                if (StrUtil.isNotEmpty(workWx)) {
+                    MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.workWx, workWx);
+                    ThreadUtil.execute(() -> {
+                        try {
+                            NotifyUtil.send(notify1, "用户操作报警", context);
+                        } catch (Exception e) {
+                            DefaultSystemLog.getLog().error("发送报警信息错误", e);
+                        }
+                    });
+                }
+            }
+        }
+    }
 
-	@Override
-	public void insert(UserOperateLogV1 userOperateLogV1) {
-		super.insert(userOperateLogV1);
-		ThreadUtil.execute(() -> {
-			try {
-				this.checkMonitor(userOperateLogV1);
-			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("执行操作监控错误", e);
-			}
-		});
-	}
+    @Override
+    public void insert(UserOperateLogV1 userOperateLogV1) {
+        super.insert(userOperateLogV1);
+        ThreadUtil.execute(() -> {
+            try {
+                this.checkMonitor(userOperateLogV1);
+            } catch (Exception e) {
+                DefaultSystemLog.getLog().error("执行操作监控错误", e);
+            }
+        });
+    }
 
-	@Override
-	public PageResultDto<UserOperateLogV1> listPage(HttpServletRequest request) {
-		// 验证工作空间权限
-		Map<String, String> paramMap = ServletUtil.getParamMap(request);
-		String workspaceId = this.getCheckUserWorkspace(request);
-		paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + StrUtil.EMPTY);
-		return super.listPage(paramMap);
-	}
+    @Override
+    public PageResultDto<UserOperateLogV1> listPage(HttpServletRequest request) {
+        // 验证工作空间权限
+        Map<String, String> paramMap = ServletUtil.getParamMap(request);
+        String workspaceId = this.getCheckUserWorkspace(request);
+        paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + StrUtil.EMPTY);
+        return super.listPage(paramMap);
+    }
 
-	@Override
-	public String getCheckUserWorkspace(HttpServletRequest request) {
-		// 忽略检查
-		String header = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
-		return ObjectUtil.defaultIfNull(header, StrUtil.EMPTY);
-	}
+    @Override
+    public String getCheckUserWorkspace(HttpServletRequest request) {
+        // 忽略检查
+        String header = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+        return ObjectUtil.defaultIfNull(header, StrUtil.EMPTY);
+    }
 
-	@Override
-	protected void checkUserWorkspace(String workspaceId, UserModel userModel) {
-		// 忽略检查
-	}
+    @Override
+    protected void checkUserWorkspace(String workspaceId, UserModel userModel) {
+        // 忽略检查
+    }
 
-	@Override
-	protected String[] clearTimeColumns() {
-		return new String[]{"optTime", "createTimeMillis"};
-	}
+    @Override
+    protected String[] clearTimeColumns() {
+        return new String[]{"optTime", "createTimeMillis"};
+    }
 }

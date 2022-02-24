@@ -1,7 +1,7 @@
 <template>
   <div class="node-full-content">
     <!-- 数据表格 -->
-    <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" bordered rowKey="id">
+    <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" bordered rowKey="id">
       <template slot="title">
         <a-space>
           <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
@@ -154,7 +154,7 @@ export default {
         { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, sorter: true, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 240 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 220 },
       ],
       rules: {
         name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
