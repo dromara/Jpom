@@ -424,6 +424,7 @@ public class GitUtil {
      * @throws TransportException 非账号密码异常
      */
     private static void checkTransportException(Exception ex, File gitFile, PrintWriter printWriter) throws Exception {
+        println(printWriter, "");
         if (ex instanceof TransportException) {
             String msg = ex.getMessage();
             if (msg.contains(JGitText.get().notAuthorized) || msg.contains(JGitText.get().authenticationNotSupported)) {

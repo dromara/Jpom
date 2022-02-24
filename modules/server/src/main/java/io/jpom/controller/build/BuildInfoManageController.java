@@ -67,141 +67,152 @@ import java.util.Objects;
 public class BuildInfoManageController extends BaseServerController {
 
 
-	private final BuildInfoService buildInfoService;
-	private final DbBuildHistoryLogService dbBuildHistoryLogService;
-	private final BuildExecuteService buildExecuteService;
+    private final BuildInfoService buildInfoService;
+    private final DbBuildHistoryLogService dbBuildHistoryLogService;
+    private final BuildExecuteService buildExecuteService;
 
-	public BuildInfoManageController(BuildInfoService buildInfoService,
-									 DbBuildHistoryLogService dbBuildHistoryLogService,
-									 BuildExecuteService buildExecuteService) {
-		this.buildInfoService = buildInfoService;
-		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
-		this.buildExecuteService = buildExecuteService;
-	}
+    public BuildInfoManageController(BuildInfoService buildInfoService,
+                                     DbBuildHistoryLogService dbBuildHistoryLogService,
+                                     BuildExecuteService buildExecuteService) {
+        this.buildInfoService = buildInfoService;
+        this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+        this.buildExecuteService = buildExecuteService;
+    }
 
-	/**
-	 * 开始构建
-	 *
-	 * @param id id
-	 * @return json
-	 */
-	@RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
-	public String start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-						String buildRemark,
-						String resultDirFile) {
-		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
-		Assert.notNull(item, "没有对应数据");
-		if (StrUtil.isNotEmpty(resultDirFile)) {
-			BuildInfoModel update = new BuildInfoModel();
-			update.setId(id);
-			update.setResultDirFile(resultDirFile);
-			buildInfoService.update(update);
-		}
-		// userModel
-		UserModel userModel = getUser();
-		// 执行构建
-		return buildExecuteService.start(item.getId(), userModel, null, 0, buildRemark).toString();
-	}
+    /**
+     * 开始构建
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public String start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+                        String buildRemark,
+                        String resultDirFile,
+                        String branchName,
+                        String branchTagName) {
+        BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
+        Assert.notNull(item, "没有对应数据");
+        // 更新数据
+        BuildInfoModel update = new BuildInfoModel();
+        if (StrUtil.isNotEmpty(resultDirFile)) {
+            update.setResultDirFile(resultDirFile);
+        }
+        if (StrUtil.isNotEmpty(branchName)) {
+            update.setBranchName(branchName);
+        }
+        if (StrUtil.isNotEmpty(branchTagName)) {
+            update.setBranchTagName(branchTagName);
+        }
+        if (!StrUtil.isAllBlank(resultDirFile, branchName, branchTagName)) {
+            update.setId(id);
+            buildInfoService.update(update);
+        }
+        // userModel
+        UserModel userModel = getUser();
+        // 执行构建
+        return buildExecuteService.start(item.getId(), userModel, null, 0, buildRemark).toString();
+    }
 
-	/**
-	 * 取消构建
-	 *
-	 * @param id id
-	 * @return json
-	 */
-	@RequestMapping(value = "/build/manage/cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
-	public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
-		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
-		Objects.requireNonNull(item, "没有对应数据");
-		BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
-		Objects.requireNonNull(nowStatus);
-		if (BuildStatus.Ing != nowStatus && BuildStatus.PubIng != nowStatus) {
-			return JsonMessage.getString(501, "当前状态不在进行中");
-		}
-		boolean status = buildExecuteService.cancelTask(item.getId());
-		if (!status) {
+    /**
+     * 取消构建
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "/build/manage/cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
+        BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
+        Objects.requireNonNull(item, "没有对应数据");
+        BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
+        Objects.requireNonNull(nowStatus);
+        if (BuildStatus.Ing != nowStatus && BuildStatus.PubIng != nowStatus) {
+            return JsonMessage.getString(501, "当前状态不在进行中");
+        }
+        boolean status = buildExecuteService.cancelTask(item.getId());
+        if (!status) {
 			/*BuildInfoModel buildInfoModel = new BuildInfoModel();
 			buildInfoModel.setId(id);
 			buildInfoModel.setStatus(BuildStatus.Cancel.getCode());*/
-			buildInfoService.updateStatus(id, BuildStatus.Cancel);
-		}
-		return JsonMessage.getString(200, "取消成功");
-	}
+            buildInfoService.updateStatus(id, BuildStatus.Cancel);
+        }
+        return JsonMessage.getString(200, "取消成功");
+    }
 
-	/**
-	 * 重新发布
-	 *
-	 * @param logId logId
-	 * @return json
-	 */
-	@RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
-	public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
-		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
-		Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
-		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
-		Objects.requireNonNull(item, "没有对应数据");
-		String e = buildExecuteService.checkStatus(item.getStatus());
-		Assert.isNull(e, () -> e);
-		UserModel userModel = getUser();
-		BuildExtraModule buildExtraModule = BuildExtraModule.build(buildHistoryLog);
-		//new BuildExtraModule();
-		//buildExtraModule.updateValue(buildHistoryLog);
-		ReleaseManage manage = ReleaseManage.builder()
-				.buildExtraModule(buildExtraModule)
-				.logId(buildHistoryLog.getId())
-				.userModel(userModel)
-				.buildId(buildHistoryLog.getBuildNumberId())
-				.buildExecuteService(buildExecuteService)
-				.build();
-		//ReleaseManage releaseManage = new ReleaseManage(buildHistoryLog, userModel);
-		// 标记发布中
-		//releaseManage.updateStatus(BuildStatus.PubIng);
-		ThreadUtil.execute(manage);
-		return JsonMessage.getString(200, "重新发布中");
-	}
+    /**
+     * 重新发布
+     *
+     * @param logId logId
+     * @return json
+     */
+    @RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
+        Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
+        BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
+        Objects.requireNonNull(item, "没有对应数据");
+        String e = buildExecuteService.checkStatus(item.getStatus());
+        Assert.isNull(e, () -> e);
+        UserModel userModel = getUser();
+        BuildExtraModule buildExtraModule = BuildExtraModule.build(buildHistoryLog);
+        //new BuildExtraModule();
+        //buildExtraModule.updateValue(buildHistoryLog);
+        ReleaseManage manage = ReleaseManage.builder()
+                .buildExtraModule(buildExtraModule)
+                .logId(buildHistoryLog.getId())
+                .userModel(userModel)
+                .buildId(buildHistoryLog.getBuildNumberId())
+                .buildExecuteService(buildExecuteService)
+                .build();
+        //ReleaseManage releaseManage = new ReleaseManage(buildHistoryLog, userModel);
+        // 标记发布中
+        //releaseManage.updateStatus(BuildStatus.PubIng);
+        ThreadUtil.execute(manage);
+        return JsonMessage.getString(200, "重新发布中");
+    }
 
-	/**
-	 * 获取构建的日志
-	 *
-	 * @param id      id
-	 * @param buildId 构建编号
-	 * @param line    需要获取的行号
-	 * @return json
-	 */
-	@RequestMapping(value = "/build/manage/get-now-log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
-							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
-		Assert.notNull(item, "没有对应数据");
-		Assert.state(buildId <= item.getBuildId(), "还没有对应的构建记录");
+    /**
+     * 获取构建的日志
+     *
+     * @param id      id
+     * @param buildId 构建编号
+     * @param line    需要获取的行号
+     * @return json
+     */
+    @RequestMapping(value = "/build/manage/get-now-log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
+                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+        BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
+        Assert.notNull(item, "没有对应数据");
+        Assert.state(buildId <= item.getBuildId(), "还没有对应的构建记录");
 
-		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
-		buildHistoryLog.setBuildDataId(id);
-		buildHistoryLog.setBuildNumberId(buildId);
-		BuildHistoryLog queryByBean = dbBuildHistoryLogService.queryByBean(buildHistoryLog);
-		Assert.notNull(queryByBean, "没有对应的构建历史");
+        BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
+        buildHistoryLog.setBuildDataId(id);
+        buildHistoryLog.setBuildNumberId(buildId);
+        BuildHistoryLog queryByBean = dbBuildHistoryLogService.queryByBean(buildHistoryLog);
+        Assert.notNull(queryByBean, "没有对应的构建历史");
 
-		File file = BuildUtil.getLogFile(item.getId(), buildId);
-		Assert.state(FileUtil.isFile(file), "日志文件错误");
+        File file = BuildUtil.getLogFile(item.getId(), buildId);
+        Assert.state(FileUtil.isFile(file), "日志文件错误");
 
-		if (!file.exists()) {
-			if (buildId == item.getBuildId()) {
-				return JsonMessage.getString(201, "还没有日志文件");
-			}
-			return JsonMessage.getString(300, "日志文件不存在");
-		}
-		JSONObject data = FileUtils.readLogFile(file, line);
-		// 运行中
-		Integer status = queryByBean.getStatus();
-		data.put("run", status == BuildStatus.Ing.getCode() || status == BuildStatus.PubIng.getCode());
-		// 构建中
-		data.put("buildRun", status == BuildStatus.Ing.getCode());
+        if (!file.exists()) {
+            if (buildId == item.getBuildId()) {
+                return JsonMessage.getString(201, "还没有日志文件");
+            }
+            return JsonMessage.getString(300, "日志文件不存在");
+        }
+        JSONObject data = FileUtils.readLogFile(file, line);
+        // 运行中
+        Integer status = queryByBean.getStatus();
+        data.put("run", status == BuildStatus.Ing.getCode() || status == BuildStatus.PubIng.getCode());
+        // 构建中
+        data.put("buildRun", status == BuildStatus.Ing.getCode());
 
-		return JsonMessage.getString(200, "ok", data);
-	}
+        return JsonMessage.getString(200, "ok", data);
+    }
 }

@@ -108,7 +108,7 @@ export default {
           },
           width: 160,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
+        { title: "操作", align: "center", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
     };
   },
@@ -211,5 +211,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-</style>
+<style scoped></style>

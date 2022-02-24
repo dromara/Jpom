@@ -74,23 +74,23 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" @click="handleTrigger(record)">触发器</a-button>
+                <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" @click="copyItem(record)">复制</a-button>
+                <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
               </a-menu-item>
 
               <a-menu-item>
                 <a-tooltip
                   title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
                 >
-                  <a-button type="danger" :disabled="!record.sourceDirExist" @click="handleClear(record)">清除代码 </a-button>
+                  <a-button size="small" type="danger" :disabled="!record.sourceDirExist" @click="handleClear(record)">清除代码 </a-button>
                 </a-tooltip>
               </a-menu-item>
             </a-menu>
@@ -481,7 +481,11 @@
     <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
       <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
-          <template slot="tabBarExtraContent"> <a-button type="primary" @click="resetTrigger">重置</a-button> </template>
+          <template slot="tabBarExtraContent">
+            <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
+              <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+            </a-tooltip>
+          </template>
           <a-tab-pane key="1" tab="执行构建">
             <a-space style="display: block" direction="vertical" align="baseline">
               <a-alert message="温馨提示" type="warning">
@@ -548,6 +552,10 @@
                   <ul>
                     <li>批量构建参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
                     <li>参数中的 id 、token 和触发构建一致</li>
+                    <li>
+                      <a-tag>No(0, "未构建")</a-tag>, <a-tag>Ing(1, "构建中")</a-tag>, <a-tag>Success(2, "构建结束")</a-tag>, <a-tag>Error(3, "构建失败")</a-tag>, <a-tag>PubIng(4, "发布中")</a-tag>,
+                      <a-tag>PubSuccess(5, "发布成功")</a-tag>, <a-tag>PubError(6, "发布失败")</a-tag>, <a-tag>Cancel(7, "取消构建")</a-tag>,
+                    </li>
                   </ul>
                 </template>
               </a-alert>
@@ -607,10 +615,40 @@
           <a-input readOnly disabled v-model="temp.name" />
         </a-form-model-item>
         <a-form-model-item label="分支" prop="branchName">
-          <a-input readOnly disabled v-model="temp.branchName" />
+          <custom-select
+            v-model="temp.branchName"
+            :data="branchList"
+            @onRefreshSelect="loadBranchListById(temp.repositoryId)"
+            inputPlaceholder="自定义分支通配表达式"
+            selectPlaceholder="请选择构建对应的分支"
+          >
+            <div slot="inputTips">
+              支持通配符(AntPathMatcher)
+              <ul>
+                <li>? 匹配一个字符</li>
+                <li>* 匹配零个或多个字符</li>
+                <li>** 匹配路径中的零个或多个目录</li>
+              </ul>
+            </div>
+          </custom-select>
         </a-form-model-item>
-        <a-form-model-item v-if="temp.branchTagName" label="标签(TAG)" prop="branchTagName">
-          <a-input readOnly disabled v-model="temp.branchTagName" />
+        <a-form-model-item v-if="(branchTagList && branchTagList.length) || (temp.branchTagName && temp.branchTagName.length)" label="标签(TAG)" prop="branchTagName">
+          <custom-select
+            v-model="temp.branchTagName"
+            :data="branchTagList"
+            @onRefreshSelect="loadBranchListById(temp.repositoryId)"
+            inputPlaceholder="自定义标签通配表达式"
+            selectPlaceholder="选择构建的标签,不选为最新提交"
+          >
+            <div slot="inputTips">
+              支持通配符(AntPathMatcher)
+              <ul>
+                <li>? 匹配一个字符</li>
+                <li>* 匹配零个或多个字符</li>
+                <li>** 匹配路径中的零个或多个目录</li>
+              </ul>
+            </div>
+          </custom-select>
         </a-form-model-item>
         <a-form-model-item prop="resultDirFile" label="产物目录">
           <a-input v-model="temp.resultDirFile" placeholder="不填写则不更新" />
@@ -1110,10 +1148,13 @@ export default {
       if (this.tempRepository.repoType !== 0) {
         return;
       }
-
+      this.loadBranchListById(this.tempRepository?.id);
+    },
+    loadBranchListById(id) {
       this.branchList = [];
+      this.branchTagList = [];
       const params = {
-        repositoryId: this.tempRepository?.id,
+        repositoryId: id,
       };
       getBranchList(params).then((res) => {
         if (res.code === 200) {
@@ -1239,6 +1280,8 @@ export default {
     handleConfirmStartBuild(record) {
       this.temp = Object.assign(record);
       this.buildConfirmVisible = true;
+      this.branchList = [];
+      this.branchTagList = [];
       // this.$confirm({
       //   title: "系统提示",
       //   content: "确定要开始构建 【名称：" + record.name + "】 【分支：" + record.branchName + "】 吗？",
@@ -1254,6 +1297,8 @@ export default {
         id: this.temp.id,
         buildRemark: this.temp.buildRemark,
         resultDirFile: this.temp.resultDirFile,
+        branchTagName: this.temp.branchTagName,
+        branchName: this.temp.branchName,
       }).then((res) => {
         if (res.code === 200) {
           this.$notification.success({

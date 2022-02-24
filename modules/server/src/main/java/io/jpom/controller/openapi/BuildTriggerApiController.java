@@ -295,6 +295,7 @@ public class BuildTriggerApiController extends BaseJpomController {
             jsonObject.put("statusCode", buildStatus.getCode());
             jsonObject.put("status", buildStatus.name());
         }
+        jsonObject.put("buildNumberId", item.getBuildId());
         return jsonObject;
     }
 
