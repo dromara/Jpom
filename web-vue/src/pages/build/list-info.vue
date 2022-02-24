@@ -480,70 +480,120 @@
     <!-- 触发器 -->
     <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
       <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
-        <a-space style="display: block" direction="vertical" align="baseline">
-          <a-alert message="温馨提示" type="warning">
-            <template slot="description">
-              <ul>
-                <li>可以添加 delay=x 参数来延迟执行构建</li>
-                <li>单个触发器地址中：第一个随机字符串为构建ID，第二个随机字符串为 token</li>
-                <li>重置为重新生成触发地址,重置成功后之前的触发器地址将失效</li>
-                <li>批量构建参数 BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]</li>
-                <li>批量构建参数还支持指定参数, branchName（分支名）、branchTagName（标签）、script（构建脚本）、resultDirFile（构建产物）、webhook（通知 webhook）</li>
-                <li>
-                  批量构建全部参数举例 BODY json： [ { "id":"1", "token":"a", "delay":"0","branchName":"test","branchTagName":"1.*","script":"mvn clean
-                  package","resultDirFile":"/target/","webhook":"http://test.com/webhook" } ]
-                </li>
-                <li>批量构建传人其他参数将同步执行修改</li>
-              </ul>
-            </template>
-          </a-alert>
-          <a-alert
-            v-clipboard:copy="temp.triggerBuildUrl"
-            v-clipboard:success="
-              () => {
-                tempVue.prototype.$notification.success({ message: '复制成功' });
-              }
-            "
-            v-clipboard:error="
-              () => {
-                tempVue.prototype.$notification.error({ message: '复制失败' });
-              }
-            "
-            type="info"
-            :message="`单个触发器地址(点击可以复制)`"
-          >
-            <template slot="description">
-              <a-tag>GET</a-tag> <span>{{ temp.triggerBuildUrl }} </span>
-              <a-icon type="copy" />
-            </template>
-          </a-alert>
-          <a-alert
-            v-clipboard:copy="temp.batchTriggerBuildUrl"
-            v-clipboard:success="
-              () => {
-                tempVue.prototype.$notification.success({ message: '复制成功' });
-              }
-            "
-            v-clipboard:error="
-              () => {
-                tempVue.prototype.$notification.error({ message: '复制失败' });
-              }
-            "
-            type="info"
-            :message="`批量触发器地址(点击可以复制)`"
-          >
-            <template slot="description">
-              <a-tag>POST</a-tag> <span>{{ temp.batchTriggerBuildUrl }} </span>
-              <a-icon type="copy" />
-            </template>
-          </a-alert>
-
-          <a-row type="flex" justify="center">
-            <a-col :span="2">
-              <a-button type="primary" class="btn-add" @click="resetTrigger">重置</a-button>
-            </a-col>
-          </a-row>
-        </a-space>
+        <a-tabs default-active-key="1">
+          <template slot="tabBarExtraContent"> <a-button type="primary" @click="resetTrigger">重置</a-button> </template>
+          <a-tab-pane key="1" tab="执行构建">
+            <a-space style="display: block" direction="vertical" align="baseline">
+              <a-alert message="温馨提示" type="warning">
+                <template slot="description">
+                  <ul>
+                    <li>单个触发器地址中：第一个随机字符串为构建ID，第二个随机字符串为 token</li>
+                    <li>重置为重新生成触发地址,重置成功后之前的触发器地址将失效,构建触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效</li>
+                    <li>批量构建参数 BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]</li>
+                    <li>批量构建参数还支持指定参数,delay（延迟执行构建,单位秒） branchName（分支名）、branchTagName（标签）、script（构建脚本）、resultDirFile（构建产物）、webhook（通知 webhook）</li>
+                    <li>
+                      批量构建全部参数举例 BODY json： [ { "id":"1", "token":"a", "delay":"0","branchName":"test","branchTagName":"1.*","script":"mvn clean
+                      package","resultDirFile":"/target/","webhook":"http://test.com/webhook" } ]
+                    </li>
+                    <li>批量构建传人其他参数将同步执行修改</li>
+                  </ul>
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.triggerBuildUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`单个触发器地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>GET</a-tag> <span>{{ temp.triggerBuildUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.batchTriggerBuildUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`批量触发器地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>POST</a-tag> <span>{{ temp.batchTriggerBuildUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+            </a-space>
+          </a-tab-pane>
+          <a-tab-pane key="2" tab="查看当前状态">
+            <a-space style="display: block" direction="vertical" align="baseline">
+              <a-alert message="温馨提示" type="warning">
+                <template slot="description">
+                  <ul>
+                    <li>批量构建参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
+                    <li>参数中的 id 、token 和触发构建一致</li>
+                  </ul>
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.batchBuildStatusUrl2"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`获取单个构建状态地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>GET</a-tag> <span>{{ temp.batchBuildStatusUrl2 }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.batchBuildStatusUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`批量获取构建状态地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>POST</a-tag> <span>{{ temp.batchBuildStatusUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+            </a-space>
+          </a-tab-pane>
+        </a-tabs>
       </a-form-model>
     </a-modal>
     <!-- 构建日志 -->
@@ -785,7 +835,7 @@ export default {
           dataIndex: "operation",
           width: 130,
           scopedSlots: { customRender: "operation" },
-          align: "left",
+          align: "center",
           // fixed: "right",
         },
       ],
@@ -1160,6 +1210,10 @@ export default {
     fillTriggerResult(res) {
       this.temp.triggerBuildUrl = `${location.protocol}//${location.host}${res.data.triggerBuildUrl}`;
       this.temp.batchTriggerBuildUrl = `${location.protocol}//${location.host}${res.data.batchTriggerBuildUrl}`;
+      this.temp.batchBuildStatusUrl = `${location.protocol}//${location.host}${res.data.batchBuildStatusUrl}`;
+      // this.temp.id = res.data.id;
+      // this.temp.token = res.data.token;
+      this.temp.batchBuildStatusUrl2 = `${this.temp.batchBuildStatusUrl}?id=${res.data.id}&token=${res.data.token}`;
       this.temp = { ...this.temp };
     },
     // 清除构建
