@@ -211,7 +211,7 @@ export default {
           },
           width: 170,
         },
-        { title: "操作", align: "center", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 130 },
+        { title: "操作", align: "center", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 120 },
       ],
       // 表单校验规则
       rules: {
