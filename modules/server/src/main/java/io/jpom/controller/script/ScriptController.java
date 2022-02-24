@@ -37,6 +37,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
@@ -60,114 +61,117 @@ import java.util.List;
 @Feature(cls = ClassFeature.SCRIPT)
 public class ScriptController extends BaseServerController {
 
-	private final ScriptServer scriptServer;
-	private final NodeScriptServer nodeScriptServer;
-	private final ScriptExecuteLogServer scriptExecuteLogServer;
+    private final ScriptServer scriptServer;
+    private final NodeScriptServer nodeScriptServer;
+    private final ScriptExecuteLogServer scriptExecuteLogServer;
 
-	public ScriptController(ScriptServer scriptServer,
-							NodeScriptServer nodeScriptServer,
-							ScriptExecuteLogServer scriptExecuteLogServer) {
-		this.scriptServer = scriptServer;
-		this.nodeScriptServer = nodeScriptServer;
-		this.scriptExecuteLogServer = scriptExecuteLogServer;
-	}
+    public ScriptController(ScriptServer scriptServer,
+                            NodeScriptServer nodeScriptServer,
+                            ScriptExecuteLogServer scriptExecuteLogServer) {
+        this.scriptServer = scriptServer;
+        this.nodeScriptServer = nodeScriptServer;
+        this.scriptExecuteLogServer = scriptExecuteLogServer;
+    }
 
-	/**
-	 * get script list
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String scriptList() {
-		PageResultDto<ScriptModel> pageResultDto = scriptServer.listPage(getRequest());
-		return JsonMessage.getString(200, "success", pageResultDto);
-	}
+    /**
+     * get script list
+     *
+     * @return json
+     */
+    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String scriptList() {
+        PageResultDto<ScriptModel> pageResultDto = scriptServer.listPage(getRequest());
+        return JsonMessage.getString(200, "success", pageResultDto);
+    }
 
-	@RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String save(String id,
-					   @ValidatorItem String context,
-					   @ValidatorItem String name,
-					   String autoExecCron,
-					   String defArgs,
-					   String description, String nodeIds) {
-		ScriptModel scriptModel = new ScriptModel();
-		scriptModel.setId(id);
-		scriptModel.setContext(context);
-		scriptModel.setName(name);
-		scriptModel.setNodeIds(nodeIds);
-		scriptModel.setDescription(description);
-		scriptModel.setDefArgs(defArgs);
+    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public String save(String id,
+                       @ValidatorItem String context,
+                       @ValidatorItem String name,
+                       String autoExecCron,
+                       String defArgs,
+                       String description, String nodeIds) {
+        ScriptModel scriptModel = new ScriptModel();
+        scriptModel.setId(id);
+        scriptModel.setContext(context);
+        scriptModel.setName(name);
+        scriptModel.setNodeIds(nodeIds);
+        scriptModel.setDescription(description);
+        scriptModel.setDefArgs(defArgs);
 
-		Assert.hasText(scriptModel.getContext(), "内容为空");
-		//
-		scriptModel.setAutoExecCron(this.checkCron(autoExecCron));
-		//
-		String oldNodeIds = null;
-		if (StrUtil.isEmpty(id)) {
-			scriptServer.insert(scriptModel);
-		} else {
-			HttpServletRequest request = getRequest();
-			ScriptModel byKey = scriptServer.getByKey(id, request);
-			Assert.notNull(byKey, "没有对应的数据");
-			oldNodeIds = byKey.getNodeIds();
-			scriptServer.updateById(scriptModel, request);
-		}
-		this.syncNodeScript(scriptModel, oldNodeIds);
-		return JsonMessage.getString(200, "修改成功");
-	}
+        Assert.hasText(scriptModel.getContext(), "内容为空");
+        //
+        scriptModel.setAutoExecCron(this.checkCron(autoExecCron));
+        //
+        String oldNodeIds = null;
+        if (StrUtil.isEmpty(id)) {
+            scriptServer.insert(scriptModel);
+        } else {
+            HttpServletRequest request = getRequest();
+            ScriptModel byKey = scriptServer.getByKey(id, request);
+            Assert.notNull(byKey, "没有对应的数据");
+            oldNodeIds = byKey.getNodeIds();
+            scriptServer.updateById(scriptModel, request);
+        }
+        this.syncNodeScript(scriptModel, oldNodeIds);
+        return JsonMessage.getString(200, "修改成功");
+    }
 
-	private void syncDelNodeScript(ScriptModel scriptModel, UserModel user, Collection<String> delNode) {
-		for (String s : delNode) {
-			NodeModel byKey = nodeService.getByKey(s, getRequest());
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("id", scriptModel.getId());
-			JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Del, user, jsonObject);
-			Assert.state(request.getCode() == 200, "处理 " + byKey.getName() + " 节点删除脚本失败" + request.getMsg());
-			nodeScriptServer.syncNode(byKey);
-		}
-	}
+    private void syncDelNodeScript(ScriptModel scriptModel, UserModel user, Collection<String> delNode) {
+        for (String s : delNode) {
+            NodeModel byKey = nodeService.getByKey(s, getRequest());
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", scriptModel.getId());
+            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Del, user, jsonObject);
+            Assert.state(request.getCode() == 200, "处理 " + byKey.getName() + " 节点删除脚本失败" + request.getMsg());
+            nodeScriptServer.syncNode(byKey);
+        }
+    }
 
-	private void syncNodeScript(ScriptModel scriptModel, String oldNode) {
-		List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
-		List<String> newNodeIds = StrUtil.splitTrim(scriptModel.getNodeIds(), StrUtil.COMMA);
-		Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
-		UserModel user = getUser();
-		// 删除
-		this.syncDelNodeScript(scriptModel, user, delNode);
-		// 更新
-		for (String newNodeId : newNodeIds) {
-			NodeModel byKey = nodeService.getByKey(newNodeId, getRequest());
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("id", scriptModel.getId());
-			jsonObject.put("type", "sync");
-			jsonObject.put("context", scriptModel.getContext());
-			jsonObject.put("autoExecCron", scriptModel.getAutoExecCron());
-			jsonObject.put("defArgs", scriptModel.getDefArgs());
-			jsonObject.put("description", scriptModel.getDescription());
-			jsonObject.put("name", scriptModel.getName());
-			jsonObject.put("workspaceId", scriptModel.getWorkspaceId());
-			JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Save, user, jsonObject);
-			Assert.state(request.getCode() == 200, "处理 " + byKey.getName() + " 节点同步脚本失败" + request.getMsg());
-			nodeScriptServer.syncNode(byKey);
-		}
-	}
+    private void syncNodeScript(ScriptModel scriptModel, String oldNode) {
+        List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
+        List<String> newNodeIds = StrUtil.splitTrim(scriptModel.getNodeIds(), StrUtil.COMMA);
+        Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
+        UserModel user = getUser();
+        // 删除
+        this.syncDelNodeScript(scriptModel, user, delNode);
+        // 更新
+        for (String newNodeId : newNodeIds) {
+            NodeModel byKey = nodeService.getByKey(newNodeId, getRequest());
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", scriptModel.getId());
+            jsonObject.put("type", "sync");
+            jsonObject.put("context", scriptModel.getContext());
+            jsonObject.put("autoExecCron", scriptModel.getAutoExecCron());
+            jsonObject.put("defArgs", scriptModel.getDefArgs());
+            jsonObject.put("description", scriptModel.getDescription());
+            jsonObject.put("name", scriptModel.getName());
+            jsonObject.put("workspaceId", scriptModel.getWorkspaceId());
+            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Save, user, jsonObject);
+            Assert.state(request.getCode() == 200, "处理 " + byKey.getName() + " 节点同步脚本失败" + request.getMsg());
+            nodeScriptServer.syncNode(byKey);
+        }
+    }
 
-	@RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String del(String id) {
-		HttpServletRequest request = getRequest();
-		ScriptModel server = scriptServer.getByKey(id, request);
-		if (server != null) {
-			File file = server.scriptPath();
-			boolean del = FileUtil.del(file);
-			Assert.state(del, "清理脚本文件失败");
-			// 删除节点中的脚本
-			String nodeIds = server.getNodeIds();
-			List<String> delNode = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
-			this.syncDelNodeScript(server, getUser(), delNode);
-			scriptServer.delByKey(id, request);
-			//
-			scriptExecuteLogServer.delByWorkspace(request, entity -> entity.set("scriptId", id));
-		}
-		return JsonMessage.getString(200, "删除成功");
-	}
+    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public String del(String id) {
+        HttpServletRequest request = getRequest();
+        ScriptModel server = scriptServer.getByKey(id, request);
+        if (server != null) {
+            File file = server.scriptPath();
+            boolean del = FileUtil.del(file);
+            Assert.state(del, "清理脚本文件失败");
+            // 删除节点中的脚本
+            String nodeIds = server.getNodeIds();
+            List<String> delNode = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
+            this.syncDelNodeScript(server, getUser(), delNode);
+            scriptServer.delByKey(id, request);
+            //
+            scriptExecuteLogServer.delByWorkspace(request, entity -> entity.set("scriptId", id));
+        }
+        return JsonMessage.getString(200, "删除成功");
+    }
 }

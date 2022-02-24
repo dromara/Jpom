@@ -23,6 +23,7 @@
 package io.jpom.service.monitor;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import io.jpom.model.data.MonitorUserOptModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
@@ -50,7 +51,10 @@ public class MonitorUserOptService extends BaseWorkspaceService<MonitorUserOptMo
      */
     public List<MonitorUserOptModel> listByType(String workspaceId, ClassFeature classFeature, MethodFeature methodFeature, String userId) {
         MonitorUserOptModel where = new MonitorUserOptModel();
-        where.setWorkspaceId(workspaceId);
+        if (StrUtil.isNotEmpty(workspaceId)) {
+            // 没有工作空间查询全部
+            where.setWorkspaceId(workspaceId);
+        }
         where.setStatus(true);
         List<MonitorUserOptModel> list = super.listByBean(where);
         if (CollUtil.isEmpty(list)) {
