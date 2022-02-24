@@ -84,7 +84,7 @@
 
         <a-form-model-item label="工作空间" prop="feature" class="feature jpom-userWorkspace">
           <a-transfer
-            :titles="['带选择区', '已选择区']"
+            :titles="['待选择区', '已选择区']"
             :show-select-all="false"
             :data-source="workspaceList"
             :filter-option="filterOption"
