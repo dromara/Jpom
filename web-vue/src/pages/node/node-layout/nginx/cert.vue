@@ -1,7 +1,7 @@
 <template>
   <div class="node-full-content">
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" size="middle" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-button type="primary" @click="handleAdd">导入证书</a-button>
@@ -19,10 +19,10 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button type="primary" @click="handleDownload(record)">导出</a-button>
-          <a-button type="primary" @click="handleTemplate(record)">模板</a-button>
-          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" type="primary" @click="handleDownload(record)">导出</a-button>
+          <a-button size="small" type="primary" @click="handleTemplate(record)">模板</a-button>
+          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
@@ -84,9 +84,9 @@ export default {
       editCertVisible: false,
       templateVisible: false,
       columns: [
-        { title: "ID", dataIndex: "id", width: 150, ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "域名", dataIndex: "domain", width: 170, ellipsis: true, scopedSlots: { customRender: "domain" } },
+        { title: "ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "域名", dataIndex: "domain", ellipsis: true, scopedSlots: { customRender: "domain" } },
         {
           title: "生效时间",
           dataIndex: "effectiveTime",
@@ -109,7 +109,7 @@ export default {
           },
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 360 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 220 },
       ],
       rules: {
         id: [{ required: true, message: "Please input ID", trigger: "blur" }],

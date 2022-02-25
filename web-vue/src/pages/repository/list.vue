@@ -199,11 +199,11 @@ export default {
       username: null,
       importTypePlaceholder: "",
       columns: [
-        { title: "仓库名称", dataIndex: "name", sorter: true, width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "仓库名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         {
           title: "仓库地址",
           dataIndex: "gitUrl",
-          width: 300,
+
           sorter: true,
           ellipsis: true,
           scopedSlots: { customRender: "gitUrl" },
@@ -239,9 +239,9 @@ export default {
         {
           title: "操作",
           dataIndex: "operation",
-          width: 160,
+          align: "center",
+          width: 120,
           scopedSlots: { customRender: "operation" },
-          align: "left",
         },
       ],
       reposColumns: [

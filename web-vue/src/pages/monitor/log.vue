@@ -90,7 +90,7 @@ export default {
           width: 170,
         },
         { title: "通知状态", dataIndex: "notifyStatus", width: 100, ellipsis: true, scopedSlots: { customRender: "notifyStatus" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
     };
   },
