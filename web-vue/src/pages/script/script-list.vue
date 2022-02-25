@@ -48,7 +48,20 @@
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="danger" :disabled="!record.nodeIds" @click="handleUnbind(record)">解绑</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
     </a-table>
@@ -107,7 +120,7 @@
   </div>
 </template>
 <script>
-import { getScriptListAll, editScript, deleteScript } from "@/api/server-script";
+import { getScriptListAll, editScript, deleteScript, unbindScript } from "@/api/server-script";
 import codeEditor from "@/components/codeEditor";
 import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/script/script-console";
@@ -265,6 +278,28 @@ export default {
         this.listQuery.order_field = sorter.field;
       }
       this.loadData();
+    },
+    // 解绑
+    handleUnbind(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要解绑脚本关联的节点么？解绑不会真实请求节点解绑,一般用于服务器无法连接且已经确定不再使用。如果误操作可能冗余数据",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 解绑
+          unbindScript({
+            id: record.id,
+          }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
     },
   },
 };
