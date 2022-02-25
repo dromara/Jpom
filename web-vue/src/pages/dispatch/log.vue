@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <!-- <div ref="filter" class="filter"> -->
-      <!-- <a-button type="primary" @click="handleFilter">刷新</a-button> -->
+    <!-- <a-button type="primary" @click="handleFilter">刷新</a-button> -->
     <!-- </div> -->
     <!-- 数据表格 -->
     <a-table
@@ -101,7 +101,7 @@ export default {
         },
         { title: "操作人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 100 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 100 },
       ],
     };
   },
@@ -181,5 +181,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-</style>
+<style scoped></style>

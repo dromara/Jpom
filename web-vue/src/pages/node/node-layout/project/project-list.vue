@@ -422,7 +422,7 @@ export default {
         },
         { title: "运行状态", dataIndex: "status", width: 80, ellipsis: true, align: "center", scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 180 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 180 },
       ],
       rules: {
         id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],

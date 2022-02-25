@@ -32,13 +32,13 @@
       </a-space>
     </div>
     <a-table size="middle" :locale="tableLocale" :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="pid" class="node-table" :pagination="false">
-      <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
+      <!-- <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="user" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip slot="jpomName" slot-scope="text" placement="topLeft" :title="text">
+      </a-tooltip> -->
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
@@ -83,18 +83,18 @@ export default {
       historyData: [],
       processName: "java",
       columns: [
-        { title: "进程 ID", dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
-        { title: "进程名称", dataIndex: "command", width: 150, ellipsis: true, scopedSlots: { customRender: "command" } },
-        { title: "端口", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "所有者", dataIndex: "user", width: 100, ellipsis: true, scopedSlots: { customRender: "user" } },
-        { title: "项目名称", dataIndex: "jpomName", width: 150, ellipsis: true, scopedSlots: { customRender: "jpomName" } },
-        { title: "物理内存", dataIndex: "res", width: 100, ellipsis: true },
-        { title: "进程状态", dataIndex: "status", width: 100, ellipsis: true },
-        { title: "占用CPU", dataIndex: "cpu", width: 100, ellipsis: true },
-        { title: "物理内存百分比", dataIndex: "mem", width: 140, ellipsis: true },
-        { title: "虚拟内存", dataIndex: "virt", width: 100, ellipsis: true },
-        { title: "共享内存", dataIndex: "shr", width: 100, ellipsis: true },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 100, fixed: "right" },
+        { title: "进程 ID", dataIndex: "pid", width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "进程名称", dataIndex: "command", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "端口", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "所有者", dataIndex: "user", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "项目名称", dataIndex: "jpomName", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "物理内存", dataIndex: "res", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "进程状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "占用CPU", dataIndex: "cpu", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "物理内存百分比", dataIndex: "mem", width: 140, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "虚拟内存", dataIndex: "virt", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "共享内存", dataIndex: "shr", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 80, fixed: "right" },
       ],
     };
   },

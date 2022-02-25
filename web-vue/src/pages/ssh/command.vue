@@ -205,7 +205,7 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "modifyUser" },
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 180 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 180 },
       ],
     };
   },

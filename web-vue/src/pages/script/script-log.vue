@@ -77,7 +77,7 @@ export default {
         { title: "执行时间", dataIndex: "createTimeMillis", sorter: true, ellipsis: true, scopedSlots: { customRender: "createTimeMillis" } },
         { title: "触发类型", dataIndex: "triggerExecType", width: 100, ellipsis: true, scopedSlots: { customRender: "triggerExecTypeMap" } },
         { title: "执行人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 150 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 150 },
       ],
     };
   },

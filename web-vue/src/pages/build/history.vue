@@ -155,7 +155,7 @@ export default {
         },
         { title: "发布方式", dataIndex: "releaseMethod", width: 100, ellipsis: true, scopedSlots: { customRender: "releaseMethod" } },
         { title: "构建人", dataIndex: "modifyUser", width: 130, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 150, fixed: "right" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 150, align: "center" },
       ],
     };
   },
