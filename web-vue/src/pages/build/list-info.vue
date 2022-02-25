@@ -143,7 +143,7 @@
               </a-select>
             </a-form-model-item>
 
-            <a-form-model-item v-if="temp.buildMode !== undefined" v-show="tempRepository.repoType === 0" label="分支" prop="branchName">
+            <a-form-model-item v-if="temp.buildMode !== undefined && tempRepository.repoType === 0" label="分支" prop="branchName">
               <a-row>
                 <a-col :span="10">
                   <custom-select v-model="temp.branchName" :data="branchList" @onRefreshSelect="loadBranchList" inputPlaceholder="自定义分支通配表达式" selectPlaceholder="请选择构建对应的分支,必选">

@@ -97,7 +97,7 @@ public class SvnKitUtil {
 				}
 			}
 		} else {
-			throw new IllegalStateException("不支持到协议类型");
+			throw new IllegalStateException("不支持的协议类型");
 		}
 		// 实例化客户端管理类
 		return SVNClientManager.newInstance(OPTIONS, authManager);

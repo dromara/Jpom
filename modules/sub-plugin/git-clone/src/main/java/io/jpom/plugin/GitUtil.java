@@ -140,7 +140,7 @@ public class GitUtil {
             // http
             UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
             transportCommand.setCredentialsProvider(credentialsProvider);
-        } else if (protocol == 2) {
+        } else if (protocol == 1) {
             // ssh
             //File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel);
             File rsaFile = (File) parameter.get("rsaFile");
