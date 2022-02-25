@@ -34,5 +34,5 @@ jobs:
         run: mvn -B package
 #        run: |
 #          docker buildx create --use
-#          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.13 -f ./modules/server/DockerfileRelease --push .
+#          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.14 -f ./modules/server/DockerfileRelease --push .
 #          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
