@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Package Testing
 
 on:
   push:
