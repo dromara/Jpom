@@ -174,4 +174,20 @@ public class ScriptController extends BaseServerController {
         }
         return JsonMessage.getString(200, "删除成功");
     }
+
+    /**
+     * 释放脚本关联的节点
+     *
+     * @param id 脚本ID
+     * @return json
+     */
+    @RequestMapping(value = "unbind.json", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public String unbind(@ValidatorItem String id) {
+        ScriptModel update = new ScriptModel();
+        update.setId(id);
+        update.setNodeIds(StrUtil.EMPTY);
+        scriptServer.updateById(update, getRequest());
+        return JsonMessage.getString(200, "解绑成功");
+    }
 }

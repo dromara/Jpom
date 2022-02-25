@@ -38,6 +38,20 @@ export function deleteScript(params) {
   });
 }
 
+/**
+ * 解绑 Script
+ * @param {id} params
+ 
+ * params.id 编辑修改时判断 ID
+ */
+export function unbindScript(params) {
+  return axios({
+    url: "/script/unbind.json",
+    method: "get",
+    params: params,
+  });
+}
+
 // 脚本模版日志列表
 export function getScriptLogList(params) {
   return axios({
