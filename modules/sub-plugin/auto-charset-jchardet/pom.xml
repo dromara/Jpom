@@ -1,91 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<parent>
-		<artifactId>jpom-parent</artifactId>
-		<groupId>io.jpom</groupId>
-		<version>2.8.14</version>
-		<relativePath>../../../pom.xml</relativePath>
-	</parent>
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>io.jpom.plugins</groupId>
-	<artifactId>auto-charset-jchardet</artifactId>
-	<name>plugin-auto-charset-jchardet</name>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>jpom-plugins-parent</artifactId>
+        <groupId>io.jpom.plugins</groupId>
+        <version>2.8.14</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>auto-charset-jchardet</artifactId>
+    <name>plugin-auto-charset-jchardet</name>
 
-	<properties>
-		<maven.compiler.source>8</maven.compiler.source>
-		<maven.compiler.target>8</maven.compiler.target>
-	</properties>
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
 
-	<dependencies>
-		<!--  文件编码识别-->
-		<dependency>
-			<groupId>net.sourceforge.jchardet</groupId>
-			<artifactId>jchardet</artifactId>
-			<version>1.0</version>
-		</dependency>
+    <dependencies>
+        <!--  文件编码识别-->
+        <dependency>
+            <groupId>net.sourceforge.jchardet</groupId>
+            <artifactId>jchardet</artifactId>
+            <version>1.0</version>
+        </dependency>
 
-		<dependency>
-			<groupId>io.jpom</groupId>
-			<artifactId>common</artifactId>
-			<scope>provided</scope>
-			<version>${project.version}</version>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>io.jpom</groupId>
+            <artifactId>common</artifactId>
+            <scope>provided</scope>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.1</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<!-- 是否指定项目classpath下的依赖 -->
-							<addClasspath>true</addClasspath>
-							<!-- 指定依赖的时候声明前缀 -->
-							<classpathPrefix>./</classpathPrefix>
-						</manifest>
-						<manifestEntries>
-							<!-- 项目版本号 -->
-							<Jpom-Project-Version>${project.version}</Jpom-Project-Version>
-							<!-- 打包时间 -->
-							<Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
-							<Jpom-Type>${project.artifactId}</Jpom-Type>
-							<Implementation-URL>https://gitee.com/dromara/Jpom</Implementation-URL>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<!--这里要替换成jar包main方法所在类 -->
-						</manifest>
-					</archive>
-					<appendAssemblyId>false</appendAssemblyId>
-					<descriptors>
-						<descriptor>script/release.xml</descriptor>
-					</descriptors>
-				</configuration>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!-- 是否指定项目classpath下的依赖 -->
+                            <addClasspath>true</addClasspath>
+                            <!-- 指定依赖的时候声明前缀 -->
+                            <classpathPrefix>./</classpathPrefix>
+                        </manifest>
+                        <manifestEntries>
+                            <!-- 项目版本号 -->
+                            <Jpom-Project-Version>${project.version}</Jpom-Project-Version>
+                            <!-- 打包时间 -->
+                            <Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
+                            <Jpom-Type>${project.artifactId}</Jpom-Type>
+                            <Implementation-URL>https://gitee.com/dromara/Jpom</Implementation-URL>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!--这里要替换成jar包main方法所在类 -->
+                        </manifest>
+                    </archive>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>script/release.xml</descriptor>
+                    </descriptors>
+                </configuration>
 
-				<executions>
+                <executions>
 
-					<execution>
-						<id>make-assembly</id> <!-- this is used for inheritance merges -->
-						<phase>package</phase> <!-- 指定在打包节点执行jar包合并操作 -->
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- 指定在打包节点执行jar包合并操作 -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

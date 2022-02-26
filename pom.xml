@@ -8,14 +8,7 @@
         <module>modules/agent</module>
         <module>modules/server</module>
         <module>modules/common</module>
-        <module>modules/sub-plugin/webhook</module>
-        <module>modules/sub-plugin/email</module>
-        <module>modules/sub-plugin/svn-clone</module>
-        <module>modules/sub-plugin/maven-plugin</module>
-        <module>modules/sub-plugin/auto-charset-jchardet</module>
-        <module>modules/sub-plugin/db-h2</module>
-        <module>modules/sub-plugin/docker-cli</module>
-        <module>modules/sub-plugin/git-clone</module>
+        <module>modules/sub-plugin</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

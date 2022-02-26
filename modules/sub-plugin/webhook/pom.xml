@@ -1,56 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<parent>
-		<artifactId>jpom-parent</artifactId>
-		<groupId>io.jpom</groupId>
-		<version>2.8.14</version>
-		<relativePath>../../../pom.xml</relativePath>
-	</parent>
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>io.jpom.plugins</groupId>
-	<artifactId>webhook</artifactId>
-	<name>plugin-webhook</name>
-	<properties>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>jpom-plugins-parent</artifactId>
+        <groupId>io.jpom.plugins</groupId>
+        <version>2.8.14</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>webhook</artifactId>
+    <name>plugin-webhook</name>
+    <properties>
 
-	</properties>
+    </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>io.jpom</groupId>
-			<artifactId>common</artifactId>
-			<scope>provided</scope>
-			<version>${project.version}</version>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>io.jpom</groupId>
+            <artifactId>common</artifactId>
+            <scope>provided</scope>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.1</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<!-- 是否指定项目classpath下的依赖 -->
-							<addClasspath>true</addClasspath>
-							<!-- 指定依赖的时候声明前缀 -->
-							<classpathPrefix>./</classpathPrefix>
-						</manifest>
-						<manifestEntries>
-							<!-- 项目版本号 -->
-							<Jpom-Project-Version>${project.version}</Jpom-Project-Version>
-							<!-- 打包时间 -->
-							<Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
-							<Jpom-Type>${project.artifactId}</Jpom-Type>
-							<Implementation-URL>https://gitee.com/dromara/Jpom</Implementation-URL>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!-- 是否指定项目classpath下的依赖 -->
+                            <addClasspath>true</addClasspath>
+                            <!-- 指定依赖的时候声明前缀 -->
+                            <classpathPrefix>./</classpathPrefix>
+                        </manifest>
+                        <manifestEntries>
+                            <!-- 项目版本号 -->
+                            <Jpom-Project-Version>${project.version}</Jpom-Project-Version>
+                            <!-- 打包时间 -->
+                            <Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
+                            <Jpom-Type>${project.artifactId}</Jpom-Type>
+                            <Implementation-URL>https://gitee.com/dromara/Jpom</Implementation-URL>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
