@@ -3,13 +3,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>jpom-parent</artifactId>
-        <groupId>io.jpom</groupId>
+        <artifactId>jpom-plugins-parent</artifactId>
+        <groupId>io.jpom.plugins</groupId>
         <version>2.8.14</version>
-        <relativePath>../../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.jpom.plugins</groupId>
     <artifactId>git-clone</artifactId>
     <name>plugin-git-clone</name>
     <properties>
