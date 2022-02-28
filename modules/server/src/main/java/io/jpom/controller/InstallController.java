@@ -75,6 +75,7 @@ public class InstallController extends BaseServerController {
      * @return json
      * @api {post} install_submit.json 初始化提交
      * @apiGroup index
+     * @apiUse defResultJson
      * @apiParam {String} userName 系统管理员登录名
      * @apiParam {String} userPwd 设置的登录密码 sha1 后传入
      * @apiSuccess {JSON}  data.tokenData token 相关信息
