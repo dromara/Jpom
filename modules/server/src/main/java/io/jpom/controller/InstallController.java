@@ -73,6 +73,13 @@ public class InstallController extends BaseServerController {
      * @param userName 系统管理员登录名
      * @param userPwd  系统管理员的登录密码
      * @return json
+     * @api {post} install_submit.json 初始化提交
+     * @apiGroup index
+     * @apiParam {String} userName 系统管理员登录名
+     * @apiParam {String} userPwd 设置的登录密码 sha1 后传入
+     * @apiSuccess {JSON}  data.tokenData token 相关信息
+     * @apiSuccess {String}  data.mfaKey 二次验证的key
+     * @apiSuccess {String}  data.url 二次验证的二维码相关字符串用户快速扫码导入
      */
     @PostMapping(value = "install_submit.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin

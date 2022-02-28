@@ -64,7 +64,7 @@
       </template>
     </a-table>
     <!-- 编辑节点 -->
-    <a-modal v-model="editVisible" title="编辑节点" width="70vw" @ok="handleEditOk" :maskClosable="false">
+    <a-modal v-model="editVisible" title="编辑服务" width="70vw" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="服务名称" prop="name">
           <a-input v-model="temp.name" :disabled="temp.serviceId ? true : false" placeholder="服务名称" />
