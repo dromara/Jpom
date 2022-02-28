@@ -157,6 +157,7 @@ public class IndexControl extends BaseServerController {
      * check if need to init system
      * @api {get} check-system 检查是否需要初始化系统
      * @apiGroup index
+     * @apiUse defResultJson
      * @apiSuccess {String} routerBase 二级地址
      * @apiSuccess {String} name 系统名称
      * @apiSuccess {String} subTitle 主页面副标题
