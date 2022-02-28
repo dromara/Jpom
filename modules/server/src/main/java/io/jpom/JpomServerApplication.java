@@ -47,93 +47,100 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  *
  * @author jiangzeyin
  * @date 2017/9/14
+ * @apiDefine loginUser
+ * @apiHeader {String} Authorization 用户token
+ * @apiPermission login-user
+ * @apiSuccess (800) {none} data 需要登录
+ * @apiSuccess (801) {none} data 登录信息过期,但是可以续期
+ * @apiSuccess (302) {none} data 当前用户没有操作权限
+ * @apiSuccess (999) {none} data 当前 IP 不能访问
  */
 @SpringBootApplication
 @ServletComponentScan
 @EnableCommonBoot
 public class JpomServerApplication implements ApplicationEventLoad {
 
-	/**
-	 * 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
-	 */
-	private static boolean loadInitDb = false;
-	/**
-	 * 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
-	 */
-	private static boolean recoverH2Db = false;
+    /**
+     * 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
+     */
+    private static boolean loadInitDb = false;
+    /**
+     * 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
+     */
+    private static boolean recoverH2Db = false;
 
-	/**
-	 * 启动执行
-	 * --rest:ip_config 重置 IP 白名单配置
-	 * --rest:load_init_db 重新加载数据库初始化操作
-	 * --rest:super_user_pwd 重置超级管理员密码
-	 * --recover:h2db 当 h2 数据出现奔溃无法启动需要执行恢复逻辑
-	 * --close:super_user_mfa 重置超级管理员 mfa
-	 *
-	 * @param args 参数
-	 * @throws Exception 异常
-	 */
-	public static void main(String[] args) throws Exception {
-		long time = SystemClock.now();
-		if (ArrayUtil.containsIgnoreCase(args, "--rest:load_init_db")) {
-			loadInitDb = true;
-		}
-		if (ArrayUtil.containsIgnoreCase(args, "--recover:h2db")) {
-			recoverH2Db = true;
-		}
-		//
-		JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
-		jpomApplication
-				// 拦截器
-				.addInterceptor(IpInterceptor.class)
-				.addInterceptor(LoginInterceptor.class)
-				.addInterceptor(OpenApiInterceptor.class)
-				.addInterceptor(PermissionInterceptor.class)
-				.run(args);
-		// 重置 ip 白名单配置
-		if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
-			SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
-			parametersServer.delByKey(SystemIpConfigModel.ID);
-			Console.log("Clear IP whitelist configuration successfully");
-		}
-		//  重置超级管理员密码
-		if (ArrayUtil.containsIgnoreCase(args, "--rest:super_user_pwd")) {
-			UserService userService = SpringUtil.getBean(UserService.class);
-			String restResult = userService.restSuperUserPwd();
-			if (restResult != null) {
-				Console.log(restResult);
-			} else {
-				Console.log("There is no super administrator account in the system");
-			}
-		}
-		// 关闭超级管理员 mfa
-		if (ArrayUtil.containsIgnoreCase(args, "--close:super_user_mfa")) {
-			UserService userService = SpringUtil.getBean(UserService.class);
-			String restResult = userService.closeSuperUserMfa();
-			if (restResult != null) {
-				Console.log(restResult);
-			} else {
-				Console.log("There is no super administrator account in the system");
-			}
-		}
-		//
-		Console.log("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
-	}
+    /**
+     * 启动执行
+     * --rest:ip_config 重置 IP 白名单配置
+     * --rest:load_init_db 重新加载数据库初始化操作
+     * --rest:super_user_pwd 重置超级管理员密码
+     * --recover:h2db 当 h2 数据出现奔溃无法启动需要执行恢复逻辑
+     * --close:super_user_mfa 重置超级管理员 mfa
+     *
+     * @param args 参数
+     * @throws Exception 异常
+     */
+    public static void main(String[] args) throws Exception {
+        long time = SystemClock.now();
+        if (ArrayUtil.containsIgnoreCase(args, "--rest:load_init_db")) {
+            loadInitDb = true;
+        }
+        if (ArrayUtil.containsIgnoreCase(args, "--recover:h2db")) {
+            recoverH2Db = true;
+        }
+        //
+        JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
+        jpomApplication
+                // 拦截器
+                .addInterceptor(IpInterceptor.class)
+                .addInterceptor(LoginInterceptor.class)
+                .addInterceptor(OpenApiInterceptor.class)
+                .addInterceptor(PermissionInterceptor.class)
+                .run(args);
+        // 重置 ip 白名单配置
+        if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
+            SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
+            parametersServer.delByKey(SystemIpConfigModel.ID);
+            Console.log("Clear IP whitelist configuration successfully");
+        }
+        //  重置超级管理员密码
+        if (ArrayUtil.containsIgnoreCase(args, "--rest:super_user_pwd")) {
+            UserService userService = SpringUtil.getBean(UserService.class);
+            String restResult = userService.restSuperUserPwd();
+            if (restResult != null) {
+                Console.log(restResult);
+            } else {
+                Console.log("There is no super administrator account in the system");
+            }
+        }
+        // 关闭超级管理员 mfa
+        if (ArrayUtil.containsIgnoreCase(args, "--close:super_user_mfa")) {
+            UserService userService = SpringUtil.getBean(UserService.class);
+            String restResult = userService.closeSuperUserMfa();
+            if (restResult != null) {
+                Console.log(restResult);
+            } else {
+                Console.log("There is no super administrator account in the system");
+            }
+        }
+        //
+        Console.log("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
+    }
 
 
-	@Override
-	public void applicationLoad() {
-		DbConfig instance = DbConfig.getInstance();
-		if (loadInitDb) {
-			instance.clearExecuteSqlLog();
-		}
-		if (recoverH2Db) {
-			try {
-				instance.recoverDb();
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(-2);
-			}
-		}
-	}
+    @Override
+    public void applicationLoad() {
+        DbConfig instance = DbConfig.getInstance();
+        if (loadInitDb) {
+            instance.clearExecuteSqlLog();
+        }
+        if (recoverH2Db) {
+            try {
+                instance.recoverDb();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(-2);
+            }
+        }
+    }
 }

@@ -5,6 +5,8 @@ target/
 venv/
 node_modules/
 
+#
+apidoc/
 
 
 # dependencies
