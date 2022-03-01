@@ -114,7 +114,10 @@
                     </a-tooltip>
                   </a-col>
                   <a-col :span="8">
-                    <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')" :title="`内存占用率：${item.occupyMemoryUsed && item.occupyMemoryUsed !== -1 ? item.occupyMemoryUsed : item.occupyMemory}%`">
+                    <a-tooltip
+                      @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')"
+                      :title="`内存占用率：${item.occupyMemoryUsed && item.occupyMemoryUsed !== -1 ? item.occupyMemoryUsed : item.occupyMemory}%`"
+                    >
                       <a-progress
                         :width="80"
                         type="circle"
