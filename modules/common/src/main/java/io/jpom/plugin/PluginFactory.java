@@ -32,6 +32,7 @@ import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.common.JpomManifest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @date 2019/8/13
  */
+@Slf4j
 public class PluginFactory implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ContextClosedEvent> {
 
     private static final List<FeatureCallback> FEATURE_CALLBACKS = new ArrayList<>();
@@ -171,7 +173,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
             }).compare(o1, o2));
             PLUGIN_MAP.put(key, value);
         });
-
+        log.debug("load plugin count:{}", pluginMap.keySet().size());
     }
 
     @Override

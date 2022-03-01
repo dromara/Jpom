@@ -1,12 +1,12 @@
-import axios from './config';
+import axios from "./config";
 
 // 监控列表
 export function getMonitorList(params) {
   return axios({
-    url: '/monitor/getMonitorList',
-    method: 'post',
-    data: params
-  })
+    url: "/monitor/getMonitorList",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -19,14 +19,14 @@ export function getMonitorList(params) {
  *  cycle: 监控周期
  *  projects: 监控项目
  *  notifyUser: 报警联系人
- * } params 
+ * } params
  */
 export function editMonitor(params) {
   return axios({
-    url: '/monitor/updateMonitor',
-    method: 'post',
-    data: params
-  })
+    url: "/monitor/updateMonitor",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -35,26 +35,26 @@ export function editMonitor(params) {
  *  id: 监控 ID
  *  status: 状态 true | false
  *  type: 状态类型 status | restart
- * } params 
+ * } params
  */
 export function changeMonitorStatus(params) {
   return axios({
-    url: '/monitor/changeStatus',
-    method: 'post',
-    data: params
-  })
+    url: "/monitor/changeStatus",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
  * 删除监控
- * @param {*} id 
+ * @param {*} id
  */
 export function deleteMonitor(id) {
   return axios({
-    url: '/monitor/deleteMonitor',
-    method: 'post',
-    data: {id}
-  })
+    url: "/monitor/deleteMonitor",
+    method: "post",
+    data: { id },
+  });
 }
 
 /**
@@ -64,14 +64,14 @@ export function deleteMonitor(id) {
  *  limit: 每页条数
  *  nodeId: 节点 ID
  *  notifyStatus: 通知状态
- * } params 
+ * } params
  */
 export function getMonitorLogList(params) {
   return axios({
-    url: '/monitor/list_data.json',
-    method: 'post',
-    data: params
-  })
+    url: "/monitor/list_data.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -79,20 +79,20 @@ export function getMonitorLogList(params) {
  */
 export function getMonitorOperateLogList() {
   return axios({
-    url: '/monitor_user_opt/list_data',
-    method: 'post'
-  })
+    url: "/monitor_user_opt/list_data",
+    method: "post",
+  });
 }
 
 /**
  * 操作类型列表
- * @returns 
+ * @returns
  */
 export function getMonitorOperateTypeList() {
   return axios({
-    url: '/monitor_user_opt/type_data',
-    method: 'post'
-  })
+    url: "/monitor_user_opt/type_data",
+    method: "post",
+  });
 }
 
 /**
@@ -104,26 +104,33 @@ export function getMonitorOperateTypeList() {
  *  notifyUser: 通知用户 json 字符串
  *  monitorUser： 监控用户 json 字符串
  *  monitorOpt: 监控操作 json 字符串
- * } params 
- * @returns 
+ * } params
+ * @returns
  */
 export function editMonitorOperate(params) {
   return axios({
-    url: '/monitor_user_opt/update',
-    method: 'post',
-    data: params
-  })
+    url: "/monitor_user_opt/update",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
  * 删除操作监控
- * @param {*} id 
- * @returns 
+ * @param {*} id
+ * @returns
  */
 export function deleteMonitorOperate(id) {
   return axios({
-    url: '/monitor_user_opt/delete',
-    method: 'post',
-    data: {id}
-  })
+    url: "/monitor_user_opt/delete",
+    method: "post",
+    data: { id },
+  });
 }
+
+export const notifyStyle = {
+  0:'钉钉',
+  1:'邮箱',
+  2:'企业微信',
+  3:'webhook',
+};

@@ -4,6 +4,8 @@
 
 ### 🐣 新增功能
 
+1. 【server】监控新增 webhook 字段（感谢@[wxyShine](https://gitee.com/wxyShine) ）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】节点统计图表内存占用率取出字段（感谢@[wxyShine](https://gitee.com/wxyShine) ）

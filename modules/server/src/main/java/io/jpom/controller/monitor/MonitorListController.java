@@ -22,6 +22,9 @@
  */
 package io.jpom.controller.monitor;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.RegexPool;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -59,108 +62,116 @@ import java.util.List;
 @Feature(cls = ClassFeature.MONITOR)
 public class MonitorListController extends BaseServerController {
 
-	private final MonitorService monitorService;
-	private final DbMonitorNotifyLogService dbMonitorNotifyLogService;
-	private final UserService userService;
-	private final ProjectInfoCacheService projectInfoCacheService;
+    private final MonitorService monitorService;
+    private final DbMonitorNotifyLogService dbMonitorNotifyLogService;
+    private final UserService userService;
+    private final ProjectInfoCacheService projectInfoCacheService;
 
-	public MonitorListController(MonitorService monitorService,
-								 DbMonitorNotifyLogService dbMonitorNotifyLogService,
-								 UserService userService,
-								 ProjectInfoCacheService projectInfoCacheService) {
-		this.monitorService = monitorService;
-		this.dbMonitorNotifyLogService = dbMonitorNotifyLogService;
-		this.userService = userService;
-		this.projectInfoCacheService = projectInfoCacheService;
-	}
+    public MonitorListController(MonitorService monitorService,
+                                 DbMonitorNotifyLogService dbMonitorNotifyLogService,
+                                 UserService userService,
+                                 ProjectInfoCacheService projectInfoCacheService) {
+        this.monitorService = monitorService;
+        this.dbMonitorNotifyLogService = dbMonitorNotifyLogService;
+        this.userService = userService;
+        this.projectInfoCacheService = projectInfoCacheService;
+    }
 
-	/**
-	 * 展示监控列表
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String getMonitorList() {
-		PageResultDto<MonitorModel> pageResultDto = monitorService.listPage(getRequest());
-		return JsonMessage.getString(200, "", pageResultDto);
-	}
+    /**
+     * 展示监控列表
+     *
+     * @return json
+     */
+    @RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String getMonitorList() {
+        PageResultDto<MonitorModel> pageResultDto = monitorService.listPage(getRequest());
+        return JsonMessage.getString(200, "", pageResultDto);
+    }
 
-	/**
-	 * 删除列表
-	 *
-	 * @param id id
-	 * @return json
-	 */
-	@RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.DEL)
-	public String deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) throws SQLException {
-		//
-		HttpServletRequest request = getRequest();
-		int delByKey = monitorService.delByKey(id, request);
-		if (delByKey > 0) {
-			// 删除日志
-			dbMonitorNotifyLogService.delByWorkspace(request, entity -> entity.set("monitorId", id));
-		}
-		return JsonMessage.getString(200, "删除成功");
-	}
+    /**
+     * 删除列表
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public String deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) throws SQLException {
+        //
+        HttpServletRequest request = getRequest();
+        int delByKey = monitorService.delByKey(id, request);
+        if (delByKey > 0) {
+            // 删除日志
+            dbMonitorNotifyLogService.delByWorkspace(request, entity -> entity.set("monitorId", id));
+        }
+        return JsonMessage.getString(200, "删除成功");
+    }
 
 
-	/**
-	 * 增加或修改监控
-	 *
-	 * @param id         id
-	 * @param name       name
-	 * @param notifyUser user
-	 * @return json
-	 */
-	@RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EDIT)
-	public String updateMonitor(String id,
-								@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
-								@ValidatorItem(msg = "请配置监控周期") String execCron,
-								String notifyUser) {
-		String status = getParameter("status");
-		String autoRestart = getParameter("autoRestart");
+    /**
+     * 增加或修改监控
+     *
+     * @param id         id
+     * @param name       name
+     * @param notifyUser user
+     * @return json
+     */
+    @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public String updateMonitor(String id,
+                                @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
+                                @ValidatorItem(msg = "请配置监控周期") String execCron,
+                                String notifyUser, String webhook) {
+        String status = getParameter("status");
+        String autoRestart = getParameter("autoRestart");
 
-		JSONArray jsonArray = JSONArray.parseArray(notifyUser);
+        JSONArray jsonArray = JSONArray.parseArray(notifyUser);
 //		List<String> notifyUsers = jsonArray.toJavaList(String.class);
-		List<String> notifyUserList = jsonArray.toJavaList(String.class);
-		Assert.notEmpty(jsonArray, "请选择报警联系人");
-		for (Object o : jsonArray) {
-			String userId = (String) o;
-			Assert.state(userService.exists(new UserModel(userId)), "没有对应的用户：" + userId);
-		}
-		String projects = getParameter("projects");
-		JSONArray projectsArray = JSONArray.parseArray(projects);
-		List<MonitorModel.NodeProject> nodeProjects = projectsArray.toJavaList(MonitorModel.NodeProject.class);
-		Assert.notEmpty(nodeProjects, "请至少选择一个节点");
-		for (MonitorModel.NodeProject nodeProject : nodeProjects) {
-			Assert.notEmpty(nodeProject.getProjects(), "请至少选择一个项目");
-			for (String project : nodeProject.getProjects()) {
-				boolean exists = projectInfoCacheService.exists(nodeProject.getNode(), project);
-				Assert.state(exists, "没有对应的项目：" + project);
-			}
-		}
-		boolean start = "on".equalsIgnoreCase(status);
-		MonitorModel monitorModel = monitorService.getByKey(id);
-		if (monitorModel == null) {
-			monitorModel = new MonitorModel();
-		}
-		monitorModel.setAutoRestart("on".equalsIgnoreCase(autoRestart));
-		monitorModel.setExecCron(this.checkCron(execCron));
-		monitorModel.projects(nodeProjects);
-		monitorModel.setStatus(start);
-		monitorModel.notifyUser(notifyUserList);
-		monitorModel.setName(name);
+        List<String> notifyUserList = jsonArray.toJavaList(String.class);
+        if (CollUtil.isNotEmpty(notifyUserList)) {
+            for (String userId : notifyUserList) {
+                Assert.state(userService.exists(new UserModel(userId)), "没有对应的用户：" + userId);
+            }
+        }
+        String projects = getParameter("projects");
+        JSONArray projectsArray = JSONArray.parseArray(projects);
+        List<MonitorModel.NodeProject> nodeProjects = projectsArray.toJavaList(MonitorModel.NodeProject.class);
+        Assert.notEmpty(nodeProjects, "请至少选择一个节点");
+        for (MonitorModel.NodeProject nodeProject : nodeProjects) {
+            Assert.notEmpty(nodeProject.getProjects(), "请至少选择一个项目");
+            for (String project : nodeProject.getProjects()) {
+                boolean exists = projectInfoCacheService.exists(nodeProject.getNode(), project);
+                Assert.state(exists, "没有对应的项目：" + project);
+            }
+        }
+        //
+        // 设置参数
+        if (StrUtil.isNotEmpty(webhook)) {
+            Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
+        }
+        Assert.state(CollUtil.isNotEmpty(notifyUserList) || StrUtil.isNotEmpty(webhook), "请选择一位报警联系人或者填写webhook");
 
-		if (StrUtil.isEmpty(id)) {
-			//添加监控
-			monitorService.insert(monitorModel);
-			return JsonMessage.getString(200, "添加成功");
-		}
-		HttpServletRequest request = getRequest();
-		monitorService.updateById(monitorModel, request);
-		return JsonMessage.getString(200, "修改成功");
-	}
+        boolean start = "on".equalsIgnoreCase(status);
+        MonitorModel monitorModel = monitorService.getByKey(id);
+        if (monitorModel == null) {
+            monitorModel = new MonitorModel();
+        }
+        monitorModel.setAutoRestart("on".equalsIgnoreCase(autoRestart));
+        monitorModel.setExecCron(this.checkCron(execCron));
+        monitorModel.projects(nodeProjects);
+        monitorModel.setStatus(start);
+        monitorModel.setWebhook(webhook);
+        monitorModel.notifyUser(notifyUserList);
+        monitorModel.setName(name);
+
+        if (StrUtil.isEmpty(id)) {
+            //添加监控
+            monitorService.insert(monitorModel);
+            return JsonMessage.getString(200, "添加成功");
+        }
+        HttpServletRequest request = getRequest();
+        monitorService.updateById(monitorModel, request);
+        return JsonMessage.getString(200, "修改成功");
+    }
 }
