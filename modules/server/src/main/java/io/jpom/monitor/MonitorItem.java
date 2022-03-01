@@ -42,11 +42,13 @@ import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.MonitorNotifyLog;
+import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.DbMonitorNotifyLogService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.NodeService;
+import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.user.UserService;
 
 import java.util.HashMap;
@@ -66,6 +68,7 @@ public class MonitorItem implements Task {
     private final DbMonitorNotifyLogService dbMonitorNotifyLogService;
     private final UserService userService;
     private final MonitorService monitorService;
+    private final ProjectInfoCacheService projectInfoCacheService;
     private final NodeService nodeService;
     private final String monitorId;
     private MonitorModel monitorModel;
@@ -75,6 +78,7 @@ public class MonitorItem implements Task {
         this.userService = SpringUtil.getBean(UserService.class);
         this.monitorService = SpringUtil.getBean(MonitorService.class);
         this.nodeService = SpringUtil.getBean(NodeService.class);
+        this.projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
         this.monitorId = id;
     }
 
@@ -154,7 +158,7 @@ public class MonitorItem implements Task {
                 monitorNotifyLog.setProjectId(id);
                 monitorNotifyLog.setMonitorId(monitorModel.getId());
                 //
-                this.notifyMsg(monitorNotifyLog);
+                this.notifyMsg(nodeModel, monitorNotifyLog);
             }
             return false;
         }).filter(aBoolean -> !aBoolean).collect(Collectors.toList());
@@ -222,10 +226,10 @@ public class MonitorItem implements Task {
         monitorNotifyLog.setContent(context);
         monitorNotifyLog.setCreateTime(System.currentTimeMillis());
         monitorNotifyLog.setNodeId(nodeModel.getId());
-        monitorNotifyLog.setProjectId(projectCopyId);
+        monitorNotifyLog.setProjectId(id);
         monitorNotifyLog.setMonitorId(monitorModel.getId());
         //
-        this.notifyMsg(monitorNotifyLog);
+        this.notifyMsg(nodeModel, monitorNotifyLog);
         return runStatus;
     }
 
@@ -250,19 +254,20 @@ public class MonitorItem implements Task {
         return entity1 == null || entity1.status();
     }
 
-    private void notifyMsg(MonitorNotifyLog monitorNotifyLog) {
+    private void notifyMsg(NodeModel nodeModel, MonitorNotifyLog monitorNotifyLog) {
         List<String> notify = monitorModel.notifyUser();
         // 发送通知
         if (monitorNotifyLog.getTitle() == null) {
             return;
         }
+        ProjectInfoCacheModel projectInfoCacheModel = projectInfoCacheService.getData(nodeModel.getId(), monitorNotifyLog.getProjectId());
         //
         notify.forEach(notifyUser -> this.sendNotifyMsgToUser(monitorNotifyLog, notifyUser));
         //
-        this.sendNotifyMsgToWebhook(monitorNotifyLog, monitorModel.getWebhook());
+        this.sendNotifyMsgToWebhook(monitorNotifyLog, nodeModel, projectInfoCacheModel, monitorModel.getWebhook());
     }
 
-    private void sendNotifyMsgToWebhook(MonitorNotifyLog monitorNotifyLog, String webhook) {
+    private void sendNotifyMsgToWebhook(MonitorNotifyLog monitorNotifyLog, NodeModel nodeModel, ProjectInfoCacheModel projectInfoCacheModel, String webhook) {
         if (StrUtil.isEmpty(webhook)) {
             return;
         }
@@ -271,7 +276,12 @@ public class MonitorItem implements Task {
         map.put("monitorId", monitorModel.getId());
         map.put("monitorName", monitorModel.getName());
         map.put("nodeId", monitorNotifyLog.getNodeId());
+        map.put("nodeName", nodeModel.getName());
+        map.put("runStatus", monitorNotifyLog.getStatus());
         map.put("projectId", monitorNotifyLog.getProjectId());
+        if (projectInfoCacheModel != null) {
+            map.put("projectName", projectInfoCacheModel.getName());
+        }
         map.put("title", monitorNotifyLog.getTitle());
         map.put("content", monitorNotifyLog.getContent());
         //

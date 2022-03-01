@@ -123,7 +123,8 @@
               <template slot="title">
                 <ul>
                   <li>发生报警时候请求</li>
-                  <li>传人参数有：monitorId、monitorName、nodeId、projectId、title、content</li>
+                  <li>传人参数有：monitorId、monitorName、nodeId、nodeName、projectId、projectName、title、content、runStatus</li>
+                  <li>runStatus 值为 true 表示项目当前为运行中(异常恢复),false 表示项目当前为运行(发生异常)</li>
                 </ul>
               </template>
               <a-icon type="question-circle" theme="filled" />
