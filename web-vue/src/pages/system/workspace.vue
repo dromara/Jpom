@@ -197,6 +197,7 @@ export default {
         pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
         pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
+        showQuickJumper: true,
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
@@ -209,6 +210,7 @@ export default {
         pageSize: this.envVarListQuery.limit || PAGE_DEFAULT_LIMIT,
         pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
+        showQuickJumper: true,
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.envVarListQuery);
         },

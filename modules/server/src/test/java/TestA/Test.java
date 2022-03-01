@@ -46,8 +46,8 @@
 //
 //import cn.hutool.core.io.FileUtil;
 //import io.jpom.permission.CacheControllerFeature;
-//import io.jpom.plugin.ClassFeature;
-//import io.jpom.plugin.MethodFeature;
+//import io.jpom.permission.ClassFeature;
+//import io.jpom.permission.MethodFeature;
 //
 //import java.util.Map;
 //import java.util.Set;

@@ -24,9 +24,9 @@ package io.jpom.socket.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.plugin.ClassFeature;
-import io.jpom.plugin.Feature;
-import io.jpom.plugin.MethodFeature;
+import io.jpom.permission.ClassFeature;
+import io.jpom.permission.Feature;
+import io.jpom.permission.MethodFeature;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.ProxySession;

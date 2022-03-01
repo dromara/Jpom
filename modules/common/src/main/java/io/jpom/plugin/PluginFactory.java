@@ -56,21 +56,21 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PluginFactory implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ContextClosedEvent> {
 
-    private static final List<FeatureCallback> FEATURE_CALLBACKS = new ArrayList<>();
+    //    private static final List<FeatureCallback> FEATURE_CALLBACKS = new ArrayList<>();
     private static final Map<String, List<PluginItemWrap>> PLUGIN_MAP = new ConcurrentHashMap<>();
 
-    /**
-     * 添加回调事件
-     *
-     * @param featureCallback 回调
-     */
-    public static void addFeatureCallback(FeatureCallback featureCallback) {
-        FEATURE_CALLBACKS.add(featureCallback);
-    }
-
-    public static List<FeatureCallback> getFeatureCallbacks() {
-        return FEATURE_CALLBACKS;
-    }
+//    /**
+//     * 添加回调事件
+//     *
+//     * @param featureCallback 回调
+//     */
+//    public static void addFeatureCallback(FeatureCallback featureCallback) {
+//        FEATURE_CALLBACKS.add(featureCallback);
+//    }
+//
+//    public static List<FeatureCallback> getFeatureCallbacks() {
+//        return FEATURE_CALLBACKS;
+//    }
 
     /**
      * 获取插件端

@@ -41,7 +41,6 @@ import io.jpom.common.Const;
 import io.jpom.common.JpomApplicationEvent;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
-import io.jpom.common.interceptor.PluginFeatureInterceptor;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.util.CommandUtil;
 import org.springframework.boot.SpringApplication;
@@ -105,7 +104,7 @@ public class JpomApplication extends ApplicationBuilder {
 
         // 参数拦截器
         addInterceptor(ParameterInterceptor.class);
-        addInterceptor(PluginFeatureInterceptor.class);
+//        addInterceptor(PluginFeatureInterceptor.class);
         //
         addApplicationEventClient(new JpomApplicationEvent());
         // 添加初始化监听

@@ -932,6 +932,7 @@ export default {
         pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
         showQuickJumper: true,
+        showLessItems: true,
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
