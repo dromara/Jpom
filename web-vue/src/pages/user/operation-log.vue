@@ -18,10 +18,10 @@
           <a-select show-search option-filter-prop="children" v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
           </a-select>
-          <a-select show-search option-filter-prop="children" v-model="listQuery.classFeature" allowClear placeholder="请选择功能" class="search-input-item">
+          <a-select show-search option-filter-prop="children" v-model="listQuery.classFeature" allowClear placeholder="操作功能" class="search-input-item">
             <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
-          <a-select show-search option-filter-prop="children" v-model="listQuery.methodFeature" allowClear placeholder="请选择操作" class="search-input-item">
+          <a-select show-search option-filter-prop="children" v-model="listQuery.methodFeature" allowClear placeholder="操作方法" class="search-input-item">
             <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
           <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
@@ -39,12 +39,13 @@
       <a-tooltip slot="methodFeature" slot-scope="text" placement="topLeft" :title="methodFeatureMap[text]">
         <span>{{ methodFeatureMap[text] }}</span>
       </a-tooltip>
-      <a-tooltip slot="dataId" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="optTypeMsg" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="optStatus" slot-scope="text" placement="topLeft" :title="`默认状态码为 200 表示执行成功,部分操作状态码可能为 0,状态码为 0 的操作大部分为没有操作结果或者异步执行`">
         <span>{{ text }}</span>
       </a-tooltip>
+
       <template slot="operation" slot-scope="text, record">
         <a-button size="small" type="primary" @click="handleDetail(record)">详情</a-button>
       </template>
@@ -94,11 +95,10 @@ export default {
         { title: "操作者", dataIndex: "userId" },
         { title: "IP", dataIndex: "ip" /*width: 130*/ },
         { title: "节点", dataIndex: "nodeId", width: 120, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
-        { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "dataId" } },
-        { title: "功能", dataIndex: "classFeature", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "classFeature" } },
-        { title: "方法", dataIndex: "methodFeature", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "methodFeature" } },
-
-        { title: "执行结果", dataIndex: "optStatusMsg", width: 100 },
+        { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "操作功能", dataIndex: "classFeature", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "classFeature" } },
+        { title: "操作方法", dataIndex: "methodFeature", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "methodFeature" } },
+        { title: "状态码", dataIndex: "optStatus", width: 90, scopedSlots: { customRender: "optStatus" } },
         {
           title: "操作时间",
           dataIndex: "createTimeMillis",
