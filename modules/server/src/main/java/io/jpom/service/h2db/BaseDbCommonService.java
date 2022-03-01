@@ -530,8 +530,8 @@ public abstract class BaseDbCommonService<T> {
         db.setWrapper((Character) null);
         try {
             pageResult = db.page(where, page);
-        } catch (SQLException e) {
-            throw new JpomRuntimeException("数据库异常:" + e.getMessage(), e);
+        } catch (Exception e) {
+            throw warpException(e);
         }
         //
         List<T> list = pageResult.stream().map(entity -> {

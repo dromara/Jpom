@@ -20,7 +20,7 @@
             <a-select-option :value="1">正常</a-select-option>
             <a-select-option :value="0">异常</a-select-option>
           </a-select>
-          <a-select v-model="listQuery.notifyStatus" allowClear placeholder="请选择通知状态" class="search-input-item">
+          <a-select v-model="listQuery.notifyStatus" allowClear placeholder="通知状态" class="search-input-item">
             <a-select-option :value="1">成功</a-select-option>
             <a-select-option :value="0">失败</a-select-option>
           </a-select>
@@ -38,10 +38,7 @@
       </a-tooltip>
       <span slot="status" slot-scope="text">{{ text ? "正常" : "异常" }}</span>
       <template slot="notifyStyle" slot-scope="text">
-        <span v-if="text === 0">钉钉</span>
-        <span v-else-if="text === 1">邮箱</span>
-        <span v-else-if="text === 2">企业微信</span>
-        <span v-else>未知</span>
+        {{ notifyStyle[text] || "未知" }}
       </template>
       <span slot="notifyStatus" slot-scope="text">{{ text ? "成功" : "失败" }}</span>
       <template slot="operation" slot-scope="text, record">
@@ -61,7 +58,7 @@
   </div>
 </template>
 <script>
-import { getMonitorLogList } from "@/api/monitor";
+import { getMonitorLogList, notifyStyle } from "@/api/monitor";
 import { getNodeListAll } from "@/api/node";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
@@ -74,6 +71,7 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       temp: {},
       detailVisible: false,
+      notifyStyle,
       detailData: [],
       columns: [
         { title: "报警标题", dataIndex: "title", ellipsis: true, scopedSlots: { customRender: "tooltip" } },

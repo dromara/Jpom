@@ -116,6 +116,21 @@
             @change="handleChange"
           />
         </a-form-model-item>
+        <a-form-model-item prop="webhook">
+          <template slot="label">
+            WebHooks
+            <a-tooltip v-show="!temp.id">
+              <template slot="title">
+                <ul>
+                  <li>发生报警时候请求</li>
+                  <li>传人参数有：monitorId、monitorName、nodeId、projectId、title、content</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input v-model="temp.webhook" placeholder="接收报警消息,非必填，GET请求" />
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
   </div>
@@ -323,9 +338,9 @@ export default {
           })
           .map((item) => item.key);
 
-        if (targetKeysTemp.length <= 0) {
+        if (targetKeysTemp.length <= 0 && !this.temp.webhook) {
           this.$notification.warn({
-            message: "请选择报警联系人",
+            message: "请选择一位报警联系人或者填写webhook",
           });
           return false;
         }
