@@ -17,7 +17,7 @@
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-input allowClear class="search-input-item" @pressEnter="loadData" v-model="listQuery['%resultDirFile%']" placeholder="产物目录" />
-          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
@@ -931,6 +931,7 @@ export default {
         pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
         pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
+        showQuickJumper: true,
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },

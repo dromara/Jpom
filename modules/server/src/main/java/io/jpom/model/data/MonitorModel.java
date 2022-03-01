@@ -31,6 +31,7 @@ import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.util.List;
 
@@ -114,10 +115,6 @@ public class MonitorModel extends BaseWorkspaceModel {
         return projects == null ? null : JSON.toJSONString(projects);
     }
 
-    public void setProjects(String projects) {
-        this.projects = projects;
-    }
-
     public void projects(List<NodeProject> projects) {
         if (projects == null) {
             this.projects = null;
@@ -133,10 +130,6 @@ public class MonitorModel extends BaseWorkspaceModel {
     public String getNotifyUser() {
         List<String> object = notifyUser();
         return object == null ? null : JSON.toJSONString(object);
-    }
-
-    public void setNotifyUser(String notifyUser) {
-        this.notifyUser = notifyUser;
     }
 
     public void notifyUser(List<String> notifyUser) {
@@ -168,6 +161,7 @@ public class MonitorModel extends BaseWorkspaceModel {
         return false;
     }
 
+    @Getter
     public enum NotifyType implements BaseEnum {
         /**
          * 通知方式
@@ -184,16 +178,6 @@ public class MonitorModel extends BaseWorkspaceModel {
         NotifyType(int code, String desc) {
             this.code = code;
             this.desc = desc;
-        }
-
-        @Override
-        public int getCode() {
-            return code;
-        }
-
-        @Override
-        public String getDesc() {
-            return desc;
         }
     }
 

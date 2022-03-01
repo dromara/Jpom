@@ -5,7 +5,7 @@
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
           <a-input v-model="listQuery['%tag%']" @pressEnter="loadData" placeholder="标签" class="search-input-item" />
-          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
         </a-space>
