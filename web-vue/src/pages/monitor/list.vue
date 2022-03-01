@@ -25,7 +25,7 @@
             <a-select-option :value="1">报警中</a-select-option>
             <a-select-option :value="0">未报警</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
@@ -90,8 +90,12 @@
           </a-auto-complete>
         </a-form-model-item>
         <a-form-model-item label="监控项目" prop="projects">
-          <a-select v-model="projectKeys" mode="multiple" show-search option-filter-prop="children">
-            <a-select-option v-for="project in nodeProjectList" :key="project.id">【{{ project.nodeName }}】{{ project.name }}</a-select-option>
+          <a-select option-label-prop="label" v-model="projectKeys" mode="multiple" placeholder="选择要监控的项目,file 类型项目不可以监控" show-search option-filter-prop="children">
+            <a-select-opt-group :label="nodeMap[nodeItem.node].name" v-for="nodeItem in nodeProjectGroupList" :key="nodeItem.node">
+              <a-select-option :label="`${project.name} - ${project.runMode}`" v-for="project in nodeItem.projects" :disabled="!noFileModes.includes(project.runMode)" :key="project.id">
+                【{{ project.nodeName }}】{{ project.name }} - {{ project.runMode }}
+              </a-select-option>
+            </a-select-opt-group>
           </a-select>
         </a-form-model-item>
         <a-form-model-item prop="notifyUser" class="jpom-notify">
@@ -112,7 +116,7 @@
             }"
             :filter-option="filterOption"
             :target-keys="targetKeys"
-            :render="(item) => item.name"
+            :render="renderItem"
             @change="handleChange"
           />
         </a-form-model-item>
@@ -124,7 +128,7 @@
                 <ul>
                   <li>发生报警时候请求</li>
                   <li>传人参数有：monitorId、monitorName、nodeId、nodeName、projectId、projectName、title、content、runStatus</li>
-                  <li>runStatus 值为 true 表示项目当前为运行中(异常恢复),false 表示项目当前为运行(发生异常)</li>
+                  <li>runStatus 值为 true 表示项目当前为运行中(异常恢复),false 表示项目当前未运行(发生异常)</li>
                 </ul>
               </template>
               <a-icon type="question-circle" theme="filled" />
@@ -138,6 +142,7 @@
 </template>
 <script>
 import { getMonitorList, editMonitor, deleteMonitor } from "@/api/monitor";
+import { noFileModes } from "@/api/node-project";
 import { getUserListAll } from "@/api/user";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { parseTime, itemGroupBy } from "@/utils/time";
@@ -151,10 +156,13 @@ export default {
       list: [],
       userList: [],
       nodeProjectList: [],
+      nodeProjectGroupList: [],
+      nodeMap: {},
       targetKeys: [],
       projectKeys: [],
       // tree 选中的值
       checkedKeys: {},
+      noFileModes,
       temp: {},
       editMonitorVisible: false,
       columns: [
@@ -249,14 +257,21 @@ export default {
     // 加载节点项目列表
     loadNodeProjectList(fn) {
       this.nodeProjectList = [];
+      this.nodeProjectGroupList = [];
       getProjectListAll().then((res) => {
         if (res.code === 200) {
           getNodeListAll().then((res1) => {
+            res1.data.forEach((element) => {
+              this.nodeMap[element.id] = element;
+            });
+
             this.nodeProjectList = res.data.map((item) => {
               let nodeInfo = res1.data.filter((nodeItem) => nodeItem.id === item.nodeId);
               item.nodeName = nodeInfo.length > 0 ? nodeInfo[0].name : "未知";
               return item;
             });
+            this.nodeProjectGroupList = itemGroupBy(this.nodeProjectList, "nodeId", "node", "projects");
+            // console.log(this.nodeProjectGroupList);
             fn && fn();
           });
         }
@@ -270,7 +285,18 @@ export default {
     handleChange(targetKeys) {
       this.targetKeys = targetKeys;
     },
-
+    renderItem(item) {
+      const customLabel = (
+        <a-tooltip title="如果不可以选择则表示对应的用户没有配置邮箱">
+          <a-icon type="warning" theme="twoTone" />
+          {item.name}
+        </a-tooltip>
+      );
+      return {
+        label: item.disabled ? customLabel : item.name,
+        value: item.name,
+      };
+    },
     // 新增
     handleAdd() {
       this.temp = {};

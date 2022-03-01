@@ -25,7 +25,7 @@
             <a-select-option :value="0">失败</a-select-option>
           </a-select>
           <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
         </a-space>
@@ -77,8 +77,8 @@ export default {
         { title: "报警标题", dataIndex: "title", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点名称", dataIndex: "nodeId", width: 100, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         { title: "项目 ID", dataIndex: "projectId", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "报警状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "报警方式", dataIndex: "notifyStyle", width: 100, ellipsis: true, scopedSlots: { customRender: "notifyStyle" } },
+        { title: "报警状态", dataIndex: "status", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "报警方式", dataIndex: "notifyStyle", width: 100, align: "center", ellipsis: true, scopedSlots: { customRender: "notifyStyle" } },
         {
           title: "报警时间",
           dataIndex: "createTime",
@@ -101,6 +101,7 @@ export default {
         pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
         pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
+        showQuickJumper: true,
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },

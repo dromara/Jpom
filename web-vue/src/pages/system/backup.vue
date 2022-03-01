@@ -9,7 +9,7 @@
           <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="search-input-item">
             <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">创建备份</a-button>

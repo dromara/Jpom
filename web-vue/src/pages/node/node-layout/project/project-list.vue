@@ -18,7 +18,7 @@
         <a-space>
           <a-input class="search-input-item" v-model="listQuery['%projectId%']" placeholder="项目ID" />
           <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="项目名称" />
-          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>

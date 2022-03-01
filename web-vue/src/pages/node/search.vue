@@ -21,7 +21,7 @@
           <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
             <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="getNodeProjectData">搜索</a-button>
           </a-tooltip>
           <span>| </span>

@@ -17,7 +17,7 @@
             <a-select-option :value="1">开启</a-select-option>
             <a-select-option :value="0">关闭</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>

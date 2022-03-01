@@ -8,7 +8,7 @@
           <a-input v-model="listQuery['%host%']" @pressEnter="loadData" placeholder="host" class="search-input-item" />
           <a-input v-model="listQuery['%swarmId%']" @pressEnter="loadData" placeholder="集群ID" class="search-input-item" />
 
-          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">添加</a-button>

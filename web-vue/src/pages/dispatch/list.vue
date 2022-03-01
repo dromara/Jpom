@@ -21,7 +21,7 @@
           <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
             <a-select-option v-for="(name, key) in statusMap" :key="key">{{ name }}</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt 键点击按钮快速回到第一页">
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleLink">添加关联项目</a-button>
