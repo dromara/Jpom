@@ -165,7 +165,26 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
     /**
      * 判断是否存在 发布关联
      *
-     * @param dataId 数据ID
+     * @param dataId        数据ID
+     * @param releaseMethod 发布方法
+     * @param request       请求对象
+     * @return true 关联
+     */
+    public boolean checkReleaseMethodByLike(String dataId, HttpServletRequest request, BuildReleaseMethod releaseMethod) {
+        Entity entity = new Entity();
+        entity.set("releaseMethod", releaseMethod.getCode());
+        String workspaceId = this.getCheckUserWorkspace(request);
+        entity.set("workspaceId", workspaceId);
+        entity.set("releaseMethodDataId", StrUtil.format(" like '%{}%'", dataId));
+        return super.exists(entity);
+    }
+
+    /**
+     * 判断是否存在 发布关联
+     *
+     * @param dataId        数据ID
+     * @param request       请求对象
+     * @param releaseMethod 发布方法
      * @return true 关联
      */
     public boolean checkReleaseMethod(String dataId, HttpServletRequest request, BuildReleaseMethod releaseMethod) {

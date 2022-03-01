@@ -305,7 +305,14 @@
               </a-form-model-item>
               <!-- SSH -->
               <template v-if="temp.releaseMethod === 3">
-                <a-form-model-item label="发布的SSH" prop="releaseMethodDataId">
+                <a-form-model-item prop="releaseMethodDataId">
+                  <template slot="label">
+                    发布的SSH
+                    <a-tooltip v-show="!temp.id">
+                      <template slot="title"> 如果 ssh 没有配置授权目录是不能选择的哟 </template>
+                      <a-icon type="question-circle" theme="filled" />
+                    </a-tooltip>
+                  </template>
                   <a-select mode="multiple" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
                     <a-select-option v-for="ssh in sshList" :disabled="!ssh.fileDirs" :key="ssh.id">{{ ssh.name }}</a-select-option>
                   </a-select>

@@ -258,7 +258,7 @@ public class SshController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
 		HttpServletRequest request = getRequest();
-		boolean checkSsh = buildInfoService.checkReleaseMethod(id, request, BuildReleaseMethod.Ssh);
+		boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, request, BuildReleaseMethod.Ssh);
 		Assert.state(!checkSsh, "当前ssh存在构建项，不能删除");
 		// 判断是否绑定节点
 		List<NodeModel> nodeBySshId = nodeService.getNodeBySshId(id);
