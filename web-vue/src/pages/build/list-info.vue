@@ -886,6 +886,8 @@ export default {
       ],
       rules: {
         name: [{ required: true, message: "请填写构建名称", trigger: "blur" }],
+        buildMode: [{ required: true, message: "请选择构建方式", trigger: "blur" }],
+        releaseMethod: [{ required: true, message: "请选择发布操作", trigger: "blur" }],
         branchName: [{ required: true, message: "请选择分支", trigger: "blur" }],
         script: [{ required: true, message: "请填写构建命令", trigger: "blur" }],
         resultDirFile: [{ required: true, message: "请填写产物目录", trigger: "blur" }],
@@ -1081,11 +1083,7 @@ export default {
         cacheBuild: true,
         saveBuildFile: true,
       };
-      // this.$nextTick(() => {
-      //   setTimeout(() => {
-      //     this.introGuide();
-      //   }, 500);
-      // });
+      this.$refs["editBuildForm"]?.resetFields();
     },
     // 复制
     copyItem(record) {
@@ -1097,6 +1095,7 @@ export default {
     // 修改
     handleEdit(record) {
       this.temp = Object.assign(record);
+      this.$refs["editBuildForm"]?.resetFields();
       this.temp.buildMode = this.temp.buildMode || 0;
       // 设置当前临时的 额外构建信息
       this.tempExtraData = JSON.parse(record.extraData) || {};
@@ -1207,7 +1206,7 @@ export default {
             this.$notification.success({
               message: res.msg,
             });
-            this.$refs["editBuildForm"].resetFields();
+            //this.$refs["editBuildForm"].resetFields();
             this.editBuildVisible = false;
             this.handleFilter();
             this.loadGroupList();

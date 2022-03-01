@@ -130,9 +130,9 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                     continue;
                 }
                 //
-                String context = StrUtil.format("操作用户：{}\n操作状态：{}\n操作类型：{}\n所属工作空间：{}\n操作节点：{}\n 操作数据id: {}\n操作IP: {}\n{}",
+                String context = StrUtil.format("操作用户：{}\n操作状态码：{}\n操作类型：{}\n所属工作空间：{}\n操作节点：{}\n 操作数据id: {}\n操作IP: {}\n{}",
                         optUserItem.getName(),
-                        userOperateLogV1.getOptStatusMsg(),
+                        userOperateLogV1.getOptStatus(),
                         optTypeMsg,
                         workspaceModel == null ? StrUtil.EMPTY : workspaceModel.getName(),
                         userOperateLogV1.getNodeId(), userOperateLogV1.getDataId(), userOperateLogV1.getIp(), otherMsg);

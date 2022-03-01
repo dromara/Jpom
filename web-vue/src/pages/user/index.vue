@@ -59,7 +59,7 @@
     <a-modal v-model="editUserVisible" width="60vw" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
       <a-form-model ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="登录名称" prop="id">
-          <a-input v-model="temp.id" placeholder="创建之后不能修改" :disabled="createOption == false" />
+          <a-input @change="checkTipUserName" v-model="temp.id" placeholder="创建之后不能修改" :disabled="createOption == false" />
         </a-form-model-item>
         <a-form-model-item label="密码" :prop="createOption ? 'password' : 'none'">
           <a-input-password v-model="temp.password" :placeholder="createOption ? '登录密码' : '如果不修改密码则不用填写'" />
@@ -67,7 +67,14 @@
         <a-form-model-item label="昵称" prop="name">
           <a-input v-model="temp.name" placeholder="昵称" />
         </a-form-model-item>
-        <a-form-model-item label="管理员" prop="systemUser">
+        <a-form-model-item prop="systemUser">
+          <template slot="label">
+            管理员
+            <a-tooltip v-show="!temp.id">
+              <template slot="title"> 管理员拥有：管理服务端的部分权限 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-tooltip title="管理员拥有：管理服务端的部分权限">
             <a-switch
               :checked="temp.systemUser == 1"
@@ -83,7 +90,16 @@
           </a-tooltip>
         </a-form-model-item>
 
-        <a-form-model-item label="工作空间" prop="feature" class="feature jpom-userWorkspace">
+        <a-form-model-item prop="feature" class="feature jpom-userWorkspace">
+          <template slot="label">
+            工作空间
+            <a-tooltip v-show="!temp.id">
+              <template slot="title">
+                注意勾选后还需要点击左边按钮移动到待选择区。如果移动按钮不可用表示数据没有任何变化。记得需要构建父级节点再操作奥，取消操作需要挨个选择取消注意观察选择数量
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-transfer
             :titles="['待选择区', '已选择区']"
             :show-select-all="false"
@@ -483,6 +499,20 @@ export default {
         this.listQuery.order_field = sorter.field;
       }
       this.loadData();
+    },
+    checkTipUserName() {
+      if (this.temp?.id === "demo") {
+        this.$confirm({
+          title: "系统提示",
+          content: "demo 账号是系统特定演示使用的账号,系统默认将对 demo 账号限制很大权限。非演示场景不建议使用 demo 账号",
+          okText: "确认",
+          cancelText: "取消",
+          onOk: () => {},
+          onCancel: () => {
+            this.temp.id = "";
+          },
+        });
+      }
     },
   },
 };
