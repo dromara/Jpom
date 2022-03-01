@@ -1,0 +1,3 @@
+[submodule "Jpom-site"]
+    path = docs/Jpom-site
+    url = https://gitee.com/keepbx/Jpom-site.git
