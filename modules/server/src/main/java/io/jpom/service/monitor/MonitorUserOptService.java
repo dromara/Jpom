@@ -25,8 +25,8 @@ package io.jpom.service.monitor;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.data.MonitorUserOptModel;
-import io.jpom.plugin.ClassFeature;
-import io.jpom.plugin.MethodFeature;
+import io.jpom.permission.ClassFeature;
+import io.jpom.permission.MethodFeature;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 

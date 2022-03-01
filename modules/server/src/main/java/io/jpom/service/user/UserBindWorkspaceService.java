@@ -27,7 +27,7 @@ import cn.hutool.db.Entity;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
-import io.jpom.plugin.MethodFeature;
+import io.jpom.permission.MethodFeature;
 import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;

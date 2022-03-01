@@ -150,7 +150,9 @@
               <a-select-option value="github"> github </a-select-option>
               <a-select-option value="gitlab"> gitlab </a-select-option>
             </a-select>
-            <a-input-search style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" :placeholder="importTypePlaceholder" />
+            <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder}`">
+              <a-input-search style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" :placeholder="importTypePlaceholder" />
+            </a-tooltip>
           </a-input-group>
         </a-form-model-item>
       </a-form-model>
@@ -284,6 +286,7 @@ export default {
         pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
         pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
+        showQuickJumper: true,
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
@@ -296,6 +299,7 @@ export default {
         pageSize: this.giteeImportForm.limit || PAGE_DEFAULT_LIMIT,
         pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
+        showQuickJumper: true,
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.giteeImportForm);
         },
