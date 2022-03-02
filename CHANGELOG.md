@@ -9,6 +9,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】节点统计图表内存占用率取出字段（感谢@[wxyShine](https://gitee.com/wxyShine) ）
+2. 【server】修复 ssh 上传文件资源未释放问题（感谢@也许是个意外 ）
 
 ------
 

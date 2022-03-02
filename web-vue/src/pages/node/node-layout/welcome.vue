@@ -19,7 +19,7 @@
           v-model="processName"
           :data="processNames"
           inputPlaceholder="自定义进程类型"
-          selectPlaceholder=""
+          selectPlaceholder="选择进程名"
           suffixIcon=""
         >
           <template slot="suffixIcon"> <a-icon type="down" /></template>
