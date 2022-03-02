@@ -8,17 +8,18 @@
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
-      <div ref="filter" class="filter">
-        <a-space>
-          <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="handleUpload">上传文件</a-button>
-          <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="handleUploadZip">上传压缩文件（自动解压）</a-button>
-          <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="loadFileList()">刷新</a-button>
-          <a-button :disabled="!this.tempNode.parentDir" type="danger" @click="handleDeletePath()">删除</a-button>
-          <span v-if="this.nowPath">当前目录:{{ this.nowPath }}</span>
-          <!-- <span v-if="this.nowPath">{{ this.tempNode.parentDir }}</span> -->
-        </a-space>
-      </div>
-      <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+      <!-- <div ref="filter" class="filter"></div> -->
+      <a-table size="middle" :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+        <template slot="title">
+          <a-space>
+            <a-button size="small" :disabled="!this.tempNode.parentDir" type="primary" @click="handleUpload">上传文件</a-button>
+            <a-button size="small" :disabled="!this.tempNode.parentDir" type="primary" @click="handleUploadZip">上传压缩文件（自动解压）</a-button>
+            <a-button size="small" :disabled="!this.tempNode.parentDir" type="primary" @click="loadFileList()">刷新</a-button>
+            <a-button size="small" :disabled="!this.tempNode.parentDir" type="danger" @click="handleDeletePath()">删除</a-button>
+            <span v-if="this.nowPath">当前目录:{{ this.nowPath }}</span>
+            <!-- <span v-if="this.nowPath">{{ this.tempNode.parentDir }}</span> -->
+          </a-space>
+        </template>
         <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
@@ -31,11 +32,11 @@
         <template slot="operation" slot-scope="text, record">
           <a-space>
             <a-tooltip title="需要到 ssh 信息中配置允许编辑的文件后缀">
-              <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑 </a-button>
+              <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑 </a-button>
             </a-tooltip>
             <!-- <a-button type="primary" :disabled="!record.textFileEdit" @click="handlePreview(record)">跟踪</a-button> -->
-            <a-button type="primary" @click="handleDownload(record)">下载</a-button>
-            <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>
+            <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
       </a-table>
@@ -100,7 +101,7 @@ export default {
         { title: "文件类型", dataIndex: "dir", width: 100, ellipsis: true, scopedSlots: { customRender: "dir" } },
         { title: "文件大小", dataIndex: "size", width: 120, ellipsis: true, scopedSlots: { customRender: "size" } },
         { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 270 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 180 },
       ],
       editFileVisible: false,
     };
@@ -397,8 +398,5 @@ export default {
   margin: 10px 10px 0;
   padding: 10px;
   background-color: #fff;
-}
-.filter {
-  margin: 0 0 10px;
 }
 </style>
