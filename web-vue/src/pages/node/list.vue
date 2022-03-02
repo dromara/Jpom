@@ -161,7 +161,7 @@
     </a-table>
 
     <!-- 编辑区 -->
-    <a-modal v-model="editNodeVisible" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
+    <a-modal v-model="editNodeVisible" width="60%" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
       <a-form-model ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <!-- <a-form-model-item label="节点 ID" prop="id">
           <a-input v-model="temp.id" placeholder="创建之后不能修改" />
@@ -170,7 +170,7 @@
           <a-input v-model="temp.name" placeholder="节点名称" />
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
-          <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder=""> </custom-select>
+          <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
         </a-form-model-item>
         <a-form-model-item label="绑定 SSH " prop="sshId">
           <a-select show-search option-filter-prop="children" v-model="temp.sshId" placeholder="请选择SSH">
