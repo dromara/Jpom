@@ -175,7 +175,7 @@ sh /xxxx/Server.sh restart --rest:load_init_db
 2. 尝试自动恢复
    1. 在执行启动命令后填参数 `--recover:h2db`
    2. `sh /xxxx/Server.sh restart --recover:h2db`
-   3. 此分发不一定成功，或者可能出现恢复后到数据不完整（恢复后需要检查数据是否完成）
+   3. 此方法不一定成功，或者可能出现恢复后到数据不完整（恢复后需要检查数据是否完成）
 
 ### 常见问题未知问题
 
