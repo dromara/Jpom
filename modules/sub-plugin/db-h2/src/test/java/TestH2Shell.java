@@ -20,11 +20,15 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+import cn.hutool.core.io.FastByteArrayOutputStream;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import org.h2.tools.Shell;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.sql.SQLException;
 
 /**
@@ -33,18 +37,20 @@ import java.sql.SQLException;
  */
 public class TestH2Shell {
 
-	@Test
-	public void testShell() throws SQLException {
+    @Test
+    public void testShell() throws SQLException {
 //
-		Shell shell = new Shell();
-		String sql = StrUtil.format("SCRIPT DROP to '{}'", FileUtil.file(".", "t.sql").getAbsoluteFile());
-		String[] params = new String[]{
-				"-url", "jdbc:h2:/Users/user/jpom/server/db/Server",
-				"-user", "jpom",
-				"-password", "jpom",
-				"-driver", "org.h2.Driver",
-				"-sql", sql
-		};
-		shell.runTool(params);
-	}
+        Shell shell = new Shell();
+        String sql = StrUtil.format("SCRIPT DROP to '{}'", FileUtil.file(".", "t.sql").getAbsoluteFile());
+        String[] params = new String[]{
+                "-url", "jdbc:h2:/Users/user/jpom/server/db/Server",
+                "-user", "jpom",
+                "-password", "jpom",
+                "-driver", "org.h2.Driver",
+                "-sql", sql
+        };
+        FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
+        shell.setOut(new PrintStream(baos));
+        shell.runTool(params);
+    }
 }

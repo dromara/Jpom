@@ -23,6 +23,7 @@
 package io.jpom.plugin;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FastByteArrayOutputStream;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
@@ -39,6 +40,7 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -149,7 +151,12 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
                 "-driver", "org.h2.Driver",
                 "-sql", sql
         };
-        shell.runTool(params);
+        try (FastByteArrayOutputStream arrayOutputStream = new FastByteArrayOutputStream()) {
+            try (PrintStream printStream = new PrintStream(arrayOutputStream)) {
+                shell.setOut(printStream);
+                shell.runTool(params);
+            }
+        }
     }
 
     /**
