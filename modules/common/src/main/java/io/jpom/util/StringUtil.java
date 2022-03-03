@@ -100,7 +100,7 @@ public class StringUtil {
 		} else {
 			newWhitePath = FileUtil.getAbsolutePath(file.getParentFile());
 		}
-		String itemAbsPath = FileUtil.getAbsolutePath(new File(startPath));
+		String itemAbsPath = FileUtil.getAbsolutePath(startPath);
 		itemAbsPath = FileUtil.normalize(itemAbsPath);
 		newWhitePath = FileUtil.normalize(newWhitePath);
 		String path = StrUtil.removePrefix(newWhitePath, itemAbsPath);
