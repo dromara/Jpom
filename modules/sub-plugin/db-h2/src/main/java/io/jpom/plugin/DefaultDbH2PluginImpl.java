@@ -52,84 +52,84 @@ import java.util.Map;
 @PluginConfig(name = "db-h2")
 public class DefaultDbH2PluginImpl implements IDefaultPlugin {
 
-	@Override
-	public Object execute(Object main, Map<String, Object> parameter) throws Exception {
-		String method = StrUtil.toString(main);
-		if (StrUtil.equals("backupSql", method)) {
-			String url = (String) parameter.get("url");
-			String user = (String) parameter.get("user");
-			String password = (String) parameter.get("pass");
-			String backupSqlPath = (String) parameter.get("backupSqlPath");
-			List<String> tableNameList = (List<String>) parameter.get("tableNameList");
-			this.backupSql(url, user, password, backupSqlPath, tableNameList);
-		} else if (StrUtil.equals("restoreBackupSql", method)) {
-			String backupSqlPath = (String) parameter.get("backupSqlPath");
-			DataSource dataSource = (DataSource) parameter.get("dataSource");
-			if (dataSource == null) {
-				// 加载数据源
-				dataSource = DSFactory.get();
-			}
-			this.restoreBackupSql(backupSqlPath, dataSource);
-		} else if (StrUtil.equals("recoverToSql", method)) {
-			File dbPath = (File) parameter.get("dbPath");
-			String dbName = (String) parameter.get("dbName");
-			File recoverBackup = (File) parameter.get("recoverBackup");
-			return this.recover(dbPath, dbName, recoverBackup);
-		} else {
-			throw new IllegalArgumentException("不支持的类型");
-		}
-		return "done";
-	}
+    @Override
+    public Object execute(Object main, Map<String, Object> parameter) throws Exception {
+        String method = StrUtil.toString(main);
+        if (StrUtil.equals("backupSql", method)) {
+            String url = (String) parameter.get("url");
+            String user = (String) parameter.get("user");
+            String password = (String) parameter.get("pass");
+            String backupSqlPath = (String) parameter.get("backupSqlPath");
+            List<String> tableNameList = (List<String>) parameter.get("tableNameList");
+            this.backupSql(url, user, password, backupSqlPath, tableNameList);
+        } else if (StrUtil.equals("restoreBackupSql", method)) {
+            String backupSqlPath = (String) parameter.get("backupSqlPath");
+            DataSource dataSource = (DataSource) parameter.get("dataSource");
+            if (dataSource == null) {
+                // 加载数据源
+                dataSource = DSFactory.get();
+            }
+            this.restoreBackupSql(backupSqlPath, dataSource);
+        } else if (StrUtil.equals("recoverToSql", method)) {
+            File dbPath = (File) parameter.get("dbPath");
+            String dbName = (String) parameter.get("dbName");
+            File recoverBackup = (File) parameter.get("recoverBackup");
+            return this.recover(dbPath, dbName, recoverBackup);
+        } else {
+            throw new IllegalArgumentException("不支持的类型");
+        }
+        return "done";
+    }
 
-	/**
-	 * 恢复
-	 *
-	 * @param dbPath        数据库路径
-	 * @param dbName        数据库名
-	 * @param recoverBackup 恢复到哪个路径
-	 * @return 返回恢复到 sql 文件
-	 * @throws SQLException sql
-	 */
-	private File recover(File dbPath, String dbName, File recoverBackup) throws SQLException {
-		String dbLocalPath = FileUtil.getAbsolutePath(dbPath);
-		ArrayList<String> list = FileLister.getDatabaseFiles(dbLocalPath, dbName, true);
-		if (CollUtil.isEmpty(list)) {
-			return null;
-		}
-		FileUtil.mkdir(recoverBackup);
-		// 备份数据
-		for (String s : list) {
-			FileUtil.move(FileUtil.file(s), recoverBackup, true);
-		}
-		String absolutePath = FileUtil.getAbsolutePath(recoverBackup);
-		Console.log("h2 db recover backup path,{}", absolutePath);
-		// 恢复数据
-		Recover recover = new Recover();
-		recover.runTool("-dir", absolutePath, "-db", dbName);
-		return FileUtil.file(recoverBackup, dbName + ".h2.sql");
-	}
+    /**
+     * 恢复
+     *
+     * @param dbPath        数据库路径
+     * @param dbName        数据库名
+     * @param recoverBackup 恢复到哪个路径
+     * @return 返回恢复到 sql 文件
+     * @throws SQLException sql
+     */
+    private File recover(File dbPath, String dbName, File recoverBackup) throws SQLException {
+        String dbLocalPath = FileUtil.getAbsolutePath(dbPath);
+        ArrayList<String> list = FileLister.getDatabaseFiles(dbLocalPath, dbName, true);
+        if (CollUtil.isEmpty(list)) {
+            return null;
+        }
+        FileUtil.mkdir(recoverBackup);
+        // 备份数据
+        for (String s : list) {
+            FileUtil.move(FileUtil.file(s), recoverBackup, true);
+        }
+        String absolutePath = FileUtil.getAbsolutePath(recoverBackup);
+        Console.log("h2 db recover backup path,{}", absolutePath);
+        // 恢复数据
+        Recover recover = new Recover();
+        recover.runTool("-dir", absolutePath, "-db", dbName);
+        return FileUtil.file(recoverBackup, dbName + ".h2.sql");
+    }
 
-	/**
-	 * 备份 SQL
-	 *
-	 * @param url           jdbc url
-	 * @param user          user
-	 * @param password      password
-	 * @param backupSqlPath backup SQL file path, absolute path
-	 * @param tableNameList backup table name list, if need backup all table, use null
-	 */
-	private void backupSql(String url, String user, String password,
-						   String backupSqlPath, List<String> tableNameList) throws SQLException {
-		// 备份 SQL
-		String sql = StrUtil.format("SCRIPT DROP to '{}'", backupSqlPath);
-		// 判断是否部分部分表
-		if (!CollectionUtils.isEmpty(tableNameList)) {
-			String tableNames = StrUtil.join(StrUtil.COMMA, tableNameList.toArray());
-			sql = StrUtil.format("{} TABLE {}", sql, tableNames);
-		}
-		DefaultSystemLog.getLog().debug("backup SQL is: {}", sql);
-		// 执行 SQL 备份脚本
-		Shell shell = new Shell();
+    /**
+     * 备份 SQL
+     *
+     * @param url           jdbc url
+     * @param user          user
+     * @param password      password
+     * @param backupSqlPath backup SQL file path, absolute path
+     * @param tableNameList backup table name list, if need backup all table, use null
+     */
+    private void backupSql(String url, String user, String password,
+                           String backupSqlPath, List<String> tableNameList) throws SQLException {
+        // 备份 SQL
+        String sql = StrUtil.format("SCRIPT DROP to '{}'", backupSqlPath);
+        // 判断是否部分部分表
+        if (!CollectionUtils.isEmpty(tableNameList)) {
+            String tableNames = StrUtil.join(StrUtil.COMMA, tableNameList.toArray());
+            sql = StrUtil.format("{} TABLE {}", sql, tableNames);
+        }
+        DefaultSystemLog.getLog().debug("backup SQL is: {}", sql);
+        // 执行 SQL 备份脚本
+        Shell shell = new Shell();
 
 		/*
 		  url 表示 h2 数据库的 jdbc url
@@ -142,30 +142,31 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
 		 * - ${fileName1} 表示备份之后的文件名
 		 * - table 表示需要备份的表名称，后面跟多个表名，用英文逗号分割
 		 */
-		String[] params = new String[]{
-				"-url", url,
-				"-user", user,
-				"-password", password,
-				"-driver", "org.h2.Driver",
-				"-sql", sql
-		};
-		shell.runTool(params);
-	}
+        String[] params = new String[]{
+                "-url", url,
+                "-user", user,
+                "-password", password,
+                "-driver", "org.h2.Driver",
+                "-sql", sql
+        };
+        shell.runTool(params);
+    }
 
-	/**
-	 * 还原备份 SQL
-	 *
-	 * @param backupSqlPath backup SQL file path, absolute path
-	 * @throws SQLException SQLException
-	 * @throws IOException  FileNotFoundException
-	 */
-	private void restoreBackupSql(String backupSqlPath, DataSource dataSource) throws SQLException, IOException {
-		Assert.notNull(dataSource, "Restore Backup sql error...H2 DataSource not null");
-		try (Connection connection = dataSource.getConnection()) {
-			// 读取数据库备份文件，执行还原
-			try (FileReader fileReader = new FileReader(backupSqlPath)) {
-				RunScript.execute(connection, fileReader);
-			}
-		}
-	}
+    /**
+     * 还原备份 SQL
+     *
+     * @param backupSqlPath backup SQL file path, absolute path
+     * @throws SQLException SQLException
+     * @throws IOException  FileNotFoundException
+     */
+    private void restoreBackupSql(String backupSqlPath, DataSource dataSource) throws SQLException, IOException {
+        Assert.notNull(dataSource, "Restore Backup sql error...H2 DataSource not null");
+        try (Connection connection = dataSource.getConnection()) {
+            // 读取数据库备份文件，执行还原
+            File backupSqlFile = FileUtil.file(backupSqlPath);
+            try (FileReader fileReader = new FileReader(backupSqlFile)) {
+                RunScript.execute(connection, fileReader);
+            }
+        }
+    }
 }
