@@ -21,7 +21,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-          
 
       - run: cd web-vue && npm i && npm run build
       - name: Set up JDK 8
@@ -32,6 +31,11 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn -B package
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1.0.2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          #file: ./zhuzhu-project/target/site/jacoco/jacoco.xml
 #        run: |
 #          docker buildx create --use
 #          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.14 -f ./modules/server/DockerfileRelease --push .
