@@ -228,10 +228,10 @@ public class InitDb implements DisposableBean, InitializingBean, SignalHandler {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        String[] signalArray = new String[]{"TERM"};
-        for (String s : signalArray) {
-            this.silenceSignalHandle(s);
-        }
+//        String[] signalArray = new String[]{"TERM"};
+//        for (String s : signalArray) {
+//            this.silenceSignalHandle(s);
+//        }
     }
 
     @Override
