@@ -32,7 +32,7 @@ jobs:
       - name: Build with Maven
         run: mvn -B package
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1.0.2
+        uses: codecov/codecov-action@v2
         with:
           token: ${{secrets.CODECOV_TOKEN}}
           #file: ./zhuzhu-project/target/site/jacoco/jacoco.xml
