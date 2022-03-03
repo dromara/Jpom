@@ -22,4 +22,3 @@ jobs:
         run: mvn cobertura:cobertura -Pcobertura
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
-      - run: bash <(curl -s https://codecov.io/bash)
