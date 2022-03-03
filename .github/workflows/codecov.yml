@@ -1,4 +1,4 @@
-name: codecov
+name: codecov2
 on:
   push:
     branches: [ master ]
