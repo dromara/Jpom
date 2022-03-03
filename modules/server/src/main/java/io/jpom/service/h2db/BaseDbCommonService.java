@@ -35,14 +35,13 @@ import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
 import cn.hutool.db.sql.Condition;
 import cn.hutool.db.sql.Order;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.PageResultDto;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.db.DbConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.h2.jdbc.JdbcSQLNonTransientException;
 import org.springframework.util.Assert;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -56,6 +55,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @date 2019/7/20
  */
+@Slf4j
 public abstract class BaseDbCommonService<T> {
 
     static {
@@ -113,7 +113,7 @@ public abstract class BaseDbCommonService<T> {
     public void insert(T t) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return;
         }
         Db db = Db.use();
@@ -137,7 +137,7 @@ public abstract class BaseDbCommonService<T> {
         }
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return;
         }
         Db db = Db.use();
@@ -173,7 +173,7 @@ public abstract class BaseDbCommonService<T> {
     public int insert(Entity entity) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
         }
         Db db = Db.use();
@@ -206,7 +206,7 @@ public abstract class BaseDbCommonService<T> {
     public int update(Entity entity, Entity where) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
         }
         Db db = Db.use();
@@ -255,7 +255,7 @@ public abstract class BaseDbCommonService<T> {
         }
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return null;
         }
         Entity where = new Entity(tableName);
@@ -337,7 +337,7 @@ public abstract class BaseDbCommonService<T> {
         //		}
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
         }
         Entity where = new Entity(tableName);
@@ -360,7 +360,7 @@ public abstract class BaseDbCommonService<T> {
     public int del(Entity where) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
         }
         where.setTableName(tableName);
@@ -407,7 +407,7 @@ public abstract class BaseDbCommonService<T> {
     public long count(Entity where) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
         }
         where.setTableName(getTableName());
@@ -429,7 +429,7 @@ public abstract class BaseDbCommonService<T> {
     public long count(String sql, Object... params) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
         }
         try {
@@ -459,7 +459,7 @@ public abstract class BaseDbCommonService<T> {
     public List<Entity> queryList(Entity where) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return null;
         }
         where.setTableName(getTableName());
@@ -481,7 +481,7 @@ public abstract class BaseDbCommonService<T> {
     public List<T> findByCondition(Condition... wheres) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return null;
         }
         Db db = Db.use();
@@ -521,7 +521,7 @@ public abstract class BaseDbCommonService<T> {
     public PageResultDto<T> listPage(Entity where, Page page) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return PageResultDto.EMPTY;
         }
         where.setTableName(getTableName());
@@ -569,7 +569,7 @@ public abstract class BaseDbCommonService<T> {
     public List<Entity> query(String sql, Object... params) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return null;
         }
         try {
@@ -589,7 +589,7 @@ public abstract class BaseDbCommonService<T> {
     public int execute(String sql, Object... params) {
         if (!DbConfig.getInstance().isInit()) {
             // ignore
-            DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored:{}", this.tClass);
+            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
         }
         try {
