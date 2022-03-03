@@ -45,7 +45,7 @@ server {
     location / {
         proxy_pass   http://127.0.0.1:2122/;
         # 代理的二级路径配置 值填写nginx 中location的值  如 location /test-path/ {}
-        # proxy_set_header Jpom-ProxyPath      /;
+        # proxy_set_header Jpom-ProxyPath      /test-path/;
         proxy_set_header Host      $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

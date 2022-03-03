@@ -57,10 +57,8 @@ vim filename（文件名）
 # windows 中执行管理bat命令乱码或者执行失败
 
 > 请修改文件编码为当前系统默认的编码（windows中默认为GB2312）、检查文件内容换行符
-
-#  Jpom使用Nginx代理推荐配置
-
-[查看>>](../辅助配置/nginx-config.md)
+> 
+> 使用 GB2312 编码后请检查脚本里面是否包含 CHCHP 相关命令,如果存在需要将其一并删除
 
 # Jpom添加项目、启动、查看项目报错
 
@@ -106,9 +104,12 @@ hostname
 
 # 服务端添加插件端
 
-1. 手动添加
-2. 插件端自动注册
-3. SSH 安装插件端
+目前支持的方式有如下：
+
+1. 手动添加，节点列表添加按钮，填写节点信息
+2. 插件端自动注册，配置服务端 token，在插件端中配置注册信息
+3. SSH 安装插件端，先添加 ssh 到服务端中，然后根据页面按钮提示安装
+4. 快速安装并绑定，节点列表中有快速安装操作引导
 
 # 升级 Jpom 版本
 
@@ -134,9 +135,6 @@ hostname
    1. `sudo dpkg-reconfigure dash` 在选择项中选No，搞定了！
 2. 通过 `bash ./Agent.sh`、`bash ./Server.sh`执行
 
-# 开发计划
-
-[开发计划](https://cdn.jsdelivr.net/gh/dromara/Jpom/PLANS.md)
 
 # 数据库异常
 
@@ -176,6 +174,84 @@ sh /xxxx/Server.sh restart --rest:load_init_db
    1. 在执行启动命令后填参数 `--recover:h2db`
    2. `sh /xxxx/Server.sh restart --recover:h2db`
    3. 此方法不一定成功，或者可能出现恢复后的数据不完整（恢复后需要检查数据是否完整）
+
+
+#  Jpom使用Nginx代理推荐配置
+
+### Http 相关配置
+
+```
+server {
+    #charset koi8-r;
+    access_log  /var/log/nginx/jpom.log main;
+    listen       80;
+    server_name  jpom.xxxxxx.cn;
+    
+    location / {
+        proxy_pass   http://127.0.0.1:2122/;
+        proxy_set_header Host      $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # iframe 重定向
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        # 上传文件大小
+        client_max_body_size  50000m;
+        client_body_buffer_size 128k;
+        #  websocket 配置
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        #  代理的二级路径配置 值填写nginx 中location的值  如 location /test-path/ {}
+        #  proxy_set_header Jpom-ProxyPath      /test-path/;
+    }
+}
+```
+
+### Https 推荐配置
+
+```
+server {
+    listen 443;
+    server_name jpom.xxxxxx.cn;
+    access_log  /var/log/nginx/jpom.log main;
+    ssl on;
+    ssl_certificate   /etc/nginx/ssl/jpom-xxxxxx.pem;
+    ssl_certificate_key  /etc/nginx/ssl/jpom-xxxxxx.key;
+    ssl_session_timeout 5m;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers on;
+    
+    location / {
+        proxy_pass   http://127.0.0.1:2122/;
+        # 代理的二级路径配置 值填写nginx 中location的值  如 location /test-path/ {}
+        # proxy_set_header Jpom-ProxyPath      /test-path/;
+        proxy_set_header Host      $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # iframe 重定向
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        client_max_body_size  50000m;
+        client_body_buffer_size 128k;
+        #	websocket 配置
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+server {
+    #charset koi8-r;
+    listen       80;
+    server_name  jpom.xxxxxx.cn;
+    rewrite ^(.*)$  https://$host$1 permanent;
+}
+```
+
+
+# 开发计划
+
+[开发计划](https://cdn.jsdelivr.net/gh/dromara/Jpom/PLANS.md)
 
 ### 常见问题未知问题
 
