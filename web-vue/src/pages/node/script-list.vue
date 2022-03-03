@@ -39,8 +39,9 @@
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ nodeMap[text] }}</span>
       </a-tooltip>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
+      <a-tooltip slot="name" @click="handleEdit(record)" slot-scope="text, record" placement="topLeft" :title="text">
+        <!-- <span>{{ text }}</span> -->
+        <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
       </a-tooltip>
       <template slot="scriptType" slot-scope="text">
         <a-tooltip v-if="text === 'server-sync'" title="服务端分发的脚本">
@@ -62,8 +63,10 @@
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
           <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
-          <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button>
-          <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
+          <!-- <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button> -->
+          <a-tooltip :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去解绑' : '删除'}`">
+            <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
+          </a-tooltip>
         </a-space>
       </template>
     </a-table>
@@ -150,11 +153,11 @@ export default {
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         { title: "类型", dataIndex: "scriptType", width: 70, align: "center", ellipsis: true, scopedSlots: { customRender: "scriptType" } },
-        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, scopedSlots: { customRender: "autoExecCron" } },
+        { title: "定时执行", dataIndex: "autoExecCron", ellipsis: true, width: 120, scopedSlots: { customRender: "autoExecCron" } },
         { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, sorter: true, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 220 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 170 },
       ],
       rules: {
         name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
@@ -211,10 +214,12 @@ export default {
         id: record.scriptId,
         nodeId: record.nodeId,
       }).then((res) => {
-        this.temp = Object.assign(res.data);
-        this.temp.nodeId = record.nodeId;
-        //
-        this.editScriptVisible = true;
+        if (res.code === 200) {
+          this.temp = Object.assign(res.data);
+          this.temp.nodeId = record.nodeId;
+          //
+          this.editScriptVisible = true;
+        }
       });
     },
     // 提交 Script 数据

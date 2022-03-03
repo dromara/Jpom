@@ -17,7 +17,7 @@
     </parent>
     <groupId>io.jpom</groupId>
     <artifactId>jpom-parent</artifactId>
-    <name>Jpom Java项目在线管理</name>
+    <name>Jpom (Java Project Online Manage)</name>
     <description>
         简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
     </description>
@@ -73,49 +73,6 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-            <!-- Javadoc -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <!--                            <additionalparam>-Xdoclint:none</additionalparam>-->
-                            <additionalOptions>-Xdoclint:none</additionalOptions>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <tags>
-                        <tag>
-                            <name>date</name>
-                            <placement>a</placement>
-                            <head>创建时间</head>
-                        </tag>
-                    </tags>
-                </configuration>
-            </plugin>
-            <!-- source插件,打包源码 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
@@ -183,7 +140,7 @@
             </build>
         </profile>
         <profile>
-            <id>release-plugin-profile</id>
+            <id>release</id>
             <distributionManagement>
                 <snapshotRepository>
                     <id>maven-repo</id>
@@ -196,6 +153,48 @@
             </distributionManagement>
             <build>
                 <plugins>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadoc</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <!--                            <additionalparam>-Xdoclint:none</additionalparam>-->
+                                    <additionalOptions>-Xdoclint:none</additionalOptions>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <tags>
+                                <tag>
+                                    <name>date</name>
+                                    <placement>a</placement>
+                                    <head>创建时间</head>
+                                </tag>
+                            </tags>
+                        </configuration>
+                    </plugin>
+                    <!-- source插件,打包源码 -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.4</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <!-- GPG -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
