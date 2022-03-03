@@ -21,8 +21,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: './web-vue/package-lock.json'
+          #cache: 'npm'
+          #cache-dependency-path: './web-vue/package-lock.json'
       - run: npm ci
         working-directory: './web-vue'
       - run: npm run build
@@ -37,10 +37,8 @@ jobs:
       - name: Build with Maven
         run: mvn -B package && mvn cobertura:cobertura
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{secrets.CODECOV_TOKEN}}
-          #file: ./zhuzhu-project/target/site/jacoco/jacoco.xml
+        uses: codecov/codecov-action@v1
+        #file: ./zhuzhu-project/target/site/jacoco/jacoco.xml
 #        run: |
 #          docker buildx create --use
 #          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.14 -f ./modules/server/DockerfileRelease --push .
