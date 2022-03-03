@@ -35,9 +35,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        run: mvn -B package && mvn cobertura:cobertura
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        run: mvn -B package
         #file: ./zhuzhu-project/target/site/jacoco/jacoco.xml
 #        run: |
 #          docker buildx create --use
