@@ -23,11 +23,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
           #cache: 'npm'
           #cache-dependency-path: './web-vue/package-lock.json'
-      - run: npm ci
-        working-directory: './web-vue'
-      - run: npm run build
-        working-directory: './web-vue'
-      #- run: cd web-vue && npm i && npm run build
+      #- run: npm ci
+      #  working-directory: './web-vue'
+      #- run: npm run build
+      #  working-directory: './web-vue'
+      - run: cd web-vue && npm i && npm run build
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
