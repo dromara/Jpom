@@ -33,8 +33,10 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
+import cn.jiangzeyin.common.request.XssFilter;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONValidator;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.data.NodeModel;
@@ -56,6 +58,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -122,24 +125,47 @@ public class OperateLogController implements AopLogInterface {
             // 获取节点
             cacheInfo.nodeModel = (NodeModel) request.getAttribute("node");
             //
-            cacheInfo.dataId = request.getParameter("id");
-            //
             cacheInfo.userAgent = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.USER_AGENT);
             cacheInfo.workspaceId = ServletUtil.getHeaderIgnoreCase(request, Const.WORKSPACEID_REQ_HEADER);
             //
-            Map<String, String> map = ServletUtil.getParamMap(request);
-            // 过滤密码字段
-            Set<Map.Entry<String, String>> entries = map.entrySet();
-            for (Map.Entry<String, String> entry : entries) {
-                String key = entry.getKey();
-                if (StrUtil.containsAnyIgnoreCase(key, "pwd", "password")) {
-                    entry.setValue("***");
-                }
-            }
-            map.put("request_url", request.getRequestURI());
-            cacheInfo.reqData = JSONObject.toJSONString(map);
+            Map<String, Object> allData = this.buildRequestParam(request);
+            //
+            cacheInfo.dataId = StrUtil.toStringOrNull(allData.get("id"));
+            allData.put("request_url", request.getRequestURI());
+            //
+            cacheInfo.reqData = JSONObject.toJSONString(allData);
             CACHE_INFO_THREAD_LOCAL.set(cacheInfo);
         }
+    }
+
+    private Map<String, Object> buildRequestParam(HttpServletRequest request) {
+        Map<String, String> map = ServletUtil.getParamMap(request);
+        // 过滤密码字段
+        Set<Map.Entry<String, String>> entries = map.entrySet();
+        for (Map.Entry<String, String> entry : entries) {
+            String key = entry.getKey();
+            if (StrUtil.containsAnyIgnoreCase(key, XssFilter.logFilterPar)) {
+                entry.setValue("***");
+            }
+        }
+        //
+        Map<String, Object> allData = new HashMap<>(30);
+        String body = ServletUtil.getBody(request);
+        if (StrUtil.isNotEmpty(body)) {
+            JSONValidator jsonValidator = JSONValidator.from(body);
+            JSONValidator.Type type = jsonValidator.getType();
+            if (type == null || type == JSONValidator.Type.Value) {
+                allData.put("bodyData", body);
+            } else if (type == JSONValidator.Type.Object) {
+                JSONObject jsonObject = JSONObject.parseObject(body);
+                allData.putAll(jsonObject);
+                //
+            } else if (type == JSONValidator.Type.Array) {
+                allData.put("bodyData", JSONObject.toJSON(body));
+            }
+        }
+        allData.putAll(map);
+        return allData;
     }
 
     @Override
