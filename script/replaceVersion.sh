@@ -41,6 +41,9 @@ sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../script/docker.sh
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/server/DockerfileRelease
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../.github/workflows/docker-image.yml
 
+# logo
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/common/src/main/resources/jpom-logo.txt
+
 # vue version
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../web-vue/package.json
 

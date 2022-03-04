@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.util;
+package cn;
 
 import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.util.StrUtil;
@@ -36,7 +36,7 @@ import java.security.CodeSource;
  */
 public final class VersionUtils {
 
-	private static final String VERSION = getVersion(io.jpom.util.VersionUtils.class, "1.0.0");
+	private static final String VERSION = getVersion(VersionUtils.class, "1.0.0");
 
 	private VersionUtils() {
 	}

@@ -22,44 +22,24 @@
  */
 package io.jpom;
 
-import cn.hutool.core.io.FileUtil;
-import io.jpom.common.JpomManifest;
-import io.jpom.util.VersionUtils;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 
+import java.io.InputStream;
+
 /**
- * @author Hotstrip
  * load Jpom version and print Jpom logo
+ *
+ * @author Hotstrip
  */
 public class JpomLogo implements ApplicationListener<ApplicationReadyEvent> {
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-        System.out.println(buildBannerText());
+        InputStream inputStream = ResourceUtil.getStream("jpom-logo.txt");
+        String logo = IoUtil.readUtf8(inputStream);
+        System.out.println(logo);
     }
-
-    private static final String JPOM_LOGO = "\n" +
-            "       _                       \n" +
-            "      | |                      \n" +
-            "      | |_ __   ___  _ __ ___  \n" +
-            "  _   | | '_ \\ / _ \\| '_ ` _ \\ \n" +
-            " | |__| | |_) | (_) | | | | | |\n" +
-            "  \\____/| .__/ \\___/|_| |_| |_|\n" +
-            "        | |                    \n" +
-            "        |_|                    \n";
-
-    /**
-     * @return jpom logo banner
-     * @see JpomManifest#getVersion()
-     */
-    private String buildBannerText() {
-        String lineSeparator = FileUtil.getLineSeparator();
-        return lineSeparator
-                + JPOM_LOGO
-                + lineSeparator
-                + " :: Jpom :: (v" + VersionUtils.getVersion(getClass(), JpomManifest.getInstance().getVersion()) + ")"
-                + lineSeparator;
-    }
-
 }
