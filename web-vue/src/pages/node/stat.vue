@@ -58,126 +58,131 @@
           </div>
         </a-space>
         <a-row :gutter="[16, 16]">
-          <a-col v-for="item in list" :key="item.id" :span="6">
-            <template>
-              <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
-                <template slot="title">
-                  <a-row :gutter="[4, 0]">
-                    <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
-                      <a-tooltip>
-                        <template slot="title">
-                          <div>节点名称：{{ item.name }}</div>
-                          <div>节点地址：{{ item.url }}</div>
-                        </template>
-                        {{ item.name }}
+          <template v-if="list && list.length">
+            <a-col v-for="item in list" :key="item.id" :span="6">
+              <template>
+                <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
+                  <template slot="title">
+                    <a-row :gutter="[4, 0]">
+                      <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                        <a-tooltip>
+                          <template slot="title">
+                            <div>节点名称：{{ item.name }}</div>
+                            <div>节点地址：{{ item.url }}</div>
+                          </template>
+                          {{ item.name }}
+                        </a-tooltip>
+                      </a-col>
+                      <a-col :span="7" style="text-align: right">
+                        <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.status === 0 ? '' : '异常描述：' + item.failureMsg} `">
+                          <a-tag :color="item.status === 0 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
+                        </a-tooltip>
+                      </a-col>
+                    </a-row>
+                  </template>
+
+                  <a-row :gutter="[8, 8]">
+                    <a-col :span="8">
+                      <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
+                        <a-progress
+                          type="circle"
+                          :width="80"
+                          :stroke-color="{
+                            '0%': '#87d068',
+                            '30%': '#87d068',
+                            '100%': '#108ee9',
+                          }"
+                          size="small"
+                          status="active"
+                          :percent="item.occupyCpu"
+                        />
                       </a-tooltip>
                     </a-col>
-                    <a-col :span="7" style="text-align: right">
-                      <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.status === 0 ? '' : '异常描述：' + item.failureMsg} `">
-                        <a-tag :color="item.status === 0 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
+                    <a-col :span="8">
+                      <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
+                        <a-progress
+                          type="circle"
+                          :width="80"
+                          :stroke-color="{
+                            '0%': '#87d068',
+                            '30%': '#87d068',
+                            '100%': '#108ee9',
+                          }"
+                          size="small"
+                          status="active"
+                          :percent="item.occupyDisk"
+                        />
+                      </a-tooltip>
+                    </a-col>
+                    <a-col :span="8">
+                      <a-tooltip
+                        @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')"
+                        :title="`内存占用率：${item.occupyMemoryUsed && item.occupyMemoryUsed !== -1 ? item.occupyMemoryUsed : item.occupyMemory}%`"
+                      >
+                        <a-progress
+                          :width="80"
+                          type="circle"
+                          :stroke-color="{
+                            '0%': '#87d068',
+                            '30%': '#87d068',
+                            '100%': '#108ee9',
+                          }"
+                          size="small"
+                          status="active"
+                          :percent="item.occupyMemoryUsed && item.occupyMemoryUsed !== -1 ? item.occupyMemoryUsed : item.occupyMemory"
+                        />
                       </a-tooltip>
                     </a-col>
                   </a-row>
-                </template>
 
-                <a-row :gutter="[8, 8]">
-                  <a-col :span="8">
-                    <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
-                      <a-progress
-                        type="circle"
-                        :width="80"
-                        :stroke-color="{
-                          '0%': '#87d068',
-                          '30%': '#87d068',
-                          '100%': '#108ee9',
-                        }"
-                        size="small"
-                        status="active"
-                        :percent="item.occupyCpu"
-                      />
-                    </a-tooltip>
-                  </a-col>
-                  <a-col :span="8">
-                    <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
-                      <a-progress
-                        type="circle"
-                        :width="80"
-                        :stroke-color="{
-                          '0%': '#87d068',
-                          '30%': '#87d068',
-                          '100%': '#108ee9',
-                        }"
-                        size="small"
-                        status="active"
-                        :percent="item.occupyDisk"
-                      />
-                    </a-tooltip>
-                  </a-col>
-                  <a-col :span="8">
-                    <a-tooltip
-                      @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')"
-                      :title="`内存占用率：${item.occupyMemoryUsed && item.occupyMemoryUsed !== -1 ? item.occupyMemoryUsed : item.occupyMemory}%`"
-                    >
-                      <a-progress
-                        :width="80"
-                        type="circle"
-                        :stroke-color="{
-                          '0%': '#87d068',
-                          '30%': '#87d068',
-                          '100%': '#108ee9',
-                        }"
-                        size="small"
-                        status="active"
-                        :percent="item.occupyMemoryUsed && item.occupyMemoryUsed !== -1 ? item.occupyMemoryUsed : item.occupyMemory"
-                      />
-                    </a-tooltip>
-                  </a-col>
-                </a-row>
-
-                <a-row :gutter="[8, 8]" style="text-align: center">
-                  <a-col :span="8">
-                    <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'networkTime')" :title="`${item.status === 4 ? '-' : '延迟' + item.networkTime + 'ms 点击查看历史趋势'}`">
-                      <a-statistic
-                        title="延迟"
-                        :value="item.networkTime"
-                        valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                        :formatter="
-                          (v) => {
-                            return item.networkTime === -1 ? '-' : item.networkTime + 'ms';
-                          }
-                        "
-                      />
-                    </a-tooltip>
-                  </a-col>
-                  <a-col :span="8">
-                    <a-tooltip :title="formatDuration(item.upTimeStr) || '-'">
-                      <a-statistic
-                        title="运行时间"
-                        valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                        :formatter="
-                          (v) => {
-                            return formatDuration(item.upTimeStr, '', 1) || '-';
-                          }
-                        "
-                      />
-                    </a-tooltip>
-                  </a-col>
-                  <a-col :span="8">
-                    <a-tooltip :title="`${item.status === 4 ? '-' : parseTime(item.modifyTimeMillis)}`">
-                      <a-statistic
-                        title="更新时间"
-                        valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                        :formatter="
-                          (v) => {
-                            return item.status === 4 ? '-' : parseTime(item.modifyTimeMillis, '{h}:{i}:{s}');
-                          }
-                        "
-                      />
-                    </a-tooltip>
-                  </a-col>
-                </a-row>
-              </a-card>
-            </template>
+                  <a-row :gutter="[8, 8]" style="text-align: center">
+                    <a-col :span="8">
+                      <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'networkTime')" :title="`${item.status === 4 ? '-' : '延迟' + item.networkTime + 'ms 点击查看历史趋势'}`">
+                        <a-statistic
+                          title="延迟"
+                          :value="item.networkTime"
+                          valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+                          :formatter="
+                            (v) => {
+                              return item.networkTime === -1 ? '-' : item.networkTime + 'ms';
+                            }
+                          "
+                        />
+                      </a-tooltip>
+                    </a-col>
+                    <a-col :span="8">
+                      <a-tooltip :title="formatDuration(item.upTimeStr) || '-'">
+                        <a-statistic
+                          title="运行时间"
+                          valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+                          :formatter="
+                            (v) => {
+                              return formatDuration(item.upTimeStr, '', 1) || '-';
+                            }
+                          "
+                        />
+                      </a-tooltip>
+                    </a-col>
+                    <a-col :span="8">
+                      <a-tooltip :title="`${item.status === 4 ? '-' : parseTime(item.modifyTimeMillis)}`">
+                        <a-statistic
+                          title="更新时间"
+                          valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+                          :formatter="
+                            (v) => {
+                              return item.status === 4 ? '-' : parseTime(item.modifyTimeMillis, '{h}:{i}:{s}');
+                            }
+                          "
+                        />
+                      </a-tooltip>
+                    </a-col>
+                  </a-row>
+                </a-card>
+              </template>
+            </a-col>
+          </template>
+          <a-col v-else :span="24">
+            <a-empty description="没有任何节点" />
           </a-col>
           <!-- v-if="this.listQuery.total / this.listQuery.limit > 1" -->
         </a-row>
