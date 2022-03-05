@@ -42,7 +42,6 @@ import io.jpom.model.data.UserModel;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.system.WorkspaceService;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import io.jpom.system.extconf.DbExtConfig;
@@ -93,7 +92,7 @@ public class InitDb implements DisposableBean, InitializingBean, SignalHandler {
         setting.set("maxWait", dbExtConfig.getMaxWait() + "");
         setting.set("minIdle", dbExtConfig.getMinIdle() + "");
         // 调试模式显示sql 信息
-        if (!ConfigBean.getInstance().isPro()) {
+        if (dbExtConfig.getShowSql()) {
 
             setting.set(SqlLog.KEY_SHOW_SQL, "true");
 			/*
