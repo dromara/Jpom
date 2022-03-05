@@ -72,6 +72,7 @@ import java.util.Set;
 public class OperateLogController implements AopLogInterface {
     private static final ThreadLocal<CacheInfo> CACHE_INFO_THREAD_LOCAL = new ThreadLocal<>();
 
+    private DbUserOperateLogService dbUserOperateLogService;
 
     @PreLoadMethod
     private static void init() {
@@ -104,6 +105,10 @@ public class OperateLogController implements AopLogInterface {
         cacheInfo.setOptTime(SystemClock.now());
         cacheInfo.setResultCode(feature.resultCode());
         cacheInfo.setLogResponse(feature.logResponse());
+        //
+        if (dbUserOperateLogService == null) {
+            dbUserOperateLogService = SpringUtil.getBean(DbUserOperateLogService.class);
+        }
         return cacheInfo;
     }
 
@@ -134,6 +139,11 @@ public class OperateLogController implements AopLogInterface {
             allData.put("request_url", request.getRequestURI());
             //
             cacheInfo.reqData = JSONObject.toJSONString(allData);
+            //
+            if (cacheInfo.methodFeature == MethodFeature.DEL) {
+                // 删除数据 提前查询出操作到数据相关信息
+                cacheInfo.optDataNameMap = dbUserOperateLogService.buildDataMsg(cacheInfo.classFeature, cacheInfo.dataId, cacheInfo.nodeModel == null ? null : cacheInfo.nodeModel.getId());
+            }
             CACHE_INFO_THREAD_LOCAL.set(cacheInfo);
         }
     }
@@ -247,8 +257,7 @@ public class OperateLogController implements AopLogInterface {
         //
         try {
             BaseServerController.resetInfo(UserModel.EMPTY);
-            DbUserOperateLogService dbUserOperateLogService = SpringUtil.getBean(DbUserOperateLogService.class);
-            dbUserOperateLogService.insert(userOperateLogV1);
+            dbUserOperateLogService.insert(userOperateLogV1, cacheInfo);
         } finally {
             BaseServerController.removeEmpty();
         }
@@ -293,5 +302,9 @@ public class OperateLogController implements AopLogInterface {
         private String reqData;
         private int[] resultCode;
         private Boolean logResponse;
+        /**
+         * 操作到数据到名称相关 map
+         */
+        private Map<String, Object> optDataNameMap;
     }
 }

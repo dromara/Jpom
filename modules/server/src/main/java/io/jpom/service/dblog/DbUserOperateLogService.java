@@ -22,7 +22,7 @@
  */
 package io.jpom.service.dblog;
 
-import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.BeanPath;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -42,12 +42,12 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.monitor.NotifyUtil;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.service.h2db.BaseDbCommonService;
 import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.monitor.MonitorUserOptService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.UserService;
+import io.jpom.system.init.OperateLogController;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,10 +64,14 @@ import java.util.stream.Collectors;
  */
 @Service
 public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLogV1> {
-    
+
     private final MonitorUserOptService monitorUserOptService;
     private final UserService userService;
     private final WorkspaceService workspaceService;
+    /**
+     * 通用 bean 的名称字段 bean-path
+     */
+    private static final BeanPath[] NAME_BEAN_PATHS = new BeanPath[]{BeanPath.create("name"), BeanPath.create("title")};
 
     public DbUserOperateLogService(MonitorUserOptService monitorUserOptService,
                                    UserService userService,
@@ -77,7 +81,31 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
         this.workspaceService = workspaceService;
     }
 
-    private Map<String, Object> buildDataMsg(ClassFeature classFeature, UserOperateLogV1 userOperateLogV1) {
+    /**
+     * 根据 数据ID 和 节点ID 查询相关数据名称
+     *
+     * @param classFeature     功能
+     * @param cacheInfo        操作缓存
+     * @param userOperateLogV1 操作日志
+     * @return map
+     */
+    private Map<String, Object> buildDataMsg(ClassFeature classFeature, OperateLogController.CacheInfo cacheInfo, UserOperateLogV1 userOperateLogV1) {
+        Map<String, Object> optDataNameMap = cacheInfo.getOptDataNameMap();
+        if (optDataNameMap != null) {
+            return optDataNameMap;
+        }
+        return this.buildDataMsg(classFeature, userOperateLogV1.getDataId(), userOperateLogV1.getNodeId());
+    }
+
+    /**
+     * 根据 数据ID 和 节点ID 查询相关数据名称
+     *
+     * @param classFeature 功能
+     * @param dataId       数据ID
+     * @param nodeId       节点ID
+     * @return map
+     */
+    public Map<String, Object> buildDataMsg(ClassFeature classFeature, String dataId, String nodeId) {
         if (classFeature == null) {
             return null;
         }
@@ -86,31 +114,30 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
             return null;
         }
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("数据id", userOperateLogV1.getDataId());
-        BaseDbCommonService<?> baseDbCommonService = SpringUtil.getBean(dbService);
-        Object data = baseDbCommonService.getByKey(userOperateLogV1.getDataId());
-        if (data != null) {
-            Object name = BeanUtil.getProperty(data, "name");
-            if (name != null) {
-                map.put("数据名称", name);
-            } else {
-                name = BeanUtil.getProperty(data, "title");
-                map.put("数据名称", name);
-            }
-        }
+        map.put("数据id", dataId);
+        BaseDbService<?> baseDbCommonService = SpringUtil.getBean(dbService);
+        Object data = baseDbCommonService.getData(nodeId, dataId);
+        map.put("数据名称", this.tryGetBeanName(data));
         //
-        map.put("节点id", userOperateLogV1.getNodeId());
+        map.put("节点id", nodeId);
         ClassFeature parent = classFeature.getParent();
         if (parent == ClassFeature.NODE) {
             Class<? extends BaseDbService<?>> dbServiceParent = parent.getDbService();
-            BaseDbCommonService<?> baseDbCommonServiceParent = SpringUtil.getBean(dbServiceParent);
-            Object dataParent = baseDbCommonServiceParent.getByKey(userOperateLogV1.getNodeId());
-            Object name = BeanUtil.getProperty(dataParent, "name");
-            if (name != null) {
-                map.put("节点名称", name);
-            }
+            BaseDbService<?> baseDbCommonServiceParent = SpringUtil.getBean(dbServiceParent);
+            Object dataParent = baseDbCommonServiceParent.getData(nodeId, dataId);
+            map.put("节点名称", this.tryGetBeanName(dataParent));
         }
         return map;
+    }
+
+    private Object tryGetBeanName(Object data) {
+        for (BeanPath beanPath : NAME_BEAN_PATHS) {
+            Object o = beanPath.get(data);
+            if (o != null) {
+                return o;
+            }
+        }
+        return null;
     }
 
     private String buildContent(UserModel optUserItem, Map<String, Object> dataMap, WorkspaceModel workspaceModel, String optTypeMsg, UserOperateLogV1 userOperateLogV1) {
@@ -134,14 +161,20 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
         return CollUtil.join(list, StrUtil.LF);
     }
 
-    private void checkMonitor(UserOperateLogV1 userOperateLogV1) {
+    /**
+     * 判断当前操作是否需要报警
+     *
+     * @param userOperateLogV1 操作信息
+     * @param cacheInfo        操作缓存相关
+     */
+    private void checkMonitor(UserOperateLogV1 userOperateLogV1, OperateLogController.CacheInfo cacheInfo) {
         ClassFeature classFeature = EnumUtil.fromString(ClassFeature.class, userOperateLogV1.getClassFeature(), null);
         MethodFeature methodFeature = EnumUtil.fromString(MethodFeature.class, userOperateLogV1.getMethodFeature(), null);
         UserModel optUserItem = userService.getByKey(userOperateLogV1.getUserId());
         if (classFeature == null || methodFeature == null || optUserItem == null) {
             return;
         }
-        Map<String, Object> dataMap = this.buildDataMsg(classFeature, userOperateLogV1);
+        Map<String, Object> dataMap = this.buildDataMsg(classFeature, cacheInfo, userOperateLogV1);
         WorkspaceModel workspaceModel = workspaceService.getByKey(userOperateLogV1.getWorkspaceId());
 
         String optTypeMsg = StrUtil.format(" 【{}】->【{}】", classFeature.getName(), methodFeature.getName());
@@ -204,12 +237,17 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
         }
     }
 
-    @Override
-    public void insert(UserOperateLogV1 userOperateLogV1) {
+    /**
+     * 插入操作日志
+     *
+     * @param userOperateLogV1 日志信息
+     * @param cacheInfo        当前操作相关信息
+     */
+    public void insert(UserOperateLogV1 userOperateLogV1, OperateLogController.CacheInfo cacheInfo) {
         super.insert(userOperateLogV1);
         ThreadUtil.execute(() -> {
             try {
-                this.checkMonitor(userOperateLogV1);
+                this.checkMonitor(userOperateLogV1, cacheInfo);
             } catch (Exception e) {
                 DefaultSystemLog.getLog().error("执行操作监控错误", e);
             }

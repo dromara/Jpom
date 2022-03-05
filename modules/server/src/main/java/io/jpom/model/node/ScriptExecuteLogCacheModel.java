@@ -22,65 +22,61 @@
  */
 package io.jpom.model.node;
 
+import cn.hutool.core.annotation.PropIgnore;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.service.h2db.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author bwcx_jzy
  * @since 2021/12/12
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "SCRIPT_EXECUTE_LOG", name = "节点脚本模版执行记录")
+@Data
 public class ScriptExecuteLogCacheModel extends BaseNodeModel {
 
-	/**
-	 * 脚本ID
-	 */
-	private String scriptId;
-	/**
-	 * 脚本名称
-	 */
-	private String scriptName;
-	/**
-	 * 触发类型 {0，手动，1 自动触发}
-	 */
-	private Integer triggerExecType;
+    /**
+     *
+     */
+    @PropIgnore
+    private String name;
+    /**
+     * 脚本ID
+     */
+    private String scriptId;
+    /**
+     * 脚本名称
+     */
+    private String scriptName;
+    /**
+     * 触发类型 {0，手动，1 自动触发}
+     */
+    private Integer triggerExecType;
 
-	@Override
-	public String fullId() {
-		throw new IllegalStateException("NO implements");
-	}
+    @Override
+    public String fullId() {
+        throw new IllegalStateException("NO implements");
+    }
 
-	public Integer getTriggerExecType() {
-		return triggerExecType;
-	}
+    public void setName(String name) {
+        this.name = name;
+        this.scriptName = name;
+    }
 
-	public void setTriggerExecType(Integer triggerExecType) {
-		this.triggerExecType = triggerExecType;
-	}
+    public void setScriptName(String scriptName) {
+        this.scriptName = scriptName;
+        this.name = scriptName;
+    }
 
-	public String getScriptName() {
-		return scriptName;
-	}
+    @Override
+    public String dataId() {
+        return getScriptId();
+    }
 
-	public void setScriptName(String scriptName) {
-		this.scriptName = scriptName;
-	}
-
-	public String getScriptId() {
-		return scriptId;
-	}
-
-	public void setScriptId(String scriptId) {
-		this.scriptId = scriptId;
-	}
-
-	@Override
-	public String dataId() {
-		return getScriptId();
-	}
-
-	@Override
-	public void dataId(String id) {
-		setScriptId(id);
-	}
+    @Override
+    public void dataId(String id) {
+        setScriptId(id);
+    }
 }
