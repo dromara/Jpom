@@ -27,20 +27,32 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.EnableCommonBoot;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.common.spring.event.ApplicationEventLoad;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.transport.DockerHttpClient;
+import io.jpom.common.Const;
 import io.jpom.common.Type;
 import io.jpom.common.interceptor.IpInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.OpenApiInterceptor;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.SystemIpConfigModel;
+import io.jpom.model.docker.DockerInfoModel;
+import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;
 import io.jpom.system.db.DbConfig;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+
+import java.net.URI;
+import java.time.Duration;
 
 /**
  * jpom 启动类
@@ -116,10 +128,36 @@ public class JpomServerApplication implements ApplicationEventLoad {
                 Console.log("There is no super administrator account in the system");
             }
         }
-        //
+        // 自动添加本机 docker
+		localDocker();
         Console.log("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
     }
 
+	private static void localDocker() {
+		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
+		URI dockerHost = config.getDockerHost();
+		String host = dockerHost.toString();
+		DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+				.dockerHost(dockerHost).connectionTimeout(Duration.ofSeconds(3)).build();
+		try {
+			DockerClientImpl.getInstance(config, httpClient).pingCmd().exec();
+			Entity entity = Entity.create();
+			entity.set("host", host);
+			entity.set("workspaceId", Const.WORKSPACE_DEFAULT_ID);
+			DockerInfoService dockerInfoService = SpringUtil.getBean(DockerInfoService.class);
+			boolean exists = dockerInfoService.exists(entity);
+			if (exists) {
+				Console.log("Local docker already exists");
+			} else {
+				DockerInfoModel.DockerInfoModelBuilder builder = DockerInfoModel.builder();
+				builder.host(host).name("localhost").status(1);
+				dockerInfoService.insert(builder.build());
+				Console.log("Automatically add local docker host: {}", dockerHost);
+			}
+		} catch (Exception e) {
+			Console.error(e, "There is no docker service local");
+		}
+	}
 
     @Override
     public void applicationLoad() {
