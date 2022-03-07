@@ -249,7 +249,7 @@ server {
 ```
 
 
-## 配置 maven 私服
+# 配置 maven 私服
 
 在 Java 中很多时候都需要配置 maven 私服来构建项目
 
