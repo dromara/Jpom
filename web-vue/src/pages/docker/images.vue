@@ -150,6 +150,38 @@
             </a-col>
           </a-row>
         </a-form-model-item>
+        <a-form-model-item label="环境变量">
+          <a-row v-for="(item, index) in temp.env" :key="index">
+            <a-col :span="10">
+              <a-input v-model="item.key" placeholder="变量名"/>
+            </a-col>
+            <a-col :span="10" :offset="1">
+              <a-input v-model="item.value" placeholder="变量值"/>
+            </a-col>
+            <a-col :span="2" :offset="1">
+              <a-space>
+                <a-icon
+                  type="minus-circle"
+                  v-if="temp.env && temp.env.length > 1"
+                  @click="
+                    () => {
+                      temp.env.splice(index, 1);
+                    }
+                  "
+                />
+
+                <a-icon
+                  type="plus-square"
+                  @click="
+                    () => {
+                      temp.env.push({});
+                    }
+                  "
+                />
+              </a-space>
+            </a-col>
+          </a-row>
+        </a-form-model-item>
         <a-form-model-item label="自动启动">
           <a-switch v-model="temp.autorun" checked-children="启动" un-checked-children="不启动" />
         </a-form-model-item>
@@ -165,6 +197,7 @@
 import { parseTime, renderSize } from "@/utils/time";
 import { dockerImagesList, dockerImageRemove, dockerImageInspect, dockerImageCreateContainer, dockerImagePullImage } from "@/api/docker-api";
 import PullImageLog from "@/pages/docker/pull-image-log";
+
 export default {
   components: {
     PullImageLog,
@@ -288,7 +321,7 @@ export default {
         this.temp = {
           volumes: [{}],
           exposedPorts: (res.data?.config?.exposedPorts || [{}]).map((item) => {
-            item.disabled = item.port;
+            item.disabled = item.port !== null;
             item.ip = "0.0.0.0";
             item.scheme = item.scheme || "tcp";
             return item;
@@ -296,6 +329,7 @@ export default {
           image: (record.repoTags || []).join(","),
           autorun: true,
           imageId: record.id,
+          env: [{}]
         };
       });
     },
@@ -310,6 +344,7 @@ export default {
           autorun: this.temp.autorun,
           imageId: this.temp.imageId,
           name: this.temp.name,
+          env: {}
         };
         temp.volumes = (this.temp.volumes || [])
           .filter((item) => {
@@ -328,7 +363,12 @@ export default {
             return item.ip + ":" + item.publicPort + ":" + item.port;
           })
           .join(",");
-        //
+        // 环境变量
+        this.temp.env.forEach((item) => {
+          if (item.key && item.key) {
+            temp.env[item.key] = item.value
+          }
+        })
         dockerImageCreateContainer(temp).then((res) => {
           if (res.code === 200) {
             this.$notification.success({
