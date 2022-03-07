@@ -34,14 +34,17 @@ import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.plugin.*;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -160,15 +163,14 @@ public class DockerImagesController extends BaseServerController {
 	 */
 	@PostMapping(value = "create-container", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
-	public String createContainer(@ValidatorItem String id, @ValidatorItem String imageId, @ValidatorItem String name, String autorun, String volumes, String exposedPorts) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+	public String createContainer(@RequestBody JSONObject jsonObject) throws Exception {
+		Assert.hasText(jsonObject.getString("id"), "id 不能为空");
+		Assert.hasText(jsonObject.getString("imageId"), "镜像不能为空");
+		Assert.hasText(jsonObject.getString("name"), "容器名称不能为空");
+		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(jsonObject.getString("id"), getRequest());
 		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
 		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("imageId", imageId);
-		parameter.put("autorun", autorun);
-		parameter.put("volumes", volumes);
-		parameter.put("name", name);
-		parameter.put("exposedPorts", exposedPorts);
+		parameter.putAll(jsonObject);
 		plugin.execute("createContainer", parameter);
 		return JsonMessage.getString(200, "创建成功");
 	}

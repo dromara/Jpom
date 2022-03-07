@@ -160,6 +160,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 			String exposedPorts = (String) parameter.get("exposedPorts");
 			String volumes = (String) parameter.get("volumes");
 			Object autorunStr = parameter.get("autorun");
+			Map<String, String> env = (Map<String, String>) parameter.get("env");
 			//
 			CreateContainerCmd containerCmd = dockerClient.createContainerCmd(imageId);
 			CreateContainerCmd createContainerCmd = containerCmd.withName(name);
@@ -178,6 +179,14 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 						.map(Bind::parse)
 						.collect(Collectors.toList());
 				hostConfig.withBinds(binds);
+			}
+			// 环境变量
+			if (env != null) {
+				List<String> envList = env.entrySet()
+						.stream()
+						.map(entry -> StrUtil.format("{}={}", entry.getKey(), entry.getValue()))
+						.collect(Collectors.toList());
+				containerCmd.withEnv(envList);
 			}
 			createContainerCmd.withHostConfig(hostConfig);
 			CreateContainerResponse containerResponse = containerCmd.exec();

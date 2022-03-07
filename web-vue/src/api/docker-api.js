@@ -191,6 +191,9 @@ export function dockerImageCreateContainer(params) {
   return axios({
     url: "/docker/images/create-container",
     method: "post",
+    headers: {
+        "Content-Type": "application/json",
+    },
     data: params,
   });
 }
