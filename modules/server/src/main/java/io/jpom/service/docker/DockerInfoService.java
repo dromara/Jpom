@@ -35,6 +35,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.Const;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.IAsyncLoad;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.docker.DockerSwarmInfoMode;
 import io.jpom.plugin.IPlugin;
@@ -91,6 +92,7 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
             builder.host(dockerHost).name("localhost").status(1);
             DockerInfoModel dockerInfoModel = builder.build();
             dockerInfoModel.setWorkspaceId(Const.WORKSPACE_DEFAULT_ID);
+            dockerInfoModel.setModifyUser(UserModel.SYSTEM_ADMIN);
             this.insert(dockerInfoModel);
             Console.log("Automatically add local docker host: {}", dockerHost);
         } catch (Exception e) {
