@@ -5,6 +5,7 @@
 ### 🐣 新增功能
 
 1. 【server】监控新增 webhook 字段（感谢@[wxyShine](https://gitee.com/wxyShine) ）
+2. 【server】新增自动添加本机 docker (感谢@💎ℳ๓₯㎕斌💎💘)
 
 ### 🐞 解决BUG、优化功能
 
