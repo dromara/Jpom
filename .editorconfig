@@ -24,3 +24,7 @@ end_of_line = crlf
 [*.vue]
 indent_style = space
 indent_size = 2
+
+[*.java]
+indent_style = space
+indent_size = 4
