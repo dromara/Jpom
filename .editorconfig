@@ -25,6 +25,6 @@ end_of_line = crlf
 indent_style = space
 indent_size = 2
 
-[*.{java,xml}]
+[*.{java,xml,sql}]
 indent_style = space
 indent_size = 4

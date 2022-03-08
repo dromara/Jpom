@@ -197,7 +197,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
      *
      * @param workspaceId 工作空间ID
      */
-    private void checkUserWorkspace(String workspaceId) {
+    public void checkUserWorkspace(String workspaceId) {
         UserModel userModel = BaseServerController.getUserByThreadLocal();
         this.checkUserWorkspace(workspaceId, userModel);
     }

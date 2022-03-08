@@ -22,11 +22,10 @@
  */
 package io.jpom.controller.system;
 
+import cn.hutool.core.map.MapUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
-import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.model.system.WorkspaceModel;
 import io.jpom.service.system.AgentWorkspaceService;
 import org.springframework.http.MediaType;
@@ -34,39 +33,73 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-import java.util.List;
-
 /**
- * @author jiangzeyin
- * @date 2019/4/16
+ * @author lidaofu
+ * @since 2022/3/8
  */
 @RestController
 @RequestMapping(value = "/system/workspace_env")
 public class AgentWorkspaceEnvVarController extends BaseAgentController {
-    @Resource
-    private AgentWorkspaceService agentWorkspaceService;
+
+    private final AgentWorkspaceService agentWorkspaceService;
+
+    public AgentWorkspaceEnvVarController(AgentWorkspaceService agentWorkspaceService) {
+        this.agentWorkspaceService = agentWorkspaceService;
+    }
 
     /**
      * 更新环境变量
-     * @param json 数据json
+     *
+     * @param name        名称
+     * @param value       值
+     * @param description 描述
      * @return json
      */
-    @PostMapping(value = "/updateWorkspaceEnvVar", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updateWorkspaceEnvVar(@ValidatorItem String json) {
+    @PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String updateWorkspaceEnvVar(@ValidatorItem String name,
+                                        @ValidatorItem String value,
+                                        @ValidatorItem String description) {
         String workspaceId = getWorkspaceId();
-        List<WorkspaceEnvVarModel> list = JSONObject.parseArray(json, WorkspaceEnvVarModel.class);
-        WorkspaceModel workspaceModel = new WorkspaceModel();
-        workspaceModel.setWorkspaceId(workspaceId);
-        workspaceModel.setList(list);
-        workspaceModel.setId(workspaceId);
-        WorkspaceModel item = agentWorkspaceService.getItem(workspaceId);
-        if (null==item){
-            agentWorkspaceService.addItem(workspaceModel);
-        }else {
-            agentWorkspaceService.updateItem(workspaceModel);
+        synchronized (AgentWorkspaceEnvVarController.class) {
+            WorkspaceModel.WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceModel.WorkspaceEnvVarModel();
+            workspaceEnvVarModel.setName(name);
+            workspaceEnvVarModel.setValue(value);
+            workspaceEnvVarModel.setDescription(description);
+            //
+            WorkspaceModel item = agentWorkspaceService.getItem(workspaceId);
+            if (null == item) {
+                item = new WorkspaceModel();
+                item.setVarData(MapUtil.of(name, workspaceEnvVarModel));
+                item.setName(workspaceId);
+                item.setId(workspaceId);
+                agentWorkspaceService.addItem(item);
+            } else {
+                item.put(name, workspaceEnvVarModel);
+                agentWorkspaceService.updateItem(item);
+            }
         }
-        return JsonMessage.getString(200, "缓存更新成功！");
+        return JsonMessage.getString(200, "更新成功");
+    }
+
+
+    /**
+     * 删除环境变量
+     *
+     * @param name 名称
+     * @return json
+     */
+    @PostMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String delete(@ValidatorItem String name) {
+        String workspaceId = getWorkspaceId();
+        synchronized (AgentWorkspaceEnvVarController.class) {
+            //
+            WorkspaceModel item = agentWorkspaceService.getItem(workspaceId);
+            if (null != item) {
+                item.remove(name);
+                agentWorkspaceService.updateItem(item);
+            }
+        }
+        return JsonMessage.getString(200, "删除成功");
     }
 
 }
