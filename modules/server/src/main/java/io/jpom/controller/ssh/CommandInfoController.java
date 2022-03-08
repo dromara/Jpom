@@ -83,10 +83,21 @@ public class CommandInfoController extends BaseServerController {
 	}
 
 	/**
-	 * 创建命令
+	 * 新建/编辑命令
 	 *
-	 * @param data 命令信息
-	 * @return result
+     * @param data 命令信息
+     * @return result
+     *
+     * @api {POST} node/ssh_command/edit 新建/编辑命令
+     * @apiGroup node/ssh_command
+     * @apiUse defResultJson
+     * @apiBody {String} name           命令名称
+     * @apiBody {String} command        命令内容
+     * @apiBody {String} [desc]         命令描述
+     * @apiBody {String} defParams      默认参数
+     * @apiBody {String} autoExecCron   定时构建表达式
+     * @apiBody {String} id             命令主键 ID
+     * @apiBody {String} [sshIds]       SSH 节点
 	 */
 	@RequestMapping(value = "edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
@@ -139,7 +150,12 @@ public class CommandInfoController extends BaseServerController {
 	 *
 	 * @param id id
 	 * @return result
-	 */
+     *
+     * @api {DELETE} node/ssh_command/del 删除命令
+     * @apiGroup node/ssh_command
+     * @apiUse defResultJson
+     * @apiParam {String} id 日志 id
+     */
 	@RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
 	public String del(String id) {
@@ -157,13 +173,21 @@ public class CommandInfoController extends BaseServerController {
 	 * 批量执行命令
 	 *
 	 * @return result
+     *
+     * @api {POST} node/ssh_command/batch 批量执行命令
+     * @apiGroup node/ssh_command
+     * @apiUse defResultJson
+     * @apiParam {String} id 命令 id
+     * @apiParam {String} [params] 参数
+     * @apiParam {String} nodes ssh节点
+     * @apiSuccess {String} data batchId
 	 */
 	@RequestMapping(value = "batch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String batch(String id,
 						String params,
 						@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "运行节点不能为空") String nodes) throws IOException {
-		Assert.hasText(id, "请选择执行对命令");
+		Assert.hasText(id, "请选择执行的命令");
 		Assert.hasText(nodes, "请选择执行节点");
 		String batchId = commandService.executeBatch(id, params, nodes);
 		return JsonMessage.getString(200, "操作成功", batchId);

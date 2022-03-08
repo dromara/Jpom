@@ -196,7 +196,14 @@ public enum NodeUrl {
 	Tomcat_File_Download("/tomcat/download"),
 	Tomcat_File_Upload("/tomcat/upload"),
 	Tomcat_File_UploadWar("/tomcat/uploadWar"),
-	/**
+
+    /**
+     * Workspace
+     */
+    Workspace_EnvVar_Update("/system/workspace_env/updateWorkspaceEnvVar"),
+
+
+    /**
 	 * 缓存
 	 */
 	Cache("/system/cache"),

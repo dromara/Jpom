@@ -96,15 +96,15 @@
     </a-modal>
     <!-- 环境变量编辑区 -->
     <a-modal v-model="editEnvVisible" title="编辑环境变量" @ok="handleEnvEditOk" :maskClosable="false">
-      <a-form-model ref="editEnvForm" :rules="rulesEnv" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form-model ref="editEnvForm" :rules="rulesEnv" :model="envTemp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="名称" prop="name">
-          <a-input v-model="temp.name" placeholder="变量名称" />
+          <a-input v-model="envTemp.name" placeholder="变量名称" />
         </a-form-model-item>
         <a-form-model-item label="值" prop="value">
-          <a-input v-model="temp.value" type="textarea" :rows="5" placeholder="变量值" />
+          <a-input v-model="envTemp.value" type="textarea" :rows="5" placeholder="变量值" />
         </a-form-model-item>
         <a-form-model-item label="描述" prop="description">
-          <a-input v-model="temp.description" type="textarea" :rows="5" placeholder="变量描述" />
+          <a-input v-model="envTemp.description" type="textarea" :rows="5" placeholder="变量描述" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -128,6 +128,7 @@ export default {
       envVarListVisible: false,
       editEnvVisible: false,
       temp: {},
+      envTemp: {},
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "描述", dataIndex: "description", ellipsis: true, scopedSlots: { customRender: "description" } },
@@ -246,11 +247,13 @@ export default {
     },
     viewEnvVar(record) {
       this.temp = record;
+      this.envTemp.workspaceId=this.temp.id;
+      this.envVarListQuery.workspaceId=record.id;
       this.envVarListVisible = true;
       this.loadDataEnvVar();
     },
     addEnvVar() {
-      this.temp = {};
+     this.envTemp.workspaceId=this.temp.id;
       this.editEnvVisible = true;
       this.$refs["editEnvForm"] && this.$refs["editEnvForm"].resetFields();
     },
@@ -264,7 +267,8 @@ export default {
       this.editVisible = true;
     },
     handleEnvEdit(record) {
-      this.temp = record;
+      this.envTemp = record;
+      this.envTemp.workspaceId=this.temp.id;
       this.editEnvVisible = true;
     },
     handleEditOk() {
@@ -290,7 +294,7 @@ export default {
         if (!valid) {
           return false;
         }
-        editWorkspaceEnv(this.temp).then((res) => {
+        editWorkspaceEnv(this.envTemp).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
