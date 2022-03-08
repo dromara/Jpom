@@ -24,6 +24,7 @@ package io.jpom.controller.system;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
@@ -79,6 +80,12 @@ public class WorkspaceEnvVarController extends BaseServerController {
     public String list() {
         workspaceEnvVarService.getCheckUserWorkspace(getRequest());
         PageResultDto<WorkspaceEnvVarModel> listPage = workspaceEnvVarService.listPage(getRequest());
+        listPage.each(workspaceEnvVarModel -> {
+            Integer privacy = workspaceEnvVarModel.getPrivacy();
+            if (privacy != null && privacy == 1) {
+                workspaceEnvVarModel.setValue(StrUtil.EMPTY);
+            }
+        });
         return JsonMessage.getString(200, "", listPage);
     }
 
@@ -96,16 +103,29 @@ public class WorkspaceEnvVarController extends BaseServerController {
     public String edit(String id,
                        @ValidatorItem String workspaceId,
                        @ValidatorItem String name,
-                       @ValidatorItem String value,
+                       String value,
                        @ValidatorItem String description,
+                       @ValidatorItem String privacy,
                        String nodeIds) {
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
 
         this.checkInfo(id, name, workspaceId);
+        boolean privacyBool = BooleanUtil.toBoolean(privacy);
         //
         WorkspaceEnvVarModel workspaceModel = new WorkspaceEnvVarModel();
         workspaceModel.setName(name);
-        workspaceModel.setValue(value);
+        if (privacyBool) {
+            if (StrUtil.isNotEmpty(value)) {
+                workspaceModel.setValue(value);
+            } else {
+                // 隐私字段 创建必填
+                Assert.state(StrUtil.isNotEmpty(id), "请填写参数值");
+            }
+        } else {
+            // 非隐私必填
+            Assert.hasText(value, "请填写参数值");
+            workspaceModel.setValue(value);
+        }
         workspaceModel.setWorkspaceId(workspaceId);
         workspaceModel.setNodeIds(nodeIds);
         workspaceModel.setDescription(description);
@@ -113,6 +133,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
         String oldNodeIds = null;
         if (StrUtil.isEmpty(id)) {
             // 创建
+            workspaceModel.setPrivacy(privacyBool ? 1 : 0);
             workspaceEnvVarService.insert(workspaceModel);
         } else {
             WorkspaceEnvVarModel byKey = workspaceEnvVarService.getByKey(id);
@@ -120,6 +141,8 @@ public class WorkspaceEnvVarController extends BaseServerController {
             Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择工作空间错误");
             oldNodeIds = byKey.getNodeIds();
             workspaceModel.setId(id);
+            // 不能修改
+            workspaceModel.setPrivacy(null);
             workspaceEnvVarService.update(workspaceModel);
         }
         this.syncNodeEnvVar(workspaceModel, oldNodeIds);

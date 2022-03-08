@@ -56,7 +56,7 @@
       </a-form-model>
     </a-modal>
     <!-- 环境变量 -->
-    <a-modal v-model="envVarListVisible" title="环境变量" width="80vw" :footer="null" :maskClosable="false">
+    <a-modal v-model="envVarListVisible" :title="`${temp.name} 工作空间环境变量`" width="80vw" :footer="null" :maskClosable="false">
       <div ref="filter" class="filter">
         <a-space>
           <a-input v-model="envVarListQuery['%name%']" placeholder="名称" @pressEnter="loadDataEnvVar" allowClear class="search-input-item" />
@@ -95,16 +95,26 @@
       </a-table>
     </a-modal>
     <!-- 环境变量编辑区 -->
-    <a-modal v-model="editEnvVisible" title="编辑环境变量" @ok="handleEnvEditOk" :maskClosable="false">
+    <a-modal v-model="editEnvVisible" title="编辑环境变量" width="50vw" @ok="handleEnvEditOk" :maskClosable="false">
       <a-form-model ref="editEnvForm" :rules="rulesEnv" :model="envTemp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="名称" prop="name">
           <a-input v-model="envTemp.name" placeholder="变量名称" />
         </a-form-model-item>
-        <a-form-model-item label="值" prop="value">
+        <a-form-model-item label="值" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
           <a-input v-model="envTemp.value" type="textarea" :rows="5" placeholder="变量值" />
         </a-form-model-item>
         <a-form-model-item label="描述" prop="description">
           <a-input v-model="envTemp.description" type="textarea" :rows="5" placeholder="变量描述" />
+        </a-form-model-item>
+        <a-form-model-item prop="privacy">
+          <template slot="label">
+            隐私变量
+            <a-tooltip v-show="!envTemp.id">
+              <template slot="title"> 隐私变量是指一些密码字段或者关键密钥等重要信息，隐私字段只能修改不能查看（编辑弹窗中无法看到对应值）。 隐私字段一旦创建后将不能切换为非隐私字段 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-switch v-model="envTemp.privacy" :disabled="envTemp.id" checked-children="隐私" un-checked-children="非隐私" />
         </a-form-model-item>
         <a-form-model-item>
           <template slot="label">
@@ -262,13 +272,18 @@ export default {
     },
     viewEnvVar(record) {
       this.temp = record;
-      this.envTemp.workspaceId = this.temp.id;
+      this.envTemp = {
+        workspaceId: this.temp.id,
+      };
       this.envVarListQuery.workspaceId = record.id;
       this.envVarListVisible = true;
       this.loadDataEnvVar();
     },
     addEnvVar() {
-      this.envTemp.workspaceId = this.temp.id;
+      this.envTemp = {
+        workspaceId: this.temp.id,
+      };
+
       this.editEnvVisible = true;
       this.$refs["editEnvForm"] && this.$refs["editEnvForm"].resetFields();
       this.getAllNodeList(this.envTemp.workspaceId);
