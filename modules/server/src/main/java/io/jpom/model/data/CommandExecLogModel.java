@@ -52,6 +52,7 @@ public class CommandExecLogModel extends BaseWorkspaceModel {
 	 * ssh Id
 	 */
 	private String sshId;
+
 	/**
 	 * @see Status
 	 */
@@ -71,10 +72,12 @@ public class CommandExecLogModel extends BaseWorkspaceModel {
 	 * 参数
 	 */
 	private String params;
+
 	/**
 	 * 触发类型 {0，手动，1 自动触发}
 	 */
 	private Integer triggerExecType;
+
 	/**
 	 * 日志文件是否存在
 	 */
