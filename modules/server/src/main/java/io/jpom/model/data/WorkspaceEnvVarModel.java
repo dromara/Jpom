@@ -54,4 +54,8 @@ public class WorkspaceEnvVarModel extends BaseWorkspaceModel {
      * 节点ID
      */
     private String nodeIds;
+    /**
+     * 隐私变量{1，隐私变量，0 非隐私变量（明文回显）}
+     */
+    private Integer privacy;
 }
