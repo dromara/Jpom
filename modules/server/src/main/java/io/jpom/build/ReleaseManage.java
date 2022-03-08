@@ -313,7 +313,7 @@ public class ReleaseManage implements Runnable {
         // 执行命令
         String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
         if (ArrayUtil.isEmpty(commands)) {
-            logRecorder.info("没有需要执行的ssh命令");
+            logRecorder.info("没有需要执行的命令");
             return;
         }
         String command = StrUtil.EMPTY;
