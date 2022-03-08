@@ -106,6 +106,20 @@
         <a-form-model-item label="描述" prop="description">
           <a-input v-model="envTemp.description" type="textarea" :rows="5" placeholder="变量描述" />
         </a-form-model-item>
+        <a-form-model-item>
+          <template slot="label">
+            分发节点
+            <a-tooltip v-show="!temp.id">
+              <template slot="title"> 分发节点是指将变量同步到对应节点，在节点脚本中也可以使用当前变量</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-select show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="envTemp.chooseNode">
+            <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
   </div>
@@ -114,7 +128,7 @@
 import { getWorkSpaceList, editWorkSpace, deleteWorkspace, getWorkspaceEnvList, editWorkspaceEnv, deleteWorkspaceEnv } from "@/api/workspace";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-
+import { getNodeListByWorkspace } from "@/api/node";
 export default {
   data() {
     return {
@@ -122,6 +136,7 @@ export default {
       envVarLoading: false,
       list: [],
       envVarList: [],
+      nodeList: [],
       envVarListQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       editVisible: false,
@@ -247,15 +262,16 @@ export default {
     },
     viewEnvVar(record) {
       this.temp = record;
-      this.envTemp.workspaceId=this.temp.id;
-      this.envVarListQuery.workspaceId=record.id;
+      this.envTemp.workspaceId = this.temp.id;
+      this.envVarListQuery.workspaceId = record.id;
       this.envVarListVisible = true;
       this.loadDataEnvVar();
     },
     addEnvVar() {
-     this.envTemp.workspaceId=this.temp.id;
+      this.envTemp.workspaceId = this.temp.id;
       this.editEnvVisible = true;
       this.$refs["editEnvForm"] && this.$refs["editEnvForm"].resetFields();
+      this.getAllNodeList(this.envTemp.workspaceId);
     },
     handleAdd() {
       this.temp = {};
@@ -268,8 +284,10 @@ export default {
     },
     handleEnvEdit(record) {
       this.envTemp = record;
-      this.envTemp.workspaceId=this.temp.id;
+      this.envTemp.workspaceId = this.temp.id;
+      this.envTemp = { ...this.envTemp, chooseNode: record.nodeIds ? record.nodeIds.split(",") : [] };
       this.editEnvVisible = true;
+      this.getAllNodeList(this.envTemp.workspaceId);
     },
     handleEditOk() {
       this.$refs["editForm"].validate((valid) => {
@@ -294,6 +312,7 @@ export default {
         if (!valid) {
           return false;
         }
+        this.envTemp.nodeIds = this.envTemp?.chooseNode?.join(",");
         editWorkspaceEnv(this.envTemp).then((res) => {
           if (res.code === 200) {
             // 成功
@@ -363,6 +382,14 @@ export default {
             }
           });
         },
+      });
+    },
+    // 获取所有节点
+    getAllNodeList(workspaceId) {
+      getNodeListByWorkspace({
+        workspaceId: workspaceId,
+      }).then((res) => {
+        this.nodeList = res.data || [];
       });
     },
   },

@@ -22,10 +22,10 @@
  */
 package io.jpom.controller.system;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
@@ -35,6 +35,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -48,6 +49,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -82,6 +84,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
 
     /**
      * 编辑变量
+     *
      * @param workspaceId 空间id
      * @param name        变量名称
      * @param value       值
@@ -90,32 +93,69 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @PostMapping(value = "/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String edit(String id, @ValidatorItem String workspaceId, @ValidatorItem String name, @ValidatorItem String value, @ValidatorItem String description) {
-        workspaceEnvVarService.getCheckUserWorkspace(getRequest());
+    public String edit(String id,
+                       @ValidatorItem String workspaceId,
+                       @ValidatorItem String name,
+                       @ValidatorItem String value,
+                       @ValidatorItem String description,
+                       String nodeIds) {
+        workspaceEnvVarService.checkUserWorkspace(workspaceId);
+
         this.checkInfo(id, name, workspaceId);
         //
         WorkspaceEnvVarModel workspaceModel = new WorkspaceEnvVarModel();
         workspaceModel.setName(name);
         workspaceModel.setValue(value);
         workspaceModel.setWorkspaceId(workspaceId);
+        workspaceModel.setNodeIds(nodeIds);
         workspaceModel.setDescription(description);
+        //
+        String oldNodeIds = null;
         if (StrUtil.isEmpty(id)) {
             // 创建
             workspaceEnvVarService.insert(workspaceModel);
         } else {
+            WorkspaceEnvVarModel byKey = workspaceEnvVarService.getByKey(id);
+            Assert.notNull(byKey, "没有对应的数据");
+            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择工作空间错误");
+            oldNodeIds = byKey.getNodeIds();
             workspaceModel.setId(id);
             workspaceEnvVarService.update(workspaceModel);
         }
-        List<NodeModel> nodeModels = nodeService.listByWorkspace(getRequest());
-        List<WorkspaceEnvVarModel> workspaceEnvVarModels = workspaceEnvVarService.listByWorkspaceId(workspaceId);
-        for (NodeModel model : nodeModels) {
-            try {
-                NodeForward.requestBySys(model, NodeUrl.Workspace_EnvVar_Update, "json", JSONObject.toJSONString(workspaceEnvVarModels));
-            } catch (Exception e) {
-                DefaultSystemLog.getLog().warn("节点：" + model.getName() + "连接失败！", e);
-            }
-        }
+        this.syncNodeEnvVar(workspaceModel, oldNodeIds);
         return JsonMessage.getString(200, "操作成功");
+    }
+
+    private void syncDelNodeEnvVar(String name, UserModel user, Collection<String> delNode, String workspaceId) {
+        for (String s : delNode) {
+            NodeModel byKey = nodeService.getByKey(s);
+            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择节点错误");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("name", name);
+            JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Delete, user, jsonObject);
+            Assert.state(jsonMessage.getCode() == 200, "处理 " + byKey.getName() + " 节点删除脚本失败" + jsonMessage.getMsg());
+        }
+    }
+
+    private void syncNodeEnvVar(WorkspaceEnvVarModel workspaceEnvVarModel, String oldNode) {
+        String workspaceId = workspaceEnvVarModel.getWorkspaceId();
+        List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
+        List<String> newNodeIds = StrUtil.splitTrim(workspaceEnvVarModel.getNodeIds(), StrUtil.COMMA);
+        Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
+        UserModel user = getUser();
+        // 删除
+        this.syncDelNodeEnvVar(workspaceEnvVarModel.getName(), user, delNode, workspaceId);
+        // 更新
+        for (String newNodeId : newNodeIds) {
+            NodeModel byKey = nodeService.getByKey(newNodeId);
+            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择节点错误");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("description", workspaceEnvVarModel.getDescription());
+            jsonObject.put("name", workspaceEnvVarModel.getName());
+            jsonObject.put("value", workspaceEnvVarModel.getValue());
+            JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Update, user, jsonObject);
+            Assert.state(jsonMessage.getCode() == 200, "处理 " + byKey.getName() + " 节点同步脚本失败" + jsonMessage.getMsg());
+        }
     }
 
     private void checkInfo(String id, String name, String workspaceId) {
@@ -140,10 +180,17 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @GetMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
-        workspaceEnvVarService.getCheckUserWorkspace(getRequest());
+    public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id,
+                         @ValidatorItem String workspaceId) {
+        workspaceEnvVarService.checkUserWorkspace(workspaceId);
+        WorkspaceEnvVarModel byKey = workspaceEnvVarService.getByKey(id);
+        Assert.notNull(byKey, "没有对应的数据");
+        Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择工作空间错误");
+        String oldNodeIds = byKey.getNodeIds();
+        List<String> delNode = StrUtil.splitTrim(oldNodeIds, StrUtil.COMMA);
+        this.syncDelNodeEnvVar(byKey.getName(), getUser(), delNode, workspaceId);
         // 删除信息
-        workspaceEnvVarService.delByKey(id, getRequest());
+        workspaceEnvVarService.delByKey(id);
         return JsonMessage.getString(200, "删除成功");
     }
 }

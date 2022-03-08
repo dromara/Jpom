@@ -24,6 +24,8 @@ package io.jpom.model.data;
 
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 工作空间环境变量
@@ -31,36 +33,25 @@ import io.jpom.service.h2db.TableName;
  * @author bwcx_jzy
  * @date 2021/12/10
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "WORKSPACE_ENV_VAR", name = "工作空间环境变量")
+@Data
 public class WorkspaceEnvVarModel extends BaseWorkspaceModel {
 
-	private String name;
-
-	private String value;
-
-	private String description;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    /**
+     * 名称
+     */
+    private String name;
+    /**
+     * 值
+     */
+    private String value;
+    /**
+     * 描述
+     */
+    private String description;
+    /**
+     * 节点ID
+     */
+    private String nodeIds;
 }
