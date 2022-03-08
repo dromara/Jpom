@@ -8,7 +8,7 @@
 ├── docs      		=> 一键安装的命令脚本以及版本号文件
 ├── modules   		=> java 后端目录（agent、server）
    ├── agent 		=> 插件端代码
-   ├── commone 		=> 这个项目的公共模块（插件端、服务端都依赖该模块）
+   ├── common 		=> 这个项目的公共模块（插件端、服务端都依赖该模块）
    ├── server 		=> 服务端代码
    ├── sub-plugin 	=> 插件模块
 ├── script    		=> 一些通用脚本
@@ -31,6 +31,7 @@
 5. Java 代码、方法需要遵循小驼峰法
 6. Java 类名需要遵循大驼峰法
 7. 前端项目统一采用 `prettier` 方式来格式化（需要安装插件）
+8. 所有 controller 层的接口都需要添加文档注释（至少包含接口的作用说明、参数说明、返回值说明及添加 apiDoc 文档注释）
 
 > 注：由于旧代码存在很多不规范问题，会逐步调整为新规范。在新写的代码都需要需要遵循上面说明
 > 
@@ -66,11 +67,45 @@
 5. 可以视情况添加其他说明：如提交记录
 6. emoji 表情参考：[https://emojixd.com/](https://emojixd.com/)
 
+## apiDoc 文档注释规范
+### 【强制】所有需要包含在 apiDoc 文档中的接口，都必须有 `@api` 文档标记
+说明：如果没有 `@api` 文档标记，则定义的文档不会出现在生成后的 apiDoc 文档中。
+
+### 【强制】所有 apiDoc 的文档标记必须定义在 javaDoc 标记的后面
+说明：如果先定义 javaDoc 文档标记，再定义 apiDoc 的文档标记，则 javaDoc 的标记可能会包含在 apiDoc 的标记属性中，这并不是我们想要的结果。
+
+正例：
+```
+/**
+* @author hjk
+* @api {method} path title
+* @apiParam {Number} id Users unique ID.
+*/
+```
+
+反例：
+
+说明：参数 id 的说明应该是 Users unique ID. 如果这样定义则变成了 Users unique ID.@author hjk
+```
+/**
+* @api {method} path title
+* @apiParam {Number} id Users unique ID.
+* @author hjk
+*/
+```
+
+### 【强制】定义通用文档块
+
+说明：使用 `@apiDefine` 定义通用的文档块，然后使用 `@apiUse` 来引用，增强文档块的复用性。
+
+所有的文档块统一定义在 `server` 模块下的 `io.jpom.ApiDoc`
+
+
 ## 分支说明
 
-1. 新功能都提交到 dev 分支, 不能直接提交到 master 分支
-2. PR 只接收 dev 分支
-3. 一般功能开发可以直接提交到 dev 分支，较大功能开发建议新开发分支提交
+1. 新功能都提交到 dev 分支, 不能提交到 master 分支
+2. PR 提交到 dev 分支
+3. 一般功能开发可以直接提交到 dev 分支，较大功能开发需要新建分支提交
 
 ## 需要的小组
 

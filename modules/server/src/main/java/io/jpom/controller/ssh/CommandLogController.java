@@ -74,10 +74,15 @@ public class CommandLogController extends BaseServerController {
 	}
 
 	/**
-	 * 删除命令
+	 * 删除日志记录
 	 *
 	 * @param id id
 	 * @return result
+     *
+     * @api {POST} node/ssh_command_log/del 删除日志记录
+     * @apiGroup node/ssh_command_log
+     * @apiUse defResultJson
+     * @apiParam {String} id 记录 id
 	 */
 	@RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
@@ -93,11 +98,27 @@ public class CommandLogController extends BaseServerController {
 	}
 
 	/**
-	 * 删除命令
+	 * 命令执行记录
 	 *
 	 * @param commandId 命令ID
 	 * @param batchId   批次ID
 	 * @return result
+     *
+     * @api {GET}  node/ssh_command_log/batch_list 命令执行记录
+     * @apiGroup node/ssh_command_log
+     * @apiUse defResultJson
+     * @apiParam {String} commandId 命令ID
+     * @apiParam {String} batchId 批次ID
+     * @apiSuccess {Object} commandExecLogModels 命令执行记录
+     * @apiSuccess {String} commandExecLogModels.commandId 命令ID
+     * @apiSuccess {String} commandExecLogModels.batchId 批次ID
+     * @apiSuccess {String} commandExecLogModels.sshId ssh Id
+     * @apiSuccess {Number} commandExecLogModels.status Status
+     * @apiSuccess {String} commandExecLogModels.commandName 命令名称
+     * @apiSuccess {String} commandExecLogModels.sshName ssh 名称
+     * @apiSuccess {String} commandExecLogModels.params 参数
+     * @apiSuccess {Number} commandExecLogModels.triggerExecType 触发类型 {0，手动，1 自动触发}
+     * @apiSuccess {Boolean} commandExecLogModels.hasLog 日志文件是否存在
 	 */
 	@GetMapping(value = "batch_list", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
@@ -116,6 +137,13 @@ public class CommandLogController extends BaseServerController {
 	 * @param id   id
 	 * @param line 需要获取的行号
 	 * @return json
+     *
+     * @api {POST} node/ssh_command_log/log 获取日志
+     * @apiGroup node/ssh_command_log
+     * @apiUse defResultJson
+     * @apiParam {String} id 日志 id
+     * @apiParam {Number} line 需要获取的行号
+     * @apiSuccess {Boolean} run 运行状态
 	 */
 	@RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
@@ -138,6 +166,17 @@ public class CommandLogController extends BaseServerController {
 		return JsonMessage.getString(200, "", data);
 	}
 
+    /**
+     * 下载日志
+     *
+     * @param logId 日志 id
+     *
+     * @api {GET} node/ssh_command_log/download_log 下载日志
+     * @apiGroup node/ssh_command_log
+     * @apiUse defResultJson
+     * @apiParam {String} logId 日志 id
+     * @apiSuccess {File} file 日志文件
+     */
 	@RequestMapping(value = "download_log", method = RequestMethod.GET)
 	@ResponseBody
 	@Feature(method = MethodFeature.DOWNLOAD)
