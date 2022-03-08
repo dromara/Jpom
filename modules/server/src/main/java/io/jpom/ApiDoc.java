@@ -23,13 +23,18 @@
 package io.jpom;
 
 /**
+ * apiDoc 通用文档块
+ *
  * @author bwcx_jzy
  * @since 2022/2/28
  */
-public class ApiDoc {
+public interface ApiDoc {
 
     /**
+     * 登录用户返回消息体
+     *
      * @author bwcx_jzy
+     *
      * @apiDefine loginUser
      * @apiUse defResultJson
      * @apiHeader {String} Authorization 用户token
@@ -39,20 +44,21 @@ public class ApiDoc {
      * @apiSuccess (302) {none} data 当前用户没有操作权限
      * @apiSuccess (999) {none} data 当前 IP 不能访问
      */
-    private void loginUser() {
-    }
+    void loginUser();
 
     /**
+     * 默认的通用返回消息体
+     *
      * @author bwcx_jzy
+     *
      * @apiDefine defResultJson
      * @apiSuccessExample {json} Success-Response:
      * HTTP/1.1 200 OK
      * {
-     * "code": "200",
-     * "msg": "成功",
-     * "data": {},
+     *   "code": "200",
+     *   "msg": "成功",
+     *   "data": {},
      * }
      */
-    private void defResultJson() {
-    }
+    void defResultJson();
 }
