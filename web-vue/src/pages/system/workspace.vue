@@ -361,6 +361,7 @@ export default {
       }
       this.loadDataEnvVar();
     },
+    //
     handleEnvDelete(record) {
       this.$confirm({
         title: "系统提示",
@@ -369,7 +370,10 @@ export default {
         cancelText: "取消",
         onOk: () => {
           // 删除
-          deleteWorkspaceEnv(record.id).then((res) => {
+          deleteWorkspaceEnv({
+            id: record.id,
+            workspaceId: this.temp.id,
+          }).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,

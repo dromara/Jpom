@@ -81,10 +81,10 @@ export function editWorkspaceEnv(data) {
  * @param {String} id
  * } params
  */
-export function deleteWorkspaceEnv(id) {
+export function deleteWorkspaceEnv(params) {
   return axios({
     url: "/system/workspace_env/delete",
     method: "get",
-    params: { id: id },
+    params: params,
   });
 }
