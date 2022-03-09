@@ -40,7 +40,6 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.h2db.TableName;
-import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.UserBindWorkspaceService;
 import org.springframework.http.MediaType;
@@ -65,14 +64,11 @@ public class WorkspaceController extends BaseServerController {
 
     private final WorkspaceService workspaceService;
     private final UserBindWorkspaceService userBindWorkspaceService;
-    private final WorkspaceEnvVarService workspaceEnvVarService;
 
     public WorkspaceController(WorkspaceService workspaceService,
-                               UserBindWorkspaceService userBindWorkspaceService,
-                               WorkspaceEnvVarService workspaceEnvVarService) {
+                               UserBindWorkspaceService userBindWorkspaceService) {
         this.workspaceService = workspaceService;
         this.userBindWorkspaceService = userBindWorkspaceService;
-        this.workspaceEnvVarService = workspaceEnvVarService;
     }
 
     /**
@@ -177,8 +173,6 @@ public class WorkspaceController extends BaseServerController {
         Assert.state(!workspace, "当前工作空间下还绑定着用户信息");
         // 删除信息
         workspaceService.delByKey(id);
-        // 删除环境变量
-        workspaceEnvVarService.delByKey(null, entity -> entity.set("workspaceId", id));
         return JsonMessage.toJson(200, "删除成功 " + autoDelete);
     }
 }
