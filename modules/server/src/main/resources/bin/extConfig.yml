@@ -18,7 +18,7 @@ jpom:
   subTitle:
   # 登录页名称
   loginTitle:
-  # logo 文件路径（绝对路径） jpg、png、gif
+  # logo 文件路径（绝对路径、http） jpg、png、gif、
   logoFile:
   # 禁用页面引导导航
   disabledGuide: false

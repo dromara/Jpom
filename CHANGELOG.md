@@ -1,6 +1,6 @@
 # 🚀 版本日志
 
-# 2.8.15
+# 2.8.15 (2022-03-09)
 
 ### 🐣 新增功能
 
@@ -12,7 +12,7 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】节点统计图表内存占用率取出字段（感谢@[wxyShine](https://gitee.com/wxyShine) ）
+1. 【server】节点统计图表内存占用率取错字段（感谢@[wxyShine](https://gitee.com/wxyShine) ）
 2. 【server】修复 ssh 上传文件资源未释放问题（感谢@也许是个意外 ）
 3. 【server】备份数据不将 sql 输出到控制台
 4. 【server】取消信号量监听,会出现 kill pid 无法关闭进程的情况
