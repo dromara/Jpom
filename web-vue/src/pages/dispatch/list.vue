@@ -1005,7 +1005,7 @@ export default {
         if (!valid) {
           return false;
         }
-        const key = this.temp.type;
+        // const key = this.temp.type;
         if (this.temp.type == "upload") {
           // 判断文件
           if (this.fileList.length === 0) {
@@ -1016,7 +1016,7 @@ export default {
           }
           // 上传文件
           const formData = new FormData();
-          this.$message.loading({ content: "正在上传文件...", key, duration: 0 });
+          //this.$message.loading({ content: "正在上传文件...", key, duration: 0 });
           formData.append("file", this.fileList[0]);
           formData.append("id", this.temp.id);
           formData.append("afterOpt", this.temp.afterOpt);
@@ -1027,7 +1027,7 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              this.$message.success({ content: "上传成功,开始分发!", key });
+              // this.$message.success({ content: "上传成功,开始分发!", key });
               this.fileList = [];
               this.loadData();
               this.dispatchVisible = false;
@@ -1044,19 +1044,19 @@ export default {
             return false;
           }
           // 远程下载
-          this.$message.loading({ content: "正在下载文件...", key, duration: 0 });
+          // this.$message.loading({ content: "正在下载文件...", key, duration: 0 });
           remoteDownload(this.temp).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
               });
-              this.$message.success({ content: "下载成功,开始分发!", key });
+              // this.$message.success({ content: "下载成功,开始分发!", key });
 
               this.loadData();
               this.dispatchVisible = false;
               this.$refs["dispatchForm"] && this.$refs["dispatchForm"].resetFields();
             } else {
-              this.$message.warn({ content: "下载失败", key });
+              // this.$message.warn({ content: "下载失败", key });
             }
           });
           return true;
