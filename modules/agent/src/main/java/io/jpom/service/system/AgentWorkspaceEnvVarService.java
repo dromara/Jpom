@@ -22,7 +22,7 @@
  */
 package io.jpom.service.system;
 
-import io.jpom.model.system.WorkspaceModel;
+import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.service.BaseOperService;
 import io.jpom.system.AgentConfigBean;
 import org.springframework.stereotype.Service;
@@ -32,9 +32,9 @@ import org.springframework.stereotype.Service;
  * @since 2022/3/8 9:16
  **/
 @Service
-public class AgentWorkspaceService extends BaseOperService<WorkspaceModel> {
+public class AgentWorkspaceEnvVarService extends BaseOperService<WorkspaceEnvVarModel> {
 
-    public AgentWorkspaceService() {
+    public AgentWorkspaceEnvVarService() {
         super(AgentConfigBean.WORKSPACE_ENV_VAR);
     }
 }

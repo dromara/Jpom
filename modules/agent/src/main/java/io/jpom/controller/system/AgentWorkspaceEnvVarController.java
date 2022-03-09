@@ -26,8 +26,8 @@ import cn.hutool.core.map.MapUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import io.jpom.common.BaseAgentController;
-import io.jpom.model.system.WorkspaceModel;
-import io.jpom.service.system.AgentWorkspaceService;
+import io.jpom.model.system.WorkspaceEnvVarModel;
+import io.jpom.service.system.AgentWorkspaceEnvVarService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,10 +41,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/system/workspace_env")
 public class AgentWorkspaceEnvVarController extends BaseAgentController {
 
-    private final AgentWorkspaceService agentWorkspaceService;
+    private final AgentWorkspaceEnvVarService agentWorkspaceEnvVarService;
 
-    public AgentWorkspaceEnvVarController(AgentWorkspaceService agentWorkspaceService) {
-        this.agentWorkspaceService = agentWorkspaceService;
+    public AgentWorkspaceEnvVarController(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService) {
+        this.agentWorkspaceEnvVarService = agentWorkspaceEnvVarService;
     }
 
     /**
@@ -61,21 +61,21 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
                                         @ValidatorItem String description) {
         String workspaceId = getWorkspaceId();
         synchronized (AgentWorkspaceEnvVarController.class) {
-            WorkspaceModel.WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceModel.WorkspaceEnvVarModel();
+            WorkspaceEnvVarModel.WorkspaceEnvVarItemModel workspaceEnvVarModel = new WorkspaceEnvVarModel.WorkspaceEnvVarItemModel();
             workspaceEnvVarModel.setName(name);
             workspaceEnvVarModel.setValue(value);
             workspaceEnvVarModel.setDescription(description);
             //
-            WorkspaceModel item = agentWorkspaceService.getItem(workspaceId);
+            WorkspaceEnvVarModel item = agentWorkspaceEnvVarService.getItem(workspaceId);
             if (null == item) {
-                item = new WorkspaceModel();
+                item = new WorkspaceEnvVarModel();
                 item.setVarData(MapUtil.of(name, workspaceEnvVarModel));
                 item.setName(workspaceId);
                 item.setId(workspaceId);
-                agentWorkspaceService.addItem(item);
+                agentWorkspaceEnvVarService.addItem(item);
             } else {
                 item.put(name, workspaceEnvVarModel);
-                agentWorkspaceService.updateItem(item);
+                agentWorkspaceEnvVarService.updateItem(item);
             }
         }
         return JsonMessage.getString(200, "更新成功");
@@ -93,10 +93,10 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
         String workspaceId = getWorkspaceId();
         synchronized (AgentWorkspaceEnvVarController.class) {
             //
-            WorkspaceModel item = agentWorkspaceService.getItem(workspaceId);
+            WorkspaceEnvVarModel item = agentWorkspaceEnvVarService.getItem(workspaceId);
             if (null != item) {
                 item.remove(name);
-                agentWorkspaceService.updateItem(item);
+                agentWorkspaceEnvVarService.updateItem(item);
             }
         }
         return JsonMessage.getString(200, "删除成功");
