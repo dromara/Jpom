@@ -32,7 +32,9 @@
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
           <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button>
-          <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-tooltip :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去解绑' : '删除'}`">
+            <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
+          </a-tooltip>
         </a-space>
       </template>
     </a-table>
