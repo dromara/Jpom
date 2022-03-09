@@ -6,8 +6,7 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】删除工作空间同步删除环境变量
-2. 【server】工作空间变量隐私变量不切换无法创建问题
+1. 【server】工作空间变量隐私变量不切换无法创建问题
 
 ------
 
@@ -140,8 +139,7 @@
 6. 【server】本地构建命令 容器构建支持引用工作空间变量
 7. 【server】修复构建触发器无法执行（感谢@[老诗人](https://gitee.com/laoshirenggo) ）
 8. 【server】服务端脚本新增工作空间环境变量
-9. 修复检查 Jpom
-   包中没有释放资源（感谢@[大海](https://gitee.com/hasape) [Gitee issues I4T9L0](https://gitee.com/dromara/Jpom/issues/I4T9L0) ）
+9. 修复检查 Jpom 包中没有释放资源（感谢@[大海](https://gitee.com/hasape) [Gitee issues I4T9L0](https://gitee.com/dromara/Jpom/issues/I4T9L0) ）
 
 ------
 
@@ -361,8 +359,7 @@
 9. 【server】发布命令（SSH发布命令、本地命令）支持变量替换：`#{BUILD_ID}`、`#{BUILD_NAME}`、`#{BUILD_RESULT_FILE}`、`#{BUILD_NUMBER_ID}`
 10. 【server】新增自动备份全量数据配置 `db.autoBackupIntervalDay` 默认一天备份一次,执行备份时间 凌晨0点或者中午12点
 11. 【agent】项目的 webhook 新增项目启动成功后通知，并且参数新增 `type` 指包括：`beforeStop`,`start`,`stop`,`beforeRestart`
-12. 【agent】项目新增自启动配置项,在 agent
-    启动时候检查对应项目是否启动，未启动执行启动逻辑 [Gitee issues I4IJFK](https://gitee.com/dromara/Jpom/issues/I4IJFK)
+12. 【agent】项目新增自启动配置项,在 agent 启动时候检查对应项目是否启动，未启动执行启动逻辑 [Gitee issues I4IJFK](https://gitee.com/dromara/Jpom/issues/I4IJFK)
 13. 【server】构建新增 webhook，实时通知构建进度
 14. 【server】节点分发新增分发间隔时间配置
 15. 新增控制台日志配置数据 `consoleLog.charset` 避免部分服务器执行命令响应乱码 （感谢@……）
@@ -619,8 +616,7 @@
 11. 【server】项目控制台新增心跳消息，避免超过一定时间后无法操作的情况
 12. 【server】ssh 新增心跳消息，避免超过一定时间后无法操作的情况
 13. 【server】系统缓存中的文件占用空间大小调整为定时更新（10分钟）
-14. 【server】修复 bug：分发列表页面点击【创建分发项目】按钮之后不能正常显示【分发节点】感谢
-    @xingenhi [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/bd38528fbd3067d220b7569f08449d7796e07c74) [@Hotstrip](https://gitee.com/hotstrip)
+14. 【server】修复 bug：分发列表页面点击【创建分发项目】按钮之后不能正常显示【分发节点】感谢 @xingenhi [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/bd38528fbd3067d220b7569f08449d7796e07c74) [@Hotstrip](https://gitee.com/hotstrip)
 15. 【server】fix: 编辑管理员时用户名不可修改
 16. 【server】折叠显示部分列表操作按钮（减少误操作）
 
