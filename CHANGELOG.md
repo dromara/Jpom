@@ -18,6 +18,7 @@
 4. 【server】取消信号量监听,会出现 kill pid 无法关闭进程的情况
 5. 【server】优化操作报警，能获取到更多到数据名称
 6. 【server】修护工作空间变量编辑使用默认工作空间相关问题（感谢@lidaofu）
+7. 【server】配置自定义 logo 支持远程地址（http）(感谢@wxyShine)
 
 ------
 

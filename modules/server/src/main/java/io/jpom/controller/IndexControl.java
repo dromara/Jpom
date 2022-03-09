@@ -27,6 +27,8 @@ import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.lang.RegexPool;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
@@ -57,6 +59,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -131,10 +134,15 @@ public class IndexControl extends BaseServerController {
      */
     @RequestMapping(value = "logo_image", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
     @NotLogin
-    public void logoImage(HttpServletResponse response) {
+    public void logoImage(HttpServletResponse response) throws IOException {
         ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
         String logoFile = instance.getLogoFile();
         if (StrUtil.isNotEmpty(logoFile)) {
+            if (Validator.isMatchRegex(RegexPool.URL_HTTP, logoFile)) {
+                // 重定向
+                response.sendRedirect(logoFile);
+                return;
+            }
             File file = FileUtil.file(logoFile);
             if (FileUtil.isFile(file)) {
                 String type = FileTypeUtil.getType(file);
