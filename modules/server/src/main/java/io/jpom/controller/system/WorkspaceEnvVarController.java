@@ -105,7 +105,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
                        @ValidatorItem String name,
                        String value,
                        @ValidatorItem String description,
-                       @ValidatorItem String privacy,
+                       String privacy,
                        String nodeIds) {
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
 

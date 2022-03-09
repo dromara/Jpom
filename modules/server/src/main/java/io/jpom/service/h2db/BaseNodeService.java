@@ -43,6 +43,7 @@ import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.system.AgentException;
+import io.jpom.system.AuthorizeException;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -151,39 +152,39 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
             List<T> cacheAll = super.listByBean(where);
             cacheAll = ObjectUtil.defaultIfNull(cacheAll, Collections.EMPTY_LIST);
             Set<String> cacheIds = cacheAll.stream()
-                    .map(BaseNodeModel::dataId)
-                    .collect(Collectors.toSet());
+                .map(BaseNodeModel::dataId)
+                .collect(Collectors.toSet());
             //
             List<T> projectInfoModels = jsonArray.toJavaList(this.tClass);
             List<T> models = projectInfoModels.stream()
-                    .peek(item -> this.fullData(item, nodeModel))
-                    .filter(item -> {
-                        // 检查对应的工作空间 是否存在
-                        return workspaceService.exists(new WorkspaceModel(item.getWorkspaceId()));
-                    })
-                    .filter(projectInfoModel -> {
-                        // 避免重复同步
-                        return StrUtil.equals(nodeModel.getWorkspaceId(), projectInfoModel.getWorkspaceId());
-                    })
-                    .peek(item -> cacheIds.remove(item.dataId()))
-                    .collect(Collectors.toList());
+                .peek(item -> this.fullData(item, nodeModel))
+                .filter(item -> {
+                    // 检查对应的工作空间 是否存在
+                    return workspaceService.exists(new WorkspaceModel(item.getWorkspaceId()));
+                })
+                .filter(projectInfoModel -> {
+                    // 避免重复同步
+                    return StrUtil.equals(nodeModel.getWorkspaceId(), projectInfoModel.getWorkspaceId());
+                })
+                .peek(item -> cacheIds.remove(item.dataId()))
+                .collect(Collectors.toList());
             // 设置 临时缓存，便于放行检查
             BaseServerController.resetInfo(UserModel.EMPTY);
             //
             models.forEach(BaseNodeService.super::upsert);
             // 删除项目
             Set<String> strings = cacheIds.stream()
-                    .map(s -> BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), s))
-                    .collect(Collectors.toSet());
+                .map(s -> BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), s))
+                .collect(Collectors.toSet());
             if (CollUtil.isNotEmpty(strings)) {
                 super.delByKey(strings, null);
             }
             String format = StrUtil.format(
-                    "{} 节点拉取到 {} 个{},已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
-                    nodeModelName, CollUtil.size(jsonArray), dataName,
-                    CollUtil.size(cacheAll), dataName,
-                    CollUtil.size(models), dataName,
-                    CollUtil.size(strings));
+                "{} 节点拉取到 {} 个{},已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
+                nodeModelName, CollUtil.size(jsonArray), dataName,
+                CollUtil.size(cacheAll), dataName,
+                CollUtil.size(models), dataName,
+                CollUtil.size(strings));
             DefaultSystemLog.getLog().debug(format);
             return format;
         } catch (Exception e) {
@@ -196,8 +197,12 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
     protected String checkException(Exception e, String nodeModelName) {
         if (e instanceof AgentException) {
             AgentException agentException = (AgentException) e;
-            DefaultSystemLog.getLog().error("同步失败 {}", agentException.getMessage());
+            DefaultSystemLog.getLog().error("{} 同步失败 {}", nodeModelName, agentException.getMessage());
             return "同步失败" + agentException.getMessage();
+        } else if (e instanceof AuthorizeException) {
+            AuthorizeException authorizeException = (AuthorizeException) e;
+            DefaultSystemLog.getLog().error("{} 同步失败 {}", nodeModelName, authorizeException.getMessage());
+            return "同步失败" + authorizeException.getMessage();
         }
         DefaultSystemLog.getLog().error("同步节点" + dataName + "失败:" + nodeModelName, e);
         return "同步节点" + dataName + "失败" + e.getMessage();

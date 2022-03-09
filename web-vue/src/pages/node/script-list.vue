@@ -36,7 +36,7 @@
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="`${nodeMap[text]} 节点ID： ${text}`">
         <span>{{ nodeMap[text] }}</span>
       </a-tooltip>
       <a-tooltip slot="name" @click="handleEdit(record)" slot-scope="text, record" placement="topLeft" :title="text">
