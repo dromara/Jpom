@@ -121,7 +121,7 @@
                     <!--排除文件-->
                     <excludes>
                         <!-- https://github.com/mathieucarbou/license-maven-plugin/blob/master/license-maven-plugin/src/main/java/com/mycila/maven/plugin/license/Default.java-->
-                        <exclude>script/**</exclude>
+
                         <exclude>docs/**</exclude>
                         <exclude>web-vue/**</exclude>
                         <exclude>**/*.yml</exclude>
