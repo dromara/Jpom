@@ -35,9 +35,9 @@ import java.util.Map;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class WorkspaceModel extends BaseModel {
+public class WorkspaceEnvVarModel extends BaseModel {
 
-    private Map<String, WorkspaceEnvVarModel> varData;
+    private Map<String, WorkspaceEnvVarItemModel> varData;
 
     /**
      * 更新变量
@@ -45,7 +45,7 @@ public class WorkspaceModel extends BaseModel {
      * @param name                 变量名称
      * @param workspaceEnvVarModel 变量信息
      */
-    public void put(String name, WorkspaceEnvVarModel workspaceEnvVarModel) {
+    public void put(String name, WorkspaceEnvVarItemModel workspaceEnvVarModel) {
         if (varData == null) {
             varData = new HashMap<>(2);
         }
@@ -69,7 +69,7 @@ public class WorkspaceModel extends BaseModel {
      * @since 2022/3/8
      */
     @Data
-    public static class WorkspaceEnvVarModel {
+    public static class WorkspaceEnvVarItemModel {
 
         private String name;
 

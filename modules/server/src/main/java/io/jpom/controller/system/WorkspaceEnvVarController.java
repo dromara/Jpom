@@ -162,8 +162,8 @@ public class WorkspaceEnvVarController extends BaseServerController {
 
     private void syncNodeEnvVar(WorkspaceEnvVarModel workspaceEnvVarModel, String oldNode) {
         String workspaceId = workspaceEnvVarModel.getWorkspaceId();
-        List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
         List<String> newNodeIds = StrUtil.splitTrim(workspaceEnvVarModel.getNodeIds(), StrUtil.COMMA);
+        List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
         Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
         UserModel user = getUser();
         // 删除
@@ -175,7 +175,13 @@ public class WorkspaceEnvVarController extends BaseServerController {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("description", workspaceEnvVarModel.getDescription());
             jsonObject.put("name", workspaceEnvVarModel.getName());
-            jsonObject.put("value", workspaceEnvVarModel.getValue());
+            if (StrUtil.isNotEmpty(workspaceEnvVarModel.getValue())) {
+                jsonObject.put("value", workspaceEnvVarModel.getValue());
+            } else {
+                // 查询
+                WorkspaceEnvVarModel byKeyExits = workspaceEnvVarService.getByKey(workspaceEnvVarModel.getId());
+                jsonObject.put("value", byKeyExits.getValue());
+            }
             JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Update, user, jsonObject);
             Assert.state(jsonMessage.getCode() == 200, "处理 " + byKey.getName() + " 节点同步脚本失败" + jsonMessage.getMsg());
         }

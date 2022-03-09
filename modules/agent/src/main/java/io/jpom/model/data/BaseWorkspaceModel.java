@@ -25,6 +25,8 @@ package io.jpom.model.data;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.Const;
 import io.jpom.model.BaseModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 插件端 工作空间相关的数据
@@ -32,46 +34,27 @@ import io.jpom.model.BaseModel;
  * @author bwcx_jzy
  * @since 2021/12/12
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public abstract class BaseWorkspaceModel extends BaseModel {
 
-	private String workspaceId;
+    private String workspaceId;
 
-	/**
-	 * 最后修改人
-	 */
-	private String modifyUser;
+    /**
+     * 最后修改人
+     */
+    private String modifyUser;
 
-	private String modifyTime;
+    private String modifyTime;
 
-	public String getModifyUser() {
-		if (StrUtil.isEmpty(modifyUser)) {
-			return StrUtil.DASHED;
-		}
-		return modifyUser;
-	}
+    public String getModifyUser() {
+        if (StrUtil.isEmpty(modifyUser)) {
+            return StrUtil.DASHED;
+        }
+        return modifyUser;
+    }
 
-	public String getModifyTime() {
-		return modifyTime;
-	}
-
-	/**
-	 * 修改时间
-	 *
-	 * @param modifyTime time
-	 */
-	public void setModifyTime(String modifyTime) {
-		this.modifyTime = modifyTime;
-	}
-
-	public void setModifyUser(String modifyUser) {
-		this.modifyUser = modifyUser;
-	}
-
-	public String getWorkspaceId() {
-		return StrUtil.emptyToDefault(workspaceId, Const.WORKSPACE_DEFAULT_ID);
-	}
-
-	public void setWorkspaceId(String workspaceId) {
-		this.workspaceId = workspaceId;
-	}
+    public String getWorkspaceId() {
+        return StrUtil.emptyToDefault(workspaceId, Const.WORKSPACE_DEFAULT_ID);
+    }
 }
