@@ -39,5 +39,5 @@ jobs:
         #file: ./zhuzhu-project/target/site/jacoco/jacoco.xml
 #        run: |
 #          docker buildx create --use
-#          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.15 -f ./modules/server/DockerfileRelease --push .
+#          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.16 -f ./modules/server/DockerfileRelease --push .
 #          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
