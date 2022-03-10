@@ -35,6 +35,10 @@ WORKDIR $JPOM_HOME
 ARG DEPENDENCY=/target/dependency
 COPY --from=builder ${DEPENDENCY}/modules/agent/target/${JPOM_PKG} ${JPOM_HOME}
 
+# 时区
+ENV TZ Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 VOLUME $JPOM_HOME
 EXPOSE 2123
 
