@@ -169,7 +169,7 @@ exit $RETVAL
 
 脚本里面支持的变量有：#{PROJECT_ID}、#{PROJECT_NAME}、#{PROJECT_PATH}
 
-如果多给项目管理方式相同，脚本模版可以重复使用奥（并非一个项目对应一个脚本模版）
+如果多个项目管理方式相同，脚本模版可以重复使用奥（并非一个项目对应一个脚本模版）
 
 更新脚本示例：[✈️进入>>](/FQA/DSL.md)
 
@@ -179,7 +179,7 @@ exit $RETVAL
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/add-project2.png)
 
 注意：
-1. scriptArgs 为对应环节执行脚本传人的参数,这里可以使用空格隔空传人多给参数 
+1. scriptArgs 为对应环节执行脚本传人的参数,这里可以使用空格隔空传人多个参数 
 2. scriptId 需要填写当前节点里面存在的脚本的 id,脚本ID 可以在编辑脚本弹窗里面查看，如下图
 
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/edit-script3.png)
