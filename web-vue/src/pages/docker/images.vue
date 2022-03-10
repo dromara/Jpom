@@ -153,10 +153,10 @@
         <a-form-model-item label="环境变量">
           <a-row v-for="(item, index) in temp.env" :key="index">
             <a-col :span="10">
-              <a-input v-model="item.key" placeholder="变量名"/>
+              <a-input v-model="item.key" placeholder="变量名" />
             </a-col>
             <a-col :span="10" :offset="1">
-              <a-input v-model="item.value" placeholder="变量值"/>
+              <a-input v-model="item.value" placeholder="变量值" />
             </a-col>
             <a-col :span="2" :offset="1">
               <a-space>
@@ -175,6 +175,35 @@
                   @click="
                     () => {
                       temp.env.push({});
+                    }
+                  "
+                />
+              </a-space>
+            </a-col>
+          </a-row>
+        </a-form-model-item>
+        <a-form-model-item label="命令">
+          <a-row v-for="(item, index) in temp.commands" :key="index">
+            <a-col :span="20">
+              <a-input addon-before="命令值" v-model="item.value" placeholder="填写运行命令" />
+            </a-col>
+
+            <a-col :span="2" :offset="1">
+              <a-space>
+                <a-icon
+                  type="minus-circle"
+                  v-if="temp.commands && temp.commands.length > 1"
+                  @click="
+                    () => {
+                      temp.commands.splice(index, 1);
+                    }
+                  "
+                />
+                <a-icon
+                  type="plus-square"
+                  @click="
+                    () => {
+                      temp.commands.push({});
                     }
                   "
                 />
@@ -329,7 +358,8 @@ export default {
           image: (record.repoTags || []).join(","),
           autorun: true,
           imageId: record.id,
-          env: [{}]
+          env: [{}],
+          commands: [{}],
         };
       });
     },
@@ -344,7 +374,8 @@ export default {
           autorun: this.temp.autorun,
           imageId: this.temp.imageId,
           name: this.temp.name,
-          env: {}
+          env: {},
+          commands: [],
         };
         temp.volumes = (this.temp.volumes || [])
           .filter((item) => {
@@ -366,9 +397,13 @@ export default {
         // 环境变量
         this.temp.env.forEach((item) => {
           if (item.key && item.key) {
-            temp.env[item.key] = item.value
+            temp.env[item.key] = item.value;
           }
-        })
+        });
+        //
+        temp.commands = (this.temp.commands || []).map((item) => {
+          return item.value || "";
+        });
         dockerImageCreateContainer(temp).then((res) => {
           if (res.code === 200) {
             this.$notification.success({
