@@ -30,6 +30,7 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseAgentController;
+import io.jpom.socket.AgentFileTailWatcher;
 import io.jpom.system.WebAopLog;
 import io.jpom.util.LayuiTreeUtil;
 import org.springframework.http.MediaType;
@@ -70,6 +71,7 @@ public class LogManageController extends BaseAgentController {
         long modified = file.lastModified();
         Assert.state(System.currentTimeMillis() - modified > TimeUnit.DAYS.toMillis(1), "不能删除近一天相关的日志(文件修改时间)");
         if (FileUtil.del(file)) {
+            AgentFileTailWatcher.offlineFile(file);
             return JsonMessage.getString(200, "删除成功");
         }
         return JsonMessage.getString(500, "删除失败");
