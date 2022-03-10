@@ -62,13 +62,15 @@ sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/server/Dockerfile
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/agent/Dockerfile
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../script/docker.sh
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/server/DockerfileRelease
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../.github/workflows/package-testing.yml
 
 # logo
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/common/src/main/resources/jpom-logo.txt
 
 # vue version
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../web-vue/package.json
+
+# release-sha1sum.sh
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/release-sha1sum.sh
 
 # 保留新版本号
 echo "$new_version" > $pwd/../docs/version.txt
