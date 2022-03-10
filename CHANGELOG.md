@@ -1,6 +1,6 @@
 # 🚀 版本日志
 
-# 2.8.16
+# 2.8.16 (2022-03-10)
 
 ### 🐣 新增功能
 
@@ -174,10 +174,10 @@
 8. 【server】本地构建模式模糊匹配支持匹配多个结果
 9. 【server】修复节点分发不能删除节点问题（感谢@a19920714liou [Gitee issues I4SHSP](https://gitee.com/dromara/Jpom/issues/I4SHSP) ）
 10. 【server】ssh 快捷安装插件端保存安装包避免多次上传 （感谢@a19920714liou [Gitee issues I4SHJC](https://gitee.com/dromara/Jpom/issues/I4SHJC)
-    ）
+	）
 11. 【server】ssh 快捷安装插件端权限改为管理员
 12. 【server】构建 ssh 发布授权目录采用下拉模式,提升用户操作感知 (
-    感谢@hjk2008 [Gitee issues I4SICE](https://gitee.com/dromara/Jpom/issues/I4SICE) )
+	感谢@hjk2008 [Gitee issues I4SICE](https://gitee.com/dromara/Jpom/issues/I4SICE) )
 13. 【server】修复数据库自动备份失败问题
 
 > 🙏 特别感谢：[💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) 贡献容器构建相关架构
@@ -494,7 +494,7 @@
 19. 【server】节点分发支持 file 类型项目
 20. 【agent】项目新增配置日志文件输出到指定目录
 21. 【server】构建产物目录支持通配符`AntPathMatcher`模式 （感谢@saysay [Gitee issues I455FM](https://gitee.com/dromara/Jpom/issues/I455FM)
-    ）
+	）
 22. 【server】新增 h2 数据库缓存大小配置 [CACHE_SIZE](http://www.h2database.com/html/features.html#cache_settings) `db.cacheSize
 23. 【server】构建触发器新增延迟执行参数（感谢@Steve.Liu）
 24. 【server】增加全局项目搜索功能
