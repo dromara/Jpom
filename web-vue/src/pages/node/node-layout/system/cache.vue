@@ -41,6 +41,16 @@
           <a-timeline-item>
             <span class="layui-elem-quote">插件数：{{ temp.pluginSize || 0 }}</span>
           </a-timeline-item>
+          <a-timeline-item>
+            <div class="layui-elem-quote">
+              环境变量：
+              <a-tag v-for="(item, index) in temp.envVarKeys" :key="index">
+                <a-tooltip :title="`环境变量的key:${item}`">
+                  {{ item }}
+                </a-tooltip>
+              </a-tag>
+            </div>
+          </a-timeline-item>
         </a-timeline>
       </a-tab-pane>
       <a-tab-pane key="2" tab="运行中的定时任务"> <task-stat :taskList="taskList" @refresh="loadData" /></a-tab-pane>

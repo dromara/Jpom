@@ -1,4 +1,5 @@
 import axios from "./config";
+import { loadRouterBase } from "./config";
 
 /**
  * 备份列表
@@ -75,7 +76,7 @@ export function restoreBackup(id) {
  * @returns
  */
 export function downloadBackupFile(id) {
-  return `/system/backup/download?id=${id}`;
+  return `${loadRouterBase("/system/backup/download")}?id=${id}`;
 }
 
 /**

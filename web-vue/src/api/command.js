@@ -1,4 +1,5 @@
 import axios from "./config";
+import { loadRouterBase } from "./config";
 
 // 命令列表
 export function getCommandList(params) {
@@ -83,7 +84,7 @@ export function getCommandLogInfo(params) {
  * @param {*} logId
  */
 export function downloadLog(logId) {
-  return `/node/ssh_command_log/download_log?logId=${logId}`;
+  return `${loadRouterBase("/node/ssh_command_log/download_log")}?logId=${logId}`;
 }
 
 export const statusMap = {

@@ -42,6 +42,7 @@ import io.jpom.model.stat.NodeStatModel;
 import io.jpom.service.dblog.DbSystemMonitorLogService;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.NodeService;
+import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.stereotype.Service;
@@ -166,6 +167,8 @@ public class NodeStatService extends BaseWorkspaceService<NodeStatModel> impleme
                     this.save(modelList, nodeTopInfo, jsonObject);
                 } catch (AuthorizeException agentException) {
                     this.save(modelList, 2, agentException.getMessage());
+                } catch (AgentException e) {
+                    this.save(modelList, 1, e.getMessage());
                 } catch (Exception e) {
                     this.save(modelList, 1, e.getMessage());
                     DefaultSystemLog.getLog().error("获取节点监控信息失败", e);

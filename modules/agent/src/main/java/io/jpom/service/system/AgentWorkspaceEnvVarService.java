@@ -20,32 +20,21 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.controller;
+package io.jpom.service.system;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.extra.servlet.ServletUtil;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletResponse;
-import java.net.URL;
+import io.jpom.model.system.WorkspaceEnvVarModel;
+import io.jpom.service.BaseOperService;
+import io.jpom.system.AgentConfigBean;
+import org.springframework.stereotype.Service;
 
 /**
- * robots 接口
- *
- * @author bwcx_jzy
- * @since 2022/3/5
- */
-@RestController
-public class RobotsController {
+ * @author lidaofu
+ * @since 2022/3/8 9:16
+ **/
+@Service
+public class AgentWorkspaceEnvVarService extends BaseOperService<WorkspaceEnvVarModel> {
 
-    @GetMapping(value = "robots.txt", produces = MediaType.TEXT_PLAIN_VALUE)
-    public void robots(HttpServletResponse response) {
-        URL resource = ResourceUtil.getResource("robots.txt");
-        String readString = FileUtil.readString(resource, CharsetUtil.CHARSET_UTF_8);
-        ServletUtil.write(response, readString, MediaType.TEXT_PLAIN_VALUE);
+    public AgentWorkspaceEnvVarService() {
+        super(AgentConfigBean.WORKSPACE_ENV_VAR);
     }
 }

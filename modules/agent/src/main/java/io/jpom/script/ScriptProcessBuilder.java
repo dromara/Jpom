@@ -22,6 +22,7 @@
  */
 package io.jpom.script;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -32,12 +33,16 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.NodeScriptModel;
+import io.jpom.model.system.WorkspaceEnvVarModel;
+import io.jpom.service.system.AgentWorkspaceEnvVarService;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.SocketSessionUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.websocket.Session;
 import java.io.File;
@@ -51,6 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author jiangzeyin
  * @date 2019/4/25
  */
+@Slf4j
 public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
     /**
      * 执行中的缓存
@@ -72,7 +78,19 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
         command.add(0, script);
         command.add(0, CommandUtil.EXECUTE_PREFIX);
-        DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
+        log.debug(CollUtil.join(command, StrUtil.SPACE));
+        String workspaceId = nodeScriptModel.getWorkspaceId();
+        // 添加环境变量
+        AgentWorkspaceEnvVarService workspaceService = SpringUtil.getBean(AgentWorkspaceEnvVarService.class);
+        WorkspaceEnvVarModel item = workspaceService.getItem(workspaceId);
+        if (item != null) {
+            Map<String, WorkspaceEnvVarModel.WorkspaceEnvVarItemModel> varData = item.getVarData();
+            if (varData != null) {
+                Map<String, String> envMap = CollStreamUtil.toMap(varData.values(), WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getName, WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getValue);
+                Map<String, String> environment = processBuilder.environment();
+                environment.putAll(envMap);
+            }
+        }
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
         processBuilder.directory(scriptFile.getParentFile());

@@ -17,6 +17,15 @@ export function getNodeListAll() {
   });
 }
 
+// node 列表 根据 工作空间ID
+export function getNodeListByWorkspace(params) {
+  return axios({
+    url: "/node/list_data_by_workspace_id.json",
+    method: "get",
+    params: params,
+  });
+}
+
 // node group all
 export function getNodeGroupAll() {
   return axios({

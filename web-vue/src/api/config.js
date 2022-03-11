@@ -208,3 +208,8 @@ function redoRequest(config) {
 }
 
 export default request;
+
+//
+export function loadRouterBase(url) {
+  return `${((window.routerBase || "") + url).replace(new RegExp("//", "gm"), "/")}`;
+}
