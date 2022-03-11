@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # The MIT License (MIT)
 #
@@ -21,26 +22,32 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-FROM maven:3.8.4-jdk-8-slim as builder
-WORKDIR /target/dependency
-COPY . .
 
-RUN mvn -B -e -T 1C clean package -pl modules/agent -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
+# 版本
+jpom_version=2.8.16
 
-FROM openjdk:8
-ENV JPOM_HOME	/usr/local/jpom-agent
-ARG JPOM_VERSION
-ENV JPOM_PKG    agent-${JPOM_VERSION}-release
-WORKDIR $JPOM_HOME
-ARG DEPENDENCY=/target/dependency
-COPY --from=builder ${DEPENDENCY}/modules/agent/target/${JPOM_PKG} ${JPOM_HOME}
+function checkItem()
+{
+rm -f $1-${jpom_version}-release.$2.sha1 $1-${jpom_version}-release.$2
 
-# 时区
-ENV TZ Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+curl -LfsSo $1-${jpom_version}-release.$2.sha1 https://download.fastgit.org/dromara/Jpom/releases/download/v${jpom_version}/$1-${jpom_version}-release.$2.sha1
 
-VOLUME $JPOM_HOME
-EXPOSE 2123
+ESUM=`cat $1-${jpom_version}-release.$2.sha1`
 
-ENTRYPOINT ["/bin/bash", "Agent.sh", "start"]
+echo "$1-${jpom_version}-release.$2 => ${ESUM}"
+
+curl -LfsSo $1-${jpom_version}-release.$2 https://download.fastgit.org/dromara/Jpom/releases/download/v${jpom_version}/$1-${jpom_version}-release.$2
+
+echo "${ESUM} $1-${jpom_version}-release.$2" | sha1sum -c -;
+
+rm -f $1-${jpom_version}-release.$2.sha1 $1-${jpom_version}-release.$2
+}
+
+# check agent
+checkItem agent tar.gz
+checkItem agent zip
+
+# check server
+checkItem server tar.gz
+checkItem server zip
 

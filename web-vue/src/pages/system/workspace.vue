@@ -56,7 +56,7 @@
       </a-form-model>
     </a-modal>
     <!-- 环境变量 -->
-    <a-modal v-model="envVarListVisible" title="环境变量" width="80vw" :footer="null" :maskClosable="false">
+    <a-modal v-model="envVarListVisible" :title="`${temp.name} 工作空间环境变量`" width="80vw" :footer="null" :maskClosable="false">
       <div ref="filter" class="filter">
         <a-space>
           <a-input v-model="envVarListQuery['%name%']" placeholder="名称" @pressEnter="loadDataEnvVar" allowClear class="search-input-item" />
@@ -77,8 +77,9 @@
         bordered
         :rowKey="(record, index) => index"
       >
-        <a-tooltip slot="value" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
+        <a-tooltip slot="value" slot-scope="text, item" placement="topLeft" :title="item.privacy === 1 ? '隐私字段' : text">
+          <a-icon v-if="item.privacy === 1" type="eye-invisible" />
+          <span v-else>{{ text }}</span>
         </a-tooltip>
         <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
@@ -95,16 +96,40 @@
       </a-table>
     </a-modal>
     <!-- 环境变量编辑区 -->
-    <a-modal v-model="editEnvVisible" title="编辑环境变量" @ok="handleEnvEditOk" :maskClosable="false">
-      <a-form-model ref="editEnvForm" :rules="rulesEnv" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+    <a-modal v-model="editEnvVisible" title="编辑环境变量" width="50vw" @ok="handleEnvEditOk" :maskClosable="false">
+      <a-form-model ref="editEnvForm" :rules="rulesEnv" :model="envTemp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="名称" prop="name">
-          <a-input v-model="temp.name" placeholder="变量名称" />
+          <a-input v-model="envTemp.name" placeholder="变量名称" />
         </a-form-model-item>
-        <a-form-model-item label="值" prop="value">
-          <a-input v-model="temp.value" type="textarea" :rows="5" placeholder="变量值" />
+        <a-form-model-item label="值" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
+          <a-input v-model="envTemp.value" type="textarea" :rows="5" placeholder="变量值" />
         </a-form-model-item>
         <a-form-model-item label="描述" prop="description">
-          <a-input v-model="temp.description" type="textarea" :rows="5" placeholder="变量描述" />
+          <a-input v-model="envTemp.description" type="textarea" :rows="5" placeholder="变量描述" />
+        </a-form-model-item>
+        <a-form-model-item prop="privacy">
+          <template slot="label">
+            隐私变量
+            <a-tooltip v-show="!envTemp.id">
+              <template slot="title"> 隐私变量是指一些密码字段或者关键密钥等重要信息，隐私字段只能修改不能查看（编辑弹窗中无法看到对应值）。 隐私字段一旦创建后将不能切换为非隐私字段 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-switch v-model="envTemp.privacy" :disabled="envTemp.id" checked-children="隐私" un-checked-children="非隐私" />
+        </a-form-model-item>
+        <a-form-model-item>
+          <template slot="label">
+            分发节点
+            <a-tooltip v-show="!envTemp.id">
+              <template slot="title"> 分发节点是指将变量同步到对应节点，在节点脚本中也可以使用当前变量</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-select show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="envTemp.chooseNode">
+            <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -114,7 +139,7 @@
 import { getWorkSpaceList, editWorkSpace, deleteWorkspace, getWorkspaceEnvList, editWorkspaceEnv, deleteWorkspaceEnv } from "@/api/workspace";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-
+import { getNodeListByWorkspace } from "@/api/node";
 export default {
   data() {
     return {
@@ -122,12 +147,14 @@ export default {
       envVarLoading: false,
       list: [],
       envVarList: [],
+      nodeList: [],
       envVarListQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       editVisible: false,
       envVarListVisible: false,
       editEnvVisible: false,
       temp: {},
+      envTemp: {},
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "描述", dataIndex: "description", ellipsis: true, scopedSlots: { customRender: "description" } },
@@ -246,13 +273,21 @@ export default {
     },
     viewEnvVar(record) {
       this.temp = record;
+      this.envTemp = {
+        workspaceId: this.temp.id,
+      };
+      this.envVarListQuery.workspaceId = record.id;
       this.envVarListVisible = true;
       this.loadDataEnvVar();
     },
     addEnvVar() {
-      this.temp = {};
+      this.envTemp = {
+        workspaceId: this.temp.id,
+      };
+
       this.editEnvVisible = true;
       this.$refs["editEnvForm"] && this.$refs["editEnvForm"].resetFields();
+      this.getAllNodeList(this.envTemp.workspaceId);
     },
     handleAdd() {
       this.temp = {};
@@ -264,8 +299,11 @@ export default {
       this.editVisible = true;
     },
     handleEnvEdit(record) {
-      this.temp = record;
+      this.envTemp = record;
+      this.envTemp.workspaceId = this.temp.id;
+      this.envTemp = { ...this.envTemp, chooseNode: record.nodeIds ? record.nodeIds.split(",") : [] };
       this.editEnvVisible = true;
+      this.getAllNodeList(this.envTemp.workspaceId);
     },
     handleEditOk() {
       this.$refs["editForm"].validate((valid) => {
@@ -290,7 +328,8 @@ export default {
         if (!valid) {
           return false;
         }
-        editWorkspaceEnv(this.temp).then((res) => {
+        this.envTemp.nodeIds = this.envTemp?.chooseNode?.join(",");
+        editWorkspaceEnv(this.envTemp).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
@@ -322,6 +361,7 @@ export default {
       }
       this.loadDataEnvVar();
     },
+    //
     handleEnvDelete(record) {
       this.$confirm({
         title: "系统提示",
@@ -330,7 +370,10 @@ export default {
         cancelText: "取消",
         onOk: () => {
           // 删除
-          deleteWorkspaceEnv(record.id).then((res) => {
+          deleteWorkspaceEnv({
+            id: record.id,
+            workspaceId: this.temp.id,
+          }).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -359,6 +402,14 @@ export default {
             }
           });
         },
+      });
+    },
+    // 获取所有节点
+    getAllNodeList(workspaceId) {
+      getNodeListByWorkspace({
+        workspaceId: workspaceId,
+      }).then((res) => {
+        this.nodeList = res.data || [];
       });
     },
   },

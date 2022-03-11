@@ -1,4 +1,5 @@
 import axios from "./config";
+import { loadRouterBase } from "./config";
 
 /**
  * 构建列表
@@ -207,7 +208,7 @@ export function geteBuildHistory(params) {
  * @param {*} logId
  */
 export function downloadBuildLog(logId) {
-  return `/build/history/download_log.html?logId=${logId}`;
+  return `${loadRouterBase("/build/history/download_log.html")}?logId=${logId}`;
 }
 
 /**
@@ -215,7 +216,7 @@ export function downloadBuildLog(logId) {
  * @param {*} logId
  */
 export function downloadBuildFile(logId) {
-  return `/build/history/download_file.html?logId=${logId}`;
+  return `${loadRouterBase("/build/history/download_file.html")}?logId=${logId}`;
 }
 
 /**

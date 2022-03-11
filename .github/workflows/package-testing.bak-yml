@@ -1,0 +1,43 @@
+name: Package Testing
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ 16.x ]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          #cache: 'npm'
+          #cache-dependency-path: './web-vue/package-lock.json'
+      #- run: npm ci
+      #  working-directory: './web-vue'
+      #- run: npm run build
+      #  working-directory: './web-vue'
+      - run: cd web-vue && npm i && npm run build
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      - name: Build with Maven
+        run: mvn -B package
+        #file: ./zhuzhu-project/target/site/jacoco/jacoco.xml
+#        run: |
+#          docker buildx create --use
+#          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.16 -f ./modules/server/DockerfileRelease --push .
+#          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .

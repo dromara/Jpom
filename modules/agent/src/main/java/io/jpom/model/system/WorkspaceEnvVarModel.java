@@ -20,32 +20,61 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.controller;
+package io.jpom.model.system;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.extra.servlet.ServletUtil;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.jpom.model.BaseModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import javax.servlet.http.HttpServletResponse;
-import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * robots 接口
- *
- * @author bwcx_jzy
- * @since 2022/3/5
+ * @author lidaofu
+ * @since 2022/3/8
  */
-@RestController
-public class RobotsController {
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class WorkspaceEnvVarModel extends BaseModel {
 
-    @GetMapping(value = "robots.txt", produces = MediaType.TEXT_PLAIN_VALUE)
-    public void robots(HttpServletResponse response) {
-        URL resource = ResourceUtil.getResource("robots.txt");
-        String readString = FileUtil.readString(resource, CharsetUtil.CHARSET_UTF_8);
-        ServletUtil.write(response, readString, MediaType.TEXT_PLAIN_VALUE);
+    private Map<String, WorkspaceEnvVarItemModel> varData;
+
+    /**
+     * 更新变量
+     *
+     * @param name                 变量名称
+     * @param workspaceEnvVarModel 变量信息
+     */
+    public void put(String name, WorkspaceEnvVarItemModel workspaceEnvVarModel) {
+        if (varData == null) {
+            varData = new HashMap<>(2);
+        }
+        varData.put(name, workspaceEnvVarModel);
+    }
+
+    /**
+     * 删除 变量
+     *
+     * @param name 名称
+     */
+    public void remove(String name) {
+        if (varData == null) {
+            return;
+        }
+        varData.remove(name);
+    }
+
+    /**
+     * @author lidaofu
+     * @since 2022/3/8
+     */
+    @Data
+    public static class WorkspaceEnvVarItemModel {
+
+        private String name;
+
+        private String value;
+
+        private String description;
     }
 }

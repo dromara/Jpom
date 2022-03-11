@@ -49,6 +49,7 @@ import io.jpom.service.dblog.DbUserOperateLogService;
 import io.jpom.system.AopLogInterface;
 import io.jpom.system.WebAopLog;
 import lombok.Data;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -160,7 +161,7 @@ public class OperateLogController implements AopLogInterface {
         }
         //
         Map<String, Object> allData = new HashMap<>(30);
-        String body = ServletUtil.getBody(request);
+        String body = ServletFileUpload.isMultipartContent(request) ? null : ServletUtil.getBody(request);
         if (StrUtil.isNotEmpty(body)) {
             JSONValidator jsonValidator = JSONValidator.from(body);
             JSONValidator.Type type = jsonValidator.getType();

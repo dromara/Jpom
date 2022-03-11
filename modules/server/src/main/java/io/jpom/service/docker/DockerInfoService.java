@@ -96,7 +96,7 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
             this.insert(dockerInfoModel);
             Console.log("Automatically add local docker host: {}", dockerHost);
         } catch (Exception e) {
-            Console.error(e, "There is no docker service local");
+            Console.error("There is no docker service local {}", e.getMessage());
         }
     }
 

@@ -80,6 +80,12 @@ public class AgentConfigBean {
 	 */
 	public static final String JDK_CONF = "jdk_conf.json";
 
+    /**
+     * 环境变量列表信息
+     */
+	public static final String WORKSPACE_ENV_VAR = "workspace_env_var.json";
+
+
 	private static AgentConfigBean agentConfigBean;
 
 	/**
