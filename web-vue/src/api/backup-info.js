@@ -76,7 +76,9 @@ export function restoreBackup(id) {
  * @returns
  */
 export function downloadBackupFile(id) {
-  return `${loadRouterBase("/system/backup/download")}?id=${id}`;
+  return loadRouterBase("/system/backup/download", {
+    id: id,
+  });
 }
 
 /**

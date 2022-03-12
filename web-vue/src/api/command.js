@@ -84,7 +84,9 @@ export function getCommandLogInfo(params) {
  * @param {*} logId
  */
 export function downloadLog(logId) {
-  return `${loadRouterBase("/node/ssh_command_log/download_log")}?logId=${logId}`;
+  return loadRouterBase("/node/ssh_command_log/download_log", {
+    logId: logId,
+  });
 }
 
 export const statusMap = {

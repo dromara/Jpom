@@ -41,11 +41,9 @@ import io.jpom.service.dblog.DbBuildHistoryLogService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -58,88 +56,87 @@ import java.util.Objects;
 @Feature(cls = ClassFeature.BUILD_LOG)
 public class BuildInfoHistoryController extends BaseServerController {
 
-	private final BuildInfoService buildInfoService;
-	private final DbBuildHistoryLogService dbBuildHistoryLogService;
+    private final BuildInfoService buildInfoService;
+    private final DbBuildHistoryLogService dbBuildHistoryLogService;
 
-	public BuildInfoHistoryController(BuildInfoService buildInfoService,
-									  DbBuildHistoryLogService dbBuildHistoryLogService) {
-		this.buildInfoService = buildInfoService;
-		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
-	}
+    public BuildInfoHistoryController(BuildInfoService buildInfoService,
+                                      DbBuildHistoryLogService dbBuildHistoryLogService) {
+        this.buildInfoService = buildInfoService;
+        this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+    }
 
-	/**
-	 * 下载构建物
-	 *
-	 * @param logId 日志id
-	 */
-	@RequestMapping(value = "/build/history/download_file.html", method = RequestMethod.GET)
-	@Feature(method = MethodFeature.DOWNLOAD)
-	public void downloadFile(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
-		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
-		if (buildHistoryLog == null) {
-			return;
-		}
-		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
-		if (item == null) {
-			return;
-		}
-		File logFile = BuildUtil.getHistoryPackageFile(item.getId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
-		if (!FileUtil.exist(logFile)) {
-			return;
-		}
-		if (logFile.isFile()) {
-			ServletUtil.write(getResponse(), logFile);
-		} else {
-			File zipFile = BuildUtil.isDirPackage(logFile);
-			assert zipFile != null;
-			ServletUtil.write(getResponse(), zipFile);
-		}
-	}
+    /**
+     * 下载构建物
+     *
+     * @param logId 日志id
+     */
+    @RequestMapping(value = "/build/history/download_file.html", method = RequestMethod.GET)
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void downloadFile(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
+        if (buildHistoryLog == null) {
+            return;
+        }
+        BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
+        if (item == null) {
+            return;
+        }
+        File logFile = BuildUtil.getHistoryPackageFile(item.getId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
+        if (!FileUtil.exist(logFile)) {
+            return;
+        }
+        if (logFile.isFile()) {
+            ServletUtil.write(getResponse(), logFile);
+        } else {
+            File zipFile = BuildUtil.isDirPackage(logFile);
+            assert zipFile != null;
+            ServletUtil.write(getResponse(), zipFile);
+        }
+    }
 
 
-	@RequestMapping(value = "/build/history/download_log.html", method = RequestMethod.GET)
-	@ResponseBody
-	@Feature(method = MethodFeature.DOWNLOAD)
-	public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId) throws IOException {
-		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
-		Objects.requireNonNull(buildHistoryLog);
-		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
-		Objects.requireNonNull(item);
-		File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
-		if (!FileUtil.exist(logFile)) {
-			return;
-		}
-		if (logFile.isFile()) {
-			ServletUtil.write(getResponse(), logFile);
-		}
-	}
+    @RequestMapping(value = "/build/history/download_log.html", method = RequestMethod.GET)
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId) {
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
+        Objects.requireNonNull(buildHistoryLog);
+        BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
+        Objects.requireNonNull(item);
+        File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
+        if (!FileUtil.exist(logFile)) {
+            return;
+        }
+        if (logFile.isFile()) {
+            ServletUtil.write(getResponse(), logFile);
+        }
+    }
 
-	@RequestMapping(value = "/build/history/history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String historyList() {
-		PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(getRequest());
-		pageResultTemp.each(buildHistoryLog -> {
-			File file = BuildUtil.getHistoryPackageFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
-			buildHistoryLog.setHashFile(FileUtil.exist(file));
-			//
-			File logFile = BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId());
-			buildHistoryLog.setHasLog(FileUtil.exist(logFile));
-		});
-		return JsonMessage.getString(200, "获取成功", pageResultTemp);
-	}
+    @RequestMapping(value = "/build/history/history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String historyList() {
+        PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(getRequest());
+        pageResultTemp.each(buildHistoryLog -> {
+            File file = BuildUtil.getHistoryPackageFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
+            buildHistoryLog.setHashFile(FileUtil.exist(file));
+            //
+            File logFile = BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId());
+            buildHistoryLog.setHasLog(FileUtil.exist(logFile));
+        });
+        return JsonMessage.getString(200, "获取成功", pageResultTemp);
+    }
 
-	/**
-	 * 构建
-	 *
-	 * @param logId id
-	 * @return json
-	 */
-	@RequestMapping(value = "/build/history/delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.DEL)
-	public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
-		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
-		Objects.requireNonNull(buildHistoryLog);
-		JsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(buildHistoryLog);
-		return jsonMessage.toString();
-	}
+    /**
+     * 构建
+     *
+     * @param logId id
+     * @return json
+     */
+    @RequestMapping(value = "/build/history/delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
+        Objects.requireNonNull(buildHistoryLog);
+        JsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(buildHistoryLog);
+        return jsonMessage.toString();
+    }
 }
