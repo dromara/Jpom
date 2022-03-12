@@ -36,10 +36,12 @@ max_line_length = 200
 [*.{json, yml}]
 indent_style = space
 indent_size = 2
+max_line_length = off
 
 [*.md]
 insert_final_newline = false
 trim_trailing_whitespace = false
+max_line_length = off
 
 [*.bat]
 end_of_line = crlf
