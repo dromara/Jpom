@@ -208,7 +208,9 @@ export function geteBuildHistory(params) {
  * @param {*} logId
  */
 export function downloadBuildLog(logId) {
-  return `${loadRouterBase("/build/history/download_log.html")}?logId=${logId}`;
+  return loadRouterBase("/build/history/download_log.html", {
+    logId: logId,
+  });
 }
 
 /**
@@ -216,7 +218,9 @@ export function downloadBuildLog(logId) {
  * @param {*} logId
  */
 export function downloadBuildFile(logId) {
-  return `${loadRouterBase("/build/history/download_file.html")}?logId=${logId}`;
+  return loadRouterBase("/build/history/download_file.html", {
+    logId: logId,
+  });
 }
 
 /**

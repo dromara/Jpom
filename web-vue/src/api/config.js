@@ -45,18 +45,22 @@ request.interceptors.request.use(
     if (config.headers["Content-Type"].indexOf("application/x-www-form-urlencoded") !== -1) {
       config.data = Qs.stringify(config.data);
     }
-    let wid = router.app.$route.query.wid;
-    if (!wid) {
-      wid = getHashVars().wid;
-    }
     config.headers[TOKEN_HEADER_KEY] = store.getters.getToken;
-    config.headers[CACHE_WORKSPACE_ID] = wid ? wid : store.getters.getWorkspaceId;
+    config.headers[CACHE_WORKSPACE_ID] = getWid();
     return config;
   },
   (error) => {
     return Promise.reject(error);
   }
 );
+
+function getWid() {
+  let wid = router.app.$route.query.wid;
+  if (!wid) {
+    wid = getHashVars().wid;
+  }
+  return wid ? wid : store.getters.getWorkspaceId;
+}
 
 function getHashVars() {
   var vars = {};
@@ -210,6 +214,9 @@ function redoRequest(config) {
 export default request;
 
 //
-export function loadRouterBase(url) {
-  return `${((window.routerBase || "") + url).replace(new RegExp("//", "gm"), "/")}`;
+export function loadRouterBase(url, params) {
+  const paramsObj = params || {};
+  paramsObj[CACHE_WORKSPACE_ID] = getWid();
+  const paramsQuery = Qs.stringify(paramsObj);
+  return `${((window.routerBase || "") + url).replace(new RegExp("//", "gm"), "/")}?${paramsQuery}`;
 }
