@@ -197,7 +197,7 @@ public class DockerBuild implements AutoCloseable {
 		}
 		for (String s : copy) {
 			List<String> split = StrUtil.split(s, StrUtil.COLON);
-			logRecorder.info("send file to : {}", split.get(1));
+			logRecorder.info("send file to : {}\n", split.get(1));
 			dockerClient.copyArchiveToContainerCmd(containerId)
 					.withHostResource(split.get(0))
 					.withRemotePath(split.get(1))
