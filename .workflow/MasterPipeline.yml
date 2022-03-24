@@ -4,7 +4,7 @@ displayName: MasterPipeline
 stages:
   - stage:
     name: compile
-    displayName: 编译
+    displayName: 编译 
     steps:
       - step: build@maven
         name: build_maven
