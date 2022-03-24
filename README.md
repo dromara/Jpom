@@ -201,12 +201,12 @@ docker run -d -p 2122:2122 \
 2. 解压文件
 3. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. agent-x.x.x-release 目录为插件端的全部安装文件
-    2. 上传到对应服务器
+    2. 上传到对应服务器（整个目录）
     3. 命令运行（Agent.sh、Agent.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2123`
 4. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. server-x.x.x-release 目录为服务端的全部安装文件
-    2. 上传到对应服务器
+    2. 上传到对应服务器（整个目录）
     3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
@@ -220,12 +220,12 @@ docker run -d -p 2122:2122 \
 4. 切换到项目根目录执行:`mvn clean package`
 5. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
-    2. 打包上传服务器运行
+    2. 打包上传服务器运行（整个目录）
     3. 命令运行（Agent.sh、Agent.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2123`
 6. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
-    2. 打包上传服务器运行
+    2. 打包上传服务器运行（整个目录）
     3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
