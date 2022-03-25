@@ -7,6 +7,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复非超级管理员部分下载功能无法正常使用
+2. 【server】ssh 私钥连接新增 `private key content` 登录 （感谢 [@震秦](https://gitee.com/zhzhenqin) [Gitee PR 159](https://gitee.com/dromara/Jpom/pulls/159) ）
 
 ------
 

@@ -40,13 +40,12 @@ import com.jcraft.jsch.SftpException;
 import io.jpom.model.data.SshModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ConfigBean;
-import org.apache.commons.lang.StringUtils;
+import io.jpom.util.JschUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -94,14 +93,16 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         } else if (connectType == SshModel.ConnectType.PUBKEY) {
             File rsaFile = null;
             String privateKey = sshModel.getPrivateKey();
-            if (StringUtils.startsWith(privateKey, URLUtil.FILE_URL_PREFIX)) {
+            if (StrUtil.startWith(privateKey, URLUtil.FILE_URL_PREFIX)) {
                 String rsaPath = StrUtil.removePrefix(privateKey, URLUtil.FILE_URL_PREFIX);
                 rsaFile = FileUtil.file(rsaPath);
-            } else if(StrUtil.startWith(privateKey, io.jpom.util.JschUtil.HEADER)) {
+            } else if (StrUtil.startWith(privateKey, JschUtils.HEADER)) {
                 // 直接采用 private key content 登录，无需写入文件
-                String content = privateKey;
-                content = StringUtils.trimToEmpty(content);
-                session = io.jpom.util.JschUtil.createSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), content.getBytes(StandardCharsets.UTF_8));
+                session = JschUtils.createSession(sshModel.getHost(),
+                        sshModel.getPort(),
+                        sshModel.getUser(),
+                        StrUtil.trim(privateKey),
+                        sshModel.password());
             } else if (StrUtil.isEmpty(privateKey)) {
                 File home = FileUtil.getUserHomeDir();
                 Assert.notNull(home, "用户目录没有找到");
@@ -120,14 +121,11 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                 FileUtil.writeString(privateKey, rsaFile, CharsetUtil.UTF_8);
             }
             // 如果是私钥正文，则 session 已经初始化了
-            if(session == null) {
+            if (session == null) {
                 // 简要私钥文件是否存在
                 Assert.state(FileUtil.isFile(rsaFile), "私钥文件不存在：" + FileUtil.getAbsolutePath(rsaFile));
-                byte[] pas = null;
-                if (StrUtil.isNotEmpty(sshModel.getPassword())) {
-                    pas = sshModel.getPassword().getBytes();
-                }
-                session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), FileUtil.getAbsolutePath(rsaFile), pas);
+                session = JschUtil.openSession(sshModel.getHost(),
+                        sshModel.getPort(), sshModel.getUser(), FileUtil.getAbsolutePath(rsaFile), sshModel.password());
             }
         } else {
             throw new IllegalArgumentException("不支持的模式");
@@ -146,10 +144,9 @@ public class SshService extends BaseWorkspaceService<SshModel> {
      * @param sshModel ssh
      * @param tag      标识
      * @return true 存在运行中的
-     * @throws IOException   IO
-     * @throws JSchException jsch
+     * @throws IOException IO
      */
-    public boolean checkSshRun(SshModel sshModel, String tag) throws IOException, JSchException {
+    public boolean checkSshRun(SshModel sshModel, String tag) throws IOException {
         return this.checkSshRunPid(sshModel, tag) != null;
     }
 
