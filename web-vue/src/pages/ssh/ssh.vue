@@ -419,7 +419,7 @@ export default {
         },
       ],
       options: [
-        { label: "Password", value: "PASS" },
+        { label: "密码", value: "PASS" },
         { label: "证书", value: "PUBKEY" },
       ],
       // 表单校验规则
