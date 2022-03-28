@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <!-- <div ref="filter" class="filter">
-     
+
     </div> -->
     <!-- 数据表格 -->
     <a-table
@@ -420,7 +420,7 @@ export default {
       ],
       options: [
         { label: "Password", value: "PASS" },
-        { label: "PubKey", value: "PUBKEY" },
+        { label: "证书", value: "PUBKEY" },
       ],
       // 表单校验规则
       rules: {
