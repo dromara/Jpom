@@ -8,6 +8,7 @@
 
 1. 【server】修复非超级管理员部分下载功能无法正常使用
 2. 【server】ssh 私钥连接新增 `private key content` 登录 （感谢 [@震秦](https://gitee.com/zhzhenqin) [Gitee PR 159](https://gitee.com/dromara/Jpom/pulls/159) ）
+3. 【server】修复非默认工作空间节点分发白名单无法保存问题（感谢@愿好）
 
 ------
 
