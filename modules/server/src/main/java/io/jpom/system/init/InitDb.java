@@ -51,8 +51,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,7 +70,7 @@ import java.util.stream.Collectors;
 @PreLoadClass(value = Integer.MIN_VALUE + 1)
 @Configuration
 @Slf4j
-public class InitDb implements DisposableBean, InitializingBean, SignalHandler {
+public class InitDb implements DisposableBean, InitializingBean {
 
     @PreLoadMethod(value = Integer.MIN_VALUE)
     private static void init() {
@@ -238,14 +236,14 @@ public class InitDb implements DisposableBean, InitializingBean, SignalHandler {
         this.silenceDestroy();
     }
 
-    private void silenceSignalHandle(String name) {
-        try {
-            Signal.handle(new Signal(name), this);
-            log.debug("{} signal handle success", name);
-        } catch (Exception e) {
-            log.debug("{} signal handle fail:{}", name, e.getMessage());
-        }
-    }
+//    private void silenceSignalHandle(String name) {
+//        try {
+//            Signal.handle(new Signal(name), this);
+//            log.debug("{} signal handle success", name);
+//        } catch (Exception e) {
+//            log.debug("{} signal handle fail:{}", name, e.getMessage());
+//        }
+//    }
 
     private void silenceDestroy() {
         DbConfig.getInstance().close();
@@ -259,9 +257,9 @@ public class InitDb implements DisposableBean, InitializingBean, SignalHandler {
         }
     }
 
-    @Override
-    public void handle(Signal signal) {
-        log.warn("signal event {} {}", signal.getName(), signal.getNumber());
-        this.silenceDestroy();
-    }
+//    @Override
+//    public void handle(Signal signal) {
+//        log.warn("signal event {} {}", signal.getName(), signal.getNumber());
+//        this.silenceDestroy();
+//    }
 }
