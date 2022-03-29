@@ -22,7 +22,7 @@ spring:
     multipart:
       max-request-size: 2GB
       max-file-size: 1GB
-#thymeleaf end
+
 banner:
   msg: Jpom-Server Starting
 # 静态资源配置
