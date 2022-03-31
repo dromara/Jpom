@@ -145,7 +145,7 @@ public class Test {
 		file = FileUtil.getParent(file, 5);
 		String absolutePath = "/Users/user/IdeaProjects/Jpom-demo-case";
 		System.out.println(absolutePath);
-		String image = "maven:3.8.4-jdk-8";
+		String image = "maven:3.8.5-jdk-8";
 		String workingDir = "/jpom/";
 		CreateContainerCmd containerCmd = dockerClient.createContainerCmd(image);
 		String name = "jpom-test";

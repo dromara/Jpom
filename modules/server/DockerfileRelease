@@ -21,7 +21,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-FROM maven:3.8.4-jdk-8
+FROM maven:3.8.5-jdk-8
 
 ENV JPOM_HOME	/usr/local/jpom-server
 ENV JPOM_PKG	server-2.8.17-release.tar.gz

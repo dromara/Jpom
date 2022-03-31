@@ -23,7 +23,7 @@
 
 # syntax = docker/dockerfile:experimental
 
-FROM maven:3.8.4-jdk-8-slim as builder
+FROM maven:3.8.5-jdk-8-slim as builder
 WORKDIR /target/dependency
 COPY . .
 
@@ -48,7 +48,7 @@ RUN set -eux; \
 
 RUN mvn -B -e -T 1C clean package -pl modules/server -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
 
-FROM maven:3.8.4-jdk-8
+FROM maven:3.8.5-jdk-8
 ENV JPOM_HOME   /usr/local/jpom-server
 ARG JPOM_VERSION
 ENV JPOM_PKG    server-${JPOM_VERSION}-release
