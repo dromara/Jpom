@@ -21,7 +21,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-FROM maven:3.8.4-jdk-8-slim as builder
+FROM maven:3.8.5-jdk-8-slim as builder
 WORKDIR /target/dependency
 COPY . .
 
