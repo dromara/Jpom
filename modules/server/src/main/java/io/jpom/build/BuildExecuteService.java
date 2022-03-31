@@ -58,6 +58,7 @@ import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
@@ -123,7 +124,7 @@ public class BuildExecuteService {
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, status);
         Objects.requireNonNull(nowStatus);
         if (BuildStatus.Ing == nowStatus ||
-                BuildStatus.PubIng == nowStatus) {
+            BuildStatus.PubIng == nowStatus) {
             return "当前还在：" + nowStatus.getDesc();
         }
         return null;
@@ -158,12 +159,12 @@ public class BuildExecuteService {
             Assert.notNull(repositoryModel, "仓库信息不存在");
             Map<String, String> env = workspaceEnvVarService.getEnv(buildInfoModel.getWorkspaceId());
             BuildExecuteService.TaskData.TaskDataBuilder taskBuilder = BuildExecuteService.TaskData.builder()
-                    .buildInfoModel(buildInfoModel)
-                    .repositoryModel(repositoryModel)
-                    .userModel(userModel)
-                    .buildRemark(buildRemark)
-                    .delay(delay).env(env)
-                    .triggerBuildType(triggerBuildType);
+                .buildInfoModel(buildInfoModel)
+                .repositoryModel(repositoryModel)
+                .userModel(userModel)
+                .buildRemark(buildRemark)
+                .delay(delay).env(env)
+                .triggerBuildType(triggerBuildType);
             this.runTask(taskBuilder.build());
             String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
             return new JsonMessage<>(200, msg, buildInfoModel.getBuildId());
@@ -185,11 +186,11 @@ public class BuildExecuteService {
         String logId = this.insertLog(buildExtraModule, taskData);
         //
         BuildInfoManage.BuildInfoManageBuilder builder = BuildInfoManage.builder()
-                .taskData(taskData)
-                .logId(logId)
-                .buildExtraModule(buildExtraModule)
-                .dbBuildHistoryLogService(dbBuildHistoryLogService)
-                .buildExecuteService(this);
+            .taskData(taskData)
+            .logId(logId)
+            .buildExtraModule(buildExtraModule)
+            .dbBuildHistoryLogService(dbBuildHistoryLogService)
+            .buildExecuteService(this);
         BuildInfoManage build = builder.build();
         //BuildInfoManage manage = new BuildInfoManage(taskData);
         BUILD_MANAGE_MAP.put(buildInfoModel.getId(), build);
@@ -387,9 +388,9 @@ public class BuildExecuteService {
                     for (String path : paths) {
                         File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), subBefore);
                         FileCopier.create(FileUtil.file(this.gitFile, path), FileUtil.file(toFile, path))
-                                .setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
-                                .setCopyFilter(file1 -> !file1.isHidden())
-                                .copy();
+                            .setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
+                            .setCopyFilter(file1 -> !file1.isHidden())
+                            .copy();
                     }
                 }
             }
@@ -401,9 +402,9 @@ public class BuildExecuteService {
                 }
                 File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
                 FileCopier.create(file, toFile)
-                        .setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
-                        .setCopyFilter(file1 -> !file1.isHidden())
-                        .copy();
+                    .setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
+                    .setCopyFilter(file1 -> !file1.isHidden())
+                    .copy();
             }
             logRecorder.info(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
             // 修改构建产物目录
@@ -522,8 +523,8 @@ public class BuildExecuteService {
             String fromTag = dockerYmlDsl.getFromTag();
             // 根据 tag 查询
             List<DockerInfoModel> dockerInfoModels = buildExecuteService
-                    .dockerInfoService
-                    .queryByTag(buildInfoModel.getWorkspaceId(), 1, fromTag);
+                .dockerInfoService
+                .queryByTag(buildInfoModel.getWorkspaceId(), 1, fromTag);
             DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
             Assert.notNull(dockerInfoModel, "没有可用的 docker server");
             logRecorder.info("use docker {}", dockerInfoModel.getName());
@@ -610,12 +611,12 @@ public class BuildExecuteService {
             if (status && buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
                 // 发布文件
                 ReleaseManage releaseManage = ReleaseManage.builder()
-                        .buildId(buildInfoModel.getBuildId())
-                        .buildExtraModule(buildExtraModule)
-                        .userModel(userModel)
-                        .logId(logId)
-                        .buildExecuteService(buildExecuteService)
-                        .logRecorder(logRecorder).build();
+                    .buildId(buildInfoModel.getBuildId())
+                    .buildExtraModule(buildExtraModule)
+                    .userModel(userModel)
+                    .logId(logId)
+                    .buildExecuteService(buildExecuteService)
+                    .logRecorder(logRecorder).build();
                 releaseManage.start();
             } else {
                 //
@@ -704,7 +705,12 @@ public class BuildExecuteService {
             final boolean[] status = new boolean[1];
             processBuilder.redirectErrorStream(true);
             Map<String, String> environment = processBuilder.environment();
+            // env file
+            File envFile = FileUtil.file(this.gitFile, ".env");
+            Map<String, String> envFileMap = FileUtils.readEnvFile(envFile);
+            environment.putAll(envFileMap);
             environment.putAll(taskData.env);
+            //
             process = processBuilder.start();
             //
             InputStream inputStream = process.getInputStream();

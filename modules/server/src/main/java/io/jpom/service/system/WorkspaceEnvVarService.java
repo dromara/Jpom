@@ -24,15 +24,14 @@ package io.jpom.service.system;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author bwcx_jzy
@@ -57,16 +56,7 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
         workspaceEnvVarModel.setWorkspaceId(workspaceId);
         Map<String, String> evn = this.getEnv(workspaceId);
         for (int i = 0; i < commands.length; i++) {
-            commands[i] = this.formatCommandItem(commands[i], evn);
+            commands[i] = StringUtil.formatStrByMap(commands[i], evn);
         }
-    }
-
-    private String formatCommandItem(String command, Map<String, String> evn) {
-        String replace = command;
-        Set<Map.Entry<String, String>> entries = evn.entrySet();
-        for (Map.Entry<String, String> entry : entries) {
-            replace = StrUtil.replace(replace, StrUtil.format("#{{}}", entry.getKey()), entry.getValue());
-        }
-        return replace;
     }
 }
