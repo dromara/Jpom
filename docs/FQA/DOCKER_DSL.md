@@ -9,7 +9,7 @@ steps:
   - uses: java
     version: 8
   - uses: maven
-    version: 3.8.4
+    version: 3.8.5
   - uses: node
     version: 16.3.0
 # 将容器中的文件缓存到 docker 卷中
