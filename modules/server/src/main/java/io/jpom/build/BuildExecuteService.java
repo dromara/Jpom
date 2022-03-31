@@ -22,7 +22,6 @@
  */
 package io.jpom.build;
 
-import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
@@ -34,7 +33,6 @@ import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -60,6 +58,7 @@ import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
@@ -708,21 +707,8 @@ public class BuildExecuteService {
             Map<String, String> environment = processBuilder.environment();
             // env file
             File envFile = FileUtil.file(this.gitFile, ".env");
-            if (FileUtil.isFile(envFile)) {
-                List<String> list = FileUtil.readLines(envFile, CharsetUtil.CHARSET_UTF_8);
-                List<Tuple> collect = list.stream()
-                    .map(StrUtil::trim)
-                    .filter(s -> !StrUtil.isEmpty(s) && !StrUtil.startWith(s, "#"))
-                    .map(s -> {
-                        List<String> list1 = StrUtil.splitTrim(s, "=");
-                        if (CollUtil.size(list1) != 2) {
-                            return null;
-                        }
-                        return new Tuple(list1.get(0), list1.get(1));
-                    }).filter(Objects::nonNull).collect(Collectors.toList());
-                Map<String, String> map = CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
-                environment.putAll(map);
-            }
+            Map<String, String> envFileMap = FileUtils.readEnvFile(envFile);
+            environment.putAll(envFileMap);
             environment.putAll(taskData.env);
             //
             process = processBuilder.start();

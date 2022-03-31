@@ -63,6 +63,7 @@ import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
@@ -186,27 +187,21 @@ public class ReleaseManage implements Runnable {
      * @param commands 命令
      */
     private void formatCommand(String[] commands) {
+        File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
+        File envFile = FileUtil.file(sourceFile, ".env");
+        Map<String, String> envFileMap = FileUtils.readEnvFile(envFile);
+        //
+        envFileMap.put("BUILD_ID", this.buildExtraModule.getId());
+        envFileMap.put("BUILD_NAME", this.buildExtraModule.getName());
+        envFileMap.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
+        envFileMap.put("BUILD_NUMBER_ID", this.buildId + StrUtil.EMPTY);
+        //
         for (int i = 0; i < commands.length; i++) {
-            commands[i] = this.formatCommandItem(commands[i]);
+            commands[i] = StringUtil.formatStrByMap(commands[i], envFileMap);
         }
         //
         WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
         workspaceEnvVarService.formatCommand(this.buildExtraModule.getWorkspaceId(), commands);
-
-    }
-
-    /**
-     * 格式化命令模版
-     *
-     * @param command 命令
-     * @return 格式化后
-     */
-    private String formatCommandItem(String command) {
-        String replace = StrUtil.replace(command, "#{BUILD_ID}", this.buildExtraModule.getId());
-        replace = StrUtil.replace(replace, "#{BUILD_NAME}", this.buildExtraModule.getName());
-        replace = StrUtil.replace(replace, "#{BUILD_RESULT_FILE}", FileUtil.getAbsolutePath(this.resultFile));
-        replace = StrUtil.replace(replace, "#{BUILD_NUMBER_ID}", this.buildId + StrUtil.EMPTY);
-        return replace;
     }
 
     private String parseDockerTag(File envFile, String tag) {
@@ -254,8 +249,8 @@ public class ReleaseManage implements Runnable {
             String fromTag = this.buildExtraModule.getFromTag();
             // 根据 tag 查询
             List<DockerInfoModel> dockerInfoModels = buildExecuteService
-                    .dockerInfoService
-                    .queryByTag(this.buildExtraModule.getWorkspaceId(), 1, fromTag);
+                .dockerInfoService
+                .queryByTag(this.buildExtraModule.getWorkspaceId(), 1, fromTag);
             DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
             if (dockerInfoModel == null) {
                 logRecorder.info("没有可用的 docker server");
@@ -424,7 +419,7 @@ public class ReleaseManage implements Runnable {
     private void diffSyncProject(NodeModel nodeModel, String projectId, AfterOpt afterOpt, boolean clearOld) {
         File resultFile = this.resultFile;
         String resultFileParent = resultFile.isFile() ?
-                FileUtil.getAbsolutePath(resultFile.getParent()) : FileUtil.getAbsolutePath(this.resultFile);
+            FileUtil.getAbsolutePath(resultFile.getParent()) : FileUtil.getAbsolutePath(this.resultFile);
         //
         List<File> files = FileUtil.loopFiles(resultFile);
         List<JSONObject> collect = files.stream().map(file -> {
@@ -469,7 +464,7 @@ public class ReleaseManage implements Runnable {
             String startPath = StringUtil.delStartPath(file, resultFileParent, false);
             //
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
-                    projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, this.userModel, false);
+                projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, this.userModel, false);
             if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                 throw new JpomRuntimeException("同步项目文件失败：" + jsonMessage);
             }
@@ -508,10 +503,10 @@ public class ReleaseManage implements Runnable {
             unZip = false;
         }
         JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile, null,
-                projectId,
-                unZip,
-                afterOpt,
-                nodeModel, this.userModel, clearOld);
+            projectId,
+            unZip,
+            afterOpt,
+            nodeModel, this.userModel, clearOld);
         if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
             logRecorder.info("发布项目包成功：" + jsonMessage);
         } else {
