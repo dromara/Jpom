@@ -63,7 +63,9 @@ systemctl start docker
 systemctl daemon-reload && systemctl restart docker
 ```
 
-### Docker TLS 证书
+### Docker TLS 证书 （非必须）
+
+> 如果服务端所在端服务器已经按照 docker 在 2.8.15+ 版本会自动加载本地 docker 到 Jpom 中，这样就可以不用修改任何配置即可使用 jpom 管理本地 docker。即可忽略该步骤 
 
 Jpom 使用 docker http 接口是实现和 docker 通讯和管理，但是默认没有开启任何认证这样使得 docker 极不安全，如果端口暴露到公网还容易出现挖矿情况
 
@@ -125,7 +127,9 @@ systemctl status docker
 
 ![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/docker-cli/service1.png)
 
-### 配置 tcp + tls
+### 配置 tcp + tls  （非必须）
+
+> 如果服务端所在端服务器已经按照 docker 在 2.8.15+ 版本会自动加载本地 docker 到 Jpom 中，这样就可以不用修改任何配置即可使用 jpom 管理本地 docker。即可忽略该步骤
 
 `vim /lib/systemd/system/docker.service`
 
