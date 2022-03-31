@@ -899,11 +899,15 @@ export default {
         "runsOn: ubuntu-latest\n" +
         "# 使用哪个 docker 构建,填写 docker 标签 默认查询可用的第一个,如果 tag 查询出多个也选择第一个结果\n" +
         "fromTag: xxx\n" +
+        "# version 需要在对应镜像源中存在\n" +
+        "# java 镜像源 https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/\n" +
+        "# maven 镜像源 https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/\n" +
+        "# node 镜像源 https://registry.npmmirror.com/-/binary/node/\n" +
         "steps:\n" +
         "  - uses: java\n" +
         "    version: 8\n" +
         "  - uses: maven\n" +
-        "    version: 3.8.4\n" +
+        "    version: 3.8.5\n" +
         "  - uses: node\n" +
         "    version: 16.3.0\n" +
         "# 将容器中的文件缓存到 docker 卷中\n" +
