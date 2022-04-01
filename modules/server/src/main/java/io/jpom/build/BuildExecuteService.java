@@ -708,8 +708,13 @@ public class BuildExecuteService {
             // env file
             File envFile = FileUtil.file(this.gitFile, ".env");
             Map<String, String> envFileMap = FileUtils.readEnvFile(envFile);
-            environment.putAll(envFileMap);
             environment.putAll(taskData.env);
+            //
+            envFileMap.put("BUILD_ID", this.buildExtraModule.getId());
+            envFileMap.put("BUILD_NAME", this.buildExtraModule.getName());
+            envFileMap.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
+            envFileMap.put("BUILD_NUMBER_ID", this.taskData.buildInfoModel.getBuildId() + "");
+            environment.putAll(envFileMap);
             //
             process = processBuilder.start();
             //
