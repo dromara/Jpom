@@ -192,7 +192,7 @@
                     <a-button type="link"> 点击查看 <a-icon type="fullscreen" /> </a-button>
                   </p>
                 </template>
-                <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build" />
+                <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID}、仓库目录下 .env、工作空间变量" />
               </a-popover>
             </a-form-model-item>
             <a-form-model-item v-if="temp.buildMode === 1" prop="script">

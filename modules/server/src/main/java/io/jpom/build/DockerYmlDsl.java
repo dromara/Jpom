@@ -140,7 +140,9 @@ public class DockerYmlDsl extends BaseJsonModel {
         String link = String.format("https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/%s/binaries/apache-maven-%s-bin.tar.gz", version, version);
         HttpRequest request = HttpUtil.createRequest(Method.HEAD, link);
         HttpResponse httpResponse = request.execute();
-        Assert.isTrue(httpResponse.isOk() || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 maven 版本号");
+        Assert.isTrue(httpResponse.isOk()
+            || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP
+            || httpResponse.getStatus() == HttpStatus.HTTP_BAD_METHOD, "请填入正确的 maven 版本号");
     }
 
     private void javaPluginCheck(Map<String, Object> step) {
