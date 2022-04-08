@@ -93,6 +93,9 @@ public class DockerYmlDsl extends BaseJsonModel {
         stepsCheck();
     }
 
+    /**
+     * 检查 steps
+     */
     public void stepsCheck() {
         Set<String> usesSet = new HashSet<>();
         boolean containsRun = false;
@@ -134,6 +137,11 @@ public class DockerYmlDsl extends BaseJsonModel {
         Assert.notNull(step.get("path"), "cache 插件 path 不能为空");
     }
 
+    /**
+     * 检查 maven 插件
+     *
+     * @param step 参数
+     */
     private void mavenPluginCheck(Map<String, Object> step) {
         Assert.notNull(step.get("version"), "maven 插件 version 不能为空");
         String version = String.valueOf(step.get("version"));
@@ -145,6 +153,11 @@ public class DockerYmlDsl extends BaseJsonModel {
             || httpResponse.getStatus() == HttpStatus.HTTP_BAD_METHOD, "请填入正确的 maven 版本号");
     }
 
+    /**
+     * 检查 go 插件
+     *
+     * @param step 参数
+     */
     private void javaPluginCheck(Map<String, Object> step) {
         Assert.notNull(step.get("version"), "java 插件 version 不能为空");
         Integer version = Integer.valueOf(String.valueOf(step.get("version")));
@@ -152,6 +165,11 @@ public class DockerYmlDsl extends BaseJsonModel {
         Assert.isTrue(supportedVersions.contains(version), String.format("目前java 插件支持的版本: %s", supportedVersions));
     }
 
+    /**
+     * 检查 node 插件
+     *
+     * @param step 参数
+     */
     private void nodePluginCheck(Map<String, Object> step) {
         Assert.notNull(step.get("version"), "node 插件 version 不能为空");
         String version = String.valueOf(step.get("version"));
@@ -160,6 +178,11 @@ public class DockerYmlDsl extends BaseJsonModel {
         Assert.isTrue(httpResponse.isOk() || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 node 版本号");
     }
 
+    /**
+     * 检查 go 插件
+     *
+     * @param step 参数
+     */
     private void goPluginCheck(Map<String, Object> step) {
         Assert.notNull(step.get("version"), "go 插件 version 不能为空");
         String version = String.valueOf(step.get("version"));
@@ -170,6 +193,11 @@ public class DockerYmlDsl extends BaseJsonModel {
             httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, "请填入正确的 go 版本号");
     }
 
+    /**
+     * 检查 python3 插件
+     *
+     * @param step 参数
+     */
     private void python3PluginCheck(Map<String, Object> step) {
         Assert.notNull(step.get("version"), "python3 插件 version 不能为空");
         String version = String.valueOf(step.get("version"));
