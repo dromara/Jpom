@@ -58,7 +58,7 @@
         </template>
       </a-table>
       <!-- 上传文件 -->
-      <a-modal v-model="uploadFileVisible" width="300px" title="上传文件" :footer="null" :maskClosable="true">
+      <a-modal @cancel="closeUploadFile" v-model="uploadFileVisible" width="300px" title="上传文件" :footer="null" :maskClosable="true">
         <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="`${uploadFileZip ? ZIP_ACCEPT : ''}`" :multiple="!uploadFileZip">
           <a-button>
             <a-icon type="upload"/>
@@ -215,8 +215,7 @@ export default {
             message: res.msg,
           });
           this.loadFileList();
-          this.fileFolderName = "";
-          this.addFileFolderVisible = false;
+          this.closeAddFileFolder()
         }
       })
     },
@@ -229,6 +228,9 @@ export default {
     beforeUpload(file) {
       this.uploadFileList = [...this.uploadFileList, file];
       return false;
+    },
+    closeUploadFile(){
+      this.uploadFileList = [];
     },
     // 开始上传文件
     startUpload() {
@@ -246,7 +248,7 @@ export default {
               message: res.msg,
             });
             this.loadFileList();
-            this.uploadFileList = [];
+            this.closeUploadFile()
             this.uploadFileVisible = false;
           }
         });
