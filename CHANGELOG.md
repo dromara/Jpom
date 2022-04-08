@@ -5,12 +5,15 @@
 
 ### 🐣 新增功能
 
+1. 【server】SSH文件管理器中加入创建目录和文件的功能 （感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 161](https://gitee.com/dromara/Jpom/pulls/161) ）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】本地构建命令、本地命令发布、ssh 发布支持加载仓库目录 `.env` 文件为环境变量 （感谢@z~）
 2. 【server】容器相关引用 maven 版本升级为 3.8.5
 3. 【server】容器构建 DSL 示例添加镜像地址说明 （感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 160](https://gitee.com/dromara/Jpom/pulls/160) ）
 4. 【server】本地构建命令添加本次构建相关的默认变量（感谢@杨杰）
+5. 【server】优化 SHH 文件管理中文件上传,压缩包上传操作（感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 161](https://gitee.com/dromara/Jpom/pulls/161) ）
 
 ------
 
