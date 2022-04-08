@@ -490,31 +490,29 @@ public class SshFileController extends BaseServerController {
     }
 
     @RequestMapping(value = "new_file_folder.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String newFileFolder(String id, String path, String name, String unFolder) {
+    public String newFileFolder(String id, String path, String name, String unFolder) throws IOException {
         SshModel sshModel = sshService.getByKey(id, false);
         Assert.notNull(sshModel, "ssh error");
         Session session = SshService.getSessionByModel(sshModel);
-        try (Sftp sftp = new Sftp(session, sshModel.getCharsetT())) {
-            // 验证合法性，防止越权
-            FileUtil.file(path, name);
-            String remotePath = FileUtil.normalize(path + StrUtil.SLASH + name);
-            StringBuilder command = new StringBuilder();
-            if (Convert.toBool(unFolder, false)) {
-                // 文件
-                command.append("touch ").append(remotePath);
-            } else {
-                // 目录
-                command.append("mkdir ").append(remotePath);
+        // 验证合法性，防止越权
+        FileUtil.file(path, name);
+        String remotePath = FileUtil.normalize(path + StrUtil.SLASH + name);
+        StringBuilder command = new StringBuilder();
+        if (Convert.toBool(unFolder, false)) {
+            // 文件
+            command.append("touch ").append(remotePath);
+        } else {
+            // 目录
+            command.append("mkdir ").append(remotePath);
+            try (Sftp sftp = new Sftp(session, sshModel.getCharsetT())) {
                 if (sftp.mkdir(remotePath)) {
+                    // 创建成功
+                    return JsonMessage.getString(200, "操作成功");
                 }
             }
-            String result = sshService.exec(sshModel, String.valueOf(command));
-            return JsonMessage.getString(200, "操作成功");
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return JsonMessage.getString(400, "操作失败");
+        String result = sshService.exec(sshModel, String.valueOf(command));
+        return JsonMessage.getString(200, "操作成功 " + result);
     }
 
 }
