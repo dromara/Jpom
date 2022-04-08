@@ -225,3 +225,17 @@ export function updateFileData(params) {
     data: params,
   });
 }
+
+/**
+ * 新增目录  或文件
+ * @param params
+ * @returns {id, path, name,unFolder} params x
+ */
+export function newFileFolder(params) {
+    return axios({
+        url: "/node/ssh/new_file_folder.json",
+        method: "post",
+        data: params,
+    });
+}
+
