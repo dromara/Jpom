@@ -452,7 +452,7 @@ public class SshFileController extends BaseServerController {
             File savePath = FileUtil.file(tempPath, "ssh", sshModel.getId());
             multipart.setSavePath(FileUtil.getAbsolutePath(savePath));
             multipart.addFieldName("file")
-                    .setUseOriginalFilename(true);
+                .setUseOriginalFilename(true);
             //
             if (Convert.toBool(unzip, false)) {
                 multipart.setFileExt(StringUtil.PACKAGE_EXT);
@@ -487,6 +487,34 @@ public class SshFileController extends BaseServerController {
             FileUtil.del(localPath);
         }
         return JsonMessage.getString(200, "上传成功");
+    }
+
+    @RequestMapping(value = "new_file_folder.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String newFileFolder(String id, String path, String name, String unFolder) {
+        SshModel sshModel = sshService.getByKey(id, false);
+        Assert.notNull(sshModel, "ssh error");
+        Session session = SshService.getSessionByModel(sshModel);
+        try (Sftp sftp = new Sftp(session, sshModel.getCharsetT())) {
+            // 验证合法性，防止越权
+            FileUtil.file(path, name);
+            String remotePath = FileUtil.normalize(path + StrUtil.SLASH + name);
+            StringBuilder command = new StringBuilder();
+            if (Convert.toBool(unFolder, false)) {
+                // 文件
+                command.append("touch ").append(remotePath);
+            } else {
+                // 目录
+                command.append("mkdir ").append(remotePath);
+                if (sftp.mkdir(remotePath)) {
+                }
+            }
+            String result = sshService.exec(sshModel, String.valueOf(command));
+            return JsonMessage.getString(200, "操作成功");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return JsonMessage.getString(400, "操作失败");
     }
 
 }
