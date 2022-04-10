@@ -36,7 +36,7 @@
           <a-form-model-item :wrapper-col="{ span: 24 }" prop="userPwd">
             <a-input-password v-model="loginForm.userPwd" placeholder="密码" />
           </a-form-model-item>
-          <a-form-model-item :wrapper-col="{ span: 24 }" prop="code">
+          <a-form-model-item v-if="!this.disabledCaptcha" :wrapper-col="{ span: 24 }" prop="code">
             <a-row>
               <a-col :span="14">
                 <a-input v-model="loginForm.code" placeholder="验证码" />
@@ -91,6 +91,7 @@ export default {
           { pattern: /^\d{6}$/, message: "验证码 6 为纯数字" },
         ],
       },
+      disabledCaptcha: false,
     };
   },
   created() {
@@ -127,6 +128,7 @@ export default {
         if (res.data?.loginTitle) {
           this.loginTitle = res.data.loginTitle;
         }
+        this.disabledCaptcha = res.data.disabledCaptcha;
       });
     },
     // Controls the background display or hiding

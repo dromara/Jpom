@@ -6,6 +6,7 @@
 ### 🐣 新增功能
 
 1. 【server】SSH文件管理器中加入创建目录和文件的功能 （感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 161](https://gitee.com/dromara/Jpom/pulls/161) ）
+2. 【server】新增禁用登录图形验证码配置属性 `jpom.disabledCaptcha` （ [Gitee issues I4GD0U](https://gitee.com/dromara/Jpom/issues/I4GD0U) ）
 
 ### 🐞 解决BUG、优化功能
 
