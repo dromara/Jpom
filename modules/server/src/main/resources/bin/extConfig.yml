@@ -22,6 +22,8 @@ jpom:
   logoFile:
   # 禁用页面引导导航
   disabledGuide: false
+  # 禁用登录图形验证码 （一般用于服务器没有字体或者开启了两部验证后才关闭图形验证码）
+  disabledCaptcha: false
 user:
   # 最多能创建多少个用户
   maxCount: 10

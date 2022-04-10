@@ -27,11 +27,9 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.script.ScriptUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import io.jpom.system.extconf.DbExtConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -162,13 +160,15 @@ public class ServerExtConfigBean {
     @Value("${jpom.disabledGuide:false}")
     private Boolean disabledGuide;
     /**
+     * 禁用登录图形验证码
+     */
+    @Value("${jpom.disabledCaptcha:false}")
+    private Boolean disabledCaptcha;
+    /**
      * 检查节点心跳间隔时间
      */
     @Value("${system.nodeHeartSecond:30}")
     private Integer nodeHeartSecond;
-
-    @Resource
-    private DbExtConfig dbExtConfig;
 
     /**
      * 获取上传文件超时时间
@@ -253,8 +253,22 @@ public class ServerExtConfigBean {
         return userDemoTip;
     }
 
+    /**
+     * 是否禁用导航
+     *
+     * @return bool
+     */
     public boolean getDisabledGuide() {
         return Convert.toBool(disabledGuide, false);
+    }
+
+    /**
+     * 是否禁用登录图形验证码
+     *
+     * @return boolean
+     */
+    public boolean getDisabledCaptcha() {
+        return Convert.toBool(disabledCaptcha, false);
     }
 
     public int getNodeHeartSecond() {
