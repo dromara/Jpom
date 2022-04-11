@@ -79,7 +79,7 @@
         <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
       </a-modal>
       <!--  新增文件 目录    -->
-      <a-modal @cancel="closeAddFileFolder" v-model="addFileFolderVisible" width="300px" :title="addFileOrFolderTitle" :footer="null" :maskClosable="true">
+      <a-modal v-model="addFileFolderVisible" width="300px" :title="addFileOrFolderType === 1 ? '新增目录' : '新建文件'" :footer="null" :maskClosable="true">
         <a-space direction="vertical" style="width: 100%">
           <span v-if="this.nowPath">当前目录:{{ this.nowPath }}</span>
           <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
@@ -145,7 +145,6 @@ export default {
       ],
       editFileVisible: false,
       addFileFolderVisible: false,
-      addFileOrFolderTitle: "新增目录",
       // 目录1 文件2 标识
       addFileOrFolderType: 1,
       fileFolderName: "",
@@ -202,17 +201,17 @@ export default {
     handleAddFolder() {
       this.addFileFolderVisible = true;
       this.addFileOrFolderType = 1;
-      this.addFileOrFolderTitle = "新增目录";
+      this.fileFolderName = "";
     },
     handleAddFile() {
       this.addFileFolderVisible = true;
       this.addFileOrFolderType = 2;
-      this.addFileOrFolderTitle = "新增文件";
-    },
-    closeAddFileFolder() {
-      this.addFileFolderVisible = false;
       this.fileFolderName = "";
     },
+    // closeAddFileFolder() {
+    //   this.addFileFolderVisible = false;
+    //   this.fileFolderName = "";
+    // },
     // 确认新增文件  目录
     startAddFileFolder() {
       const params = {
@@ -226,8 +225,9 @@ export default {
           this.$notification.success({
             message: res.msg,
           });
+          this.addFileFolderVisible = false;
           this.loadFileList();
-          this.closeAddFileFolder();
+          // this.closeAddFileFolder();
         }
       });
     },

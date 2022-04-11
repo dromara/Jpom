@@ -35,6 +35,7 @@ import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -491,24 +492,40 @@ public class SshFileController extends BaseServerController {
         return JsonMessage.getString(200, "上传成功");
     }
 
+    /**
+     * @return json
+     * @api {post} new_file_folder.json ssh 中创建文件夹/文件
+     * @apiGroup ssh
+     * @apiUse defResultJson
+     * @apiParam {String} id ssh id
+     * @apiParam {String} path ssh 选择到目录
+     * @apiParam {String} name 文件名
+     * @apiParam {String} unFolder true/1 为文件夹，false/0 为文件
+     * @apiSuccess {JSON}  data
+     */
     @RequestMapping(value = "new_file_folder.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String newFileFolder(String id, String path, String name, String unFolder) throws IOException {
+    public String newFileFolder(String id, @ValidatorItem String path, @ValidatorItem String name, String unFolder) throws IOException {
         SshModel sshModel = sshService.getByKey(id, false);
         Assert.notNull(sshModel, "ssh error");
         Session session = SshService.getSessionByModel(sshModel);
+        String normalize = FileUtil.normalize(name);
+        Assert.state(!StrUtil.contains(normalize, StrUtil.SLASH), "文件名不能包含/");
         // 验证合法性，防止越权
         FileUtil.file(path, name);
         String remotePath = FileUtil.normalize(path + StrUtil.SLASH + name);
-        StringBuilder command = new StringBuilder();
-        if (Convert.toBool(unFolder, false)) {
-            // 文件
-            command.append("touch ").append(remotePath);
-        } else {
-            // 目录
-            command.append("mkdir ").append(remotePath);
-            try (Sftp sftp = new Sftp(session, sshModel.getCharsetT())) {
+        try (Sftp sftp = new Sftp(session, sshModel.getCharsetT())) {
+            if (sftp.exist(remotePath)) {
+                return JsonMessage.getString(400, "文件夹或者文件已存在");
+            }
+            StringBuilder command = new StringBuilder();
+            if (Convert.toBool(unFolder, false)) {
+                // 文件
+                command.append("touch ").append(remotePath);
+            } else {
+                // 目录
+                command.append("mkdir ").append(remotePath);
                 try {
-                    if (sftp.exist(remotePath) || sftp.mkdir(remotePath)) {
+                    if (sftp.mkdir(remotePath)) {
                         // 创建成功
                         return JsonMessage.getString(200, "操作成功");
                     }
@@ -517,9 +534,9 @@ public class SshFileController extends BaseServerController {
                     return JsonMessage.getString(500, "创建文件夹失败（文件夹名可能已经存在啦）:" + e.getMessage());
                 }
             }
+            String result = sshService.exec(sshModel, String.valueOf(command));
+            return JsonMessage.getString(200, "操作成功 " + result);
         }
-        String result = sshService.exec(sshModel, String.valueOf(command));
-        return JsonMessage.getString(200, "操作成功 " + result);
     }
 
 }

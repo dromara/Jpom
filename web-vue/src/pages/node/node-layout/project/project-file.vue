@@ -18,12 +18,34 @@
         <template slot="title">
           <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
           <a-space>
-            <a-tooltip title="上传文件">
-              <a-button size="small" type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleUpload"><a-icon type="upload" /></a-button>
-            </a-tooltip>
-            <a-tooltip title="上传压缩包并自动解压">
-              <a-button size="small" type="primary" :disabled="!Object.keys(this.tempNode).length" @click="handleZipUpload"><a-icon type="upload" /><a-icon type="file-zip" /></a-button>
-            </a-tooltip>
+            <a-dropdown :disabled="!Object.keys(this.tempNode).length">
+              <a-button size="small" type="primary" @click="(e) => e.preventDefault()"><a-icon type="upload" />上传</a-button>
+              <a-menu slot="overlay">
+                <a-menu-item @click="handleUpload">
+                  <a-space><a-icon type="file" />上传文件</a-space>
+                </a-menu-item>
+                <a-menu-item @click="handleZipUpload">
+                  <a-space><a-icon type="file-zip" />上传压缩包并自动解压</a-space>
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
+            <a-dropdown :disabled="!Object.keys(this.tempNode).length">
+              <a-button size="small" type="primary" @click="(e) => e.preventDefault()">新建</a-button>
+              <a-menu slot="overlay">
+                <a-menu-item @click="handleAddFolder">
+                  <a-space>
+                    <a-icon type="folder-add" />
+                    <a-space>新建目录</a-space>
+                  </a-space>
+                </a-menu-item>
+                <a-menu-item @click="handleAddFile">
+                  <a-space>
+                    <a-icon type="file-add" />
+                    <a-space>新建空白文件</a-space>
+                  </a-space>
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
             <a-tooltip title="通过 URL 下载远程文件到项目文件夹,需要到节点系统配置->白名单配置中配置允许的 HOST 白名单">
               <a-button size="small" type="primary" @click="openRemoteUpload"><a-icon type="cloud-download" /></a-button>
             </a-tooltip>
@@ -119,11 +141,23 @@
           </a-form-model-item>
         </a-form-model>
       </a-modal>
+      <!-- 创建文件/文件夹 -->
+      <a-modal v-model="addFileFolderVisible" width="300px" :title="addFileOrFolderType === 1 ? '新增目录' : '新建文件'" :footer="null" :maskClosable="true">
+        <a-space direction="vertical" style="width: 100%">
+          <span v-if="this.nowPath">当前目录:{{ this.nowPath }}</span>
+          <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
+          <a-tooltip :title="this.addFileOrFolderType === 1 ? '目录创建成功后需要手动刷新右边树才能显示出来哟' : ''">
+            <a-input v-model="fileFolderName" placeholder="输入文件或者文件夹名" />
+          </a-tooltip>
+
+          <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">确认</a-button>
+        </a-space>
+      </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
 <script>
-import { getFileList, downloadProjectFile, noFileModes, deleteProjectFile, uploadProjectFile, readFile, updateFile, remoteDownload } from "@/api/node-project";
+import { getFileList, downloadProjectFile, noFileModes, deleteProjectFile, uploadProjectFile, readFile, updateFile, remoteDownload, newFileFolder } from "@/api/node-project";
 import { ZIP_ACCEPT } from "@/utils/const";
 import codeEditor from "@/components/codeEditor";
 
@@ -197,6 +231,10 @@ export default {
       rules: {
         url: [{ required: true, message: "远程下载Url不为空", trigger: "change" }],
       },
+      addFileFolderVisible: false,
+      // 目录1 文件2 标识
+      addFileOrFolderType: 1,
+      fileFolderName: "",
     };
   },
   computed: {
@@ -624,6 +662,36 @@ export default {
     goReadFile(record) {
       // const filePath = this.uploadPath + record.filename;
       this.$emit("goReadFile", this.uploadPath, record.filename);
+    },
+    handleAddFolder() {
+      this.addFileFolderVisible = true;
+      this.addFileOrFolderType = 1;
+      this.fileFolderName = "";
+    },
+    handleAddFile() {
+      this.addFileFolderVisible = true;
+      this.addFileOrFolderType = 2;
+      this.fileFolderName = "";
+    },
+    // 确认新增文件  目录
+    startAddFileFolder() {
+      const params = {
+        nodeId: this.nodeId,
+        id: this.projectId,
+        levelName: this.uploadPath,
+        filename: this.fileFolderName,
+        unFolder: this.addFileOrFolderType === 1 ? false : true,
+      };
+      newFileFolder(params).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.addFileFolderVisible = false;
+          this.loadData();
+          this.loadFileList();
+        }
+      });
     },
   },
 };
