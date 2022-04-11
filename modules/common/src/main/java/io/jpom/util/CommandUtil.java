@@ -37,6 +37,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 命令行工具
@@ -57,6 +59,14 @@ public class CommandUtil {
      * 执行前缀
      */
     public static final String EXECUTE_PREFIX;
+    /**
+     * 是否缓存执行结果
+     */
+    private static final ThreadLocal<Boolean> CACHE_COMMAND_RESULT_TAG = new ThreadLocal<>();
+    /**
+     * 缓存执行结果
+     */
+    private static final ThreadLocal<Map<String, String>> CACHE_COMMAND_RESULT = new ThreadLocal<>();
 
     static {
         if (SystemUtil.getOsInfo().isLinux()) {
@@ -81,6 +91,22 @@ public class CommandUtil {
     }
 
     /**
+     * 开启缓存执行结果
+     */
+    public static void openCache() {
+        CACHE_COMMAND_RESULT_TAG.set(true);
+        CACHE_COMMAND_RESULT.set(new ConcurrentHashMap<>(16));
+    }
+
+    /**
+     * 关闭缓存执行结果
+     */
+    public static void closeCache() {
+        CACHE_COMMAND_RESULT_TAG.remove();
+        CACHE_COMMAND_RESULT.remove();
+    }
+
+    /**
      * 获取执行命令的 前缀
      *
      * @return list
@@ -89,7 +115,20 @@ public class CommandUtil {
         return ObjectUtil.clone(COMMAND);
     }
 
+    /**
+     * 执行命令
+     *
+     * @param command 命令
+     * @return 结果
+     */
     public static String execSystemCommand(String command) {
+        Boolean cache = CACHE_COMMAND_RESULT_TAG.get();
+        if (cache != null && cache) {
+            // 开启缓存
+            Map<String, String> cacheMap = CACHE_COMMAND_RESULT.get();
+            return cacheMap.computeIfAbsent(command, key -> execSystemCommand(key, null));
+        }
+        // 直接执行
         return execSystemCommand(command, null);
     }
 

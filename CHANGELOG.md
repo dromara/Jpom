@@ -15,6 +15,7 @@
 3. 【server】容器构建 DSL 示例添加镜像地址说明 （感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 160](https://gitee.com/dromara/Jpom/pulls/160) ）
 4. 【server】本地构建命令添加本次构建相关的默认变量（感谢@杨杰）
 5. 【server】优化 SHH 文件管理中文件上传,压缩包上传操作（感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 161](https://gitee.com/dromara/Jpom/pulls/161) ）
+6. 【agent】批量获取项目状态新增缓存，避免部分环境获取项目状态超时（感谢@奇奇  ）
 
 ------
 
