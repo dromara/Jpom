@@ -566,6 +566,19 @@ export function stopProject(params) {
 }
 
 /**
+ * 新增目录  或文件
+ * @param params
+ * @returns {id, path, name,unFolder} params x
+ */
+export function newFileFolder(params) {
+  return axios({
+    url: "/node/manage/file/new_file_folder",
+    method: "get",
+    params,
+  });
+}
+
+/**
  * 所有的运行模式
  */
 export const runModeList = ["Dsl", "ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"];

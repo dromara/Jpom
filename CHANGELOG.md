@@ -7,6 +7,7 @@
 
 1. 【server】SSH文件管理器中加入创建目录和文件的功能 （感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 161](https://gitee.com/dromara/Jpom/pulls/161) ）
 2. 【server】新增禁用登录图形验证码配置属性 `jpom.disabledCaptcha` （ [Gitee issues I4GD0U](https://gitee.com/dromara/Jpom/issues/I4GD0U) ）
+3. 【agent】节点项目文件管理新增创建文件夹/文件功能 （感谢 [@Eibons](https://gitee.com/eibons) [Gitee issues I4ZFFH](https://gitee.com/dromara/Jpom/issues/I4ZFFH) ）
 
 ### 🐞 解决BUG、优化功能
 
