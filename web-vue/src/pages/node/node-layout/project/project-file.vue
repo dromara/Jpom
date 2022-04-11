@@ -144,13 +144,14 @@
       <!-- 创建文件/文件夹 -->
       <a-modal v-model="addFileFolderVisible" width="300px" :title="addFileOrFolderType === 1 ? '新增目录' : '新建文件'" :footer="null" :maskClosable="true">
         <a-space direction="vertical" style="width: 100%">
-          <span v-if="this.nowPath">当前目录:{{ this.nowPath }}</span>
+          <span v-if="uploadPath">当前目录:{{ uploadPath }}</span>
           <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
           <a-tooltip :title="this.addFileOrFolderType === 1 ? '目录创建成功后需要手动刷新右边树才能显示出来哟' : ''">
             <a-input v-model="fileFolderName" placeholder="输入文件或者文件夹名" />
           </a-tooltip>
-
-          <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">确认</a-button>
+          <a-row type="flex" justify="center">
+            <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">确认</a-button>
+          </a-row>
         </a-space>
       </a-modal>
     </a-layout-content>
