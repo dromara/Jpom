@@ -86,8 +86,9 @@
           <a-tooltip :title="this.addFileOrFolderType === 1 ? '目录创建成功后需要手动刷新右边树才能显示出来哟' : ''">
             <a-input v-model="fileFolderName" placeholder="输入文件或者文件夹名" />
           </a-tooltip>
-
-          <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">确认</a-button>
+          <a-row type="flex" justify="center">
+            <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">确认</a-button>
+          </a-row>
         </a-space>
       </a-modal>
       <!-- Terminal -->
