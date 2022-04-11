@@ -52,6 +52,7 @@ import io.jpom.system.ServerConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.CompressionFileUtil;
 import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -76,6 +77,7 @@ import java.util.Vector;
 @RestController
 @RequestMapping("node/ssh")
 @Feature(cls = ClassFeature.SSH_FILE)
+@Slf4j
 public class SshFileController extends BaseServerController {
 
     private final SshService sshService;
@@ -505,9 +507,14 @@ public class SshFileController extends BaseServerController {
             // 目录
             command.append("mkdir ").append(remotePath);
             try (Sftp sftp = new Sftp(session, sshModel.getCharsetT())) {
-                if (sftp.mkdir(remotePath)) {
-                    // 创建成功
-                    return JsonMessage.getString(200, "操作成功");
+                try {
+                    if (sftp.exist(remotePath) || sftp.mkdir(remotePath)) {
+                        // 创建成功
+                        return JsonMessage.getString(200, "操作成功");
+                    }
+                } catch (Exception e) {
+                    log.error("ssh创建文件夹异常", e);
+                    return JsonMessage.getString(500, "创建文件夹失败（文件夹名可能已经存在啦）:" + e.getMessage());
                 }
             }
         }
