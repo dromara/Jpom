@@ -38,8 +38,6 @@ consoleLog:
   # 控制台编码格式
   charset:
 project:
-  # 是否禁用 使用jmx获取项目状态
-  disableVirtualMachine: false
   # 停止项目等待的时长 单位秒
   stopWaitTime: 10
 system:

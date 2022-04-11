@@ -79,12 +79,6 @@ public class AgentExtConfigBean {
     private String serverToken;
 
     /**
-     * 项目状态禁用 调用jmx获取
-     */
-    @Value("${project.disableVirtualMachine:false}")
-    private boolean disableVirtualMachine;
-
-    /**
      * 停止项目等待的时长 单位秒，最小为1秒
      */
     @Value("${project.stopWaitTime:10}")
@@ -92,10 +86,6 @@ public class AgentExtConfigBean {
 
     public int getStopWaitTime() {
         return stopWaitTime;
-    }
-
-    public boolean isDisableVirtualMachine() {
-        return disableVirtualMachine;
     }
 
     public String getAgentId() {
