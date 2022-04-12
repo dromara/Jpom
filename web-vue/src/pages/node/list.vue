@@ -252,10 +252,10 @@
 
             <a-form-model-item label="代理" prop="httpProxy">
               <a-input v-model="temp.httpProxy" placeholder="代理地址 (127.0.0.1:8888)">
-                <a-select slot="addonBefore" v-model="temp.httpProxyType" default-value="HTTP" style="width: 80px">
-                  <a-select-option value="HTTP"> HTTP </a-select-option>
-                  <a-select-option value="SOCKS">SOCKS </a-select-option>
-                  <a-select-option value="DIRECT">DIRECT </a-select-option>
+                <a-select slot="addonBefore" v-model="temp.httpProxyType" default-value="HTTP" style="width: 100px">
+                  <a-select-option value="HTTP">HTTP</a-select-option>
+                  <a-select-option value="SOCKS">SOCKS</a-select-option>
+                  <a-select-option value="DIRECT">DIRECT</a-select-option>
                 </a-select>
                 <!--						<a-input v-model="temp.url" placeholder="节点地址 (127.0.0.1:2123)"/>-->
               </a-input>
