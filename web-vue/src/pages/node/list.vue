@@ -161,8 +161,8 @@
     </a-table>
 
     <!-- 编辑区 -->
-    <a-modal v-model="editNodeVisible" width="60%" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
-      <a-form-model ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+    <a-modal v-model="editNodeVisible" width="50%" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
+      <a-form-model ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
         <!-- <a-form-model-item label="节点 ID" prop="id">
           <a-input v-model="temp.id" placeholder="创建之后不能修改" />
         </a-form-model-item> -->
@@ -172,12 +172,7 @@
         <a-form-model-item label="分组名称" prop="group">
           <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
         </a-form-model-item>
-        <a-form-model-item label="绑定 SSH " prop="sshId">
-          <a-select show-search option-filter-prop="children" v-model="temp.sshId" placeholder="请选择SSH">
-            <a-select-option value="">不绑定</a-select-option>
-            <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{ ssh.name }}</a-select-option>
-          </a-select>
-        </a-form-model-item>
+
         <!-- <a-form-model-item label="监控周期" prop="cycle">
           <a-select v-model="temp.cycle" defaultValue="0" placeholder="监控周期">
             <a-select-option v-for="(name, key) in nodeMonitorCycle" :key="parseInt(key)">{{ name }}</a-select-option>
@@ -243,9 +238,30 @@
             <a-input-password v-model="temp.loginPwd" placeholder="节点密码,请查看节点启动输出的信息" />
           </a-form-model-item>
         </div>
-        <a-form-model-item label="超时时间(s)" prop="timeOut">
-          <a-input-number v-model="temp.timeOut" :min="0" placeholder="秒 (值太小可能会取不到节点状态)" style="width: 100%" />
-        </a-form-model-item>
+        <a-collapse>
+          <a-collapse-panel key="1" header="其他配置">
+            <a-form-model-item label="超时时间(s)" prop="timeOut">
+              <a-input-number v-model="temp.timeOut" :min="0" placeholder="秒 (值太小可能会取不到节点状态)" style="width: 100%" />
+            </a-form-model-item>
+            <a-form-model-item label="绑定 SSH " prop="sshId">
+              <a-select show-search option-filter-prop="children" v-model="temp.sshId" placeholder="请选择SSH">
+                <a-select-option value="">不绑定</a-select-option>
+                <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{ ssh.name }}</a-select-option>
+              </a-select>
+            </a-form-model-item>
+
+            <a-form-model-item label="代理" prop="httpProxy">
+              <a-input v-model="temp.httpProxy" placeholder="代理地址 (127.0.0.1:8888)">
+                <a-select slot="addonBefore" v-model="temp.httpProxyType" default-value="HTTP" style="width: 80px">
+                  <a-select-option value="HTTP"> HTTP </a-select-option>
+                  <a-select-option value="SOCKS">SOCKS </a-select-option>
+                  <a-select-option value="DIRECT">DIRECT </a-select-option>
+                </a-select>
+                <!--						<a-input v-model="temp.url" placeholder="节点地址 (127.0.0.1:2123)"/>-->
+              </a-input>
+            </a-form-model-item>
+          </a-collapse-panel>
+        </a-collapse>
       </a-form-model>
     </a-modal>
     <!-- 管理节点 -->

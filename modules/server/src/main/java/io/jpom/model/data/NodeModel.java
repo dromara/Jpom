@@ -22,11 +22,21 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.BaseGroupModel;
 import io.jpom.service.h2db.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.List;
 
 /**
  * 节点实体
@@ -34,151 +44,89 @@ import io.jpom.service.h2db.TableName;
  * @author jiangzeyin
  * @date 2019/4/16
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "NODE_INFO", name = "节点信息")
+@Data
+@NoArgsConstructor
 public class NodeModel extends BaseGroupModel {
 
-	private String url;
-	private String loginName;
-	private String loginPwd;
-	private String name;
+    private String url;
+    private String loginName;
+    private String loginPwd;
+    private String name;
 
-	/**
-	 * 节点协议
-	 */
-	private String protocol;
-	/**
-	 * 开启状态，如果关闭状态就暂停使用节点 1 启用
-	 */
-	private Integer openStatus;
-	/**
-	 * 节点超时时间
-	 */
-	private Integer timeOut;
-	/**
-	 * 绑定的sshId
-	 */
-	private String sshId;
+    /**
+     * 节点协议
+     */
+    private String protocol;
+    /**
+     * 开启状态，如果关闭状态就暂停使用节点 1 启用
+     */
+    private Integer openStatus;
+    /**
+     * 节点超时时间
+     */
+    private Integer timeOut;
+    /**
+     * 绑定的sshId
+     */
+    private String sshId;
+    /**
+     * 锁定类型
+     */
+    private String unLockType;
+    /**
+     * 监控周期
+     *
+     * @see io.jpom.model.Cycle
+     */
+    @Deprecated
+    private Integer cycle;
+    /**
+     * http 代理
+     */
+    private String httpProxy;
+    /**
+     * https 代理 类型
+     */
+    private String httpProxyType;
 
-	/**
-	 * 锁定类型
-	 */
-	private String unLockType;
+    public boolean isOpenStatus() {
+        return openStatus != null && openStatus == 1;
+    }
 
-	/**
-	 * 监控周期
-	 *
-	 * @see io.jpom.model.Cycle
-	 */
-	@Deprecated
-	private Integer cycle;
+    public NodeModel(String id) {
+        this.setId(id);
+    }
 
-	public String getName() {
-		return name;
-	}
+    /**
+     * 获取 授权的信息
+     *
+     * @return sha1
+     */
+    public String toAuthorize() {
+        return SecureUtil.sha1(loginName + "@" + loginPwd);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getRealUrl(NodeUrl nodeUrl) {
+        return StrUtil.format("{}://{}{}", getProtocol().toLowerCase(), getUrl(), nodeUrl.getUrl());
+    }
 
-	@Deprecated
-	public Integer getCycle() {
-		return cycle;
-	}
-
-	/**
-	 * @param cycle 监控频率
-	 * @see io.jpom.model.Cycle
-	 */
-	@Deprecated
-	public void setCycle(Integer cycle) {
-		this.cycle = cycle;
-	}
-
-	public String getSshId() {
-		return sshId;
-	}
-
-	public void setSshId(String sshId) {
-		this.sshId = sshId;
-	}
-
-	public Integer getTimeOut() {
-		return timeOut;
-	}
-
-	public void setTimeOut(Integer timeOut) {
-		this.timeOut = timeOut;
-	}
-
-	public Integer getOpenStatus() {
-		return openStatus;
-	}
-
-	public void setOpenStatus(Integer openStatus) {
-		this.openStatus = openStatus;
-	}
-
-	public boolean isOpenStatus() {
-		return openStatus != null && openStatus == 1;
-	}
-
-	public NodeModel() {
-	}
-
-	public NodeModel(String id) {
-		this.setId(id);
-	}
-
-	public String getProtocol() {
-		return protocol;
-	}
-
-	public void setProtocol(String protocol) {
-		this.protocol = protocol.toLowerCase();
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public String getLoginName() {
-		return loginName;
-	}
-
-	public void setLoginName(String loginName) {
-		this.loginName = loginName;
-	}
-
-	public String getLoginPwd() {
-		return loginPwd;
-	}
-
-	public void setLoginPwd(String loginPwd) {
-		this.loginPwd = loginPwd;
-	}
-
-	public String getUnLockType() {
-		return unLockType;
-	}
-
-	public void setUnLockType(String unLockType) {
-		this.unLockType = unLockType;
-	}
-
-	/**
-	 * 获取 授权的信息
-	 *
-	 * @return sha1
-	 */
-	public String toAuthorize() {
-		return SecureUtil.sha1(loginName + "@" + loginPwd);
-	}
-
-	public String getRealUrl(NodeUrl nodeUrl) {
-		return StrUtil.format("{}://{}{}", getProtocol(), getUrl(), nodeUrl.getUrl());
-	}
+    /**
+     * 获取节点的代理
+     *
+     * @return proxy
+     */
+    public Proxy proxy() {
+        String httpProxy = this.getHttpProxy();
+        if (StrUtil.isNotEmpty(httpProxy)) {
+            List<String> split = StrUtil.splitTrim(httpProxy, StrUtil.COLON);
+            String host = CollUtil.getFirst(split);
+            int port = Convert.toInt(CollUtil.getLast(split), 0);
+            String type = this.getHttpProxyType();
+            Proxy.Type type1 = EnumUtil.fromString(Proxy.Type.class, type, Proxy.Type.HTTP);
+            return new Proxy(type1, new InetSocketAddress(host, port));
+        }
+        return null;
+    }
 }
