@@ -45,3 +45,5 @@ system:
   timerMatchSecond: false
   # 旧包文件保留个数
   oldJarsCount: 2
+  # Check the url for the new version
+  remoteVersionUrl:
