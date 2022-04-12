@@ -71,6 +71,7 @@ public class RemoteVersion extends BaseJsonModel {
 
     /**
      * 主 url 用于拉取远程版本信息
+     * https://keepbx.gitee.io/jpom-site/docs/release-versions.json
      */
     private static final String DEFAULT_URL = "https://jpom.io/docs/release-versions.json";
     /**
