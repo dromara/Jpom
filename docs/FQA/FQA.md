@@ -298,6 +298,17 @@ binds:
 
 1. 使用构建命令来指定 `settings.xml` 文件位置，如：mvn -s xxx/settings.xml clean package
 
+### 获取项目状态超时
+
+如果在节点（插件端）控制台或者项目列表中出现一直没有显示项目状态，或者出现提示超时信息。
+这种一般是获取项目状态超时，因为 jpom 针对 java 程序获取状态默认使用 jps 命令来处理，据了解可能在不同的 jdk 中 jps 命令存在一定差异，可能出现 jps 命令响应很慢（openJ9 ）
+
+解决办法有如下：
+
+1. 配置节点超时时间 + 配置前端请求超时时间（前端请求超时时间在服务端 extConfig 中配置）
+2. 跟换 jdk（建议使用 openjdk） 或者排查 是否出现异常进程
+3. 升级 jpom 版本，2.8.18+ 优化过批量获取项目状态相关逻辑，会缩短整个接口耗时
+
 # 开发计划
 
 [开发计划](https://cdn.jsdelivr.net/gh/dromara/Jpom/PLANS.md)
