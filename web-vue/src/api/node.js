@@ -136,6 +136,8 @@ export function editNode(params) {
     loginName: params.loginName,
     loginPwd: params.loginPwd,
     type: params.type,
+    httpProxy: params.httpProxy,
+    httpProxyType: params.httpProxyType,
   };
   return axios({
     url: "/node/save.json",
