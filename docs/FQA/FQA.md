@@ -309,6 +309,32 @@ binds:
 2. 跟换 jdk（建议使用 openjdk） 或者排查 是否出现异常进程
 3. 升级 jpom 版本，2.8.18+ 优化过批量获取项目状态相关逻辑，会缩短整个接口耗时
 
+### 在线升级（远程更新）
+
+> jpom 中提供在线升级功能，方便用户及时知道有新版本并快速更新。
+
+目前更新策略是每天定时更新和手动触发更新
+
+使用该功能可能出现对问题有如下：
+
+1. 无法获取到最新版本
+2. 控制台有错误信息（`获取远程版本信息失败: xxxx`）
+
+出现上述大部分为网络原因，因为默认使用 `github pages`（海外）来获取最新信息，如果服务器无法访问外网或者不能使用公网那么基本是不能正常使用。
+
+目前系统中提供到解决方案有如下：
+
+1. 不能访问外网则可以自定义配置远程地址：(配置方法在 extConfig.yml 文件中修改 `system.remoteVersionUrl` 属性)
+   1. [https://jpom.io/docs/release-versions.json](https://jpom.io/docs/release-versions.json) （GitHub Pages）
+   2. [https://keepbx.gitee.io/jpom-site/docs/release-versions.json](https://keepbx.gitee.io/jpom-site/docs/release-versions.json) (Gitee Pages)
+   3. [https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/release-versions.json](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/release-versions.json) (jsdelivr)
+2. 自己搭建服务（Jpom 中更新规则使用二级从定向）
+   1. 生成第一级远程更新信息地址
+   2. 第一级地址内容如示例：`{url:"https://dromara.gitee.io/jpom/docs/versions.json"}`
+   3. 生成第二级远程安装包地址
+   4. 第二级地址内容示例：`{tag_name:"v2.8.18",agentUrl:"https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/agent-2.8.18-release.zip",serverUrl:"https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/server-2.8.18-release.zip",changelogUrl:"https://gitee.com/dromara/Jpom/raw/master/CHANGELOG.md"}`
+   5. 配置远程更新地址 (配置方法在 extConfig.yml 文件中修改 `system.remoteVersionUrl` 属性)
+
 # 开发计划
 
 [开发计划](https://cdn.jsdelivr.net/gh/dromara/Jpom/PLANS.md)
