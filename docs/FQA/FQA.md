@@ -343,6 +343,35 @@ binds:
    4. 第二级地址内容示例：`{tag_name:"v2.8.18",agentUrl:"https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/agent-2.8.18-release.zip",serverUrl:"https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/server-2.8.18-release.zip",changelogUrl:"https://gitee.com/dromara/Jpom/raw/master/CHANGELOG.md"}`
    5. 配置远程更新地址 (配置方法在 extConfig.yml 文件中修改 `system.remoteVersionUrl` 属性)
 
+# 配置上传文件大小限制
+
+Jpom 上传文件大小限制默认为 1GB，如果有上传更大到文件需要修改限制大小
+
+Jpom 使用 SpringBoot 实现，大部分配置遵循 SpringBoot 配置属性。
+
+上传文件大小限制配置属性为：
+
+```
+spring:
+  servlet:
+    multipart:
+      # 上传文件大小限制
+      max-request-size: 2GB
+      max-file-size: 1GB
+```
+
+如果上下大文件出现 OOM 那么则需要为程序配置更大大内存，因为上传文件默认都会先缓存到内存中
+
+配置方式为：修改配置文件(`extConfig.yml`)中对应属性值
+
+# 关于上传文件进度条说明
+
+目前 Jpom 中到上传文件进度条仅是一个心里安慰剂（有相关经验到开发同学都懂）
+
+目前暂时没有考虑优化为真实进度条的计划（主要是因为开发起来有一定工作量，带来的体验并不能提升多少）
+
+关于在浏览器中上传项目文件缓慢原因说明， Jpom 目前都使用 http 协议和插件端通讯，那么在浏览器中上传，首先会将文件上传到服务端，再又服务端上传到插件端（节点）,如果上传耗时就会多用一部分时间。服务端上传到插件端中理论上如果使用内网通讯那么此耗时基本可以忽略。
+
 # 开发计划
 
 [开发计划](https://cdn.jsdelivr.net/gh/dromara/Jpom/PLANS.md)
