@@ -97,8 +97,17 @@
         </template>
       </a-table>
       <!-- 批量上传文件 -->
-      <a-modal v-model="uploadFileVisible" width="300px" title="上传项目文件" :footer="null" :maskClosable="true">
-        <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" multiple>
+      <a-modal v-model="uploadFileVisible" width="300px" title="上传项目文件" :footer="null" :maskClosable="false">
+        <a-upload
+          :file-list="uploadFileList"
+          :remove="
+            () => {
+              this.uploadFileList = [];
+            }
+          "
+          :before-upload="beforeUpload"
+          multiple
+        >
           <a-button><a-icon type="upload" />选择文件</a-button>
         </a-upload>
         <br />
@@ -110,8 +119,17 @@
         </a-space>
       </a-modal>
       <!-- 上传压缩文件 -->
-      <a-modal v-model="uploadZipFileVisible" width="300px" title="上传压缩文件" :footer="null" :maskClosable="true">
-        <a-upload :file-list="uploadFileList" :remove="handleZipRemove" :before-upload="beforeZipUpload" :accept="ZIP_ACCEPT">
+      <a-modal v-model="uploadZipFileVisible" width="300px" title="上传压缩文件" :footer="null" :maskClosable="false">
+        <a-upload
+          :file-list="uploadFileList"
+          :remove="
+            () => {
+              this.uploadFileList = [];
+            }
+          "
+          :before-upload="beforeZipUpload"
+          :accept="ZIP_ACCEPT"
+        >
           <a-button><a-icon type="upload" />选择压缩文件</a-button>
         </a-upload>
         <br />
@@ -393,7 +411,10 @@ export default {
       //初始化成功数
       this.successSize = 0;
       this.uploadFileList = [];
+      this.uploading = false;
+      this.percentage = 0;
       this.uploadFileVisible = true;
+      this.timer && clearInterval(this.timer);
     },
     handleRemove(file) {
       const index = this.uploadFileList.indexOf(file);
@@ -413,7 +434,7 @@ export default {
       });
       // 设置上传状态
       this.uploading = true;
-      const timer = setInterval(() => {
+      this.timer = setInterval(() => {
         this.percentage = this.percentage > 99 ? 99 : this.percentage + 1;
       }, 1000);
 
@@ -440,7 +461,7 @@ export default {
             setTimeout(() => {
               this.percentage = 0;
               this.uploading = false;
-              clearInterval(timer);
+              clearInterval(this.timer);
               this.loadFileList();
               this.uploadFileList = [];
             }, 1000);
@@ -459,11 +480,12 @@ export default {
       this.checkBox = false;
       this.successSize = 0;
       this.uploadFileList = [];
+      this.uploading = false;
+      this.percentage = 0;
       this.uploadZipFileVisible = true;
+      this.timer && clearInterval(this.timer);
     },
-    handleZipRemove() {
-      this.uploadFileList = [];
-    },
+
     beforeZipUpload(file) {
       this.uploadFileList = [file];
       return false;
@@ -475,7 +497,7 @@ export default {
       });
       // 设置上传状态
       this.uploading = true;
-      const timer = setInterval(() => {
+      this.timer = setInterval(() => {
         this.percentage = this.percentage > 99 ? 99 : this.percentage + 1;
       }, 1000);
 
@@ -500,7 +522,7 @@ export default {
           setTimeout(() => {
             this.percentage = 0;
             this.uploading = false;
-            clearInterval(timer);
+            clearInterval(this.timer);
             this.checkBox = false;
             this.uploadFileList = [];
             this.loadFileList();
