@@ -18,10 +18,6 @@ spring:
     active: local
   mvc:
     throw-exception-if-no-handler-found: true
-  servlet:
-    multipart:
-      max-request-size: 2GB
-      max-file-size: 1GB
 
 banner:
   msg: Jpom-Server Starting
