@@ -1,6 +1,6 @@
 package io.jpom.controller;
 
-import io.jpom.common.interceptor.NotLogin;
+
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping("${server.error.path:${error.path:/error}}")
-@NotLogin
 public class MyErrorController extends BaseMyErrorController {
+
     public MyErrorController(ErrorAttributes errorAttributes) {
         super(errorAttributes);
     }

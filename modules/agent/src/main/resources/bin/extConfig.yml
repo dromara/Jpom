@@ -47,3 +47,10 @@ system:
   oldJarsCount: 2
   # Check the url for the new version
   remoteVersionUrl:
+# spring 相关配置
+spring:
+  servlet:
+    multipart:
+      # 上传文件大小限制
+      max-request-size: 2GB
+      max-file-size: 1GB
