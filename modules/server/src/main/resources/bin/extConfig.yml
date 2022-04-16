@@ -65,6 +65,11 @@ spring:
       # 是否允许远程访问（开启此配置有安全风险），默认为 false（当部署到服务器上之后，是否可以通过其他浏览器访问数据库）
       settings:
         web-allow-others: false
+  servlet:
+    multipart:
+      # 上传文件大小限制
+      max-request-size: 2GB
+      max-file-size: 1GB
 # 构建相关配置
 build:
   # 最多保存多少份历史记录
