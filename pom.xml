@@ -55,7 +55,7 @@
         <jpom-min-version>1.0.0</jpom-min-version>
         <spring-boot.version>2.6.3</spring-boot.version>
 
-        <common-boot.version>2.2.3</common-boot.version>
+        <common-boot.version>2.2.4</common-boot.version>
         <h2.version>1.4.200</h2.version>
         <!-- 跳过测试 -->
         <skipTests>true</skipTests>
