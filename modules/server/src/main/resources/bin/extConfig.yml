@@ -24,6 +24,8 @@ jpom:
   disabledGuide: false
   # 禁用登录图形验证码 （一般用于服务器没有字体或者开启了两部验证后才关闭图形验证码）
   disabledCaptcha: false
+  # 前端消息弹出位置，可选 topLeft topRight bottomLeft bottomRight
+  notificationPlacement:
 user:
   # 最多能创建多少个用户
   maxCount: 10

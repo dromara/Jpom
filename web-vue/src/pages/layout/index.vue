@@ -133,6 +133,9 @@ export default {
 
           // 禁用导航
           this.$store.dispatch("disabledGuide", res.data.disabledGuide);
+          this.$notification.config({
+            placement: res.data.notificationPlacement,
+          });
         }
         if (res.code !== 200) {
           this.$notification.warn({

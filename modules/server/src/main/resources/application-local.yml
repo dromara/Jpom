@@ -22,3 +22,4 @@ jpom:
 #  loginTitle: dsfasdf
 #  logoFile: https://www.surely.cool/surely-vue-logo.png
 #  disabledCaptcha: true
+#  notificationPlacement: topLeft
