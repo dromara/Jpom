@@ -11,6 +11,7 @@
 
 1. 修复上传文件限制大小异常拦截不生效的问题（感谢@）
 2. 新增配置前端消息弹窗位置属性 `jpom.notificationPlacement` （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I53V8B](https://gitee.com/dromara/Jpom/issues/I53V8B)）
+3. 构建历史新增批量删除
 
 ------
 
