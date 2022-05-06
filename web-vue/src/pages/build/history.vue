@@ -11,8 +11,9 @@
       :columns="columns"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       bordered
-      :rowKey="(record, index) => index"
+      rowKey="id"
       @change="change"
+      :row-selection="rowSelection"
     >
       <template slot="title">
         <a-space>
@@ -29,6 +30,7 @@
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
+          <a-button type="danger" :disabled="!tableSelections || tableSelections.length <= 0" @click="handleBatchDelete"> 批量删除 </a-button>
           <a-tooltip>
             <template slot="title">
               <div>构建历史是用于记录每次构建的信息,可以保留构建产物信息,构建日志。同时还可以快速回滚发布</div>
@@ -132,6 +134,7 @@ export default {
       statusMap: statusMap,
       temp: {},
       buildLogVisible: false,
+      tableSelections: [],
       columns: [
         { title: "构建名称", dataIndex: "buildName", /*width: 120,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "构建 ID", dataIndex: "buildNumberId", width: 90, align: "center", ellipsis: true, scopedSlots: { customRender: "buildNumberId" } },
@@ -171,6 +174,12 @@ export default {
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
+      };
+    },
+    rowSelection() {
+      return {
+        onChange: this.tableSelectionChange,
+        selectedRowKeys: this.tableSelections,
       };
     },
   },
@@ -272,6 +281,33 @@ export default {
         },
       });
     },
+    // 批量删除
+    handleBatchDelete() {
+      if (!this.tableSelections || this.tableSelections.length <= 0) {
+        this.$notification.warning({
+          message: "没有选择任何数据",
+        });
+        return;
+      }
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要删除这些构建历史记录么？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          deleteBuildHistory(this.tableSelections.join(",")).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.tableSelections = [];
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
     // 查看构建日志
     handleBuildLog(record) {
       this.temp = {
@@ -283,6 +319,10 @@ export default {
     // 关闭日志对话框
     closeBuildLogModel() {
       this.loadData();
+    },
+    // 多选相关
+    tableSelectionChange(selectedRowKeys) {
+      this.tableSelections = selectedRowKeys;
     },
   },
 };
