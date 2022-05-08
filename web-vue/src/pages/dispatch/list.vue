@@ -186,7 +186,7 @@
                   v-for="project in item.project"
                   :disabled="
                     dispatchList.filter((item, nowIndex) => {
-                      return item.projectId === project.projectId && nowIndex !== index;
+                      return item.nodeId === project.nodeId && item.projectId === project.projectId && nowIndex !== index;
                     }).length > 0
                   "
                   :key="project.projectId"
