@@ -10,8 +10,9 @@
 ### 🐞 解决BUG、优化功能
 
 1. 修复上传文件限制大小异常拦截不生效的问题（感谢@）
-2. 新增配置前端消息弹窗位置属性 `jpom.notificationPlacement` （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I53V8B](https://gitee.com/dromara/Jpom/issues/I53V8B)）
+2. 新增配置前端消息弹窗位置属性 `jpom.notificationPlacement` （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I53V8B](https://gitee.com/dromara/Jpom/issues/I53V8B) ）
 3. 构建历史新增批量删除
+4. 修复关联分发项目，无法选择不同节点下相同的项目的问题（感谢[@宋建平](https://gitee.com/sjping) [Gitee issues I5680N](https://gitee.com/dromara/Jpom/issues/I5680N) ）
 
 ------
 
