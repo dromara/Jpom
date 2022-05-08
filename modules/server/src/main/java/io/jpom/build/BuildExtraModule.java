@@ -110,6 +110,11 @@ public class BuildExtraModule extends BaseModel {
 	 */
 	private Boolean saveBuildFile;
 
+    /**
+     * 构建的时候判断仓库代码是否有变动，true 表示需要判断代码有变动才触发构建
+     */
+    private Boolean checkRepositoryDiff;
+
 	public String getResultDirFile() {
 		if (resultDirFile == null) {
 			return null;
