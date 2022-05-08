@@ -33,6 +33,7 @@ import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -263,6 +264,19 @@ public class BuildExecuteService {
         buildService.updateStatus(buildId, buildStatus);
     }
 
+    /**
+     * 更新最后一次构建完成的仓库代码 last commit
+     *
+     * @param buildId      构建ID
+     * @param lastCommitId 最后一次的仓库代码 last commit
+     */
+    private void updateLastCommitId(String buildId, String lastCommitId) {
+        BuildInfoModel buildInfoModel = new BuildInfoModel();
+        buildInfoModel.setId(buildId);
+        buildInfoModel.setRepositoryLastCommitId(lastCommitId);
+        buildService.update(buildInfoModel);
+    }
+
     @Builder
     public static class TaskData {
         private final BuildInfoModel buildInfoModel;
@@ -284,6 +298,11 @@ public class BuildExecuteService {
          * 环境变量
          */
         private Map<String, String> env;
+
+        /**
+         * 仓库代码最后一次变动信息（ID，git 为 commit hash, svn 最后的版本号）
+         */
+        private String repositoryLastCommitId;
     }
 
 
@@ -458,6 +477,8 @@ public class BuildExecuteService {
                 RepositoryModel.RepoType repoType = EnumUtil.likeValueOf(RepositoryModel.RepoType.class, repoTypeCode);
                 Integer protocolCode = repositoryModel.getProtocol();
                 GitProtocolEnum protocol = EnumUtil.likeValueOf(GitProtocolEnum.class, protocolCode);
+                Boolean checkRepositoryDiff = buildExtraModule.getCheckRepositoryDiff();
+                String repositoryLastCommitId = buildInfoModel.getRepositoryLastCommitId();
                 if (repoType == RepositoryModel.RepoType.Git) {
                     // git with password
                     IPlugin plugin = PluginFactory.getPlugin("git-clone");
@@ -493,7 +514,17 @@ public class BuildExecuteService {
                         // 分支模式
                         map.put("branchName", newBranchName);
                         logRecorder.info("repository [" + branchName + "] clone pull from " + newBranchName);
-                        msg = (String) plugin.execute("pull", map);
+                        String[] result = (String[]) plugin.execute("pull", map);
+                        msg = result[1];
+                        // 判断hash 码和上次构建是否一致
+                        if (checkRepositoryDiff != null && checkRepositoryDiff) {
+                            if (StrUtil.equals(repositoryLastCommitId, result[0])) {
+                                // 如果一致，则不构建
+                                logRecorder.info("仓库代码没有任何变动终止本次构建：{}", result[0]);
+                                return false;
+                            }
+                        }
+                        taskData.repositoryLastCommitId = result[0];
                     }
                 } else if (repoType == RepositoryModel.RepoType.Svn) {
                     // svn
@@ -505,9 +536,18 @@ public class BuildExecuteService {
                     File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel);
                     map.put("rsaFile", rsaFile);
                     IPlugin plugin = PluginFactory.getPlugin("svn-clone");
-                    Object result = plugin.execute(gitFile, map);
+                    String[] result = (String[]) plugin.execute(gitFile, map);
                     //msg = SvnKitUtil.checkOut(repositoryModel, gitFile);
-                    msg = StrUtil.toString(result);
+                    msg = ArrayUtil.get(result, 1);
+                    // 判断版本号和上次构建是否一致
+                    if (checkRepositoryDiff != null && checkRepositoryDiff) {
+                        if (StrUtil.equals(repositoryLastCommitId, result[0])) {
+                            // 如果一致，则不构建
+                            logRecorder.info("仓库代码没有任何变动终止本次构建：{}", result[0]);
+                            return false;
+                        }
+                    }
+                    taskData.repositoryLastCommitId = result[0];
                 }
                 logRecorder.info(msg);
             } catch (Exception e) {
@@ -625,6 +665,16 @@ public class BuildExecuteService {
             return true;
         }
 
+        /**
+         * 结束流程
+         *
+         * @return 流程执行是否成功
+         */
+        private boolean finish() {
+            buildExecuteService.updateLastCommitId(taskData.buildInfoModel.getId(), taskData.repositoryLastCommitId);
+            return true;
+        }
+
         @Override
         public void run() {
             currentThread = Thread.currentThread();
@@ -634,6 +684,7 @@ public class BuildExecuteService {
             suppliers.put("pull", BuildInfoManage.this::pull);
             suppliers.put("executeCommand", BuildInfoManage.this::executeCommand);
             suppliers.put("release", BuildInfoManage.this::packageRelease);
+            suppliers.put("finish", BuildInfoManage.this::finish);
             // 依次执行流程，发生异常结束整个流程
             String processName = StrUtil.EMPTY;
             long startTime = SystemClock.now();

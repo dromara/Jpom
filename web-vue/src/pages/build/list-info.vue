@@ -192,7 +192,13 @@
                     <a-button type="link"> 点击查看 <a-icon type="fullscreen" /> </a-button>
                   </p>
                 </template>
-                <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID}、仓库目录下 .env、工作空间变量" />
+                <a-input
+                  v-model="temp.script"
+                  type="textarea"
+                  :auto-size="{ minRows: 2, maxRows: 6 }"
+                  allow-clear
+                  placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID}、仓库目录下 .env、工作空间变量"
+                />
               </a-popover>
             </a-form-model-item>
             <a-form-model-item v-if="temp.buildMode === 1" prop="script">
@@ -475,8 +481,19 @@
                     保留产物：
                   </a-tooltip>
                 </a-col>
-                <a-col :span="10">
+                <a-col :span="4">
                   <a-switch v-model="tempExtraData.saveBuildFile" checked-children="是" un-checked-children="否" />
+                </a-col>
+                <a-col :span="4" style="text-align: right">
+                  <a-tooltip>
+                    <template slot="title"> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
+
+                    <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                    差异构建：
+                  </a-tooltip>
+                </a-col>
+                <a-col :span="4">
+                  <a-switch v-model="tempExtraData.checkRepositoryDiff" checked-children="是" un-checked-children="否" />
                 </a-col>
               </a-row>
             </a-form-model-item>

@@ -57,7 +57,10 @@ ALTER TABLE BACKUP_INFO
 	ADD IF NOT EXISTS modifyUser VARCHAR(50) comment '操作人';
 
 ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS buildMode int comment '构建方式 {0 本地构建, 1 docker 构建Ï}';
+	ADD IF NOT EXISTS buildMode int comment '构建方式 {0 本地构建, 1 docker 构建}';
 
 ALTER TABLE BUILD_INFO
 	ALTER COLUMN releaseMethodDataId CLOB COMMENT '构建关联的数据ID';
+
+ALTER TABLE BUILD_INFO
+    ADD IF NOT EXISTS repositoryLastCommitId varchar(255) comment '仓库代码最后一次变动信息（ID，git 为 commit hash, svn 最后的版本号）';

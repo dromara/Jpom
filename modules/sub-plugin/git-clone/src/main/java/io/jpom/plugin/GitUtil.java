@@ -120,7 +120,7 @@ public class GitUtil {
         }
         String url = (String) parameter.get("url");
         CloneCommand command = cloneCommand.setURI(url)
-                .setDirectory(file);
+            .setDirectory(file);
         // 设置凭证
         setCredentials(command, parameter);
         return command.call();
@@ -212,14 +212,14 @@ public class GitUtil {
         synchronized (url.intern()) {
             try {
                 LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository()
-                        .setRemote(url);
+                    .setRemote(url);
                 // 更新凭证
                 setCredentials(lsRemoteCommand, parameter);
                 //
                 Collection<Ref> call = lsRemoteCommand
-                        .setHeads(true)
-                        .setTags(true)
-                        .call();
+                    .setHeads(true)
+                    .setTags(true)
+                    .call();
                 if (CollUtil.isEmpty(call)) {
                     return null;
                 }
@@ -295,7 +295,7 @@ public class GitUtil {
      * @throws IOException     IO
      * @throws GitAPIException api
      */
-    public static String checkoutPull(Map<String, Object> parameter, File file, String branchName, PrintWriter printWriter) throws Exception {
+    public static String[] checkoutPull(Map<String, Object> parameter, File file, String branchName, PrintWriter printWriter) throws Exception {
         String url = (String) parameter.get("url");
         synchronized (url.intern()) {
             try (Git git = initGit(parameter, branchName, file, printWriter)) {
@@ -307,7 +307,7 @@ public class GitUtil {
                 checkTransportException(t, file, printWriter);
             }
         }
-        return StrUtil.EMPTY;
+        return new String[]{StrUtil.EMPTY,StrUtil.EMPTY};
     }
 
     /**
@@ -337,12 +337,12 @@ public class GitUtil {
         if (tagOpt == null && !StrUtil.equals(git.getRepository().getBranch(), branchName)) {
             println(printWriter, "start switch branch from {} to {}", git.getRepository().getBranch(), branchName);
             git.checkout().
-                    setCreateBranch(createBranch).
-                    setName(branchName).
-                    setForceRefUpdate(true).
-                    setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
-                    setProgressMonitor(progressMonitor).
-                    call();
+                setCreateBranch(createBranch).
+                setName(branchName).
+                setForceRefUpdate(true).
+                setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
+                setProgressMonitor(progressMonitor).
+                call();
         }
         PullCommand pull = git.pull();
         if (tagOpt != null) {
@@ -352,9 +352,9 @@ public class GitUtil {
         setCredentials(pull, parameter);
         //
         PullResult call = pull
-                .setRemoteBranchName(branchName)
-                .setProgressMonitor(progressMonitor)
-                .call();
+            .setRemoteBranchName(branchName)
+            .setProgressMonitor(progressMonitor)
+            .call();
         // 输出拉取结果
         if (call != null) {
             String fetchedFrom = call.getFetchedFrom();
@@ -396,11 +396,11 @@ public class GitUtil {
                 PullResult pull = pull(git, parameter, branchName, TagOpt.FETCH_TAGS, printWriter);
                 // 切换到对应的 tag
                 git.checkout()
-                        .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
-                        .setForceRefUpdate(true)
-                        .setName(tagName)
-                        .setForced(true)
-                        .call();
+                    .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
+                    .setForceRefUpdate(true)
+                    .setName(tagName)
+                    .setForced(true)
+                    .call();
                 // 获取最后提交信息
                 Collection<ReflogEntry> reflogEntries = git.reflog().setRef(Constants.HEAD).call();
                 ReflogEntry first = CollUtil.getFirst(reflogEntries);
@@ -488,15 +488,17 @@ public class GitUtil {
      *
      * @param file       仓库文件夹
      * @param branchName 分支
-     * @return 描述
+     * @return String[] 第一个元素为最后一次 hash 值， 第二个元素为描述
      * @throws IOException     IO
      * @throws GitAPIException api
      */
-    public static String getLastCommitMsg(File file, String branchName) throws IOException, GitAPIException {
+    public static String[] getLastCommitMsg(File file, String branchName) throws IOException, GitAPIException {
         try (Git git = Git.open(file)) {
             ObjectId anyObjectId = getAnyObjectId(git, branchName);
             Objects.requireNonNull(anyObjectId, "没有" + branchName + "分支");
-            return getLastCommitMsg(file, branchName, anyObjectId);
+            //System.out.println(anyObjectId.getName());
+            String lastCommitMsg = getLastCommitMsg(file, branchName, anyObjectId);
+            return new String[]{anyObjectId.getName(), lastCommitMsg};
         }
     }
 
@@ -516,12 +518,12 @@ public class GitUtil {
             String time = new DateTime(revCommit.getCommitTime() * 1000L).toString();
             PersonIdent personIdent = revCommit.getAuthorIdent();
             return StrUtil.format("{} {} {}[{}] {} {}",
-                    desc,
-                    revCommit.getShortMessage(),
-                    personIdent.getName(),
-                    personIdent.getEmailAddress(),
-                    time,
-                    revCommit.getParentCount());
+                desc,
+                revCommit.getShortMessage(),
+                personIdent.getName(),
+                personIdent.getEmailAddress(),
+                time,
+                revCommit.getParentCount());
         }
     }
 
