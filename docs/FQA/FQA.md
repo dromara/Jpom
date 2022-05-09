@@ -197,6 +197,20 @@ sh /xxxx/Server.sh restart --rest:load_init_db
    3. 此方法不一定成功，或者可能出现恢复后的数据不完整（恢复后需要检查数据是否完整）
 
 
+
+# WebSocket （web socket 错误,请检查是否开启 ws 代理）
+
+Jpom 中服务端和插件端通信方式有 http、WebSocket,http 主要传输一下基础操作、上传文件相关，WebSocket 主要用于一些需要实时传输的信息如：控制台日志、脚本执行日志等。
+
+服务端中对接口也是采用 http+WebSocket 来实现，如果用户在使用中出现 WebSocket 连接错误或者控制台看不到任何信息时候：需要检查一下是否使用代理软件代理 Jpom 服务端或者插件端（如：nginx 代理）
+
+如果使用了代理需要确认是否配置 WebSocket 相关配置
+
+```
+proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection "upgrade";
+```
+
 #  Jpom使用Nginx代理推荐配置
 
 ### Http 相关配置
