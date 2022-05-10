@@ -46,14 +46,12 @@ import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.NodeProjectInfoModel;
+import io.jpom.script.ProjectFileBackupUtil;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.service.manage.ConsoleService;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.system.AgentConfigBean;
-import io.jpom.util.CompressionFileUtil;
-import io.jpom.util.FileUtils;
-import io.jpom.util.ProjectCommanderUtil;
-import io.jpom.util.StringUtil;
+import io.jpom.util.*;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -193,79 +191,77 @@ public class ProjectFileControl extends BaseAgentController {
         // 是否清空
         String clearType = getParameter("clearType");
         String levelName = getParameter("levelName");
-        File lib;
-        if (StrUtil.isEmpty(levelName)) {
-            lib = new File(pim.allLib());
-        } else {
-            lib = FileUtil.file(pim.allLib(), levelName);
-        }
-        // 判断是否需要清空
-        if ("clear".equalsIgnoreCase(clearType)) {
-            if (!FileUtil.clean(lib)) {
-                FileUtil.del(lib.toPath());
-                //return JsonMessage.getString(500, "清除旧lib失败");
+        File lib = StrUtil.isEmpty(levelName) ? new File(pim.allLib()) : FileUtil.file(pim.allLib(), levelName);
+        // 备份文件
+        String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
+        try {
+            // 判断是否需要清空
+            if ("clear".equalsIgnoreCase(clearType)) {
+                CommandUtil.systemFastDel(lib);
             }
-        }
-        if ("unzip".equals(type)) {
-            multipartFileBuilder.setFileExt(StringUtil.PACKAGE_EXT);
-            multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
-            String path = multipartFileBuilder.save();
-            // 解压
-            File file = new File(path);
-            try {
-                CompressionFileUtil.unCompress(file, lib);
-            } finally {
-                if (!FileUtil.del(file)) {
-                    DefaultSystemLog.getLog().error("删除文件失败：" + file.getPath());
+            if ("unzip".equals(type)) {
+                multipartFileBuilder.setFileExt(StringUtil.PACKAGE_EXT);
+                multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
+                String path = multipartFileBuilder.save();
+                // 解压
+                File file = new File(path);
+                try {
+                    CompressionFileUtil.unCompress(file, lib);
+                } finally {
+                    if (!FileUtil.del(file)) {
+                        DefaultSystemLog.getLog().error("删除文件失败：" + file.getPath());
+                    }
                 }
+            } else {
+                multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(lib));
+                // 保存
+                multipartFileBuilder.save();
             }
-        } else {
-            multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(lib));
-            // 保存
-            multipartFileBuilder.save();
-        }
-        // 修改使用状态
-        pim.setUseLibDesc("upload");
-        projectInfoService.updateItem(pim);
-        //
-        String after = getParameter("after");
-        if (StrUtil.isNotEmpty(after)) {
+            // 修改使用状态
+            pim.setUseLibDesc("upload");
+            projectInfoService.updateItem(pim);
             //
-            List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = pim.getJavaCopyItemList();
-            //
-            AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(after, AfterOpt.No.getCode()));
-            if ("restart".equalsIgnoreCase(after) || afterOpt == AfterOpt.Restart) {
-                String result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
-                // 自动处理副本集
-                if (javaCopyItemList != null) {
-                    ThreadUtil.execute(() -> javaCopyItemList.forEach(javaCopyItem -> {
-                        try {
-                            consoleService.execCommand(ConsoleCommandOp.restart, pim, javaCopyItem);
-                        } catch (Exception e) {
-                            DefaultSystemLog.getLog().error("重启副本集失败", e);
-                        }
-                    }));
-                }
-                return JsonMessage.getString(200, "上传成功并重启：" + result);
-            }
-            if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
-                boolean restart = this.restart(pim, null, afterOpt);
-                if (javaCopyItemList != null) {
-                    ThreadUtil.execute(() -> {
-                        // 副本
-                        for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-                            if (!this.restart(pim, javaCopyItem, afterOpt)) {
-                                return;
-                            }
-                            // 休眠30秒 等待之前项目正常启动
+            String after = getParameter("after");
+            if (StrUtil.isNotEmpty(after)) {
+                //
+                List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = pim.getJavaCopyItemList();
+                //
+                AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(after, AfterOpt.No.getCode()));
+                if ("restart".equalsIgnoreCase(after) || afterOpt == AfterOpt.Restart) {
+                    String result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
+                    // 自动处理副本集
+                    if (javaCopyItemList != null) {
+                        ThreadUtil.execute(() -> javaCopyItemList.forEach(javaCopyItem -> {
                             try {
-                                TimeUnit.SECONDS.sleep(30);
-                            } catch (InterruptedException ignored) {
+                                consoleService.execCommand(ConsoleCommandOp.restart, pim, javaCopyItem);
+                            } catch (Exception e) {
+                                DefaultSystemLog.getLog().error("重启副本集失败", e);
                             }
-                        }
-                    });
+                        }));
+                    }
+                    return JsonMessage.getString(200, "上传成功并重启：" + result);
+                }
+                if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
+                    boolean restart = this.restart(pim, null, afterOpt);
+                    if (javaCopyItemList != null) {
+                        ThreadUtil.execute(() -> {
+                            // 副本
+                            for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+                                if (!this.restart(pim, javaCopyItem, afterOpt)) {
+                                    return;
+                                }
+                                // 休眠30秒 等待之前项目正常启动
+                                try {
+                                    TimeUnit.SECONDS.sleep(30);
+                                } catch (InterruptedException ignored) {
+                                }
+                            }
+                        });
+                    }
                 }
             }
+        } finally {
+            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId);
         }
         return JsonMessage.getString(200, "上传成功");
     }
@@ -296,27 +292,33 @@ public class ProjectFileControl extends BaseAgentController {
         } else {
             file = FileUtil.file(pim.allLib(), levelName);
         }
-        if ("clear".equalsIgnoreCase(type)) {
-            // 清空文件
-            if (FileUtil.clean(file)) {
-                return JsonMessage.getString(200, "清除成功");
-            }
-            boolean run = AbstractProjectCommander.getInstance().isRun(pim, null);
-            Assert.state(!run, "文件被占用，请先停止项目");
-            return JsonMessage.getString(500, "删除失败：" + file.getAbsolutePath());
-        } else {
-            // 删除文件
-            Assert.hasText(filename, "请选择要删除的文件");
-            file = FileUtil.file(file, filename);
-
-            if (file.exists()) {
-                if (FileUtil.del(file)) {
-                    return JsonMessage.getString(200, "删除成功");
+        // 备份文件
+        String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
+        try {
+            if ("clear".equalsIgnoreCase(type)) {
+                // 清空文件
+                if (FileUtil.clean(file)) {
+                    return JsonMessage.getString(200, "清除成功");
                 }
+                boolean run = AbstractProjectCommander.getInstance().isRun(pim, null);
+                Assert.state(!run, "文件被占用，请先停止项目");
+                return JsonMessage.getString(500, "删除失败：" + file.getAbsolutePath());
             } else {
-                return JsonMessage.getString(404, "文件不存在");
+                // 删除文件
+                Assert.hasText(filename, "请选择要删除的文件");
+                file = FileUtil.file(file, filename);
+
+                if (file.exists()) {
+                    if (FileUtil.del(file)) {
+                        return JsonMessage.getString(200, "删除成功");
+                    }
+                } else {
+                    return JsonMessage.getString(404, "文件不存在");
+                }
+                return JsonMessage.getString(500, "删除失败");
             }
-            return JsonMessage.getString(500, "删除失败");
+        } finally {
+            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId);
         }
     }
 
@@ -325,19 +327,26 @@ public class ProjectFileControl extends BaseAgentController {
     public String batchDelete(@RequestBody DiffFileVo diffFileVo) {
         String id = diffFileVo.getId();
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
-        //
-        List<DiffFileVo.DiffItem> data = diffFileVo.getData();
-        Assert.notEmpty(data, "没有要对比的数据");
-        //
-        String path = projectInfoModel.allLib();
-        for (DiffFileVo.DiffItem datum : data) {
-            File file = FileUtil.file(path, datum.getName());
-            if (FileUtil.del(file)) {
-                continue;
+        // 备份文件
+        String backupId = ProjectFileBackupUtil.backup(projectInfoModel.getId(), projectInfoModel.allLib());
+        try {
+            //
+            List<DiffFileVo.DiffItem> data = diffFileVo.getData();
+            Assert.notEmpty(data, "没有要对比的数据");
+            //
+            String path = projectInfoModel.allLib();
+            for (DiffFileVo.DiffItem datum : data) {
+                File file = FileUtil.file(path, datum.getName());
+                if (FileUtil.del(file)) {
+                    continue;
+                }
+                return JsonMessage.getString(500, "删除失败");
             }
-            return JsonMessage.getString(500, "删除失败");
+            return JsonMessage.getString(200, "删除成功");
+        } finally {
+            ProjectFileBackupUtil.checkDiff(projectInfoModel.getId(), projectInfoModel.allLib(), backupId);
         }
-        return JsonMessage.getString(200, "删除成功");
+
     }
 
     /**
@@ -374,8 +383,14 @@ public class ProjectFileControl extends BaseAgentController {
         // 判断文件后缀
         AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
         Charset charset = AgentWhitelist.checkFileSuffix(whitelist.getAllowEditSuffix(), filename);
-        FileUtil.writeString(fileText, FileUtil.file(pim.allLib(), filePath, filename), charset);
-        return JsonMessage.getString(200, "文件写入成功");
+        // 备份文件
+        String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
+        try {
+            FileUtil.writeString(fileText, FileUtil.file(pim.allLib(), filePath, filename), charset);
+            return JsonMessage.getString(200, "文件写入成功");
+        } finally {
+            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId);
+        }
     }
 
 
@@ -424,8 +439,10 @@ public class ProjectFileControl extends BaseAgentController {
         Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
         List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
         Assert.state(CollUtil.isNotEmpty(collect), "不允许下载当前地址的文件");
+        NodeProjectInfoModel pim = projectInfoService.getItem(id);
+        // 备份文件
+        String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
         try {
-            NodeProjectInfoModel pim = projectInfoService.getItem(id);
             File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
             File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
             if (BooleanUtil.toBoolean(unzip)) {
@@ -442,6 +459,8 @@ public class ProjectFileControl extends BaseAgentController {
         } catch (Exception e) {
             DefaultSystemLog.getLog().error("下载远程文件异常", e);
             return JsonMessage.getString(500, "下载远程文件失败:" + e.getMessage());
+        } finally {
+            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId);
         }
     }
 
