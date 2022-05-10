@@ -48,12 +48,16 @@ public class ProjectFileBackupUtil {
         // 检查备份保留个数
         File[] files = backupPath.listFiles();
         List<File> collect = Arrays.stream(files)
+            .filter(FileUtil::isDirectory)
             .sorted(Comparator.comparing(FileUtil::lastModifiedTime))
             .collect(Collectors.toList());
         // 截取
-        collect = CollUtil.sub(collect, 0, collect.size() - backupCount);
-        // 删除
-        collect.forEach(CommandUtil::systemFastDel);
+        int max = Math.max(collect.size() - backupCount, 0);
+        if (max > 0) {
+            collect = CollUtil.sub(collect, 0, max);
+            // 删除
+            collect.forEach(CommandUtil::systemFastDel);
+        }
         //
         return backupId;
     }
