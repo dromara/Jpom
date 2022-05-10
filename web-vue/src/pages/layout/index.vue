@@ -134,7 +134,7 @@ export default {
           // 禁用导航
           this.$store.dispatch("disabledGuide", res.data.disabledGuide);
           this.$notification.config({
-            placement: res.data.notificationPlacement,
+            placement: res.data.notificationPlacement ? res.data.notificationPlacement : "topRight",
           });
         }
         if (res.code !== 200) {
