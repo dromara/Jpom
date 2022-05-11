@@ -2,6 +2,7 @@
   <div class="node-full-content">
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 数据表格 -->
+    <a-alert message="jdk 管理功能暂时没有计划维护（建议使用 DSL 模式代替）" style="margin-top: 10px; margin-bottom: 40px" banner />
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>

@@ -463,7 +463,7 @@
               <template slot="label">
                 缓存构建目录
                 <a-tooltip v-show="!temp.id">
-                  <template slot="title"> 开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存) </template>
+                  <template slot="title"> 开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存) 、特别说明如果缓存目录中缺失版本控制相关文件将自动删除后重新拉取代码</template>
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
