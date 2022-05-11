@@ -42,6 +42,9 @@ RUN mkdir -p $JPOM_HOME && \
     tar -zxvf $JPOM_HOME/$JPOM_PKG -C $JPOM_HOME && \
     rm -rf $JPOM_HOME/$JPOM_PKG
 
+# 健康检查
+HEALTHCHECK CMD curl -X POST -f http://localhost:2122/check-system || exit 1
+
 EXPOSE 2122
 
 ENTRYPOINT ["/bin/bash", "Server.sh", "start"]

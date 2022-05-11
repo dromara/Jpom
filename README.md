@@ -179,13 +179,30 @@ apt install -y wget && \
 
 > ⚠️ 注意：容器化安装方式需要先安装docker，[点击跳转docker安装文档](https://jpom.io/docs/#/%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/%E5%AE%89%E8%A3%85/%E5%AE%B9%E5%99%A8%E5%8C%96%E5%AE%89%E8%A3%85)
 
+
+#### 使用挂载方式存储相关数据（在部分环境可能出现兼容性问题）
+
 ```
 docker pull jpomdocker/jpom
 docker run -d -p 2122:2122 \
 	--name jpom-server \
-	-v /etc/localtime:/etc/localtime:ro \
 	-v /home/jpom-server/log:/usr/local/jpom-server/log \
 	-v /home/jpom-server/data:/usr/local/jpom-server/data \
+	jpomdocker/jpom
+```
+
+#### 使用容器卷方式存储相关数据
+
+```
+docker pull jpomdocker/jpom
+docker volume create jpom-server-data
+docker volume create jpom-server-db
+docker volume create jpom-server-log
+docker run -d -p 2122:2122 \
+	--name jpom-server \
+	-v jpom-server-data:/usr/local/jpom-server/data \
+	-v jpom-server-db:/usr/local/jpom-server/db \
+	-v jpom-server-log:/usr/local/jpom-server/log \
 	jpomdocker/jpom
 ```
 
