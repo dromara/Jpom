@@ -57,20 +57,19 @@
 
 执行如下命令：(https://blog.csdn.net/perter_liao/article/details/76757605)
 
-```
-1.编辑文件
+```shell
+# 1.编辑文件
 vim filename（文件名）
   
-2.进入末行模式（按esc键）
+# 2.进入末行模式（按esc键）
 
-3.设置文件格式
+# 3.设置文件格式
 :set fileformat=unix
  
-4.保存退出
+# 4.保存退出
  :wq
  
-5.#sh filename
-  OK!
+# 5.#sh filename OK!
 ```
   
 > 同时需要注意文件编码格式和内容换行符 
@@ -101,14 +100,14 @@ vim filename（文件名）
 # 启动很慢
 
 在 linux 中出现如下日志：`Please verify your network configuration.`
-```
+```log
 WARN [main] o.s.b.StartupInfoLogger [StartupInfoLogger.java:117]- x:() InetAddress.getLocalHost().getHostName() took 10084 milliseconds to respond. Please verify your network configuration.
 ```
 
 解决方法：
 1. 查看主机名
 
-```
+```log
 hostname
 ```
 
@@ -116,7 +115,7 @@ hostname
 
 2. 在/etc/hosts上加上主机名
 
-```
+```log
 127.0.0.1   localhost myhostname
 ::1         localhost myhostname
 ```
@@ -161,7 +160,7 @@ hostname
 
 ### 字段没有找到
 
-```
+```log
 Caused by: org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException: NULL not allowed for column "xxxx"; SQL statement:
 ```
 
@@ -171,7 +170,7 @@ Caused by: org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException: NULL not al
 
 1. 在执行启动命令后填参数 `--rest:load_init_db` 
 
-```
+```shell
 sh /xxxx/Server.sh restart --rest:load_init_db
 ```
 
@@ -206,7 +205,7 @@ Jpom 中服务端和插件端通信方式有 http、WebSocket,http 主要传输�
 
 如果使用了代理需要确认是否配置 WebSocket 相关配置
 
-```
+```log
 proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection "upgrade";
 ```
@@ -215,7 +214,7 @@ proxy_set_header Connection "upgrade";
 
 ### Http 相关配置
 
-```
+```log
 server {
     #charset koi8-r;
     access_log  /var/log/nginx/jpom.log main;
@@ -244,7 +243,7 @@ server {
 
 ### Https 推荐配置
 
-```
+```log
 server {
     listen 443;
     server_name jpom.xxxxxx.cn;
@@ -308,13 +307,13 @@ server {
 1. 推荐使用构建命令来指定 `settings.xml` 文件位置，如：mvn -s xxx/settings.xml clean package
 2. 使用 `binds` 来配置指定 maven `.m2 目录`或者`settings.xml`【注意容器构建必须使用宿主机对应的 docker 容器构建否则 binds 将不生效】
 
-```
+```yaml
 # 指定 .m2 目录
 binds:
   - /Users/user/.m2/:/root/.m2/
 ```
 
-```
+```yaml
 # 指定 settings.xml 文件
 binds:
   - /Users/user/.m2/settings.xml:/root/.m2/settings.xml
@@ -371,7 +370,7 @@ Jpom 使用 SpringBoot 实现，大部分配置遵循 SpringBoot 配置属性。
 
 上传文件大小限制配置属性为：
 
-```
+```yaml
 spring:
   servlet:
     multipart:
@@ -391,6 +390,78 @@ spring:
 目前暂时没有考虑优化为真实进度条的计划（主要是因为开发起来有一定工作量，带来的体验并不能提升多少）
 
 关于在浏览器中上传项目文件缓慢原因说明， Jpom 目前都使用 http 协议和插件端通讯，那么在浏览器中上传，首先会将文件上传到服务端，再由服务端上传到插件端（节点）,用户感知到的上传耗时就会多用一部分时间。服务端上传到插件端中理论上如果使用内网通讯那么此耗时基本可以忽略。
+
+# 上传或者构建发布出现：`Error writing to server` 异常信息
+
+```log
+io.jpom.system.AgentException: xxx节点异常：Error writing to server
+	at io.jpom.common.forward.NodeForward.responseException(NodeForward.java:235)
+	at io.jpom.common.forward.NodeForward.request(NodeForward.java:208)
+	at io.jpom.common.forward.NodeForward.request(NodeForward.java:90)
+	at io.jpom.outgiving.OutGivingRun.fileUpload(OutGivingRun.java:145)
+	at io.jpom.build.ReleaseManage.doProject(ReleaseManage.java:505)
+	at io.jpom.build.ReleaseManage.start(ReleaseManage.java:165)
+	at io.jpom.build.ReleaseManage.run(ReleaseManage.java:546)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+```
+
+出现上述信息可能是因为上传文件超过插件端上传文件大小限制，需要配置更大到上传文件限制
+
+# 如何在 Jpom 中备份项目文件
+
+在 Jpom 中备份项目相关文件有如下方式：
+
+1. 在线构建产生到构建历史
+2. 为节点项目开启备份文件功能
+
+### 在线构建备份文件说明
+
+在线构建会为每次构建成功到产物目录生成一个构建历史并备份相关文件
+
+可以针对相关产物文件进行：
+
+- 下载：下载到本地
+- 回滚：重新执行一遍发布逻辑
+
+### 开启备份文件功能相关说明如下
+
+- 默认未开启文件备份功能
+- 可以配置全局开启，插件端配置（ `extConfig.yml` ）文件中配置`project.fileBackupCount`属性
+- DSL 项目可以在配置内容新增 `file.backupCount` 来开启（DSL 配置优先级最高）
+- 如果配置值小于等于 0 则不开启备份功能
+- 备份文件保留规则为，只保留有差异的文件
+
+### 如果限制仅备份指定后缀文件
+
+##### 全局限制
+
+插件端配置（ `extConfig.yml` ）文件中配置`project.fileBackupSuffix`属性
+
+配置示例：
+```yaml
+project:
+  # 项目文件备份保留个数,大于 0 才会备份
+  fileBackupCount: 5
+  # 限制备份指定文件后缀（支持正则）
+  fileBackupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]
+```
+
+##### 单个项目限制
+
+ 目前仅支持对 DSL 的单个项目配置限制，配置到 DSL 内容中
+
+配置示例：
+```yaml
+project:
+  # 项目文件备份保留个数,大于 0 才会备份
+  backupCount: 5
+  # 限制备份指定文件后缀（支持正则）
+  backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]
+```
+
+
 
 # 开发计划
 
