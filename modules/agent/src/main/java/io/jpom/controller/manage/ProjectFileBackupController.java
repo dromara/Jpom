@@ -48,6 +48,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -72,7 +73,9 @@ public class ProjectFileBackupController extends BaseAgentController {
         super.getProjectInfoModel(id);
         File path = ProjectFileBackupUtil.path(id);
         //
-        List<File> collect = Arrays.stream(path.listFiles()).filter(FileUtil::isDirectory).collect(Collectors.toList());
+        List<File> collect = Arrays.stream(Optional.ofNullable(path.listFiles()).orElse(new File[0]))
+            .filter(FileUtil::isDirectory)
+            .collect(Collectors.toList());
         if (CollUtil.isEmpty(collect)) {
             return JsonMessage.getString(200, "查询成功", Collections.EMPTY_LIST);
         }
