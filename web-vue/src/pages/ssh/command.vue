@@ -54,7 +54,7 @@
     <a-modal v-model="editCommandVisible" width="80vw" title="编辑 命令" @ok="handleEditCommandOk" :maskClosable="false">
       <a-form-model ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="命令名称" prop="name">
-          <a-input v-model="temp.name" placeholder="命令名称" />
+          <a-input v-model="temp.name" maxLength="100" placeholder="命令名称" />
         </a-form-model-item>
 
         <a-form-model-item prop="command">
@@ -107,7 +107,7 @@
           </a-auto-complete>
         </a-form-model-item>
         <a-form-model-item label="命令描述" prop="desc">
-          <a-input v-model="temp.desc" type="textarea" :rows="3" style="resize: none" placeholder="命令详细描述" />
+          <a-input v-model="temp.desc" maxLength="255" type="textarea" :rows="3" style="resize: none" placeholder="命令详细描述" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>

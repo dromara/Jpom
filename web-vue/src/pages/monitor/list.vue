@@ -51,7 +51,7 @@
     <a-modal v-model="editMonitorVisible" width="60%" title="编辑监控" @ok="handleEditMonitorOk" :maskClosable="false">
       <a-form-model ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="监控名称" prop="name">
-          <a-input v-model="temp.name" placeholder="监控名称" />
+          <a-input v-model="temp.name" maxLength="50" placeholder="监控名称" />
         </a-form-model-item>
 
         <a-form-model-item label="开启状态" prop="status">

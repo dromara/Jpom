@@ -104,11 +104,11 @@
         <a-form-model-item label="名称" prop="name">
           <a-row>
             <a-col :span="10">
-              <a-input v-model="temp.name" placeholder="名称" />
+              <a-input v-model="temp.name" maxLength="50" placeholder="名称" />
             </a-col>
             <a-col :span="4" style="text-align: right">分组名称：</a-col>
             <a-col :span="10">
-              <custom-select suffixIcon="" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder=""> </custom-select>
+              <custom-select suffixIcon="" maxLength="50" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder=""> </custom-select>
             </a-col>
           </a-row>
         </a-form-model-item>
@@ -263,7 +263,7 @@
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
-              <a-input v-model="temp.resultDirFile" placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist" />
+              <a-input maxLength="50" v-model="temp.resultDirFile" placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist" />
             </a-form-model-item>
           </a-collapse-panel>
           <a-collapse-panel key="1">
@@ -463,7 +463,10 @@
               <template slot="label">
                 缓存构建目录
                 <a-tooltip v-show="!temp.id">
-                  <template slot="title"> 开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存) 、特别说明如果缓存目录中缺失版本控制相关文件将自动删除后重新拉取代码</template>
+                  <template slot="title">
+                    开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存)
+                    、特别说明如果缓存目录中缺失版本控制相关文件将自动删除后重新拉取代码</template
+                  >
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>

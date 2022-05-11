@@ -92,7 +92,7 @@
     <a-modal v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditSshOk" :maskClosable="false">
       <a-form-model ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="SSH 名称" prop="name">
-          <a-input v-model="temp.name" placeholder="SSH 名称" />
+          <a-input v-model="temp.name" maxLength="50" placeholder="SSH 名称" />
         </a-form-model-item>
         <a-form-model-item label="Host" prop="host">
           <a-input-group compact prop="host">

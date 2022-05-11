@@ -72,7 +72,7 @@
           <a-input v-model="temp.id" disabled readOnly />
         </a-form-model-item>
         <a-form-model-item label="Script 名称" prop="name">
-          <a-input v-model="temp.name" placeholder="名称" />
+          <a-input maxLength="50" v-model="temp.name" placeholder="名称" />
         </a-form-model-item>
         <a-form-model-item label="Script 内容" prop="context">
           <div style="height: 40vh; overflow-y: scroll">
@@ -95,7 +95,7 @@
           </a-auto-complete>
         </a-form-model-item>
         <a-form-model-item label="描述" prop="description">
-          <a-input v-model="temp.description" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
+          <a-input v-model="temp.description" maxLength="200" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
         </a-form-model-item>
         <a-form-model-item>
           <template slot="label">
