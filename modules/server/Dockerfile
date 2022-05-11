@@ -60,8 +60,11 @@ COPY --from=builder ${DEPENDENCY}/modules/server/target/${JPOM_PKG} ${JPOM_HOME}
 ENV TZ Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-VOLUME $JPOM_HOME
+VOLUME $JPOM_HOME/data $JPOM_HOME/db $JPOM_HOME/log
+
+HEALTHCHECK CMD curl -X POST -f http://localhost:2122/check-system || exit 1
 EXPOSE 2122
+
 
 ENTRYPOINT ["/bin/bash", "Server.sh", "start"]
 
