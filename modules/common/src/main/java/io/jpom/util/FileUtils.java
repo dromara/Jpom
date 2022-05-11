@@ -31,14 +31,10 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -73,36 +69,42 @@ public class FileUtils {
      * @param startPath 开始路径
      * @return 排序后的json
      */
-    public static JSONArray parseInfo(File[] files, boolean time, String startPath) {
+    public static List<JSONObject> parseInfo(File[] files, boolean time, String startPath) {
+        return parseInfo(CollUtil.newArrayList(files), time, startPath);
+    }
+
+    /**
+     * 对文件信息解析排序
+     *
+     * @param files     文件数组
+     * @param time      是否安装时间排序
+     * @param startPath 开始路径
+     * @return 排序后的json
+     */
+    public static List<JSONObject> parseInfo(Collection<File> files, boolean time, String startPath) {
         if (files == null) {
-            return new JSONArray();
+            return new ArrayList<>();
         }
-        int size = files.length;
-        JSONArray arrayFile = new JSONArray(size);
-        for (File file : files) {
+        return files.stream().map(file -> {
             JSONObject jsonObject = FileUtils.fileToJson(file);
             //
             if (startPath != null) {
                 String levelName = StringUtil.delStartPath(file, startPath, false);
                 jsonObject.put("levelName", levelName);
             }
-            //
-            arrayFile.add(jsonObject);
-        }
-        arrayFile.sort((o1, o2) -> {
-            JSONObject jsonObject1 = (JSONObject) o1;
-            JSONObject jsonObject2 = (JSONObject) o2;
+            return jsonObject;
+        }).sorted((jsonObject1, jsonObject2) -> {
             if (time) {
                 return jsonObject2.getLong("modifyTimeLong").compareTo(jsonObject1.getLong("modifyTimeLong"));
             }
             return jsonObject1.getString("filename").compareTo(jsonObject2.getString("filename"));
-        });
-        final int[] i = {0};
-        arrayFile.forEach(o -> {
-            JSONObject jsonObject = (JSONObject) o;
-            jsonObject.put("index", ++i[0]);
-        });
-        return arrayFile;
+        }).collect(Collectors.toList());
+//        final int[] i = {0};
+//        arrayFile.forEach(o -> {
+//            JSONObject jsonObject = (JSONObject) o;
+//            jsonObject.put("index", ++i[0]);
+//        });
+//        return arrayFile;
     }
 
     /**

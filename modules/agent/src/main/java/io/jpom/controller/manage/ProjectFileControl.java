@@ -58,6 +58,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,21 +93,19 @@ public class ProjectFileControl extends BaseAgentController {
         File fileDir = FileUtil.file(lib, StrUtil.emptyToDefault(path, FileUtil.FILE_SEPARATOR));
         boolean exist = FileUtil.exist(fileDir);
         if (!exist) {
-            return JsonMessage.getString(200, "查询成功", new JSONArray());
+            return JsonMessage.getString(200, "查询成功", Collections.EMPTY_LIST);
         }
         //
         File[] filesAll = fileDir.listFiles();
         if (ArrayUtil.isEmpty(filesAll)) {
-            return JsonMessage.getString(200, "查询成功", new JSONArray());
+            return JsonMessage.getString(200, "查询成功", Collections.EMPTY_LIST);
         }
-        JSONArray arrayFile = FileUtils.parseInfo(filesAll, false, lib);
+        List<JSONObject> arrayFile = FileUtils.parseInfo(filesAll, false, lib);
         AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
-        for (Object o : arrayFile) {
-            JSONObject jsonObject = (JSONObject) o;
+        for (JSONObject jsonObject : arrayFile) {
             String filename = jsonObject.getString("filename");
             jsonObject.put("textFileEdit", AgentWhitelist.checkSilentFileSuffix(whitelist.getAllowEditSuffix(), filename));
         }
-
         return JsonMessage.getString(200, "查询成功", arrayFile);
     }
 
@@ -286,12 +285,12 @@ public class ProjectFileControl extends BaseAgentController {
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String deleteFile(String filename, String type, String levelName) {
         NodeProjectInfoModel pim = getProjectInfoModel();
-        File file;
-        if (StrUtil.isEmpty(levelName)) {
-            file = FileUtil.file(pim.allLib());
-        } else {
-            file = FileUtil.file(pim.allLib(), levelName);
-        }
+        File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, StrUtil.SLASH));
+//        if (StrUtil.isEmpty(levelName)) {
+//            file = FileUtil.file(pim.allLib());
+//        } else {
+//            file = FileUtil.file(pim.allLib(), levelName);
+//        }
         // 备份文件
         String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
         try {

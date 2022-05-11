@@ -12,6 +12,7 @@ import io.jpom.system.AgentExtConfigBean;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.StringUtil;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.util.Arrays;
@@ -29,6 +30,29 @@ import java.util.stream.Collectors;
 public class ProjectFileBackupUtil {
 
     /**
+     * 整个项目的备份目录
+     *
+     * @param pathId 项目ID
+     * @return file
+     */
+    public static File path(String pathId) {
+        String dataPath = ConfigBean.getInstance().getDataPath();
+        return FileUtil.file(dataPath, "project_file_backup", pathId);
+    }
+
+    /**
+     * 获取项目的单次备份目录，备份ID
+     *
+     * @param pathId   项目ID
+     * @param backupId 备份ID
+     * @return file
+     */
+    public static File path(String pathId, String backupId) {
+        File fileBackup = path(pathId);
+        return FileUtil.file(fileBackup, backupId);
+    }
+
+    /**
      * 备份项目文件
      *
      * @param pathId      目录ID（项目ID）
@@ -40,12 +64,21 @@ public class ProjectFileBackupUtil {
             // 未开启备份
             return null;
         }
-        String dataPath = ConfigBean.getInstance().getDataPath();
         String backupId = DateTime.now().toString(DatePattern.PURE_DATETIME_MS_FORMAT);
-        File backupPath = FileUtil.file(dataPath, "project_file_backup", pathId);
-        File projectFileBackup = FileUtil.file(backupPath, backupId);
+        File projectFileBackup = ProjectFileBackupUtil.path(pathId, backupId);
+        Assert.state(!FileUtil.exist(projectFileBackup), "备份目录冲突：" + projectFileBackup.getName());
         FileUtil.copyContent(FileUtil.file(projectPath), projectFileBackup, true);
-        // 检查备份保留个数
+        //
+        return backupId;
+    }
+
+    /**
+     * 检查备份保留个数
+     *
+     * @param backupPath 目录
+     */
+    private static void clearOldBackup(File backupPath) {
+        int backupCount = AgentExtConfigBean.getInstance().getProjectFileBackupCount();
         File[] files = backupPath.listFiles();
         List<File> collect = Arrays.stream(files)
             .filter(FileUtil::isDirectory)
@@ -58,8 +91,6 @@ public class ProjectFileBackupUtil {
             // 删除
             collect.forEach(CommandUtil::systemFastDel);
         }
-        //
-        return backupId;
     }
 
     /**
@@ -74,10 +105,10 @@ public class ProjectFileBackupUtil {
             // 备份ID 不存在
             return;
         }
-        String dataPath = ConfigBean.getInstance().getDataPath();
-        File backupPath = FileUtil.file(dataPath, "project_file_backup", pathId, backupId);
+        File backupItemPath = ProjectFileBackupUtil.path(pathId, backupId);
+        File backupPath = ProjectFileBackupUtil.path(pathId);
         // 获取文件列表
-        Map<String, File> backupFiles = ProjectFileBackupUtil.listFiles(backupPath.getAbsolutePath());
+        Map<String, File> backupFiles = ProjectFileBackupUtil.listFiles(backupItemPath.getAbsolutePath());
         Map<String, File> nowFiles = ProjectFileBackupUtil.listFiles(projectPath);
         nowFiles.forEach((fileSha1, file) -> {
             // 当前目录存在的，但是备份目录也存在的相同文件则删除
@@ -87,7 +118,9 @@ public class ProjectFileBackupUtil {
             }
         });
         // 删除空文件夹
-        loopClean(backupPath);
+        loopClean(backupItemPath);
+        // 检查备份保留个数
+        clearOldBackup(backupPath);
     }
 
     private static void loopClean(File backupPath) {
