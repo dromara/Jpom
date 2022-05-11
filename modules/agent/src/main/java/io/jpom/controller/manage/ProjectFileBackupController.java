@@ -170,33 +170,28 @@ public class ProjectFileBackupController extends BaseAgentController {
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
         File backupPath = ProjectFileBackupUtil.path(id, backupId);
         String projectPath = projectInfoModel.allLib();
-        String nowBackupId = ProjectFileBackupUtil.backup(projectInfoModel.getId(), projectPath);
-        try {
-            //
-            File backupFile;
-            File projectFile;
-            if (StrUtil.isEmpty(filename)) {
-                // 目录
-                backupFile = FileUtil.file(backupPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
-                Assert.state(FileUtil.exist(backupFile), "对应的文件不存在");
-                projectFile = FileUtil.file(projectPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
-                // 创建文件
-                FileUtil.mkdir(projectFile);
-                // 清空
-                if (StrUtil.equalsIgnoreCase(type, "clear")) {
-                    FileUtil.clean(projectFile);
-                }
-                //
-                FileUtil.copyContent(backupFile, projectFile, true);
-            } else {
-                // 文件
-                backupFile = FileUtil.file(backupPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
-                Assert.state(FileUtil.exist(backupFile), "对应的文件不存在");
-                projectFile = FileUtil.file(projectPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
-                FileUtil.copy(backupFile, projectFile, true);
+        //
+        File backupFile;
+        File projectFile;
+        if (StrUtil.isEmpty(filename)) {
+            // 目录
+            backupFile = FileUtil.file(backupPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
+            Assert.state(FileUtil.exist(backupFile), "对应的文件不存在");
+            projectFile = FileUtil.file(projectPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
+            // 创建文件
+            FileUtil.mkdir(projectFile);
+            // 清空
+            if (StrUtil.equalsIgnoreCase(type, "clear")) {
+                FileUtil.clean(projectFile);
             }
-        } finally {
-            ProjectFileBackupUtil.checkDiff(id, projectPath, nowBackupId, projectInfoModel.dslConfig());
+            //
+            FileUtil.copyContent(backupFile, projectFile, true);
+        } else {
+            // 文件
+            backupFile = FileUtil.file(backupPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
+            Assert.state(FileUtil.exist(backupFile), "对应的文件不存在");
+            projectFile = FileUtil.file(projectPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
+            FileUtil.copy(backupFile, projectFile, true);
         }
         return JsonMessage.getString(200, "还原成功");
     }
