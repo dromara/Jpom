@@ -14,6 +14,8 @@
 2. 【server】新增配置前端消息弹窗位置属性 `jpom.notificationPlacement` （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I53V8B](https://gitee.com/dromara/Jpom/issues/I53V8B) ）
 3. 【server】构建历史新增批量删除
 4. 【server】修复关联分发项目，无法选择不同节点下相同的项目的问题（感谢[@宋建平](https://gitee.com/sjping) [Gitee issues I5680N](https://gitee.com/dromara/Jpom/issues/I5680N) ）
+5. 【server】调整 docker-compose 使用卷方式存储数据，避免在部分环境中出现无法正常使用情况 (感谢 [@💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) 贡献解决方案)（感谢[@笨笨巫师](https://gitee.com/zhangxin_gitosc) [Gitee issues I52OAV](https://gitee.com/dromara/Jpom/issues/I52OAV) ）
+6. 【server】调整节点里面在部分情况下会出现空白行 （感谢[@💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) ）
 
 ------
 

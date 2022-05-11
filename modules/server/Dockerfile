@@ -65,7 +65,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # 数据目录
 ENV jpom.path ${JPOM_DATA_PATH}
 
-VOLUME $JPOM_DATA_PATH $JPOM_HOME/log
+VOLUME $JPOM_DATA_PATH $JPOM_LOG_PATH
 
 HEALTHCHECK CMD curl -X POST -f http://localhost:2122/check-system || exit 1
 EXPOSE 2122
