@@ -109,7 +109,7 @@
 >
 > 如果需要修改数据、日志存储路径请参照 `extConfig.yml` 文件中 `jpom.path` 配置属性
 
-```
+```shell
 yum install -y wget && \
 	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
 	bash install.sh Server
@@ -152,7 +152,7 @@ apt install -y wget && \
 >
 > 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) ）
 
-```
+```shell
 yum install -y wget && \
 	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
 	bash install.sh Agent
@@ -182,7 +182,7 @@ apt install -y wget && \
 
 #### 使用挂载方式存储相关数据（在部分环境可能出现兼容性问题）
 
-```
+```shell
 docker pull jpomdocker/jpom
 docker run -d -p 2122:2122 \
 	--name jpom-server \
@@ -193,15 +193,13 @@ docker run -d -p 2122:2122 \
 
 #### 使用容器卷方式存储相关数据
 
-```
+```shell
 docker pull jpomdocker/jpom
 docker volume create jpom-server-data
-docker volume create jpom-server-db
 docker volume create jpom-server-log
 docker run -d -p 2122:2122 \
 	--name jpom-server \
 	-v jpom-server-data:/usr/local/jpom-server/data \
-	-v jpom-server-db:/usr/local/jpom-server/db \
 	-v jpom-server-log:/usr/local/jpom-server/log \
 	jpomdocker/jpom
 ```
@@ -350,14 +348,14 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 > nodejs 编译指定目录：
 
 ```
-    yarn --cwd xxxx/ install
-    yarn --cwd xxxx/ build
+yarn --cwd xxxx/ install
+yarn --cwd xxxx/ build
 ```
 
 > maven 编译指定目录：
 
 ```
-    mvn -f xxxx/pom.xml clean package
+mvn -f xxxx/pom.xml clean package
 ```
 
 ## 📝 常见问题、操作说明

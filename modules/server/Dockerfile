@@ -52,6 +52,8 @@ FROM maven:3.8.5-jdk-8
 ENV JPOM_HOME   /usr/local/jpom-server
 ARG JPOM_VERSION
 ENV JPOM_PKG    server-${JPOM_VERSION}-release
+ENV JPOM_DATA_PATH ${JPOM_HOME}/data
+ENV JPOM_LOG_PATH ${JPOM_HOME}/log
 WORKDIR $JPOM_HOME
 ARG DEPENDENCY=/target/dependency
 COPY --from=builder ${DEPENDENCY}/modules/server/target/${JPOM_PKG} ${JPOM_HOME}
@@ -60,7 +62,10 @@ COPY --from=builder ${DEPENDENCY}/modules/server/target/${JPOM_PKG} ${JPOM_HOME}
 ENV TZ Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-VOLUME $JPOM_HOME/data $JPOM_HOME/db $JPOM_HOME/log
+# 数据目录
+ENV jpom.path ${JPOM_DATA_PATH}
+
+VOLUME $JPOM_DATA_PATH $JPOM_HOME/log
 
 HEALTHCHECK CMD curl -X POST -f http://localhost:2122/check-system || exit 1
 EXPOSE 2122
