@@ -27,6 +27,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -139,8 +141,29 @@ public class ProjectFileBackupUtil {
             File backupFile = backupFiles.get(fileSha1);
             if (backupFile != null) {
                 CommandUtil.systemFastDel(backupFile);
+                backupFiles.remove(fileSha1);
             }
         });
+        // 判断保存指定后缀
+        String[] backupSuffix = Optional.ofNullable(dslYmlDto)
+            .map(DslYmlDto::getFile)
+            .map(DslYmlDto.FileConfig::getBackupSuffix)
+            .orElse(AgentExtConfigBean.getInstance().getProjectFileBackupSuffix());
+        if (ArrayUtil.isNotEmpty(backupSuffix)) {
+            backupFiles.values()
+                .stream()
+                .filter(file -> {
+                    String name = FileUtil.getName(file);
+                    for (String reg : backupSuffix) {
+                        if (ReUtil.isMatch(reg, name)) {
+                            // 满足正则条件
+                            return false;
+                        }
+                    }
+                    return !StrUtil.endWithAny(name, backupSuffix);
+                })
+                .forEach(CommandUtil::systemFastDel);
+        }
         // 删除空文件夹
         loopClean(backupItemPath);
         // 检查备份保留个数

@@ -91,12 +91,22 @@ public class AgentExtConfigBean {
     @Value("${project.fileBackupCount:0}")
     private Integer projectFileBackupCount;
 
+    /**
+     *
+     */
+    @Value("${project.fileBackupSuffix:}")
+    private String[] projectFileBackupSuffix;
+
     public int getStopWaitTime() {
         return stopWaitTime;
     }
 
     public int getProjectFileBackupCount() {
         return ObjectUtil.defaultIfNull(projectFileBackupCount, 0);
+    }
+
+    public String[] getProjectFileBackupSuffix() {
+        return projectFileBackupSuffix;
     }
 
     public String getAgentId() {

@@ -128,5 +128,10 @@ public class DslYmlDto extends BaseJsonModel {
          * 保留文件备份数量
          */
         private Integer backupCount;
+
+        /**
+         * 指定备份文件后缀，如果未指定则备份所有类型文件
+         */
+        private String[] backupSuffix;
     }
 }

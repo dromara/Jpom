@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.yaml.snakeyaml.constructor.ConstructorException;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -76,4 +78,17 @@ public abstract class BaseExceptionHandler {
         log.warn(e.getMessage());
         ServletUtil.write(response, JsonMessage.getString(HttpStatus.NOT_ACCEPTABLE.value(), BaseMyErrorController.FILE_MAX_SIZE_MSG, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
     }
+
+    @ExceptionHandler({ConstructorException.class})
+    public void handleConstructorException(HttpServletResponse response, ConstructorException e) {
+        log.warn(e.getMessage());
+        ServletUtil.write(response, JsonMessage.getString(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（请检查是否有非法字段）：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+    }
+
+    @ExceptionHandler({ScannerException.class})
+    public void handleScannerException(HttpServletResponse response, ScannerException e) {
+        log.warn(e.getMessage());
+        ServletUtil.write(response, JsonMessage.getString(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（不要使用 \\t(TAB) 缩进）：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+    }
+
 }
