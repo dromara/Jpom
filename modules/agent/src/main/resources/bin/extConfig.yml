@@ -40,6 +40,8 @@ consoleLog:
 project:
   # 停止项目等待的时长 单位秒
   stopWaitTime: 10
+  # 项目文件备份保留个数,大于 1 才会备份
+  fileBackupCount: 0
 system:
   # cron 定时器是否开启匹配秒
   timerMatchSecond: false
