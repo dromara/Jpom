@@ -23,6 +23,7 @@
 package io.jpom.system;
 
 import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpRequest;
@@ -84,8 +85,18 @@ public class AgentExtConfigBean {
     @Value("${project.stopWaitTime:10}")
     private int stopWaitTime;
 
+    /**
+     * 项目文件备份保留个数,大于 1 才会备份
+     */
+    @Value("${project.fileBackupCount:0}")
+    private Integer projectFileBackupCount;
+
     public int getStopWaitTime() {
         return stopWaitTime;
+    }
+
+    public int getProjectFileBackupCount() {
+        return ObjectUtil.defaultIfNull(projectFileBackupCount, 0);
     }
 
     public String getAgentId() {

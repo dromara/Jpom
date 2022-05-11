@@ -25,6 +25,7 @@ package io.jpom.plugin;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.system.JpomRuntimeException;
+import io.jpom.util.CommandUtil;
 import org.tmatesoft.svn.core.*;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
@@ -151,15 +152,11 @@ public class SvnKitUtil {
         try {
             if (targetPath.exists()) {
                 if (!FileUtil.file(targetPath, SVNFileUtil.getAdminDirectoryName()).exists()) {
-                    if (!FileUtil.del(targetPath)) {
-                        FileUtil.del(targetPath.toPath());
-                    }
+                    CommandUtil.systemFastDel(targetPath);
                 } else {
                     // 判断url是否变更
                     if (!checkUrl(targetPath, map)) {
-                        if (!FileUtil.del(targetPath)) {
-                            FileUtil.del(targetPath.toPath());
-                        }
+                        CommandUtil.systemFastDel(targetPath);
                     } else {
                         ourClientManager.getWCClient().doCleanup(targetPath);
                     }
