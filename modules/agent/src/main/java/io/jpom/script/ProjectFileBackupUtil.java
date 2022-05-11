@@ -98,7 +98,7 @@ public class ProjectFileBackupUtil {
      * @param backupPath 目录
      */
     private static void clearOldBackup(File backupPath, DslYmlDto dslYmlDto) {
-        int backupCount = Optional.of(dslYmlDto)
+        int backupCount = Optional.ofNullable(dslYmlDto)
             .map(DslYmlDto::getFile)
             .map(DslYmlDto.FileConfig::getBackupCount)
             .orElse(AgentExtConfigBean.getInstance().getProjectFileBackupCount());

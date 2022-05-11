@@ -457,9 +457,7 @@ export default {
     },
     // 修改模版节点
     changeTemplateNode(nodeId) {
-      getConfigData({
-        nodeId: nodeId,
-      }).then((res) => {
+      getConfigData(nodeId).then((res) => {
         if (res.code === 200) {
           this.tempNodeConfig = { ...this.tempNodeConfig, content: res.data.content };
         }
