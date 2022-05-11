@@ -1,8 +1,8 @@
 <template>
   <div>
     <div v-show="viewList">
-      <a-table :data-source="backupListData.list" :loading="backupListLoading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
-        <template #title> 备份文件存储目录：{{ backupListData.path }} </template>
+      <a-table size="middle" :data-source="backupListData.list" :loading="backupListLoading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+        <template v-if="backupListData.path" #title> 备份文件存储目录：{{ backupListData.path }} </template>
         <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
@@ -11,8 +11,8 @@
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
           <a-space>
-            <a-button type="primary" @click="handleBackupFile(record)">详情</a-button>
-            <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" @click="handleBackupFile(record)">详情</a-button>
+            <a-button size="small" type="danger" @click="handlBackupeDelete(record)">删除</a-button>
           </a-space>
         </template>
       </a-table>
@@ -41,22 +41,16 @@
       </a-layout-sider>
       <!-- 表格 -->
       <a-layout-content class="file-content">
-        <a-table :data-source="fileList" size="middle" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+        <a-table :data-source="fileList" size="middle" :loading="loading" :columns="fileColumns" :pagination="false" bordered :rowKey="(record, index) => index">
           <template slot="title">
-            <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
+            <a-button size="small" type="primary" @click="recoverPath(uploadPath)">还原</a-button>
+
             <a-space>
               <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || "" }}</a-tag>
             </a-space>
           </template>
-          <a-tooltip slot="filename" slot-scope="text, record" placement="topLeft" :title="text">
-            <a-dropdown :trigger="['contextmenu']">
-              <span>{{ text }}</span>
-              <a-menu slot="overlay">
-                <a-menu-item key="1">
-                  <a-button icon="bars" @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link"> 阅读文件 </a-button>
-                </a-menu-item>
-              </a-menu>
-            </a-dropdown>
+          <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
           </a-tooltip>
           <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
             <span>{{ text ? "目录" : "文件" }}</span>
@@ -74,6 +68,7 @@
               <template v-else>
                 <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>
               </template>
+              <a-button size="small" type="primary" @click="recover(record)">还原</a-button>
               <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
             </a-space>
           </template>
@@ -83,7 +78,7 @@
   </div>
 </template>
 <script>
-import { listBackup, backupFileList, backupDownloadProjectFile, backupDeleteProjectFile } from "@/api/node-project-backup";
+import { listBackup, backupFileList, backupDownloadProjectFile, backupDeleteProjectFile, backupRecoverProjectFile } from "@/api/node-project-backup";
 
 export default {
   components: {},
@@ -118,6 +113,13 @@ export default {
       columns: [
         { title: "文件名称", dataIndex: "filename", ellipsis: true, scopedSlots: { customRender: "filename" } },
 
+        { title: "文件大小", dataIndex: "fileSize", width: 120, ellipsis: true, scopedSlots: { customRender: "fileSize" } },
+        { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true },
+        { title: "操作", dataIndex: "operation", width: 180, align: "center", scopedSlots: { customRender: "operation" } },
+      ],
+      fileColumns: [
+        { title: "文件名称", dataIndex: "filename", ellipsis: true, scopedSlots: { customRender: "filename" } },
+        { title: "文件类型", dataIndex: "isDirectory", width: 100, ellipsis: true, scopedSlots: { customRender: "isDirectory" } },
         { title: "文件大小", dataIndex: "fileSize", width: 120, ellipsis: true, scopedSlots: { customRender: "fileSize" } },
         { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true },
         { title: "操作", dataIndex: "operation", width: 180, align: "center", scopedSlots: { customRender: "operation" } },
@@ -321,10 +323,91 @@ export default {
         },
       });
     },
+    // 删除备份
+    handlBackupeDelete(record) {
+      const msg = "真的要删除【" + record.filename + "】备份文件夹么？";
+      this.$confirm({
+        title: "系统提示",
+        content: msg,
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 请求参数
+          const params = {
+            nodeId: this.nodeId,
+            id: this.projectId,
+            levelName: "/",
+            filename: "/",
+            backupId: record.filename,
+          };
+          // 删除
+          backupDeleteProjectFile(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadBackupList();
+            }
+          });
+        },
+      });
+    },
     handleBackupFile(record) {
       this.viewList = false;
       this.temp = Object.assign({}, record);
       this.loadData();
+    },
+    recoverPath(filename) {
+      const msg = filename ? "将还原【" + filename + "】目录," : "";
+      this.$confirm({
+        title: "系统提示",
+        content: msg + "请选择还原方式,清空还原将会先删除项目目录中的文件再将对应备份文件恢复至当前目录",
+        okText: "覆盖还原",
+        cancelText: "清空还原",
+        closable: true,
+        onOk: () => {
+          // // 请求参数
+          this.recoverNet("", filename);
+        },
+        onCancel: () => {
+          this.recoverNet("clear", filename);
+        },
+      });
+    },
+    //
+    recover(record) {
+      if (record.isDirectory) {
+        this.recoverPath(record.filename);
+      } else {
+        this.$confirm({
+          title: "系统提示",
+          content: "是否将【" + record.filename + "】此文件还原到项目目录？",
+          okText: "确认",
+          cancelText: "取消",
+          onOk: () => {
+            // // 请求参数
+            this.recoverNet("", record.filename);
+          },
+        });
+      }
+    },
+    recoverNet(type, filename) {
+      const params = {
+        nodeId: this.nodeId,
+        id: this.projectId,
+        type,
+        levelName: this.uploadPath,
+        filename,
+        backupId: this.temp.filename,
+      };
+      // 删除
+      backupRecoverProjectFile(params).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+        }
+      });
     },
   },
 };
@@ -349,9 +432,6 @@ export default {
   margin: 10px 10px 0;
   padding: 10px;
   background-color: #fff;
-}
-.filter {
-  margin: 0 0 10px;
 }
 .successTag {
   height: 32px;

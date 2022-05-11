@@ -177,7 +177,19 @@
       </a-layout-content>
     </a-layout>
     <!-- 查看备份列表 -->
-    <a-modal v-model="backupListVisible" width="80vw" height="80vh" title="备份列表" :footer="null" :maskClosable="true">
+    <a-modal
+      v-model="backupListVisible"
+      width="80vw"
+      height="80vh"
+      title="备份列表"
+      :footer="null"
+      :maskClosable="true"
+      @cancel="
+        () => {
+          loadData();
+        }
+      "
+    >
       <projectFileBackup v-if="backupListVisible" :nodeId="this.nodeId" :projectId="this.projectId"></projectFileBackup>
     </a-modal>
   </div>

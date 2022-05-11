@@ -10,10 +10,12 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.script.ProjectFileBackupUtil;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -52,7 +54,7 @@ public class ProjectFileBackupController extends BaseAgentController {
         if (CollUtil.isEmpty(collect)) {
             return JsonMessage.getString(200, "查询成功", Collections.EMPTY_LIST);
         }
-        List<JSONObject> arrayFile = FileUtils.parseInfo(collect, false, path.getAbsolutePath());
+        List<JSONObject> arrayFile = FileUtils.parseInfo(collect, true, path.getAbsolutePath());
         //
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("path", FileUtil.getAbsolutePath(path));
@@ -127,4 +129,52 @@ public class ProjectFileBackupController extends BaseAgentController {
         CommandUtil.systemFastDel(file);
         return JsonMessage.getString(200, "删除成功");
     }
+
+    /**
+     * 还原项目文件
+     *
+     * @param id        项目ID
+     * @param backupId  备份ID
+     * @param type      类型 clear 清空还原
+     * @param filename  文件名
+     * @param levelName 目录
+     * @return msg
+     */
+    @RequestMapping(value = "backup-recover", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName) {
+        NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
+        File backupPath = ProjectFileBackupUtil.path(id, backupId);
+        String projectPath = projectInfoModel.allLib();
+        String nowBackupId = ProjectFileBackupUtil.backup(projectInfoModel.getId(), projectPath);
+        try {
+            //
+            File backupFile;
+            File projectFile;
+            if (StrUtil.isEmpty(filename)) {
+                // 目录
+                backupFile = FileUtil.file(backupPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
+                Assert.state(FileUtil.exist(backupFile), "对应的文件不存在");
+                projectFile = FileUtil.file(projectPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
+                // 创建文件
+                FileUtil.mkdir(projectFile);
+                // 清空
+                if (StrUtil.equalsIgnoreCase(type, "clear")) {
+                    FileUtil.clean(projectFile);
+                }
+                //
+                FileUtil.copyContent(backupFile, projectFile, true);
+            } else {
+                // 文件
+                backupFile = FileUtil.file(backupPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
+                Assert.state(FileUtil.exist(backupFile), "对应的文件不存在");
+                projectFile = FileUtil.file(projectPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
+                FileUtil.copy(backupFile, projectFile, true);
+            }
+        } finally {
+            ProjectFileBackupUtil.checkDiff(id, projectPath, nowBackupId, projectInfoModel.dslConfig());
+        }
+        return JsonMessage.getString(200, "还原成功");
+    }
+
+
 }

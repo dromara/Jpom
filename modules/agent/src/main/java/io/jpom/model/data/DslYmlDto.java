@@ -25,6 +25,8 @@ package io.jpom.model.data;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.setting.yaml.YamlUtil;
 import io.jpom.model.BaseJsonModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -35,133 +37,96 @@ import java.io.InputStream;
  * @author bwcx_jzy
  * @since 2022/1/15
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class DslYmlDto extends BaseJsonModel {
 
-	/**
-	 * 描述
-	 */
-	private String description;
+    /**
+     * 描述
+     */
+    private String description;
 
-	/**
-	 * 运行
-	 */
-	private Run run;
+    /**
+     * 运行
+     */
+    private Run run;
 
-	public String getDescription() {
-		return description;
-	}
+    /**
+     * 文件相关配置
+     */
+    private FileConfig file;
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    /**
+     * 构建对象
+     *
+     * @param yml yml 内容
+     * @return DslYmlDto
+     */
+    public static DslYmlDto build(String yml) {
+        InputStream inputStream = new ByteArrayInputStream(yml.getBytes());
+        return YamlUtil.load(inputStream, DslYmlDto.class);
+    }
 
-	public Run getRun() {
-		return run;
-	}
-
-	public void setRun(Run run) {
-		this.run = run;
-	}
-
-	/**
-	 * 构建对象
-	 *
-	 * @param yml yml 内容
-	 * @return DslYmlDto
-	 */
-	public static DslYmlDto build(String yml) {
-		InputStream inputStream = new ByteArrayInputStream(yml.getBytes());
-		return YamlUtil.load(inputStream, DslYmlDto.class);
-	}
-
-	/**
-	 * 运行管理
-	 */
-	public static class Run extends BaseJsonModel {
-		private Start start;
-		private Status status;
-		private Stop stop;
-
-		public Start getStart() {
-			return start;
-		}
-
-		public void setStart(Start start) {
-			this.start = start;
-		}
-
-		public Status getStatus() {
-			return status;
-		}
-
-		public void setStatus(Status status) {
-			this.status = status;
-		}
-
-		public Stop getStop() {
-			return stop;
-		}
-
-		public void setStop(Stop stop) {
-			this.stop = stop;
-		}
-	}
+    /**
+     * 运行管理
+     */
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    public static class Run extends BaseJsonModel {
+        private Start start;
+        private Status status;
+        private Stop stop;
+    }
 
 
-	/**
-	 * 启动流程
-	 */
-	public static class Start extends BaseProcess {
+    /**
+     * 启动流程
+     */
+    public static class Start extends BaseProcess {
 
-	}
+    }
 
-	/**
-	 * 获取状态流程
-	 */
-	public static class Status extends BaseProcess {
+    /**
+     * 获取状态流程
+     */
+    public static class Status extends BaseProcess {
 
-	}
+    }
 
-	/**
-	 * 停止流程
-	 */
-	public static class Stop extends BaseProcess {
+    /**
+     * 停止流程
+     */
+    public static class Stop extends BaseProcess {
 
-	}
+    }
 
-	public static class BaseProcess extends BaseJsonModel {
-		/**
-		 * 脚本 ID
-		 */
-		private String scriptId;
-		/**
-		 * 执行参数
-		 */
-		private String scriptArgs;
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    public static class BaseProcess extends BaseJsonModel {
+        /**
+         * 脚本 ID
+         */
+        private String scriptId;
+        /**
+         * 执行参数
+         */
+        private String scriptArgs;
 
-		public String getScriptId() {
-			return scriptId;
-		}
+        /**
+         * 通过 脚本模版运行
+         *
+         * @return true
+         */
+        public boolean runByScript() {
+            return StrUtil.isNotEmpty(this.getScriptId());
+        }
+    }
 
-		public void setScriptId(String scriptId) {
-			this.scriptId = scriptId;
-		}
-
-		public String getScriptArgs() {
-			return scriptArgs;
-		}
-
-		public void setScriptArgs(String scriptArgs) {
-			this.scriptArgs = scriptArgs;
-		}
-
-		/**
-		 * 通过 脚本模版运行
-		 *
-		 * @return true
-		 */
-		public boolean runByScript() {
-			return StrUtil.isNotEmpty(this.getScriptId());
-		}
-	}
+    @Data
+    public static class FileConfig {
+        /**
+         * 保留文件备份数量
+         */
+        private Integer backupCount;
+    }
 }

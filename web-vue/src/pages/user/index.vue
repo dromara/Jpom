@@ -59,13 +59,13 @@
     <a-modal v-model="editUserVisible" width="60vw" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
       <a-form-model ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="登录名称" prop="id">
-          <a-input @change="checkTipUserName" maxLength="50" v-model="temp.id" placeholder="创建之后不能修改" :disabled="createOption == false" />
+          <a-input @change="checkTipUserName" :maxLength="50" v-model="temp.id" placeholder="创建之后不能修改" :disabled="createOption == false" />
         </a-form-model-item>
         <a-form-model-item label="密码" :prop="createOption ? 'password' : 'none'">
           <a-input-password v-model="temp.password" :placeholder="createOption ? '登录密码' : '如果不修改密码则不用填写'" />
         </a-form-model-item>
         <a-form-model-item label="昵称" prop="name">
-          <a-input v-model="temp.name" maxLength="50" placeholder="昵称" />
+          <a-input v-model="temp.name" :maxLength="50" placeholder="昵称" />
         </a-form-model-item>
         <a-form-model-item prop="systemUser">
           <template slot="label">

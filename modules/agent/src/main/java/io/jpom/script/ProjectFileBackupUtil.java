@@ -8,6 +8,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.model.data.DslYmlDto;
 import io.jpom.system.AgentExtConfigBean;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.CommandUtil;
@@ -15,10 +16,7 @@ import io.jpom.util.StringUtil;
 import org.springframework.util.Assert;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -77,8 +75,12 @@ public class ProjectFileBackupUtil {
      *
      * @param backupPath 目录
      */
-    private static void clearOldBackup(File backupPath) {
-        int backupCount = AgentExtConfigBean.getInstance().getProjectFileBackupCount();
+    private static void clearOldBackup(File backupPath, DslYmlDto dslYmlDto) {
+        int backupCount = Optional.of(dslYmlDto)
+            .map(DslYmlDto::getFile)
+            .map(DslYmlDto.FileConfig::getBackupCount)
+            .orElse(AgentExtConfigBean.getInstance().getProjectFileBackupCount());
+        //
         File[] files = backupPath.listFiles();
         List<File> collect = Arrays.stream(files)
             .filter(FileUtil::isDirectory)
@@ -100,7 +102,7 @@ public class ProjectFileBackupUtil {
      * @param projectPath 项目路径
      * @param backupId    要对比的备份ID
      */
-    public static void checkDiff(String pathId, String projectPath, String backupId) {
+    public static void checkDiff(String pathId, String projectPath, String backupId, DslYmlDto dslYmlDto) {
         if (StrUtil.isEmpty(backupId)) {
             // 备份ID 不存在
             return;
@@ -120,21 +122,20 @@ public class ProjectFileBackupUtil {
         // 删除空文件夹
         loopClean(backupItemPath);
         // 检查备份保留个数
-        clearOldBackup(backupPath);
+        clearOldBackup(backupPath, dslYmlDto);
     }
 
     private static void loopClean(File backupPath) {
         if (FileUtil.isFile(backupPath)) {
             return;
         }
-        // 检查目录是否为空
-        if (FileUtil.isDirEmpty(backupPath)) {
-            FileUtil.del(backupPath);
-            return;
-        }
         File[] files = backupPath.listFiles();
         for (File file : files) {
             ProjectFileBackupUtil.loopClean(file);
+        }
+        // 检查目录是否为空
+        if (FileUtil.isDirEmpty(backupPath)) {
+            FileUtil.del(backupPath);
         }
     }
 

@@ -102,6 +102,7 @@ public enum NodeUrl {
     MANAGE_FILE_BACKUP_LIST_ITEM_FILES("/manage/file/backup-item-files"),
     MANAGE_FILE_BACKUP_DOWNLOAD("/manage/file/backup-download"),
     MANAGE_FILE_BACKUP_DELETE("/manage/file/backup-delete"),
+    MANAGE_FILE_BACKUP_RECOVER("/manage/file/backup-recover"),
     /**
      * jzy add  timeout
      */

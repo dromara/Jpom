@@ -74,4 +74,19 @@ public class ProjectFileBackupController extends BaseServerController {
     public String deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.MANAGE_FILE_BACKUP_DELETE).toString();
     }
+
+    /**
+     * 还原项目文件
+     *
+     * @param id        项目ID
+     * @param backupId  备份ID
+     * @param type      类型 clear 清空还原
+     * @param filename  文件名
+     * @param levelName 目录
+     * @return msg
+     */
+    @RequestMapping(value = "backup-recover", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName) {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.MANAGE_FILE_BACKUP_RECOVER).toString();
+    }
 }
