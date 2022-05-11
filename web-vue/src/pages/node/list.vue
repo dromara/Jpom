@@ -121,43 +121,35 @@
       </template>
       <!-- 嵌套表格 -->
       <!-- <template slot="expandIcon" slot-scope="text" v-if="text.record.openStatus === 1"> <a-icon type="plus" /></template> -->
-
-      <a-table
-        size="middle"
-        :loading="childLoading"
-        :columns="childColumns"
-        slot="expandedRowRender"
-        slot-scope="text"
-        :data-source="text.children"
-        :pagination="false"
-        :rowKey="(record, index) => text.id + index"
-      >
-        <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-        <a-tooltip slot="javaVersion" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-        <a-tooltip slot="runTime" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-        <template slot="projectCount" slot-scope="text, item">
-          <div v-if="text" @click="syncNode(item)">
-            <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
-              <a-tag>{{ text }} </a-tag>
-              <a-icon type="sync" />
-            </a-tooltip>
-          </div>
-        </template>
-        <template slot="scriptCount" slot-scope="text, item">
-          <div v-if="text" @click="syncNodeScript(item)">
-            <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
-              <a-tag>{{ text }} </a-tag>
-              <a-icon type="sync" />
-            </a-tooltip>
-          </div>
-        </template>
-      </a-table>
+      <template slot="expandedRowRender" slot-scope="record">
+        <a-table size="middle" :loading="childLoading" :columns="childColumns" :data-source="nodeStatusData[record.id]" :pagination="false" :rowKey="(record, index) => index">
+          <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+          <a-tooltip slot="javaVersion" slot-scope="text" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+          <a-tooltip slot="runTime" slot-scope="text" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+          <template slot="projectCount" slot-scope="text, item">
+            <div v-if="text" @click="syncNode(item)">
+              <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
+                <a-tag>{{ text }} </a-tag>
+                <a-icon type="sync" />
+              </a-tooltip>
+            </div>
+          </template>
+          <template slot="scriptCount" slot-scope="text, item">
+            <div v-if="text" @click="syncNodeScript(item)">
+              <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
+                <a-tag>{{ text }} </a-tag>
+                <a-icon type="sync" />
+              </a-tooltip>
+            </div>
+          </template>
+        </a-table>
+      </template>
     </a-table>
 
     <!-- 编辑区 -->
@@ -421,6 +413,7 @@ export default {
       // nodeMonitorCycle: nodeMonitorCycle,
       sshList: [],
       list: [],
+      nodeStatusData: {},
       groupList: [],
       showOptVisible: {},
       temp: {
@@ -613,9 +606,11 @@ export default {
         this.childLoading = true;
         getNodeStatus(record.id).then((res) => {
           if (res.code === 200) {
-            // const index = this.list.findIndex(ele => ele.id === record.id);
-            // this.list[index].children = res.data;
-            record.children = res.data;
+            // bwcx_jzy 2022-05-11 单独使用对象，避免一级表格出现空白行
+            this.nodeStatusData = {
+              ...this.nodeStatusData,
+              [record.id]: [{ ...res.data[0], id: record.id + new Date().getTime() }],
+            };
           }
           this.childLoading = false;
         });
@@ -715,8 +710,8 @@ export default {
     },
     // 管理节点
     handleNode(record) {
-      this.temp = Object.assign(record);
-      this.drawerTitle = `${this.temp.name} (${this.temp.url})`;
+      this.temp = Object.assign({}, record);
+      this.drawerTitle = `${record.name} (${this.temp.url})`;
       this.drawerVisible = true;
       let nodeId = this.$route.query.nodeId;
       if (nodeId !== record.id) {
@@ -874,12 +869,12 @@ export default {
 /* .filter {
   margin-bottom: 10px;
 } */
-/* 
+/*
 .filter-item {
   width: 150px;
   margin-right: 10px;
 } */
-/* 
+/*
 .btn-add {
   margin-left: 10px;
   margin-right: 0;
