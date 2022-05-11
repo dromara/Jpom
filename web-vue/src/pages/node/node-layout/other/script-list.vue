@@ -46,7 +46,7 @@
           <a-input v-model="temp.id" disabled readOnly />
         </a-form-model-item>
         <a-form-model-item label="Script 名称" prop="name">
-          <a-input maxLength="50" v-model="temp.name" placeholder="名称" />
+          <a-input :maxLength="50" v-model="temp.name" placeholder="名称" />
         </a-form-model-item>
         <a-form-model-item label="Script 内容" prop="context">
           <div style="height: 40vh; overflow-y: scroll">

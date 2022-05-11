@@ -159,7 +159,7 @@
           <a-input v-model="temp.id" placeholder="创建之后不能修改" />
         </a-form-model-item> -->
         <a-form-model-item label="节点名称" prop="name">
-          <a-input maxLength="50" v-model="temp.name" placeholder="节点名称" />
+          <a-input :maxLength="50" v-model="temp.name" placeholder="节点名称" />
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
           <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>

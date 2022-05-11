@@ -217,7 +217,6 @@ public class ProjectFileControl extends BaseAgentController {
                 multipartFileBuilder.save();
             }
             // 修改使用状态
-            pim.setUseLibDesc("upload");
             projectInfoService.updateItem(pim);
             //
             String after = getParameter("after");
@@ -260,7 +259,7 @@ public class ProjectFileControl extends BaseAgentController {
                 }
             }
         } finally {
-            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId);
+            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
         }
         return JsonMessage.getString(200, "上传成功");
     }
@@ -317,7 +316,7 @@ public class ProjectFileControl extends BaseAgentController {
                 return JsonMessage.getString(500, "删除失败");
             }
         } finally {
-            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId);
+            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
         }
     }
 
@@ -343,7 +342,7 @@ public class ProjectFileControl extends BaseAgentController {
             }
             return JsonMessage.getString(200, "删除成功");
         } finally {
-            ProjectFileBackupUtil.checkDiff(projectInfoModel.getId(), projectInfoModel.allLib(), backupId);
+            ProjectFileBackupUtil.checkDiff(projectInfoModel.getId(), projectInfoModel.allLib(), backupId, projectInfoModel.dslConfig());
         }
 
     }
@@ -388,7 +387,7 @@ public class ProjectFileControl extends BaseAgentController {
             FileUtil.writeString(fileText, FileUtil.file(pim.allLib(), filePath, filename), charset);
             return JsonMessage.getString(200, "文件写入成功");
         } finally {
-            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId);
+            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
         }
     }
 
@@ -459,7 +458,7 @@ public class ProjectFileControl extends BaseAgentController {
             DefaultSystemLog.getLog().error("下载远程文件异常", e);
             return JsonMessage.getString(500, "下载远程文件失败:" + e.getMessage());
         } finally {
-            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId);
+            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
         }
     }
 

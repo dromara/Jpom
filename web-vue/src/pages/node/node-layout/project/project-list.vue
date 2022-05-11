@@ -80,19 +80,19 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" @click="handleMonitor(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.status">监控 </a-button>
+                <a-button size="small" type="primary" @click="handleMonitor(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.status">监控 </a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" @click="handleReplica(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
+                <a-button size="small" type="primary" @click="handleReplica(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
               </a-menu-item>
               <a-menu-item>
                 <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
-                  <a-button type="danger" :disabled="record.outGivingProject">删除</a-button>
+                  <a-button size="small" type="danger" :disabled="record.outGivingProject === 1">删除</a-button>
                 </a-tooltip>
-                <a-button v-else type="danger" @click="handleDelete(record)">删除</a-button>
+                <a-button v-else size="small" type="danger" @click="handleDelete(record)">删除</a-button>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -103,10 +103,10 @@
     <a-modal v-model="editProjectVisible" width="60vw" title="编辑项目" @ok="handleEditProjectOk" :maskClosable="false">
       <a-form-model ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="项目 ID" prop="id">
-          <a-input maxLength="50" v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
+          <a-input :maxLength="50" v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
         <a-form-model-item label="项目名称" prop="name">
-          <a-input v-model="temp.name" maxLength="50" placeholder="项目名称" />
+          <a-input v-model="temp.name" :maxLength="50" placeholder="项目名称" />
         </a-form-model-item>
         <a-form-model-item prop="runMode">
           <template slot="label">

@@ -173,7 +173,10 @@ export const PROJECT_DSL_DEFATUL =
   "  stop:\r\n" +
   "#    scriptId: project.sh\r\n" +
   "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
-  "    scriptArgs: stop";
+  "    scriptArgs: stop\r\n" +
+  "file:\r\n" +
+  "# 备份文件保留个数\r\n" +
+  "#  backupCount: 5\r\n";
 
 /**
  * 获取 socket 地址

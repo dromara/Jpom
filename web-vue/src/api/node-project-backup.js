@@ -61,3 +61,21 @@ export function backupDeleteProjectFile(params) {
     data: params,
   });
 }
+
+/**
+ * 还原文件
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ *  levelName: 文件 levelName
+ *  filename: 文件名称
+ *
+ * } params
+ */
+export function backupRecoverProjectFile(params) {
+  return axios({
+    url: "/node/manage/file/backup-recover",
+    method: "post",
+    data: params,
+  });
+}

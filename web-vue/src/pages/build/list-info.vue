@@ -104,11 +104,11 @@
         <a-form-model-item label="名称" prop="name">
           <a-row>
             <a-col :span="10">
-              <a-input v-model="temp.name" maxLength="50" placeholder="名称" />
+              <a-input v-model="temp.name" :maxLength="50" placeholder="名称" />
             </a-col>
             <a-col :span="4" style="text-align: right">分组名称：</a-col>
             <a-col :span="10">
-              <custom-select suffixIcon="" maxLength="50" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder=""> </custom-select>
+              <custom-select suffixIcon="" :maxLength="50" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder=""> </custom-select>
             </a-col>
           </a-row>
         </a-form-model-item>
@@ -263,7 +263,7 @@
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
-              <a-input maxLength="50" v-model="temp.resultDirFile" placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist" />
+              <a-input :maxLength="50" v-model="temp.resultDirFile" placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist" />
             </a-form-model-item>
           </a-collapse-panel>
           <a-collapse-panel key="1">

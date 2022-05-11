@@ -7,6 +7,7 @@
 
 1. 【server】节点新增代理配置，实现使用代理访问插件端（感谢@背着砍刀的诗人）
 2. 【server】构建新增差异构建配置选择（如果仓库代码未变动则不执行构建）
+3. 项目管理文件新增备份，自动备份变动的文件（感谢[@少爷123](https://gitee.com/58753101) [Gitee issues I54ZFM](https://gitee.com/dromara/Jpom/issues/I54ZFM)）
 
 ### 🐞 解决BUG、优化功能
 

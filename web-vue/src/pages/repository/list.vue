@@ -48,7 +48,7 @@
     <a-modal v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="仓库名称" prop="name">
-          <a-input v-model="temp.name" maxLength="50" placeholder="仓库名称" />
+          <a-input v-model="temp.name" :maxLength="50" placeholder="仓库名称" />
         </a-form-model-item>
         <a-form-model-item label="仓库地址" prop="gitUrl">
           <a-input-group compact>
