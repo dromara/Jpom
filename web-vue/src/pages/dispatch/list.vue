@@ -150,10 +150,10 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
+          <a-input v-model="temp.id" maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
         <a-form-model-item label="分发名称" prop="name">
-          <a-input v-model="temp.name" placeholder="分发名称" />
+          <a-input v-model="temp.name" maxLength="50" placeholder="分发名称" />
         </a-form-model-item>
 
         <a-form-model-item label="分发节点" required>
@@ -240,10 +240,10 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
+          <a-input v-model="temp.id" maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
         <a-form-model-item label="项目名称" prop="name">
-          <a-input v-model="temp.name" placeholder="项目名称" />
+          <a-input v-model="temp.name" maxLength="50" placeholder="项目名称" />
         </a-form-model-item>
 
         <a-form-model-item prop="runMode">
