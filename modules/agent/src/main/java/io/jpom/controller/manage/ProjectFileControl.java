@@ -446,7 +446,7 @@ public class ProjectFileControl extends BaseAgentController {
             if (BooleanUtil.toBoolean(unzip)) {
                 // 需要解压文件
                 try {
-                    CompressionFileUtil.unCompress(file, downloadFile);
+                    CompressionFileUtil.unCompress(downloadFile, file);
                 } finally {
                     if (!FileUtil.del(downloadFile)) {
                         DefaultSystemLog.getLog().error("删除文件失败：" + file.getPath());
