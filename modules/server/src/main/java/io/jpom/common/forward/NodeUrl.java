@@ -97,9 +97,11 @@ public enum NodeUrl {
     Manage_Recover_List_Data("/manage/recover/list_data"),
 
     Manage_Recover_Item_Data("/manage/recover/item_data"),
-
-
     Manage_File_GetFileList("/manage/file/getFileList"),
+    MANAGE_FILE_BACKUP_LIST_BACKUP("/manage/file/list-backup"),
+    MANAGE_FILE_BACKUP_LIST_ITEM_FILES("/manage/file/backup-item-files"),
+    MANAGE_FILE_BACKUP_DOWNLOAD("/manage/file/backup-download"),
+    MANAGE_FILE_BACKUP_DELETE("/manage/file/backup-delete"),
     /**
      * jzy add  timeout
      */
