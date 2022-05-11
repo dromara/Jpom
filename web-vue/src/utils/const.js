@@ -176,7 +176,10 @@ export const PROJECT_DSL_DEFATUL =
   "    scriptArgs: stop\r\n" +
   "file:\r\n" +
   "# 备份文件保留个数\r\n" +
-  "#  backupCount: 5\r\n";
+  "#  backupCount: 5\r\n" +
+  "# 限制备份指定文件后缀（支持正则）\r\n" +
+  "#  backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]\r\n" +
+  "\r\n";
 
 /**
  * 获取 socket 地址
