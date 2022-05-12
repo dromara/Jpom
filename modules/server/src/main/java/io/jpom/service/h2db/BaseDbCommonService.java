@@ -247,6 +247,8 @@ public abstract class BaseDbCommonService<T> {
      * 根据主键查询实体
      *
      * @param keyValue 主键值
+     * @param fill     是否执行填充逻辑
+     * @param consumer 参数回调
      * @return 数据
      */
     public T getByKey(String keyValue, boolean fill, Consumer<Entity> consumer) {

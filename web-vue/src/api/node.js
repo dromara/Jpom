@@ -96,6 +96,14 @@ export function unLockWorkspace(params) {
   });
 }
 
+export function syncToWorkspace(params) {
+  return axios({
+    url: "/node/sync-to-workspace",
+    method: "get",
+    params: params,
+  });
+}
+
 // 删除节点项目缓存
 export function delAllProjectCache() {
   return axios({
