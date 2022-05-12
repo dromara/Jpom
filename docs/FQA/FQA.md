@@ -407,7 +407,7 @@ io.jpom.system.AgentException: xxx节点异常：Error writing to server
 	at java.lang.Thread.run(Thread.java:748)
 ```
 
-出现上述信息可能是因为上传文件超过插件端上传文件大小限制，需要配置更大到上传文件限制
+出现上述信息可能是因为上传文件超过插件端上传文件大小限制，需要配置更大的上传文件限制
 
 # 如何在 Jpom 中备份项目文件
 
@@ -416,7 +416,7 @@ io.jpom.system.AgentException: xxx节点异常：Error writing to server
 1. 在线构建产生到构建历史
 2. 为节点项目开启备份文件功能
 
-### 在线构建备份文件说明
+## 在线构建备份文件说明
 
 在线构建会为每次构建成功到产物目录生成一个构建历史并备份相关文件
 
@@ -425,17 +425,25 @@ io.jpom.system.AgentException: xxx节点异常：Error writing to server
 - 下载：下载到本地
 - 回滚：重新执行一遍发布逻辑
 
-### 开启备份文件功能相关说明如下
-
+## 开启备份文件功能相关说明如下
+ 
 - 默认未开启文件备份功能
-- 可以配置全局开启，插件端配置（ `extConfig.yml` ）文件中配置`project.fileBackupCount`属性
-- DSL 项目可以在配置内容新增 `file.backupCount` 来开启（DSL 配置优先级最高）
 - 如果配置值小于等于 0 则不开启备份功能
 - 备份文件保留规则为，只保留有差异的文件
 
-### 如果限制仅备份指定后缀文件
+### 全局开启
 
-#### 全局限制
+插件端配置（ `extConfig.yml` ）文件中配置`project.fileBackupCount`属性
+
+### 单个项目开启
+
+目前仅支持对 DSL 的单个项目开启文件备份，配置到 DSL 内容中
+
+DSL 项目可以在配置内容新增 `file.backupCount` 来开启（DSL 配置优先级最高）
+
+## 如果限制仅备份指定后缀文件
+
+### 全局限制
 
 插件端配置（ `extConfig.yml` ）文件中配置`project.fileBackupSuffix`属性
 
@@ -448,7 +456,7 @@ project:
   fileBackupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]
 ```
 
-#### 单个项目限制
+### 单个项目限制
 
  目前仅支持对 DSL 的单个项目配置限制，配置到 DSL 内容中
 
