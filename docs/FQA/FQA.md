@@ -354,7 +354,7 @@ binds:
 1. 不能访问外网则可以自定义配置远程地址：(配置方法在 extConfig.yml 文件中修改 `system.remoteVersionUrl` 属性)
    1. [https://jpom.io/docs/release-versions.json](https://jpom.io/docs/release-versions.json) （GitHub Pages）
    2. [https://keepbx.gitee.io/jpom-site/docs/release-versions.json](https://keepbx.gitee.io/jpom-site/docs/release-versions.json) (Gitee Pages)
-   3. [https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/release-versions.json](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/release-versions.json) (jsdelivr)
+   3. [https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/docs/release-versions.json](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/docs/release-versions.json) (jsdelivr)
 2. 自己搭建服务（Jpom 中更新规则使用二级从定向）
    1. 生成第一级远程更新信息地址
    2. 第一级地址内容如示例：`{url:"https://dromara.gitee.io/jpom/docs/versions.json"}`

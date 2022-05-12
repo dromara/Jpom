@@ -1,4 +1,4 @@
-![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.png)
+![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom_logo.png)
 
 ##  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
 
@@ -26,9 +26,9 @@ mkdir -p /home/jpom/server/
 apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
 ```
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/install1.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/install1.png)
 
-![install2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/install2.png)
+![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/install2.png)
 
 ### 初始化服务端
 
@@ -36,13 +36,13 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 > 添加一个超级管理员账号，请妥善保管此账号同时请设置安全度较强的密码
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/inits1.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/inits1.png)
 
 #### 开启账号 MFA
 
 > 为了系统安全，强烈建议超级管理员账号开启 MFA 两步验证
 >
-![install2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/inits2.png)
+![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/inits2.png)
 
 ## 安装插件端
 
@@ -52,8 +52,8 @@ mkdir -p /home/jpom/agent/
 apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
 ```
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/install-agent1.png)
-![install2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/install-agent2.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/install-agent1.png)
+![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/install-agent2.png)
 
 ### 添加节点
 
@@ -63,14 +63,14 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 节点账号密码在安装启动成功后会输出到控制台，请根据输出到内容填写。如果自己修改了账号密码则填写修改后到
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/inita1.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/inita1.png)
 
 
 ### 配置白名单
 
 项目白名单是为了防止随意配置目录，同时也为了保护系统目录
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_java/inita2.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/inita2.png)
 
 
 ## 创建脚本
@@ -83,7 +83,7 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 执行：`sudo dpkg-reconfigure dash` 在选择项中选No，搞定了！
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/edit-script1.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/edit-script1.png)
 
 脚本内容：
 
@@ -173,44 +173,44 @@ exit $RETVAL
 
 ## 创建项目
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/edit-project.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/edit-project.png)
 
 注意：
 1. scriptArgs 为对应环节执行脚本传人的参数,这里可以使用空格隔空传人多个参数 
 2. scriptId 需要填写当前节点里面存在的脚本的 id,脚本ID 可以在编辑脚本弹窗里面查看，如下图
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/edit-script2.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/edit-script2.png)
 
 ## 添加构建仓库
 
 这里使用 jpom 演示的仓库中的 python 
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/repo1.png)
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/repo2.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/repo1.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/repo2.png)
 
 ## 添加本地构建
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/build1.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/build1.png)
 
 这里需要注意构建产物目录：是指仓库下面的相对路径
 
 发布项目需要选择节点再选择项目
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/build2.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/build2.png)
 
 构建
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/build3.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/build3.png)
 
 执行构建
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/build4.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/build4.png)
 
 看到最后输出上传成功并重启表示项目已经发布完成
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/build5.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/build5.png)
 
 
 ## 查看项目
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/project_dsl_python/project-list.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/project-list.png)

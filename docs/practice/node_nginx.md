@@ -1,4 +1,4 @@
-![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.png)
+![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom_logo.png)
 
 ##  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
 
@@ -34,10 +34,10 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ### 执行命令后控制台输出如下
 
-![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install1.png)
-![install2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install2.png)
-![install3](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install3.png)
-![install4](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install4.png)
+![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install1.png)
+![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install2.png)
+![install3](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install3.png)
+![install4](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install4.png)
 
 
 ## 第二步：安装 Jpom 插件端
@@ -52,8 +52,8 @@ mkdir -p /home/jpom/agent && cd /home/jpom/agent
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
 ```
 
-![agent1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/agent1.png)
-![agent2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/agent2.png)
+![agent1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/agent1.png)
+![agent2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/agent2.png)
 
 图 2 中圈出来第为插件端的账号密码
 
@@ -111,31 +111,31 @@ make install
 
 第一次使用系统需要设置一个系统管理员账号（系统管理员账号密码有强度要求，请安装提示设置。同时也请您牢记系统管理员账号）
 
-![install-user1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install-user1.png)
-![install-user2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install-user2.png)
+![install-user1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install-user1.png)
+![install-user2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install-user2.png)
 
 ### 添加 Jpom 节点
 
 节点列表还没有任何节点，我们需要将我们之前安装等插件端添加到服务端中来
 
-![node-list1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/node-list1.png)
+![node-list1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/node-list1.png)
 
-![add-node](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/add-node.png)
+![add-node](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/add-node.png)
 
-![add-node2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/add-node2.png)
+![add-node2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/add-node2.png)
 
 图 3 中的节点密码为上面步骤中第四步中安装并启动插件端后控制台输出第账号和密码
 
 ## 第五步：在 Jpom 中配置 nginx
 
 1. 配置白名单信息
-   1. ![nginx-config1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-config1.png)
+   1. ![nginx-config1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/node_nginx/nginx-config1.png)
 2. 配置 nginx 服务
-   1. ![edit-nginx-name1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-edit-name1.png)
-   2. ![edit-nginx-name2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-edit-name2.png)
+   1. ![edit-nginx-name1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/node_nginx/nginx-edit-name1.png)
+   2. ![edit-nginx-name2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/node_nginx/nginx-edit-name2.png)
    3. 填写的 `/usr/local/nginx/sbin/nginx` 为 nginx 执行文件绝对路径
 3. 启动 nginx 服务
-   1. ![nginx-start1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-start1.png)
+   1. ![nginx-start1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/node_nginx/nginx-start1.png)
 
 注意：
 1. 服务名称请一定填写绝对路径
@@ -159,4 +159,4 @@ Github: `https://github.com/dromara/Jpom`
 
 常见问题：`https://jpom-site.keepbx.cn/docs/#/FQA/FQA`
 
- ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_qrcode.jpg)
+ ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/wx_qrcode.jpg)

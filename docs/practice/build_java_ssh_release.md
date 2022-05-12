@@ -1,4 +1,4 @@
-![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.png)
+![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom_logo.png)
 
 ##  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
 
@@ -23,11 +23,11 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 #### 执行命令后控制台输出如下
 
-![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/ssh_release2/setp1.1.png)
+![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/ssh_release2/setp1.1.png)
 
-![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/ssh_release2/setp1.2.png)
+![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/ssh_release2/setp1.2.png)
 
-![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/ssh_release2/setp1.3.png)
+![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/ssh_release2/setp1.3.png)
 
 
 #### 服务端访问地址
@@ -41,7 +41,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 1. `需要设置 Jpom 系统中的管理员账号密码`
 2. `注意超级管理的密码强度`
 
-![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/ssh_release2/setp2.png)
+![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/ssh_release2/setp2.png)
 
 ## 第三步 配置 ssh 信息
 
@@ -52,7 +52,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 3. 登录的账号信息（账号、密码）
 4. 文件目录
 
-![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/ssh_release2/setp3.png)
+![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/ssh_release2/setp3.png)
 
 #### 备注：`文件目录为给对应 ssh 授权部分目录可以在 Jpom 中使用，一般用于构建发布目录、ssh 文件管理`
 
@@ -60,7 +60,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 > 配置项目查看构建信息，用于管理项目发布流程
 
-![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/ssh_release2/setp4.png)
+![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/ssh_release2/setp4.png)
 
 1. 构建的项目（仓库）信息
 2. 项目的构建命令（依赖的构建环境：maven、vue、python、php）
@@ -110,4 +110,4 @@ Github: `https://github.com/dromara/Jpom`
 
 常见问题：`https://jpom-site.keepbx.cn/docs/#/FQA/FQA`
 
- ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_qrcode.jpg)
+ ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/wx_qrcode.jpg)
