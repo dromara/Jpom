@@ -327,7 +327,7 @@
       <a-alert message="温馨提示" type="warning">
         <template slot="description">
           <ul>
-            <li>同步机制采用 IP+PORT+连接方式 确定为是同一个服务器</li>
+            <li>同步机制采用 IP+PORT+连接方式 确定是同一个服务器</li>
             <li>当目标工作空间不存在对应的 SSH 时候将自动创建一个新的 SSH</li>
             <li>当目标工作空间已经存在 SSH 时候将自动同步 SSH 账号、密码、私钥信息</li>
           </ul>
