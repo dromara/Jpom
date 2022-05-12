@@ -1,6 +1,6 @@
 <p align="center">
 	<a href="https://jpom.io/"  target="_blank">
-	    <img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.png" width="400" alt="logo">
+	    <img src="https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom_logo.png" width="400" alt="logo">
 	</a>
 </p>
 <p align="center">
@@ -29,7 +29,7 @@
     <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dromara/Jpom&amp;utm_campaign=Badge_Grade">
       <img src="https://app.codacy.com/project/badge/Grade/843b953f1446449c9a075e44ea778336" alt="codacy"/>
     </a>
-	<a target="_blank" href="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx-qrcode-praise.png">
+	<a target="_blank" href="https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/wx-qrcode-praise.png">
 		<img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
 	</a>
 </p>
@@ -391,18 +391,18 @@ mvn -f xxxx/pom.xml clean package
 
 ## 🛠️ 整体架构
 
-![jpom-func-arch](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom-func-arch.jpg)
+![jpom-func-arch](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom-func-arch.jpg)
 
 ### 🐞 交流讨论 、提供bug反馈或建议
 
 1. 微信群二维码（添加小助手：备注Jpom 进群）
 2. 微信赞赏 [赞赏记录](./docs/praise/praise.md)
 3. [码云赞赏： 在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
-4. 微信公众号：[CodeGzh](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
+4. 微信公众号：[CodeGzh](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 5. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
 6. 邀请您一起贡献教程文档 [文档仓库地址](https://gitee.com/keepbx/Jpom-site)
 
-![wx-qrcode-praise.png](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx-qrcode-praise.png)
+![wx-qrcode-praise.png](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/wx-qrcode-praise.png)
 
 ### 🔔 精品项目推荐
 
