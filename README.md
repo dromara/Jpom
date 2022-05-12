@@ -184,6 +184,8 @@ apt install -y wget && \
 
 ```shell
 docker pull jpomdocker/jpom
+mkdir -p /home/jpom-server/log
+mkdir -p /home/jpom-server/data
 docker run -d -p 2122:2122 \
 	--name jpom-server \
 	-v /home/jpom-server/log:/usr/local/jpom-server/log \
