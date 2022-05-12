@@ -8,9 +8,9 @@
 # All the variables are required
 # acme.sh --deploy -d xxx --deploy-hook gitee_pages
 
-export GITEE_TOKEN="xxx"
-export GITEE_OWNER_ID="xxx"
-export GITEE_REPO_ID="xxx"
+# export GITEE_TOKEN="xxx"
+# export GITEE_OWNER_ID="xxx"
+# export GITEE_REPO_ID="xxx"
 
 gitee_pages_deploy() {
   _cdomain="$1"
