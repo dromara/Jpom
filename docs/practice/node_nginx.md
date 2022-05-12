@@ -1,0 +1,162 @@
+![](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.png)
+
+##  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
+
+## 前言
+
+> 本文主要介绍：
+> 如何从零开始使用 Jpom 中的节点 nginx 管理 （注意：本文采用一键安装）。
+>
+> 本文中服务端和插件端是安装在同一个服务器中的，实际操作时根据业务情况来安装
+>
+> 文中使用到的依赖环境版本仅供参考，实际使用中请根据业务情况来安装对应的版本
+
+> 本文基于 2.8.4 版本讲解
+
+## 需要准备的环境
+
+1. Jpom 服务端、Jpom 插件端（安装 jpom 需要 java 环境）
+2. 插件端所在服务器需要 nginx 环境
+
+# 操作步骤
+
+## 第一步：安装 Jpom 服务端
+
+> 目前安装 Jpom 服务端的方式有：一键安装、下载安装、编译打包安装、docker 安装，建议按照自己熟悉的方式来安装
+>
+> 教程中使用一键安装的命令安装服务端
+
+```
+mkdir -p /home/jpom/server && cd /home/jpom/server
+# 这里我们选择快速安装 jdk 实际中请根据自己情况选择
+yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
+```
+
+### 执行命令后控制台输出如下
+
+![install1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install1.png)
+![install2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install2.png)
+![install3](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install3.png)
+![install4](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install4.png)
+
+
+## 第二步：安装 Jpom 插件端
+
+> 目前安装 Jpom 插件端的方式有：一键安装、下载安装、编译打包安装，建议按照自己熟悉的方式来安装
+>
+> 教程中使用一键安装的命令安装插件端
+
+```
+mkdir -p /home/jpom/agent && cd /home/jpom/agent
+# 这里我们选择快速安装 jdk 实际中请根据自己情况选择
+yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
+```
+
+![agent1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/agent1.png)
+![agent2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/agent2.png)
+
+图 2 中圈出来第为插件端的账号密码
+
+
+## 第三步：编译安装 nginx
+
+1. 安装各种依赖
+
+```
+#gcc安装，nginx源码编译需要
+yum install -y gcc-c++
+
+#PCRE pcre-devel 安装，nginx 的 http 模块使用 pcre 来解析正则表达式
+yum install -y pcre pcre-devel
+
+#zlib安装，nginx 使用zlib对http包的内容进行gzip
+yum install -y zlib zlib-devel
+
+#OpenSSL 安装，强大的安全套接字层密码库，nginx 不仅支持 http 协议，还支持 https（即在ssl协议上传输http）
+yum install -y openssl openssl-devel
+```
+
+2. 使用 wget 命令下载
+
+```
+mkdir -p /usr/local/nginx && cd /usr/local/nginx
+#下载版本号可根据目前官网最新稳定版自行调整
+wget -O nginx-1.20.2.tar.gz https://nginx.org/download/nginx-1.20.2.tar.gz
+```
+
+3. 编译 nginx
+
+```
+#根目录使用ls命令可以看到下载的nginx压缩包，然后解压
+tar -zxvf nginx-1.20.2.tar.gz
+
+#解压后进入目录
+cd nginx-1.20.2
+
+#使用默认配置
+./configure
+
+#编译安装
+make
+make install
+```
+
+## 第四步：初始化 Jpom 服务端和插件端
+
+访问：http://IP:2122 这里 ip 请更换为您服务器中第实际 ip
+
+如果无法访问请优先检查 Jpom 访问是否正常运行、服务端防火墙、云服务器的安全组规则等网络原因
+
+### 初始化系统管理员
+
+第一次使用系统需要设置一个系统管理员账号（系统管理员账号密码有强度要求，请安装提示设置。同时也请您牢记系统管理员账号）
+
+![install-user1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install-user1.png)
+![install-user2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/install-user2.png)
+
+### 添加 Jpom 节点
+
+节点列表还没有任何节点，我们需要将我们之前安装等插件端添加到服务端中来
+
+![node-list1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/node-list1.png)
+
+![add-node](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/add-node.png)
+
+![add-node2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/build_node_release/add-node2.png)
+
+图 3 中的节点密码为上面步骤中第四步中安装并启动插件端后控制台输出第账号和密码
+
+## 第五步：在 Jpom 中配置 nginx
+
+1. 配置白名单信息
+   1. ![nginx-config1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-config1.png)
+2. 配置 nginx 服务
+   1. ![edit-nginx-name1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-edit-name1.png)
+   2. ![edit-nginx-name2](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-edit-name2.png)
+   3. 填写的 `/usr/local/nginx/sbin/nginx` 为 nginx 执行文件绝对路径
+3. 启动 nginx 服务
+   1. ![nginx-start1](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/tutorial/images/node_nginx/nginx-start1.png)
+
+注意：
+1. 服务名称请一定填写绝对路径
+2. 如果已经启动的 nginx 再配置服务名称，需要先停止之前启动的服务再由 jpom 中启动，因为 jpom 中使用绝对路径来监控 nginx 状态
+
+## 第六步：愉快地使用 Jpom 在线编辑、管理 nginx
+
+# 说明
+
+- linux 系统中如果使用 yum 安装或者配置了服务，在配置 nginx 服务名称中则配置对应的服务名称，默认为 nginx
+- windows 系统中则需要为 nginx 配置服务才能正常监控 nginx 状态，建议使用 [winsw](https://github.com/winsw/winsw) 来配置
+
+
+# Jpom 链接
+
+官网：`https://jpom.io`
+
+Gitee: `https://gitee.com/dromara/Jpom`
+
+Github: `https://github.com/dromara/Jpom`
+
+常见问题：`https://jpom-site.keepbx.cn/docs/#/FQA/FQA`
+
+ ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_qrcode.jpg)
