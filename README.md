@@ -360,11 +360,21 @@ mvn -f xxxx/pom.xml clean package
 
 ## 📝 常见问题、操作说明
 
-[https://jpom.io/docs/](https://jpom-site.keepbx.cn/docs/)
+### Github Pages
 
-[https://jpom.io/docs/#/FQA/FQA](https://jpom-site.keepbx.cn/docs/#/FQA/FQA)
+> 走 cdn 存在缓存不一定是最新
 
-[名词解释](https://jpom.io/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
+- [文档主页](https://jpom.io/docs/)
+- [FQA](https://jpom.io/docs/#/FQA/FQA)
+- [名词解释](https://jpom.io/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
+
+### Gitee Pages
+
+> 几乎是最新
+
+- [文档主页](https://keepbx.gitee.io/jpom-site/docs/)
+- [FQA](https://keepbx.gitee.io/jpom-site/docs/#/FQA/FQA)
+- [名词解释](https://keepbx.gitee.io/jpom-site/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
 
 ### 实践案例
 
