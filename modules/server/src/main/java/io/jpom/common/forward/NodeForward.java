@@ -231,6 +231,9 @@ public class NodeForward {
             if (cause instanceof java.net.SocketTimeoutException) {
                 return new AgentException(nodeModel.getName() + "节点网络连接超时,请优先检查插件端运行状态再检查节点超时时间配置是否合理,上传文件超时时间配置是否合理。" + message);
             }
+            if (cause instanceof IOException && StrUtil.containsIgnoreCase(message, "Error writing to server")) {
+                return new AgentException(nodeModel.getName() + "节点上传失败,请优先检查限制上传大小配置是否合理。" + message);
+            }
         }
         return new AgentException(nodeModel.getName() + "节点异常：" + message);
     }
