@@ -238,3 +238,11 @@ export function newFileFolder(params) {
     data: params,
   });
 }
+
+export function syncToWorkspace(params) {
+  return axios({
+    url: "/node/ssh/sync-to-workspace",
+    method: "get",
+    params: params,
+  });
+}

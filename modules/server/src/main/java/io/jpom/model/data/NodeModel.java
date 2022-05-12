@@ -99,6 +99,11 @@ public class NodeModel extends BaseGroupModel {
         this.setId(id);
     }
 
+    public NodeModel(String id, String workspaceId) {
+        this.setId(id);
+        this.setWorkspaceId(workspaceId);
+    }
+
     /**
      * 获取 授权的信息
      *

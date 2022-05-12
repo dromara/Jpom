@@ -53,6 +53,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -242,6 +244,49 @@ public class NodeService extends BaseGroupService<NodeModel> {
         super.update(nodeModel1);
     }
 
+    /**
+     * 将节点信息同步到其他工作空间
+     *
+     * @param ids            多给节点ID
+     * @param nowWorkspaceId 当前的工作空间ID
+     * @param workspaceId    同步到哪个工作空间
+     */
+    public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
+        StrUtil.splitTrim(ids, StrUtil.COMMA)
+            .forEach(id -> {
+                NodeModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
+                Assert.notNull(data, "没有对应到节点信息");
+                //
+                NodeModel where = new NodeModel();
+                where.setWorkspaceId(workspaceId);
+                where.setUrl(data.getUrl());
+                NodeModel nodeModel = NodeService.super.queryByBean(where);
+                if (nodeModel == null) {
+                    // 不存在则添加节点
+                    data.setId(null);
+                    data.setWorkspaceId(workspaceId);
+                    data.setCreateTimeMillis(null);
+                    data.setModifyTimeMillis(null);
+                    data.setModifyUser(null);
+                    NodeService.super.insert(data);
+                } else {
+                    // 修改信息
+                    NodeModel update = new NodeModel(nodeModel.getId());
+                    update.setLoginName(data.getLoginName());
+                    update.setLoginPwd(data.getLoginPwd());
+                    update.setProtocol(data.getProtocol());
+                    update.setHttpProxy(data.getHttpProxy());
+                    update.setHttpProxyType(data.getHttpProxyType());
+                    NodeService.super.updateById(update);
+                }
+            });
+    }
+
+    /**
+     * 判断节点是否锁定中
+     *
+     * @param nodeModel 节点
+     */
     private void checkLockType(NodeModel nodeModel) {
         if (nodeModel == null) {
             return;
@@ -304,19 +349,19 @@ public class NodeService extends BaseGroupService<NodeModel> {
      * @param info 节点信息
      */
     private void updateDuplicateNode(NodeModel info) {
-        if (StrUtil.hasEmpty(info.getUrl(), info.getLoginName(), info.getLoginPwd())) {
-            return;
-        }
-        NodeModel update = new NodeModel();
-        update.setLoginName(info.getLoginName());
-        update.setLoginPwd(info.getLoginPwd());
-        //
-        NodeModel where = new NodeModel();
-        where.setUrl(info.getUrl());
-        int updateCount = super.update(super.dataBeanToEntity(update), super.dataBeanToEntity(where));
-        if (updateCount > 1) {
-            DefaultSystemLog.getLog().debug("update duplicate node {} {}", info.getUrl(), updateCount);
-        }
+//        if (StrUtil.hasEmpty(info.getUrl(), info.getLoginName(), info.getLoginPwd())) {
+//            return;
+//        }
+//        NodeModel update = new NodeModel();
+//        update.setLoginName(info.getLoginName());
+//        update.setLoginPwd(info.getLoginPwd());
+//        //
+//        NodeModel where = new NodeModel();
+//        where.setUrl(info.getUrl());
+//        int updateCount = super.update(super.dataBeanToEntity(update), super.dataBeanToEntity(where));
+//        if (updateCount > 1) {
+//            DefaultSystemLog.getLog().debug("update duplicate node {} {}", info.getUrl(), updateCount);
+//        }
     }
 
     /**

@@ -83,10 +83,10 @@
                 <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button size="small" type="primary" @click="handleMonitor(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.status">监控 </a-button>
+                <a-button size="small" type="primary" @click="handleMonitor(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.status">监控 </a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button size="small" type="primary" @click="handleReplica(record)" v-show="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
+                <a-button size="small" type="primary" @click="handleReplica(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
               </a-menu-item>
               <a-menu-item>
                 <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">

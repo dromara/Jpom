@@ -11,7 +11,8 @@
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       @change="changePage"
       bordered
-      :rowKey="(record, index) => index"
+      rowKey="id"
+      :row-selection="rowSelection"
     >
       <template slot="title">
         <a-space>
@@ -22,7 +23,14 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
           <a-tooltip>
             <template slot="title">
               <div>
@@ -58,7 +66,12 @@
               <a-button size="small" type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">安装节点</a-button>
             </a-tooltip>
           </div>
-          <div v-else><a-tag>没有Java环境</a-tag></div>
+          <div v-else>
+            <a-tooltip v-if="sshAgentInfo[record.id].error" :title="sshAgentInfo[record.id].error">
+              <a-tag>连接异常</a-tag>
+            </a-tooltip>
+            <a-tag v-else>没有Java环境</a-tag>
+          </div>
         </div>
         <div v-else>-</div>
       </template>
@@ -309,15 +322,37 @@
         </template>
       </a-table>
     </a-modal>
+    <!-- 同步到其他工作空间 -->
+    <a-modal v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+      <a-alert message="温馨提示" type="warning">
+        <template slot="description">
+          <ul>
+            <li>同步机制采用 IP+PORT+连接方式 确定为是同一个服务器</li>
+            <li>当目标工作空间不存在对应的 SSH 时候将自动创建一个新的 SSH</li>
+            <li>当目标工作空间已经存在 SSH 时候将自动同步 SSH 账号、密码、私钥信息</li>
+          </ul>
+        </template>
+      </a-alert>
+      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item> </a-form-model-item>
+        <a-form-model-item label="选择工作空间" prop="workspaceId">
+          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
+            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import { deleteSsh, editSsh, getSshList, getSshCheckAgent, getSshOperationLogList, installAgentNode, getAgent, uploadAgent } from "@/api/ssh";
+import { deleteSsh, editSsh, getSshList, getSshCheckAgent, getSshOperationLogList, installAgentNode, getAgent, uploadAgent, syncToWorkspace } from "@/api/ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { getWorkSpaceListAll } from "@/api/workspace";
 import Vue from "vue";
+import { mapGetters } from "vuex";
 
 export default {
   components: {
@@ -332,6 +367,9 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       editSshVisible: false,
       nodeVisible: false,
+      syncToWorkspaceVisible: false,
+      tableSelections: [],
+      workspaceList: [],
       tempNode: {},
       fileList: [],
       sshAgentInfo: {},
@@ -397,7 +435,7 @@ export default {
           dataIndex: "nodeId",
           scopedSlots: { customRender: "nodeId" },
           width: 120,
-          // ellipsis: true,
+          ellipsis: true,
         },
         {
           title: "修改时间",
@@ -446,6 +484,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["getWorkspaceId"]),
     viewOperationLogPagination() {
       return {
         total: this.viewOperationLogListQuery.total || 0,
@@ -470,6 +509,14 @@ export default {
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
+      };
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
       };
     },
   },
@@ -730,6 +777,45 @@ export default {
     // 关闭抽屉层
     onClose() {
       this.drawerVisible = false;
+    },
+    // 加载工作空间数据
+    loadWorkSpaceListAll() {
+      getWorkSpaceListAll().then((res) => {
+        if (res.code === 200) {
+          this.workspaceList = res.data;
+        }
+      });
+    },
+    // 同步到其他工作情况
+    syncToWorkspaceShow() {
+      this.syncToWorkspaceVisible = true;
+      this.loadWorkSpaceListAll();
+      this.temp = {
+        workspaceId: undefined,
+      };
+    },
+    //
+    handleSyncToWorkspace() {
+      if (!this.temp.workspaceId) {
+        this.$notification.warn({
+          message: "请选择工作空间",
+        });
+        return false;
+      }
+      // 同步
+      syncToWorkspace({
+        ids: this.tableSelections.join(","),
+        workspaceId: this.temp.workspaceId,
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.tableSelections = [];
+          this.syncToWorkspaceVisible = false;
+          return false;
+        }
+      });
     },
   },
 };
