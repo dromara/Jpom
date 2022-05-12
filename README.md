@@ -35,10 +35,10 @@
 </p>
 
 <p align="center">
-	👉 <a target="_blank" href="https://jpom.io/">https://jpom.io/</a> | <a target="_blank" href="https://demo.jpom.io/">https://demo.jpom.io/</a>👈
+	👉 <a target="_blank" href="https://jpom.io/">https://jpom.io/</a> 👈
 </p>
 <p align="center">
-	备用地址：<a target="_blank" href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a target="_blank" href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
+	备用地址：<a target="_blank" href="https://jpom-docs.keepbx.cn">https://jpom-docs.keepbx.cn</a> | <a target="_blank" href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
 ## 📚 您为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
@@ -116,7 +116,7 @@ yum install -y wget && \
 
 # 备用地址
 yum install -y wget && \
-	wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && \
+	wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/docs/install.sh && \
 	bash install.sh Server
 
 支持自动安装jdk环境
@@ -159,7 +159,7 @@ yum install -y wget && \
 
 # 备用地址
 yum install -y wget && \
-	wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && \
+	wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/docs/install.sh && \
 	bash install.sh Agent
 
 # 支持自动安装jdk环境
@@ -326,9 +326,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 ## 💻 演示项目
 
-[https://demo.jpom.io](https://demo.jpom.io)
-
-[https://jpom.keepbx.cn](https://jpom.keepbx.cn) (备用)
+[https://jpom.keepbx.cn](https://jpom.keepbx.cn)
 
 ```   
 账号：demo
