@@ -435,7 +435,7 @@ io.jpom.system.AgentException: xxx节点异常：Error writing to server
 
 ### 如果限制仅备份指定后缀文件
 
-##### 全局限制
+#### 全局限制
 
 插件端配置（ `extConfig.yml` ）文件中配置`project.fileBackupSuffix`属性
 
@@ -448,7 +448,7 @@ project:
   fileBackupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]
 ```
 
-##### 单个项目限制
+#### 单个项目限制
 
  目前仅支持对 DSL 的单个项目配置限制，配置到 DSL 内容中
 
