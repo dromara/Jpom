@@ -1,7 +1,7 @@
-[submodule "code"]
-	path = code
+[submodule "jpom-parent"]
+	path = jpom-parent
 	url = https://gitee.com/dromara/Jpom.git
-[submodule "docs-path"]
-	path = docs-path
+[submodule "docs"]
+	path = docs
 	url = https://gitee.com/dromara/Jpom.git
 	branch = docs
