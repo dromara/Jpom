@@ -1,6 +1,7 @@
 [submodule "jpom-parent"]
 	path = jpom-parent
 	url = https://gitee.com/dromara/Jpom.git
+	branch = master
 [submodule "docs"]
 	path = docs
 	url = https://gitee.com/dromara/Jpom.git

@@ -42,3 +42,12 @@
 </p>
 
 ### 使用 git submodule 合并管理代码和文档仓库
+
+
+```shell
+git submodule add -b master https://gitee.com/dromara/Jpom.git jpom-parent
+```
+
+```shell
+git submodule add -b docs https://gitee.com/dromara/Jpom.git docs
+```
