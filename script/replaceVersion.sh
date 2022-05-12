@@ -50,10 +50,6 @@ fi
 # 替换所有模块pom.xml中的版本
 cd ../ && mvn versions:set -DnewVersion=$1
 
-# 替换 jpom.io 主页版本号
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/js/version.js
-# 替换远程更新包的版本号
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/versions.json
 # 替换 docker 中的版本
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../.env
 
