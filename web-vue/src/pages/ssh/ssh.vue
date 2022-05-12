@@ -63,7 +63,7 @@
               placement="topLeft"
               :title="`${sshAgentInfo[record.id].pid > 0 ? 'ssh 中已经运行了插件端进程ID：' + sshAgentInfo[record.id].pid : '点击快速安装插件端,java :' + sshAgentInfo[record.id].javaVersion}`"
             >
-              <a-button size="small" type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">安装节点</a-button>
+              <a-button size="small" type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">{{ sshAgentInfo[record.id].pid > 0 ? "运行中" : "安装节点" }}</a-button>
             </a-tooltip>
           </div>
           <div v-else>
