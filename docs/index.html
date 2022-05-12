@@ -1,72 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <meta name="description" content="Jpom-项目管理系统,一款简而轻的低侵入式Java运维、监控软件"/>
-    <meta name="keywords" content="Jpom,Java项目管理,Jar管理,Java管理系统,服务器项目运维"/>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+	<meta name="description" content="Jpom-项目管理系统,一款简而轻的低侵入式Java运维、监控软件"/>
+	<meta name="keywords" content="Jpom,Java项目管理,Jar管理,Java管理系统,服务器项目运维"/>
 
-    <!-- QQ分享卡片信息 -->
-    <meta itemprop="name" content="Jpom-项目管理系统"/>
-    <meta itemprop="description" content="一款简而轻的低侵入式Java运维、监控软件。"/>
-    <meta itemprop="image" content="//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/logo_small.jpg"/>
-    <!--    -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Jpom 项目管理系统文档">
-    <meta property="og:url" content="https://jpom.io/docs">
-    <meta property="og:site_name" content="Jpom 文档">
-    <meta property="og:description" content="Jpom-项目管理系统,一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
+	<!-- QQ分享卡片信息 -->
+	<meta itemprop="name" content="Jpom-项目管理系统"/>
+	<meta itemprop="description" content="一款简而轻的低侵入式Java运维、监控软件。"/>
+	<meta itemprop="image" content="//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/logo_small.jpg"/>
+	<!--    -->
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="Jpom 项目管理系统文档">
+	<meta property="og:url" content="https://jpom.io/docs">
+	<meta property="og:site_name" content="Jpom 文档">
+	<meta property="og:description" content="Jpom-项目管理系统,一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
 
-    <title>Jpom-项目管理系统文档</title>
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>Jpom-项目管理系统文档</title>
+	<meta name="viewport"
+		  content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 
-    <link rel="shortcut icon" href="//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/favicon.ico">
-    <link rel="icon" href="//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/favicon.ico">
+	<link rel="icon" href="//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/favicon.ico" type="image/x-icon">
 
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css">
-    <!-- 百度统计 -->
-    <script>
-        var _hmt = _hmt || [];
-        (function () {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?1acbde0eb1cc4225dcfe6d1143767a3d";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css">
+	<!-- 百度统计 -->
+	<script>
+		var _hmt = _hmt || [];
+		(function () {
+			var hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?1acbde0eb1cc4225dcfe6d1143767a3d";
+			var s = document.getElementsByTagName("script")[0];
+			s.parentNode.insertBefore(hm, s);
+		})();
+	</script>
 </head>
 <body>
 <div id="app"></div>
 <script>
-    window.$docsify = {
-        name: 'Jpom',
-        logo: '//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/logo_small.jpg',
-        repo: 'https://gitee.com/dromara/Jpom',
-        homepage: 'https://cdn.jsdelivr.net/gh/dromara/Jpom/README.md',
-        basePath: 'https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/',
-        alias: {
-            '/.*/catalog.md': 'https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/catalog.md',
-            '.*?/CHANGELOG': 'https://cdn.jsdelivr.net/gh/dromara/Jpom/CHANGELOG.md',
-            '.*?/PLANS': 'https://cdn.jsdelivr.net/gh/dromara/Jpom/PLANS.md',
-            '.*?/praise': 'https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/praise/praise.md',
-            '.*?/README': 'https://cdn.jsdelivr.net/gh/dromara/Jpom/README.md',
-        },
-        subMaxLevel: 2,
-        // loadNavbar: true,
-        loadSidebar: 'catalog.md',
-        //自动显示标题
-        autoHeader: true,
-        //自动跳转到页面顶部
-        auto2top: true,
-        //小屏设备下合并导航栏到侧边栏
-        mergeNavbar: true,
-        //搜索插件
-        search: {
-            placeholder: '搜索',
-            noData: '没有结果！',
-        }
-    }
+	var hostConfigJson = {
+		'keepbx.gitee.io': 'https://keepbx.gitee.io/jpom-site/',
+		'cdn': 'https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/'
+	}
+	var useHostUrl = hostConfigJson[location.host] || hostConfigJson.cdn;
+	window.$docsify = {
+		name: 'Jpom',
+		logo: '//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/logo_small.jpg',
+		repo: 'https://gitee.com/dromara/Jpom',
+		homepage: 'https://cdn.jsdelivr.net/gh/dromara/Jpom/README.md',
+		basePath: useHostUrl + 'docs/',
+		alias: {
+			'/.*/catalog.md': useHostUrl + 'docs/catalog.md',
+			'.*?/CHANGELOG': 'https://cdn.jsdelivr.net/gh/dromara/Jpom/CHANGELOG.md',
+			'.*?/PLANS': 'https://cdn.jsdelivr.net/gh/dromara/Jpom/PLANS.md',
+			'.*?/praise': 'https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/praise/praise.md',
+			'.*?/README': 'https://cdn.jsdelivr.net/gh/dromara/Jpom/README.md',
+		},
+		subMaxLevel: 2,
+		// loadNavbar: true,
+		loadSidebar: 'catalog.md',
+		//自动显示标题
+		autoHeader: true,
+		//自动跳转到页面顶部
+		auto2top: true,
+		//小屏设备下合并导航栏到侧边栏
+		mergeNavbar: true,
+		//搜索插件
+		search: {
+			placeholder: '搜索',
+			noData: '没有结果！',
+		}
+	}
 </script>
 <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
 <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
@@ -74,17 +79,17 @@
 <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/emoji.min.js"></script>
 <script src="//cdn.jsdelivr.net/npm/docsify-copy-code"></script>
 <script>
-    (function () {
-        var bp = document.createElement('script');
-        var curProtocol = window.location.protocol.split(':')[0];
-        if (curProtocol === 'https') {
-            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
-        } else {
-            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-        }
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(bp, s);
-    })();
+	(function () {
+		var bp = document.createElement('script');
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+			bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		} else {
+			bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	})();
 </script>
 </body>
 </html>
