@@ -39,7 +39,7 @@ import java.util.Map;
 
 /**
  * @author bwcx_jzy
- * @date 2021/3/17
+ * @since 2021/3/17
  * @see org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
  */
 public abstract class BaseMyErrorController extends AbstractErrorController {

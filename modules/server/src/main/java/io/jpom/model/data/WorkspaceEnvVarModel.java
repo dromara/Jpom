@@ -31,7 +31,7 @@ import lombok.EqualsAndHashCode;
  * 工作空间环境变量
  *
  * @author bwcx_jzy
- * @date 2021/12/10
+ * @since 2021/12/10
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "WORKSPACE_ENV_VAR", name = "工作空间环境变量")

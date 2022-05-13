@@ -24,6 +24,7 @@ package io.jpom.common.forward;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IORuntimeException;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
@@ -60,7 +61,7 @@ import java.util.Set;
  * 节点请求转发
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 public class NodeForward {
 
@@ -125,15 +126,13 @@ public class NodeForward {
 
         httpRequest.body(jsonData.toString(), ContentType.JSON.getValue());
 
-        HttpResponse response;
-        try {
-            response = httpRequest
-                .execute();
+        try (HttpResponse response = httpRequest.execute()) {
+            //
+            return parseBody(response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        //
-        return parseBody(response, nodeModel);
+
     }
 
     /**
@@ -199,16 +198,13 @@ public class NodeForward {
             }
             httpRequest.form(clone);
         }
-        HttpResponse response;
-        try {
-            response = httpRequest
-                .form(params)
-                .execute();
+        httpRequest.form(params);
+        try (HttpResponse response = httpRequest.execute()) {
+            //
+            return parseBody(response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        //
-        return parseBody(response, nodeModel);
     }
 
     /**
@@ -274,17 +270,13 @@ public class NodeForward {
         }
         //
         addUser(httpRequest, nodeModel, nodeUrl);
-        HttpResponse response;
-        try {
+        try (HttpResponse response = httpRequest.execute();) {
             //
-            response = httpRequest
-                .execute();
+            JsonMessage<T> jsonMessage = parseBody(response, nodeModel);
+            return jsonMessage.getData(tClass);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        //
-        JsonMessage<T> jsonMessage = parseBody(response, nodeModel);
-        return jsonMessage.getData(tClass);
     }
 
 
@@ -313,15 +305,14 @@ public class NodeForward {
                 DefaultSystemLog.getLog().error("转发文件异常", e);
             }
         });
-        HttpResponse response;
-        try {
-            // @author jzy add  timeout
-            httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
-            response = httpRequest.execute();
+        // @author jzy add  timeout
+        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+        try (HttpResponse response = httpRequest.execute()) {
+            return parseBody(response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        return parseBody(response, nodeModel);
+
     }
 
     /**
@@ -339,15 +330,14 @@ public class NodeForward {
         addUser(httpRequest, nodeModel, nodeUrl);
         //
         httpRequest.form(fileName, file);
-        HttpResponse response;
-        try {
-            // @author jzy add  timeout
-            httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
-            response = httpRequest.execute();
+        // @author jzy add  timeout
+        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+        try (HttpResponse response = httpRequest.execute()) {
+            return parseBody(response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        return parseBody(response, nodeModel);
+
     }
 
     /**
@@ -366,14 +356,16 @@ public class NodeForward {
         //
         Map params = ServletUtil.getParams(request);
         httpRequest.form(params);
+        // @author jzy add  timeout
+        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
         //
-        HttpResponse response1;
+        HttpResponse response1 = null;
         try {
-            // @author jzy add  timeout
-            httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
             response1 = httpRequest.execute();
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
+        } finally {
+            IoUtil.close(response1);
         }
         String contentDisposition = response1.header("Content-Disposition");
         response.setHeader("Content-Disposition", contentDisposition);

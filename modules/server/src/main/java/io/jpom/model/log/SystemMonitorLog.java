@@ -29,7 +29,7 @@ import io.jpom.service.h2db.TableName;
  * 系统监控记录
  *
  * @author Arno
- * @date 2019/9/16
+ * @since 2019/9/16
  */
 @TableName(value = "SYSTEMMONITORLOG", name = "节点监控记录")
 public class SystemMonitorLog extends BaseDbModel {

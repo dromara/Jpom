@@ -42,7 +42,7 @@ import java.util.List;
  * 管理的信息获取接口
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 @RestController
 @RequestMapping(value = "/manage/")

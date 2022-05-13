@@ -39,7 +39,7 @@ import io.jpom.system.ServerExtConfigBean;
  * jwt 工具类
  *
  * @author bwcx_jzy
- * @date 2020/7/25
+ * @since 2020/7/25
  */
 public class JwtUtil {
 

@@ -31,7 +31,7 @@ import java.nio.file.WatchEvent;
 
 /**
  * @author bwcx_jzy
- * @date 2019/8/26
+ * @since 2019/8/26
  */
 public class TestFileModify {
     public static void main(String[] args) {

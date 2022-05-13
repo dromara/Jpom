@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  * 分发线程
  *
  * @author bwcx_jzy
- * @date 2019/7/18
+ * @since 2019/7/18
  **/
 public class OutGivingRun {
 

@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
  * 监控消息
  *
  * @author bwcx_jzy
- * @date 2019/7/20
+ * @since 2019/7/20
  */
 @Service
 public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotifyLog> {

@@ -30,7 +30,7 @@ import io.jpom.model.BaseJsonModel;
  * 节点项目
  *
  * @author jiangzeyin
- * @date 2019/4/22
+ * @since 2019/4/22
  */
 public class OutGivingNodeProject extends BaseJsonModel {
 

@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
  * 自动注册server 节点
  *
  * @author bwcx_jzy
- * @date 2019/8/6
+ * @since 2019/8/6
  */
 @PreLoadClass
 public class AutoRegSeverNode {

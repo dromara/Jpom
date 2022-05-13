@@ -41,7 +41,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * @author bwcx_jzy
- * @date 2019/7/21
+ * @since 2019/7/21
  */
 public class FileTailWatcherRun implements Runnable {
     /**

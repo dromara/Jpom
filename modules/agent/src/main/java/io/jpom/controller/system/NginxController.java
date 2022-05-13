@@ -61,7 +61,7 @@ import java.util.List;
  * nginx 列表
  *
  * @author jiangzeyin
- * @date 2019/4/17
+ * @since 2019/4/17
  */
 @RestController
 @RequestMapping("/system/nginx")

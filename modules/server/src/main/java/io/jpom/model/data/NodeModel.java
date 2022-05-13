@@ -42,7 +42,7 @@ import java.util.List;
  * 节点实体
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "NODE_INFO", name = "节点信息")

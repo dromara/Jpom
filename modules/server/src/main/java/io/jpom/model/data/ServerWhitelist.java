@@ -32,7 +32,7 @@ import java.util.Set;
  * 节点分发白名单
  *
  * @author jiangzeyin
- * @date 2019/4/22
+ * @since 2019/4/22
  */
 public class ServerWhitelist extends BaseJsonModel {
 

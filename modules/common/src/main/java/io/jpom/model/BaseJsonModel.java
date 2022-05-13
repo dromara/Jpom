@@ -31,7 +31,7 @@ import java.io.Serializable;
  * json方法基础类
  *
  * @author jiangzeyin
- * @date 2019/4/10
+ * @since 2019/4/10
  */
 public abstract class BaseJsonModel implements Serializable {
 

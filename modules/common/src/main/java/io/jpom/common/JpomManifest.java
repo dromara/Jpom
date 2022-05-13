@@ -69,7 +69,7 @@ import java.util.zip.ZipFile;
  * Jpom 的运行信息
  *
  * @author jiangzeyin
- * @date 2019/4/7
+ * @since 2019/4/7
  */
 public class JpomManifest {
 

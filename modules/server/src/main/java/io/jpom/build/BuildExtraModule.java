@@ -37,7 +37,7 @@ import lombok.EqualsAndHashCode;
  * 构建物基类
  *
  * @author bwcx_jzy
- * @date 2019/7/19
+ * @since 2019/7/19
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

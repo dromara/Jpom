@@ -38,7 +38,7 @@ import java.util.Set;
  * 文件跟随器工具
  *
  * @author bwcx_jzy
- * @date 2019/7/21
+ * @since 2019/7/21
  */
 public abstract class BaseFileTailWatcher<T> {
 

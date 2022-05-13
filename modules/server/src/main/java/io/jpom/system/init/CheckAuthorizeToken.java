@@ -34,7 +34,7 @@ import io.jpom.util.CheckPassword;
  * 验证token 合法性
  *
  * @author bwcx_jzy
- * @date 2019/8/5
+ * @since 2019/8/5
  */
 @PreLoadClass
 public class CheckAuthorizeToken {

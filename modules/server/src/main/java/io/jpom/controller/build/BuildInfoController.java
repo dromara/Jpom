@@ -72,7 +72,7 @@ import java.util.Objects;
  * 以前的数据会在程序启动时插入到数据库中
  *
  * @author Hotstrip
- * @date 2021-08-09
+ * @since 2021-08-09
  */
 @RestController
 @Feature(cls = ClassFeature.BUILD)

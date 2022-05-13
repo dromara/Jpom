@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  * 数据库基础操作 通用 service
  *
  * @author bwcx_jzy
- * @date 2019/7/20
+ * @since 2019/7/20
  */
 @Slf4j
 public abstract class BaseDbCommonService<T> {

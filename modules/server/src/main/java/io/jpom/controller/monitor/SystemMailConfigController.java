@@ -47,7 +47,7 @@ import java.util.Map;
  * 监控邮箱配置
  *
  * @author bwcx_jzy
- * @date 2019/7/16
+ * @since 2019/7/16
  */
 @RestController
 @RequestMapping(value = "system")

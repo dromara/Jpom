@@ -28,7 +28,7 @@ import cn.jiangzeyin.common.JsonMessage;
  * 授权错误
  *
  * @author jiangzeyin
- * @date 2019/4/17
+ * @since 2019/4/17
  */
 public class AuthorizeException extends RuntimeException {
 	private final JsonMessage<?> jsonMessage;

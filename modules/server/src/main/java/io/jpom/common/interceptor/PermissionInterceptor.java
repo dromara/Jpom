@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServletResponse;
  * 权限拦截器
  *
  * @author jiangzeyin
- * @date 2019/03/16.
+ * @since 2019/03/16.
  */
 @InterceptorPattens(sort = 1)
 public class PermissionInterceptor extends BaseJpomInterceptor {

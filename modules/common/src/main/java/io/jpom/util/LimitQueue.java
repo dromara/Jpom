@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * 定长队列
  *
  * @author jiangzeyin
- * @date 2019/3/16
+ * @since 2019/3/16
  */
 public class LimitQueue<E> extends ConcurrentLinkedDeque<E> {
     private final int limit;

@@ -29,7 +29,7 @@ import io.jpom.service.h2db.TableName;
  * 脚本模版实体
  *
  * @author bwcx_jzy
- * @date 2021/12/12
+ * @since 2021/12/12
  **/
 @TableName(value = "SCRIPT_INFO", name = "节点脚本模版")
 public class ScriptCacheModel extends BaseNodeModel {
