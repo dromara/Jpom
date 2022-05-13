@@ -392,7 +392,7 @@ mvn -f xxxx/pom.xml clean package
 ## 🐞 交流讨论 、提供bug反馈或建议
 
 1. 微信群二维码（添加小助手：备注Jpom 进群）
-2. 微信赞赏 [赞赏记录](./docs/praise/praise.md)
+2. 微信赞赏 [赞赏记录](../docs/docs/praise/praise.md)
 3. [码云赞赏： 在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
 4. 微信公众号：[CodeGzh](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 5. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
