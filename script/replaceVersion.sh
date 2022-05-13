@@ -34,7 +34,7 @@ echo "当前路径：${pwd}"
 
 if [ -n "$1" ];then
     new_version="$1"
-    old_version=`cat ${pwd}/../docs/version.txt`
+    old_version=`cat ${pwd}/../docs/versions.tag`
     echo "$old_version 替换为新版本 $new_version"
 else
     # 参数错误，退出
@@ -43,7 +43,7 @@ else
 fi
 
 if [ ! -n "$old_version" ]; then
-    echo "ERROR: 旧版本不存在，请确认 /docs/version.txt 中信息正确"
+    echo "ERROR: 旧版本不存在，请确认 /docs/versions.tag 中信息正确"
     exit
 fi
 
@@ -55,4 +55,4 @@ sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/release-versions.jso
 
 
 # 保留新版本号
-echo "$new_version" > $pwd/../docs/version.txt
+echo "$new_version" > $pwd/../docs/versions.tag

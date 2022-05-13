@@ -137,8 +137,12 @@ fi
 echo "开始安装：${JPOM_TYPE}"
 # 判断是否在文件
 if [[ ! -f "${JPOM_TYPE}.zip" ]]; then
-  # 下载
-  wget -O ${JPOM_TYPE}.zip https://1232788122276831.cn-beijing.fc.aliyuncs.com/2016-08-15/proxy/jpom/jpom-releases/?type=${JPOM_TYPE}
+  # 转小写
+  url_type=`echo ${JPOM_TYPE} | tr 'A-Z' 'a-z'`
+  # 获取最新的版本号
+  versions=`curl -LfsS https://jpom-docs.keepbx.cn/docs/versions.tag`
+  download_url="https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/${url_type}-${versions}-release.zip"
+  wget -O ${JPOM_TYPE}.zip ${download_url}
 fi
 # 解压
 unzip -o ${JPOM_TYPE}.zip
