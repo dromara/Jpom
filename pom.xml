@@ -11,6 +11,10 @@
     <modules>
         <module>jpom-parent</module>
     </modules>
+    <name>Jpom (Java Project Online Manage) Package</name>
+    <description>
+        简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
+    </description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
