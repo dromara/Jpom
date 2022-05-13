@@ -365,7 +365,7 @@ export default {
     handleEdit(record) {
       workspaceList(record.id).then((res) => {
         this.createOption = false;
-        this.temp = Object.assign(record);
+        this.temp = Object.assign({}, record);
         // 设置选中 key
         this.targetKeys = [];
         res.data.forEach((element) => {

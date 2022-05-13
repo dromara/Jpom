@@ -94,7 +94,7 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.editJdkVisible = true;
     },
     // 提交 JDK 数据

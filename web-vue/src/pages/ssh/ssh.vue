@@ -595,12 +595,12 @@ export default {
     },
     // 进入终端
     handleTerminal(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.terminalVisible = true;
     },
     // 操作日志
     handleViewLog(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.viewOperationLogListQuery.sshId = this.temp.id;
       this.viewOperationLog = true;
       this.viewOperationLogList = [];
@@ -638,7 +638,7 @@ export default {
     },
     // 文件管理
     handleFile(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `${this.temp.name} (${this.temp.host}) 文件管理`;
       this.drawerVisible = true;
     },
@@ -675,7 +675,7 @@ export default {
     // 安装节点
     install(record) {
       this.getAgentFn().then(() => {
-        this.temp = Object.assign(record);
+        this.temp = Object.assign({}, record);
         this.tempNode = {
           url: `${this.temp.host}:2123`,
           protocol: "http",

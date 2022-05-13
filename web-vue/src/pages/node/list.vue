@@ -679,12 +679,12 @@ export default {
     },
     // 进入终端
     handleTerminal(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.terminalVisible = true;
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.loadSshList();
       // this.temp.tempGroup = "";
       this.editNodeVisible = true;

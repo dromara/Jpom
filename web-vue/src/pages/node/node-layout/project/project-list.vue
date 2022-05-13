@@ -654,7 +654,7 @@ export default {
     // 文件管理
     handleFile(record) {
       this.checkRecord = record;
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `文件管理(${this.temp.name})`;
       this.drawerFileVisible = true;
     },
@@ -665,7 +665,7 @@ export default {
     // 控制台
     handleConsole(record) {
       this.checkRecord = record;
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `控制台(${this.temp.name})`;
       this.drawerConsoleVisible = true;
     },
@@ -676,7 +676,7 @@ export default {
     },
     // 监控
     handleMonitor(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `监控(${this.temp.name})`;
       this.drawerMonitorVisible = true;
     },
@@ -686,7 +686,7 @@ export default {
     },
     // 副本集
     handleReplica(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `副本集(${this.temp.name})`;
       this.drawerReplicaVisible = true;
     },

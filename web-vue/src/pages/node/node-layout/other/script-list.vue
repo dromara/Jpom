@@ -184,7 +184,7 @@ export default {
         id: record.scriptId,
         nodeId: this.node.id,
       }).then((res) => {
-        this.temp = Object.assign(res.data);
+        this.temp = Object.assign({}, res.data);
         //
         this.editScriptVisible = true;
       });
@@ -244,7 +244,7 @@ export default {
     },
     // 执行 Script
     handleExec(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `控制台(${this.temp.name})`;
       this.drawerConsoleVisible = true;
     },
@@ -254,7 +254,7 @@ export default {
     },
     // 准备上传文件
     handleUpload(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.uploadFileVisible = true;
     },
     handleRemove(file) {

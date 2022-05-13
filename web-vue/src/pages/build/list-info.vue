@@ -1260,7 +1260,7 @@ export default {
     },
     // 触发器
     handleTrigger(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.tempVue = Vue;
       getTriggerUrl(record.id).then((res) => {
         if (res.code === 200) {
@@ -1310,7 +1310,7 @@ export default {
     },
     // 开始构建
     handleConfirmStartBuild(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.buildConfirmVisible = true;
       this.branchList = [];
       this.branchTagList = [];
@@ -1353,7 +1353,7 @@ export default {
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
-          this.temp = Object.assign(record);
+          this.temp = Object.assign({}, record);
           stopBuild(this.temp.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({

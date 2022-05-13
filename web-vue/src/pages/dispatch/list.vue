@@ -1125,7 +1125,7 @@ export default {
     },
     // 文件管理
     handleFile(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `文件管理(${this.temp.projectId})`;
       this.drawerFileVisible = true;
     },
@@ -1135,7 +1135,7 @@ export default {
     },
     // 控制台
     handleConsole(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `控制台(${this.temp.projectId})`;
       this.drawerConsoleVisible = true;
     },

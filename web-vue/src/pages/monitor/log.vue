@@ -161,7 +161,7 @@ export default {
     handleDetail(record) {
       this.detailData = [];
       this.detailVisible = true;
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.detailData.push({ title: "标题", description: this.temp.title });
       this.detailData.push({ title: "内容", description: this.temp.content });
       this.detailData.push({ title: "通知对象", description: this.temp.notifyObject });

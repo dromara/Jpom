@@ -201,7 +201,7 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.editTomcatVisible = true;
     },
     // 提交 Tomcat 数据
@@ -273,7 +273,7 @@ export default {
     },
     // 查看日志
     handleLog(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `Tomcat 日志(${this.temp.name})`;
       this.drawerLogVisible = true;
     },
@@ -398,7 +398,7 @@ export default {
     },
     // 上传 WAR 文件
     handleUploadWar(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.uploadFileVisible = true;
     },
     handleRemove(file) {
