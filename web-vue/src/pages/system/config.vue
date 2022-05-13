@@ -29,7 +29,7 @@
         style="margin-top: 10px"
         banner
       />
-      <a-alert message="如果配置错误需要重新服务端并添加命令行参数 --rest:ip_config 将恢复默认配置" style="margin-top: 10px" banner />
+      <a-alert message="如果配置错误需要重启服务端并添加命令行参数 --rest:ip_config 将恢复默认配置" style="margin-top: 10px" banner />
       <a-form-model style="margin-top: 10px" ref="editIpConfigForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item prop="content">
           <template slot="label">
