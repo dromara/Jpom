@@ -353,7 +353,7 @@ export default {
     },
     // 编辑
     handleEdit(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       const params = {
         id: this.ssh.id,
         path: record.path,
@@ -385,7 +385,7 @@ export default {
     },
     // 查看
     handlePreview(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.terminalVisible = true;
     },
     // 下载

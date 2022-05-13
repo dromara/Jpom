@@ -242,7 +242,7 @@ export default {
     // 修改
     handleEdit(record) {
       this.loadUserList();
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.temp = {
         ...this.temp,
         start: this.temp.status,

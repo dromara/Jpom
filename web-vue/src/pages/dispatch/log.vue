@@ -166,7 +166,7 @@ export default {
     handleDetail(record) {
       this.detailData = [];
       this.detailVisible = true;
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.detailData.push({ title: "分发结果", description: this.temp.result });
     },
     // 分页、排序、筛选变化时触发

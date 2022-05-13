@@ -194,7 +194,7 @@ export default {
     handleDetail(record) {
       this.detailData = [];
       this.detailVisible = true;
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       try {
         this.temp.reqData = JSON.parse(this.temp.reqData);
       } catch (e) {

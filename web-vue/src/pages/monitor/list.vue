@@ -314,7 +314,7 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.temp.projectsTemp = JSON.parse(this.temp.projects);
       this.targetKeys = [];
       this.loadUserList(() => {
