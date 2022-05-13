@@ -492,10 +492,6 @@ project:
 >修改插件端外部配置文件`extConfig.yml`中的 jpom.authorize.agentName 和 jpom.authorize.agentPwd 属性
 
 
-# 开发计划
-
-[开发计划](https://cdn.jsdelivr.net/gh/dromara/Jpom/PLANS.md)
-
 ### 常见问题未知问题
 
 https://github.com/alibaba/arthas/issues/347
