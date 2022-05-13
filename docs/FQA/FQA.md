@@ -492,12 +492,12 @@ project:
 >修改插件端外部配置文件`extConfig.yml`中的 jpom.authorize.agentName 和 jpom.authorize.agentPwd 属性
 
 
-### 常见问题未知问题
+# 常见问题未知问题
 
 https://github.com/alibaba/arthas/issues/347
 
 https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4770092
 
-### windows 环境项目在运行中不能删除文件
+# windows 环境项目在运行中不能删除文件
 
 > 由于系统原因，暂时还没有找到解决办法
