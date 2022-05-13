@@ -51,6 +51,7 @@ fi
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/js/version.js
 # 替换远程更新包的版本号
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/versions.json
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/release-versions.json
 
 
 # 保留新版本号
