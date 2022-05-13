@@ -108,6 +108,6 @@ Gitee: `https://gitee.com/dromara/Jpom`
 
 Github: `https://github.com/dromara/Jpom`
 
-常见问题：`https://jpom-site.keepbx.cn/docs/#/FQA/FQA`
+常见问题：`https://jpom-docs.keepbx.cn/docs/#/FQA/FQA`
 
  ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/wx_qrcode.jpg)

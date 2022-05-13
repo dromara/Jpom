@@ -30,7 +30,7 @@
 
 </p>
 <p align="center">
-	<a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
+	<a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://jpom-docs.keepbx.cn/">https://jpom-docs.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
 # [https://gitee.com/dromara/Jpom](https://gitee.com/dromara/Jpom)

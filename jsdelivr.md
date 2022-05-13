@@ -1,10 +1,12 @@
 
-https://www.jsdelivr.com/package/gh/jiangzeyin/Jpom-site
+https://www.jsdelivr.com/package/gh/dromara/Jpom
 
-[![](https://data.jsdelivr.com/v1/package/gh/jiangzeyin/Jpom-site/badge)](https://www.jsdelivr.com/package/gh/jiangzeyin/Jpom-site)
+[![](https://data.jsdelivr.com/v1/package/gh/dromara/Jpom/badge)](https://www.jsdelivr.com/package/gh/dromara/Jpom)
 
 https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/
 
-https://purge.jsdelivr.net/gh/jiangzeyin/Jpom-site/
+https://cdn.jsdelivr.net/gh/dromara/Jpom@docs
+
+https://purge.jsdelivr.net/gh/dromara/Jpom/
 
 
