@@ -275,7 +275,7 @@ docker-compose up
 6. 启动开发模式 控制台执行 `npm run serve`
 7. 根据控制台输出的地址访问前端页面 例如`http://127.0.0.1:3000/`
 
-### 管理命令
+## 管理命令
 
 1. windows 中 Agent.bat 、Server.bat
 
@@ -307,7 +307,7 @@ Agent.sh status    查看Jpom插件端运行状态
 Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 ```
 
-### linux 服务方式管理
+## linux 服务方式管理
 
 > 这里安装服务仅供参考，实际中可以根据需求自定义配置
 
@@ -317,7 +317,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 >
 > service jpom-agent {status | start | stop}
 
-### ⚙️ Jpom 的参数配置
+## ⚙️ Jpom 的参数配置
 
 在项目运行的根路径下的`extConfig.yml`文件
 
