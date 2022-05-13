@@ -360,13 +360,13 @@ mvn -f xxxx/pom.xml clean package
 
 ## 📝 常见问题、操作说明
 
-### Github Pages (走 cdn 存在缓存不一定是最新)
+### Github Pages
 
 - [文档主页](https://jpom.io/docs/)
 - [FQA](https://jpom.io/docs/#/FQA/FQA)
 - [名词解释](https://jpom.io/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
 
-### Gitee Pages ( 缓存时间短、几乎是最新 )
+### Gitee Pages
 
 - [文档主页](https://jpom-docs.keepbx.cn/docs/)
 - [FQA](https://jpom-docs.keepbx.cn/docs/#/FQA/FQA)
