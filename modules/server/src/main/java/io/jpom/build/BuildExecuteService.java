@@ -756,10 +756,10 @@ public class BuildExecuteService {
             final boolean[] status = new boolean[1];
             processBuilder.redirectErrorStream(true);
             Map<String, String> environment = processBuilder.environment();
+            environment.putAll(taskData.env);
             // env file
             File envFile = FileUtil.file(this.gitFile, ".env");
             Map<String, String> envFileMap = FileUtils.readEnvFile(envFile);
-            environment.putAll(taskData.env);
             //
             envFileMap.put("BUILD_ID", this.buildExtraModule.getId());
             envFileMap.put("BUILD_NAME", this.buildExtraModule.getName());
