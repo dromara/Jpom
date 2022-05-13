@@ -210,7 +210,7 @@ docker run -d -p 2122:2122 \
 >
 > 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档[https://jpom.io/docs/](https://jpom.io/docs/)
 
-### 下载安装
+## 下载安装
 
 > [帮助文档](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装)
 
@@ -227,7 +227,7 @@ docker run -d -p 2122:2122 \
     3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
-### 编译安装
+## 编译安装
 
 > [帮助文档](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装)
 
@@ -248,7 +248,7 @@ docker run -d -p 2122:2122 \
 
 > 也可以使用 `script/release.bat` `script/release.sh` 快速打包
 
-### 一键启动 docker-compose
+## 一键启动 docker-compose
 
 - 无需安装任何环境,自动编译构建
 
@@ -260,7 +260,7 @@ cd Jpom
 docker-compose up
 ```
 
-### 编译运行
+## 编译运行
 
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
 2. 运行插件端
