@@ -199,7 +199,8 @@ public class BuildInfoController extends BaseServerController {
             Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
         }
         try {
-            FileUtil.checkSlip(FileUtil.getUserHomeDir(), FileUtil.file(resultDirFile));
+            File userHomeDir = FileUtil.getUserHomeDir();
+            FileUtil.checkSlip(userHomeDir, FileUtil.file(userHomeDir, resultDirFile));
         } catch (Exception e) {
             return JsonMessage.getString(405, "产物目录不能越级：" + e.getMessage());
         }
