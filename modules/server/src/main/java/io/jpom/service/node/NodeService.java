@@ -268,6 +268,8 @@ public class NodeService extends BaseGroupService<NodeModel> {
                     data.setCreateTimeMillis(null);
                     data.setModifyTimeMillis(null);
                     data.setModifyUser(null);
+                    // ssh 不同步
+                    data.setSshId(null);
                     NodeService.super.insert(data);
                 } else {
                     // 修改信息
