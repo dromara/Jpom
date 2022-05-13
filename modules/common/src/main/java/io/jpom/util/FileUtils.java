@@ -28,6 +28,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
@@ -194,6 +195,7 @@ public class FileUtils {
      * @return map
      */
     public static Map<String, String> readEnvFile(File envFile) {
+        HashMap<String, String> map = MapUtil.newHashMap(10);
         if (FileUtil.isFile(envFile)) {
             List<String> list = FileUtil.readLines(envFile, CharsetUtil.CHARSET_UTF_8);
             List<Tuple> collect = list.stream()
@@ -206,8 +208,10 @@ public class FileUtils {
                     }
                     return new Tuple(list1.get(0), list1.get(1));
                 }).filter(Objects::nonNull).collect(Collectors.toList());
-            return CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
+            Map<String, String> envMap = CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
+            // java.lang.UnsupportedOperationException
+            map.putAll(envMap);
         }
-        return new HashMap<>();
+        return map;
     }
 }
