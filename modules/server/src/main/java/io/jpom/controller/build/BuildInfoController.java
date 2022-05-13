@@ -198,6 +198,11 @@ public class BuildInfoController extends BaseServerController {
         if (StrUtil.isNotEmpty(webhook)) {
             Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
         }
+        try {
+            FileUtil.checkSlip(FileUtil.getUserHomeDir(), FileUtil.file(resultDirFile));
+        } catch (Exception e) {
+            return JsonMessage.getString(405, "产物目录不能越级：" + e.getMessage());
+        }
         buildInfoModel.setAutoBuildCron(this.checkCron(autoBuildCron));
         buildInfoModel.setWebhook(webhook);
         buildInfoModel.setRepositoryId(repositoryId);
@@ -377,7 +382,7 @@ public class BuildInfoController extends BaseServerController {
     @RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public String branchList(
-            @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空")) String repositoryId) throws Exception {
+        @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空")) String repositoryId) throws Exception {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, false);
         Assert.notNull(repositoryModel, "无效的仓库信息");
