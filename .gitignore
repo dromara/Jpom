@@ -1,0 +1,48 @@
+# Created by .ignore support plugin (hsz.mobi)
+target/
+.idea/
+*.iml
+venv/
+node_modules/
+
+#
+apidoc/
+
+
+# dependencies
+**/node_modules
+# roadhog-api-doc ignore
+/src/utils/request-temp.js
+_roadhog-api-doc
+
+# production
+dist/
+/.vscode
+
+# misc
+.DS_Store
+npm-debug.log*
+yarn-error.log
+
+/coverage
+.idea
+yarn.lock
+package-lock.json
+*bak
+pom.xml.versionsBackup
+.vscode
+
+# visual studio code
+.history
+*.log
+functions/*
+.temp/**
+
+# umi
+.umi
+.umi-production
+
+# screenshot
+screenshot
+.firebase
+.eslintcache
