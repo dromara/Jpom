@@ -52,7 +52,7 @@ import java.nio.charset.StandardCharsets;
  * 系统配置
  *
  * @author bwcx_jzy
- * @date 2019/08/08
+ * @since 2019/08/08
  */
 @RestController
 @RequestMapping(value = "system")

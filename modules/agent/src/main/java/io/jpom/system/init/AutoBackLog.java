@@ -44,7 +44,7 @@ import java.util.List;
  * 自动备份控制台日志，防止日志文件过大
  *
  * @author jiangzeyin
- * @date 2019/3/17
+ * @since 2019/3/17
  */
 @PreLoadClass
 public class AutoBackLog {

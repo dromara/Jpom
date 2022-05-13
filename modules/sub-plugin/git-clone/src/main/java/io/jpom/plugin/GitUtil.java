@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @author Hotstrip
  * add git with ssh key to visit repository
- * @date 2019/7/15
+ * @since 2019/7/15
  **/
 public class GitUtil {
 

@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * 外部配置文件
  *
  * @author jiangzeyin
- * @date 2019/3/04
+ * @since 2019/3/04
  */
 @Configuration
 public class ServerExtConfigBean {

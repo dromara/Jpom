@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 分发日志
  *
  * @author bwcx_jzy
- * @date 2019/7/20
+ * @since 2019/7/20
  */
 @RestController
 @RequestMapping(value = "/outgiving")

@@ -26,7 +26,7 @@ package io.jpom.permission;
  * 功能方法
  *
  * @author bwcx_jzy
- * @date 2019/8/13
+ * @since 2019/8/13
  */
 public enum MethodFeature {
 	/**

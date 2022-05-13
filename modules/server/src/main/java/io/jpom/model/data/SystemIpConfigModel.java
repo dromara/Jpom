@@ -26,7 +26,7 @@ import io.jpom.model.BaseJsonModel;
 
 /**
  * @author bwcx_jzy
- * @date 2021/4/18
+ * @since 2021/4/18
  */
 public class SystemIpConfigModel extends BaseJsonModel {
 

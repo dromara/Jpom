@@ -36,7 +36,7 @@ import java.util.List;
  * 分发实体
  *
  * @author jiangzeyin
- * @date 2019/4/21
+ * @since 2019/4/21
  */
 @TableName(value = "OUT_GIVING", name = "节点分发")
 public class OutGivingModel extends BaseWorkspaceModel {

@@ -44,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 命令行工具
  *
  * @author jiangzeyin
- * @date 2019/4/15
+ * @since 2019/4/15
  */
 public class CommandUtil {
     /**

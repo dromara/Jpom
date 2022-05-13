@@ -47,7 +47,7 @@ import java.util.Map;
  * 数据目录权限检查
  *
  * @author jiangzeyin
- * @date 2019/3/26
+ * @since 2019/3/26
  */
 @PreLoadClass(value = Integer.MIN_VALUE)
 public class CheckPath {

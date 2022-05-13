@@ -41,7 +41,7 @@ import java.util.List;
  * ssh 信息
  *
  * @author bwcx_jzy
- * @date 2019/8/9
+ * @since 2019/8/9
  */
 @TableName(value = "SSH_INFO", name = "SSH 信息")
 @Data

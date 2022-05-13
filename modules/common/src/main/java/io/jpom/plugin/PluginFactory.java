@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
  * 插件工厂
  *
  * @author bwcx_jzy
- * @date 2019/8/13
+ * @since 2019/8/13
  */
 @Slf4j
 public class PluginFactory implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ContextClosedEvent> {

@@ -31,7 +31,7 @@ import lombok.EqualsAndHashCode;
  * 用户操作日志
  *
  * @author jiangzeyin
- * @date 2019/4/19
+ * @since 2019/4/19
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "USEROPERATELOGV1", name = "用户操作日志")

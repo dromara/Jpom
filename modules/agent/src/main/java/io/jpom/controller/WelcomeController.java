@@ -48,7 +48,7 @@ import java.util.List;
 
 /**
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 @RestController
 public class WelcomeController extends AbstractController {

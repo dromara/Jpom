@@ -30,7 +30,7 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
  * 插件端socket 配置
  *
  * @author jiangzeyin
- * @date 2019/4/19
+ * @since 2019/4/19
  */
 @Configuration
 public class AgentWebSocketConfig {

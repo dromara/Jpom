@@ -26,7 +26,7 @@ package io.jpom.entity;
  * 项目信息
  *
  * @author bwcx_jzy
- * @date 2019/11/18
+ * @since 2019/11/18
  */
 public class ProjectInfo {
     // 必传参数

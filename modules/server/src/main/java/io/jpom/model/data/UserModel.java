@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  * 用户实体
  *
  * @author jiangzeyin
- * @date 2019/1/16
+ * @since 2019/1/16
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "USER_INFO", name = "用户账号")

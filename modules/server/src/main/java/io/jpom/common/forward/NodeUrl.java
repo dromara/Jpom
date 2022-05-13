@@ -28,7 +28,7 @@ import io.jpom.system.ServerExtConfigBean;
  * agent 端的请求地址枚举
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 public enum NodeUrl {
     /**

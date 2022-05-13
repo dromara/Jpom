@@ -40,7 +40,7 @@ import java.util.jar.Manifest;
  * jvm jmx 工具
  *
  * @author jiangzeyin
- * @date 2019/4/13
+ * @since 2019/4/13
  */
 public class JvmUtil {
 

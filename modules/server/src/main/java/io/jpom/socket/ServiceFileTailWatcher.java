@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 文件跟随器
  *
  * @author jiangzeyin
- * @date 2019/07/21
+ * @since 2019/07/21
  */
 public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
     private static final ConcurrentHashMap<File, ServiceFileTailWatcher<WebSocketSession>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();

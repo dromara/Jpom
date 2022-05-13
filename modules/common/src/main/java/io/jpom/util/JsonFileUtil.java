@@ -39,7 +39,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * json 文件读写工具
  *
  * @author jiangzeyin
- * @date 2017/5/15
+ * @since 2017/5/15
  */
 public class JsonFileUtil {
 	private static final ReentrantReadWriteLock FILE_LOCK = new ReentrantReadWriteLock();

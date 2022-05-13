@@ -50,7 +50,7 @@ import java.security.PublicKey;
  * https://www.jianshu.com/p/036072b45a2d
  *
  * @author bwcx_jzy
- * @date 2019/7/10
+ * @since 2019/7/10
  **/
 public class TestSshGit {
 	public static void main(String[] args) throws GitAPIException, IOException {

@@ -45,7 +45,7 @@ import java.nio.charset.Charset;
  * 外部资源配置
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 @Configuration
 @Getter

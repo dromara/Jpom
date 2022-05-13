@@ -38,7 +38,7 @@ import java.io.File;
  * 检查授权信息
  *
  * @author jiangzeyin
- * @date 2019/4/17
+ * @since 2019/4/17
  */
 @PreLoadClass
 public class CheckAuthorize {

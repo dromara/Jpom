@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Configuration;
  * agent 端授权账号信息
  *
  * @author jiangzeyin
- * @date 2019/4/17
+ * @since 2019/4/17
  */
 @Configuration
 public class AgentAuthorize {

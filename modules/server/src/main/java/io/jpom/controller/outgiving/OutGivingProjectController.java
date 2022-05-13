@@ -71,7 +71,7 @@ import java.util.stream.Collectors;
  * 分发文件管理
  *
  * @author jiangzeyin
- * @date 2019/4/21
+ * @since 2019/4/21
  */
 @RestController
 @RequestMapping(value = "/outgiving")

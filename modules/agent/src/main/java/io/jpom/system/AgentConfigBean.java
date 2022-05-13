@@ -34,7 +34,7 @@ import java.io.File;
  * 插件端配置
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 @Configuration
 public class AgentConfigBean {

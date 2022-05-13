@@ -75,7 +75,7 @@ import java.util.zip.ZipFile;
  * ssh 安装插件端
  *
  * @author bwcx_jzy
- * @date 2019/8/17
+ * @since 2019/8/17
  */
 @RestController
 @RequestMapping(value = "node/ssh")

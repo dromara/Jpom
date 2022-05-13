@@ -35,7 +35,7 @@ import java.io.File;
  * 配置信息静态变量类
  *
  * @author jiangzeyin
- * @date 2019/1/16
+ * @since 2019/1/16
  */
 @Configuration
 public class ServerConfigBean {

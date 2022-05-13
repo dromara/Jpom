@@ -43,7 +43,7 @@ import java.util.*;
  * 白名单
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 public class AgentWhitelist extends BaseJsonModel {
 	/**

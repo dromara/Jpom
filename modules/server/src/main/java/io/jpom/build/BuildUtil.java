@@ -39,7 +39,7 @@ import java.io.File;
  * 构建工具类
  *
  * @author bwcx_jzy
- * @date 2019/7/19
+ * @since 2019/7/19
  */
 public class BuildUtil {
 

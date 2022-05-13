@@ -40,7 +40,7 @@ import java.util.List;
  * windows 系统查询命令
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 public class WindowsSystemCommander extends AbstractSystemCommander {
 
