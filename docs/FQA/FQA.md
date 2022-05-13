@@ -362,6 +362,19 @@ binds:
    4. 第二级地址内容示例：`{tag_name:"v2.8.18",agentUrl:"https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/agent-2.8.18-release.zip",serverUrl:"https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/server-2.8.18-release.zip",changelogUrl:"https://gitee.com/dromara/Jpom/raw/master/CHANGELOG.md"}`
    5. 配置远程更新地址 (配置方法在 extConfig.yml 文件中修改 `system.remoteVersionUrl` 属性)
 
+
+# 如何修改Jpom自身控制台日志级别
+
+修改管理程序命令文件中`--spring.profiles.active=`属性值`pro/dev`
+
+# 如何修改程序日志路径
+
+修改管理程序命令文件中 --jpom.log=/jpom/log/
+
+# 如何指定Jpom运行 jvm 内存
+
+修改管理程序命令文件中 JVM 变量添加 -Xms512m -Xmx1024m
+
 # 配置上传文件大小限制
 
 Jpom 上传文件大小限制默认为 1GB，如果有上传更大到文件需要修改限制大小
@@ -469,6 +482,14 @@ project:
   backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]
 ```
 
+
+# 如何修改Jpom数据存储目录
+
+> 修改外部配置文件`extConfig.yml`中的 jpom.path 属性
+
+# 如何修改Jpom插件端账户/密码
+
+>修改插件端外部配置文件`extConfig.yml`中的 jpom.authorize.agentName 和 jpom.authorize.agentPwd 属性
 
 
 # 开发计划
