@@ -389,7 +389,7 @@ mvn -f xxxx/pom.xml clean package
 
 ![jpom-func-arch](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom-func-arch.jpg)
 
-### 🐞 交流讨论 、提供bug反馈或建议
+## 🐞 交流讨论 、提供bug反馈或建议
 
 1. 微信群二维码（添加小助手：备注Jpom 进群）
 2. 微信赞赏 [赞赏记录](./docs/praise/praise.md)
@@ -400,7 +400,7 @@ mvn -f xxxx/pom.xml clean package
 
 ![wx-qrcode-praise.png](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/wx-qrcode-praise.png)
 
-### 🔔 精品项目推荐
+## 🔔 精品项目推荐
 
 | 项目名称          | 项目地址                                                                       | 项目介绍                                          |
 |---------------|----------------------------------------------------------------------------|-----------------------------------------------|
