@@ -212,16 +212,16 @@ docker run -d -p 2122:2122 \
 
 ### 下载安装
 
-> [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
+> [帮助文档](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装)
 
 1. 下载安装包 [https://gitee.com/dromara/Jpom/attach_files](https://gitee.com/dromara/Jpom/attach_files)
 2. 解压文件
-3. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
+3. 安装插件端（ [流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. agent-x.x.x-release 目录为插件端的全部安装文件
     2. 上传到对应服务器（整个目录）
     3. 命令运行（Agent.sh、Agent.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2123`
-4. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
+4. 安装服务端（ [流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. server-x.x.x-release 目录为服务端的全部安装文件
     2. 上传到对应服务器（整个目录）
     3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
@@ -229,18 +229,18 @@ docker run -d -p 2122:2122 \
 
 ### 编译安装
 
-> [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
+> [帮助文档](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装)
 
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支)
 2. 切换到`web-vue`目录 执行`npm install` (vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
 3. 执行`npm run build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
 4. 切换到项目根目录执行:`mvn clean package`
-5. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
+5. 安装插件端（ [流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
     2. 打包上传服务器运行（整个目录）
     3. 命令运行（Agent.sh、Agent.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2123`
-6. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
+6. 安装服务端（ [流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行（整个目录）
     3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
@@ -372,9 +372,9 @@ mvn -f xxxx/pom.xml clean package
 
 > 几乎是最新
 
-- [文档主页](https://keepbx.gitee.io/jpom-site/docs/)
-- [FQA](https://keepbx.gitee.io/jpom-site/docs/#/FQA/FQA)
-- [名词解释](https://keepbx.gitee.io/jpom-site/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
+- [文档主页](https://jpom-docs.keepbx.cn/docs/)
+- [FQA](https://jpom-docs.keepbx.cn/docs/#/FQA/FQA)
+- [名词解释](https://jpom-docs.keepbx.cn/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
 
 ### 实践案例
 
@@ -400,7 +400,7 @@ mvn -f xxxx/pom.xml clean package
 3. [码云赞赏： 在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
 4. 微信公众号：[CodeGzh](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 5. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
-6. 邀请您一起贡献教程文档 [文档仓库地址](https://gitee.com/keepbx/Jpom-site)
+6. 邀请您一起贡献教程文档 [文档仓库地址](https://gitee.com/dromara/Jpom/tree/docs)
 
 ![wx-qrcode-praise.png](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/wx-qrcode-praise.png)
 
