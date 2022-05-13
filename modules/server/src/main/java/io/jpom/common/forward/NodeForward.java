@@ -359,19 +359,15 @@ public class NodeForward {
         // @author jzy add  timeout
         httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
         //
-        HttpResponse response1 = null;
-        try {
-            response1 = httpRequest.execute();
+        try (HttpResponse response1 = httpRequest.execute()) {
+            String contentDisposition = response1.header("Content-Disposition");
+            response.setHeader("Content-Disposition", contentDisposition);
+            String contentType = response1.header("Content-Type");
+            response.setContentType(contentType);
+            ServletUtil.write(response, response1.bodyStream());
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
-        } finally {
-            IoUtil.close(response1);
         }
-        String contentDisposition = response1.header("Content-Disposition");
-        response.setHeader("Content-Disposition", contentDisposition);
-        String contentType = response1.header("Content-Type");
-        response.setContentType(contentType);
-        ServletUtil.write(response, response1.bodyStream());
     }
 
     private static void addUser(HttpRequest httpRequest, NodeModel nodeModel, NodeUrl nodeUrl) {
