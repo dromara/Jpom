@@ -75,6 +75,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -196,7 +197,7 @@ public class BuildExecuteService {
         //BuildInfoManage manage = new BuildInfoManage(taskData);
         BUILD_MANAGE_MAP.put(buildInfoModel.getId(), build);
         //
-        ThreadUtil.execute(build);
+        ThreadUtil.execAsync(build);
     }
 
     /**
@@ -307,7 +308,7 @@ public class BuildExecuteService {
 
 
     @Builder
-    private static class BuildInfoManage implements Runnable {
+    private static class BuildInfoManage implements Callable<Boolean> {
 
         private final TaskData taskData;
         private final BuildExtraModule buildExtraModule;
@@ -676,7 +677,7 @@ public class BuildExecuteService {
         }
 
         @Override
-        public void run() {
+        public Boolean call() {
             currentThread = Thread.currentThread();
             // 初始化构建流程 准备->拉取代码->执行构建命令->打包发布
             Map<String, Supplier<Boolean>> suppliers = new LinkedHashMap<>(10);
@@ -718,6 +719,7 @@ public class BuildExecuteService {
                 long allTime = SystemClock.now() - startTime;
                 logRecorder.info("构建完成 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
                 this.asyncWebHooks("success");
+                return true;
             } catch (RuntimeException runtimeException) {
                 buildExecuteService.updateStatus(taskData.buildInfoModel.getId(), this.logId, BuildStatus.Error);
                 Throwable cause = runtimeException.getCause();
@@ -732,6 +734,7 @@ public class BuildExecuteService {
                 BaseServerController.removeAll();
                 this.asyncWebHooks("done");
             }
+            return false;
         }
 
 //		private void log(String title, Throwable throwable) {
