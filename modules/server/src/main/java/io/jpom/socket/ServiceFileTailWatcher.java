@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
     private static final ConcurrentHashMap<File, ServiceFileTailWatcher<WebSocketSession>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
-    private ServiceFileTailWatcher(File logFile) throws IOException {
+    private ServiceFileTailWatcher(File logFile) {
         super(logFile);
     }
 
@@ -73,7 +73,7 @@ public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
             throw new IOException("加载文件失败:" + file.getPath());
         }
         agentFileTailWatcher.add(session, FileUtil.getName(file));
-        agentFileTailWatcher.tailWatcherRun.start();
+        agentFileTailWatcher.start();
     }
 
     /**

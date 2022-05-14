@@ -34,16 +34,13 @@ public class LimitQueue<E> extends ConcurrentLinkedDeque<E> {
     private final int limit;
 
     public LimitQueue(int limit) {
-        if (limit == 0) {
-            this.limit = 10;
-        } else {
-            this.limit = limit;
-        }
+        this.limit = limit;
     }
 
     @Override
     public boolean offerFirst(E s) {
         if (full()) {
+            // 删除最后一个
             pollLast();
         }
         return super.offerFirst(s);
@@ -52,6 +49,7 @@ public class LimitQueue<E> extends ConcurrentLinkedDeque<E> {
     @Override
     public boolean offerLast(E s) {
         if (full()) {
+            // 删除第一个
             pollFirst();
         }
         return super.offerLast(s);

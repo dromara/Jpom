@@ -69,7 +69,7 @@ public class ExtConfigBean {
      * 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
      */
     @Value("${log.fileCharset:}")
-    private String logFileCharset;
+    private String logFileCharsetStr;
     /**
      * 初始读取日志文件行号
      */
@@ -79,11 +79,11 @@ public class ExtConfigBean {
      * 控制台编码格式
      */
     @Value("${consoleLog.charset:}")
-    private String consoleLogCharset;
+    private String consoleLogCharsetStr;
     /**
      *
      */
-    private Charset consoleLogCharsetCache;
+    private Charset consoleLogCharset;
     /**
      * 是否开启秒级匹配
      */
@@ -100,17 +100,21 @@ public class ExtConfigBean {
     /**
      *
      */
-    private Charset logFileCharsets;
+    private Charset logFileCharset;
 
     public int getLogInitReadLine() {
-        if (logInitReadLine < 0) {
-            return 10;
-        }
-        return logInitReadLine;
+        return Math.max(logInitReadLine, 10);
     }
 
     public Charset getLogFileCharset() {
-        return logFileCharsets;
+        // 读取配置的编码格式
+        if (logFileCharset == null && StrUtil.isNotBlank(logFileCharsetStr)) {
+            try {
+                logFileCharset = CharsetUtil.charset(logFileCharsetStr);
+            } catch (Exception ignored) {
+            }
+        }
+        return logFileCharset;
     }
 
     public boolean isConsoleLogReqResponse() {
@@ -160,13 +164,6 @@ public class ExtConfigBean {
     public static ExtConfigBean getInstance() {
         if (extConfigBean == null) {
             extConfigBean = SpringUtil.getBean(ExtConfigBean.class);
-            // 读取配置的编码格式
-            if (StrUtil.isNotBlank(extConfigBean.logFileCharset)) {
-                try {
-                    extConfigBean.logFileCharsets = CharsetUtil.charset(extConfigBean.logFileCharset);
-                } catch (Exception ignored) {
-                }
-            }
         }
         return extConfigBean;
     }
@@ -204,10 +201,10 @@ public class ExtConfigBean {
     }
 
     public Charset getConsoleLogCharset() {
-        if (consoleLogCharsetCache == null) {
-            consoleLogCharsetCache = CharsetUtil.parse(consoleLogCharset, CharsetUtil.systemCharset());
+        if (consoleLogCharset == null) {
+            consoleLogCharset = CharsetUtil.parse(consoleLogCharsetStr, CharsetUtil.systemCharset());
         }
-        return consoleLogCharsetCache;
+        return consoleLogCharset;
     }
 
     public boolean getTimerMatchSecond() {
