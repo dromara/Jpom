@@ -22,14 +22,22 @@
  */
 package io.jpom.util;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.io.file.Tailer;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import io.jpom.plugin.PluginFactory;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.websocket.Session;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -42,17 +50,36 @@ import java.util.Set;
  */
 public abstract class BaseFileTailWatcher<T> {
 
-    protected FileTailWatcherRun tailWatcherRun;
     protected File logFile;
+    /**
+     * 缓存近x条
+     */
+    private final LimitQueue<String> limitQueue = new LimitQueue<>(ExtConfigBean.getInstance().getLogInitReadLine());
+    private final Tailer tailer;
 
     /**
      * 所有会话
      */
     protected final Set<T> socketSessions = new HashSet<>();
 
-    public BaseFileTailWatcher(File logFile) throws IOException {
+    public BaseFileTailWatcher(File logFile) {
         this.logFile = logFile;
-        this.tailWatcherRun = new FileTailWatcherRun(logFile, this::sendAll);
+        //this.tailWatcherRun = new FileTailWatcherRun(logFile, this::sendAll);
+        Charset detSet = ExtConfigBean.getInstance().getLogFileCharset();
+        if (detSet == null) {
+            try {
+                String charsetName = (String) PluginFactory.getPlugin("charset-detector").execute(logFile);
+                detSet = StrUtil.isEmpty(charsetName) ? CharsetUtil.CHARSET_UTF_8 : CharsetUtil.charset(charsetName);
+            } catch (Exception e) {
+                DefaultSystemLog.getLog().warn("自动识别文件编码格式错误：{}", e.getMessage());
+                detSet = CharsetUtil.CHARSET_UTF_8;
+            }
+            detSet = (detSet == StandardCharsets.US_ASCII) ? CharsetUtil.CHARSET_UTF_8 : detSet;
+        }
+        tailer = new Tailer(logFile, detSet, line -> {
+            limitQueue.offer(line);
+            this.sendAll(line);
+        }, ExtConfigBean.getInstance().getLogInitReadLine(), DateUnit.SECOND.getMillis());
     }
 
     protected void send(T session, String msg) {
@@ -97,9 +124,7 @@ public abstract class BaseFileTailWatcher<T> {
      */
     protected void add(T session, String name) {
         if (this.socketSessions.contains(session) || this.socketSessions.add(session)) {
-            LimitQueue<String> limitQueue = this.tailWatcherRun.getLimitQueue();
-            if (limitQueue.size() <= 0) {
-                this.send(session, "日志文件为空");
+            if (CollUtil.isEmpty(limitQueue)) {
                 return;
             }
             this.send(session, StrUtil.format("监听{}日志成功,目前共有{}人正在查看", name, this.socketSessions.size()));
@@ -113,10 +138,14 @@ public abstract class BaseFileTailWatcher<T> {
         //        }
     }
 
+    public void start() {
+        this.tailer.start();
+    }
+
     /**
      * 关闭
      */
     protected void close() {
-        this.tailWatcherRun.close();
+        this.tailer.stop();
     }
 }

@@ -22,8 +22,12 @@
  */
 package cn;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.Tailer;
+import cn.hutool.core.util.StrUtil;
+import io.jpom.util.LimitQueue;
+import org.junit.Test;
 
 import java.io.File;
 
@@ -38,5 +42,14 @@ public class TestTailer {
         }, 10);
         tailer.start(true);
         System.out.println("12");
+    }
+
+    @Test
+    public void testLimitQueue() {
+        LimitQueue<String> limitQueue = new LimitQueue<>(5);
+        for (int i = 0; i < 20; i++) {
+            limitQueue.offer(i + "");
+            System.out.println(CollUtil.join(limitQueue, StrUtil.SPACE));
+        }
     }
 }

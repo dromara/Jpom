@@ -20,14 +20,19 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ZipUtil;
+import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 /**
  * Created by jiangzeyin on 2019/4/22.
@@ -51,5 +56,28 @@ public class TestFile {
         ZipUtil.unzip(new File("D:\\SystemDocument\\Desktop\\Desktop.7z"), new File("D:\\SystemDocument\\Desktop\\Desktop.7z\""));
 
         System.out.println(FileUtil.extName("test.zip"));
+    }
+
+    @Test
+    public void testReadFile() throws IOException {
+
+        URL resource = ResourceUtil.getResource(".");
+        String fileStr = resource.getFile();
+        File file = FileUtil.file(fileStr);
+        file = FileUtil.getParent(file, 2);
+        file = FileUtil.file(file, "log", "info.log");
+        BufferedReader reader = FileUtil.getReader(file, CharsetUtil.CHARSET_UTF_8);
+        LineNumberReader lineNumberReader = new LineNumberReader(reader);
+        lineNumberReader.setLineNumber(20);
+
+        System.out.println(lineNumberReader.getLineNumber() + "  " + lineNumberReader.readLine());
+        System.out.println(lineNumberReader.getLineNumber() + "  " + lineNumberReader.readLine());
+
+        try (Stream<String> lines = Files.lines(Paths.get(file.getAbsolutePath()))) {
+            String line32 = lines.skip(31).findFirst().get();
+            System.out.println(line32);
+            System.out.println(lines.skip(32).findFirst().get());
+        }
+//        FileUtil.tail();
     }
 }
