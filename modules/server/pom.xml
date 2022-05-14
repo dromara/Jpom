@@ -251,10 +251,21 @@
         <profile>
             <id>develop-plugin-profile</id>
             <dependencies>
+                <!--                <dependency>-->
+                <!--                    <groupId>io.jpom.jpom-plugin</groupId>-->
+                <!--                    <artifactId>netty</artifactId>-->
+                <!--                    <version>LATEST</version>-->
+                <!--                </dependency>-->
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>jna-mac</id>
+            <dependencies>
                 <dependency>
-                    <groupId>io.jpom.jpom-plugin</groupId>
-                    <artifactId>netty</artifactId>
-                    <version>LATEST</version>
+                    <groupId>net.java.dev.jna</groupId>
+                    <artifactId>jna</artifactId>
+                    <version>5.11.0</version>
                 </dependency>
             </dependencies>
         </profile>
