@@ -22,8 +22,8 @@
  */
 package io.jpom.service.node;
 
-import io.jpom.model.data.OutGivingModel;
-import io.jpom.model.data.OutGivingNodeProject;
+import io.jpom.model.outgiving.OutGivingModel;
+import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;

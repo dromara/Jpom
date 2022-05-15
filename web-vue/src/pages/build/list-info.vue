@@ -306,7 +306,7 @@
               </a-form-model-item>
               <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
                 <a-select show-search allowClear v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
-                  <a-select-option v-for="opt in afterOptList" :key="opt.value">{{ opt.title }}</a-select-option>
+                  <a-select-option v-for="opt in afterOptListSimple" :key="opt.value">{{ opt.title }}</a-select-option>
                 </a-select>
               </a-form-model-item>
               <!-- SSH -->
@@ -735,7 +735,7 @@ import {
   statusMap,
   getBuildGroupAll,
 } from "@/api/build-info";
-import { getDishPatchListAll, afterOptList } from "@/api/dispatch";
+import { getDishPatchListAll, afterOptList, afterOptListSimple } from "@/api/dispatch";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { itemGroupBy, parseTime } from "@/utils/time";
@@ -840,6 +840,7 @@ export default {
       triggerVisible: false,
       buildLogVisible: false,
       afterOptList,
+      afterOptListSimple,
       buildConfirmVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },

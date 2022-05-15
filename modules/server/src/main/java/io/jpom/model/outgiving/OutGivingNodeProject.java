@@ -20,29 +20,50 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.service.dblog;
+package io.jpom.model.outgiving;
 
-import io.jpom.model.outgiving.OutGivingNodeProject;
-import io.jpom.model.log.OutGivingLog;
-import io.jpom.service.h2db.BaseWorkspaceService;
-import org.springframework.stereotype.Service;
+import io.jpom.model.BaseEnum;
+import io.jpom.model.BaseJsonModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /**
- * 分发日志
+ * 节点项目
  *
- * @author bwcx_jzy
- * @since 2019/7/20
+ * @author jiangzeyin
+ * @since 2019/4/22
  */
-@Service
-public class DbOutGivingLogService extends BaseWorkspaceService<OutGivingLog> {
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class OutGivingNodeProject extends BaseJsonModel {
 
+    private String nodeId;
+    private String projectId;
+    private String lastOutGivingTime;
+    private Integer status;
+    private String result;
 
-	@Override
-	public void insert(OutGivingLog outGivingLog) {
-		outGivingLog.setStartTime(System.currentTimeMillis());
-		if (outGivingLog.getStatus() == OutGivingNodeProject.Status.Cancel.getCode()) {
-			outGivingLog.setEndTime(System.currentTimeMillis());
-		}
-		super.insert(outGivingLog);
-	}
+    /**
+     * 状态
+     */
+    @Getter
+    public enum Status implements BaseEnum {
+        /**
+         *
+         */
+        No(0, "未分发"),
+        Ing(1, "分发中"),
+        Ok(2, "分发成功"),
+        Fail(3, "分发失败"),
+        Cancel(4, "取消分发"),
+        ;
+        private final int code;
+        private final String desc;
+
+        Status(int code, String desc) {
+            this.code = code;
+            this.desc = desc;
+        }
+    }
 }
