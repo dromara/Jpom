@@ -56,6 +56,6 @@ public class LimitQueue<E> extends ConcurrentLinkedDeque<E> {
     }
 
     public boolean full() {
-        return size() > limit;
+        return size() >= limit;
     }
 }

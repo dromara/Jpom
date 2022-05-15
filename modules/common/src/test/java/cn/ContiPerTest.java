@@ -40,6 +40,7 @@ public class ContiPerTest {
     public ContiPerfRule i = new ContiPerfRule();
 
 //    @Test
+    @Test
     @PerfTest(invocations = 200000000, threads = 16)
     public void test1() throws Exception {
         IdUtil.fastSimpleUUID();
