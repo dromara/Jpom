@@ -23,7 +23,7 @@
 package io.jpom.model.log;
 
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.model.data.OutGivingNodeProject;
+import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.service.h2db.TableName;
 
 /**

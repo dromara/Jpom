@@ -32,7 +32,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.OutGivingModel;
+import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.permission.NodeDataPermission;

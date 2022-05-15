@@ -201,6 +201,11 @@ export const afterOptList = [
   { title: "顺序执行(有执行失败将继续)", value: 3 },
 ];
 
+export const afterOptListSimple = [
+  { title: "不做任何操作", value: 0 },
+  { title: "执行重启", value: 1 },
+];
+
 export const dispatchStatusMap = {
   0: "未分发",
   1: "分发中",

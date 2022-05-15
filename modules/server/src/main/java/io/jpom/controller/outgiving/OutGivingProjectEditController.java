@@ -41,6 +41,8 @@ import io.jpom.model.BaseEnum;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.*;
 import io.jpom.model.enums.BuildReleaseMethod;
+import io.jpom.model.outgiving.OutGivingModel;
+import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;

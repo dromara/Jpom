@@ -39,6 +39,7 @@ import io.jpom.model.PageResultDto;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.db.DbConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.h2.jdbc.JdbcSQLNonTransientConnectionException;
 import org.h2.jdbc.JdbcSQLNonTransientException;
 import org.springframework.util.Assert;
 
@@ -673,8 +674,11 @@ public abstract class BaseDbCommonService<T> {
      * @param e 异常
      */
     protected JpomRuntimeException warpException(Exception e) {
-        if (ExceptionUtil.isCausedBy(e, JdbcSQLNonTransientException.class)) {
+        if (e instanceof JdbcSQLNonTransientException || ExceptionUtil.isCausedBy(e, JdbcSQLNonTransientException.class)) {
             return new JpomRuntimeException("数据库异常,可能数据库文件已经损坏(可能丢失部分数据),需要重新初始化。可以尝试在启动参数里面添加 --recover:h2db 来自动恢复,：" + e.getMessage(), e);
+        }
+        if (e instanceof JdbcSQLNonTransientConnectionException) {
+            return new JpomRuntimeException("数据库异常,可能因为服务器资源不足（内存、硬盘）等原因造成数据异常关闭。需要手动重启服务端来恢复，：" + e.getMessage(), e);
         }
         return new JpomRuntimeException("数据库异常", e);
     }
