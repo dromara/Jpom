@@ -29,7 +29,7 @@ import io.jpom.model.log.OutGivingLog;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.service.dblog.DbOutGivingLogService;
+import io.jpom.service.outgiving.DbOutGivingLogService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

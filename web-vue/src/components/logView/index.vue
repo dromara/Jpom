@@ -57,14 +57,17 @@
         </a-row>
       </template>
     </div>
-    <pre class="log-view" :id="`${this.id}`" :style="`height:${this.height}`">{{ defText }}</pre>
+    <!-- <pre class="log-view" :id="`${this.id}`" :style="`height:${this.height}`">{{ defText }}</pre> -->
+    <viewPre ref="viewPre" :height="this.height" :searchReg="this.searchReg" :config="this.temp"></viewPre>
   </div>
 </template>
 
 <script>
+import viewPre from "./view-pre";
 export default {
   name: "LogView",
   components: {
+    viewPre,
     // VNodes: {
     //   functional: true,
     //   render: (h, ctx) => ctx.props.vnodes,
@@ -76,10 +79,6 @@ export default {
     },
   },
   props: {
-    seg: {
-      String,
-      default: "</br>",
-    },
     height: {
       String,
       default: "50vh",
@@ -99,10 +98,6 @@ export default {
   },
   data() {
     return {
-      regReplaceText: "<b style='color:red'>$1</b>",
-      regRemove: /<b[^>]*>([^>]*)<\/b[^>]*>/g,
-      regRemoveSpan: /<span[^>]*>([^>]*)<\/span[^>]*>/g,
-      searchReg: null,
       regModifiers: ["i", "g"],
       modifiers: [
         {
@@ -122,8 +117,7 @@ export default {
           value: "s",
         },
       ],
-      // 日志内容
-      logContextArray: [],
+      searchReg: "",
       temp: {
         logScroll: true,
         logShowLine: 500,
@@ -131,13 +125,13 @@ export default {
         searchValue: "",
       },
       defLogShowLine: 500,
-      defId: "logScrollArea",
-      defText: "loading context...",
-      id: "",
+      // defId: "logScrollArea",
+      // defText: "loading context...",
+      // id: "",
     };
   },
   mounted() {
-    this.id = this.defId + new Date().getTime();
+    // this.id = this.defId + new Date().getTime();
     //let html = "<span><b><b style='color:OrangeRed;'>222</b></b></span>";
     //console.log(html.replace(this.regRemove, "$1").replace(this.regRemove, "$1").replace(this.regRemoveSpan, "$1"));
   },
@@ -151,47 +145,11 @@ export default {
       }
       this.regModifiers = checkedValues;
     },
-
-    //
     appendLine(data) {
-      if (!data) {
-        return;
-      }
-      const dataArray = Array.isArray(data) ? data : [data];
-      dataArray.forEach((item) => {
-        item = item.replace(/[<>&]/g, function (match) {
-          //  pos, originalText
-          switch (match) {
-            case "<":
-              return "&lt;";
-            case ">":
-              return "&gt;";
-            case "&":
-              return "&amp;";
-            case '"':
-              return "&quot;";
-          }
-        });
-        this.logContextArray.push(this.lineFormat(item));
-      });
-
-      //console.log(this.temp.logScroll);
-      if (this.temp.logScroll) {
-        this.logContextArray = this.logContextArray.slice(-this.temp.logShowLine);
-      }
-
-      // 自动滚动到底部
-      this.$nextTick(() => {
-        this.toHtml();
-        const projectConsole = document.getElementById(this.id);
-        if (!projectConsole) {
-          return;
-        }
-        // console.log("111");
-        if (this.temp.logScroll) {
-          projectConsole.scrollTop = projectConsole.scrollHeight;
-        }
-      });
+      this.$refs.viewPre.appendLine(data);
+    },
+    clearLogCache() {
+      this.$refs.viewPre.clearLogCache();
     },
     // 搜索
     onSearch() {
@@ -204,41 +162,8 @@ export default {
       //
       // console.log(this.regModifier);
       this.searchReg = this.temp.searchValue ? new RegExp("(" + this.temp.searchValue + ")", this.regModifier) : null;
-      // console.log(this.searchReg);
-      this.logContextArray = this.logContextArray.map((item) => this.lineFormat(item));
       this.$nextTick(() => {
-        this.toHtml();
-      });
-    },
-    toHtml() {
-      const projectConsole = document.getElementById(this.id);
-      if (!projectConsole) {
-        return;
-      }
-      projectConsole.innerHTML = this.logContextArray.join("") || this.defText;
-      return projectConsole;
-    },
-    lineFormat(item) {
-      // console.log(item.match(this.regRemove), item.replace(this.regRemove, "$1"));
-      item = item.replace(this.regRemove, "$1").replace(this.regRemove, "$1").replace(this.regRemoveSpan, "$1");
-      // console.log(item);
-      if (this.searchReg) {
-        item = item.replace(this.searchReg, this.regReplaceText);
-      }
-      if (item.match(/error|Exception/i)) {
-        item = "<b style='color:OrangeRed'>" + item + "</b>";
-      } else if (item.match(/WARNING|failed/i)) {
-        item = "<b style='color:orange'>" + item + "</b>";
-      }
-      item = "<span>" + item + "</span>";
-      // console.log(item);
-      return item;
-    },
-    clearLogCache() {
-      this.logContextArray = [];
-      this.$nextTick(() => {
-        const projectConsole = document.getElementById(this.id);
-        projectConsole.innerHTML = this.defText;
+        this.$refs.viewPre.changeBuffer();
       });
     },
   },
@@ -246,17 +171,6 @@ export default {
 </script>
 
 <style scoped>
-.log-view {
-  padding: 5px;
-  color: #fff;
-  font-size: 14px;
-  background-color: black;
-  width: 100%;
-  height: calc(100vh - 120px);
-  overflow-y: auto;
-  border: 1px solid #e2e2e2;
-  border-radius: 5px 5px;
-}
 .log-filter {
   /* margin-top: -22px; */
   /* margin-bottom: 10px; */
@@ -264,19 +178,5 @@ export default {
   padding-top: 0;
   padding-bottom: 10px;
   line-height: 0;
-}
-</style>
-
-<style>
-.log-view span {
-  display: block;
-  counter-increment: line;
-}
-.log-view span:before {
-  content: counter(line);
-  display: inline-block;
-  padding: 0 5px;
-  /* border-right: 1px solid #e2e2e2; */
-  color: #888;
 }
 </style>

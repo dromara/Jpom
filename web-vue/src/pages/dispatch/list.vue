@@ -1243,9 +1243,7 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
-  margin-bottom: 10px;
-}
+
 .replica-area {
   width: 300px;
 }

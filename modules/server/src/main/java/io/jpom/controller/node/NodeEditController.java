@@ -39,7 +39,8 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
-import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.outgiving.LogReadServer;
+import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
@@ -65,6 +66,7 @@ public class NodeEditController extends BaseServerController {
     private final OutGivingServer outGivingServer;
     private final MonitorService monitorService;
     private final BuildInfoService buildService;
+    private final LogReadServer logReadServer;
     private final ProjectInfoCacheService projectInfoCacheService;
     private final NodeScriptServer nodeScriptServer;
     private final NodeStatService nodeStatService;
@@ -73,6 +75,7 @@ public class NodeEditController extends BaseServerController {
     public NodeEditController(OutGivingServer outGivingServer,
                               MonitorService monitorService,
                               BuildInfoService buildService,
+                              LogReadServer logReadServer,
                               ProjectInfoCacheService projectInfoCacheService,
                               NodeScriptServer nodeScriptServer,
                               NodeStatService nodeStatService,
@@ -80,6 +83,7 @@ public class NodeEditController extends BaseServerController {
         this.outGivingServer = outGivingServer;
         this.monitorService = monitorService;
         this.buildService = buildService;
+        this.logReadServer = logReadServer;
         this.projectInfoCacheService = projectInfoCacheService;
         this.nodeScriptServer = nodeScriptServer;
         this.nodeStatService = nodeStatService;
@@ -181,6 +185,8 @@ public class NodeEditController extends BaseServerController {
         //  判断分发
         boolean checkNode = outGivingServer.checkNode(id, request);
         Assert.state(!checkNode, "该节点存在分发项目，不能删除");
+        boolean checkLogRead = logReadServer.checkNode(id, request);
+        Assert.state(!checkLogRead, "该日志阅读项目，不能删除");
         // 监控
         boolean checkNode1 = monitorService.checkNode(id);
         Assert.state(!checkNode1, "该节点存在监控项，不能删除");

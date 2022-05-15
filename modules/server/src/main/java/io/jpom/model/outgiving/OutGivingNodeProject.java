@@ -36,10 +36,8 @@ import lombok.Getter;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class OutGivingNodeProject extends BaseJsonModel {
+public class OutGivingNodeProject extends BaseNodeProject {
 
-    private String nodeId;
-    private String projectId;
     private String lastOutGivingTime;
     private Integer status;
     private String result;

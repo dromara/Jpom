@@ -20,13 +20,14 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.service.node;
+package io.jpom.service.outgiving;
 
 import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -41,28 +42,37 @@ import java.util.List;
 public class OutGivingServer extends BaseWorkspaceService<OutGivingModel> implements IStatusRecover {
 
 
-	public boolean checkNode(String nodeId, HttpServletRequest request) {
-		List<OutGivingModel> list = super.listByWorkspace(request);
-		if (list == null || list.isEmpty()) {
-			return false;
-		}
-		for (OutGivingModel outGivingModel : list) {
-			List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.outGivingNodeProjectList();
-			if (outGivingNodeProjectList != null) {
-				for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
-					if (outGivingNodeProject.getNodeId().equals(nodeId)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
+    public void checkNodeProject(String nodeId, String projectId, HttpServletRequest request) {
+        // 检查节点分发
+        List<OutGivingModel> outGivingModels = super.listByWorkspace(request);
+        if (outGivingModels != null) {
+            boolean match = outGivingModels.stream().anyMatch(outGivingModel -> outGivingModel.checkContains(nodeId, projectId));
+            Assert.state(!match, "当前项目存在节点分发，不能直接删除");
+        }
+    }
 
-	@Override
-	public int statusRecover() {
-		// 恢复异常数据
-		String updateSql = "update " + super.getTableName() + " set status=? where status=?";
-		return super.execute(updateSql, OutGivingModel.Status.DONE.getCode(), OutGivingModel.Status.ING.getCode());
-	}
+    public boolean checkNode(String nodeId, HttpServletRequest request) {
+        List<OutGivingModel> list = super.listByWorkspace(request);
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        for (OutGivingModel outGivingModel : list) {
+            List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.outGivingNodeProjectList();
+            if (outGivingNodeProjectList != null) {
+                for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
+                    if (outGivingNodeProject.getNodeId().equals(nodeId)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int statusRecover() {
+        // 恢复异常数据
+        String updateSql = "update " + super.getTableName() + " set status=? where status=?";
+        return super.execute(updateSql, OutGivingModel.Status.DONE.getCode(), OutGivingModel.Status.ING.getCode());
+    }
 }
