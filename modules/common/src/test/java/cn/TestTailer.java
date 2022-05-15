@@ -22,6 +22,7 @@
  */
 package cn;
 
+import cn.hutool.core.collection.BoundedPriorityQueue;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.Tailer;
@@ -30,6 +31,7 @@ import io.jpom.util.LimitQueue;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Comparator;
 
 public class TestTailer {
     public static void main(String[] args) {
@@ -49,7 +51,20 @@ public class TestTailer {
         LimitQueue<String> limitQueue = new LimitQueue<>(5);
         for (int i = 0; i < 20; i++) {
             limitQueue.offer(i + "");
-            System.out.println(CollUtil.join(limitQueue, StrUtil.SPACE));
+            System.out.println((i + 1) + "  " + CollUtil.join(limitQueue, StrUtil.SPACE));
+        }
+        //
+        System.out.println("-------");
+        BoundedPriorityQueue<Integer> boundedPriorityQueue = new BoundedPriorityQueue<>(5, Comparator.reverseOrder());
+        for (int i = 0; i < 20; i++) {
+            boundedPriorityQueue.offer(i);
+            System.out.println((i + 1) + "  " + CollUtil.join(boundedPriorityQueue, StrUtil.SPACE));
         }
     }
+
+    @Test
+    public void testLine() {
+
+    }
+
 }
