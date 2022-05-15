@@ -29,13 +29,15 @@ import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.monitor.MonitorUserOptService;
 import io.jpom.service.node.NodeService;
-import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.outgiving.LogReadServer;
+import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.node.command.CommandExecLogService;
 import io.jpom.service.node.command.CommandService;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.service.node.ssh.SshService;
+import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.service.system.WorkspaceService;
@@ -65,6 +67,7 @@ public enum ClassFeature {
     SSH_COMMAND("SSH命令管理", CommandService.class),
     SSH_COMMAND_LOG("SSH命令日志", CommandExecLogService.class),
     OUTGIVING("分发管理", OutGivingServer.class),
+    LOG_READ("日志阅读", LogReadServer.class),
     OUTGIVING_LOG("分发日志", DbOutGivingLogService.class),
     OUTGIVING_CONFIG_WHITELIST("分发白名单配置"),
     MONITOR("项目监控", MonitorService.class),

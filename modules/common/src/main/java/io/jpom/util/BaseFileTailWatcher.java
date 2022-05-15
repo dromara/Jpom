@@ -65,6 +65,14 @@ public abstract class BaseFileTailWatcher<T> {
     public BaseFileTailWatcher(File logFile) {
         this.logFile = logFile;
         //this.tailWatcherRun = new FileTailWatcherRun(logFile, this::sendAll);
+        Charset charset = detectorCharset(logFile);
+        tailer = new Tailer(logFile, charset, line -> {
+            limitQueue.offer(line);
+            this.sendAll(line);
+        }, ExtConfigBean.getInstance().getLogInitReadLine(), DateUnit.SECOND.getMillis());
+    }
+
+    public static Charset detectorCharset(File logFile) {
         Charset detSet = ExtConfigBean.getInstance().getLogFileCharset();
         if (detSet == null) {
             try {
@@ -76,10 +84,7 @@ public abstract class BaseFileTailWatcher<T> {
             }
             detSet = (detSet == StandardCharsets.US_ASCII) ? CharsetUtil.CHARSET_UTF_8 : detSet;
         }
-        tailer = new Tailer(logFile, detSet, line -> {
-            limitQueue.offer(line);
-            this.sendAll(line);
-        }, ExtConfigBean.getInstance().getLogInitReadLine(), DateUnit.SECOND.getMillis());
+        return detSet;
     }
 
     protected void send(T session, String msg) {

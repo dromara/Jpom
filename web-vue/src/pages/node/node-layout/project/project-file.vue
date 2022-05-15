@@ -766,9 +766,6 @@ export default {
   padding: 10px;
   background-color: #fff;
 }
-.filter {
-  margin: 0 0 10px;
-}
 .successTag {
   height: 32px;
   line-height: 30px;

@@ -40,7 +40,7 @@ import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.service.dblog.DbMonitorNotifyLogService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.NodeService;
-import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;

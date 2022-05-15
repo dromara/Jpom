@@ -37,7 +37,7 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.model.data.UserModel;
-import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.outgiving.OutGivingServer;
 
 import java.io.File;
 import java.util.List;

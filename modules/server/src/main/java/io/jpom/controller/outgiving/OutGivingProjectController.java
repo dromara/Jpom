@@ -48,7 +48,7 @@ import io.jpom.outgiving.OutGivingRun;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;

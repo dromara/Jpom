@@ -63,6 +63,24 @@ export function renderSize(value) {
   return size + unitArr[index];
 }
 
+/**
+ * 数组分组  [{id:1,value:1},{id:2,value:3}] => {1:{id:1,value:1},2:{id:2,value:3}}
+ * @param {function} group
+ * @returns Object
+ */
+Array.prototype.groupBy = function (group) {
+  return group && typeof group === "function"
+    ? Array.prototype.reduce.call(
+        this,
+        function (c, v) {
+          var k = group(v);
+          c[k] = v;
+          return c;
+        },
+        {}
+      )
+    : this;
+};
 //
 export function itemGroupBy(arr, groupKey, key, dataKey) {
   key = key || "type";
