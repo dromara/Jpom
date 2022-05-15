@@ -172,10 +172,13 @@ public class TestBigFileRead {
 
         int cacheBeforeCount = 1;
         int afterCount = 1;
-        LimitQueue<Tuple> beforeQueue = new LimitQueue<>(cacheBeforeCount);
         String searchKey = ".*(0999996|0999995).*";
-        AtomicInteger hitIndex = new AtomicInteger(0);
+        this.searchList(strings, searchKey, cacheBeforeCount, afterCount);
+    }
 
+    private void searchList(Collection<Tuple> strings, String searchKey, int cacheBeforeCount, int afterCount) {
+        AtomicInteger hitIndex = new AtomicInteger(0);
+        LimitQueue<Tuple> beforeQueue = new LimitQueue<>(cacheBeforeCount);
         List<Integer> cacheLineNum = new LinkedList<>();
         strings.forEach(tuple -> {
             String s = tuple.get(1);
@@ -190,7 +193,8 @@ public class TestBigFileRead {
                 hitIndex.set(index);
             }
             // 是否需要输出后面的内容
-            if (index > hitIndex.get() && index <= hitIndex.get() + afterCount) {
+            int i = hitIndex.get();
+            if (i > 0 && index > i && index <= i + afterCount) {
                 log(cacheLineNum, tuple);
             }
             if (cacheBeforeCount > 0) {
@@ -212,13 +216,12 @@ public class TestBigFileRead {
 
     @Test
     public void testLinNumberReadRange() throws IOException {
-        int[] calculate = this.calculate(1000, 100, false);
-        this.readRangeLine(testFile, CharsetUtil.CHARSET_UTF_8, calculate).forEach(new Consumer<Tuple>() {
-            @Override
-            public void accept(Tuple s) {
-                System.out.println(s);
-            }
-        });
+        int[] calculate = this.calculate(0, 1, true);
+        Collection<Tuple> tuples = this.readRangeLine(testFile, CharsetUtil.CHARSET_UTF_8, calculate);
+        int cacheBeforeCount = 1;
+        int afterCount = 1;
+        String searchKey = "abcdef";
+        this.searchList(tuples, searchKey, cacheBeforeCount, afterCount);
     }
 
     public Collection<Tuple> readLastLine(File file, Charset charset, int line) throws IOException {
