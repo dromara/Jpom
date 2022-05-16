@@ -258,7 +258,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 int afterCount = reqJson.getIntValue("afterCount");
                 String keyword = reqJson.getString("keyword");
                 Charset charset = BaseFileTailWatcher.detectorCharset(file);
-                FileSearchUtil.searchList(file, charset, keyword, beforeCount, afterCount, head, tail, first, objects -> {
+                String resultMsg = FileSearchUtil.searchList(file, charset, keyword, beforeCount, afterCount, head, tail, first, objects -> {
                     try {
                         String line = objects.get(1);
                         SocketSessionUtil.send(session, line);
@@ -266,6 +266,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                         throw new RuntimeException(e);
                     }
                 });
+                SocketSessionUtil.send(session, resultMsg);
             } catch (Exception e) {
                 DefaultSystemLog.getLog().error("文件搜索失败", e);
                 try {

@@ -5,6 +5,8 @@
 
 ### 🐣 新增功能
 
+1. 新增日志查询功能 （感谢  @ 、 [@漫步青春的日子](https://gitee.com/imoom) [Gitee issues I54GDY](https://gitee.com/dromara/Jpom/issues/I54GDY) ）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复构建读取 .env 文件空时候无法正常使用（感谢[@wangfeng2228952430](https://gitee.com/wangfeng2228952430) [Gitee issues I57DC1](https://gitee.com/dromara/Jpom/issues/I57DC1) ）

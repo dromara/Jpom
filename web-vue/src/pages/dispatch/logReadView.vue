@@ -28,6 +28,8 @@
             <a-space>
               <div>
                 <!-- 关键词： -->
+                <!-- ^.*\d+.*$ -->
+                <!-- .*(0999996|0999995).*   .*(a|b).* -->
                 <a-tooltip placement="right" title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
                   <a-input placeholder="关键词,支持正则" :style="`width: 250px`" v-model="temp.cacheData.keyword" @pressEnter="sendSearchLog"> </a-input>
                 </a-tooltip>
@@ -40,6 +42,16 @@
                 显示后N行
                 <a-input-number id="inputNumber" v-model="temp.cacheData.afterCount" :min="0" :max="1000" @pressEnter="sendSearchLog" />
               </div>
+              <a-popover title="正则语法参考">
+                <template slot="content">
+                  <ul>
+                    <li><b>^.*\d+.*$</b> - 匹配包含数字的行</li>
+                    <li><b>.*(a|b).*</b> - 匹配包含 a 或者 b 的行</li>
+                    <li><b>.*(异常).*</b> - 匹配包含 异常 的行</li>
+                  </ul>
+                </template>
+                <a-button type="link" style="padding: 0" icon="unordered-list"><span style="margin-left: 2px">语法参考</span></a-button>
+              </a-popover>
             </a-space>
             <a-space>
               <div>
@@ -100,7 +112,8 @@ import { itemGroupBy } from "@/utils/time";
 import { getFileList } from "@/api/node-project";
 import { getWebSocketUrl } from "@/utils/const";
 import { mapGetters } from "vuex";
-import viewPre from "@/components/logView/view-pre.vue";
+import viewPre from "@/components/logView/view-pre";
+import { updateCache } from "@/api/log-read";
 export default {
   components: {
     viewPre,
@@ -167,7 +180,7 @@ export default {
     cacheData.afterCount = cacheData.afterCount || 10;
     cacheData.head = cacheData.head || 0;
     cacheData.tail = cacheData.tail || 100;
-    cacheData.first = cacheData.first === undefined ? "false" : cacheData.first;
+    cacheData.first = cacheData.first === undefined ? "false" : cacheData.first + "";
     this.temp = { ...this.temp, cacheData: cacheData };
     this.loadNodeList().then(() => {
       this.loadFileData();
@@ -182,9 +195,19 @@ export default {
         const socket = this.initWebSocket(domId, socketUrl);
 
         this.socketCache = { ...this.socketCache, [domId]: { socket: socket, projectId: item.projectId, nodeId: item.nodeId } };
+
+        // 连接成功后
+        socket.onopen = () => {
+          if (cacheData.logFile) {
+            // 之前已经打开的
+            this.sendMsg(domId, "showlog", this.temp.cacheData);
+          }
+        };
       });
+      //
     });
     this.activeTagKey = this.temp.cacheData.useNodeId + "," + this.temp.cacheData.useProjectId;
+    // console.log(cacheData);
   },
   methods: {
     initWebSocket(id, url) {
@@ -192,14 +215,7 @@ export default {
       if (!socket || socket.readyState !== socket.OPEN || socket.readyState !== socket.CONNECTING) {
         socket = new WebSocket(url);
       }
-      // 连接成功后
-      socket.onopen = () => {
-        //   this.sendMsg("showlog");
-        // this.socketCache[id].heart = setInterval(() => {
-        //   this.sendMsg(id, "heart");
-        //   // this.loadFileSize();
-        // }, 5000);
-      };
+
       socket.onerror = (err) => {
         console.error(err);
         this.$notification.error({
@@ -376,6 +392,8 @@ export default {
           this.$refs[item][0].clearLogCache();
           this.sendMsg(item, "showlog", this.temp.cacheData);
         });
+        //
+        updateCache(Object.assign({}, this.temp.cacheData, { id: this.temp.id })).then();
       }
       //
     },
