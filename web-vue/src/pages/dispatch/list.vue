@@ -1208,7 +1208,9 @@ export default {
     // 添加分发
     addDispachList() {
       if (this.dispatchList.length >= this.totalProjectNum) {
-        this.$$notification.error("已无更多节点项目，请先创建项目");
+        this.$notification.error({
+          message: "已无更多节点项目，请先创建项目",
+        });
         return false;
       }
       this.dispatchList.push({ nodeId: "", projectId: "", index: "", project: [], status: true, placeholder: "请先选择节点", disabled: true });
@@ -1243,7 +1245,6 @@ export default {
 };
 </script>
 <style scoped>
-
 .replica-area {
   width: 300px;
 }
