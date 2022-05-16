@@ -528,3 +528,20 @@ https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4770092
  }
 </script>
 ```
+
+# kill: xx xxx : arguments must be process or job IDs
+
+当相关日志出现类似错误信息时候，是因为 kill 默认只支持单过进程，当传入多过进程 id 就会出现类似提示
+
+一般是因为使用： ` pid=$(ps -ef | grep -v 'grep' | egrep xxxx | awk '{printf $2 " "}')` 匹配到多过进程号
+
+这里解决方案有如下：
+
+1. 检查 ps 命令筛选是否准确唯一，如果筛选关键词错误请先修正筛选关键词
+2. 使用相关命令实现批量 kill 进程
+
+### 批量关键进程相关命令举例：
+
+- kill -9 $(ps aux |grep "xxx"| awk '{print $2}')
+- kill -9 $(pgrep xxx)
+- ps -ef | grep -v 'grep' | egrep xxxx | awk '{printf $2 " "}' | xargs kill -9
