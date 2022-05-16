@@ -55,8 +55,8 @@
             </a-space>
             <a-space>
               <div>
-                <!-- 关键词： -->
-                <a-tooltip placement="right" title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
+                <!-- 搜索模式 -->
+                <a-tooltip placement="right" title="搜索模式,默认查看文件最后多少行，从头搜索指从指定行往下搜索，从尾搜索指从文件尾往上搜索多少行">
                   <a-select
                     :style="`width: 250px`"
                     :value="temp.cacheData.first"
@@ -81,6 +81,20 @@
                 文件后N行
                 <a-input-number id="inputNumber" v-model="temp.cacheData.tail" :min="0" :max="1000" @pressEnter="sendSearchLog" />
               </div>
+              <a-popover title="搜索配置参考">
+                <template slot="content">
+                  <ul>
+                    <li><b>从尾搜索、文件前0行、文件后3行</b> - 在文件最后 3 行中搜索</li>
+                    <li><b>从头搜索、文件前0行、文件后3行</b> - 在文件第 3 - 2147483647 行中搜索</li>
+                    <li><b>从尾搜索、文件前2行、文件后3行</b> - 在文件第 1 - 2 行中搜索</li>
+                    <li><b>从尾搜索、文件前100行、文件后100行</b> - 在文件第 1 - 100 行中搜索</li>
+                    <li><b>从头搜索、文件前2行、文件后3行</b> - 在文件第 2 - 2 行中搜索</li>
+                    <li><b>从尾搜索、文件前20行、文件后3行</b> - 在文件第 17 - 20 行中搜索</li>
+                    <li><b>从头搜索、文件前20行、文件后3行</b> - 在文件第 3 - 20 行中搜索</li>
+                  </ul>
+                </template>
+                <a-button type="link" style="padding: 0" icon="unordered-list"><span style="margin-left: 2px">搜索参考</span></a-button>
+              </a-popover>
             </a-space>
           </a-space>
         </div>
