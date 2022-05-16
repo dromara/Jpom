@@ -1,8 +1,30 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 Code Technology Studio
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.util;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 
@@ -18,16 +40,31 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
+ * 文件搜索工具
+ *
  * @author bwcx_jzy
  * @since 2022/5/15
  */
 public class FileSearchUtil {
 
-    public static void searchList(File file, Charset charset,
-                                  String searchKey,
-                                  int cacheBeforeCount, int afterCount,
-                                  int head, int tailCount,
-                                  boolean first, Consumer<Tuple> consumer) throws IOException {
+    /**
+     * @param file             文件
+     * @param charset          编码格式
+     * @param searchKey        搜索关键词
+     * @param cacheBeforeCount 关键词前多少行
+     * @param afterCount       关键词后多少行
+     * @param head             搜索文件头多少行
+     * @param tailCount        文件后多少行
+     * @param first            是否从头开始读取
+     * @param consumer         回调
+     * @return 结果描述
+     * @throws IOException io
+     */
+    public static String searchList(File file, Charset charset,
+                                    String searchKey,
+                                    int cacheBeforeCount, int afterCount,
+                                    int head, int tailCount,
+                                    boolean first, Consumer<Tuple> consumer) throws IOException {
 
         int[] calculate = FileSearchUtil.calculate(head, tailCount, first);
         Collection<Tuple> strings;
@@ -36,13 +73,13 @@ public class FileSearchUtil {
         } else {
             strings = FileSearchUtil.readRangeLine(file, charset, calculate);
         }
-        searchList(strings, searchKey, cacheBeforeCount, afterCount, consumer);
-
+        int showLine = searchList(strings, searchKey, cacheBeforeCount, afterCount, consumer);
+        return StrUtil.format("在 {} 行中搜索到并显示 {} 行", CollUtil.size(strings), showLine);
     }
 
-    private static void searchList(Collection<Tuple> strings, String searchKey, int cacheBeforeCount, int afterCount, Consumer<Tuple> consumer) {
+    private static int searchList(Collection<Tuple> strings, String searchKey, int beforeCount, int afterCount, Consumer<Tuple> consumer) {
         AtomicInteger hitIndex = new AtomicInteger(0);
-        LimitQueue<Tuple> beforeQueue = new LimitQueue<>(cacheBeforeCount);
+        LimitQueue<Tuple> beforeQueue = new LimitQueue<>(beforeCount);
         List<Integer> cacheLineNum = new LinkedList<>();
         strings.forEach(tuple -> {
             String s = tuple.get(1);
@@ -61,11 +98,12 @@ public class FileSearchUtil {
             if (i > 0 && index > i && index <= i + afterCount) {
                 checkEchoCache(cacheLineNum, tuple, consumer);
             }
-            if (cacheBeforeCount > 0) {
+            if (beforeCount > 0) {
                 //
                 beforeQueue.offerFirst(tuple);
             }
         });
+        return CollUtil.size(cacheLineNum);
     }
 
     private static void checkEchoCache(List<Integer> cacheLineNum, Tuple tuple, Consumer<Tuple> consumer) {

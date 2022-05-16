@@ -51,8 +51,8 @@
                     temp = {
                       ...temp,
                       projectList: temp.projectList.map((item, index1) => {
-                        if (index1 === index) {
-                          return Object.assign(item, { projectId: '' });
+                        if (index1 === index && item.projectId) {
+                          return Object.assign(item, { projectId: undefined });
                         }
                         return item;
                       }),
@@ -67,8 +67,8 @@
             </a-col>
             <a-col :span="11">
               <span>项目: </span>
-              <a-select style="width: 80%" v-model="item.projectId" :placeholder="`请选择项目`">
-                <a-select-option value=""> 请先选择节点</a-select-option>
+              <a-select :disabled="!item.nodeId" style="width: 80%" v-model="item.projectId" :placeholder="`请选择项目`">
+                <!-- <a-select-option value=""> 请先选择节点</a-select-option> -->
                 <template v-if="nodeProjectList[item.nodeId]">
                   <a-select-option
                     v-for="project in nodeProjectList[item.nodeId].projects"
@@ -318,13 +318,6 @@ export default {
     handleLogRead(record) {
       // console.log(record);
       this.temp = Object.assign({}, record, { projectList: JSON.parse(record.nodeProject), cacheData: JSON.parse(record.cacheData || "{}") });
-
-      // const cacheData = this.temp.cacheData;
-      // cacheData.useProjectId = this.temp.projectList[0].projectId;
-      // cacheData.useNodeId = this.temp.projectList[0].nodeId;
-      // cacheData.afterCount = 10;
-      // cacheData.beforeCount = 0;
-      // this.temp = { ...this.temp, cacheData: cacheData };
       this.logReadVisible = true;
       //
     },
