@@ -221,6 +221,7 @@ public class TestBigFileRead {
         System.out.println(Arrays.toString(FileSearchUtil.calculate(0, 3, true)));
 
         System.out.println(Arrays.toString(FileSearchUtil.calculate(2, 3, false)));
+        System.out.println(Arrays.toString(FileSearchUtil.calculate(100, 100, false)));
         System.out.println(Arrays.toString(FileSearchUtil.calculate(2, 3, true)));
 
         System.out.println(Arrays.toString(FileSearchUtil.calculate(20, 3, true)));
