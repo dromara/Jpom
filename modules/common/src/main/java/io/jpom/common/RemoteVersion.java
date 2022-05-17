@@ -77,7 +77,7 @@ public class RemoteVersion extends BaseJsonModel {
      * <p>
      * 2. https://jpom.io/docs/release-versions.json
      * <p>
-     * 3. https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/docs/release-versions.json
+     * 3. https://jpom-docs.keepbx.cn/docs/release-versions.json
      */
     private static final String DEFAULT_URL = "https://jpom.io/docs/release-versions.json";
     /**
