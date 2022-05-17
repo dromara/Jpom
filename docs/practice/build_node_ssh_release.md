@@ -53,7 +53,7 @@ wget -O node-v16.13.1-linux-x64.tar.gz https://oss.npmmirror.com/dist/node/v16.1
 mkdir -p /usr/node/ && tar -zxf node-v16.13.1-linux-x64.tar.gz  -C /usr/node/
 ```
 
-![node1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/node1.png)
+![node1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/node1.png)
 
 配置环境变量
 
@@ -104,27 +104,27 @@ systemctl start nginx
 
 第一次使用系统需要设置一个系统管理员账号（系统管理员账号密码有强度要求，请安装提示设置。同时也请您牢记系统管理员账号）
 
-![install-user1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install-user1.png)
-![install-user2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install-user2.png)
+![install-user1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install-user1.png)
+![install-user2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install-user2.png)
 
 ### 在 Jpom 中添加 ssh 信息
 
-1. ![ssh-list](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/ssh-list.png)
-2. ![ssh-add](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/ssh-add.png)
-3. ![ssh-add2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/ssh-add2.png)
+1. ![ssh-list](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/ssh-list.png)
+2. ![ssh-add](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/ssh-add.png)
+3. ![ssh-add2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/ssh-add2.png)
 
 注意这里一定要配置：文件目录，文件目录为授权允许在 Jpom 管理的文件夹，这里为后面构建发布会使用到
 
 ## 第六步：创建构建仓库、创建构建信息
 
 1. 添加仓库
-   1. ![repository-list](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/repository-list.png)
-   2. ![repository-add1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/repository-add1.png)
-   3. ![repository-add2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/repository-add2.png)
+   1. ![repository-list](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/repository-list.png)
+   2. ![repository-add1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/repository-add1.png)
+   3. ![repository-add2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/repository-add2.png)
 2. 添加构建信息
-   1. ![build-list](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/build-list.png)
-   2. ![build-add1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/build-add1.png)
-   3. ![build-ssh](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/build-ssh.png)
+   1. ![build-list](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/build-list.png)
+   2. ![build-add1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/build-add1.png)
+   3. ![build-ssh](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/build-ssh.png)
    4. 构建命令解释：`cd antdv && npm i && npm run build` 由于仓库是多模块项目的仓库，首先需要切换到对应到目录（如果项目存在仓库根路径则不需要切换到对应的目录），如果执行对应到构建命令，由于 node 项目构建都需要装包这里先执行 `npm i`装包再执行 `npm run build` 多条命令用 && 拼接是为了保证上一条命令执行成功才执行下一条
    5. 产物目录解释：`antdv/dist` 由于当前项目存储到 antdv 目录中，构建完成将生成 dist 目录，那么这里需要填写：`antdv/dist`，这里注意需要添加仓库路径下面到相对路径
    6. ssh/目录，是选择发布到哪个 ssh 中的哪个目录里面
@@ -132,19 +132,19 @@ systemctl start nginx
 3. 执行构建
    1. 第一次构建可能需要较长时间，是因为需要安装依赖包。加快构建速度也可以考虑修改镜像源地址
    2. 构建中请注意执行构建命令过程中是否发生错误信息影响到没有达到预期到构建结果（没有对应到构建产物）
-   3. ![build-release-ssh](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/build-release-ssh.png)
+   3. ![build-release-ssh](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/build-release-ssh.png)
 
 ## 第七步：配置 nginx 访问
 
 1. 查看文件是否上传成功 `/home/web/testvue`
-   2. ![ssh-view](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/ssh-view.png)
+   2. ![ssh-view](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/ssh-view.png)
 2. 配置 nginx 
    1. `vim /etc/nginx/conf.d/default.conf` 实际中请根据业务配置来变更配置路径和方式
-   2. ![ssh-edit-nginx](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/ssh-edit-nginx.png)
+   2. ![ssh-edit-nginx](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/ssh-edit-nginx.png)
 
 ## 第八步：愉快地使用前端项目
 
-![use](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/use.png)
+![use](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/use.png)
 
 
 # Jpom 链接
@@ -157,6 +157,6 @@ Github: `https://github.com/dromara/Jpom`
 
 常见问题：`https://jpom-docs.keepbx.cn/docs/#/FQA/FQA`
 
- ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/wx_qrcode.jpg)
+ ![微信群：jpom66 (请备注 Jpom)](https://jpom-docs.keepbx.cn/images/wx_qrcode.jpg)
 
 

@@ -3,7 +3,7 @@
 1. 码云捐赠赞赏
    1. [在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
 2. 微信二维码赞赏
-   1. [点击查看二维码](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/wx_praise_small.png)
+   1. [点击查看二维码](https://jpom-docs.keepbx.cn/images/wx_praise_small.png)
 
 # 赞赏公示-2022
 

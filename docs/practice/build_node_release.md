@@ -144,44 +144,44 @@ systemctl start nginx
 1. 进入节点管理
    1. ![node-list2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/node-list2.png)
 2. 配置白名单信息
-   1. ![node-conf1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/node-conf1.png)
-   2. ![node-conf12](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/node-conf2.png)
+   1. ![node-conf1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/node-conf1.png)
+   2. ![node-conf12](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/node-conf2.png)
    3. 注意这里的项目路径是指，咋们节点项目允许所在的文件夹路径、nginx 路径是指咋们允许在线编辑的 nginx 配置文件的文件夹路径
    4. nginx 配置建议使用 `include /etc/nginx/conf.d/*.conf` 来管理
 3. 进入项目列表
-   1. ![project-list1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/project-list1.png)
+   1. ![project-list1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/project-list1.png)
 4. 创建 `File 类型项目`
-   1. ![project-add](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/project-add.png)
+   1. ![project-add](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/project-add.png)
 
 ## 第八步：创建构建仓库、创建构建信息
 
 1. 添加仓库
-   1. ![repository-list](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/repository-list.png)
-   2. ![repository-add1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/repository-add1.png)
-   3. ![repository-add2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/repository-add2.png)
+   1. ![repository-list](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/repository-list.png)
+   2. ![repository-add1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/repository-add1.png)
+   3. ![repository-add2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/repository-add2.png)
 2. 添加构建信息
-   1. ![build-list](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/build-list.png)
-   2. ![build-add1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/build-add1.png)
-   3. ![build-add2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/build-add2.png)
+   1. ![build-list](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/build-list.png)
+   2. ![build-add1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/build-add1.png)
+   3. ![build-add2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/build-add2.png)
    4. 构建命令解释：`cd antdv && npm i && npm run build` 由于仓库是多模块项目的仓库，首先需要切换到对应到目录（如果项目存在仓库根路径则不需要切换到对应的目录），如果执行对应到构建命令，由于 node 项目构建都需要装包这里先执行 `npm i`装包再执行 `npm run build` 多条命令用 && 拼接是为了保证上一条命令执行成功才执行下一条
    5. 产物目录解释：`antdv/dist` 由于当前项目存储到 antdv 目录中，构建完成将生成 dist 目录，那么这里需要填写：`antdv/dist`，这里注意需要添加仓库路径下面到相对路径
 3. 执行构建
    1. 第一次构建可能需要较长时间，是因为需要安装依赖包。加快构建速度也可以考虑修改镜像源地址
    2. 构建中请注意执行构建命令过程中是否发生错误信息影响到没有达到预期到构建结果（没有对应到构建产物）
-   3. ![build-release](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/build-release.png)
+   3. ![build-release](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/build-release.png)
 
 ## 第九步：检查项目文件夹是否正确、配置 nginx 访问
 
 1. 查看项目文件夹里面的文件
    1. 当前项目文件夹 `/home/test/vue` 由所选的项目路径+添加的文件路径组成
-   2. ![project-file](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/project-file.png)
+   2. ![project-file](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/project-file.png)
 2. 配置 nginx 
-   1. ![nginx-list](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/nginx-list.png)
-   2. ![nginx-edit](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/nginx-edit.png)
+   1. ![nginx-list](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/nginx-list.png)
+   2. ![nginx-edit](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/nginx-edit.png)
 
 ## 第十步：愉快地使用前端项目
 
-![use](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/use.png)
+![use](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/use.png)
 
 
 # Jpom 链接
@@ -194,4 +194,4 @@ Github: `https://github.com/dromara/Jpom`
 
 常见问题：`https://jpom-docs.keepbx.cn/docs/#/FQA/FQA`
 
- ![微信群：jpom66 (请备注 Jpom)](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/wx_qrcode.jpg)
+ ![微信群：jpom66 (请备注 Jpom)](https://jpom-docs.keepbx.cn/images/wx_qrcode.jpg)
