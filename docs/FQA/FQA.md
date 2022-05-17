@@ -540,7 +540,7 @@ https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4770092
 1. 检查 ps 命令筛选是否准确唯一，如果筛选关键词错误请先修正筛选关键词
 2. 使用相关命令实现批量 kill 进程
 
-### 批量关键进程相关命令举例：
+### 批量关闭进程相关命令举例：
 
 - kill -9 $(ps aux |grep "xxx"| awk '{print $2}')
 - kill -9 $(pgrep xxx)
