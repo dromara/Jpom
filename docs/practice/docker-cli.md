@@ -1,4 +1,4 @@
-![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom_logo.png)
+![](https://jpom-docs.keepbx.cn/images/jpom_logo.png)
 
 ##  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
 
@@ -25,9 +25,9 @@ mkdir -p /home/jpom/server/
 apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
 ```
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/install1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/install1.png)
 
-![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/install2.png)
+![install2](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/install2.png)
 
 ### 初始化服务端
 
@@ -35,13 +35,13 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 > 添加一个超级管理员账号，请妥善保管此账号同时请设置安全度较强的密码
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/inits1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/inits1.png)
 
 #### 开启账号 MFA
 
 > 为了系统安全，强烈建议超级管理员账号开启 MFA 两步验证
 >
-![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/inits2.png)
+![install2](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/inits2.png)
 
 ## 安装 docker
 
@@ -136,7 +136,7 @@ fi
 
 证书示例：
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/tls1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/tls1.png)
 
 ## 配置 docker
 
@@ -144,7 +144,7 @@ fi
 
 systemctl status docker
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/service1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/service1.png)
 
 ### 配置 tcp + tls  （非必须）
 
@@ -152,7 +152,7 @@ systemctl status docker
 
 `vim /lib/systemd/system/docker.service`
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/service2.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/service2.png)
 
 ExecStart 需要添加内容
 
@@ -172,7 +172,7 @@ ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
 
 部分情况需要删除：`-H fd://`
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/service3.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/service3.png)
 
 ### 重启 docker 
 
@@ -184,20 +184,20 @@ systemctl daemon-reload && systemctl restart docker
 
 ## 添加 docker
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/add-docker1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/add-docker1.png)
 
 注意这里 host 为：`tcp://127.0.0.1:2375` 这里因为连接本地 docker 所有使用 127.0.0.1 实际中请更换
 
 证书为压缩文件，压缩文件需要包含生成证书文件：`key.pem` `ca.pem` `cert.pem`
 
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/ca1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/ca1.png)
 
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/add-docker2.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/add-docker2.png)
 
 ## Jpom 中使用
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/docker-constole.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/docker-constole.png)
 
 > docker 相关更多正在努力开发中💪 敬请期待

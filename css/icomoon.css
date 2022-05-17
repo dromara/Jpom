@@ -1,10 +1,10 @@
 @font-face {
 	font-family: 'icomoon';
-	src:url('https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/fonts/icomoon/icomoon.eot?qtatmt');
-	src:url('https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/fonts/icomoon/icomoon.eot?qtatmt#iefix') format('embedded-opentype'),
-		url('https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/fonts/icomoon/icomoon.ttf?qtatmt') format('truetype'),
-		url('https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/fonts/icomoon/icomoon.woff?qtatmt') format('woff'),
-		url('https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/fonts/icomoon/icomoon.svg?qtatmt#icomoon') format('svg');
+	src:url('https://jpom-docs.keepbx.cn/fonts/icomoon/icomoon.eot?qtatmt');
+	src:url('https://jpom-docs.keepbx.cn/fonts/icomoon/icomoon.eot?qtatmt#iefix') format('embedded-opentype'),
+		url('https://jpom-docs.keepbx.cn/fonts/icomoon/icomoon.ttf?qtatmt') format('truetype'),
+		url('https://jpom-docs.keepbx.cn/fonts/icomoon/icomoon.woff?qtatmt') format('woff'),
+		url('https://jpom-docs.keepbx.cn/fonts/icomoon/icomoon.svg?qtatmt#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }

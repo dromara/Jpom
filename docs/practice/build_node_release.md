@@ -1,4 +1,4 @@
-![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom_logo.png)
+![](https://jpom-docs.keepbx.cn/images/jpom_logo.png)
 
 ##  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
 
@@ -36,10 +36,10 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ### 执行命令后控制台输出如下
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install1.png)
-![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install2.png)
-![install3](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install3.png)
-![install4](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install4.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install1.png)
+![install2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install2.png)
+![install3](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install3.png)
+![install4](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install4.png)
 
 ## 第二步：安装 node 环境
 
@@ -56,7 +56,7 @@ wget -O node-v16.13.1-linux-x64.tar.gz https://oss.npmmirror.com/dist/node/v16.1
 mkdir -p /usr/node/ && tar -zxf node-v16.13.1-linux-x64.tar.gz  -C /usr/node/
 ```
 
-![node1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/node1.png)
+![node1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/node1.png)
 
 配置环境变量
 
@@ -87,8 +87,8 @@ mkdir -p /home/jpom/agent && cd /home/jpom/agent
 yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
 ```
 
-![agent1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/agent1.png)
-![agent2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/agent2.png)
+![agent1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/agent1.png)
+![agent2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/agent2.png)
 
 图 2 中圈出来第为插件端的账号密码
 
@@ -124,25 +124,25 @@ systemctl start nginx
 
 第一次使用系统需要设置一个系统管理员账号（系统管理员账号密码有强度要求，请安装提示设置。同时也请您牢记系统管理员账号）
 
-![install-user1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install-user1.png)
-![install-user2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install-user2.png)
+![install-user1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install-user1.png)
+![install-user2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install-user2.png)
 
 ### 添加 Jpom 节点
 
 节点列表还没有任何节点，我们需要将我们之前安装等插件端添加到服务端中来
 
-![node-list1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/node-list1.png)
+![node-list1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/node-list1.png)
 
-![add-node](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/add-node.png)
+![add-node](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/add-node.png)
 
-![add-node2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/add-node2.png)
+![add-node2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/add-node2.png)
 
 图 3 中的节点密码为上面步骤中第四步中安装并启动插件端后控制台输出第账号和密码
 
 ## 第七步：配置节点信息、创建节点项目
 
 1. 进入节点管理
-   1. ![node-list2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/node-list2.png)
+   1. ![node-list2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/node-list2.png)
 2. 配置白名单信息
    1. ![node-conf1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/node-conf1.png)
    2. ![node-conf12](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/node-conf2.png)

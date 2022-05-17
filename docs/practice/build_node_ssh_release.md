@@ -1,4 +1,4 @@
-![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom_logo.png)
+![](https://jpom-docs.keepbx.cn/images/jpom_logo.png)
 
 ##  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
 
@@ -33,10 +33,10 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ### 执行命令后控制台输出如下
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install1.png)
-![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install2.png)
-![install3](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install3.png)
-![install4](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_node_release/install4.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install1.png)
+![install2](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install2.png)
+![install3](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install3.png)
+![install4](https://jpom-docs.keepbx.cn/tutorial/images/build_node_release/install4.png)
 
 ## 第二步：安装 node 环境
 

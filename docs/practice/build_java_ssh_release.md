@@ -1,4 +1,4 @@
-![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom_logo.png)
+![](https://jpom-docs.keepbx.cn/images/jpom_logo.png)
 
 ##  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
 
@@ -23,9 +23,9 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 #### 执行命令后控制台输出如下
 
-![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/ssh_release2/setp1.1.png)
+![](https://jpom-docs.keepbx.cn/tutorial/images/ssh_release2/setp1.1.png)
 
-![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/ssh_release2/setp1.2.png)
+![](https://jpom-docs.keepbx.cn/tutorial/images/ssh_release2/setp1.2.png)
 
 ![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/ssh_release2/setp1.3.png)
 

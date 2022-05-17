@@ -1,4 +1,4 @@
-![](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/images/jpom_logo.png)
+![](https://jpom-docs.keepbx.cn/images/jpom_logo.png)
 
 ##  `简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件`
 
@@ -24,9 +24,9 @@ mkdir -p /home/jpom/server/
 apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
 ```
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/install1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/install1.png)
 
-![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/install2.png)
+![install2](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/install2.png)
 
 ### 初始化服务端
 
@@ -34,13 +34,13 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 > 添加一个超级管理员账号，请妥善保管此账号同时请设置安全度较强的密码
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/inits1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/inits1.png)
 
 #### 开启账号 MFA
 
 > 为了系统安全，强烈建议超级管理员账号开启 MFA 两步验证
 >
-![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/inits2.png)
+![install2](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/inits2.png)
 
 ## 安装 docker
 
@@ -116,7 +116,7 @@ rm -vf client.csr server.csr ca.srl extfile.cnf
 
 证书示例：
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/tls1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/tls1.png)
 
 ## 配置 docker
 
@@ -124,7 +124,7 @@ rm -vf client.csr server.csr ca.srl extfile.cnf
 
 systemctl status docker
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/service1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/service1.png)
 
 ### 配置 tcp + tls   （非必须）
 
@@ -132,7 +132,7 @@ systemctl status docker
 
 `vim /lib/systemd/system/docker.service`
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/service2.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/service2.png)
 
 ExecStart 需要添加内容
 
@@ -143,21 +143,21 @@ ExecStart 需要添加内容
 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --tlsverify --tlscacert=/home/docker/tls-ca/ca.pem --tlscert=/home/docker/tls-ca/server-cert.pem --tlskey=/home/docker/tls-ca/server-key.pem -H tcp://0.0.0.0:2375
 ```
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/service3.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/service3.png)
 
 ## 添加 docker
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/add-docker1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/add-docker1.png)
 
 注意这里 host 为：`tcp://127.0.0.1:2375` 这里因为连接本地 docker 所有使用 127.0.0.1 实际中请更换
 
 证书为压缩文件，压缩文件需要包含生成证书文件：`key.pem` `ca.pem` `cert.pem`
 
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/ca1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/ca1.png)
 
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/docker-cli/add-docker2.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/docker-cli/add-docker2.png)
 
 
 ## 安装插件端
@@ -168,8 +168,8 @@ mkdir -p /home/jpom/agent/
 apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
 ```
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/install-agent1.png)
-![install2](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/install-agent2.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/install-agent1.png)
+![install2](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/install-agent2.png)
 
 ### 添加节点
 
@@ -179,13 +179,13 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 节点账号密码在安装启动成功后会输出到控制台，请根据输出到内容填写。如果自己修改了账号密码则填写修改后到
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/inita1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/inita1.png)
 
 ### 配置白名单
 
 项目白名单是为了防止随意配置目录，同时也为了保护系统目录
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_java/inita2.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_java/inita2.png)
 
 
 ### 创建项目（jar）
@@ -194,8 +194,8 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 这里使用 jpom 演示的仓库中的 python
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/repo1.png)
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/project_dsl_python/repo2.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_python/repo1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/project_dsl_python/repo2.png)
 
 ## 添加容器构建
 
@@ -203,7 +203,7 @@ apt install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 发布项目需要选择节点再选择项目
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_docker_java_node_release/edit-build1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/build_docker_java_node_release/edit-build1.png)
 
 DSL 示例：
 ```
@@ -235,9 +235,9 @@ steps:
 
 执行构建
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_docker_java_node_release/build1.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/build_docker_java_node_release/build1.png)
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_docker_java_node_release/build2.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/build_docker_java_node_release/build2.png)
 
 第一次构建需要较长时间，请耐心等待
 如果构建中发生非预期错误，请根据错误信息检查或者看看相关环境是否匹配
@@ -245,4 +245,4 @@ steps:
 
 ## 查看项目
 
-![install1](https://cdn.jsdelivr.net/gh/dromara/Jpom@docs/tutorial/images/build_docker_java_node_release/project-list.png)
+![install1](https://jpom-docs.keepbx.cn/tutorial/images/build_docker_java_node_release/project-list.png)
