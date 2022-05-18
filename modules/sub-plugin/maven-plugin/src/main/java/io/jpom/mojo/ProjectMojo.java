@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
  * mojo
  *
  * @author bwcx_jzy
- * @date 2019/11/18
+ * @since 2019/11/18
  */
 @Mojo(name = "jpom-project", defaultPhase = LifecyclePhase.PACKAGE)
 public class ProjectMojo extends AbstractMojo {

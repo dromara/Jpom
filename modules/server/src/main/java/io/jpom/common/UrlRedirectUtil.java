@@ -38,7 +38,7 @@ import java.util.function.Function;
  * 配置nginx 代理实现
  *
  * @author bwcx_jzy
- * @date 2019/11/14
+ * @since 2019/11/14
  */
 public class UrlRedirectUtil {
 

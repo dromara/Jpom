@@ -26,7 +26,7 @@ package io.jpom.socket;
  * 控制台socket 操作枚举
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 public enum ConsoleCommandOp {
     /**

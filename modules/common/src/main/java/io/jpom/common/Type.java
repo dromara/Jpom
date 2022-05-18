@@ -28,7 +28,7 @@ import java.util.function.Function;
  * Jpom 程序类型
  *
  * @author jiangzeyin
- * @date 2019/4/17
+ * @since 2019/4/17
  */
 public enum Type {
 	/**

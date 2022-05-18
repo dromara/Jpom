@@ -215,7 +215,7 @@ export default {
         nodeId: record.nodeId,
       }).then((res) => {
         if (res.code === 200) {
-          this.temp = Object.assign(res.data);
+          this.temp = Object.assign({}, res.data);
           this.temp.nodeId = record.nodeId;
           //
           this.editScriptVisible = true;
@@ -276,12 +276,12 @@ export default {
     },
     // 执行 Script
     handleExec(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `控制台(${this.temp.name})`;
       this.drawerConsoleVisible = true;
     },
     handleLog(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `日志(${this.temp.name})`;
       this.drawerLogVisible = true;
     },

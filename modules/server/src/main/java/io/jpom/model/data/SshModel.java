@@ -31,6 +31,8 @@ import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.nio.charset.Charset;
 import java.util.List;
@@ -39,10 +41,12 @@ import java.util.List;
  * ssh 信息
  *
  * @author bwcx_jzy
- * @date 2019/8/9
+ * @since 2019/8/9
  */
 @TableName(value = "SSH_INFO", name = "SSH 信息")
 @Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public class SshModel extends BaseWorkspaceModel {
 
     private String name;
@@ -77,6 +81,14 @@ public class SshModel extends BaseWorkspaceModel {
      */
     private String allowEditSuffix;
 
+    public SshModel(String id) {
+        this.setId(id);
+    }
+
+    public SshModel(String id, String workspaceId) {
+        this.setId(id);
+        this.setWorkspaceId(workspaceId);
+    }
 
     public ConnectType connectType() {
         return EnumUtil.fromString(ConnectType.class, this.connectType, ConnectType.PASS);

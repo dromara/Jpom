@@ -47,7 +47,7 @@ import java.util.Map;
  * 在线升级
  *
  * @author bwcx_jzy
- * @date 2021/8/3
+ * @since 2021/8/3
  */
 @ServerEndpoint(value = "/node_update")
 @Component

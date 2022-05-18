@@ -46,7 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 插件端,控制台socket
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 @ServerEndpoint(value = "/tomcat_log")
 @Component

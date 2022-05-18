@@ -55,7 +55,7 @@ import java.util.stream.Stream;
  * Auto import build.json data to DB
  *
  * @author Hotstrip
- * @date 2021-08-02
+ * @since 2021-08-02
  */
 public class LoadBuildJsonToDB {
 	private LoadBuildJsonToDB() {

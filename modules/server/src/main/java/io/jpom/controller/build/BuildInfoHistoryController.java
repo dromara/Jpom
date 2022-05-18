@@ -23,6 +23,7 @@
 package io.jpom.controller.build;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -126,17 +128,23 @@ public class BuildInfoHistoryController extends BaseServerController {
     }
 
     /**
-     * 构建
+     * 删除构建历史，支持批量删除，用逗号分隔
      *
      * @param logId id
      * @return json
      */
     @RequestMapping(value = "/build/history/delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
-        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
-        Objects.requireNonNull(buildHistoryLog);
-        JsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(buildHistoryLog);
-        return jsonMessage.toString();
+    public JsonMessage<String> delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
+        List<String> strings = StrUtil.splitTrim(logId, StrUtil.COMMA);
+        for (String itemId : strings) {
+            BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(itemId, getRequest());
+            Objects.requireNonNull(buildHistoryLog);
+            JsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(buildHistoryLog);
+            if (jsonMessage.getCode() != 200) {
+                return jsonMessage;
+            }
+        }
+        return new JsonMessage<>(200, "删除成功");
     }
 }

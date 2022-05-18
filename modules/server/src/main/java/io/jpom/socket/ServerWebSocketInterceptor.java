@@ -55,7 +55,7 @@ import java.util.Map;
  * socket 拦截器、鉴权
  *
  * @author jiangzeyin
- * @date 2019/4/19
+ * @since 2019/4/19
  */
 public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 

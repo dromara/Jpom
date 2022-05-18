@@ -24,7 +24,7 @@ import cn.hutool.core.util.StrUtil;
 
 /**
  * @author bwcx_jzy
- * @date 2019/8/4
+ * @since 2019/8/4
  */
 public class TestVersion {
     public static void main(String[] args) {

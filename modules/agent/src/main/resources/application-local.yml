@@ -1,0 +1,5 @@
+project:
+  # 项目文件备份保留个数,大于 0 才会备份
+  fileBackupCount: 5
+  # 限制备份指定文件后缀（支持正则）
+  #fileBackupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]

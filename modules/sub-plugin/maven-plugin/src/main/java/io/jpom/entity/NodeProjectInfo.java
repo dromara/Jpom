@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * @author bwcx_jzy
- * @date 2019/11/19
+ * @since 2019/11/19
  */
 public class NodeProjectInfo extends ProjectInfo {
 

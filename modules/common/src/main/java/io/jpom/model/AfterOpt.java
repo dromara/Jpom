@@ -24,7 +24,7 @@ package io.jpom.model;
 
 /**
  * @author bwcx_jzy
- * @date 2020/3/21
+ * @since 2020/3/21
  */
 public enum AfterOpt implements BaseEnum {
 	/**

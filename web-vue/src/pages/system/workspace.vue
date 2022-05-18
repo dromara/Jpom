@@ -47,11 +47,11 @@
     <a-modal v-model="editVisible" title="编辑工作空间" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="名称" prop="name">
-          <a-input v-model="temp.name" placeholder="工作空间名称" />
+          <a-input v-model="temp.name" :maxLength="50" placeholder="工作空间名称" />
         </a-form-model-item>
 
         <a-form-model-item label="描述" prop="description">
-          <a-input v-model="temp.description" type="textarea" :rows="5" placeholder="工作空间描述" />
+          <a-input v-model="temp.description" maxLength="200" type="textarea" :rows="5" placeholder="工作空间描述" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -99,13 +99,13 @@
     <a-modal v-model="editEnvVisible" title="编辑环境变量" width="50vw" @ok="handleEnvEditOk" :maskClosable="false">
       <a-form-model ref="editEnvForm" :rules="rulesEnv" :model="envTemp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="名称" prop="name">
-          <a-input v-model="envTemp.name" placeholder="变量名称" />
+          <a-input v-model="envTemp.name" :maxLength="50" placeholder="变量名称" />
         </a-form-model-item>
         <a-form-model-item label="值" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
           <a-input v-model="envTemp.value" type="textarea" :rows="5" placeholder="变量值" />
         </a-form-model-item>
         <a-form-model-item label="描述" prop="description">
-          <a-input v-model="envTemp.description" type="textarea" :rows="5" placeholder="变量描述" />
+          <a-input v-model="envTemp.description" maxLength="200" type="textarea" :rows="5" placeholder="变量描述" />
         </a-form-model-item>
         <a-form-model-item prop="privacy">
           <template slot="label">

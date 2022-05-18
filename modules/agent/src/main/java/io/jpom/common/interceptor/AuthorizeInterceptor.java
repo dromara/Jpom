@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletResponse;
  * 授权拦截
  *
  * @author jiangzeyin
- * @date 2019/4/17
+ * @since 2019/4/17
  */
 @InterceptorPattens()
 public class AuthorizeInterceptor extends BaseInterceptor {

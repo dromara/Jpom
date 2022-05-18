@@ -185,6 +185,7 @@ public class IndexControl extends BaseServerController {
         data.put("loginTitle", instance.getLoginTitle());
         data.put("disabledGuide", instance.getDisabledGuide());
         data.put("disabledCaptcha", instance.getDisabledCaptcha());
+        data.put("notificationPlacement", instance.getNotificationPlacement());
         if (userService.canUse()) {
             return JsonMessage.getString(200, "success", data);
         }

@@ -20,29 +20,33 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.service.dblog;
+import cn.hutool.core.thread.ThreadUtil;
+import org.junit.jupiter.api.Test;
 
-import io.jpom.model.data.OutGivingNodeProject;
-import io.jpom.model.log.OutGivingLog;
-import io.jpom.service.h2db.BaseWorkspaceService;
-import org.springframework.stereotype.Service;
+import java.util.concurrent.*;
 
 /**
- * 分发日志
- *
  * @author bwcx_jzy
- * @date 2019/7/20
+ * @since 2022/5/13
  */
-@Service
-public class DbOutGivingLogService extends BaseWorkspaceService<OutGivingLog> {
+public class TestThread {
+
+    @Test
+    public void test() throws ExecutionException, InterruptedException {
+        ExecutorService executorService = ThreadUtil.newSingleExecutor();
 
 
-	@Override
-	public void insert(OutGivingLog outGivingLog) {
-		outGivingLog.setStartTime(System.currentTimeMillis());
-		if (outGivingLog.getStatus() == OutGivingNodeProject.Status.Cancel.getCode()) {
-			outGivingLog.setEndTime(System.currentTimeMillis());
-		}
-		super.insert(outGivingLog);
-	}
+        for (int i = 0; i < 5; i++) {
+            int finalI = i;
+            executorService.submit(new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    System.out.println(finalI);
+                    return finalI;
+                }
+            });
+        }
+
+        ThreadUtil.sleep(10, TimeUnit.SECONDS);
+    }
 }

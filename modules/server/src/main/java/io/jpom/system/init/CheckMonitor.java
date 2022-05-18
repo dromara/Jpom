@@ -51,7 +51,7 @@ import java.util.Map;
  * 检查监控数据状态
  *
  * @author bwcx_jzy
- * @date 2019/7/14
+ * @since 2019/7/14
  */
 @PreLoadClass(value = Integer.MAX_VALUE)
 public class CheckMonitor {

@@ -43,7 +43,7 @@ import java.util.Objects;
  * 代理socket 会话
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 public class ProxySession extends WebSocketClient {
 	private final WebSocketSession session;

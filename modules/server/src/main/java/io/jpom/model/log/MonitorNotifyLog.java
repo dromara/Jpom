@@ -31,7 +31,7 @@ import io.jpom.service.h2db.TableName;
  * 监控日志
  *
  * @author bwcx_jzy
- * @date 2019/7/13
+ * @since 2019/7/13
  */
 @TableName(value = "MONITORNOTIFYLOG", name = "监控通知")
 public class MonitorNotifyLog extends BaseWorkspaceModel {

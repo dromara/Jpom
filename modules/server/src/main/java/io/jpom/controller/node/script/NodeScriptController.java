@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServletRequest;
  * 脚本管理
  *
  * @author jiangzeyin
- * @date 2019/4/24
+ * @since 2019/4/24
  */
 @RestController
 @RequestMapping(value = "/node/script")

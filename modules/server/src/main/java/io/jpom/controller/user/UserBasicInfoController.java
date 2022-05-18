@@ -57,7 +57,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author bwcx_jzy
- * @date 2019/8/10
+ * @since 2019/8/10
  */
 @RestController
 @RequestMapping(value = "/user")

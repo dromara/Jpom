@@ -37,7 +37,7 @@ import lombok.EqualsAndHashCode;
  * 构建物基类
  *
  * @author bwcx_jzy
- * @date 2019/7/19
+ * @since 2019/7/19
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -109,6 +109,11 @@ public class BuildExtraModule extends BaseModel {
 	 * 是否保留构建历史产物
 	 */
 	private Boolean saveBuildFile;
+
+    /**
+     * 构建的时候判断仓库代码是否有变动，true 表示需要判断代码有变动才触发构建
+     */
+    private Boolean checkRepositoryDiff;
 
 	public String getResultDirFile() {
 		if (resultDirFile == null) {

@@ -29,7 +29,7 @@ import io.jpom.model.log.OutGivingLog;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.service.dblog.DbOutGivingLogService;
+import io.jpom.service.outgiving.DbOutGivingLogService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 分发日志
  *
  * @author bwcx_jzy
- * @date 2019/7/20
+ * @since 2019/7/20
  */
 @RestController
 @RequestMapping(value = "/outgiving")

@@ -46,7 +46,7 @@ import java.util.List;
  * 构建 service 新版本，数据从数据库里面加载
  *
  * @author Hotstrip
- * @date 2021-08-10
+ * @since 2021-08-10
  **/
 @Service
 public class BuildInfoService extends BaseGroupService<BuildInfoModel> implements ICron<BuildInfoModel>, IStatusRecover {

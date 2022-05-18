@@ -35,7 +35,7 @@ import java.io.IOException;
  * socket 会话对象
  *
  * @author jiangzeyin
- * @date 2018/9/29
+ * @since 2018/9/29
  */
 public class SocketSessionUtil {
 	/**

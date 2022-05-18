@@ -104,11 +104,11 @@
         <a-form-model-item label="名称" prop="name">
           <a-row>
             <a-col :span="10">
-              <a-input v-model="temp.name" placeholder="名称" />
+              <a-input v-model="temp.name" :maxLength="50" placeholder="名称" />
             </a-col>
             <a-col :span="4" style="text-align: right">分组名称：</a-col>
             <a-col :span="10">
-              <custom-select suffixIcon="" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder=""> </custom-select>
+              <custom-select suffixIcon="" :maxLength="50" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder=""> </custom-select>
             </a-col>
           </a-row>
         </a-form-model-item>
@@ -192,7 +192,13 @@
                     <a-button type="link"> 点击查看 <a-icon type="fullscreen" /> </a-button>
                   </p>
                 </template>
-                <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID}、仓库目录下 .env、工作空间变量" />
+                <a-input
+                  v-model="temp.script"
+                  type="textarea"
+                  :auto-size="{ minRows: 2, maxRows: 6 }"
+                  allow-clear
+                  placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID}、仓库目录下 .env、工作空间变量"
+                />
               </a-popover>
             </a-form-model-item>
             <a-form-model-item v-if="temp.buildMode === 1" prop="script">
@@ -257,7 +263,7 @@
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
-              <a-input v-model="temp.resultDirFile" placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist" />
+              <a-input :maxLength="50" v-model="temp.resultDirFile" placeholder="构建产物目录,相对仓库的路径,如 java 项目的 target/xxx.jar vue 项目的 dist" />
             </a-form-model-item>
           </a-collapse-panel>
           <a-collapse-panel key="1">
@@ -300,7 +306,7 @@
               </a-form-model-item>
               <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
                 <a-select show-search allowClear v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
-                  <a-select-option v-for="opt in afterOptList" :key="opt.value">{{ opt.title }}</a-select-option>
+                  <a-select-option v-for="opt in afterOptListSimple" :key="opt.value">{{ opt.title }}</a-select-option>
                 </a-select>
               </a-form-model-item>
               <!-- SSH -->
@@ -457,7 +463,10 @@
               <template slot="label">
                 缓存构建目录
                 <a-tooltip v-show="!temp.id">
-                  <template slot="title"> 开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存) </template>
+                  <template slot="title">
+                    开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存)
+                    、特别说明如果缓存目录中缺失版本控制相关文件将自动删除后重新拉取代码</template
+                  >
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
               </template>
@@ -475,8 +484,19 @@
                     保留产物：
                   </a-tooltip>
                 </a-col>
-                <a-col :span="10">
+                <a-col :span="4">
                   <a-switch v-model="tempExtraData.saveBuildFile" checked-children="是" un-checked-children="否" />
+                </a-col>
+                <a-col :span="4" style="text-align: right">
+                  <a-tooltip>
+                    <template slot="title"> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
+
+                    <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                    差异构建：
+                  </a-tooltip>
+                </a-col>
+                <a-col :span="4">
+                  <a-switch v-model="tempExtraData.checkRepositoryDiff" checked-children="是" un-checked-children="否" />
                 </a-col>
               </a-row>
             </a-form-model-item>
@@ -715,7 +735,7 @@ import {
   statusMap,
   getBuildGroupAll,
 } from "@/api/build-info";
-import { getDishPatchListAll, afterOptList } from "@/api/dispatch";
+import { getDishPatchListAll, afterOptList, afterOptListSimple } from "@/api/dispatch";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { itemGroupBy, parseTime } from "@/utils/time";
@@ -820,6 +840,7 @@ export default {
       triggerVisible: false,
       buildLogVisible: false,
       afterOptList,
+      afterOptListSimple,
       buildConfirmVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -1240,7 +1261,7 @@ export default {
     },
     // 触发器
     handleTrigger(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.tempVue = Vue;
       getTriggerUrl(record.id).then((res) => {
         if (res.code === 200) {
@@ -1290,7 +1311,7 @@ export default {
     },
     // 开始构建
     handleConfirmStartBuild(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.buildConfirmVisible = true;
       this.branchList = [];
       this.branchTagList = [];
@@ -1333,7 +1354,7 @@ export default {
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
-          this.temp = Object.assign(record);
+          this.temp = Object.assign({}, record);
           stopBuild(this.temp.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({

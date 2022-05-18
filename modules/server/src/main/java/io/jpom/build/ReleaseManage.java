@@ -81,7 +81,7 @@ import java.util.stream.Collectors;
  * 发布管理
  *
  * @author bwcx_jzy
- * @date 2019/7/19
+ * @since 2019/7/19
  */
 @Builder
 public class ReleaseManage implements Runnable {

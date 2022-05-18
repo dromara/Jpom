@@ -29,7 +29,7 @@ import lombok.EqualsAndHashCode;
  * 基础实体（带id）
  *
  * @author jiangzeyin
- * @date 2019/3/14
+ * @since 2019/3/14
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

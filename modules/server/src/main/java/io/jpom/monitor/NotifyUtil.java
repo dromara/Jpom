@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 通知util
  *
  * @author bwcx_jzy
- * @date 2019/7/13
+ * @since 2019/7/13
  */
 public class NotifyUtil {
 

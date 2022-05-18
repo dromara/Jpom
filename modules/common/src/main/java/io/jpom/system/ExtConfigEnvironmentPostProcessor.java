@@ -36,7 +36,7 @@ import java.util.List;
  * 动态读取外部配置文件
  *
  * @author jiangzeyin
- * @date 2019/3/5
+ * @since 2019/3/5
  */
 public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcessor {
 

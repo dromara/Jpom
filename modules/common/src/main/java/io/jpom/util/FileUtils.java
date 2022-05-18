@@ -28,24 +28,21 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * 文件工具
  *
  * @author jiangzeyin
- * @date 2019/4/28
+ * @since 2019/4/28
  */
 public class FileUtils {
 
@@ -73,36 +70,42 @@ public class FileUtils {
      * @param startPath 开始路径
      * @return 排序后的json
      */
-    public static JSONArray parseInfo(File[] files, boolean time, String startPath) {
+    public static List<JSONObject> parseInfo(File[] files, boolean time, String startPath) {
+        return parseInfo(CollUtil.newArrayList(files), time, startPath);
+    }
+
+    /**
+     * 对文件信息解析排序
+     *
+     * @param files     文件数组
+     * @param time      是否安装时间排序
+     * @param startPath 开始路径
+     * @return 排序后的json
+     */
+    public static List<JSONObject> parseInfo(Collection<File> files, boolean time, String startPath) {
         if (files == null) {
-            return new JSONArray();
+            return new ArrayList<>();
         }
-        int size = files.length;
-        JSONArray arrayFile = new JSONArray(size);
-        for (File file : files) {
+        return files.stream().map(file -> {
             JSONObject jsonObject = FileUtils.fileToJson(file);
             //
             if (startPath != null) {
                 String levelName = StringUtil.delStartPath(file, startPath, false);
                 jsonObject.put("levelName", levelName);
             }
-            //
-            arrayFile.add(jsonObject);
-        }
-        arrayFile.sort((o1, o2) -> {
-            JSONObject jsonObject1 = (JSONObject) o1;
-            JSONObject jsonObject2 = (JSONObject) o2;
+            return jsonObject;
+        }).sorted((jsonObject1, jsonObject2) -> {
             if (time) {
                 return jsonObject2.getLong("modifyTimeLong").compareTo(jsonObject1.getLong("modifyTimeLong"));
             }
             return jsonObject1.getString("filename").compareTo(jsonObject2.getString("filename"));
-        });
-        final int[] i = {0};
-        arrayFile.forEach(o -> {
-            JSONObject jsonObject = (JSONObject) o;
-            jsonObject.put("index", ++i[0]);
-        });
-        return arrayFile;
+        }).collect(Collectors.toList());
+//        final int[] i = {0};
+//        arrayFile.forEach(o -> {
+//            JSONObject jsonObject = (JSONObject) o;
+//            jsonObject.put("index", ++i[0]);
+//        });
+//        return arrayFile;
     }
 
     /**
@@ -192,6 +195,7 @@ public class FileUtils {
      * @return map
      */
     public static Map<String, String> readEnvFile(File envFile) {
+        HashMap<String, String> map = MapUtil.newHashMap(10);
         if (FileUtil.isFile(envFile)) {
             List<String> list = FileUtil.readLines(envFile, CharsetUtil.CHARSET_UTF_8);
             List<Tuple> collect = list.stream()
@@ -204,8 +208,10 @@ public class FileUtils {
                     }
                     return new Tuple(list1.get(0), list1.get(1));
                 }).filter(Objects::nonNull).collect(Collectors.toList());
-            return CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
+            Map<String, String> envMap = CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
+            // java.lang.UnsupportedOperationException
+            map.putAll(envMap);
         }
-        return new HashMap<>();
+        return map;
     }
 }

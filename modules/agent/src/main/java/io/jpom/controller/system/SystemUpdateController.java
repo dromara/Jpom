@@ -50,7 +50,7 @@ import java.util.Objects;
  * 在线升级
  *
  * @author bwcx_jzy
- * @date 2019/7/22
+ * @since 2019/7/22
  */
 @RestController
 @RequestMapping(value = "system")

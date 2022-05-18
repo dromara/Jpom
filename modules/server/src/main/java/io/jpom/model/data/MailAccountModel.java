@@ -29,7 +29,7 @@ import io.jpom.model.BaseJsonModel;
  * 系统邮箱配置
  *
  * @author bwcx_jzy
- * @date 2019/7/16
+ * @since 2019/7/16
  **/
 public class MailAccountModel extends BaseJsonModel {
 

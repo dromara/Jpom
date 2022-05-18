@@ -29,7 +29,7 @@ import io.jpom.model.BaseJsonModel;
  * 网络端口信息实体
  *
  * @author jiangzeyin
- * @date 2019/4/10
+ * @since 2019/4/10
  */
 public class NetstatModel extends BaseJsonModel {
 	/**

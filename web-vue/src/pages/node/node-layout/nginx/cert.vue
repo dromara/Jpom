@@ -163,7 +163,7 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.temp.type = "edit";
       this.temp.path = this.temp.whitePath;
       this.editCertVisible = true;
@@ -256,7 +256,7 @@ export default {
     },
     // 显示模板
     handleTemplate(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.templateVisible = true;
     },
   },

@@ -10,7 +10,8 @@ services:
     environment:
       "jpom.authorize.token": ${SERVER_TOKEN}
     volumes:
-      - jpom-server:/usr/local/jpom-server
+      - jpom-server-data:/usr/local/jpom-server/data
+      - jpom-server-log:/usr/local/jpom-server/log
     ports:
       - "2122:2122"
   agent01:
@@ -52,4 +53,5 @@ services:
 volumes:
   jpom-agent01:
   jpom-agent02:
-  jpom-server:
+  jpom-server-data:
+  jpom-server-log:

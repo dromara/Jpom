@@ -33,13 +33,14 @@ import java.util.UUID;
 
 /**
  * @author bwcx_jzy
- * @date 2019/9/3
+ * @since 2019/9/3
  */
 public class ContiPerTest {
     @Rule
     public ContiPerfRule i = new ContiPerfRule();
 
 //    @Test
+    @Test
     @PerfTest(invocations = 200000000, threads = 16)
     public void test1() throws Exception {
         IdUtil.fastSimpleUUID();

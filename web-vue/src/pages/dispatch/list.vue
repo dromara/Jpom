@@ -150,10 +150,10 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
+          <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
         <a-form-model-item label="分发名称" prop="name">
-          <a-input v-model="temp.name" placeholder="分发名称" />
+          <a-input v-model="temp.name" :maxLength="50" placeholder="分发名称" />
         </a-form-model-item>
 
         <a-form-model-item label="分发节点" required>
@@ -186,7 +186,7 @@
                   v-for="project in item.project"
                   :disabled="
                     dispatchList.filter((item, nowIndex) => {
-                      return item.projectId === project.projectId && nowIndex !== index;
+                      return item.nodeId === project.nodeId && item.projectId === project.projectId && nowIndex !== index;
                     }).length > 0
                   "
                   :key="project.projectId"
@@ -240,10 +240,10 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
+          <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
         <a-form-model-item label="项目名称" prop="name">
-          <a-input v-model="temp.name" placeholder="项目名称" />
+          <a-input v-model="temp.name" :maxLength="50" placeholder="项目名称" />
         </a-form-model-item>
 
         <a-form-model-item prop="runMode">
@@ -1125,7 +1125,7 @@ export default {
     },
     // 文件管理
     handleFile(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `文件管理(${this.temp.projectId})`;
       this.drawerFileVisible = true;
     },
@@ -1135,7 +1135,7 @@ export default {
     },
     // 控制台
     handleConsole(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `控制台(${this.temp.projectId})`;
       this.drawerConsoleVisible = true;
     },
@@ -1208,7 +1208,9 @@ export default {
     // 添加分发
     addDispachList() {
       if (this.dispatchList.length >= this.totalProjectNum) {
-        this.$$notification.error("已无更多节点项目，请先创建项目");
+        this.$notification.error({
+          message: "已无更多节点项目，请先创建项目",
+        });
         return false;
       }
       this.dispatchList.push({ nodeId: "", projectId: "", index: "", project: [], status: true, placeholder: "请先选择节点", disabled: true });
@@ -1243,9 +1245,6 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
-  margin-bottom: 10px;
-}
 .replica-area {
   width: 300px;
 }

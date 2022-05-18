@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author bwcx_jzy
- * @date 2019/9/4
+ * @since 2019/9/4
  */
 @InterceptorPattens(value = "/api/**")
 public class OpenApiInterceptor extends BaseInterceptor {
