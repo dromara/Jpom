@@ -209,57 +209,56 @@ public class GitUtil {
      */
     public static Tuple getBranchAndTagList(Map<String, Object> parameter) throws Exception {
         String url = (String) parameter.get("url");
-        synchronized (url.intern()) {
-            try {
-                LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository()
-                    .setRemote(url);
-                // 更新凭证
-                setCredentials(lsRemoteCommand, parameter);
-                //
-                Collection<Ref> call = lsRemoteCommand
-                    .setHeads(true)
-                    .setTags(true)
-                    .call();
-                if (CollUtil.isEmpty(call)) {
-                    return null;
-                }
-                Map<String, List<Ref>> refMap = CollStreamUtil.groupByKey(call, ref -> {
-                    String name = ref.getName();
-                    if (name.startsWith(Constants.R_TAGS)) {
-                        return Constants.R_TAGS;
-                    } else if (name.startsWith(Constants.R_HEADS)) {
-                        return Constants.R_HEADS;
-                    }
-                    return null;
-                });
 
-                // branch list
-                List<Ref> branchListRef = refMap.get(Constants.R_HEADS);
-                if (branchListRef == null) {
-                    return null;
-                }
-                List<String> branchList = branchListRef.stream().map(ref -> {
-                    String name = ref.getName();
-                    if (name.startsWith(Constants.R_HEADS)) {
-                        return name.substring((Constants.R_HEADS).length());
-                    }
-                    return null;
-                }).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
-
-                // list tag
-                List<Ref> tagListRef = refMap.get(Constants.R_TAGS);
-                List<String> tagList = tagListRef == null ? new ArrayList<>() : tagListRef.stream().map(ref -> {
-                    String name = ref.getName();
-                    if (name.startsWith(Constants.R_TAGS)) {
-                        return name.substring((Constants.R_TAGS).length());
-                    }
-                    return null;
-                }).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
-                return new Tuple(branchList, tagList);
-            } catch (Exception t) {
-                checkTransportException(t, null, null);
+        try {
+            LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository()
+                .setRemote(url);
+            // 更新凭证
+            setCredentials(lsRemoteCommand, parameter);
+            //
+            Collection<Ref> call = lsRemoteCommand
+                .setHeads(true)
+                .setTags(true)
+                .call();
+            if (CollUtil.isEmpty(call)) {
                 return null;
             }
+            Map<String, List<Ref>> refMap = CollStreamUtil.groupByKey(call, ref -> {
+                String name = ref.getName();
+                if (name.startsWith(Constants.R_TAGS)) {
+                    return Constants.R_TAGS;
+                } else if (name.startsWith(Constants.R_HEADS)) {
+                    return Constants.R_HEADS;
+                }
+                return null;
+            });
+
+            // branch list
+            List<Ref> branchListRef = refMap.get(Constants.R_HEADS);
+            if (branchListRef == null) {
+                return null;
+            }
+            List<String> branchList = branchListRef.stream().map(ref -> {
+                String name = ref.getName();
+                if (name.startsWith(Constants.R_HEADS)) {
+                    return name.substring((Constants.R_HEADS).length());
+                }
+                return null;
+            }).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
+
+            // list tag
+            List<Ref> tagListRef = refMap.get(Constants.R_TAGS);
+            List<String> tagList = tagListRef == null ? new ArrayList<>() : tagListRef.stream().map(ref -> {
+                String name = ref.getName();
+                if (name.startsWith(Constants.R_TAGS)) {
+                    return name.substring((Constants.R_TAGS).length());
+                }
+                return null;
+            }).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
+            return new Tuple(branchList, tagList);
+        } catch (Exception t) {
+            checkTransportException(t, null, null);
+            return null;
         }
     }
 
@@ -307,7 +306,7 @@ public class GitUtil {
                 checkTransportException(t, file, printWriter);
             }
         }
-        return new String[]{StrUtil.EMPTY,StrUtil.EMPTY};
+        return new String[]{StrUtil.EMPTY, StrUtil.EMPTY};
     }
 
     /**
