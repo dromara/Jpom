@@ -149,23 +149,26 @@ public class SvnKitUtil {
     public static String[] checkOut(Map<String, Object> map, File targetPath) throws SVNException {
         // 实例化客户端管理类
         SVNClientManager ourClientManager = getAuthClient(map);
-        try {
-            if (targetPath.exists()) {
-                if (!FileUtil.file(targetPath, SVNFileUtil.getAdminDirectoryName()).exists()) {
-                    CommandUtil.systemFastDel(targetPath);
-                } else {
-                    // 判断url是否变更
-                    if (!checkUrl(targetPath, map)) {
+        String url = (String) map.get("url");
+        String path = FileUtil.getAbsolutePath(targetPath);
+        synchronized (StrUtil.concat(false, url, path).intern()) {
+            try {
+                if (targetPath.exists()) {
+                    if (!FileUtil.file(targetPath, SVNFileUtil.getAdminDirectoryName()).exists()) {
                         CommandUtil.systemFastDel(targetPath);
                     } else {
-                        ourClientManager.getWCClient().doCleanup(targetPath);
+                        // 判断url是否变更
+                        if (!checkUrl(targetPath, map)) {
+                            CommandUtil.systemFastDel(targetPath);
+                        } else {
+                            ourClientManager.getWCClient().doCleanup(targetPath);
+                        }
                     }
                 }
+                return checkOut(ourClientManager, url, targetPath);
+            } finally {
+                ourClientManager.dispose();
             }
-            String url = (String) map.get("url");
-            return checkOut(ourClientManager, url, targetPath);
-        } finally {
-            ourClientManager.dispose();
         }
     }
 

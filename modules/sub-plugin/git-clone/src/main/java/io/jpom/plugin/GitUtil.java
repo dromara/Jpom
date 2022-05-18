@@ -296,7 +296,8 @@ public class GitUtil {
      */
     public static String[] checkoutPull(Map<String, Object> parameter, File file, String branchName, PrintWriter printWriter) throws Exception {
         String url = (String) parameter.get("url");
-        synchronized (url.intern()) {
+        String path = FileUtil.getAbsolutePath(file);
+        synchronized (StrUtil.concat(false, url, path).intern()) {
             try (Git git = initGit(parameter, branchName, file, printWriter)) {
                 // 拉取代码
                 PullResult pull = pull(git, parameter, branchName, null, printWriter);
@@ -389,7 +390,8 @@ public class GitUtil {
      */
     public static String checkoutPullTag(Map<String, Object> parameter, File file, String branchName, String tagName, PrintWriter printWriter) throws Exception {
         String url = (String) parameter.get("url");
-        synchronized (url.intern()) {
+        String path = FileUtil.getAbsolutePath(file);
+        synchronized (StrUtil.concat(false, url, path).intern()) {
             try (Git git = initGit(parameter, null, file, printWriter)) {
                 // 拉取最新代码
                 PullResult pull = pull(git, parameter, branchName, TagOpt.FETCH_TAGS, printWriter);
