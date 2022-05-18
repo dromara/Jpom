@@ -41,11 +41,13 @@ import io.jpom.model.BaseEnum;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.*;
 import io.jpom.model.enums.BuildReleaseMethod;
+import io.jpom.model.outgiving.OutGivingModel;
+import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
-import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -61,7 +63,7 @@ import java.util.List;
  * 节点分发编辑项目
  *
  * @author jiangzeyin
- * @date 2019/4/22
+ * @since 2019/4/22
  */
 @RestController
 @RequestMapping(value = "/outgiving")

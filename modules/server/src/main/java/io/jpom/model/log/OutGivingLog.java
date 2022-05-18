@@ -23,14 +23,14 @@
 package io.jpom.model.log;
 
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.model.data.OutGivingNodeProject;
+import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.service.h2db.TableName;
 
 /**
  * 项目分发日志
  *
  * @author bwcx_jzy
- * @date 2019/7/19
+ * @since 2019/7/19
  **/
 @TableName(value = "OUTGIVINGLOG", name = "分发日志")
 public class OutGivingLog extends BaseWorkspaceModel {

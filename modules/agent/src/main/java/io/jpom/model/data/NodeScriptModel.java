@@ -35,7 +35,7 @@ import java.io.File;
  * 脚本模板
  *
  * @author jiangzeyin
- * @date 2019/4/24
+ * @since 2019/4/24
  */
 public class NodeScriptModel extends BaseWorkspaceModel {
 	/**

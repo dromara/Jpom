@@ -11,6 +11,7 @@
       @expand="expand"
       :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
       @change="changePage"
+      :row-selection="rowSelection"
     >
       <template slot="title">
         <a-space>
@@ -30,20 +31,20 @@
               <a-menu-item>
                 <a-button type="primary" @click="fastInstall">快速安装</a-button>
               </a-menu-item>
+              <a-menu-item>
+                <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+              </a-menu-item>
             </a-menu>
           </a-dropdown>
 
           <a-tooltip>
             <template slot="title">
-              <div>点击节点管理进入节点管理页面</div>
-
-              <div>
-                <ul>
-                  <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
-                  <li>节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件）</li>
-                  <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
-                </ul>
-              </div>
+              <ul>
+                <li>点击节点管理进入节点管理页面</li>
+                <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
+                <li>节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件）</li>
+                <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
+              </ul>
             </template>
             <a-icon type="question-circle" theme="filled" />
           </a-tooltip>
@@ -121,43 +122,35 @@
       </template>
       <!-- 嵌套表格 -->
       <!-- <template slot="expandIcon" slot-scope="text" v-if="text.record.openStatus === 1"> <a-icon type="plus" /></template> -->
-
-      <a-table
-        size="middle"
-        :loading="childLoading"
-        :columns="childColumns"
-        slot="expandedRowRender"
-        slot-scope="text"
-        :data-source="text.children"
-        :pagination="false"
-        :rowKey="(record, index) => text.id + index"
-      >
-        <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-        <a-tooltip slot="javaVersion" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-        <a-tooltip slot="runTime" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
-        <template slot="projectCount" slot-scope="text, item">
-          <div v-if="text" @click="syncNode(item)">
-            <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
-              <a-tag>{{ text }} </a-tag>
-              <a-icon type="sync" />
-            </a-tooltip>
-          </div>
-        </template>
-        <template slot="scriptCount" slot-scope="text, item">
-          <div v-if="text" @click="syncNodeScript(item)">
-            <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
-              <a-tag>{{ text }} </a-tag>
-              <a-icon type="sync" />
-            </a-tooltip>
-          </div>
-        </template>
-      </a-table>
+      <template slot="expandedRowRender" slot-scope="record">
+        <a-table size="middle" :loading="childLoading" :columns="childColumns" :data-source="nodeStatusData[record.id]" :pagination="false" :rowKey="(record, index) => index">
+          <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+          <a-tooltip slot="javaVersion" slot-scope="text" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+          <a-tooltip slot="runTime" slot-scope="text" placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+          <template slot="projectCount" slot-scope="text, item">
+            <div v-if="text" @click="syncNode(item)">
+              <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
+                <a-tag>{{ text }} </a-tag>
+                <a-icon type="sync" />
+              </a-tooltip>
+            </div>
+          </template>
+          <template slot="scriptCount" slot-scope="text, item">
+            <div v-if="text" @click="syncNodeScript(item)">
+              <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
+                <a-tag>{{ text }} </a-tag>
+                <a-icon type="sync" />
+              </a-tooltip>
+            </div>
+          </template>
+        </a-table>
+      </template>
     </a-table>
 
     <!-- 编辑区 -->
@@ -167,7 +160,7 @@
           <a-input v-model="temp.id" placeholder="创建之后不能修改" />
         </a-form-model-item> -->
         <a-form-model-item label="节点名称" prop="name">
-          <a-input v-model="temp.name" placeholder="节点名称" />
+          <a-input :maxLength="50" v-model="temp.name" placeholder="节点名称" />
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
           <custom-select v-model="temp.group" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
@@ -392,11 +385,44 @@
       </div>
       <div v-else>loading....</div>
     </a-modal>
+    <!-- 同步到其他工作空间 -->
+    <a-modal v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+      <a-alert message="温馨提示" type="warning">
+        <template slot="description">
+          <ul>
+            <li>同步机制采用节点地址确定是同一个服务器（节点）</li>
+            <li>当目标工作空间不存在对应的节点时候将自动创建一个新的节点（逻辑节点）</li>
+            <li>当目标工作空间已经存在节点时候将自动同步节点授权信息、代理配置信息</li>
+          </ul>
+        </template>
+      </a-alert>
+      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item> </a-form-model-item>
+        <a-form-model-item label="选择工作空间" prop="workspaceId">
+          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
+            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeList, getNodeStatus, editNode, unbind, deleteNode, syncProject, unLockWorkspace, getNodeGroupAll, fastInstall, pullFastInstallResult, confirmFastInstall } from "@/api/node";
+import {
+  getNodeList,
+  getNodeStatus,
+  editNode,
+  unbind,
+  deleteNode,
+  syncProject,
+  unLockWorkspace,
+  getNodeGroupAll,
+  fastInstall,
+  pullFastInstallResult,
+  confirmFastInstall,
+  syncToWorkspace,
+} from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
@@ -421,11 +447,10 @@ export default {
       // nodeMonitorCycle: nodeMonitorCycle,
       sshList: [],
       list: [],
+      nodeStatusData: {},
       groupList: [],
       showOptVisible: {},
-      temp: {
-        timeOut: 0,
-      },
+      temp: {},
       fastInstallActiveKey: ["1", "2", "4"],
       fastInstallInfo: null,
       tempVue: null,
@@ -436,6 +461,7 @@ export default {
       terminalVisible: false,
       unlockNode: false,
       fastInstallNode: false,
+      syncToWorkspaceVisible: false,
       drawerTitle: "",
       columns: [
         // { title: "节点 ID", dataIndex: "id", sorter: true, key: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
@@ -480,6 +506,7 @@ export default {
         timeOut: [{ required: true, message: "Please input timeout", trigger: "blur" }],
       },
       workspaceList: [],
+      tableSelections: [],
     };
   },
   computed: {
@@ -495,6 +522,14 @@ export default {
         showTotal: (total) => {
           return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
+      };
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
       };
     },
   },
@@ -613,9 +648,11 @@ export default {
         this.childLoading = true;
         getNodeStatus(record.id).then((res) => {
           if (res.code === 200) {
-            // const index = this.list.findIndex(ele => ele.id === record.id);
-            // this.list[index].children = res.data;
-            record.children = res.data;
+            // bwcx_jzy 2022-05-11 单独使用对象，避免一级表格出现空白行
+            this.nodeStatusData = {
+              ...this.nodeStatusData,
+              [record.id]: [{ ...res.data[0], id: record.id + new Date().getTime() }],
+            };
           }
           this.childLoading = false;
         });
@@ -642,12 +679,12 @@ export default {
     },
     // 进入终端
     handleTerminal(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.terminalVisible = true;
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.loadSshList();
       // this.temp.tempGroup = "";
       this.editNodeVisible = true;
@@ -715,8 +752,8 @@ export default {
     },
     // 管理节点
     handleNode(record) {
-      this.temp = Object.assign(record);
-      this.drawerTitle = `${this.temp.name} (${this.temp.url})`;
+      this.temp = Object.assign({}, record);
+      this.drawerTitle = `${record.name} (${this.temp.url})`;
       this.drawerVisible = true;
       let nodeId = this.$route.query.nodeId;
       if (nodeId !== record.id) {
@@ -794,7 +831,7 @@ export default {
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
-          // 删除
+          // 解锁
           unLockWorkspace({
             id: this.temp.id,
             workspaceId: this.temp.workspaceId,
@@ -867,6 +904,37 @@ export default {
         }
       });
     },
+    // 同步到其他工作情况
+    syncToWorkspaceShow() {
+      this.syncToWorkspaceVisible = true;
+      this.loadWorkSpaceListAll();
+      this.temp = {
+        workspaceId: undefined,
+      };
+    },
+    //
+    handleSyncToWorkspace() {
+      if (!this.temp.workspaceId) {
+        this.$notification.warn({
+          message: "请选择工作空间",
+        });
+        return false;
+      }
+      // 同步
+      syncToWorkspace({
+        ids: this.tableSelections.join(","),
+        workspaceId: this.temp.workspaceId,
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.tableSelections = [];
+          this.syncToWorkspaceVisible = false;
+          return false;
+        }
+      });
+    },
   },
 };
 </script>
@@ -874,12 +942,12 @@ export default {
 /* .filter {
   margin-bottom: 10px;
 } */
-/* 
+/*
 .filter-item {
   width: 150px;
   margin-right: 10px;
 } */
-/* 
+/*
 .btn-add {
   margin-left: 10px;
   margin-right: 0;

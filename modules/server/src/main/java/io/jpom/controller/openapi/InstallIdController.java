@@ -42,7 +42,7 @@ import java.io.FileNotFoundException;
  * 获取当前服务端安装id
  *
  * @author bwcx_jzy
- * @date 2019/8/7
+ * @since 2019/8/7
  */
 @RestController
 public class InstallIdController {

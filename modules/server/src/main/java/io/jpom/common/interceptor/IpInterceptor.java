@@ -42,7 +42,7 @@ import javax.servlet.http.HttpServletResponse;
  * ip 访问限制拦截器
  *
  * @author bwcx_jzy
- * @date 2021/4/18
+ * @since 2021/4/18
  */
 @InterceptorPattens(sort = -2, exclude = ServerOpenApi.API + "**")
 public class IpInterceptor extends BaseJpomInterceptor {

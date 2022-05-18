@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
  * 初始化数据库
  *
  * @author jiangzeyin
- * @date 2019/4/19
+ * @since 2019/4/19
  */
 @PreLoadClass(value = Integer.MIN_VALUE + 1)
 @Configuration
@@ -183,11 +183,11 @@ public class InitDb implements DisposableBean, InitializingBean {
     private static void loadJsonToDb() {
 		/*
 		  @author Hotstrip
-		  @date 2021-08-03
+		  @since 2021-08-03
 		  load build.js data to DB
 		 */
         LoadBuildJsonToDB.getInstance().doJsonToSql();
-        // @author bwcx_jzy @date 2021-12-02
+        // @author bwcx_jzy @since 2021-12-02
         LoadJsonConfigToDb instance = LoadJsonConfigToDb.getInstance();
         // init workspace
         WorkspaceService workspaceService = SpringUtil.getBean(WorkspaceService.class);

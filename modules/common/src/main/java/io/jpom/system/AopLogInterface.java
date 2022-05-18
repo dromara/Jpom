@@ -28,7 +28,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
  * 日志接口
  *
  * @author jiangzeyin
- * @date 2019/4/19
+ * @since 2019/4/19
  */
 public interface AopLogInterface {
     /**

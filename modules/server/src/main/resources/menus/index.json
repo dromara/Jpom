@@ -85,6 +85,10 @@
         "title": "分发日志"
       },
       {
+        "id": "logRead",
+        "title": "日志阅读"
+      },
+      {
         "id": "outgivingWhitelistDirectory",
         "title": "白名单配置"
       }

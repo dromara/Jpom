@@ -48,7 +48,7 @@
     <a-modal v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="仓库名称" prop="name">
-          <a-input v-model="temp.name" placeholder="仓库名称" />
+          <a-input v-model="temp.name" :maxLength="50" placeholder="仓库名称" />
         </a-form-model-item>
         <a-form-model-item label="仓库地址" prop="gitUrl">
           <a-input-group compact>
@@ -56,7 +56,7 @@
               <a-select-option :value="0">GIT</a-select-option>
               <a-select-option :value="1">SVN</a-select-option>
             </a-select>
-            <a-input style="width: 80%" v-model="temp.gitUrl" placeholder="仓库地址" />
+            <a-input style="width: 80%" maxLength="250" v-model="temp.gitUrl" placeholder="仓库地址" />
           </a-input-group>
         </a-form-model-item>
         <a-form-model-item label="协议" prop="protocol">
@@ -380,7 +380,7 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       if (this.temp.protocol === undefined) {
         this.temp.protocol = this.temp.gitUrl.indexOf("http") > -1 ? 0 : 1;
       }

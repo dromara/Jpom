@@ -43,7 +43,7 @@
     <a-modal v-model="editOperateMonitorVisible" width="50vw" title="编辑监控" @ok="handleEditOperateMonitorOk" :maskClosable="false">
       <a-form-model ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 17 }">
         <a-form-model-item label="监控名称" prop="name">
-          <a-input v-model="temp.name" placeholder="监控名称" />
+          <a-input v-model="temp.name" :maxLength="50" placeholder="监控名称" />
         </a-form-model-item>
         <a-form-model-item label="开启状态" prop="status">
           <a-switch v-model="temp.start" checked-children="开" un-checked-children="关" />
@@ -242,7 +242,7 @@ export default {
     // 修改
     handleEdit(record) {
       this.loadUserList();
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.temp = {
         ...this.temp,
         start: this.temp.status,

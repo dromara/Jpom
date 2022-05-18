@@ -36,3 +36,7 @@ body {
 .ant-btn-sm {
   font-size: 12px;
 }
+
+pre {
+  margin: 0;
+}

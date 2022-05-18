@@ -41,7 +41,7 @@ import java.util.*;
  * 数据库配置
  *
  * @author jiangzeyin
- * @date 2019/4/19
+ * @since 2019/4/19
  */
 public class DbConfig {
 

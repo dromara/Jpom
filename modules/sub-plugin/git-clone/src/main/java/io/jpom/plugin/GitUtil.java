@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @author Hotstrip
  * add git with ssh key to visit repository
- * @date 2019/7/15
+ * @since 2019/7/15
  **/
 public class GitUtil {
 
@@ -120,7 +120,7 @@ public class GitUtil {
         }
         String url = (String) parameter.get("url");
         CloneCommand command = cloneCommand.setURI(url)
-                .setDirectory(file);
+            .setDirectory(file);
         // 设置凭证
         setCredentials(command, parameter);
         return command.call();
@@ -209,57 +209,56 @@ public class GitUtil {
      */
     public static Tuple getBranchAndTagList(Map<String, Object> parameter) throws Exception {
         String url = (String) parameter.get("url");
-        synchronized (url.intern()) {
-            try {
-                LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository()
-                        .setRemote(url);
-                // 更新凭证
-                setCredentials(lsRemoteCommand, parameter);
-                //
-                Collection<Ref> call = lsRemoteCommand
-                        .setHeads(true)
-                        .setTags(true)
-                        .call();
-                if (CollUtil.isEmpty(call)) {
-                    return null;
-                }
-                Map<String, List<Ref>> refMap = CollStreamUtil.groupByKey(call, ref -> {
-                    String name = ref.getName();
-                    if (name.startsWith(Constants.R_TAGS)) {
-                        return Constants.R_TAGS;
-                    } else if (name.startsWith(Constants.R_HEADS)) {
-                        return Constants.R_HEADS;
-                    }
-                    return null;
-                });
 
-                // branch list
-                List<Ref> branchListRef = refMap.get(Constants.R_HEADS);
-                if (branchListRef == null) {
-                    return null;
-                }
-                List<String> branchList = branchListRef.stream().map(ref -> {
-                    String name = ref.getName();
-                    if (name.startsWith(Constants.R_HEADS)) {
-                        return name.substring((Constants.R_HEADS).length());
-                    }
-                    return null;
-                }).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
-
-                // list tag
-                List<Ref> tagListRef = refMap.get(Constants.R_TAGS);
-                List<String> tagList = tagListRef == null ? new ArrayList<>() : tagListRef.stream().map(ref -> {
-                    String name = ref.getName();
-                    if (name.startsWith(Constants.R_TAGS)) {
-                        return name.substring((Constants.R_TAGS).length());
-                    }
-                    return null;
-                }).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
-                return new Tuple(branchList, tagList);
-            } catch (Exception t) {
-                checkTransportException(t, null, null);
+        try {
+            LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository()
+                .setRemote(url);
+            // 更新凭证
+            setCredentials(lsRemoteCommand, parameter);
+            //
+            Collection<Ref> call = lsRemoteCommand
+                .setHeads(true)
+                .setTags(true)
+                .call();
+            if (CollUtil.isEmpty(call)) {
                 return null;
             }
+            Map<String, List<Ref>> refMap = CollStreamUtil.groupByKey(call, ref -> {
+                String name = ref.getName();
+                if (name.startsWith(Constants.R_TAGS)) {
+                    return Constants.R_TAGS;
+                } else if (name.startsWith(Constants.R_HEADS)) {
+                    return Constants.R_HEADS;
+                }
+                return null;
+            });
+
+            // branch list
+            List<Ref> branchListRef = refMap.get(Constants.R_HEADS);
+            if (branchListRef == null) {
+                return null;
+            }
+            List<String> branchList = branchListRef.stream().map(ref -> {
+                String name = ref.getName();
+                if (name.startsWith(Constants.R_HEADS)) {
+                    return name.substring((Constants.R_HEADS).length());
+                }
+                return null;
+            }).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
+
+            // list tag
+            List<Ref> tagListRef = refMap.get(Constants.R_TAGS);
+            List<String> tagList = tagListRef == null ? new ArrayList<>() : tagListRef.stream().map(ref -> {
+                String name = ref.getName();
+                if (name.startsWith(Constants.R_TAGS)) {
+                    return name.substring((Constants.R_TAGS).length());
+                }
+                return null;
+            }).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
+            return new Tuple(branchList, tagList);
+        } catch (Exception t) {
+            checkTransportException(t, null, null);
+            return null;
         }
     }
 
@@ -295,9 +294,10 @@ public class GitUtil {
      * @throws IOException     IO
      * @throws GitAPIException api
      */
-    public static String checkoutPull(Map<String, Object> parameter, File file, String branchName, PrintWriter printWriter) throws Exception {
+    public static String[] checkoutPull(Map<String, Object> parameter, File file, String branchName, PrintWriter printWriter) throws Exception {
         String url = (String) parameter.get("url");
-        synchronized (url.intern()) {
+        String path = FileUtil.getAbsolutePath(file);
+        synchronized (StrUtil.concat(false, url, path).intern()) {
             try (Git git = initGit(parameter, branchName, file, printWriter)) {
                 // 拉取代码
                 PullResult pull = pull(git, parameter, branchName, null, printWriter);
@@ -307,7 +307,7 @@ public class GitUtil {
                 checkTransportException(t, file, printWriter);
             }
         }
-        return StrUtil.EMPTY;
+        return new String[]{StrUtil.EMPTY, StrUtil.EMPTY};
     }
 
     /**
@@ -337,12 +337,12 @@ public class GitUtil {
         if (tagOpt == null && !StrUtil.equals(git.getRepository().getBranch(), branchName)) {
             println(printWriter, "start switch branch from {} to {}", git.getRepository().getBranch(), branchName);
             git.checkout().
-                    setCreateBranch(createBranch).
-                    setName(branchName).
-                    setForceRefUpdate(true).
-                    setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
-                    setProgressMonitor(progressMonitor).
-                    call();
+                setCreateBranch(createBranch).
+                setName(branchName).
+                setForceRefUpdate(true).
+                setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
+                setProgressMonitor(progressMonitor).
+                call();
         }
         PullCommand pull = git.pull();
         if (tagOpt != null) {
@@ -352,9 +352,9 @@ public class GitUtil {
         setCredentials(pull, parameter);
         //
         PullResult call = pull
-                .setRemoteBranchName(branchName)
-                .setProgressMonitor(progressMonitor)
-                .call();
+            .setRemoteBranchName(branchName)
+            .setProgressMonitor(progressMonitor)
+            .call();
         // 输出拉取结果
         if (call != null) {
             String fetchedFrom = call.getFetchedFrom();
@@ -390,17 +390,18 @@ public class GitUtil {
      */
     public static String checkoutPullTag(Map<String, Object> parameter, File file, String branchName, String tagName, PrintWriter printWriter) throws Exception {
         String url = (String) parameter.get("url");
-        synchronized (url.intern()) {
+        String path = FileUtil.getAbsolutePath(file);
+        synchronized (StrUtil.concat(false, url, path).intern()) {
             try (Git git = initGit(parameter, null, file, printWriter)) {
                 // 拉取最新代码
                 PullResult pull = pull(git, parameter, branchName, TagOpt.FETCH_TAGS, printWriter);
                 // 切换到对应的 tag
                 git.checkout()
-                        .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
-                        .setForceRefUpdate(true)
-                        .setName(tagName)
-                        .setForced(true)
-                        .call();
+                    .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
+                    .setForceRefUpdate(true)
+                    .setName(tagName)
+                    .setForced(true)
+                    .call();
                 // 获取最后提交信息
                 Collection<ReflogEntry> reflogEntries = git.reflog().setRef(Constants.HEAD).call();
                 ReflogEntry first = CollUtil.getFirst(reflogEntries);
@@ -488,15 +489,17 @@ public class GitUtil {
      *
      * @param file       仓库文件夹
      * @param branchName 分支
-     * @return 描述
+     * @return String[] 第一个元素为最后一次 hash 值， 第二个元素为描述
      * @throws IOException     IO
      * @throws GitAPIException api
      */
-    public static String getLastCommitMsg(File file, String branchName) throws IOException, GitAPIException {
+    public static String[] getLastCommitMsg(File file, String branchName) throws IOException, GitAPIException {
         try (Git git = Git.open(file)) {
             ObjectId anyObjectId = getAnyObjectId(git, branchName);
             Objects.requireNonNull(anyObjectId, "没有" + branchName + "分支");
-            return getLastCommitMsg(file, branchName, anyObjectId);
+            //System.out.println(anyObjectId.getName());
+            String lastCommitMsg = getLastCommitMsg(file, branchName, anyObjectId);
+            return new String[]{anyObjectId.getName(), lastCommitMsg};
         }
     }
 
@@ -516,12 +519,12 @@ public class GitUtil {
             String time = new DateTime(revCommit.getCommitTime() * 1000L).toString();
             PersonIdent personIdent = revCommit.getAuthorIdent();
             return StrUtil.format("{} {} {}[{}] {} {}",
-                    desc,
-                    revCommit.getShortMessage(),
-                    personIdent.getName(),
-                    personIdent.getEmailAddress(),
-                    time,
-                    revCommit.getParentCount());
+                desc,
+                revCommit.getShortMessage(),
+                personIdent.getName(),
+                personIdent.getEmailAddress(),
+                time,
+                revCommit.getParentCount());
         }
     }
 

@@ -10,6 +10,7 @@
           <a-input-search
             enter-button="添加"
             v-model="selectInput"
+            :maxLength="maxLength"
             @search="onSearch"
             @blur="visibleInput(false)"
             @focus="visibleInput(true)"
@@ -75,6 +76,10 @@ export default {
     suffixIcon: {
       type: String,
       default: "reload",
+    },
+    maxLength: {
+      type: Number,
+      default: 200,
     },
   },
   watch: {

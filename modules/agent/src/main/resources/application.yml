@@ -10,7 +10,7 @@ spring:
   application:
     name: jpomAgent
   profiles:
-    active: dev
+    active: local
 
 banner:
   msg: Jpom-Agent Starting

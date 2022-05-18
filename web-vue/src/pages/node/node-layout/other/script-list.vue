@@ -46,7 +46,7 @@
           <a-input v-model="temp.id" disabled readOnly />
         </a-form-model-item>
         <a-form-model-item label="Script 名称" prop="name">
-          <a-input v-model="temp.name" placeholder="名称" />
+          <a-input :maxLength="50" v-model="temp.name" placeholder="名称" />
         </a-form-model-item>
         <a-form-model-item label="Script 内容" prop="context">
           <div style="height: 40vh; overflow-y: scroll">
@@ -69,7 +69,7 @@
           </a-auto-complete>
         </a-form-model-item>
         <a-form-model-item label="描述" prop="description">
-          <a-input v-model="temp.description" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
+          <a-input maxLength="200" v-model="temp.description" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -184,7 +184,7 @@ export default {
         id: record.scriptId,
         nodeId: this.node.id,
       }).then((res) => {
-        this.temp = Object.assign(res.data);
+        this.temp = Object.assign({}, res.data);
         //
         this.editScriptVisible = true;
       });
@@ -244,7 +244,7 @@ export default {
     },
     // 执行 Script
     handleExec(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `控制台(${this.temp.name})`;
       this.drawerConsoleVisible = true;
     },
@@ -254,7 +254,7 @@ export default {
     },
     // 准备上传文件
     handleUpload(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.uploadFileVisible = true;
     },
     handleRemove(file) {

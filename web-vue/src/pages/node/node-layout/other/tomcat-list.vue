@@ -4,7 +4,7 @@
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered rowKey="id" @expand="expand">
       <template slot="title">
-        <a-alert message="tomcat 管理功能暂时没有计划维护,如需要使用到该功能请多多测试后再使用" style="margin-top: 10px; margin-bottom: 40px" banner />
+        <a-alert message="tomcat 管理功能暂时没有计划维护,如需要使用到该功能请多多测试后再使用（建议使用 DSL 模式代替）" style="margin-top: 10px; margin-bottom: 40px" banner />
         <a-space>
           <a-button type="primary" @click="handleAdd">新增</a-button>
           <a-button type="primary" @click="handleFilter">刷新</a-button>
@@ -201,7 +201,7 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.editTomcatVisible = true;
     },
     // 提交 Tomcat 数据
@@ -273,7 +273,7 @@ export default {
     },
     // 查看日志
     handleLog(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `Tomcat 日志(${this.temp.name})`;
       this.drawerLogVisible = true;
     },
@@ -398,7 +398,7 @@ export default {
     },
     // 上传 WAR 文件
     handleUploadWar(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.uploadFileVisible = true;
     },
     handleRemove(file) {

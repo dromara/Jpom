@@ -32,7 +32,7 @@ import io.jpom.socket.handler.*;
 
 /**
  * @author bwcx_jzy
- * @date 2019/8/9
+ * @since 2019/8/9
  */
 public enum HandlerType {
 	/**

@@ -13,6 +13,7 @@ const routeMenuMap = {
   commandLogList: "/ssh/command-log",
   outgivingList: "/dispatch/list",
   outgivingLog: "/dispatch/log",
+  logRead: "/dispatch/log-read",
   outgivingWhitelistDirectory: "/dispatch/white-list",
   monitorList: "/monitor/list",
   monitorLog: "/monitor/log",

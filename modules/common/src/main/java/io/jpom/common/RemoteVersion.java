@@ -29,6 +29,7 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -72,11 +73,11 @@ public class RemoteVersion extends BaseJsonModel {
     /**
      * 主 url 用于拉取远程版本信息
      * <p>
-     * 1. https://keepbx.gitee.io/jpom-site/docs/release-versions.json
+     * 1. https://dromara.gitee.io/Jpom/docs/release-versions.json
      * <p>
      * 2. https://jpom.io/docs/release-versions.json
      * <p>
-     * 3. https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/release-versions.json
+     * 3. https://jpom-docs.keepbx.cn/docs/release-versions.json
      */
     private static final String DEFAULT_URL = "https://jpom.io/docs/release-versions.json";
     /**
@@ -127,17 +128,11 @@ public class RemoteVersion extends BaseJsonModel {
     public static RemoteVersion loadRemoteInfo() {
         String body = StrUtil.EMPTY;
         try {
+            String remoteVersionUrl = ExtConfigBean.getInstance().getRemoteVersionUrl();
+            remoteVersionUrl = StrUtil.emptyToDefault(remoteVersionUrl, DEFAULT_URL);
+            remoteVersionUrl = Validator.isUrl(remoteVersionUrl) ? remoteVersionUrl : DEFAULT_URL;
             // 获取缓存中到信息
-            RemoteVersion remoteVersion = null;
-            // 远程获取
-            String transitUrl = RemoteVersion.loadTransitUrl();
-            if (StrUtil.isNotEmpty(transitUrl)) {
-                HttpRequest request = HttpUtil.createGet(transitUrl);
-                body = request.execute().body();
-                //
-                remoteVersion = JSONObject.parseObject(body, RemoteVersion.class);
-            }
-
+            RemoteVersion remoteVersion = RemoteVersion.loadTransitUrl(remoteVersionUrl);
             if (remoteVersion == null || StrUtil.isEmpty(remoteVersion.getTagName())) {
                 // 没有版本信息
                 return null;
@@ -154,20 +149,28 @@ public class RemoteVersion extends BaseJsonModel {
     /**
      * 获取第一层信息，用于中转
      *
+     * @param remoteVersionUrl 请url
      * @return 中转URL
      */
-    private static String loadTransitUrl() {
+    private static RemoteVersion loadTransitUrl(String remoteVersionUrl) {
         String body = StrUtil.EMPTY;
         try {
-            String remoteVersionUrl = ExtConfigBean.getInstance().getRemoteVersionUrl();
-            remoteVersionUrl = StrUtil.emptyToDefault(remoteVersionUrl, DEFAULT_URL);
-            remoteVersionUrl = Validator.isUrl(remoteVersionUrl) ? remoteVersionUrl : DEFAULT_URL;
             log.debug("use remote version url: {}", remoteVersionUrl);
             HttpRequest request = HttpUtil.createGet(remoteVersionUrl);
-            body = request.execute().body();
+            try (HttpResponse execute = request.execute()) {
+                body = execute.body();
+            }
             //
             JSONObject jsonObject = JSONObject.parseObject(body);
-            return jsonObject.getString("url");
+            RemoteVersion remoteVersion = jsonObject.toJavaObject(RemoteVersion.class);
+            if (StrUtil.isAllNotEmpty(remoteVersion.getTagName(), remoteVersion.getAgentUrl(), remoteVersion.getServerUrl(), remoteVersion.getServerUrl())) {
+                return remoteVersion;
+            }
+            String jumpUrl = jsonObject.getString("url");
+            if (StrUtil.isEmpty(jumpUrl)) {
+                return null;
+            }
+            return loadTransitUrl(jumpUrl);
         } catch (Exception e) {
             DefaultSystemLog.getLog().warn("获取远程版本信息失败:{} {}", e.getMessage(), body);
             return null;
@@ -201,8 +204,10 @@ public class RemoteVersion extends BaseJsonModel {
         // 获取 changelog
         String changelogUrl = remoteVersion.getChangelogUrl();
         if (StrUtil.isNotEmpty(changelogUrl)) {
-            String body = HttpUtil.createGet(changelogUrl).execute().body();
-            remoteVersion.setChangelog(body);
+            try (HttpResponse execute = HttpUtil.createGet(changelogUrl).execute()) {
+                String body = execute.body();
+                remoteVersion.setChangelog(body);
+            }
         }
         //
         FileUtil.writeUtf8String(remoteVersion.toString(), getFile());

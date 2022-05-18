@@ -35,7 +35,7 @@ import java.io.IOException;
  * 拦截器
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 public abstract class BaseJpomInterceptor extends BaseInterceptor {
 

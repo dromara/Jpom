@@ -34,10 +34,10 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.OutGivingModel;
-import io.jpom.model.data.OutGivingNodeProject;
+import io.jpom.model.outgiving.OutGivingModel;
+import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.model.data.UserModel;
-import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.outgiving.OutGivingServer;
 
 import java.io.File;
 import java.util.List;
@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  * 分发线程
  *
  * @author bwcx_jzy
- * @date 2019/7/18
+ * @since 2019/7/18
  **/
 public class OutGivingRun {
 

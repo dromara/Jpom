@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
  * 登录拦截器
  *
  * @author jiangzeyin
- * @date 2017/2/4.
+ * @since 2017/2/4.
  */
 @InterceptorPattens(sort = -1, exclude = ServerOpenApi.API + "**")
 public class LoginInterceptor extends BaseJpomInterceptor {

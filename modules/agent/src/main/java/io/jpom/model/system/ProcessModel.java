@@ -33,7 +33,7 @@ import java.io.IOException;
  * 进程信息实体
  *
  * @author jiangzeyin
- * @date 2019/4/15
+ * @since 2019/4/15
  */
 public class ProcessModel extends BaseJsonModel {
     /**

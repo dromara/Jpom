@@ -84,6 +84,11 @@ const children = [
     component: () => import("../pages/dispatch/log"),
   },
   {
+    path: "/dispatch/log-read",
+    name: "dispatch-log-read",
+    component: () => import("../pages/dispatch/logRead"),
+  },
+  {
     path: "/dispatch/white-list",
     name: "dispatch-white-list",
     component: () => import("../pages/dispatch/white-list"),

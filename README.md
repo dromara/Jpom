@@ -1,6 +1,6 @@
 <p align="center">
 	<a href="https://jpom.io/"  target="_blank">
-	    <img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.png" width="400" alt="logo">
+	    <img src="https://jpom-docs.keepbx.cn/images/jpom_logo.png" width="400" alt="logo">
 	</a>
 </p>
 <p align="center">
@@ -29,16 +29,16 @@
     <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dromara/Jpom&amp;utm_campaign=Badge_Grade">
       <img src="https://app.codacy.com/project/badge/Grade/843b953f1446449c9a075e44ea778336" alt="codacy"/>
     </a>
-	<a target="_blank" href="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx-qrcode-praise.png">
+	<a target="_blank" href="https://jpom-docs.keepbx.cn/images/wx-qrcode-praise.png">
 		<img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
 	</a>
 </p>
 
 <p align="center">
-	👉 <a target="_blank" href="https://jpom.io/">https://jpom.io/</a> | <a target="_blank" href="https://demo.jpom.io/">https://demo.jpom.io/</a>👈
+	👉 <a target="_blank" href="https://jpom.io/">https://jpom.io/</a> 👈
 </p>
 <p align="center">
-	备用地址：<a target="_blank" href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a target="_blank" href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
+	备用地址：<a target="_blank" href="https://jpom-docs.keepbx.cn">https://jpom-docs.keepbx.cn</a> | <a target="_blank" href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
 ## 📚 您为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
@@ -53,7 +53,7 @@
 2. 不同项目有不同管理命令（不易记、易混淆）
 3. 查看项目运行状态需要再次使用命令
 4. 服务器密码分发混乱（安全性低）
-5. 集群项目需要挨个操作项目步骤
+5. 集群项目不断重复以上操作项目步骤
 
 ### 🎁 使用Jpom后
 
@@ -109,14 +109,14 @@
 >
 > 如果需要修改数据、日志存储路径请参照 `extConfig.yml` 文件中 `jpom.path` 配置属性
 
-```
+```shell
 yum install -y wget && \
 	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
 	bash install.sh Server
 
 # 备用地址
 yum install -y wget && \
-	wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && \
+	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
 	bash install.sh Server
 
 支持自动安装jdk环境
@@ -152,14 +152,14 @@ apt install -y wget && \
 >
 > 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) ）
 
-```
+```shell
 yum install -y wget && \
 	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
 	bash install.sh Agent
 
 # 备用地址
 yum install -y wget && \
-	wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && \
+	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
 	bash install.sh Agent
 
 # 支持自动安装jdk环境
@@ -175,17 +175,34 @@ apt install -y wget && \
 
 启动成功后,插件端的端口为 `2123`
 
-### 容器化安装
+## 📦 容器化安装
 
 > ⚠️ 注意：容器化安装方式需要先安装docker，[点击跳转docker安装文档](https://jpom.io/docs/#/%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/%E5%AE%89%E8%A3%85/%E5%AE%B9%E5%99%A8%E5%8C%96%E5%AE%89%E8%A3%85)
 
-```
+
+#### 使用挂载方式存储相关数据（在部分环境可能出现兼容性问题）
+
+```shell
 docker pull jpomdocker/jpom
+mkdir -p /home/jpom-server/log
+mkdir -p /home/jpom-server/data
 docker run -d -p 2122:2122 \
 	--name jpom-server \
-	-v /etc/localtime:/etc/localtime:ro \
 	-v /home/jpom-server/log:/usr/local/jpom-server/log \
 	-v /home/jpom-server/data:/usr/local/jpom-server/data \
+	jpomdocker/jpom
+```
+
+#### 使用容器卷方式存储相关数据
+
+```shell
+docker pull jpomdocker/jpom
+docker volume create jpom-server-data
+docker volume create jpom-server-log
+docker run -d -p 2122:2122 \
+	--name jpom-server \
+	-v jpom-server-data:/usr/local/jpom-server/data \
+	-v jpom-server-log:/usr/local/jpom-server/log \
 	jpomdocker/jpom
 ```
 
@@ -193,37 +210,37 @@ docker run -d -p 2122:2122 \
 >
 > 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档[https://jpom.io/docs/](https://jpom.io/docs/)
 
-### 下载安装
+## 💾 下载安装
 
-> [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
+> [帮助文档](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装)
 
 1. 下载安装包 [https://gitee.com/dromara/Jpom/attach_files](https://gitee.com/dromara/Jpom/attach_files)
 2. 解压文件
-3. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
+3. 安装插件端（ [流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. agent-x.x.x-release 目录为插件端的全部安装文件
     2. 上传到对应服务器（整个目录）
     3. 命令运行（Agent.sh、Agent.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2123`
-4. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
+4. 安装服务端（ [流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. server-x.x.x-release 目录为服务端的全部安装文件
     2. 上传到对应服务器（整个目录）
     3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2122` 访问管理页面 例如`http://127.0.0.1:2122/`
 
-### 编译安装
+## ⌨️ 编译安装
 
-> [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
+> [帮助文档](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装)
 
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支)
 2. 切换到`web-vue`目录 执行`npm install` (vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
 3. 执行`npm run build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
 4. 切换到项目根目录执行:`mvn clean package`
-5. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
+5. 安装插件端（ [流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
     2. 打包上传服务器运行（整个目录）
     3. 命令运行（Agent.sh、Agent.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
     4. 默认运行端口：`2123`
-6. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
+6. 安装服务端（ [流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行（整个目录）
     3. 命令运行（Server.sh、Server.bat）`出现乱码或者无法正常执行,请优先检查编码格式、换行符是否匹配`
@@ -231,7 +248,7 @@ docker run -d -p 2122:2122 \
 
 > 也可以使用 `script/release.bat` `script/release.sh` 快速打包
 
-### 一键启动 docker-compose
+## 📦 一键启动 docker-compose
 
 - 无需安装任何环境,自动编译构建
 
@@ -243,7 +260,7 @@ cd Jpom
 docker-compose up
 ```
 
-### 编译运行
+## 💻 编译运行
 
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
 2. 运行插件端
@@ -258,7 +275,7 @@ docker-compose up
 6. 启动开发模式 控制台执行 `npm run serve`
 7. 根据控制台输出的地址访问前端页面 例如`http://127.0.0.1:3000/`
 
-### 管理命令
+## 管理命令
 
 1. windows 中 Agent.bat 、Server.bat
 
@@ -290,7 +307,7 @@ Agent.sh status    查看Jpom插件端运行状态
 Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 ```
 
-### linux 服务方式管理
+## linux 服务方式管理
 
 > 这里安装服务仅供参考，实际中可以根据需求自定义配置
 
@@ -300,7 +317,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 >
 > service jpom-agent {status | start | stop}
 
-### ⚙️ Jpom 的参数配置
+## ⚙️ Jpom 的参数配置
 
 在项目运行的根路径下的`extConfig.yml`文件
 
@@ -309,9 +326,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 ## 💻 演示项目
 
-[https://demo.jpom.io](https://demo.jpom.io)
-
-[https://jpom.keepbx.cn](https://jpom.keepbx.cn) (备用)
+[https://jpom.keepbx.cn](https://jpom.keepbx.cn)
 
 ```   
 账号：demo
@@ -333,23 +348,29 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 > nodejs 编译指定目录：
 
 ```
-    yarn --cwd xxxx/ install
-    yarn --cwd xxxx/ build
+yarn --cwd xxxx/ install
+yarn --cwd xxxx/ build
 ```
 
 > maven 编译指定目录：
 
 ```
-    mvn -f xxxx/pom.xml clean package
+mvn -f xxxx/pom.xml clean package
 ```
 
 ## 📝 常见问题、操作说明
 
-[https://jpom.io/docs/](https://jpom-site.keepbx.cn/docs/)
+### Github Pages
 
-[https://jpom.io/docs/#/FQA/FQA](https://jpom-site.keepbx.cn/docs/#/FQA/FQA)
+- [文档主页](https://jpom.io/docs/)
+- [FQA](https://jpom.io/docs/#/FQA/FQA)
+- [名词解释](https://jpom.io/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
 
-[名词解释](https://jpom.io/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
+### Gitee Pages
+
+- [文档主页](https://jpom-docs.keepbx.cn/docs/)
+- [FQA](https://jpom-docs.keepbx.cn/docs/#/FQA/FQA)
+- [名词解释](https://jpom-docs.keepbx.cn/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
 
 ### 实践案例
 
@@ -366,20 +387,20 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 ## 🛠️ 整体架构
 
-![jpom-func-arch](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom-func-arch.jpg)
+![jpom-func-arch](https://jpom-docs.keepbx.cn/images/jpom-func-arch.jpg)
 
-### 🐞 交流讨论 、提供bug反馈或建议
+## 🐞 交流讨论 、提供bug反馈或建议
 
 1. 微信群二维码（添加小助手：备注Jpom 进群）
-2. 微信赞赏 [赞赏记录](./docs/praise/praise.md)
+2. 微信赞赏 [赞赏记录](https://jpom-docs.keepbx.cn/docs/index.html#/praise)
 3. [码云赞赏： 在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
-4. 微信公众号：[CodeGzh](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
+4. 微信公众号：[CodeGzh](https://jpom-docs.keepbx.cn/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 5. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
-6. 邀请您一起贡献教程文档 [文档仓库地址](https://gitee.com/keepbx/Jpom-site)
+6. 邀请您一起贡献教程文档 [文档仓库地址](https://gitee.com/dromara/Jpom/tree/docs)
 
-![wx-qrcode-praise.png](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx-qrcode-praise.png)
+![wx-qrcode-praise.png](https://jpom-docs.keepbx.cn/images/wx-qrcode-praise.png)
 
-### 🔔 精品项目推荐
+## 🔔 精品项目推荐
 
 | 项目名称          | 项目地址                                                                       | 项目介绍                                          |
 |---------------|----------------------------------------------------------------------------|-----------------------------------------------|

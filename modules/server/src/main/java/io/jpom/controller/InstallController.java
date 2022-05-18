@@ -52,7 +52,7 @@ import java.util.List;
  * 初始化程序
  *
  * @author jiangzeyin
- * @date 2019/2/22
+ * @since 2019/2/22
  */
 @RestController
 public class InstallController extends BaseServerController {

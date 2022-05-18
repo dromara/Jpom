@@ -86,7 +86,7 @@ export default {
         id: this.project.projectId,
         copyIds: JSON.stringify(ids),
       };
-    
+
       getRuningProjectCopyInfo(tempParams).then((res) => {
         if (res.code === 200) {
           this.list = this.list.map((element) => {
@@ -106,7 +106,7 @@ export default {
     },
     // 控制台
     handleConsole(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `控制台(${this.temp.tagId})`;
       this.drawerConsoleVisible = true;
     },
@@ -117,7 +117,7 @@ export default {
     },
     // 监控
     handleMonitor(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
       this.drawerTitle = `监控(${this.temp.tagId})`;
       this.drawerMonitorVisible = true;
     },

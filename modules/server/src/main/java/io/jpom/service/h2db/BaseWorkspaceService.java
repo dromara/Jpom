@@ -33,7 +33,6 @@ import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserBindWorkspaceService;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -119,14 +118,14 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
      * 获取我所有的空间
      *
      * @param request 请求对象
-     * @return
+     * @return page
      */
     @Override
     public PageResultDto<T> listPage(HttpServletRequest request) {
         // 验证工作空间权限
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         String workspaceId = request.getParameter("workspaceId");
-        if (StringUtils.isEmpty(workspaceId)) {
+        if (StrUtil.isEmpty(workspaceId)) {
             workspaceId = this.getCheckUserWorkspace(request);
         }
         Assert.hasText(workspaceId, "此接口需要传workspaceId！");

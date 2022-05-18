@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 用户操作日志
  *
  * @author jiangzeyin
- * @date 2019/4/19
+ * @since 2019/4/19
  */
 @RestController
 @RequestMapping(value = "/user/log")

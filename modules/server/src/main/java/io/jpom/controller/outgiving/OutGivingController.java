@@ -39,16 +39,16 @@ import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.OutGivingModel;
-import io.jpom.model.data.OutGivingNodeProject;
+import io.jpom.model.outgiving.OutGivingModel;
+import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
-import io.jpom.service.dblog.DbOutGivingLogService;
-import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.outgiving.DbOutGivingLogService;
+import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -64,7 +64,7 @@ import java.util.stream.Collectors;
  * 分发控制
  *
  * @author jiangzeyin
- * @date 2019/4/20
+ * @since 2019/4/20
  */
 @RestController
 @RequestMapping(value = "/outgiving")

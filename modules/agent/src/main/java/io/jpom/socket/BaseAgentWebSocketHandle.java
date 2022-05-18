@@ -45,7 +45,7 @@ import static javax.websocket.CloseReason.CloseCodes.CANNOT_ACCEPT;
  * 插件端socket 基类
  *
  * @author jiangzeyin
- * @date 2019/4/24
+ * @since 2019/4/24
  */
 public abstract class BaseAgentWebSocketHandle {
 

@@ -46,7 +46,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  * jpom 启动类
  *
  * @author jiangzeyin
- * @date 2017/9/14
+ * @since 2017/9/14
  */
 @SpringBootApplication
 @ServletComponentScan

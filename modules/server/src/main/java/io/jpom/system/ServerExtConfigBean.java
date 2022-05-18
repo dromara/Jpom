@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * 外部配置文件
  *
  * @author jiangzeyin
- * @date 2019/3/04
+ * @since 2019/3/04
  */
 @Configuration
 public class ServerExtConfigBean {
@@ -164,6 +164,13 @@ public class ServerExtConfigBean {
      */
     @Value("${jpom.disabledCaptcha:false}")
     private Boolean disabledCaptcha;
+
+    /**
+     * 前端消息弹出位置，可选 topLeft topRight bottomLeft bottomRight
+     */
+    @Value("${jpom.notificationPlacement:}")
+    private String notificationPlacement;
+
     /**
      * 检查节点心跳间隔时间
      */
@@ -274,6 +281,10 @@ public class ServerExtConfigBean {
     public int getNodeHeartSecond() {
         int integer = ObjectUtil.defaultIfNull(nodeHeartSecond, 30);
         return Math.max(integer, 5);
+    }
+
+    public String getNotificationPlacement() {
+        return notificationPlacement;
     }
 
     /**

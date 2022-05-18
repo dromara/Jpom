@@ -26,7 +26,7 @@ package io.jpom.util;
  * 判断密码强度
  *
  * @author jiangzeyin
- * @date 2019/3/18
+ * @since 2019/3/18
  */
 public class CheckPassword {
 

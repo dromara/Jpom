@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
  * Jpom
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 public class JpomApplication extends ApplicationBuilder {
 

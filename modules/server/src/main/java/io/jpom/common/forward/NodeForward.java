@@ -24,6 +24,7 @@ package io.jpom.common.forward;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IORuntimeException;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
@@ -60,7 +61,7 @@ import java.util.Set;
  * 节点请求转发
  *
  * @author jiangzeyin
- * @date 2019/4/16
+ * @since 2019/4/16
  */
 public class NodeForward {
 
@@ -125,15 +126,13 @@ public class NodeForward {
 
         httpRequest.body(jsonData.toString(), ContentType.JSON.getValue());
 
-        HttpResponse response;
-        try {
-            response = httpRequest
-                .execute();
+        try (HttpResponse response = httpRequest.execute()) {
+            //
+            return parseBody(response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        //
-        return parseBody(response, nodeModel);
+
     }
 
     /**
@@ -199,16 +198,13 @@ public class NodeForward {
             }
             httpRequest.form(clone);
         }
-        HttpResponse response;
-        try {
-            response = httpRequest
-                .form(params)
-                .execute();
+        httpRequest.form(params);
+        try (HttpResponse response = httpRequest.execute()) {
+            //
+            return parseBody(response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        //
-        return parseBody(response, nodeModel);
     }
 
     /**
@@ -230,6 +226,9 @@ public class NodeForward {
         } else if (exception instanceof cn.hutool.http.HttpException) {
             if (cause instanceof java.net.SocketTimeoutException) {
                 return new AgentException(nodeModel.getName() + "节点网络连接超时,请优先检查插件端运行状态再检查节点超时时间配置是否合理,上传文件超时时间配置是否合理。" + message);
+            }
+            if (cause instanceof IOException && StrUtil.containsIgnoreCase(message, "Error writing to server")) {
+                return new AgentException(nodeModel.getName() + "节点上传失败,请优先检查限制上传大小配置是否合理。" + message);
             }
         }
         return new AgentException(nodeModel.getName() + "节点异常：" + message);
@@ -271,17 +270,13 @@ public class NodeForward {
         }
         //
         addUser(httpRequest, nodeModel, nodeUrl);
-        HttpResponse response;
-        try {
+        try (HttpResponse response = httpRequest.execute();) {
             //
-            response = httpRequest
-                .execute();
+            JsonMessage<T> jsonMessage = parseBody(response, nodeModel);
+            return jsonMessage.getData(tClass);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        //
-        JsonMessage<T> jsonMessage = parseBody(response, nodeModel);
-        return jsonMessage.getData(tClass);
     }
 
 
@@ -310,15 +305,14 @@ public class NodeForward {
                 DefaultSystemLog.getLog().error("转发文件异常", e);
             }
         });
-        HttpResponse response;
-        try {
-            // @author jzy add  timeout
-            httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
-            response = httpRequest.execute();
+        // @author jzy add  timeout
+        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+        try (HttpResponse response = httpRequest.execute()) {
+            return parseBody(response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        return parseBody(response, nodeModel);
+
     }
 
     /**
@@ -336,15 +330,14 @@ public class NodeForward {
         addUser(httpRequest, nodeModel, nodeUrl);
         //
         httpRequest.form(fileName, file);
-        HttpResponse response;
-        try {
-            // @author jzy add  timeout
-            httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
-            response = httpRequest.execute();
+        // @author jzy add  timeout
+        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+        try (HttpResponse response = httpRequest.execute()) {
+            return parseBody(response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        return parseBody(response, nodeModel);
+
     }
 
     /**
@@ -363,20 +356,18 @@ public class NodeForward {
         //
         Map params = ServletUtil.getParams(request);
         httpRequest.form(params);
+        // @author jzy add  timeout
+        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
         //
-        HttpResponse response1;
-        try {
-            // @author jzy add  timeout
-            httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
-            response1 = httpRequest.execute();
+        try (HttpResponse response1 = httpRequest.execute()) {
+            String contentDisposition = response1.header("Content-Disposition");
+            response.setHeader("Content-Disposition", contentDisposition);
+            String contentType = response1.header("Content-Type");
+            response.setContentType(contentType);
+            ServletUtil.write(response, response1.bodyStream());
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
-        String contentDisposition = response1.header("Content-Disposition");
-        response.setHeader("Content-Disposition", contentDisposition);
-        String contentType = response1.header("Content-Type");
-        response.setContentType(contentType);
-        ServletUtil.write(response, response1.bodyStream());
     }
 
     private static void addUser(HttpRequest httpRequest, NodeModel nodeModel, NodeUrl nodeUrl) {

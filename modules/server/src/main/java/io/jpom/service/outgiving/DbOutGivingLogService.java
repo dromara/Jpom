@@ -20,49 +20,29 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.service.node;
+package io.jpom.service.outgiving;
 
-import io.jpom.model.data.OutGivingModel;
-import io.jpom.model.data.OutGivingNodeProject;
-import io.jpom.service.IStatusRecover;
+import io.jpom.model.outgiving.OutGivingNodeProject;
+import io.jpom.model.log.OutGivingLog;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-
 /**
- * 分发管理
+ * 分发日志
  *
- * @author jiangzeyin
- * @date 2019/4/21
+ * @author bwcx_jzy
+ * @since 2019/7/20
  */
 @Service
-public class OutGivingServer extends BaseWorkspaceService<OutGivingModel> implements IStatusRecover {
+public class DbOutGivingLogService extends BaseWorkspaceService<OutGivingLog> {
 
-
-	public boolean checkNode(String nodeId, HttpServletRequest request) {
-		List<OutGivingModel> list = super.listByWorkspace(request);
-		if (list == null || list.isEmpty()) {
-			return false;
-		}
-		for (OutGivingModel outGivingModel : list) {
-			List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.outGivingNodeProjectList();
-			if (outGivingNodeProjectList != null) {
-				for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
-					if (outGivingNodeProject.getNodeId().equals(nodeId)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
 
 	@Override
-	public int statusRecover() {
-		// 恢复异常数据
-		String updateSql = "update " + super.getTableName() + " set status=? where status=?";
-		return super.execute(updateSql, OutGivingModel.Status.DONE.getCode(), OutGivingModel.Status.ING.getCode());
+	public void insert(OutGivingLog outGivingLog) {
+		outGivingLog.setStartTime(System.currentTimeMillis());
+		if (outGivingLog.getStatus() == OutGivingNodeProject.Status.Cancel.getCode()) {
+			outGivingLog.setEndTime(System.currentTimeMillis());
+		}
+		super.insert(outGivingLog);
 	}
 }

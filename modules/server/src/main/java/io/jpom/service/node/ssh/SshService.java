@@ -37,8 +37,10 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.node.NodeService;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.JschUtils;
 import org.springframework.stereotype.Service;
@@ -99,10 +101,10 @@ public class SshService extends BaseWorkspaceService<SshModel> {
             } else if (StrUtil.startWith(privateKey, JschUtils.HEADER)) {
                 // 直接采用 private key content 登录，无需写入文件
                 session = JschUtils.createSession(sshModel.getHost(),
-                        sshModel.getPort(),
-                        sshModel.getUser(),
-                        StrUtil.trim(privateKey),
-                        sshModel.password());
+                    sshModel.getPort(),
+                    sshModel.getUser(),
+                    StrUtil.trim(privateKey),
+                    sshModel.password());
             } else if (StrUtil.isEmpty(privateKey)) {
                 File home = FileUtil.getUserHomeDir();
                 Assert.notNull(home, "用户目录没有找到");
@@ -125,7 +127,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                 // 简要私钥文件是否存在
                 Assert.state(FileUtil.isFile(rsaFile), "私钥文件不存在：" + FileUtil.getAbsolutePath(rsaFile));
                 session = JschUtil.openSession(sshModel.getHost(),
-                        sshModel.getPort(), sshModel.getUser(), FileUtil.getAbsolutePath(rsaFile), sshModel.password());
+                    sshModel.getPort(), sshModel.getUser(), FileUtil.getAbsolutePath(rsaFile), sshModel.password());
             }
         } else {
             throw new IllegalArgumentException("不支持的模式");
@@ -374,5 +376,43 @@ public class SshService extends BaseWorkspaceService<SshModel> {
             JschUtil.close(channel);
             JschUtil.close(session);
         }
+    }
+
+    /**
+     * 将节点信息同步到其他工作空间
+     *
+     * @param ids            多给节点ID
+     * @param nowWorkspaceId 当前的工作空间ID
+     * @param workspaceId    同步到哪个工作空间
+     */
+    public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
+        StrUtil.splitTrim(ids, StrUtil.COMMA)
+            .forEach(id -> {
+                SshModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
+                Assert.notNull(data, "没有对应到节点信息");
+                //
+                SshModel where = new SshModel();
+                where.setWorkspaceId(workspaceId);
+                where.setHost(data.getHost());
+                where.setPort(data.getPort());
+                where.setConnectType(data.getConnectType());
+                SshModel sshModel = super.queryByBean(where);
+                if (sshModel == null) {
+                    // 不存在则添加 信息
+                    data.setId(null);
+                    data.setWorkspaceId(workspaceId);
+                    data.setCreateTimeMillis(null);
+                    data.setModifyTimeMillis(null);
+                    data.setModifyUser(null);
+                    super.insert(data);
+                } else {
+                    // 修改信息
+                    SshModel update = new SshModel(data.getId());
+                    update.setUser(data.getUser());
+                    update.setPassword(data.getPassword());
+                    update.setPrivateKey(data.getPrivateKey());
+                    super.updateById(update);
+                }
+            });
     }
 }

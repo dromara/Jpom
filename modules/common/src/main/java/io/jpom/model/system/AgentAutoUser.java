@@ -28,7 +28,7 @@ import io.jpom.model.BaseJsonModel;
  * agent 端自动生成的密码实体
  *
  * @author jiangzeyin
- * @date 2019/4/18
+ * @since 2019/4/18
  */
 public class AgentAutoUser extends BaseJsonModel {
 

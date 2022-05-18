@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * ssh 终端执行日志
  *
  * @author jiangzeyin
- * @date 2021/08/04
+ * @since 2021/08/04
  */
 @Service
 public class SshTerminalExecuteLogService extends BaseWorkspaceService<SshTerminalExecuteLog> {

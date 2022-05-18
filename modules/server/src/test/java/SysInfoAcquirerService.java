@@ -40,7 +40,7 @@
 // * 网管信息信息信息采集类
 // *
 // * @author liming.cen
-// * @date 2017-4-11
+// * @since 2017-4-11
 // */
 //@Service
 //public class SysInfoAcquirerService {

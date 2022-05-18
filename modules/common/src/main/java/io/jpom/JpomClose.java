@@ -36,7 +36,7 @@ import java.io.IOException;
  * 命令行关闭Jpom
  *
  * @author jiangzeyin
- * @date 2019/4/7
+ * @since 2019/4/7
  */
 public class JpomClose {
 	private static JpomClose jpomManager;
