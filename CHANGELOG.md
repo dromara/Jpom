@@ -11,6 +11,7 @@
 
 1. 【server】修复构建读取 .env 文件空时候无法正常使用（感谢[@wangfeng2228952430](https://gitee.com/wangfeng2228952430) [Gitee issues I57DC1](https://gitee.com/dromara/Jpom/issues/I57DC1) ）
 2. 【server】优化构建拉取仓库`锁对象`,避免出现死锁问题（感谢@信徒 ）
+3. 【server】修复节点分发配置多个节点无法正常报错问题（感谢@李道甫 ）
 
 ------
 
