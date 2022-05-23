@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -444,11 +445,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     /**
      * 自动清理数据接口
      *
-     * @param timeClo  时间字段
-     * @param maxCount 最大数量
-     * @param consumer 查询出超过范围的时间回调
+     * @param timeClo   时间字段
+     * @param maxCount  最大数量
+     * @param predicate 查询出超过范围的时间,回调
      */
-    protected void autoLoopClear(String timeClo, int maxCount, Consumer<Entity> whereCon, Consumer<T> consumer) {
+    protected void autoLoopClear(String timeClo, int maxCount, Consumer<Entity> whereCon, Predicate<T> predicate) {
         if (maxCount <= 0) {
             return;
         }
@@ -470,8 +471,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 if (pageResult.isEmpty()) {
                     return;
                 }
-                pageResult.each(consumer);
-                List<String> ids = pageResult.getResult().stream().map(BaseDbModel::getId).collect(Collectors.toList());
+//                pageResult.each(consumer);
+                List<String> ids = pageResult.getResult().stream().filter(predicate).map(BaseDbModel::getId).collect(Collectors.toList());
                 super.delByKey(ids, null);
             }
         });
