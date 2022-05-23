@@ -69,7 +69,7 @@ spring:
         web-allow-others: false
   servlet:
     multipart:
-      # 上传文件大小限制
+      # 上传文件大小限制 12KB -- parses as 12 kilobytes 5MB  -- parses as 5 megabytes 20  -- parses as 20 kilobytes
       max-request-size: 2GB
       max-file-size: 1GB
 # 构建相关配置
