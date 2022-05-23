@@ -1,23 +1,7 @@
-#运行端口号
-server:
-  port: 2123
-  servlet:
-    session:
-      timeout: 1H
-      cookie:
-        name: JPOMID-AGENT
+# see extConfigDefault.yml
+
 spring:
   application:
     name: jpomAgent
   profiles:
     active: local
-
-banner:
-  msg: Jpom-Agent Starting
-# 启动完成自动初始化指定包
-preload:
-  packageName: io.jpom.system.init
-# 强制去掉空格
-request:
-  trimAll: true
-  urlDecode: true

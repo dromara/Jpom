@@ -23,6 +23,7 @@
 package io.jpom.system;
 
 import cn.hutool.core.lang.Console;
+import cn.hutool.core.util.ClassUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.env.YamlPropertySourceLoader;
@@ -30,7 +31,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -44,13 +47,32 @@ public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcess
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
-        Resource resource = ExtConfigBean.getResource();
-        try {
-            List<PropertySource<?>> propertySources = yamlPropertySourceLoader.load(ExtConfigBean.FILE_NAME, resource);
-            propertySources.forEach(propertySource -> environment.getPropertySources().addLast(propertySource));
-        } catch (Exception e) {
-            Console.error(e.getMessage());
+        {
+            YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
+            Resource resource = ExtConfigBean.getResource();
+            try {
+                List<PropertySource<?>> propertySources = yamlPropertySourceLoader.load(ExtConfigBean.FILE_NAME, resource);
+                propertySources.forEach(propertySource -> environment.getPropertySources().addLast(propertySource));
+            } catch (Exception e) {
+                Console.error(e.getMessage());
+            }
+        }
+        {
+            // 兼容一些全局默认配置属性
+            List<URL> resources = ClassUtil.getResources("bin/extConfigDefault.yml");
+            for (int i = 0; i < resources.size(); i++) {
+                URL resource = resources.get(i);
+                Resource extConfigDefault = new UrlResource(resource);
+                if (extConfigDefault.exists()) {
+                    YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
+                    try {
+                        List<PropertySource<?>> propertySources = yamlPropertySourceLoader.load("extConfigDefault" + i + ".yml", extConfigDefault);
+                        propertySources.forEach(propertySource -> environment.getPropertySources().addLast(propertySource));
+                    } catch (Exception e) {
+                        Console.error(e.getMessage());
+                    }
+                }
+            }
         }
     }
 }
