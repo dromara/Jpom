@@ -37,29 +37,30 @@ import java.io.File;
 @Service
 public class CommandExecLogService extends BaseWorkspaceService<CommandExecLogModel> {
 
-	@Override
-	protected void fillSelectResult(CommandExecLogModel data) {
-		if (data == null) {
-			return;
-		}
-		data.setHasLog(FileUtil.exist(data.logFile()));
-	}
+    @Override
+    protected void fillSelectResult(CommandExecLogModel data) {
+        if (data == null) {
+            return;
+        }
+        data.setHasLog(FileUtil.exist(data.logFile()));
+    }
 
-	@Override
-	protected void executeClearImpl(int h2DbLogStorageCount) {
-		super.autoLoopClear("createTimeMillis", h2DbLogStorageCount, null, commandExecLogModel -> {
-			File file = commandExecLogModel.logFile();
-			CommandUtil.systemFastDel(file);
-			File parentFile = file.getParentFile();
-			boolean empty = FileUtil.isEmpty(parentFile);
-			if (empty) {
-				CommandUtil.systemFastDel(parentFile);
-			}
-		});
-	}
+    @Override
+    protected void executeClearImpl(int h2DbLogStorageCount) {
+        super.autoLoopClear("createTimeMillis", h2DbLogStorageCount, null, commandExecLogModel -> {
+            File file = commandExecLogModel.logFile();
+            CommandUtil.systemFastDel(file);
+            File parentFile = file.getParentFile();
+            boolean empty = FileUtil.isEmpty(parentFile);
+            if (empty) {
+                CommandUtil.systemFastDel(parentFile);
+            }
+            return true;
+        });
+    }
 
-	@Override
-	protected String[] clearTimeColumns() {
-		return super.clearTimeColumns();
-	}
+    @Override
+    protected String[] clearTimeColumns() {
+        return super.clearTimeColumns();
+    }
 }
