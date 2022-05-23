@@ -25,9 +25,10 @@ package io.jpom.system;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.ClassUtil;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.env.YamlPropertySourceLoader;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
@@ -42,8 +43,7 @@ import java.util.List;
  * @author jiangzeyin
  * @since 2019/3/5
  */
-@Order(Integer.MIN_VALUE)
-public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcessor {
+public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -74,5 +74,10 @@ public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcess
                 }
             }
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return ConfigDataEnvironmentPostProcessor.ORDER - 1;
     }
 }
