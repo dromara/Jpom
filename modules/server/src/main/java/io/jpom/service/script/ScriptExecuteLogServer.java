@@ -25,7 +25,10 @@ package io.jpom.service.script;
 import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.util.CommandUtil;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
 
 /**
  * @author bwcx_jzy
@@ -34,20 +37,35 @@ import org.springframework.stereotype.Service;
 @Service
 public class ScriptExecuteLogServer extends BaseWorkspaceService<ScriptExecuteLogModel> {
 
-	/**
-	 * 创建执行记录
-	 *
-	 * @param scriptModel 脚本
-	 * @param type        执行类型
-	 * @return 对象
-	 */
-	public ScriptExecuteLogModel create(ScriptModel scriptModel, int type) {
-		ScriptExecuteLogModel scriptExecuteLogModel = new ScriptExecuteLogModel();
-		scriptExecuteLogModel.setScriptId(scriptModel.getId());
-		scriptExecuteLogModel.setScriptName(scriptModel.getName());
-		scriptExecuteLogModel.setTriggerExecType(type);
-		scriptExecuteLogModel.setWorkspaceId(scriptModel.getWorkspaceId());
-		super.insert(scriptExecuteLogModel);
-		return scriptExecuteLogModel;
-	}
+    /**
+     * 创建执行记录
+     *
+     * @param scriptModel 脚本
+     * @param type        执行类型
+     * @return 对象
+     */
+    public ScriptExecuteLogModel create(ScriptModel scriptModel, int type) {
+        ScriptExecuteLogModel scriptExecuteLogModel = new ScriptExecuteLogModel();
+        scriptExecuteLogModel.setScriptId(scriptModel.getId());
+        scriptExecuteLogModel.setScriptName(scriptModel.getName());
+        scriptExecuteLogModel.setTriggerExecType(type);
+        scriptExecuteLogModel.setWorkspaceId(scriptModel.getWorkspaceId());
+        super.insert(scriptExecuteLogModel);
+        return scriptExecuteLogModel;
+    }
+
+
+    @Override
+    protected void executeClearImpl(int h2DbLogStorageCount) {
+        super.autoLoopClear("createTimeMillis", h2DbLogStorageCount, null, scriptExecuteLogModel -> {
+            File logFile = ScriptModel.logFile(scriptExecuteLogModel.getScriptId(), scriptExecuteLogModel.getId());
+            boolean fastDel = CommandUtil.systemFastDel(logFile);
+            return !fastDel;
+        });
+    }
+
+    @Override
+    protected String[] clearTimeColumns() {
+        return super.clearTimeColumns();
+    }
 }

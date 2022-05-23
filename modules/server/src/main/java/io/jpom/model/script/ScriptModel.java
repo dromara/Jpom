@@ -38,108 +38,118 @@ import java.io.File;
  */
 @TableName(value = "SERVER_SCRIPT_INFO", name = "脚本模版")
 public class ScriptModel extends BaseWorkspaceModel {
-	/**
-	 * 模版名称
-	 */
-	private String name;
-	/**
-	 * 最后执行人员
-	 */
-	private String lastRunUser;
-	/**
-	 * 定时执行
-	 */
-	private String autoExecCron;
-	/**
-	 * 默认参数
-	 */
-	private String defArgs;
-	/**
-	 * 描述
-	 */
-	private String description;
+    /**
+     * 模版名称
+     */
+    private String name;
+    /**
+     * 最后执行人员
+     */
+    private String lastRunUser;
+    /**
+     * 定时执行
+     */
+    private String autoExecCron;
+    /**
+     * 默认参数
+     */
+    private String defArgs;
+    /**
+     * 描述
+     */
+    private String description;
 
-	private String context;
-	/**
-	 * 节点ID
-	 */
-	private String nodeIds;
+    private String context;
+    /**
+     * 节点ID
+     */
+    private String nodeIds;
 
-	public String getNodeIds() {
-		return nodeIds;
-	}
+    public String getNodeIds() {
+        return nodeIds;
+    }
 
-	public void setNodeIds(String nodeIds) {
-		this.nodeIds = nodeIds;
-	}
+    public void setNodeIds(String nodeIds) {
+        this.nodeIds = nodeIds;
+    }
 
-	public String getContext() {
-		return context;
-	}
+    public String getContext() {
+        return context;
+    }
 
-	public void setContext(String context) {
-		this.context = context;
-	}
+    public void setContext(String context) {
+        this.context = context;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getLastRunUser() {
-		return lastRunUser;
-	}
+    public String getLastRunUser() {
+        return lastRunUser;
+    }
 
-	public void setLastRunUser(String lastRunUser) {
-		this.lastRunUser = lastRunUser;
-	}
+    public void setLastRunUser(String lastRunUser) {
+        this.lastRunUser = lastRunUser;
+    }
 
-	public String getAutoExecCron() {
-		return autoExecCron;
-	}
+    public String getAutoExecCron() {
+        return autoExecCron;
+    }
 
-	public void setAutoExecCron(String autoExecCron) {
-		this.autoExecCron = autoExecCron;
-	}
+    public void setAutoExecCron(String autoExecCron) {
+        this.autoExecCron = autoExecCron;
+    }
 
-	public String getDefArgs() {
-		return defArgs;
-	}
+    public String getDefArgs() {
+        return defArgs;
+    }
 
-	public void setDefArgs(String defArgs) {
-		this.defArgs = defArgs;
-	}
+    public void setDefArgs(String defArgs) {
+        this.defArgs = defArgs;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
 
-	public File scriptPath() {
-		if (StrUtil.isEmpty(getId())) {
-			throw new IllegalArgumentException("id 为空");
-		}
-		File path = ConfigBean.getInstance().getScriptPath();
-		return FileUtil.file(path, getId());
-	}
+    public File scriptPath() {
+        return scriptPath(getId());
+    }
 
-	public File logFile(String executeId) {
-		File path = this.scriptPath();
-		return FileUtil.file(path, "log", executeId + ".log");
-	}
+    public static File scriptPath(String id) {
+        if (StrUtil.isEmpty(id)) {
+            throw new IllegalArgumentException("id 为空");
+        }
+        File path = ConfigBean.getInstance().getScriptPath();
+        return FileUtil.file(path, id);
+    }
 
-	public File scriptFile() {
-		File path = this.scriptPath();
-		File file = FileUtil.file(path, StrUtil.format("script.{}", CommandUtil.SUFFIX));
-		//
-		FileUtil.writeString(getContext(), file, ExtConfigBean.getInstance().getConsoleLogCharset());
-		return file;
-	}
+    public File logFile(String executeId) {
+        //File path = this.scriptPath();
+        //return FileUtil.file(path, "log", executeId + ".log");
+        return logFile(getId(), executeId);
+    }
+
+    public static File logFile(String id, String executeId) {
+        File path = scriptPath(id);
+        return FileUtil.file(path, "log", executeId + ".log");
+    }
+
+    public File scriptFile() {
+        File path = this.scriptPath();
+        File file = FileUtil.file(path, StrUtil.format("script.{}", CommandUtil.SUFFIX));
+        //
+        FileUtil.writeString(getContext(), file, ExtConfigBean.getInstance().getConsoleLogCharset());
+        return file;
+    }
 }
