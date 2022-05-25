@@ -144,7 +144,7 @@ public abstract class BaseFileTailWatcher<T> {
     }
 
     public void start() {
-        this.tailer.start();
+        this.tailer.start(true);
     }
 
     /**
