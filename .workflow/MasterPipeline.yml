@@ -29,8 +29,8 @@ stages:
         artifacts:
           - name: BUILD_ARTIFACT
             path:
-              - ./modules/server/target/server-2.8.22-release/
-              - ./modules/agent/target/agent-2.8.22-release/
+              - ./modules/server/target/server-2.8.22-release.zip
+              - ./modules/agent/target/agent-2.8.22-release.zip
       - step: publish@general_artifacts
         name: publish_general_artifacts
         displayName: 上传制品
