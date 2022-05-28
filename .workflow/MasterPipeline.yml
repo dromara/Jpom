@@ -40,14 +40,19 @@ stages:
         settings: []
         strategy:
           retry: '0'
+  - name: stage-0aa9dee2
+    displayName: 打包
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
       - step: publish@general_artifacts
         name: publish_general_artifacts
-        displayName: 上传制品
+        displayName: 合并打包
         dependArtifact: all_zip
-        artifactName: output
+        artifactName: jpom-2-8-22
         strategy:
           retry: '0'
-        dependsOn: build_maven
 permissions:
   - role: admin
     members: []
