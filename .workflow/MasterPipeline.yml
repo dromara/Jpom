@@ -35,5 +35,8 @@ stages:
         name: publish_general_artifacts
         displayName: 上传制品
         dependArtifact: BUILD_ARTIFACT
-        artifactName: jpom-2.8.22
+        artifactName: output
         dependsOn: build_maven
+permissions:
+  - role: admin
+    members: []
