@@ -31,6 +31,15 @@ stages:
             path:
               - modules/server/target/server-2.8.22-release.zip
               - modules/agent/target/agent-2.8.22-release.zip
+          - name: server_zip
+            path:
+              - modules/server/target/server-2.8.22-release.zip
+          - name: agent_zip
+            path:
+              - modules/agent/target/agent-2.8.22-release.zip
+        settings: []
+        strategy:
+          retry: '0'
       - step: publish@general_artifacts
         name: publish_general_artifacts
         displayName: 上传制品
