@@ -2,7 +2,7 @@ version: '1.0'
 name: pipeline-20220528
 displayName: docker-hub
 triggers:
-  trigger: auto
+  trigger: manual
   push:
     branches:
       precise:
