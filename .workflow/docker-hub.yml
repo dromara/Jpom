@@ -29,6 +29,8 @@ stages:
           - docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
         strategy:
           retry: '0'
+strategy:
+  blocking: true
 permissions:
   - role: admin
     members: []
