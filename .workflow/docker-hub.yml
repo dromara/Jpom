@@ -12,22 +12,21 @@ triggers:
         - v
 stages:
   - name: stage-1b917201
-    displayName: 未命名
+    displayName: 容器发布
     strategy: naturally
     trigger: auto
     executor: []
     steps:
-      - step: shell@agent
-        name: execute_shell
-        displayName: buildx
-        hostGroupID: gitee-go
-        script: |-
-          # 请在此输入您想执行的脚本
-          echo 'Hello Gitee!'
-          # 服务端
-          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.22 -f ./modules/server/DockerfileRelease --push .
-          #
-          docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
+      - step: execute@docker
+        name: execute_by_docker
+        displayName: 基于镜像的脚本执行
+        image: hub.docker.com/bash:latest
+        command:
+          - echo 'success!'
+          - '# 服务端'
+          - docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.8.22 -f ./modules/server/DockerfileRelease --push .
+          - '#'
+          - docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
         strategy:
           retry: '0'
 permissions:
