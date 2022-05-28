@@ -27,15 +27,17 @@ stages:
           - cd ..
           - mvn -B -e clean package -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
         artifacts:
-          - name: BUILD_ARTIFACT
+          - name: all_zip
             path:
               - modules/server/target/server-2.8.22-release.zip
               - modules/agent/target/agent-2.8.22-release.zip
       - step: publish@general_artifacts
         name: publish_general_artifacts
         displayName: 上传制品
-        dependArtifact: BUILD_ARTIFACT
+        dependArtifact: all_zip
         artifactName: output
+        strategy:
+          retry: '0'
         dependsOn: build_maven
 permissions:
   - role: admin
