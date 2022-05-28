@@ -2,7 +2,7 @@ version: '1.0'
 name: master-pipeline
 displayName: MasterPipeline
 triggers:
-  trigger: auto
+  trigger: manual
   push:
     branches:
       precise:
