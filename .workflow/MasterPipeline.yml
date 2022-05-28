@@ -53,6 +53,8 @@ stages:
         artifactName: jpom-2-8-22
         strategy:
           retry: '0'
+strategy:
+  blocking: true
 permissions:
   - role: admin
     members: []
