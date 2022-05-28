@@ -20,10 +20,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.commander.impl.LinuxSystemCommander;
 import org.junit.Test;
 
@@ -40,6 +42,12 @@ public class TestStr {
         System.out.println(ReUtil.get(RegexPool.NUMBERS, "7499.1 total", 0));
     }
 
+    @Test
+    public void testJsonByte() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("byte", new byte[]{1});
+        System.out.println(jsonObject);
+    }
 
     @Test
     public void testFile() {

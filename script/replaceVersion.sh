@@ -68,5 +68,8 @@ sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../web-vue/package.json
 # release-sha1sum.sh
 sed -i.bak "s/${old_version}/${new_version}/g" $pwd/release-sha1sum.sh
 
+# gitee go
+sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../.workflow/MasterPipeline.yml
+
 # 保留新版本号
 echo "$new_version" > $pwd/../docs/version.txt
