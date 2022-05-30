@@ -431,7 +431,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         } catch (java.lang.IllegalStateException illegalStateException) {
             return 0L;
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("查询数据错误 ：{}", e.getMessage());
+            DefaultSystemLog.getLog().error("查询数据错误", e);
             return 0L;
         }
         if (pageResult.isEmpty()) {

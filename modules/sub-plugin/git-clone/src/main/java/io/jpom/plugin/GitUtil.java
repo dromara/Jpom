@@ -135,7 +135,7 @@ public class GitUtil {
     private static void setCredentials(TransportCommand<?, ?> transportCommand, Map<String, Object> parameter) {
         Integer protocol = (Integer) parameter.get("protocol");
         String username = (String) parameter.get("username");
-        String password = (String) parameter.get("password");
+        String password = StrUtil.emptyToDefault((String) parameter.get("password"), StrUtil.EMPTY);
         if (protocol == 0) {
             // http
             UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
