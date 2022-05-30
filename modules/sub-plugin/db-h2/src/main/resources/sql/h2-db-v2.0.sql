@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BUILD_INFO
 	`group`             VARCHAR(50) comment '分组名称',
 	branchName          VARCHAR(50) comment '分支',
 	script              CLOB comment '构建命令',
-	resultDirFile       VARCHAR(50) comment '构建产物目录',
+	resultDirFile       VARCHAR(200) comment '构建产物目录',
 	releaseMethod       int comment '发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}',
 	modifyUser          VARCHAR(50) comment '修改人',
 	`status`            int comment '状态',
