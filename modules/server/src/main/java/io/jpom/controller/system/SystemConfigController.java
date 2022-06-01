@@ -278,7 +278,7 @@ public class SystemConfigController extends BaseServerController {
         String format = StrUtil.format("node_whitelist_{}", workspaceId);
         systemParametersServer.upsert(format, agentWhitelist, format);
         //
-        List<String> nodeIdsStr = StrUtil.splitTrim(nodeIds, StrUtil.LF);
+        List<String> nodeIdsStr = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
         UserModel user = getUser();
         for (String s : nodeIdsStr) {
             NodeModel byKey = nodeService.getByKey(s, httpServletRequest);
