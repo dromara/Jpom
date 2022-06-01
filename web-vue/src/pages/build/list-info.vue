@@ -770,7 +770,7 @@ export default {
       viewScriptTemplVisible: false,
       buildScipts: [
         {
-          title: "Java 项目",
+          title: "Java 项目(示例参考，具体还需要根据项目实际情况来决定)",
           children: [
             {
               title: "不执行，也不编译测试用例 mvn clean package -Dmaven.test.skip=true",
@@ -803,27 +803,27 @@ export default {
           ],
         },
         {
-          title: "vue 项目",
+          title: "vue 项目(示例参考，具体还需要根据项目实际情况来决定)",
           children: [
             {
-              title: "npm run build",
-              value: "npm run build",
+              title: "需要先安装依赖 npm i && npm run build",
+              value: "npm i && npm run build",
             },
             {
-              title: "打包正式环境 npm run build:prod",
-              value: "npm run build:prod",
+              title: "打包正式环境 npm i && npm run build:prod",
+              value: "npm i && npm run build:prod",
             },
             {
-              title: "打包预发布环境 npm run build:stage",
-              value: "npm run build:stage",
+              title: "打包预发布环境 npm i && npm run build:stage",
+              value: "npm i && npm run build:stage",
             },
             {
-              title: "yarn build",
-              value: "yarn build",
+              title: "需要先安装依赖 yarn && yarn run build",
+              value: "yarn && yarn run build",
             },
             {
-              title: "指定目录打包 yarn --cwd xxx/build",
-              value: "yarn --cwd xxx/build",
+              title: "指定目录打包 yarn && yarn --cwd xxx build",
+              value: "yarn && yarn --cwd xxx build",
             },
           ],
         },
