@@ -936,10 +936,6 @@ export default {
 };
 </script>
 <style scoped>
-.btn-add {
-  margin-left: 10px;
-  margin-right: 0;
-}
 
 .replica-area {
   width: 340px;
