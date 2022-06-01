@@ -86,10 +86,15 @@ public class ProjectFileBackupUtil {
             // 未开启备份
             return null;
         }
+        File file = FileUtil.file(projectPath);
+        //
+        if (!FileUtil.exist(file)) {
+            return null;
+        }
         String backupId = DateTime.now().toString(DatePattern.PURE_DATETIME_MS_FORMAT);
         File projectFileBackup = ProjectFileBackupUtil.path(pathId, backupId);
         Assert.state(!FileUtil.exist(projectFileBackup), "备份目录冲突：" + projectFileBackup.getName());
-        FileUtil.copyContent(FileUtil.file(projectPath), projectFileBackup, true);
+        FileUtil.copyContent(file, projectFileBackup, true);
         //
         return backupId;
     }
@@ -105,7 +110,13 @@ public class ProjectFileBackupUtil {
             .map(DslYmlDto.FileConfig::getBackupCount)
             .orElse(AgentExtConfigBean.getInstance().getProjectFileBackupCount());
         //
+        if (!FileUtil.isDirectory(backupPath)) {
+            return;
+        }
         File[] files = backupPath.listFiles();
+        if (files == null) {
+            return;
+        }
         List<File> collect = Arrays.stream(files)
             .filter(FileUtil::isDirectory)
             .sorted(Comparator.comparing(FileUtil::lastModifiedTime))
