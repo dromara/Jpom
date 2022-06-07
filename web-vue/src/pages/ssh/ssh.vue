@@ -620,8 +620,10 @@ export default {
       });
     },
     changeListLog(page, f, sorter) {
-      this.viewOperationLogListQuery.page = page.current;
-      this.viewOperationLogListQuery.limit = page.pageSize;
+      if (pagination) {
+        this.viewOperationLogListQuery.page = page.current;
+        this.viewOperationLogListQuery.limit = page.pageSize;
+      }
       if (sorter) {
         this.viewOperationLogListQuery.order = sorter.order;
         this.viewOperationLogListQuery.order_field = sorter.field;
@@ -766,8 +768,10 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      this.listQuery.page = pagination.current;
-      this.listQuery.limit = pagination.pageSize;
+      if (pagination) {
+        this.listQuery.page = pagination.current;
+        this.listQuery.limit = pagination.pageSize;
+      }
       if (sorter) {
         this.listQuery.order = sorter.order;
         this.listQuery.order_field = sorter.field;
