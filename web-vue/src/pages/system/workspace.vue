@@ -344,8 +344,10 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      this.listQuery.page = pagination.current;
-      this.listQuery.limit = pagination.pageSize;
+      if (pagination) {
+        this.listQuery.page = pagination.current;
+        this.listQuery.limit = pagination.pageSize;
+      }
       if (sorter) {
         this.listQuery.order = sorter.order;
         this.listQuery.order_field = sorter.field;
@@ -353,8 +355,10 @@ export default {
       this.loadData();
     },
     changeListeEnvVar(pagination, filters, sorter) {
-      this.envVarListQuery.page = pagination.current;
-      this.envVarListQuery.limit = pagination.pageSize;
+      if (pagination) {
+        this.envVarListQuery.page = pagination.current;
+        this.envVarListQuery.limit = pagination.pageSize;
+      }
       if (sorter) {
         this.envVarListQuery.order = sorter.order;
         this.envVarListQuery.order_field = sorter.field;
