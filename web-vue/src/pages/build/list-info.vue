@@ -410,13 +410,15 @@
                   </a-tooltip>
                 </a-form-model-item>
                 <a-form-model-item label="发布集群" prop="swarmId">
-                  <a-select show-search allowClear v-model="tempExtraData.dockerSwarmId" placeholder="请选择发布到哪个 docker 集群">
+                  <a-select @change="selectSwarm()" show-search allowClear v-model="tempExtraData.dockerSwarmId" placeholder="请选择发布到哪个 docker 集群">
                     <a-select-option value="">不发布到 docker 集群</a-select-option>
                     <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
                   </a-select>
                 </a-form-model-item>
-                <a-form-model-item label="服务名" prop="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
-                  <a-input v-model="tempExtraData.dockerSwarmServiceName" placeholder="请填写发布到集群的服务名" />
+                <a-form-model-item  label="服务名" prop="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
+                  <a-select allowClear placeholder="请选择发布到集群的服务名" v-model="tempExtraData.dockerSwarmServiceName">
+                    <a-select-option v-for="item2 in swarmServiceListOptions" :key="item2.spec.name">{{ item2.spec.name }}</a-select-option>
+                  </a-select>
                 </a-form-model-item>
               </template>
             </template>
@@ -742,7 +744,7 @@ import { itemGroupBy, parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
 import Vue from "vue";
-import { dockerSwarmListAll } from "@/api/docker-swarm";
+import {dockerSwarmListAll, dockerSwarmServicesList} from "@/api/docker-swarm";
 
 export default {
   components: {
@@ -834,6 +836,8 @@ export default {
       cascaderList: [],
       sshList: [],
       dockerSwarmList: [],
+      //集群下 服务下拉数据
+      swarmServiceListOptions:[],
       temp: {},
       // 页面控制变量
       editBuildVisible: false,
@@ -1388,6 +1392,22 @@ export default {
       }
       this.loadData();
     },
+    // 选择发布集群时 渲染服务名称 数据
+    selectSwarm(){
+      this.swarmServiceListOptions = [];
+      if (this.tempExtraData.dockerSwarmId){
+        // 选中时才处理
+        dockerSwarmServicesList({
+          id:this.tempExtraData.dockerSwarmId}
+        ).then((res) => {
+          if (res.code === 200) {
+            this.swarmServiceListOptions = res.data
+          }
+        });
+      }else {
+        this.swarmServiceListOptions = [];
+      }
+    }
   },
 };
 </script>
