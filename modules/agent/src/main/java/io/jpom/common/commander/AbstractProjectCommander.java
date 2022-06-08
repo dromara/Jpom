@@ -335,10 +335,11 @@ public abstract class AbstractProjectCommander {
     public String restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
         this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "beforeRestart");
         boolean run = this.isRun(nodeProjectInfoModel, javaCopyItem);
+        String msg = StrUtil.EMPTY;
         if (run) {
-            this.stop(nodeProjectInfoModel, javaCopyItem);
+            msg += this.stop(nodeProjectInfoModel, javaCopyItem);
         }
-        return this.start(nodeProjectInfoModel, javaCopyItem);
+        return msg + StrUtil.SPACE + StrUtil.DASHED + StrUtil.SPACE + this.start(nodeProjectInfoModel, javaCopyItem);
     }
 
     /**
@@ -365,9 +366,8 @@ public abstract class AbstractProjectCommander {
             //
             String dslContent = nodeProjectInfoModel.getDslContent();
         } else if (runMode == RunMode.ClassPath || runMode == RunMode.JavaExtDirsCp) {
-            JarClassLoader jarClassLoader = JarClassLoader.load(fileLib);
             // 判断主类
-            try {
+            try (JarClassLoader jarClassLoader = JarClassLoader.load(fileLib)) {
                 jarClassLoader.loadClass(nodeProjectInfoModel.getMainClass());
             } catch (ClassNotFoundException notFound) {
                 return "没有找到对应的MainClass:" + nodeProjectInfoModel.getMainClass();
@@ -656,6 +656,19 @@ public abstract class AbstractProjectCommander {
      */
     protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, boolean status) {
         int stopWaitTime = AgentExtConfigBean.getInstance().getStopWaitTime();
+        return this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, stopWaitTime, status);
+    }
+
+    /***
+     * 阻塞检查程序状态
+     * @param nodeProjectInfoModel 项目
+     * @param javaCopyItem  副本
+     * @param status 要检查的状态
+     * @param stopWaitTime  检查等待时间
+     *
+     * @return 和参数status相反
+     */
+    protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int stopWaitTime, boolean status) {
         stopWaitTime = Math.max(stopWaitTime, 1);
         int loopCount = (int) (TimeUnit.SECONDS.toMillis(stopWaitTime) / 500);
         int count = 0;
