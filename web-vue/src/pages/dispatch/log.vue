@@ -8,7 +8,7 @@
       size="middle"
       :data-source="list"
       :columns="columns"
-      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+      :pagination="pagination"
       @change="changePage"
       bordered
       :rowKey="(record, index) => index"
@@ -63,7 +63,7 @@ import { getNodeListAll } from "@/api/node";
 import { getDishPatchLogList, getDishPatchListAll, dispatchStatusMap } from "@/api/dispatch";
 import { parseTime } from "@/utils/time";
 
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
   data() {
     return {
@@ -107,17 +107,7 @@ export default {
   },
   computed: {
     pagination() {
-      return {
-        total: this.listQuery.total,
-        current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.listQuery);
     },
   },
   created() {
@@ -171,14 +161,7 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.listQuery.page = pagination.current;
-        this.listQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.listQuery.order = sorter.order;
-        this.listQuery.order_field = sorter.field;
-      }
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
   },

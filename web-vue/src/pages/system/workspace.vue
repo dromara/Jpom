@@ -1,15 +1,7 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      :columns="columns"
-      size="middle"
-      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
-      bordered
-      @change="changePage"
-      :rowKey="(record, index) => index"
-    >
+    <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" bordered @change="changePage" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="工作空间名称" allowClear class="search-input-item" />
@@ -72,7 +64,7 @@
         size="middle"
         :loading="envVarLoading"
         :columns="envVarColumns"
-        :pagination="this.envVarListQuery.total / this.envVarListQuery.limit > 1 ? (this, envVarPagination) : false"
+        :pagination="envVarPagination"
         @change="changeListeEnvVar"
         bordered
         :rowKey="(record, index) => index"
@@ -138,7 +130,7 @@
 <script>
 import { getWorkSpaceList, editWorkSpace, deleteWorkspace, getWorkspaceEnvList, editWorkspaceEnv, deleteWorkspaceEnv } from "@/api/workspace";
 import { parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { getNodeListByWorkspace } from "@/api/node";
 export default {
   data() {
@@ -218,30 +210,10 @@ export default {
   },
   computed: {
     pagination() {
-      return {
-        total: this.listQuery.total,
-        current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.listQuery);
     },
     envVarPagination() {
-      return {
-        total: this.envVarListQuery.total,
-        current: this.envVarListQuery.page || 1,
-        pageSize: this.envVarListQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.envVarListQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.envVarListQuery);
     },
   },
   created() {
@@ -344,25 +316,12 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.listQuery.page = pagination.current;
-        this.listQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.listQuery.order = sorter.order;
-        this.listQuery.order_field = sorter.field;
-      }
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
     changeListeEnvVar(pagination, filters, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.envVarListQuery.page = pagination.current;
-        this.envVarListQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.envVarListQuery.order = sorter.order;
-        this.envVarListQuery.order_field = sorter.field;
-      }
+      this.envVarListQuery = CHANGE_PAGE(this.envVarListQuery, { pagination, sorter });
+
       this.loadDataEnvVar();
     },
     //

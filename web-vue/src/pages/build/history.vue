@@ -5,16 +5,7 @@
       <a-button type="primary" @click="handleFilter">刷新</a-button> 
     </div> -->
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      size="middle"
-      :columns="columns"
-      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
-      bordered
-      rowKey="id"
-      @change="change"
-      :row-selection="rowSelection"
-    >
+    <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" bordered rowKey="id" @change="change" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-select show-search option-filter-prop="children" v-model="listQuery.buildDataId" allowClear placeholder="请选择构建名称" class="search-input-item">
@@ -117,7 +108,7 @@ import BuildLog from "./log";
 import { geteBuildHistory, getBuildListAll, downloadBuildLog, rollback, deleteBuildHistory, releaseMethodMap, statusMap, downloadBuildFile, triggerBuildTypeMap } from "@/api/build-info";
 import { parseTime, formatDuration } from "@/utils/time";
 
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
   components: {
     BuildLog,
@@ -164,17 +155,7 @@ export default {
   },
   computed: {
     pagination() {
-      return {
-        total: this.listQuery.total,
-        current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.listQuery);
     },
     rowSelection() {
       return {
@@ -213,15 +194,8 @@ export default {
       });
     },
     // 分页、排序、筛选变化时触发
-    change(pagination, f, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.listQuery.page = pagination.current;
-        this.listQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.listQuery.order = sorter.order;
-        this.listQuery.order_field = sorter.field;
-      }
+    changef(pagination, filters, sorter) {
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
     // 选择时间

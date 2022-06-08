@@ -4,16 +4,7 @@
 
     </div> -->
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      :columns="columns"
-      size="middle"
-      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
-      @change="changePage"
-      bordered
-      rowKey="id"
-      :row-selection="rowSelection"
-    >
+    <a-table :data-source="list" :columns="columns" size="middle" :pagination="pagination" @change="changePage" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="节点名称" />
@@ -275,7 +266,7 @@
         :data-source="viewOperationLogList"
         :loading="viewOperationLoading"
         :columns="viewOperationLogColumns"
-        :pagination="viewOperationLogListQuery.total / viewOperationLogListQuery.limit > 1 ? (this, viewOperationLogPagination) : false"
+        :pagination="viewOperationLogPagination"
         @change="changeListLog"
         bordered
         size="middle"
@@ -349,7 +340,7 @@ import { deleteSsh, editSsh, getSshList, getSshCheckAgent, getSshOperationLogLis
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
 import { parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import Vue from "vue";
 import { mapGetters } from "vuex";
@@ -486,30 +477,10 @@ export default {
   computed: {
     ...mapGetters(["getWorkspaceId"]),
     viewOperationLogPagination() {
-      return {
-        total: this.viewOperationLogListQuery.total || 0,
-        current: this.viewOperationLogListQuery.page || 1,
-        pageSize: this.viewOperationLogListQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.viewOperationLogListQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.viewOperationLogListQuery);
     },
     pagination() {
-      return {
-        total: this.listQuery.total || 0,
-        current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.listQuery);
     },
     rowSelection() {
       return {
@@ -601,11 +572,16 @@ export default {
     // 操作日志
     handleViewLog(record) {
       this.temp = Object.assign({}, record);
-      this.viewOperationLogListQuery.sshId = this.temp.id;
       this.viewOperationLog = true;
       this.viewOperationLogList = [];
-      this.viewOperationLogListQuery.total = 0;
-      this.viewOperationLogListQuery.page = 1;
+
+      this.viewOperationLogListQuery = {
+        sshId: this.temp.id,
+        total: 0,
+        page: 1,
+      };
+      // this.viewOperationLogListQuery.total = 0;
+      //this.viewOperationLogListQuery.page = 1;
       this.tempVue = Vue;
       this.handleListLog();
     },
@@ -619,15 +595,9 @@ export default {
         this.viewOperationLoading = false;
       });
     },
-    changeListLog(pagination, f, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.viewOperationLogListQuery.page = pagination.current;
-        this.viewOperationLogListQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.viewOperationLogListQuery.order = sorter.order;
-        this.viewOperationLogListQuery.order_field = sorter.field;
-      }
+    changeListLog(pagination, filters, sorter) {
+      this.viewOperationLogListQuery = CHANGE_PAGE(this.viewOperationLogListQuery, { pagination, sorter });
+
       this.handleListLog();
     },
     // 选择时间
@@ -768,14 +738,7 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.listQuery.page = pagination.current;
-        this.listQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.listQuery.order = sorter.order;
-        this.listQuery.order_field = sorter.field;
-      }
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
     // 关闭抽屉层

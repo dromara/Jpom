@@ -3,7 +3,7 @@
     <!-- 搜索区 -->
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
-    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" @change="changePage">
+    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
       <template slot="title">
         <a-space>
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="仓库名称" />
@@ -183,7 +183,7 @@
 <script>
 import { deleteRepository, editRepository, getRepositoryList, authorizeRepos, restHideField } from "@/api/repository";
 import { parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_SIZW_OPTIONS } from "@/utils/const";
+import { PAGE_DEFAULT_LIST_QUERY, COMPUTED_PAGINATION, CHANGE_PAGE } from "@/utils/const";
 
 export default {
   components: {},
@@ -280,30 +280,10 @@ export default {
   computed: {
     // 分页
     pagination() {
-      return {
-        total: this.listQuery.total,
-        current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.listQuery);
     },
     reposPagination() {
-      return {
-        total: this.giteeImportForm.total,
-        current: this.giteeImportForm.page || 1,
-        pageSize: this.giteeImportForm.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.giteeImportForm);
-        },
-      };
+      return COMPUTED_PAGINATION(this.giteeImportForm);
     },
   },
   watch: {},
@@ -455,14 +435,7 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.listQuery.page = pagination.current;
-        this.listQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.listQuery.order = sorter.order;
-        this.listQuery.order_field = sorter.field;
-      }
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
     // 在导入仓库时，选择不同的 git 平台显示不同的提示语

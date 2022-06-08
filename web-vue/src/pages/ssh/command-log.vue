@@ -1,14 +1,6 @@
 <template>
   <div class="full-content">
-    <a-table
-      size="middle"
-      :data-source="commandList"
-      :columns="columns"
-      bordered
-      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
-      @change="changePage"
-      :rowKey="(record, index) => index"
-    >
+    <a-table size="middle" :data-source="commandList" :columns="columns" bordered :pagination="pagination" @change="changePage" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%commandName%']" @pressEnter="getCommandLogData" placeholder="搜索命令名称" class="search-input-item" />
@@ -54,7 +46,7 @@
 
 <script>
 import { getCommandLogList, statusMap, triggerExecTypeMap, deleteCommandLog, downloadLog } from "@/api/command";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_SIZW_OPTIONS } from "@/utils/const";
+import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { parseTime } from "@/utils/time";
 import CommandLog from "./command-view-log";
 
@@ -109,17 +101,7 @@ export default {
   },
   computed: {
     pagination() {
-      return {
-        total: this.listQuery.total || 0,
-        current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.listQuery);
     },
   },
   mounted() {
@@ -145,14 +127,7 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.listQuery.page = pagination.current;
-        this.listQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.listQuery.order = sorter.order;
-        this.listQuery.order_field = sorter.field;
-      }
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.getCommandLogData();
     },
     //  删除命令

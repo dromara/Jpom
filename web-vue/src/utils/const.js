@@ -29,14 +29,13 @@ export const NO_LOADING_KEY = "loading";
 
 export const LOADING_TIP = "loadingTip";
 
-/**
- * 分页默认条数
- */
-export const PAGE_DEFAULT_LIMIT = 10;
+const cachePageLimitKeyName = "page_limit";
+const cachePageLimit = parseInt(localStorage.getItem(cachePageLimitKeyName) || 10);
+
 /**
  * 分页选择条
  */
-export const PAGE_DEFAULT_SIZW_OPTIONS = ["5", PAGE_DEFAULT_LIMIT + "", "20", "30", "40", "50"];
+export const PAGE_DEFAULT_SIZW_OPTIONS = ["5", "10", "15", "20", "25", "30", "35", "40", "50"];
 /**
  * 展示总条数计算方法
  * @param {Number} total 总记录数
@@ -50,7 +49,50 @@ export function PAGE_DEFAULT_SHOW_TOTAL(total, listQuery) {
   return `总计 ${total} 条`;
 }
 
-export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: PAGE_DEFAULT_LIMIT, total: 0 };
+export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(cachePageLimit) ? 10 : cachePageLimit, total: 0 };
+
+/**
+ * 计算分页数据
+ * @param {JSON} queryParam
+ * @returns
+ */
+export function COMPUTED_PAGINATION(queryParam) {
+  // console.log(queryParam);
+  const limit = queryParam.size || PAGE_DEFAULT_LIST_QUERY.limit;
+  return {
+    total: queryParam.total || 0,
+    current: queryParam.current || 1,
+    pageSize: limit,
+    pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+    showSizeChanger: true,
+    showQuickJumper: true,
+    showLessItems: true,
+    hideOnSinglePage: limit <= 20,
+    showTotal: (total) => {
+      return PAGE_DEFAULT_SHOW_TOTAL(total, queryParam);
+    },
+  };
+}
+
+/**
+ * 分页切换
+ * @param {JSON} listQuery
+ * @param {JSON} param1
+ * @returns
+ */
+export function CHANGE_PAGE(listQuery, { pagination, sorter }) {
+  if (pagination && Object.keys(pagination).length) {
+    listQuery = { ...listQuery, page: pagination.current, limit: pagination.pageSize };
+    //
+    localStorage.setItem(cachePageLimitKeyName, pagination.pageSize);
+    //
+    PAGE_DEFAULT_LIST_QUERY.limit = pagination.pageSize;
+  }
+  if (sorter && Object.keys(sorter).length) {
+    listQuery = { ...listQuery, order: sorter.order, order_field: sorter.field };
+  }
+  return listQuery;
+}
 
 /**
  * 缓存当前的工作空间 ID
