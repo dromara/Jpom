@@ -620,7 +620,7 @@ export default {
       });
     },
     changeListLog(page, f, sorter) {
-      if (pagination) {
+      if (page) {
         this.viewOperationLogListQuery.page = page.current;
         this.viewOperationLogListQuery.limit = page.pageSize;
       }
