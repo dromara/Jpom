@@ -1,5 +1,5 @@
 // vue.config.js
-const IP = "127.0.0.1";
+const HOST = "127.0.0.1:2122";
 const Timestamp = new Date().getTime();
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
@@ -13,32 +13,32 @@ module.exports = {
     proxy: {
       // websocket
       "/ssh": {
-        target: `wss://${IP}:2122`,
+        target: `wss://${HOST}`,
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       "/tomcat_log": {
-        target: `wss://${IP}:2122`,
+        target: `wss://${HOST}`,
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       "/console": {
-        target: `wss://${IP}:2122`,
+        target: `wss://${HOST}`,
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       "/script_run": {
-        target: `wss://${IP}:2122`,
+        target: `wss://${HOST}`,
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       // http
       "/*": {
-        target: `http://${IP}:2122`,
+        target: `http://${HOST}`,
         timeout: 10 * 60 * 1000,
       },
     },
