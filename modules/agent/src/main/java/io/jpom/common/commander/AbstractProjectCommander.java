@@ -338,8 +338,9 @@ public abstract class AbstractProjectCommander {
         String msg = StrUtil.EMPTY;
         if (run) {
             msg += this.stop(nodeProjectInfoModel, javaCopyItem);
+            msg += StrUtil.SPACE + StrUtil.DASHED + StrUtil.SPACE;
         }
-        return msg + StrUtil.SPACE + StrUtil.DASHED + StrUtil.SPACE + this.start(nodeProjectInfoModel, javaCopyItem);
+        return msg + this.start(nodeProjectInfoModel, javaCopyItem);
     }
 
     /**
