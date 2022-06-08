@@ -2,15 +2,7 @@
   <div class="full-content">
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      size="middle"
-      :columns="columns"
-      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
-      bordered
-      :rowKey="(record, index) => index"
-      @change="change"
-    >
+    <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" bordered :rowKey="(record, index) => index" @change="change">
       <template slot="title">
         <a-space>
           <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
@@ -61,7 +53,7 @@
 import { getMonitorLogList, notifyStyle } from "@/api/monitor";
 import { getNodeListAll } from "@/api/node";
 import { parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
   data() {
     return {
@@ -95,17 +87,7 @@ export default {
   computed: {
     // 分页
     pagination() {
-      return {
-        total: this.listQuery.total,
-        current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.listQuery);
     },
   },
   created() {
@@ -138,15 +120,8 @@ export default {
       });
     },
     // 分页、排序、筛选变化时触发
-    change(pagination, fl, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.listQuery.page = pagination.current;
-        this.listQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.listQuery.order = sorter.order;
-        this.listQuery.order_field = sorter.field;
-      }
+    change(pagination, filters, sorter) {
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
 
       this.loadData();
     },

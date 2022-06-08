@@ -332,15 +332,15 @@ public abstract class AbstractProjectCommander {
      * @return 结果
      * @throws Exception 异常
      */
-    public String restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+    public Tuple restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
         this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "beforeRestart");
         boolean run = this.isRun(nodeProjectInfoModel, javaCopyItem);
-        String msg = StrUtil.EMPTY;
+        String stopMsg = StrUtil.EMPTY;
         if (run) {
-            msg += this.stop(nodeProjectInfoModel, javaCopyItem);
-            msg += StrUtil.SPACE + StrUtil.DASHED + StrUtil.SPACE;
+            stopMsg = this.stop(nodeProjectInfoModel, javaCopyItem);
         }
-        return msg + this.start(nodeProjectInfoModel, javaCopyItem);
+        String startMsg = this.start(nodeProjectInfoModel, javaCopyItem);
+        return new Tuple(startMsg, stopMsg);
     }
 
     /**

@@ -5,7 +5,7 @@
       :data-source="list"
       size="middle"
       :columns="columns"
-      :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false"
+      :pagination="pagination"
       @change="changePage"
       :row-selection="rowSelection"
       bordered
@@ -348,7 +348,7 @@ import Monitor from "./project-monitor";
 import Replica from "./project-replica";
 import { parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL } from "@/utils/const";
+import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL } from "@/utils/const";
 
 import {
   getJdkList,
@@ -438,17 +438,7 @@ export default {
       return (this.temp.whitelistDirectory || "") + (this.temp.lib || "");
     },
     pagination() {
-      return {
-        total: this.listQuery.total || 0,
-        current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.listQuery);
     },
     rowSelection() {
       return {
@@ -924,14 +914,7 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.listQuery.page = pagination.current;
-        this.listQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.listQuery.order = sorter.order;
-        this.listQuery.order_field = sorter.field;
-      }
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
   },

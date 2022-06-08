@@ -3,7 +3,7 @@
   <div class="full-content">
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
-    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="this.listQuery.total / this.listQuery.limit > 1 ? (this, pagination) : false" @change="changePage">
+    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
       <template slot="title">
         <a-space>
           <a-input allowClear class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="构建名称" />
@@ -415,7 +415,7 @@
                     <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
                   </a-select>
                 </a-form-model-item>
-                <a-form-model-item  label="服务名" prop="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
+                <a-form-model-item label="服务名" prop="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
                   <a-select allowClear placeholder="请选择发布到集群的服务名" v-model="tempExtraData.dockerSwarmServiceName">
                     <a-select-option v-for="item2 in swarmServiceListOptions" :key="item2.spec.name">{{ item2.spec.name }}</a-select-option>
                   </a-select>
@@ -742,9 +742,9 @@ import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { itemGroupBy, parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
+import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
 import Vue from "vue";
-import {dockerSwarmListAll, dockerSwarmServicesList} from "@/api/docker-swarm";
+import { dockerSwarmListAll, dockerSwarmServicesList } from "@/api/docker-swarm";
 
 export default {
   components: {
@@ -837,7 +837,7 @@ export default {
       sshList: [],
       dockerSwarmList: [],
       //集群下 服务下拉数据
-      swarmServiceListOptions:[],
+      swarmServiceListOptions: [],
       temp: {},
       // 页面控制变量
       editBuildVisible: false,
@@ -956,18 +956,7 @@ export default {
   },
   computed: {
     pagination() {
-      return {
-        total: this.listQuery.total,
-        current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
-        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showLessItems: true,
-        showTotal: (total) => {
-          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
-        },
-      };
+      return COMPUTED_PAGINATION(this.listQuery);
     },
     selectSshDirs() {
       if (!this.sshList || this.sshList.length <= 0) {
@@ -1384,32 +1373,25 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      if (pagination && Object.keys(pagination).length) {
-        this.listQuery.page = pagination.current;
-        this.listQuery.limit = pagination.pageSize;
-      }
-      if (sorter) {
-        this.listQuery.order = sorter.order;
-        this.listQuery.order_field = sorter.field;
-      }
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
     // 选择发布集群时 渲染服务名称 数据
-    selectSwarm(){
+    selectSwarm() {
       this.swarmServiceListOptions = [];
-      if (this.tempExtraData.dockerSwarmId){
+      if (this.tempExtraData.dockerSwarmId) {
         // 选中时才处理
         dockerSwarmServicesList({
-          id:this.tempExtraData.dockerSwarmId}
-        ).then((res) => {
+          id: this.tempExtraData.dockerSwarmId,
+        }).then((res) => {
           if (res.code === 200) {
-            this.swarmServiceListOptions = res.data
+            this.swarmServiceListOptions = res.data;
           }
         });
-      }else {
+      } else {
         this.swarmServiceListOptions = [];
       }
-    }
+    },
   },
 };
 </script>

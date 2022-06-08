@@ -22,7 +22,10 @@
  */
 package io.jpom.service.manage;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.socket.ConsoleCommandOp;
@@ -57,7 +60,8 @@ public class ConsoleService {
         // 执行命令
         switch (consoleCommandOp) {
             case restart:
-                result = abstractProjectCommander.restart(nodeProjectInfoModel, copyItem);
+                Tuple restart = abstractProjectCommander.restart(nodeProjectInfoModel, copyItem);
+                result = CollUtil.join(restart, StrUtil.COMMA);
                 break;
             case start:
                 result = abstractProjectCommander.start(nodeProjectInfoModel, copyItem);
