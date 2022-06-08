@@ -407,7 +407,7 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      if (pagination) {
+      if (pagination && Object.keys(pagination).length) {
         this.listQuery.page = pagination.current;
         this.listQuery.limit = pagination.pageSize;
       }
