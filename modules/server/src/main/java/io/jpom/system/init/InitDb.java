@@ -55,10 +55,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -71,6 +68,17 @@ import java.util.stream.Collectors;
 @Configuration
 @Slf4j
 public class InitDb implements DisposableBean, InitializingBean {
+
+    private static final List<Runnable> CALLBACK = new LinkedList<>();
+
+    /**
+     * 添加监听回调
+     *
+     * @param consumer 回调
+     */
+    public static void addCallback(Runnable consumer) {
+        CALLBACK.add(consumer);
+    }
 
     @PreLoadMethod(value = Integer.MIN_VALUE)
     private static void init() {
@@ -120,9 +128,9 @@ public class InitDb implements DisposableBean, InitializingBean {
             Set<String> executeSqlLog = instance.loadExecuteSqlLog();
             // 过滤 temp sql
             List<Resource> resourcesList = Arrays.stream(resources)
-                    .sorted((o1, o2) -> StrUtil.compare(o1.getFilename(), o2.getFilename(), true))
-                    .filter(resource -> !StrUtil.containsIgnoreCase(resource.getFilename(), "temp"))
-                    .collect(Collectors.toList());
+                .sorted((o1, o2) -> StrUtil.compare(o1.getFilename(), o2.getFilename(), true))
+                .filter(resource -> !StrUtil.containsIgnoreCase(resource.getFilename(), "temp"))
+                .collect(Collectors.toList());
             // 遍历
             for (Resource resource : resourcesList) {
                 try (InputStream inputStream = resource.getInputStream()) {
@@ -151,12 +159,14 @@ public class InitDb implements DisposableBean, InitializingBean {
         // json load to db
         InitDb.loadJsonToDb();
         Console.log("h2 db Successfully loaded, url is 【{}】", dbUrl);
+        CALLBACK.forEach(Runnable::run);
+        syncAllNode();
         if (JpomManifest.getInstance().isDebug()) {
             //
         } else {
             if (serverExtConfigBean.isH2ConsoleEnabled()
-                    && StrUtil.equals(dbExtConfig.getUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
-                    && StrUtil.equals(dbExtConfig.getUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
+                && StrUtil.equals(dbExtConfig.getUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
+                && StrUtil.equals(dbExtConfig.getUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
                 Console.error("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
                 System.exit(-2);
             }
@@ -211,15 +221,18 @@ public class InitDb implements DisposableBean, InitializingBean {
         //
         workspaceService.convertNullWorkspaceId();
         instance.convertMonitorLogField();
-        //  同步项目
-        Map<String, BaseNodeService> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeService.class);
-        for (BaseNodeService<?> value : beansOfType.values()) {
-            value.syncAllNode();
-        }
         //
         Map<String, BaseGroupService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseGroupService.class);
         for (BaseGroupService<?> value : groupServiceMap.values()) {
             value.repairGroupFiled();
+        }
+    }
+
+    private static void syncAllNode() {
+        //  同步项目
+        Map<String, BaseNodeService> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeService.class);
+        for (BaseNodeService<?> value : beansOfType.values()) {
+            value.syncAllNode();
         }
     }
 
@@ -253,7 +266,7 @@ public class InitDb implements DisposableBean, InitializingBean {
             dsFactory.destroy();
             Console.log("h2 db destroy");
         } catch (Throwable throwable) {
-            System.err.println(throwable.getMessage());
+            //System.err.println(throwable.getMessage());
         }
     }
 

@@ -32,6 +32,7 @@ import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -65,102 +66,108 @@ import java.util.stream.Collectors;
 @PreLoadClass
 public class AutoRegSeverNode {
 
-	/**
-	 * 向服务端注册插件端
-	 */
-	@PreLoadMethod
-	private static void reg() {
-		AgentExtConfigBean instance = AgentExtConfigBean.getInstance();
-		String agentId = instance.getAgentId();
-		String serverUrl = instance.getServerUrl();
-		if (StrUtil.isEmpty(agentId) || StrUtil.isEmpty(serverUrl)) {
-			//  如果二者缺一不注册
-			return;
-		}
-		String oldInstallId = null;
-		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), AgentConfigBean.SERVER_ID);
-		JSONObject serverJson = null;
-		if (file.exists()) {
-			try {
-				serverJson = (JSONObject) JsonFileUtil.readJson(file.getAbsolutePath());
-			} catch (FileNotFoundException e) {
-				serverJson = new JSONObject();
-			}
-			oldInstallId = serverJson.getString("installId");
-		}
-		HttpRequest installRequest = instance.createServerRequest(ServerOpenApi.INSTALL_ID);
-		String body1 = installRequest.execute().body();
-		JsonMessage jsonMessage = JSON.parseObject(body1, JsonMessage.class);
-		if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-			DefaultSystemLog.getLog().error("获取Server 安装id失败:" + jsonMessage);
-			return;
-		}
-		String installId = jsonMessage.dataToString();
-		boolean eqInstall = StrUtil.equals(oldInstallId, installId);
-		//
-		URL url = URLUtil.toUrlForHttp(instance.getAgentUrl());
-		String protocol = url.getProtocol();
+    /**
+     * 向服务端注册插件端
+     */
+    @PreLoadMethod
+    private static void reg() {
+        AgentExtConfigBean instance = AgentExtConfigBean.getInstance();
+        String agentId = instance.getAgentId();
+        String serverUrl = instance.getServerUrl();
+        if (StrUtil.isEmpty(agentId) || StrUtil.isEmpty(serverUrl)) {
+            //  如果二者缺一不注册
+            return;
+        }
+        String oldInstallId = null;
+        File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), AgentConfigBean.SERVER_ID);
+        JSONObject serverJson = null;
+        if (file.exists()) {
+            try {
+                serverJson = (JSONObject) JsonFileUtil.readJson(file.getAbsolutePath());
+            } catch (FileNotFoundException e) {
+                serverJson = new JSONObject();
+            }
+            oldInstallId = serverJson.getString("installId");
+        }
+        HttpRequest installRequest = instance.createServerRequest(ServerOpenApi.INSTALL_ID);
+        try (HttpResponse execute = installRequest.execute()) {
+            String body1 = execute.body();
+            JsonMessage<?> jsonMessage = JSON.parseObject(body1, JsonMessage.class);
+            if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+                DefaultSystemLog.getLog().error("获取Server 安装id失败:" + jsonMessage);
+                return;
+            }
+            String installId = jsonMessage.dataToString();
+            boolean eqInstall = StrUtil.equals(oldInstallId, installId);
+            //
+            URL url = URLUtil.toUrlForHttp(instance.getAgentUrl());
+            String protocol = url.getProtocol();
 
-		HttpRequest serverRequest = instance.createServerRequest(ServerOpenApi.UPDATE_NODE_INFO);
-		serverRequest.form("id", agentId);
-		serverRequest.form("name", "节点：" + agentId);
-		serverRequest.form("openStatus", 1);
-		serverRequest.form("protocol", protocol);
-		serverRequest.form("url", url.getHost() + CharPool.COLON + url.getPort());
-		AgentAuthorize agentAuthorize = AgentAuthorize.getInstance();
-		serverRequest.form("loginName", agentAuthorize.getAgentName());
-		serverRequest.form("loginPwd", agentAuthorize.getAgentPwd());
-		serverRequest.form("type", eqInstall ? "update" : "add");
-		String body = serverRequest.execute().body();
-		DefaultSystemLog.getLog().info("自动注册Server:" + body);
-		JsonMessage regJsonMessage = JSON.parseObject(body, JsonMessage.class);
-		if (regJsonMessage.getCode() == HttpStatus.HTTP_OK) {
-			if (serverJson == null) {
-				serverJson = new JSONObject();
-			}
-			if (!eqInstall) {
-				serverJson.put("installId", installId);
-				serverJson.put("regTime", DateTime.now().toString());
-			} else {
-				serverJson.put("updateTime", DateTime.now().toString());
-			}
-			JsonFileUtil.saveJson(file.getAbsolutePath(), serverJson);
-		} else {
-			DefaultSystemLog.getLog().error("自动注册插件端失败：{}", body);
-		}
-	}
+            HttpRequest serverRequest = instance.createServerRequest(ServerOpenApi.UPDATE_NODE_INFO);
+            serverRequest.form("id", agentId);
+            serverRequest.form("name", "节点：" + agentId);
+            serverRequest.form("openStatus", 1);
+            serverRequest.form("protocol", protocol);
+            serverRequest.form("url", url.getHost() + CharPool.COLON + url.getPort());
+            AgentAuthorize agentAuthorize = AgentAuthorize.getInstance();
+            serverRequest.form("loginName", agentAuthorize.getAgentName());
+            serverRequest.form("loginPwd", agentAuthorize.getAgentPwd());
+            serverRequest.form("type", eqInstall ? "update" : "add");
+            try (HttpResponse httpResponse = serverRequest.execute()) {
+                String body = httpResponse.body();
+                DefaultSystemLog.getLog().info("自动注册Server:" + body);
+                JsonMessage<?> regJsonMessage = JSON.parseObject(body, JsonMessage.class);
+                if (regJsonMessage.getCode() == HttpStatus.HTTP_OK) {
+                    if (serverJson == null) {
+                        serverJson = new JSONObject();
+                    }
+                    if (!eqInstall) {
+                        serverJson.put("installId", installId);
+                        serverJson.put("regTime", DateTime.now().toString());
+                    } else {
+                        serverJson.put("updateTime", DateTime.now().toString());
+                    }
+                    JsonFileUtil.saveJson(file.getAbsolutePath(), serverJson);
+                } else {
+                    DefaultSystemLog.getLog().error("自动注册插件端失败：{}", body);
+                }
+            }
+        }
+    }
 
-	/**
-	 * 自动推送插件端信息到服务端
-	 *
-	 * @param url 服务端url
-	 */
-	public static void autoPushToServer(String url) {
-		url = StrUtil.removeSuffix(url, CharPool.SINGLE_QUOTE + "");
-		url = StrUtil.removePrefix(url, CharPool.SINGLE_QUOTE + "");
-		UrlBuilder urlBuilder = UrlBuilder.ofHttp(url);
-		//
-		LinkedHashSet<InetAddress> localAddressList = NetUtil.localAddressList(address -> {
-			// 非loopback地址，指127.*.*.*的地址
-			return !address.isLoopbackAddress()
-					// 需为IPV4地址
-					&& address instanceof Inet4Address;
-		});
-		Set<String> ips = localAddressList.stream()
-				.map(InetAddress::getHostAddress)
-				.filter(StrUtil::isNotEmpty)
-				.collect(Collectors.toSet());
-		urlBuilder.addQuery("ips", CollUtil.join(ips, StrUtil.COMMA));
-		AgentAuthorize agentAuthorize = AgentAuthorize.getInstance();
-		urlBuilder.addQuery("loginName", agentAuthorize.getAgentName());
-		urlBuilder.addQuery("loginPwd", agentAuthorize.getAgentPwd());
-		int port = ConfigBean.getInstance().getPort();
-		urlBuilder.addQuery("port", port + "");
-		//
-		String build = urlBuilder.build();
-		String body = HttpUtil.createGet(build).execute().body();
-		Console.log("push result:" + body);
-	}
+    /**
+     * 自动推送插件端信息到服务端
+     *
+     * @param url 服务端url
+     */
+    public static void autoPushToServer(String url) {
+        url = StrUtil.removeSuffix(url, CharPool.SINGLE_QUOTE + "");
+        url = StrUtil.removePrefix(url, CharPool.SINGLE_QUOTE + "");
+        UrlBuilder urlBuilder = UrlBuilder.ofHttp(url);
+        //
+        LinkedHashSet<InetAddress> localAddressList = NetUtil.localAddressList(address -> {
+            // 非loopback地址，指127.*.*.*的地址
+            return !address.isLoopbackAddress()
+                // 需为IPV4地址
+                && address instanceof Inet4Address;
+        });
+        Set<String> ips = localAddressList.stream()
+            .map(InetAddress::getHostAddress)
+            .filter(StrUtil::isNotEmpty)
+            .collect(Collectors.toSet());
+        urlBuilder.addQuery("ips", CollUtil.join(ips, StrUtil.COMMA));
+        AgentAuthorize agentAuthorize = AgentAuthorize.getInstance();
+        urlBuilder.addQuery("loginName", agentAuthorize.getAgentName());
+        urlBuilder.addQuery("loginPwd", agentAuthorize.getAgentPwd());
+        int port = ConfigBean.getInstance().getPort();
+        urlBuilder.addQuery("port", port + "");
+        //
+        String build = urlBuilder.build();
+        try (HttpResponse execute = HttpUtil.createGet(build).execute()) {
+            String body = execute.body();
+            Console.log("push result:" + body);
+        }
+    }
 
 
 }

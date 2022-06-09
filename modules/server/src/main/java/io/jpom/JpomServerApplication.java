@@ -35,12 +35,17 @@ import io.jpom.common.interceptor.IpInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.OpenApiInterceptor;
 import io.jpom.common.interceptor.PermissionInterceptor;
+import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.data.SystemIpConfigModel;
+import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;
 import io.jpom.system.db.DbConfig;
+import io.jpom.system.init.InitDb;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+
+import java.util.concurrent.Future;
 
 /**
  * jpom 启动类
@@ -61,6 +66,10 @@ public class JpomServerApplication implements ApplicationEventLoad {
      * 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
      */
     private static boolean recoverH2Db = false;
+    /**
+     * 备份数据库
+     */
+    private static boolean backupH2 = false;
 
     /**
      * 启动执行
@@ -69,6 +78,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
      * --rest:super_user_pwd 重置超级管理员密码
      * --recover:h2db 当 h2 数据出现奔溃无法启动需要执行恢复逻辑
      * --close:super_user_mfa 重置超级管理员 mfa
+     * --backup-h2 备份数据库
      *
      * @param args 参数
      * @throws Exception 异常
@@ -81,15 +91,18 @@ public class JpomServerApplication implements ApplicationEventLoad {
         if (ArrayUtil.containsIgnoreCase(args, "--recover:h2db")) {
             recoverH2Db = true;
         }
+        if (ArrayUtil.containsIgnoreCase(args, "--backup-h2")) {
+            backupH2 = true;
+        }
         //
         JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
         jpomApplication
-                // 拦截器
-                .addInterceptor(IpInterceptor.class)
-                .addInterceptor(LoginInterceptor.class)
-                .addInterceptor(OpenApiInterceptor.class)
-                .addInterceptor(PermissionInterceptor.class)
-                .run(args);
+            // 拦截器
+            .addInterceptor(IpInterceptor.class)
+            .addInterceptor(LoginInterceptor.class)
+            .addInterceptor(OpenApiInterceptor.class)
+            .addInterceptor(PermissionInterceptor.class)
+            .run(args);
         // 重置 ip 白名单配置
         if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
             SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
@@ -132,6 +145,23 @@ public class JpomServerApplication implements ApplicationEventLoad {
                 e.printStackTrace();
                 System.exit(-2);
             }
+        }
+        if (backupH2) {
+            InitDb.addCallback(() -> {
+                Console.log("Start backing up the database");
+                BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
+                Future<BackupInfoModel> backupInfoModelFuture = backupInfoService.autoBackup();
+                try {
+                    BackupInfoModel backupInfoModel = backupInfoModelFuture.get();
+                    Console.log("Complete the backup database, save the path as {}", backupInfoModel.getFilePath());
+                    System.exit(0);
+                } catch (Exception e) {
+                    Console.error("Backup database failed：{}", e.getMessage());
+                    e.printStackTrace();
+                    System.exit(-2);
+                }
+            });
+
         }
     }
 }
