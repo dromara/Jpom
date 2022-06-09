@@ -32,11 +32,25 @@ import cn.hutool.core.util.StrUtil;
  */
 public class JpomRuntimeException extends RuntimeException {
 
-	public JpomRuntimeException(String message) {
-		super(message);
-	}
+    /**
+     * 程序是否需要关闭
+     */
+    private Integer exitCode;
 
-	public JpomRuntimeException(String message, Throwable throwable) {
-		super(StrUtil.format("{} {}", message, StrUtil.emptyToDefault(throwable.getMessage(), StrUtil.EMPTY)), throwable);
-	}
+    public JpomRuntimeException(String message) {
+        super(message);
+    }
+
+    public JpomRuntimeException(String message, Integer exitCode) {
+        super(message);
+        this.exitCode = exitCode;
+    }
+
+    public JpomRuntimeException(String message, Throwable throwable) {
+        super(StrUtil.format("{} {}", message, StrUtil.emptyToDefault(throwable.getMessage(), StrUtil.EMPTY)), throwable);
+    }
+
+    public Integer getExitCode() {
+        return exitCode;
+    }
 }

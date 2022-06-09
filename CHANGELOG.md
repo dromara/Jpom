@@ -1,5 +1,24 @@
 # 🚀 版本日志
 
+# 2.9.0
+
+### 🐣 新增功能
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】升级 h2 版本，低版本存在漏洞(CVE-2021-23463)
+
+### ⚠️ 注意
+
+> 此版本为不兼容升级，需要手动升级操作数据相关迁移，操作流程如下：
+
+1. 导出低版本数据
+   1. 启动程序参数里面添加 --backup-h2
+   2. linux 环境举例：`sh /xxxx/Server.sh restart --backup-h2`
+2. 将导出的低版本数据( sql 文件) 导入到新版本中
+   1. 启动程序参数里面添加 --replace-import-h2-sql=/xxxx.sql (路径需要替换为第一步控制台输出的 sql 文件保存路径)
+   2. linux 环境举例：`sh /xxxx/Server.sh restart --replace-import-h2-sql=/xxxx.sql`
+
 # 2.8.24 (2022-06-09)
 
 ### 🐣 新增功能

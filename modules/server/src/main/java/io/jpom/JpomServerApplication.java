@@ -83,6 +83,8 @@ public class JpomServerApplication implements ApplicationEventLoad {
      * --backup-h2 备份数据库
      * <p>
      * --import-h2-sql=/xxxx.sql 导入指定文件 sql
+     * <p>
+     * --replace-import-h2-sql=/xxxx.sql 替换导入指定文件 sql（会删除掉已经存的数据）
      *
      * @param args 参数
      * @throws Exception 异常
@@ -162,21 +164,38 @@ public class JpomServerApplication implements ApplicationEventLoad {
         String importH2Sql = StringUtil.getArgsValue(ARGS, "import-h2-sql");
         if (StrUtil.isNotEmpty(importH2Sql)) {
             // 导入数据
-            InitDb.addCallback(() -> {
-                File file = FileUtil.file(importH2Sql);
-                String sqlPath = FileUtil.getAbsolutePath(file);
-                if (!FileUtil.isFile(file)) {
-                    consoleExit(2, "sql file does not exist :{}", sqlPath);
-                }
-                Console.log("Start importing data:{}", sqlPath);
-                BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
-                boolean flag = backupInfoService.restoreWithSql(sqlPath);
-                if (!flag) {
-                    consoleExit(2, "Failed to import according to sql,{}", sqlPath);
-                }
-                Console.log("Import successfully according to sql,{}", sqlPath);
-            });
+            importH2Sql(importH2Sql);
         }
+        String replaceImportH2Sql = StringUtil.getArgsValue(ARGS, "replace-import-h2-sql");
+        if (StrUtil.isNotEmpty(replaceImportH2Sql)) {
+            // 删除掉旧数据
+            try {
+                instance.deleteDbFiles();
+            } catch (Exception e) {
+                e.printStackTrace();
+                consoleExit(-2, "Failed to import according to sql,{}", replaceImportH2Sql);
+            }
+            // 导入数据
+            importH2Sql(replaceImportH2Sql);
+        }
+        //
+    }
+
+    private static void importH2Sql(String importH2Sql) {
+        InitDb.addCallback(() -> {
+            File file = FileUtil.file(importH2Sql);
+            String sqlPath = FileUtil.getAbsolutePath(file);
+            if (!FileUtil.isFile(file)) {
+                consoleExit(2, "sql file does not exist :{}", sqlPath);
+            }
+            Console.log("Start importing data:{}", sqlPath);
+            BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
+            boolean flag = backupInfoService.restoreWithSql(sqlPath);
+            if (!flag) {
+                consoleExit(2, "Failed to import according to sql,{}", sqlPath);
+            }
+            Console.log("Import successfully according to sql,{}", sqlPath);
+        });
     }
 
     /**

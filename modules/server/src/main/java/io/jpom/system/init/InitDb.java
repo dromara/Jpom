@@ -42,9 +42,11 @@ import io.jpom.model.data.UserModel;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.system.WorkspaceService;
+import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import io.jpom.system.extconf.DbExtConfig;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -215,6 +217,14 @@ public class InitDb implements DisposableBean, InitializingBean {
             instance.loadSshInfo();
             instance.loadMonitorInfo();
             instance.loadOutgivinInfo();
+        } catch (JpomRuntimeException jpomRuntimeException) {
+            Integer exitCode = jpomRuntimeException.getExitCode();
+            if (exitCode != null) {
+                Console.error(jpomRuntimeException.getMessage());
+                System.exit(exitCode);
+            } else {
+                throw Lombok.sneakyThrow(jpomRuntimeException);
+            }
         } finally {
             BaseServerController.removeEmpty();
         }
