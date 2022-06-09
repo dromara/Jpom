@@ -9,8 +9,8 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 修复切换分页限制数再排序数据查询条数不正确问题 （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I5B47O](https://gitee.com/dromara/Jpom/issues/I5B47O) ）
-2. 优化编辑构建时发布选择 docker 镜像服务名输入改为下拉框（感谢@W）
+1. 【server】修复切换分页限制数再排序数据查询条数不正确问题 （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I5B47O](https://gitee.com/dromara/Jpom/issues/I5B47O) ）
+2. 【server】优化编辑构建时发布选择 docker 镜像服务名输入改为下拉框（感谢@W）
 3. 【agent】重启项目操作返回停止项目相关信息
 4. 【server】缓存用户选择的每页条数
 
