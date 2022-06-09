@@ -5,6 +5,7 @@
 ### 🐣 新增功能
 
 1. 【server】新增命令行创建数据库备份参数 `--backup-h2` `sh /xxxx/Server.sh restart --backup-h2`
+2. 【server】新增命令行导入 sql 数据文件参数 `--import-h2-sql=/xxxx.sql` `sh /xxxx/Server.sh restart --import-h2-sql=/xxxx.sql`
 
 ### 🐞 解决BUG、优化功能
 

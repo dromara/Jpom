@@ -25,8 +25,10 @@ package io.jpom;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.EnableCommonBoot;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.common.spring.event.ApplicationEventLoad;
@@ -42,9 +44,11 @@ import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;
 import io.jpom.system.db.DbConfig;
 import io.jpom.system.init.InitDb;
+import io.jpom.util.StringUtil;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
+import java.io.File;
 import java.util.concurrent.Future;
 
 /**
@@ -59,17 +63,9 @@ import java.util.concurrent.Future;
 public class JpomServerApplication implements ApplicationEventLoad {
 
     /**
-     * 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
+     * 参数
      */
-    private static boolean loadInitDb = false;
-    /**
-     * 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
-     */
-    private static boolean recoverH2Db = false;
-    /**
-     * 备份数据库
-     */
-    private static boolean backupH2 = false;
+    private static String[] ARGS;
 
     /**
      * 启动执行
@@ -79,21 +75,14 @@ public class JpomServerApplication implements ApplicationEventLoad {
      * --recover:h2db 当 h2 数据出现奔溃无法启动需要执行恢复逻辑
      * --close:super_user_mfa 重置超级管理员 mfa
      * --backup-h2 备份数据库
+     * --import-h2-sql=/xxxx.sql 导入指定文件 sql
      *
      * @param args 参数
      * @throws Exception 异常
      */
     public static void main(String[] args) throws Exception {
         long time = SystemClock.now();
-        if (ArrayUtil.containsIgnoreCase(args, "--rest:load_init_db")) {
-            loadInitDb = true;
-        }
-        if (ArrayUtil.containsIgnoreCase(args, "--recover:h2db")) {
-            recoverH2Db = true;
-        }
-        if (ArrayUtil.containsIgnoreCase(args, "--backup-h2")) {
-            backupH2 = true;
-        }
+        ARGS = args;
         //
         JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
         jpomApplication
@@ -135,10 +124,12 @@ public class JpomServerApplication implements ApplicationEventLoad {
     @Override
     public void applicationLoad() {
         DbConfig instance = DbConfig.getInstance();
-        if (loadInitDb) {
+        if (ArrayUtil.containsIgnoreCase(ARGS, "--rest:load_init_db")) {
+            // 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
             instance.clearExecuteSqlLog();
         }
-        if (recoverH2Db) {
+        if (ArrayUtil.containsIgnoreCase(ARGS, "--recover:h2db")) {
+            // 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
             try {
                 instance.recoverDb();
             } catch (Exception e) {
@@ -146,7 +137,8 @@ public class JpomServerApplication implements ApplicationEventLoad {
                 System.exit(-2);
             }
         }
-        if (backupH2) {
+        if (ArrayUtil.containsIgnoreCase(ARGS, "--backup-h2")) {
+            // 备份数据库
             InitDb.addCallback(() -> {
                 Console.log("Start backing up the database");
                 BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
@@ -161,7 +153,25 @@ public class JpomServerApplication implements ApplicationEventLoad {
                     System.exit(-2);
                 }
             });
-
+        }
+        String importH2Sql = StringUtil.getArgsValue(ARGS, "import-h2-sql");
+        if (StrUtil.isNotEmpty(importH2Sql)) {
+            // 导入数据
+            InitDb.addCallback(() -> {
+                File file = FileUtil.file(importH2Sql);
+                String sqlPath = FileUtil.getAbsolutePath(file);
+                if (!FileUtil.isFile(file)) {
+                    Console.error("sql file does not exist :{}", sqlPath);
+                    System.exit(2);
+                }
+                BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
+                boolean flag = backupInfoService.restoreWithSql(sqlPath);
+                if (!flag) {
+                    Console.error("Failed to import according to sql,{}", sqlPath);
+                    System.exit(2);
+                }
+                Console.log("Import successfully according to sql,{}", sqlPath);
+            });
         }
     }
 }
