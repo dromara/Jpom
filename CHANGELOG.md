@@ -4,6 +4,8 @@
 
 ### 🐣 新增功能
 
+1. 【server】新增命令行创建数据库备份参数 `--backup-h2` `sh /xxxx/Server.sh restart --backup-h2`
+
 ### 🐞 解决BUG、优化功能
 
 1. 修复切换分页限制数再排序数据查询条数不正确问题 （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I5B47O](https://gitee.com/dromara/Jpom/issues/I5B47O) ）
