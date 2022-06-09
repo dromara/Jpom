@@ -58,10 +58,10 @@ export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(cachePageLimit) ?
  */
 export function COMPUTED_PAGINATION(queryParam) {
   // console.log(queryParam);
-  const limit = queryParam.size || PAGE_DEFAULT_LIST_QUERY.limit;
+  const limit = queryParam.limit || PAGE_DEFAULT_LIST_QUERY.limit;
   return {
     total: queryParam.total || 0,
-    current: queryParam.current || 1,
+    current: queryParam.page || 1,
     pageSize: limit,
     pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
     showSizeChanger: true,
