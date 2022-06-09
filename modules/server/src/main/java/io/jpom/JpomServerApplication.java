@@ -69,12 +69,19 @@ public class JpomServerApplication implements ApplicationEventLoad {
 
     /**
      * 启动执行
+     * <p>
      * --rest:ip_config 重置 IP 白名单配置
+     * <p>
      * --rest:load_init_db 重新加载数据库初始化操作
+     * <p>
      * --rest:super_user_pwd 重置超级管理员密码
+     * <p>
      * --recover:h2db 当 h2 数据出现奔溃无法启动需要执行恢复逻辑
+     * <p>
      * --close:super_user_mfa 重置超级管理员 mfa
+     * <p>
      * --backup-h2 备份数据库
+     * <p>
      * --import-h2-sql=/xxxx.sql 导入指定文件 sql
      *
      * @param args 参数
@@ -134,7 +141,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
                 instance.recoverDb();
             } catch (Exception e) {
                 e.printStackTrace();
-                System.exit(-2);
+                consoleExit(-2, "Failed to restore database：{}", e.getMessage());
             }
         }
         if (ArrayUtil.containsIgnoreCase(ARGS, "--backup-h2")) {
@@ -145,12 +152,10 @@ public class JpomServerApplication implements ApplicationEventLoad {
                 Future<BackupInfoModel> backupInfoModelFuture = backupInfoService.autoBackup();
                 try {
                     BackupInfoModel backupInfoModel = backupInfoModelFuture.get();
-                    Console.log("Complete the backup database, save the path as {}", backupInfoModel.getFilePath());
-                    System.exit(0);
+                    consoleExit(0, "Complete the backup database, save the path as {}", backupInfoModel.getFilePath());
                 } catch (Exception e) {
-                    Console.error("Backup database failed：{}", e.getMessage());
                     e.printStackTrace();
-                    System.exit(-2);
+                    consoleExit(-2, "Backup database failed：{}", e.getMessage());
                 }
             });
         }
@@ -161,17 +166,33 @@ public class JpomServerApplication implements ApplicationEventLoad {
                 File file = FileUtil.file(importH2Sql);
                 String sqlPath = FileUtil.getAbsolutePath(file);
                 if (!FileUtil.isFile(file)) {
-                    Console.error("sql file does not exist :{}", sqlPath);
-                    System.exit(2);
+                    consoleExit(2, "sql file does not exist :{}", sqlPath);
                 }
+                Console.log("Start importing data:{}", sqlPath);
                 BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
                 boolean flag = backupInfoService.restoreWithSql(sqlPath);
                 if (!flag) {
-                    Console.error("Failed to import according to sql,{}", sqlPath);
-                    System.exit(2);
+                    consoleExit(2, "Failed to import according to sql,{}", sqlPath);
                 }
                 Console.log("Import successfully according to sql,{}", sqlPath);
             });
         }
+    }
+
+    /**
+     * 控制台输出并结束程序
+     *
+     * @param status   终止码
+     * @param template 输出消息
+     * @param args     参数
+     */
+    private static void consoleExit(int status, String template, Object... args) {
+        if (status == 0) {
+            Console.log(template, args);
+        } else {
+            Console.error(template, args);
+        }
+        Console.log("Need to log out manually: Ctrl+C/Control+C ");
+        System.exit(status);
     }
 }
