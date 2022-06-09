@@ -409,13 +409,27 @@
                     <a-input v-model="tempExtraData.dockerTag" placeholder="容器标签,如：xxxx:latest 多个使用逗号隔开" />
                   </a-tooltip>
                 </a-form-model-item>
-                <a-form-model-item label="发布集群" prop="swarmId">
+                <a-form-model-item prop="swarmId">
+                  <template slot="label">
+                    发布集群
+                    <a-tooltip v-show="!temp.id">
+                      <template slot="title"> 目前使用的 docker swarm 集群，需要先创建 swarm 集群才能选择 </template>
+                      <a-icon type="question-circle" theme="filled" />
+                    </a-tooltip>
+                  </template>
                   <a-select @change="selectSwarm()" show-search allowClear v-model="tempExtraData.dockerSwarmId" placeholder="请选择发布到哪个 docker 集群">
                     <a-select-option value="">不发布到 docker 集群</a-select-option>
                     <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
                   </a-select>
                 </a-form-model-item>
-                <a-form-model-item label="服务名" prop="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
+                <a-form-model-item prop="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
+                  <template slot="label">
+                    集群服务
+                    <a-tooltip v-show="!temp.id">
+                      <template slot="title"> 需要选发布到集群中的对应的服务名，需要提前去集群中创建服务 </template>
+                      <a-icon type="question-circle" theme="filled" />
+                    </a-tooltip>
+                  </template>
                   <a-select allowClear placeholder="请选择发布到集群的服务名" v-model="tempExtraData.dockerSwarmServiceName">
                     <a-select-option v-for="item2 in swarmServiceListOptions" :key="item2.spec.name">{{ item2.spec.name }}</a-select-option>
                   </a-select>
