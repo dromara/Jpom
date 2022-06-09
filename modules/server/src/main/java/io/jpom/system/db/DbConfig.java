@@ -45,154 +45,175 @@ import java.util.*;
  */
 public class DbConfig {
 
-	private static final String DB = "db";
+    private static final String DB = "db";
 
-	/**
-	 * 默认的账号或者密码
-	 */
-	public static final String DEFAULT_USER_OR_AUTHORIZATION = "jpom";
+    /**
+     * 默认的账号或者密码
+     */
+    public static final String DEFAULT_USER_OR_AUTHORIZATION = "jpom";
 
-	private static DbConfig dbConfig;
+    private static DbConfig dbConfig;
 
-	/**
-	 * 是否初始化成功
-	 */
-	private volatile boolean init;
+    /**
+     * 是否初始化成功
+     */
+    private volatile boolean init;
 
-	/**
-	 * 恢复 sql 文件
-	 */
-	private File recoverSqlFile;
+    /**
+     * 恢复 sql 文件
+     */
+    private File recoverSqlFile;
 
-	/**
-	 * 单利模式
-	 *
-	 * @return config
-	 */
-	public static DbConfig getInstance() {
-		if (dbConfig == null) {
-			dbConfig = new DbConfig();
-		}
-		return dbConfig;
-	}
+    /**
+     * 单利模式
+     *
+     * @return config
+     */
+    public static DbConfig getInstance() {
+        if (dbConfig == null) {
+            dbConfig = new DbConfig();
+        }
+        return dbConfig;
+    }
 
-	public void initOk() {
-		init = true;
-	}
+    public void initOk() {
+        init = true;
+    }
 
-	public void close() {
-		init = false;
-	}
+    public void close() {
+        init = false;
+    }
 
-	public boolean isInit() {
-		return init;
-	}
+    public boolean isInit() {
+        return init;
+    }
 
-	/**
-	 * 获取数据库保存路径
-	 *
-	 * @return 默认本地数据目录下面的 db 目录
-	 * @author bwcx_jzy
-	 */
-	public File dbLocalPath() {
-		return FileUtil.file(ExtConfigBean.getInstance().getPath(), DB);
-	}
+    /**
+     * 获取数据库保存路径
+     *
+     * @return 默认本地数据目录下面的 db 目录
+     * @author bwcx_jzy
+     */
+    public File dbLocalPath() {
+        return FileUtil.file(ExtConfigBean.getInstance().getPath(), DB);
+    }
 
-	/**
-	 * 获取数据库的jdbc 连接
-	 *
-	 * @return jdbc
-	 */
-	public String getDbUrl() {
-		DbExtConfig dbExtConfig = SpringUtil.getBean(DbExtConfig.class);
-		String dbUrl = dbExtConfig.getUrl();
-		if (StrUtil.isNotEmpty(dbUrl)) {
-			return dbUrl;
-		}
-		File file = FileUtil.file(this.dbLocalPath(), this.getDbName());
-		String path = FileUtil.getAbsolutePath(file);
-		return StrUtil.format("jdbc:h2:{};CACHE_SIZE={};MODE=MYSQL", path, dbExtConfig.getCacheSize().toKilobytes());
-	}
+    /**
+     * 获取数据库的jdbc 连接
+     *
+     * @return jdbc
+     */
+    public String getDbUrl() {
+        DbExtConfig dbExtConfig = SpringUtil.getBean(DbExtConfig.class);
+        String dbUrl = dbExtConfig.getUrl();
+        if (StrUtil.isNotEmpty(dbUrl)) {
+            return dbUrl;
+        }
+        File file = FileUtil.file(this.dbLocalPath(), this.getDbName());
+        String path = FileUtil.getAbsolutePath(file);
+        return StrUtil.format("jdbc:h2:{};CACHE_SIZE={};MODE=MYSQL", path, dbExtConfig.getCacheSize().toKilobytes());
+    }
 
-	public String getDbName() {
-		return JpomApplication.getAppType().name();
-	}
+    public String getDbName() {
+        return JpomApplication.getAppType().name();
+    }
 
-	/**
-	 * 加载 本地已经执行的记录
-	 *
-	 * @return sha1 log
-	 * @author bwcx_jzy
-	 */
-	public Set<String> loadExecuteSqlLog() {
-		File localPath = this.dbLocalPath();
-		File file = FileUtil.file(localPath, "execute.init.sql.log");
-		if (!FileUtil.isFile(file)) {
-			// 不存在或者是文件夹
-			FileUtil.del(file);
-			return new LinkedHashSet<>();
-		}
-		List<String> strings = FileUtil.readLines(file, CharsetUtil.CHARSET_UTF_8);
-		return new LinkedHashSet<>(strings);
-	}
+    /**
+     * 加载 本地已经执行的记录
+     *
+     * @return sha1 log
+     * @author bwcx_jzy
+     */
+    public Set<String> loadExecuteSqlLog() {
+        File localPath = this.dbLocalPath();
+        File file = FileUtil.file(localPath, "execute.init.sql.log");
+        if (!FileUtil.isFile(file)) {
+            // 不存在或者是文件夹
+            FileUtil.del(file);
+            return new LinkedHashSet<>();
+        }
+        List<String> strings = FileUtil.readLines(file, CharsetUtil.CHARSET_UTF_8);
+        return new LinkedHashSet<>(strings);
+    }
 
-	/**
-	 * 清除执行记录
-	 */
-	public void clearExecuteSqlLog() {
-		File localPath = this.dbLocalPath();
-		File file = FileUtil.file(localPath, "execute.init.sql.log");
-		FileUtil.del(file);
-	}
+    /**
+     * 清除执行记录
+     */
+    public void clearExecuteSqlLog() {
+        File localPath = this.dbLocalPath();
+        File file = FileUtil.file(localPath, "execute.init.sql.log");
+        FileUtil.del(file);
+    }
 
-	/**
-	 * 恢复数据库
-	 *
-	 * @param dsFactory 数据库连接
-	 */
-	public void executeRecoverDbSql(DSFactory dsFactory) throws Exception {
-		if (!FileUtil.isFile(this.recoverSqlFile)) {
-			return;
-		}
-		//
-		IPlugin plugin = PluginFactory.getPlugin("db-h2");
-		Map<String, Object> map = new HashMap<>(10);
-		map.put("backupSqlPath", FileUtil.getAbsolutePath(this.recoverSqlFile));
-		map.put("dataSource", dsFactory.getDataSource());
-		plugin.execute("restoreBackupSql", map);
-	}
+    /**
+     * 恢复数据库
+     *
+     * @param dsFactory 数据库连接
+     */
+    public void executeRecoverDbSql(DSFactory dsFactory) throws Exception {
+        if (!FileUtil.isFile(this.recoverSqlFile)) {
+            return;
+        }
+        //
+        IPlugin plugin = PluginFactory.getPlugin("db-h2");
+        Map<String, Object> map = new HashMap<>(10);
+        map.put("backupSqlPath", FileUtil.getAbsolutePath(this.recoverSqlFile));
+        map.put("dataSource", dsFactory.getDataSource());
+        plugin.execute("restoreBackupSql", map);
+    }
 
-	/**
-	 * 恢复数据库
-	 */
-	public void recoverDb() throws Exception {
-		File dbLocalPathFile = this.dbLocalPath();
-		if (!FileUtil.exist(dbLocalPathFile)) {
-			return;
-		}
-		String dbName = this.getDbName();
-		File recoverBackup = FileUtil.file(dbLocalPathFile, "recover_backup", DateTime.now().toString());
-		//
-		IPlugin plugin = PluginFactory.getPlugin("db-h2");
-		Map<String, Object> map = new HashMap<>(10);
-		map.put("dbName", dbName);
-		map.put("dbPath", dbLocalPathFile);
-		map.put("recoverBackup", recoverBackup);
-		File backupSql = (File) plugin.execute("recoverToSql", map);
-		// 清空记录
-		this.clearExecuteSqlLog();
-		// 记录恢复的 sql
-		this.recoverSqlFile = backupSql;
-	}
+    /**
+     * 恢复数据库
+     */
+    public void recoverDb() throws Exception {
+        File dbLocalPathFile = this.dbLocalPath();
+        if (!FileUtil.exist(dbLocalPathFile)) {
+            return;
+        }
+        String dbName = this.getDbName();
+        File recoverBackup = FileUtil.file(dbLocalPathFile, "recover_backup", DateTime.now().toString());
+        //
+        IPlugin plugin = PluginFactory.getPlugin("db-h2");
+        Map<String, Object> map = new HashMap<>(10);
+        map.put("dbName", dbName);
+        map.put("dbPath", dbLocalPathFile);
+        map.put("recoverBackup", recoverBackup);
+        File backupSql = (File) plugin.execute("recoverToSql", map);
+        // 清空记录
+        this.clearExecuteSqlLog();
+        // 记录恢复的 sql
+        this.recoverSqlFile = backupSql;
+    }
 
-	/**
-	 * 保存本地已经执行的记录
-	 *
-	 * @author bwcx_jzy
-	 */
-	public void saveExecuteSqlLog(Set<String> logs) {
-		File localPath = this.dbLocalPath();
-		File file = FileUtil.file(localPath, "execute.init.sql.log");
-		FileUtil.writeUtf8Lines(logs, file);
-	}
+    /**
+     * 恢复数据库
+     */
+    public void deleteDbFiles() throws Exception {
+        File dbLocalPathFile = this.dbLocalPath();
+        if (!FileUtil.exist(dbLocalPathFile)) {
+            return;
+        }
+        String dbName = this.getDbName();
+        File recoverBackup = FileUtil.file(dbLocalPathFile, "recover_backup", DateTime.now().toString());
+        //
+        IPlugin plugin = PluginFactory.getPlugin("db-h2");
+        Map<String, Object> map = new HashMap<>(10);
+        map.put("dbName", dbName);
+        map.put("dbPath", dbLocalPathFile);
+        map.put("recoverBackup", recoverBackup);
+        plugin.execute("deleteDbFiles", map);
+        // 清空记录
+        this.clearExecuteSqlLog();
+    }
+
+    /**
+     * 保存本地已经执行的记录
+     *
+     * @author bwcx_jzy
+     */
+    public void saveExecuteSqlLog(Set<String> logs) {
+        File localPath = this.dbLocalPath();
+        File file = FileUtil.file(localPath, "execute.init.sql.log");
+        FileUtil.writeUtf8Lines(logs, file);
+    }
 }

@@ -30,6 +30,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.ds.DSFactory;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import org.h2.store.FileLister;
+import org.h2.tools.DeleteDbFiles;
 import org.h2.tools.Recover;
 import org.h2.tools.RunScript;
 import org.h2.tools.Shell;
@@ -77,6 +78,11 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
             String dbName = (String) parameter.get("dbName");
             File recoverBackup = (File) parameter.get("recoverBackup");
             return this.recover(dbPath, dbName, recoverBackup);
+        } else if (StrUtil.equals("deleteDbFiles", method)) {
+            File dbPath = (File) parameter.get("dbPath");
+            String dbName = (String) parameter.get("dbName");
+            File recoverBackup = (File) parameter.get("recoverBackup");
+            this.deleteDbFiles(dbPath, dbName, recoverBackup);
         } else {
             throw new IllegalArgumentException("不支持的类型");
         }
@@ -109,6 +115,31 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
         Recover recover = new Recover();
         recover.runTool("-dir", absolutePath, "-db", dbName);
         return FileUtil.file(recoverBackup, dbName + ".h2.sql");
+    }
+
+    /**
+     * 删除数据
+     *
+     * @param dbPath 数据库路径
+     * @param dbName 数据库名
+     * @throws SQLException sql
+     */
+    private void deleteDbFiles(File dbPath, String dbName, File recoverBackup) throws SQLException {
+        String dbLocalPath = FileUtil.getAbsolutePath(dbPath);
+        ArrayList<String> list = FileLister.getDatabaseFiles(dbLocalPath, dbName, true);
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
+        if (recoverBackup != null) {
+            FileUtil.mkdir(recoverBackup);
+            // 备份数据
+            for (String s : list) {
+                FileUtil.move(FileUtil.file(s), recoverBackup, true);
+            }
+        }
+        // 删除数据
+        DeleteDbFiles deleteDbFiles = new DeleteDbFiles();
+        deleteDbFiles.runTool("-dir", dbLocalPath, "-db", dbName);
     }
 
     /**
@@ -145,11 +176,11 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
 		 * - table 表示需要备份的表名称，后面跟多个表名，用英文逗号分割
 		 */
         String[] params = new String[]{
-                "-url", url,
-                "-user", user,
-                "-password", password,
-                "-driver", "org.h2.Driver",
-                "-sql", sql
+            "-url", url,
+            "-user", user,
+            "-password", password,
+            "-driver", "org.h2.Driver",
+            "-sql", sql
         };
         try (FastByteArrayOutputStream arrayOutputStream = new FastByteArrayOutputStream()) {
             try (PrintStream printStream = new PrintStream(arrayOutputStream)) {
