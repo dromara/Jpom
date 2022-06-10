@@ -13,11 +13,11 @@
 > 此版本为不兼容升级，需要手动升级操作数据相关迁移，操作流程如下：
 
 1. 导出低版本数据
-   1. 启动程序参数里面添加 --backup-h2
-   2. linux 环境举例：`sh /xxxx/Server.sh restart --backup-h2`
+	1. 启动程序参数里面添加 --backup-h2
+	2. linux 环境举例：`sh /xxxx/Server.sh restart --backup-h2`
 2. 将导出的低版本数据( sql 文件) 导入到新版本中
-   1. 启动程序参数里面添加 --replace-import-h2-sql=/xxxx.sql (路径需要替换为第一步控制台输出的 sql 文件保存路径)
-   2. linux 环境举例：`sh /xxxx/Server.sh restart --replace-import-h2-sql=/xxxx.sql`
+	1. 启动程序参数里面添加 --replace-import-h2-sql=/xxxx.sql (路径需要替换为第一步控制台输出的 sql 文件保存路径)
+	2. linux 环境举例：`sh /xxxx/Server.sh restart --replace-import-h2-sql=/xxxx.sql --transform-sql`
 
 # 2.8.24 (2022-06-09)
 
@@ -28,13 +28,13 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复切换分页限制数再排序数据查询条数不正确问题 （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I5B47O](https://gitee.com/dromara/Jpom/issues/I5B47O) ）
+1. 【server】修复切换分页限制数再排序数据查询条数不正确问题
+   （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I5B47O](https://gitee.com/dromara/Jpom/issues/I5B47O) ）
 2. 【server】优化编辑构建时发布选择 docker 镜像服务名输入改为下拉框（感谢@W）
 3. 【agent】重启项目操作返回停止项目相关信息
 4. 【server】缓存用户选择的每页条数
 
 ------
-
 
 # 2.8.23 (2022-06-01)
 
@@ -62,11 +62,14 @@
 
 ### 🐣 新增功能
 
-1. 新增日志查询功能 （感谢  @ 、 [@漫步青春的日子](https://gitee.com/imoom) [Gitee issues I54GDY](https://gitee.com/dromara/Jpom/issues/I54GDY) ）
+1. 新增日志查询功能 （感谢 @
+   、 [@漫步青春的日子](https://gitee.com/imoom) [Gitee issues I54GDY](https://gitee.com/dromara/Jpom/issues/I54GDY) ）
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复构建读取 .env 文件空时候无法正常使用（感谢[@wangfeng2228952430](https://gitee.com/wangfeng2228952430) [Gitee issues I57DC1](https://gitee.com/dromara/Jpom/issues/I57DC1) ）
+1. 【server】修复构建读取 .env
+   文件空时候无法正常使用（感谢[@wangfeng2228952430](https://gitee.com/wangfeng2228952430) [Gitee issues I57DC1](https://gitee.com/dromara/Jpom/issues/I57DC1)
+   ）
 2. 【server】优化构建拉取仓库`锁对象`,避免出现死锁问题（感谢@信徒 ）
 3. 【server】修复节点分发配置多个节点无法正常保存问题（感谢@李道甫 ）
 4. 【agent】上传文件大小限制配置属性默认值恢复为 1GB,避免用户升级后需要逐一配置 （感谢@李道甫 ）
@@ -91,16 +94,27 @@
 
 1. 【server】节点新增代理配置，实现使用代理访问插件端（感谢@背着砍刀的诗人）
 2. 【server】构建新增差异构建配置选择（如果仓库代码未变动则不执行构建）
-3. 项目管理文件新增备份，自动备份变动的文件（感谢[@少爷123](https://gitee.com/58753101) [Gitee issues I54ZFM](https://gitee.com/dromara/Jpom/issues/I54ZFM) ）
-4. 【server】SH配置和节点配置新增跨工作空间同步功能，方便快速同步信息（感谢[@陈旭](https://gitee.com/chenxu8989) ） [Gitee issues I56YTU](https://gitee.com/dromara/Jpom/issues/I56YTU)
+3.
+
+项目管理文件新增备份，自动备份变动的文件（感谢[@少爷123](https://gitee.com/58753101) [Gitee issues I54ZFM](https://gitee.com/dromara/Jpom/issues/I54ZFM)
+）
+
+4. 【server】SH配置和节点配置新增跨工作空间同步功能，方便快速同步信息（感谢[@陈旭](https://gitee.com/chenxu8989)
+   ） [Gitee issues I56YTU](https://gitee.com/dromara/Jpom/issues/I56YTU)
 
 ### 🐞 解决BUG、优化功能
 
 1. 修复上传文件限制大小异常拦截不生效的问题（感谢@小工匠 ）
-2. 【server】新增配置前端消息弹窗位置属性 `jpom.notificationPlacement` （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I53V8B](https://gitee.com/dromara/Jpom/issues/I53V8B) ）
+2. 【server】新增配置前端消息弹窗位置属性 `jpom.notificationPlacement`
+   （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I53V8B](https://gitee.com/dromara/Jpom/issues/I53V8B) ）
 3. 【server】构建历史新增批量删除
-4. 【server】修复关联分发项目，无法选择不同节点下相同的项目的问题（感谢[@宋建平](https://gitee.com/sjping) [Gitee issues I5680N](https://gitee.com/dromara/Jpom/issues/I5680N) ）
-5. 【server】调整 docker-compose 使用卷方式存储数据，避免在部分环境中出现无法正常使用情况 (感谢 [@💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) 贡献解决方案)（感谢[@笨笨巫师](https://gitee.com/zhangxin_gitosc) [Gitee issues I52OAV](https://gitee.com/dromara/Jpom/issues/I52OAV) ）
+4.
+
+【server】修复关联分发项目，无法选择不同节点下相同的项目的问题（感谢[@宋建平](https://gitee.com/sjping) [Gitee issues I5680N](https://gitee.com/dromara/Jpom/issues/I5680N)
+）
+
+5. 【server】调整 docker-compose 使用卷方式存储数据，避免在部分环境中出现无法正常使用情况 (感谢 [@💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) 贡献解决方案)
+   （感谢[@笨笨巫师](https://gitee.com/zhangxin_gitosc) [Gitee issues I52OAV](https://gitee.com/dromara/Jpom/issues/I52OAV) ）
 6. 【server】调整节点里面在部分情况下会出现空白行 （感谢[@💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) ）
 7. 【server】前端部分输入框添加`maxLength` 限制避免出现数据库字段长度不足问题（感谢@ccx2480 ）
 8. 【agent】修复项目下载远程文件解压方法错误（感谢@背着砍刀的诗人 ）
@@ -108,7 +122,7 @@
 10. 【server】优化报错构建时未判断构建产物越级问题（感谢@奇奇 ）
 
 > 使用项目文件备份说明：
-> 
+>
 > 1. 默认未开启文件备份功能
 > 2. 可以配置全局开启，插件端配置（ `extConfig.yml` ）文件中配置`project.fileBackupCount`属性
 > 3. DSL 项目可以在配置内容新增 `file.backupCount` 来开启（DSL 配置优先级最高）
@@ -127,6 +141,7 @@
 
 出现如上提示信息需要对插件端或者服务端进行配置合理对上传文件大小限制。
 配置方式：在对应端的 `extConfig.yml` 配置文件中配置如下代码
+
 ```yaml
 spring:
   servlet:
@@ -142,22 +157,27 @@ spring:
 
 ### 🐣 新增功能
 
-1. 【server】SSH文件管理器中加入创建目录和文件的功能 （感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 161](https://gitee.com/dromara/Jpom/pulls/161) ）
-2. 【server】新增禁用登录图形验证码配置属性 `jpom.disabledCaptcha` （感谢 [@放学后的茶会](https://gitee.com/tt2yui) [Gitee issues I4GD0U](https://gitee.com/dromara/Jpom/issues/I4GD0U) ）
-3. 【agent】节点项目文件管理新增创建文件夹/文件功能 （感谢 [@Eibons](https://gitee.com/eibons) [Gitee issues I4ZFFH](https://gitee.com/dromara/Jpom/issues/I4ZFFH) ）
+1. 【server】SSH文件管理器中加入创建目录和文件的功能
+   （感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 161](https://gitee.com/dromara/Jpom/pulls/161) ）
+2. 【server】新增禁用登录图形验证码配置属性 `jpom.disabledCaptcha`
+   （感谢 [@放学后的茶会](https://gitee.com/tt2yui) [Gitee issues I4GD0U](https://gitee.com/dromara/Jpom/issues/I4GD0U) ）
+3. 【agent】节点项目文件管理新增创建文件夹/文件功能
+   （感谢 [@Eibons](https://gitee.com/eibons) [Gitee issues I4ZFFH](https://gitee.com/dromara/Jpom/issues/I4ZFFH) ）
 
 ### 🐞 解决BUG、优化功能
 
 1. 【server】本地构建命令、本地命令发布、ssh 发布支持加载仓库目录 `.env` 文件为环境变量 （感谢@z~）
 2. 【server】容器相关引用 maven 版本升级为 3.8.5
-3. 【server】容器构建 DSL 示例添加镜像地址说明 （感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 160](https://gitee.com/dromara/Jpom/pulls/160) ）
+3. 【server】容器构建 DSL 示例添加镜像地址说明
+   （感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 160](https://gitee.com/dromara/Jpom/pulls/160) ）
 4. 【server】本地构建命令添加本次构建相关的默认变量（感谢@杨杰）
-5. 【server】优化 SHH 文件管理中文件上传,压缩包上传操作（感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 161](https://gitee.com/dromara/Jpom/pulls/161) ）
-6. 【agent】批量获取项目状态新增缓存，避免部分环境获取项目状态超时（感谢@奇奇  ）
+5. 【server】优化 SHH
+   文件管理中文件上传,压缩包上传操作（感谢 [@wxyShine](https://gitee.com/wxyShine) [Gitee PR 161](https://gitee.com/dromara/Jpom/pulls/161)
+   ）
+6. 【agent】批量获取项目状态新增缓存，避免部分环境获取项目状态超时（感谢@奇奇 ）
 7. 远程升级检查地址支持自定义配置，解决没有外网或者网络不同情况下自定义配置升级服务器
 
 ------
-
 
 # 2.8.17 (2022-03-28)
 
@@ -166,7 +186,8 @@ spring:
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复非超级管理员部分下载功能无法正常使用
-2. 【server】ssh 私钥连接新增 `private key content` 登录 （感谢 [@震秦](https://gitee.com/zhzhenqin) [Gitee PR 159](https://gitee.com/dromara/Jpom/pulls/159) ）
+2. 【server】ssh 私钥连接新增 `private key content` 登录
+   （感谢 [@震秦](https://gitee.com/zhzhenqin) [Gitee PR 159](https://gitee.com/dromara/Jpom/pulls/159) ）
 3. 【server】修复非默认工作空间节点分发白名单无法保存问题（感谢@愿好）
 
 ------
@@ -316,7 +337,8 @@ spring:
 6. 【server】本地构建命令 容器构建支持引用工作空间变量
 7. 【server】修复构建触发器无法执行（感谢@[老诗人](https://gitee.com/laoshirenggo) ）
 8. 【server】服务端脚本新增工作空间环境变量
-9. 修复检查 Jpom 包中没有释放资源（感谢@[大海](https://gitee.com/hasape) [Gitee issues I4T9L0](https://gitee.com/dromara/Jpom/issues/I4T9L0) ）
+9. 修复检查 Jpom
+   包中没有释放资源（感谢@[大海](https://gitee.com/hasape) [Gitee issues I4T9L0](https://gitee.com/dromara/Jpom/issues/I4T9L0) ）
 
 ------
 
@@ -536,7 +558,8 @@ spring:
 9. 【server】发布命令（SSH发布命令、本地命令）支持变量替换：`#{BUILD_ID}`、`#{BUILD_NAME}`、`#{BUILD_RESULT_FILE}`、`#{BUILD_NUMBER_ID}`
 10. 【server】新增自动备份全量数据配置 `db.autoBackupIntervalDay` 默认一天备份一次,执行备份时间 凌晨0点或者中午12点
 11. 【agent】项目的 webhook 新增项目启动成功后通知，并且参数新增 `type` 指包括：`beforeStop`,`start`,`stop`,`beforeRestart`
-12. 【agent】项目新增自启动配置项,在 agent 启动时候检查对应项目是否启动，未启动执行启动逻辑 [Gitee issues I4IJFK](https://gitee.com/dromara/Jpom/issues/I4IJFK)
+12. 【agent】项目新增自启动配置项,在 agent
+	启动时候检查对应项目是否启动，未启动执行启动逻辑 [Gitee issues I4IJFK](https://gitee.com/dromara/Jpom/issues/I4IJFK)
 13. 【server】构建新增 webhook，实时通知构建进度
 14. 【server】节点分发新增分发间隔时间配置
 15. 新增控制台日志配置数据 `consoleLog.charset` 避免部分服务器执行命令响应乱码 （感谢@……）

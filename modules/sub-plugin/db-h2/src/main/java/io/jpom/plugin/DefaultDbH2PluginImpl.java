@@ -81,8 +81,8 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
         } else if (StrUtil.equals("deleteDbFiles", method)) {
             File dbPath = (File) parameter.get("dbPath");
             String dbName = (String) parameter.get("dbName");
-            File recoverBackup = (File) parameter.get("recoverBackup");
-            this.deleteDbFiles(dbPath, dbName, recoverBackup);
+            File backupPath = (File) parameter.get("backupPath");
+            this.deleteDbFiles(dbPath, dbName, backupPath);
         } else {
             throw new IllegalArgumentException("不支持的类型");
         }
@@ -124,17 +124,17 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
      * @param dbName 数据库名
      * @throws SQLException sql
      */
-    private void deleteDbFiles(File dbPath, String dbName, File recoverBackup) throws SQLException {
+    private void deleteDbFiles(File dbPath, String dbName, File backupPath) throws SQLException {
         String dbLocalPath = FileUtil.getAbsolutePath(dbPath);
         ArrayList<String> list = FileLister.getDatabaseFiles(dbLocalPath, dbName, true);
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        if (recoverBackup != null) {
-            FileUtil.mkdir(recoverBackup);
+        if (backupPath != null) {
+            FileUtil.mkdir(backupPath);
             // 备份数据
             for (String s : list) {
-                FileUtil.move(FileUtil.file(s), recoverBackup, true);
+                FileUtil.move(FileUtil.file(s), backupPath, true);
             }
         }
         // 删除数据

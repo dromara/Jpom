@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.SSH_INFO
     `name`            VARCHAR(50) comment '名称',
     host              varchar(100) not null comment 'ssh host IP',
     port              int          not null comment '端口',
-    user              varchar(100) not null comment '用户',
+    `user`              varchar(100) not null comment '用户',
     password          varchar(100) comment '密码',
     charset           varchar(100) comment '编码格式',
     fileDirs          CLOB comment '文件目录',

@@ -35,7 +35,9 @@ import io.jpom.system.ExtConfigBean;
 import io.jpom.system.extconf.DbExtConfig;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 数据库配置
@@ -119,6 +121,22 @@ public class DbConfig {
     }
 
     /**
+     * 转换 sql 文件内容,低版本兼容高版本
+     *
+     * @param sqlFile sql 文件
+     */
+    public void transformSql(File sqlFile) {
+        List<String> list = FileUtil.readLines(sqlFile, StandardCharsets.UTF_8);
+        list = list.stream().map(s -> {
+            if (StrUtil.startWith(s, "CREATE PRIMARY KEY SYSTEM_LOB_STREAM_PRIMARY_KEY ON SYSTEM_LOB_STREAM(ID, PART);")) {
+                return "-- " + s;
+            }
+            return s;
+        }).collect(Collectors.toList());
+        FileUtil.writeLines(list, sqlFile, StandardCharsets.UTF_8);
+    }
+
+    /**
      * 加载 本地已经执行的记录
      *
      * @return sha1 log
@@ -188,22 +206,22 @@ public class DbConfig {
     /**
      * 恢复数据库
      */
-    public void deleteDbFiles() throws Exception {
+    public String deleteDbFiles() throws Exception {
         File dbLocalPathFile = this.dbLocalPath();
         if (!FileUtil.exist(dbLocalPathFile)) {
-            return;
+            return null;
         }
-        String dbName = this.getDbName();
-        File recoverBackup = FileUtil.file(dbLocalPathFile, "recover_backup", DateTime.now().toString());
+        File deleteBackup = FileUtil.file(dbLocalPathFile, "recover_backup", DateTime.now().toString());
         //
         IPlugin plugin = PluginFactory.getPlugin("db-h2");
         Map<String, Object> map = new HashMap<>(10);
-        map.put("dbName", dbName);
+        map.put("dbName", this.getDbName());
         map.put("dbPath", dbLocalPathFile);
-        map.put("recoverBackup", recoverBackup);
+        map.put("backupPath", deleteBackup);
         plugin.execute("deleteDbFiles", map);
         // 清空记录
         this.clearExecuteSqlLog();
+        return FileUtil.getAbsolutePath(deleteBackup);
     }
 
     /**
