@@ -221,7 +221,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
         } else {
             Console.error(template, args);
         }
-        Console.log("Need to log out manually: Ctrl+C/Control+C ");
+        Console.log("has stopped running automatically，Need to log out manually: Ctrl+C/Control+C ");
         System.exit(status);
     }
 }
