@@ -19,6 +19,18 @@
 	1. 启动程序参数里面添加 `--replace-import-h2-sql=/xxxx.sql --transform-sql` (路径需要替换为第一步控制台输出的 sql 文件保存路径)
 	2. linux 环境举例：`sh /xxxx/Server.sh restart --replace-import-h2-sql=/xxxx.sql --transform-sql`
 
+------
+
+# 2.8.25
+
+### 🐣 新增功能
+
+### 🐞 解决BUG、优化功能
+
+1.【server】修复 docker 集群服务编辑端口配置不能区分开问题（感谢@Y.）
+
+------
+
 # 2.8.24 (2022-06-09)
 
 ### 🐣 新增功能
