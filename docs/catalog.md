@@ -2,6 +2,7 @@
 * [常见问题](FQA/FQA.md)
 * [名词解释](FQA/名词解释.md)
 * [更新记录](CHANGELOG)
+* [2.8.x 升级 2.9.x](FQA/upgrade-to-2.9.x.md)
 * [赞赏记录](praise)
 * 实践案例
     * [本地构建 + SSH 发布 java 项目](practice/build_java_ssh_release.md)
