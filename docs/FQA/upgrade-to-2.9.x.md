@@ -29,7 +29,7 @@
    1. 启动程序参数里面添加 `--replace-import-h2-sql=/xxxx.sql --transform-sql` (路径需要替换为第二步控制台输出的 sql 文件保存路径)
    2. linux 环境举例：`sh /xxxx/Server.sh restart --replace-import-h2-sql=/xxxx.sql --transform-sql`
 5. 观察控制输出内容
-   1. 当控制台输出 `Import successfully according to sql,/xxx/xxx/db/backup/xxxx.sql` 字样表示升级成功并启动自动启动程序
+   1. 当控制台输出 `Import successfully according to sql,/xxx/xxx/db/backup/xxxx.sql` 字样表示升级成功并自动启动程序
    2. 如果出现异常信息可以先尝试在搜索引擎搜索看看是否有解决办法
    3. 联系官方协助排查
 6. 愉快的使用 Jpom 2.9.x
@@ -98,3 +98,13 @@ IF "!ID!"=="0" EXIT
 ```
 
 `注意要修改 sql 路径`
+
+#### 问：容器安装的应该如何升级？
+
+**答**：升级流程和 linux 流程一致，需要注意的就是上传文件的方式需要先上传到宿主机，再通过 `docker cp` 方式将文件复制到容器中
+
+举例：
+```shell
+# docker cp 本地文件路径 容器ID/容器NAME:容器内路径
+docker cp /roo/Server-2.9.0.jar jpom-server:/usr/local/jpom-server/lib/Server-2.9.0.jar
+```
