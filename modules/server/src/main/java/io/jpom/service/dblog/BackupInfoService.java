@@ -238,8 +238,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
             return true;
         } catch (Exception e) {
             // 记录错误日志信息，返回数据库备份还原执行失败
-            log.error("restore H2 Database backup...catch exception...message: {}, cause: {}",
-                e.getMessage(), e.getCause());
+            log.error("restore H2 Database backup...catch exception...message: {}", e.getMessage(), e);
             return false;
         }
     }
