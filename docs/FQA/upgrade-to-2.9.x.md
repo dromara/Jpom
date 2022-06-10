@@ -109,13 +109,16 @@ IF "!ID!"=="0" EXIT
 **答**：有
 
 1. 备份数据
+
 ```shell
-java -jar server-2.8.24.jar --spring.profiles.active=pro --server.port=2122 --backup-h2
+java -jar server-2.8.24.jar --spring.profiles.active=pro --backup-h2
 ```
 2. 导入数据
+
 ```shell
-java -jar server-2.9.0.jar --spring.profiles.active=pro --server.port=2122 --replace-import-h2-sql=/xxxx.sql --transform-sql
+java -jar server-2.9.0.jar --spring.profiles.active=pro --replace-import-h2-sql=/xxxx.sql --transform-sql
 ```
+
 3. 更新管理脚本中的：`RUNJAR` 变量值为：`server-2.9.0.jar`
 
 **注意**：
@@ -130,7 +133,16 @@ java -jar server-2.9.0.jar --spring.profiles.active=pro --server.port=2122 --rep
 **答**：升级流程和 linux 流程一致，需要注意的就是上传文件的方式需要先上传到宿主机，再通过 `docker cp` 方式将文件复制到容器中
 
 举例：
+
 ```shell
 # docker cp 本地文件路径 容器ID/容器NAME:容器内路径
 docker cp /roo/Server-2.9.0.jar jpom-server:/usr/local/jpom-server/lib/Server-2.9.0.jar
 ```
+
+#### 问：升级服务端后需要将插件端也升级到 2.9.0 吗？
+
+**答**：我们建议服务端和插件端的版本一致，可以同步升级到 2.9.0。
+
+只要您在使用过程中没有发现部分功能异常，无法使用，接口 404 等情况下，插件端不及时更新也是没有太多问题的。
+
+插件端和服务端版本差异请尽量一致或者缩写，避免出现部分功能调整后关联影响。
