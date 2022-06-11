@@ -10,8 +10,10 @@ cd ${DIR_PATH} && cd docs && yarn run build
 # 删除文件
 cd ${DIR_PATH} && cd docs-pages && ls -lt | awk '{ print $9 }' | xargs rm -rf
 
+# 复制文件
 cd ${DIR_PATH} && cp -r ./docs/dist/* ./docs-pages
 
-cd ${DIR_PATH} && cd docs-pages && git add . &&  git commit -m 'update docs pages'
+# 提交代码
+cd ${DIR_PATH} && cd docs-pages && git add . &&  git commit -m 'update docs pages' && git push
 
 
