@@ -35,7 +35,7 @@ postList: none
 
 <p align="center">
   <a class="become-sponsor" href="https://jpom.keepbx.cn?from=site-nav">演示站点</a>
-  <a class="become-sponsor" href="/praise/">支持这个项目</a>
+  <a class="become-sponsor" href="/pages/praise/">支持这个项目</a>
 </p>
 
 <style>
