@@ -390,14 +390,14 @@ mvn -f xxxx/pom.xml clean package
 
 > 里面有部分图片加载可能比较慢
 
-1. [本地构建 + SSH 发布 java 项目](https://jpom.io/pages/practice/build_java_ssh_release)
-2. [本地构建 + 项目发布 node 项目](https://jpom.io/pages/practice/build_node_release)
-3. [本地构建 + SSH 发布 node 项目](https://jpom.io/pages/practice/build_node_ssh_release)
-4. [本地构建 + 自定义管理 python 项目](https://jpom.io/pages/practice/project_dsl_python)
-5. [自定义管理 java 项目](https://jpom.io/pages/practice/project_dsl_java)
-6. [管理编译安装的 nginx](https://jpom.io/pages/practice/node_nginx)
+1. [本地构建 + SSH 发布 java 项目](https://jpom.io/pages/practice/build-java-ssh-release)
+2. [本地构建 + 项目发布 node 项目](https://jpom.io/pages/practice/build-node-release)
+3. [本地构建 + SSH 发布 node 项目](https://jpom.io/pages/practice/build-node-ssh-release)
+4. [本地构建 + 自定义管理 python 项目](https://jpom.io/pages/practice/project-dsl-python)
+5. [自定义管理 java 项目](https://jpom.io/pages/practice/project-dsl-java)
+6. [管理编译安装的 nginx](https://jpom.io/pages/practice/node-nginx)
 7. [管理 docker](https://jpom.io/pages/practice/docker-cli)
-8. [容器构建 + 项目发布 java 项目](https://jpom.io/pages/practice/build_docker_java_node_release)
+8. [容器构建 + 项目发布 java 项目](https://jpom.io/pages/practice/build-docker-java-node-release)
 
 ## 🛠️ 整体架构
 
