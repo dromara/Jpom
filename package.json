@@ -10,11 +10,12 @@
     },
     "license": "MIT",
     "devDependencies": {
+        "@vuepress/plugin-google-analytics": "^1.9.7",
+        "@vuepress/plugin-nprogress": "^1.9.7",
         "dayjs": "^1.9.7",
         "inquirer": "^7.1.0",
         "json2yaml": "^1.1.0",
         "vuepress": "1.9.2",
-        "@vuepress/plugin-nprogress": "^1.9.7",
         "vuepress-plugin-baidu-tongji": "^1.0.1",
         "vuepress-plugin-demo-block": "^0.7.2",
         "vuepress-plugin-fulltext-search": "^2.2.1",

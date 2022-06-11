@@ -8,7 +8,7 @@ node_modules/
 #
 apidoc/
 
-
+dist/
 # dependencies
 **/node_modules
 # roadhog-api-doc ignore
