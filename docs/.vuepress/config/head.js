@@ -11,6 +11,16 @@ module.exports = [
     ['meta', {name: 'og:description', content: 'Jpom-项目管理系统,一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件'}],
 
     ['script', {}, `
-    
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
   `]
 ];
