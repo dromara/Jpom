@@ -379,15 +379,15 @@ mvn -f xxxx/pom.xml clean package
 
 ### Github Pages
 
-- [文档主页](https://jpom.io/docs/)
-- [FQA](https://jpom.io/docs/#/FQA/FQA)
-- [名词解释](https://jpom.io/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
+- [文档主页](https://jpom.io/)
+- [FQA](https://jpom.io/pages/FQA/)
+- [名词解释](https://jpom.io/pages/FQA/proper-noun/)
 
 ### Gitee Pages
 
-- [文档主页](https://jpom-docs.keepbx.cn/docs/)
-- [FQA](https://jpom-docs.keepbx.cn/docs/#/FQA/FQA)
-- [名词解释](https://jpom-docs.keepbx.cn/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
+- [文档主页](https://jpom-docs.keepbx.cn/)
+- [FQA](https://jpom-docs.keepbx.cn/pages/FQA/)
+- [名词解释](https://jpom-docs.keepbx.cn/pages/FQA/proper-noun/)
 
 ### 实践案例
 
@@ -446,11 +446,11 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 
 ### 项目分支说明
 
-| 分支   | 说明                                                         |
-| ------ | ------------------------------------------------------------ |
+| 分支     | 说明                                            |
+|--------|-----------------------------------------------|
 | master | 主分支，受保护分支，此分支不接受 PR。在 dev 分支后经过测试没问题后会合并到此分支。 |
 | dev    | 开发分支，接受 PR，PR 请提交到 dev 分支。                    |
-| docs   | 项目文档分支，接受 PR，介绍项目功能、汇总常见问题等。        |
+| docs   | 项目文档分支，接受 PR，介绍项目功能、汇总常见问题等。                  |
 
 > 目前用到的主要是 dev 和 docs 分支，接受 PR 修改，其他的分支为归档分支，贡献者可以不用管。
 
@@ -459,7 +459,7 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 
 1. 快扫描下方左侧微信群二维码和我们一起交流讨论吧！（添加小助手：备注 Jpom 进群）
 2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐，欢迎扫描下方右侧[微信收款码赞赏](https://jpom-docs.keepbx.cn/images/wx-qrcode-praise.png)或通过[码云赞赏](https://gitee.com/dromara/Jpom)（在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom-docs.keepbx.cn/docs/index.html#/praise)
-3. 微信公众号：[CodeGzh](https://jpom-docs.keepbx.cn/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
+3. 微信公众号：[CodeGzh](https://jpom-docs.keepbx.cn/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
 6. 参与贡献，请查看[贡献指南](#🔨贡献指南)。
 
