@@ -52,6 +52,10 @@ git submodule add -b master https://gitee.com/dromara/Jpom.git jpom-parent
 git submodule add -b docs https://gitee.com/dromara/Jpom.git docs
 ```
 
+```shell
+git submodule sync 
+git submodule update
+```
 
 ## idea modules 
 
