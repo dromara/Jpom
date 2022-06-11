@@ -45,6 +45,17 @@
 
 
 ```shell
+[submodule "jpom-parent"]
+	path = jpom-parent
+	url = https://gitee.com/dromara/Jpom.git
+	branch = master
+[submodule "docs"]
+	path = docs
+	url = https://gitee.com/dromara/Jpom.git
+	branch = docs
+```
+
+```shell
 git submodule add -b master https://gitee.com/dromara/Jpom.git jpom-parent
 ```
 
@@ -55,6 +66,12 @@ git submodule add -b docs https://gitee.com/dromara/Jpom.git docs
 ```shell
 git submodule sync 
 git submodule update
+```
+
+```shell
+git checkout --orphan docs-pages
+git rm -rf .
+git push --set-upstream origin docs-pages
 ```
 
 ## idea modules 
