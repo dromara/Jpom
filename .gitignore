@@ -16,7 +16,6 @@ apidoc/
 _roadhog-api-doc
 
 # production
-dist/
 /.vscode
 
 # misc

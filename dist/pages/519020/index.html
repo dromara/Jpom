@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>DSL-java | Jpom</title>
+    <meta name="generator" content="VuePress 1.9.2">
+    <link rel="icon" href="/favicon.ico">
+    <script>
+    
+  </script>
+    <meta name="description" content="简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
+    <meta name="keywords" content="Jpom,Java项目管理,Jar管理,Java管理系统,服务器项目运维,CI/CD">
+    <meta name="theme-color" content="#11a8cd">
+    <meta name="og:type" content="website">
+    <meta name="og:title" content="Jpom 项目管理系统文档">
+    <meta name="og:url" content="https://jpom.io/docs">
+    <meta name="og:site_name" content="Jpom 文档">
+    <meta name="og:description" content="Jpom-项目管理系统,一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
+    
+    <link rel="preload" href="/assets/css/0.styles.e7e47ee3.css" as="style"><link rel="preload" href="/assets/js/app.3f896a1c.js" as="script"><link rel="preload" href="/assets/js/2.9cab37f9.js" as="script"><link rel="preload" href="/assets/js/15.927e0679.js" as="script"><link rel="prefetch" href="/assets/js/10.5a4eb008.js"><link rel="prefetch" href="/assets/js/11.5bc96fe9.js"><link rel="prefetch" href="/assets/js/12.226d55f5.js"><link rel="prefetch" href="/assets/js/13.885df2a7.js"><link rel="prefetch" href="/assets/js/14.35e3edfb.js"><link rel="prefetch" href="/assets/js/16.2c53695d.js"><link rel="prefetch" href="/assets/js/17.ddedba81.js"><link rel="prefetch" href="/assets/js/18.2794a917.js"><link rel="prefetch" href="/assets/js/19.853b0a5d.js"><link rel="prefetch" href="/assets/js/20.b4a9b4f7.js"><link rel="prefetch" href="/assets/js/21.43f51b15.js"><link rel="prefetch" href="/assets/js/22.bd0a9726.js"><link rel="prefetch" href="/assets/js/23.8ccaf856.js"><link rel="prefetch" href="/assets/js/24.e177091c.js"><link rel="prefetch" href="/assets/js/25.0e4e3733.js"><link rel="prefetch" href="/assets/js/26.44fd06cc.js"><link rel="prefetch" href="/assets/js/27.dc3dc761.js"><link rel="prefetch" href="/assets/js/28.bce20419.js"><link rel="prefetch" href="/assets/js/29.99109d74.js"><link rel="prefetch" href="/assets/js/3.7c7bef24.js"><link rel="prefetch" href="/assets/js/30.9bb36302.js"><link rel="prefetch" href="/assets/js/31.c178ce1c.js"><link rel="prefetch" href="/assets/js/32.8e4e34ce.js"><link rel="prefetch" href="/assets/js/33.025af61d.js"><link rel="prefetch" href="/assets/js/34.1e6285cb.js"><link rel="prefetch" href="/assets/js/35.7231130f.js"><link rel="prefetch" href="/assets/js/36.881f42d2.js"><link rel="prefetch" href="/assets/js/37.67caec7b.js"><link rel="prefetch" href="/assets/js/38.3478ff2b.js"><link rel="prefetch" href="/assets/js/39.3768b69d.js"><link rel="prefetch" href="/assets/js/4.e80d4ded.js"><link rel="prefetch" href="/assets/js/40.4e7b8eda.js"><link rel="prefetch" href="/assets/js/41.70c61c3b.js"><link rel="prefetch" href="/assets/js/42.0b4f78a5.js"><link rel="prefetch" href="/assets/js/43.15207017.js"><link rel="prefetch" href="/assets/js/44.df2c454a.js"><link rel="prefetch" href="/assets/js/45.e5c30e61.js"><link rel="prefetch" href="/assets/js/46.35fb7799.js"><link rel="prefetch" href="/assets/js/47.2f1be475.js"><link rel="prefetch" href="/assets/js/48.a3c2c48b.js"><link rel="prefetch" href="/assets/js/49.503c8a26.js"><link rel="prefetch" href="/assets/js/5.45053408.js"><link rel="prefetch" href="/assets/js/50.1501806b.js"><link rel="prefetch" href="/assets/js/51.085a6585.js"><link rel="prefetch" href="/assets/js/52.8b336377.js"><link rel="prefetch" href="/assets/js/53.79c0eece.js"><link rel="prefetch" href="/assets/js/54.5e31bee5.js"><link rel="prefetch" href="/assets/js/55.4e998885.js"><link rel="prefetch" href="/assets/js/56.267fa446.js"><link rel="prefetch" href="/assets/js/57.9ceef4eb.js"><link rel="prefetch" href="/assets/js/58.7d271f21.js"><link rel="prefetch" href="/assets/js/59.484b5382.js"><link rel="prefetch" href="/assets/js/6.76def408.js"><link rel="prefetch" href="/assets/js/60.70322911.js"><link rel="prefetch" href="/assets/js/61.e5fca9dc.js"><link rel="prefetch" href="/assets/js/62.327f833f.js"><link rel="prefetch" href="/assets/js/63.335b6e5f.js"><link rel="prefetch" href="/assets/js/64.719a739f.js"><link rel="prefetch" href="/assets/js/65.90b5b180.js"><link rel="prefetch" href="/assets/js/66.6ec5a877.js"><link rel="prefetch" href="/assets/js/7.0b2b802a.js"><link rel="prefetch" href="/assets/js/8.f1e9e90f.js"><link rel="prefetch" href="/assets/js/9.ee76d1f7.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.e7e47ee3.css">
+  </head>
+  <body class="theme-mode-light">
+    <div id="app" data-server-rendered="true"><div class="theme-container sidebar-open have-rightmenu"><header class="navbar blur"><div title="目录" class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="/images/jpom_logo.png" alt="Jpom" class="logo"> <span class="site-name can-hide">Jpom</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/" class="nav-link">首页</a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="文档" class="dropdown-title"><a href="/pages/install/" class="link-title">文档</a> <span class="title" style="display:none;">文档</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><!----> <a href="/pages/upgrade/2.8.x-to-2.9.x/" class="nav-link">v2.8.X迁移到v2.9.X指南</a></li><li class="dropdown-item"><!----> <a href="/pages/practice/" class="nav-link">实践案例</a></li></ul></div></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="常见问题" class="dropdown-title"><a href="/pages/FQA/" class="link-title">常见问题</a> <span class="title" style="display:none;">常见问题</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><!----> <a href="/pages/FQA/proper-noun/" class="nav-link">名词解释</a></li></ul></div></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="💖支持" class="dropdown-title"><a href="/pages/praise/" class="link-title">💖支持</a> <span class="title" style="display:none;">💖支持</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><!----> <a href="/pages/praise/join/" class="nav-link">加入社区讨论</a></li></ul></div></div><div class="nav-item"><a href="/pages/changelog/history/" class="nav-link">更新记录</a></div><div class="nav-item"><a href="https://gitee.com/dromara/Jpom" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  Gitee
+  <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></div><div class="nav-item"><a href="https://github.com/dromara/Jpom" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  Github
+  <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <div class="sidebar-hover-trigger"></div> <aside class="sidebar" style="display:none;"><!----> <nav class="nav-links"><div class="nav-item"><a href="/" class="nav-link">首页</a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="文档" class="dropdown-title"><a href="/pages/install/" class="link-title">文档</a> <span class="title" style="display:none;">文档</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><!----> <a href="/pages/upgrade/2.8.x-to-2.9.x/" class="nav-link">v2.8.X迁移到v2.9.X指南</a></li><li class="dropdown-item"><!----> <a href="/pages/practice/" class="nav-link">实践案例</a></li></ul></div></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="常见问题" class="dropdown-title"><a href="/pages/FQA/" class="link-title">常见问题</a> <span class="title" style="display:none;">常见问题</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><!----> <a href="/pages/FQA/proper-noun/" class="nav-link">名词解释</a></li></ul></div></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="💖支持" class="dropdown-title"><a href="/pages/praise/" class="link-title">💖支持</a> <span class="title" style="display:none;">💖支持</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><!----> <a href="/pages/praise/join/" class="nav-link">加入社区讨论</a></li></ul></div></div><div class="nav-item"><a href="/pages/changelog/history/" class="nav-link">更新记录</a></div><div class="nav-item"><a href="https://gitee.com/dromara/Jpom" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  Gitee
+  <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></div><div class="nav-item"><a href="https://github.com/dromara/Jpom" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  Github
+  <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/pages/FQA/" class="sidebar-link">常见问题</a></li><li><a href="/pages/FQA/proper-noun/" class="sidebar-link">名词解释</a></li><li><a href="/pages/FQA/upgrade/" class="sidebar-link">升级 Jpom 版本</a></li><li><a href="/pages/FQA/nginx-conf/" class="sidebar-link">Nginx代理推荐配置</a></li><li><a href="/pages/FQA/maven-conf/" class="sidebar-link">配置 maven 私服</a></li><li><a href="/pages/FQA/project-file-backup/" class="sidebar-link">开启备份文件功能相关说明如下</a></li><li><a href="/pages/9d6940/" class="sidebar-link">关于工作空间和角色对比说明</a></li></ul> </aside> <div><main class="page"><div class="theme-vdoing-wrapper "><div class="articleInfo-wrap" data-v-06225672><div class="articleInfo" data-v-06225672><ul class="breadcrumbs" data-v-06225672><li data-v-06225672><a href="/" title="首页" class="iconfont icon-home router-link-active" data-v-06225672></a></li> <li data-v-06225672><span data-v-06225672>FQA</span></li></ul> <div class="info" data-v-06225672><div title="作者" class="author iconfont icon-touxiang" data-v-06225672><a href="https://gitee.com/bwcx-jzy" target="_blank" title="作者" class="beLink" data-v-06225672>bwcx_jzy</a></div> <div title="创建时间" class="date iconfont icon-riqi" data-v-06225672><a href="javascript:;" data-v-06225672>2022-06-11</a></div> <!----></div></div></div> <!----> <div class="content-wrapper"><div class="right-menu-wrapper"><div class="right-menu-margin"><div class="right-menu-title">目录</div> <div class="right-menu-content"></div></div></div> <h1><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNSR0IArs4c6QAABKFJREFUSA3tVl1oFVcQnrMbrak3QUgkya1akpJYcrUtIqW1JvFBE9LiQ5v6JmJpolbMg32rVrhgoYK0QiMY6i9Y6EMaW5D+xFJaTYItIuK2Kr3+BJNwkxBj05sQY3b3nM6cs2dv9t7NT/vQJw/sndk5M/PNzJkzewGerP+pAmy+ON8lLzUJgA8ZYxYIYZmGYRnctDaWvJJAmTtfP1pvXsBCCPP8QFcCaRkZYACgDZFO4stNIcBCajEOlmmC9XpJ9bAGCaPaPmzPl32dvLSVu3BWCTQs0XQQ6g0DYgwLIoAZbBCdW/i+781o1VVlm/410mw4h06Y7bIPHNyWDyL4FHkX03Q8SrzNhZTZriieckWt7cL6MM85YcLpsi/7O9/iXFT6MswI0DmmpkSaJ0qLxFIm3+i1THHB3zmBH3PYx9CcykcLOeQVVa7QtdxTgQgEleX2AjHYfwA+2ddV77ruGoJUbhGDI09YSNXyMpUt5ylOzxgbUmtOp7NmbNt8v3arjTBfYELmLUV+M+nSawNNAUqpT3ClJWg5I3BLT+cGW/DXNGCa6tx1aakCGEigArTn4TDIPdrXXYKCZNrHLMCOEPvHBlLQ99s9eHB7EB6NTki73CVPQ2F5MSx/uRQixfmq7rK0wYD8w8E905bnPDfwoWs/rfv93NWN/ZfvwsLIU7A09gxECyISeGJkHAau98L97tuw7NXnoPyNF8FcYGLGKsOs0mN3OEyec9esGW/ZEl945dTP34wlR2FZVQWU1q0Cw8Tr7p+hgLLNL0FPxx/Q35mA8aEUrH6nCgwEl0tn7wUiZYJnNRh6DK4UH/k0lfyrsBKdPVv/AriGIQcEDQZ65LBAGe2Rzui9Ybjz7XUppz1/uKBbyVPGkN3ZAeC6hr0x7Nr38N5+EqkoOm17xpoqR9ohQF55ERSvr4Dkr3chNfC3DMzGJlNBElW8w9nsGQvhNGIzDkXzCg8cLK951xHsFBlTJspJNi3ZFIMF2AeDV3q8DNOB+YHi6QTrChDIWDBRi5U5f+ZMfJLu3ccrqxtdxk4SKH336LFxSmkqefwU5T8fhdSdQf9IVKD6aNiwI/hnmcAZ91isYMJIaCUCx9W098+LgruikeTqzqqxKPUwqJyCPJiyemVVZBOijDGjD38Os0jOiSPL1z3SPjXNANbiNPXAdzTfukjjuknNBbyz3nwgTd3AVFqUJ5hpHlq9MveLnWwttUfoygBmvVjuikxND3znrhsELnZk7k+OjIGxeNEkomyLVta0xxn+HZhjBc4YZ/AFjHjz9u3xRZl2BN4aq9nFwWh16IrQ1aHHEd3j1+4/dB9OtH4e29A2H1DyHQRmOSfQZ1Fy7MHBTGB6J/Djq6p3OxyO2cB+4Car7v/o3GXgfAkj23+x9ID1Teoamo/SXcbvSf2PX7Vc8DdCmE1vN9di+32P9/5YR3vLnhCVGUWBjEkr3yh4H8v9CzmsbdhzOKzsJKM90iFdaTMjRPhGVsakRvOaRidljo6H6G7j+ctrJpsP+4COhDIl0La2+FS4+5mlocBaXY5QnGZysIBYoeSsl5qQzrSj/cgNrfuEzlWBfwA+EjrZyWUvpAAAAABJRU5ErkJggg==">DSL-java<!----></h1> <div class="page-slot page-slot-top">
+  </div> <div class="theme-vdoing-content content__default"><h1 id="java-程序"><a href="#java-程序" class="header-anchor">#</a> java 程序</h1> <h3 id="linux-示例"><a href="#linux-示例" class="header-anchor">#</a> linux 示例</h3> <div class="language- line-numbers-mode"><pre class="language-text"><code>#!/bin/bash
+Tag=&quot;Application_#{PROJECT_ID}&quot;
+MainClass=&quot;org.springframework.boot.loader.JarLauncher&quot;
+Lib=&quot;#{PROJECT_PATH}&quot;
+Log=&quot;#{PROJECT_PATH}/run.log&quot;
+JVM=&quot;-server -Xms128m -Xmx128m -XX:PermSize=32M -XX:MaxNewSize=64m -XX:MaxPermSize=64m -Djava.awt.headless=true -XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled&quot;
+echo $Tag
+RETVAL=&quot;0&quot;
+
+# See how we were called.
+function start() {
+    echo  $Log 
+    if [ ! -f $Log ]; then
+        touch $Log
+    fi
+    nohup java $JVM -Dappliction=$Tag -Djava.ext.dirs=$Lib&quot;:${JAVA_HOME}/jre/lib/ext&quot; $MainClass &gt; $Log 2&gt;&amp;1 &amp;  
+		sleep 3
+    head -n 10 $Log
+}
+
+
+function stop() {
+    pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 &quot; &quot;}')
+    if [ &quot;$pid&quot; != &quot;&quot; ]; then      
+        echo -n &quot;boot ( pid $pid) is running&quot; 
+        echo 
+        echo -n $&quot;Shutting down boot: &quot;
+        pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 &quot; &quot;}')
+        if [ &quot;$pid&quot; != &quot;&quot; ]; then
+            echo &quot;kill boot process&quot;
+            kill -9 &quot;$pid&quot;
+        fi
+        else 
+             echo &quot;boot is stopped&quot; 
+        fi
+
+    status
+}
+
+function status()
+{
+    pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 &quot; &quot;}')
+    #echo &quot;$pid&quot;
+    if [ &quot;$pid&quot; != &quot;&quot; ]; then
+        echo &quot;running:$pid&quot;
+    else
+        echo &quot;boot is stopped&quot;
+    fi
+}
+
+# See how we were called.
+RETVAL=&quot;0&quot;
+case &quot;$1&quot; in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status
+        ;;
+    *)
+      usage
+      ;;
+esac
+
+exit $RETVAL
+</code></pre> <div class="line-numbers-wrapper"><span class="line-number">1</span><br><span class="line-number">2</span><br><span class="line-number">3</span><br><span class="line-number">4</span><br><span class="line-number">5</span><br><span class="line-number">6</span><br><span class="line-number">7</span><br><span class="line-number">8</span><br><span class="line-number">9</span><br><span class="line-number">10</span><br><span class="line-number">11</span><br><span class="line-number">12</span><br><span class="line-number">13</span><br><span class="line-number">14</span><br><span class="line-number">15</span><br><span class="line-number">16</span><br><span class="line-number">17</span><br><span class="line-number">18</span><br><span class="line-number">19</span><br><span class="line-number">20</span><br><span class="line-number">21</span><br><span class="line-number">22</span><br><span class="line-number">23</span><br><span class="line-number">24</span><br><span class="line-number">25</span><br><span class="line-number">26</span><br><span class="line-number">27</span><br><span class="line-number">28</span><br><span class="line-number">29</span><br><span class="line-number">30</span><br><span class="line-number">31</span><br><span class="line-number">32</span><br><span class="line-number">33</span><br><span class="line-number">34</span><br><span class="line-number">35</span><br><span class="line-number">36</span><br><span class="line-number">37</span><br><span class="line-number">38</span><br><span class="line-number">39</span><br><span class="line-number">40</span><br><span class="line-number">41</span><br><span class="line-number">42</span><br><span class="line-number">43</span><br><span class="line-number">44</span><br><span class="line-number">45</span><br><span class="line-number">46</span><br><span class="line-number">47</span><br><span class="line-number">48</span><br><span class="line-number">49</span><br><span class="line-number">50</span><br><span class="line-number">51</span><br><span class="line-number">52</span><br><span class="line-number">53</span><br><span class="line-number">54</span><br><span class="line-number">55</span><br><span class="line-number">56</span><br><span class="line-number">57</span><br><span class="line-number">58</span><br><span class="line-number">59</span><br><span class="line-number">60</span><br><span class="line-number">61</span><br><span class="line-number">62</span><br><span class="line-number">63</span><br><span class="line-number">64</span><br><span class="line-number">65</span><br><span class="line-number">66</span><br><span class="line-number">67</span><br><span class="line-number">68</span><br></div></div><h3 id="window-示例"><a href="#window-示例" class="header-anchor">#</a> window 示例</h3> <div class="language- line-numbers-mode"><pre class="language-text"><code>@echo off
+@REM setlocal enabledelayedexpansion
+@REM Set environment variables to prevent some servers from failing to taskkill
+set PATH = %PATH%;C:\Windows\system32;C:\Windows;C:\Windows\system32\Wbem
+
+set Tag=Jpom-demo-case-#{PROJECT_ID}
+set MainClass=org.springframework.boot.loader.JarLauncher
+set Lib=#{PROJECT_PATH}
+set Log=#{PROJECT_PATH}/run.log
+set JVM=-server -Xms200m -Xmx400m
+set ARGS= 
+
+
+IF &quot;%1&quot;==&quot;start&quot; call:start
+IF &quot;%1&quot;==&quot;stop&quot; call:stop
+IF &quot;%1&quot;==&quot;status&quot; call:status
+
+
+@REM start
+:start
+    if &quot;%JAVA_HOME%&quot;==&quot;&quot; (
+        echo please configure [JAVA_HOME] environment variable
+        EXIT 2
+    )
+
+	echo Starting.....
+	javaw %JVM% -Dapplication=%Tag% -Djava.ext.dirs=%Lib%  %MainClass% %ARGS% %1 &gt;&gt; %Log%
+	timeout 3
+	EXIT 0
+goto:eof
+
+
+@REM stop
+:stop
+	for /f &quot;tokens=1 delims= &quot; %%I in ('jps -v ^| findstr &quot;Jpom-demo-case-#{PROJECT_ID}&quot;') do taskkill /F /PID %%I
+	EXIT 0
+goto:eof
+
+@REM view status
+:status
+	for /f &quot;tokens=1 delims= &quot; %%I in ('jps -v ^| findstr &quot;Jpom-demo-case-#{PROJECT_ID}&quot;') do @echo running:%%I
+	
+	EXIT 0
+goto:eof
+</code></pre> <div class="line-numbers-wrapper"><span class="line-number">1</span><br><span class="line-number">2</span><br><span class="line-number">3</span><br><span class="line-number">4</span><br><span class="line-number">5</span><br><span class="line-number">6</span><br><span class="line-number">7</span><br><span class="line-number">8</span><br><span class="line-number">9</span><br><span class="line-number">10</span><br><span class="line-number">11</span><br><span class="line-number">12</span><br><span class="line-number">13</span><br><span class="line-number">14</span><br><span class="line-number">15</span><br><span class="line-number">16</span><br><span class="line-number">17</span><br><span class="line-number">18</span><br><span class="line-number">19</span><br><span class="line-number">20</span><br><span class="line-number">21</span><br><span class="line-number">22</span><br><span class="line-number">23</span><br><span class="line-number">24</span><br><span class="line-number">25</span><br><span class="line-number">26</span><br><span class="line-number">27</span><br><span class="line-number">28</span><br><span class="line-number">29</span><br><span class="line-number">30</span><br><span class="line-number">31</span><br><span class="line-number">32</span><br><span class="line-number">33</span><br><span class="line-number">34</span><br><span class="line-number">35</span><br><span class="line-number">36</span><br><span class="line-number">37</span><br><span class="line-number">38</span><br><span class="line-number">39</span><br><span class="line-number">40</span><br><span class="line-number">41</span><br><span class="line-number">42</span><br><span class="line-number">43</span><br><span class="line-number">44</span><br></div></div><h1 id="python-程序"><a href="#python-程序" class="header-anchor">#</a> python 程序</h1> <h2 id="linux-示例-2"><a href="#linux-示例-2" class="header-anchor">#</a> linux 示例</h2> <div class="language- line-numbers-mode"><pre class="language-text"><code>#!/bin/bash
+Tag=&quot;Application_#{PROJECT_ID}&quot;
+Lib=&quot;#{PROJECT_PATH}&quot;
+Log=&quot;#{PROJECT_PATH}/run.log&quot;
+echo $Tag
+RETVAL=&quot;0&quot;
+
+# See how we were called.
+function start() {
+    echo  $Log 
+    if [ ! -f $Log ]; then
+        touch $Log
+    fi
+    nohup python $Lib/simple_httpd.py $Tag &gt; $Log 2&gt;&amp;1 &amp;  
+	sleep 3
+    head -n 10 $Log
+}
+
+
+function stop() {
+    pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 &quot; &quot;}')
+    if [ &quot;$pid&quot; != &quot;&quot; ]; then      
+        echo -n &quot;boot ( pid $pid) is running&quot; 
+        echo 
+        echo -n $&quot;Shutting down boot: &quot;
+        pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 &quot; &quot;}')
+        if [ &quot;$pid&quot; != &quot;&quot; ]; then
+            echo &quot;kill boot process&quot;
+            kill -9 &quot;$pid&quot;
+        fi
+        else 
+             echo &quot;boot is stopped&quot; 
+        fi
+
+    status
+}
+
+function status()
+{
+    pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 &quot; &quot;}')
+    #echo &quot;$pid&quot;
+    if [ &quot;$pid&quot; != &quot;&quot; ]; then
+        echo &quot;running:$pid&quot;
+    else
+        echo &quot;boot is stopped&quot;
+    fi
+}
+
+# See how we were called.
+RETVAL=&quot;0&quot;
+case &quot;$1&quot; in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status
+        ;;
+    *)
+      usage
+      ;;
+esac
+
+exit $RETVAL
+</code></pre> <div class="line-numbers-wrapper"><span class="line-number">1</span><br><span class="line-number">2</span><br><span class="line-number">3</span><br><span class="line-number">4</span><br><span class="line-number">5</span><br><span class="line-number">6</span><br><span class="line-number">7</span><br><span class="line-number">8</span><br><span class="line-number">9</span><br><span class="line-number">10</span><br><span class="line-number">11</span><br><span class="line-number">12</span><br><span class="line-number">13</span><br><span class="line-number">14</span><br><span class="line-number">15</span><br><span class="line-number">16</span><br><span class="line-number">17</span><br><span class="line-number">18</span><br><span class="line-number">19</span><br><span class="line-number">20</span><br><span class="line-number">21</span><br><span class="line-number">22</span><br><span class="line-number">23</span><br><span class="line-number">24</span><br><span class="line-number">25</span><br><span class="line-number">26</span><br><span class="line-number">27</span><br><span class="line-number">28</span><br><span class="line-number">29</span><br><span class="line-number">30</span><br><span class="line-number">31</span><br><span class="line-number">32</span><br><span class="line-number">33</span><br><span class="line-number">34</span><br><span class="line-number">35</span><br><span class="line-number">36</span><br><span class="line-number">37</span><br><span class="line-number">38</span><br><span class="line-number">39</span><br><span class="line-number">40</span><br><span class="line-number">41</span><br><span class="line-number">42</span><br><span class="line-number">43</span><br><span class="line-number">44</span><br><span class="line-number">45</span><br><span class="line-number">46</span><br><span class="line-number">47</span><br><span class="line-number">48</span><br><span class="line-number">49</span><br><span class="line-number">50</span><br><span class="line-number">51</span><br><span class="line-number">52</span><br><span class="line-number">53</span><br><span class="line-number">54</span><br><span class="line-number">55</span><br><span class="line-number">56</span><br><span class="line-number">57</span><br><span class="line-number">58</span><br><span class="line-number">59</span><br><span class="line-number">60</span><br><span class="line-number">61</span><br><span class="line-number">62</span><br><span class="line-number">63</span><br><span class="line-number">64</span><br><span class="line-number">65</span><br><span class="line-number">66</span><br></div></div></div></div>  <div class="page-edit"><div class="edit-link"><a href="https://github.com/dromara/Jpom/edit/docs/docs/FQA/DSL-java.md" target="_blank" rel="noopener noreferrer">帮助我们改善此文档</a> <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></div> <!----> <!----></div> <div class="page-nav-wapper"><!----> <!----></div></div> <!----></main></div> <div class="footer"><div class="icons"><a href="mailto:keepbx@jiangzeyin.cn" title="发邮件" target="_blank" class="iconfont icon-youjian"></a><a href="https://gitee.com/dromara/Jpom" title="Gitee" target="_blank" class="iconfont icon-gitee"></a><a href="https://github.com/dromara/Jpom" title="GitHub" target="_blank" class="iconfont icon-github"></a></div> 
+  Theme by
+  <a href="https://github.com/xugaoyi/vuepress-theme-vdoing" target="_blank" title="本站主题">Vdoing</a> 
+    | Copyright © 2017-2022
+    <span>MIT License</span></div> <div class="buttons"><div title="返回顶部" class="button blur go-to-top iconfont icon-fanhuidingbu" style="display:none;"></div> <div title="去评论" class="button blur go-to-comment iconfont icon-pinglun" style="display:none;"></div> <div title="主题模式" class="button blur theme-mode-but iconfont icon-zhuti"><ul class="select-box" style="display:none;"><li class="iconfont icon-zidong">
+          跟随系统
+        </li><li class="iconfont icon-rijianmoshi">
+          浅色模式
+        </li><li class="iconfont icon-yejianmoshi">
+          深色模式
+        </li><li class="iconfont icon-yuedu">
+          阅读模式
+        </li></ul></div></div> <!----> <!----> <!----></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.3f896a1c.js" defer></script><script src="/assets/js/2.9cab37f9.js" defer></script><script src="/assets/js/15.927e0679.js" defer></script>
+  </body>
+</html>

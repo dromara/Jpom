@@ -1,3 +1,8 @@
+---
+title: DOCKER_DSL
+date: 2022-06-11 09:57:14
+permalink: /pages/5020f7/
+---
 ## 完整的容器构建 dsl 示例
 
 ```
