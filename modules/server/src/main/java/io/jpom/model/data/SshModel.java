@@ -80,6 +80,10 @@ public class SshModel extends BaseWorkspaceModel {
      * 允许编辑的后缀文件
      */
     private String allowEditSuffix;
+    /**
+     * 节点超时时间
+     */
+    private Integer timeOut;
 
     public SshModel(String id) {
         this.setId(id);
@@ -116,6 +120,18 @@ public class SshModel extends BaseWorkspaceModel {
             pas = this.getPassword().getBytes();
         }
         return pas;
+    }
+
+    /**
+     * 超时时间
+     *
+     * @return 最小值 1 分钟
+     */
+    public int timeOut() {
+        if (this.timeOut == null) {
+            return 5;
+        }
+        return Math.max(1, this.timeOut);
     }
 
     public Charset getCharsetT() {

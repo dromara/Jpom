@@ -4,6 +4,10 @@
 
 ### 🐣 新增功能
 
+1. 【server】SSH 终端新增全屏方式打开
+   （感谢[@jaseeon](https://gitee.com/jaseeon) [Gitee issues I5BS52](https://gitee.com/dromara/Jpom/issues/I5BS52) ）
+2. 【server】SSH 新增超时时间配置（感谢@带刺的玫瑰）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】升级 h2 版本，低版本存在漏洞(CVE-2021-23463)

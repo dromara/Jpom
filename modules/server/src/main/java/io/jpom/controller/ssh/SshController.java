@@ -25,6 +25,7 @@ package io.jpom.controller.ssh;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSplitter;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
@@ -53,6 +54,7 @@ import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,6 +73,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "node/ssh")
 @Feature(cls = ClassFeature.SSH)
+@Slf4j
 public class SshController extends BaseServerController {
 
     private final SshService sshService;
@@ -176,6 +179,8 @@ public class SshController extends BaseServerController {
         sshModel.setConnectType(connectType.name());
         // 获取允许编辑的后缀
         String allowEditSuffix = getParameter("allowEditSuffix");
+        int timeOut = getParameterInt("timeOut", 5);
+        sshModel.setTimeOut(timeOut);
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
         sshModel.allowEditSuffix(allowEditSuffixList);
         try {
@@ -205,6 +210,7 @@ public class SshController extends BaseServerController {
             Session session = SshService.getSessionByModel(sshModel);
             JschUtil.close(session);
         } catch (Exception e) {
+            log.warn("ssh连接失败", e);
             return JsonMessage.getString(505, "ssh连接失败：" + e.getMessage());
         }
         if (add) {

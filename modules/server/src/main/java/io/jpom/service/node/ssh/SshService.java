@@ -30,6 +30,7 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.ssh.ChannelType;
+import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -69,16 +70,16 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         data.setPrivateKey(null);
     }
 
-    /**
-     * 获取 ssh 回话
-     *
-     * @param sshId id
-     * @return session
-     */
-    public static Session getSession(String sshId) {
-        SshModel sshModel = SpringUtil.getBean(SshService.class).getByKey(sshId, false);
-        return getSessionByModel(sshModel);
-    }
+//    /**
+//     * 获取 ssh 回话
+//     *
+//     * @param sshId id
+//     * @return session
+//     */
+//    public static Session getSession(String sshId) {
+//        SshModel sshModel = SpringUtil.getBean(SshService.class).getByKey(sshId, false);
+//        return getSessionByModel(sshModel);
+//    }
 
     /**
      * 获取 ssh 回话
@@ -88,9 +89,10 @@ public class SshService extends BaseWorkspaceService<SshModel> {
      */
     public static Session getSessionByModel(SshModel sshModel) {
         Session session = null;
+        int timeOut = (int) TimeUnit.SECONDS.toMillis(sshModel.timeOut());
         SshModel.ConnectType connectType = sshModel.connectType();
         if (connectType == SshModel.ConnectType.PASS) {
-            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword(), timeOut);
 
         } else if (connectType == SshModel.ConnectType.PUBKEY) {
             File rsaFile = null;
@@ -126,8 +128,13 @@ public class SshService extends BaseWorkspaceService<SshModel> {
             if (session == null) {
                 // 简要私钥文件是否存在
                 Assert.state(FileUtil.isFile(rsaFile), "私钥文件不存在：" + FileUtil.getAbsolutePath(rsaFile));
-                session = JschUtil.openSession(sshModel.getHost(),
+                session = JschUtil.createSession(sshModel.getHost(),
                     sshModel.getPort(), sshModel.getUser(), FileUtil.getAbsolutePath(rsaFile), sshModel.password());
+                try {
+                    session.connect(timeOut);
+                } catch (JSchException e) {
+                    throw new JschRuntimeException(e);
+                }
             }
         } else {
             throw new IllegalArgumentException("不支持的模式");

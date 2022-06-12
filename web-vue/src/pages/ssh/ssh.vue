@@ -137,9 +137,7 @@
 
           <a-textarea v-model="temp.privateKey" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="私钥内容,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:/xxxx/xx" />
         </a-form-model-item>
-        <a-form-model-item label="编码格式" prop="charset">
-          <a-input v-model="temp.charset" placeholder="编码格式" />
-        </a-form-model-item>
+
         <a-form-model-item prop="fileDirs">
           <template slot="label">
             文件目录
@@ -175,6 +173,16 @@
             placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，多个使用换行。示例：设置编码：txt@utf-8， 不设置编码：txt"
           />
         </a-form-model-item>
+        <a-collapse>
+          <a-collapse-panel key="1" header="其他配置">
+            <a-form-model-item label="编码格式" prop="charset">
+              <a-input v-model="temp.charset" placeholder="编码格式" />
+            </a-form-model-item>
+            <a-form-model-item label="超时时间(s)" prop="timeOut">
+              <a-input-number v-model="temp.timeOut" :min="1" placeholder="单位秒,最小值 1 秒" style="width: 100%" />
+            </a-form-model-item>
+          </a-collapse-panel>
+        </a-collapse>
       </a-form-model>
     </a-modal>
     <!-- 安装节点 -->
@@ -554,6 +562,7 @@ export default {
         type: "add",
         charset: "UTF-8",
         port: 22,
+        timeOut: 5,
         connectType: "PASS",
       };
       this.editSshVisible = true;
@@ -563,9 +572,16 @@ export default {
     // 修改
     handleEdit(record) {
       this.temp = Object.assign({}, record);
-      this.temp.fileDirs = record.fileDirs ? JSON.parse(record.fileDirs).join("\r\n") : "";
+      // this.temp.;
       this.temp.allowEditSuffix = record.allowEditSuffix ? JSON.parse(record.allowEditSuffix).join("\r\n") : "";
-      this.temp.type = "edit";
+      // this.temp.type = "edit";
+      this.temp = {
+        ...this.temp,
+        fileDirs: record.fileDirs ? JSON.parse(record.fileDirs).join("\r\n") : "",
+        type: "edit",
+        allowEditSuffix: record.allowEditSuffix ? JSON.parse(record.allowEditSuffix).join("\r\n") : "",
+        timeOut: record.timeOut || 5,
+      };
       this.editSshVisible = true;
       // @author jzy 08-04
       this.$refs["editSshForm"] && this.$refs["editSshForm"].resetFields();
