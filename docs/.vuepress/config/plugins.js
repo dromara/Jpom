@@ -13,7 +13,7 @@ module.exports = [
     [
         '@vuepress/google-analytics',
         {
-            'ga': 'G-8HJ9QLHCPY' // UA-00000000-0
+            'ga': 'UA-231678761-1' // UA-00000000-0
         }
     ],
     ['one-click-copy', { // 代码块复制按钮
