@@ -36,6 +36,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.BaseModel;
 import io.jpom.service.system.CertService;
 import io.jpom.system.JpomRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
 import java.security.PrivateKey;
@@ -48,6 +49,7 @@ import java.util.Date;
  *
  * @author Arno
  */
+@Slf4j
 public class CertModel extends BaseModel {
 
     private static final String KEY = "Jpom 管理系统";
@@ -207,7 +209,7 @@ public class CertModel extends BaseModel {
             jsonObject.put("keyPath", key);
             return jsonObject;
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } finally {
             IoUtil.close(inputStream);
         }

@@ -33,6 +33,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseJpomController;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.system.ExtConfigBean;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -45,6 +46,7 @@ import java.util.*;
  * @author jiangzeyin
  * @since 2019/4/16
  */
+@Slf4j
 public class AgentWhitelist extends BaseJsonModel {
 	/**
 	 * 项目目录白名单、日志文件白名单
@@ -148,7 +150,7 @@ public class AgentWhitelist extends BaseJsonModel {
 		try {
 			return CollUtil.join(jsonArray, StrUtil.CRLF);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		}
 		return "";
 	}

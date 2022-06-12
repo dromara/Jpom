@@ -26,6 +26,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.BaseJsonModel;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
@@ -35,6 +36,7 @@ import java.io.IOException;
  * @author jiangzeyin
  * @since 2019/4/15
  */
+@Slf4j
 public class ProcessModel extends BaseJsonModel {
     /**
      * 进程id
@@ -123,7 +125,7 @@ public class ProcessModel extends BaseJsonModel {
                 String jpomName = AbstractProjectCommander.getInstance().getJpomNameByPid(pid);
                 this.setJpomName(jpomName);
             } catch (IOException e) {
-                DefaultSystemLog.getLog().error("解析进程失败", e);
+                log.error("解析进程失败", e);
             }
         }
     }

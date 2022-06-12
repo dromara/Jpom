@@ -31,6 +31,7 @@ import cn.jiangzeyin.common.interceptor.BaseCallbackController;
 import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
 import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
@@ -46,6 +47,7 @@ import java.io.File;
  */
 @Aspect
 @Component
+@Slf4j
 public class WebAopLog extends PropertyDefinerBase {
 
 	private static volatile AopLogInterface aopLogInterface;
@@ -80,7 +82,7 @@ public class WebAopLog extends PropertyDefinerBase {
 			}
 		}
 		if (consoleLogReqResponse && logResult != null) {
-			DefaultSystemLog.getLog().info(BaseCallbackController.getRequestAttributes().getRequest().getRequestURI() + " :" + logResult);
+			log.info(BaseCallbackController.getRequestAttributes().getRequest().getRequestURI() + " :" + logResult);
 		}
 		return proceed;
 	}

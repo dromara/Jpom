@@ -36,6 +36,7 @@ import io.jpom.model.system.NetstatModel;
 import io.jpom.model.system.ProcessModel;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.util.CommandUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -53,6 +54,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/manage/")
+@Slf4j
 public class InternalController extends BaseAgentController {
 
 	/**
@@ -174,7 +176,7 @@ public class InternalController extends BaseAgentController {
 //			jsonObject.put("nonHeapCommitted", FileUtil.readableFileSize(nonCommitted));
 //			return jsonObject;
 //		} catch (Exception e) {
-//			DefaultSystemLog.getLog().error(e.getMessage(), e);
+//			log.error(e.getMessage(), e);
 //		}
 //		return null;
 //	}
@@ -202,7 +204,7 @@ public class InternalController extends BaseAgentController {
 			CommandUtil.execSystemCommand(command);
 			downLoad(getResponse(), fileName);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 //            getResponse().sendRedirect("internal?tag=" + tag);
 		}
 		return JsonMessage.getString(200, "");
@@ -230,7 +232,7 @@ public class InternalController extends BaseAgentController {
 			CommandUtil.execSystemCommand(command);
 			downLoad(getResponse(), fileName);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 //            getResponse().sendRedirect("internal?tag=" + tag);
 		}
 		return JsonMessage.getString(200, "");

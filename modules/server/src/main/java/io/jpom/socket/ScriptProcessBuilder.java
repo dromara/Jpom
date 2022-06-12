@@ -40,6 +40,7 @@ import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.SocketSessionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.File;
@@ -53,6 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author jiangzeyin
  * @since 2022/1/19
  */
+@Slf4j
 public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
     /**
      * 执行中的缓存
@@ -78,7 +80,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
         command.add(0, script);
         command.add(0, CommandUtil.EXECUTE_PREFIX);
-        DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
+        log.debug(CollUtil.join(command, StrUtil.SPACE));
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
         Map<String, String> environment = processBuilder.environment();
@@ -119,7 +121,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
                     try {
                         SocketSessionUtil.send(session, line);
                     } catch (IOException e) {
-                        DefaultSystemLog.getLog().error("发送消息失败", e);
+                        log.error("发送消息失败", e);
                     }
                 });
             }
@@ -178,7 +180,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             this.end(jsonObject.toString());
             this.handle("execute done:" + waitFor + " time:" + DateUtil.now());
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("执行异常", e);
+            log.error("执行异常", e);
             this.end("执行异常：" + e.getMessage());
         } finally {
             this.close();
@@ -198,7 +200,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             try {
                 SocketSessionUtil.send(session, msg);
             } catch (IOException e) {
-                DefaultSystemLog.getLog().error("发送消息失败", e);
+                log.error("发送消息失败", e);
             }
             iterator.remove();
         }
@@ -220,7 +222,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             try {
                 SocketSessionUtil.send(session, line);
             } catch (IOException e) {
-                DefaultSystemLog.getLog().error("发送消息失败", e);
+                log.error("发送消息失败", e);
                 iterator.remove();
             }
         }

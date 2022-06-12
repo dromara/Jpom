@@ -34,6 +34,7 @@ import cn.hutool.jwt.signers.JWTSignerUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.data.UserModel;
 import io.jpom.system.ServerExtConfigBean;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * jwt 工具类
@@ -41,6 +42,7 @@ import io.jpom.system.ServerExtConfigBean;
  * @author bwcx_jzy
  * @since 2020/7/25
  */
+@Slf4j
 public class JwtUtil {
 
 	/**
@@ -82,7 +84,7 @@ public class JwtUtil {
 		try {
 			return parseBody(token);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().warn("token 解析失败：" + token, e);
+			log.warn("token 解析失败：" + token, e);
 			return null;
 		}
 	}

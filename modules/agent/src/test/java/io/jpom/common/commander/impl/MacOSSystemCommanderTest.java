@@ -25,8 +25,10 @@ package io.jpom.common.commander.impl;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+@Slf4j
 public class MacOSSystemCommanderTest {
     private static OsInfo osInfo;
 
@@ -40,9 +42,9 @@ public class MacOSSystemCommanderTest {
      */
     @Test
     public void testGetAllMonitor() {
-        DefaultSystemLog.getLog().info("is Mac: {}", osInfo.isMac());
-        DefaultSystemLog.getLog().info("is Linux: {}", osInfo.isLinux());
-        DefaultSystemLog.getLog().info("is MacOSX: {}", osInfo.isMacOsX());
+        log.info("is Mac: {}", osInfo.isMac());
+        log.info("is Linux: {}", osInfo.isLinux());
+        log.info("is MacOSX: {}", osInfo.isMacOsX());
         // Mac OS
         if (osInfo.isMac() || osInfo.isMacOsX()) {
             // String result = CommandUtil.execSystemCommand("top -l 1 -n 1");
@@ -60,9 +62,9 @@ public class MacOSSystemCommanderTest {
                     "PID    COMMAND %CPU TIME     #TH #WQ #PORTS MEM   PURG CMPRS PGRP  PPID  STATE   BOOSTS %CPU_ME %CPU_OTHRS UID FAULTS COW MSGSENT MSGRECV SYSBSD SYSMACH CSW PAGEINS IDLEW POWER INSTRS CYCLES USER #MREGS RPRVT VPRVT VSIZE KPRVT KSHRD\n" +
                     "35069  top     0.0  00:00.24 1/1 0   14     3428K 0B   0B    35069 28803 running *0[1]  0.00000 0.00000    0   1603   91  269374  134686  1834   138100  28  0       0     0.0   0      0      root N/A    N/A   N/A   N/A   N/A   N/A";
 
-            DefaultSystemLog.getLog().info(result);
+            log.info(result);
 
-            DefaultSystemLog.getLog().info("-----------------------------");
+            log.info("-----------------------------");
 
             MacOsSystemCommander macOSSystemCommander = new MacOsSystemCommander();
             macOSSystemCommander.getAllMonitor();

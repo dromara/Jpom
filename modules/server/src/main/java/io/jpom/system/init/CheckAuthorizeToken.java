@@ -29,6 +29,7 @@ import cn.jiangzeyin.common.PreLoadMethod;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.CheckPassword;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 验证token 合法性
@@ -37,6 +38,7 @@ import io.jpom.util.CheckPassword;
  * @since 2019/8/5
  */
 @PreLoadClass
+@Slf4j
 public class CheckAuthorizeToken {
 
 	@PreLoadMethod
@@ -46,12 +48,12 @@ public class CheckAuthorizeToken {
 			return;
 		}
 		if (authorizeToken.length() < 6) {
-			DefaultSystemLog.getLog().error("配置的授权token长度小于六位不生效", new JpomRuntimeException("配置的授权token长度小于六位不生效"));
+			log.error("配置的授权token长度小于六位不生效", new JpomRuntimeException("配置的授权token长度小于六位不生效"));
 			System.exit(-1);
 		}
 		int strength = CheckPassword.checkPasswordStrength(authorizeToken);
 		if (strength != 2) {
-			DefaultSystemLog.getLog().error("配置的授权token 需要包含数字，字母，符号的组合", new JpomRuntimeException("配置的授权token 需要包含数字，字母，符号的组合"));
+			log.error("配置的授权token 需要包含数字，字母，符号的组合", new JpomRuntimeException("配置的授权token 需要包含数字，字母，符号的组合"));
 			System.exit(-1);
 		}
 	}

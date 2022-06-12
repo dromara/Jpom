@@ -179,8 +179,8 @@ public class SshController extends BaseServerController {
         sshModel.setConnectType(connectType.name());
         // 获取允许编辑的后缀
         String allowEditSuffix = getParameter("allowEditSuffix");
-        int timeOut = getParameterInt("timeOut", 5);
-        sshModel.setTimeOut(timeOut);
+        int timeout = getParameterInt("timeout", 5);
+        sshModel.setTimeout(timeout);
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
         sshModel.allowEditSuffix(allowEditSuffixList);
         try {
@@ -253,7 +253,7 @@ public class SshController extends BaseServerController {
                 String javaVersion = sshService.checkCommand(model, "java");
                 data.put("javaVersion", javaVersion);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("检查运行状态异常:{}", e.getMessage());
+                log.error("检查运行状态异常:{}", e.getMessage());
                 data.put("error", e.getMessage());
             }
             result.put(sshModel.getId(), data);

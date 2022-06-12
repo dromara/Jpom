@@ -40,6 +40,7 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.WorkspaceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,6 +57,7 @@ import java.util.stream.Collectors;
  * @since 2019/8/5
  */
 @RestController
+@Slf4j
 public class NodeInfoController extends AbstractController {
 
 	private static final Map<String, JSONObject> CACHE_RECEIVE_PUSH = new HashMap<>();
@@ -113,7 +115,7 @@ public class NodeInfoController extends AbstractController {
 			try {
 				nodeService.testNode(model);
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().warn("测试结果：{} {}", model.getUrl(), e.getMessage());
+				log.warn("测试结果：{} {}", model.getUrl(), e.getMessage());
 				return null;
 			}
 			return model;

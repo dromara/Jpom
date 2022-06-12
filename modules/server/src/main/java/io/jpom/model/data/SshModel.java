@@ -83,7 +83,7 @@ public class SshModel extends BaseWorkspaceModel {
     /**
      * 节点超时时间
      */
-    private Integer timeOut;
+    private Integer timeout;
 
     public SshModel(String id) {
         this.setId(id);
@@ -127,11 +127,11 @@ public class SshModel extends BaseWorkspaceModel {
      *
      * @return 最小值 1 分钟
      */
-    public int timeOut() {
-        if (this.timeOut == null) {
+    public int timeout() {
+        if (this.timeout == null) {
             return 5;
         }
-        return Math.max(1, this.timeOut);
+        return Math.max(1, this.timeout);
     }
 
     public Charset getCharsetT() {

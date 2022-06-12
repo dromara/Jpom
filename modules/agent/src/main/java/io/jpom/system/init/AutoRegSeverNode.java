@@ -47,6 +47,7 @@ import io.jpom.system.AgentConfigBean;
 import io.jpom.system.AgentExtConfigBean;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.JsonFileUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -64,6 +65,7 @@ import java.util.stream.Collectors;
  * @since 2019/8/6
  */
 @PreLoadClass
+@Slf4j
 public class AutoRegSeverNode {
 
     /**
@@ -94,7 +96,7 @@ public class AutoRegSeverNode {
             String body1 = execute.body();
             JsonMessage<?> jsonMessage = JSON.parseObject(body1, JsonMessage.class);
             if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-                DefaultSystemLog.getLog().error("获取Server 安装id失败:" + jsonMessage);
+                log.error("获取Server 安装id失败:" + jsonMessage);
                 return;
             }
             String installId = jsonMessage.dataToString();
@@ -115,7 +117,7 @@ public class AutoRegSeverNode {
             serverRequest.form("type", eqInstall ? "update" : "add");
             try (HttpResponse httpResponse = serverRequest.execute()) {
                 String body = httpResponse.body();
-                DefaultSystemLog.getLog().info("自动注册Server:" + body);
+                log.info("自动注册Server:" + body);
                 JsonMessage<?> regJsonMessage = JSON.parseObject(body, JsonMessage.class);
                 if (regJsonMessage.getCode() == HttpStatus.HTTP_OK) {
                     if (serverJson == null) {
@@ -129,7 +131,7 @@ public class AutoRegSeverNode {
                     }
                     JsonFileUtil.saveJson(file.getAbsolutePath(), serverJson);
                 } else {
-                    DefaultSystemLog.getLog().error("自动注册插件端失败：{}", body);
+                    log.error("自动注册插件端失败：{}", body);
                 }
             }
         }

@@ -42,6 +42,7 @@ import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.JvmUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 
@@ -52,6 +53,7 @@ import java.io.File;
  * @since 2019/4/18
  */
 @PreLoadClass
+@Slf4j
 public class AutoImportLocalNode {
 
 	private static NodeService nodeService;
@@ -84,7 +86,7 @@ public class AutoImportLocalNode {
 			}
 			findPid(mainClassPid.toString());
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("自动添加本机节点错误", e);
+			log.error("自动添加本机节点错误", e);
 		}
 	}
 

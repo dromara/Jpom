@@ -216,7 +216,7 @@ public class BackupInfoController extends BaseServerController {
 		// 检查备份文件是否存在
 		File file = new File(backupInfoModel.getFilePath());
 		if (!FileUtil.exist(file)) {
-			//DefaultSystemLog.getLog().error("文件不存在，无法下载...backupId: {}", id);
+			//log.error("文件不存在，无法下载...backupId: {}", id);
 			ServletUtil.write(getResponse(), JsonMessage.getString(404, "文件不存在，无法下载"), ContentType.JSON.toString());
 			return;
 		}

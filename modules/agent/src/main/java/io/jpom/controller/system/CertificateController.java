@@ -36,6 +36,7 @@ import io.jpom.model.data.CertModel;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.service.system.CertService;
 import io.jpom.system.AgentConfigBean;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,6 +59,7 @@ import java.util.zip.ZipFile;
  */
 @RestController
 @RequestMapping(value = "/system/certificate")
+@Slf4j
 public class CertificateController extends BaseAgentController {
 
 	@Resource
@@ -115,7 +117,7 @@ public class CertificateController extends BaseAgentController {
 				certService.updateItem(certModel);
 			}
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("证书文件", e);
+			log.error("证书文件", e);
 			return JsonMessage.getString(400, "解析证书文件失败：" + e.getMessage());
 		}
 		return JsonMessage.getString(200, "提交成功");

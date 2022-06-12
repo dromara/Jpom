@@ -31,6 +31,7 @@ import io.jpom.model.data.NodeScriptModel;
 import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.service.script.NodeScriptServer;
 import io.jpom.util.SocketSessionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -45,6 +46,7 @@ import java.io.IOException;
  */
 @ServerEndpoint(value = "/script_run")
 @Component
+@Slf4j
 public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 
 	private NodeScriptServer nodeScriptServer;
@@ -70,12 +72,12 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 			}
 			SocketSessionUtil.send(session, "连接成功：" + nodeScriptModel.getName());
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("socket 错误", e);
+			log.error("socket 错误", e);
 			try {
 				SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
 				session.close();
 			} catch (IOException e1) {
-				DefaultSystemLog.getLog().error(e1.getMessage(), e1);
+				log.error(e1.getMessage(), e1);
 			}
 		}
 	}
@@ -125,7 +127,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 		nodeScriptServer.updateItem(nodeScriptModel);
 		json.put("code", 200);
 		json.put("msg", "执行成功");
-		DefaultSystemLog.getLog().info(json.toString());
+		log.info(json.toString());
 		SocketSessionUtil.send(session, json.toString());
 	}
 

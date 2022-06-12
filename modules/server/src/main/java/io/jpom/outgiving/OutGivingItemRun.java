@@ -43,6 +43,7 @@ import io.jpom.model.log.OutGivingLog;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.outgiving.OutGivingServer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2021/12/10
  */
+@Slf4j
 public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
 
 	private final String outGivingId;
@@ -107,7 +109,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
 			}
 			this.updateStatus(this.outGivingId, this.outGivingNodeProject, result, jsonMessage.toString());
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", e);
+			log.error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", e);
 			result = OutGivingNodeProject.Status.Fail;
 			this.updateStatus(this.outGivingId, this.outGivingNodeProject, result, "error:" + e.getMessage());
 		}

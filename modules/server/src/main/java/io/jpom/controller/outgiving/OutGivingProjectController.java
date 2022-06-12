@@ -53,6 +53,7 @@ import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -76,6 +77,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(value = "/outgiving")
 @Feature(cls = ClassFeature.OUTGIVING)
+@Slf4j
 public class OutGivingProjectController extends BaseServerController {
 
     private final OutGivingServer outGivingServer;
@@ -248,7 +250,7 @@ public class OutGivingProjectController extends BaseServerController {
             OutGivingRun.startRun(outGivingModel.getId(), downloadFile, getUser(), unzip);
             return JsonMessage.getString(200, "分发成功");
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("下载远程文件异常", e);
+            log.error("下载远程文件异常", e);
             return JsonMessage.getString(500, "下载远程文件失败:" + e.getMessage());
         }
     }

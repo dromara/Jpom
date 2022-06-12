@@ -138,7 +138,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
     }
 
     private static void addPlugin(String pluginName, File file) {
-        DefaultSystemLog.getLog().info("加载：{} 插件", pluginName);
+        log.info("加载：{} 插件", pluginName);
         ClassLoader contextClassLoader = ClassLoaderUtil.getClassLoader();
         JarClassLoader.loadJar((URLClassLoader) contextClassLoader, file);
     }
@@ -154,7 +154,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
                 .map(aClass -> new PluginItemWrap((Class<? extends IPlugin>) aClass))
                 .filter(pluginItemWrap -> {
                     if (StrUtil.isEmpty(pluginItemWrap.getName())) {
-                        DefaultSystemLog.getLog().warn("plugin config name error:{}", pluginItemWrap.getClassName());
+                        log.warn("plugin config name error:{}", pluginItemWrap.getClassName());
                         return false;
                     }
                     return true;

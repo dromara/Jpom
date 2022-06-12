@@ -63,6 +63,7 @@ import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
@@ -86,6 +87,7 @@ import java.util.stream.Collectors;
  * @since 2022/1/26
  */
 @Service
+@Slf4j
 public class BuildExecuteService {
 
     /**
@@ -807,7 +809,7 @@ public class BuildExecuteService {
                 try {
                     plugin.execute(webhook, map);
                 } catch (Exception e) {
-                    DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
+                    log.error("WebHooks 调用错误", e);
                 }
             });
 

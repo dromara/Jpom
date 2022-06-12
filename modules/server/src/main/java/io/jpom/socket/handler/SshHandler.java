@@ -44,6 +44,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.user.UserBindWorkspaceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -64,6 +65,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2019/8/9
  */
 @Feature(cls = ClassFeature.SSH_TERMINAL, method = MethodFeature.EXECUTE)
+@Slf4j
 public class SshHandler extends BaseTerminalHandler {
 
     private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
@@ -92,7 +94,7 @@ public class SshHandler extends BaseTerminalHandler {
             handlerItem.startRead();
         } catch (Exception e) {
             // 输出超时日志 @author jzy
-            DefaultSystemLog.getLog().error("ssh 控制台连接超时", e);
+            log.error("ssh 控制台连接超时", e);
             sendBinary(session, "ssh 控制台连接超时");
             this.destroy(session);
             return;
@@ -111,17 +113,19 @@ public class SshHandler extends BaseTerminalHandler {
             return;
         }
         String payload = message.getPayload();
-        if (JSONValidator.from(payload).getType() == JSONValidator.Type.Object) {
-            JSONObject jsonObject = JSONObject.parseObject(payload);
-            String data = jsonObject.getString("data");
-            if (StrUtil.equals(data, "jpom-heart")) {
-                // 心跳消息不转发
-                return;
-            }
-            if (StrUtil.equals(data, "resize")) {
-                // 缓存区大小
-                handlerItem.resize(jsonObject);
-                return;
+        try (JSONValidator from = JSONValidator.from(payload)) {
+            if (from.getType() == JSONValidator.Type.Object) {
+                JSONObject jsonObject = JSONObject.parseObject(payload);
+                String data = jsonObject.getString("data");
+                if (StrUtil.equals(data, "jpom-heart")) {
+                    // 心跳消息不转发
+                    return;
+                }
+                if (StrUtil.equals(data, "resize")) {
+                    // 缓存区大小
+                    handlerItem.resize(jsonObject);
+                    return;
+                }
             }
         }
         init();
@@ -134,7 +138,7 @@ public class SshHandler extends BaseTerminalHandler {
             this.sendCommand(handlerItem, payload, userInfo, sshCommandNotLimited);
         } catch (Exception e) {
             sendBinary(session, "Failure:" + e.getMessage());
-            DefaultSystemLog.getLog().error("执行命令异常", e);
+            log.error("执行命令异常", e);
         }
     }
 
@@ -194,7 +198,7 @@ public class SshHandler extends BaseTerminalHandler {
         }
 
         void startRead() throws JSchException {
-            this.channel.connect((int) TimeUnit.SECONDS.toMillis(sshItem.timeOut()));
+            this.channel.connect((int) TimeUnit.SECONDS.toMillis(sshItem.timeout()));
             ThreadUtil.execute(this);
         }
 
@@ -273,7 +277,7 @@ public class SshHandler extends BaseTerminalHandler {
                 if (!this.openSession.isConnected()) {
                     return;
                 }
-                DefaultSystemLog.getLog().error("读取错误", e);
+                log.error("读取错误", e);
                 SshHandler.this.destroy(this.session);
             }
         }

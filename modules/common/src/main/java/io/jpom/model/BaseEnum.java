@@ -22,9 +22,11 @@
  */
 package io.jpom.model;
 
+import cn.hutool.log.StaticLog;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -78,7 +80,7 @@ public interface BaseEnum {
 					map1.put(item.getCode(), item);
 				}
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-				DefaultSystemLog.getLog().error("enum error", e);
+				StaticLog.error("enum error", e);
 				return null;
 			}
 			return map1;
@@ -185,7 +187,7 @@ public interface BaseEnum {
 					jsonArray.add(jsonObject);
 				}
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-				DefaultSystemLog.getLog().error("enum error", e);
+                StaticLog.error("enum error", e);
 				return null;
 			}
 			return jsonArray;

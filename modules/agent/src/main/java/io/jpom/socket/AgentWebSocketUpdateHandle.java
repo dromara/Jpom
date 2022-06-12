@@ -36,6 +36,7 @@ import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.UploadFileModel;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.util.SocketSessionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -51,6 +52,7 @@ import java.util.Map;
  */
 @ServerEndpoint(value = "/node_update")
 @Component
+@Slf4j
 public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 
 	private static final Map<String, UploadFileModel> UPLOAD_FILE_INFO = new HashMap<>();
@@ -123,7 +125,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 			JpomApplication.restart();
 		} catch (Exception e) {
 			result = "重启失败" + e.getMessage();
-			DefaultSystemLog.getLog().error("重启失败", e);
+			log.error("重启失败", e);
 		}
 		return result;
 	}

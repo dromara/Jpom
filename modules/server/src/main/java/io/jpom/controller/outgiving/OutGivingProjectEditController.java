@@ -49,6 +49,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.service.node.ProjectInfoCacheService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,6 +69,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/outgiving")
 @Feature(cls = ClassFeature.OUTGIVING)
+@Slf4j
 public class OutGivingProjectEditController extends BaseServerController {
 
 	private final OutGivingWhitelistService outGivingWhitelistService;
@@ -210,7 +212,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 				projectInfoCacheService.syncNode(nodeModel, outGivingModel.getId());
 			}
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("保存分发项目失败", e);
+			log.error("保存分发项目失败", e);
 			if (!edit) {
 				fail = true;
 				outGivingServer.delByKey(outGivingModel.getId());
@@ -223,7 +225,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 						deleteNodeProject(entry.get(0), userModel, outGivingModel.getId());
 					}
 				} catch (Exception e) {
-					DefaultSystemLog.getLog().error("还原项目失败", e);
+					log.error("还原项目失败", e);
 				}
 			}
 		}

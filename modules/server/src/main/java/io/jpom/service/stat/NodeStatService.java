@@ -45,6 +45,7 @@ import io.jpom.service.node.NodeService;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.ServerExtConfigBean;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -61,6 +62,7 @@ import java.util.stream.Collectors;
  * @since 2022/1/22
  */
 @Service
+@Slf4j
 public class NodeStatService extends BaseWorkspaceService<NodeStatModel> implements IAsyncLoad, Runnable {
 
     private final ServerExtConfigBean serverExtConfigBean;
@@ -171,7 +173,7 @@ public class NodeStatService extends BaseWorkspaceService<NodeStatModel> impleme
                     this.save(modelList, 1, e.getMessage());
                 } catch (Exception e) {
                     this.save(modelList, 1, e.getMessage());
-                    DefaultSystemLog.getLog().error("获取节点监控信息失败", e);
+                    log.error("获取节点监控信息失败", e);
                 } finally {
                     BaseServerController.removeEmpty();
                 }

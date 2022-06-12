@@ -31,6 +31,7 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -45,6 +46,7 @@ import java.util.concurrent.TimeUnit;
  * @author bwcx_jzy
  * @since 2021/7/29
  */
+@Slf4j
 public class TestJschExec {
 
 	//private static final String cmd = "java -Dappliction=jpom-test-jar -jar /home/data/test/springboot-test-jar-0.0.1-SNAPSHOT.jar";
@@ -89,7 +91,7 @@ public class TestJschExec {
 						//System.out.println(s + "  " + command.length);
 					} catch (Exception e) {
 						e.printStackTrace();
-						DefaultSystemLog.getLog().error("写入错误", e);
+						log.error("写入错误", e);
 					}
 				}
 			}).addRepeatWorker(() -> {
@@ -102,7 +104,7 @@ public class TestJschExec {
 						stringBuilder.append(new String(Arrays.copyOfRange(buffer, 0, i), CharsetUtil.CHARSET_UTF_8));
 					}
 				} catch (Exception e) {
-					DefaultSystemLog.getLog().error("读取错误", e);
+					log.error("读取错误", e);
 				}
 			}).start();
 			System.out.println(stringBuilder);
@@ -136,7 +138,7 @@ public class TestJschExec {
 			} catch (Exception e) {
 				e.printStackTrace();
 				if (!StrUtil.contains(e.getMessage(), "Pipe closed")) {
-					DefaultSystemLog.getLog().error("读取 exec err 流发生异常", e);
+					log.error("读取 exec err 流发生异常", e);
 					error[0] = "读取 exec err 流发生异常" + e.getMessage();
 				}
 			} finally {
@@ -148,7 +150,7 @@ public class TestJschExec {
 			} catch (Exception e) {
 				e.printStackTrace();
 				if (!StrUtil.contains(e.getMessage(), "Pipe closed")) {
-					DefaultSystemLog.getLog().error("读取 exec 流发生异常", e);
+					log.error("读取 exec 流发生异常", e);
 					result[0] = "读取 exec 流发生异常" + e.getMessage();
 				}
 			} finally {
@@ -184,7 +186,7 @@ public class TestJschExec {
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (!StrUtil.contains(e.getMessage(), "Pipe closed")) {
-				DefaultSystemLog.getLog().error("读取 exec err 流发生异常", e);
+				log.error("读取 exec err 流发生异常", e);
 				error[0] = "读取 exec err 流发生异常" + e.getMessage();
 			}
 		}
@@ -194,7 +196,7 @@ public class TestJschExec {
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (!StrUtil.contains(e.getMessage(), "Pipe closed")) {
-				DefaultSystemLog.getLog().error("读取 exec 流发生异常", e);
+				log.error("读取 exec 流发生异常", e);
 				result[0] = "读取 exec 流发生异常" + e.getMessage();
 			}
 		}
@@ -225,7 +227,7 @@ public class TestJschExec {
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (!StrUtil.contains(e.getMessage(), "Pipe closed")) {
-				DefaultSystemLog.getLog().error("读取 exec 流发生异常", e);
+				log.error("读取 exec 流发生异常", e);
 				result = "读取 exec 流发生异常" + e.getMessage();
 			}
 		}
@@ -235,7 +237,7 @@ public class TestJschExec {
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (!StrUtil.contains(e.getMessage(), "Pipe closed")) {
-				DefaultSystemLog.getLog().error("读取 exec err 流发生异常", e);
+				log.error("读取 exec err 流发生异常", e);
 				error = "读取 exec err 流发生异常" + e.getMessage();
 			}
 		}

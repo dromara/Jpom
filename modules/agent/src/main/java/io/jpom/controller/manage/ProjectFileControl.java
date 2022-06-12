@@ -52,6 +52,7 @@ import io.jpom.service.manage.ConsoleService;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.util.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -73,6 +74,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping(value = "/manage/file/")
+@Slf4j
 public class ProjectFileControl extends BaseAgentController {
 
     private final ConsoleService consoleService;
@@ -208,7 +210,7 @@ public class ProjectFileControl extends BaseAgentController {
                     CompressionFileUtil.unCompress(file, lib);
                 } finally {
                     if (!FileUtil.del(file)) {
-                        DefaultSystemLog.getLog().error("删除文件失败：" + file.getPath());
+                        log.error("删除文件失败：" + file.getPath());
                     }
                 }
             } else {
@@ -233,7 +235,7 @@ public class ProjectFileControl extends BaseAgentController {
                             try {
                                 consoleService.execCommand(ConsoleCommandOp.restart, pim, javaCopyItem);
                             } catch (Exception e) {
-                                DefaultSystemLog.getLog().error("重启副本集失败", e);
+                                log.error("重启副本集失败", e);
                             }
                         }));
                     }
@@ -275,7 +277,7 @@ public class ProjectFileControl extends BaseAgentController {
             }
             return true;
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("重复失败", e);
+            log.error("重复失败", e);
             // 完整重启，不再继续剩余的节点项目
             return afterOpt != AfterOpt.Order_Must_Restart;
         }
@@ -415,7 +417,7 @@ public class ProjectFileControl extends BaseAgentController {
             }
             ServletUtil.write(getResponse(), file);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("下载文件异常", e);
+            log.error("下载文件异常", e);
         }
         return "下载失败。请刷新页面后重试";
     }
@@ -449,13 +451,13 @@ public class ProjectFileControl extends BaseAgentController {
                     CompressionFileUtil.unCompress(downloadFile, file);
                 } finally {
                     if (!FileUtil.del(downloadFile)) {
-                        DefaultSystemLog.getLog().error("删除文件失败：" + file.getPath());
+                        log.error("删除文件失败：" + file.getPath());
                     }
                 }
             }
             return JsonMessage.getString(200, "下载成功文件大小：" + FileUtil.readableFileSize(downloadFile));
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("下载远程文件异常", e);
+            log.error("下载远程文件异常", e);
             return JsonMessage.getString(500, "下载远程文件失败:" + e.getMessage());
         } finally {
             ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());

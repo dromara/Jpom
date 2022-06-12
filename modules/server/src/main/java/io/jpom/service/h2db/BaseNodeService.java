@@ -44,6 +44,7 @@ import io.jpom.service.node.NodeService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -57,6 +58,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2021/12/5
  */
+@Slf4j
 public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorkspaceService<T> {
 
     protected final NodeService nodeService;
@@ -94,7 +96,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
         ThreadUtil.execute(() -> {
             List<NodeModel> list = nodeService.list();
             if (CollUtil.isEmpty(list)) {
-                DefaultSystemLog.getLog().debug("没有任何节点");
+                log.debug("没有任何节点");
                 return;
             }
             // 排序 避免项目被个节点绑定
@@ -132,7 +134,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
     public String syncExecuteNode(NodeModel nodeModel) {
         String nodeModelName = nodeModel.getName();
         if (!nodeModel.isOpenStatus()) {
-            DefaultSystemLog.getLog().debug("{} 节点未启用", nodeModelName);
+            log.debug("{} 节点未启用", nodeModelName);
             return "节点未启用";
         }
         try {
@@ -142,7 +144,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
                 entity.set("nodeId", nodeModel.getId());
                 int del = super.del(entity);
                 //
-                DefaultSystemLog.getLog().debug("{} 节点没有拉取到任何{}", nodeModelName, dataName);
+                log.debug("{} 节点没有拉取到任何{}", nodeModelName, dataName);
                 return "节点没有拉取到任何" + dataName;
             }
             // 查询现在存在的项目
@@ -185,7 +187,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
                 CollUtil.size(cacheAll), dataName,
                 CollUtil.size(models), dataName,
                 CollUtil.size(strings));
-            DefaultSystemLog.getLog().debug(format);
+            log.debug(format);
             return format;
         } catch (Exception e) {
             return this.checkException(e, nodeModelName);
@@ -197,14 +199,14 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
     protected String checkException(Exception e, String nodeModelName) {
         if (e instanceof AgentException) {
             AgentException agentException = (AgentException) e;
-            DefaultSystemLog.getLog().error("{} 同步失败 {}", nodeModelName, agentException.getMessage());
+            log.error("{} 同步失败 {}", nodeModelName, agentException.getMessage());
             return "同步失败" + agentException.getMessage();
         } else if (e instanceof AuthorizeException) {
             AuthorizeException authorizeException = (AuthorizeException) e;
-            DefaultSystemLog.getLog().error("{} 同步失败 {}", nodeModelName, authorizeException.getMessage());
+            log.error("{} 同步失败 {}", nodeModelName, authorizeException.getMessage());
             return "同步失败" + authorizeException.getMessage();
         }
-        DefaultSystemLog.getLog().error("同步节点" + dataName + "失败:" + nodeModelName, e);
+        log.error("同步节点" + dataName + "失败:" + nodeModelName, e);
         return "同步节点" + dataName + "失败" + e.getMessage();
     }
 
@@ -216,7 +218,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
     public void syncNode(final NodeModel nodeModel, String id) {
         String nodeModelName = nodeModel.getName();
         if (!nodeModel.isOpenStatus()) {
-            DefaultSystemLog.getLog().debug("{} 节点未启用", nodeModelName);
+            log.debug("{} 节点未启用", nodeModelName);
             return;
         }
         ThreadUtil.execute(() -> {

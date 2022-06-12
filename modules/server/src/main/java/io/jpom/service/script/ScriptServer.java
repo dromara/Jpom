@@ -34,6 +34,7 @@ import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.socket.ScriptProcessBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -44,6 +45,7 @@ import java.util.List;
  * @since 2022/1/19
  */
 @Service
+@Slf4j
 public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements ICron<ScriptModel> {
 
 	@Override
@@ -91,7 +93,7 @@ public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements I
 			CronUtils.remove(taskId);
 			return false;
 		}
-		DefaultSystemLog.getLog().debug("start script cron {} {} {}", id, scriptModel.getName(), autoExecCron);
+		log.debug("start script cron {} {} {}", id, scriptModel.getName(), autoExecCron);
 		CronUtils.upsert(taskId, autoExecCron, new CronTask(id));
 		return true;
 	}
@@ -120,7 +122,7 @@ public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements I
 				// 执行
 				ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs());
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("触发自动执行命令模版异常", e);
+				log.error("触发自动执行命令模版异常", e);
 			} finally {
 				BaseServerController.removeEmpty();
 			}

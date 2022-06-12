@@ -36,6 +36,7 @@ import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.script.ProjectFileBackupUtil;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,6 +60,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping(value = "/manage/file/")
+@Slf4j
 public class ProjectFileBackupController extends BaseAgentController {
 
     /**
@@ -132,7 +134,7 @@ public class ProjectFileBackupController extends BaseAgentController {
             }
             ServletUtil.write(response, file);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("下载文件异常", e);
+            log.error("下载文件异常", e);
             ServletUtil.write(response, "下载文件异常:" + e.getMessage(), MediaType.TEXT_HTML_VALUE);
         }
     }

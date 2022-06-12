@@ -362,7 +362,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
 //        where.setUrl(info.getUrl());
 //        int updateCount = super.update(super.dataBeanToEntity(update), super.dataBeanToEntity(where));
 //        if (updateCount > 1) {
-//            DefaultSystemLog.getLog().debug("update duplicate node {} {}", info.getUrl(), updateCount);
+//            log.debug("update duplicate node {} {}", info.getUrl(), updateCount);
 //        }
     }
 

@@ -71,7 +71,7 @@ public class DockerCliHandler extends BaseTerminalHandler {
 			handlerItem.startRead();
 		} catch (Exception e) {
 			// 输出超时日志 @author jzy
-			DefaultSystemLog.getLog().error("docker 控制台连接超时", e);
+			log.error("docker 控制台连接超时", e);
 			sendBinary(session, "docker 控制台连接超时");
 			this.destroy(session);
 			return;
@@ -108,7 +108,7 @@ public class DockerCliHandler extends BaseTerminalHandler {
 			this.sendCommand(handlerItem, payload);
 		} catch (Exception e) {
 			sendBinary(session, "Failure:" + e.getMessage());
-			DefaultSystemLog.getLog().error("执行命令异常", e);
+			log.error("执行命令异常", e);
 		}
 	}
 

@@ -55,6 +55,7 @@ import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.extconf.DbExtConfig;
 import io.jpom.system.init.InitDb;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -83,6 +84,7 @@ import java.util.List;
 @RequestMapping(value = "system")
 @Feature(cls = ClassFeature.SYSTEM_CONFIG)
 @SystemPermission
+@Slf4j
 public class SystemConfigController extends BaseServerController {
 
     private final SystemParametersServer systemParametersServer;
@@ -134,7 +136,7 @@ public class SystemConfigController extends BaseServerController {
             ByteArrayResource resource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
             yamlPropertySourceLoader.load("test", resource);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().warn("内容格式错误，请检查修正", e);
+            log.warn("内容格式错误，请检查修正", e);
             return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
         }
         boolean restartBool = Convert.toBool(restart, false);

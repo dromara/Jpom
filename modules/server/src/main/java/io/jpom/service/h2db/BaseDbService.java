@@ -45,6 +45,7 @@ import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserModel;
 import io.jpom.system.extconf.DbExtConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,6 +63,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2021/8/13
  */
+@Slf4j
 public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonService<T> {
 
     public BaseDbService() {
@@ -374,7 +376,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 entity.set(timeColumn, "< " + time);
                 int count = super.del(entity);
                 if (count > 0) {
-                    DefaultSystemLog.getLog().debug("{} 清理了 {}条数据", super.getTableName(), count);
+                    log.debug("{} 清理了 {}条数据", super.getTableName(), count);
                 }
             });
         }
@@ -431,7 +433,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         } catch (java.lang.IllegalStateException illegalStateException) {
             return 0L;
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("查询数据错误", e);
+            log.error("查询数据错误", e);
             return 0L;
         }
         if (pageResult.isEmpty()) {

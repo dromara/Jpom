@@ -52,7 +52,7 @@ public class InternalController extends BaseServerController {
 	@ResponseBody
 	public String getInternalData() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_internal_data).toString();
-		//DefaultSystemLog.getLog().info("data: {}", data == null ? "" : data.toString());
+		//log.info("data: {}", data == null ? "" : data.toString());
 //		return JsonMessage.getString(200, "success", data);
 	}
 

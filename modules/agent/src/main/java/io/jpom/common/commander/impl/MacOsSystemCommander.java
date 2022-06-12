@@ -33,6 +33,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.system.ProcessModel;
 import io.jpom.util.CommandUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import java.util.List;
 /**
  * @author User
  */
+@Slf4j
 public class MacOsSystemCommander extends AbstractSystemCommander {
 
 	@Override
@@ -67,7 +69,7 @@ public class MacOsSystemCommander extends AbstractSystemCommander {
 			jsonObject.put("memory", memory);
 		}
 		jsonObject.put("disk", getHardDisk());
-		DefaultSystemLog.getLog().info("Mac OS monitor data: {}", jsonObject.toJSONString());
+		log.info("Mac OS monitor data: {}", jsonObject.toJSONString());
 		return jsonObject;
 	}
 
@@ -84,7 +86,7 @@ public class MacOsSystemCommander extends AbstractSystemCommander {
 			return null;
 		}
 		double used = 0, free = 0;
-		DefaultSystemLog.getLog().debug("Mac Os mem info: {}", info);
+		log.debug("Mac Os mem info: {}", info);
 		int index = info.indexOf(CharPool.COLON) + 1;
 		String[] split = info.substring(index).split(StrUtil.COMMA);
 		for (String str : split) {
@@ -97,7 +99,7 @@ public class MacOsSystemCommander extends AbstractSystemCommander {
 				used = Convert.toDouble(value, 0.0);
 			}
 		}
-		DefaultSystemLog.getLog().debug("Mac OS mem: used: {}, unused: {}", used, free);
+		log.debug("Mac OS mem: used: {}, unused: {}", used, free);
 		return String.format("%.2f", used / (used + free) * 100);
 	}
 
@@ -111,7 +113,7 @@ public class MacOsSystemCommander extends AbstractSystemCommander {
 		if (StrUtil.isEmpty(info)) {
 			return null;
 		}
-		DefaultSystemLog.getLog().debug("Mac Os cpu info: {}", info);
+		log.debug("Mac Os cpu info: {}", info);
 		int i = info.indexOf(CharPool.COLON);
 		String[] split = info.substring(i + 1).split(StrUtil.COMMA);
 		for (String str : split) {
@@ -152,9 +154,9 @@ public class MacOsSystemCommander extends AbstractSystemCommander {
 		ProcessModel processModel;
 		for (String item : list) {
 			processModel = new ProcessModel();
-			DefaultSystemLog.getLog().debug("process item: {}", item);
+			log.debug("process item: {}", item);
 			List<String> values = StrSplitter.splitTrim(item, StrUtil.SPACE, true);
-			//DefaultSystemLog.getLog().debug(JSON.toJSONString(values));
+			//log.debug(JSON.toJSONString(values));
 			processModel.setPid(Convert.toInt(values.get(0), 0));
 			//processModel.setPort(values.get(6));
 			processModel.setCommand(values.get(1));
@@ -228,7 +230,7 @@ public class MacOsSystemCommander extends AbstractSystemCommander {
 				CommandUtil.asyncExeLocalCommand(FileUtil.file(SystemUtil.getUserInfo().getHomeDir()), serviceName);
 				return "ok";
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("执行异常", e);
+				log.error("执行异常", e);
 				return "执行异常：" + e.getMessage();
 			}
 		}

@@ -41,6 +41,7 @@ import io.jpom.service.manage.TomcatManageService;
 import io.jpom.socket.AgentFileTailWatcher;
 import io.jpom.util.LayuiTreeUtil;
 import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -56,6 +57,7 @@ import java.util.concurrent.TimeUnit;
  */
 @RestController
 @RequestMapping(value = "/tomcat/")
+@Slf4j
 public class TomcatManageController extends BaseAgentController {
 
     @Resource
@@ -336,7 +338,7 @@ public class TomcatManageController extends BaseAgentController {
             }
             ServletUtil.write(getResponse(), file);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("下载文件异常", e);
+            log.error("下载文件异常", e);
         }
         return "下载失败。请刷新页面后重试";
     }

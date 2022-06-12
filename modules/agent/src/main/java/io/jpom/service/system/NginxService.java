@@ -40,6 +40,7 @@ import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
  * @author Arno
  */
 @Service
+@Slf4j
 public class NginxService extends BaseDataService {
 
     private final WhitelistDirectoryService whitelistDirectoryService;
@@ -106,7 +108,7 @@ public class NginxService extends BaseDataService {
                     jsonObject.putAll(data);
                 }
             } catch (IOException e) {
-                DefaultSystemLog.getLog().error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
 
             return jsonObject;
@@ -296,7 +298,7 @@ public class NginxService extends BaseDataService {
 
             }
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return jsonObject;
     }

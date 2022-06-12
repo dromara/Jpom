@@ -41,6 +41,7 @@ import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -57,6 +58,7 @@ import java.util.Map;
  * @author jiangzeyin
  * @since 2019/4/19
  */
+@Slf4j
 public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 
 	private boolean checkNode(HttpServletRequest httpServletRequest, Map<String, Object> attributes, UserModel userModel) {
@@ -79,7 +81,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 		String type = httpServletRequest.getParameter("type");
 		HandlerType handlerType = EnumUtil.fromString(HandlerType.class, type, null);
 		if (handlerType == null) {
-			DefaultSystemLog.getLog().warn("传入的类型错误：{}", type);
+			log.warn("传入的类型错误：{}", type);
 		}
 		return handlerType;
 	}
@@ -225,7 +227,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 	@Override
 	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
 		if (exception != null) {
-			DefaultSystemLog.getLog().error("afterHandshake", exception);
+			log.error("afterHandshake", exception);
 		}
 	}
 }

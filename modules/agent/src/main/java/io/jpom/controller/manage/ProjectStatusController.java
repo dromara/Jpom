@@ -36,6 +36,7 @@ import io.jpom.service.manage.ConsoleService;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JvmUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,6 +53,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/manage/")
+@Slf4j
 public class ProjectStatusController extends BaseAgentController {
 
     private final ConsoleService consoleService;
@@ -77,7 +79,7 @@ public class ProjectStatusController extends BaseAgentController {
             try {
                 pid = AbstractProjectCommander.getInstance().getPid(nodeProjectInfoModel, null);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("获取项目pid 失败", e);
+                log.error("获取项目pid 失败", e);
             }
             if (pid <= 0) {
                 Assert.state(JvmUtil.jpsNormal, "当前服务器 jps 命令异常,请检查 jdk 是否完整,以及 java 环境变量是否配置正确");
@@ -125,7 +127,7 @@ public class ProjectStatusController extends BaseAgentController {
                     NodeProjectInfoModel projectInfoServiceItem = projectInfoService.getItem(item);
                     pid = AbstractProjectCommander.getInstance().getPid(projectInfoServiceItem, null);
                 } catch (Exception e) {
-                    DefaultSystemLog.getLog().error("获取端口错误", e);
+                    log.error("获取端口错误", e);
                     continue;
                 }
                 if (pid <= 0) {
@@ -175,7 +177,7 @@ public class ProjectStatusController extends BaseAgentController {
                         continue;
                     }
                 } catch (Exception e) {
-                    DefaultSystemLog.getLog().error("获取端口错误", e);
+                    log.error("获取端口错误", e);
                     continue;
                 }
                 itemObj = new JSONObject();
@@ -205,7 +207,7 @@ public class ProjectStatusController extends BaseAgentController {
             }
             return JsonMessage.getString(201, "重启项目失败：" + result);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("获取项目pid 失败", e);
+            log.error("获取项目pid 失败", e);
             result = "error:" + e.getMessage();
             return JsonMessage.getString(500, "重启项目异常：" + result);
         }
@@ -227,7 +229,7 @@ public class ProjectStatusController extends BaseAgentController {
             }
             return JsonMessage.getString(201, "关闭项目失败：" + result);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("获取项目pid 失败", e);
+            log.error("获取项目pid 失败", e);
             result = "error:" + e.getMessage();
             return JsonMessage.getString(500, "关闭项目异常：" + result);
         }
@@ -248,7 +250,7 @@ public class ProjectStatusController extends BaseAgentController {
             }
             return JsonMessage.getString(201, "启动项目失败：" + result);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("获取项目pid 失败", e);
+            log.error("获取项目pid 失败", e);
             result = "error:" + e.getMessage();
             return JsonMessage.getString(500, "启动项目异常：" + result);
         }

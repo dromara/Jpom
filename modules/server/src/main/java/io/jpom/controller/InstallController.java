@@ -41,6 +41,7 @@ import io.jpom.model.dto.UserLoginDto;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.util.TwoFactorAuthUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +56,7 @@ import java.util.List;
  * @since 2019/2/22
  */
 @RestController
+@Slf4j
 public class InstallController extends BaseServerController {
 
 
@@ -108,7 +110,7 @@ public class InstallController extends BaseServerController {
             BaseServerController.resetInfo(userModel);
             userService.insert(userModel);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("初始化用户失败", e);
+            log.error("初始化用户失败", e);
             return JsonMessage.getString(400, "初始化失败:" + e.getMessage());
         }
         //自动登录

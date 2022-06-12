@@ -44,6 +44,7 @@ import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.service.system.NginxService;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,6 +66,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/system/nginx")
+@Slf4j
 public class NginxController extends BaseAgentController {
 
 	@Resource
@@ -183,13 +185,13 @@ public class NginxController extends BaseAgentController {
 				}
 			}
 		} catch (IOException e) {
-			DefaultSystemLog.getLog().error("解析失败", e);
+			log.error("解析失败", e);
 			return JsonMessage.getString(500, "解析失败");
 		}
 		try {
 			FileUtil.writeString(context, file, CharsetUtil.UTF_8);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			return JsonMessage.getString(400, "操作失败:" + e.getMessage());
 		}
 		String msg = this.reloadNginx();
@@ -202,11 +204,11 @@ public class NginxController extends BaseAgentController {
 			String format = StrUtil.format("{} -s reload", serviceName);
 			String msg = CommandUtil.execSystemCommand(format);
 			if (StrUtil.isNotEmpty(msg)) {
-				DefaultSystemLog.getLog().info(msg);
+				log.info(msg);
 				return "(" + msg + ")";
 			}
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("reload nginx error", e);
+			log.error("reload nginx error", e);
 		}
 		return StrUtil.EMPTY;
 	}
@@ -267,7 +269,7 @@ public class NginxController extends BaseAgentController {
 					FileUtil.rename(file, file.getName() + "_back", false, true);
 				}
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("删除nginx", e);
+				log.error("删除nginx", e);
 				return JsonMessage.getString(400, "操作失败:" + e.getMessage());
 			}
 		}

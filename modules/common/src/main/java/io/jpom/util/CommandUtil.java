@@ -30,6 +30,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.system.ExtConfigBean;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author jiangzeyin
  * @since 2019/4/15
  */
+@Slf4j
 public class CommandUtil {
     /**
      * 系统命令
@@ -149,7 +151,7 @@ public class CommandUtil {
             String[] cmd = commands.toArray(new String[]{});
             result = exec(cmd, file);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("执行命令异常", e);
+            log.error("执行命令异常", e);
             result += e.getMessage();
         }
         return result;
@@ -165,20 +167,20 @@ public class CommandUtil {
     private static String exec(String[] cmd, File file) throws IOException {
         Process process = new ProcessBuilder(cmd).directory(file).redirectErrorStream(true).start();
         Charset charset;
-        boolean log;
+        boolean isLog;
         try {
             charset = ExtConfigBean.getInstance().getConsoleLogCharset();
-            log = true;
+            isLog = true;
         } catch (Exception e) {
             // 直接执行，使用默认编码格式
             charset = CharsetUtil.systemCharset();
             // 不记录日志
-            log = false;
+            isLog = false;
         }
         charset = ObjectUtil.defaultIfNull(charset, CharsetUtil.defaultCharset());
         String result = RuntimeUtil.getResult(process, charset);
-        if (log) {
-            DefaultSystemLog.getLog().debug("exec {} {} {}", charset.name(), Arrays.toString(cmd), result);
+        if (isLog) {
+            log.debug("exec {} {} {}", charset.name(), Arrays.toString(cmd), result);
         }
         return result;
     }
@@ -194,7 +196,7 @@ public class CommandUtil {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
         //
-        DefaultSystemLog.getLog().debug(newCommand);
+        log.debug(newCommand);
         List<String> commands = getCommand();
         commands.add(newCommand);
         ProcessBuilder pb = new ProcessBuilder(commands);

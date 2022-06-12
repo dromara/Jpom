@@ -47,6 +47,7 @@ import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JsonFileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -71,6 +72,7 @@ import java.util.zip.ZipFile;
  * @author jiangzeyin
  * @since 2019/4/7
  */
+@Slf4j
 public class JpomManifest {
 
     private volatile static JpomManifest JPOM_MANIFEST;
@@ -384,7 +386,7 @@ public class JpomManifest {
                 }
             }
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("解析jar", e);
+            log.error("解析jar", e);
             return new JsonMessage<>(500, " 解析错误:" + e.getMessage());
         }
         return new JsonMessage<>(200, "", jarVersion);

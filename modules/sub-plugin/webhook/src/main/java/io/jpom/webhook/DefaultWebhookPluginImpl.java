@@ -29,6 +29,7 @@ import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
@@ -39,6 +40,7 @@ import java.util.Map;
  * @since 2021/12/22
  */
 @PluginConfig(name = "webhook")
+@Slf4j
 public class DefaultWebhookPluginImpl implements IDefaultPlugin {
 
     @Override
@@ -51,10 +53,10 @@ public class DefaultWebhookPluginImpl implements IDefaultPlugin {
             HttpRequest httpRequest = HttpUtil.createGet(webhook);
             httpRequest.form(parameter);
             String body = httpRequest.execute().body();
-            DefaultSystemLog.getLog().info(webhook + CharPool.COLON + body);
+            log.info(webhook + CharPool.COLON + body);
             return body;
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
+            log.error("WebHooks 调用错误", e);
             return "WebHooks error:" + e.getMessage();
         }
     }

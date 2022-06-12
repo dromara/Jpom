@@ -30,6 +30,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -41,6 +42,7 @@ import java.util.Map;
  * @since 2021/12/22
  */
 @PluginConfig(name = "email")
+@Slf4j
 public class DefaultEmailPluginImpl implements IDefaultPlugin {
 
     @Override
@@ -71,7 +73,7 @@ public class DefaultEmailPluginImpl implements IDefaultPlugin {
                 transport.close();
                 return true;
             } catch (Exception e) {
-                DefaultSystemLog.getLog().warn("检查邮箱信息错误：{}", e.getMessage());
+                log.warn("检查邮箱信息错误：{}", e.getMessage());
                 return false;
             }
         }

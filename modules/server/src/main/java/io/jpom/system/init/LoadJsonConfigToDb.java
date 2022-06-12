@@ -47,6 +47,7 @@ import io.jpom.service.user.UserService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.JsonFileUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.List;
@@ -58,6 +59,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2021/12/2
  */
+@Slf4j
 public class LoadJsonConfigToDb {
 
 	private LoadJsonConfigToDb() {
@@ -91,9 +93,9 @@ public class LoadJsonConfigToDb {
 			parametersServer.upsert(SystemIpConfigModel.ID, systemIpConfigModel, SystemIpConfigModel.ID);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
-			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+			log.info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("load ip config error ", e);
+			log.error("load ip config error ", e);
 		}
 	}
 
@@ -114,9 +116,9 @@ public class LoadJsonConfigToDb {
 			parametersServer.upsert(MailAccountModel.ID, mailAccountModel, MailAccountModel.ID);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
-			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+			log.info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("load mail config error ", e);
+			log.error("load mail config error ", e);
 		}
 	}
 
@@ -138,9 +140,9 @@ public class LoadJsonConfigToDb {
 			parametersServer.upsert(id, serverWhitelist, id);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
-			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+			log.info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("load mail config error ", e);
+			log.error("load mail config error ", e);
 		}
 	}
 
@@ -172,9 +174,9 @@ public class LoadJsonConfigToDb {
 			userService.insert(userModels);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
-			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+			log.info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("load user info error ", e);
+			log.error("load user info error ", e);
 		}
 	}
 
@@ -201,9 +203,9 @@ public class LoadJsonConfigToDb {
 			nodeService.insert(nodeModels);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
-			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+			log.info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("load node error ", e);
+			log.error("load node error ", e);
 		}
 	}
 
@@ -225,9 +227,9 @@ public class LoadJsonConfigToDb {
 			sshService.insert(sshModels);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
-			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+			log.info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("load ssh error ", e);
+			log.error("load ssh error ", e);
 		}
 	}
 
@@ -250,9 +252,9 @@ public class LoadJsonConfigToDb {
 			monitorService.insert(monitorModels);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
-			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+			log.info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("load monitor error ", e);
+			log.error("load monitor error ", e);
 		}
 	}
 
@@ -276,9 +278,9 @@ public class LoadJsonConfigToDb {
 			outGivingServer.insert(outGivingModels);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
-			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+			log.info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("load OUTGIVING error ", e);
+			log.error("load OUTGIVING error ", e);
 		}
 	}
 

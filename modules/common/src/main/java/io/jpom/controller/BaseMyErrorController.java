@@ -24,6 +24,7 @@ package io.jpom.controller;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,7 @@ import java.util.Map;
  * @since 2021/3/17
  * @see org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
  */
+@Slf4j
 public abstract class BaseMyErrorController extends AbstractErrorController {
 
     public static final String FILE_MAX_SIZE_MSG = "上传文件太大了,请重新选择一个较小的文件上传吧";
@@ -58,7 +60,7 @@ public abstract class BaseMyErrorController extends AbstractErrorController {
         }
         Integer statusCode = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         String requestUri = (String) request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-        DefaultSystemLog.getLog().error("发生异常：" + statusCode + "  " + requestUri);
+        log.error("发生异常：" + statusCode + "  " + requestUri);
         // 判断异常信息
         Object attribute = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
         Map<String, Object> body = new HashMap<>(5);

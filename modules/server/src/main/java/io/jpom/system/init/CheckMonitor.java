@@ -42,6 +42,7 @@ import io.jpom.service.node.NodeService;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.system.ConfigBean;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 import java.util.List;
@@ -54,6 +55,7 @@ import java.util.Map;
  * @since 2019/7/14
  */
 @PreLoadClass(value = Integer.MAX_VALUE)
+@Slf4j
 public class CheckMonitor {
 
 	@PreLoadMethod
@@ -71,7 +73,7 @@ public class CheckMonitor {
 				//
 				RemoteVersion.loadRemoteInfo();
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("系统调度执行出现错误", e);
+				log.error("系统调度执行出现错误", e);
 			}
 		});
 		// 拉取 脚本模版日志
@@ -110,10 +112,10 @@ public class CheckMonitor {
 			jsonObject.put("ids", strings);
 			JsonMessage<Object> jsonMessage = NodeForward.requestBody(nodeModel, NodeUrl.SCRIPT_DEL_EXEC_LOG, null, jsonObject);
 			if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-				DefaultSystemLog.getLog().error("删除脚本模版执行数据错误:{}", jsonMessage);
+				log.error("删除脚本模版执行数据错误:{}", jsonMessage);
 			}
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("同步脚本异常", e);
+			log.error("同步脚本异常", e);
 		}
 	}
 
@@ -130,7 +132,7 @@ public class CheckMonitor {
 			statusRecoverMap.forEach((name, iCron) -> {
 				int count = iCron.statusRecover();
 				if (count > 0) {
-					DefaultSystemLog.getLog().debug("{} Recover bad data {}", name, count);
+					log.debug("{} Recover bad data {}", name, count);
 				}
 			});
 			//

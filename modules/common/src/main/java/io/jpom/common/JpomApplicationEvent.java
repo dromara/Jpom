@@ -38,6 +38,7 @@ import io.jpom.JpomApplication;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JsonFileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ContextClosedEvent;
@@ -57,6 +58,7 @@ import java.util.List;
  * @author jiangzeyin
  * @since 2019/4/7
  */
+@Slf4j
 public class JpomApplicationEvent implements ApplicationEventClient {
 	private FileLock lock;
 	private FileOutputStream fileOutputStream;
@@ -78,7 +80,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 			try {
 				this.lockFile(jpomManifest.getPid());
 			} catch (IOException e) {
-				DefaultSystemLog.getLog().error("lockFile", e);
+				log.error("lockFile", e);
 			}
 			// 写入Jpom 信息 、 写入全局信息
 			File appJpomFile = instance.getApplicationJpomInfo(JpomApplication.getAppType());
@@ -133,7 +135,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 				lock = fileChannel.lock();
 				break;
 			} catch (OverlappingFileLockException | IOException e) {
-				DefaultSystemLog.getLog().warn("获取进程文件锁失败：" + e.getMessage());
+				log.warn("获取进程文件锁失败：" + e.getMessage());
 			}
 			ThreadUtil.sleep(100);
 		}
@@ -151,7 +153,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 			FileUtil.mkdir(file);
 			file = FileUtil.createTempFile("jpom", ".temp", file, true);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error(StrUtil.format("Jpom Failed to create data directory, directory location：{}," +
+			log.error(StrUtil.format("Jpom Failed to create data directory, directory location：{}," +
 					"Please check whether the current user has permission to this directory or modify the configuration file：{} jpom.path in is the path where the directory can be created", path, extConfigPath), e);
 			System.exit(-1);
 		}
@@ -178,7 +180,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 					File oldJars = JpomManifest.getOldJarsPath();
 					FileUtil.mkdir(oldJars);
 					FileUtil.move(beforeJarFile, oldJars, true);
-					DefaultSystemLog.getLog().info("备份旧程序包：" + beforeJar);
+					log.info("备份旧程序包：" + beforeJar);
 				}
 			}
 		}

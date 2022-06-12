@@ -25,6 +25,7 @@ package io.jpom.socket;
 import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.util.BaseFileTailWatcher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.File;
@@ -39,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author jiangzeyin
  * @since 2019/07/21
  */
+@Slf4j
 public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
     private static final ConcurrentHashMap<File, ServiceFileTailWatcher<WebSocketSession>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
@@ -65,7 +67,7 @@ public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
             try {
                 return new ServiceFileTailWatcher<>(file);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("创建文件监听失败", e);
+                log.error("创建文件监听失败", e);
                 return null;
             }
         });

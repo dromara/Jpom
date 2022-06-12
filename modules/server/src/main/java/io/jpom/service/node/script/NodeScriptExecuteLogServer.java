@@ -105,7 +105,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLog
     public Collection<String> syncExecuteNodeInc(NodeModel nodeModel) {
         String nodeModelName = nodeModel.getName();
         if (!nodeModel.isOpenStatus()) {
-            DefaultSystemLog.getLog().debug("{} 节点未启用", nodeModelName);
+            log.debug("{} 节点未启用", nodeModelName);
             return null;
         }
         try {
@@ -133,7 +133,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLog
                 "{} 节点拉取到 {} 个执行记录,更新 {} 个执行记录",
                 nodeModelName, CollUtil.size(jsonArray),
                 CollUtil.size(models));
-            DefaultSystemLog.getLog().debug(format);
+            log.debug(format);
             return models.stream().map(BaseDbModel::getId).collect(Collectors.toList());
         } catch (Exception e) {
             this.checkException(e, nodeModelName);
@@ -158,7 +158,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLog
                     }
                     return true;
                 } catch (Exception e) {
-                    DefaultSystemLog.getLog().error("自动清除数据错误 {} {}", executeLogModel.getNodeId(), executeLogModel.getScriptName(), e);
+                    log.error("自动清除数据错误 {} {}", executeLogModel.getNodeId(), executeLogModel.getScriptName(), e);
                     return false;
                 }
             });

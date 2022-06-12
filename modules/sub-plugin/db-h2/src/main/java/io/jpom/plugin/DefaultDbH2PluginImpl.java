@@ -29,6 +29,7 @@ import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.ds.DSFactory;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import lombok.extern.slf4j.Slf4j;
 import org.h2.store.FileLister;
 import org.h2.tools.DeleteDbFiles;
 import org.h2.tools.Recover;
@@ -53,6 +54,7 @@ import java.util.Map;
  * @since 2022/1/18
  */
 @PluginConfig(name = "db-h2")
+@Slf4j
 public class DefaultDbH2PluginImpl implements IDefaultPlugin {
 
     @Override
@@ -160,7 +162,7 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
             String tableNames = StrUtil.join(StrUtil.COMMA, tableNameList.toArray());
             sql = StrUtil.format("{} TABLE {}", sql, tableNames);
         }
-        DefaultSystemLog.getLog().debug("backup SQL is: {}", sql);
+        log.debug("backup SQL is: {}", sql);
         // 执行 SQL 备份脚本
         Shell shell = new Shell();
 

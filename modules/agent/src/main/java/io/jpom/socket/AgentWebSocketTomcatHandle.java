@@ -33,6 +33,7 @@ import io.jpom.model.data.TomcatInfoModel;
 import io.jpom.service.manage.TomcatEditService;
 import io.jpom.system.WebAopLog;
 import io.jpom.util.SocketSessionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -50,6 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @ServerEndpoint(value = "/tomcat_log")
 @Component
+@Slf4j
 public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 
 	private TomcatEditService tomcatEditService;
@@ -74,12 +76,12 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 			}
 			SocketSessionUtil.send(session, "连接成功：" + (tomcatInfoModel == null ? "" : tomcatInfoModel.getName()));
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("socket 错误", e);
+			log.error("socket 错误", e);
 			try {
 				SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
 				session.close();
 			} catch (IOException e1) {
-				DefaultSystemLog.getLog().error(e1.getMessage(), e1);
+				log.error(e1.getMessage(), e1);
 			}
 		}
 	}
@@ -121,11 +123,11 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 				AgentFileTailWatcher.addWatcher(file, session);
 				CACHE_FILE.put(session.getId(), file);
 			} catch (IOException io) {
-				DefaultSystemLog.getLog().error("监听日志变化", io);
+				log.error("监听日志变化", io);
 				SocketSessionUtil.send(session, io.getMessage());
 			}
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("执行命令失败", e);
+			log.error("执行命令失败", e);
 			SocketSessionUtil.send(session, "执行命令失败,详情如下：");
 			SocketSessionUtil.send(session, ExceptionUtil.stacktraceToString(e));
 		}
@@ -139,11 +141,11 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 			try {
 				AgentFileTailWatcher.addWatcher(file, session);
 			} catch (IOException io) {
-				DefaultSystemLog.getLog().error("监听日志变化", io);
+				log.error("监听日志变化", io);
 				SocketSessionUtil.send(session, io.getMessage());
 			}
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("执行命令失败", e);
+			log.error("执行命令失败", e);
 			SocketSessionUtil.send(session, "执行命令失败,详情如下：");
 			SocketSessionUtil.send(session, ExceptionUtil.stacktraceToString(e));
 		}

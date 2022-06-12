@@ -30,6 +30,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -42,6 +43,7 @@ import java.nio.charset.Charset;
  * @since 2022/1/26
  */
 @Builder
+@Slf4j
 public class LogRecorder implements AutoCloseable {
 	/**
 	 * 文件
@@ -77,7 +79,7 @@ public class LogRecorder implements AutoCloseable {
 	 * @param throwable 堆栈信息
 	 */
 	public void error(String title, Throwable throwable) {
-		DefaultSystemLog.getLog().error(title, throwable);
+		log.error(title, throwable);
 		FileUtil.appendLines(CollectionUtil.toList(title), this.getFile(), this.getCharset());
 		String s = ExceptionUtil.stacktraceToString(throwable);
 		FileUtil.appendLines(CollectionUtil.toList(s), this.getFile(), this.getCharset());

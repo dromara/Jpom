@@ -47,6 +47,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -67,6 +68,7 @@ import java.util.stream.Collectors;
  * @since : 2021/12/6 22:11
  */
 @Service
+@Slf4j
 public class CommandService extends BaseWorkspaceService<CommandModel> implements ICron<CommandModel> {
 
     private final SshService sshService;
@@ -122,7 +124,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             CronUtils.remove(taskId);
             return false;
         }
-        DefaultSystemLog.getLog().debug("start ssh command cron {} {} {}", id, buildInfoModel.getName(), autoExecCron);
+        log.debug("start ssh command cron {} {} {}", id, buildInfoModel.getName(), autoExecCron);
         CronUtils.upsert(taskId, autoExecCron, new CommandService.CronTask(id));
         return true;
     }
@@ -151,7 +153,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
                 CommandModel commandModel = CommandService.this.getByKey(this.id);
                 CommandService.this.executeBatch(commandModel, commandModel.getDefParams(), commandModel.getSshIds(), 1);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("触发自动执行命令模版异常", e);
+                log.error("触发自动执行命令模版异常", e);
             } finally {
                 BaseServerController.removeEmpty();
             }
@@ -226,7 +228,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             try {
                 this.execute(commandModel, commandExecLogModel, sshModel, commandParamsLine);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("命令模版执行链接异常", e);
+                log.error("命令模版执行链接异常", e);
                 this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.SESSION_ERROR);
             }
         });
@@ -266,13 +268,13 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
                 InputStream in = null;
 
                 try {
-                    channel.connect((int) TimeUnit.SECONDS.toMillis(sshModel.timeOut()));
+                    channel.connect((int) TimeUnit.SECONDS.toMillis(sshModel.timeout()));
                     in = channel.getInputStream();
                     IoUtil.readLines(in, charset, (LineHandler) line -> this.appendLine(outputStream, line));
                     // 更新状态
                     this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.DONE);
                 } catch (Exception e) {
-                    DefaultSystemLog.getLog().error("执行命令错误", e);
+                    log.error("执行命令错误", e);
                     // 更新状态
                     this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.ERROR);
                     // 记录错误日志
@@ -312,7 +314,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             outputStream.write(LINE_BYTES);
             outputStream.flush();
         } catch (IOException e) {
-            DefaultSystemLog.getLog().warn("command log append line:{}", e.getMessage());
+            log.warn("command log append line:{}", e.getMessage());
         }
     }
 

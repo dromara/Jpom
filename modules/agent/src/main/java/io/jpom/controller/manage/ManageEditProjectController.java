@@ -42,6 +42,7 @@ import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.service.manage.JdkInfoService;
 import io.jpom.system.ConfigBean;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,6 +62,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/manage/")
+@Slf4j
 public class ManageEditProjectController extends BaseAgentController {
 
     private final WhitelistDirectoryService whitelistDirectoryService;
@@ -282,7 +284,7 @@ public class ManageEditProjectController extends BaseAgentController {
                 return JsonMessage.getString(200, "修改成功");
             }
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return JsonMessage.getString(500, "保存数据异常:" + e.getMessage());
         }
     }
@@ -371,7 +373,7 @@ public class ManageEditProjectController extends BaseAgentController {
             }
             return JsonMessage.getString(200, "删除成功！");
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return JsonMessage.getString(500, "删除异常：" + e.getMessage());
         }
     }

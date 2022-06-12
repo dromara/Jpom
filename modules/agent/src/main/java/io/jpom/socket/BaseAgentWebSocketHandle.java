@@ -31,6 +31,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.system.AgentAuthorize;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.SocketSessionUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.websocket.CloseReason;
 import javax.websocket.Session;
@@ -47,6 +48,7 @@ import static javax.websocket.CloseReason.CloseCodes.CANNOT_ACCEPT;
  * @author jiangzeyin
  * @since 2019/4/24
  */
+@Slf4j
 public abstract class BaseAgentWebSocketHandle {
 
 	private static final ConcurrentHashMap<String, String> USER = new ConcurrentHashMap<>();
@@ -54,7 +56,7 @@ public abstract class BaseAgentWebSocketHandle {
 	protected String getParameters(Session session, String name) {
 		Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
 		Map<String, String> parameters = session.getPathParameters();
-		DefaultSystemLog.getLog().debug("web socket parameters: {} {}", JSONObject.toJSONString(requestParameterMap), parameters);
+		log.debug("web socket parameters: {} {}", JSONObject.toJSONString(requestParameterMap), parameters);
 		List<String> strings = requestParameterMap.get(name);
 		String value = CollUtil.join(strings, StrUtil.COMMA);
 		if (StrUtil.isEmpty(value)) {
@@ -76,7 +78,7 @@ public abstract class BaseAgentWebSocketHandle {
 			try {
 				session.close(new CloseReason(CANNOT_ACCEPT, "授权信息错误"));
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("socket 错误", e);
+				log.error("socket 错误", e);
 			}
 			return true;
 		}
@@ -104,7 +106,7 @@ public abstract class BaseAgentWebSocketHandle {
 			SocketSessionUtil.send(session, "服务端发生异常" + ExceptionUtil.stacktraceToString(thr));
 		} catch (IOException ignored) {
 		}
-		DefaultSystemLog.getLog().error(session.getId() + "socket 异常", thr);
+		log.error(session.getId() + "socket 异常", thr);
 	}
 
 	protected String getOptUserName(Session session) {
@@ -117,7 +119,7 @@ public abstract class BaseAgentWebSocketHandle {
 		try {
 			AgentFileTailWatcher.offline(session);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("关闭异常", e);
+			log.error("关闭异常", e);
 		}
 		// top
 		//        TopManager.removeMonitor(session);

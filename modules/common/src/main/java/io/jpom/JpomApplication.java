@@ -43,6 +43,7 @@ import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.util.CommandUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -60,6 +61,7 @@ import java.util.concurrent.TimeUnit;
  * @author jiangzeyin
  * @since 2019/4/16
  */
+@Slf4j
 public class JpomApplication extends ApplicationBuilder {
 
     /**
@@ -202,7 +204,7 @@ public class JpomApplication extends ApplicationBuilder {
                     CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), command);
                 }
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("重启自身异常", e);
+                log.error("重启自身异常", e);
             }
         });
     }

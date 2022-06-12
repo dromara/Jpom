@@ -30,6 +30,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.system.init.OperateLogController;
+import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.springframework.web.socket.TextMessage;
@@ -47,6 +48,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author lf
  */
+@Slf4j
 public class NodeClient extends WebSocketClient {
     private final WebSocketSession session;
     private final OperateLogController logController;
@@ -103,7 +105,7 @@ public class NodeClient extends WebSocketClient {
                 session.sendMessage(new TextMessage(message));
             }
         } catch (IOException e) {
-            DefaultSystemLog.getLog().error("发送消息失败", e);
+            log.error("发送消息失败", e);
         }
         try {
             JSONObject jsonObject = JSONObject.parseObject(message);
@@ -131,7 +133,7 @@ public class NodeClient extends WebSocketClient {
         try {
             super.close();
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("关闭异常", e);
+            log.error("关闭异常", e);
         }
     }
 
@@ -142,6 +144,6 @@ public class NodeClient extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        DefaultSystemLog.getLog().error("发生异常", e);
+        log.error("发生异常", e);
     }
 }
