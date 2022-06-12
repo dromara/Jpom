@@ -87,13 +87,13 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+                <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+                <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" @click="handleViewLog(record)">终端日志</a-button>
+                <a-button size="small" type="primary" @click="handleViewLog(record)">终端日志</a-button>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -148,22 +148,7 @@
           </template>
           <a-textarea v-model="temp.fileDirs" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="授权可以直接访问的目录，多个回车换行即可" />
         </a-form-model-item>
-        <a-form-model-item prop="notAllowedCommand">
-          <template slot="label">
-            禁止命令
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
-                限制禁止在在线终端执行的命令
-                <ul>
-                  <li>超级管理员没有任何限制</li>
-                  <li>其他用户可以配置权限解除限制</li>
-                </ul>
-              </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-textarea v-model="temp.notAllowedCommand" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开" />
-        </a-form-model-item>
+
         <a-form-model-item label="文件后缀" prop="suffix">
           <a-input
             v-model="temp.allowEditSuffix"
@@ -180,6 +165,22 @@
             </a-form-model-item>
             <a-form-model-item label="超时时间(s)" prop="timeout">
               <a-input-number v-model="temp.timeout" :min="1" placeholder="单位秒,最小值 1 秒" style="width: 100%" />
+            </a-form-model-item>
+            <a-form-model-item prop="notAllowedCommand">
+              <template slot="label">
+                禁止命令
+                <a-tooltip v-show="temp.type !== 'edit'">
+                  <template slot="title">
+                    限制禁止在在线终端执行的命令
+                    <ul>
+                      <li>超级管理员没有任何限制</li>
+                      <li>其他用户可以配置权限解除限制</li>
+                    </ul>
+                  </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-textarea v-model="temp.notAllowedCommand" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开。(超级管理员没有任何限制)" />
             </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
