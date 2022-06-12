@@ -139,7 +139,7 @@ postList: none
 </span>
 <span style="width: 150px;text-align: left">
     <a href="https://liteflow.yomahub.com/" target="_blank">
-        <img :src="$withBase('/images/friends/liteflow-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/liteflow-logo.png')" class="no-zoom" style="height:40px;max-width:170px;margin: 10px;">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
