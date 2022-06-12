@@ -40,6 +40,7 @@ import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 节点Client
@@ -52,7 +53,7 @@ public class NodeClient extends WebSocketClient {
     private final NodeModel nodeModel;
 
 
-    public NodeClient(String uri, NodeModel nodeModel, WebSocketSession session) throws URISyntaxException {
+    public NodeClient(String uri, NodeModel nodeModel, WebSocketSession session) throws URISyntaxException, InterruptedException {
         super(new URI(uri));
         // 添加 http proxy
         Proxy proxy = nodeModel.proxy();
@@ -61,7 +62,13 @@ public class NodeClient extends WebSocketClient {
         }
         this.session = session;
         this.nodeModel = nodeModel;
-        this.connect();
+        //
+        Integer timeOut = nodeModel.getTimeOut();
+        if (timeOut == null) {
+            this.connect();
+        } else {
+            this.connectBlocking(timeOut, TimeUnit.SECONDS);
+        }
         this.loopOpen();
         logController = SpringUtil.getBean(OperateLogController.class);
     }

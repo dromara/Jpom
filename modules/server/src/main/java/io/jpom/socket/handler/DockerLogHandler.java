@@ -53,65 +53,65 @@ import java.util.function.Consumer;
 public class DockerLogHandler extends BaseProxyHandler {
 
 
-	@Override
-	protected void init(WebSocketSession session, Map<String, Object> attributes) throws URISyntaxException, IOException {
-		super.init(session, attributes);
-		//
-		DockerInfoModel dockerInfoModel = (DockerInfoModel) attributes.get("dataItem");
-		this.sendMsg(session, "连接成功：" + dockerInfoModel.getName() + StrUtil.CRLF);
-	}
+    @Override
+    protected void init(WebSocketSession session, Map<String, Object> attributes) throws Exception {
+        super.init(session, attributes);
+        //
+        DockerInfoModel dockerInfoModel = (DockerInfoModel) attributes.get("dataItem");
+        this.sendMsg(session, "连接成功：" + dockerInfoModel.getName() + StrUtil.CRLF);
+    }
 
-	public DockerLogHandler() {
-		super(null);
-	}
+    public DockerLogHandler() {
+        super(null);
+    }
 
-	@Override
-	protected Object[] getParameters(Map<String, Object> attributes) {
-		return new Object[0];
-	}
+    @Override
+    protected Object[] getParameters(Map<String, Object> attributes) {
+        return new Object[0];
+    }
 
-	@Override
-	protected String handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
-		DockerInfoModel dockerInfoModel = (DockerInfoModel) attributes.get("dataItem");
-		if (consoleCommandOp == ConsoleCommandOp.heart) {
-			return null;
-		}
-		if (consoleCommandOp == ConsoleCommandOp.showlog) {
-			super.logOpt(this.getClass(), attributes, json);
-			String containerId = json.getString("containerId");
-			Map<String, Object> map = dockerInfoModel.toParameter();
-			map.put("containerId", containerId);
-			int tail = json.getIntValue("tail");
-			if (tail > 0) {
-				map.put("tail", tail);
-			}
-			Consumer<String> consumer = s -> {
-				try {
-					SocketSessionUtil.send(session, s);
-				} catch (IOException e) {
-					log.error("发消息异常", e);
-				}
-			};
-			map.put("charset", CharsetUtil.CHARSET_UTF_8);
-			map.put("consumer", consumer);
-			IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-			try {
-				plugin.execute("logContainer", map);
-			} catch (Exception e) {
-				log.error("拉取 容器日志异常", e);
-				return "执行异常:" + e.getMessage();
-			}
-		} else {
-			return null;
-		}
-		return null;
-	}
+    @Override
+    protected String handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
+        DockerInfoModel dockerInfoModel = (DockerInfoModel) attributes.get("dataItem");
+        if (consoleCommandOp == ConsoleCommandOp.heart) {
+            return null;
+        }
+        if (consoleCommandOp == ConsoleCommandOp.showlog) {
+            super.logOpt(this.getClass(), attributes, json);
+            String containerId = json.getString("containerId");
+            Map<String, Object> map = dockerInfoModel.toParameter();
+            map.put("containerId", containerId);
+            int tail = json.getIntValue("tail");
+            if (tail > 0) {
+                map.put("tail", tail);
+            }
+            Consumer<String> consumer = s -> {
+                try {
+                    SocketSessionUtil.send(session, s);
+                } catch (IOException e) {
+                    log.error("发消息异常", e);
+                }
+            };
+            map.put("charset", CharsetUtil.CHARSET_UTF_8);
+            map.put("consumer", consumer);
+            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+            try {
+                plugin.execute("logContainer", map);
+            } catch (Exception e) {
+                log.error("拉取 容器日志异常", e);
+                return "执行异常:" + e.getMessage();
+            }
+        } else {
+            return null;
+        }
+        return null;
+    }
 
 
-	@Override
-	public void destroy(WebSocketSession session) {
-		//
-		super.destroy(session);
+    @Override
+    public void destroy(WebSocketSession session) {
+        //
+        super.destroy(session);
 //		ScriptProcessBuilder.stopWatcher(session);
-	}
+    }
 }
