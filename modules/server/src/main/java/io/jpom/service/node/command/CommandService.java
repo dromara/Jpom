@@ -268,7 +268,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
                 InputStream in = null;
 
                 try {
-                    channel.connect((int) TimeUnit.SECONDS.toMillis(sshModel.timeout()));
+                    channel.connect(sshModel.timeout());
                     in = channel.getInputStream();
                     IoUtil.readLines(in, charset, (LineHandler) line -> this.appendLine(outputStream, line));
                     // 更新状态

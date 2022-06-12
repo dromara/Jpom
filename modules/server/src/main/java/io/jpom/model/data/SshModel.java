@@ -36,6 +36,7 @@ import lombok.NoArgsConstructor;
 
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * ssh 信息
@@ -129,9 +130,9 @@ public class SshModel extends BaseWorkspaceModel {
      */
     public int timeout() {
         if (this.timeout == null) {
-            return 5;
+            return (int) TimeUnit.SECONDS.toMillis(5);
         }
-        return Math.max(1, this.timeout);
+        return (int) TimeUnit.SECONDS.toMillis(Math.max(1, this.timeout));
     }
 
     public Charset getCharsetT() {
