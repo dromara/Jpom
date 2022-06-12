@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 代理socket 会话
@@ -46,80 +47,81 @@ import java.util.Objects;
  * @since 2019/4/16
  */
 public class ProxySession extends WebSocketClient {
-	private final WebSocketSession session;
-	private final OperateLogController logController;
+    private final WebSocketSession session;
+    private final OperateLogController logController;
 
-	private ProxySession(URI uri, WebSocketSession session) {
-		super(uri);
-		Objects.requireNonNull(session);
-		this.session = session;
-		this.connect();
-		this.loopOpen();
-		logController = SpringUtil.getBean(OperateLogController.class);
-	}
+    /**
+     * 等待连接成功
+     */
+    private void loopOpen() {
+        int count = 0;
+        while (!this.isOpen() && count < 20) {
+            ThreadUtil.sleep(500);
+            count++;
+        }
+    }
 
-	/**
-	 * 等待连接成功
-	 */
-	private void loopOpen() {
-		int count = 0;
-		while (!this.isOpen() && count < 20) {
-			ThreadUtil.sleep(500);
-			count++;
-		}
-	}
+    public ProxySession(String uri, Integer timeOut, WebSocketSession session) throws URISyntaxException, InterruptedException {
+        super(new URI(uri));
+        //this(new URI(uri), session);
+        Objects.requireNonNull(session);
+        this.session = session;
+        if (timeOut == null) {
+            this.connect();
+        } else {
+            this.connectBlocking(Math.max(timeOut, 1), TimeUnit.SECONDS);
+        }
+        this.loopOpen();
+        logController = SpringUtil.getBean(OperateLogController.class);
+    }
 
-	public ProxySession(String uri, WebSocketSession session) throws URISyntaxException {
-		this(new URI(uri), session);
-	}
+    @Override
+    public void onOpen(ServerHandshake serverHandshake) {
 
-	@Override
-	public void onOpen(ServerHandshake serverHandshake) {
+    }
 
-	}
+    @Override
+    public void onMessage(String message) {
+        try {
+            session.sendMessage(new TextMessage(message));
+        } catch (IOException e) {
+            DefaultSystemLog.getLog().error("发送消息失败", e);
+        }
+        try {
+            JSONObject jsonObject = JSONObject.parseObject(message);
+            String reqId = jsonObject.getString("reqId");
+            if (StrUtil.isNotEmpty(reqId)) {
+                logController.updateLog(reqId, message);
+            }
+        } catch (Exception ignored) {
+        }
+    }
 
-	@Override
-	public void onMessage(String message) {
-		try {
-			session.sendMessage(new TextMessage(message));
-		} catch (IOException e) {
-			DefaultSystemLog.getLog().error("发送消息失败", e);
-		}
-		try {
-			JSONObject jsonObject = JSONObject.parseObject(message);
-			String reqId = jsonObject.getString("reqId");
-			if (StrUtil.isNotEmpty(reqId)) {
-				logController.updateLog(reqId, message);
-			}
-		} catch (Exception ignored) {
-		}
-	}
+    @Override
+    public void onClose(int code, String reason, boolean remote) {
+        try {
+            session.close();
+        } catch (IOException e) {
+            DefaultSystemLog.getLog().error("关闭错误", e);
+        }
+    }
 
-	@Override
-	public void onClose(int code, String reason, boolean remote) {
-		try {
-			session.close();
-		} catch (IOException e) {
-			DefaultSystemLog.getLog().error("关闭错误", e);
-		}
-	}
-
-	@Override
-	public void onError(Exception ex) {
-		try {
-			session.sendMessage(new TextMessage("agent服务端发生异常" + ExceptionUtil.stacktraceToString(ex)));
+    @Override
+    public void onError(Exception ex) {
+        try {
+            session.sendMessage(new TextMessage("agent服务端发生异常" + ExceptionUtil.stacktraceToString(ex)));
 //            SocketSessionUtil.send(session, );
-		} catch (IOException ignored) {
-		}
-		DefaultSystemLog.getLog().error("发生错误", ex);
-	}
+        } catch (IOException ignored) {
+        }
+        DefaultSystemLog.getLog().error("发生错误", ex);
+    }
 
-	@Override
-	public void send(String text) {
-		try {
-			super.send(text);
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("转发消息失败", e);
-		}
-	}
+    @Override
+    public void send(String text) {
+        try {
+            super.send(text);
+        } catch (Exception e) {
+            DefaultSystemLog.getLog().error("转发消息失败", e);
+        }
+    }
 }
