@@ -7,6 +7,7 @@
 1. 【server】SSH 终端新增全屏方式打开
    （感谢[@jaseeon](https://gitee.com/jaseeon) [Gitee issues I5BS52](https://gitee.com/dromara/Jpom/issues/I5BS52) ）
 2. 【server】SSH 新增超时时间配置（感谢@带刺的玫瑰）
+3. 【server】SFTP 新增超时时间（感谢@带刺的玫瑰）
 
 ### 🐞 解决BUG、优化功能
 

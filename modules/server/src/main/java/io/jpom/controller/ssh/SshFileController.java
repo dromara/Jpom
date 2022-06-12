@@ -198,7 +198,7 @@ public class SshFileController extends BaseServerController {
         Sftp sftp = null;
         try {
             Session session = SshService.getSessionByModel(sshModel);
-            sftp = new Sftp(session, sshModel.getCharsetT());
+            sftp = new Sftp(session, sshModel.getCharsetT(), sshModel.timeout());
             String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             sftp.download(normalize, byteArrayOutputStream);
@@ -221,7 +221,7 @@ public class SshFileController extends BaseServerController {
         Sftp sftp = null;
         try {
             Session session = SshService.getSessionByModel(sshModel);
-            sftp = new Sftp(session, sshModel.getCharsetT());
+            sftp = new Sftp(session, sshModel.getCharsetT(), sshModel.timeout());
             String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
             sftp.upload(normalize, file);
         } finally {
@@ -367,7 +367,7 @@ public class SshFileController extends BaseServerController {
             //
             String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
             session = SshService.getSessionByModel(sshModel);
-            sftp = new Sftp(session, sshModel.getCharsetT());
+            sftp = new Sftp(session, sshModel.getCharsetT(), sshModel.timeout());
             // 尝试删除
             boolean dirOrFile = this.tryDelDirOrFile(sftp, normalize);
             if (dirOrFile) {
@@ -513,7 +513,7 @@ public class SshFileController extends BaseServerController {
         // 验证合法性，防止越权
         FileUtil.file(path, name);
         String remotePath = FileUtil.normalize(path + StrUtil.SLASH + name);
-        try (Sftp sftp = new Sftp(session, sshModel.getCharsetT())) {
+        try (Sftp sftp = new Sftp(session, sshModel.getCharsetT(), sshModel.timeout())) {
             if (sftp.exist(remotePath)) {
                 return JsonMessage.getString(400, "文件夹或者文件已存在");
             }

@@ -98,7 +98,7 @@ ALTER TABLE NODE_INFO
     ADD IF NOT EXISTS httpProxyType VARCHAR(20) comment 'http 代理类型';
 
 ALTER TABLE SSH_INFO
-    ADD IF NOT EXISTS timeOut int default 0 comment '节点超时时间';
+    ADD IF NOT EXISTS timeout int default 0 comment '节点超时时间';
 
 
 

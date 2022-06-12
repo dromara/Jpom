@@ -253,7 +253,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
             //
             session = getSessionByModel(sshModel);
             // 上传文件
-            sftp = new Sftp(session);
+            sftp = new Sftp(session, charset, sshModel.timeout());
             String home = sftp.home();
             String path = home + "/.jpom/";
             String destFile = path + IdUtil.fastSimpleUUID() + ".sh";
@@ -353,7 +353,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         try {
             session = getSessionByModel(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            try (Sftp sftp = new Sftp(channel, sshModel.getCharsetT())) {
+            try (Sftp sftp = new Sftp(channel, sshModel.getCharsetT(), sshModel.timeout())) {
                 sftp.syncUpload(desc, remotePath);
             }
             //uploadDir(channel, remotePath, desc, sshModel.getCharsetT());
