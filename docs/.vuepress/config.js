@@ -3,7 +3,13 @@ const themeConfig = require('./config/themeConfig.js');
 const plugins = require('./config/plugins.js');
 
 module.exports = {
-
+    locales: {
+        '/': {
+            lang: 'zh-CN',
+            title: 'Jpom',
+            description: '简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件'
+        }
+    },
     theme: 'vdoing', // 使用依赖包主题
     title: "Jpom",
     description: '简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件',
