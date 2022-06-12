@@ -68,7 +68,15 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-space>
-          <a-button size="small" type="primary" @click="handleTerminal(record)">终端</a-button>
+          <a-dropdown>
+            <a-button size="small" type="primary" @click="handleTerminal(record, false)">终端<a-icon type="down" /></a-button>
+            <a-menu slot="overlay">
+              <a-menu-item key="1">
+                <a-button size="small" type="primary" icon="fullscreen" @click="handleTerminal(record, true)">全屏终端</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+
           <a-tooltip placement="topLeft" title="如果按钮不可用,请去 ssh 编辑中添加允许管理的授权文件夹">
             <a-button size="small" type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
           </a-tooltip>
@@ -255,7 +263,25 @@
       <ssh-file v-if="drawerVisible" :ssh="temp" />
     </a-drawer>
     <!-- Terminal -->
-    <a-modal v-model="terminalVisible" width="80vw" :title="temp.name" :footer="null" :maskClosable="false">
+    <a-modal
+      :dialogStyle="{
+        maxWidth: '100vw',
+        top: this.terminalFullscreen ? 0 : false,
+        paddingBottom: 0,
+      }"
+      :width="this.terminalFullscreen ? '100vw' : '80vw'"
+      :bodyStyle="{
+        padding: '0px 10px',
+        paddingTop: '10px',
+        marginRight: '10px',
+        height: `${this.terminalFullscreen ? 'calc(100vh - 56px)' : '70vh'}`,
+      }"
+      v-model="terminalVisible"
+      :title="temp.name"
+      :footer="null"
+      :maskClosable="false"
+      :destroyOnClose="true"
+    >
       <terminal v-if="terminalVisible" :sshId="temp.id" />
     </a-modal>
     <!-- 操作日志 -->
@@ -369,6 +395,7 @@ export default {
       drawerTitle: "",
       drawerVisible: false,
       terminalVisible: false,
+      terminalFullscreen: false,
       viewOperationLog: false,
       viewOperationLoading: false,
       viewOperationLogList: [],
@@ -442,7 +469,7 @@ export default {
           title: "操作",
           dataIndex: "operation",
           scopedSlots: { customRender: "operation" },
-          width: 180,
+          width: 200,
           align: "center",
           // ellipsis: true,
         },
@@ -565,9 +592,10 @@ export default {
       });
     },
     // 进入终端
-    handleTerminal(record) {
+    handleTerminal(record, terminalFullscreen) {
       this.temp = Object.assign({}, record);
       this.terminalVisible = true;
+      this.terminalFullscreen = terminalFullscreen;
     },
     // 操作日志
     handleViewLog(record) {

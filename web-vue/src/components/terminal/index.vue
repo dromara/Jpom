@@ -1,5 +1,5 @@
 <template>
-  <div id="xterm" class="xterm" style="height: 70vh" />
+  <div id="xterm" class="xterm" />
 </template>
 <script>
 import "xterm/css/xterm.css";
@@ -131,9 +131,11 @@ export default {
 };
 </script>
 
-<style scoped lang="stylus">
-
-.xterm{
-margin-left: -8px;
+<style scoped>
+.xterm {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  flex: 1;
 }
 </style>

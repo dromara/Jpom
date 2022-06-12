@@ -193,7 +193,7 @@ apt install -y wget && \
 
 ### 方式二：📦 容器化安装
 
-> ⚠️ 注意：容器化安装方式需要先安装 docker，[点击跳转docker安装文档](https://jpom.io/docs/#/%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/%E5%AE%89%E8%A3%85/%E5%AE%B9%E5%99%A8%E5%8C%96%E5%AE%89%E8%A3%85)
+> ⚠️ 注意：容器化安装方式需要先安装 docker，[点击跳转docker安装文档](https://jpom.io/pages/b63dc5/)
 
 
 #### 使用挂载方式存储相关数据（在部分环境可能出现兼容性问题）
@@ -224,20 +224,18 @@ docker run -d -p 2122:2122 \
 
 > 容器化安装仅提供服务端版。由于容器和宿主机环境隔离，而导致插件端的很多功能无法正常使用，因此对插件端容器化意义不大。
 >
-> 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档 [https://jpom.io/docs/](https://jpom.io/docs/)
+> 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档 [https://jpom.io/pages/b63dc5/](https://jpom.io/pages/b63dc5/)
 
 ### 方式三：💾 下载安装
 
-> 通过此方式安装有一些安装须知，具体查看：[帮助文档](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装)
-
 1. 下载安装包 [https://gitee.com/dromara/Jpom/attach_files](https://gitee.com/dromara/Jpom/attach_files)
 2. 解压文件
-3. 安装插件端（[流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端)）
+3. 安装插件端
     1. agent-x.x.x-release 目录为插件端的全部安装文件
     2. 上传到对应服务器（整个目录）
     3. 启动插件端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
     4. 插件端默认运行端口：`2123`
-4. 安装服务端（[流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端)）
+4. 安装服务端
     1. server-x.x.x-release 目录为服务端的全部安装文件
     2. 上传到对应服务器（整个目录）
     3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
@@ -245,18 +243,17 @@ docker run -d -p 2122:2122 \
 
 ### 方式四：⌨️ 编译安装
 
-> 通过此方式安装有一些安装须知，具体查看：[帮助文档](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装)
 
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页，拉取最新完整代码（建议使用 master 分支）
 2. 切换到 `web-vue` 目录，执行 `npm install`（vue 环境需要提前搭建和安装依赖包详情可以查看 web-vue 目录下 README.md）
 3. 执行 `npm run build` 进行 vue 项目打包
 4. 切换到项目根目录执行：`mvn clean package`
-5. 安装插件端（[流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端)）
+5. 安装插件端
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
     2. 打包上传服务器运行（整个目录）
     3. 启动插件端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
     4. 默认运行端口：`2123`
-6. 安装服务端（ [流程说明](https://jpom-docs.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
+6. 安装服务端
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行（整个目录）
     3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
@@ -379,28 +376,28 @@ mvn -f xxxx/pom.xml clean package
 
 ### Github Pages
 
-- [文档主页](https://jpom.io/docs/)
-- [FQA](https://jpom.io/docs/#/FQA/FQA)
-- [名词解释](https://jpom.io/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
+- [文档主页](https://jpom.io/)
+- [FQA](https://jpom.io/pages/FQA/)
+- [名词解释](https://jpom.io/pages/FQA/proper-noun/)
 
 ### Gitee Pages
 
-- [文档主页](https://jpom-docs.keepbx.cn/docs/)
-- [FQA](https://jpom-docs.keepbx.cn/docs/#/FQA/FQA)
-- [名词解释](https://jpom-docs.keepbx.cn/docs/index.html#/FQA/%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A)
+- [文档主页](https://jpom-docs.keepbx.cn/)
+- [FQA](https://jpom-docs.keepbx.cn/pages/FQA/)
+- [名词解释](https://jpom-docs.keepbx.cn/pages/FQA/proper-noun/)
 
 ### 实践案例
 
 > 里面有部分图片加载可能比较慢
 
-1. [本地构建 + SSH 发布 java 项目](https://jpom.io/docs/index.html#/practice/build_java_ssh_release.md)
-2. [本地构建 + 项目发布 node 项目](https://jpom.io/docs/index.html#/practice/build_node_release.md)
-3. [本地构建 + SSH 发布 node 项目](https://jpom.io/docs/index.html#/practice/build_node_ssh_release.md)
-4. [本地构建 + 自定义管理 python 项目](https://jpom.io/docs/index.html#/practice/project_dsl_python.md)
-5. [自定义管理 java 项目](https://jpom.io/docs/index.html#/practice/project_dsl_java.md)
-6. [管理编译安装的 nginx](https://jpom.io/docs/index.html#/practice/node_nginx.md)
-7. [管理 docker](https://jpom.io/docs/index.html#/practice/docker-cli.md)
-8. [容器构建 + 项目发布 java 项目](https://jpom.io/docs/index.html#/practice/build_docker_java_node_release.md)
+1. [本地构建 + SSH 发布 java 项目](https://jpom.io/pages/practice/build-java-ssh-release)
+2. [本地构建 + 项目发布 node 项目](https://jpom.io/pages/practice/build-node-release)
+3. [本地构建 + SSH 发布 node 项目](https://jpom.io/pages/practice/build-node-ssh-release)
+4. [本地构建 + 自定义管理 python 项目](https://jpom.io/pages/practice/project-dsl-python)
+5. [自定义管理 java 项目](https://jpom.io/pages/practice/project-dsl-java)
+6. [管理编译安装的 nginx](https://jpom.io/pages/practice/node-nginx)
+7. [管理 docker](https://jpom.io/pages/practice/docker-cli)
+8. [容器构建 + 项目发布 java 项目](https://jpom.io/pages/practice/build-docker-java-node-release)
 
 ## 🛠️ 整体架构
 
@@ -446,11 +443,11 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 
 ### 项目分支说明
 
-| 分支   | 说明                                                         |
-| ------ | ------------------------------------------------------------ |
+| 分支     | 说明                                            |
+|--------|-----------------------------------------------|
 | master | 主分支，受保护分支，此分支不接受 PR。在 dev 分支后经过测试没问题后会合并到此分支。 |
 | dev    | 开发分支，接受 PR，PR 请提交到 dev 分支。                    |
-| docs   | 项目文档分支，接受 PR，介绍项目功能、汇总常见问题等。        |
+| docs   | 项目文档分支，接受 PR，介绍项目功能、汇总常见问题等。                  |
 
 > 目前用到的主要是 dev 和 docs 分支，接受 PR 修改，其他的分支为归档分支，贡献者可以不用管。
 
@@ -459,7 +456,7 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 
 1. 快扫描下方左侧微信群二维码和我们一起交流讨论吧！（添加小助手：备注 Jpom 进群）
 2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐，欢迎扫描下方右侧[微信收款码赞赏](https://jpom-docs.keepbx.cn/images/wx-qrcode-praise.png)或通过[码云赞赏](https://gitee.com/dromara/Jpom)（在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom-docs.keepbx.cn/docs/index.html#/praise)
-3. 微信公众号：[CodeGzh](https://jpom-docs.keepbx.cn/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
+3. 微信公众号：[CodeGzh](https://jpom-docs.keepbx.cn/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
 6. 参与贡献，请查看[贡献指南](#🔨贡献指南)。
 

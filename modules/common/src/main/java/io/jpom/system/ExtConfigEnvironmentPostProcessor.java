@@ -60,6 +60,9 @@ public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcess
         {
             // 兼容一些全局默认配置属性
             List<URL> resources = ClassUtil.getResources("bin/extConfigDefault.yml");
+            if (resources.isEmpty()) {
+                resources.add(ClassUtil.getResourceURL("bin/extConfigDefault.yml"));
+            }
             for (int i = 0; i < resources.size(); i++) {
                 URL resource = resources.get(i);
                 Resource extConfigDefault = new UrlResource(resource);
