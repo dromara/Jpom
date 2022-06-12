@@ -271,7 +271,7 @@ public class SshHandler extends BaseTerminalHandler {
                 int i;
                 //如果没有数据来，线程会一直阻塞在这个地方等待数据。
                 while ((i = inputStream.read(buffer)) != -1) {
-                    sendBinary(session, new String(Arrays.copyOfRange(buffer, 0, i), sshItem.getCharsetT()));
+                    sendBinary(session, new String(Arrays.copyOfRange(buffer, 0, i), sshItem.charset()));
                 }
             } catch (Exception e) {
                 if (!this.openSession.isConnected()) {

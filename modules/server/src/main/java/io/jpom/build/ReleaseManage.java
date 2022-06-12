@@ -366,7 +366,7 @@ public class ReleaseManage implements Runnable {
                 logRecorder.info("发布目录为空");
             } else {
                 logRecorder.info("{} {} start ftp upload", DateUtil.now(), item.getName());
-                try (Sftp sftp = new Sftp(session, item.getCharsetT(), item.timeout())) {
+                try (Sftp sftp = new Sftp(session, item.charset(), item.timeout())) {
                     String prefix = "";
                     if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
                         prefix = sftp.pwd();

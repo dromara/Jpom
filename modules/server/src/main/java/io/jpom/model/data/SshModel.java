@@ -135,14 +135,8 @@ public class SshModel extends BaseWorkspaceModel {
         return (int) TimeUnit.SECONDS.toMillis(Math.max(1, this.timeout));
     }
 
-    public Charset getCharsetT() {
-        Charset charset;
-        try {
-            charset = Charset.forName(this.getCharset());
-        } catch (Exception e) {
-            charset = CharsetUtil.CHARSET_UTF_8;
-        }
-        return charset;
+    public Charset charset() {
+        return CharsetUtil.parse(this.getCharset(), CharsetUtil.CHARSET_UTF_8);
     }
 
     public List<String> allowEditSuffix() {
