@@ -55,6 +55,7 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import io.jpom.util.JvmUtil;
 import io.jpom.util.ProjectCommanderUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +75,7 @@ import java.util.jar.Manifest;
  *
  * @author Administrator
  */
+@Slf4j
 public abstract class AbstractProjectCommander {
 
     public static final String RUNNING_TAG = "running";
@@ -177,7 +179,7 @@ public abstract class AbstractProjectCommander {
                         CommandUtil.asyncExeLocalCommand(file, command);
                     }
                 } catch (Exception e) {
-                    DefaultSystemLog.getLog().error("执行命令失败", e);
+                    log.error("执行命令失败", e);
                 }
             });
         }
@@ -292,7 +294,7 @@ public abstract class AbstractProjectCommander {
             try {
                 this.webHooks(nodeProjectInfoModel, javaCopyItem, type, other);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("project webhook {}", e.getMessage());
+                log.error("project webhook {}", e.getMessage());
             }
         });
     }
@@ -406,7 +408,7 @@ public abstract class AbstractProjectCommander {
                 return jarFile.getAbsolutePath() + "中没有找到对应的MainClass:" + mainClass;
             }
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("解析jar", e);
+            log.error("解析jar", e);
             return jarFile.getAbsolutePath() + " 解析错误:" + e.getMessage();
         }
         return null;
@@ -436,7 +438,7 @@ public abstract class AbstractProjectCommander {
         // 清空日志
         String r = AbstractSystemCommander.getInstance().emptyLogFile(file);
         if (StrUtil.isNotEmpty(r)) {
-            DefaultSystemLog.getLog().info(r);
+            log.info(r);
         }
         return "ok";
     }
@@ -497,7 +499,7 @@ public abstract class AbstractProjectCommander {
      */
     private String getLinuxPsStatus(String tag) {
         String execSystemCommand = CommandUtil.execSystemCommand("ps -ef | grep " + tag);
-        DefaultSystemLog.getLog().debug("getLinuxPsStatus {} {}", tag, execSystemCommand);
+        log.debug("getLinuxPsStatus {} {}", tag, execSystemCommand);
         List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
         for (String item : list) {
             if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
@@ -588,7 +590,7 @@ public abstract class AbstractProjectCommander {
             return StrUtil.DASHED;
         }
         String tag = JvmUtil.parseCommandJpomTag(virtualMachine);
-        DefaultSystemLog.getLog().debug("getJpomNameByPid pid: {} {} {}", pid, tag, virtualMachine);
+        log.debug("getJpomNameByPid pid: {} {} {}", pid, tag, virtualMachine);
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         NodeProjectInfoModel item = projectInfoService.getItem(tag);
         if (item == null) {

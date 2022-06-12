@@ -29,6 +29,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.extra.ftp.FtpConfig;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
@@ -49,6 +50,7 @@ import org.springframework.util.Assert;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -89,10 +91,10 @@ public class SshService extends BaseWorkspaceService<SshModel> {
      */
     public static Session getSessionByModel(SshModel sshModel) {
         Session session = null;
-        int timeOut = (int) TimeUnit.SECONDS.toMillis(sshModel.timeOut());
+        int timeout = (int) TimeUnit.SECONDS.toMillis(sshModel.timeout());
         SshModel.ConnectType connectType = sshModel.connectType();
         if (connectType == SshModel.ConnectType.PASS) {
-            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword(), timeOut);
+            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword(), timeout);
 
         } else if (connectType == SshModel.ConnectType.PUBKEY) {
             File rsaFile = null;
@@ -130,11 +132,11 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                 Assert.state(FileUtil.isFile(rsaFile), "私钥文件不存在：" + FileUtil.getAbsolutePath(rsaFile));
                 session = JschUtil.createSession(sshModel.getHost(),
                     sshModel.getPort(), sshModel.getUser(), FileUtil.getAbsolutePath(rsaFile), sshModel.password());
-                try {
-                    session.connect(timeOut);
-                } catch (JSchException e) {
-                    throw new JschRuntimeException(e);
-                }
+            }
+            try {
+                session.connect(timeout);
+            } catch (JSchException e) {
+                throw new JschRuntimeException(e);
             }
         } else {
             throw new IllegalArgumentException("不支持的模式");
@@ -351,8 +353,9 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         try {
             session = getSessionByModel(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            Sftp sftp = new Sftp(channel, sshModel.getCharsetT());
-            sftp.syncUpload(desc, remotePath);
+            try (Sftp sftp = new Sftp(channel, sshModel.getCharsetT())) {
+                sftp.syncUpload(desc, remotePath);
+            }
             //uploadDir(channel, remotePath, desc, sshModel.getCharsetT());
         } finally {
             JschUtil.close(channel);
@@ -366,17 +369,17 @@ public class SshService extends BaseWorkspaceService<SshModel> {
      * @param sshModel   实体
      * @param remoteFile 远程文件
      * @param save       文件对象
-     * @throws FileNotFoundException io
-     * @throws SftpException         sftp
+     * @throws IOException   io
+     * @throws SftpException sftp
      */
-    public void download(SshModel sshModel, String remoteFile, File save) throws FileNotFoundException, SftpException {
+    public void download(SshModel sshModel, String remoteFile, File save) throws IOException, SftpException {
         Session session = null;
         ChannelSftp channel = null;
         OutputStream output = null;
         try {
             session = getSessionByModel(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            output = new FileOutputStream(save);
+            output = Files.newOutputStream(save.toPath());
             channel.get(remoteFile, output);
         } finally {
             IoUtil.close(output);

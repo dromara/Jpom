@@ -141,7 +141,7 @@ public class RemoteVersion extends BaseJsonModel {
             RemoteVersion.cacheLoadTime(remoteVersion);
             return remoteVersion;
         } catch (Exception e) {
-            DefaultSystemLog.getLog().warn("获取远程版本信息失败:{} {}", e.getMessage(), body);
+            log.warn("获取远程版本信息失败:{} {}", e.getMessage(), body);
             return null;
         }
     }
@@ -172,7 +172,7 @@ public class RemoteVersion extends BaseJsonModel {
             }
             return loadTransitUrl(jumpUrl);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().warn("获取远程版本信息失败:{} {}", e.getMessage(), body);
+            log.warn("获取远程版本信息失败:{} {}", e.getMessage(), body);
             return null;
         }
     }
@@ -231,7 +231,7 @@ public class RemoteVersion extends BaseJsonModel {
             }
             remoteVersion = JSONObject.parseObject(fileStr, RemoteVersion.class);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().warn("解析远程版本信息失败:{} {}", e.getMessage(), fileStr);
+            log.warn("解析远程版本信息失败:{} {}", e.getMessage(), fileStr);
         }
         // 判断上次获取时间
         Long lastTime = remoteVersion == null ? 0 : remoteVersion.getLastTime();

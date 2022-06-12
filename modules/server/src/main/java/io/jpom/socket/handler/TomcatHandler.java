@@ -37,6 +37,7 @@ import io.jpom.socket.ProxySession;
 import io.jpom.socket.ServiceFileTailWatcher;
 import io.jpom.system.WebAopLog;
 import io.jpom.util.SocketSessionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.File;
@@ -50,6 +51,7 @@ import java.util.Map;
  * @since 2019/4/24
  */
 @Feature(cls = ClassFeature.TOMCAT, method = MethodFeature.EXECUTE)
+@Slf4j
 public class TomcatHandler extends BaseProxyHandler {
 
 	public TomcatHandler() {
@@ -87,7 +89,7 @@ public class TomcatHandler extends BaseProxyHandler {
 				ServiceFileTailWatcher.addWatcher(file, session);
 				attributes.put("nowFile", file);
 			} catch (Exception io) {
-				DefaultSystemLog.getLog().error("监听日志变化", io);
+				log.error("监听日志变化", io);
 				SocketSessionUtil.send(session, io.getMessage());
 			}
 		}

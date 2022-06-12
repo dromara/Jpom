@@ -129,7 +129,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
                     try {
                         SocketSessionUtil.send(session, line);
                     } catch (IOException e) {
-                        DefaultSystemLog.getLog().error("发送消息失败", e);
+                        log.error("发送消息失败", e);
                     }
                 });
             }
@@ -188,7 +188,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             this.end(jsonObject.toString());
             this.handle("execute done:" + waitFor + " time:" + DateUtil.now());
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("执行异常", e);
+            log.error("执行异常", e);
             this.end("执行异常：" + e.getMessage());
         } finally {
             this.close();
@@ -208,7 +208,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             try {
                 SocketSessionUtil.send(session, msg);
             } catch (IOException e) {
-                DefaultSystemLog.getLog().error("发送消息失败", e);
+                log.error("发送消息失败", e);
             }
             iterator.remove();
         }
@@ -230,7 +230,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             try {
                 SocketSessionUtil.send(session, line);
             } catch (IOException e) {
-                DefaultSystemLog.getLog().error("发送消息失败", e);
+                log.error("发送消息失败", e);
                 iterator.remove();
             }
         }

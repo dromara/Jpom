@@ -178,8 +178,8 @@
             <a-form-model-item label="编码格式" prop="charset">
               <a-input v-model="temp.charset" placeholder="编码格式" />
             </a-form-model-item>
-            <a-form-model-item label="超时时间(s)" prop="timeOut">
-              <a-input-number v-model="temp.timeOut" :min="1" placeholder="单位秒,最小值 1 秒" style="width: 100%" />
+            <a-form-model-item label="超时时间(s)" prop="timeout">
+              <a-input-number v-model="temp.timeout" :min="1" placeholder="单位秒,最小值 1 秒" style="width: 100%" />
             </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
@@ -562,7 +562,7 @@ export default {
         type: "add",
         charset: "UTF-8",
         port: 22,
-        timeOut: 5,
+        timeout: 5,
         connectType: "PASS",
       };
       this.editSshVisible = true;
@@ -580,7 +580,7 @@ export default {
         fileDirs: record.fileDirs ? JSON.parse(record.fileDirs).join("\r\n") : "",
         type: "edit",
         allowEditSuffix: record.allowEditSuffix ? JSON.parse(record.allowEditSuffix).join("\r\n") : "",
-        timeOut: record.timeOut || 5,
+        timeout: record.timeout || 5,
       };
       this.editSshVisible = true;
       // @author jzy 08-04

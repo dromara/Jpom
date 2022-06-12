@@ -46,6 +46,7 @@ import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerExtConfigBean;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -63,6 +64,7 @@ import java.util.Set;
  * @author jiangzeyin
  * @since 2019/4/16
  */
+@Slf4j
 public class NodeForward {
 
     /**
@@ -216,7 +218,7 @@ public class NodeForward {
     private static AgentException responseException(Exception exception, NodeModel nodeModel) {
         String message = exception.getMessage();
         Throwable cause = exception.getCause();
-        DefaultSystemLog.getLog().error("node [{}] connect failed...message: [{}]", nodeModel.getName(), message);
+        log.error("node [{}] connect failed...message: [{}]", nodeModel.getName(), message);
         if (exception instanceof IORuntimeException) {
             if (cause instanceof java.net.ConnectException || cause instanceof java.net.SocketTimeoutException) {
                 return new AgentException(nodeModel.getName() + "节点网络连接异常或超时,请优先检查插件端运行状态再检查 IP 地址、" +
@@ -302,7 +304,7 @@ public class NodeForward {
             try {
                 httpRequest.form(s, multipartFile.getBytes(), multipartFile.getOriginalFilename());
             } catch (IOException e) {
-                DefaultSystemLog.getLog().error("转发文件异常", e);
+                log.error("转发文件异常", e);
             }
         });
         // @author jzy add  timeout
@@ -448,7 +450,7 @@ public class NodeForward {
         urlQuery.add("name", URLUtil.encode(nodeModel.getLoginName()));
         urlQuery.add("password", URLUtil.encode(nodeModel.getLoginPwd()));
         String format = StrUtil.format("{}://{}{}?{}", ws, nodeModel.getUrl(), nodeUrl.getUrl(), urlQuery.toString());
-        DefaultSystemLog.getLog().debug("web socket url:{}", format);
+        log.debug("web socket url:{}", format);
         return format;
     }
 
@@ -462,7 +464,7 @@ public class NodeForward {
         int status = response.getStatus();
         String body = response.body();
         if (status != HttpStatus.HTTP_OK) {
-            DefaultSystemLog.getLog().warn("{} 响应异常 状态码错误：{} {}", nodeModel.getName(), status, body);
+            log.warn("{} 响应异常 状态码错误：{} {}", nodeModel.getName(), status, body);
             throw new AgentException(nodeModel.getName() + " 节点响应异常,状态码错误：" + status);
         }
         return toJsonMessage(body);

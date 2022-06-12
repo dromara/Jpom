@@ -31,6 +31,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ProjectInfoService;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
  * @since 2021/12/10
  */
 @PreLoadClass
+@Slf4j
 public class AutoStartProject {
 
 	@PreLoadMethod
@@ -69,7 +71,7 @@ public class AutoStartProject {
 						}
 					}
 				} catch (Exception e) {
-					DefaultSystemLog.getLog().warn("自动启动项目失败：{} {}", nodeProjectInfoModel.getId(), e.getMessage());
+					log.warn("自动启动项目失败：{} {}", nodeProjectInfoModel.getId(), e.getMessage());
 				}
 			}
 		});

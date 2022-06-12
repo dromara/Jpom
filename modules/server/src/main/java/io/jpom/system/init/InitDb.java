@@ -144,7 +144,7 @@ public class InitDb implements DisposableBean, InitializingBean {
                     }
                     sqlFileNow = resource.getFilename();
                     int rows = Db.use(dsFactory.getDataSource()).execute(sql);
-                    DefaultSystemLog.getLog().info("exec init SQL file: {} complete, and affected rows is: {}", sqlFileNow, rows);
+                    log.info("exec init SQL file: {} complete, and affected rows is: {}", sqlFileNow, rows);
                     executeSqlLog.add(sha1);
                 } catch (IOException ignored) {
                 }
@@ -153,7 +153,7 @@ public class InitDb implements DisposableBean, InitializingBean {
             GlobalDSFactory.set(dsFactory);
             //
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("初始化数据库失败 {}", sqlFileNow, e);
+            log.error("初始化数据库失败 {}", sqlFileNow, e);
             System.exit(0);
             return;
         }

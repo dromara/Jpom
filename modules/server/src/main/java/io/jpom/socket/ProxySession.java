@@ -29,6 +29,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.system.init.OperateLogController;
+import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.springframework.web.socket.TextMessage;
@@ -46,6 +47,7 @@ import java.util.concurrent.TimeUnit;
  * @author jiangzeyin
  * @since 2019/4/16
  */
+@Slf4j
 public class ProxySession extends WebSocketClient {
     private final WebSocketSession session;
     private final OperateLogController logController;
@@ -85,7 +87,7 @@ public class ProxySession extends WebSocketClient {
         try {
             session.sendMessage(new TextMessage(message));
         } catch (IOException e) {
-            DefaultSystemLog.getLog().error("发送消息失败", e);
+            log.error("发送消息失败", e);
         }
         try {
             JSONObject jsonObject = JSONObject.parseObject(message);
@@ -102,7 +104,7 @@ public class ProxySession extends WebSocketClient {
         try {
             session.close();
         } catch (IOException e) {
-            DefaultSystemLog.getLog().error("关闭错误", e);
+            log.error("关闭错误", e);
         }
     }
 
@@ -113,7 +115,7 @@ public class ProxySession extends WebSocketClient {
 //            SocketSessionUtil.send(session, );
         } catch (IOException ignored) {
         }
-        DefaultSystemLog.getLog().error("发生错误", ex);
+        log.error("发生错误", ex);
     }
 
     @Override
@@ -121,7 +123,7 @@ public class ProxySession extends WebSocketClient {
         try {
             super.send(text);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("转发消息失败", e);
+            log.error("转发消息失败", e);
         }
     }
 }

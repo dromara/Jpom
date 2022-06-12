@@ -25,6 +25,7 @@ package io.jpom.util;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -37,6 +38,7 @@ import java.io.IOException;
  * @author jiangzeyin
  * @since 2018/9/29
  */
+@Slf4j
 public class SocketSessionUtil {
 	/**
 	 * 锁
@@ -76,7 +78,7 @@ public class SocketSessionUtil {
 					exception = null;
 					break;
 				} catch (IOException e) {
-					DefaultSystemLog.getLog().error("发送消息失败:" + tryCount, e);
+					log.error("发送消息失败:" + tryCount, e);
 					exception = e;
 				}
 			} while (tryCount <= ERROR_TRY_COUNT);
@@ -110,7 +112,7 @@ public class SocketSessionUtil {
 					exception = null;
 					break;
 				} catch (IOException e) {
-					DefaultSystemLog.getLog().error("发送消息失败:" + tryCount, e);
+					log.error("发送消息失败:" + tryCount, e);
 					exception = e;
 				}
 			} while (tryCount <= ERROR_TRY_COUNT);

@@ -51,6 +51,7 @@ import io.jpom.service.system.SystemParametersServer;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.client.NodeClient;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.File;
@@ -70,6 +71,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 @SystemPermission(superUser = true)
 @Feature(cls = ClassFeature.UPGRADE_NODE_LIST, method = MethodFeature.EXECUTE)
+@Slf4j
 public class NodeUpdateHandler extends BaseProxyHandler {
 
     private final ConcurrentMap<String, NodeClient> clientMap = new ConcurrentHashMap<>();
@@ -121,7 +123,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     NodeClient client = new NodeClient(url, model, session);
                     clientMap.put(model.getId(), client);
                 } catch (Exception e) {
-                    DefaultSystemLog.getLog().error("创建插件端连接失败", e);
+                    log.error("创建插件端连接失败", e);
                 }
             });
         }
@@ -207,7 +209,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 ThreadUtil.execute(() -> this.updateNodeItem(ids.getString(finalI), session, agentFileModel, http));
             }
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("升级失败", e);
+            log.error("升级失败", e);
         }
     }
 
@@ -236,7 +238,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             }
             this.sendMsg(callbackRestartMessage.setData("重连失败"), session);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("升级后重连插件端失败:" + id, e);
+            log.error("升级后重连插件端失败:" + id, e);
             this.sendMsg(callbackRestartMessage.setData("重连插件端失败"), session);
         }
     }
@@ -277,7 +279,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             }
             this.sendMsg(restartMessage.setData("重连失败"), session);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("升级后重连插件端失败:" + id, e);
+            log.error("升级后重连插件端失败:" + id, e);
             this.sendMsg(restartMessage.setData("重连插件端失败"), session);
         }
     }
@@ -304,7 +306,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 this.onError(session, "节点连接丢失");
             }
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("升级失败:" + id, e);
+            log.error("升级失败:" + id, e);
             this.onError(session, "节点升级失败：" + e.getMessage());
         }
     }

@@ -25,6 +25,7 @@ package io.jpom.socket;
 import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.util.BaseFileTailWatcher;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.websocket.Session;
 import java.io.File;
@@ -39,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author jiangzeyin
  * @since 2019/3/16
  */
+@Slf4j
 public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
     private static final ConcurrentHashMap<File, AgentFileTailWatcher<Session>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
@@ -60,14 +62,14 @@ public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
      */
     public static boolean addWatcher(File file, Session session) throws IOException {
         if (!FileUtil.isFile(file)) {
-            DefaultSystemLog.getLog().warn("文件不存在或者是目录:" + file.getPath());
+            log.warn("文件不存在或者是目录:" + file.getPath());
             return false;
         }
         AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
             try {
                 return new AgentFileTailWatcher<>(file);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("创建文件监听失败", e);
+                log.error("创建文件监听失败", e);
                 return null;
             }
         });

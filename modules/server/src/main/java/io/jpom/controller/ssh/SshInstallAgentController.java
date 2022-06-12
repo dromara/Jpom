@@ -53,6 +53,7 @@ import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.FileUrlResource;
@@ -80,6 +81,7 @@ import java.util.zip.ZipFile;
 @RestController
 @RequestMapping(value = "node/ssh")
 @Feature(cls = ClassFeature.SSH)
+@Slf4j
 public class SshInstallAgentController extends BaseServerController {
 
 	private final SshService sshService;
@@ -216,7 +218,7 @@ public class SshInstallAgentController extends BaseServerController {
 			}
 			String command = StrUtil.format("{}bash {} start upgrade", chmod, shPtah);
 			String result = sshService.exec(sshModel, command);
-			DefaultSystemLog.getLog().debug("ssh install agent node {} {}", command, result);
+			log.debug("ssh install agent node {} {}", command, result);
 			// 休眠 5 秒, 尝试 5 次
 			int waitCount = getParameterInt("waitCount", 5);
 			this.loopCheck(waitCount, nodeModel, sshModel, path, result);
@@ -251,7 +253,7 @@ public class SshInstallAgentController extends BaseServerController {
 		waitCount = Math.max(waitCount, 5);
 		//int time = 3;
 		while (--waitCount >= 0) {
-			//DefaultSystemLog.getLog().debug("there is left {} / 3 times try to get authorize info", waitCount);
+			//log.debug("there is left {} / 3 times try to get authorize info", waitCount);
 			ThreadUtil.sleep(5, TimeUnit.SECONDS);
 			if (StrUtil.hasEmpty(nodeModel.getLoginName(), nodeModel.getLoginPwd())) {
 				String error = this.getAuthorize(sshModel, nodeModel, path);
@@ -283,7 +285,7 @@ public class SshInstallAgentController extends BaseServerController {
 			nodeModel.setLoginPwd(autoUser.getAgentPwd());
 			nodeModel.setLoginName(autoUser.getAgentName());
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("拉取授权信息失败:{}", e.getMessage());
+			log.error("拉取授权信息失败:{}", e.getMessage());
 			return "获取授权信息失败,请检查对应的插件端运行状态" + e.getMessage();
 		} finally {
 			FileUtil.del(saveFile);

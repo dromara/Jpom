@@ -32,6 +32,7 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.system.init.OperateLogController;
 import io.jpom.util.SocketSessionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
@@ -43,6 +44,7 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2019/8/9
  */
+@Slf4j
 public abstract class BaseHandler extends TextWebSocketHandler {
 
 	@Override
@@ -78,7 +80,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
 
 	@Override
 	public void handleTransportError(WebSocketSession session, Throwable exception) {
-		DefaultSystemLog.getLog().error(session.getId() + "socket 异常", exception);
+		log.error(session.getId() + "socket 异常", exception);
 		destroy(session);
 	}
 
@@ -98,7 +100,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
 		try {
 			SocketSessionUtil.send(session, msg);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("发送消息失败", e);
+			log.error("发送消息失败", e);
 		}
 	}
 
@@ -139,7 +141,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
 			OperateLogController operateLogController = SpringUtil.getBean(OperateLogController.class);
 			operateLogController.log(userInfo, JSONObject.toJSONString(attributes), cacheInfo);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("记录操作日志异常", e);
+			log.error("记录操作日志异常", e);
 		} finally {
 			if (proxySession != null) {
 				attributes.put("proxySession", proxySession);

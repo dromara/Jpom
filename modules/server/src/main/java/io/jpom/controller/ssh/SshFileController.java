@@ -109,7 +109,7 @@ public class SshFileController extends BaseServerController {
         try {
             this.downloadFile(sshModel, path, name, response);
         } catch (SftpException e) {
-            DefaultSystemLog.getLog().error("下载失败", e);
+            log.error("下载失败", e);
             ServletUtil.write(response, "download error", MediaType.TEXT_HTML_VALUE);
         }
     }
@@ -376,7 +376,7 @@ public class SshFileController extends BaseServerController {
             }
             return JsonMessage.getString(200, "删除成功");
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("ssh删除文件异常", e);
+            log.error("ssh删除文件异常", e);
             return JsonMessage.getString(400, "删除失败:" + e.getMessage());
         } finally {
             IoUtil.close(sftp);
@@ -482,7 +482,7 @@ public class SshFileController extends BaseServerController {
             }
 
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("ssh上传文件异常", e);
+            log.error("ssh上传文件异常", e);
             return JsonMessage.getString(400, "上传失败:" + e.getMessage());
         } finally {
             JschUtil.close(channel);

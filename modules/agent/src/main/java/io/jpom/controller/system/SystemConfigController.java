@@ -36,6 +36,7 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.system.ExtConfigBean;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -56,6 +57,7 @@ import java.nio.charset.StandardCharsets;
  */
 @RestController
 @RequestMapping(value = "system")
+@Slf4j
 public class SystemConfigController extends BaseAgentController {
 
 	@RequestMapping(value = "getConfig.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -79,7 +81,7 @@ public class SystemConfigController extends BaseAgentController {
 			ByteArrayResource resource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
 			yamlPropertySourceLoader.load("test", resource);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().warn("内容格式错误，请检查修正", e);
+			log.warn("内容格式错误，请检查修正", e);
 			return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
 		}
 		if (JpomManifest.getInstance().isDebug()) {

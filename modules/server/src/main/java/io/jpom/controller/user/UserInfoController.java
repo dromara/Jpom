@@ -33,6 +33,7 @@ import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,6 +51,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/user")
+@Slf4j
 public class UserInfoController extends BaseServerController {
 
 	private final UserService userService;
@@ -84,7 +86,7 @@ public class UserInfoController extends BaseServerController {
 			getSession().invalidate();
 			return JsonMessage.getString(200, "修改密码成功！");
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			return JsonMessage.getString(500, "系统异常：" + e.getMessage());
 		}
 	}

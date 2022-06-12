@@ -39,6 +39,7 @@ import io.jpom.service.h2db.TableName;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.JsonFileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -57,6 +58,7 @@ import java.util.stream.Stream;
  * @author Hotstrip
  * @since 2021-08-02
  */
+@Slf4j
 public class LoadBuildJsonToDB {
     private LoadBuildJsonToDB() {
 
@@ -85,7 +87,7 @@ public class LoadBuildJsonToDB {
         // 判断 list 是否为空
         if (null == list) {
             if (!FileUtil.exist(FileUtil.file(backupOldData, ServerConfigBean.BUILD))) {
-                //DefaultSystemLog.getLog().warn("There is no any data, the build.json file maybe no content or file is not exist...");
+                //log.warn("There is no any data, the build.json file maybe no content or file is not exist...");
             }
             return;
         }
@@ -93,7 +95,7 @@ public class LoadBuildJsonToDB {
         initSql(list);
         // 将 json 文件转移到备份目录
         FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
-        DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+        log.info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
     }
 
     /**
@@ -120,7 +122,7 @@ public class LoadBuildJsonToDB {
 
         // 遍历对象集合
         list.forEach(buildModelVo -> {
-            DefaultSystemLog.getLog().debug("buildModelVo: {}", JSON.toJSONString(buildModelVo));
+            log.debug("buildModelVo: {}", JSON.toJSONString(buildModelVo));
 
             // 拿到构造 SQL 的参数
             String gitUrl = buildModelVo.getString("gitUrl");
@@ -171,9 +173,9 @@ public class LoadBuildJsonToDB {
         try {
             rows = Db.use(dsFactory.getDataSource()).execute(sql);
         } catch (SQLException e) {
-            DefaultSystemLog.getLog().warn("exec SQL: {} failed", sql, e);
+            log.warn("exec SQL: {} failed", sql, e);
         }
-        DefaultSystemLog.getLog().info("exec SQL: {} complete, and affected rows is: {}", sql, rows);
+        log.info("exec SQL: {} complete, and affected rows is: {}", sql, rows);
     }
 
     /**
@@ -243,7 +245,7 @@ public class LoadBuildJsonToDB {
      */
     private List<JSONObject> readBuildJsonFileToList(File file) {
         if (!file.exists()) {
-            DefaultSystemLog.getLog().debug("there is no build.json file...");
+            log.debug("there is no build.json file...");
             return null;
         }
         try {
@@ -254,7 +256,7 @@ public class LoadBuildJsonToDB {
                 .flatMap((Function<Object, Stream<JSONObject>>) o -> Stream.of((JSONObject) o))
                 .collect(Collectors.toList());
         } catch (FileNotFoundException e) {
-            DefaultSystemLog.getLog().error("read build.json file failed...caused: {}...message: {}", e.getCause(), e.getMessage());
+            log.error("read build.json file failed...caused: {}...message: {}", e.getCause(), e.getMessage());
         }
         return null;
     }

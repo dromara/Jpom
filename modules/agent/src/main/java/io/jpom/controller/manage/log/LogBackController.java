@@ -31,6 +31,7 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.util.FileUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +49,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "manage/log")
+@Slf4j
 public class LogBackController extends BaseAgentController {
 
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,7 +78,7 @@ public class LogBackController extends BaseAgentController {
             }
             return JsonMessage.getString(201, "重置失败：" + msg);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return JsonMessage.getString(500, "重置日志失败");
         }
     }
@@ -113,7 +115,7 @@ public class LogBackController extends BaseAgentController {
                 return "没有对应文件";
             }
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("下载文件异常", e);
+            log.error("下载文件异常", e);
         }
         return "下载失败。请刷新页面后重试";
     }

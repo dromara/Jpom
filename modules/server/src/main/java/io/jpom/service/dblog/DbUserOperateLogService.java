@@ -48,6 +48,7 @@ import io.jpom.service.monitor.MonitorUserOptService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.init.OperateLogController;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -63,6 +64,7 @@ import java.util.stream.Collectors;
  * @since 2019/7/20
  */
 @Service
+@Slf4j
 public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLogV1> {
 
     private final MonitorUserOptService monitorUserOptService;
@@ -204,7 +206,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                         try {
                             NotifyUtil.send(notify1, "用户操作报警", context);
                         } catch (Exception e) {
-                            DefaultSystemLog.getLog().error("发送报警信息错误", e);
+                            log.error("发送报警信息错误", e);
                         }
                     });
 
@@ -217,7 +219,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                         try {
                             NotifyUtil.send(notify1, "用户操作报警", context);
                         } catch (Exception e) {
-                            DefaultSystemLog.getLog().error("发送报警信息错误", e);
+                            log.error("发送报警信息错误", e);
                         }
                     });
                 }
@@ -229,7 +231,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                         try {
                             NotifyUtil.send(notify1, "用户操作报警", context);
                         } catch (Exception e) {
-                            DefaultSystemLog.getLog().error("发送报警信息错误", e);
+                            log.error("发送报警信息错误", e);
                         }
                     });
                 }
@@ -249,7 +251,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
             try {
                 this.checkMonitor(userOperateLogV1, cacheInfo);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("执行操作监控错误", e);
+                log.error("执行操作监控错误", e);
             }
         });
     }

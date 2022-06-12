@@ -52,6 +52,7 @@ import io.jpom.plugin.*;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.system.JpomRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,6 +72,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @Feature(cls = ClassFeature.BUILD_REPOSITORY)
+@Slf4j
 public class RepositoryController extends BaseServerController {
 
     private final RepositoryService repositoryService;
@@ -143,7 +145,7 @@ public class RepositoryController extends BaseServerController {
             } catch (JpomRuntimeException jpomRuntimeException) {
                 throw jpomRuntimeException;
             } catch (Exception e) {
-                DefaultSystemLog.getLog().warn("获取仓库分支失败", e);
+                log.warn("获取仓库分支失败", e);
                 return JsonMessage.toJson(500, "无法连接此仓库，" + e.getMessage());
             }
         }
@@ -423,7 +425,7 @@ public class RepositoryController extends BaseServerController {
                 if (StrUtil.startWith(repositoryModelReq.getRsaPrv(), URLUtil.FILE_URL_PREFIX)) {
                     String rsaPath = StrUtil.removePrefix(repositoryModelReq.getRsaPrv(), URLUtil.FILE_URL_PREFIX);
                     if (!FileUtil.exist(rsaPath)) {
-                        DefaultSystemLog.getLog().warn("there is no rsa file... {}", rsaPath);
+                        log.warn("there is no rsa file... {}", rsaPath);
                         return false;
                     }
                 } else {

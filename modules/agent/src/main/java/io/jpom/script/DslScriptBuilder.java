@@ -38,6 +38,7 @@ import io.jpom.service.script.NodeScriptServer;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ import java.util.Map;
  * @since 2022/1/15
  */
 @Setter
+@Slf4j
 public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
 
@@ -75,7 +77,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
         command.add(0, script);
         command.add(0, CommandUtil.EXECUTE_PREFIX);
-        DefaultSystemLog.getLog().debug(CollUtil.join(command, StrUtil.SPACE));
+        log.debug(CollUtil.join(command, StrUtil.SPACE));
         if (environment != null) {
             processBuilder.environment().putAll(environment);
         }
@@ -98,7 +100,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             //
             this.handle("execute done:" + waitFor + " time:" + DateUtil.now());
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("执行异常", e);
+            log.error("执行异常", e);
             String msg = "执行异常：" + e.getMessage();
             this.end(msg);
         }
@@ -128,7 +130,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             result.add(0, "" + waitFor);
             return CollUtil.join(result, StrUtil.CRLF);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("执行异常", e);
+            log.error("执行异常", e);
             return "执行异常：" + e.getMessage();
         } finally {
             this.close();

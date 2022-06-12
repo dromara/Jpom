@@ -25,6 +25,7 @@ package cn;
 import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.CodeSource;
 
@@ -34,68 +35,69 @@ import java.security.CodeSource;
  *
  * @author Hotstrip
  */
+@Slf4j
 public final class VersionUtils {
 
-	private static final String VERSION = getVersion(VersionUtils.class, "1.0.0");
+    private static final String VERSION = getVersion(VersionUtils.class, "1.0.0");
 
-	private VersionUtils() {
-	}
+    private VersionUtils() {
+    }
 
-	/**
-	 * Gets version.
-	 *
-	 * @return the version
-	 */
-	public static String getVersion() {
-		return VERSION;
-	}
+    /**
+     * Gets version.
+     *
+     * @return the version
+     */
+    public static String getVersion() {
+        return VERSION;
+    }
 
-	/**
-	 * Gets version.
-	 *
-	 * @param cls            the cls
-	 * @param defaultVersion the default version
-	 * @return the version
-	 */
-	public static String getVersion(final Class<?> cls, final String defaultVersion) {
-		// find version info from MANIFEST.MF first
-		String version = cls.getPackage().getImplementationVersion();
-		if (StrUtil.isEmpty(version)) {
-			version = cls.getPackage().getSpecificationVersion();
-		}
-		if (!StrUtil.isEmpty(version)) {
-			return version;
-		}
-		// guess version fro jar file name if nothing's found from MANIFEST.MF
-		CodeSource codeSource = cls.getProtectionDomain().getCodeSource();
+    /**
+     * Gets version.
+     *
+     * @param cls            the cls
+     * @param defaultVersion the default version
+     * @return the version
+     */
+    public static String getVersion(final Class<?> cls, final String defaultVersion) {
+        // find version info from MANIFEST.MF first
+        String version = cls.getPackage().getImplementationVersion();
+        if (StrUtil.isEmpty(version)) {
+            version = cls.getPackage().getSpecificationVersion();
+        }
+        if (!StrUtil.isEmpty(version)) {
+            return version;
+        }
+        // guess version fro jar file name if nothing's found from MANIFEST.MF
+        CodeSource codeSource = cls.getProtectionDomain().getCodeSource();
 
-		if (codeSource == null) {
-			DefaultSystemLog.getLog().warn("No codeSource for class {} when getVersion, use default version {}", cls.getName(), defaultVersion);
-			return defaultVersion;
-		}
-		String file = codeSource.getLocation().getFile();
-		if (file != null && file.endsWith(FileNameUtil.EXT_JAR)) {
-			file = file.substring(0, file.length() - 4);
-			int i = file.lastIndexOf('/');
-			if (i >= 0) {
-				file = file.substring(i + 1);
-			}
-			i = file.indexOf("-");
-			if (i >= 0) {
-				file = file.substring(i + 1);
-			}
-			while (file.length() > 0 && !Character.isDigit(file.charAt(0))) {
-				i = file.indexOf("-");
-				if (i < 0) {
-					break;
-				}
-				file = file.substring(i + 1);
-			}
-			version = file;
-		}
-		// return default version if no version info is found
-		return StrUtil.isEmpty(version) ? defaultVersion : version;
-	}
+        if (codeSource == null) {
+            log.warn("No codeSource for class {} when getVersion, use default version {}", cls.getName(), defaultVersion);
+            return defaultVersion;
+        }
+        String file = codeSource.getLocation().getFile();
+        if (file != null && file.endsWith(FileNameUtil.EXT_JAR)) {
+            file = file.substring(0, file.length() - 4);
+            int i = file.lastIndexOf('/');
+            if (i >= 0) {
+                file = file.substring(i + 1);
+            }
+            i = file.indexOf("-");
+            if (i >= 0) {
+                file = file.substring(i + 1);
+            }
+            while (file.length() > 0 && !Character.isDigit(file.charAt(0))) {
+                i = file.indexOf("-");
+                if (i < 0) {
+                    break;
+                }
+                file = file.substring(i + 1);
+            }
+            version = file;
+        }
+        // return default version if no version info is found
+        return StrUtil.isEmpty(version) ? defaultVersion : version;
+    }
 }
 
 

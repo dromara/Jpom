@@ -46,6 +46,7 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ServerConfigBean;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,6 +70,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/node")
 @SystemPermission(superUser = true)
 @Feature(cls = ClassFeature.UPGRADE_NODE_LIST)
+@Slf4j
 public class NodeUpdateController extends BaseServerController {
 
 	private final SystemParametersServer systemParametersServer;
@@ -216,7 +218,7 @@ public class NodeUpdateController extends BaseServerController {
 		try {
 			nodeService.testNode(nodeModel);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().warn("测试结果：{} {}", nodeModel.getUrl(), e.getMessage());
+			log.warn("测试结果：{} {}", nodeModel.getUrl(), e.getMessage());
 			return JsonMessage.getString(500, "节点连接失败：" + e.getMessage());
 		}
 		// 插入

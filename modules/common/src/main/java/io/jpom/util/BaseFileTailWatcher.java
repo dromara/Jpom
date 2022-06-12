@@ -31,6 +31,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.websocket.Session;
@@ -48,6 +49,7 @@ import java.util.Set;
  * @author bwcx_jzy
  * @since 2019/7/21
  */
+@Slf4j
 public abstract class BaseFileTailWatcher<T> {
 
     protected File logFile;
@@ -79,7 +81,7 @@ public abstract class BaseFileTailWatcher<T> {
                 String charsetName = (String) PluginFactory.getPlugin("charset-detector").execute(logFile);
                 detSet = StrUtil.isEmpty(charsetName) ? CharsetUtil.CHARSET_UTF_8 : CharsetUtil.charset(charsetName);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().warn("自动识别文件编码格式错误：{}", e.getMessage());
+                log.warn("自动识别文件编码格式错误：{}", e.getMessage());
                 detSet = CharsetUtil.CHARSET_UTF_8;
             }
             detSet = (detSet == StandardCharsets.US_ASCII) ? CharsetUtil.CHARSET_UTF_8 : detSet;
@@ -112,7 +114,7 @@ public abstract class BaseFileTailWatcher<T> {
             try {
                 this.send(socketSession, msg);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("发送消息失败", e);
+                log.error("发送消息失败", e);
                 iterator.remove();
             }
         }

@@ -26,6 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.BaseModel;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,6 +35,7 @@ import java.io.IOException;
 /**
  * @author lf
  */
+@Slf4j
 public class UploadFileModel extends BaseModel {
 	private long size = 0;
 	private long completeSize = 0;
@@ -80,7 +82,7 @@ public class UploadFileModel extends BaseModel {
 			fileOutputStream.write(data);
 			fileOutputStream.flush();
 		} catch (IOException e) {
-			DefaultSystemLog.getLog().error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		}
 	}
 

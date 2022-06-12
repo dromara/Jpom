@@ -35,6 +35,7 @@ import io.jpom.common.Type;
 import io.jpom.cron.IAsyncLoad;
 import io.jpom.cron.ICron;
 import io.jpom.system.ConfigBean;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
@@ -43,6 +44,7 @@ import java.util.Map;
  * @since Created Time 2021/8/2
  */
 @PreLoadClass(value = Integer.MAX_VALUE)
+@Slf4j
 public class ConsoleStartSuccess {
 
 
@@ -55,7 +57,7 @@ public class ConsoleStartSuccess {
 			cronMap.forEach((name, iCron) -> {
 				int startCron = iCron.startCron();
 				if (startCron > 0) {
-					DefaultSystemLog.getLog().debug("{} scheduling has been started:{}", name, startCron);
+					log.debug("{} scheduling has been started:{}", name, startCron);
 				}
 			});
 			Map<String, IAsyncLoad> asyncLoadMap = SpringUtil.getApplicationContext().getBeansOfType(IAsyncLoad.class);

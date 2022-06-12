@@ -37,6 +37,7 @@ import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.h2db.BaseGroupService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +50,7 @@ import java.util.List;
  * @since 2021-08-10
  **/
 @Service
+@Slf4j
 public class BuildInfoService extends BaseGroupService<BuildInfoModel> implements ICron<BuildInfoModel>, IStatusRecover {
 
     /**
@@ -119,7 +121,7 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
             CronUtils.remove(taskId);
             return false;
         }
-        DefaultSystemLog.getLog().debug("start build cron {} {} {}", id, buildInfoModel.getName(), autoBuildCron);
+        log.debug("start build cron {} {} {}", id, buildInfoModel.getName(), autoBuildCron);
         CronUtils.upsert(taskId, autoBuildCron, new CronTask(id, autoBuildCron));
         return true;
     }

@@ -59,7 +59,7 @@ export function editSsh(params) {
     fileDirs: params.fileDirs,
     notAllowedCommand: params.notAllowedCommand,
     allowEditSuffix: params.allowEditSuffix,
-    timeOut: params.timeOut,
+    timeout: params.timeout,
   };
   return axios({
     url: "/node/ssh/save.json",

@@ -31,6 +31,7 @@ import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.h2db.TableName;
 import io.jpom.service.node.NodeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -40,6 +41,7 @@ import java.util.Set;
  * @since 2021/12/3
  */
 @Service
+@Slf4j
 public class WorkspaceService extends BaseDbService<WorkspaceModel> {
 
 	/**
@@ -57,7 +59,7 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> {
 		defaultWorkspace.setDescription("系统默认的工作空间,不能删除");
 		super.insert(defaultWorkspace);
 
-		DefaultSystemLog.getLog().info("init created default workspace");
+		log.info("init created default workspace");
 	}
 
 
@@ -75,7 +77,7 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> {
 			NodeService nodeService = SpringUtil.getBean(NodeService.class);
 			int execute = nodeService.execute(sql, Const.WORKSPACE_DEFAULT_ID);
 			if (execute > 0) {
-				DefaultSystemLog.getLog().info("convertNullWorkspaceId {} {}", tableName.value(), execute);
+				log.info("convertNullWorkspaceId {} {}", tableName.value(), execute);
 			}
 		}
 

@@ -29,6 +29,7 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.NodeProjectInfoModel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +47,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/manage/")
+@Slf4j
 public class ProjectListController extends BaseAgentController {
 
 	/**
@@ -93,7 +95,7 @@ public class ProjectListController extends BaseAgentController {
 			List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
 			return JsonMessage.getString(200, "查询成功！", nodeProjectInfoModels);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			return JsonMessage.getString(500, "查询异常：" + e.getMessage());
 		}
 	}

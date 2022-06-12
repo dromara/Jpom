@@ -50,6 +50,7 @@ import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.user.UserService;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +63,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2021/12/14
  */
+@Slf4j
 public class MonitorItem implements Task {
 
 
@@ -140,7 +142,7 @@ public class MonitorItem implements Task {
                     context = jsonMessage.toString();
                 }
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("监控 {} 节点异常 {}", nodeModel.getName(), e.getMessage());
+                log.error("监控 {} 节点异常 {}", nodeModel.getName(), e.getMessage());
                 //
                 title = StrUtil.format("【{}】节点的运行状态异常", nodeModel.getName());
                 context = ExceptionUtil.stacktraceToString(e);
@@ -207,7 +209,7 @@ public class MonitorItem implements Task {
                     }
                     context = "重启结果：" + reJson;
                 } catch (Exception e) {
-                    DefaultSystemLog.getLog().error("执行重启操作", e);
+                    log.error("执行重启操作", e);
                     title = StrUtil.format("【{}】节点的【{}】项目{}已经停止，重启操作异常", nodeModel.getName(), id, copyMsg);
                     context = ExceptionUtil.stacktraceToString(e);
                 }
@@ -296,7 +298,7 @@ public class MonitorItem implements Task {
                 plugin.execute(webhook, map);
                 dbMonitorNotifyLogService.updateStatus(logId, true, null);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
+                log.error("WebHooks 调用错误", e);
                 dbMonitorNotifyLogService.updateStatus(logId, false, ExceptionUtil.stacktraceToString(e));
             }
         });
@@ -361,7 +363,7 @@ public class MonitorItem implements Task {
                 NotifyUtil.send(notify, title, context);
                 dbMonitorNotifyLogService.updateStatus(logId, true, null);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("发送报警通知异常", e);
+                log.error("发送报警通知异常", e);
                 dbMonitorNotifyLogService.updateStatus(logId, false, ExceptionUtil.stacktraceToString(e));
             }
         });

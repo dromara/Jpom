@@ -49,6 +49,7 @@ import io.jpom.service.dblog.DbUserOperateLogService;
 import io.jpom.system.AopLogInterface;
 import io.jpom.system.WebAopLog;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -70,6 +71,7 @@ import java.util.Set;
  * @since 2019/4/19
  */
 @PreLoadClass
+@Slf4j
 public class OperateLogController implements AopLogInterface {
     private static final ThreadLocal<CacheInfo> CACHE_INFO_THREAD_LOCAL = new ThreadLocal<>();
 
@@ -88,14 +90,14 @@ public class OperateLogController implements AopLogInterface {
         Class<?> declaringClass = method.getDeclaringClass();
         MethodFeature methodFeature = feature.method();
         if (methodFeature == MethodFeature.NULL) {
-            DefaultSystemLog.getLog().error("权限分发配置错误：{}  {}", declaringClass, method.getName());
+            log.error("权限分发配置错误：{}  {}", declaringClass, method.getName());
             return null;
         }
         ClassFeature classFeature = feature.cls();
         if (classFeature == ClassFeature.NULL) {
             Feature feature1 = declaringClass.getAnnotation(Feature.class);
             if (feature1 == null || feature1.cls() == ClassFeature.NULL) {
-                DefaultSystemLog.getLog().error("权限分发配置错误：{}  {} class not find", declaringClass, method.getName());
+                log.error("权限分发配置错误：{}  {} class not find", declaringClass, method.getName());
                 return null;
             }
             classFeature = feature1.cls();

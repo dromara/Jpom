@@ -34,6 +34,7 @@ import io.jpom.common.JpomManifest;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JvmUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,84 +51,85 @@ import java.util.Map;
  * @since 2019/3/26
  */
 @PreLoadClass(value = Integer.MIN_VALUE)
+@Slf4j
 public class CheckPath {
 
-	/**
-	 * 判断是否重复运行
-	 */
-	@PreLoadMethod(2)
-	private static void checkDuplicateRun() {
-		try {
-			Class<?> appClass = JpomApplication.getAppClass();
-			String pid = String.valueOf(JpomManifest.getInstance().getPid());
-			Integer mainClassPid = JvmUtil.findMainClassPid(appClass.getName());
-			if (mainClassPid == null || pid.equals(ObjectUtil.toString(mainClassPid))) {
-				return;
-			}
-			DefaultSystemLog.getLog().warn("The Jpom program recommends that only one corresponding program be run on a machine：" + JpomApplication.getAppType() + "  pid:" + mainClassPid);
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("检查异常", e);
-		}
-	}
+    /**
+     * 判断是否重复运行
+     */
+    @PreLoadMethod(2)
+    private static void checkDuplicateRun() {
+        try {
+            Class<?> appClass = JpomApplication.getAppClass();
+            String pid = String.valueOf(JpomManifest.getInstance().getPid());
+            Integer mainClassPid = JvmUtil.findMainClassPid(appClass.getName());
+            if (mainClassPid == null || pid.equals(ObjectUtil.toString(mainClassPid))) {
+                return;
+            }
+            log.warn("The Jpom program recommends that only one corresponding program be run on a machine：" + JpomApplication.getAppType() + "  pid:" + mainClassPid);
+        } catch (Exception e) {
+            log.error("检查异常", e);
+        }
+    }
 
-	@PreLoadMethod(3)
-	private static void reqXssLog() {
-		if (!ExtConfigBean.getInstance().isConsoleLogReqXss()) {
-			// 不在控制台记录请求日志信息
-			DefaultSystemLog.setLogCallback(new DefaultSystemLog.LogCallback() {
-				@Override
-				public void log(DefaultSystemLog.LogType type, Object... log) {
-					//
-					if (type == DefaultSystemLog.LogType.REQUEST_ERROR) {
-						DefaultSystemLog.getLog().info(Arrays.toString(log));
-					}
-				}
+    @PreLoadMethod(3)
+    private static void reqXssLog() {
+        if (!ExtConfigBean.getInstance().isConsoleLogReqXss()) {
+            // 不在控制台记录请求日志信息
+            DefaultSystemLog.setLogCallback(new DefaultSystemLog.LogCallback() {
+                @Override
+                public void log(DefaultSystemLog.LogType type, Object... log) {
+                    //
+                    if (type == DefaultSystemLog.LogType.REQUEST_ERROR) {
+                        CheckPath.log.info(Arrays.toString(log));
+                    }
+                }
 
-				@Override
-				public void logStart(HttpServletRequest request, String id, String url, HttpMethod httpMethod, String ip, Map<String, String> parameters, Map<String, String> header) {
+                @Override
+                public void logStart(HttpServletRequest request, String id, String url, HttpMethod httpMethod, String ip, Map<String, String> parameters, Map<String, String> header) {
 
-				}
+                }
 
-				@Override
-				public void logError(String id, int status) {
+                @Override
+                public void logError(String id, int status) {
 
-				}
+                }
 
-				@Override
-				public void logTimeOut(String id, long time) {
+                @Override
+                public void logTimeOut(String id, long time) {
 
-				}
-			});
-		}
-	}
+                }
+            });
+        }
+    }
 
-	@PreLoadMethod(4)
-	private static void clearTemp() {
-		File file = ConfigBean.getInstance().getTempPath();
-		/**
-		 * @author Hotstrip
-		 * use Hutool's FileUtil.del method just put file as param not file's path
-		 * or else,  may be return Accessdenied exception
-		 */
-		try {
-			FileUtil.del(file);
-		} catch (Exception e) {
-			// Try again  jzy 2021-07-31
-			DefaultSystemLog.getLog().warn("Attempt to delete temporary folder failed, try to handle read-only permission：{}", e.getMessage());
-			List<File> files = FileUtil.loopFiles(file);
-			long count = files.stream().map(file12 -> file12.setWritable(true)).filter(aBoolean -> aBoolean).count();
-			DefaultSystemLog.getLog().warn("Cumulative number of files in temporary folder: {}, number of successful processing：{}", CollUtil.size(files), count);
-			try {
-				FileUtil.del(file.toPath());
-			} catch (Exception e1) {
-				e1.addSuppressed(e);
-				boolean causedBy = ExceptionUtil.isCausedBy(e1, AccessDeniedException.class);
-				if (causedBy) {
-					DefaultSystemLog.getLog().error("清除临时文件失败,请手动清理：" + FileUtil.getAbsolutePath(file), e);
-					return;
-				}
-				DefaultSystemLog.getLog().error("清除临时文件失败,请检查目录：" + FileUtil.getAbsolutePath(file), e);
-			}
-		}
-	}
+    @PreLoadMethod(4)
+    private static void clearTemp() {
+        File file = ConfigBean.getInstance().getTempPath();
+        /**
+         * @author Hotstrip
+         * use Hutool's FileUtil.del method just put file as param not file's path
+         * or else,  may be return Accessdenied exception
+         */
+        try {
+            FileUtil.del(file);
+        } catch (Exception e) {
+            // Try again  jzy 2021-07-31
+            log.warn("Attempt to delete temporary folder failed, try to handle read-only permission：{}", e.getMessage());
+            List<File> files = FileUtil.loopFiles(file);
+            long count = files.stream().map(file12 -> file12.setWritable(true)).filter(aBoolean -> aBoolean).count();
+            log.warn("Cumulative number of files in temporary folder: {}, number of successful processing：{}", CollUtil.size(files), count);
+            try {
+                FileUtil.del(file.toPath());
+            } catch (Exception e1) {
+                e1.addSuppressed(e);
+                boolean causedBy = ExceptionUtil.isCausedBy(e1, AccessDeniedException.class);
+                if (causedBy) {
+                    log.error("清除临时文件失败,请手动清理：" + FileUtil.getAbsolutePath(file), e);
+                    return;
+                }
+                log.error("清除临时文件失败,请检查目录：" + FileUtil.getAbsolutePath(file), e);
+            }
+        }
+    }
 }

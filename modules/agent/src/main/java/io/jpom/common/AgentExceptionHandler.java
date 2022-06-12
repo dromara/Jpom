@@ -27,6 +27,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.system.JpomRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -41,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
  * @since 2019/04/17
  */
 @ControllerAdvice
+@Slf4j
 public class AgentExceptionHandler extends BaseExceptionHandler {
 
     /**
@@ -52,7 +54,7 @@ public class AgentExceptionHandler extends BaseExceptionHandler {
      */
     @ExceptionHandler({JpomRuntimeException.class, RuntimeException.class, Exception.class})
     public void defExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e);
+        log.error("controller " + request.getRequestURI(), e);
         if (e instanceof JpomRuntimeException) {
             ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
         } else {
@@ -69,7 +71,7 @@ public class AgentExceptionHandler extends BaseExceptionHandler {
      */
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ValidateException.class})
     public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e);
+        log.error("controller " + request.getRequestURI(), e);
         ServletUtil.write(response, JsonMessage.getString(405, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
     }
 }

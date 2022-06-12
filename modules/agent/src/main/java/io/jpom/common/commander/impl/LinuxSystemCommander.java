@@ -35,6 +35,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.system.ProcessModel;
 import io.jpom.util.CommandUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import java.util.List;
  * @author jiangzeyin
  * @since 2019/4/16
  */
+@Slf4j
 public class LinuxSystemCommander extends AbstractSystemCommander {
 
 	@Override
@@ -249,7 +251,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 				CommandUtil.asyncExeLocalCommand(FileUtil.file(SystemUtil.getUserInfo().getHomeDir()), serviceName);
 				return "ok";
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("执行异常", e);
+				log.error("执行异常", e);
 				return "执行异常：" + e.getMessage();
 			}
 		}

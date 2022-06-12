@@ -42,6 +42,7 @@ import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.util.TwoFactorAuthUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,6 +62,7 @@ import java.util.concurrent.TimeUnit;
  */
 @RestController
 @RequestMapping(value = "/user")
+@Slf4j
 public class UserBasicInfoController extends BaseServerController {
 
 	private static final TimedCache<String, Integer> CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(30));
@@ -144,7 +146,7 @@ public class UserBasicInfoController extends BaseServerController {
 		try {
 			EmailUtil.send(email, "Jpom 验证码", "验证码是：" + randomInt);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("发送失败", e);
+			log.error("发送失败", e);
 			return JsonMessage.getString(500, "发送邮件失败：" + e.getMessage());
 		}
 		CACHE.put(email, randomInt);

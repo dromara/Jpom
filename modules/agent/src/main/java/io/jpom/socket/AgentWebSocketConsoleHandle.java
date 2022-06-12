@@ -40,6 +40,7 @@ import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.util.BaseFileTailWatcher;
 import io.jpom.util.FileSearchUtil;
 import io.jpom.util.SocketSessionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -57,6 +58,7 @@ import java.util.function.Consumer;
  */
 @ServerEndpoint(value = "/console")
 @Component
+@Slf4j
 public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
     private static ProjectInfoService projectInfoService;
@@ -82,12 +84,12 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 SocketSessionUtil.send(session, "连接成功：" + nodeProjectInfoModel.getName());
             }
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("socket 错误", e);
+            log.error("socket 错误", e);
             try {
                 SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
                 session.close();
             } catch (IOException e1) {
-                DefaultSystemLog.getLog().error(e1.getMessage(), e1);
+                log.error(e1.getMessage(), e1);
             }
         }
     }
@@ -200,7 +202,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     break;
             }
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("执行命令失败", e);
+            log.error("执行命令失败", e);
             SocketSessionUtil.send(session, "执行命令失败,详情如下：");
             SocketSessionUtil.send(session, ExceptionUtil.stacktraceToString(e));
             return;
@@ -217,7 +219,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         if (resultData != null) {
             reqJson.putAll(resultData);
             reqJson.put("JPOM_MSG", "JPOM_MSG");
-            DefaultSystemLog.getLog().info(reqJson.toString());
+            log.info(reqJson.toString());
             SocketSessionUtil.send(session, reqJson.toString());
         }
     }
@@ -268,7 +270,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 });
                 SocketSessionUtil.send(session, resultMsg);
             } catch (Exception e) {
-                DefaultSystemLog.getLog().error("文件搜索失败", e);
+                log.error("文件搜索失败", e);
                 try {
                     SocketSessionUtil.send(session, "执行命令失败,详情如下：");
                 } catch (IOException ignored) {
@@ -293,7 +295,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 SocketSessionUtil.send(session, "监听文件失败,可能文件不存在");
             }
         } catch (IOException io) {
-            DefaultSystemLog.getLog().error("监听日志变化", io);
+            log.error("监听日志变化", io);
             SocketSessionUtil.send(session, io.getMessage());
         }
     }

@@ -30,6 +30,7 @@ import io.jpom.common.commander.impl.LinuxTomcatCommander;
 import io.jpom.common.commander.impl.WindowsTomcatCommander;
 import io.jpom.model.data.TomcatInfoModel;
 import io.jpom.system.JpomRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author LF
  */
+@Slf4j
 public abstract class AbstractTomcatCommander {
 
 	private static AbstractTomcatCommander abstractTomcatCommander;
@@ -107,7 +109,7 @@ public abstract class AbstractTomcatCommander {
 	}
 
 	protected void exec(String command, boolean close) {
-		DefaultSystemLog.getLog().info(command);
+		log.info(command);
 		try {
 			// 执行命令
 			Process process = Runtime.getRuntime().exec(command);
@@ -119,7 +121,7 @@ public abstract class AbstractTomcatCommander {
 				process.destroy();
 			}
 		} catch (IOException | InterruptedException e) {
-			DefaultSystemLog.getLog().error("tomcat执行名称失败", e);
+			log.error("tomcat执行名称失败", e);
 		}
 	}
 }

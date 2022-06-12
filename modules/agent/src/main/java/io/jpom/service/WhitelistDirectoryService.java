@@ -27,6 +27,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.util.JsonFileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import java.util.List;
  * @since 2019/2/28
  */
 @Service
+@Slf4j
 public class WhitelistDirectoryService extends BaseDataService {
 
 	/**
@@ -54,7 +56,7 @@ public class WhitelistDirectoryService extends BaseDataService {
 			}
 			return jsonObject.toJavaObject(AgentWhitelist.class);
 		} catch (Exception e) {
-			DefaultSystemLog.getLog().error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		}
 		return new AgentWhitelist();
 	}

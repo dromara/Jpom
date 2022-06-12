@@ -46,6 +46,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.user.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.h2.util.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -60,6 +61,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @NotLogin
+@Slf4j
 public class BuildTriggerApiController extends BaseJpomController {
 
     private final BuildInfoService buildInfoService;
@@ -188,7 +190,7 @@ public class BuildTriggerApiController extends BaseJpomController {
             }).collect(Collectors.toList());
             return JsonMessage.getString(200, "触发成功", collect);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("构建触发批量触发异常", e);
+            log.error("构建触发批量触发异常", e);
             return JsonMessage.getString(500, "触发异常", e.getMessage());
         }
     }
@@ -263,7 +265,7 @@ public class BuildTriggerApiController extends BaseJpomController {
             }).collect(Collectors.toList());
             return JsonMessage.getString(200, "", collect);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("获取构建状态异常", e);
+            log.error("获取构建状态异常", e);
             return JsonMessage.getString(500, "发送异常", e.getMessage());
         }
     }

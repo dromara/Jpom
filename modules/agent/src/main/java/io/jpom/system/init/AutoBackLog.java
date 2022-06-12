@@ -36,6 +36,7 @@ import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.system.AgentExtConfigBean;
 import io.jpom.cron.CronUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.List;
@@ -47,6 +48,7 @@ import java.util.List;
  * @since 2019/3/17
  */
 @PreLoadClass
+@Slf4j
 public class AutoBackLog {
 
 	private static final String ID = "auto_back_log";
@@ -62,7 +64,7 @@ public class AutoBackLog {
 		// 获取cron 表达式
 		String cron = StrUtil.emptyToDefault(AgentExtConfigBean.getInstance().autoBackConsoleCron, "none");
 		if ("none".equalsIgnoreCase(cron.trim())) {
-			//DefaultSystemLog.getLog().info("没有配置自动备份控制台日志表达式");
+			//log.info("没有配置自动备份控制台日志表达式");
 			//return;
 			cron = "0 0/10 * * * ?";
 		}
@@ -85,7 +87,7 @@ public class AutoBackLog {
 					javaCopyItemList.forEach(javaCopyItem -> checkProject(projectInfoModel, javaCopyItem));
 				});
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("定时备份日志失败", e);
+				log.error("定时备份日志失败", e);
 			}
 		});
 	}

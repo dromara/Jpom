@@ -28,6 +28,7 @@ import io.jpom.cron.ICron;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.monitor.MonitorItem;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,6 +40,7 @@ import java.util.List;
  * @author Arno
  */
 @Service
+@Slf4j
 public class MonitorService extends BaseWorkspaceService<MonitorModel> implements ICron<MonitorModel> {
 
 	@Override
@@ -88,7 +90,7 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
 			CronUtils.remove(taskId);
 			return false;
 		}
-		DefaultSystemLog.getLog().debug("start monitor cron {} {} {}", id, monitorModel.getName(), autoExecCron);
+		log.debug("start monitor cron {} {} {}", id, monitorModel.getName(), autoExecCron);
 		CronUtils.upsert(taskId, autoExecCron, new MonitorItem(id));
 		return true;
 	}
