@@ -91,7 +91,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
      */
     public static Session getSessionByModel(SshModel sshModel) {
         Session session = null;
-        int timeout = (int) TimeUnit.SECONDS.toMillis(sshModel.timeout());
+        int timeout = sshModel.timeout();
         SshModel.ConnectType connectType = sshModel.connectType();
         if (connectType == SshModel.ConnectType.PASS) {
             session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword(), timeout);

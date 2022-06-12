@@ -198,7 +198,7 @@ public class SshHandler extends BaseTerminalHandler {
         }
 
         void startRead() throws JSchException {
-            this.channel.connect((int) TimeUnit.SECONDS.toMillis(sshItem.timeout()));
+            this.channel.connect(sshItem.timeout());
             ThreadUtil.execute(this);
         }
 
