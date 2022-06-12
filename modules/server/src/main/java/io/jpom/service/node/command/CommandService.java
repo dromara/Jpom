@@ -257,7 +257,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             //
             workspaceEnvVarService.formatCommand(commandModel.getWorkspaceId(), commands);
             //
-            Charset charset = sshModel.getCharsetT();
+            Charset charset = sshModel.charset();
 
             sshService.exec(sshModel, (s, session) -> {
                 final ChannelExec channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);

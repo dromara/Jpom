@@ -202,7 +202,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
      * @throws IOException io
      */
     public String exec(SshModel sshModel, String... command) throws IOException {
-        Charset charset = sshModel.getCharsetT();
+        Charset charset = sshModel.charset();
         return this.exec(sshModel, (s, session) -> {
             // 执行命令
             String exec, error;
@@ -248,7 +248,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
             for (String s : command) {
                 stringBuilder.append(s).append(StrUtil.LF);
             }
-            Charset charset = sshModel.getCharsetT();
+            Charset charset = sshModel.charset();
             FileUtil.writeString(stringBuilder.toString(), buildSsh, charset);
             //
             session = getSessionByModel(sshModel);
@@ -353,7 +353,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         try {
             session = getSessionByModel(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            try (Sftp sftp = new Sftp(channel, sshModel.getCharsetT(), sshModel.timeout())) {
+            try (Sftp sftp = new Sftp(channel, sshModel.charset(), sshModel.timeout())) {
                 sftp.syncUpload(desc, remotePath);
             }
             //uploadDir(channel, remotePath, desc, sshModel.getCharsetT());
