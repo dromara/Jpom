@@ -22,5 +22,20 @@ module.exports = [
         var s = document.getElementsByTagName("script")[0];
         s.parentNode.insertBefore(bp, s);
     })();
-  `]
+  `],
+    ['script', {}, `
+        var bp = document.createElement('script');
+        bp.src = 'https://www.googletagmanager.com/gtag/js?id=G-FYSG66S4HQ';
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+        (function() {
+            window.dataLayer = window.dataLayer || [];
+        
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+            gtag('config', 'G-FYSG66S4HQ');
+        })();
+   `]
 ];

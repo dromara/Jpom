@@ -10,7 +10,6 @@
     },
     "license": "MIT",
     "devDependencies": {
-        "@vuepress/plugin-google-analytics": "^1.9.7",
         "@vuepress/plugin-nprogress": "^1.9.7",
         "dayjs": "^1.9.7",
         "inquirer": "^7.1.0",

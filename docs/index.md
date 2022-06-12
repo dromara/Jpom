@@ -22,10 +22,10 @@ features: # 可选的
   details: 多用户管理，实现不同用户不同权限，用户操作、管理日志完善记录
 - title: 白名单模式
   details: 为了数据安全防止用户随便查看、删除文件配置安全的白名单路径。
-- title: Docker 管理
-  details: 在线管理镜像、容器、swarm集群。界面化管理 docker 
-- title: NGINX配置、SSL证书
-  details: 在线快速方便的修改nginx配置文件，ssl证书统一管理
+- title: DOCKER 管理
+  details: 在线管理镜像、容器、SWARM 集群。界面化管理 DOCKER 
+- title: NGINX 配置、SSL 证书
+  details: 在线快速方便的修改 NGINX 配置文件，SSL 证书统一管理
 
 # 文章列表显示方式: detailed 默认，显示详细版文章列表（包括作者、分类、标签、摘要、分页等）| simple => 显示简约版文章列表（仅标题和日期）| none 不显示文章列表
 postList: none
@@ -34,7 +34,7 @@ postList: none
 <br/>
 
 <p align="center">
-  <a class="become-sponsor" href="https://jpom.keepbx.cn?from=site-nav">演示站点</a>
+  <a class="become-sponsor" href="https://jpom.keepbx.cn?from=site-middle">演示站点</a>
   <a class="become-sponsor" href="/pages/praise/">支持这个项目</a>
 </p>
 
@@ -121,11 +121,10 @@ postList: none
 
 <br/>
 
-## 🧲友情链接
-
+## 🤝 dromara 组织项目
 <span style="width: 150px;flex:1;text-align: left">
-    <a href="https://gitee.com/dromara/hutool" target="_blank">
-        <img :src="$withBase('/images/friends/hutool.jpg')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+    <a href="https://hutool.cn/" target="_blank">
+        <img :src="$withBase('/images/friends/hutool-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
@@ -138,6 +137,23 @@ postList: none
         <img :src="$withBase('/images/friends/maxkey.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
     </a>
 </span>
+<span style="width: 150px;text-align: left">
+    <a href="https://liteflow.yomahub.com/" target="_blank">
+        <img :src="$withBase('/images/friends/liteflow-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+    </a>
+</span>
+<span style="width: 150px;text-align: left">
+    <a href="https://tlog.yomahub.com/" target="_blank">
+        <img :src="$withBase('/images/friends/tlog-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+    </a>
+</span>
+<span style="width: 150px;text-align: left">
+    <a href="https://forest.dtflyx.com/" target="_blank">
+        <img :src="$withBase('/images/friends/forest-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+    </a>
+</span>
+
+## 🧲友情链接
 <span style="width: 150px;text-align: left">
     <a href="https://shop108037867.taobao.com" target="_blank">
         <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">

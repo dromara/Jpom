@@ -10,12 +10,12 @@ module.exports = [
             hm: '1acbde0eb1cc4225dcfe6d1143767a3d'
         }
     ],
-    [
-        '@vuepress/google-analytics',
-        {
-            'ga': 'UA-231678761-1' // UA-00000000-0
-        }
-    ],
+    // [
+    //     '@vuepress/google-analytics',
+    //     {
+    //         'ga': 'UA-231678761-1' // UA-00000000-0
+    //     }
+    // ],
     ['one-click-copy', { // 代码块复制按钮
         copySelector: ['div[class*="language-"] pre', 'div[class*="aside-code"] aside'], // String or Array
         copyMessage: '复制成功', // default is 'Copy successfully and then paste it for use.'
