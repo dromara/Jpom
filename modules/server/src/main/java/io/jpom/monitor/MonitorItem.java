@@ -261,6 +261,7 @@ public class MonitorItem implements Task {
             return;
         }
         ProjectInfoCacheModel projectInfoCacheModel = projectInfoCacheService.getData(nodeModel.getId(), monitorNotifyLog.getProjectId());
+        monitorNotifyLog.setWorkspaceId(projectInfoCacheModel.getWorkspaceId());
         //
         notify.forEach(notifyUser -> this.sendNotifyMsgToUser(monitorNotifyLog, notifyUser));
         //
