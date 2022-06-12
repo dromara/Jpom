@@ -24,7 +24,7 @@
 
 
 # 版本
-jpom_version=2.8.25
+jpom_version=2.9.0
 
 function checkItem()
 {

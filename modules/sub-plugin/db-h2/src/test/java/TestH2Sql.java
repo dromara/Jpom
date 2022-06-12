@@ -20,37 +20,31 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.system;
-
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import org.junit.Test;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Jpom 运行错误
- *
- * @author jiangzeyin
- * @since 2019/4/16
+ * @author bwcx_jzy
+ * @since 2022/6/10
  */
-public class JpomRuntimeException extends RuntimeException {
+public class TestH2Sql {
 
-    /**
-     * 程序是否需要关闭
-     */
-    private Integer exitCode;
-
-    public JpomRuntimeException(String message) {
-        super(message);
-    }
-
-    public JpomRuntimeException(String message, Integer exitCode) {
-        super(message);
-        this.exitCode = exitCode;
-    }
-
-    public JpomRuntimeException(String message, Throwable throwable) {
-        super(StrUtil.format("{} {}", message, StrUtil.emptyToDefault(throwable.getMessage(), StrUtil.EMPTY)), throwable);
-    }
-
-    public Integer getExitCode() {
-        return exitCode;
+    @Test
+    public void test() {
+        File sqlFile = FileUtil.file("/Users/user/jpom/server/db/backup/20220609131122.sql");
+        List<String> list = FileUtil.readLines(sqlFile, StandardCharsets.UTF_8);
+        list = list.stream().map(s -> {
+            if (StrUtil.startWith(s, "CREATE PRIMARY KEY SYSTEM_LOB_STREAM_PRIMARY_KEY ON SYSTEM_LOB_STREAM(ID, PART);")) {
+                return "-- " + s;
+            }
+            return s;
+        }).collect(Collectors.toList());
+        FileUtil.writeLines(list, sqlFile, StandardCharsets.UTF_8);
     }
 }

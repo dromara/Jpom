@@ -41,6 +41,7 @@ import io.jpom.system.db.DbConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.h2.jdbc.JdbcSQLNonTransientConnectionException;
 import org.h2.jdbc.JdbcSQLNonTransientException;
+import org.h2.mvstore.MVStoreException;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
@@ -263,13 +264,13 @@ public abstract class BaseDbCommonService<T> {
         }
         Entity where = new Entity(tableName);
         where.set(key, keyValue);
-        Db db = Db.use();
-        db.setWrapper((Character) null);
-        if (consumer != null) {
-            consumer.accept(where);
-        }
         Entity entity;
         try {
+            Db db = Db.use();
+            db.setWrapper((Character) null);
+            if (consumer != null) {
+                consumer.accept(where);
+            }
             entity = db.get(where);
         } catch (Exception e) {
             throw warpException(e);
@@ -370,9 +371,9 @@ public abstract class BaseDbCommonService<T> {
         if (where.isEmpty()) {
             throw new JpomRuntimeException("没有删除条件");
         }
-        Db db = Db.use();
-        db.setWrapper((Character) null);
         try {
+            Db db = Db.use();
+            db.setWrapper((Character) null);
             return db.del(where);
         } catch (Exception e) {
             throw warpException(e);
@@ -674,11 +675,21 @@ public abstract class BaseDbCommonService<T> {
      * @param e 异常
      */
     protected JpomRuntimeException warpException(Exception e) {
+        String message = e.getMessage();
+        if (e instanceof MVStoreException || ExceptionUtil.isCausedBy(e, MVStoreException.class)) {
+            if (StrUtil.containsIgnoreCase(message, "The write format 1 is smaller than the supported format 2")) {
+                log.warn(message);
+                String tip = "升级数据库流程：" + StrUtil.LF;
+                tip += StrUtil.TAB + "1. 导出低版本数据 【启动程序参数里面添加 --backup-h2】" + StrUtil.LF;
+                tip += StrUtil.TAB + "2. 将导出的低版本数据( sql 文件) 导入到新版本中【启动程序参数里面添加 --replace-import-h2-sql=/xxxx.sql (路径需要替换为第一步控制台输出的 sql 文件保存路径)】";
+                return new JpomRuntimeException("数据库版本不兼容,需要处理跨版本升级。" + StrUtil.LF + tip + StrUtil.LF, -1);
+            }
+        }
         if (e instanceof JdbcSQLNonTransientException || ExceptionUtil.isCausedBy(e, JdbcSQLNonTransientException.class)) {
-            return new JpomRuntimeException("数据库异常,可能数据库文件已经损坏(可能丢失部分数据),需要重新初始化。可以尝试在启动参数里面添加 --recover:h2db 来自动恢复,：" + e.getMessage(), e);
+            return new JpomRuntimeException("数据库异常,可能数据库文件已经损坏(可能丢失部分数据),需要重新初始化。可以尝试在启动参数里面添加 --recover:h2db 来自动恢复,：" + message, e);
         }
         if (e instanceof JdbcSQLNonTransientConnectionException) {
-            return new JpomRuntimeException("数据库异常,可能因为服务器资源不足（内存、硬盘）等原因造成数据异常关闭。需要手动重启服务端来恢复，：" + e.getMessage(), e);
+            return new JpomRuntimeException("数据库异常,可能因为服务器资源不足（内存、硬盘）等原因造成数据异常关闭。需要手动重启服务端来恢复，：" + message, e);
         }
         return new JpomRuntimeException("数据库异常", e);
     }

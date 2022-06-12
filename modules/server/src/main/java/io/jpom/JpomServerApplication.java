@@ -78,11 +78,15 @@ public class JpomServerApplication implements ApplicationEventLoad {
      * <p>
      * --recover:h2db 当 h2 数据出现奔溃无法启动需要执行恢复逻辑
      * <p>
-     * --close:super_user_mfa 重置超级管理员 mfa
+     * --close:super_user_mfa 关闭超级管理员 mfa
      * <p>
      * --backup-h2 备份数据库
      * <p>
      * --import-h2-sql=/xxxx.sql 导入指定文件 sql
+     * <p>
+     * --replace-import-h2-sql=/xxxx.sql 替换导入指定文件 sql（会删除掉已经存的数据）
+     * <p>
+     * --transform-sql 转换 sql 内容(低版本兼容高版本),仅在导入 sql 文件时候生效：--import-h2-sql=/xxxx.sql、--replace-import-h2-sql=/xxxx.sql
      *
      * @param args 参数
      * @throws Exception 异常
@@ -162,21 +166,46 @@ public class JpomServerApplication implements ApplicationEventLoad {
         String importH2Sql = StringUtil.getArgsValue(ARGS, "import-h2-sql");
         if (StrUtil.isNotEmpty(importH2Sql)) {
             // 导入数据
-            InitDb.addCallback(() -> {
-                File file = FileUtil.file(importH2Sql);
-                String sqlPath = FileUtil.getAbsolutePath(file);
-                if (!FileUtil.isFile(file)) {
-                    consoleExit(2, "sql file does not exist :{}", sqlPath);
-                }
-                Console.log("Start importing data:{}", sqlPath);
-                BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
-                boolean flag = backupInfoService.restoreWithSql(sqlPath);
-                if (!flag) {
-                    consoleExit(2, "Failed to import according to sql,{}", sqlPath);
-                }
-                Console.log("Import successfully according to sql,{}", sqlPath);
-            });
+            importH2Sql(importH2Sql);
         }
+        String replaceImportH2Sql = StringUtil.getArgsValue(ARGS, "replace-import-h2-sql");
+        if (StrUtil.isNotEmpty(replaceImportH2Sql)) {
+            // 删除掉旧数据
+            try {
+                String dbFiles = instance.deleteDbFiles();
+                if (dbFiles != null) {
+                    Console.log("Automatically backup data files to {} path", dbFiles);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                consoleExit(-2, "Failed to import according to sql,{}", replaceImportH2Sql);
+            }
+            // 导入数据
+            importH2Sql(replaceImportH2Sql);
+        }
+        //
+    }
+
+    private static void importH2Sql(String importH2Sql) {
+        InitDb.addCallback(() -> {
+            File file = FileUtil.file(importH2Sql);
+            String sqlPath = FileUtil.getAbsolutePath(file);
+            if (!FileUtil.isFile(file)) {
+                consoleExit(2, "sql file does not exist :{}", sqlPath);
+            }
+            //
+            if (ArrayUtil.containsIgnoreCase(ARGS, "--transform-sql")) {
+                DbConfig.getInstance().transformSql(file);
+            }
+            //
+            Console.log("Start importing data:{}", sqlPath);
+            BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
+            boolean flag = backupInfoService.restoreWithSql(sqlPath);
+            if (!flag) {
+                consoleExit(2, "Failed to import according to sql,{}", sqlPath);
+            }
+            Console.log("Import successfully according to sql,{}", sqlPath);
+        });
     }
 
     /**
@@ -192,7 +221,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
         } else {
             Console.error(template, args);
         }
-        Console.log("Need to log out manually: Ctrl+C/Control+C ");
+        Console.log("has stopped running automatically，Need to log out manually: Ctrl+C/Control+C ");
         System.exit(status);
     }
 }
