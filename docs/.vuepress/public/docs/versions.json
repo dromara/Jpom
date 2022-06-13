@@ -1,6 +1,6 @@
 {
-  "tag_name": "v2.8.25",
-  "agentUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/agent-2.8.25-release.zip",
-  "serverUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/server-2.8.25-release.zip",
+  "tag_name": "v2.9.0",
+  "agentUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/agent-2.9.0-release.zip",
+  "serverUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/server-2.9.0-release.zip",
   "changelogUrl": "https://gitee.com/dromara/Jpom/raw/master/CHANGELOG.md"
 }
