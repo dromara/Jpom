@@ -71,7 +71,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InitDb implements DisposableBean, InitializingBean {
 
-    private static final List<Runnable> CALLBACK = new LinkedList<>();
+    private static final List<Runnable> BEFORE_CALLBACK = new LinkedList<>();
+    private static final List<Runnable> AFTER_CALLBACK = new LinkedList<>();
+
+    public static void addBeforeCallback(Runnable consumer) {
+        BEFORE_CALLBACK.add(consumer);
+    }
 
     /**
      * 添加监听回调
@@ -79,12 +84,13 @@ public class InitDb implements DisposableBean, InitializingBean {
      * @param consumer 回调
      */
     public static void addCallback(Runnable consumer) {
-        CALLBACK.add(consumer);
+        AFTER_CALLBACK.add(consumer);
     }
 
     @PreLoadMethod(value = Integer.MIN_VALUE)
     private static void init() {
         //
+        BEFORE_CALLBACK.forEach(Runnable::run);
         DbConfig instance = DbConfig.getInstance();
         ServerExtConfigBean serverExtConfigBean = ServerExtConfigBean.getInstance();
         DbExtConfig dbExtConfig = SpringUtil.getBean(DbExtConfig.class);
@@ -161,7 +167,7 @@ public class InitDb implements DisposableBean, InitializingBean {
         // json load to db
         InitDb.loadJsonToDb();
         Console.log("h2 db Successfully loaded, url is 【{}】", dbUrl);
-        CALLBACK.forEach(Runnable::run);
+        AFTER_CALLBACK.forEach(Runnable::run);
         syncAllNode();
         if (JpomManifest.getInstance().isDebug()) {
             //

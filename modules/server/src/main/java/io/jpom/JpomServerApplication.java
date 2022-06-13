@@ -171,15 +171,17 @@ public class JpomServerApplication implements ApplicationEventLoad {
         String replaceImportH2Sql = StringUtil.getArgsValue(ARGS, "replace-import-h2-sql");
         if (StrUtil.isNotEmpty(replaceImportH2Sql)) {
             // 删除掉旧数据
-            try {
-                String dbFiles = instance.deleteDbFiles();
-                if (dbFiles != null) {
-                    Console.log("Automatically backup data files to {} path", dbFiles);
+            InitDb.addBeforeCallback(() -> {
+                try {
+                    String dbFiles = instance.deleteDbFiles();
+                    if (dbFiles != null) {
+                        Console.log("Automatically backup data files to {} path", dbFiles);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    consoleExit(-2, "Failed to import according to sql,{}", replaceImportH2Sql);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                consoleExit(-2, "Failed to import according to sql,{}", replaceImportH2Sql);
-            }
+            });
             // 导入数据
             importH2Sql(replaceImportH2Sql);
         }
