@@ -68,11 +68,14 @@ git submodule add -b docs-pages git@gitee.com:dromara/Jpom.git docs-pages
 ```
 
 ```shell
+git submodule init
 git submodule sync 
-git submodule update
+git submodule update --init
+git submodule update --remote
 ```
 
 ```shell
+# 创建空白分支 
 git checkout --orphan docs-pages
 git rm -rf .
 git push --set-upstream origin docs-pages
