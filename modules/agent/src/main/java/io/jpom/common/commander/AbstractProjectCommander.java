@@ -34,7 +34,6 @@ import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.commander.impl.LinuxProjectCommander;
 import io.jpom.common.commander.impl.MacOsProjectCommander;

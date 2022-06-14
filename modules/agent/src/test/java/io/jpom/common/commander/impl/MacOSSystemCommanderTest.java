@@ -24,7 +24,6 @@ package io.jpom.common.commander.impl;
 
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 

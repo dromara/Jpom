@@ -28,7 +28,6 @@ import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;

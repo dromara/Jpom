@@ -26,7 +26,6 @@ import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 import lombok.extern.slf4j.Slf4j;

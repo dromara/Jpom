@@ -44,7 +44,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.List;
 import java.util.Map;

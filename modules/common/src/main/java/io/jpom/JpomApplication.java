@@ -24,12 +24,12 @@ package io.jpom;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.validator.ParameterInterceptor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -207,5 +207,22 @@ public class JpomApplication extends ApplicationBuilder {
                 log.error("重启自身异常", e);
             }
         });
+    }
+
+    /**
+     * 控制台输出并结束程序
+     *
+     * @param status   终止码
+     * @param template 输出消息
+     * @param args     参数
+     */
+    public static void consoleExit(int status, String template, Object... args) {
+        if (status == 0) {
+            Console.log(template, args);
+        } else {
+            Console.error(template, args);
+        }
+        Console.log("has stopped running automatically，Need to log out manually: Ctrl+C/Control+C ");
+        System.exit(status);
     }
 }

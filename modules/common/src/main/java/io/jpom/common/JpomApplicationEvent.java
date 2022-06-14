@@ -29,7 +29,6 @@ import cn.hutool.core.lang.Console;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.common.spring.event.ApplicationEventClient;
 import cn.jiangzeyin.common.spring.event.ApplicationEventLoad;

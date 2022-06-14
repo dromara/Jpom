@@ -28,7 +28,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;

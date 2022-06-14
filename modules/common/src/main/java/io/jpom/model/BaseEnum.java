@@ -23,10 +23,8 @@
 package io.jpom.model;
 
 import cn.hutool.log.StaticLog;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -24,7 +24,6 @@ package cn;
 
 import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.security.CodeSource;

@@ -23,7 +23,6 @@
 package io.jpom.model.system;
 
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.BaseJsonModel;
 import lombok.extern.slf4j.Slf4j;

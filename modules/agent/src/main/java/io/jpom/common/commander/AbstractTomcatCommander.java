@@ -25,7 +25,6 @@ package io.jpom.common.commander;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.common.commander.impl.LinuxTomcatCommander;
 import io.jpom.common.commander.impl.WindowsTomcatCommander;
 import io.jpom.model.data.TomcatInfoModel;

@@ -23,7 +23,6 @@
 package io.jpom.socket.handler;
 
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.socket.BaseHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.BinaryMessage;

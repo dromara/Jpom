@@ -33,7 +33,6 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;

@@ -24,13 +24,9 @@ package io.jpom.common;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import org.springframework.http.HttpHeaders;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.function.Function;
 
 /**

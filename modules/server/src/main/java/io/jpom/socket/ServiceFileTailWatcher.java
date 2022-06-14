@@ -23,7 +23,6 @@
 package io.jpom.socket;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.util.BaseFileTailWatcher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;

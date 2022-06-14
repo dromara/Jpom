@@ -24,7 +24,6 @@ package io.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.BaseModel;
 import lombok.extern.slf4j.Slf4j;
 

@@ -26,15 +26,15 @@ import ch.qos.logback.core.PropertyDefinerBase;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.interceptor.BaseCallbackController;
 import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 import java.io.File;

@@ -24,7 +24,6 @@ package io.jpom.system.init;
 
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;

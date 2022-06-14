@@ -30,7 +30,6 @@ import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.common.JpomManifest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContextInitializer;

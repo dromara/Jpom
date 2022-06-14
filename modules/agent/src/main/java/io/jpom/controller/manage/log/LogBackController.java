@@ -24,7 +24,6 @@ package io.jpom.controller.manage.log;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;

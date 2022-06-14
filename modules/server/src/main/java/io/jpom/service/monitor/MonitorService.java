@@ -22,7 +22,6 @@
  */
 package io.jpom.service.monitor;
 
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
 import io.jpom.model.data.MonitorModel;

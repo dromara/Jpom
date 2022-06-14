@@ -26,7 +26,6 @@ import cn.hutool.core.lang.Console;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;

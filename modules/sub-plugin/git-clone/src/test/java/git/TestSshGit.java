@@ -23,7 +23,6 @@
 package git;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.crypto.KeyUtil;
 import cn.hutool.crypto.PemUtil;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -40,9 +39,7 @@ import org.eclipse.jgit.util.FS;
 import org.junit.Test;
 
 import java.io.*;
-import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 
 /**
  * https://qa.1r1g.com/sf/ask/875171671/

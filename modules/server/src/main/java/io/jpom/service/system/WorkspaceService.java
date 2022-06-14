@@ -23,7 +23,6 @@
 package io.jpom.service.system;
 
 import cn.hutool.core.util.ClassUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;

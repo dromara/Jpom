@@ -31,7 +31,6 @@ import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;

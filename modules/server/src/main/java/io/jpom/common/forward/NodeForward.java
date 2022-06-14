@@ -24,14 +24,12 @@ package io.jpom.common.forward;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IORuntimeException;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.*;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;

@@ -20,8 +20,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.comparator.VersionComparator;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -36,9 +36,8 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author bwcx_jzy
