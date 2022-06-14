@@ -23,8 +23,6 @@
 package io.jpom.service.outgiving;
 
 import io.jpom.model.outgiving.LogReadModel;
-import io.jpom.model.outgiving.OutGivingModel;
-import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;

@@ -30,7 +30,6 @@ import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.system.ProcessModel;

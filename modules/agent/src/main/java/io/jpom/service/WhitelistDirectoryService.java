@@ -22,7 +22,6 @@
  */
 package io.jpom.service;
 
-import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.system.AgentConfigBean;

@@ -29,7 +29,6 @@ import cn.hutool.cron.TaskExecutor;
 import cn.hutool.cron.TaskTable;
 import cn.hutool.cron.listener.TaskListener;
 import cn.hutool.cron.task.Task;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.system.ExtConfigBean;
 import lombok.extern.slf4j.Slf4j;

@@ -20,8 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-import cn.hutool.core.util.StrUtil;
-import io.jpom.util.CommandUtil;
+
 import io.jpom.util.FileUtils;
 import org.junit.Test;
 

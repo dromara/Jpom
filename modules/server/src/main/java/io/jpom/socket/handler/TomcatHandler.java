@@ -23,7 +23,6 @@
 package io.jpom.socket.handler;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;

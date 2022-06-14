@@ -24,7 +24,6 @@ package io.jpom.socket;
 
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;

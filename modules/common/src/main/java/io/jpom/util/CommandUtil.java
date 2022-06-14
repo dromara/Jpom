@@ -28,7 +28,6 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.system.ExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
 

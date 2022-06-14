@@ -27,7 +27,6 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.io.file.Tailer;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;

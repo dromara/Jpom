@@ -23,7 +23,6 @@
 package io.jpom.system.init;
 
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import io.jpom.system.JpomRuntimeException;

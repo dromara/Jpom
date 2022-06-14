@@ -23,7 +23,6 @@
 package io.jpom.model.outgiving;
 
 import io.jpom.model.BaseEnum;
-import io.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

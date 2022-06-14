@@ -28,7 +28,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.ds.DSFactory;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import lombok.extern.slf4j.Slf4j;
 import org.h2.store.FileLister;
 import org.h2.tools.DeleteDbFiles;

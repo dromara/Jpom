@@ -29,7 +29,8 @@ import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.plugin.*;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
@@ -38,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.function.Consumer;
 

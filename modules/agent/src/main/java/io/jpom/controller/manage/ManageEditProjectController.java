@@ -29,7 +29,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;

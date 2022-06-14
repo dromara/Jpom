@@ -29,7 +29,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.ds.GlobalDSFactory;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.BuildInfoModel;

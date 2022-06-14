@@ -32,10 +32,10 @@ import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.ds.GlobalDSFactory;
 import cn.hutool.db.sql.SqlLog;
 import cn.hutool.setting.Setting;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
 import io.jpom.model.data.UserModel;
@@ -89,11 +89,13 @@ public class InitDb implements DisposableBean, InitializingBean {
 
     @PreLoadMethod(value = Integer.MIN_VALUE)
     private static void init() {
-        //
-        BEFORE_CALLBACK.forEach(Runnable::run);
         DbConfig instance = DbConfig.getInstance();
         ServerExtConfigBean serverExtConfigBean = ServerExtConfigBean.getInstance();
         DbExtConfig dbExtConfig = SpringUtil.getBean(DbExtConfig.class);
+        //
+        dbSecurityCheck(serverExtConfigBean, dbExtConfig);
+        //
+        BEFORE_CALLBACK.forEach(Runnable::run);
         //
         Setting setting = new Setting();
         String dbUrl = instance.getDbUrl();
@@ -169,15 +171,13 @@ public class InitDb implements DisposableBean, InitializingBean {
         Console.log("h2 db Successfully loaded, url is 【{}】", dbUrl);
         AFTER_CALLBACK.forEach(Runnable::run);
         syncAllNode();
-        if (JpomManifest.getInstance().isDebug()) {
-            //
-        } else {
-            if (serverExtConfigBean.isH2ConsoleEnabled()
-                && StrUtil.equals(dbExtConfig.getUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
-                && StrUtil.equals(dbExtConfig.getUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
-                Console.error("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
-                System.exit(-2);
-            }
+    }
+
+    private static void dbSecurityCheck(ServerExtConfigBean serverExtConfigBean, DbExtConfig dbExtConfig) {
+        if (!JpomManifest.getInstance().isDebug() && serverExtConfigBean.isH2ConsoleEnabled()
+            && StrUtil.equals(dbExtConfig.getUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
+            && StrUtil.equals(dbExtConfig.getUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
+            JpomApplication.consoleExit(-2, "【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
         }
     }
 

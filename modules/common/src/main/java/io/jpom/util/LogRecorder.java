@@ -28,7 +28,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 

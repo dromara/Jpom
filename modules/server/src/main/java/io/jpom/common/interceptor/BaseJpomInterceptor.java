@@ -22,14 +22,7 @@
  */
 package io.jpom.common.interceptor;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.interceptor.BaseInterceptor;
-import io.jpom.common.UrlRedirectUtil;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * 拦截器

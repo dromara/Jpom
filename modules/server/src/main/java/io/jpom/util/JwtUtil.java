@@ -31,7 +31,6 @@ import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTHeader;
 import cn.hutool.jwt.JWTValidator;
 import cn.hutool.jwt.signers.JWTSignerUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.data.UserModel;
 import io.jpom.system.ServerExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
