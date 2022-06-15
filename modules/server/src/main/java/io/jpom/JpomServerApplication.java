@@ -161,6 +161,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
                     e.printStackTrace();
                     JpomApplication.consoleExit(-2, "Backup database failed：{}", e.getMessage());
                 }
+                return false;
             });
         }
         String importH2Sql = StringUtil.getArgsValue(ARGS, "import-h2-sql");
@@ -207,6 +208,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
                 JpomApplication.consoleExit(2, "Failed to import according to sql,{}", sqlPath);
             }
             Console.log("Import successfully according to sql,{}", sqlPath);
+            return true;
         });
     }
 }

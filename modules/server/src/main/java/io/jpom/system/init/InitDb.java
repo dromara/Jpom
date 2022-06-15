@@ -22,6 +22,8 @@
  */
 package io.jpom.system.init;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.exceptions.CheckedUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
@@ -54,10 +56,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import java.io.IOException;
+import javax.sql.DataSource;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -72,7 +76,7 @@ import java.util.stream.Collectors;
 public class InitDb implements DisposableBean, InitializingBean {
 
     private static final List<Runnable> BEFORE_CALLBACK = new LinkedList<>();
-    private static final List<Runnable> AFTER_CALLBACK = new LinkedList<>();
+    private static final List<Supplier<Boolean>> AFTER_CALLBACK = new LinkedList<>();
 
     public static void addBeforeCallback(Runnable consumer) {
         BEFORE_CALLBACK.add(consumer);
@@ -81,10 +85,10 @@ public class InitDb implements DisposableBean, InitializingBean {
     /**
      * 添加监听回调
      *
-     * @param consumer 回调
+     * @param supplier 回调，返回 true 需要重新初始化数据库
      */
-    public static void addCallback(Runnable consumer) {
-        AFTER_CALLBACK.add(consumer);
+    public static void addCallback(Supplier<Boolean> supplier) {
+        AFTER_CALLBACK.add(supplier);
     }
 
     @PreLoadMethod(value = Integer.MIN_VALUE)
@@ -121,7 +125,7 @@ public class InitDb implements DisposableBean, InitializingBean {
             setting.set(SqlLog.KEY_SHOW_PARAMS, "true");
         }
         Console.log("start load h2 db");
-        String sqlFileNow = StrUtil.EMPTY;
+        final String[] sqlFileNow = {StrUtil.EMPTY};
         try {
             // 创建连接
             DSFactory dsFactory = DSFactory.create(setting);
@@ -142,37 +146,64 @@ public class InitDb implements DisposableBean, InitializingBean {
                 .filter(resource -> !StrUtil.containsIgnoreCase(resource.getFilename(), "temp"))
                 .collect(Collectors.toList());
             // 遍历
-            for (Resource resource : resourcesList) {
-                try (InputStream inputStream = resource.getInputStream()) {
-                    String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
-                    String sha1 = SecureUtil.sha1(sql);
-                    if (executeSqlLog.contains(sha1)) {
-                        // 已经执行过啦，不再执行
-                        continue;
-                    }
-                    sqlFileNow = resource.getFilename();
-                    int rows = Db.use(dsFactory.getDataSource()).execute(sql);
-                    log.info("exec init SQL file: {} complete, and affected rows is: {}", sqlFileNow, rows);
-                    executeSqlLog.add(sha1);
-                } catch (IOException ignored) {
-                }
-            }
+            DataSource dataSource = dsFactory.getDataSource();
+            // 第一次初始化数据库
+            tryInitSql(resourcesList, executeSqlLog, dataSource, s -> sqlFileNow[0] = s);
+            //
             instance.saveExecuteSqlLog(executeSqlLog);
             GlobalDSFactory.set(dsFactory);
+            // 执行回调方法
+            long count = AFTER_CALLBACK.stream().mapToInt(value -> value.get() ? 1 : 0).count();
+            if (count > 0) {
+                // 因为导入数据后数据结构可能发生变动
+                // 第二次初始化数据库
+                tryInitSql(resourcesList, CollUtil.newHashSet(), dataSource, s -> sqlFileNow[0] = s);
+            }
             //
         } catch (Exception e) {
-            log.error("初始化数据库失败 {}", sqlFileNow, e);
+            log.error("初始化数据库失败 {}", sqlFileNow[0], e);
             System.exit(0);
             return;
         }
         instance.initOk();
-        AFTER_CALLBACK.forEach(Runnable::run);
         // json load to db
         InitDb.loadJsonToDb();
         Console.log("h2 db Successfully loaded, url is 【{}】", dbUrl);
         syncAllNode();
     }
 
+    private static void tryInitSql(List<Resource> resourcesList, Set<String> executeSqlLog, DataSource dataSource, Consumer<String> eachSql) {
+        for (Resource resource : resourcesList) {
+            try (InputStream inputStream = resource.getInputStream()) {
+                String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
+                String sha1 = SecureUtil.sha1(sql);
+                if (executeSqlLog.contains(sha1)) {
+                    // 已经执行过啦，不再执行
+                    continue;
+                }
+                String sqlFileNow = resource.getFilename();
+                eachSql.accept(sqlFileNow);
+                Db.use(dataSource).tx((CheckedUtil.VoidFunc1Rt<Db>) parameter -> {
+                    try {
+                        int rows = parameter.execute(sql);
+                        log.info("exec init SQL file: {} complete, and affected rows is: {}", sqlFileNow, rows);
+                    } catch (SQLException e) {
+                        throw Lombok.sneakyThrow(e);
+                    }
+                });
+                executeSqlLog.add(sha1);
+            } catch (Exception e) {
+                throw Lombok.sneakyThrow(e);
+            }
+        }
+    }
+
+    /**
+     * 数据库是否开启 web 配置检查
+     *
+     * @param serverExtConfigBean 服务端配置
+     * @param dbExtConfig         外部配置
+     */
     private static void dbSecurityCheck(ServerExtConfigBean serverExtConfigBean, DbExtConfig dbExtConfig) {
         if (!JpomManifest.getInstance().isDebug() && serverExtConfigBean.isH2ConsoleEnabled()
             && StrUtil.equals(dbExtConfig.getUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
