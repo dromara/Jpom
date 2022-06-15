@@ -166,10 +166,10 @@ public class InitDb implements DisposableBean, InitializingBean {
             return;
         }
         instance.initOk();
+        AFTER_CALLBACK.forEach(Runnable::run);
         // json load to db
         InitDb.loadJsonToDb();
         Console.log("h2 db Successfully loaded, url is 【{}】", dbUrl);
-        AFTER_CALLBACK.forEach(Runnable::run);
         syncAllNode();
     }
 
