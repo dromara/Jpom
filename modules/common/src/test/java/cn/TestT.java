@@ -34,19 +34,25 @@ import java.util.List;
  * @since 2019/9/4
  */
 public class TestT {
-	public static void main(String[] args) {
-		Duration parse = Duration.parse("1H");
-		System.out.println(parse.getSeconds());
-	}
 
-	@Test
-	public void testList() {
-		List<Integer> list = CollUtil.newArrayList(1, 2, 3, 4, 5, 6);
-		list.sort(Comparator.reverseOrder());
-		int size = CollUtil.size(list);
-		list = CollUtil.sub(list, 2, size);
-		System.out.println(list);
-	}
+    @Test
+    public void tset() {
+
+    }
+
+    public static void main(String[] args) {
+        Duration parse = Duration.parse("1H");
+        System.out.println(parse.getSeconds());
+    }
+
+    @Test
+    public void testList() {
+        List<Integer> list = CollUtil.newArrayList(1, 2, 3, 4, 5, 6);
+        list.sort(Comparator.reverseOrder());
+        int size = CollUtil.size(list);
+        list = CollUtil.sub(list, 2, size);
+        System.out.println(list);
+    }
 
 
 }

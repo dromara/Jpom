@@ -2,17 +2,7 @@
   <div class="full-content">
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
-    <a-table
-      :columns="columns"
-      :data-source="list"
-      bordered
-      size="middle"
-      rowKey="id"
-      @expand="expand"
-      :pagination="pagination"
-      @change="changePage"
-      :row-selection="rowSelection"
-    >
+    <a-table :columns="columns" :data-source="list" bordered size="middle" rowKey="id" @expand="expand" :pagination="pagination" @change="changePage" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%id%']" @pressEnter="loadData" placeholder="节点ID" />
@@ -263,7 +253,19 @@
       <node-layout v-if="drawerVisible" :node="temp" />
     </a-drawer>
     <!-- Terminal -->
-    <a-modal v-model="terminalVisible" width="80%" title="Terminal" :footer="null" :maskClosable="false">
+    <a-modal
+      v-model="terminalVisible"
+      :bodyStyle="{
+        padding: '0px 10px',
+        paddingTop: '10px',
+        marginRight: '10px',
+        height: `70vh`,
+      }"
+      width="80%"
+      title="Terminal"
+      :footer="null"
+      :maskClosable="false"
+    >
       <terminal v-if="terminalVisible" :sshId="temp.sshId" :nodeId="temp.id" />
     </a-modal>
     <!-- 解锁节点 -->
@@ -408,28 +410,28 @@
   </div>
 </template>
 <script>
-import { mapGetters } from "vuex";
+import {mapGetters} from "vuex";
 import {
+  confirmFastInstall,
+  deleteNode,
+  editNode,
+  fastInstall,
+  getNodeGroupAll,
   getNodeList,
   getNodeStatus,
-  editNode,
-  unbind,
-  deleteNode,
-  syncProject,
-  unLockWorkspace,
-  getNodeGroupAll,
-  fastInstall,
   pullFastInstallResult,
-  confirmFastInstall,
+  syncProject,
   syncToWorkspace,
+  unbind,
+  unLockWorkspace,
 } from "@/api/node";
-import { getSshListAll } from "@/api/ssh";
-import { syncScript } from "@/api/node-other";
+import {getSshListAll} from "@/api/ssh";
+import {syncScript} from "@/api/node-other";
 import NodeLayout from "./node-layout";
 import Terminal from "@/pages/ssh/terminal";
-import { parseTime } from "@/utils/time";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { getWorkSpaceListAll } from "@/api/workspace";
+import {parseTime} from "@/utils/time";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {getWorkSpaceListAll} from "@/api/workspace";
 import CustomSelect from "@/components/customSelect";
 import Vue from "vue";
 
