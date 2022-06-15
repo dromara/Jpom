@@ -73,10 +73,11 @@
   </div>
 </template>
 <script>
-import { getProjectData, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from "@/api/node-project";
-import { mapGetters } from "vuex";
-import { getWebSocketUrl } from "@/utils/const";
+import {deleteProjectLogBackFile, downloadProjectLogBackFile, downloadProjectLogFile, getLogBackList, getProjectData, getProjectLogSize} from "@/api/node-project";
+import {mapGetters} from "vuex";
+import {getWebSocketUrl} from "@/utils/const";
 import LogView from "@/components/logView";
+
 export default {
   components: {
     LogView,
@@ -138,7 +139,7 @@ export default {
       };
       getProjectData(params).then((res) => {
         if (res.code === 200) {
-          this.project = res.data;
+          this.project = { ...this.project, ...res.data };
           if (this.copyId) {
             if (this.project.javaCopyItemList) {
               const finds = this.project.javaCopyItemList.filter((item) => item.id === this.copyId);
@@ -404,7 +405,7 @@ export default {
 /* .filter {
   margin: 0 0 10px;
 } */
-/* 
+/*
 .console {
   padding: 5px;
   color: #fff;
