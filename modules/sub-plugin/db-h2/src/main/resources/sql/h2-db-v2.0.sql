@@ -67,67 +67,6 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BUILD_INFO
 );
 comment on table BUILD_INFO is '构建信息';
 
--- @author jzy 2021-08-13 添加基础字段
-
-ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS createTimeMillis BIGINT COMMENT '数据创建时间';
-ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS modifyTimeMillis BIGINT COMMENT '数据修改时间';
-
-ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS createTimeMillis BIGINT COMMENT '数据创建时间';
-ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS modifyTimeMillis BIGINT COMMENT '数据修改时间';
-
--- @author Hotstrip -> add repositoryId in case it's not exists
-ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS repositoryId VARCHAR(50) COMMENT '仓库 id';
-
--- @author Hotstrip 增加 modifyUser
-ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS modifyUser VARCHAR(50) comment '修改人';
-
--- @author Hotstrip 增加 status
-ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS `status` int comment '状态';
-
--- @author Hotstrip 增加 TRIGGERTOKEN
-ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS triggerToken VARCHAR(100) comment '触发器token';
-
--- @author bwcx_jzy 2021-12-06
-ALTER TABLE BUILD_INFO
-	ALTER COLUMN triggerToken VARCHAR(100) comment '触发器token';
-
--- @author jzy 增加 RSAPRV
-ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS rsaPrv VARCHAR(4096) comment 'SSH RSA 私钥';
-
--- @author Hotstrip update RSAPRV field length
-ALTER TABLE REPOSITORY
-	ALTER COLUMN rsaPrv VARCHAR(4096) comment 'SSH RSA 私钥';
-
--- @author bwcx_jzy 增加 releaseMethodDataId
-ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS releaseMethodDataId VARCHAR(200) comment '构建关联的数据ID';
-
--- @author lidaofu 增加 strike
-ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS strike int DEFAULT 0 comment '逻辑删除';
-
-
--- @author bwcx_jzy 增加 modifyUser
-ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS modifyUser VARCHAR(50) comment '修改人';
-
--- @author jzy
-ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS branchTagName VARCHAR(50) comment '标签';
-
--- @author hjk 增加字段长度，200->500
-ALTER TABLE BUILD_INFO
-	ALTER COLUMN script CLOB comment '构建命令';
-
 -- 备份数据库信息表 @author Hotstrip
 CREATE TABLE IF NOT EXISTS PUBLIC.BACKUP_INFO
 (
@@ -144,12 +83,3 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BACKUP_INFO
 );
 comment on table BACKUP_INFO is '备份数据库信息';
 
--- @author Hotstrip 增加字段 status
-ALTER TABLE BACKUP_INFO
-	ADD IF NOT EXISTS `status` int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}';
-
--- @author bwcx_jzy
-ALTER TABLE BUILD_INFO
-	ADD IF NOT EXISTS workspaceId VARCHAR(50) comment '所属工作空间';
-ALTER TABLE REPOSITORY
-	ADD IF NOT EXISTS workspaceId VARCHAR(50) comment '所属工作空间';
