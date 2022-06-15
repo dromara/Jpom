@@ -113,7 +113,7 @@ public class DbConfig {
         }
         File file = FileUtil.file(this.dbLocalPath(), this.getDbName());
         String path = FileUtil.getAbsolutePath(file);
-        return StrUtil.format("jdbc:h2:{};CACHE_SIZE={};MODE=MYSQL", path, dbExtConfig.getCacheSize().toKilobytes());
+        return StrUtil.format("jdbc:h2:{};CACHE_SIZE={};MODE=MYSQL;LOCK_TIMEOUT=10000", path, dbExtConfig.getCacheSize().toKilobytes());
     }
 
     public String getDbName() {
