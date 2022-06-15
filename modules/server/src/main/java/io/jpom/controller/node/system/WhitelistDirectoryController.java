@@ -54,48 +54,48 @@ import java.util.Map;
 @SystemPermission
 public class WhitelistDirectoryController extends BaseServerController {
 
-	private final WhitelistDirectoryService whitelistDirectoryService;
+    private final WhitelistDirectoryService whitelistDirectoryService;
 
-	public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService) {
-		this.whitelistDirectoryService = whitelistDirectoryService;
-	}
-
-
-	/**
-	 * get whiteList data
-	 * 白名单数据接口
-	 *
-	 * @return json
-	 * @author Hotstrip
-	 */
-	@RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
-	public String whiteList() {
-		AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
-		Map<String, String> map = new HashMap<>(8);
-		if (agentWhitelist != null) {
-			/**
-			 * put key and value into map
-			 * 赋值给 map 对象返回
-			 */
-			Field[] fields = ReflectUtil.getFields(AgentWhitelist.class);
-			for (Field field : fields) {
-				Collection<String> fieldValue = (Collection<String>) ReflectUtil.getFieldValue(agentWhitelist, field);
-				map.put(field.getName(), AgentWhitelist.convertToLine(fieldValue));
-			}
-		}
-		return JsonMessage.getString(200, "ok", map);
-	}
+    public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService) {
+        this.whitelistDirectoryService = whitelistDirectoryService;
+    }
 
 
-	/**
-	 * 保存接口
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
-	public String whitelistDirectorySubmit() {
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.WhitelistDirectory_Submit).toString();
-	}
+    /**
+     * get whiteList data
+     * 白名单数据接口
+     *
+     * @return json
+     * @author Hotstrip
+     */
+    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @SystemPermission
+    public String whiteList() {
+        AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
+        Map<String, String> map = new HashMap<>(8);
+        if (agentWhitelist != null) {
+            /**
+             * put key and value into map
+             * 赋值给 map 对象返回
+             */
+            Field[] fields = ReflectUtil.getFields(AgentWhitelist.class, field -> Collection.class.isAssignableFrom(field.getType()));
+            for (Field field : fields) {
+                Collection<String> fieldValue = (Collection<String>) ReflectUtil.getFieldValue(agentWhitelist, field);
+                map.put(field.getName(), AgentWhitelist.convertToLine(fieldValue));
+            }
+        }
+        return JsonMessage.getString(200, "ok", map);
+    }
+
+
+    /**
+     * 保存接口
+     *
+     * @return json
+     */
+    @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @SystemPermission
+    public String whitelistDirectorySubmit() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.WhitelistDirectory_Submit).toString();
+    }
 }
