@@ -11,6 +11,7 @@
 2. 【server】修复部分终端弹窗太小问题（感谢@syso）
 3. 【server】修复重新初始化数据库异常问题（感谢@Dream、hu丶向...🤡）
 4. 【server】修复系统管理中查看白名单配置报错（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5CGO7](https://gitee.com/dromara/Jpom/issues/I5CGO7) ）
+5. 【server】优化监听到路由错误 刷新页面
 
 ------
 
