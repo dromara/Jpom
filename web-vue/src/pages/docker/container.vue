@@ -131,16 +131,30 @@
       <log-view v-if="logVisible" :id="this.id" :containerId="temp.id" />
     </a-modal>
     <!-- Terminal -->
-    <a-modal v-model="terminalVisible" width="80vw" :title="`docker cli ${(temp.names || []).join(',')}`" :footer="null" :maskClosable="false">
+    <a-modal
+      v-model="terminalVisible"
+      width="80vw"
+
+      :bodyStyle="{
+        padding: '0px 10px',
+        paddingTop: '10px',
+        marginRight: '10px',
+        height: `70vh`,
+      }"
+      :title="`docker cli ${(temp.names || []).join(',')}`"
+      :footer="null"
+      :maskClosable="false"
+    >
       <terminal v-if="terminalVisible" :id="this.id" :containerId="temp.id" />
     </a-modal>
   </div>
 </template>
 <script>
-import { parseTime } from "@/utils/time";
-import { dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStop } from "@/api/docker-api";
+import {parseTime} from "@/utils/time";
+import {dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStop} from "@/api/docker-api";
 import LogView from "@/pages/docker/log-view";
 import Terminal from "@/pages/docker/terminal";
+
 export default {
   components: {
     LogView,
