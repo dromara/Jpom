@@ -41,4 +41,9 @@ public class H2BackupTest extends ApplicationStartTest {
 	public void testBackup() {
 		backupInfoService.checkAutoBackup();
 	}
+
+    @Test
+    public void testAuto() {
+        backupInfoService.autoBackup();
+    }
 }
