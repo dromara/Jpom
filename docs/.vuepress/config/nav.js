@@ -22,7 +22,7 @@ module.exports = [
         ]
     },
 
-    {text: '更新记录', link: '/pages/changelog/history/'},
+    {text: '更新记录', link: '/pages/changelog/new'},
 
     {text: 'Gitee', link: 'https://gitee.com/dromara/Jpom'},
     {text: 'Github', link: 'https://github.com/dromara/Jpom'},
