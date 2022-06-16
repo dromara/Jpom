@@ -96,12 +96,12 @@
                 </a-menu-item>
 
                 <a-menu-item>
-                  <a-tooltip title="删除会检查数据关联性,并且节点不存在项目或者脚本">
+                  <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
                     <a-button type="danger" @click="handleDelete(record)">删除</a-button>
                   </a-tooltip>
                 </a-menu-item>
                 <a-menu-item>
-                  <a-tooltip title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用">
+                  <a-tooltip placement="leftBottom" title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用">
                     <a-button type="danger" @click="handleUnbind(record)">解绑</a-button>
                   </a-tooltip>
                 </a-menu-item>
