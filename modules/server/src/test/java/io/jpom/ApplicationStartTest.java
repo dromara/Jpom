@@ -30,8 +30,10 @@ import io.jpom.system.init.InitDb;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.annotation.Resource;
@@ -42,25 +44,27 @@ import javax.annotation.Resource;
  */
 @SpringBootTest(classes = {JpomServerApplication.class, InitDb.class, PluginFactory.class})
 @AutoConfigureMockMvc
+@EnableAutoConfiguration
+@ContextConfiguration(initializers = PluginFactory.class)
 @Slf4j
 public class ApplicationStartTest {
 
-	@Autowired
-	protected MockMvc mockMvc;
+    @Autowired
+    protected MockMvc mockMvc;
 
-	@Resource
-	protected DbExtConfig dbExtConfig;
+    @Resource
+    protected DbExtConfig dbExtConfig;
 
 
-	@Test
-	public void testApplicationStart() {
-		log.info("Jpom Server Application started.....");
-	}
+    @Test
+    public void testApplicationStart() {
+        log.info("Jpom Server Application started.....");
+    }
 
-	@Test
-	public void testServerExtConfigBean() {
-		ServerExtConfigBean serverExtConfigBean = SpringUtil.getBean(ServerExtConfigBean.class);
-		System.out.println(serverExtConfigBean);
-	}
+    @Test
+    public void testServerExtConfigBean() {
+        ServerExtConfigBean serverExtConfigBean = SpringUtil.getBean(ServerExtConfigBean.class);
+        System.out.println(serverExtConfigBean);
+    }
 
 }

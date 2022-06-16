@@ -186,7 +186,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
         backupInfoModel.setBackupType(backupType.getCode());
         backupInfoModel.setFilePath(backupSqlPath);
         this.insert(backupInfoModel);
-
+        IPlugin plugin = PluginFactory.getPlugin("db-h2");
         // 开启一个子线程去执行任务，任务完成之后修改对应的数据库备份信息
         return ThreadUtil.execAsync(() -> {
             // 修改用的实体类
@@ -194,7 +194,6 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
             BeanUtil.copyProperties(backupInfoModel, backupInfo);
             try {
                 log.debug("start a new Thread to execute H2 Database backup...start");
-                IPlugin plugin = PluginFactory.getPlugin("db-h2");
                 Map<String, Object> map = new HashMap<>(10);
                 map.put("url", url);
                 map.put("user", user);
