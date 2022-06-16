@@ -8,6 +8,7 @@ import store from "../store/index";
 
 // 不需要鉴权的名单
 const whiteList = ["/login", "/install", "/system/ipAccess"];
+const noTabs = ["/full-terminal"];
 
 router.beforeEach((to, from, next) => {
   // 检测白名单
@@ -27,6 +28,10 @@ router.beforeEach((to, from, next) => {
     return;
   }
 
+  if (noTabs.indexOf(to.path) !== -1) {
+    next();
+    return;
+  }
   // 如果存在 token (已经登录)
   store.dispatch("loadSystemMenus").then(() => {
     // 存储 store

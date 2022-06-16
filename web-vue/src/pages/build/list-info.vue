@@ -88,6 +88,7 @@
 
               <a-menu-item>
                 <a-tooltip
+                  placement="leftBottom"
                   title="清除代码(仓库目录)为删除服务器中存储仓库目录里面的所有东西,删除后下次构建将重新拉起仓库里面的文件,一般用于解决服务器中文件和远程仓库中文件有冲突时候使用。执行时间取决于源码目录大小和文件数量如超时请耐心等待，或稍后重试"
                 >
                   <a-button size="small" type="danger" :disabled="!record.sourceDirExist" @click="handleClear(record)">清除代码 </a-button>
@@ -735,30 +736,30 @@
 <script>
 import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
-import { getRepositoryListAll } from "@/api/repository";
+import {getRepositoryListAll} from "@/api/repository";
 import {
+  buildModeMap,
   clearBuid,
   deleteBuild,
   editBuild,
   getBranchList,
-  buildModeMap,
+  getBuildGroupAll,
   getBuildList,
   getTriggerUrl,
   releaseMethodMap,
   resetTrigger,
   startBuild,
-  stopBuild,
   statusMap,
-  getBuildGroupAll,
+  stopBuild,
 } from "@/api/build-info";
-import { getDishPatchListAll, afterOptList, afterOptListSimple } from "@/api/dispatch";
-import { getProjectListAll, getNodeListAll } from "@/api/node";
-import { getSshListAll } from "@/api/ssh";
-import { itemGroupBy, parseTime } from "@/utils/time";
+import {afterOptList, afterOptListSimple, getDishPatchListAll} from "@/api/dispatch";
+import {getNodeListAll, getProjectListAll} from "@/api/node";
+import {getSshListAll} from "@/api/ssh";
+import {itemGroupBy, parseTime} from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
 import Vue from "vue";
-import { dockerSwarmListAll, dockerSwarmServicesList } from "@/api/docker-swarm";
+import {dockerSwarmListAll, dockerSwarmServicesList} from "@/api/docker-swarm";
 
 export default {
   components: {

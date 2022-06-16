@@ -101,6 +101,15 @@ public class SshController extends BaseServerController {
         return new JsonMessage<>(200, "", list);
     }
 
+    @GetMapping(value = "get-item.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<SshModel> getItem(@ValidatorItem String id) {
+        SshModel byKey = sshService.getByKey(id, getRequest());
+        Assert.notNull(byKey, "对应的 ssh 不存在");
+        return new JsonMessage<>(200, "", byKey);
+    }
+
+
     /**
      * 编辑
      *

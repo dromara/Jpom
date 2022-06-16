@@ -203,6 +203,11 @@ const router = new Router({
       component: () => import("../pages/login/install"),
     },
     {
+      path: "/full-terminal",
+      name: "full-terminal",
+      component: () => import("../pages/ssh/full-terminal"),
+    },
+    {
       path: "*",
       name: "404",
       component: () => import("../pages/404"),
