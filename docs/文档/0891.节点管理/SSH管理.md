@@ -2,6 +2,12 @@
 title: SSH管理
 date: 2022-06-11 09:57:14
 permalink: /pages/c6da0f/
+tags: 
+  - null
+categories: 
+  - docs
+  - 文档
+  - 节点管理
 ---
 # SSH管理
 
