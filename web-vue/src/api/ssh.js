@@ -9,6 +9,15 @@ export function getSshList(params) {
   });
 }
 
+// 查询单个 ssh
+export function getItem(params) {
+  return axios({
+    url: "/node/ssh/get-item.json",
+    method: "get",
+    params: params,
+  });
+}
+
 // 检查 ssh 是否安装 插件端
 export function getSshCheckAgent(params) {
   return axios({

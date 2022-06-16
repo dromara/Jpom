@@ -74,6 +74,11 @@
               <a-menu-item key="1">
                 <a-button size="small" type="primary" icon="fullscreen" @click="handleTerminal(record, true)">全屏终端</a-button>
               </a-menu-item>
+              <a-menu-item key="2">
+                <router-link target="_blank" :to="{ path: '/full-terminal', query: { id: record.id, wid: getWorkspaceId } }">
+                  <a-button size="small" type="primary" icon="fullscreen"> 新标签终端</a-button>
+                </router-link>
+              </a-menu-item>
             </a-menu>
           </a-dropdown>
 
@@ -371,14 +376,14 @@
   </div>
 </template>
 <script>
-import { deleteSsh, editSsh, getSshList, getSshCheckAgent, getSshOperationLogList, installAgentNode, getAgent, uploadAgent, syncToWorkspace } from "@/api/ssh";
+import {deleteSsh, editSsh, getAgent, getSshCheckAgent, getSshList, getSshOperationLogList, installAgentNode, syncToWorkspace, uploadAgent} from "@/api/ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
-import { parseTime } from "@/utils/time";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { getWorkSpaceListAll } from "@/api/workspace";
+import {parseTime} from "@/utils/time";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {getWorkSpaceListAll} from "@/api/workspace";
 import Vue from "vue";
-import { mapGetters } from "vuex";
+import {mapGetters} from "vuex";
 
 export default {
   components: {
