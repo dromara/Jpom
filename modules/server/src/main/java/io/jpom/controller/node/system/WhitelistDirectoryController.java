@@ -78,10 +78,15 @@ public class WhitelistDirectoryController extends BaseServerController {
              * put key and value into map
              * 赋值给 map 对象返回
              */
-            Field[] fields = ReflectUtil.getFields(AgentWhitelist.class, field -> Collection.class.isAssignableFrom(field.getType()));
+            Field[] fields = ReflectUtil.getFields(AgentWhitelist.class, field -> Collection.class.isAssignableFrom(field.getType()) || String.class.isAssignableFrom(field.getType()));
             for (Field field : fields) {
-                Collection<String> fieldValue = (Collection<String>) ReflectUtil.getFieldValue(agentWhitelist, field);
-                map.put(field.getName(), AgentWhitelist.convertToLine(fieldValue));
+                Object fieldValue = ReflectUtil.getFieldValue(agentWhitelist, field);
+                if (fieldValue instanceof Collection) {
+                    Collection<String> collection = (Collection<String>) fieldValue;
+                    map.put(field.getName(), AgentWhitelist.convertToLine(collection));
+                } else if (fieldValue instanceof String) {
+                    map.put(field.getName(), (String) fieldValue);
+                }
             }
         }
         return JsonMessage.getString(200, "ok", map);

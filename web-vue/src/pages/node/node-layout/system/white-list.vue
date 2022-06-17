@@ -10,8 +10,11 @@
       <a-form-model-item label="证书路径" prop="certificate">
         <a-input v-model="temp.certificate" type="textarea" :rows="5" style="resize: none" placeholder="请输入证书存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径" />
       </a-form-model-item>
-      <a-form-model-item label="Nginx 路径" prop="nginx">
+      <a-form-model-item label="Nginx 白名单路径" prop="nginx">
         <a-input v-model="temp.nginx" type="textarea" :rows="5" style="resize: none" placeholder="请输入 nginx 存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径" />
+      </a-form-model-item>
+      <a-form-model-item label="Nginx 安装路径" prop="nginxPath">
+        <a-input v-model="temp.nginxPath" placeholder="请输入 nginx安装路径,一般情况下无需配置，windows 下建议配置 nginx 安装的绝对路径,用于能 reload nginx " />
       </a-form-model-item>
       <a-form-model-item label="远程下载安全HOST" prop="allowRemoteDownloadHost">
         <a-input v-model="temp.allowRemoteDownloadHost" type="textarea" :rows="5" style="resize: none" placeholder="请输入远程下载安全HOST，回车支持输入多个路径，示例 https://www.test.com 等" />
@@ -32,7 +35,8 @@
   </div>
 </template>
 <script>
-import { getWhiteList, editWhiteList } from "@/api/node-system";
+import {editWhiteList, getWhiteList} from "@/api/node-system";
+
 export default {
   props: {
     node: {

@@ -1,5 +1,15 @@
 # 🚀 版本日志
 
+## 2.9.1
+
+### 🐣 新增功能
+
+1. 【agent】插件端白名单新增 nginx 安装路径,解决 nginx reload 问题（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5CJR7](https://gitee.com/dromara/Jpom/issues/I5CJR7) ）
+
+### 🐞 解决BUG、优化功能
+
+------
+
 ## 2.9.1 (2022-06-16)
 
 ### 🐣 新增功能
