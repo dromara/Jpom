@@ -186,7 +186,7 @@ public class ReleaseManage implements Runnable {
      *
      * @param commands 命令
      */
-    private void formatCommand(String[] commands) {
+    private Map<String, String> formatCommand(String[] commands) {
         File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
         File envFile = FileUtil.file(sourceFile, ".env");
         Map<String, String> envFileMap = FileUtils.readEnvFile(envFile);
@@ -202,6 +202,7 @@ public class ReleaseManage implements Runnable {
         //
         WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
         workspaceEnvVarService.formatCommand(this.buildExtraModule.getWorkspaceId(), commands);
+        return envFileMap;
     }
 
     private String parseDockerTag(File envFile, String tag) {
