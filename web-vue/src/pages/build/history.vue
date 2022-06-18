@@ -1,8 +1,8 @@
 <template>
   <div class="full-content">
     <!-- <div ref="filter" class="filter">
-     
-      <a-button type="primary" @click="handleFilter">刷新</a-button> 
+
+      <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div> -->
     <!-- 数据表格 -->
     <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" bordered rowKey="id" @change="change" :row-selection="rowSelection">
@@ -105,10 +105,11 @@
 </template>
 <script>
 import BuildLog from "./log";
-import { geteBuildHistory, getBuildListAll, downloadBuildLog, rollback, deleteBuildHistory, releaseMethodMap, statusMap, downloadBuildFile, triggerBuildTypeMap } from "@/api/build-info";
-import { parseTime, formatDuration } from "@/utils/time";
+import {deleteBuildHistory, downloadBuildFile, downloadBuildLog, getBuildListAll, geteBuildHistory, releaseMethodMap, rollback, statusMap, triggerBuildTypeMap} from "@/api/build-info";
+import {formatDuration, parseTime} from "@/utils/time";
 
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+
 export default {
   components: {
     BuildLog,
@@ -194,7 +195,7 @@ export default {
       });
     },
     // 分页、排序、筛选变化时触发
-    changef(pagination, filters, sorter) {
+    change(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
