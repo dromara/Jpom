@@ -5,6 +5,7 @@
 ### 🐣 新增功能
 
 1. 【agent】插件端白名单新增 nginx 安装路径,解决 nginx reload 问题（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5CJR7](https://gitee.com/dromara/Jpom/issues/I5CJR7) ）
+2. 【server】构建历史分页查询不生效（感谢[@PQ宝剑](https://gitee.com/pqbaojian) [Gitee issues I5CYOD](https://gitee.com/dromara/Jpom/issues/I5CYOD) ）
 
 ### 🐞 解决BUG、优化功能
 
