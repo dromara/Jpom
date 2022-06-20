@@ -265,7 +265,7 @@ public class BuildTriggerApiController extends BaseJpomController {
             return JsonMessage.getString(200, "", collect);
         } catch (Exception e) {
             log.error("获取构建状态异常", e);
-            return JsonMessage.getString(500, "发送异常", e.getMessage());
+            return JsonMessage.getString(500, "发生异常", e.getMessage());
         }
     }
 
