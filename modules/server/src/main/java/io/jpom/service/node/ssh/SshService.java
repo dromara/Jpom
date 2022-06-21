@@ -401,6 +401,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                 where.setWorkspaceId(workspaceId);
                 where.setHost(data.getHost());
                 where.setPort(data.getPort());
+                where.setUser(data.getUser());
                 where.setConnectType(data.getConnectType());
                 SshModel sshModel = super.queryByBean(where);
                 if (sshModel == null) {

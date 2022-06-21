@@ -202,6 +202,8 @@ public class SshController extends BaseServerController {
         Entity entity = Entity.create();
         entity.set("host", sshModel.getHost());
         entity.set("port", sshModel.getPort());
+        entity.set("user", sshModel.getUser());
+        entity.set("connectType", sshModel.getConnectType());
         entity.set("workspaceId", workspaceId);
         if (StrUtil.isNotEmpty(id)) {
             entity.set("id", StrUtil.format(" <> {}", id));
