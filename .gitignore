@@ -5,6 +5,9 @@ target/
 venv/
 node_modules/
 
+# Jrebel
+rebel.xml
+
 #
 apidoc/
 
