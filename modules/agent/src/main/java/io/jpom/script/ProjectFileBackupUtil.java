@@ -27,6 +27,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
@@ -142,53 +143,58 @@ public class ProjectFileBackupUtil {
             // 备份ID 不存在
             return;
         }
-        File backupItemPath = ProjectFileBackupUtil.path(pathId, backupId);
-        File backupPath = ProjectFileBackupUtil.path(pathId);
-        // 获取文件列表
-        Map<String, File> backupFiles = ProjectFileBackupUtil.listFiles(backupItemPath.getAbsolutePath());
-        Map<String, File> nowFiles = ProjectFileBackupUtil.listFiles(projectPath);
-        nowFiles.forEach((fileSha1, file) -> {
-            // 当前目录存在的，但是备份目录也存在的相同文件则删除
-            File backupFile = backupFiles.get(fileSha1);
-            if (backupFile != null) {
-                CommandUtil.systemFastDel(backupFile);
-                backupFiles.remove(fileSha1);
-            }
-        });
-        // 判断保存指定后缀
-        String[] backupSuffix = Optional.ofNullable(dslYmlDto)
-            .map(DslYmlDto::getFile)
-            .map(DslYmlDto.FileConfig::getBackupSuffix)
-            .orElse(AgentExtConfigBean.getInstance().getProjectFileBackupSuffix());
-        if (ArrayUtil.isNotEmpty(backupSuffix)) {
-            backupFiles.values()
-                .stream()
-                .filter(file -> {
-                    String name = FileUtil.getName(file);
-                    for (String reg : backupSuffix) {
-                        if (ReUtil.isMatch(reg, name)) {
-                            // 满足正则条件
-                            return false;
+        // 考虑到大文件对比，比较耗时。需要异步对比文件
+        ThreadUtil.execute(() -> {
+            File backupItemPath = ProjectFileBackupUtil.path(pathId, backupId);
+            File backupPath = ProjectFileBackupUtil.path(pathId);
+            // 获取文件列表
+            Map<String, File> backupFiles = ProjectFileBackupUtil.listFiles(backupItemPath.getAbsolutePath());
+            Map<String, File> nowFiles = ProjectFileBackupUtil.listFiles(projectPath);
+            nowFiles.forEach((fileSha1, file) -> {
+                // 当前目录存在的，但是备份目录也存在的相同文件则删除
+                File backupFile = backupFiles.get(fileSha1);
+                if (backupFile != null) {
+                    CommandUtil.systemFastDel(backupFile);
+                    backupFiles.remove(fileSha1);
+                }
+            });
+            // 判断保存指定后缀
+            String[] backupSuffix = Optional.ofNullable(dslYmlDto)
+                .map(DslYmlDto::getFile)
+                .map(DslYmlDto.FileConfig::getBackupSuffix)
+                .orElse(AgentExtConfigBean.getInstance().getProjectFileBackupSuffix());
+            if (ArrayUtil.isNotEmpty(backupSuffix)) {
+                backupFiles.values()
+                    .stream()
+                    .filter(file -> {
+                        String name = FileUtil.getName(file);
+                        for (String reg : backupSuffix) {
+                            if (ReUtil.isMatch(reg, name)) {
+                                // 满足正则条件
+                                return false;
+                            }
                         }
-                    }
-                    return !StrUtil.endWithAny(name, backupSuffix);
-                })
-                .forEach(CommandUtil::systemFastDel);
-        }
-        // 删除空文件夹
-        loopClean(backupItemPath);
-        // 检查备份保留个数
-        clearOldBackup(backupPath, dslYmlDto);
+                        return !StrUtil.endWithAny(name, backupSuffix);
+                    })
+                    .forEach(CommandUtil::systemFastDel);
+            }
+            // 删除空文件夹
+            loopClean(backupItemPath);
+            // 检查备份保留个数
+            clearOldBackup(backupPath, dslYmlDto);
+        });
     }
 
     private static void loopClean(File backupPath) {
         if (FileUtil.isFile(backupPath)) {
             return;
         }
-        File[] files = backupPath.listFiles();
-        for (File file : files) {
-            ProjectFileBackupUtil.loopClean(file);
-        }
+        //
+        Optional.ofNullable(backupPath.listFiles()).ifPresent(files1 -> {
+            for (File file : files1) {
+                ProjectFileBackupUtil.loopClean(file);
+            }
+        });
         // 检查目录是否为空
         if (FileUtil.isDirEmpty(backupPath)) {
             FileUtil.del(backupPath);
