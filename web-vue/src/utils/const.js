@@ -36,40 +36,38 @@ const cachePageLimit = parseInt(localStorage.getItem(cachePageLimitKeyName) || 1
  * 分页选择条
  */
 export const PAGE_DEFAULT_SIZW_OPTIONS = ["5", "10", "15", "20", "25", "30", "35", "40", "50"];
+
 /**
  * 展示总条数计算方法
  * @param {Number} total 总记录数
- * @param {JSON} listQuery  通用分页参数
  * @returns String
  */
-export function PAGE_DEFAULT_SHOW_TOTAL(total, listQuery) {
-  if (total <= listQuery.limit) {
+export function PAGE_DEFAULT_SHOW_TOTAL(total) {
     return `总计 ${total} 条`;
-  }
-  return `总计 ${total} 条`;
 }
 
 export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(cachePageLimit) ? 10 : cachePageLimit, total: 0 };
 
 /**
  * 计算分页数据
- * @param {JSON} queryParam
+ * @param {JSON} queryParam 分页参数
+ * @param {Array} pageSizeOptions 分页选择条选项
  * @returns
  */
-export function COMPUTED_PAGINATION(queryParam) {
+export function COMPUTED_PAGINATION(queryParam, pageSizeOptions) {
   // console.log(queryParam);
   const limit = queryParam.limit || PAGE_DEFAULT_LIST_QUERY.limit;
   return {
     total: queryParam.total || 0,
     current: queryParam.page || 1,
     pageSize: limit,
-    pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+    pageSizeOptions: pageSizeOptions || PAGE_DEFAULT_SIZW_OPTIONS,
     showSizeChanger: true,
     showQuickJumper: true,
     showLessItems: true,
     hideOnSinglePage: limit <= 20,
     showTotal: (total) => {
-      return PAGE_DEFAULT_SHOW_TOTAL(total, queryParam);
+      return PAGE_DEFAULT_SHOW_TOTAL(total);
     },
   };
 }

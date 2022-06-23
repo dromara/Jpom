@@ -232,7 +232,7 @@ public class RepositoryController extends BaseServerController {
                 .form("simple", true)
                 .form("order_by", "updated_at")
                 .form("page", page.getPageNumber())
-                .form("per_page", Math.max(page.getPageSize(), 15))
+                .form("per_page", page.getPageSize())
                 .execute();
         String body = reposResponse.body();
         Assert.state(userResponse.isOk(), "拉取仓库信息错误：" + body);

@@ -156,7 +156,7 @@
           </a-input-group>
         </a-form-model-item>
       </a-form-model>
-      <a-table :loading="loading" :columns="reposColumns" :data-source="repos" bordered rowKey="id" @change="reposChange" :pagination="reposPagination">
+      <a-table :loading="loading" :columns="reposColumns" :data-source="repos" bordered rowKey="full_name" @change="reposChange" :pagination="reposPagination">
         <template slot="private" slot-scope="text, record">
           <a-switch :disabled="true" :checked="record.private" />
         </template>
@@ -190,7 +190,8 @@ export default {
   data() {
     return {
       loading: false,
-      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
+      PAGE_DEFAULT_SIZW_OPTIONS: ["15", "20", "25", "30", "35", "40", "50"],
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, { limit: 15 }),
       list: [],
       total: 0,
       temp: {},
@@ -267,7 +268,7 @@ export default {
           align: "left",
         },
       ],
-      giteeImportForm: Object.assign({ type: "gitee" }, PAGE_DEFAULT_LIST_QUERY),
+      giteeImportForm: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, { limit: 15, type: "gitee" }),
       giteeImportFormRules: {
         token: [{ required: true, message: "请输入私人令牌", trigger: "blur" }],
       },
@@ -280,10 +281,10 @@ export default {
   computed: {
     // 分页
     pagination() {
-      return COMPUTED_PAGINATION(this.listQuery);
+      return COMPUTED_PAGINATION(this.listQuery, this.PAGE_DEFAULT_SIZW_OPTIONS);
     },
     reposPagination() {
-      return COMPUTED_PAGINATION(this.giteeImportForm);
+      return COMPUTED_PAGINATION(this.giteeImportForm, this.PAGE_DEFAULT_SIZW_OPTIONS);
     },
   },
   watch: {},
