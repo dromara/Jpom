@@ -24,6 +24,7 @@ package io.jpom.controller.build;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
@@ -36,6 +37,7 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
@@ -52,6 +54,7 @@ import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.system.JpomRuntimeException;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -61,8 +64,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -189,6 +194,7 @@ public class RepositoryController extends BaseServerController {
         Page page = repositoryService.parsePage(paramMap);
         String token = paramMap.get("token");
         Assert.hasText(token, "请填写个人令牌");
+        String gitlabAddress = paramMap.getOrDefault("gitlabAddress", "https://gitlab.com");
         //
         String type = paramMap.get("type");
         PageResultDto<JSONObject> pageResultDto;
@@ -200,7 +206,7 @@ public class RepositoryController extends BaseServerController {
                 pageResultDto = this.githubRepos(token, page);
                 break;
             case "gitlab":
-                pageResultDto = this.gitlabRepos(token, page);
+                pageResultDto = this.gitlabRepos(token, page, gitlabAddress);
                 break;
             default:
                 throw new IllegalArgumentException("不支持的类型");
@@ -215,32 +221,40 @@ public class RepositoryController extends BaseServerController {
      *
      * @param token 个人令牌
      * @param page  分页
+     * @param gitlabAddress gitLab 地址
      * @return page
      */
-    private PageResultDto<JSONObject> gitlabRepos(String token, Page page) {
-        //
-        HttpResponse userResponse = HttpUtil.createGet("https://gitlab.com/api/v4/user")
-                .form("access_token", token)
-                .execute();
+    private PageResultDto<JSONObject> gitlabRepos(String token, Page page, String gitlabAddress) {
+        // 删除最后的 /
+        if (gitlabAddress.endsWith("/")) {
+            gitlabAddress = gitlabAddress.substring(0, gitlabAddress.length() - 1);
+        }
+
+        // 内部自建 GitLab，一般都没有配置 https 协议，如果用户没有指定协议，默认走 http，gitlab 走 https
+        // https 访问不了的情况下自动替换为 http
+        if (!StrUtil.startWithAnyIgnoreCase(gitlabAddress, "http://", "https://")) {
+            gitlabAddress = "http://" + gitlabAddress;
+        }
+
+        HttpResponse userResponse = null;
+        try {
+            userResponse = GitLabUtil.getGitLabUserInfo(gitlabAddress, token);
+        } catch (IORuntimeException ioRuntimeException) {
+            // 连接超时，切换至 http 协议进行重试
+            if (StrUtil.startWithIgnoreCase(gitlabAddress, "https")) {
+                gitlabAddress = "http" + gitlabAddress.substring(5);
+                userResponse = GitLabUtil.getGitLabUserInfo(gitlabAddress, token);
+            }
+            Assert.state(userResponse != null, "无法连接至 GitLab：" + ioRuntimeException.getMessage());
+        }
+
         Assert.state(userResponse.isOk(), "令牌不正确：" + userResponse.body());
         JSONObject userBody = JSONObject.parseObject(userResponse.body());
         String username = userBody.getString("username");
-        // 拉取仓库信息
-        HttpResponse reposResponse = HttpUtil.createGet("https://gitlab.com/api/v4/projects")
-                .form("private_token", token)
-                .form("membership", true)
-                .form("simple", true)
-                .form("order_by", "updated_at")
-                .form("page", page.getPageNumber())
-                .form("per_page", page.getPageSize())
-                .execute();
-        String body = reposResponse.body();
-        Assert.state(userResponse.isOk(), "拉取仓库信息错误：" + body);
 
-        String totalCountStr = reposResponse.header("X-Total");
-        int totalCount = Convert.toInt(totalCountStr, 0);
-        //String totalPage = reposResponse.header("total_page");
-        JSONArray jsonArray = JSONArray.parseArray(body);
+        Map<String, Object> gitLabRepos = GitLabUtil.getGitLabRepos(gitlabAddress, token, page);
+
+        JSONArray jsonArray = JSONArray.parseArray((String) gitLabRepos.get("body"));
         List<JSONObject> objects = jsonArray.stream().map(o -> {
             JSONObject repo = (JSONObject) o;
             JSONObject jsonObject = new JSONObject();
@@ -256,7 +270,7 @@ public class RepositoryController extends BaseServerController {
             return jsonObject;
         }).collect(Collectors.toList());
         //
-        PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), totalCount);
+        PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), (int) gitLabRepos.get("total"));
         pageResultDto.setResult(objects);
         return pageResultDto;
     }
@@ -458,4 +472,157 @@ public class RepositoryController extends BaseServerController {
         FileUtil.del(rsaFile);
         return JsonMessage.getString(200, "删除成功");
     }
+
+    /**
+     * GitLab 版本号信息，参考：https://docs.gitlab.com/ee/api/version.html
+     */
+    @Data
+    private static class GitLabVersionInfo {
+
+        /**
+         * 版本号，如：8.13.0-pre
+         */
+        private String version;
+
+        /**
+         * 修订号，如：4e963fe
+         */
+        private String revision;
+
+        /**
+         * API 版本号，如：v4
+         */
+        private String apiVersion;
+    }
+
+    /**
+     * GitLab 工具
+     */
+    private static class GitLabUtil {
+
+        /**
+         * GitLab 版本信息容器，key：GitLab 地址，value：GitLabVersionInfo
+         */
+        private static final Map<String, GitLabVersionInfo> gitlabVersionMap = new ConcurrentHashMap<>();
+
+        /**
+         * 获取 GitLab 版本
+         *
+         * @param gitlabAddress GitLab 地址
+         * @param token 用户 token
+         * @return 请求结果
+         */
+        private static HttpResponse getGitLabVersion(String gitlabAddress, String token, String apiVersion) {
+            // 参考：https://docs.gitlab.com/ee/api/version.html
+            return HttpUtil.createGet(StrUtil.format("{}/api/{}/version", gitlabAddress, apiVersion))
+                .header("PRIVATE-TOKEN", token)
+                .execute();
+        }
+
+        /**
+         * 获取 GitLab 版本信息
+         *
+         * @param url GitLab 地址
+         * @param token 用户 token
+         */
+        private static GitLabVersionInfo getGitLabVersionInfo(String url, String token) {
+            // 缓存中有的话，从缓存读取
+            GitLabVersionInfo gitLabVersionInfo = gitlabVersionMap.get(url);
+            if (gitLabVersionInfo != null)
+                return gitLabVersionInfo;
+
+            // 获取 GitLab 版本号信息
+            GitLabVersionInfo glvi = null;
+            String apiVersion = "v4";
+            HttpResponse v4 = getGitLabVersion(url, token, apiVersion);
+            if (v4 != null) {
+                glvi = JSON.parseObject(v4.body(), GitLabVersionInfo.class);
+            } else {
+                apiVersion = "v3";
+                HttpResponse v3 = getGitLabVersion(url, token, apiVersion);
+                if (v3 != null) {
+                    glvi = JSON.parseObject(v3.body(), GitLabVersionInfo.class);
+                }
+            }
+
+            Assert.state(glvi != null, "获取 GitLab 版本号失败，请检查 GitLab 地址和 token 是否正确");
+
+            // 添加到缓存中
+            glvi.setApiVersion(apiVersion);
+            gitlabVersionMap.put(url, glvi);
+
+            return glvi;
+        }
+
+        /**
+         * 获取 GitLab API 版本号
+         *
+         * @param url GitLab 地址
+         * @param token 用户 token
+         * @return GitLab API 版本号，如：v4
+         */
+        private static String getGitLabApiVersion(String url, String token) {
+            return getGitLabVersionInfo(url, token).getApiVersion();
+        }
+
+        /**
+         * 获取 GitLab 用户信息
+         *
+         * @param gitlabAddress GitLab 地址
+         * @param token 用户 token
+         * @return 请求结果
+         */
+        private static HttpResponse getGitLabUserInfo(String gitlabAddress, String token) {
+            // 参考：https://docs.gitlab.com/ee/api/users.html
+            return HttpUtil.createGet(
+                StrUtil.format(
+                    "{}/api/{}/user",
+                    gitlabAddress,
+                    getGitLabApiVersion(gitlabAddress, token)
+                )
+            )
+                .form("access_token", token)
+                .timeout(5000)
+                .execute();
+        }
+
+        /**
+         * 获取 GitLab 仓库信息
+         *
+         * @param gitlabAddress GitLab 地址
+         * @param token 用户 token
+         * @return 响应结果
+         */
+        private static Map<String, Object> getGitLabRepos(String gitlabAddress, String token, Page page) {
+            // 参考：https://docs.gitlab.com/ee/api/projects.html
+            HttpResponse reposResponse = HttpUtil.createGet(
+                StrUtil.format(
+                    "{}/api/{}/projects",
+                    gitlabAddress,
+                    getGitLabApiVersion(gitlabAddress, token)
+                )
+            )
+                .form("private_token", token)
+                .form("membership", true)
+                .form("simple", true)
+                .form("order_by", "updated_at")
+                .form("page", page.getPageNumber())
+                .form("per_page", page.getPageSize())
+                .execute();
+
+            String body = reposResponse.body();
+            Assert.state(reposResponse.isOk(), "拉取仓库信息错误：" + body);
+
+            String totalCountStr = reposResponse.header("X-Total");
+            int totalCount = Convert.toInt(totalCountStr, 0);
+            //String totalPage = reposResponse.header("total_page");
+
+            Map<String, Object> map = new HashMap<>(2);
+            map.put("body", body);
+            map.put("total", totalCount);
+
+            return map;
+        }
+    }
+
 }

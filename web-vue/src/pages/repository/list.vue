@@ -154,6 +154,14 @@
               <a-input-search style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.token" @search="handleGiteeImportFormOk" :placeholder="importTypePlaceholder" />
             </a-tooltip>
           </a-input-group>
+          <a-input-group
+            compact
+            style="width: 105%"
+            v-if="giteeImportForm.type === 'gitlab'">
+            <a-tooltip title="请输入 GitLab 的地址，支持自建 GitLab，不需要输入协议，如：gitlab.com、gitlab.jpom.io、10.1.2.3、10.1.2.3:8888 等">
+              <a-input style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.gitlabAddress" placeholder="gitlab.com" />
+            </a-tooltip>
+          </a-input-group>
         </a-form-model-item>
       </a-form-model>
       <a-table :loading="loading" :columns="reposColumns" :data-source="repos" bordered rowKey="full_name" @change="reposChange" :pagination="reposPagination">
