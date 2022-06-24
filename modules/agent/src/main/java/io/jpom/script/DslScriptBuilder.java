@@ -150,7 +150,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     public static String run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String log) {
         DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, log);
         if (builder == null) {
-            return "脚本模版不存在";
+            return "脚本模版不存在:" + scriptProcess.getScriptId();
         }
         builder.execute();
         return null;
@@ -164,7 +164,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     public static String syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel) {
         DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, null);
         if (builder == null) {
-            return "脚本模版不存在";
+            return "脚本模版不存在:" + scriptProcess.getScriptId();
         }
         return builder.syncExecute();
     }

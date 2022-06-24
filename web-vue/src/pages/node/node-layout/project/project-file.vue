@@ -148,7 +148,7 @@
           </a-space>
         </a-modal>
 
-        <a-modal v-model="editFileVisible" width="80vw" title="编辑文件" cancelText="关闭" :maskClosable="true" @ok="updateFileData" @cancel="handleCloseModal">
+        <a-modal v-model="editFileVisible" width="80vw" :title="`编辑文件 ${filename}`" cancelText="关闭" :maskClosable="true" @ok="updateFileData" @cancel="handleCloseModal">
           <div style="height: 60vh">
             <code-editor showTool v-model="fileContent" :fileSuffix="filename"></code-editor>
           </div>
