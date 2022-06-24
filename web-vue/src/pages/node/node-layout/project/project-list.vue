@@ -18,13 +18,7 @@
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
 
-          <a-dropdown
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-          >
+          <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               批量操作
               <a-icon type="down" />
@@ -74,13 +68,7 @@
           <a-tooltip :title="`${noFileModes.includes(record.runMode) ? '到控制台去管理项目状态' : 'File 类型项目不能使用控制台功能'}`">
             <a-button size="small" type="primary" @click="handleConsole(record)" :disabled="!noFileModes.includes(record.runMode)">控制台</a-button>
           </a-tooltip>
-          <a-dropdown
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-          >
+          <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
               <a-icon type="down" />

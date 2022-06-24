@@ -23,13 +23,7 @@
 
           <a-button size="small" v-if="!copyId" type="primary" @click="goFile">文件管理</a-button>
 
-          <a-dropdown
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-          >
+          <a-dropdown>
             <!-- <a type="link" class="ant-dropdown-link"> 更多<a-icon type="down" /> </a> -->
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               <a-tag>

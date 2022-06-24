@@ -61,13 +61,7 @@
               </a-tooltip>
             </a-tooltip>
           </template>
-          <a-dropdown
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-          >
+          <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
             <a-menu slot="overlay">
               <a-menu-item>
