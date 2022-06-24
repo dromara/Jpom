@@ -18,6 +18,7 @@
 6. 【agent】优化新增文件、删除文件目录加载两次问题（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5DMKG](https://gitee.com/dromara/Jpom/issues/I5DMKG) ）
 7. 【server】优化下拉菜单、下拉框跟随页面滚动 （感谢[@pl.com](https://gitee.com/pl.com) [Gitee issues I5D6I0](https://gitee.com/dromara/Jpom/issues/I5D6I0) ）
 8. 【server】导入仓库支持按仓库名搜索
+9. 【server】修复导入仓库 GitLab 私有列显示错误
 
 ------
 
