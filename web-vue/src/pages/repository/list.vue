@@ -156,6 +156,13 @@
           </a-input-group>
           <a-input-group
             compact
+            style="width: 105%">
+            <a-tooltip title="输入仓库名称或者仓库路径进行搜索">
+              <a-input style="width: 55%; margin-top: 1px" enter-button v-model="giteeImportForm.condition" placeholder="输入仓库名称或者仓库路径进行搜索" />
+            </a-tooltip>
+          </a-input-group>
+          <a-input-group
+            compact
             style="width: 105%"
             v-if="giteeImportForm.type === 'gitlab'">
             <a-tooltip title="请输入 GitLab 的地址，支持自建 GitLab，不需要输入协议，如：gitlab.com、gitlab.jpom.io、10.1.2.3、10.1.2.3:8888 等">
