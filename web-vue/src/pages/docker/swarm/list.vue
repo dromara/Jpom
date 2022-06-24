@@ -27,13 +27,7 @@
           <a-button size="small" :disabled="parseInt(record.status) !== 1" type="primary" @click="handleConsole(record, 'server')">服务</a-button>
           <a-button size="small" :disabled="parseInt(record.status) !== 1" type="primary" @click="handleConsole(record, 'node')">节点</a-button>
 
-          <a-dropdown
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-          >
+          <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
             <a-menu slot="overlay">
               <a-menu-item> <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button> </a-menu-item>

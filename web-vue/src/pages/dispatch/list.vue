@@ -99,13 +99,7 @@
             <a-button size="small" type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
             <a-button size="small" type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
           </template>
-          <a-dropdown
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-          >
+          <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
               <a-icon type="down" />

@@ -22,13 +22,7 @@
         </a-select-option>
       </a-select>
     </a-tooltip>
-    <a-dropdown
-      :getPopupContainer="
-        (triggerNode) => {
-          return triggerNode.parentNode || document.body;
-        }
-      "
-    >
+    <a-dropdown>
       <!--      <a-avatar-->
       <!--        shape="square"-->
       <!--        size="large"-->
