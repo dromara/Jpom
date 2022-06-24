@@ -32,6 +32,7 @@ import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -231,7 +232,7 @@ public abstract class AbstractProjectCommander {
             if (runMode == RunMode.Dsl) {
                 //
                 String startDsl = this.runDsl(nodeProjectInfoModel, "stop", process -> {
-                    String log = nodeProjectInfoModel.getAbsoluteLog(null);
+                    String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
                     return DslScriptBuilder.run(process, nodeProjectInfoModel, log);
                 });
                 boolean checkRun = this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false);
@@ -400,8 +401,7 @@ public abstract class AbstractProjectCommander {
             if (mainClass == null) {
                 return jarFile.getAbsolutePath() + "中没有找到对应的MainClass属性";
             }
-            JarClassLoader jarClassLoader = JarClassLoader.load(jarFile);
-            try {
+            try (JarClassLoader jarClassLoader = JarClassLoader.load(jarFile)) {
                 jarClassLoader.loadClass(mainClass);
             } catch (ClassNotFoundException notFound) {
                 return jarFile.getAbsolutePath() + "中没有找到对应的MainClass:" + mainClass;
@@ -453,6 +453,8 @@ public abstract class AbstractProjectCommander {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.Dsl) {
             String status = this.runDsl(nodeProjectInfoModel, "status", baseProcess -> DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel));
+            String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
+            FileUtil.appendString(status, FileUtil.file(log), CharsetUtil.CHARSET_UTF_8);
             List<String> split1 = StrUtil.split(status, StrUtil.CRLF);
             return CollUtil.getLast(split1);
         } else {
