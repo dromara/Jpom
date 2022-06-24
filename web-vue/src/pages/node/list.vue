@@ -27,7 +27,13 @@
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary jpom-node-manage-add" @click="handleAdd">新增</a-button>
-          <a-dropdown>
+          <a-dropdown
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+          >
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
             <a-menu slot="overlay">
               <a-menu-item>
@@ -97,7 +103,13 @@
             <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
               <a-button size="small" type="primary" @click="handleTerminal(record)" :disabled="!record.sshId"><a-icon type="code" />终端</a-button>
             </a-tooltip>
-            <a-dropdown>
+            <a-dropdown
+              :getPopupContainer="
+                (triggerNode) => {
+                  return triggerNode.parentNode || document.body;
+                }
+              "
+            >
               <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                 更多
                 <a-icon type="down" />

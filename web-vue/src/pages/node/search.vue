@@ -37,7 +37,13 @@
           </a-tooltip>
           <span>| </span>
 
-          <a-dropdown>
+          <a-dropdown
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+          >
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               批量操作
               <a-icon type="down" />

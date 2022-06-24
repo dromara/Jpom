@@ -103,7 +103,13 @@
         <a-space>
           <a-button size="small" type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
           <a-button size="small" type="primary" v-else @click="handleConfirmStartBuild(record)">构建</a-button>
-          <a-dropdown>
+          <a-dropdown
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+          >
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
               <a-icon type="down" />
