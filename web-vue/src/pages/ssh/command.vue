@@ -66,7 +66,18 @@
           </div>
         </a-form-model-item>
         <a-form-model-item label="SSH节点">
-          <a-select show-search option-filter-prop="children" placeholder="请选择SSH节点" mode="multiple" v-model="chooseSsh">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            placeholder="请选择SSH节点"
+            mode="multiple"
+            v-model="chooseSsh"
+          >
             <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>
@@ -111,7 +122,17 @@
         </a-form-model-item>
 
         <a-form-model-item label="SSH节点" required>
-          <a-select show-search option-filter-prop="children" mode="multiple" v-model="chooseSsh">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            mode="multiple"
+            v-model="chooseSsh"
+          >
             <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>
@@ -140,10 +161,10 @@
 </template>
 
 <script>
-import { deleteCommand, editCommand, executeBatch, getCommandList } from "@/api/command";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { parseTime } from "@/utils/time";
-import { getSshListAll } from "@/api/ssh";
+import {deleteCommand, editCommand, executeBatch, getCommandList} from "@/api/command";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {parseTime} from "@/utils/time";
+import {getSshListAll} from "@/api/ssh";
 import codeEditor from "@/components/codeEditor";
 import CommandLog from "./command-view-log";
 

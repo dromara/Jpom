@@ -3,27 +3,38 @@
     <a-tabs type="card" default-active-key="1">
       <a-tab-pane key="1" tab="服务端"> <upgrade></upgrade></a-tab-pane>
       <a-tab-pane key="2" tab="所有节点(插件端)" force-render>
-        <a-table
-          :columns="columns"
-          :data-source="listComputed"
-          bordered
-          size="middle"
-          rowKey="id"
-          class="table"
-          :pagination="pagination"
-          @change="changePage"
-          :row-selection="rowSelection"
-        >
+        <a-table :columns="columns" :data-source="listComputed" bordered size="middle" rowKey="id" class="table" :pagination="pagination" @change="changePage" :row-selection="rowSelection">
           <template slot="title">
             <a-space>
               <a-input class="search-input-item" @pressEnter="refresh" v-model="listQuery['%name%']" placeholder="节点名称" />
               <a-input class="search-input-item" @pressEnter="refresh" v-model="listQuery['%url%']" placeholder="节点地址" />
-              <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+              <a-select
+                :getPopupContainer="
+                  (triggerNode) => {
+                    return triggerNode.parentNode || document.body;
+                  }
+                "
+                show-search
+                option-filter-prop="children"
+                v-model="listQuery.group"
+                allowClear
+                placeholder="分组"
+                class="search-input-item"
+              >
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
               <a-button :loading="loading" type="primary" @click="refresh">搜索</a-button>
 
-              <a-select v-model="temp.protocol" placeholder="升级协议" class="search-input-item">
+              <a-select
+                :getPopupContainer="
+                  (triggerNode) => {
+                    return triggerNode.parentNode || document.body;
+                  }
+                "
+                v-model="temp.protocol"
+                placeholder="升级协议"
+                class="search-input-item"
+              >
                 <a-select-option value="WebSocket">WebSocket</a-select-option>
                 <a-select-option value="Http">Http</a-select-option>
               </a-select>
@@ -65,9 +76,9 @@
 </template>
 <script>
 import upgrade from "@/components/upgrade";
-import { uploadAgentFile, downloadRemote, checkVersion, getNodeList, getNodeGroupAll } from "@/api/node";
-import { mapGetters } from "vuex";
-import { getWebSocketUrl, COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import {checkVersion, downloadRemote, getNodeGroupAll, getNodeList, uploadAgentFile} from "@/api/node";
+import {mapGetters} from "vuex";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, getWebSocketUrl, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
 
 export default {
   components: {

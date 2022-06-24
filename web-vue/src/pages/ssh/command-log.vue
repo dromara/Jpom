@@ -5,10 +5,34 @@
         <a-space>
           <a-input v-model="listQuery['%commandName%']" @pressEnter="getCommandLogData" placeholder="搜索命令名称" class="search-input-item" />
           <a-input v-model="listQuery['%sshName%']" @pressEnter="getCommandLogData" placeholder="搜索ssh名称" class="search-input-item" />
-          <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.status"
+            allowClear
+            placeholder="状态"
+            class="search-input-item"
+          >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
           </a-select>
-          <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.triggerExecType"
+            allowClear
+            placeholder="触发类型"
+            class="search-input-item"
+          >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
@@ -45,9 +69,9 @@
 </template>
 
 <script>
-import { getCommandLogList, statusMap, triggerExecTypeMap, deleteCommandLog, downloadLog } from "@/api/command";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import {deleteCommandLog, downloadLog, getCommandLogList, statusMap, triggerExecTypeMap} from "@/api/command";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {parseTime} from "@/utils/time";
 import CommandLog from "./command-view-log";
 
 export default {

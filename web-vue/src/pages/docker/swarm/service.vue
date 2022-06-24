@@ -120,7 +120,16 @@
                         </a-col>
                         <a-col :span="8" :offset="1">
                           <a-input addon-before="容器" v-model="item.targetPort" placeholder="容器端口">
-                            <a-select slot="addonAfter" v-model="item.protocol" placeholder="端口协议">
+                            <a-select
+                              :getPopupContainer="
+                                (triggerNode) => {
+                                  return triggerNode.parentNode || document.body;
+                                }
+                              "
+                              slot="addonAfter"
+                              v-model="item.protocol"
+                              placeholder="端口协议"
+                            >
                               <a-select-option value="TCP">TCP</a-select-option>
                               <a-select-option value="UDP">UDP</a-select-option>
                               <a-select-option value="SCTP">SCTP</a-select-option>
@@ -395,10 +404,11 @@
 </template>
 
 <script>
-import { dockerSwarmServicesList, dockerSwarmServicesDel, dockerSwarmServicesEdit } from "@/api/docker-swarm";
+import {dockerSwarmServicesDel, dockerSwarmServicesEdit, dockerSwarmServicesList} from "@/api/docker-swarm";
 import SwarmTask from "./task";
 import PullLog from "./pull-log";
-import { renderSize } from "@/utils/time";
+import {renderSize} from "@/utils/time";
+
 export default {
   components: { SwarmTask, PullLog },
   props: {

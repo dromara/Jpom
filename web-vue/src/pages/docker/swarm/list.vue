@@ -34,8 +34,8 @@
               <a-menu-item>
                 <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
               </a-menu-item>
-            </a-menu></a-dropdown
-          >
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
     </a-table>
@@ -68,10 +68,10 @@
 </template>
 
 <script>
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { editDockerSwarm, dockerSwarmList, unbindSwarm } from "@/api/docker-swarm";
-import { parseTime } from "@/utils/time";
-import { mapGetters } from "vuex";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {dockerSwarmList, editDockerSwarm, unbindSwarm} from "@/api/docker-swarm";
+import {parseTime} from "@/utils/time";
+import {mapGetters} from "vuex";
 import Console from "./console";
 
 export default {

@@ -6,7 +6,11 @@
           |
 
           <a-input-group compact style="width: 200px">
-            <a-select v-model="logScroll">
+            <a-select  :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            " v-model="logScroll">
               <a-select-option value="true"> 自动滚动 </a-select-option>
               <a-select-option value="false"> 关闭滚动 </a-select-option>
             </a-select>
@@ -26,8 +30,8 @@
 </template>
 <script>
 // import { getProjectData, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from "@/api/node-project";
-import { mapGetters } from "vuex";
-import { getWebSocketUrl } from "@/utils/const";
+import {mapGetters} from "vuex";
+import {getWebSocketUrl} from "@/utils/const";
 import LogView from "@/components/logView";
 
 export default {
@@ -132,5 +136,4 @@ export default {
 .filter {
   margin: 0 0 10px;
 }
-
 </style>

@@ -8,7 +8,16 @@
               <slot name="before"></slot>
               <a-tooltip title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
                 <a-input addonBefore="正则:/" placeholder="关键词高亮,支持正则" v-model="temp.searchValue" :style="`width: ${searchWidth}`" @pressEnter="onSearch">
-                  <a-select slot="addonAfter" :value="'/' + this.regModifier" style="width: 80px">
+                  <a-select
+                    :getPopupContainer="
+                      (triggerNode) => {
+                        return triggerNode.parentNode || document.body;
+                      }
+                    "
+                    slot="addonAfter"
+                    :value="'/' + this.regModifier"
+                    style="width: 80px"
+                  >
                     <div @mousedown="(e) => e.preventDefault()" slot="dropdownRender" style="width: 300px; padding: 10px; cursor: pointer; background-color: #fff; border-radius: 5px">
                       <a-checkbox-group @change="regModifierChange" :value="regModifiers" :options="modifiers"> </a-checkbox-group>
                     </div>
@@ -64,6 +73,7 @@
 
 <script>
 import viewPre from "./view-pre";
+
 export default {
   name: "LogView",
   components: {

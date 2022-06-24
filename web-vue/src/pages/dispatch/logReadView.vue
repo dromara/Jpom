@@ -8,7 +8,17 @@
           <template v-if="temp.projectList && temp.cacheData">
             <div>
               节点：
-              <a-select :value="`${temp.cacheData.useNodeId},${temp.cacheData.useProjectId}`" style="width: 200px" @change="nodeChange" placeholder="请选择节点">
+              <a-select
+                :getPopupContainer="
+                  (triggerNode) => {
+                    return triggerNode.parentNode || document.body;
+                  }
+                "
+                :value="`${temp.cacheData.useNodeId},${temp.cacheData.useProjectId}`"
+                style="width: 200px"
+                @change="nodeChange"
+                placeholder="请选择节点"
+              >
                 <a-select-option v-for="item in temp.projectList" :key="`${item.nodeId},${item.projectId}`">
                   {{ nodeName[item.nodeId] && nodeName[item.nodeId].name }}
                 </a-select-option>
@@ -121,13 +131,14 @@
   </div>
 </template>
 <script>
-import { getProjectListAll, getNodeListAll } from "@/api/node";
-import { itemGroupBy } from "@/utils/time";
-import { getFileList } from "@/api/node-project";
-import { getWebSocketUrl } from "@/utils/const";
-import { mapGetters } from "vuex";
+import {getNodeListAll, getProjectListAll} from "@/api/node";
+import {itemGroupBy} from "@/utils/time";
+import {getFileList} from "@/api/node-project";
+import {getWebSocketUrl} from "@/utils/const";
+import {mapGetters} from "vuex";
 import viewPre from "@/components/logView/view-pre";
-import { updateCache } from "@/api/log-read";
+import {updateCache} from "@/api/log-read";
+
 export default {
   components: {
     viewPre,
