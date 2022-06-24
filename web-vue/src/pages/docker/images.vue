@@ -79,7 +79,17 @@
                     </a-col>
                     <a-col :span="8" :offset="1">
                       <a-input addon-before="容器" :disabled="item.disabled" v-model="item.port" placeholder="容器端口">
-                        <a-select slot="addonAfter" :disabled="item.disabled" v-model="item.scheme" placeholder="端口协议">
+                        <a-select
+                          :getPopupContainer="
+                            (triggerNode) => {
+                              return triggerNode.parentNode || document.body;
+                            }
+                          "
+                          slot="addonAfter"
+                          :disabled="item.disabled"
+                          v-model="item.scheme"
+                          placeholder="端口协议"
+                        >
                           <a-select-option value="tcp">tcp</a-select-option>
                           <a-select-option value="udp">udp</a-select-option>
                           <a-select-option value="sctp">sctp</a-select-option>
@@ -223,8 +233,8 @@
   </div>
 </template>
 <script>
-import { parseTime, renderSize } from "@/utils/time";
-import { dockerImagesList, dockerImageRemove, dockerImageInspect, dockerImageCreateContainer, dockerImagePullImage } from "@/api/docker-api";
+import {parseTime, renderSize} from "@/utils/time";
+import {dockerImageCreateContainer, dockerImageInspect, dockerImagePullImage, dockerImageRemove, dockerImagesList} from "@/api/docker-api";
 import PullImageLog from "@/pages/docker/pull-image-log";
 
 export default {

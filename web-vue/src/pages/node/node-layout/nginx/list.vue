@@ -97,7 +97,15 @@
       <a-modal v-model="editNginxVisible" title="编辑 Nginx 配置文件" @ok="handleEditNginxOk" :maskClosable="false" width="70vw">
         <a-form-model ref="editNginxForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
           <a-form-model-item label="白名单路径" prop="whitePath">
-            <a-select v-model="temp.whitePath" placeholder="请选择白名单路径">
+            <a-select
+              :getPopupContainer="
+                (triggerNode) => {
+                  return triggerNode.parentNode || document.body;
+                }
+              "
+              v-model="temp.whitePath"
+              placeholder="请选择白名单路径"
+            >
               <a-select-option v-for="element in whiteList" :key="element">{{ element }}</a-select-option>
             </a-select>
           </a-form-model-item>
@@ -122,7 +130,7 @@
   </a-layout>
 </template>
 <script>
-import { getNginxDirectoryList, getNginxFileList, editNginxConfig, deleteNginxConfig, loadNginxWhiteList, loadNginxConfig, loadNginxData, doNginxCommand, editNginxServerName } from "@/api/node-nginx";
+import {deleteNginxConfig, doNginxCommand, editNginxConfig, editNginxServerName, getNginxDirectoryList, getNginxFileList, loadNginxConfig, loadNginxData, loadNginxWhiteList} from "@/api/node-nginx";
 
 import codeEditor from "@/components/codeEditor";
 

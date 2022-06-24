@@ -5,7 +5,19 @@
         <a-space>
           <a-input v-model="listQuery['nodeId']" @pressEnter="loadData" placeholder="id" class="search-input-item" />
           <a-input v-model="listQuery['nodeName']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
-          <a-select show-search option-filter-prop="children" v-model="listQuery['nodeRole']" allowClear placeholder="角色" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery['nodeRole']"
+            allowClear
+            placeholder="角色"
+            class="search-input-item"
+          >
             <a-select-option key="worker">工作节点</a-select-option>
             <a-select-option key="manager">管理节点</a-select-option>
           </a-select>
@@ -124,7 +136,7 @@
 </template>
 
 <script>
-import { dockerSwarmNodeList, dockerSwarmNodeLeave, dockerSwarmNodeUpdate } from "@/api/docker-swarm";
+import {dockerSwarmNodeLeave, dockerSwarmNodeList, dockerSwarmNodeUpdate} from "@/api/docker-swarm";
 
 export default {
   components: {},

@@ -105,7 +105,18 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-select show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="temp.chooseNode">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            placeholder="请选择分发到的节点"
+            mode="multiple"
+            v-model="temp.chooseNode"
+          >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>
@@ -120,12 +131,13 @@
   </div>
 </template>
 <script>
-import { getScriptListAll, editScript, deleteScript, unbindScript } from "@/api/server-script";
+import {deleteScript, editScript, getScriptListAll, unbindScript} from "@/api/server-script";
 import codeEditor from "@/components/codeEditor";
-import { getNodeListAll } from "@/api/node";
+import {getNodeListAll} from "@/api/node";
 import ScriptConsole from "@/pages/script/script-console";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {parseTime} from "@/utils/time";
+
 export default {
   components: {
     ScriptConsole,

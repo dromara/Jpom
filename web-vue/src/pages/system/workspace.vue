@@ -117,7 +117,18 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-select show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="envTemp.chooseNode">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            placeholder="请选择分发到的节点"
+            mode="multiple"
+            v-model="envTemp.chooseNode"
+          >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>
@@ -128,10 +139,11 @@
   </div>
 </template>
 <script>
-import { getWorkSpaceList, editWorkSpace, deleteWorkspace, getWorkspaceEnvList, editWorkspaceEnv, deleteWorkspaceEnv } from "@/api/workspace";
-import { parseTime } from "@/utils/time";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { getNodeListByWorkspace } from "@/api/node";
+import {deleteWorkspace, deleteWorkspaceEnv, editWorkSpace, editWorkspaceEnv, getWorkspaceEnvList, getWorkSpaceList} from "@/api/workspace";
+import {parseTime} from "@/utils/time";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {getNodeListByWorkspace} from "@/api/node";
+
 export default {
   data() {
     return {

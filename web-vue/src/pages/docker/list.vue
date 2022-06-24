@@ -104,7 +104,12 @@
           <a-input v-model="temp.host" placeholder="容器地址 tcp://127.0.0.1:2375" />
         </a-form-model-item>
         <!-- <a-form-model-item label="接口版本" prop="apiVersion">
-          <a-select show-search option-filter-prop="children" v-model="temp.apiVersion" allowClear placeholder="接口版本">
+          <a-select
+          :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            " show-search option-filter-prop="children" v-model="temp.apiVersion" allowClear placeholder="接口版本">
             <a-select-option v-for="item in apiVersions" :key="item.version">{{ item.webVersion }}</a-select-option>
           </a-select>
         </a-form-model-item> -->
@@ -126,20 +131,22 @@
           <a-input-number style="width: 100%" v-model="temp.heartbeatTimeout" placeholder="心跳超时 单位秒" />
         </a-form-model-item>
         <a-form-model-item label="标签" prop="tagInput">
-          <template v-for="tag in temp.tagsArray">
-            <a-tooltip :key="tag" :title="tag">
-              <a-tag
-                :key="tag"
-                :closable="true"
-                @close="
-                  () => {
-                    temp.tagsArray = temp.tagsArray.filter((removedTag) => tag !== removedTag);
-                  }
-                "
-              >
-                {{ `${tag}` }}
-              </a-tag>
-            </a-tooltip>
+          <template>
+            <div>
+              <a-tooltip :key="index" :title="tag" v-for="(tag, index) in temp.tagsArray">
+                <a-tag
+                  :key="tag"
+                  :closable="true"
+                  @close="
+                    () => {
+                      temp.tagsArray = temp.tagsArray.filter((removedTag) => tag !== removedTag);
+                    }
+                  "
+                >
+                  {{ `${tag}` }}
+                </a-tag>
+              </a-tooltip>
+            </div>
           </template>
           <a-input
             v-if="temp.inputVisible"
@@ -176,13 +183,14 @@
             option-filter-prop="children"
             @change="
               (v) => {
-                let temp = this.swarmList.filter((item) => {
-                  return item.id === v;
-                });
-                if (temp.length) {
-                  this.temp = { ...this.temp, remoteAddr: temp[0].nodeAddr };
+                if (
+                  swarmList.filter((item) => {
+                    return item.id === v;
+                  }).length
+                ) {
+                  temp = { ...temp, remoteAddr: temp[0].nodeAddr };
                 } else {
-                  this.temp = { ...this.temp, remoteAddr: '' };
+                  temp = { ...temp, remoteAddr: '' };
                 }
               }
             "
@@ -221,12 +229,13 @@
   </div>
 </template>
 <script>
-import { dockerList, apiVersions, editDocker, editDockerByFile, deleteDcoker, dcokerSwarmLeaveForce } from "@/api/docker-api";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { initDockerSwarm, dockerSwarmListAll, joinDockerSwarm } from "@/api/docker-swarm";
-import { parseTime } from "@/utils/time";
+import {apiVersions, dcokerSwarmLeaveForce, deleteDcoker, dockerList, editDocker, editDockerByFile} from "@/api/docker-api";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {dockerSwarmListAll, initDockerSwarm, joinDockerSwarm} from "@/api/docker-swarm";
+import {parseTime} from "@/utils/time";
 import Console from "./console";
-import { mapGetters } from "vuex";
+import {mapGetters} from "vuex";
+
 export default {
   components: {
     Console,

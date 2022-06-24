@@ -9,7 +9,19 @@
           <a-input v-model="listQuery['taskNode']" @pressEnter="loadData" placeholder="节点id" class="search-input-item" />
 
           <a-tooltip :title="TASK_STATE[listQuery['taskState']]">
-            <a-select show-search option-filter-prop="children" v-model="listQuery['taskState']" allowClear placeholder="状态" class="search-input-item">
+            <a-select
+              :getPopupContainer="
+                (triggerNode) => {
+                  return triggerNode.parentNode || document.body;
+                }
+              "
+              show-search
+              option-filter-prop="children"
+              v-model="listQuery['taskState']"
+              allowClear
+              placeholder="状态"
+              class="search-input-item"
+            >
               <a-select-option :key="key" v-for="(item, key) in TASK_STATE">{{ item }}- {{ key }}</a-select-option>
               <a-select-option value="">状态</a-select-option>
             </a-select>
@@ -93,9 +105,10 @@
 </template>
 
 <script>
-import { dockerSwarmServicesTaskList, dockerSwarmNodeLeave, dockerSwarmNodeUpdate, TASK_STATE } from "@/api/docker-swarm";
-import { parseTime } from "@/utils/time";
+import {dockerSwarmNodeLeave, dockerSwarmNodeUpdate, dockerSwarmServicesTaskList, TASK_STATE} from "@/api/docker-swarm";
+import {parseTime} from "@/utils/time";
 import PullLog from "./pull-log";
+
 export default {
   components: { PullLog },
   props: {

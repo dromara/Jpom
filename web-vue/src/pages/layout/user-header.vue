@@ -1,7 +1,19 @@
 <template>
   <div class="user-header">
     <a-tooltip placement="left" title="切换工作空间">
-      <a-select v-model="selectWorkspace" class="workspace jpom-workspace" option-filter-prop="children" show-search placeholder="工作空间" @change="handleChange">
+      <a-select
+        :getPopupContainer="
+          (triggerNode) => {
+            return triggerNode.parentNode || document.body;
+          }
+        "
+        v-model="selectWorkspace"
+        class="workspace jpom-workspace"
+        option-filter-prop="children"
+        show-search
+        placeholder="工作空间"
+        @change="handleChange"
+      >
         <a-icon slot="suffixIcon" type="swap" />
         <a-select-option v-for="item in myWorkspaceList" :key="item.id">
           <a-tooltip placement="left" :title="item.name">
@@ -274,12 +286,13 @@
   </div>
 </template>
 <script>
-import { mapGetters } from "vuex";
-import { updatePwd, sendEmailCode, editUserInfo, getUserInfo, myWorkspace, closeMfa, generateMfa, bindMfa } from "@/api/user";
+import {mapGetters} from "vuex";
+import {bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd} from "@/api/user";
 import QRCode from "qrcodejs2";
 import sha1 from "sha1";
 import Vue from "vue";
-import { MFA_APP_TIP_ARRAY } from "@/utils/const";
+import {MFA_APP_TIP_ARRAY} from "@/utils/const";
+
 export default {
   data() {
     return {
