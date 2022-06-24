@@ -194,7 +194,7 @@ public class RepositoryController extends BaseServerController {
         Page page = repositoryService.parsePage(paramMap);
         String token = paramMap.get("token");
         Assert.hasText(token, "请填写个人令牌");
-        String gitlabAddress = paramMap.getOrDefault("gitlabAddress", "https://gitlab.com");
+        String gitlabAddress = StrUtil.blankToDefault(paramMap.get("gitlabAddress"), "https://gitlab.com");
         //
         String type = paramMap.get("type");
         PageResultDto<JSONObject> pageResultDto;
