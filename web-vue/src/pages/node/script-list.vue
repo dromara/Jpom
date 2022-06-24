@@ -4,7 +4,17 @@
     <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
       <template slot="title">
         <a-space>
-          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="listQuery.nodeId"
+            allowClear
+            placeholder="请选择节点"
+            class="search-input-item"
+          >
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" allowClear class="search-input-item" />
@@ -123,13 +133,14 @@
   </div>
 </template>
 <script>
-import { getScriptListAll, editScript, deleteScript, itemScript, delAllCache } from "@/api/node-other";
+import {delAllCache, deleteScript, editScript, getScriptListAll, itemScript} from "@/api/node-other";
 import codeEditor from "@/components/codeEditor";
-import { getNodeListAll } from "@/api/node";
+import {getNodeListAll} from "@/api/node";
 import ScriptConsole from "@/pages/node/node-layout/other/script-console";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {parseTime} from "@/utils/time";
 import ScriptLog from "@/pages/node/node-layout/other/script-log";
+
 export default {
   components: {
     ScriptConsole,

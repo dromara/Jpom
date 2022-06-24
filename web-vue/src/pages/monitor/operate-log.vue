@@ -1,19 +1,21 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table
-      size="middle"
-      :data-source="list"
-      :columns="columns"
-      :pagination="pagination"
-      @change="changePage"
-      bordered
-      :rowKey="(record, index) => index"
-    >
+    <a-table size="middle" :data-source="list" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="监控名称" class="search-input-item" />
-          <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="listQuery.status"
+            allowClear
+            placeholder="开启状态"
+            class="search-input-item"
+          >
             <a-select-option :value="1">开启</a-select-option>
             <a-select-option :value="0">关闭</a-select-option>
           </a-select>
@@ -96,10 +98,11 @@
   </div>
 </template>
 <script>
-import { getMonitorOperateLogList, getMonitorOperateTypeList, editMonitorOperate, deleteMonitorOperate } from "@/api/monitor";
-import { getUserListAll } from "@/api/user";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import {deleteMonitorOperate, editMonitorOperate, getMonitorOperateLogList, getMonitorOperateTypeList} from "@/api/monitor";
+import {getUserListAll} from "@/api/user";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {parseTime} from "@/utils/time";
+
 export default {
   data() {
     return {

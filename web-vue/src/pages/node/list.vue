@@ -8,7 +8,19 @@
           <a-input v-model="listQuery['%id%']" @pressEnter="loadData" placeholder="节点ID" />
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
           <a-input v-model="listQuery['%url%']" @pressEnter="loadData" placeholder="节点地址" />
-          <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.group"
+            allowClear
+            placeholder="分组"
+            class="search-input-item"
+          >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
@@ -190,7 +202,17 @@
             </a-tooltip>
           </template>
           <a-input v-model="temp.url" placeholder="节点地址 (127.0.0.1:2123)">
-            <a-select slot="addonBefore" v-model="temp.protocol" default-value="Http://" style="width: 80px">
+            <a-select
+              :getPopupContainer="
+                (triggerNode) => {
+                  return triggerNode.parentNode || document.body;
+                }
+              "
+              slot="addonBefore"
+              v-model="temp.protocol"
+              default-value="Http://"
+              style="width: 80px"
+            >
               <a-select-option value="Http"> Http:// </a-select-option>
               <a-select-option value="Https"> Https:// </a-select-option>
             </a-select>
@@ -227,7 +249,17 @@
               <a-input-number v-model="temp.timeOut" :min="0" placeholder="秒 (值太小可能会取不到节点状态)" style="width: 100%" />
             </a-form-model-item>
             <a-form-model-item label="绑定 SSH " prop="sshId">
-              <a-select show-search option-filter-prop="children" v-model="temp.sshId" placeholder="请选择SSH">
+              <a-select
+                :getPopupContainer="
+                  (triggerNode) => {
+                    return triggerNode.parentNode || document.body;
+                  }
+                "
+                show-search
+                option-filter-prop="children"
+                v-model="temp.sshId"
+                placeholder="请选择SSH"
+              >
                 <a-select-option value="">不绑定</a-select-option>
                 <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{ ssh.name }}</a-select-option>
               </a-select>
@@ -235,7 +267,17 @@
 
             <a-form-model-item label="代理" prop="httpProxy">
               <a-input v-model="temp.httpProxy" placeholder="代理地址 (127.0.0.1:8888)">
-                <a-select slot="addonBefore" v-model="temp.httpProxyType" default-value="HTTP" style="width: 100px">
+                <a-select
+                  :getPopupContainer="
+                    (triggerNode) => {
+                      return triggerNode.parentNode || document.body;
+                    }
+                  "
+                  slot="addonBefore"
+                  v-model="temp.httpProxyType"
+                  default-value="HTTP"
+                  style="width: 100px"
+                >
                   <a-select-option value="HTTP">HTTP</a-select-option>
                   <a-select-option value="SOCKS">SOCKS</a-select-option>
                   <a-select-option value="DIRECT">DIRECT</a-select-option>
@@ -272,7 +314,17 @@
     <a-modal v-model="unlockNode" title="解锁节点" @ok="handleUnLockNodeOk" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="绑定工作空间" prop="workspaceId">
-          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="temp.workspaceId"
+            placeholder="请选择工作空间"
+          >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -401,7 +453,17 @@
       <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item> </a-form-model-item>
         <a-form-model-item label="选择工作空间" prop="workspaceId">
-          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="temp.workspaceId"
+            placeholder="请选择工作空间"
+          >
             <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-model-item>

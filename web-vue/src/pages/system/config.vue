@@ -75,7 +75,18 @@
       <a-alert :message="`一键分发同步多个节点的白名单配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model ref="editWhiteForm" :model="tempWhite" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="分发节点">
-          <a-select show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="tempWhite.chooseNode">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            placeholder="请选择分发到的节点"
+            mode="multiple"
+            v-model="tempWhite.chooseNode"
+          >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>
@@ -138,7 +149,19 @@
           <a-col :span="11">
             <a-row type="flex" justify="center">
               <a-form-model-item label="模版节点">
-                <a-select style="width: 30vw" show-search @change="changeTemplateNode" option-filter-prop="children" placeholder="请选择模版节点" v-model="tempNodeConfig.templateNodeId">
+                <a-select
+                  :getPopupContainer="
+                    (triggerNode) => {
+                      return triggerNode.parentNode || document.body;
+                    }
+                  "
+                  style="width: 30vw"
+                  show-search
+                  @change="changeTemplateNode"
+                  option-filter-prop="children"
+                  placeholder="请选择模版节点"
+                  v-model="tempNodeConfig.templateNodeId"
+                >
                   <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
                     {{ item.name }}
                   </a-select-option>
@@ -152,7 +175,19 @@
           <a-col :span="11">
             <a-row type="flex" justify="center">
               <a-form-model-item label="分发节点">
-                <a-select style="width: 30vw" show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="tempNodeConfig.chooseNode">
+                <a-select
+                  :getPopupContainer="
+                    (triggerNode) => {
+                      return triggerNode.parentNode || document.body;
+                    }
+                  "
+                  style="width: 30vw"
+                  show-search
+                  option-filter-prop="children"
+                  placeholder="请选择分发到的节点"
+                  mode="multiple"
+                  v-model="tempNodeConfig.chooseNode"
+                >
                   <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
                     {{ item.name }}
                   </a-select-option>
@@ -229,11 +264,11 @@
   </a-tabs>
 </template>
 <script>
-import { getConfigData, editConfig, getIpConfigData, getNodeConfig, getMenusConfig, saveMenusConfig, saveNodeConfig, editIpConfig, systemInfo, getWhitelist, saveWhitelist } from "@/api/system";
+import {editConfig, editIpConfig, getConfigData, getIpConfigData, getMenusConfig, getNodeConfig, getWhitelist, saveMenusConfig, saveNodeConfig, saveWhitelist, systemInfo} from "@/api/system";
 import codeEditor from "@/components/codeEditor";
-import { RESTART_UPGRADE_WAIT_TIME_COUNT } from "@/utils/const";
+import {RESTART_UPGRADE_WAIT_TIME_COUNT} from "@/utils/const";
 import Vue from "vue";
-import { getNodeListAll } from "@/api/node";
+import {getNodeListAll} from "@/api/node";
 
 export default {
   components: {
