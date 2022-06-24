@@ -1,6 +1,20 @@
 <template>
   <div @mousedown="setSelectOpen(true)">
-    <Select v-model="selected" :style="selStyle" :open="selectOpen" @blur="setSelectOpen(false)" showSearch @focus="setSelectOpen(true)" @change="selectChange" :placeholder="selectPlaceholder">
+    <Select
+      :getPopupContainer="
+        (triggerNode) => {
+          return triggerNode.parentNode || document.body;
+        }
+      "
+      v-model="selected"
+      :style="selStyle"
+      :open="selectOpen"
+      @blur="setSelectOpen(false)"
+      showSearch
+      @focus="setSelectOpen(true)"
+      @change="selectChange"
+      :placeholder="selectPlaceholder"
+    >
       <a-icon slot="suffixIcon" v-if="suffixIcon" :type="suffixIcon" @click="refreshSelect" />
       <template v-if="$slots.suffixIcon && !suffixIcon" slot="suffixIcon">
         <slot name="suffixIcon"></slot>
@@ -36,7 +50,7 @@
 </template>
 
 <script>
-import { Select } from "ant-design-vue";
+import {Select} from "ant-design-vue";
 
 export default {
   components: {

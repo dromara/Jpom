@@ -1,24 +1,35 @@
 <template>
   <div class="full-content">
     <!-- <div ref="filter" class="filter"></div> -->
-    <a-table
-      :data-source="projList"
-      :columns="columns"
-      size="middle"
-      bordered
-      :pagination="pagination"
-      @change="changePage"
-      :row-selection="rowSelection"
-      :rowKey="(record, index) => index"
-    >
+    <a-table :data-source="projList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="listQuery.nodeId"
+            allowClear
+            placeholder="请选择节点"
+            class="search-input-item"
+          >
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
           <a-input v-model="listQuery['%name%']" @pressEnter="getNodeProjectData" placeholder="搜索项目" class="search-input-item" />
 
-          <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="listQuery.runMode"
+            allowClear
+            placeholder="项目类型"
+            class="search-input-item"
+          >
             <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
@@ -116,13 +127,14 @@
   </div>
 </template>
 <script>
-import { getProjectList, delAllProjectCache, getNodeListAll } from "@/api/node";
-import { restartProject, startProject, stopProject, getRuningProjectInfo, runModeList, noFileModes } from "@/api/node-project";
+import {delAllProjectCache, getNodeListAll, getProjectList} from "@/api/node";
+import {getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject} from "@/api/node-project";
 import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
-import { parseTime, itemGroupBy } from "@/utils/time";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import {itemGroupBy, parseTime} from "@/utils/time";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
+
 export default {
   components: {
     File,
@@ -502,6 +514,6 @@ export default {
 }
 
 .lib-exist {
-  color: #faad14; 
+  color: #faad14;
 }*/
 </style>

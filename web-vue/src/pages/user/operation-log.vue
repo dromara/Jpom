@@ -4,16 +4,64 @@
     <a-table size="middle" :data-source="list" :columns="columns" :pagination="pagination" bordered :rowKey="(record, index) => index" @change="change">
       <template slot="title">
         <a-space>
-          <a-select show-search option-filter-prop="children" v-model="listQuery.userId" allowClear placeholder="请选择操作者" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.userId"
+            allowClear
+            placeholder="请选择操作者"
+            class="search-input-item"
+          >
             <a-select-option v-for="item in userList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
-          <a-select show-search option-filter-prop="children" v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.nodeId"
+            allowClear
+            placeholder="请选择节点"
+            class="search-input-item"
+          >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
           </a-select>
-          <a-select show-search option-filter-prop="children" v-model="listQuery.classFeature" allowClear placeholder="操作功能" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.classFeature"
+            allowClear
+            placeholder="操作功能"
+            class="search-input-item"
+          >
             <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
-          <a-select show-search option-filter-prop="children" v-model="listQuery.methodFeature" allowClear placeholder="操作方法" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.methodFeature"
+            allowClear
+            placeholder="操作方法"
+            class="search-input-item"
+          >
             <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
           <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
@@ -59,13 +107,14 @@
   </div>
 </template>
 <script>
-import { getOperationLogList } from "@/api/operation-log";
-import { getMonitorOperateTypeList } from "@/api/monitor";
-import { getNodeListAll } from "@/api/node";
-import { getUserListAll } from "@/api/user";
-import { parseTime } from "@/utils/time";
+import {getOperationLogList} from "@/api/operation-log";
+import {getMonitorOperateTypeList} from "@/api/monitor";
+import {getNodeListAll} from "@/api/node";
+import {getUserListAll} from "@/api/user";
+import {parseTime} from "@/utils/time";
 import JsonViewer from "vue-json-viewer";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+
 export default {
   components: { JsonViewer },
   data() {

@@ -1,15 +1,7 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      size="middle"
-      :columns="columns"
-      :pagination="pagination"
-      @change="changePage"
-      bordered
-      :rowKey="(record, index) => index"
-    >
+    <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="日志名称" class="search-input-item" />
@@ -67,7 +59,17 @@
             </a-col>
             <a-col :span="11">
               <span>项目: </span>
-              <a-select :disabled="!item.nodeId" style="width: 80%" v-model="item.projectId" :placeholder="`请选择项目`">
+              <a-select
+                :getPopupContainer="
+                  (triggerNode) => {
+                    return triggerNode.parentNode || document.body;
+                  }
+                "
+                :disabled="!item.nodeId"
+                style="width: 80%"
+                v-model="item.projectId"
+                :placeholder="`请选择项目`"
+              >
                 <!-- <a-select-option value=""> 请先选择节点</a-select-option> -->
                 <template v-if="nodeProjectList[item.nodeId]">
                   <a-select-option
@@ -123,13 +125,14 @@
   </div>
 </template>
 <script>
-import { getLogReadList, editLogRead, deleteLogRead } from "@/api/log-read";
-import { parseTime, itemGroupBy } from "@/utils/time";
-import { getProjectListAll, getNodeListAll } from "@/api/node";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import {deleteLogRead, editLogRead, getLogReadList} from "@/api/log-read";
+import {itemGroupBy, parseTime} from "@/utils/time";
+import {getNodeListAll, getProjectListAll} from "@/api/node";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
 
-import { mapGetters } from "vuex";
+import {mapGetters} from "vuex";
 import logReadView from "./logReadView";
+
 export default {
   components: {
     logReadView,

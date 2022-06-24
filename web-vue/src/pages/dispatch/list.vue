@@ -1,24 +1,36 @@
 <template>
   <div class="full-content">
     <!-- 表格 :scroll="{x: 740, y: tableHeight - 60}" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
-    <a-table
-      :columns="columns"
-      :data-source="list"
-      bordered
-      rowKey="id"
-      @expand="expand"
-      :pagination="pagination"
-      @change="changePage"
-    >
+    <a-table :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="pagination" @change="changePage">
       <template slot="title">
         <a-space>
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%id%']" placeholder="id" />
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="名称" />
-          <a-select v-model="listQuery.outGivingProject" allowClear placeholder="分发类型" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="listQuery.outGivingProject"
+            allowClear
+            placeholder="分发类型"
+            class="search-input-item"
+          >
             <a-select-option :value="1">独立</a-select-option>
             <a-select-option :value="0">关联</a-select-option>
           </a-select>
-          <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="listQuery.status"
+            allowClear
+            placeholder="请选择状态"
+            class="search-input-item"
+          >
             <a-select-option v-for="(name, key) in statusMap" :key="key">{{ name }}</a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
@@ -200,7 +212,15 @@
           <a-button type="primary" @click="addDispachList">添加</a-button>
         </a-form-model-item>
         <a-form-model-item label="分发后操作" prop="afterOpt">
-          <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="temp.afterOpt"
+            placeholder="请选择发布后操作"
+          >
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -263,7 +283,15 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-select v-model="temp.runMode" placeholder="请选择运行方式">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="temp.runMode"
+            placeholder="请选择运行方式"
+          >
             <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -284,7 +312,16 @@
             </a-tooltip>
           </template>
           <a-input-group compact>
-            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
+            <a-select
+              :getPopupContainer="
+                (triggerNode) => {
+                  return triggerNode.parentNode || document.body;
+                }
+              "
+              style="width: 50%"
+              v-model="temp.whitelistDirectory"
+              placeholder="请选择项目白名单路径"
+            >
               <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
             </a-select>
             <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹" />
@@ -345,7 +382,15 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-select v-model="temp.logPath" placeholder="请选择日志目录">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="temp.logPath"
+            placeholder="请选择日志目录"
+          >
             <a-select-option key="" value="">默认是在项目文件夹父级</a-select-option>
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
@@ -357,7 +402,15 @@
           <a-input v-model="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】" />
         </a-form-model-item>
         <a-form-model-item label="分发后操作" prop="afterOpt">
-          <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="temp.afterOpt"
+            placeholder="请选择发布后操作"
+          >
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -386,7 +439,16 @@
         </a-form-model-item>
         <!-- 节点 -->
         <a-form-model-item label="分发节点" prop="nodeId">
-          <a-select v-model="temp.nodeIdList" mode="multiple" placeholder="请选择分发节点">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="temp.nodeIdList"
+            mode="multiple"
+            placeholder="请选择分发节点"
+          >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ `${node.name}` }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -500,7 +562,15 @@
           <a-switch v-model="temp.autoUnzip" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
         <a-form-model-item label="分发后操作" prop="afterOpt">
-          <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="temp.afterOpt"
+            placeholder="请选择发布后操作"
+          >
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -521,23 +591,24 @@ import File from "@/pages/node/node-layout/project/project-file";
 import Console from "@/pages/node/node-layout/project/project-console";
 import codeEditor from "@/components/codeEditor";
 import {
-  getDishPatchList,
-  getDispatchProject,
+  afterOptList,
+  delDisPatchProject,
   editDispatch,
   editDispatchProject,
-  uploadDispatchFile,
+  getDishPatchList,
+  getDispatchProject,
   getDispatchWhiteList,
   releaseDelDisPatch,
-  delDisPatchProject,
   remoteDownload,
-  afterOptList,
   statusMap,
   unbindOutgiving,
+  uploadDispatchFile,
 } from "@/api/dispatch";
-import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { getProjectData, runModeList, javaModes, noFileModes } from "@/api/node-project";
-import { itemGroupBy, parseTime } from "@/utils/time";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL } from "@/utils/const";
+import {getNodeListAll, getProjectListAll} from "@/api/node";
+import {getProjectData, javaModes, noFileModes, runModeList} from "@/api/node-project";
+import {itemGroupBy, parseTime} from "@/utils/time";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL} from "@/utils/const";
+
 export default {
   components: {
     File,

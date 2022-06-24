@@ -5,7 +5,19 @@
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" placeholder="名称" @pressEnter="loadData" allowClear class="search-input-item" />
-          <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.triggerExecType"
+            allowClear
+            placeholder="触发类型"
+            class="search-input-item"
+          >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-range-picker
@@ -50,11 +62,12 @@
   </div>
 </template>
 <script>
-import { getScriptLogList, scriptDel, triggerExecTypeMap } from "@/api/server-script";
+import {getScriptLogList, scriptDel, triggerExecTypeMap} from "@/api/server-script";
 
 import ScriptLogView from "@/pages/script/script-log-view";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import {parseTime} from "@/utils/time";
+
 export default {
   components: {
     ScriptLogView,

@@ -7,13 +7,49 @@
       <template slot="title">
         <a-space>
           <a-input allowClear class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="构建名称" />
-          <a-select show-search allowClear option-filter-prop="children" v-model="listQuery.status" placeholder="状态" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            allowClear
+            option-filter-prop="children"
+            v-model="listQuery.status"
+            placeholder="状态"
+            class="search-input-item"
+          >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
           </a-select>
-          <a-select show-search option-filter-prop="children" v-model="listQuery.releaseMethod" allowClear placeholder="发布方式" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.releaseMethod"
+            allowClear
+            placeholder="发布方式"
+            class="search-input-item"
+          >
             <a-select-option v-for="(val, key) in releaseMethodMap" :key="key">{{ val }}</a-select-option>
           </a-select>
-          <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="listQuery.group"
+            allowClear
+            placeholder="分组"
+            class="search-input-item"
+          >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-input allowClear class="search-input-item" @pressEnter="loadData" v-model="listQuery['%resultDirFile%']" placeholder="产物目录" />
@@ -139,7 +175,19 @@
             <div v-if="temp.buildMode === undefined" style="text-align: center">请选择构建方式</div>
 
             <a-form-model-item v-if="temp.buildMode !== undefined" label="构建源仓库" prop="repositoryId">
-              <a-select show-search option-filter-prop="children" v-model="temp.repositoryId" @select="changeRepositpry" @change="changeRepositpry" placeholder="请选择仓库">
+              <a-select
+                :getPopupContainer="
+                  (triggerNode) => {
+                    return triggerNode.parentNode || document.body;
+                  }
+                "
+                show-search
+                option-filter-prop="children"
+                v-model="temp.repositoryId"
+                @select="changeRepositpry"
+                @change="changeRepositpry"
+                placeholder="请选择仓库"
+              >
                 <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
               </a-select>
             </a-form-model-item>
@@ -297,16 +345,45 @@
               <template v-if="temp.releaseMethod === 0"> 不发布：只执行构建流程并且保存构建历史,不执行发布流程</template>
               <!-- 节点分发 -->
               <a-form-model-item v-if="temp.releaseMethod === 1" label="分发项目" prop="releaseMethodDataId">
-                <a-select show-search allowClear v-model="tempExtraData.releaseMethodDataId_1" placeholder="请选择分发项目">
+                <a-select
+                  :getPopupContainer="
+                    (triggerNode) => {
+                      return triggerNode.parentNode || document.body;
+                    }
+                  "
+                  show-search
+                  allowClear
+                  v-model="tempExtraData.releaseMethodDataId_1"
+                  placeholder="请选择分发项目"
+                >
                   <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }} </a-select-option>
                 </a-select>
               </a-form-model-item>
               <!-- 项目 -->
               <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataIdList">
-                <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="请选择节点项目" />
+                <a-cascader
+                  :getPopupContainer="
+                    (triggerNode) => {
+                      return triggerNode.parentNode || document.body;
+                    }
+                  "
+                  v-model="temp.releaseMethodDataIdList"
+                  :options="cascaderList"
+                  placeholder="请选择节点项目"
+                />
               </a-form-model-item>
               <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
-                <a-select show-search allowClear v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
+                <a-select
+                  :getPopupContainer="
+                    (triggerNode) => {
+                      return triggerNode.parentNode || document.body;
+                    }
+                  "
+                  show-search
+                  allowClear
+                  v-model="tempExtraData.afterOpt"
+                  placeholder="请选择发布后操作"
+                >
                   <a-select-option v-for="opt in afterOptListSimple" :key="opt.value">{{ opt.title }}</a-select-option>
                 </a-select>
               </a-form-model-item>
@@ -320,14 +397,34 @@
                       <a-icon type="question-circle" theme="filled" />
                     </a-tooltip>
                   </template>
-                  <a-select mode="multiple" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
+                  <a-select
+                    :getPopupContainer="
+                      (triggerNode) => {
+                        return triggerNode.parentNode || document.body;
+                      }
+                    "
+                    mode="multiple"
+                    v-model="tempExtraData.releaseMethodDataId_3"
+                    placeholder="请选择SSH"
+                  >
                     <a-select-option v-for="ssh in sshList" :disabled="!ssh.fileDirs" :key="ssh.id">{{ ssh.name }}</a-select-option>
                   </a-select>
                 </a-form-model-item>
                 <a-form-model-item label="发布目录" prop="releaseMethodDataId">
                   <a-input-group compact>
                     <a-tooltip title="如果多选 ssh 下面目录只显示选项中的第一项，但是授权目录需要保证每项都配置对应目录">
-                      <a-select show-search allowClear style="width: 30%" v-model="tempExtraData.releaseSshDir" placeholder="请选择SSH">
+                      <a-select
+                        :getPopupContainer="
+                          (triggerNode) => {
+                            return triggerNode.parentNode || document.body;
+                          }
+                        "
+                        show-search
+                        allowClear
+                        style="width: 30%"
+                        v-model="tempExtraData.releaseSshDir"
+                        placeholder="请选择SSH"
+                      >
                         <a-select-option v-for="item in selectSshDirs" :key="item">{{ item }}</a-select-option>
                       </a-select>
                     </a-tooltip>
@@ -418,7 +515,18 @@
                       <a-icon type="question-circle" theme="filled" />
                     </a-tooltip>
                   </template>
-                  <a-select @change="selectSwarm()" show-search allowClear v-model="tempExtraData.dockerSwarmId" placeholder="请选择发布到哪个 docker 集群">
+                  <a-select
+                    :getPopupContainer="
+                      (triggerNode) => {
+                        return triggerNode.parentNode || document.body;
+                      }
+                    "
+                    @change="selectSwarm()"
+                    show-search
+                    allowClear
+                    v-model="tempExtraData.dockerSwarmId"
+                    placeholder="请选择发布到哪个 docker 集群"
+                  >
                     <a-select-option value="">不发布到 docker 集群</a-select-option>
                     <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
                   </a-select>
@@ -431,7 +539,16 @@
                       <a-icon type="question-circle" theme="filled" />
                     </a-tooltip>
                   </template>
-                  <a-select allowClear placeholder="请选择发布到集群的服务名" v-model="tempExtraData.dockerSwarmServiceName">
+                  <a-select
+                    :getPopupContainer="
+                      (triggerNode) => {
+                        return triggerNode.parentNode || document.body;
+                      }
+                    "
+                    allowClear
+                    placeholder="请选择发布到集群的服务名"
+                    v-model="tempExtraData.dockerSwarmServiceName"
+                  >
                     <a-select-option v-for="item2 in swarmServiceListOptions" :key="item2.spec.name">{{ item2.spec.name }}</a-select-option>
                   </a-select>
                 </a-form-model-item>

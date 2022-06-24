@@ -1,18 +1,13 @@
 <template>
   <div class="node-full-content">
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      size="middle"
-      :columns="columns"
-      :pagination="pagination"
-      @change="changePage"
-      :row-selection="rowSelection"
-      bordered
-      :rowKey="(record, index) => index"
-    >
+    <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" @change="changePage" :row-selection="rowSelection" bordered :rowKey="(record, index) => index">
       <template slot="title">
-        <!-- <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="loadData">
+        <!-- <a-select   :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            " v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="loadData">
         <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
       </a-select> -->
         <a-space>
@@ -125,7 +120,15 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-select v-model="temp.runMode" placeholder="请选择运行方式">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="temp.runMode"
+            placeholder="请选择运行方式"
+          >
             <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -145,7 +148,16 @@
             </a-tooltip>
           </template>
           <a-input-group compact>
-            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
+            <a-select
+              :getPopupContainer="
+                (triggerNode) => {
+                  return triggerNode.parentNode || document.body;
+                }
+              "
+              style="width: 50%"
+              v-model="temp.whitelistDirectory"
+              placeholder="请选择项目白名单路径"
+            >
               <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
             </a-select>
             <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹" @blur.native="checkLibIndexExist" />
@@ -206,7 +218,15 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-select v-model="temp.logPath" placeholder="请选择项目白名单路径">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="temp.logPath"
+            placeholder="请选择项目白名单路径"
+          >
             <a-select-option key="" value="">默认是在项目文件夹父级</a-select-option>
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
@@ -220,7 +240,15 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="temp.jdkId"
+            placeholder="请选择 JDK"
+          >
             <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -346,25 +374,25 @@ import Console from "./project-console";
 import FileRead from "./project-file-read";
 import Monitor from "./project-monitor";
 import Replica from "./project-replica";
-import { parseTime } from "@/utils/time";
+import {parseTime} from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL } from "@/utils/const";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL} from "@/utils/const";
 
 import {
-  getJdkList,
-  getRuningProjectInfo,
-  getProjectData,
   deleteProject,
-  getProjectList,
-  getProjectAccessList,
   editProject,
+  getJdkList,
+  getProjectAccessList,
+  getProjectData,
+  getProjectList,
+  getRuningProjectInfo,
+  javaModes,
   nodeJudgeLibExist,
+  noFileModes,
   restartProject,
+  runModeList,
   startProject,
   stopProject,
-  runModeList,
-  javaModes,
-  noFileModes,
 } from "@/api/node-project";
 
 export default {

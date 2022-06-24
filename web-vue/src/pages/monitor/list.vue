@@ -1,27 +1,49 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      size="middle"
-      :columns="columns"
-      :pagination="pagination"
-      @change="changePage"
-      bordered
-      :rowKey="(record, index) => index"
-    >
+    <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="监控名称" class="search-input-item" />
-          <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="listQuery.status"
+            allowClear
+            placeholder="开启状态"
+            class="search-input-item"
+          >
             <a-select-option :value="1">开启</a-select-option>
             <a-select-option :value="0">关闭</a-select-option>
           </a-select>
-          <a-select v-model="listQuery.autoRestart" allowClear placeholder="自动重启" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="listQuery.autoRestart"
+            allowClear
+            placeholder="自动重启"
+            class="search-input-item"
+          >
             <a-select-option :value="1">是</a-select-option>
             <a-select-option :value="0">否</a-select-option>
           </a-select>
-          <a-select v-model="listQuery.alarm" allowClear placeholder="报警状态" class="search-input-item">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            v-model="listQuery.alarm"
+            allowClear
+            placeholder="报警状态"
+            class="search-input-item"
+          >
             <a-select-option :value="1">报警中</a-select-option>
             <a-select-option :value="0">未报警</a-select-option>
           </a-select>
@@ -65,7 +87,7 @@
         </a-form-model-item>
 
         <!-- <a-form-model-item label="自动重启" prop="autoRestart">
-           
+
           </a-form-model-item> -->
 
         <!-- <a-form-model-item label="监控周期" prop="cycle">
@@ -90,7 +112,19 @@
           </a-auto-complete>
         </a-form-model-item>
         <a-form-model-item label="监控项目" prop="projects">
-          <a-select option-label-prop="label" v-model="projectKeys" mode="multiple" placeholder="选择要监控的项目,file 类型项目不可以监控" show-search option-filter-prop="children">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            option-label-prop="label"
+            v-model="projectKeys"
+            mode="multiple"
+            placeholder="选择要监控的项目,file 类型项目不可以监控"
+            show-search
+            option-filter-prop="children"
+          >
             <a-select-opt-group :label="nodeMap[nodeItem.node].name" v-for="nodeItem in nodeProjectGroupList" :key="nodeItem.node">
               <a-select-option :label="`${project.name} - ${project.runMode}`" v-for="project in nodeItem.projects" :disabled="!noFileModes.includes(project.runMode)" :key="project.id">
                 【{{ project.nodeName }}】{{ project.name }} - {{ project.runMode }}
@@ -141,12 +175,13 @@
   </div>
 </template>
 <script>
-import { getMonitorList, editMonitor, deleteMonitor } from "@/api/monitor";
-import { noFileModes } from "@/api/node-project";
-import { getUserListAll } from "@/api/user";
-import { getProjectListAll, getNodeListAll } from "@/api/node";
-import { parseTime, itemGroupBy } from "@/utils/time";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, CRON_DATA_SOURCE } from "@/utils/const";
+import {deleteMonitor, editMonitor, getMonitorList} from "@/api/monitor";
+import {noFileModes} from "@/api/node-project";
+import {getUserListAll} from "@/api/user";
+import {getNodeListAll, getProjectListAll} from "@/api/node";
+import {itemGroupBy, parseTime} from "@/utils/time";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+
 export default {
   data() {
     return {
