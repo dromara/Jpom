@@ -48,7 +48,13 @@
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-dropdown>
+          <a-dropdown
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+          >
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
               <a-icon type="down" />

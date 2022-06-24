@@ -16,6 +16,7 @@
 4. 【server】修复通过私人令牌导入仓库表格主键指定错误
 5. 【server】修复 GitLab 通过私人令牌导入仓库接口分页错误
 6. 【agent】优化新增文件、删除文件目录加载两次问题（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5DMKG](https://gitee.com/dromara/Jpom/issues/I5DMKG) ）
+7. 【server】优化下拉菜单、下拉框跟随页面滚动 （感谢[@pl.com](https://gitee.com/pl.com) [Gitee issues I5D6I0](https://gitee.com/dromara/Jpom/issues/I5D6I0) ）
 
 ------
 

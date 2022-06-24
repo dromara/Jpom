@@ -2,15 +2,7 @@
   <div class="full-content">
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      size="middle"
-      :columns="columns"
-      :pagination="pagination"
-      @change="changePage"
-      bordered
-      :rowKey="(record, index) => index"
-    >
+    <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery.id" @pressEnter="loadData" placeholder="用户名ID" class="search-input-item" />
@@ -24,7 +16,13 @@
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-dropdown>
+          <a-dropdown
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+          >
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
             <a-menu slot="overlay">
               <a-menu-item>
@@ -36,8 +34,8 @@
               <a-menu-item>
                 <a-button type="danger" size="small" :disabled="record.twoFactorAuthKey ? false : true" @click="handleCloseMfa(record)">关闭MFA</a-button>
               </a-menu-item>
-            </a-menu></a-dropdown
-          >
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
       <template slot="systemUser" slot-scope="text, record">
@@ -168,12 +166,13 @@
   </div>
 </template>
 <script>
-import { getUserList, editUser, deleteUser, unlockUser, closeUserMfa, workspaceList } from "@/api/user";
-import { getWorkSpaceListAll } from "@/api/workspace";
-import { getMonitorOperateTypeList } from "@/api/monitor";
-import { parseTime } from "@/utils/time";
+import {closeUserMfa, deleteUser, editUser, getUserList, unlockUser, workspaceList} from "@/api/user";
+import {getWorkSpaceListAll} from "@/api/workspace";
+import {getMonitorOperateTypeList} from "@/api/monitor";
+import {parseTime} from "@/utils/time";
 import sha1 from "sha1";
-import { COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+
 function handleTreeData(data, targetKeys = [], left) {
   if (left) {
     data.forEach((item) => {

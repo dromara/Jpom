@@ -20,7 +20,13 @@
             <a-button size="small" type="primary" @click="handleAdd">新增配置</a-button>
             ｜
             <a-switch v-model="nginxData.status" checked-children="运行中" un-checked-children="未运行" disabled />
-            <a-dropdown>
+            <a-dropdown
+              :getPopupContainer="
+                (triggerNode) => {
+                  return triggerNode.parentNode || document.body;
+                }
+              "
+            >
               <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
                 更多操作
                 <a-icon type="down" />
