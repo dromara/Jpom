@@ -132,4 +132,16 @@ public class ProjectFileControl extends BaseServerController {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.MANAGE_FILE_NEW_FILE_FOLDER).toString();
     }
 
+
+    /**
+     * 修改文件名
+     *
+     * @return json
+     */
+    @GetMapping(value = "rename_file_folder", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.EDIT)
+    public String renameFileFolder() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.MANAGE_FILE_RENAME_FILE_FOLDER).toString();
+    }
+
 }

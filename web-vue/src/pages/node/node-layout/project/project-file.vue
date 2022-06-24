@@ -34,13 +34,13 @@
               <a-dropdown :disabled="!Object.keys(this.tempNode).length">
                 <a-button size="small" type="primary" @click="(e) => e.preventDefault()">新建</a-button>
                 <a-menu slot="overlay">
-                  <a-menu-item @click="handleAddFolder">
+                  <a-menu-item @click="handleAddFile(1)">
                     <a-space>
                       <a-icon type="folder-add" />
                       <a-space>新建目录</a-space>
                     </a-space>
                   </a-menu-item>
-                  <a-menu-item @click="handleAddFile">
+                  <a-menu-item @click="handleAddFile(2)">
                     <a-space>
                       <a-icon type="file-add" />
                       <a-space>新建空白文件</a-space>
@@ -64,10 +64,13 @@
           </template>
           <a-tooltip slot="filename" slot-scope="text, record" placement="topLeft" :title="text">
             <a-dropdown :trigger="['contextmenu']">
-              <span>{{ text }}</span>
+              <div>{{ text }}</div>
               <a-menu slot="overlay">
                 <a-menu-item key="1">
                   <a-button icon="bars" @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link"> 阅读文件 </a-button>
+                </a-menu-item>
+                <a-menu-item key="2">
+                  <a-button icon="highlight" @click="handleRenameFile(record)" type="link"> 重命名 </a-button>
                 </a-menu-item>
               </a-menu>
             </a-dropdown>
@@ -174,6 +177,16 @@
             </a-row>
           </a-space>
         </a-modal>
+        <!-- 从命名文件/文件夹 -->
+        <a-modal v-model="renameFileFolderVisible" width="300px" :title="`重命名`" :footer="null" :maskClosable="true">
+          <a-space direction="vertical" style="width: 100%">
+            <a-input v-model="fileFolderName" placeholder="输入新名称" />
+
+            <a-row type="flex" justify="center">
+              <a-button type="primary" :disabled="fileFolderName.length === 0" @click="renameFileFolder">确认</a-button>
+            </a-row>
+          </a-space>
+        </a-modal>
       </a-layout-content>
     </a-layout>
     <!-- 查看备份列表 -->
@@ -195,8 +208,8 @@
   </div>
 </template>
 <script>
-import { getFileList, downloadProjectFile, noFileModes, deleteProjectFile, uploadProjectFile, readFile, updateFile, remoteDownload, newFileFolder } from "@/api/node-project";
-import { ZIP_ACCEPT } from "@/utils/const";
+import {deleteProjectFile, downloadProjectFile, getFileList, newFileFolder, noFileModes, readFile, remoteDownload, renameFileFolder, updateFile, uploadProjectFile} from "@/api/node-project";
+import {ZIP_ACCEPT} from "@/utils/const";
 import codeEditor from "@/components/codeEditor";
 import projectFileBackup from "./project-file-backup.vue";
 
@@ -252,7 +265,7 @@ export default {
       uploading: false,
       percentage: 0,
       checkBox: false,
-      tableHeight: "80vh",
+      // tableHeight: "80vh",
       defaultProps: {
         children: "children",
         label: "filename",
@@ -276,6 +289,8 @@ export default {
       // 目录1 文件2 标识
       addFileOrFolderType: 1,
       fileFolderName: "",
+      oldFileFolderName: "",
+      renameFileFolderVisible: false,
     };
   },
   computed: {
@@ -695,7 +710,7 @@ export default {
                 message: res.msg,
               });
               this.loadData();
-              this.loadFileList();
+              // this.loadFileList();
             }
           });
         },
@@ -708,14 +723,9 @@ export default {
       // const filePath = this.uploadPath + record.filename;
       this.$emit("goReadFile", this.uploadPath, record.filename);
     },
-    handleAddFolder() {
+    handleAddFile(type) {
       this.addFileFolderVisible = true;
-      this.addFileOrFolderType = 1;
-      this.fileFolderName = "";
-    },
-    handleAddFile() {
-      this.addFileFolderVisible = true;
-      this.addFileOrFolderType = 2;
+      this.addFileOrFolderType = type;
       this.fileFolderName = "";
     },
     // 确认新增文件  目录
@@ -734,6 +744,30 @@ export default {
           });
           this.addFileFolderVisible = false;
           this.loadData();
+          // this.loadFileList();
+        }
+      });
+    },
+    handleRenameFile(record) {
+      this.renameFileFolderVisible = true;
+      this.fileFolderName = record.filename;
+      this.oldFileFolderName = record.filename;
+    },
+    // 确认修改文件 目录名称
+    renameFileFolder() {
+      const params = {
+        nodeId: this.nodeId,
+        id: this.projectId,
+        levelName: this.uploadPath,
+        newname: this.fileFolderName,
+        filename: this.oldFileFolderName,
+      };
+      renameFileFolder(params).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.renameFileFolderVisible = false;
           this.loadFileList();
         }
       });

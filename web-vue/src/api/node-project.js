@@ -579,6 +579,19 @@ export function newFileFolder(params) {
 }
 
 /**
+ * 修改目录或文件名称
+ * @param params
+ * @returns {id, levelName, filename,newname} params x
+ */
+export function renameFileFolder(params) {
+  return axios({
+    url: "/node/manage/file/rename_file_folder",
+    method: "get",
+    params,
+  });
+}
+
+/**
  * 所有的运行模式
  */
 export const runModeList = ["Dsl", "ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"];

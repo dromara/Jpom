@@ -3,7 +3,7 @@
     <!-- 侧边栏 节点管理菜单 -->
     <a-layout-sider theme="light" :class="`node-sider jpom-node-sider ${this.fullScreenFlag ? 'sider-scroll' : 'sider-full-screen'}`">
       <a-menu theme="light" mode="inline" @openChange="openChange" :default-selected-keys="selectedKeys" :openKeys="openKey">
-        <template v-for="menu in nodeMenuList">
+        <template v-for="(menu, index) in nodeMenuList">
           <a-sub-menu v-if="menu.childs" :key="menu.id" :class="menu.id">
             <span slot="title">
               <a-icon :type="menu.icon_v3" />
@@ -13,7 +13,7 @@
               <span>{{ subMenu.title }}</span>
             </a-menu-item>
           </a-sub-menu>
-          <a-menu-item v-else :key="menu.id" @click="handleMenuClick(menu.id)">
+          <a-menu-item v-else :key="menu.id + index" @click="handleMenuClick(menu.id)">
             <a-icon :type="menu.icon_v3" />
             <span>{{ menu.title }}</span>
           </a-menu-item>
@@ -41,7 +41,7 @@
   </a-layout>
 </template>
 <script>
-import { getNodeMenu } from "@/api/menu";
+import {getNodeMenu} from "@/api/menu";
 import Welcome from "@/pages/node/node-layout/welcome";
 import ProjectList from "@/pages/node/node-layout/project/project-list";
 import JdkList from "@/pages/node/node-layout/project/jdk-list";
@@ -56,7 +56,8 @@ import Cache from "@/pages/node/node-layout/system/cache";
 import Log from "@/pages/node/node-layout/system/log.vue";
 import Upgrade from "@/pages/node/node-layout/system/upgrade.vue";
 import ConfigFile from "@/pages/node/node-layout/system/config-file.vue";
-import { mapGetters } from "vuex";
+import {mapGetters} from "vuex";
+
 export default {
   components: {
     Welcome,
@@ -191,7 +192,7 @@ export default {
   min-height: calc(100vh - 85px)
   overflow-y: auto;
 }
-  
+
 .sider-full-screen {
   height: calc(100vh - 75px);
   overflow-y: scroll;
