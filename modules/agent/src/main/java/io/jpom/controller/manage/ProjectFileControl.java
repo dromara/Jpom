@@ -471,7 +471,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @param unFolder  true/1 为文件夹，false/0 为文件
      * @return json
      */
-    @RequestMapping(value = "new_file_folder.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "new_file_folder.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public String newFileFolder(String id, String levelName, @ValidatorItem String filename, String unFolder) {
         NodeProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         Assert.notNull(projectInfoModel, "没有对应到项目");
@@ -483,6 +483,29 @@ public class ProjectFileControl extends BaseAgentController {
         } else {
             FileUtil.mkdir(file);
         }
+        return JsonMessage.getString(200, "操作成功");
+    }
+
+    /**
+     * 修改文件夹/文件
+     *
+     * @param id        项目ID
+     * @param levelName 二级文件夹名
+     * @param filename  文件名
+     * @param newname   新文件名
+     * @return json
+     */
+    @PostMapping(value = "rename.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String rename(String id, String levelName, @ValidatorItem String filename, String newname) {
+        NodeProjectInfoModel projectInfoModel = getProjectInfoModel();
+        File file = FileUtil.file(projectInfoModel.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
+        File newFile = FileUtil.file(projectInfoModel.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), newname);
+
+        Assert.state(FileUtil.exist(file), "文件不存在");
+        Assert.state(!FileUtil.exist(newFile), "文件名已经存在拉");
+
+        FileUtil.rename(file, newname, false);
+
         return JsonMessage.getString(200, "操作成功");
     }
 
