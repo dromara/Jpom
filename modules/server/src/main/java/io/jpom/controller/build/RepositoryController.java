@@ -266,9 +266,9 @@ public class RepositoryController extends BaseServerController {
             String htmlUrl = repo.getString("http_url_to_repo");
             jsonObject.put("url", htmlUrl);
             jsonObject.put("full_name", repo.getString("path_with_namespace"));
-            jsonObject.put("private", StrUtil.equalsIgnoreCase("private", repo.getString("visibility")));
+            // visibility 有三种：public, internal, or private.（非 public，都是 private）
+            jsonObject.put("private", !StrUtil.equalsIgnoreCase("public", repo.getString("visibility")));
             jsonObject.put("description", repo.getString("description"));
-            //
             jsonObject.put("username", username);
             jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(null, htmlUrl));
             return jsonObject;
@@ -761,7 +761,8 @@ public class RepositoryController extends BaseServerController {
             )
                 .form("private_token", token)
                 .form("membership", true)
-                .form("simple", true)
+                // 当 simple=true 时，不返回项目的 visibility，无法判断是私有仓库、公开仓库还是内部仓库
+//                .form("simple", true)
                 .form("order_by", "updated_at")
                 .form("page", page.getPageNumber())
                 .form("per_page", page.getPageSize())
