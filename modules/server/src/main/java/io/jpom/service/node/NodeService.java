@@ -65,8 +65,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
     private final SshService sshService;
     private final WorkspaceService workspaceService;
 
-    public NodeService(SshService sshService,
-                       WorkspaceService workspaceService) {
+    public NodeService(SshService sshService, WorkspaceService workspaceService) {
         this.sshService = sshService;
         this.workspaceService = workspaceService;
     }
@@ -249,36 +248,35 @@ public class NodeService extends BaseGroupService<NodeModel> {
      * @param workspaceId    同步到哪个工作空间
      */
     public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
-        StrUtil.splitTrim(ids, StrUtil.COMMA)
-            .forEach(id -> {
-                NodeModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                Assert.notNull(data, "没有对应到节点信息");
-                //
-                NodeModel where = new NodeModel();
-                where.setWorkspaceId(workspaceId);
-                where.setUrl(data.getUrl());
-                NodeModel nodeModel = NodeService.super.queryByBean(where);
-                if (nodeModel == null) {
-                    // 不存在则添加节点
-                    data.setId(null);
-                    data.setWorkspaceId(workspaceId);
-                    data.setCreateTimeMillis(null);
-                    data.setModifyTimeMillis(null);
-                    data.setModifyUser(null);
-                    // ssh 不同步
-                    data.setSshId(null);
-                    NodeService.super.insert(data);
-                } else {
-                    // 修改信息
-                    NodeModel update = new NodeModel(nodeModel.getId());
-                    update.setLoginName(data.getLoginName());
-                    update.setLoginPwd(data.getLoginPwd());
-                    update.setProtocol(data.getProtocol());
-                    update.setHttpProxy(data.getHttpProxy());
-                    update.setHttpProxyType(data.getHttpProxyType());
-                    NodeService.super.updateById(update);
-                }
-            });
+        StrUtil.splitTrim(ids, StrUtil.COMMA).forEach(id -> {
+            NodeModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
+            Assert.notNull(data, "没有对应到节点信息");
+            //
+            NodeModel where = new NodeModel();
+            where.setWorkspaceId(workspaceId);
+            where.setUrl(data.getUrl());
+            NodeModel nodeModel = NodeService.super.queryByBean(where);
+            if (nodeModel == null) {
+                // 不存在则添加节点
+                data.setId(null);
+                data.setWorkspaceId(workspaceId);
+                data.setCreateTimeMillis(null);
+                data.setModifyTimeMillis(null);
+                data.setModifyUser(null);
+                // ssh 不同步
+                data.setSshId(null);
+                NodeService.super.insert(data);
+            } else {
+                // 修改信息
+                NodeModel update = new NodeModel(nodeModel.getId());
+                update.setLoginName(data.getLoginName());
+                update.setLoginPwd(data.getLoginPwd());
+                update.setProtocol(data.getProtocol());
+                update.setHttpProxy(data.getHttpProxy());
+                update.setHttpProxyType(data.getHttpProxyType());
+                NodeService.super.updateById(update);
+            }
+        });
     }
 
     /**
@@ -306,7 +304,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
 
     @Override
     public void insertNotFill(NodeModel nodeModel) {
-        nodeModel.setWorkspaceId(Const.WORKSPACE_DEFAULT_ID);
+        nodeModel.setWorkspaceId(StrUtil.emptyToDefault(nodeModel.getWorkspaceId(), Const.WORKSPACE_DEFAULT_ID));
         this.fillNodeInfo(nodeModel);
         super.insertNotFill(nodeModel);
         this.updateDuplicateNode(nodeModel);
