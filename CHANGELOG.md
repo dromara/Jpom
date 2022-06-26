@@ -19,6 +19,7 @@
 7. 【server】优化下拉菜单、下拉框跟随页面滚动 （感谢[@pl.com](https://gitee.com/pl.com) [Gitee issues I5D6I0](https://gitee.com/dromara/Jpom/issues/I5D6I0) ）
 8. 【server】导入仓库支持按仓库名搜索
 9. 【server】修复导入仓库 GitLab 私有列显示错误
+10. 副本功能优化,新增名称字段,项目列表快速查看 （感谢[@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I5E52A](https://gitee.com/dromara/Jpom/issues/I5E52A) ） 
 
 ------
 

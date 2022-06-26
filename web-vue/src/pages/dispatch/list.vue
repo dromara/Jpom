@@ -488,22 +488,9 @@
             </a-form-model-item>
 
             <div v-if="javaModes.includes(temp.runMode)">
-              <!-- 副本信息 -->
-              <a-row v-for="replica in temp[`${nodeId}_javaCopyItemList`]" :key="replica.id">
-                <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
-                  <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
-                </a-form-model-item>
-                <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
-                  <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
-                </a-form-model-item>
-                <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
-                  <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(nodeId, replica)">删除</a-button>
-                </a-tooltip>
-              </a-row>
-              <!-- 添加副本 -->
               <a-form-model-item>
                 <template slot="label">
-                  副本操作
+                  副本
                   <a-tooltip v-show="temp.type !== 'edit'">
                     <template slot="title">
                       <ul>
@@ -513,7 +500,38 @@
                     <a-icon type="question-circle" theme="filled" />
                   </a-tooltip>
                 </template>
-                <a-button type="primary" @click="handleAddReplica(nodeId)">添加副本</a-button>
+                <!-- 副本信息 -->
+                <a-collapse v-if="temp[`${nodeId}_javaCopyItemList`] && temp[`${nodeId}_javaCopyItemList`].length">
+                  <a-collapse-panel v-for="replica in temp[`${nodeId}_javaCopyItemList`]" :key="replica.id">
+                    <template #header>
+                      <a-row>
+                        <a-col :span="18"> 副本 {{ replica.name }} {{ replica.id }} </a-col>
+                        <a-col :span="4">
+                          <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除">
+                            <a-button size="small" :disabled="!replica.deleteAble" type="danger" @click.stop="handleDeleteReplica(nodeId, replica)">删除</a-button>
+                          </a-tooltip>
+                        </a-col>
+                      </a-row>
+                    </template>
+                    <a-form-model-item :label="`名称`" prop="replicaName">
+                      <a-input v-model="replica.name" class="replica-area" placeholder="副本名称" />
+                    </a-form-model-item>
+                    <a-form-model-item :label="`JVM 参数`" prop="jvm">
+                      <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
+                    </a-form-model-item>
+                    <a-form-model-item :label="`args 参数`" prop="args">
+                      <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
+                    </a-form-model-item>
+                    <!-- <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
+                      <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(nodeId, replica)">删除</a-button>
+                    </a-tooltip> -->
+                  </a-collapse-panel>
+                </a-collapse>
+
+                <!-- 添加副本 -->
+                <a-form-model-item>
+                  <a-button type="primary" @click="handleAddReplica(nodeId)">添加副本</a-button>
+                </a-form-model-item>
               </a-form-model-item>
             </div>
           </a-collapse-panel>
@@ -965,6 +983,7 @@ export default {
         id: repliccaId,
         jvm: "",
         args: "",
+        name: "",
         deleteAble: true,
       });
       this.temp = { ...this.temp };
@@ -1009,6 +1028,7 @@ export default {
             copyIds.push(element.id);
             tempData[`${key}_jvm_${element.id}`] = element.jvm;
             tempData[`${key}_args_${element.id}`] = element.args;
+            tempData[`${key}_name_${element.id}`] = element.name;
           });
           // 移除多余的后缀 ,
           tempData[`${key}_javaCopyIds`] = copyIds.join(",");
@@ -1302,11 +1322,11 @@ export default {
 </script>
 <style scoped>
 .replica-area {
-  width: 300px;
+  width: 80%;
 }
-.replica-btn-del {
+/* .replica-btn-del {
   position: absolute;
   right: 0;
   top: 74px;
-}
+} */
 </style>

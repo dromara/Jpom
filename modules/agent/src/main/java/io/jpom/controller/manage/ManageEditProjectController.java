@@ -146,11 +146,13 @@ public class ManageEditProjectController extends BaseAgentController {
                 List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = new ArrayList<>(split.length);
                 for (String copyId : split) {
                     String jvm = getParameter("jvm_" + copyId);
+                    String name = getParameter("name_" + copyId);
                     String args = getParameter("args_" + copyId);
                     //
                     NodeProjectInfoModel.JavaCopyItem javaCopyItem = new NodeProjectInfoModel.JavaCopyItem();
                     javaCopyItem.setId(copyId);
                     javaCopyItem.setParentId(id);
+                    javaCopyItem.setName(name);
                     javaCopyItem.setModifyTime(DateUtil.now());
                     javaCopyItem.setJvm(StrUtil.emptyToDefault(jvm, StrUtil.EMPTY));
                     javaCopyItem.setArgs(StrUtil.emptyToDefault(args, StrUtil.EMPTY));

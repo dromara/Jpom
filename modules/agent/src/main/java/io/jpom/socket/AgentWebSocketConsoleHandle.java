@@ -68,6 +68,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             }
             String projectId = super.getParameters(session, "projectId");
             String copyId = super.getParameters(session, "copyId");
+            copyId = StrUtil.nullToDefault(copyId, StrUtil.EMPTY);
             // 判断项目
             if (!JpomApplication.SYSTEM_ID.equals(projectId)) {
                 if (projectInfoService == null) {
@@ -78,7 +79,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     return;
                 }
                 //
-                SocketSessionUtil.send(session, "连接成功：" + nodeProjectInfoModel.getName());
+                SocketSessionUtil.send(session, "连接成功：" + nodeProjectInfoModel.getName() + (StrUtil.isEmpty(copyId) ? StrUtil.EMPTY : StrUtil.AT + copyId));
             }
         } catch (Exception e) {
             log.error("socket 错误", e);
