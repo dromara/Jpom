@@ -1,19 +1,7 @@
 <template>
   <div class="user-header">
     <a-tooltip placement="left" title="切换工作空间">
-      <a-select
-        :getPopupContainer="
-          (triggerNode) => {
-            return triggerNode.parentNode || document.body;
-          }
-        "
-        v-model="selectWorkspace"
-        class="workspace jpom-workspace"
-        option-filter-prop="children"
-        show-search
-        placeholder="工作空间"
-        @change="handleChange"
-      >
+      <a-select v-model="selectWorkspace" class="workspace jpom-workspace" option-filter-prop="children" show-search placeholder="工作空间" @change="handleChange">
         <a-icon slot="suffixIcon" type="swap" />
         <a-select-option v-for="item in myWorkspaceList" :key="item.id">
           <a-tooltip placement="left" :title="item.name">
