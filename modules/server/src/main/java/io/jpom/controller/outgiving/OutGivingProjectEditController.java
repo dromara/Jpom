@@ -395,8 +395,10 @@ public class OutGivingProjectEditController extends BaseServerController {
 				for (String copyId : split) {
 					String copyJvm = getParameter(StrUtil.format("{}_jvm_{}", nodeModel.getId(), copyId));
 					String copyArgs = getParameter(StrUtil.format("{}_args_{}", nodeModel.getId(), copyId));
+                    String nameArgs = getParameter(StrUtil.format("{}_name_{}", nodeModel.getId(), copyId));
 					allData.put("jvm_" + copyId, copyJvm);
 					allData.put("args_" + copyId, copyArgs);
+                    allData.put("name_" + copyId, nameArgs);
 				}
 			}
 			JsonMessage<String> jsonMessage = this.sendData(nodeModel, userModel, allData, false);

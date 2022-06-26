@@ -1,7 +1,19 @@
 <template>
   <div class="node-full-content">
     <!-- 数据表格 -->
-    <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" @change="changePage" :row-selection="rowSelection" bordered :rowKey="(record, index) => index">
+    <a-table
+      :data-source="list"
+      :expandIconColumnIndex="-1"
+      :expandIconAsCell="false"
+      :expandedRowKeys="expandedRowKeys"
+      size="middle"
+      :columns="columns"
+      :pagination="pagination"
+      @change="changePage"
+      :row-selection="rowSelection"
+      bordered
+      rowKey="id"
+    >
       <template slot="title">
         <!-- <a-select   :getPopupContainer="
               (triggerNode) => {
@@ -39,6 +51,17 @@
 
         状态数据是异步获取有一定时间延迟
       </template>
+      <template slot="copyIcon" slot-scope="javaCopyItemList, record">
+        <template v-if="javaCopyItemList">
+          <div v-if="!expandedRowKeys.includes(record.id)" class="ant-table-row-expand-icon ant-table-row-collapsed" @click="handleExpand(record, true)"></div>
+          <div v-else class="ant-table-row-expand-icon ant-table-row-expanded" @click="handleExpand(record, false)"></div>
+        </template>
+        <template v-else>
+          <a-tooltip title="当项目存在副本集时此列将可以用于查看副本集功能，其他情况此列没有实际作用">
+            <a-icon type="minus-circle" />
+          </a-tooltip>
+        </template>
+      </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="`名称：${text}`">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -62,6 +85,26 @@
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
         <span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
       </a-tooltip>
+
+      <template slot="expandedRowRender" slot-scope="record">
+        <a-table :columns="copyColumns" :data-source="record.javaCopyItemList" rowKey="id" :pagination="false">
+          <template slot="id" slot-scope="text">
+            {{ text }}
+            <a-icon type="reload" @click="getRuningProjectCopyInfo(record)" />
+          </template>
+          <template slot="name" slot-scope="text, record">
+            {{ text || record.id }}
+          </template>
+          <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
+          <template slot="operation" slot-scope="text, copyRecord">
+            <a-space>
+              <a-button size="small" type="primary" @click="handleConsoleCopy(record, copyRecord)">控制台</a-button>
+              <a-button size="small" type="danger" @click="handleDeleteCopy(record, copyRecord)">删除</a-button>
+            </a-space>
+          </template>
+        </a-table>
+      </template>
+
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
@@ -80,9 +123,9 @@
               <a-menu-item>
                 <a-button size="small" type="primary" @click="handleMonitor(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.status">监控 </a-button>
               </a-menu-item>
-              <a-menu-item>
+              <!-- <a-menu-item>
                 <a-button size="small" type="primary" @click="handleReplica(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
-              </a-menu-item>
+              </a-menu-item> -->
               <a-menu-item>
                 <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
                   <a-button size="small" type="danger" :disabled="record.outGivingProject === 1">删除</a-button>
@@ -266,31 +309,45 @@
         </a-form-model-item>
         <div v-if="javaModes.includes(temp.runMode)">
           <!-- 副本信息 -->
-          <a-row v-for="replica in temp.javaCopyItemList" :key="replica.id">
-            <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
-              <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
-            </a-form-model-item>
-            <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
-              <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
-            </a-form-model-item>
-            <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
-              <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)">删除</a-button>
-            </a-tooltip>
-          </a-row>
-          <!-- 添加副本 -->
+          <!-- <a-row> </a-row> -->
           <a-form-model-item>
             <template slot="label">
-              副本操作
+              副本
               <a-tooltip v-show="temp.type !== 'edit'">
-                <template slot="title">
-                  <ul>
-                    <li>副本是指同一个项目在一个节点（服务器）中运行多份</li>
-                  </ul>
-                </template>
+                <template slot="title"> 副本是指同一个项目在一个节点（服务器）中运行多份 </template>
                 <a-icon type="question-circle" theme="filled" />
               </a-tooltip>
             </template>
-            <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
+            <a-collapse v-if="temp.javaCopyItemList && temp.javaCopyItemList.length">
+              <a-collapse-panel v-for="replica in temp.javaCopyItemList" :key="replica.id">
+                <template #header>
+                  <a-row>
+                    <a-col :span="4"> 副本 {{ replica.id }} </a-col>
+                    <a-col :span="10">
+                      <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除">
+                        <a-button size="small" :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)">删除</a-button>
+                      </a-tooltip>
+                    </a-col>
+                  </a-row>
+                </template>
+                <a-form-model-item :label="`名称`" prop="replicaName">
+                  <a-input v-model="replica.name" class="replica-area" placeholder="副本名称" />
+                </a-form-model-item>
+                <a-form-model-item :label="`JVM 参数`" prop="jvm">
+                  <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
+                </a-form-model-item>
+                <a-form-model-item :label="`args 参数`" prop="args">
+                  <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080" />
+                </a-form-model-item>
+                <!-- <a-form-model-item> -->
+
+                <!-- </a-form-model-item> -->
+              </a-collapse-panel>
+            </a-collapse>
+            <!-- 添加副本 -->
+            <a-form-model-item>
+              <a-button size="small" type="primary" @click="handleAddReplica">添加副本</a-button>
+            </a-form-model-item>
           </a-form-model-item>
         </div>
         <a-form-model-item prop="autoStart" v-show="noFileModes.includes(temp.runMode)">
@@ -341,7 +398,7 @@
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :nodeId="node.id" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
+      <console v-if="drawerConsoleVisible" :nodeId="node.id" :id="temp.id" :projectId="temp.projectId" :replica="replicaTemp" :copyId="replicaTemp ? replicaTemp.id : ''" @goFile="goFile" />
     </a-drawer>
     <!-- 项目阅读文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReadFileVisible" @close="onReadFileClose">
@@ -352,9 +409,9 @@
       <monitor v-if="drawerMonitorVisible" :node="node" :project="temp" />
     </a-drawer>
     <!-- 项目副本集组件 -->
-    <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReplicaVisible" @close="onReplicaClose">
+    <!-- <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReplicaVisible" @close="onReplicaClose">
       <replica v-if="drawerReplicaVisible" :node="node" :project="temp" />
-    </a-drawer>
+    </a-drawer> -->
     <!-- 批量操作状态 -->
     <a-modal v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="selectedRows">
@@ -373,7 +430,7 @@ import File from "./project-file";
 import Console from "./project-console";
 import FileRead from "./project-file-read";
 import Monitor from "./project-monitor";
-import Replica from "./project-replica";
+// import Replica from "./project-replica";
 import {parseTime} from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
 import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL} from "@/utils/const";
@@ -385,6 +442,7 @@ import {
   getProjectAccessList,
   getProjectData,
   getProjectList,
+  getRuningProjectCopyInfo,
   getRuningProjectInfo,
   javaModes,
   nodeJudgeLibExist,
@@ -405,7 +463,7 @@ export default {
     File,
     Console,
     Monitor,
-    Replica,
+    // Replica,
     codeEditor,
     FileRead,
   },
@@ -421,6 +479,7 @@ export default {
       PROJECT_DSL_DEFATUL,
       list: [],
       temp: {},
+      replicaTemp: null,
       editProjectVisible: false,
       drawerTitle: "",
       drawerFileVisible: false,
@@ -436,6 +495,7 @@ export default {
       batchVisible: false,
       batchTitle: "",
       columns: [
+        { title: "", dataIndex: "javaCopyItemList", align: "center", width: "40px", scopedSlots: { customRender: "copyIcon" } },
         { title: "项目名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "运行方式", dataIndex: "runMode", sorter: true, width: 90, ellipsis: true, align: "center", scopedSlots: { customRender: "runMode" } },
         { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: 170, ellipsis: true, scopedSlots: { customRender: "time" } },
@@ -452,6 +512,15 @@ export default {
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 180 },
       ],
+      copyColumns: [
+        { title: "编号", dataIndex: "id", width: "80px", ellipsis: true, scopedSlots: { customRender: "id" } },
+        { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "进程 ID", dataIndex: "pid", width: 100, ellipsis: true, scopedSlots: { customRender: "pid" } },
+        { title: "端口号", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
+        { title: "最后修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "120px" },
+      ],
       rules: {
         id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
         name: [{ required: true, message: "请输入项目名称", trigger: "blur" }],
@@ -459,6 +528,7 @@ export default {
         whitelistDirectory: [{ required: true, message: "请选择项目白名单路径", trigger: "blur" }],
         lib: [{ required: true, message: "请输入项目文件夹", trigger: "blur" }],
       },
+      expandedRowKeys: [],
     };
   },
   computed: {
@@ -483,9 +553,7 @@ export default {
     this.loadData();
   },
   methods: {
-    parseTime(v) {
-      return parseTime(v);
-    },
+    parseTime,
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {
@@ -533,7 +601,19 @@ export default {
           // 如果运行模式是文件，则无需批量启动/重启/关闭
           let tempList = resultList.filter((item) => item.runMode !== "File");
           let fileList = resultList.filter((item) => item.runMode === "File");
-          this.list = tempList.concat(fileList);
+          this.list = tempList.concat(fileList).map((item) => {
+            //  javaCopyItemList
+            let javaCopyItemList = null;
+            if (item.javaCopyItemList) {
+              try {
+                javaCopyItemList = JSON.parse(item.javaCopyItemList);
+                javaCopyItemList = javaCopyItemList.length ? javaCopyItemList : null;
+              } catch (error) {
+                //
+              }
+            }
+            return { ...item, javaCopyItemList: javaCopyItemList };
+          });
           // // 项目ID 字段更新
           // this.list = this.list.map((element) => {
           //   //element.dataId = element.id;
@@ -621,6 +701,7 @@ export default {
         id: repliccaId,
         jvm: "",
         args: "",
+        name: "",
         deleteAble: true,
       });
     },
@@ -650,13 +731,17 @@ export default {
         };
         // 额外参数
         const replicaParams = {};
-        let javaCopyIds = "";
-        this.temp.javaCopyItemList.forEach((element) => {
-          javaCopyIds += `${element.id},`;
-          replicaParams[`jvm_${element.id}`] = element.jvm;
-          replicaParams[`args_${element.id}`] = element.args;
-        });
-        replicaParams["javaCopyIds"] = javaCopyIds.substring(0, javaCopyIds.length - 1);
+
+        let javaCopyIds = this.temp.javaCopyItemList
+          .map((element) => {
+            //javaCopyIds += `${element.id},`;
+            replicaParams[`jvm_${element.id}`] = element.jvm;
+            replicaParams[`args_${element.id}`] = element.args;
+            replicaParams[`name_${element.id}`] = element.name;
+            return element.id;
+          })
+          .join(",");
+        replicaParams["javaCopyIds"] = javaCopyIds;
         editProject(params, replicaParams).then((res) => {
           if (res.code === 200) {
             this.$notification.success({
@@ -686,6 +771,16 @@ export default {
       this.temp = Object.assign({}, record);
       this.drawerTitle = `控制台(${this.temp.name})`;
       this.drawerConsoleVisible = true;
+      this.replicaTemp = null;
+    },
+    // 副本控制台
+    handleConsoleCopy(record, copyItem) {
+      this.checkRecord = record;
+      this.temp = Object.assign({}, record);
+      this.drawerTitle = `控制台(${this.temp.name})-${copyItem.id}`;
+      this.drawerConsoleVisible = true;
+      this.replicaTemp = copyItem;
+      console.log(record, copyItem);
     },
     // 关闭控制台
     onConsoleClose() {
@@ -702,16 +797,16 @@ export default {
     onMonitorClose() {
       this.drawerMonitorVisible = false;
     },
-    // 副本集
-    handleReplica(record) {
-      this.temp = Object.assign({}, record);
-      this.drawerTitle = `副本集(${this.temp.name})`;
-      this.drawerReplicaVisible = true;
-    },
+    // // 副本集
+    // handleReplica(record) {
+    //   this.temp = Object.assign({}, record);
+    //   this.drawerTitle = `副本集(${this.temp.name})`;
+    //   this.drawerReplicaVisible = true;
+    // },
     // 关闭副本集
-    onReplicaClose() {
-      this.drawerReplicaVisible = false;
-    },
+    // onReplicaClose() {
+    //   this.drawerReplicaVisible = false;
+    // },
     // 删除
     handleDelete(record) {
       this.$confirm({
@@ -945,19 +1040,97 @@ export default {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
+    //
+    handleExpand(item, status) {
+      //javaCopyItemList
+      if (status) {
+        this.expandedRowKeys.push(item.id);
+        this.getRuningProjectCopyInfo(item);
+      } else {
+        this.expandedRowKeys = this.expandedRowKeys.filter((item2) => item2 !== item.id);
+      }
+    },
+
+    getRuningProjectCopyInfo(project) {
+      const ids = project.javaCopyItemList.map((item) => item.id);
+      const tempParams = {
+        nodeId: this.node.id,
+        id: project.projectId,
+        copyIds: JSON.stringify(ids),
+      };
+
+      getRuningProjectCopyInfo(tempParams).then((res) => {
+        if (res.code === 200) {
+          this.list = this.list.map((item) => {
+            let javaCopyItemList = item.javaCopyItemList;
+            if (javaCopyItemList && item.projectId === project.projectId) {
+              javaCopyItemList = javaCopyItemList.map((copyItem) => {
+                if (res.data[copyItem.id]) {
+                  // element.port = res.data[element.id].port;
+                  // element.pid = res.data[element.id].pid;
+                  // element.status = true;
+                  return { ...copyItem, status: true, pid: res.data[copyItem.id].pid, port: res.data[copyItem.id].port };
+                }
+                return copyItem;
+              });
+            }
+            return { ...item, javaCopyItemList: javaCopyItemList };
+          });
+
+          this.list = this.list.map((element) => {
+            return element;
+          });
+        }
+      });
+    },
+    // 删除
+    handleDeleteCopy(project, record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要删除副本项目么？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          const params = {
+            nodeId: this.node.id,
+            id: project.projectId,
+            copyId: record.id,
+          };
+          deleteProject(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              this.list = this.list.map((item) => {
+                let javaCopyItemList = item.javaCopyItemList;
+                if (javaCopyItemList) {
+                  javaCopyItemList = javaCopyItemList.filter((item2) => {
+                    return item2.id !== record.id;
+                  });
+                }
+                return { ...item, javaCopyItemList: javaCopyItemList };
+              });
+              // this.loadData();
+            }
+          });
+        },
+      });
+    },
   },
 };
 </script>
 <style scoped>
 .replica-area {
-  width: 340px;
+  width: 80%;
 }
 
-.replica-btn-del {
+/* .replica-btn-del {
   position: absolute;
   right: 120px;
   top: 74px;
-}
+} */
 
 .lib-exist {
   color: #faad14;

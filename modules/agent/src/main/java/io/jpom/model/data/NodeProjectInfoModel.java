@@ -440,6 +440,10 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
          */
         @Deprecated
         private String parendId;
+        /**
+         * 名称
+         */
+        private String name;
         private String parentId;
         /**
          * id
