@@ -643,6 +643,8 @@ export default {
                 // this.list.forEach((element) => {});
               }
             });
+            //
+            this.expandedRowKeys = [];
           }
         }
         this.loading = false;
@@ -1040,7 +1042,7 @@ export default {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
-    //
+    // 折叠事件
     handleExpand(item, status) {
       //javaCopyItemList
       if (status) {
@@ -1050,7 +1052,7 @@ export default {
         this.expandedRowKeys = this.expandedRowKeys.filter((item2) => item2 !== item.id);
       }
     },
-
+    // 获取副本信息
     getRuningProjectCopyInfo(project) {
       const ids = project.javaCopyItemList.map((item) => item.id);
       const tempParams = {
