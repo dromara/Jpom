@@ -24,10 +24,8 @@ package io.jpom.system.init;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.exceptions.UtilException;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
-import cn.hutool.core.lang.Filter;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.text.CharPool;
@@ -52,8 +50,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.*;
-import java.util.Enumeration;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.URL;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -148,7 +147,7 @@ public class AutoRegSeverNode {
         UrlBuilder urlBuilder = UrlBuilder.ofHttp(url);
         String networkName = (String) urlBuilder.getQuery().get("networkName");
         //
-        LinkedHashSet<InetAddress> localAddressList = localAddressList(networkInterface -> StrUtil.isEmpty(networkName) || StrUtil.equals(networkName, networkInterface.getName()), address -> {
+        LinkedHashSet<InetAddress> localAddressList = NetUtil.localAddressList(networkInterface -> StrUtil.isEmpty(networkName) || StrUtil.equals(networkName, networkInterface.getName()), address -> {
             // 非loopback地址，指127.*.*.*的地址
             return !address.isLoopbackAddress()
                 // 需为IPV4地址
@@ -171,43 +170,4 @@ public class AutoRegSeverNode {
             Console.log("push result:" + body);
         }
     }
-
-    /**
-     * 获取所有满足过滤条件的本地IP地址对象
-     *
-     * @param addressFilter 过滤器，null表示不过滤，获取所有地址
-     * @return 过滤后的地址对象列表
-     * @see NetUtil#localAddressList(Filter)
-     */
-    private static LinkedHashSet<InetAddress> localAddressList(Filter<NetworkInterface> interfaceFilter, Filter<InetAddress> addressFilter) {
-        Enumeration<NetworkInterface> networkInterfaces;
-        try {
-            networkInterfaces = NetworkInterface.getNetworkInterfaces();
-        } catch (SocketException e) {
-            throw new UtilException(e);
-        }
-
-        if (networkInterfaces == null) {
-            throw new UtilException("Get network interface error!");
-        }
-
-        final LinkedHashSet<InetAddress> ipSet = new LinkedHashSet<>();
-
-        while (networkInterfaces.hasMoreElements()) {
-            final NetworkInterface networkInterface = networkInterfaces.nextElement();
-            if (interfaceFilter != null && !interfaceFilter.accept(networkInterface)) {
-                continue;
-            }
-            final Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
-            while (inetAddresses.hasMoreElements()) {
-                final InetAddress inetAddress = inetAddresses.nextElement();
-                if (inetAddress != null && (null == addressFilter || addressFilter.accept(inetAddress))) {
-                    ipSet.add(inetAddress);
-                }
-            }
-        }
-
-        return ipSet;
-    }
-
 }
