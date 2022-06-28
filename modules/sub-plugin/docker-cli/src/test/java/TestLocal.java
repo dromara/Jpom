@@ -20,17 +20,23 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import cn.hutool.json.JSONUtil;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.StatsCmd;
 import com.github.dockerjava.api.command.VersionCmd;
+import com.github.dockerjava.api.model.Statistics;
 import com.github.dockerjava.api.model.Version;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.core.InvocationBuilder;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
@@ -39,31 +45,43 @@ import org.slf4j.LoggerFactory;
  * @since 2022/1/25
  */
 public class TestLocal {
-	private DockerClient dockerClient;
+    private DockerClient dockerClient;
 
-	@Test
-	public void test() {
-		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-		Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
-		logger.setLevel(Level.INFO);
+    @Before
+    public void init() {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+        logger.setLevel(Level.INFO);
 
-		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-				// .withDockerHost("tcp://192.168.163.11:2376").build();
+        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
+            // .withDockerHost("tcp://192.168.163.11:2376").build();
 //				.withApiVersion()
-				.withDockerHost("tcp://127.0.0.1:2375").build();
+            .withDockerHost("tcp://127.0.0.1:2375").build();
 
-		DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
-				.dockerHost(config.getDockerHost())
-				.sslConfig(config.getSSLConfig())
-				.maxConnections(100)
+        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+            .dockerHost(config.getDockerHost())
+            .sslConfig(config.getSSLConfig())
+            .maxConnections(100)
 //				.connectionTimeout(Duration.ofSeconds(30))
 //				.responseTimeout(Duration.ofSeconds(45))
-				.build();
-		this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
-		dockerClient.pingCmd().exec();
-		VersionCmd versionCmd = dockerClient.versionCmd();
-		Version exec = versionCmd.exec();
-		System.out.println(exec);
+            .build();
+        this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
+    }
 
-	}
+    @Test
+    public void test() {
+
+        dockerClient.pingCmd().exec();
+        VersionCmd versionCmd = dockerClient.versionCmd();
+        Version exec = versionCmd.exec();
+        System.out.println(exec);
+    }
+
+    @Test
+    public void tset2() throws InterruptedException {
+        StatsCmd statsCmd = dockerClient.statsCmd("5848fd613ea41f9b370a26949f590be107c165872bfc007f666b26d8a2247ac2");
+        Statistics statistics = statsCmd.exec(new InvocationBuilder.AsyncResultCallback<>()).awaitResult();
+        System.out.println(statistics);
+        System.out.println(JSONUtil.toJsonStr(statistics));
+    }
 }

@@ -7,6 +7,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 升级 SpringBoot、Hutool
+2. 【server】docker 加入集群无法正常使用问题
 
 ------
 

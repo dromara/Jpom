@@ -183,12 +183,11 @@
             option-filter-prop="children"
             @change="
               (v) => {
-                if (
-                  swarmList.filter((item) => {
-                    return item.id === v;
-                  }).length
-                ) {
-                  temp = { ...temp, remoteAddr: temp[0].nodeAddr };
+                tempList = swarmList.filter((item) => {
+                  return item.id === v;
+                });
+                if (tempList.length) {
+                  temp = { ...temp, remoteAddr: tempList[0].nodeAddr };
                 } else {
                   temp = { ...temp, remoteAddr: '' };
                 }
