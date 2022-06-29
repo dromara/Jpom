@@ -51,84 +51,98 @@ import java.util.Map;
 @RequestMapping(value = "/docker/container")
 public class DockerContainerController extends BaseServerController {
 
-	private final DockerInfoService dockerInfoService;
+    private final DockerInfoService dockerInfoService;
 
-	public DockerContainerController(DockerInfoService dockerInfoService) {
-		this.dockerInfoService = dockerInfoService;
-	}
+    public DockerContainerController(DockerInfoService dockerInfoService) {
+        this.dockerInfoService = dockerInfoService;
+    }
 
-	/**
-	 * @return json
-	 */
-	@PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String list(@ValidatorItem String id) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("name", getParameter("name"));
-		parameter.put("containerId", getParameter("containerId"));
-		parameter.put("imageId", getParameter("imageId"));
-		parameter.put("showAll", getParameter("showAll"));
-		List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listContainer", parameter);
-		return JsonMessage.getString(200, "", listContainer);
-	}
+    /**
+     * @return json
+     */
+    @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String list(@ValidatorItem String id) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("name", getParameter("name"));
+        parameter.put("containerId", getParameter("containerId"));
+        parameter.put("imageId", getParameter("imageId"));
+        parameter.put("showAll", getParameter("showAll"));
+        List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listContainer", parameter);
+        return JsonMessage.getString(200, "", listContainer);
+    }
 
-	/**
-	 * @return json
-	 */
-	@GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.DEL)
-	public String del(@ValidatorItem String id, String containerId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("containerId", containerId);
-		plugin.execute("removeContainer", parameter);
-		return JsonMessage.getString(200, "执行成功");
-	}
+    /**
+     * @return json
+     */
+    @GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public String del(@ValidatorItem String id, String containerId) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("containerId", containerId);
+        plugin.execute("removeContainer", parameter);
+        return JsonMessage.getString(200, "执行成功");
+    }
 
-	/**
-	 * @return json
-	 */
-	@GetMapping(value = "start", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
-	public String start(@ValidatorItem String id, String containerId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("containerId", containerId);
-		plugin.execute("startContainer", parameter);
-		return JsonMessage.getString(200, "执行成功");
-	}
-
-
-	/**
-	 * @return json
-	 */
-	@GetMapping(value = "stop", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
-	public String stop(@ValidatorItem String id, String containerId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("containerId", containerId);
-		plugin.execute("stopContainer", parameter);
-		return JsonMessage.getString(200, "执行成功");
-	}
+    /**
+     * @return json
+     */
+    @GetMapping(value = "start", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public String start(@ValidatorItem String id, String containerId) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("containerId", containerId);
+        plugin.execute("startContainer", parameter);
+        return JsonMessage.getString(200, "执行成功");
+    }
 
 
-	/**
-	 * @return json
-	 */
-	@GetMapping(value = "restart", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
-	public String restart(@ValidatorItem String id, String containerId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("containerId", containerId);
-		plugin.execute("restartContainer", parameter);
-		return JsonMessage.getString(200, "执行成功");
-	}
+    /**
+     * @return json
+     */
+    @GetMapping(value = "stop", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public String stop(@ValidatorItem String id, String containerId) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("containerId", containerId);
+        plugin.execute("stopContainer", parameter);
+        return JsonMessage.getString(200, "执行成功");
+    }
+
+
+    /**
+     * @return json
+     */
+    @GetMapping(value = "restart", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public String restart(@ValidatorItem String id, String containerId) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("containerId", containerId);
+        plugin.execute("restartContainer", parameter);
+        return JsonMessage.getString(200, "执行成功");
+    }
+
+    /**
+     * @return json
+     */
+    @GetMapping(value = "stats", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public String stats(@ValidatorItem String id, String containerId) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("containerId", containerId);
+        Map<String, JSONObject> stats = (Map<String, JSONObject>) plugin.execute("stats", parameter);
+        return JsonMessage.getString(200, "执行成功", stats);
+    }
 }

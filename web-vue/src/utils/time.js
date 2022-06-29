@@ -57,6 +57,10 @@ export function renderSize(value) {
   var unitArr = new Array("Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB");
   var index = 0;
   var srcsize = parseFloat(value);
+  if (srcsize <= 0) {
+    return "-";
+  }
+  // console.log(value, srcsize);
   index = Math.floor(Math.log(srcsize) / Math.log(1024));
   var size = srcsize / Math.pow(1024, index);
   size = size.toFixed(2); //保留的小数位数

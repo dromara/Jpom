@@ -20,7 +20,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -79,7 +78,7 @@ public class TestLocal {
 
     @Test
     public void tset2() throws InterruptedException {
-        StatsCmd statsCmd = dockerClient.statsCmd("5848fd613ea41f9b370a26949f590be107c165872bfc007f666b26d8a2247ac2");
+        StatsCmd statsCmd = dockerClient.statsCmd("blivechat");
         Statistics statistics = statsCmd.exec(new InvocationBuilder.AsyncResultCallback<>()).awaitResult();
         System.out.println(statistics);
         System.out.println(JSONUtil.toJsonStr(statistics));

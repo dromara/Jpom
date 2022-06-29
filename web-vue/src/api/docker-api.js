@@ -148,6 +148,22 @@ export function dockerContainerStop(params) {
 }
 
 /**
+ * 获取容器统计信息
+ * @param {JSON} params
+ */
+export function dockerContainerStats(params) {
+  return axios({
+    url: "/docker/container/stats",
+    method: "get",
+    params: params,
+    headers: {
+      // tip: "no",
+      loading: "no",
+    },
+  });
+}
+
+/**
  * 容器中的镜像列表
  * @param {JSON} params
  */
@@ -192,7 +208,7 @@ export function dockerImageCreateContainer(params) {
     url: "/docker/images/create-container",
     method: "post",
     headers: {
-        "Content-Type": "application/json",
+      "Content-Type": "application/json",
     },
     data: params,
   });
