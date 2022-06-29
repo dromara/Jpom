@@ -4,6 +4,8 @@
 
 ### 🐣 新增功能
 
+1. 【server】新增容器 stats ,方便实时查看容器内存、网络信息
+
 ### 🐞 解决BUG、优化功能
 
 1. 升级 SpringBoot、Hutool

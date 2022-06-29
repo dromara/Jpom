@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-table :data-source="list" size="middle" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" size="middle" :columns="columns" :pagination="false" bordered rowKey="id" @expand="expand">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
@@ -125,6 +125,74 @@
           </a-tooltip>
         </a-space>
       </template>
+
+      <!-- stats -->
+      <a-table slot="expandedRowRender" :rowKey="(record, index) => index" slot-scope="record" :columns="statsColumns" :data-source="statsMap[record.id]" :pagination="false">
+        <template slot="cpus" slot-scope="text, record">
+          {{ (record.cpuStats && record.cpuStats.percpuUsage) || (record.cpuStats && record.cpuStats.onlineCpus) }}
+        </template>
+        <template slot="cpuRatio" slot-scope="text, record">
+          {{
+            (
+              ((((record.cpuStats && record.cpuStats.cpuUsage && record.cpuStats.cpuUsage.totalUsage) || 0) -
+                ((record.precpuStats && record.precpuStats.cpuUsage && record.precpuStats.cpuUsage.totalUsage) || 0)) /
+                ((record.cpuStats && record.cpuStats.systemCpuUsage) || 0) -
+                ((record.precpuStats && record.precpuStats.systemCpuUsage) || 0)) *
+              100.0
+            ).toFixed(4)
+          }}
+          %
+        </template>
+        <template slot="memory" slot-scope="text, record">
+          {{ renderSize(((record.memoryStats && record.memoryStats.usage) || 0) - ((record.memoryStats && record.memoryStats.stats && record.memoryStats.stats.cache) || 0)) }}
+          /
+          {{ renderSize((record.memoryStats && record.memoryStats.limit) || 0) }}
+        </template>
+        <template slot="memoryRatio" slot-scope="text, record">
+          <!-- memoryRatio -->
+          {{
+            (
+              ((((record.memoryStats && record.memoryStats.usage) || 0) - ((record.memoryStats && record.memoryStats.stats && record.memoryStats.stats.cache) || 0)) /
+                (record.memoryStats && record.memoryStats.limit)) *
+              100.0
+            ).toFixed(4)
+          }}
+          %
+        </template>
+        <template slot="blockIo" slot-scope="text, record">
+          <a-tooltip
+            :title="`${
+              (record.blkioStats && record.blkioStats.ioServiceBytesRecursive && record.blkioStats.ioServiceBytesRecursive[0] && record.blkioStats.ioServiceBytesRecursive[0].op) || 'blkioStats'
+            }`"
+          >
+            {{ renderSize(record.blkioStats && record.blkioStats.ioServiceBytesRecursive && record.blkioStats.ioServiceBytesRecursive[0] && record.blkioStats.ioServiceBytesRecursive[0].value) || 0 }}
+          </a-tooltip>
+          /
+          <a-tooltip
+            :title="`${
+              (record.blkioStats && record.blkioStats.ioServiceBytesRecursive && record.blkioStats.ioServiceBytesRecursive[1] && record.blkioStats.ioServiceBytesRecursive[1].op) || 'blkioStats'
+            }`"
+          >
+            {{ renderSize(record.blkioStats && record.blkioStats.ioServiceBytesRecursive && record.blkioStats.ioServiceBytesRecursive[1] && record.blkioStats.ioServiceBytesRecursive[1].value) || 0 }}
+          </a-tooltip>
+        </template>
+        <template slot="netIo" slot-scope="text, record">
+          <!-- // rx_bytes 网卡接收流量 -->
+          <!-- // tx_bytes 网卡输出流量 -->
+
+          <div :key="index" v-for="(item, index) in Object.keys(record.networks || {})">
+            <a-tooltip :title="`${item} 接收流量`">
+              {{ renderSize(record.networks[item] && record.networks[item].rxBytes) || 0 }}
+            </a-tooltip>
+            /
+            <a-tooltip :title="`${item} 输出流量`">
+              {{ renderSize(record.networks[item] && record.networks[item].txBytes) || 0 }}
+            </a-tooltip>
+          </div>
+        </template>
+        <!-- // 进程或线程的数量 -->
+        <template slot="pids" slot-scope="text, record"> {{ record.pidsStats && record.pidsStats.current }}</template>
+      </a-table>
     </a-table>
     <!-- 日志 -->
     <a-modal :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
@@ -134,7 +202,6 @@
     <a-modal
       v-model="terminalVisible"
       width="80vw"
-
       :bodyStyle="{
         padding: '0px 10px',
         paddingTop: '10px',
@@ -150,8 +217,8 @@
   </div>
 </template>
 <script>
-import {parseTime} from "@/utils/time";
-import {dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStop} from "@/api/docker-api";
+import {parseTime, renderSize} from "@/utils/time";
+import {dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStats, dockerContainerStop} from "@/api/docker-api";
 import LogView from "@/pages/docker/log-view";
 import Terminal from "@/pages/docker/terminal";
 
@@ -203,6 +270,19 @@ export default {
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 200 },
       ],
+      statsColumns: [
+        { title: "CPUS", width: "80px", dataIndex: "cpus", ellipsis: true, scopedSlots: { customRender: "cpus" } },
+        { title: "CPU %", width: 100, dataIndex: "cpuRatio", ellipsis: true, scopedSlots: { customRender: "cpuRatio" } },
+
+        { title: "MEM USAGE / LIMIT", dataIndex: "memory", ellipsis: true, scopedSlots: { customRender: "memory" } },
+        { title: "MEM %", width: 100, dataIndex: "memoryRatio", ellipsis: true, scopedSlots: { customRender: "memoryRatio" } },
+        { title: "NET I/O", dataIndex: "netIo", ellipsis: true, scopedSlots: { customRender: "netIo" } },
+        { title: "BLOCK I/O", dataIndex: "blockIo", ellipsis: true, scopedSlots: { customRender: "blockIo" } },
+        { title: "PIDS", width: "80px", dataIndex: "pids", ellipsis: true, scopedSlots: { customRender: "pids" } },
+      ],
+
+      statsMap: {},
+      expandedRowKeys: [],
       action: {
         remove: {
           msg: "您确定要删除当前容器吗？",
@@ -230,6 +310,7 @@ export default {
     this.loadData();
   },
   methods: {
+    renderSize,
     // 加载数据
     loadData() {
       if (!this.visible) {
@@ -246,6 +327,7 @@ export default {
         clearTimeout(this.autoUpdateTime);
         this.autoUpdateTime = setTimeout(() => {
           this.loadData();
+          this.pullStats();
         }, 3000);
       });
     },
@@ -284,6 +366,32 @@ export default {
     handleTerminal(record) {
       this.temp = Object.assign({}, record);
       this.terminalVisible = true;
+    },
+    // 展开
+    expand(status, item) {
+      if (status) {
+        this.expandedRowKeys.push(item.id);
+        this.pullStats();
+      } else {
+        this.expandedRowKeys = this.expandedRowKeys.filter((item2) => item2 !== item.id);
+      }
+    },
+    //  获取数据
+    pullStats() {
+      if (!this.expandedRowKeys.length) {
+        return;
+      }
+      dockerContainerStats({
+        id: this.id,
+        containerId: this.expandedRowKeys.join(","),
+      }).then((res) => {
+        if (res.code === 200) {
+          Object.keys(res.data).forEach((item) => {
+            this.statsMap = { ...this.statsMap, [item]: [res.data[item]] };
+          });
+        }
+        // console.log(res);
+      });
     },
   },
 };

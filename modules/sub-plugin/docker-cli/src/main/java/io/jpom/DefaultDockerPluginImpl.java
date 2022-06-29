@@ -25,6 +25,7 @@ package io.jpom;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -34,6 +35,7 @@ import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.InvocationBuilder;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
+import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.InputStream;
@@ -106,8 +108,31 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
                 return null;
             case "listNetworks":
                 return this.listNetworksCmd(parameter);
+            case "stats":
+                return this.statsCmd(parameter);
             default:
                 throw new IllegalArgumentException("不支持的类型");
+        }
+    }
+
+    private Map<String, JSONObject> statsCmd(Map<String, Object> parameter) {
+        DockerClient dockerClient = DockerUtil.build(parameter);
+        try {
+            String containerId = (String) parameter.get("containerId");
+            List<String> split = StrUtil.split(containerId, StrUtil.COMMA);
+            return split.stream().map(s -> {
+                Statistics statistics = dockerClient.statsCmd(s).exec(new InvocationBuilder.AsyncResultCallback<Statistics>() {
+                    @SneakyThrows
+                    @Override
+                    public void onNext(Statistics object) {
+                        super.onNext(object);
+                        super.close();
+                    }
+                }).awaitResult();
+                return new Tuple(s, JSONObject.toJSON(statistics));
+            }).collect(Collectors.toMap(tuple -> tuple.get(0), tuple -> tuple.get(1)));
+        } finally {
+            IoUtil.close(dockerClient);
         }
     }
 
