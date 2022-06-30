@@ -43,7 +43,17 @@
       <a-layout-content class="file-content">
         <a-table :data-source="fileList" size="middle" :loading="loading" :columns="fileColumns" :pagination="false" bordered :rowKey="(record, index) => index">
           <template slot="title">
-            <a-button size="small" type="primary" @click="recoverPath(uploadPath)">还原</a-button>
+            <a-popconfirm
+              :title="`${uploadPath ? '将还原【' + uploadPath + '】目录,' : ''} 请选择还原方式,清空还原将会先删除项目目录中的文件再将对应备份文件恢复至当前目录`"
+              okText="覆盖还原"
+              cancelText="清空还原"
+              @confirm="recoverNet('', uploadPath)"
+              @cancel="recoverNet('clear', uploadPath)"
+            >
+              <a-icon slot="icon" type="question-circle-o" style="color: red" />
+              <!-- @click="recoverPath(uploadPath)" -->
+              <a-button size="small" type="primary">还原</a-button>
+            </a-popconfirm>
 
             <a-space>
               <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath || "" }}</a-tag>
@@ -68,7 +78,23 @@
               <template v-else>
                 <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>
               </template>
-              <a-button size="small" type="primary" @click="recover(record)">还原</a-button>
+              <template v-if="record.isDirectory">
+                <!-- record.filename -->
+                <a-popconfirm
+                  :title="`${record.filename ? '将还原【' + record.filename + '】目录,' : ''} 请选择还原方式,清空还原将会先删除项目目录中的文件再将对应备份文件恢复至当前目录`"
+                  okText="覆盖还原"
+                  cancelText="清空还原"
+                  @confirm="recoverNet('', record.filename)"
+                  @cancel="recoverNet('clear', record.filename)"
+                >
+                  <a-icon slot="icon" type="question-circle-o" style="color: red" />
+                  <a-button size="small" type="primary">还原</a-button>
+                </a-popconfirm>
+              </template>
+              <template v-else>
+                <a-button size="small" type="primary" @click="recover(record)">还原</a-button>
+              </template>
+
               <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
             </a-space>
           </template>
@@ -78,7 +104,7 @@
   </div>
 </template>
 <script>
-import { listBackup, backupFileList, backupDownloadProjectFile, backupDeleteProjectFile, backupRecoverProjectFile } from "@/api/node-project-backup";
+import {backupDeleteProjectFile, backupDownloadProjectFile, backupFileList, backupRecoverProjectFile, listBackup} from "@/api/node-project-backup";
 
 export default {
   components: {},
@@ -357,23 +383,24 @@ export default {
       this.temp = Object.assign({}, record);
       this.loadData();
     },
-    recoverPath(filename) {
-      const msg = filename ? "将还原【" + filename + "】目录," : "";
-      this.$confirm({
-        title: "系统提示",
-        content: msg + "请选择还原方式,清空还原将会先删除项目目录中的文件再将对应备份文件恢复至当前目录",
-        okText: "覆盖还原",
-        cancelText: "清空还原",
-        closable: true,
-        onOk: () => {
-          // // 请求参数
-          this.recoverNet("", filename);
-        },
-        onCancel: () => {
-          this.recoverNet("clear", filename);
-        },
-      });
-    },
+    // recoverPath(filename) {
+    //   // const msg = ;
+    //   this.$confirm({
+    //     title: "系统提示",
+    //     // content: ,
+    //     okText: "覆盖还原",
+    //     cancelText: "清空还原",
+    //     closable: false,
+    //     maskClosable: true,
+    //     onOk: () => {
+    //       // // 请求参数
+    //       this.recoverNet("", filename);
+    //     },
+    //     onCancel: () => {
+    //       this.recoverNet("clear", filename);
+    //     },
+    //   });
+    // },
     //
     recover(record) {
       if (record.isDirectory) {

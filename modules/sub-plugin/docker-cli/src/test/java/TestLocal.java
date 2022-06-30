@@ -24,10 +24,11 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.StatsCmd;
-import com.github.dockerjava.api.command.VersionCmd;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.Statistics;
+import com.github.dockerjava.api.model.UpdateContainerResponse;
 import com.github.dockerjava.api.model.Version;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
@@ -78,9 +79,25 @@ public class TestLocal {
 
     @Test
     public void tset2() throws InterruptedException {
-        StatsCmd statsCmd = dockerClient.statsCmd("blivechat");
+        StatsCmd statsCmd = dockerClient.statsCmd("socat");
         Statistics statistics = statsCmd.exec(new InvocationBuilder.AsyncResultCallback<>()).awaitResult();
         System.out.println(statistics);
         System.out.println(JSONUtil.toJsonStr(statistics));
+    }
+
+    @Test
+    public void test3() {
+//        dockerClient.inspectContainerCmd("socat")
+        UpdateContainerCmd containerCmd = dockerClient.updateContainerCmd("socat");
+//        containerCmd.withCpusetCpus(1L);
+        UpdateContainerResponse containerResponse = containerCmd.exec();
+        System.out.println(containerResponse);
+    }
+
+    @Test
+    public void test4() {
+        InspectContainerCmd socat = dockerClient.inspectContainerCmd("socat").withSize(true);
+        InspectContainerResponse exec = socat.exec();
+        System.out.println(JSONObject.toJSONString(exec));
     }
 }
