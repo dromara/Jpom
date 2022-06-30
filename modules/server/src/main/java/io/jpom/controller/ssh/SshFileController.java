@@ -383,6 +383,31 @@ public class SshFileController extends BaseServerController {
         }
     }
 
+    @RequestMapping(value = "rename.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public String rename(String id, String path, String name, String newname) {
+        Assert.hasText(name, "name error");
+        Assert.hasText(newname, "newname error");
+        SshModel sshModel = this.check(id, path, name);
+        name = FileUtil.normalize(name);
+        FileUtil.file(path, newname);
+        Session session = null;
+        ChannelSftp channel = null;
+
+        try {
+            session = SshService.getSessionByModel(sshModel);
+            channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
+            channel.rename(FileUtil.normalize(path + StrUtil.SLASH + name), FileUtil.normalize(path + StrUtil.SLASH + newname));
+        } catch (Exception e) {
+            log.error("ssh重命名失败异常", e);
+            return JsonMessage.getString(400, "重命名失败:" + e.getMessage());
+        } finally {
+            JschUtil.close(channel);
+            JschUtil.close(session);
+        }
+        return JsonMessage.getString(200, "操作成功");
+    }
+
     /**
      * 删除文件 或者 文件夹
      *

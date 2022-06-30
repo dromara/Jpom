@@ -148,10 +148,27 @@
           </a-space>
         </a-modal>
 
-        <a-modal v-model="editFileVisible" width="80vw" :title="`编辑文件 ${filename}`" cancelText="关闭" :maskClosable="true" @ok="updateFileData" @cancel="handleCloseModal">
+        <a-modal v-model="editFileVisible" width="80vw" :title="`编辑文件 ${filename}`" :maskClosable="true">
           <div style="height: 60vh">
             <code-editor showTool v-model="fileContent" :fileSuffix="filename"></code-editor>
           </div>
+
+          <template slot="footer">
+            <!-- @ok="updateFileData" @cancel="handleCloseModal" -->
+            <a-button @click="handleCloseModal"> 关闭 </a-button>
+            <a-button type="primary" @click="updateFileData"> 保存 </a-button>
+            <a-button
+              type="primary"
+              @click="
+                () => {
+                  updateFileData();
+                  handleCloseModal();
+                }
+              "
+            >
+              保存并关闭
+            </a-button>
+          </template>
         </a-modal>
         <!--远程下载  -->
         <a-modal v-model="uploadRemoteFileVisible" title="远程下载文件" @ok="handleRemoteUpload" @cancel="openRemoteUpload" :maskClosable="false">
@@ -321,6 +338,7 @@ export default {
     // 关闭编辑器弹窗
     handleCloseModal() {
       this.fileContent = "";
+      this.editFileVisible = false;
     },
     onTreeData(treeNode) {
       return new Promise((resolve) => {

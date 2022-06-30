@@ -46,8 +46,17 @@
             <!-- <span v-if="this.nowPath">{{ this.tempNode.parentDir }}</span> -->
           </a-space>
         </template>
-        <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
+        <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="text">
+          <a-dropdown :trigger="['contextmenu']">
+            <div>{{ text }}</div>
+            <a-menu slot="overlay">
+              <a-menu-item key="2">
+                <a-button icon="highlight" @click="handleRenameFile(record)" type="link"> 重命名 </a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+
+          <!-- <span>{{ text }}</span> -->
         </a-tooltip>
         <a-tooltip slot="dir" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text ? "目录" : "文件" }}</span>
@@ -100,14 +109,24 @@
           <code-editor showTool v-model="temp.fileContent" :fileSuffix="temp.name"></code-editor>
         </div>
       </a-modal>
+      <!-- 从命名文件/文件夹 -->
+      <a-modal v-model="renameFileFolderVisible" width="300px" :title="`重命名`" :footer="null" :maskClosable="true">
+        <a-space direction="vertical" style="width: 100%">
+          <a-input v-model="temp.fileFolderName" placeholder="输入新名称" />
+
+          <a-row type="flex" justify="center" v-if="temp.fileFolderName">
+            <a-button type="primary" :disabled="temp.fileFolderName.length === 0" @click="renameFileFolder">确认</a-button>
+          </a-row>
+        </a-space>
+      </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
 <script>
-import { getRootFileList, getFileList, downloadFile, deleteFile, uploadFile, readFile, updateFileData, newFileFolder } from "@/api/ssh";
+import {deleteFile, downloadFile, getFileList, getRootFileList, newFileFolder, readFile, renameFileFolder, updateFileData, uploadFile} from "@/api/ssh";
 import Terminal from "./terminal";
 import codeEditor from "@/components/codeEditor";
-import { ZIP_ACCEPT } from "@/utils/const";
+import {ZIP_ACCEPT} from "@/utils/const";
 
 export default {
   props: {
@@ -130,6 +149,7 @@ export default {
       uploadFileVisible: false,
       uploadFileZip: false,
       ZIP_ACCEPT: ZIP_ACCEPT,
+      renameFileFolderVisible: false,
       terminalVisible: false,
       tableHeight: "80vh",
       replaceFields: {
@@ -458,6 +478,32 @@ export default {
             }
           });
         },
+      });
+    },
+    handleRenameFile(record) {
+      this.renameFileFolderVisible = true;
+      this.temp = {
+        fileFolderName: record.title,
+        oldFileFolderName: record.title,
+        path: record.path,
+      };
+    },
+    // 确认修改文件 目录名称
+    renameFileFolder() {
+      const params = {
+        id: this.ssh.id,
+        path: this.temp.path,
+        name: this.temp.oldFileFolderName,
+        newname: this.temp.fileFolderName,
+      };
+      renameFileFolder(params).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.renameFileFolderVisible = false;
+          this.loadFileList();
+        }
       });
     },
   },

@@ -38,6 +38,7 @@ import io.jpom.plugin.PluginConfig;
 import lombok.SneakyThrows;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -110,14 +111,15 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
                 return this.listNetworksCmd(parameter);
             case "stats":
                 return this.statsCmd(parameter);
+            case "inspectContainer":
+                return this.inspectContainerCmd(parameter);
             default:
                 throw new IllegalArgumentException("不支持的类型");
         }
     }
 
-    private Map<String, JSONObject> statsCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
+    private Map<String, JSONObject> statsCmd(Map<String, Object> parameter) throws IOException {
+        try (DockerClient dockerClient = DockerUtil.build(parameter)) {
             String containerId = (String) parameter.get("containerId");
             List<String> split = StrUtil.split(containerId, StrUtil.COMMA);
             return split.stream().map(s -> {
@@ -131,8 +133,14 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
                 }).awaitResult();
                 return new Tuple(s, JSONObject.toJSON(statistics));
             }).collect(Collectors.toMap(tuple -> tuple.get(0), tuple -> tuple.get(1)));
-        } finally {
-            IoUtil.close(dockerClient);
+        }
+    }
+
+    private JSONObject inspectContainerCmd(Map<String, Object> parameter) throws IOException {
+        try (DockerClient dockerClient = DockerUtil.build(parameter)) {
+            String containerId = (String) parameter.get("containerId");
+            InspectContainerCmd inspectContainerCmd = dockerClient.inspectContainerCmd(containerId).withSize(true);
+            return (JSONObject) JSONObject.toJSON(inspectContainerCmd);
         }
     }
 

@@ -72,7 +72,7 @@ export default {
         if (res.code === 200) {
           this.sshData = res.data;
         }
-        console.log(this.sshData);
+        // console.log(this.sshData);
       });
     },
     handleFile() {

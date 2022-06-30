@@ -20,11 +20,13 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.Statistics;
@@ -41,6 +43,8 @@ import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
 /**
+ * https://docs.docker.com/engine/api/v1.41/#operation/ContainerKill
+ *
  * @author bwcx_jzy
  * @since 2022/1/25
  */
@@ -89,7 +93,11 @@ public class TestLocal {
     public void test3() {
 //        dockerClient.inspectContainerCmd("socat")
         UpdateContainerCmd containerCmd = dockerClient.updateContainerCmd("socat");
-//        containerCmd.withCpusetCpus(1L);
+        containerCmd.withCpusetCpus("1");
+//        containerCmd.
+//        containerCmd.withCpusetCpus()
+//        containerCmd.withMemory(DataSizeUtil.parse("10M"));
+//        containerCmd.withMemorySwap(DataSizeUtil.parse("10M"));
         UpdateContainerResponse containerResponse = containerCmd.exec();
         System.out.println(containerResponse);
     }
@@ -98,6 +106,6 @@ public class TestLocal {
     public void test4() {
         InspectContainerCmd socat = dockerClient.inspectContainerCmd("socat").withSize(true);
         InspectContainerResponse exec = socat.exec();
-        System.out.println(JSONObject.toJSONString(exec));
+        System.out.println(JSONObject.toJSONString(exec.getHostConfig(), SerializerFeature.PrettyFormat));
     }
 }
