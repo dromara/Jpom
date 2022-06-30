@@ -152,6 +152,11 @@ postList: none
         <img :src="$withBase('/images/friends/forest-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
     </a>
 </span>
+<span style="width: 150px;text-align: left">
+    <a href="https://easy-es.cn/" target="_blank">
+        <img :src="$withBase('/images/friends/easy-es.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+    </a>
+</span>
 
 ## 🧲友情链接
 <span style="width: 150px;text-align: left">
