@@ -249,6 +249,19 @@ export function newFileFolder(params) {
   });
 }
 
+/**
+ * 修改目录或文件名称
+ * @param params
+ * @returns {id, levelName, filename,newname} params x
+ */
+export function renameFileFolder(params) {
+  return axios({
+    url: "/node/ssh/rename.json",
+    method: "post",
+    data: params,
+  });
+}
+
 export function syncToWorkspace(params) {
   return axios({
     url: "/node/ssh/sync-to-workspace",

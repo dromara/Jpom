@@ -145,4 +145,18 @@ public class DockerContainerController extends BaseServerController {
         Map<String, JSONObject> stats = (Map<String, JSONObject>) plugin.execute("stats", parameter);
         return JsonMessage.getString(200, "执行成功", stats);
     }
+
+    /**
+     * @return json
+     */
+    @GetMapping(value = "inspect-container", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public String inspectContainer(@ValidatorItem String id, String containerId) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("containerId", containerId);
+        JSONObject results = (JSONObject) plugin.execute("inspectContainer", parameter);
+        return JsonMessage.getString(200, "执行成功", results);
+    }
 }
