@@ -76,7 +76,7 @@
               <a-select-option :value="0">GIT</a-select-option>
               <a-select-option :value="1">SVN</a-select-option>
             </a-select>
-            <a-input style="width: 80%" maxLength="250" v-model="temp.gitUrl" placeholder="仓库地址" />
+            <a-input style="width: 80%" :maxLength="250" v-model="temp.gitUrl" placeholder="仓库地址" />
           </a-input-group>
         </a-form-model-item>
         <a-form-model-item label="协议" prop="protocol">
