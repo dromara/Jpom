@@ -184,7 +184,6 @@
                 show-search
                 option-filter-prop="children"
                 v-model="temp.repositoryId"
-                @select="changeRepositpry"
                 @change="changeRepositpry"
                 placeholder="请选择仓库"
               >
