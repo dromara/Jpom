@@ -57,85 +57,88 @@ import java.util.Map;
 @Slf4j
 public class CheckMonitor {
 
-	@PreLoadMethod
-	private static void init() {
-		// 缓存检测调度
-		CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
-			BuildUtil.reloadCacheSize();
-			ConfigBean.getInstance().dataSize();
-		});
-		// 开启版本检测调度
-		CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {
-			try {
-				BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
-				backupInfoService.checkAutoBackup();
-				//
-				RemoteVersion.loadRemoteInfo();
-			} catch (Exception e) {
-				log.error("系统调度执行出现错误", e);
-			}
-		});
-		// 拉取 脚本模版日志
-		CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
-			NodeService nodeService = SpringUtil.getBean(NodeService.class);
-			NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
-			List<String> nodeIds = nodeScriptServer.hasScriptNode();
-			if (nodeIds == null) {
-				return;
-			}
-			for (String nodeId : nodeIds) {
-				NodeModel nodeModel = nodeService.getByKey(nodeId);
-				if (nodeModel == null) {
-					continue;
-				}
-				ThreadUtil.execute(() -> CheckMonitor.pullScriptLogItem(nodeModel));
-			}
-		});
-		// 异步加载
-		CheckMonitor.asyncLoad();
-	}
+    @PreLoadMethod
+    private static void init() {
+        // 缓存检测调度
+        CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
+            BuildUtil.reloadCacheSize();
+            ConfigBean.getInstance().dataSize();
+            //
+            ProxySelectorConfig selectorConfig = SpringUtil.getBean(ProxySelectorConfig.class);
+            selectorConfig.refresh();
+        });
+        // 开启版本检测调度
+        CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {
+            try {
+                BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
+                backupInfoService.checkAutoBackup();
+                //
+                RemoteVersion.loadRemoteInfo();
+            } catch (Exception e) {
+                log.error("系统调度执行出现错误", e);
+            }
+        });
+        // 拉取 脚本模版日志
+        CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
+            NodeService nodeService = SpringUtil.getBean(NodeService.class);
+            NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
+            List<String> nodeIds = nodeScriptServer.hasScriptNode();
+            if (nodeIds == null) {
+                return;
+            }
+            for (String nodeId : nodeIds) {
+                NodeModel nodeModel = nodeService.getByKey(nodeId);
+                if (nodeModel == null) {
+                    continue;
+                }
+                ThreadUtil.execute(() -> CheckMonitor.pullScriptLogItem(nodeModel));
+            }
+        });
+        // 异步加载
+        CheckMonitor.asyncLoad();
+    }
 
-	/**
-	 * 同步 节点的脚本模版日志
-	 *
-	 * @param nodeModel 节点
-	 */
-	private static void pullScriptLogItem(NodeModel nodeModel) {
-		try {
-			NodeScriptExecuteLogServer nodeScriptExecuteLogServer = SpringUtil.getBean(NodeScriptExecuteLogServer.class);
-			Collection<String> strings = nodeScriptExecuteLogServer.syncExecuteNodeInc(nodeModel);
-			if (strings == null) {
-				return;
-			}
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("ids", strings);
-			JsonMessage<Object> jsonMessage = NodeForward.requestBody(nodeModel, NodeUrl.SCRIPT_DEL_EXEC_LOG, null, jsonObject);
-			if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-				log.error("删除脚本模版执行数据错误:{}", jsonMessage);
-			}
-		} catch (Exception e) {
-			log.error("同步脚本异常", e);
-		}
-	}
+    /**
+     * 同步 节点的脚本模版日志
+     *
+     * @param nodeModel 节点
+     */
+    private static void pullScriptLogItem(NodeModel nodeModel) {
+        try {
+            NodeScriptExecuteLogServer nodeScriptExecuteLogServer = SpringUtil.getBean(NodeScriptExecuteLogServer.class);
+            Collection<String> strings = nodeScriptExecuteLogServer.syncExecuteNodeInc(nodeModel);
+            if (strings == null) {
+                return;
+            }
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("ids", strings);
+            JsonMessage<Object> jsonMessage = NodeForward.requestBody(nodeModel, NodeUrl.SCRIPT_DEL_EXEC_LOG, null, jsonObject);
+            if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+                log.error("删除脚本模版执行数据错误:{}", jsonMessage);
+            }
+        } catch (Exception e) {
+            log.error("同步脚本异常", e);
+        }
+    }
 
-	/**
-	 * 异步初始化
-	 */
-	private static void asyncLoad() {
-		ThreadUtil.execute(() -> {
-			BuildUtil.reloadCacheSize();
-			ConfigBean.getInstance().dataSize();
+    /**
+     * 异步初始化
+     */
+    private static void asyncLoad() {
+        ThreadUtil.execute(() -> {
+            BuildUtil.reloadCacheSize();
+            ConfigBean.getInstance().dataSize();
 
-			// 状态恢复的数据
-			Map<String, IStatusRecover> statusRecoverMap = SpringUtil.getApplicationContext().getBeansOfType(IStatusRecover.class);
-			statusRecoverMap.forEach((name, iCron) -> {
-				int count = iCron.statusRecover();
-				if (count > 0) {
-					log.debug("{} Recover bad data {}", name, count);
-				}
-			});
-			//
-			RemoteVersion.loadRemoteInfo();
-		});
-	}
+            // 状态恢复的数据
+            Map<String, IStatusRecover> statusRecoverMap = SpringUtil.getApplicationContext().getBeansOfType(IStatusRecover.class);
+            statusRecoverMap.forEach((name, iCron) -> {
+                int count = iCron.statusRecover();
+                if (count > 0) {
+                    log.debug("{} Recover bad data {}", name, count);
+                }
+            });
+            //
+            RemoteVersion.loadRemoteInfo();
+        });
+    }
 }

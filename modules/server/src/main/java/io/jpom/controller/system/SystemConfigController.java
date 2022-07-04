@@ -31,6 +31,7 @@ import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.core.net.MaskBit;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -50,20 +51,19 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
+import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.extconf.DbExtConfig;
 import io.jpom.system.init.InitDb;
+import io.jpom.system.init.ProxySelectorConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -71,6 +71,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -88,11 +89,17 @@ public class SystemConfigController extends BaseServerController {
 
     private final SystemParametersServer systemParametersServer;
     private final InitDb initDb;
+    private final NodeService nodeService;
+    private final ProxySelectorConfig proxySelectorConfig;
 
     public SystemConfigController(SystemParametersServer systemParametersServer,
-                                  InitDb initDb) {
+                                  InitDb initDb,
+                                  NodeService nodeService,
+                                  ProxySelectorConfig proxySelectorConfig) {
         this.systemParametersServer = systemParametersServer;
         this.initDb = initDb;
+        this.nodeService = nodeService;
+        this.proxySelectorConfig = proxySelectorConfig;
     }
 
     /**
@@ -365,6 +372,37 @@ public class SystemConfigController extends BaseServerController {
         InputStream inputStream = ResourceUtil.getStream(path);
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         return JSONArray.parseArray(json);
+    }
+
+    /**
+     * 加载代理配置
+     *
+     * @return json
+     */
+    @GetMapping(value = "get_proxy_config", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String getPoxyConfig() {
+        JSONArray array = systemParametersServer.getConfigDefNewInstance("global_proxy", JSONArray.class);
+        return JsonMessage.getString(200, "", array);
+    }
+
+    /**
+     * 保存代理
+     *
+     * @param proxys 参数
+     * @return json
+     */
+    @PostMapping(value = "save_proxy_config", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String saveProxyConfig(@RequestBody List<ProxySelectorConfig.ProxyConfigItem> proxys) {
+        proxys = ObjectUtil.defaultIfNull(proxys, Collections.emptyList());
+        for (ProxySelectorConfig.ProxyConfigItem proxy : proxys) {
+            if (StrUtil.isNotEmpty(proxy.getProxyAddress())) {
+                nodeService.testHttpProxy(proxy.getProxyAddress());
+            }
+        }
+        systemParametersServer.upsert("global_proxy", proxys, "global_proxy");
+        proxySelectorConfig.refresh();
+        return JsonMessage.getString(200, "修改成功");
     }
 
 }

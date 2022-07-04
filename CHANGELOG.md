@@ -6,12 +6,15 @@
 
 1. 【server】新增容器 stats ,方便实时查看容器内存、网络信息
 2. 【server】SSH 文件管理新增重命名文件功能
+3. 【server】新增全局配置,解决 git httpProxy （感谢[@五六](https://gitee.com/tutu-father) [Gitee issues I5EY03](https://gitee.com/dromara/Jpom/issues/I5EY03) ）
+
 
 ### 🐞 解决BUG、优化功能
 
 1. 升级 SpringBoot、Hutool
 2. 【server】docker 加入集群无法正常使用问题
 3. 【server】项目文件备份列表不能取消弹窗（点击关闭依然执行）问题（感谢@ʟᴊx💎💎）
+4. 【server】修复编辑构建仓库切换事件重复问题 （感谢[@五六](https://gitee.com/tutu-father) [Gitee issues I5F35E](https://gitee.com/dromara/Jpom/issues/I5F35E) ）
 
 ------
 
