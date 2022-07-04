@@ -45,7 +45,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
-import org.springframework.util.AntPathMatcher;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,8 +65,6 @@ import java.util.stream.Collectors;
  * @since 2019/7/15
  **/
 public class GitUtil {
-
-    private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
     /**
      * 检查本地的remote是否存在对应的url

@@ -300,3 +300,28 @@ export function saveMenusConfig(data) {
     data: data,
   });
 }
+
+/**
+ * 加载 代理配置
+ */
+export function getProxyConfig() {
+  return axios({
+    url: "/system/get_proxy_config",
+    method: "get",
+    params: {},
+  });
+}
+
+/**
+ * 保存代理配置
+ */
+export function saveProxyConfig(data) {
+  return axios({
+    url: "/system/save_proxy_config",
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: data,
+  });
+}

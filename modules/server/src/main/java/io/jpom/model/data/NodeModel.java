@@ -134,4 +134,22 @@ public class NodeModel extends BaseGroupModel {
         }
         return null;
     }
+
+    /**
+     * 创建代理
+     *
+     * @param type      代理类型
+     * @param httpProxy 代理地址
+     * @return proxy
+     */
+    public static Proxy crateProxy(String type, String httpProxy) {
+        if (StrUtil.isNotEmpty(httpProxy)) {
+            List<String> split = StrUtil.splitTrim(httpProxy, StrUtil.COLON);
+            String host = CollUtil.getFirst(split);
+            int port = Convert.toInt(CollUtil.getLast(split), 0);
+            Proxy.Type type1 = EnumUtil.fromString(Proxy.Type.class, type, Proxy.Type.HTTP);
+            return new Proxy(type1, new InetSocketAddress(host, port));
+        }
+        return null;
+    }
 }

@@ -202,7 +202,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
      *
      * @param httpProxy http proxy
      */
-    private void testHttpProxy(String httpProxy) {
+    public void testHttpProxy(String httpProxy) {
         if (StrUtil.isNotEmpty(httpProxy)) {
             List<String> split = StrUtil.splitTrim(httpProxy, StrUtil.COLON);
             Assert.isTrue(CollUtil.size(split) == 2, "HTTP代理地址格式不正确");
