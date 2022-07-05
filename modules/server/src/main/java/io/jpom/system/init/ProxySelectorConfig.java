@@ -40,6 +40,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -65,26 +66,26 @@ public class ProxySelectorConfig extends ProxySelector implements InitializingBe
     @Override
     public List<Proxy> select(URI uri) {
         String url = uri.toString();
-        return proxyConfigItems.stream()
-            .filter(proxyConfigItem -> {
-                if (StrUtil.equals(proxyConfigItem.getPattern(), "*")) {
-                    return true;
-                }
-                if (ReUtil.isMatch(proxyConfigItem.getPattern(), url)) {
-                    // 满足正则条件
-                    return true;
-                }
-                return StrUtil.containsIgnoreCase(url, proxyConfigItem.getPattern());
-            })
-            .map(proxyConfigItem -> NodeModel.crateProxy(proxyConfigItem.getProxyType(), proxyConfigItem.getProxyAddress()))
-            .filter(Objects::nonNull)
-            .findFirst()
-            .map(Collections::singletonList)
-            .orElseGet(() -> {
+        return Optional.ofNullable(proxyConfigItems)
+            .flatMap(proxyConfigItems -> proxyConfigItems.stream()
+                .filter(proxyConfigItem -> {
+                    if (StrUtil.equals(proxyConfigItem.getPattern(), "*")) {
+                        return true;
+                    }
+                    if (ReUtil.isMatch(proxyConfigItem.getPattern(), url)) {
+                        // 满足正则条件
+                        return true;
+                    }
+                    return StrUtil.containsIgnoreCase(url, proxyConfigItem.getPattern());
+                })
+                .map(proxyConfigItem -> NodeModel.crateProxy(proxyConfigItem.getProxyType(), proxyConfigItem.getProxyAddress()))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(Collections::singletonList)
+            ).orElseGet(() -> {
                 // revert to the default behaviour
                 return defaultProxySelector == null ? Collections.singletonList(Proxy.NO_PROXY) : defaultProxySelector.select(uri);
             });
-
     }
 
     @Override

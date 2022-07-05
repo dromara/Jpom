@@ -1,6 +1,6 @@
 <template>
   <div class="full-content">
-    <a-table :data-source="commandList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :rowKey="(record, index) => index">
+    <a-table :data-source="commandList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" rowKey="id">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="getCommandData" placeholder="搜索命令" class="search-input-item" />
@@ -10,6 +10,14 @@
             <a-button type="primary" :loading="loading" @click="getCommandData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="createCommand">新建命令</a-button>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
           <a-tooltip>
             <template slot="title">
               <div>命令模版是用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
@@ -46,7 +54,7 @@
     <a-modal v-model="editCommandVisible" width="80vw" title="编辑 命令" @ok="handleEditCommandOk" :maskClosable="false">
       <a-form-model ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="命令名称" prop="name">
-          <a-input v-model="temp.name" maxLength="100" placeholder="命令名称" />
+          <a-input v-model="temp.name" :maxLength="100" placeholder="命令名称" />
         </a-form-model-item>
 
         <a-form-model-item prop="command">
@@ -110,7 +118,7 @@
           </a-auto-complete>
         </a-form-model-item>
         <a-form-model-item label="命令描述" prop="desc">
-          <a-input v-model="temp.desc" maxLength="255" type="textarea" :rows="3" style="resize: none" placeholder="命令详细描述" />
+          <a-input v-model="temp.desc" :maxLength="255" type="textarea" :rows="3" style="resize: none" placeholder="命令详细描述" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -157,16 +165,48 @@
     <a-modal :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
       <command-log v-if="logVisible" :temp="temp" />
     </a-modal>
+    <!-- 同步到其他工作空间 -->
+    <a-modal v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+      <a-alert message="温馨提示" type="warning">
+        <template slot="description">
+          <ul>
+            <li>同步机制采用<b>脚本名称</b>确定是同一个脚本</li>
+            <li>当目标工作空间不存在对应的 脚本 时候将自动创建一个新的 脚本</li>
+            <li>当目标工作空间已经存在 脚本 时候将自动同步 脚本内容、默认参数、自动执行、描述</li>
+          </ul>
+        </template>
+      </a-alert>
+      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item> </a-form-model-item>
+        <a-form-model-item label="选择工作空间" prop="workspaceId">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="temp.workspaceId"
+            placeholder="请选择工作空间"
+          >
+            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 
 <script>
-import {deleteCommand, editCommand, executeBatch, getCommandList} from "@/api/command";
+import {deleteCommand, editCommand, executeBatch, getCommandList, syncToWorkspace} from "@/api/command";
 import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
 import {parseTime} from "@/utils/time";
 import {getSshListAll} from "@/api/ssh";
 import codeEditor from "@/components/codeEditor";
 import CommandLog from "./command-view-log";
+import {mapGetters} from "vuex";
+import {getWorkSpaceListAll} from "@/api/workspace";
 
 export default {
   components: { codeEditor, CommandLog },
@@ -220,11 +260,23 @@ export default {
         },
         { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 180 },
       ],
+      tableSelections: [],
+      syncToWorkspaceVisible: false,
+      workspaceList: [],
     };
   },
   computed: {
+    ...mapGetters(["getWorkspaceId"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+      };
     },
   },
   mounted() {
@@ -370,6 +422,45 @@ export default {
             batchId: res.data,
           };
           this.logVisible = true;
+        }
+      });
+    },
+    // 加载工作空间数据
+    loadWorkSpaceListAll() {
+      getWorkSpaceListAll().then((res) => {
+        if (res.code === 200) {
+          this.workspaceList = res.data;
+        }
+      });
+    },
+    // 同步到其他工作情况
+    syncToWorkspaceShow() {
+      this.syncToWorkspaceVisible = true;
+      this.loadWorkSpaceListAll();
+      this.temp = {
+        workspaceId: undefined,
+      };
+    },
+    //
+    handleSyncToWorkspace() {
+      if (!this.temp.workspaceId) {
+        this.$notification.warn({
+          message: "请选择工作空间",
+        });
+        return false;
+      }
+      // 同步
+      syncToWorkspace({
+        ids: this.tableSelections.join(","),
+        workspaceId: this.temp.workspaceId,
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.tableSelections = [];
+          this.syncToWorkspaceVisible = false;
+          return false;
         }
       });
     },
