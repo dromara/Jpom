@@ -114,6 +114,8 @@ public class IndexControl extends BaseServerController {
         // <routerBase>
         String proxyPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
         html = StrUtil.replace(html, "<routerBase>", proxyPath);
+        //
+        html = StrUtil.replace(html, "<link rel=\"icon\" href=\"favicon.ico\">", "<link rel=\"icon\" href=\"" + proxyPath + "favicon.ico\">");
         // <apiTimeOut>
         int webApiTimeout = ServerExtConfigBean.getInstance().getWebApiTimeout();
         html = StrUtil.replace(html, "<apiTimeout>", TimeUnit.SECONDS.toMillis(webApiTimeout) + "");
@@ -137,23 +139,79 @@ public class IndexControl extends BaseServerController {
     public void logoImage(HttpServletResponse response) throws IOException {
         ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
         String logoFile = instance.getLogoFile();
-        if (StrUtil.isNotEmpty(logoFile)) {
-            if (Validator.isMatchRegex(RegexPool.URL_HTTP, logoFile)) {
+        this.loadImage(response, logoFile, "classpath:/logo/jpom.png", "jpg", "png", "gif");
+//        if (StrUtil.isNotEmpty(logoFile)) {
+//            if (Validator.isMatchRegex(RegexPool.URL_HTTP, logoFile)) {
+//                // 重定向
+//                response.sendRedirect(logoFile);
+//                return;
+//            }
+//            File file = FileUtil.file(logoFile);
+//            if (FileUtil.isFile(file)) {
+//                String type = FileTypeUtil.getType(file);
+//                if (StrUtil.equalsAnyIgnoreCase(type, "jpg", "png", "gif")) {
+//                    ServletUtil.write(response, file);
+//                    return;
+//                }
+//            }
+//        }
+//        // 默认logo
+//        InputStream inputStream = ResourceUtil.getStream("classpath:/logo/jpom.png");
+//        ServletUtil.write(response, inputStream, MediaType.IMAGE_PNG_VALUE);
+    }
+
+    /**
+     * logo 图片
+     *
+     * @api {get} logo_image logo 图片
+     * @apiGroup index
+     * @apiSuccess {Object} BODY image
+     */
+    @RequestMapping(value = "favicon.ico", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
+    @NotLogin
+    public void favicon(HttpServletResponse response) throws IOException {
+        ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
+        String iconFile = instance.getIconFile();
+        this.loadImage(response, iconFile, "classpath:/logo/favicon.ico", "ico", "png");
+//        if (StrUtil.isNotEmpty(iconFile)) {
+//            if (Validator.isMatchRegex(RegexPool.URL_HTTP, iconFile)) {
+//                // 重定向
+//                response.sendRedirect(iconFile);
+//                return;
+//            }
+//            File file = FileUtil.file(iconFile);
+//            if (FileUtil.isFile(file)) {
+//                String type = FileTypeUtil.getType(file);
+//                if (StrUtil.equalsAnyIgnoreCase(type, "ico", "png")) {
+//                    ServletUtil.write(response, file);
+//                    return;
+//                }
+//            }
+//        }
+//        // favicon ico
+//        InputStream inputStream = ResourceUtil.getStream("classpath:/logo/favicon.ico");
+//        ServletUtil.write(response, inputStream, MediaType.IMAGE_PNG_VALUE);
+    }
+
+    private void loadImage(HttpServletResponse response, String imgFile, String defaultResource, String... suffix) throws IOException {
+        if (StrUtil.isNotEmpty(imgFile)) {
+            if (Validator.isMatchRegex(RegexPool.URL_HTTP, imgFile)) {
                 // 重定向
-                response.sendRedirect(logoFile);
+                response.sendRedirect(imgFile);
                 return;
             }
-            File file = FileUtil.file(logoFile);
+            File file = FileUtil.file(imgFile);
             if (FileUtil.isFile(file)) {
                 String type = FileTypeUtil.getType(file);
-                if (StrUtil.equalsAnyIgnoreCase(type, "jpg", "png", "gif")) {
+                String extName = FileUtil.extName(file);
+                if (StrUtil.equalsAnyIgnoreCase(type, suffix) || StrUtil.equalsAnyIgnoreCase(extName, suffix)) {
                     ServletUtil.write(response, file);
                     return;
                 }
             }
         }
-        // 默认logo
-        InputStream inputStream = ResourceUtil.getStream("classpath:/logo/jpom.png");
+        // favicon ico
+        InputStream inputStream = ResourceUtil.getStream(defaultResource);
         ServletUtil.write(response, inputStream, MediaType.IMAGE_PNG_VALUE);
     }
 

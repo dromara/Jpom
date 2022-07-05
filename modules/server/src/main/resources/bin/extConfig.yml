@@ -18,8 +18,10 @@ jpom:
   subTitle:
   # 登录页名称
   loginTitle:
-  # logo 文件路径（绝对路径、http） jpg、png、gif、
+  # logo 文件路径（绝对路径、http） 文件限制后缀:jpg、png、gif
   logoFile:
+  # icon 文件路径（绝对路径、http），建议规格 12×12、16×16、24×24、32×32、48×48 , 文件限制后缀 ico、png
+  iconFile:
   # 禁用页面引导导航
   disabledGuide: false
   # 禁用登录图形验证码 （一般用于服务器没有字体或者开启了两部验证后才关闭图形验证码）

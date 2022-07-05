@@ -26,8 +26,8 @@ banner:
   msg: Jpom-Server Starting
 # 静态资源配置
 interceptor:
-  resourceHandler: /css/**,/fonts/**,/img/**,/js/**,/favicon.ico
-  resourceLocation: classpath:/dist/css/,classpath:/dist/fonts/,classpath:/dist/img/,classpath:/dist/js/,classpath:/dist/favicon.ico
+  resourceHandler: /css/**,/fonts/**,/img/**,/js/**
+  resourceLocation: classpath:/dist/css/,classpath:/dist/fonts/,classpath:/dist/img/,classpath:/dist/js/
   initPackageName: io.jpom.common.interceptor
 # 启动完成自动初始化指定包
 preload:

@@ -155,6 +155,12 @@ public class ServerExtConfigBean {
     private String logoFile;
 
     /**
+     * icon 文件路径
+     */
+    @Value("${jpom.iconFile:}")
+    private String iconFile;
+
+    /**
      * 禁用页面引导导航
      */
     @Value("${jpom.disabledGuide:false}")
@@ -254,6 +260,10 @@ public class ServerExtConfigBean {
 
     public String getLogoFile() {
         return logoFile;
+    }
+
+    public String getIconFile() {
+        return iconFile;
     }
 
     public String getUserDemoTip() {
