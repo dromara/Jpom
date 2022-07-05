@@ -21,12 +21,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
+ * 全局代理配置
+ *
  * @author bwcx_jzy
  * @since 2022/7/4
  */
 @Slf4j
 @Configuration
 public class ProxySelectorConfig extends ProxySelector implements InitializingBean {
+
+    public static final String KEY = "global_proxy";
 
     private final SystemParametersServer systemParametersServer;
     private volatile List<ProxyConfigItem> proxyConfigItems;
@@ -73,8 +77,11 @@ public class ProxySelectorConfig extends ProxySelector implements InitializingBe
      * 刷新
      */
     public void refresh() {
-        JSONArray array = systemParametersServer.getConfigDefNewInstance("global_proxy", JSONArray.class);
-        proxyConfigItems = array.toJavaList(ProxyConfigItem.class).stream().filter(proxyConfigItem -> StrUtil.isAllNotEmpty(proxyConfigItem.pattern, proxyConfigItem.proxyAddress, proxyConfigItem.proxyType)).collect(Collectors.toList());
+        JSONArray array = systemParametersServer.getConfigDefNewInstance(ProxySelectorConfig.KEY, JSONArray.class);
+        proxyConfigItems = array.toJavaList(ProxyConfigItem.class)
+            .stream()
+            .filter(proxyConfigItem -> StrUtil.isAllNotEmpty(proxyConfigItem.pattern, proxyConfigItem.proxyAddress, proxyConfigItem.proxyType))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -95,8 +102,14 @@ public class ProxySelectorConfig extends ProxySelector implements InitializingBe
 
         private String pattern;
 
+        /**
+         * @see Proxy.Type
+         */
         private String proxyType;
 
+        /**
+         * 127.0.0.1:8888
+         */
         private String proxyAddress;
     }
 

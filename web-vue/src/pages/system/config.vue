@@ -270,7 +270,7 @@
         <a-icon type="api" />
         全局代理
       </span>
-      <a-alert :message="`全局代理配置后将对服务端的网络生效，代理配置方式：ProxySelector`" style="margin-top: 10px; margin-bottom: 20px" banner />
+      <a-alert :message="`全局代理配置后将对服务端的网络生效，代理实现方式：ProxySelector`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-row justify="center" type="flex">
         <a-form-model layout="inline" ref="editProxyForm" :model="proxyConfigData">
           <a-row v-for="(item, index) in proxyConfigData.globalProxy" :key="index">
