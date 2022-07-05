@@ -7,6 +7,7 @@
 1. 【server】新增容器 stats ,方便实时查看容器内存、网络信息
 2. 【server】SSH 文件管理新增重命名文件功能
 3. 【server】新增全局配置,解决 git httpProxy （感谢[@五六](https://gitee.com/tutu-father) [Gitee issues I5EY03](https://gitee.com/dromara/Jpom/issues/I5EY03) ）
+4. 【server】新增更新容器配置（CPU、内存等）
 
 
 ### 🐞 解决BUG、优化功能

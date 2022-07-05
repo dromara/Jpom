@@ -127,7 +127,7 @@
       </template>
 
       <!-- stats -->
-      <a-table slot="expandedRowRender" :rowKey="(record, index) => index" slot-scope="record" :columns="statsColumns" :data-source="statsMap[record.id]" :pagination="false">
+      <a-table slot="expandedRowRender" :rowKey="(record, index) => index" slot-scope="parentRecord" :columns="statsColumns" :data-source="statsMap[parentRecord.id]" :pagination="false">
         <template slot="cpus" slot-scope="text, record">
           {{ (record.cpuStats && record.cpuStats.percpuUsage) || (record.cpuStats && record.cpuStats.onlineCpus) }}
         </template>
@@ -144,9 +144,20 @@
           %
         </template>
         <template slot="memory" slot-scope="text, record">
-          {{ renderSize(((record.memoryStats && record.memoryStats.usage) || 0) - ((record.memoryStats && record.memoryStats.stats && record.memoryStats.stats.cache) || 0)) }}
-          /
-          {{ renderSize((record.memoryStats && record.memoryStats.limit) || 0) }}
+          <!-- record.state !== 'running' -->
+          <!-- text === 'running' -->
+          <template v-if="parentRecord.state === 'running'">
+            <a-button type="link" icon="edit" @click="editContainer(parentRecord)">
+              {{ renderSize(((record.memoryStats && record.memoryStats.usage) || 0) - ((record.memoryStats && record.memoryStats.stats && record.memoryStats.stats.cache) || 0)) }}
+              /
+              {{ renderSize((record.memoryStats && record.memoryStats.limit) || 0) }}
+            </a-button>
+          </template>
+          <template v-else>
+            {{ renderSize(((record.memoryStats && record.memoryStats.usage) || 0) - ((record.memoryStats && record.memoryStats.stats && record.memoryStats.stats.cache) || 0)) }}
+            /
+            {{ renderSize((record.memoryStats && record.memoryStats.limit) || 0) }}
+          </template>
         </template>
         <template slot="memoryRatio" slot-scope="text, record">
           <!-- memoryRatio -->
@@ -214,11 +225,116 @@
     >
       <terminal v-if="terminalVisible" :id="this.id" :containerId="temp.id" />
     </a-modal>
+    <!-- 编辑容器配置 -->
+    <a-modal v-model="editVisible" title="配置容器" @ok="handleEditOk" :maskClosable="false">
+      <a-form-model ref="editForm" :model="temp" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }">
+        <a-form-model-item prop="blkioWeight">
+          <template slot="label">
+            Block IO 权重
+            <a-tooltip>
+              <template slot="title"> Block IO 权重（相对权重）。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input-number style="width: 100%" v-model="temp.blkioWeight" :min="0" :max="1000" />
+        </a-form-model-item>
+        <a-form-model-item prop="cpuShares">
+          <template slot="label">
+            CPU 权重
+            <a-tooltip>
+              <template slot="title"> 一个整数值，表示此容器相对于其他容器的相对 CPU 权重。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input-number style="width: 100%" v-model="temp.cpuShares" />
+        </a-form-model-item>
+        <a-form-model-item prop="cpusetCpus">
+          <template slot="label">
+            执行的 CPU
+            <a-tooltip>
+              <template slot="title"> 允许执行的 CPU（例如，0-3、0,1）。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input style="width: 100%" v-model="temp.cpusetCpus" />
+        </a-form-model-item>
+        <a-form-model-item prop="cpusetMems">
+          <template slot="label">
+            CpusetMems
+            <a-tooltip>
+              <template slot="title"> 允许执行的内存节点 (MEM) (0-3, 0,1)。 仅在 NUMA 系统上有效。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input style="width: 100%" v-model="temp.cpusetMems" />
+        </a-form-model-item>
+        <a-form-model-item prop="cpuPeriod">
+          <template slot="label">
+            CPU 周期
+            <a-tooltip>
+              <template slot="title"> CPU 周期的长度，以微秒为单位。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input-number style="width: 100%" v-model="temp.cpuPeriod" />
+        </a-form-model-item>
+        <a-form-model-item prop="cpuQuota">
+          <template slot="label">
+            CPU 时间
+            <a-tooltip>
+              <template slot="title"> 容器在一个 CPU 周期内可以获得的 CPU 时间的微秒。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input-number style="width: 100%" v-model="temp.cpuQuota" />
+        </a-form-model-item>
+
+        <a-form-model-item prop="memory">
+          <template slot="label">
+            内存
+            <a-tooltip>
+              <template slot="title"> 设置内存限制。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input style="width: 100%" v-model="temp.memory" />
+        </a-form-model-item>
+        <a-form-model-item prop="memorySwap">
+          <template slot="label">
+            总内存
+            <a-tooltip>
+              <template slot="title"> 总内存（内存 + 交换）。 设置为 -1 以禁用交换。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input style="width: 100%" v-model="temp.memorySwap" />
+        </a-form-model-item>
+        <a-form-model-item prop="memoryReservation">
+          <template slot="label">
+            软内存
+            <a-tooltip>
+              <template slot="title"> 软内存限制。 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input style="width: 100%" v-model="temp.memoryReservation" />
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
 import {parseTime, renderSize} from "@/utils/time";
-import {dockerContainerList, dockerContainerRemove, dockerContainerRestart, dockerContainerStart, dockerContainerStats, dockerContainerStop} from "@/api/docker-api";
+import {
+  dockerContainerList,
+  dockerContainerRemove,
+  dockerContainerRestart,
+  dockerContainerStart,
+  dockerContainerStats,
+  dockerContainerStop,
+  dockerInspectContainer,
+  dockerUpdateContainer,
+} from "@/api/docker-api";
 import LogView from "@/pages/docker/log-view";
 import Terminal from "@/pages/docker/terminal";
 
@@ -301,6 +417,7 @@ export default {
           api: dockerContainerStart,
         },
       },
+      editVisible: false,
     };
   },
   beforeDestroy() {
@@ -391,6 +508,51 @@ export default {
           });
         }
         // console.log(res);
+      });
+    },
+    // 编辑容器
+    editContainer(record) {
+      dockerInspectContainer({
+        id: this.id,
+        containerId: record.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.editVisible = true;
+
+          const hostConfig = res.data.hostConfig || {};
+          const data = {
+            containerId: record.id,
+            cpusetCpus: hostConfig.cpusetCpus,
+            cpusetMems: hostConfig.cpusetMems,
+            cpuPeriod: hostConfig.cpuPeriod,
+            cpuShares: hostConfig.cpuShares,
+            cpuQuota: hostConfig.cpuQuota,
+            blkioWeight: hostConfig.blkioWeight,
+            memoryReservation: renderSize(hostConfig.memoryReservation, hostConfig.memoryReservation),
+            // Deprecated: This field is deprecated as the kernel 5.4 deprecated kmem.limit_in_bytes.
+            // kernelMemory: hostConfig.kernelMemory,
+            memory: renderSize(hostConfig.memory, hostConfig.memory),
+            memorySwap: renderSize(hostConfig.memorySwap, hostConfig.memorySwap),
+          };
+
+          this.temp = Object.assign({}, data);
+        }
+      });
+    },
+    handleEditOk() {
+      this.$refs["editForm"].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        const temp = Object.assign({}, this.temp, { id: this.id });
+        dockerUpdateContainer(temp).then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.editVisible = false;
+          }
+        });
       });
     },
   },

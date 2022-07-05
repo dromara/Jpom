@@ -50,15 +50,15 @@ export function parseTime(time, cFormat) {
  * @param {*} value
  * @returns
  */
-export function renderSize(value) {
+export function renderSize(value, defaultValue = "-") {
   if (null == value || value == "") {
-    return "-";
+    return defaultValue;
   }
   var unitArr = new Array("Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB");
   var index = 0;
   var srcsize = parseFloat(value);
   if (srcsize <= 0) {
-    return "-";
+    return defaultValue;
   }
   // console.log(value, srcsize);
   index = Math.floor(Math.log(srcsize) / Math.log(1024));
