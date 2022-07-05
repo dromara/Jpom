@@ -10,7 +10,7 @@
 4. 【server】新增更新容器配置（CPU、内存等）
 5. 【server】新增页面 ICON 配置属性：`jpom.iconFile` （感谢[@flyhigh318](https://gitee.com/flyhigh318) [Gitee issues I5FKMW](https://gitee.com/dromara/Jpom/issues/I5FKMW) ）
 6. 【server】SSH 脚本新增跨工作空间同步功能 （感谢[@flyhigh318](https://gitee.com/flyhigh318) [Gitee issues I5FC9R](https://gitee.com/dromara/Jpom/issues/I5FC9R) ）
-
+7. 【server】服务端脚本模版新增跨工作空间同步功能
 
 ### 🐞 解决BUG、优化功能
 

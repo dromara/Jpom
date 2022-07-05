@@ -317,7 +317,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
     }
 
     /**
-     * 将节点信息同步到其他工作空间
+     * 将ssh 脚本信息同步到其他工作空间
      *
      * @param ids            多给节点ID
      * @param nowWorkspaceId 当前的工作空间ID
@@ -327,7 +327,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
         StrUtil.splitTrim(ids, StrUtil.COMMA)
             .forEach(id -> {
                 CommandModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                Assert.notNull(data, "没有对应到节点信息");
+                Assert.notNull(data, "没有对应的ssh脚本信息");
                 //
                 CommandModel where = new CommandModel();
                 where.setWorkspaceId(workspaceId);

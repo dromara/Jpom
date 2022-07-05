@@ -82,6 +82,14 @@ export function scriptLog(params) {
   });
 }
 
+export function syncToWorkspace(params) {
+  return axios({
+    url: "/script/sync-to-workspace",
+    method: "get",
+    params: params,
+  });
+}
+
 export const triggerExecTypeMap = {
   0: "手动",
   1: "自动",
