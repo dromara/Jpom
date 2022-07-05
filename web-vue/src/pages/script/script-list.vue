@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
+    <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" placeholder="名称" @pressEnter="loadData" allowClear class="search-input-item" />
@@ -11,7 +11,14 @@
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="createScript">新建脚本</a-button>
-
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
           <a-tooltip>
             <template slot="title">
               <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
@@ -128,15 +135,47 @@
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
       <script-console v-if="drawerConsoleVisible" :defArgs="temp.defArgs" :id="temp.id" />
     </a-drawer>
+    <!-- 同步到其他工作空间 -->
+    <a-modal v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+      <a-alert message="温馨提示" type="warning">
+        <template slot="description">
+          <ul>
+            <li>同步机制采用<b>脚本名称</b>确定是同一个脚本</li>
+            <li>当目标工作空间不存在对应的 脚本 时候将自动创建一个新的 脚本</li>
+            <li>当目标工作空间已经存在 脚本 时候将自动同步 脚本内容、默认参数、定时执行、描述</li>
+          </ul>
+        </template>
+      </a-alert>
+      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item> </a-form-model-item>
+        <a-form-model-item label="选择工作空间" prop="workspaceId">
+          <a-select
+            :getPopupContainer="
+              (triggerNode) => {
+                return triggerNode.parentNode || document.body;
+              }
+            "
+            show-search
+            option-filter-prop="children"
+            v-model="temp.workspaceId"
+            placeholder="请选择工作空间"
+          >
+            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import {deleteScript, editScript, getScriptListAll, unbindScript} from "@/api/server-script";
+import {deleteScript, editScript, getScriptListAll, syncToWorkspace, unbindScript} from "@/api/server-script";
 import codeEditor from "@/components/codeEditor";
 import {getNodeListAll} from "@/api/node";
 import ScriptConsole from "@/pages/script/script-console";
 import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
 import {parseTime} from "@/utils/time";
+import {mapGetters} from "vuex";
+import {getWorkSpaceListAll} from "@/api/workspace";
 
 export default {
   components: {
@@ -168,11 +207,23 @@ export default {
         name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
         context: [{ required: true, message: "Please input Script context", trigger: "blur" }],
       },
+      tableSelections: [],
+      syncToWorkspaceVisible: false,
+      workspaceList: [],
     };
   },
   computed: {
+    ...mapGetters(["getWorkspaceId"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+      };
     },
   },
   mounted() {
@@ -209,7 +260,8 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = record;
+      this.temp = Object.assign({}, record);
+      // record;
       //
       // this.temp.;
       this.temp = { ...this.temp, chooseNode: record.nodeIds ? record.nodeIds.split(",") : [] };
@@ -297,6 +349,45 @@ export default {
             }
           });
         },
+      });
+    },
+    // 加载工作空间数据
+    loadWorkSpaceListAll() {
+      getWorkSpaceListAll().then((res) => {
+        if (res.code === 200) {
+          this.workspaceList = res.data;
+        }
+      });
+    },
+    // 同步到其他工作情况
+    syncToWorkspaceShow() {
+      this.syncToWorkspaceVisible = true;
+      this.loadWorkSpaceListAll();
+      this.temp = {
+        workspaceId: undefined,
+      };
+    },
+    //
+    handleSyncToWorkspace() {
+      if (!this.temp.workspaceId) {
+        this.$notification.warn({
+          message: "请选择工作空间",
+        });
+        return false;
+      }
+      // 同步
+      syncToWorkspace({
+        ids: this.tableSelections.join(","),
+        workspaceId: this.temp.workspaceId,
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.tableSelections = [];
+          this.syncToWorkspaceVisible = false;
+          return false;
+        }
       });
     },
   },

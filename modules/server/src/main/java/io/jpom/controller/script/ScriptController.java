@@ -38,11 +38,13 @@ import io.jpom.model.script.ScriptModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
+import io.jpom.permission.SystemPermission;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -189,5 +191,23 @@ public class ScriptController extends BaseServerController {
         update.setNodeIds(StrUtil.EMPTY);
         scriptServer.updateById(update, getRequest());
         return JsonMessage.getString(200, "解绑成功");
+    }
+
+    /**
+     * 同步到指定工作空间
+     *
+     * @param ids         节点ID
+     * @param workspaceId 分配到到工作空间ID
+     * @return msg
+     */
+    @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    @SystemPermission()
+    public String syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String workspaceId) {
+        String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
+        //
+        scriptServer.checkUserWorkspace(workspaceId);
+        scriptServer.syncToWorkspace(ids, nowWorkspaceId, workspaceId);
+        return JsonMessage.getString(200, "操作成功");
     }
 }

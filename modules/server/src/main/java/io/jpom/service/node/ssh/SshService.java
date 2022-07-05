@@ -385,7 +385,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
     }
 
     /**
-     * 将节点信息同步到其他工作空间
+     * 将ssh信息同步到其他工作空间
      *
      * @param ids            多给节点ID
      * @param nowWorkspaceId 当前的工作空间ID
@@ -395,7 +395,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         StrUtil.splitTrim(ids, StrUtil.COMMA)
             .forEach(id -> {
                 SshModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                Assert.notNull(data, "没有对应到节点信息");
+                Assert.notNull(data, "没有对应的ssh信息");
                 //
                 SshModel where = new SshModel();
                 where.setWorkspaceId(workspaceId);
