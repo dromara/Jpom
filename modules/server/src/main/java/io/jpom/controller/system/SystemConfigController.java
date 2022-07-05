@@ -382,7 +382,7 @@ public class SystemConfigController extends BaseServerController {
     @GetMapping(value = "get_proxy_config", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public String getPoxyConfig() {
-        JSONArray array = systemParametersServer.getConfigDefNewInstance("global_proxy", JSONArray.class);
+        JSONArray array = systemParametersServer.getConfigDefNewInstance(ProxySelectorConfig.KEY, JSONArray.class);
         return JsonMessage.getString(200, "", array);
     }
 
@@ -400,7 +400,7 @@ public class SystemConfigController extends BaseServerController {
                 nodeService.testHttpProxy(proxy.getProxyAddress());
             }
         }
-        systemParametersServer.upsert("global_proxy", proxys, "global_proxy");
+        systemParametersServer.upsert(ProxySelectorConfig.KEY, proxys, ProxySelectorConfig.KEY);
         proxySelectorConfig.refresh();
         return JsonMessage.getString(200, "修改成功");
     }
