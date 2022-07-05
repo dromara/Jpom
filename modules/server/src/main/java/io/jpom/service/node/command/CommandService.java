@@ -316,4 +316,44 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
         }
     }
 
+    /**
+     * 将节点信息同步到其他工作空间
+     *
+     * @param ids            多给节点ID
+     * @param nowWorkspaceId 当前的工作空间ID
+     * @param workspaceId    同步到哪个工作空间
+     */
+    public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
+        StrUtil.splitTrim(ids, StrUtil.COMMA)
+            .forEach(id -> {
+                CommandModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
+                Assert.notNull(data, "没有对应到节点信息");
+                //
+                CommandModel where = new CommandModel();
+                where.setWorkspaceId(workspaceId);
+                where.setName(data.getName());
+                CommandModel exits = super.queryByBean(where);
+                if (exits == null) {
+                    // 不存在则添加 信息
+                    data.setId(null);
+                    data.setWorkspaceId(workspaceId);
+                    data.setCreateTimeMillis(null);
+                    data.setModifyTimeMillis(null);
+                    data.setSshIds(null);
+                    data.setModifyUser(null);
+                    super.insert(data);
+                } else {
+                    // 修改信息
+                    CommandModel update = new CommandModel();
+                    update.setId(exits.getId());
+                    update.setCommand(data.getCommand());
+                    update.setDesc(data.getDesc());
+                    update.setType(data.getType());
+                    update.setDefParams(data.getDefParams());
+                    update.setAutoExecCron(data.getAutoExecCron());
+                    super.updateById(update);
+                }
+            });
+    }
+
 }

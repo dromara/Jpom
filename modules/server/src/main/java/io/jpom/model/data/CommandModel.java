@@ -26,6 +26,8 @@ import io.jpom.model.BaseJsonModel;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -36,124 +38,56 @@ import java.util.List;
  * @since : 2021/12/4 18:38
  */
 @TableName(value = "COMMAND_INFO", name = "命令管理")
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class CommandModel extends BaseWorkspaceModel {
-	/**
-	 * 命令名称
-	 */
-	private String name;
-	/**
-	 * 命令描述
-	 */
-	private String desc;
-	/**
-	 * 指令内容
-	 */
-	private String command;
-	/**
-	 * 命令类型，0-shell，1-powershell
-	 */
-	private Integer type;
-	/**
-	 * 命令默认参数
-	 */
-	private String defParams;
-	/**
-	 * 默认关联大 ssh id
-	 */
-	private String sshIds;
-	/**
-	 * 自动执行的 cron
-	 */
-	private String autoExecCron;
+    /**
+     * 命令名称
+     */
+    private String name;
+    /**
+     * 命令描述
+     */
+    private String desc;
+    /**
+     * 指令内容
+     */
+    private String command;
+    /**
+     * 命令类型，0-shell，1-powershell
+     */
+    private Integer type;
+    /**
+     * 命令默认参数
+     */
+    private String defParams;
+    /**
+     * 默认关联大 ssh id
+     */
+    private String sshIds;
+    /**
+     * 自动执行的 cron
+     */
+    private String autoExecCron;
 
-	public String getAutoExecCron() {
-		return autoExecCron;
-	}
+    public List<CommandParam> params() {
+        return params(getDefParams());
+    }
 
-	public void setAutoExecCron(String autoExecCron) {
-		this.autoExecCron = autoExecCron;
-	}
+    public static List<CommandParam> params(String defParams) {
+        return StringUtil.jsonConvertArray(defParams, CommandParam.class);
+    }
 
-	public String getSshIds() {
-		return sshIds;
-	}
-
-	public void setSshIds(String sshIds) {
-		this.sshIds = sshIds;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getCommand() {
-		return command;
-	}
-
-	public void setCommand(String command) {
-		this.command = command;
-	}
-
-	public Integer getType() {
-		return type;
-	}
-
-	public void setType(Integer type) {
-		this.type = type;
-	}
-
-	public String getDesc() {
-		return desc;
-	}
-
-	public void setDesc(String desc) {
-		this.desc = desc;
-	}
-
-	public String getDefParams() {
-		return defParams;
-	}
-
-	public void setDefParams(String defParams) {
-		this.defParams = defParams;
-	}
-
-	public List<CommandParam> params() {
-		return params(getDefParams());
-	}
-
-	public static List<CommandParam> params(String defParams) {
-		return StringUtil.jsonConvertArray(defParams, CommandParam.class);
-	}
-
-	public static class CommandParam extends BaseJsonModel {
-		/**
-		 * 参数值
-		 */
-		private String value;
-		/**
-		 * 描述
-		 */
-		private String desc;
-
-		public String getValue() {
-			return value;
-		}
-
-		public void setValue(String value) {
-			this.value = value;
-		}
-
-		public String getDesc() {
-			return desc;
-		}
-
-		public void setDesc(String desc) {
-			this.desc = desc;
-		}
-	}
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    public static class CommandParam extends BaseJsonModel {
+        /**
+         * 参数值
+         */
+        private String value;
+        /**
+         * 描述
+         */
+        private String desc;
+    }
 }

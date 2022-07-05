@@ -9,6 +9,7 @@
 3. 【server】新增全局配置,解决 git httpProxy （感谢[@五六](https://gitee.com/tutu-father) [Gitee issues I5EY03](https://gitee.com/dromara/Jpom/issues/I5EY03) ）
 4. 【server】新增更新容器配置（CPU、内存等）
 5. 【server】新增页面 ICON 配置属性：`jpom.iconFile` （感谢[@flyhigh318](https://gitee.com/flyhigh318) [Gitee issues I5FKMW](https://gitee.com/dromara/Jpom/issues/I5FKMW) ）
+6. 【server】SSH 脚本新增跨工作空间同步功能 （感谢[@flyhigh318](https://gitee.com/flyhigh318) [Gitee issues I5FC9R](https://gitee.com/dromara/Jpom/issues/I5FC9R) ）
 
 
 ### 🐞 解决BUG、优化功能

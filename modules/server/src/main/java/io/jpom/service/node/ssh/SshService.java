@@ -414,8 +414,13 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                     super.insert(data);
                 } else {
                     // 修改信息
-                    SshModel update = new SshModel(data.getId());
+                    SshModel update = new SshModel(sshModel.getId());
                     update.setUser(data.getUser());
+                    update.setName(data.getName());
+                    update.setCharset(data.getCharset());
+                    update.setAllowEditSuffix(data.getAllowEditSuffix());
+                    update.setFileDirs(data.getFileDirs());
+                    update.setNotAllowedCommand(data.getNotAllowedCommand());
                     update.setPassword(data.getPassword());
                     update.setPrivateKey(data.getPrivateKey());
                     super.updateById(update);
