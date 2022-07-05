@@ -20,9 +20,11 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -43,6 +45,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * https://docs.docker.com/engine/api/v1.41/#operation/ContainerKill
+ * <p>
+ * https://docs.docker.com/engine/api/v1.41/#operation/ContainerUpdate
  *
  * @author bwcx_jzy
  * @since 2022/1/25
@@ -92,13 +96,26 @@ public class TestLocal {
     public void test3() {
 //        dockerClient.inspectContainerCmd("socat")
         UpdateContainerCmd containerCmd = dockerClient.updateContainerCmd("socat");
-        containerCmd.withCpusetCpus("1");
-//        containerCmd.
-//        containerCmd.withCpusetCpus()
+//        containerCmd.withCpusetCpus("1");
+//        containerCmd.withCpusetMems("1");
+//        containerCmd.withCpuPeriod(1);
+//        containerCmd.withCpuQuota(1);
+//        containerCmd.withCpuShares(1);
+//        containerCmd.withBlkioWeight(1);
+//        containerCmd.withMemoryReservation(DataSizeUtil.parse("10M"));
+//        containerCmd.withKernelMemory(DataSizeUtil.parse("10M"));
 //        containerCmd.withMemory(DataSizeUtil.parse("10M"));
 //        containerCmd.withMemorySwap(DataSizeUtil.parse("10M"));
+
+
         UpdateContainerResponse containerResponse = containerCmd.exec();
         System.out.println(containerResponse);
+    }
+
+    @Test
+    public void testSize(){
+        System.out.println(DataSizeUtil.parse("-1"));
+        System.out.println(DataSizeUtil.parse("0"));
     }
 
     @Test

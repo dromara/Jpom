@@ -164,6 +164,34 @@ export function dockerContainerStats(params) {
 }
 
 /**
+ * 获取容器信息
+ * @param {JSON} params
+ */
+export function dockerInspectContainer(params) {
+  return axios({
+    url: "/docker/container/inspect-container",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
+ * 更新容器
+ * @param {JSON} params
+ * @returns
+ */
+export function dockerUpdateContainer(params) {
+  return axios({
+    url: "/docker/container/update-container",
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: params,
+  });
+}
+
+/**
  * 容器中的镜像列表
  * @param {JSON} params
  */

@@ -34,10 +34,8 @@ import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -157,6 +155,27 @@ public class DockerContainerController extends BaseServerController {
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("containerId", containerId);
         JSONObject results = (JSONObject) plugin.execute("inspectContainer", parameter);
+        return JsonMessage.getString(200, "执行成功", results);
+    }
+
+    /**
+     * 修改容器配置
+     *
+     * @return json
+     */
+    @PostMapping(value = "update-container", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public String updateContainer(@RequestBody JSONObject jsonObject) throws Exception {
+        // @ValidatorItem String id, String containerId
+        String id = jsonObject.getString("id");
+        Assert.hasText(id, "id 不能为空");
+        jsonObject.remove("id");
+
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.putAll(jsonObject);
+        JSONObject results = (JSONObject) plugin.execute("updateContainer", parameter);
         return JsonMessage.getString(200, "执行成功", results);
     }
 }

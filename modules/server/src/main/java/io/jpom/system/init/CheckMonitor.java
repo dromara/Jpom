@@ -63,7 +63,7 @@ public class CheckMonitor {
         CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
             BuildUtil.reloadCacheSize();
             ConfigBean.getInstance().dataSize();
-            //
+            // 定时刷新代理配置
             ProxySelectorConfig selectorConfig = SpringUtil.getBean(ProxySelectorConfig.class);
             selectorConfig.refresh();
         });
@@ -137,7 +137,7 @@ public class CheckMonitor {
                     log.debug("{} Recover bad data {}", name, count);
                 }
             });
-            //
+            // 尝试获取版本更新信息
             RemoteVersion.loadRemoteInfo();
         });
     }
