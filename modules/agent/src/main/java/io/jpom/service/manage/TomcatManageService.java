@@ -26,6 +26,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
+import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -43,113 +44,113 @@ import javax.annotation.Resource;
 @Service
 public class TomcatManageService {
 
-	@Resource
-	private TomcatEditService tomcatEditService;
+    @Resource
+    private TomcatEditService tomcatEditService;
 
-	/**
-	 * 查询tomcat状态
-	 *
-	 * @param id tomcat的id
-	 * @return tomcat状态0表示未运行，1表示运行中
-	 */
-	public int getTomcatStatus(String id) {
-		int result = 0;
-		TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
-		String url = String.format("http://127.0.0.1:%d/", tomcatInfoModel.getPort());
-		HttpRequest httpRequest = new HttpRequest(url);
-		// 设置超时时间为3秒
-		httpRequest.setConnectionTimeout(3000);
-		try {
-			HttpResponse httpResponse = httpRequest.execute();
-			result = 1;
-		} catch (Exception ignored) {
-		}
+    /**
+     * 查询tomcat状态
+     *
+     * @param id tomcat的id
+     * @return tomcat状态0表示未运行，1表示运行中
+     */
+    public int getTomcatStatus(String id) {
+        int result = 0;
+        TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
+        String url = String.format("http://127.0.0.1:%d/", tomcatInfoModel.getPort());
+        HttpRequest httpRequest = new HttpRequest(url);
+        // 设置超时时间为3秒
+        httpRequest.setConnectionTimeout(3000);
+        try (HttpResponse httpResponse = httpRequest.execute()) {
 
-		return result;
-	}
+            result = 1;
+        } catch (Exception ignored) {
+        }
 
-	/**
-	 * 查询tomcat的项目列表
-	 *
-	 * @param id tomcat的id
-	 * @return tomcat的项目列表
-	 */
-	public JSONArray getTomcatProjectList(String id) {
-		TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
-		String body = tomcatCmd(tomcatInfoModel, "text/list");
+        return result;
+    }
 
-		String[] result = body.replace(StrUtil.CRLF, "$")
-				.replace("\n", "$")
-				.split("\\$");
+    /**
+     * 查询tomcat的项目列表
+     *
+     * @param id tomcat的id
+     * @return tomcat的项目列表
+     */
+    public JSONArray getTomcatProjectList(String id) {
+        TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
+        String body = tomcatCmd(tomcatInfoModel, "text/list");
 
-		JSONArray jsonArray = new JSONArray();
+        String[] result = body.replace(StrUtil.CRLF, "$")
+            .replace("\n", "$")
+            .split("\\$");
 
-		for (int i = 1; i < result.length; i++) {
-			String str = result[i];
-			JSONObject jsonObject = new JSONObject();
-			String[] strs = str.split(StrUtil.COLON);
-			if (strs[0].endsWith("jpomAgent")) {
-				continue;
-			}
+        JSONArray jsonArray = new JSONArray();
 
-			jsonObject.put("path", StrUtil.SLASH.equals(strs[0]) ? "/ROOT" : strs[0]);
-			jsonObject.put("status", strs[1]);
-			jsonObject.put("session", strs[2]);
+        for (int i = 1; i < result.length; i++) {
+            String str = result[i];
+            JSONObject jsonObject = new JSONObject();
+            String[] strs = str.split(StrUtil.COLON);
+            if (strs[0].endsWith("jpomAgent")) {
+                continue;
+            }
 
-			jsonArray.add(jsonObject);
-		}
+            jsonObject.put("path", StrUtil.SLASH.equals(strs[0]) ? "/ROOT" : strs[0]);
+            jsonObject.put("status", strs[1]);
+            jsonObject.put("session", strs[2]);
 
-		return jsonArray;
-	}
+            jsonArray.add(jsonObject);
+        }
 
-	/**
-	 * 访问tomcat Url
-	 *
-	 * @param tomcatInfoModel tomcat信息
-	 * @param cmd             命令
-	 * @return 访问结果
-	 */
-	private String tomcatCmd(TomcatInfoModel tomcatInfoModel, String cmd) {
-		String url = String.format("http://127.0.0.1:%d/jpomAgent/%s", tomcatInfoModel.getPort(), cmd);
-		HttpRequest httpRequest = new HttpRequest(url);
-		// 设置超时时间为3秒
-		httpRequest.setConnectionTimeout(3000);
-		String body = "";
+        return jsonArray;
+    }
 
-		try {
-			HttpResponse httpResponse = httpRequest.execute();
-			if (httpResponse.isOk()) {
-				body = httpResponse.body();
-			}
-			if (httpResponse.getStatus() == HttpStatus.HTTP_NOT_FOUND) {
-				// 没有插件
-				tomcatInfoModel.initTomcat();
-				throw new JpomRuntimeException("tomcat 未初始化，已经重新初始化请稍后再试");
-			}
-		} catch (JpomRuntimeException jpom) {
-			throw jpom;
-		} catch (Exception ignored) {
-		}
+    /**
+     * 访问tomcat Url
+     *
+     * @param tomcatInfoModel tomcat信息
+     * @param cmd             命令
+     * @return 访问结果
+     */
+    private String tomcatCmd(TomcatInfoModel tomcatInfoModel, String cmd) {
+        String url = String.format("http://127.0.0.1:%d/jpomAgent/%s", tomcatInfoModel.getPort(), cmd);
+        HttpRequest httpRequest = HttpUtil.createGet(url);
+        // new HttpRequest(url);
+        // 设置超时时间为3秒
+        httpRequest.timeout(3000);
+        String body = "";
 
-		return body;
-	}
+        try (HttpResponse httpResponse = httpRequest.execute()) {
+            if (httpResponse.isOk()) {
+                body = httpResponse.body();
+            }
+            if (httpResponse.getStatus() == HttpStatus.HTTP_NOT_FOUND) {
+                // 没有插件
+                tomcatInfoModel.initTomcat();
+                throw new JpomRuntimeException("tomcat 未初始化，已经重新初始化请稍后再试");
+            }
+        } catch (JpomRuntimeException jpom) {
+            throw jpom;
+        } catch (Exception ignored) {
+        }
 
-	/**
-	 * tomcat项目管理
-	 *
-	 * @param id       tomcat id
-	 * @param path     项目路径
-	 * @param tomcatOp 执行的操作 start=启动项目 stop=停止项目 relaod=重启项目
-	 * @return 操作结果
-	 */
-	public JsonMessage tomcatProjectManage(String id, String path, TomcatOp tomcatOp) {
-		TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
-		String result = tomcatCmd(tomcatInfoModel, String.format("text/%s?path=%s", tomcatOp.name(), path));
+        return body;
+    }
 
-		if (result.startsWith("OK")) {
-			return new JsonMessage(200, "操作成功");
-		} else {
-			return new JsonMessage(500, "操作失败:" + result);
-		}
-	}
+    /**
+     * tomcat项目管理
+     *
+     * @param id       tomcat id
+     * @param path     项目路径
+     * @param tomcatOp 执行的操作 start=启动项目 stop=停止项目 relaod=重启项目
+     * @return 操作结果
+     */
+    public JsonMessage tomcatProjectManage(String id, String path, TomcatOp tomcatOp) {
+        TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
+        String result = tomcatCmd(tomcatInfoModel, String.format("text/%s?path=%s", tomcatOp.name(), path));
+
+        if (result.startsWith("OK")) {
+            return new JsonMessage(200, "操作成功");
+        } else {
+            return new JsonMessage(500, "操作失败:" + result);
+        }
+    }
 }
