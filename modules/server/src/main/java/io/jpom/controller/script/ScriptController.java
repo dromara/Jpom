@@ -87,6 +87,18 @@ public class ScriptController extends BaseServerController {
         return JsonMessage.getString(200, "success", pageResultDto);
     }
 
+    /**
+     * get script list
+     *
+     * @return json
+     */
+    @GetMapping(value = "list-all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String scriptListAll() {
+        List<ScriptModel> pageResultDto = scriptServer.listByWorkspace(getRequest());
+        return JsonMessage.getString(200, "success", pageResultDto);
+    }
+
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public String save(String id,

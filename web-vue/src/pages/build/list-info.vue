@@ -254,26 +254,22 @@
                 DSL 内容
                 <a-tooltip v-show="temp.type !== 'edit'">
                   <template slot="title">
-                    <p>以 yaml/yml 格式配置,scriptId 为脚本模版ID，可以到脚本模版编辑弹窗中查看 scriptId</p>
-                    <p>脚本里面支持的变量有：#{PROJECT_ID}、#{PROJECT_NAME}、#{PROJECT_PATH}</p>
-                    <p><b>status</b> 流程执行完脚本后，输出的内容最后一行必须为：running:$pid <b>$pid 为当前项目实际的进程ID</b>。如果输出最后一行不是预期格式项目状态将是未运行</p>
-                    <p>配置示例：</p>
-                    <code>
+                    <p>以 yaml/yml 格式配置</p>
+                    <ul>
+                      <li>配置需要声明使用具体的 docker 来执行构建相关操作(建议使用服务端所在服务器中的 docker)</li>
+                      <li>容器构建会在 docker 中生成相关挂载目录,一般情况不需要人为操作</li>
+                      <li>执行构建时会生成一个容器来执行，构建结束后会自动删除对应的容器</li>
+                    </ul>
+                    <div>
+                      目前支持都插件有（更多插件尽情期待）：
                       <ol>
-                        <li>description: 测试</li>
-                        <li>run:</li>
-                        <li>&nbsp;&nbsp;start:</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptId: eb16f693147b43a1b06f9eb96aed1bc7</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptArgs: start</li>
-                        <li>&nbsp;&nbsp;status:</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptId: eb16f693147b43a1b06f9eb96aed1bc7</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptArgs: status</li>
-                        <li>&nbsp;&nbsp;stop:</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptId: eb16f693147b43a1b06f9eb96aed1bc7</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;scriptArgs: stop</li>
+                        <li>java sdk 镜像使用：https://mirrors.tuna.tsinghua.edu.cn/ 支持版本有：8, 9, 10, 11, 12, 13, 14, 15, 16, 17</li>
+                        <li>maven sdk 镜像使用：https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/</li>
+                        <li>node sdk 镜像使用：https://registry.npmmirror.com/-/binary/node</li>
+                        <li>(存在兼容问题,实际使用中需要提前测试) python3 sdk 镜像使用：https://repo.huaweicloud.com/python/${PYTHON3_VERSION}/Python-${PYTHON3_VERSION}.tar.xz</li>
+                        <li>(存在兼容问题,实际使用中需要提前测试) go sdk 镜像使用：https://studygolang.com/dl/golang/go${GO_VERSION}.linux-${ARCH}.tar.gz</li>
                       </ol>
-                    </code>
-                    <ul></ul>
+                    </div>
                   </template>
                   <a-icon type="question-circle" theme="filled" />
                 </a-tooltip>
@@ -558,40 +554,6 @@
             <template slot="header">
               <a-form-model-item label="其他配置" style="margin-bottom: 0px"></a-form-model-item>
             </template>
-            <a-form-model-item prop="webhook">
-              <template slot="label">
-                WebHooks
-                <a-tooltip v-show="!temp.id">
-                  <template slot="title">
-                    <ul>
-                      <li>构建过程请求对应的地址,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
-                      <li>传人参数有：buildId、buildName、type、error、triggerTime</li>
-                      <li>type 的值有：startReady、pull、executeCommand、release、done、stop、success</li>
-                      <li>异步请求不能保证有序性</li>
-                    </ul>
-                  </template>
-                  <a-icon type="question-circle" theme="filled" />
-                </a-tooltip>
-              </template>
-              <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
-            </a-form-model-item>
-            <a-form-model-item label="自动构建" prop="autoBuildCron">
-              <a-auto-complete
-                v-model="temp.autoBuildCron"
-                placeholder="如果需要定时自动构建则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
-                option-label-prop="value"
-              >
-                <template slot="dataSource">
-                  <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
-                    <span slot="label">
-                      {{ group.title }}
-                    </span>
-                    <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} {{ opt.value }} </a-select-option>
-                  </a-select-opt-group>
-                </template>
-              </a-auto-complete>
-            </a-form-model-item>
-
             <a-form-model-item prop="cacheBuild">
               <template slot="label">
                 缓存构建目录
@@ -632,6 +594,69 @@
                   <a-switch v-model="tempExtraData.checkRepositoryDiff" checked-children="是" un-checked-children="否" />
                 </a-col>
               </a-row>
+            </a-form-model-item>
+            <a-form-model-item prop="webhook">
+              <template slot="label">
+                WebHooks
+                <a-tooltip v-show="!temp.id">
+                  <template slot="title">
+                    <ul>
+                      <li>构建过程请求对应的地址,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
+                      <li>传人参数有：buildId、buildName、type、error、triggerTime</li>
+                      <li>type 的值有：startReady、pull、executeCommand、release、done、stop、success</li>
+                      <li>异步请求不能保证有序性</li>
+                    </ul>
+                  </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
+            </a-form-model-item>
+            <a-form-model-item label="自动构建" prop="autoBuildCron">
+              <a-auto-complete
+                v-model="temp.autoBuildCron"
+                placeholder="如果需要定时自动构建则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
+                option-label-prop="value"
+              >
+                <template slot="dataSource">
+                  <a-select-opt-group v-for="group in cronDataSource" :key="group.title">
+                    <span slot="label">
+                      {{ group.title }}
+                    </span>
+                    <a-select-option v-for="opt in group.children" :key="opt.title" :value="opt.value"> {{ opt.title }} {{ opt.value }} </a-select-option>
+                  </a-select-opt-group>
+                </template>
+              </a-auto-complete>
+            </a-form-model-item>
+            <a-form-model-item prop="noticeScriptId">
+              <template slot="label">
+                事件脚本
+                <a-tooltip v-show="!temp.id">
+                  <template slot="title">
+                    <ul>
+                      <li>构建过程执行对应的脚本,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
+                      <li>传人环境变量有：buildId、buildName、type、error、triggerTime、buildNumberId、buildSourceFile</li>
+                      <li>执行脚本传入参数有：startReady、pull、executeCommand、release、done、stop、success</li>
+                      <li><b>注意：为了避免不必要的事件执行脚本，选择的脚本的备注中包含需要实现的事件参数关键词，如果需要执行 success 事件,那么选择的脚本的备注中需要包含 success 关键词</b></li>
+                    </ul>
+                  </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-select
+                :getPopupContainer="
+                  (triggerNode) => {
+                    return triggerNode.parentNode || document.body;
+                  }
+                "
+                allowClear
+                show-search
+                option-filter-prop="children"
+                placeholder="构建过程执行对应的脚本"
+                v-model="tempExtraData.noticeScriptId"
+              >
+                <a-select-option v-for="item2 in scriptList" :key="item2.id">{{ item2.name }}</a-select-option>
+              </a-select>
             </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
@@ -876,6 +901,7 @@ import codeEditor from "@/components/codeEditor";
 import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
 import Vue from "vue";
 import {dockerSwarmListAll, dockerSwarmServicesList} from "@/api/docker-swarm";
+import {getScriptListAll} from "@/api/server-script";
 
 export default {
   components: {
@@ -969,6 +995,7 @@ export default {
       dockerSwarmList: [],
       //集群下 服务下拉数据
       swarmServiceListOptions: [],
+      scriptList: [],
       temp: {},
       // 页面控制变量
       editBuildVisible: false,
@@ -1066,6 +1093,10 @@ export default {
         "    version: 3.8.5\n" +
         "  - uses: node\n" +
         "    version: 16.3.0\n" +
+        "#  - uses: go\n" +
+        "#    version: 1.17.6\n" +
+        "#  - uses: python3\n" +
+        "#    version: 3.6.6\n" +
         "# 将容器中的文件缓存到 docker 卷中\n" +
         "  - uses: cache\n" +
         "    path: /root/.m2\n" +
@@ -1152,6 +1183,14 @@ export default {
         }
       });
     },
+    // 加载脚本列表
+    loadScriptListList() {
+      getScriptListAll().then((res) => {
+        if (res.code === 200) {
+          this.scriptList = res.data;
+        }
+      });
+    },
     // 加载节点分发列表
     loadDispatchList() {
       this.dispatchList = [];
@@ -1227,6 +1266,7 @@ export default {
       this.loadNodeProjectList();
       this.loadSshList();
       this.loadDockerSwarmListAll();
+      this.loadScriptListList();
       this.editBuildVisible = true;
       this.tempExtraData = {
         cacheBuild: true,
@@ -1285,6 +1325,7 @@ export default {
       this.loadDispatchList();
       this.loadDockerSwarmListAll();
       this.loadNodeProjectList();
+      this.loadScriptListList();
       this.loadSshList().then(() => {
         if (this.tempExtraData.releaseMethodDataId_3) {
           //

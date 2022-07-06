@@ -48,12 +48,16 @@ import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.model.log.BuildHistoryLog;
+import io.jpom.model.script.ScriptExecuteLogModel;
+import io.jpom.model.script.ScriptModel;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.service.docker.DockerInfoService;
+import io.jpom.service.script.ScriptExecuteLogServer;
+import io.jpom.service.script.ScriptServer;
 import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
@@ -101,17 +105,23 @@ public class BuildExecuteService {
     private final RepositoryService repositoryService;
     protected final DockerInfoService dockerInfoService;
     private final WorkspaceEnvVarService workspaceEnvVarService;
+    private final ScriptServer scriptServer;
+    private final ScriptExecuteLogServer scriptExecuteLogServer;
 
     public BuildExecuteService(BuildInfoService buildService,
                                DbBuildHistoryLogService dbBuildHistoryLogService,
                                RepositoryService repositoryService,
                                DockerInfoService dockerInfoService,
-                               WorkspaceEnvVarService workspaceEnvVarService) {
+                               WorkspaceEnvVarService workspaceEnvVarService,
+                               ScriptServer scriptServer,
+                               ScriptExecuteLogServer scriptExecuteLogServer) {
         this.buildService = buildService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.repositoryService = repositoryService;
         this.dockerInfoService = dockerInfoService;
         this.workspaceEnvVarService = workspaceEnvVarService;
+        this.scriptServer = scriptServer;
+        this.scriptExecuteLogServer = scriptExecuteLogServer;
     }
 
     /**
@@ -750,7 +760,7 @@ public class BuildExecuteService {
          * @throws IOException IO
          */
         private boolean runCommand(String command) throws IOException, InterruptedException {
-            logRecorder.info(command);
+            logRecorder.info("[INFO] --- EXEC COMMAND {}", command);
             //
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.directory(this.gitFile);
@@ -779,7 +789,7 @@ public class BuildExecuteService {
                 status[0] = true;
             });
             int waitFor = process.waitFor();
-            logRecorder.info("process result " + waitFor);
+            logRecorder.info("[INFO] --- PROCESS RESULT " + waitFor);
             return status[0];
         }
 
@@ -796,7 +806,9 @@ public class BuildExecuteService {
             Map<String, Object> map = new HashMap<>(10);
             long triggerTime = SystemClock.now();
             map.put("buildId", buildInfoModel.getId());
+            map.put("buildNumberId", this.taskData.buildInfoModel.getBuildId());
             map.put("buildName", buildInfoModel.getName());
+            map.put("buildSourceFile", FileUtil.getAbsolutePath(this.gitFile));
             map.put("type", type);
             map.put("triggerBuildType", taskData.triggerBuildType);
             map.put("triggerTime", triggerTime);
@@ -811,7 +823,64 @@ public class BuildExecuteService {
                     log.error("WebHooks 调用错误", e);
                 }
             });
+            // 执行对应的事件脚本
+            try {
+                this.noticeScript(type, map);
+            } catch (Exception e) {
+                log.error("noticeScript 调用错误", e);
+            }
+        }
 
+        /**
+         * 执行事件脚本
+         *
+         * @param type 事件类型
+         * @param map  相关参数
+         * @throws Exception 异常
+         */
+        private void noticeScript(String type, Map<String, Object> map) throws Exception {
+            String noticeScriptId = this.buildExtraModule.getNoticeScriptId();
+            if (StrUtil.isEmpty(noticeScriptId)) {
+                return;
+            }
+            ScriptModel scriptModel = buildExecuteService.scriptServer.getByKey(noticeScriptId);
+            if (scriptModel == null) {
+                logRecorder.info("[WARNING] noticeScript does not exist:{}", type);
+                return;
+            }
+            // 判断是否包含需要执行的事件
+            if (!StrUtil.contains(scriptModel.getDescription(), type)) {
+                return;
+            }
+            logRecorder.info("[INFO] --- EXEC NOTICESCRIPT {}", type);
+            ScriptExecuteLogModel logModel = buildExecuteService.scriptExecuteLogServer.create(scriptModel, 1);
+            File logFile = scriptModel.logFile(logModel.getId());
+            try (LogRecorder scriptLog = LogRecorder.builder().file(logFile).build()) {
+                // 创建执行器
+                File scriptFile = scriptModel.scriptFile();
+                //
+                String script = FileUtil.getAbsolutePath(scriptFile);
+                ProcessBuilder processBuilder = new ProcessBuilder();
+                List<String> command = StrUtil.splitTrim(type, StrUtil.SPACE);
+                command.add(0, script);
+                command.add(0, CommandUtil.EXECUTE_PREFIX);
+                log.debug(CollUtil.join(command, StrUtil.SPACE));
+                processBuilder.redirectErrorStream(true).command(command).directory(scriptFile.getParentFile());
+                // 环境变量
+                Map<String, String> environment = processBuilder.environment();
+                for (Map.Entry<String, Object> stringObjectEntry : map.entrySet()) {
+                    environment.put(stringObjectEntry.getKey(), StrUtil.toStringOrNull(stringObjectEntry.getValue()));
+                }
+                Process process = processBuilder.start();
+                //
+                InputStream inputStream = process.getInputStream();
+                IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) line -> {
+                    logRecorder.info(line);
+                    scriptLog.info(line);
+                });
+                int waitFor = process.waitFor();
+                logRecorder.info("[INFO] --- NOTICESCRIPT PROCESS RESULT " + waitFor);
+            }
         }
     }
 

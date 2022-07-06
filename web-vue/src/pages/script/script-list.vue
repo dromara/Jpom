@@ -168,7 +168,7 @@
   </div>
 </template>
 <script>
-import {deleteScript, editScript, getScriptListAll, syncToWorkspace, unbindScript} from "@/api/server-script";
+import {deleteScript, editScript, getScriptList, syncToWorkspace, unbindScript} from "@/api/server-script";
 import codeEditor from "@/components/codeEditor";
 import {getNodeListAll} from "@/api/node";
 import ScriptConsole from "@/pages/script/script-console";
@@ -236,7 +236,7 @@ export default {
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
-      getScriptListAll(this.listQuery).then((res) => {
+      getScriptList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
