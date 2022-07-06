@@ -11,6 +11,7 @@
 5. 【server】新增页面 ICON 配置属性：`jpom.iconFile` （感谢[@flyhigh318](https://gitee.com/flyhigh318) [Gitee issues I5FKMW](https://gitee.com/dromara/Jpom/issues/I5FKMW) ）
 6. 【server】SSH 脚本新增跨工作空间同步功能 （感谢[@flyhigh318](https://gitee.com/flyhigh318) [Gitee issues I5FC9R](https://gitee.com/dromara/Jpom/issues/I5FC9R) ）
 7. 【server】服务端脚本模版新增跨工作空间同步功能
+8. 【server】构建新增事件脚本属性,在构建环节可以执行指定脚本来实现部分功能（感谢[@沈世举](https://gitee.com/shen-shiju) [Gitee issues I5FKFM](https://gitee.com/dromara/Jpom/issues/I5FKFM) ）
 
 ### 🐞 解决BUG、优化功能
 

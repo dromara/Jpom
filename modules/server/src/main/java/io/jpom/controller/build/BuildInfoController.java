@@ -46,6 +46,7 @@ import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.enums.BuildReleaseMethod;
+import io.jpom.model.script.ScriptModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -56,6 +57,7 @@ import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.node.ssh.SshService;
+import io.jpom.service.script.ScriptServer;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.CommandUtil;
 import org.springframework.http.MediaType;
@@ -86,19 +88,22 @@ public class BuildInfoController extends BaseServerController {
     private final RepositoryService repositoryService;
     private final BuildExecuteService buildExecuteService;
     private final DockerInfoService dockerInfoService;
+    private final ScriptServer scriptServer;
 
     public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
                                SshService sshService,
                                BuildInfoService buildInfoService,
                                RepositoryService repositoryService,
                                BuildExecuteService buildExecuteService,
-                               DockerInfoService dockerInfoService) {
+                               DockerInfoService dockerInfoService,
+                               ScriptServer scriptServer) {
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.sshService = sshService;
         this.buildInfoService = buildInfoService;
         this.repositoryService = repositoryService;
         this.buildExecuteService = buildExecuteService;
         this.dockerInfoService = dockerInfoService;
+        this.scriptServer = scriptServer;
     }
 
     /**
@@ -243,6 +248,12 @@ public class BuildInfoController extends BaseServerController {
         buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));
         if (buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
             Assert.hasText(buildInfoModel.getReleaseMethodDataId(), "没有发布分发对应关联数据ID");
+        }
+        // 验证服务端脚本
+        String noticeScriptId = jsonObject.getString("noticeScriptId");
+        if (StrUtil.isNotEmpty(noticeScriptId)) {
+            ScriptModel scriptModel = scriptServer.getByKey(noticeScriptId, getRequest());
+            Assert.notNull(scriptModel, "不存在对应的服务端脚本,请重新选择");
         }
         buildInfoModel.setExtraData(jsonObject.toJSONString());
 
