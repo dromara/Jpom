@@ -25,6 +25,7 @@ package io.jpom.webhook;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
@@ -51,9 +52,11 @@ public class DefaultWebhookPluginImpl implements IDefaultPlugin {
         try {
             HttpRequest httpRequest = HttpUtil.createGet(webhook);
             httpRequest.form(parameter);
-            String body = httpRequest.execute().body();
-            log.info(webhook + CharPool.COLON + body);
-            return body;
+            try (HttpResponse execute = httpRequest.execute()) {
+                String body = execute.body();
+                log.info(webhook + CharPool.COLON + body);
+                return body;
+            }
         } catch (Exception e) {
             log.error("WebHooks 调用错误", e);
             return "WebHooks error:" + e.getMessage();
