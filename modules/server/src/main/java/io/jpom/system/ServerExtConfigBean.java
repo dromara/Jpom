@@ -98,21 +98,6 @@ public class ServerExtConfigBean {
     private String authorizeKey;
 
     /**
-     * 构建最多保存多少份历史记录
-     */
-    @Value("${build.maxHistoryCount:1000}")
-    private int buildMaxHistoryCount;
-
-    /**
-     * 每一项构建最多保存的历史份数
-     */
-    @Value("${build.itemMaxHistoryCount:50}")
-    private int buildItemMaxHistoryCount;
-
-    @Value("${build.checkDeleteCommand:true}")
-    private Boolean buildCheckDeleteCommand;
-
-    /**
      * ssh 中执行命令 初始化的环境变量
      */
     @Value("${ssh.initEnv:}")
@@ -208,14 +193,6 @@ public class ServerExtConfigBean {
         return this.ipErrorLockTimeValue;
     }
 
-    public int getBuildMaxHistoryCount() {
-        return buildMaxHistoryCount;
-    }
-
-    public int getBuildItemMaxHistoryCount() {
-        return buildItemMaxHistoryCount;
-    }
-
     public int getAuthorizeExpired() {
         return authorizeExpired;
     }
@@ -230,11 +207,6 @@ public class ServerExtConfigBean {
 
     public byte[] getAuthorizeKey() {
         return StrUtil.emptyToDefault(this.authorizeKey, "KZQfFBJTW2v6obS1").getBytes();
-    }
-
-
-    public boolean getBuildCheckDeleteCommand() {
-        return buildCheckDeleteCommand != null && buildCheckDeleteCommand;
     }
 
     /**

@@ -32,6 +32,7 @@ import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.thread.ExecutorBuilder;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.EnumUtil;
@@ -61,6 +62,7 @@ import io.jpom.service.script.ScriptServer;
 import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
@@ -74,13 +76,9 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -100,6 +98,11 @@ public class BuildExecuteService {
 
     private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
+    /**
+     * 构建线程池
+     */
+    private static ThreadPoolExecutor threadPoolExecutor;
+
     private final BuildInfoService buildService;
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final RepositoryService repositoryService;
@@ -107,6 +110,7 @@ public class BuildExecuteService {
     private final WorkspaceEnvVarService workspaceEnvVarService;
     private final ScriptServer scriptServer;
     private final ScriptExecuteLogServer scriptExecuteLogServer;
+    private final BuildExtConfig buildExtConfig;
 
     public BuildExecuteService(BuildInfoService buildService,
                                DbBuildHistoryLogService dbBuildHistoryLogService,
@@ -114,7 +118,8 @@ public class BuildExecuteService {
                                DockerInfoService dockerInfoService,
                                WorkspaceEnvVarService workspaceEnvVarService,
                                ScriptServer scriptServer,
-                               ScriptExecuteLogServer scriptExecuteLogServer) {
+                               ScriptExecuteLogServer scriptExecuteLogServer,
+                               BuildExtConfig buildExtConfig) {
         this.buildService = buildService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.repositoryService = repositoryService;
@@ -122,6 +127,33 @@ public class BuildExecuteService {
         this.workspaceEnvVarService = workspaceEnvVarService;
         this.scriptServer = scriptServer;
         this.scriptExecuteLogServer = scriptExecuteLogServer;
+        this.buildExtConfig = buildExtConfig;
+    }
+
+    /**
+     * 创建构建线程池
+     */
+    private synchronized void initPool() {
+        if (threadPoolExecutor != null) {
+            return;
+        }
+        ExecutorBuilder executorBuilder = ExecutorBuilder.create();
+        int poolSize = buildExtConfig.getPoolSize();
+        if (poolSize > 0) {
+            executorBuilder.setCorePoolSize(0).setMaxPoolSize(poolSize);
+        }
+        executorBuilder.useArrayBlockingQueue(Math.max(buildExtConfig.getPoolWaitQueue(), 1));
+        executorBuilder.setHandler(new ThreadPoolExecutor.DiscardPolicy() {
+            @Override
+            public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+                if (r instanceof BuildInfoManage) {
+                    // 取消任务
+                    BuildInfoManage buildInfoManage = (BuildInfoManage) r;
+                    buildInfoManage.rejectedExecution();
+                }
+            }
+        });
+        threadPoolExecutor = executorBuilder.build();
     }
 
     /**
@@ -197,18 +229,19 @@ public class BuildExecuteService {
         BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildInfoModel.getExtraData(), BuildExtraModule.class);
         Assert.notNull(buildExtraModule, "构建信息缺失");
         String logId = this.insertLog(buildExtraModule, taskData);
+        // 创建线程池
+        initPool();
         //
         BuildInfoManage.BuildInfoManageBuilder builder = BuildInfoManage.builder()
             .taskData(taskData)
             .logId(logId)
             .buildExtraModule(buildExtraModule)
-            .dbBuildHistoryLogService(dbBuildHistoryLogService)
             .buildExecuteService(this);
         BuildInfoManage build = builder.build();
         //BuildInfoManage manage = new BuildInfoManage(taskData);
         BUILD_MANAGE_MAP.put(buildInfoModel.getId(), build);
-        //
-        ThreadUtil.execAsync(build);
+        // 输出提交任务日志, 提交到线程池中
+        threadPoolExecutor.execute(build.submitTask());
     }
 
     /**
@@ -218,14 +251,10 @@ public class BuildExecuteService {
      * @return bool
      */
     public boolean cancelTask(String id) {
-        BuildInfoManage buildInfoManage = BUILD_MANAGE_MAP.get(id);
-        if (buildInfoManage == null) {
-            return false;
-        }
-        buildInfoManage.cancelTask();
-        this.updateStatus(buildInfoManage.taskData.buildInfoModel.getId(), buildInfoManage.logId, BuildStatus.Cancel);
-        BUILD_MANAGE_MAP.remove(id);
-        return true;
+        return Optional.ofNullable(BUILD_MANAGE_MAP.get(id)).map(buildInfoManage1 -> {
+            buildInfoManage1.cancelTask();
+            return true;
+        }).orElse(false);
     }
 
 
@@ -319,13 +348,12 @@ public class BuildExecuteService {
 
 
     @Builder
-    private static class BuildInfoManage implements Callable<Boolean> {
+    private static class BuildInfoManage implements Runnable {
 
         private final TaskData taskData;
         private final BuildExtraModule buildExtraModule;
         private final String logId;
         private final BuildExecuteService buildExecuteService;
-        private final DbBuildHistoryLogService dbBuildHistoryLogService;
         //
         private Process process;
         private LogRecorder logRecorder;
@@ -333,44 +361,38 @@ public class BuildExecuteService {
         private Thread currentThread;
 
         /**
+         * 提交任务
+         */
+        public BuildInfoManage submitTask() {
+            BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+            File logFile = BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
+            this.logRecorder = LogRecorder.builder().file(logFile).build();
+            //
+            int queueSize = threadPoolExecutor.getQueue().size();
+            logRecorder.info("当前构建中任务数：{},队列中任务数：{}", BUILD_MANAGE_MAP.size(), queueSize);
+            return this;
+        }
+
+        /**
+         * 取消任务(拒绝执行)
+         */
+        public void rejectedExecution() {
+            int queueSize = threadPoolExecutor.getQueue().size();
+            logRecorder.info("当前构建中任务数：{},队列中任务数：{}", BUILD_MANAGE_MAP.size(), queueSize);
+            logRecorder.info("构建任务等待超时或者超出最大等待数量,取消执行当前构建");
+            this.cancelTask();
+        }
+
+        /**
          * 取消任务
          */
         public void cancelTask() {
-            if (process != null) {
-                try {
-                    process.destroy();
-                } catch (Exception ignored) {
-                }
-            }
-            currentThread.interrupt();
-        }
+            Optional.ofNullable(process).ifPresent(Process::destroy);
+            Optional.ofNullable(currentThread).ifPresent(Thread::interrupt);
 
-        private List<String> antPathMatcher(File rootFile, String match) {
-            String matchStr = FileUtil.normalize(StrUtil.SLASH + match);
-            List<String> paths = new ArrayList<>();
-            //
-            FileUtil.walkFiles(rootFile.toPath(), new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    return this.test(file);
-                }
-
-                @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes exc) throws IOException {
-                    return this.test(dir);
-                }
-
-                private FileVisitResult test(Path path) {
-                    String subPath = FileUtil.subPath(FileUtil.getAbsolutePath(rootFile), path.toFile());
-                    subPath = FileUtil.normalize(StrUtil.SLASH + subPath);
-                    if (ANT_PATH_MATCHER.match(matchStr, subPath)) {
-                        paths.add(subPath);
-                        //return FileVisitResult.TERMINATE;
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-            return paths;
+            String buildId = taskData.buildInfoModel.getId();
+            buildExecuteService.updateStatus(buildId, logId, BuildStatus.Cancel);
+            BUILD_MANAGE_MAP.remove(buildId);
         }
 
         /**
@@ -395,7 +417,7 @@ public class BuildExecuteService {
             boolean copyFile = true;
             if (ANT_PATH_MATCHER.isPattern(resultDirFile)) {
                 // 通配模式
-                List<String> paths = this.antPathMatcher(this.gitFile, resultDirFile);
+                List<String> paths = FileUtils.antPathMatcher(this.gitFile, resultDirFile);
                 int size = CollUtil.size(paths);
                 if (size <= 0) {
                     logRecorder.info(resultDirFile + " 没有匹配到任何文件");
@@ -440,7 +462,7 @@ public class BuildExecuteService {
             logRecorder.info(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
             // 修改构建产物目录
             if (updateDirFile) {
-                dbBuildHistoryLogService.updateResultDirFile(this.logId, resultDirFile);
+                buildExecuteService.dbBuildHistoryLogService.updateResultDirFile(this.logId, resultDirFile);
                 //
                 buildInfoModel.setResultDirFile(resultDirFile);
                 this.buildExtraModule.setResultDirFile(resultDirFile);
@@ -455,8 +477,6 @@ public class BuildExecuteService {
          */
         private boolean startReady() {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
-            File logFile = BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
-            this.logRecorder = LogRecorder.builder().file(logFile).build();
             this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
 
             Integer delay = taskData.delay;
@@ -688,7 +708,7 @@ public class BuildExecuteService {
         }
 
         @Override
-        public Boolean call() {
+        public void run() {
             currentThread = Thread.currentThread();
             // 初始化构建流程 准备->拉取代码->执行构建命令->打包发布
             Map<String, Supplier<Boolean>> suppliers = new LinkedHashMap<>(10);
@@ -730,7 +750,7 @@ public class BuildExecuteService {
                 long allTime = SystemClock.now() - startTime;
                 logRecorder.info("构建完成 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
                 this.asyncWebHooks("success");
-                return true;
+//                return true;
             } catch (RuntimeException runtimeException) {
                 buildExecuteService.updateStatus(taskData.buildInfoModel.getId(), this.logId, BuildStatus.Error);
                 Throwable cause = runtimeException.getCause();
@@ -745,7 +765,7 @@ public class BuildExecuteService {
                 BaseServerController.removeAll();
                 this.asyncWebHooks("done");
             }
-            return false;
+//            return false;
         }
 
 //		private void log(String title, Throwable throwable) {

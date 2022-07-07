@@ -20,19 +20,37 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+import cn.hutool.core.thread.ExecutorBuilder;
 import cn.hutool.core.thread.ThreadUtil;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author bwcx_jzy
  * @since 2022/5/13
  */
-public class TestThread {
+public class TestThread implements Callable<String> {
+
+    @Test
+    public void test1() {
+        ThreadPoolExecutor build = ExecutorBuilder.create().setCorePoolSize(1)
+            .setMaxPoolSize(1)
+            .useArrayBlockingQueue(1).setHandler(new ThreadPoolExecutor.DiscardPolicy() {
+                @Override
+                public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+                    if (r instanceof FutureTask) {
+                        FutureTask<?> futureTask = (FutureTask<?>) r;
+//                        System.out.println(futureTask.);
+                    }
+                }
+            }).build();
+        for (int i = 0; i <= 2; i++) {
+            build.execute(() -> ThreadUtil.sleep(1, TimeUnit.MINUTES));
+        }
+        build.submit(this);
+    }
 
     @Test
     public void test() throws ExecutionException, InterruptedException {
@@ -51,5 +69,10 @@ public class TestThread {
         }
 
         ThreadUtil.sleep(10, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public String call() throws Exception {
+        return null;
     }
 }

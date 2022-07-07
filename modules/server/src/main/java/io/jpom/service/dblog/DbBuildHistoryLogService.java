@@ -30,7 +30,7 @@ import io.jpom.build.BuildUtil;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.h2db.BaseWorkspaceService;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.extconf.BuildExtConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -47,9 +47,12 @@ import java.io.File;
 public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryLog> {
 
     private final BuildInfoService buildService;
+    private final BuildExtConfig buildExtConfig;
 
-    public DbBuildHistoryLogService(BuildInfoService buildService) {
+    public DbBuildHistoryLogService(BuildInfoService buildService,
+                                    BuildExtConfig buildExtConfig) {
         this.buildService = buildService;
+        this.buildExtConfig = buildExtConfig;
     }
 
 //	/**
@@ -131,7 +134,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
     public void insert(BuildHistoryLog buildHistoryLog) {
         super.insert(buildHistoryLog);
         // 清理单个
-        int buildItemMaxHistoryCount = ServerExtConfigBean.getInstance().getBuildItemMaxHistoryCount();
+        int buildItemMaxHistoryCount = buildExtConfig.getItemMaxHistoryCount();
         super.autoLoopClear("startTime", buildItemMaxHistoryCount,
             entity -> entity.set("buildDataId", buildHistoryLog.getBuildDataId()),
             buildHistoryLog1 -> {
@@ -147,7 +150,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
     @Override
     protected void executeClearImpl(int count) {
         // 清理总数据
-        int buildMaxHistoryCount = ServerExtConfigBean.getInstance().getBuildMaxHistoryCount();
+        int buildMaxHistoryCount = buildExtConfig.getMaxHistoryCount();
         int saveCount = Math.min(count, buildMaxHistoryCount);
         if (saveCount <= 0) {
             // 不清除

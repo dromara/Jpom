@@ -133,9 +133,7 @@ public class BuildInfoManageController extends BaseServerController {
         }
         boolean status = buildExecuteService.cancelTask(item.getId());
         if (!status) {
-			/*BuildInfoModel buildInfoModel = new BuildInfoModel();
-			buildInfoModel.setId(id);
-			buildInfoModel.setStatus(BuildStatus.Cancel.getCode());*/
+            // 缓存中可能不存在数据,还是需要执行取消
             buildInfoService.updateStatus(id, BuildStatus.Cancel);
         }
         return JsonMessage.getString(200, "取消成功");
@@ -161,12 +159,12 @@ public class BuildInfoManageController extends BaseServerController {
         //new BuildExtraModule();
         //buildExtraModule.updateValue(buildHistoryLog);
         ReleaseManage manage = ReleaseManage.builder()
-                .buildExtraModule(buildExtraModule)
-                .logId(buildHistoryLog.getId())
-                .userModel(userModel)
-                .buildId(buildHistoryLog.getBuildNumberId())
-                .buildExecuteService(buildExecuteService)
-                .build();
+            .buildExtraModule(buildExtraModule)
+            .logId(buildHistoryLog.getId())
+            .userModel(userModel)
+            .buildId(buildHistoryLog.getBuildNumberId())
+            .buildExecuteService(buildExecuteService)
+            .build();
         //ReleaseManage releaseManage = new ReleaseManage(buildHistoryLog, userModel);
         // 标记发布中
         //releaseManage.updateStatus(BuildStatus.PubIng);

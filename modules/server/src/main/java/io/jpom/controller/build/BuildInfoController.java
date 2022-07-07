@@ -58,7 +58,7 @@ import io.jpom.service.dblog.RepositoryService;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.script.ScriptServer;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.CommandUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -89,6 +89,7 @@ public class BuildInfoController extends BaseServerController {
     private final BuildExecuteService buildExecuteService;
     private final DockerInfoService dockerInfoService;
     private final ScriptServer scriptServer;
+    private final BuildExtConfig buildExtConfig;
 
     public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
                                SshService sshService,
@@ -96,7 +97,8 @@ public class BuildInfoController extends BaseServerController {
                                RepositoryService repositoryService,
                                BuildExecuteService buildExecuteService,
                                DockerInfoService dockerInfoService,
-                               ScriptServer scriptServer) {
+                               ScriptServer scriptServer,
+                               BuildExtConfig buildExtConfig) {
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.sshService = sshService;
         this.buildInfoService = buildInfoService;
@@ -104,6 +106,7 @@ public class BuildInfoController extends BaseServerController {
         this.buildExecuteService = buildExecuteService;
         this.dockerInfoService = dockerInfoService;
         this.scriptServer = scriptServer;
+        this.buildExtConfig = buildExtConfig;
     }
 
     /**
@@ -193,7 +196,7 @@ public class BuildInfoController extends BaseServerController {
             // 验证 dsl 内容
             this.checkDocker(script);
         }
-        if (ServerExtConfigBean.getInstance().getBuildCheckDeleteCommand()) {
+        if (buildExtConfig.checkDeleteCommand()) {
             // 判断删除命令
             Assert.state(!CommandUtil.checkContainsDel(script), "不能包含删除命令");
         }
