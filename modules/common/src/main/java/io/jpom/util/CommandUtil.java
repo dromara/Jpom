@@ -92,6 +92,18 @@ public class CommandUtil {
     }
 
     /**
+     * 填充执行命令的前缀
+     *
+     * @param command 命令
+     */
+    public static void paddingPrefix(List<String> command) {
+        if (EXECUTE_PREFIX.isEmpty()) {
+            return;
+        }
+        command.add(0, CommandUtil.EXECUTE_PREFIX);
+    }
+
+    /**
      * 开启缓存执行结果
      */
     public static void openCache() {

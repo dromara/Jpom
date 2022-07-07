@@ -883,7 +883,7 @@ public class BuildExecuteService {
                 ProcessBuilder processBuilder = new ProcessBuilder();
                 List<String> command = StrUtil.splitTrim(type, StrUtil.SPACE);
                 command.add(0, script);
-                command.add(0, CommandUtil.EXECUTE_PREFIX);
+                CommandUtil.paddingPrefix(command);
                 log.debug(CollUtil.join(command, StrUtil.SPACE));
                 processBuilder.redirectErrorStream(true).command(command).directory(scriptFile.getParentFile());
                 // 环境变量
