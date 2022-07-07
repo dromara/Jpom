@@ -23,10 +23,16 @@
 package cn;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.cron.pattern.CronPatternUtil;
 import org.junit.Test;
 
 import java.time.Duration;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,7 +43,12 @@ public class TestT {
 
     @Test
     public void tset() {
-
+        List<Date> dates = CronPatternUtil
+            .matchedDates("0 0 0 1/3 * ?", DateTime.now(),
+                DateUtil.offset(DateTime.now(), DateField.YEAR, 1), 10, true);
+        for (Date date : dates) {
+            System.out.println(DateUtil.format(date, DatePattern.NORM_DATETIME_MS_PATTERN));
+        }
     }
 
     public static void main(String[] args) {

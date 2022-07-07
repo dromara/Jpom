@@ -13,8 +13,7 @@
 7. 【server】服务端脚本模版新增跨工作空间同步功能
 8. 【server】构建新增事件脚本属性,在构建环节可以执行指定脚本来实现部分功能（感谢[@沈世举](https://gitee.com/shen-shiju) [Gitee issues I5FKFM](https://gitee.com/dromara/Jpom/issues/I5FKFM) ）
 9. 【server】优化构建任务独立线程池,并且新增配置属性 `build.poolSize`、`build.poolWaitQueue` （感谢@小翼哥）
-10. 【server】修复 windows 执行脚本出现异常（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5FK0K](https://gitee.com/dromara/Jpom/issues/I5FK0K) ）
-11. 【agent】配置项目是否备份控制台日志属性独立：`log.autoBackToFile` （感谢@Vergil。）
+10. 【agent】配置项目是否备份控制台日志属性独立：`log.autoBackToFile` （感谢@Vergil。）
 
 ### 🐞 解决BUG、优化功能
 
@@ -22,6 +21,7 @@
 2. 【server】docker 加入集群无法正常使用问题
 3. 【server】项目文件备份列表不能取消弹窗（点击关闭依然执行）问题（感谢@ʟᴊx💎💎）
 4. 【server】修复编辑构建仓库切换事件重复问题 （感谢[@五六](https://gitee.com/tutu-father) [Gitee issues I5F35E](https://gitee.com/dromara/Jpom/issues/I5F35E) ）
+5. 【server】修复 windows 执行脚本出现异常（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5FK0K](https://gitee.com/dromara/Jpom/issues/I5FK0K) ）
 
 ------
 
