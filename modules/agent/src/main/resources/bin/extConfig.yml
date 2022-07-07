@@ -20,10 +20,12 @@ whitelistDirectory:
   # 白名单目录是否验证包含关系
   checkStartsWith: true
 log:
-  # 自动备份控制台日志，防止日志文件过大，目前暂只支持linux 不停服备份,配置为 none 则不备份避免占用硬盘空间
+  # 检测控制台日志周期，防止日志文件过大，目前暂只支持linux 不停服备份
   autoBackConsoleCron: 0 0/10 * * * ?
-  # 当文件多大时自动备份
+  # 控制台日志文件保留大小
   autoBackSize: 50MB
+  # 是否自动将控制台日志文件备份
+  autoBackToFile: true
   # 保存天数 配置错误或者没有，默认是7天
   saveDays: 7
   # 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况

@@ -33,6 +33,8 @@ import io.jpom.common.ServerOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Optional;
+
 /**
  * agent 端外部配置
  *
@@ -50,7 +52,7 @@ public class AgentExtConfigBean {
     public boolean whitelistDirectoryCheckStartsWith;
 
     /**
-     * 自动备份控制台日志，防止日志文件过大，目前暂只支持linux 不停服备份  如果配置none 则不自动备份 默认10分钟扫描一次
+     * 检测控制台日志周期，防止日志文件过大，目前暂只支持linux 不停服备份
      */
     @Value("${log.autoBackConsoleCron:0 0/10 * * * ?}")
     public String autoBackConsoleCron;
@@ -61,6 +63,12 @@ public class AgentExtConfigBean {
      */
     @Value("${log.autoBackSize:50MB}")
     public String autoBackSize;
+    /**
+     * 是否自动将控制台日志文件备份
+     */
+    @Value("${log.autoBackToFile:true}")
+    public Boolean autoBackToFile;
+
     /**
      * 控制台日志保存时长单位天
      */
@@ -178,8 +186,12 @@ public class AgentExtConfigBean {
      * @return 如果表达式配置为none 则不配置，重启也不备份
      */
     public boolean openLogBack() {
-        String cron = StrUtil.emptyToDefault(autoBackConsoleCron, "none");
-        return !"none".equalsIgnoreCase(cron.trim());
+        return Optional.ofNullable(autoBackToFile).orElse(true);
+//        if(autoBackToFile==null || autoBackToFile){
+//            return
+//        }
+//        String cron = StrUtil.emptyToDefault(autoBackConsoleCron, "none");
+//        return !"none".equalsIgnoreCase(cron.trim());
     }
 
     /**

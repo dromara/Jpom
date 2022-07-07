@@ -23,7 +23,6 @@
 package io.jpom;
 
 import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -197,7 +196,8 @@ public class JpomApplication extends ApplicationBuilder {
             // Waiting for method caller,For example, the interface response
             ThreadUtil.sleep(2, TimeUnit.SECONDS);
             try {
-                String command = CommandUtil.EXECUTE_PREFIX + StrUtil.SPACE + FileUtil.getAbsolutePath(scriptFile) + " restart upgrade";
+                String command = CommandUtil.generateCommand(scriptFile, "restart upgrade");
+                //CommandUtil.EXECUTE_PREFIX + StrUtil.SPACE + FileUtil.getAbsolutePath(scriptFile) + " ";
                 if (SystemUtil.getOsInfo().isWindows()) {
                     CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
                 } else {

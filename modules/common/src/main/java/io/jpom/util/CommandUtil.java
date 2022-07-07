@@ -59,7 +59,7 @@ public class CommandUtil {
     /**
      * 执行前缀
      */
-    public static final String EXECUTE_PREFIX;
+    private static final String EXECUTE_PREFIX;
     /**
      * 是否缓存执行结果
      */
@@ -101,6 +101,16 @@ public class CommandUtil {
             return;
         }
         command.add(0, CommandUtil.EXECUTE_PREFIX);
+    }
+
+    public static String generateCommand(File file, String args) {
+        String path = FileUtil.getAbsolutePath(file);
+        return generateCommand(path, args);
+    }
+
+    public static String generateCommand(String file, String args) {
+        return StrUtil.format("{} {} {}", CommandUtil.EXECUTE_PREFIX, file, args);
+        //String command = CommandUtil.EXECUTE_PREFIX + StrUtil.SPACE + FileUtil.getAbsolutePath(scriptFile) + " restart upgrade";
     }
 
     /**
