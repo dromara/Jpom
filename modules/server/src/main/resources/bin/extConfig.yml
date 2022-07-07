@@ -82,6 +82,10 @@ build:
   itemMaxHistoryCount: 50
   # 构建命令是否检查 存在删除命令
   checkDeleteCommand: true
+  # 构建线程池大小,小于 1 则为不限制，默认大小为 5
+  poolSize: 5
+  # 构建任务等待数量，超过此数量将取消构建任务，值最小为 1
+  poolWaitQueue: 10
 ssh:
   # ssh 执行命令的 默认加载的环境变量
   initEnv: source /etc/profile && source ~/.bash_profile && source ~/.bashrc

@@ -33,8 +33,14 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.util.AntPathMatcher;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,6 +51,8 @@ import java.util.stream.Collectors;
  * @since 2019/4/28
  */
 public class FileUtils {
+
+    private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
     private static JSONObject fileToJson(File file) {
         JSONObject jsonObject = new JSONObject(6);
@@ -213,5 +221,34 @@ public class FileUtils {
             map.putAll(envMap);
         }
         return map;
+    }
+
+
+    public static List<String> antPathMatcher(File rootFile, String match) {
+        String matchStr = FileUtil.normalize(StrUtil.SLASH + match);
+        List<String> paths = new ArrayList<>();
+        //
+        FileUtil.walkFiles(rootFile.toPath(), new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                return this.test(file);
+            }
+
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes exc) throws IOException {
+                return this.test(dir);
+            }
+
+            private FileVisitResult test(Path path) {
+                String subPath = FileUtil.subPath(FileUtil.getAbsolutePath(rootFile), path.toFile());
+                subPath = FileUtil.normalize(StrUtil.SLASH + subPath);
+                if (ANT_PATH_MATCHER.match(matchStr, subPath)) {
+                    paths.add(subPath);
+                    //return FileVisitResult.TERMINATE;
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        return paths;
     }
 }
