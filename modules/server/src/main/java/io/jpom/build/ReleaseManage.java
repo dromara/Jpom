@@ -332,7 +332,8 @@ public class ReleaseManage implements Runnable {
             FileUtil.writeUtf8String(stringBuilder.toString(), commandFile);
             //
             //			command = SystemUtil.getOsInfo().isWindows() ? StrUtil.EMPTY : CommandUtil.SUFFIX;
-            command = CommandUtil.EXECUTE_PREFIX + StrUtil.SPACE + FileUtil.getAbsolutePath(commandFile);
+            command = CommandUtil.generateCommand(commandFile, "");
+            //CommandUtil.EXECUTE_PREFIX + StrUtil.SPACE + FileUtil.getAbsolutePath(commandFile);
             String result = CommandUtil.execSystemCommand(command);
             logRecorder.info(result);
         } catch (Exception e) {
