@@ -78,7 +78,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         processBuilder = new ProcessBuilder();
         List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
         command.add(0, script);
-        command.add(0, CommandUtil.EXECUTE_PREFIX);
+        CommandUtil.paddingPrefix(command);
         log.debug(CollUtil.join(command, StrUtil.SPACE));
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
