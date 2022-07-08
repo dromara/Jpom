@@ -470,6 +470,9 @@ export default {
                 message: res.msg,
               });
               this.loadData();
+              if (actionKey === "remove") {
+                this.expandedRowKeys = this.expandedRowKeys.filter((item2) => item2 !== record.id);
+              }
             }
           });
         },
