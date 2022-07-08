@@ -140,7 +140,7 @@ public class BuildExecuteService {
         ExecutorBuilder executorBuilder = ExecutorBuilder.create();
         int poolSize = buildExtConfig.getPoolSize();
         if (poolSize > 0) {
-            executorBuilder.setCorePoolSize(0).setMaxPoolSize(poolSize);
+            executorBuilder.setCorePoolSize(poolSize).setMaxPoolSize(poolSize);
         }
         executorBuilder.useArrayBlockingQueue(Math.max(buildExtConfig.getPoolWaitQueue(), 1));
         executorBuilder.setHandler(new ThreadPoolExecutor.DiscardPolicy() {
@@ -359,17 +359,24 @@ public class BuildExecuteService {
         private LogRecorder logRecorder;
         private File gitFile;
         private Thread currentThread;
+        /**
+         * 提交任务时间
+         */
+        private Long submitTaskTime;
 
         /**
          * 提交任务
          */
         public BuildInfoManage submitTask() {
+            submitTaskTime = SystemClock.now();
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             File logFile = BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
             this.logRecorder = LogRecorder.builder().file(logFile).build();
             //
             int queueSize = threadPoolExecutor.getQueue().size();
-            logRecorder.info("当前构建中任务数：{},队列中任务数：{}", BUILD_MANAGE_MAP.size(), queueSize);
+            int size = BUILD_MANAGE_MAP.size();
+            logRecorder.info("当前构建中任务数：{},队列中任务数：{} {}", size, queueSize,
+                size > buildExecuteService.buildExtConfig.getPoolSize() ? "构建任务开始进入队列等待...." : StrUtil.EMPTY);
             return this;
         }
 
@@ -378,8 +385,7 @@ public class BuildExecuteService {
          */
         public void rejectedExecution() {
             int queueSize = threadPoolExecutor.getQueue().size();
-            logRecorder.info("当前构建中任务数：{},队列中任务数：{}", BUILD_MANAGE_MAP.size(), queueSize);
-            logRecorder.info("构建任务等待超时或者超出最大等待数量,取消执行当前构建");
+            logRecorder.info("当前构建中任务数：{},队列中任务数：{} 构建任务等待超时或者超出最大等待数量,取消执行当前构建", BUILD_MANAGE_MAP.size(), queueSize);
             this.cancelTask();
         }
 
@@ -710,6 +716,7 @@ public class BuildExecuteService {
         @Override
         public void run() {
             currentThread = Thread.currentThread();
+            logRecorder.info("开始执行构建任务,任务等待时间：{}", DateUtil.formatBetween(SystemClock.now() - submitTaskTime));
             // 初始化构建流程 准备->拉取代码->执行构建命令->打包发布
             Map<String, Supplier<Boolean>> suppliers = new LinkedHashMap<>(10);
             suppliers.put("startReady", BuildInfoManage.this::startReady);
@@ -762,8 +769,8 @@ public class BuildExecuteService {
                 this.asyncWebHooks(processName, "error", e.getMessage());
             } finally {
                 BUILD_MANAGE_MAP.remove(taskData.buildInfoModel.getId());
-                BaseServerController.removeAll();
                 this.asyncWebHooks("done");
+                BaseServerController.removeAll();
             }
 //            return false;
         }
@@ -888,8 +895,12 @@ public class BuildExecuteService {
                 processBuilder.redirectErrorStream(true).command(command).directory(scriptFile.getParentFile());
                 // 环境变量
                 Map<String, String> environment = processBuilder.environment();
-                for (Map.Entry<String, Object> stringObjectEntry : map.entrySet()) {
-                    environment.put(stringObjectEntry.getKey(), StrUtil.toStringOrNull(stringObjectEntry.getValue()));
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    Object value = entry.getValue();
+                    if (value == null) {
+                        continue;
+                    }
+                    environment.put(entry.getKey(), StrUtil.toStringOrNull(value));
                 }
                 Process process = processBuilder.start();
                 //
