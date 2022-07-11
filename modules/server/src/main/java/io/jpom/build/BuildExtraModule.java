@@ -120,6 +120,11 @@ public class BuildExtraModule extends BaseModel {
      */
     private String noticeScriptId;
 
+    /**
+     * 是否执行推送到仓库中
+     */
+    private Boolean pushToRepository;
+
     public String getResultDirFile() {
         if (resultDirFile == null) {
             return null;

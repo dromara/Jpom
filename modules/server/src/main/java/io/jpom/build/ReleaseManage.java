@@ -260,6 +260,22 @@ public class ReleaseManage implements Runnable {
             for (DockerInfoModel infoModel : dockerInfoModels) {
                 this.doDockerImage(infoModel, dockerfile, baseDir, dockerTag);
             }
+            // 推送
+            Boolean pushToRepository = this.buildExtraModule.getPushToRepository();
+            if (pushToRepository != null && pushToRepository) {
+                logRecorder.info("start push to repository in({}),{}", dockerInfoModel.getName(), StrUtil.emptyToDefault(dockerInfoModel.getRegistryUrl(), StrUtil.EMPTY));
+                Map<String, Object> map = dockerInfoModel.toParameter();
+                //
+                map.put("repository", dockerTag);
+                Consumer<String> logConsumer = s -> logRecorder.info(s);
+                map.put("logConsumer", logConsumer);
+                IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+                try {
+                    plugin.execute("pushImage", map);
+                } catch (Exception e) {
+                    logRecorder.error("调用容器异常", e);
+                }
+            }
             // 发布 docker 服务
             this.updateSwarmService(dockerTag, this.buildExtraModule.getDockerSwarmId(), this.buildExtraModule.getDockerSwarmServiceName());
         } finally {

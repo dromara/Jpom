@@ -116,6 +116,9 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
                 return this.inspectContainerCmd(parameter);
             case "updateContainer":
                 return this.updateContainerCmd(parameter);
+            case "pushImage":
+                this.pushImageCmd(parameter);
+                return null;
             default:
                 throw new IllegalArgumentException("不支持的类型");
         }
@@ -304,7 +307,23 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         InspectImageCmd inspectImageCmd = dockerClient.inspectImageCmd(imageId);
         InspectImageResponse inspectImageResponse = inspectImageCmd.exec();
         return (JSONObject) JSONObject.toJSON(inspectImageResponse);
+    }
 
+    private void pushImageCmd(Map<String, Object> parameter) {
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
+        String repository = (String) parameter.get("repository");
+        try {
+            dockerClient.pushImageCmd(repository).exec(new InvocationBuilder.AsyncResultCallback<PushResponseItem>() {
+                @Override
+                public void onNext(PushResponseItem object) {
+                    String responseItem = DockerUtil.parseResponseItem(object);
+                    logConsumer.accept(responseItem);
+                }
+            }).awaitCompletion();
+        } catch (InterruptedException e) {
+            logConsumer.accept("push image 被中断:" + e);
+        }
     }
 
     private void buildImageCmd(Map<String, Object> parameter) {

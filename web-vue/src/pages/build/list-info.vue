@@ -526,6 +526,16 @@
                     <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
                   </a-select>
                 </a-form-model-item>
+                <a-form-model-item prop="pushToRepository" :label="` `" :colon="false">
+                  <a-row>
+                    <a-col :span="5" style="text-align: right">
+                      <a-space>
+                        <a-tooltip> 推送到仓库 </a-tooltip>
+                        <a-switch v-model="tempExtraData.pushToRepository" checked-children="是" un-checked-children="否" />
+                      </a-space>
+                    </a-col>
+                  </a-row>
+                </a-form-model-item>
                 <a-form-model-item prop="dockerSwarmServiceName" v-if="tempExtraData.dockerSwarmId">
                   <template slot="label">
                     集群服务
