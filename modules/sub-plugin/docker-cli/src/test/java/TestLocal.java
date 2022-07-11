@@ -20,7 +20,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -150,7 +149,9 @@ public class TestLocal {
     @Test
     public void testPull() throws InterruptedException {
         PullImageCmd imageCmd = dockerClient.pullImageCmd("registry.cn-shanghai.aliyuncs.com/jpom-demo/jpomtestdocker:1.0");
-        AuthResponse authResponse = dockerClient.authCmd().withAuthConfig(authConfig).exec();
+        AuthResponse authResponse = dockerClient.authCmd()
+            //.withAuthConfig(authConfig)
+            .exec();
         imageCmd.withAuthConfig(authConfig);
         imageCmd.exec(new InvocationBuilder.AsyncResultCallback<PullResponseItem>() {
             @Override
@@ -160,6 +161,11 @@ public class TestLocal {
             }
 
         }).awaitCompletion();
+
+    }
+
+    @Test
+    public void testConfig() {
 
     }
 }

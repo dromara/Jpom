@@ -144,7 +144,7 @@ public class DockerSwarmServiceController extends BaseServerController {
 			try {
 				plugin.execute(StrUtil.equalsIgnoreCase(type, "service") ? "logService" : "logTask", parameter);
 			} catch (Exception e) {
-				logRecorder.error("拉取异常", e);
+				logRecorder.error("拉取日志异常", e);
 			}
 			logRecorder.info("pull end");
 		});
