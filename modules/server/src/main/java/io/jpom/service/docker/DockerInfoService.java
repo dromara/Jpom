@@ -71,6 +71,11 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
     }
 
     @Override
+    protected void fillSelectResult(DockerInfoModel data) {
+        //data.setRegistryPassword(null);
+    }
+
+    @Override
     public void startLoad() {
         CronUtils.add(CRON_ID, "0 0/1 * * * ?", () -> DockerInfoService.this);
         //

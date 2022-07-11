@@ -24,7 +24,6 @@ package io.jpom;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.unit.DataSize;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.EnumUtil;
@@ -116,7 +115,7 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
     }
 
     private void logServiceCmd(Map<String, Object> parameter, String id, String type) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
+        DockerClient dockerClient = DockerUtil.get(parameter);
         Consumer<String> consumer = (Consumer<String>) parameter.get("consumer");
         try {
 
@@ -144,8 +143,6 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
                 }).awaitCompletion();
         } catch (InterruptedException e) {
             consumer.accept("获取容器日志被中断:" + e);
-        } finally {
-            IoUtil.close(dockerClient);
         }
     }
 
@@ -161,29 +158,27 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
     }
 
     public void updateServiceImage(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            String serviceId = (String) parameter.get("serviceId");
-            String image = (String) parameter.get("image");
-            //
-            InspectServiceCmd inspectServiceCmd = dockerClient.inspectServiceCmd(serviceId);
-            Service service = inspectServiceCmd.exec();
-            ServiceSpec spec = service.getSpec();
-            Assert.notNull(spec, "服务信息不完整不能操作");
-            TaskSpec taskTemplate = spec.getTaskTemplate();
-            Assert.notNull(taskTemplate, "服务信息不完整不能操作：-1");
-            ContainerSpec templateContainerSpec = taskTemplate.getContainerSpec();
-            Assert.notNull(templateContainerSpec, "服务信息不完整不能操作：-2");
-            templateContainerSpec.withImage(image);
-            //
-            UpdateServiceCmd updateServiceCmd = dockerClient.updateServiceCmd(serviceId, spec);
-            ResourceVersion version = service.getVersion();
-            Assert.notNull(version, "服务信息不完整不能操作：-3");
-            updateServiceCmd.withVersion(version.getIndex());
-            updateServiceCmd.exec();
-        } finally {
-            IoUtil.close(dockerClient);
-        }
+        DockerClient dockerClient = DockerUtil.get(parameter);
+
+        String serviceId = (String) parameter.get("serviceId");
+        String image = (String) parameter.get("image");
+        //
+        InspectServiceCmd inspectServiceCmd = dockerClient.inspectServiceCmd(serviceId);
+        Service service = inspectServiceCmd.exec();
+        ServiceSpec spec = service.getSpec();
+        Assert.notNull(spec, "服务信息不完整不能操作");
+        TaskSpec taskTemplate = spec.getTaskTemplate();
+        Assert.notNull(taskTemplate, "服务信息不完整不能操作：-1");
+        ContainerSpec templateContainerSpec = taskTemplate.getContainerSpec();
+        Assert.notNull(templateContainerSpec, "服务信息不完整不能操作：-2");
+        templateContainerSpec.withImage(image);
+        //
+        UpdateServiceCmd updateServiceCmd = dockerClient.updateServiceCmd(serviceId, spec);
+        ResourceVersion version = service.getVersion();
+        Assert.notNull(version, "服务信息不完整不能操作：-3");
+        updateServiceCmd.withVersion(version.getIndex());
+        updateServiceCmd.exec();
+
     }
 
     /**
@@ -192,75 +187,72 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
      * @param parameter 测试
      */
     public void updateServiceCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            String serviceId = (String) parameter.get("serviceId");
-            ServiceSpec serviceSpec = this.intServiceSpec(dockerClient, serviceId);
-            String name = (String) parameter.get("name");
-            serviceSpec.withName(name);
-            {
-                String mode = (String) parameter.get("mode");
-                ServiceMode serviceMode = EnumUtil.fromString(ServiceMode.class, mode);
-                ServiceModeConfig serviceModeConfig = new ServiceModeConfig();
-                if (serviceMode == ServiceMode.GLOBAL) {
-                    serviceModeConfig.withGlobal(new ServiceGlobalModeOptions());
-                } else if (serviceMode == ServiceMode.REPLICATED) {
-                    Object replicas = parameter.get("replicas");
-                    ServiceReplicatedModeOptions serviceReplicatedModeOptions = new ServiceReplicatedModeOptions();
-                    serviceReplicatedModeOptions.withReplicas(Convert.toInt(replicas, 1));
-                    serviceModeConfig.withReplicated(serviceReplicatedModeOptions);
-                }
-                serviceSpec.withMode(serviceModeConfig);
-            }
-            {
-                TaskSpec taskSpec = ObjectUtil.defaultIfNull(serviceSpec.getTaskTemplate(), new TaskSpec());
-                //
-                ContainerSpec containerSpec = this.buildContainerSpec(parameter, taskSpec.getContainerSpec());
-                taskSpec.withContainerSpec(containerSpec);
-                //
-                Map<String, Map<String, Object>> resources = (Map<String, Map<String, Object>>) parameter.get("resources");
+        DockerClient dockerClient = DockerUtil.get(parameter);
 
-                if (MapUtil.isNotEmpty(resources)) {
-                    ResourceRequirements resourceRequirements = new ResourceRequirements();
-                    ResourceSpecs limitsResourceSpecs = this.buildResourceSpecs(resources.get("limits"));
-                    if (limitsResourceSpecs != null) {
-                        resourceRequirements.withLimits(limitsResourceSpecs);
-                    }
-                    ResourceSpecs reservationsResourceSpecs = this.buildResourceSpecs(resources.get("reservations"));
-                    if (reservationsResourceSpecs != null) {
-                        resourceRequirements.withReservations(reservationsResourceSpecs);
-                    }
-                    if (ObjectUtil.isAllEmpty(resourceRequirements.getLimits(), resourceRequirements.getReservations())) {
-                        taskSpec.withResources(null);
-                    } else {
-                        taskSpec.withResources(resourceRequirements);
-                    }
+        String serviceId = (String) parameter.get("serviceId");
+        ServiceSpec serviceSpec = this.intServiceSpec(dockerClient, serviceId);
+        String name = (String) parameter.get("name");
+        serviceSpec.withName(name);
+        {
+            String mode = (String) parameter.get("mode");
+            ServiceMode serviceMode = EnumUtil.fromString(ServiceMode.class, mode);
+            ServiceModeConfig serviceModeConfig = new ServiceModeConfig();
+            if (serviceMode == ServiceMode.GLOBAL) {
+                serviceModeConfig.withGlobal(new ServiceGlobalModeOptions());
+            } else if (serviceMode == ServiceMode.REPLICATED) {
+                Object replicas = parameter.get("replicas");
+                ServiceReplicatedModeOptions serviceReplicatedModeOptions = new ServiceReplicatedModeOptions();
+                serviceReplicatedModeOptions.withReplicas(Convert.toInt(replicas, 1));
+                serviceModeConfig.withReplicated(serviceReplicatedModeOptions);
+            }
+            serviceSpec.withMode(serviceModeConfig);
+        }
+        {
+            TaskSpec taskSpec = ObjectUtil.defaultIfNull(serviceSpec.getTaskTemplate(), new TaskSpec());
+            //
+            ContainerSpec containerSpec = this.buildContainerSpec(parameter, taskSpec.getContainerSpec());
+            taskSpec.withContainerSpec(containerSpec);
+            //
+            Map<String, Map<String, Object>> resources = (Map<String, Map<String, Object>>) parameter.get("resources");
+
+            if (MapUtil.isNotEmpty(resources)) {
+                ResourceRequirements resourceRequirements = new ResourceRequirements();
+                ResourceSpecs limitsResourceSpecs = this.buildResourceSpecs(resources.get("limits"));
+                if (limitsResourceSpecs != null) {
+                    resourceRequirements.withLimits(limitsResourceSpecs);
                 }
-                serviceSpec.withTaskTemplate(taskSpec);
+                ResourceSpecs reservationsResourceSpecs = this.buildResourceSpecs(resources.get("reservations"));
+                if (reservationsResourceSpecs != null) {
+                    resourceRequirements.withReservations(reservationsResourceSpecs);
+                }
+                if (ObjectUtil.isAllEmpty(resourceRequirements.getLimits(), resourceRequirements.getReservations())) {
+                    taskSpec.withResources(null);
+                } else {
+                    taskSpec.withResources(resourceRequirements);
+                }
             }
-            {
-                EndpointSpec endpointSpec = this.buildEndpointSpec(parameter);
-                serviceSpec.withEndpointSpec(endpointSpec);
-            }
-            {
-                Map<String, Object> update = (Map<String, Object>) parameter.get("update");
-                UpdateConfig updateConfig = this.buildUpdateConfig(update);
-                serviceSpec.withUpdateConfig(updateConfig);
-                Map<String, Object> rollback = (Map<String, Object>) parameter.get("rollback");
-                UpdateConfig rollbackConfig = this.buildUpdateConfig(rollback);
-                serviceSpec.withRollbackConfig(rollbackConfig);
-            }
-            String version = (String) parameter.get("version");
-            if (StrUtil.isNotEmpty(serviceId)) {
-                UpdateServiceCmd updateServiceCmd = dockerClient.updateServiceCmd(serviceId, serviceSpec);
-                updateServiceCmd.withVersion(Convert.toLong(version, 0L));
-                updateServiceCmd.exec();
-            } else {
-                CreateServiceCmd createServiceCmd = dockerClient.createServiceCmd(serviceSpec);
-                createServiceCmd.exec();
-            }
-        } finally {
-            IoUtil.close(dockerClient);
+            serviceSpec.withTaskTemplate(taskSpec);
+        }
+        {
+            EndpointSpec endpointSpec = this.buildEndpointSpec(parameter);
+            serviceSpec.withEndpointSpec(endpointSpec);
+        }
+        {
+            Map<String, Object> update = (Map<String, Object>) parameter.get("update");
+            UpdateConfig updateConfig = this.buildUpdateConfig(update);
+            serviceSpec.withUpdateConfig(updateConfig);
+            Map<String, Object> rollback = (Map<String, Object>) parameter.get("rollback");
+            UpdateConfig rollbackConfig = this.buildUpdateConfig(rollback);
+            serviceSpec.withRollbackConfig(rollbackConfig);
+        }
+        String version = (String) parameter.get("version");
+        if (StrUtil.isNotEmpty(serviceId)) {
+            UpdateServiceCmd updateServiceCmd = dockerClient.updateServiceCmd(serviceId, serviceSpec);
+            updateServiceCmd.withVersion(Convert.toLong(version, 0L));
+            updateServiceCmd.exec();
+        } else {
+            CreateServiceCmd createServiceCmd = dockerClient.createServiceCmd(serviceSpec);
+            createServiceCmd.exec();
         }
     }
 
@@ -420,125 +412,107 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 
 
     public void removeServiceCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            String serviceId = (String) parameter.get("serviceId");
-            RemoveServiceCmd removeServiceCmd = dockerClient.removeServiceCmd(serviceId);
-            removeServiceCmd.exec();
-        } finally {
-            IoUtil.close(dockerClient);
-        }
+        DockerClient dockerClient = DockerUtil.get(parameter);
+
+        String serviceId = (String) parameter.get("serviceId");
+        RemoveServiceCmd removeServiceCmd = dockerClient.removeServiceCmd(serviceId);
+        removeServiceCmd.exec();
     }
 
     private List<JSONObject> listTasksCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            ListTasksCmd listTasksCmd = dockerClient.listTasksCmd();
-            String serviceId = (String) parameter.get("serviceId");
-            String id = (String) parameter.get("id");
-            if (StrUtil.isNotEmpty(serviceId)) {
-                listTasksCmd.withServiceFilter(serviceId);
-            }
-            if (StrUtil.isNotEmpty(id)) {
-                listTasksCmd.withIdFilter(id);
-            }
-            String name = (String) parameter.get("name");
-            if (StrUtil.isNotEmpty(name)) {
-                listTasksCmd.withNameFilter(name);
-            }
-            String node = (String) parameter.get("node");
-            if (StrUtil.isNotEmpty(node)) {
-                listTasksCmd.withNodeFilter(node);
-            }
-            String state = (String) parameter.get("state");
-            if (StrUtil.isNotEmpty(state)) {
-                TaskState taskState = EnumUtil.fromString(TaskState.class, state);
-                listTasksCmd.withStateFilter(taskState);
-            }
-            List<Task> exec = listTasksCmd.exec();
-            return exec.stream().map(swarmNode -> (JSONObject) JSONObject.toJSON(swarmNode)).collect(Collectors.toList());
-        } finally {
-            IoUtil.close(dockerClient);
+        DockerClient dockerClient = DockerUtil.get(parameter);
+
+        ListTasksCmd listTasksCmd = dockerClient.listTasksCmd();
+        String serviceId = (String) parameter.get("serviceId");
+        String id = (String) parameter.get("id");
+        if (StrUtil.isNotEmpty(serviceId)) {
+            listTasksCmd.withServiceFilter(serviceId);
         }
+        if (StrUtil.isNotEmpty(id)) {
+            listTasksCmd.withIdFilter(id);
+        }
+        String name = (String) parameter.get("name");
+        if (StrUtil.isNotEmpty(name)) {
+            listTasksCmd.withNameFilter(name);
+        }
+        String node = (String) parameter.get("node");
+        if (StrUtil.isNotEmpty(node)) {
+            listTasksCmd.withNodeFilter(node);
+        }
+        String state = (String) parameter.get("state");
+        if (StrUtil.isNotEmpty(state)) {
+            TaskState taskState = EnumUtil.fromString(TaskState.class, state);
+            listTasksCmd.withStateFilter(taskState);
+        }
+        List<Task> exec = listTasksCmd.exec();
+        return exec.stream().map(swarmNode -> (JSONObject) JSONObject.toJSON(swarmNode)).collect(Collectors.toList());
     }
 
     public List<JSONObject> listServicesCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            ListServicesCmd listServicesCmd = dockerClient.listServicesCmd();
-            String id = (String) parameter.get("id");
-            String name = (String) parameter.get("name");
-            if (StrUtil.isNotEmpty(id)) {
-                listServicesCmd.withIdFilter(CollUtil.newArrayList(id));
-            }
-            if (StrUtil.isNotEmpty(name)) {
-                listServicesCmd.withNameFilter(CollUtil.newArrayList(name));
-            }
-            List<Service> exec = listServicesCmd.exec();
-            return exec.stream().map(swarmNode -> (JSONObject) JSONObject.toJSON(swarmNode)).collect(Collectors.toList());
-        } finally {
-            IoUtil.close(dockerClient);
+        DockerClient dockerClient = DockerUtil.get(parameter);
+
+        ListServicesCmd listServicesCmd = dockerClient.listServicesCmd();
+        String id = (String) parameter.get("id");
+        String name = (String) parameter.get("name");
+        if (StrUtil.isNotEmpty(id)) {
+            listServicesCmd.withIdFilter(CollUtil.newArrayList(id));
         }
+        if (StrUtil.isNotEmpty(name)) {
+            listServicesCmd.withNameFilter(CollUtil.newArrayList(name));
+        }
+        List<Service> exec = listServicesCmd.exec();
+        return exec.stream().map(swarmNode -> (JSONObject) JSONObject.toJSON(swarmNode)).collect(Collectors.toList());
     }
 
     private void removeSwarmNodeCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            DockerCmdExecFactory dockerCmdExecFactory = (DockerCmdExecFactory) ReflectUtil.getFieldValue(dockerClient, "dockerCmdExecFactory");
-            Assert.notNull(dockerCmdExecFactory, "当前方法不被支持，暂时不能使用");
-            String nodeId = (String) parameter.get("nodeId");
-            RemoveSwarmNodeCmdImpl removeSwarmNodeCmd = new RemoveSwarmNodeCmdImpl(
-                dockerCmdExecFactory.removeSwarmNodeCmdExec(), nodeId);
-            removeSwarmNodeCmd.withForce(true);
-            removeSwarmNodeCmd.exec();
-        } finally {
-            IoUtil.close(dockerClient);
-        }
+        DockerClient dockerClient = DockerUtil.get(parameter);
+
+        DockerCmdExecFactory dockerCmdExecFactory = (DockerCmdExecFactory) ReflectUtil.getFieldValue(dockerClient, "dockerCmdExecFactory");
+        Assert.notNull(dockerCmdExecFactory, "当前方法不被支持，暂时不能使用");
+        String nodeId = (String) parameter.get("nodeId");
+        RemoveSwarmNodeCmdImpl removeSwarmNodeCmd = new RemoveSwarmNodeCmdImpl(
+            dockerCmdExecFactory.removeSwarmNodeCmdExec(), nodeId);
+        removeSwarmNodeCmd.withForce(true);
+        removeSwarmNodeCmd.exec();
     }
 
     private void updateSwarmNodeCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            String nodeId = (String) parameter.get("nodeId");
-            List<SwarmNode> nodes = dockerClient.listSwarmNodesCmd()
-                .withIdFilter(CollUtil.newArrayList(nodeId)).exec();
-            SwarmNode swarmNode = CollUtil.getFirst(nodes);
-            Assert.notNull(swarmNode, "没有对应的节点");
-            ObjectVersion version = swarmNode.getVersion();
-            Assert.notNull(version, "对应的节点信息不完整不能继续");
-            //
-            String availabilityStr = (String) parameter.get("availability");
-            String roleStr = (String) parameter.get("role");
-            //
-            SwarmNodeAvailability availability = EnumUtil.fromString(SwarmNodeAvailability.class, availabilityStr);
-            SwarmNodeRole role = EnumUtil.fromString(SwarmNodeRole.class, roleStr);
-            UpdateSwarmNodeCmd swarmNodeCmd = dockerClient.updateSwarmNodeCmd();
-            swarmNodeCmd.withSwarmNodeId(nodeId);
-            SwarmNodeSpec swarmNodeSpec = new SwarmNodeSpec();
-            swarmNodeSpec.withAvailability(availability);
-            swarmNodeSpec.withRole(role);
-            swarmNodeCmd.withSwarmNodeSpec(swarmNodeSpec);
-            swarmNodeCmd.withVersion(version.getIndex());
-            swarmNodeCmd.exec();
-        } finally {
-            IoUtil.close(dockerClient);
-        }
+        DockerClient dockerClient = DockerUtil.get(parameter);
+
+        String nodeId = (String) parameter.get("nodeId");
+        List<SwarmNode> nodes = dockerClient.listSwarmNodesCmd()
+            .withIdFilter(CollUtil.newArrayList(nodeId)).exec();
+        SwarmNode swarmNode = CollUtil.getFirst(nodes);
+        Assert.notNull(swarmNode, "没有对应的节点");
+        ObjectVersion version = swarmNode.getVersion();
+        Assert.notNull(version, "对应的节点信息不完整不能继续");
+        //
+        String availabilityStr = (String) parameter.get("availability");
+        String roleStr = (String) parameter.get("role");
+        //
+        SwarmNodeAvailability availability = EnumUtil.fromString(SwarmNodeAvailability.class, availabilityStr);
+        SwarmNodeRole role = EnumUtil.fromString(SwarmNodeRole.class, roleStr);
+        UpdateSwarmNodeCmd swarmNodeCmd = dockerClient.updateSwarmNodeCmd();
+        swarmNodeCmd.withSwarmNodeId(nodeId);
+        SwarmNodeSpec swarmNodeSpec = new SwarmNodeSpec();
+        swarmNodeSpec.withAvailability(availability);
+        swarmNodeSpec.withRole(role);
+        swarmNodeCmd.withSwarmNodeSpec(swarmNodeSpec);
+        swarmNodeCmd.withVersion(version.getIndex());
+        swarmNodeCmd.exec();
     }
 
 
     private void leaveSwarmCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            Object forceStr = parameter.get("force");
-            boolean force = Convert.toBool(forceStr, false);
-            LeaveSwarmCmd leaveSwarmCmd = dockerClient.leaveSwarmCmd();
-            if (force) {
-                leaveSwarmCmd.withForceEnabled(true);
-            }
-            leaveSwarmCmd.exec();
-        } finally {
-            IoUtil.close(dockerClient);
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        Object forceStr = parameter.get("force");
+        boolean force = Convert.toBool(forceStr, false);
+        LeaveSwarmCmd leaveSwarmCmd = dockerClient.leaveSwarmCmd();
+        if (force) {
+            leaveSwarmCmd.withForceEnabled(true);
         }
+        leaveSwarmCmd.exec();
+
     }
 
 
@@ -553,79 +527,67 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 //	}
 
     private List<JSONObject> listSwarmNodesCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            ListSwarmNodesCmd listSwarmNodesCmd = dockerClient.listSwarmNodesCmd();
-            String id = (String) parameter.get("id");
-            if (StrUtil.isNotEmpty(id)) {
-                listSwarmNodesCmd.withIdFilter(StrUtil.splitTrim(id, StrUtil.COMMA));
-            }
-            String role = (String) parameter.get("role");
-            if (StrUtil.isNotEmpty(role)) {
-                listSwarmNodesCmd.withRoleFilter(StrUtil.splitTrim(role, StrUtil.COMMA));
-            }
-            String name = (String) parameter.get("name");
-            if (StrUtil.isNotEmpty(name)) {
-                listSwarmNodesCmd.withNameFilter(StrUtil.splitTrim(name, StrUtil.COMMA));
-            }
-            List<SwarmNode> exec = listSwarmNodesCmd.exec();
-            return exec.stream().map(swarmNode -> {
-                JSONObject jsonObject = (JSONObject) JSONObject.toJSON(swarmNode);
-                jsonObject.remove("rawValues");
-                return jsonObject;
-            }).collect(Collectors.toList());
-        } finally {
-            IoUtil.close(dockerClient);
+        DockerClient dockerClient = DockerUtil.get(parameter);
+
+        ListSwarmNodesCmd listSwarmNodesCmd = dockerClient.listSwarmNodesCmd();
+        String id = (String) parameter.get("id");
+        if (StrUtil.isNotEmpty(id)) {
+            listSwarmNodesCmd.withIdFilter(StrUtil.splitTrim(id, StrUtil.COMMA));
         }
+        String role = (String) parameter.get("role");
+        if (StrUtil.isNotEmpty(role)) {
+            listSwarmNodesCmd.withRoleFilter(StrUtil.splitTrim(role, StrUtil.COMMA));
+        }
+        String name = (String) parameter.get("name");
+        if (StrUtil.isNotEmpty(name)) {
+            listSwarmNodesCmd.withNameFilter(StrUtil.splitTrim(name, StrUtil.COMMA));
+        }
+        List<SwarmNode> exec = listSwarmNodesCmd.exec();
+        return exec.stream().map(swarmNode -> {
+            JSONObject jsonObject = (JSONObject) JSONObject.toJSON(swarmNode);
+            jsonObject.remove("rawValues");
+            return jsonObject;
+        }).collect(Collectors.toList());
     }
 
 
     private void joinSwarmCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            String token = (String) parameter.get("token");
-            String remoteAddrs = (String) parameter.get("remoteAddrs");
-            JoinSwarmCmd joinSwarmCmd = dockerClient.joinSwarmCmd()
-                .withRemoteAddrs(StrUtil.splitTrim(remoteAddrs, StrUtil.COMMA))
-                .withJoinToken(token);
-            joinSwarmCmd.exec();
-        } finally {
-            IoUtil.close(dockerClient);
-        }
+        DockerClient dockerClient = DockerUtil.get(parameter);
+
+        String token = (String) parameter.get("token");
+        String remoteAddrs = (String) parameter.get("remoteAddrs");
+        JoinSwarmCmd joinSwarmCmd = dockerClient.joinSwarmCmd()
+            .withRemoteAddrs(StrUtil.splitTrim(remoteAddrs, StrUtil.COMMA))
+            .withJoinToken(token);
+        joinSwarmCmd.exec();
+
     }
 
     private JSONObject tryInitializeSwarmCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        // 先尝试获取
         try {
-            // 先尝试获取
-            try {
-                Swarm exec = dockerClient.inspectSwarmCmd().exec();
-                JSONObject jsonObject = (JSONObject) JSONObject.toJSON(exec);
-                if (jsonObject != null) {
-                    return jsonObject;
-                }
-            } catch (Exception ignored) {
-                //
-            }
-            // 尝试初始化
-            SwarmSpec swarmSpec = new SwarmSpec();
-            swarmSpec.withName("default");
-            dockerClient.initializeSwarmCmd(swarmSpec).exec();
-            // 获取信息
             Swarm exec = dockerClient.inspectSwarmCmd().exec();
-            return (JSONObject) JSONObject.toJSON(exec);
-        } finally {
-            IoUtil.close(dockerClient);
+            JSONObject jsonObject = (JSONObject) JSONObject.toJSON(exec);
+            if (jsonObject != null) {
+                return jsonObject;
+            }
+        } catch (Exception ignored) {
+            //
         }
+        // 尝试初始化
+        SwarmSpec swarmSpec = new SwarmSpec();
+        swarmSpec.withName("default");
+        dockerClient.initializeSwarmCmd(swarmSpec).exec();
+        // 获取信息
+        Swarm exec = dockerClient.inspectSwarmCmd().exec();
+        return (JSONObject) JSONObject.toJSON(exec);
     }
 
     private JSONObject inSpectSwarmCmd(Map<String, Object> parameter) {
-        DockerClient dockerClient = DockerUtil.build(parameter);
-        try {
-            Swarm exec = dockerClient.inspectSwarmCmd().exec();
-            return (JSONObject) JSONObject.toJSON(exec);
-        } finally {
-            IoUtil.close(dockerClient);
-        }
+        DockerClient dockerClient = DockerUtil.get(parameter);
+
+        Swarm exec = dockerClient.inspectSwarmCmd().exec();
+        return (JSONObject) JSONObject.toJSON(exec);
     }
 }

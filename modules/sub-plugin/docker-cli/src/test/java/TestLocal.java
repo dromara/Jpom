@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -29,15 +30,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
-import com.github.dockerjava.api.model.Statistics;
-import com.github.dockerjava.api.model.UpdateContainerResponse;
-import com.github.dockerjava.api.model.Version;
+import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.core.InvocationBuilder;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
+import io.jpom.DockerUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TestLocal {
     private DockerClient dockerClient;
+    private AuthConfig authConfig;
 
     @Before
     public void init() {
@@ -62,7 +63,8 @@ public class TestLocal {
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
             // .withDockerHost("tcp://192.168.163.11:2376").build();
 //				.withApiVersion()
-            .withDockerHost("tcp://127.0.0.1:2375").build();
+//            .withDockerHost("tcp://127.0.0.1:2375")
+            .build();
 
         DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
             .dockerHost(config.getDockerHost())
@@ -72,6 +74,13 @@ public class TestLocal {
 //				.responseTimeout(Duration.ofSeconds(45))
             .build();
         this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
+
+        //
+        authConfig = new AuthConfig();
+        authConfig.withRegistryAddress("registry.cn-shanghai.aliyuncs.com");
+        authConfig.withEmail("bwcx_jzy@163.com111");
+        authConfig.withPassword("xxx");
+        authConfig.withUsername("bwcx_jzy@163.com");
     }
 
     @Test
@@ -112,7 +121,7 @@ public class TestLocal {
     }
 
     @Test
-    public void testSize(){
+    public void testSize() {
         System.out.println(DataSizeUtil.parse("-1"));
         System.out.println(DataSizeUtil.parse("0"));
     }
@@ -122,5 +131,35 @@ public class TestLocal {
         InspectContainerCmd socat = dockerClient.inspectContainerCmd("socat").withSize(true);
         InspectContainerResponse exec = socat.exec();
         System.out.println(JSONObject.toJSONString(exec.getHostConfig(), SerializerFeature.PrettyFormat));
+    }
+
+    @Test
+    public void testAuth() {
+        AuthConfig authConfig = dockerClient.authConfig();
+        System.out.println(authConfig);
+
+        //
+        // Info exec = dockerClient.infoCmd().exec();
+        //System.out.println(JSONObject.toJSONString(exec));
+        //
+
+        AuthResponse authResponse = dockerClient.authCmd().withAuthConfig(authConfig).exec();
+        System.out.println(authResponse);
+    }
+
+    @Test
+    public void testPull() throws InterruptedException {
+        PullImageCmd imageCmd = dockerClient.pullImageCmd("registry.cn-shanghai.aliyuncs.com/jpom-demo/jpomtestdocker:1.0");
+        AuthResponse authResponse = dockerClient.authCmd().withAuthConfig(authConfig).exec();
+        imageCmd.withAuthConfig(authConfig);
+        imageCmd.exec(new InvocationBuilder.AsyncResultCallback<PullResponseItem>() {
+            @Override
+            public void onNext(PullResponseItem object) {
+                String responseItem = DockerUtil.parseResponseItem(object);
+                System.out.println(responseItem);
+            }
+
+        }).awaitCompletion();
+
     }
 }

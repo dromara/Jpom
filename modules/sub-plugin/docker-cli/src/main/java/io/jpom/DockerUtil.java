@@ -24,111 +24,77 @@ package io.jpom;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.Resource;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.AuthConfig;
+import com.github.dockerjava.api.model.AuthResponse;
 import com.github.dockerjava.api.model.ResponseItem;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author bwcx_jzy
  * @since 2022/1/26
  */
+@Slf4j
 public class DockerUtil {
 
-    public static DockerClient build(Map<String, Object> parameter) {
-        return build(parameter, 1);
-    }
+    private static final Map<String, DockerClient> DOCKER_CLIENT_MAP = new ConcurrentHashMap<>();
 
-//	/**
-//	 * 构建 docker client 对象
-//	 *
-//	 * @param parameter      参数
-//	 * @param maxConnections 连接数
-//	 * @return DockerClient
-//	 */
-//	public static DockerCmdExecFactory buildJersey(Map<String, Object> parameter, int maxConnections) {
-//		JerseyDockerCmdExecFactory jerseyDockerCmdExecFactory = new JerseyDockerCmdExecFactory();
-//		int timeout = Convert.toInt(parameter.get("timeout"), 0);
-//		if (timeout > 0) {
-//			jerseyDockerCmdExecFactory.withConnectTimeout((int) TimeUnit.SECONDS.toMillis(timeout));
-//			jerseyDockerCmdExecFactory.withReadTimeout((int) TimeUnit.SECONDS.toMillis(timeout));
-//			jerseyDockerCmdExecFactory.withConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(timeout));
-//		}
-//
-//		String host = (String) parameter.get("dockerHost");
-//		String apiVersion = (String) parameter.get("apiVersion");
-//		String dockerCertPath = (String) parameter.get("dockerCertPath");
-//		//
-//
-//
-//		JerseyDockerHttpClient.Builder builder =new JerseyDockerHttpClient.Builder();
-//
-//
-//		DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-//				.withDockerTlsVerify(StrUtil.isNotEmpty(dockerCertPath))
-//				.withApiVersion(apiVersion)
-//				.withDockerCertPath(dockerCertPath)
-//				.withDockerHost(host).build();
-//
-//		builder.dockerHost(config.getDockerHost());
-//		builder.sslConfig(config.getSSLConfig());
-//		JerseyDockerHttpClient dockerHttpClient = builder.build();
-////		dockerHttpClient.execute()
-//
-//
-//		//
-//		jerseyDockerCmdExecFactory.withMaxTotalConnections(maxConnections);
-//		jerseyDockerCmdExecFactory.init(config);
-//		return jerseyDockerCmdExecFactory.getDockerCmdExecFactory();
-//
-//		//
-////		ApacheDockerHttpClient.Builder builder = new ApacheDockerHttpClient.Builder()
-////				.dockerHost(config.getDockerHost())
-////				.sslConfig(config.getSSLConfig())
-////				.maxConnections(maxConnections);
-////		//
-////		int timeout = Convert.toInt(parameter.get("timeout"), 0);
-////		if (timeout > 0) {
-////			builder.connectionTimeout(Duration.ofSeconds(timeout));
-////			builder.responseTimeout(Duration.ofSeconds(timeout));
-////		}
-////		ApacheDockerHttpClient httpClient = builder.build();
-////		return DockerClientImpl.getInstance(config, httpClient);
-//	}
+    public static DockerClient get(Map<String, Object> parameter) {
+        String host = (String) parameter.get("dockerHost");
+        String dockerCertPath = (String) parameter.get("dockerCertPath");
+        String key = StrUtil.format("{}-{}", host, StrUtil.emptyToDefault(dockerCertPath, StrUtil.EMPTY));
+        if (parameter.containsKey("closeBefore")) {
+            //  关闭之前的连接
+            DockerClient dockerClient = DOCKER_CLIENT_MAP.remove(key);
+            IoUtil.close(dockerClient);
+        }
+        return DOCKER_CLIENT_MAP.computeIfAbsent(key, s -> create(parameter));
+    }
 
     /**
      * 构建 docker client 对象
      *
-     * @param parameter      参数
-     * @param maxConnections 连接数
+     * @param parameter 参数
      * @return DockerClient
      */
-    public static DockerClient build(Map<String, Object> parameter, int maxConnections) {
+    private static DockerClient create(Map<String, Object> parameter) {
         String host = (String) parameter.get("dockerHost");
         String apiVersion = (String) parameter.get("apiVersion");
         String dockerCertPath = (String) parameter.get("dockerCertPath");
+        String registryUsername = (String) parameter.get("registryUsername");
+        String registryPassword = (String) parameter.get("registryPassword");
+        String registryEmail = (String) parameter.get("registryEmail");
+        String registryUrl = (String) parameter.get("registryUrl");
         //
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withDockerTlsVerify(StrUtil.isNotEmpty(dockerCertPath))
-                .withApiVersion(apiVersion)
-                .withDockerCertPath(dockerCertPath)
-                .withDockerHost(host).build();
+            .withDockerTlsVerify(StrUtil.isNotEmpty(dockerCertPath))
+            .withApiVersion(apiVersion)
+            .withDockerCertPath(dockerCertPath)
+            .withDockerHost(host)
+            .withRegistryUrl(registryUrl).withRegistryEmail(registryEmail)
+            .withRegistryUsername(registryUsername).withRegistryPassword(StrUtil.emptyToDefault(registryPassword, StrUtil.EMPTY))
+            .build();
         //
         ApacheDockerHttpClient.Builder builder = new ApacheDockerHttpClient.Builder()
-                .dockerHost(config.getDockerHost())
-                .sslConfig(config.getSSLConfig())
-                .maxConnections(maxConnections);
+            .dockerHost(config.getDockerHost())
+            .sslConfig(config.getSSLConfig())
+            .maxConnections(100);
         //
         int timeout = Convert.toInt(parameter.get("timeout"), 0);
         if (timeout > 0) {
@@ -136,7 +102,13 @@ public class DockerUtil {
             builder.responseTimeout(Duration.ofSeconds(timeout));
         }
         ApacheDockerHttpClient httpClient = builder.build();
-        return DockerClientImpl.getInstance(config, httpClient);
+        DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient);
+        if (StrUtil.isNotEmpty(registryUrl)) {
+            AuthConfig authConfig = dockerClient.authConfig();
+            AuthResponse authResponse = dockerClient.authCmd().withAuthConfig(authConfig).exec();
+            log.debug("auth cmd:{}", JSONObject.toJSONString(authResponse));
+        }
+        return dockerClient;
     }
 
     /**
