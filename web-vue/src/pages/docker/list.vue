@@ -120,7 +120,16 @@
             </a-col>
             <a-col :span="16" v-if="temp.tlsVerify">
               证书文件:
-              <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.zip'">
+              <a-upload
+                :file-list="uploadFileList"
+                :remove="
+                  () => {
+                    uploadFileList = [];
+                  }
+                "
+                :before-upload="beforeUpload"
+                :accept="'.zip'"
+              >
                 <a-button><a-icon type="upload" />选择文件</a-button>
               </a-upload>
             </a-col>
@@ -162,6 +171,23 @@
             <a-tag v-if="!temp.tagsArray || temp.tagsArray.length < 10" style="background: #fff; borderstyle: dashed" @click="showInput"> <a-icon type="plus" /> 添加 </a-tag>
           </template>
         </a-form-model-item>
+
+        <a-collapse>
+          <a-collapse-panel key="1" header="其他配置">
+            <a-form-model-item label="仓库地址" prop="registryUrl">
+              <a-input v-model="temp.registryUrl" placeholder="仓库地址" />
+            </a-form-model-item>
+            <a-form-model-item label="仓库账号" prop="registryUsername">
+              <a-input v-model="temp.registryUsername" placeholder="仓库账号" />
+            </a-form-model-item>
+            <a-form-model-item label="仓库密码" prop="registryPassword">
+              <a-input-password v-model="temp.registryPassword" placeholder="仓库密码" />
+            </a-form-model-item>
+            <a-form-model-item label="账号邮箱" prop="registryEmail">
+              <a-input v-model="temp.registryEmail" placeholder="账号邮箱" />
+            </a-form-model-item>
+          </a-collapse-panel>
+        </a-collapse>
       </a-form-model>
     </a-modal>
     <!-- 创建集群 -->
@@ -352,12 +378,12 @@ export default {
       //.tags = (this.temp.tagsArray || []).join(",");
       this.$refs["editForm"]?.resetFields();
     },
-    handleRemove() {
-      // const index = this.uploadFileList.indexOf(file);
-      // const newFileList = this.uploadFileList.slice();
-      // newFileList.splice(index, 1);
-      this.uploadFileList = [];
-    },
+    // handleRemove() {
+    //   // const index = this.uploadFileList.indexOf(file);
+    //   // const newFileList = this.uploadFileList.slice();
+    //   // newFileList.splice(index, 1);
+    //   this.uploadFileList = [];
+    // },
     beforeUpload(file) {
       this.uploadFileList = [...this.uploadFileList, file];
       return false;

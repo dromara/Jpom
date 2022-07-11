@@ -52,6 +52,17 @@ ALTER TABLE DOCKER_INFO
 ALTER TABLE DOCKER_INFO
 	ADD IF NOT EXISTS swarmNodeId VARCHAR(50) comment '集群 节点ID';
 
+ALTER TABLE DOCKER_INFO
+    ADD IF NOT EXISTS registryUsername VARCHAR(255) comment '仓库账号';
+ALTER TABLE DOCKER_INFO
+    ADD IF NOT EXISTS registryPassword VARCHAR(255) comment '仓库密码';
+ALTER TABLE DOCKER_INFO
+    ADD IF NOT EXISTS registryEmail VARCHAR(255) comment '仓库邮箱';
+ALTER TABLE DOCKER_INFO
+    ADD IF NOT EXISTS registryUrl VARCHAR(255) comment '仓库地址';
+
+-- registryUsername, registryPassword, registryEmail, registryUrl
+
 -- docker swarm
 CREATE TABLE IF NOT EXISTS PUBLIC.DOCKER_SWARM_INFO
 (

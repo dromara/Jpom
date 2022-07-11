@@ -23,11 +23,13 @@
 package io.jpom;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.PingCmd;
+import com.github.dockerjava.api.model.AuthConfig;
+import com.github.dockerjava.api.model.AuthResponse;
 import com.github.dockerjava.api.model.Info;
 import com.github.dockerjava.api.model.Version;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -42,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
@@ -62,7 +65,7 @@ import java.util.stream.Collectors;
 public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
 
     @Override
-    public Object execute(Object main, Map<String, Object> parameter) {
+    public Object execute(Object main, Map<String, Object> parameter) throws IOException {
         String type = main.toString();
         switch (type) {
             case "certPath":
@@ -77,20 +80,32 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
                 return this.infoCmd(parameter);
             case "testLocal":
                 return this.testLocal();
+            case "testAuth":
+                return this.auth(parameter);
             default:
                 break;
         }
         return null;
     }
 
-    private String testLocal() {
+    private JSONObject auth(Map<String, Object> parameter) {
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        AuthConfig authConfig = dockerClient.authConfig();
+        AuthResponse exec = dockerClient.authCmd().withAuthConfig(authConfig).exec();
+        return (JSONObject) JSONObject.toJSON(exec);
+    }
+
+    private String testLocal() throws IOException {
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
         URI dockerHost = config.getDockerHost();
         String host = dockerHost.toString();
-        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
-                .dockerHost(dockerHost).connectionTimeout(Duration.ofSeconds(3)).build();
-        DockerClientImpl.getInstance(config, httpClient).pingCmd().exec();
-        return host;
+        try (DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+            .dockerHost(dockerHost).connectionTimeout(Duration.ofSeconds(3)).build()) {
+            try (PingCmd pingCmd = DockerClientImpl.getInstance(config, httpClient).pingCmd()) {
+                pingCmd.exec();
+                return host;
+            }
+        }
     }
 
     /**
@@ -101,13 +116,9 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
      */
     private JSONObject infoCmd(Map<String, Object> parameter) {
         parameter.putIfAbsent("timeout", 5);
-        DockerClient dockerClient = DockerUtil.build(parameter, 1);
-        try {
-            Info exec = dockerClient.infoCmd().exec();
-            return (JSONObject) JSONObject.toJSON(exec);
-        } finally {
-            IoUtil.close(dockerClient);
-        }
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        Info exec = dockerClient.infoCmd().exec();
+        return (JSONObject) JSONObject.toJSON(exec);
     }
 
     /**
@@ -118,12 +129,9 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
      */
     private Version pullVersion(Map<String, Object> parameter) {
         parameter.putIfAbsent("timeout", 5);
-        DockerClient dockerClient = DockerUtil.build(parameter, 1);
-        try {
-            return dockerClient.versionCmd().exec();
-        } finally {
-            IoUtil.close(dockerClient);
-        }
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        return dockerClient.versionCmd().exec();
+
     }
 
     /**
@@ -133,17 +141,14 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
      * @return true 可以通讯
      */
     private boolean checkPing(Map<String, Object> parameter) {
-        DockerClient dockerClient = null;
         try {
             parameter.putIfAbsent("timeout", 5);
-            dockerClient = DockerUtil.build(parameter, 1);
+            DockerClient dockerClient = DockerUtil.get(parameter);
             dockerClient.pingCmd().exec();
             return true;
         } catch (Exception e) {
             log.warn("检查 docker url 异常 {}", e.getMessage());
             return false;
-        } finally {
-            IoUtil.close(dockerClient);
         }
     }
 
@@ -179,27 +184,27 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
     private List<JSONObject> getApiVersions() {
         Field[] fields = ReflectUtil.getFields(RemoteApiVersion.class);
         return Arrays.stream(fields)
-                .map(field -> {
-                    boolean aFinal = Modifier.isFinal(field.getModifiers());
-                    boolean aStatic = Modifier.isStatic(field.getModifiers());
-                    boolean aPublic = Modifier.isPublic(field.getModifiers());
-                    if (!aFinal || !aStatic || !aPublic) {
-                        return null;
-                    }
-                    Object fieldValue = ReflectUtil.getFieldValue(null, field);
-                    if (fieldValue instanceof RemoteApiVersion) {
-                        return (RemoteApiVersion) fieldValue;
-                    }
+            .map(field -> {
+                boolean aFinal = Modifier.isFinal(field.getModifiers());
+                boolean aStatic = Modifier.isStatic(field.getModifiers());
+                boolean aPublic = Modifier.isPublic(field.getModifiers());
+                if (!aFinal || !aStatic || !aPublic) {
                     return null;
-                })
-                .filter(apiVersion -> apiVersion != null && apiVersion != RemoteApiVersion.UNKNOWN_VERSION)
-                .sorted((o1, o2) -> StrUtil.compareVersion(o2.getVersion(), o1.getVersion())).map(apiVersion -> {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("webVersion", apiVersion.asWebPathPart());
-                    jsonObject.put("version", apiVersion.getVersion());
-                    return jsonObject;
-                })
-                .collect(Collectors.toList());
+                }
+                Object fieldValue = ReflectUtil.getFieldValue(null, field);
+                if (fieldValue instanceof RemoteApiVersion) {
+                    return (RemoteApiVersion) fieldValue;
+                }
+                return null;
+            })
+            .filter(apiVersion -> apiVersion != null && apiVersion != RemoteApiVersion.UNKNOWN_VERSION)
+            .sorted((o1, o2) -> StrUtil.compareVersion(o2.getVersion(), o1.getVersion())).map(apiVersion -> {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("webVersion", apiVersion.asWebPathPart());
+                jsonObject.put("version", apiVersion.getVersion());
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
     }
 
     /**
