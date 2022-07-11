@@ -25,7 +25,6 @@ package io.jpom;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
@@ -477,6 +476,6 @@ public class DockerBuild implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        IoUtil.close(dockerClient);
+
     }
 }

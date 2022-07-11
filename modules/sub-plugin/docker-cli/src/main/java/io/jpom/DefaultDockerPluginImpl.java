@@ -233,8 +233,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 
         Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
         String repository = (String) parameter.get("repository");
-        AuthConfig authConfig = dockerClient.authConfig();
-        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(repository).withAuthConfig(authConfig);
+        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(repository);
         pullImageCmd.exec(new InvocationBuilder.AsyncResultCallback<PullResponseItem>() {
             @Override
             public void onNext(PullResponseItem object) {

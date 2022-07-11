@@ -178,7 +178,6 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
         Assert.notNull(version, "服务信息不完整不能操作：-3");
         updateServiceCmd.withVersion(version.getIndex());
         updateServiceCmd.exec();
-
     }
 
     /**
@@ -251,7 +250,7 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
             updateServiceCmd.withVersion(Convert.toLong(version, 0L));
             updateServiceCmd.exec();
         } else {
-            CreateServiceCmd createServiceCmd = dockerClient.createServiceCmd(serviceSpec);
+            CreateServiceCmd createServiceCmd = dockerClient.createServiceCmd(serviceSpec).withAuthConfig(dockerClient.authConfig());
             createServiceCmd.exec();
         }
     }
@@ -522,7 +521,7 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
 //			LeaveSwarmCmd leaveSwarmCmd = dockerClient.leaveSwarmCmd();
 //			leaveSwarmCmd.withForceEnabled(true)
 //		} finally {
-//			IoUtil.close(dockerClient);
+//
 //		}
 //	}
 
