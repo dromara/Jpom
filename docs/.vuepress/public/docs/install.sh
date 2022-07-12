@@ -132,15 +132,25 @@ fi
 
 # 判断
 if [[ -z "${JPOM_TYPE}" ]] ; then
-    TYPE="Server";
+    JPOM_TYPE="Server";
 fi
-echo "开始安装：${JPOM_TYPE}"
+
+versions="";
+temp_result=$(echo ${JPOM_TYPE} | grep "-")
+if [[ "${temp_result}" != "" ]] ; then
+    JPOM_TYPE=`echo "${temp_result}"|awk -F '-' '{print $1}'`
+    versions=`echo "${temp_result}"|awk -F '-' '{print $2}'`
+fi
+echo "开始安装：${JPOM_TYPE}  ${versions}"
 # 判断是否在文件
 if [[ ! -f "${JPOM_TYPE}.zip" ]]; then
   # 转小写
   url_type=`echo ${JPOM_TYPE} | tr 'A-Z' 'a-z'`
-  # 获取最新的版本号
-  versions=`curl -LfsS https://jpom-docs.keepbx.cn/docs/versions.tag`
+
+  if [[ -z "${versions}" ]] ; then
+    # 获取最新的版本号
+    versions=`curl -LfsS https://jpom-docs.keepbx.cn/docs/versions.tag`
+  fi
   download_url="https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/${url_type}-${versions}-release.zip"
   wget -O ${JPOM_TYPE}.zip ${download_url}
 fi
