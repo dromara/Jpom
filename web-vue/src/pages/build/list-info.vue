@@ -227,7 +227,14 @@
               </a-row>
             </a-form-model-item>
 
-            <a-form-model-item v-if="temp.buildMode === 0" label="构建命令" prop="script">
+            <a-form-model-item v-if="temp.buildMode === 0" prop="script">
+              <template slot="label">
+                构建命令
+                <a-tooltip v-show="!temp.id">
+                  <template slot="title"> 这里构建命令最终会在服务器上执行。 如果有多行命令那么将<b>逐行执行</b>，如果想要切换路径后执行命令则需要 <b>cd xxx && mvn clean package</b></template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
               <a-popover title="命令示例">
                 <template slot="content">
                   <p
