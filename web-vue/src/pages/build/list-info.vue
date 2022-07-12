@@ -259,7 +259,7 @@
             <a-form-model-item v-if="temp.buildMode === 1" prop="script">
               <template slot="label">
                 DSL 内容
-                <a-tooltip v-show="temp.type !== 'edit'">
+                <a-tooltip v-show="!temp.id">
                   <template slot="title">
                     <p>以 yaml/yml 格式配置</p>
                     <ul>
@@ -894,7 +894,7 @@
 <script>
 import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
-import {getRepositoryListAll} from "@/api/repository";
+import { getRepositoryListAll } from "@/api/repository";
 import {
   buildModeMap,
   clearBuid,
@@ -910,15 +910,15 @@ import {
   statusMap,
   stopBuild,
 } from "@/api/build-info";
-import {afterOptList, afterOptListSimple, getDishPatchListAll} from "@/api/dispatch";
-import {getNodeListAll, getProjectListAll} from "@/api/node";
-import {getSshListAll} from "@/api/ssh";
-import {itemGroupBy, parseTime} from "@/utils/time";
+import { afterOptList, afterOptListSimple, getDishPatchListAll } from "@/api/dispatch";
+import { getNodeListAll, getProjectListAll } from "@/api/node";
+import { getSshListAll } from "@/api/ssh";
+import { itemGroupBy, parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import Vue from "vue";
-import {dockerSwarmListAll, dockerSwarmServicesList} from "@/api/docker-swarm";
-import {getScriptListAll} from "@/api/server-script";
+import { dockerSwarmListAll, dockerSwarmServicesList } from "@/api/docker-swarm";
+import { getScriptListAll } from "@/api/server-script";
 
 export default {
   components: {
