@@ -124,43 +124,43 @@ postList: none
 ## 🤝 dromara 组织项目
 <span style="width: 150px;flex:1;text-align: left">
     <a href="https://hutool.cn/" target="_blank">
-        <img :src="$withBase('/images/friends/hutool-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/hutool-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="hutool">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="http://sa-token.dev33.cn/" target="_blank">
-        <img :src="$withBase('/images/friends/satoken-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/satoken-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="satoken">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="https://www.maxkey.top/" target="_blank">
-        <img :src="$withBase('/images/friends/maxkey.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/maxkey.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="maxkey">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="https://liteflow.yomahub.com/" target="_blank">
-        <img :src="$withBase('/images/friends/liteflow-logo.png')" class="no-zoom" style="height:40px;max-width:170px;margin: 10px;">
+        <img :src="$withBase('/images/friends/liteflow-logo.png')" class="no-zoom" style="height:40px;max-width:170px;margin: 10px;" alt="liteflow">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="https://tlog.yomahub.com/" target="_blank">
-        <img :src="$withBase('/images/friends/tlog-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/tlog-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="tlog">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="https://forest.dtflyx.com/" target="_blank">
-        <img :src="$withBase('/images/friends/forest-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/forest-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="forest">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="https://easy-es.cn/" target="_blank">
-        <img :src="$withBase('/images/friends/easy-es.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/easy-es.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="easy-es">
     </a>
 </span>
 
 ## 🧲友情链接
 <span style="width: 150px;text-align: left">
     <a href="https://shop108037867.taobao.com" target="_blank">
-        <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="yuanlaiyishe">
     </a>
 </span>
