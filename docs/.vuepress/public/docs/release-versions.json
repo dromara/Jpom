@@ -1,7 +1,7 @@
 {
     "url": "https://dromara.gitee.io/jpom/docs/versions.json",
-    "tag_name": "v2.9.3",
-    "agentUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/agent-2.9.3-release.zip",
-    "serverUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/server-2.9.3-release.zip",
+    "tag_name": "v2.9.4",
+    "agentUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/agent-2.9.4-release.zip",
+    "serverUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/server-2.9.4-release.zip",
     "changelogUrl": "https://gitee.com/dromara/Jpom/raw/master/CHANGELOG.md"
 }
