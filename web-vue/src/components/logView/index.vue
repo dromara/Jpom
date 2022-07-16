@@ -3,7 +3,7 @@
     <div class="log-filter">
       <template>
         <a-row type="flex">
-          <a-col :span="18">
+          <a-col :span="18" style="width: 650px;">
             <a-space>
               <slot name="before"></slot>
               <a-tooltip title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
@@ -34,8 +34,11 @@
               </a-tooltip>
             </a-space>
           </a-col>
-          <a-col v-if="this.extendBar" :span="6" style="text-align: right">
+          <a-col v-if="this.extendBar" :span="6" style="width: 295px;text-align: right">
             <a-space>
+              <a-tooltip title="内容超过边界自动换行">
+                <a-switch v-model="temp.wordBreak" checked-children="自动换行" un-checked-children="不换行" />
+              </a-tooltip>
               <a-tooltip title="有新内容后是否自动滚动到底部">
                 <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" />
               </a-tooltip>
@@ -133,6 +136,8 @@ export default {
         logShowLine: 500,
         tempLogShowLine: 500,
         searchValue: "",
+        // 自动换行
+        wordBreak: false,
       },
       defLogShowLine: 500,
       // defId: "logScrollArea",
