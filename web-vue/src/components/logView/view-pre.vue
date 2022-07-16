@@ -1,5 +1,6 @@
 <template>
-  <pre class="log-view" :id="`${this.domId}`" :style="`height:${this.height}`">{{ defText }}</pre>
+  <div v-if="wordBreak" class="log-view" :id="`${this.domId}`" :style="`height:${this.height}`">{{ defText }}</div>
+  <pre v-else class="log-view" :id="`${this.domId}`" :style="`height:${this.height}`">{{ defText }}</pre>
 </template>
 
 <script>
@@ -36,6 +37,12 @@ export default {
       defText: "loading context...",
       domId: "",
     };
+  },
+  computed: {
+    wordBreak() { 
+      this.changeBuffer();
+      return this.config.wordBreak || false;
+    }
   },
   mounted() {
     this.domId = this.id + new Date().getTime();
