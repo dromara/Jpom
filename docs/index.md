@@ -117,7 +117,7 @@ postList: none
 
 ## 🍭架构图
 
-<img :src="$withBase('/images/jpom-func-arch.jpg')" style="zoom: 120%">
+<img :src="$withBase('/images/jpom-func-arch.jpg')" style="zoom: 120%" alt="jpom-func-arch">
 
 <br/>
 
