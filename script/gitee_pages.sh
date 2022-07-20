@@ -85,7 +85,7 @@ gitee_pages_deploy() {
 
   gitee_url="https://gitee.com/api/v5/repos/$Le_Deploy_gitee_owner_id/$Le_Deploy_gitee_repo_id/pages"
 
-  _response=$(_post "$body" "$gitee_url" 0 PUT | _dbase64 "multiline")
+  _response=$(_post "$body" "$gitee_url" 0 PUT | _dbase64)
 
   error_response="error"
 
@@ -96,6 +96,21 @@ gitee_pages_deploy() {
   fi
 
   _debug response "$_response"
+
+  body="access_token=$Le_Deploy_gitee_token"
+  gitee_url="https://gitee.com/api/v5/repos/$Le_Deploy_gitee_owner_id/$Le_Deploy_gitee_repo_id/pages/builds"
+
+  _response=$(_post "$body" "$gitee_url" 0 POST | _dbase64)
+
+  error_response="error"
+
+  if test "${_response#*$error_response}" != "$_response"; then
+    _err "Error in deploying builds certificate:"
+    _err "$_response"
+    return 1
+  fi
+  _debug response "$_response"
+
   _info "Certificate successfully deployed"
 
   return 0
