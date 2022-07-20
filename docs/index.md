@@ -164,3 +164,10 @@ postList: none
         <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="yuanlaiyishe">
     </a>
 </span>
+
+
+<div class="wwads-cn wwads-horizontal" style="max-width:350px;"> <link rel="stylesheet" href="https://wwads.cn/css/wwads.css">
+<a href="https://wwads.cn?aff_id=217" class="wwads-img" target="_blank" rel="nofollow">
+<img src="https://wwads.cn/images/placeholder/wwads-friendly-ads.png" width="130" ></a>
+<div class="wwads-content"><a href="https://wwads.cn?aff_id=217" class="wwads-text" target="_blank" rel="nofollow" >B2B Advertising Made Easy —— 我们帮助 to B 企业轻松投放更精准 & 友好的广告</a>
+<a href="https://wwads.cn?aff_id=217" class="wwads-poweredby" title="万维广告——让广告交易像网购一样简单" target="_blank" rel="nofollow"><span>万维</span><span>广告</span></a> </div></div>
