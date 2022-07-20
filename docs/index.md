@@ -157,6 +157,16 @@ postList: none
         <img :src="$withBase('/images/friends/easy-es.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="easy-es">
     </a>
 </span>
+<span style="width: 150px;text-align: left">
+    <a href="https://su.usthe.com/" target="_blank">
+        <img :src="$withBase('/images/friends/hor-brand128.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="hor-brand128">
+    </a>
+</span>
+<span style="width: 150px;text-align: left">
+    <a href="https://hertzbeat.com/" target="_blank">
+        <img :src="$withBase('/images/friends/hertzbeat_brand.jpg')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="hertzbeat">
+    </a>
+</span>
 
 ## 🧲友情链接
 <span style="width: 150px;text-align: left">
