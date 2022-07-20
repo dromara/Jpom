@@ -20,11 +20,13 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+import cn.hutool.core.lang.Filter;
 import cn.hutool.core.net.NetUtil;
 import org.junit.Test;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.LinkedHashSet;
 
 /**
@@ -33,26 +35,33 @@ import java.util.LinkedHashSet;
  */
 public class TestIp {
 
-	@Test
-	public void test() {
-		System.out.println(NetUtil.getLocalhostStr());
+    @Test
+    public void test() {
+        System.out.println(NetUtil.getLocalhostStr());
 //		System.out.println(NetUtil.getLocalhost().getHostAddress());
-		System.out.println("------");
-		final LinkedHashSet<InetAddress> localAddressList = NetUtil.localAddressList(address -> {
-			// 非loopback地址，指127.*.*.*的地址
-			return !address.isLoopbackAddress()
-					// 需为IPV4地址
-					&& address instanceof Inet4Address;
-		});
-		for (InetAddress inetAddress : localAddressList) {
-			System.out.println(inetAddress.getHostAddress());
-			//System.out.println(((Inet4Address) inetAddress).toString());
-			//System.out.println("-");
-		}
-	}
+        System.out.println("------");
+        final LinkedHashSet<InetAddress> localAddressList = NetUtil.localAddressList(new Filter<NetworkInterface>() {
+            @Override
+            public boolean accept(NetworkInterface networkInterface) {
+                System.out.println(networkInterface.isVirtual());
+                System.out.println(networkInterface.getIndex());
+                return true;
+            }
+        }, address -> {
+            // 非loopback地址，指127.*.*.*的地址
+            return !address.isLoopbackAddress()
+                // 需为IPV4地址
+                && address instanceof Inet4Address;
+        });
+        for (InetAddress inetAddress : localAddressList) {
+            System.out.println(inetAddress.getHostAddress());
+            //System.out.println(((Inet4Address) inetAddress).toString());
+            //System.out.println("-");
+        }
+    }
 
-	@Test
-	public void test1() {
+    @Test
+    public void test1() {
 
-	}
+    }
 }
