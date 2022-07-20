@@ -174,6 +174,12 @@ postList: none
         <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="yuanlaiyishe">
     </a>
 </span>
+<span style="width: 150px;text-align: left">
+    <a href="https://weihongbin.com/" target="_blank">
+        <img :src="$withBase('/images/friends/ss.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="weihongbin">
+    </a>
+</span>
+
 
 
 <div class="wwads-cn wwads-horizontal" style="max-width:350px;"> <link rel="stylesheet" href="https://wwads.cn/css/wwads.css">
