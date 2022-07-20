@@ -223,8 +223,8 @@ public class RepositoryController extends BaseServerController {
      * <p>
      * https://docs.gitlab.com/ee/api/projects.html#list-all-projects
      *
-     * @param token 个人令牌
-     * @param page  分页
+     * @param token         个人令牌
+     * @param page          分页
      * @param gitlabAddress gitLab 地址
      * @return page
      */
@@ -499,7 +499,7 @@ public class RepositoryController extends BaseServerController {
          */
         private static String getGiteeUsername(String token) {
             // 参考：https://gitee.com/api/v5/swagger#/getV5User
-            HttpResponse userResponse = HttpUtil.createGet(GITEE_API_URL_PREFIX + "/user")
+            HttpResponse userResponse = HttpUtil.createGet(GITEE_API_URL_PREFIX + "/user", true)
                 .form(ACCESS_TOKEN, token)
                 .execute();
             Assert.state(userResponse.isOk(), "令牌不正确：" + userResponse.body());
@@ -511,12 +511,12 @@ public class RepositoryController extends BaseServerController {
          * 获取 Gitee 用户仓库信息
          *
          * @param token 用户授权码
-         * @param page 分页参数
+         * @param page  分页参数
          * @return
          */
         private static Map<String, Object> getGiteeRepos(String token, Page page, String condition) {
             // 参考：https://gitee.com/api/v5/swagger#/getV5UserRepos
-            HttpResponse reposResponse = HttpUtil.createGet(GITEE_API_URL_PREFIX + "/user/repos")
+            HttpResponse reposResponse = HttpUtil.createGet(GITEE_API_URL_PREFIX + "/user/repos", true)
                 .form(ACCESS_TOKEN, token)
                 .form(SORT, "pushed")
                 .form(PAGE, page.getPageNumber())
@@ -547,7 +547,7 @@ public class RepositoryController extends BaseServerController {
 
         /**
          * GitHub 用户信息实体类
-         *
+         * <p>
          * 参考：https://docs.github.com/en/rest/users/users#about-the-users-api
          */
         @Data
@@ -666,12 +666,12 @@ public class RepositoryController extends BaseServerController {
          * 获取 GitLab 版本
          *
          * @param gitlabAddress GitLab 地址
-         * @param token 用户 token
+         * @param token         用户 token
          * @return 请求结果
          */
         private static HttpResponse getGitLabVersion(String gitlabAddress, String token, String apiVersion) {
             // 参考：https://docs.gitlab.com/ee/api/version.html
-            return HttpUtil.createGet(StrUtil.format("{}/api/{}/version", gitlabAddress, apiVersion))
+            return HttpUtil.createGet(StrUtil.format("{}/api/{}/version", gitlabAddress, apiVersion), true)
                 .header("PRIVATE-TOKEN", token)
                 .execute();
         }
@@ -679,7 +679,7 @@ public class RepositoryController extends BaseServerController {
         /**
          * 获取 GitLab 版本信息
          *
-         * @param url GitLab 地址
+         * @param url   GitLab 地址
          * @param token 用户 token
          */
         private static GitLabVersionInfo getGitLabVersionInfo(String url, String token) {
@@ -714,7 +714,7 @@ public class RepositoryController extends BaseServerController {
         /**
          * 获取 GitLab API 版本号
          *
-         * @param url GitLab 地址
+         * @param url   GitLab 地址
          * @param token 用户 token
          * @return GitLab API 版本号，如：v4
          */
@@ -726,18 +726,18 @@ public class RepositoryController extends BaseServerController {
          * 获取 GitLab 用户信息
          *
          * @param gitlabAddress GitLab 地址
-         * @param token 用户 token
+         * @param token         用户 token
          * @return 请求结果
          */
         private static HttpResponse getGitLabUserInfo(String gitlabAddress, String token) {
             // 参考：https://docs.gitlab.com/ee/api/users.html
             return HttpUtil.createGet(
-                StrUtil.format(
-                    "{}/api/{}/user",
-                    gitlabAddress,
-                    getGitLabApiVersion(gitlabAddress, token)
+                    StrUtil.format(
+                        "{}/api/{}/user",
+                        gitlabAddress,
+                        getGitLabApiVersion(gitlabAddress, token)
+                    ), true
                 )
-            )
                 .form("access_token", token)
                 .timeout(5000)
                 .execute();
@@ -747,18 +747,18 @@ public class RepositoryController extends BaseServerController {
          * 获取 GitLab 仓库信息
          *
          * @param gitlabAddress GitLab 地址
-         * @param token 用户 token
+         * @param token         用户 token
          * @return 响应结果
          */
         private static Map<String, Object> getGitLabRepos(String gitlabAddress, String token, Page page, String condition) {
             // 参考：https://docs.gitlab.com/ee/api/projects.html
             HttpResponse reposResponse = HttpUtil.createGet(
-                StrUtil.format(
-                    "{}/api/{}/projects",
-                    gitlabAddress,
-                    getGitLabApiVersion(gitlabAddress, token)
+                    StrUtil.format(
+                        "{}/api/{}/projects",
+                        gitlabAddress,
+                        getGitLabApiVersion(gitlabAddress, token)
+                    ), true
                 )
-            )
                 .form("private_token", token)
                 .form("membership", true)
                 // 当 simple=true 时，不返回项目的 visibility，无法判断是私有仓库、公开仓库还是内部仓库
