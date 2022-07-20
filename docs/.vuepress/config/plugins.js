@@ -49,5 +49,11 @@ module.exports = [
                 return dayjs(timestamp).format('YYYY/MM/DD, HH:mm:ss')
             },
         }
+    ],
+    [
+        'sitemap',
+        {
+            hostname: 'https://jpom-docs.keepbx.cn'
+        }
     ]
 ];
