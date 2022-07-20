@@ -155,7 +155,7 @@ public class RemoteVersion extends BaseJsonModel {
         String body = StrUtil.EMPTY;
         try {
             log.debug("use remote version url: {}", remoteVersionUrl);
-            HttpRequest request = HttpUtil.createGet(remoteVersionUrl);
+            HttpRequest request = HttpUtil.createGet(remoteVersionUrl, true);
             try (HttpResponse execute = request.execute()) {
                 body = execute.body();
             }
@@ -203,7 +203,7 @@ public class RemoteVersion extends BaseJsonModel {
         // 获取 changelog
         String changelogUrl = remoteVersion.getChangelogUrl();
         if (StrUtil.isNotEmpty(changelogUrl)) {
-            try (HttpResponse execute = HttpUtil.createGet(changelogUrl).execute()) {
+            try (HttpResponse execute = HttpUtil.createGet(changelogUrl, true).execute()) {
                 String body = execute.body();
                 remoteVersion.setChangelog(body);
             }
