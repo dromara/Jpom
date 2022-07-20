@@ -351,7 +351,7 @@ public class NodeForward {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void requestDownload(NodeModel nodeModel, HttpServletRequest request, HttpServletResponse response, NodeUrl nodeUrl) {
         String url = nodeModel.getRealUrl(nodeUrl);
-        HttpRequest httpRequest = HttpUtil.createGet(url);
+        HttpRequest httpRequest = HttpUtil.createGet(url, true);
         addUser(httpRequest, nodeModel, nodeUrl);
         //
         Map params = ServletUtil.getParams(request);

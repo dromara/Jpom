@@ -50,7 +50,7 @@ public class DefaultWebhookPluginImpl implements IDefaultPlugin {
             return null;
         }
         try {
-            HttpRequest httpRequest = HttpUtil.createGet(webhook);
+            HttpRequest httpRequest = HttpUtil.createGet(webhook, true);
             httpRequest.form(parameter);
             try (HttpResponse execute = httpRequest.execute()) {
                 String body = execute.body();

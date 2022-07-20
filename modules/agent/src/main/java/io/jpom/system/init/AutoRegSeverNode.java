@@ -165,7 +165,7 @@ public class AutoRegSeverNode {
         urlBuilder.addQuery("port", port + "");
         //
         String build = urlBuilder.build();
-        try (HttpResponse execute = HttpUtil.createGet(build).execute()) {
+        try (HttpResponse execute = HttpUtil.createGet(build, true).execute()) {
             String body = execute.body();
             Console.log("push result:" + body);
         }
