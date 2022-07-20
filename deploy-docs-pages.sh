@@ -19,4 +19,7 @@ cd ${DIR_PATH} && cp -r ./docs/dist/* ./docs-pages
 # 提交代码 pages
 cd ${DIR_PATH} && cd docs-pages && git add . &&  git commit -m 'update docs pages' && git push
 
+#
+#cd ~ && ./ossutilmac64 sync ${DIR_PATH}/docs-pages  oss://jpom-download/  --delete -f
+
 
