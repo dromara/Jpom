@@ -6,7 +6,3 @@
 	path = docs
 	url = git@gitee.com:dromara/Jpom.git
 	branch = docs
-[submodule "docs-pages"]
-	path = docs-pages
-	url = git@gitee.com:dromara/Jpom.git
-	branch = docs-pages

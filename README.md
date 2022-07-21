@@ -53,18 +53,12 @@
 	path = docs
 	url = git@gitee.com:dromara/Jpom.git
 	branch = docs
-[submodule "docs-pages"]
-	path = docs
-	url = git@gitee.com:dromara/Jpom.git
-	branch = docs-pages
 ```
 
 ```shell
 git submodule add -b master git@gitee.com:dromara/Jpom.git jpom-parent
 
 git submodule add -b docs git@gitee.com:dromara/Jpom.git docs
-
-git submodule add -b docs-pages git@gitee.com:dromara/Jpom.git docs-pages
 ```
 
 ```shell
