@@ -103,7 +103,8 @@ postList: none
 
 ## 🏡代码托管
 
-> [Gitee](https://gitee.com/dromara/Jpom) | [Github](https://github.com/dromara/Jpom)
+- [Gitee ![star](https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp)](https://gitee.com/dromara/Jpom/)
+- [Github](https://github.com/dromara/Jpom)
 
 <br/>
 
