@@ -33,6 +33,7 @@ import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.extconf.DbExtConfig;
+import io.jpom.system.init.ProxySelectorConfig;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -80,6 +81,9 @@ public class DbConfig {
 
     public void initOk() {
         init = true;
+        // 立马配置 全局代理
+        ProxySelectorConfig selectorConfig = SpringUtil.getBean(ProxySelectorConfig.class);
+        selectorConfig.refresh();
     }
 
     public void close() {

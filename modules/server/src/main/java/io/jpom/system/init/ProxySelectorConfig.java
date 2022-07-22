@@ -112,7 +112,6 @@ public class ProxySelectorConfig extends ProxySelector implements InitializingBe
         defaultProxySelector = ProxySelector.getDefault();
         //
         ProxySelector.setDefault(this);
-        this.refresh();
     }
 
 
