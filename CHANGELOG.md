@@ -9,6 +9,7 @@
 1. 优化 HTTP GET 请求打开重定向
 2. 【server】触发器 token 机制调整,取消 SHA256 生成。采用数据表单独存储
 3. 【server】修复启动加载全局代理时机,避免（The database is not initialized）
+4. 管理脚本执行支持环境变量配置 jvm、端口等，`JPOM_AGENT_JVM`,`JPOM_AGENT_PORT`,`JPOM_AGENT_ARGS`、`JPOM_SERVER_JVM`,`JPOM_SERVER_PORT`,`JPOM_SERVER_ARGS`
 
 ------
 
