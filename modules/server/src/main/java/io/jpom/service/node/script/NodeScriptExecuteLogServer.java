@@ -39,6 +39,7 @@ import io.jpom.model.node.ScriptExecuteLogCacheModel;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.WorkspaceService;
+import io.jpom.system.AgentException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -73,9 +74,9 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLog
 
     @Override
     public JSONArray getLitDataArray(NodeModel nodeModel) {
-        JsonMessage<Object> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.SCRIPT_PULL_EXEC_LOG, "pullCount", 100);
+        JsonMessage<?> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.SCRIPT_PULL_EXEC_LOG, "pullCount", 100);
         if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-            throw new IllegalStateException(jsonMessage.getMsg());
+            throw new AgentException(jsonMessage.toString());
         }
         Object data = jsonMessage.getData();
         //
