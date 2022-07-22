@@ -38,6 +38,7 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
+import io.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -57,15 +58,17 @@ import java.util.Map;
 public class BuildInfoTriggerController extends BaseServerController {
 
     private final BuildInfoService buildInfoService;
+    private final TriggerTokenLogServer triggerTokenLogServer;
 
     /**
      * 填充的长度
      */
     public static final int BUILD_INFO_TRIGGER_TOKEN_FILL_LEN = 3;
-    public static final int BUILD_INFO_TRIGGER_TOKEN_DIGEST_COUNT_MAX = 500;
 
-    public BuildInfoTriggerController(BuildInfoService buildInfoService) {
+    public BuildInfoTriggerController(BuildInfoService buildInfoService,
+                                      TriggerTokenLogServer triggerTokenLogServer) {
         this.buildInfoService = buildInfoService;
+        this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
     /**
@@ -76,21 +79,28 @@ public class BuildInfoTriggerController extends BaseServerController {
      */
     @RequestMapping(value = "/build/trigger/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String getTriggerUrl(String id) {
-        BuildInfoModel item = buildInfoService.getByKey(id);
-        if (StrUtil.isEmpty(item.getTriggerToken())) {
-            item.setTriggerToken(this.createTriggerUrl());
-            buildInfoService.update(item);
+    public String getTriggerUrl(String id, String rest) {
+        BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
+        UserModel user = getUser();
+        BuildInfoModel updateInfo;
+        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
+            updateInfo = new BuildInfoModel();
+            updateInfo.setId(id);
+            updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), buildInfoService.typeName(),
+                item.getId(), user.getId()));
+            buildInfoService.update(updateInfo);
+        } else {
+            updateInfo = item;
         }
-        Map<String, String> map = this.getBuildToken(item);
-        return JsonMessage.getString(200, "ok", map);
+        Map<String, String> map = this.getBuildToken(updateInfo);
+        return JsonMessage.getString(200, StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
     private Map<String, String> getBuildToken(BuildInfoModel item) {
         String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
         String url = ServerOpenApi.BUILD_TRIGGER_BUILD2.
-                replace("{id}", item.getId()).
-                replace("{token}", item.getTriggerToken());
+            replace("{id}", item.getId()).
+            replace("{token}", item.getTriggerToken());
         String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
         Map<String, String> map = new HashMap<>(10);
         map.put("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
@@ -105,28 +115,24 @@ public class BuildInfoTriggerController extends BaseServerController {
     }
 
 
-    /**
-     * reset new trigger url
-     *
-     * @param id id
-     * @return json
-     */
-    @RequestMapping(value = "/build/trigger/rest", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String triggerRest(String id) {
-        BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
-        // new trigger url
-        item.setTriggerToken(this.createTriggerUrl());
-        buildInfoService.update(item);
-        Map<String, String> map = this.getBuildToken(item);
-        return JsonMessage.getString(200, "重置成功", map);
-    }
-
-    private String createTriggerUrl() {
-        UserModel user = getUser();
-        int randomInt = RandomUtil.randomInt(1, BUILD_INFO_TRIGGER_TOKEN_DIGEST_COUNT_MAX);
-        String fill = StrUtil.fillBefore(randomInt + "", '0', BUILD_INFO_TRIGGER_TOKEN_FILL_LEN);
-        String nowStr = new Digester(DigestAlgorithm.SHA256).setDigestCount(randomInt).digestHex(user.getId());
-        return StrUtil.format("{}{}", fill, nowStr);
-    }
+//    /**
+//     * reset new trigger url
+//     *
+//     * @param id id
+//     * @return json
+//     */
+//    @RequestMapping(value = "/build/trigger/rest", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String triggerRest(String id) {
+//        BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
+//        UserModel user = getUser();
+//        BuildInfoModel updateInfo = new BuildInfoModel();
+//        updateInfo.setId(id);
+//        // new trigger url
+//        updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), buildInfoService.typeName(),
+//            item.getId(), user.getId()));
+//        buildInfoService.update(updateInfo);
+//        Map<String, String> map = this.getBuildToken(updateInfo);
+//        return JsonMessage.getString(200, "重置成功", map);
+//    }
 }

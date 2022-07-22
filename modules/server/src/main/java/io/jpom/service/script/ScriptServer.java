@@ -24,6 +24,7 @@ package io.jpom.service.script;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
+import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.cron.CronUtils;
@@ -31,6 +32,7 @@ import io.jpom.cron.ICron;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
+import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.socket.ScriptProcessBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,7 @@ import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author bwcx_jzy
@@ -46,7 +49,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements ICron<ScriptModel> {
+public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements ICron<ScriptModel>, ITriggerToken {
 
     @Override
     public List<ScriptModel> queryStartingList() {
@@ -136,6 +139,17 @@ public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements I
                     super.updateById(update);
                 }
             });
+    }
+
+    @Override
+    public String typeName() {
+        return getTableName();
+    }
+
+    @Override
+    public List<Entity> allEntityTokens() {
+        String sql = "select id,triggerToken from " + getTableName() + " where triggerToken is not null";
+        return super.query(sql);
     }
 
     private static class CronTask implements Task {

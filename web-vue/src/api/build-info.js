@@ -112,25 +112,25 @@ export function deleteBuild(id) {
  * 获取触发器地址
  * @param {*} id
  */
-export function getTriggerUrl(id) {
+export function getTriggerUrl(data) {
   return axios({
     url: "/build/trigger/url",
     method: "post",
-    data: { id },
+    data: data,
   });
 }
 
-/**
- * 重置触发器
- * @param {*} id
- */
-export function resetTrigger(id) {
-  return axios({
-    url: "/build/trigger/rest",
-    method: "post",
-    data: { id },
-  });
-}
+// /**
+//  * 重置触发器
+//  * @param {*} id
+//  */
+// export function resetTrigger(id) {
+//   return axios({
+//     url: "/build/trigger/rest",
+//     method: "post",
+//     data: { id },
+//   });
+// }
 
 /**
  * 清理构建

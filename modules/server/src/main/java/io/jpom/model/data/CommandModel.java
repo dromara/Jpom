@@ -69,6 +69,10 @@ public class CommandModel extends BaseWorkspaceModel {
      * 自动执行的 cron
      */
     private String autoExecCron;
+    /**
+     * 触发器 token
+     */
+    private String triggerToken;
 
     public List<CommandParam> params() {
         return params(getDefParams());

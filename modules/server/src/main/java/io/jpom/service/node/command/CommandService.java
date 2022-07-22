@@ -31,6 +31,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
+import cn.hutool.db.Entity;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.system.SystemUtil;
@@ -43,6 +44,7 @@ import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.model.data.CommandModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
@@ -67,7 +69,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class CommandService extends BaseWorkspaceService<CommandModel> implements ICron<CommandModel> {
+public class CommandService extends BaseWorkspaceService<CommandModel> implements ICron<CommandModel>, ITriggerToken {
 
     private final SshService sshService;
     private final CommandExecLogService commandExecLogService;
@@ -134,6 +136,17 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
     public List<CommandModel> queryStartingList() {
         String sql = "select * from " + super.getTableName() + " where autoExecCron is not null and autoExecCron <> ''";
         return super.queryList(sql);
+    }
+
+    @Override
+    public String typeName() {
+        return getTableName();
+    }
+
+    @Override
+    public List<Entity> allEntityTokens() {
+        String sql = "select id,triggerToken from " + getTableName() + " where triggerToken is not null";
+        return super.query(sql);
     }
 
     private class CronTask implements Task {
