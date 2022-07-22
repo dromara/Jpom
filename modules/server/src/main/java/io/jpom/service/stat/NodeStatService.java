@@ -280,7 +280,15 @@ public class NodeStatService extends BaseWorkspaceService<NodeStatModel> impleme
      * @param reqNode 真实节点
      */
     private JSONObject getNodeTopInfo(NodeModel reqNode) {
-        JsonMessage<JSONObject> message = NodeForward.request(reqNode, null, NodeUrl.GetDirectTop);
-        return message.getData();
+        JsonMessage<?> message = NodeForward.request(reqNode, null, NodeUrl.GetDirectTop);
+        Object data = message.getData();
+        if (data == null) {
+            return null;
+        }
+        if (data instanceof JSONObject) {
+            return (JSONObject) data;
+        }
+        log.warn("{} node response msg:{}", reqNode.getName(), message);
+        return null;
     }
 }

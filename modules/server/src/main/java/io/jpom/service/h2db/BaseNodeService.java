@@ -31,6 +31,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -202,8 +203,11 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
             return "同步失败" + agentException.getMessage();
         } else if (e instanceof AuthorizeException) {
             AuthorizeException authorizeException = (AuthorizeException) e;
-            log.error("{} 同步失败 {}", nodeModelName, authorizeException.getMessage());
-            return "同步失败" + authorizeException.getMessage();
+            log.error("{} 授权异常 {}", nodeModelName, authorizeException.getMessage());
+            return "授权异常" + authorizeException.getMessage();
+        } else if (e instanceof JSONException) {
+            log.error("{} 消息解析失败 {}", nodeModelName, e.getMessage());
+            return "消息解析失败" + e.getMessage();
         }
         log.error("同步节点" + dataName + "失败:" + nodeModelName, e);
         return "同步节点" + dataName + "失败" + e.getMessage();
