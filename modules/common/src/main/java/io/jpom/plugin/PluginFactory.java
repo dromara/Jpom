@@ -27,13 +27,16 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.JpomManifest;
 import io.jpom.system.ExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
@@ -44,6 +47,8 @@ import java.io.File;
 import java.net.URLClassLoader;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
@@ -54,7 +59,7 @@ import java.util.stream.Collectors;
  * @since 2019/8/13
  */
 @Slf4j
-public class PluginFactory implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ContextClosedEvent> {
+public class PluginFactory implements ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<ApplicationEvent> {
 
     //    private static final List<FeatureCallback> FEATURE_CALLBACKS = new ArrayList<>();
     private static final Map<String, List<PluginItemWrap>> PLUGIN_MAP = new ConcurrentHashMap<>();
@@ -160,10 +165,6 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
                 return true;
             })
             .collect(Collectors.toList());
-        // 初始化环境变量
-        Map<String, String> environment = new HashMap<>(5);
-        environment.put(IPlugin.DATE_PATH_KEY, ExtConfigBean.getInstance().getPath());
-        environment.put(IPlugin.JPOM_VERSION_KEY, JpomManifest.getInstance().getVersion());
         //
         Map<String, List<PluginItemWrap>> pluginMap = CollStreamUtil.groupByKey(pluginItemWraps, PluginItemWrap::getName);
         pluginMap.forEach((key, value) -> {
@@ -175,22 +176,32 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
                 }
                 return order.value();
             }).compare(o1, o2));
-            for (PluginItemWrap pluginItemWrap : value) {
-                pluginItemWrap.getPlugin().initialize(environment);
-            }
             PLUGIN_MAP.put(key, value);
         });
         log.debug("load plugin count:{}", pluginMap.keySet().size());
     }
 
     @Override
-    public void onApplicationEvent(ContextClosedEvent event) {
-        Collection<List<PluginItemWrap>> values = PLUGIN_MAP.values();
-        for (List<PluginItemWrap> value : values) {
-            for (PluginItemWrap pluginItemWrap : value) {
-                IPlugin plugin = pluginItemWrap.getPlugin();
-                IoUtil.close(plugin);
+    public void onApplicationEvent(ApplicationEvent event) {
+//         <ContextClosedEvent>, ApplicationListener<ApplicationReadyEvent>
+        if (event instanceof ContextClosedEvent) {
+            Collection<List<PluginItemWrap>> values = PLUGIN_MAP.values();
+            for (List<PluginItemWrap> value : values) {
+                for (PluginItemWrap pluginItemWrap : value) {
+                    IPlugin plugin = pluginItemWrap.getPlugin();
+                    IoUtil.close(plugin);
+                }
             }
+        } else if (event instanceof ApplicationReadyEvent) {
+            // 初始化环境变量
+            Map<String, String> environment = new HashMap<>(5);
+            environment.put(IPlugin.DATE_PATH_KEY, ExtConfigBean.getInstance().getPath());
+            environment.put(IPlugin.JPOM_VERSION_KEY, JpomManifest.getInstance().getVersion());
+            // 禁止修改
+            Map<String, String> environmentUnmodifiable = MapUtil.unmodifiable(environment);
+            // 初始化
+            PLUGIN_MAP.forEach((s, value) -> value.forEach(pluginItemWrap -> pluginItemWrap.getPlugin().initialize(environmentUnmodifiable)));
         }
+
     }
 }
