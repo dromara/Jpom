@@ -128,7 +128,7 @@ public class NodeForward {
 
         try (HttpResponse response = httpRequest.execute()) {
             //
-            return parseBody(response, nodeModel);
+            return parseBody(httpRequest, response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
@@ -201,7 +201,7 @@ public class NodeForward {
         httpRequest.form(params);
         try (HttpResponse response = httpRequest.execute()) {
             //
-            return parseBody(response, nodeModel);
+            return parseBody(httpRequest, response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
@@ -272,7 +272,7 @@ public class NodeForward {
         addUser(httpRequest, nodeModel, nodeUrl);
         try (HttpResponse response = httpRequest.execute();) {
             //
-            JsonMessage<T> jsonMessage = parseBody(response, nodeModel);
+            JsonMessage<T> jsonMessage = parseBody(httpRequest, response, nodeModel);
             return jsonMessage.getData(tClass);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
@@ -308,7 +308,7 @@ public class NodeForward {
         // @author jzy add  timeout
         httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
         try (HttpResponse response = httpRequest.execute()) {
-            return parseBody(response, nodeModel);
+            return parseBody(httpRequest, response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
@@ -333,7 +333,7 @@ public class NodeForward {
         // @author jzy add  timeout
         httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
         try (HttpResponse response = httpRequest.execute()) {
-            return parseBody(response, nodeModel);
+            return parseBody(httpRequest, response, nodeModel);
         } catch (Exception e) {
             throw NodeForward.responseException(e, nodeModel);
         }
@@ -458,9 +458,12 @@ public class NodeForward {
      * @param response 响应
      * @return json
      */
-    private static <T> JsonMessage<T> parseBody(HttpResponse response, NodeModel nodeModel) {
+    private static <T> JsonMessage<T> parseBody(HttpRequest httpRequest, HttpResponse response, NodeModel nodeModel) {
         int status = response.getStatus();
         String body = response.body();
+        if (log.isDebugEnabled()) {
+            log.debug("{} -> {} {} {} {}", nodeModel.getName(), httpRequest.getUrl(), httpRequest.getMethod(), httpRequest.form(), body);
+        }
         if (status != HttpStatus.HTTP_OK) {
             log.warn("{} 响应异常 状态码错误：{} {}", nodeModel.getName(), status, body);
             throw new AgentException(nodeModel.getName() + " 节点响应异常,状态码错误：" + status);
