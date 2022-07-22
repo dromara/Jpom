@@ -23,6 +23,7 @@
 package io.jpom.plugin;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ClassUtil;
 import com.alibaba.fastjson.JSONObject;
 
@@ -36,6 +37,40 @@ import java.util.Map;
  * @since 2021/12/22
  */
 public interface IPlugin extends AutoCloseable {
+
+    /**
+     * 数据目录 key
+     */
+    String DATE_PATH_KEY = "DATE_PATH";
+    String JPOM_VERSION_KEY = "JPOM_VERSION";
+
+
+    /**
+     * 初始化插件
+     *
+     * @param environment 运行的环境变量
+     */
+    default void initialize(Map<String, String> environment) {
+    }
+
+    /**
+     * 获取插件的环境变量
+     *
+     * @return map
+     */
+    default Map<String, String> getEnvironment() {
+        return null;
+    }
+
+    /**
+     * 获取数据目录文件夹
+     *
+     * @return data path
+     */
+    default String getDataPath() {
+        Map<String, String> environment = this.getEnvironment();
+        return MapUtil.getStr(environment, DATE_PATH_KEY);
+    }
 
     /**
      * 执行插件方法

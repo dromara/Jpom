@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -57,6 +58,21 @@ import java.util.stream.Collectors;
  */
 @PluginConfig(name = "docker-cli")
 public class DefaultDockerPluginImpl implements IDefaultPlugin {
+
+    /**
+     * 插件的所有环境变量
+     */
+    private final Map<String, String> ENVIRONMENT = new ConcurrentHashMap<>();
+
+    @Override
+    public void initialize(Map<String, String> environment) {
+        ENVIRONMENT.putAll(environment);
+    }
+
+    @Override
+    public Map<String, String> getEnvironment() {
+        return ENVIRONMENT;
+    }
 
     @Override
     public Object execute(Object main, Map<String, Object> parameter) throws Exception {

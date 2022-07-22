@@ -31,6 +31,7 @@ import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.JpomManifest;
+import io.jpom.system.ExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationListener;
@@ -148,17 +149,21 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
         // 扫描插件 实现
         Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom", IPlugin.class::isAssignableFrom);
         List<PluginItemWrap> pluginItemWraps = classes
-                .stream()
-                .filter(aClass -> ClassUtil.isNormalClass(aClass) && aClass.isAnnotationPresent(PluginConfig.class))
-                .map(aClass -> new PluginItemWrap((Class<? extends IPlugin>) aClass))
-                .filter(pluginItemWrap -> {
-                    if (StrUtil.isEmpty(pluginItemWrap.getName())) {
-                        log.warn("plugin config name error:{}", pluginItemWrap.getClassName());
-                        return false;
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
+            .stream()
+            .filter(aClass -> ClassUtil.isNormalClass(aClass) && aClass.isAnnotationPresent(PluginConfig.class))
+            .map(aClass -> new PluginItemWrap((Class<? extends IPlugin>) aClass))
+            .filter(pluginItemWrap -> {
+                if (StrUtil.isEmpty(pluginItemWrap.getName())) {
+                    log.warn("plugin config name error:{}", pluginItemWrap.getClassName());
+                    return false;
+                }
+                return true;
+            })
+            .collect(Collectors.toList());
+        // 初始化环境变量
+        Map<String, String> environment = new HashMap<>(5);
+        environment.put(IPlugin.DATE_PATH_KEY, ExtConfigBean.getInstance().getPath());
+        environment.put(IPlugin.JPOM_VERSION_KEY, JpomManifest.getInstance().getVersion());
         //
         Map<String, List<PluginItemWrap>> pluginMap = CollStreamUtil.groupByKey(pluginItemWraps, PluginItemWrap::getName);
         pluginMap.forEach((key, value) -> {
@@ -170,6 +175,9 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
                 }
                 return order.value();
             }).compare(o1, o2));
+            for (PluginItemWrap pluginItemWrap : value) {
+                pluginItemWrap.getPlugin().initialize(environment);
+            }
             PLUGIN_MAP.put(key, value);
         });
         log.debug("load plugin count:{}", pluginMap.keySet().size());
