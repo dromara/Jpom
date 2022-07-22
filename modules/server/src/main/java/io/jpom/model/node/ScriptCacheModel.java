@@ -33,98 +33,102 @@ import io.jpom.service.h2db.TableName;
  **/
 @TableName(value = "SCRIPT_INFO", name = "节点脚本模版")
 public class ScriptCacheModel extends BaseNodeModel {
-	/**
-	 * 脚本ID
-	 */
-	private String scriptId;
-	/**
-	 * 模版名称
-	 */
-	private String name;
-	/**
-	 * 最后执行人员
-	 */
-	private String lastRunUser;
-	/**
-	 * 定时执行
-	 */
-	private String autoExecCron;
-	/**
-	 * 默认参数
-	 */
-	private String defArgs;
-	/**
-	 * 描述
-	 */
-	private String description;
-	/**
-	 * 脚本类型
-	 */
-	private String scriptType;
+    /**
+     * 脚本ID
+     */
+    private String scriptId;
+    /**
+     * 模版名称
+     */
+    private String name;
+    /**
+     * 最后执行人员
+     */
+    private String lastRunUser;
+    /**
+     * 定时执行
+     */
+    private String autoExecCron;
+    /**
+     * 默认参数
+     */
+    private String defArgs;
+    /**
+     * 描述
+     */
+    private String description;
+    /**
+     * 脚本类型
+     */
+    private String scriptType;
+    /**
+     * 触发器 token
+     */
+    private String triggerToken;
 
-	public String getScriptType() {
-		return scriptType;
-	}
+    public String getScriptType() {
+        return scriptType;
+    }
 
-	public void setScriptType(String scriptType) {
-		this.scriptType = scriptType;
-	}
+    public void setScriptType(String scriptType) {
+        this.scriptType = scriptType;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public String getDefArgs() {
-		return defArgs;
-	}
+    public String getDefArgs() {
+        return defArgs;
+    }
 
-	public void setDefArgs(String defArgs) {
-		this.defArgs = defArgs;
-	}
+    public void setDefArgs(String defArgs) {
+        this.defArgs = defArgs;
+    }
 
-	public String getAutoExecCron() {
-		return autoExecCron;
-	}
+    public String getAutoExecCron() {
+        return autoExecCron;
+    }
 
-	public void setAutoExecCron(String autoExecCron) {
-		this.autoExecCron = autoExecCron;
-	}
+    public void setAutoExecCron(String autoExecCron) {
+        this.autoExecCron = autoExecCron;
+    }
 
-	public String getScriptId() {
-		return scriptId;
-	}
+    public String getScriptId() {
+        return scriptId;
+    }
 
-	public void setScriptId(String scriptId) {
-		this.scriptId = scriptId;
-	}
+    public void setScriptId(String scriptId) {
+        this.scriptId = scriptId;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getLastRunUser() {
-		return lastRunUser;
-	}
+    public String getLastRunUser() {
+        return lastRunUser;
+    }
 
-	public void setLastRunUser(String lastRunUser) {
-		this.lastRunUser = lastRunUser;
-	}
+    public void setLastRunUser(String lastRunUser) {
+        this.lastRunUser = lastRunUser;
+    }
 
-	@Override
-	public String dataId() {
-		return getScriptId();
-	}
+    @Override
+    public String dataId() {
+        return getScriptId();
+    }
 
-	@Override
-	public void dataId(String id) {
-		setScriptId(id);
-	}
+    @Override
+    public void dataId(String id) {
+        setScriptId(id);
+    }
 }

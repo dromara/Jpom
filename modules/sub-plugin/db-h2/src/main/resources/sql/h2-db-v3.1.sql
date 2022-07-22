@@ -100,6 +100,14 @@ ALTER TABLE NODE_INFO
 ALTER TABLE SSH_INFO
     ADD IF NOT EXISTS timeout int default 0 comment '节点超时时间';
 
+-- @author bwcx_jzy 2022-07-22
+ALTER TABLE SCRIPT_INFO
+    ADD IF NOT EXISTS triggerToken VARCHAR(200) comment '触发器token';
+ALTER TABLE COMMAND_INFO
+    ADD IF NOT EXISTS triggerToken VARCHAR(200) comment '触发器token';
+ALTER TABLE SERVER_SCRIPT_INFO
+    ADD IF NOT EXISTS triggerToken VARCHAR(200) comment '触发器token';
+
 
 
 

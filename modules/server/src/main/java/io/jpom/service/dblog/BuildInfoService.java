@@ -35,6 +35,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.IStatusRecover;
+import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseGroupService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,7 @@ import java.util.List;
  **/
 @Service
 @Slf4j
-public class BuildInfoService extends BaseGroupService<BuildInfoModel> implements ICron<BuildInfoModel>, IStatusRecover {
+public class BuildInfoService extends BaseGroupService<BuildInfoModel> implements ICron<BuildInfoModel>, IStatusRecover, ITriggerToken {
 
     /**
      * 更新状态
@@ -123,6 +124,17 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
         log.debug("start build cron {} {} {}", id, buildInfoModel.getName(), autoBuildCron);
         CronUtils.upsert(taskId, autoBuildCron, new CronTask(id, autoBuildCron));
         return true;
+    }
+
+    @Override
+    public String typeName() {
+        return getTableName();
+    }
+
+    @Override
+    public List<Entity> allEntityTokens() {
+        String sql = "select id,triggerToken from " + getTableName() + " where triggerToken is not null";
+        return super.query(sql);
     }
 
     private static class CronTask implements Task {

@@ -68,6 +68,10 @@ public class ScriptModel extends BaseWorkspaceModel {
      * 节点ID
      */
     private String nodeIds;
+    /**
+     * 触发器 token
+     */
+    private String triggerToken;
 
 
     public File scriptPath() {

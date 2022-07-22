@@ -44,6 +44,7 @@ import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.dblog.BuildInfoService;
+import io.jpom.service.user.TriggerTokenLogServer;
 import io.jpom.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.h2.util.StringUtils;
@@ -65,42 +66,14 @@ public class BuildTriggerApiController extends BaseJpomController {
 
     private final BuildInfoService buildInfoService;
     private final BuildExecuteService buildExecuteService;
-    private final UserService userService;
+    private final TriggerTokenLogServer triggerTokenLogServer;
 
     public BuildTriggerApiController(BuildInfoService buildInfoService,
                                      BuildExecuteService buildExecuteService,
-                                     UserService userService) {
+                                     TriggerTokenLogServer triggerTokenLogServer) {
         this.buildInfoService = buildInfoService;
         this.buildExecuteService = buildExecuteService;
-        this.userService = userService;
-    }
-
-    private UserModel getByUrlToken(String token) {
-        String digestCountStr = StrUtil.sub(token, 0, BuildInfoTriggerController.BUILD_INFO_TRIGGER_TOKEN_FILL_LEN);
-        String result = StrUtil.subSuf(token, BuildInfoTriggerController.BUILD_INFO_TRIGGER_TOKEN_FILL_LEN);
-        int digestCount = Convert.toInt(digestCountStr, 1);
-
-        String sql = "select HASH('SHA256', id,?) as token,id from user_info";
-        List<Entity> query = userService.query(sql, digestCount);
-        if (query == null) {
-            return null;
-        }
-        String userId = query.stream()
-                .filter(entity -> {
-                    Object token1 = entity.get("token");
-                    String sha256;
-                    if (token1 instanceof byte[]) {
-                        byte[] bytes = (byte[]) token1;
-                        sha256 = StringUtils.convertBytesToHex(bytes);
-                    } else {
-                        sha256 = ObjectUtil.toString(token1);
-                    }
-                    return StrUtil.equals(result, sha256);
-                })
-                .map(entity -> StrUtil.toString(entity.get("id")))
-                .findFirst()
-                .orElseGet(() -> "没有对应数据:-2");
-        return userService.getByKey(userId);
+        this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
 
@@ -116,9 +89,9 @@ public class BuildTriggerApiController extends BaseJpomController {
     public String trigger2(@PathVariable String id, @PathVariable String token, String delay, String buildRemark) {
         BuildInfoModel item = buildInfoService.getByKey(id);
         Assert.notNull(item, "没有对应数据");
-        UserModel userModel = this.getByUrlToken(token);
+        UserModel userModel = this.triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
         //
-        Assert.notNull(userModel, "没有对应数据:-1");
+        Assert.notNull(userModel, "触发token错误,或者已经失效:-1");
 
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
         BaseServerController.resetInfo(userModel);
@@ -165,7 +138,7 @@ public class BuildTriggerApiController extends BaseJpomController {
                     jsonObject.put("msg", "没有对应数据");
                     return;
                 }
-                UserModel userModel = BuildTriggerApiController.this.getByUrlToken(token);
+                UserModel userModel = triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
                 if (userModel == null) {
                     jsonObject.put("msg", "对应的用户不存在,触发器已失效");
                     return;
@@ -276,7 +249,7 @@ public class BuildTriggerApiController extends BaseJpomController {
             jsonObject.put("msg", "没有对应数据");
             return jsonObject;
         }
-        UserModel userModel = BuildTriggerApiController.this.getByUrlToken(token);
+        UserModel userModel = triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
         if (userModel == null) {
             jsonObject.put("msg", "对应的用户不存在,触发器已失效");
             return jsonObject;

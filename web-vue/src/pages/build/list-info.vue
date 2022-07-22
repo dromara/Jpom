@@ -905,7 +905,7 @@ import {
   getBuildList,
   getTriggerUrl,
   releaseMethodMap,
-  resetTrigger,
+  // resetTrigger,
   startBuild,
   statusMap,
   stopBuild,
@@ -1445,7 +1445,9 @@ export default {
     handleTrigger(record) {
       this.temp = Object.assign({}, record);
       this.tempVue = Vue;
-      getTriggerUrl(record.id).then((res) => {
+      getTriggerUrl({
+        id: record.id,
+      }).then((res) => {
         if (res.code === 200) {
           this.fillTriggerResult(res);
           this.triggerVisible = true;
@@ -1454,7 +1456,10 @@ export default {
     },
     // 重置触发器
     resetTrigger() {
-      resetTrigger(this.temp.id).then((res) => {
+      getTriggerUrl({
+        id: this.temp.id,
+        rest: "rest",
+      }).then((res) => {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
