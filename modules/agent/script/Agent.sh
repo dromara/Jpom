@@ -35,7 +35,8 @@ if [ -f ~/.bashrc ]; then
     . ~/.bashrc
 fi
 # Please do not modify the value of the tag attribute, the modification will affect the stop and view status of the program
-Tag="KeepBx-Agent-System-JpomAgentApplication"
+default_tag="KeepBx-Agent-System-JpomAgentApplication"
+Tag="${JPOM_AGENT_TAG:=${default_tag}}"
 # Obtain the current path automatically
 Path=$(
   cd $(dirname $0)
@@ -46,9 +47,11 @@ Lib="${Path}lib/"
 RUNJAR=""
 Log="${Path}agent.log"
 LogBack="${Path}log/"
-JVM="-server -XX:+UseG1GC -Xms200m -Xmx400m"
 # Modify project port number Log path
-ARGS="--jpom.applicationTag=${Tag} --spring.profiles.active=pro --server.port=2123  --jpom.log=${Path}log $@"
+JVM="${JPOM_AGENT_JVM:=-server -XX:+UseG1GC -Xms200m -Xmx400m}"
+port="${JPOM_AGENT_PORT:=2123}"
+default_args="--jpom.applicationTag=${Tag} --spring.profiles.active=pro --server.port=${port}  --jpom.log=${Path}log"
+ARGS="${JPOM_AGENT_ARGS:=${default_args}} $@"
 
 echo ${Tag}
 echo ${Path}
