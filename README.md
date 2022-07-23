@@ -120,7 +120,7 @@ Jpom 支持多种安装方式，满足不同用户的个性化需求，您只需
 ```shell
 # 仅安装服务端
 yum install -y wget && \
-	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
 	bash install.sh Server
 
 # 仅安装服务端，备用下载地址
@@ -130,17 +130,17 @@ yum install -y wget && \
 
 # 安装服务端和 jdk 环境
 yum install -y wget && \
-	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
 	bash install.sh Server jdk
 
 # 安装服务端和 jdk、maven 环境
 yum install -y wget && \
-	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
 	bash install.sh Server jdk+mvn
 
 # ubuntu
 apt install -y wget && \
-	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
 	bash install.sh Server jdk
 ```
 
@@ -170,7 +170,7 @@ apt install -y wget && \
 ```shell
 # 仅安装插件端
 yum install -y wget && \
-	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
 	bash install.sh Agent
 
 # 仅安装插件端，备用下载地址
@@ -180,12 +180,12 @@ yum install -y wget && \
 
 # 安装插件端和 jdk 环境
 yum install -y wget && \
-	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
 	bash install.sh Agent jdk
 
 # ubuntu
 apt install -y wget && \
-	wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && \
+	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
 	bash install.sh Agent jdk
 ```
 

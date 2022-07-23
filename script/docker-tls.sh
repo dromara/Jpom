@@ -25,7 +25,7 @@
 #
 # -------------------------------------------------------------
 # 自动创建 Docker TLS 证书
-# wget https://dromara.gitee.io/jpom/script/docker-tls.sh
+# wget https://jpom-docs.keepbx.cn/script/docker-tls.sh
 # curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
 # systemctl daemon-reload && systemctl restart docker
 # -------------------------------------------------------------
