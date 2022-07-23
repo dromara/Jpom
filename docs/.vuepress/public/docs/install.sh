@@ -141,12 +141,17 @@ if [[ "${temp_result}" != "" ]] ; then
     JPOM_TYPE=`echo "${temp_result}"|awk -F '-' '{print $1}'`
     versions=`echo "${temp_result}"|awk -F '-' '{print $2}'`
 fi
-echo "开始安装：${JPOM_TYPE}  ${versions}"
-# 判断是否在文件
+# 创建指定目录
+# 下载类型转小写
+url_type=`echo ${JPOM_TYPE} | tr 'A-Z' 'a-z'`
+# 记录下当前目录，用于后续删除 install.sh 脚本
+previous_dir=`pwd`
+jpom_dir=/usr/local/jpom-${url_type}
+mkdir -p jpom_dir && cd jpom_dir
+now_dir=`pwd`
+echo "开始安装：${JPOM_TYPE}  ${versions}, 安装目录 ${now_dir}"
+# 判断是否存在文件
 if [[ ! -f "${JPOM_TYPE}.zip" ]]; then
-  # 转小写
-  url_type=`echo ${JPOM_TYPE} | tr 'A-Z' 'a-z'`
-
   if [[ -z "${versions}" ]] ; then
     # 获取最新的版本号
     versions=`curl -LfsS https://jpom-docs.keepbx.cn/docs/versions.tag`
@@ -159,7 +164,7 @@ unzip -o ${JPOM_TYPE}.zip
 # 删除安装包
 rm -f ${JPOM_TYPE}.zip
 # 删除安装命令
-rm -f install.sh
+rm -f ${previous_dir}/install.sh
 # 添加权限
 chmod 755 ${JPOM_TYPE}.sh
 # 启动
