@@ -103,7 +103,8 @@ postList: none
 
 ## 🏡代码托管
 
-> [Gitee](https://gitee.com/dromara/Jpom) | [Github](https://github.com/dromara/Jpom)
+- [Gitee ![star](https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp)](https://gitee.com/dromara/Jpom/)
+- [Github](https://github.com/dromara/Jpom)
 
 <br/>
 
@@ -117,45 +118,72 @@ postList: none
 
 ## 🍭架构图
 
-<img :src="$withBase('/images/jpom-func-arch.jpg')" style="zoom: 120%">
+<img :src="$withBase('/images/jpom-func-arch.jpg')" style="zoom: 120%" alt="jpom-func-arch">
 
 <br/>
 
 ## 🤝 dromara 组织项目
 <span style="width: 150px;flex:1;text-align: left">
     <a href="https://hutool.cn/" target="_blank">
-        <img :src="$withBase('/images/friends/hutool-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/hutool-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="hutool">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="http://sa-token.dev33.cn/" target="_blank">
-        <img :src="$withBase('/images/friends/satoken-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/satoken-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="satoken">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="https://www.maxkey.top/" target="_blank">
-        <img :src="$withBase('/images/friends/maxkey.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/maxkey.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="maxkey">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="https://liteflow.yomahub.com/" target="_blank">
-        <img :src="$withBase('/images/friends/liteflow-logo.png')" class="no-zoom" style="height:40px;max-width:170px;margin: 10px;">
+        <img :src="$withBase('/images/friends/liteflow-logo.png')" class="no-zoom" style="height:40px;max-width:170px;margin: 10px;" alt="liteflow">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="https://tlog.yomahub.com/" target="_blank">
-        <img :src="$withBase('/images/friends/tlog-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/tlog-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="tlog">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
     <a href="https://forest.dtflyx.com/" target="_blank">
-        <img :src="$withBase('/images/friends/forest-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/forest-logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="forest">
+    </a>
+</span>
+<span style="width: 150px;text-align: left">
+    <a href="https://easy-es.cn/" target="_blank">
+        <img :src="$withBase('/images/friends/easy-es.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="easy-es">
+    </a>
+</span>
+<span style="width: 150px;text-align: left">
+    <a href="https://su.usthe.com/" target="_blank">
+        <img :src="$withBase('/images/friends/hor-brand128.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="hor-brand128">
+    </a>
+</span>
+<span style="width: 150px;text-align: left">
+    <a href="https://hertzbeat.com/" target="_blank">
+        <img :src="$withBase('/images/friends/hertzbeat_brand.jpg')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="hertzbeat">
     </a>
 </span>
 
 ## 🧲友情链接
 <span style="width: 150px;text-align: left">
     <a href="https://shop108037867.taobao.com" target="_blank">
-        <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;">
+        <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="yuanlaiyishe">
     </a>
 </span>
+<span style="width: 150px;text-align: left">
+    <a href="https://weihongbin.com/" target="_blank">
+        <img :src="$withBase('/images/friends/weihongbin.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="weihongbin">
+    </a>
+</span>
+
+
+<div class="wwads-cn wwads-horizontal" style="max-width:350px;"> <link rel="stylesheet" href="https://cdn.wwads.cn/css/wwads.css">
+<a href="https://wwads.cn?aff_id=217" class="wwads-img" target="_blank" rel="nofollow">
+<img src="https://cdn.wwads.cn/images/placeholder/wwads-friendly-ads.png" width="130" ></a>
+<div class="wwads-content"><a href="https://wwads.cn?aff_id=217" class="wwads-text" target="_blank" rel="nofollow" >B2B Advertising Made Easy —— 我们帮助 to B 企业轻松投放更精准 & 友好的广告</a>
+<a href="https://wwads.cn?aff_id=217" class="wwads-poweredby" title="万维广告——让广告交易像网购一样简单" target="_blank" rel="nofollow"><img class="wwads-logo"><span class="wwads-logo-text">广告</span></a> </div></div>

@@ -132,7 +132,14 @@ fi
 
 # 判断
 if [[ -z "${JPOM_TYPE}" ]] ; then
-    TYPE="Server";
+    JPOM_TYPE="Server";
+fi
+
+versions="";
+temp_result=$(echo ${JPOM_TYPE} | grep "-")
+if [[ "${temp_result}" != "" ]] ; then
+    JPOM_TYPE=`echo "${temp_result}"|awk -F '-' '{print $1}'`
+    versions=`echo "${temp_result}"|awk -F '-' '{print $2}'`
 fi
 # 创建指定目录
 # 下载类型转小写
@@ -140,13 +147,15 @@ url_type=`echo ${JPOM_TYPE} | tr 'A-Z' 'a-z'`
 # 记录下当前目录，用于后续删除 install.sh 脚本
 previous_dir=`pwd`
 jpom_dir=/usr/local/jpom-${url_type}
-mkdir -p jpom_dir
-cd jpom_dir
-echo "开始安装：${JPOM_TYPE}, 安装目录 ${jpom_dir}"
+mkdir -p jpom_dir && cd jpom_dir
+now_dir=`pwd`
+echo "开始安装：${JPOM_TYPE}  ${versions}, 安装目录 ${now_dir}"
 # 判断是否存在文件
 if [[ ! -f "${JPOM_TYPE}.zip" ]]; then
-  # 获取最新的版本号
-  versions=`curl -LfsS https://jpom-docs.keepbx.cn/docs/versions.tag`
+  if [[ -z "${versions}" ]] ; then
+    # 获取最新的版本号
+    versions=`curl -LfsS https://jpom-docs.keepbx.cn/docs/versions.tag`
+  fi
   download_url="https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/${url_type}-${versions}-release.zip"
   wget -O ${JPOM_TYPE}.zip ${download_url}
 fi
