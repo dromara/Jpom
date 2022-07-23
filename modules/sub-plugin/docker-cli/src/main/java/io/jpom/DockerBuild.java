@@ -327,7 +327,7 @@ public class DockerBuild implements AutoCloseable {
             HashSet<String> tags = new HashSet<>();
             tags.add(image);
             try {
-                File file = DockerUtil.getResourceToFile(runsOn + "/Dockerfile", tempDir);
+                File file = DockerUtil.getResourceToFile(String.format("runs/%s/Dockerfile", runsOn), tempDir);
                 if (file == null) {
                     throw new IllegalArgumentException("当前还不支持：" + runsOn);
                 }

@@ -193,14 +193,8 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
                 }
             }
         } else if (event instanceof ApplicationReadyEvent) {
-            // 初始化环境变量
-            Map<String, String> environment = new HashMap<>(5);
-            environment.put(IPlugin.DATE_PATH_KEY, ExtConfigBean.getInstance().getPath());
-            environment.put(IPlugin.JPOM_VERSION_KEY, JpomManifest.getInstance().getVersion());
-            // 禁止修改
-            Map<String, String> environmentUnmodifiable = MapUtil.unmodifiable(environment);
-            // 初始化
-            PLUGIN_MAP.forEach((s, value) -> value.forEach(pluginItemWrap -> pluginItemWrap.getPlugin().initialize(environmentUnmodifiable)));
+            System.setProperty(IPlugin.DATE_PATH_KEY, ExtConfigBean.getInstance().getPath());
+            System.setProperty(IPlugin.JPOM_VERSION_KEY, JpomManifest.getInstance().getVersion());
         }
 
     }

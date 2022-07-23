@@ -46,33 +46,6 @@ public interface IPlugin extends AutoCloseable {
 
 
     /**
-     * 初始化插件
-     *
-     * @param environment 运行的环境变量
-     */
-    default void initialize(Map<String, String> environment) {
-    }
-
-    /**
-     * 获取插件的环境变量
-     *
-     * @return map
-     */
-    default Map<String, String> getEnvironment() {
-        return null;
-    }
-
-    /**
-     * 获取数据目录文件夹
-     *
-     * @return data path
-     */
-    default String getDataPath() {
-        Map<String, String> environment = this.getEnvironment();
-        return MapUtil.getStr(environment, DATE_PATH_KEY);
-    }
-
-    /**
      * 执行插件方法
      *
      * @param main      拦截到到对象

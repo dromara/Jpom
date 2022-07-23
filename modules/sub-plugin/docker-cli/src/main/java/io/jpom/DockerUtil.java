@@ -38,10 +38,14 @@ import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import io.jpom.plugin.IPlugin;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.ResourceUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,6 +58,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DockerUtil {
 
     private static final Map<String, DockerClient> DOCKER_CLIENT_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 资源路径参考 {@link org.springframework.boot.context.config.ConfigDataEnvironment}
+     */
+    private static final String[] FILE_PATHS = new String[]{System.getProperty(IPlugin.DATE_PATH_KEY) + File.separator, "file:./config/", "file:./", "classpath:/config/", "classpath:/"};
 
     public static DockerClient get(Map<String, Object> parameter) {
         String host = (String) parameter.get("dockerHost");
@@ -131,6 +140,22 @@ public class DockerUtil {
      */
     public static File getResourceToFile(String name, File tempDir) {
         try {
+            for (String filePath : FILE_PATHS) {
+                File file;
+                try {
+                    file = ResourceUtils.getFile(filePath + name);
+                    if (!file.exists()) {
+                        throw new FileNotFoundException();
+                    }
+                } catch (FileNotFoundException e) {
+                    log.debug("{} not found", filePath + name);
+                    continue;
+                }
+                log.debug("file:{}", file.getAbsolutePath());
+                File tempFile = DockerUtil.createTemp(name, tempDir);
+                Files.copy(file.toPath(), tempFile.toPath());
+                return tempFile;
+            }
             Resource resourceObj = ResourceUtil.getResourceObj(name);
             InputStream stream = resourceObj.getStream();
             File tempFile = DockerUtil.createTemp(name, tempDir);
