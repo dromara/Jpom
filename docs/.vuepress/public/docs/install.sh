@@ -130,7 +130,7 @@ if [[ "$temp_result" != "" ]]; then
 	installMvnFn
 fi
 
-# 判断
+# 判断是否填写了安装类型
 if [[ -z "${JPOM_TYPE}" ]] ; then
     JPOM_TYPE="Server";
 fi
@@ -147,7 +147,7 @@ url_type=`echo ${JPOM_TYPE} | tr 'A-Z' 'a-z'`
 # 记录下当前目录，用于后续删除 install.sh 脚本
 previous_dir=`pwd`
 jpom_dir=/usr/local/jpom-${url_type}
-mkdir -p jpom_dir && cd jpom_dir
+mkdir -p ${jpom_dir} && cd ${jpom_dir}
 now_dir=`pwd`
 echo "开始安装：${JPOM_TYPE}  ${versions}, 安装目录 ${now_dir}"
 # 判断是否存在文件
