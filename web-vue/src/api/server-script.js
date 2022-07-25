@@ -101,7 +101,20 @@ export function syncToWorkspace(params) {
   });
 }
 
+/**
+ * 获取触发器地址
+ * @param {*} id
+ */
+export function getTriggerUrl(data) {
+  return axios({
+    url: "/script/trigger-url",
+    method: "post",
+    data: data,
+  });
+}
+
 export const triggerExecTypeMap = {
   0: "手动",
   1: "自动",
+  2: "触发器",
 };

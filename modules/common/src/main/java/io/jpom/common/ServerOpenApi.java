@@ -66,6 +66,10 @@ public class ServerOpenApi {
      * 触发构建 批量触发
      */
     public static final String BUILD_TRIGGER_BUILD_BATCH = API + "/build_batch";
+    /**
+     * 获取当前构建状态和日志
+     */
+    public static final String BUILD_TRIGGER_STATUS = API + "/build_status";
 
     /**
      * SSH 脚本执行, 第一级脚本id,第二级token
@@ -76,8 +80,14 @@ public class ServerOpenApi {
      * SSH 脚本执行 批量触发
      */
     public static final String SSH_COMMAND_TRIGGER_BATCH = API + "/ssh_command_batch";
+
     /**
-     * 获取当前构建状态和日志
+     * 服务端脚本执行, 第一级脚本id,第二级token
      */
-    public static final String BUILD_TRIGGER_STATUS = API + "/build_status";
+    public static final String SERVER_SCRIPT_TRIGGER_URL = API + "/server_script/{id}/{token}";
+
+    /**
+     * 服务端脚本执行 批量触发
+     */
+    public static final String SERVER_SCRIPT_TRIGGER_BATCH = API + "/server_script_batch";
 }

@@ -62,6 +62,10 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
+                <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+              </a-menu-item>
+
+              <a-menu-item>
                 <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
               </a-menu-item>
               <a-menu-item>
@@ -165,17 +169,83 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 触发器 -->
+    <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+      <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+        <a-tabs default-active-key="1">
+          <template slot="tabBarExtraContent">
+            <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
+              <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+            </a-tooltip>
+          </template>
+          <a-tab-pane key="1" tab="执行">
+            <a-space style="display: block" direction="vertical" align="baseline">
+              <a-alert message="温馨提示" type="warning">
+                <template slot="description">
+                  <ul>
+                    <li>单个触发器地址中：第一个随机字符串为构建ID，第二个随机字符串为 token</li>
+                    <li>重置为重新生成触发地址,重置成功后之前的触发器地址将失效,构建触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效</li>
+                    <li>批量构建参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
+                  </ul>
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.triggerBuildUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`单个触发器地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>GET</a-tag> <span>{{ temp.triggerBuildUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.batchTriggerBuildUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`批量触发器地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>POST</a-tag> <span>{{ temp.batchTriggerBuildUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+            </a-space>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import {deleteScript, editScript, getScriptList, syncToWorkspace, unbindScript} from "@/api/server-script";
+import { deleteScript, editScript, getScriptList, syncToWorkspace, unbindScript, getTriggerUrl } from "@/api/server-script";
 import codeEditor from "@/components/codeEditor";
-import {getNodeListAll} from "@/api/node";
+import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/script/script-console";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
-import {parseTime} from "@/utils/time";
-import {mapGetters} from "vuex";
-import {getWorkSpaceListAll} from "@/api/workspace";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { parseTime } from "@/utils/time";
+import { mapGetters } from "vuex";
+import { getWorkSpaceListAll } from "@/api/workspace";
+import Vue from "vue";
 
 export default {
   components: {
@@ -210,6 +280,7 @@ export default {
       tableSelections: [],
       syncToWorkspaceVisible: false,
       workspaceList: [],
+      triggerVisible: false,
     };
   },
   computed: {
@@ -389,6 +460,39 @@ export default {
           return false;
         }
       });
+    },
+    // 触发器
+    handleTrigger(record) {
+      this.temp = Object.assign({}, record);
+      this.tempVue = Vue;
+      getTriggerUrl({
+        id: record.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.fillTriggerResult(res);
+          this.triggerVisible = true;
+        }
+      });
+    },
+    // 重置触发器
+    resetTrigger() {
+      getTriggerUrl({
+        id: this.temp.id,
+        rest: "rest",
+      }).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.fillTriggerResult(res);
+        }
+      });
+    },
+    fillTriggerResult(res) {
+      this.temp.triggerBuildUrl = `${location.protocol}//${location.host}${res.data.triggerBuildUrl}`;
+      this.temp.batchTriggerBuildUrl = `${location.protocol}//${location.host}${res.data.batchTriggerBuildUrl}`;
+
+      this.temp = { ...this.temp };
     },
   },
 };

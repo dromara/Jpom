@@ -206,7 +206,7 @@
               <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" tab="执行构建">
+          <a-tab-pane key="1" tab="执行">
             <a-space style="display: block" direction="vertical" align="baseline">
               <a-alert message="温馨提示" type="warning">
                 <template slot="description">
