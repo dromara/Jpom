@@ -163,6 +163,11 @@ const children = [
     name: "system-config",
     component: () => import("../pages/system/config"),
   },
+  {
+    path: "/system/build-config",
+    name: "build-config",
+    component: () => import("../pages/system/build-config"),
+  },
   // 数据库备份
   {
     path: "/system/backup",

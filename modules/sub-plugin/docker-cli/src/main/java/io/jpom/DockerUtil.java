@@ -62,7 +62,7 @@ public class DockerUtil {
     /**
      * 资源路径参考 {@link org.springframework.boot.context.config.ConfigDataEnvironment}
      */
-    private static final String[] FILE_PATHS = new String[]{System.getProperty(IPlugin.DATE_PATH_KEY) + File.separator, "file:./config/", "file:./", "classpath:/config/", "classpath:/"};
+    public static final String[] FILE_PATHS = new String[]{System.getProperty(IPlugin.DATE_PATH_KEY) + File.separator, "file:./config/", "file:./"};
 
     public static DockerClient get(Map<String, Object> parameter) {
         String host = (String) parameter.get("dockerHost");
@@ -162,8 +162,9 @@ public class DockerUtil {
             FileUtil.writeFromStream(stream, tempFile);
             return tempFile;
         } catch (Exception e) {
-            return null;
+            log.error("{}", e.getMessage(), e);
         }
+        return null;
     }
 
     /**
