@@ -67,7 +67,7 @@ public class CheckMonitor {
             ProxySelectorConfig selectorConfig = SpringUtil.getBean(ProxySelectorConfig.class);
             selectorConfig.refresh();
         });
-        // 开启版本检测调度
+        // 开启系统检测调度（自动备份数据）
         CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {
             try {
                 BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
