@@ -29,7 +29,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.crypto.digest.Digester;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import io.jpom.controller.build.BuildInfoTriggerController;
 import io.jpom.model.BaseIdModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.user.TriggerTokenLogBean;
@@ -53,6 +52,11 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> implements IStatusRecover {
+
+    /**
+     * 填充的长度
+     */
+    private static final int BUILD_INFO_TRIGGER_TOKEN_FILL_LEN = 3;
 
     private final SystemParametersServer parametersServer;
     private final UserService userService;
@@ -188,8 +192,8 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
      * @return userId
      */
     private String parseUserId(List<String> userIds, String token) {
-        String digestCountStr = StrUtil.sub(token, 0, BuildInfoTriggerController.BUILD_INFO_TRIGGER_TOKEN_FILL_LEN);
-        String result = StrUtil.subSuf(token, BuildInfoTriggerController.BUILD_INFO_TRIGGER_TOKEN_FILL_LEN);
+        String digestCountStr = StrUtil.sub(token, 0, TriggerTokenLogServer.BUILD_INFO_TRIGGER_TOKEN_FILL_LEN);
+        String result = StrUtil.subSuf(token, TriggerTokenLogServer.BUILD_INFO_TRIGGER_TOKEN_FILL_LEN);
         int digestCount = Convert.toInt(digestCountStr, 1);
         for (String userId : userIds) {
             String nowStr = new Digester(DigestAlgorithm.SHA256).setDigestCount(digestCount).digestHex(userId);

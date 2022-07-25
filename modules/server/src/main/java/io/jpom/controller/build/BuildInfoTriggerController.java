@@ -60,11 +60,6 @@ public class BuildInfoTriggerController extends BaseServerController {
     private final BuildInfoService buildInfoService;
     private final TriggerTokenLogServer triggerTokenLogServer;
 
-    /**
-     * 填充的长度
-     */
-    public static final int BUILD_INFO_TRIGGER_TOKEN_FILL_LEN = 3;
-
     public BuildInfoTriggerController(BuildInfoService buildInfoService,
                                       TriggerTokenLogServer triggerTokenLogServer) {
         this.buildInfoService = buildInfoService;
