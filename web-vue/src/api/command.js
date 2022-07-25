@@ -1,4 +1,4 @@
-import axios, {loadRouterBase} from "./config";
+import axios, { loadRouterBase } from "./config";
 
 // 命令列表
 export function getCommandList(params) {
@@ -96,6 +96,18 @@ export function syncToWorkspace(params) {
   });
 }
 
+/**
+ * 获取触发器地址
+ * @param {*} id
+ */
+export function getTriggerUrl(data) {
+  return axios({
+    url: "/node/ssh_command/trigger-url",
+    method: "post",
+    data: data,
+  });
+}
+
 export const statusMap = {
   0: "执行中",
   1: "执行结束",
@@ -106,4 +118,5 @@ export const statusMap = {
 export const triggerExecTypeMap = {
   0: "手动",
   1: "自动",
+  2: "触发器",
 };

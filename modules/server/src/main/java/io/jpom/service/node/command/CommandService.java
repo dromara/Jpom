@@ -192,7 +192,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
      * @param params       参数
      * @return 批次ID
      */
-    private String executeBatch(CommandModel commandModel, String params, String nodes, int triggerExecType) {
+    public String executeBatch(CommandModel commandModel, String params, String nodes, int triggerExecType) {
         Assert.notNull(commandModel, "没有对应对命令");
         List<CommandModel.CommandParam> commandParams = CommandModel.params(params);
         List<String> sshIds = StrUtil.split(nodes, StrUtil.COMMA, true, true);
@@ -220,6 +220,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
         commandExecLogModel.setCommandName(commandModel.getName());
         commandExecLogModel.setBatchId(batchId);
         commandExecLogModel.setSshId(sshId);
+        commandExecLogModel.setWorkspaceId(commandModel.getWorkspaceId());
         commandExecLogModel.setTriggerExecType(triggerExecType);
         if (sshModel != null) {
             commandExecLogModel.setSshName(sshModel.getName());

@@ -66,6 +66,16 @@ public class ServerOpenApi {
      * 触发构建 批量触发
      */
     public static final String BUILD_TRIGGER_BUILD_BATCH = API + "/build_batch";
+
+    /**
+     * SSH 脚本执行, 第一级脚本id,第二级token
+     */
+    public static final String SSH_COMMAND_TRIGGER_URL = API + "/ssh_command/{id}/{token}";
+
+    /**
+     * SSH 脚本执行 批量触发
+     */
+    public static final String SSH_COMMAND_TRIGGER_BATCH = API + "/ssh_command_batch";
     /**
      * 获取当前构建状态和日志
      */

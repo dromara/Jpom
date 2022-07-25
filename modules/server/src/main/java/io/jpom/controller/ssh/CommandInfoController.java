@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.ssh;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.pattern.CronPattern;
 import cn.jiangzeyin.common.JsonMessage;
@@ -29,15 +30,20 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.ServerOpenApi;
+import io.jpom.common.UrlRedirectUtil;
+import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.model.data.CommandModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.node.command.CommandExecLogService;
 import io.jpom.service.node.command.CommandService;
+import io.jpom.service.user.TriggerTokenLogServer;
 import io.jpom.util.CommandUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -46,7 +52,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 命令管理
@@ -61,11 +69,14 @@ public class CommandInfoController extends BaseServerController {
 
     private final CommandService commandService;
     private final CommandExecLogService commandExecLogService;
+    private final TriggerTokenLogServer triggerTokenLogServer;
 
     public CommandInfoController(CommandService commandService,
-                                 CommandExecLogService commandExecLogService) {
+                                 CommandExecLogService commandExecLogService,
+                                 TriggerTokenLogServer triggerTokenLogServer) {
         this.commandService = commandService;
         this.commandExecLogService = commandExecLogService;
+        this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
     /**
@@ -204,5 +215,46 @@ public class CommandInfoController extends BaseServerController {
         commandService.checkUserWorkspace(workspaceId);
         commandService.syncToWorkspace(ids, nowWorkspaceId, workspaceId);
         return JsonMessage.getString(200, "操作成功");
+    }
+
+    /**
+     * get a trigger url
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public String getTriggerUrl(String id, String rest) {
+        CommandModel item = commandService.getByKey(id, getRequest());
+        UserModel user = getUser();
+        CommandModel updateInfo;
+        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
+            updateInfo = new CommandModel();
+            updateInfo.setId(id);
+            updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), commandService.typeName(),
+                item.getId(), user.getId()));
+            commandService.update(updateInfo);
+        } else {
+            updateInfo = item;
+        }
+        Map<String, String> map = this.getBuildToken(updateInfo);
+        return JsonMessage.getString(200, StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+    }
+
+    private Map<String, String> getBuildToken(CommandModel item) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String url = ServerOpenApi.SSH_COMMAND_TRIGGER_URL.
+            replace("{id}", item.getId()).
+            replace("{token}", item.getTriggerToken());
+        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
+        Map<String, String> map = new HashMap<>(10);
+        map.put("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
+        String batchTriggerBuildUrl = String.format("/%s/%s", contextPath, ServerOpenApi.SSH_COMMAND_TRIGGER_BATCH);
+        map.put("batchTriggerBuildUrl", FileUtil.normalize(batchTriggerBuildUrl));
+
+        map.put("id", item.getId());
+        map.put("token", item.getTriggerToken());
+        return map;
     }
 }
