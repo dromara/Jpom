@@ -47,98 +47,125 @@ import java.util.List;
  */
 @Service
 public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> implements ICron<NodeScriptModel> {
+    private final NodeScriptExecLogServer execLogServer;
 
-	public NodeScriptServer() {
-		super(AgentConfigBean.SCRIPT);
-	}
+    public NodeScriptServer(NodeScriptExecLogServer execLogServer) {
+        super(AgentConfigBean.SCRIPT);
+        this.execLogServer = execLogServer;
+    }
 
-	@Override
-	public List<NodeScriptModel> list() {
-		List<NodeScriptModel> nodeScriptModels = super.list();
-		if (nodeScriptModels == null) {
-			return null;
-		}
-		// 读取文件内容
-		nodeScriptModels.forEach(NodeScriptModel::readFileTime);
-		return nodeScriptModels;
-	}
+    @Override
+    public List<NodeScriptModel> list() {
+        List<NodeScriptModel> nodeScriptModels = super.list();
+        if (nodeScriptModels == null) {
+            return null;
+        }
+        // 读取文件内容
+        nodeScriptModels.forEach(NodeScriptModel::readFileTime);
+        return nodeScriptModels;
+    }
 
-	@Override
-	public NodeScriptModel getItem(String id) {
-		NodeScriptModel nodeScriptModel = super.getItem(id);
-		if (nodeScriptModel != null) {
-			nodeScriptModel.readFileContext();
-		}
-		return nodeScriptModel;
-	}
+    @Override
+    public NodeScriptModel getItem(String id) {
+        NodeScriptModel nodeScriptModel = super.getItem(id);
+        if (nodeScriptModel != null) {
+            nodeScriptModel.readFileContext();
+        }
+        return nodeScriptModel;
+    }
 
-	@Override
-	public void addItem(NodeScriptModel nodeScriptModel) {
-		super.addItem(nodeScriptModel);
-		nodeScriptModel.saveFile();
-		this.checkCron(nodeScriptModel);
-	}
+    @Override
+    public void addItem(NodeScriptModel nodeScriptModel) {
+        super.addItem(nodeScriptModel);
+        nodeScriptModel.saveFile();
+        this.checkCron(nodeScriptModel);
+    }
 
-	@Override
-	public void updateItem(NodeScriptModel nodeScriptModel) {
-		super.updateItem(nodeScriptModel);
-		nodeScriptModel.saveFile();
-		this.checkCron(nodeScriptModel);
-	}
+    @Override
+    public void updateItem(NodeScriptModel nodeScriptModel) {
+        super.updateItem(nodeScriptModel);
+        nodeScriptModel.saveFile();
+        this.checkCron(nodeScriptModel);
+    }
 
-	@Override
-	public void deleteItem(String id) {
-		NodeScriptModel nodeScriptModel = getItem(id);
-		if (nodeScriptModel != null) {
-			FileUtil.del(nodeScriptModel.getFile(true).getParentFile());
-		}
-		super.deleteItem(id);
-		String taskId = "script:" + id;
-		CronUtils.remove(taskId);
-	}
+    @Override
+    public void deleteItem(String id) {
+        NodeScriptModel nodeScriptModel = getItem(id);
+        if (nodeScriptModel != null) {
+            FileUtil.del(nodeScriptModel.getFile(true).getParentFile());
+        }
+        super.deleteItem(id);
+        String taskId = "script:" + id;
+        CronUtils.remove(taskId);
+    }
 
-	@Override
-	public boolean checkCron(NodeScriptModel nodeScriptModel) {
-		String id = "script:" + nodeScriptModel.getId();
-		if (StrUtil.isEmpty(nodeScriptModel.getAutoExecCron())) {
-			CronUtils.remove(id);
-			return false;
-		} else {
-			CronUtils.upsert(id, nodeScriptModel.getAutoExecCron(), new CronTask(nodeScriptModel.getId()));
-			return true;
-		}
-	}
+    @Override
+    public boolean checkCron(NodeScriptModel nodeScriptModel) {
+        String id = "script:" + nodeScriptModel.getId();
+        if (StrUtil.isEmpty(nodeScriptModel.getAutoExecCron())) {
+            CronUtils.remove(id);
+            return false;
+        } else {
+            CronUtils.upsert(id, nodeScriptModel.getAutoExecCron(), new CronTask(nodeScriptModel.getId()));
+            return true;
+        }
+    }
 
-	@Override
-	public List<NodeScriptModel> queryStartingList() {
-		return this.list();
-	}
+    @Override
+    public List<NodeScriptModel> queryStartingList() {
+        return this.list();
+    }
 
-	private static class CronTask implements Task {
-		private final String id;
+    private static class CronTask implements Task {
+        private final String id;
 
-		public CronTask(String id) {
-			this.id = id;
-		}
+        public CronTask(String id) {
+            this.id = id;
+        }
 
-		@Override
-		public void execute() {
-			NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
-			NodeScriptModel scriptServerItem = nodeScriptServer.getItem(id);
-			if (scriptServerItem == null) {
-				return;
-			}
-			// 创建记录
-			NodeScriptExecLogServer execLogServer = SpringUtil.getBean(NodeScriptExecLogServer.class);
-			NodeScriptExecLogModel nodeScriptExecLogModel = new NodeScriptExecLogModel();
-			nodeScriptExecLogModel.setId(IdUtil.fastSimpleUUID());
-			nodeScriptExecLogModel.setCreateTimeMillis(SystemClock.now());
-			nodeScriptExecLogModel.setScriptId(scriptServerItem.getId());
-			nodeScriptExecLogModel.setScriptName(scriptServerItem.getName());
-			nodeScriptExecLogModel.setWorkspaceId(scriptServerItem.getWorkspaceId());
-			execLogServer.addItem(nodeScriptExecLogModel);
-			// 执行
-			ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs());
-		}
-	}
+        @Override
+        public void execute() {
+            NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
+            NodeScriptModel scriptServerItem = nodeScriptServer.getItem(id);
+            if (scriptServerItem == null) {
+                return;
+            }
+            // 创建记录
+            NodeScriptExecLogServer execLogServer = SpringUtil.getBean(NodeScriptExecLogServer.class);
+            NodeScriptExecLogModel nodeScriptExecLogModel = new NodeScriptExecLogModel();
+            nodeScriptExecLogModel.setId(IdUtil.fastSimpleUUID());
+            nodeScriptExecLogModel.setCreateTimeMillis(SystemClock.now());
+            nodeScriptExecLogModel.setScriptId(scriptServerItem.getId());
+            nodeScriptExecLogModel.setScriptName(scriptServerItem.getName());
+            nodeScriptExecLogModel.setWorkspaceId(scriptServerItem.getWorkspaceId());
+            nodeScriptExecLogModel.setTriggerExecType(1);
+            execLogServer.addItem(nodeScriptExecLogModel);
+            // 执行
+            ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs());
+        }
+    }
+
+    /**
+     * 执行脚本
+     *
+     * @param scriptServerItem 脚本
+     * @param type             类型
+     * @param args             参数
+     * @return 执行记录ID
+     */
+    public String execute(NodeScriptModel scriptServerItem, int type, String uerName, String args) {
+        NodeScriptExecLogModel nodeScriptExecLogModel = new NodeScriptExecLogModel();
+        nodeScriptExecLogModel.setId(IdUtil.fastSimpleUUID());
+        nodeScriptExecLogModel.setCreateTimeMillis(SystemClock.now());
+        nodeScriptExecLogModel.setScriptId(scriptServerItem.getId());
+        nodeScriptExecLogModel.setScriptName(scriptServerItem.getName());
+        nodeScriptExecLogModel.setModifyUser(uerName);
+        nodeScriptExecLogModel.setWorkspaceId(scriptServerItem.getWorkspaceId());
+        nodeScriptExecLogModel.setTriggerExecType(type);
+        execLogServer.addItem(nodeScriptExecLogModel);
+        String userArgs = StrUtil.emptyToDefault(args, scriptServerItem.getDefArgs());
+        // 执行
+        ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), userArgs);
+        return nodeScriptExecLogModel.getId();
+    }
 }

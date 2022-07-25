@@ -22,50 +22,36 @@
  */
 package io.jpom.model.data;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * 脚本执行记录
  *
  * @author bwcx_jzy
  * @since 2021/12/26
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class NodeScriptExecLogModel extends BaseWorkspaceModel {
 
-	/**
-	 * 运行时间
-	 */
-	private Long createTimeMillis;
+    /**
+     * 运行时间
+     */
+    private Long createTimeMillis;
 
-	/**
-	 * 脚本ID
-	 */
-	private String scriptId;
+    /**
+     * 脚本ID
+     */
+    private String scriptId;
 
-	/**
-	 * 脚本名称
-	 */
-	private String scriptName;
+    /**
+     * 脚本名称
+     */
+    private String scriptName;
 
-	public String getScriptId() {
-		return scriptId;
-	}
-
-	public void setScriptId(String scriptId) {
-		this.scriptId = scriptId;
-	}
-
-	public String getScriptName() {
-		return scriptName;
-	}
-
-	public void setScriptName(String scriptName) {
-		this.scriptName = scriptName;
-	}
-
-	public Long getCreateTimeMillis() {
-		return createTimeMillis;
-	}
-
-	public void setCreateTimeMillis(Long createTimeMillis) {
-		this.createTimeMillis = createTimeMillis;
-	}
+    /**
+     * 触发类型 {0，手动，1 自动触发，2 触发器}
+     */
+    private Integer triggerExecType;
 }

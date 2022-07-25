@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CheckMonitor {
 
     @PreLoadMethod
-    public static void init() {
+    private static void init() {
         // 开启检测调度
         CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {
             try {

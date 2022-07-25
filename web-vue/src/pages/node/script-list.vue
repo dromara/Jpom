@@ -73,6 +73,7 @@
         <a-space>
           <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
           <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
+          <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
           <!-- <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button> -->
           <a-tooltip :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去解绑' : '删除'}`">
             <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
@@ -130,16 +131,82 @@
     <a-modal :title="drawerTitle" width="85vw" v-model="drawerLogVisible" :footer="null" :maskClosable="false">
       <script-log v-if="drawerLogVisible" :scriptId="temp.scriptId" :nodeId="temp.nodeId" />
     </a-modal>
+    <!-- 触发器 -->
+    <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+      <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+        <a-tabs default-active-key="1">
+          <template slot="tabBarExtraContent">
+            <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
+              <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+            </a-tooltip>
+          </template>
+          <a-tab-pane key="1" tab="执行">
+            <a-space style="display: block" direction="vertical" align="baseline">
+              <a-alert message="温馨提示" type="warning">
+                <template slot="description">
+                  <ul>
+                    <li>单个触发器地址中：第一个随机字符串为构建ID，第二个随机字符串为 token</li>
+                    <li>重置为重新生成触发地址,重置成功后之前的触发器地址将失效,构建触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效</li>
+                    <li>批量构建参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
+                  </ul>
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.triggerBuildUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`单个触发器地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>GET</a-tag> <span>{{ temp.triggerBuildUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.batchTriggerBuildUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`批量触发器地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>POST</a-tag> <span>{{ temp.batchTriggerBuildUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+            </a-space>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import {delAllCache, deleteScript, editScript, getScriptListAll, itemScript} from "@/api/node-other";
+import { delAllCache, deleteScript, editScript, getScriptListAll, itemScript, getTriggerUrl } from "@/api/node-other";
 import codeEditor from "@/components/codeEditor";
-import {getNodeListAll} from "@/api/node";
+import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/node/node-layout/other/script-console";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
-import {parseTime} from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { parseTime } from "@/utils/time";
 import ScriptLog from "@/pages/node/node-layout/other/script-log";
+import Vue from "vue";
 
 export default {
   components: {
@@ -168,12 +235,13 @@ export default {
         { title: "修改时间", dataIndex: "modifyTimeMillis", width: 170, sorter: true, ellipsis: true, scopedSlots: { customRender: "modifyTimeMillis" } },
         { title: "修改人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "最后操作人", dataIndex: "lastRunUser", ellipsis: true, scopedSlots: { customRender: "lastRunUser" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 170 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "220px" },
       ],
       rules: {
         name: [{ required: true, message: "Please input Script name", trigger: "blur" }],
         context: [{ required: true, message: "Please input Script context", trigger: "blur" }],
       },
+      triggerVisible: false,
     };
   },
   computed: {
@@ -313,6 +381,39 @@ export default {
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
+    },
+    // 触发器
+    handleTrigger(record) {
+      this.temp = Object.assign({}, record);
+      this.tempVue = Vue;
+      getTriggerUrl({
+        id: record.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.fillTriggerResult(res);
+          this.triggerVisible = true;
+        }
+      });
+    },
+    // 重置触发器
+    resetTrigger() {
+      getTriggerUrl({
+        id: this.temp.id,
+        rest: "rest",
+      }).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.fillTriggerResult(res);
+        }
+      });
+    },
+    fillTriggerResult(res) {
+      this.temp.triggerBuildUrl = `${location.protocol}//${location.host}${res.data.triggerBuildUrl}`;
+      this.temp.batchTriggerBuildUrl = `${location.protocol}//${location.host}${res.data.batchTriggerBuildUrl}`;
+
+      this.temp = { ...this.temp };
     },
   },
 };
