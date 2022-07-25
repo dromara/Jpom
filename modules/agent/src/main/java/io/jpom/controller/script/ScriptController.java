@@ -67,187 +67,202 @@ import java.util.List;
 @RequestMapping(value = "/script")
 public class ScriptController extends BaseAgentController {
 
-	private final NodeScriptServer nodeScriptServer;
-	private final NodeScriptExecLogServer nodeScriptExecLogServer;
+    private final NodeScriptServer nodeScriptServer;
+    private final NodeScriptExecLogServer nodeScriptExecLogServer;
 
-	public ScriptController(NodeScriptServer nodeScriptServer,
-							NodeScriptExecLogServer nodeScriptExecLogServer) {
-		this.nodeScriptServer = nodeScriptServer;
-		this.nodeScriptExecLogServer = nodeScriptExecLogServer;
-	}
+    public ScriptController(NodeScriptServer nodeScriptServer,
+                            NodeScriptExecLogServer nodeScriptExecLogServer) {
+        this.nodeScriptServer = nodeScriptServer;
+        this.nodeScriptExecLogServer = nodeScriptExecLogServer;
+    }
 
-	@RequestMapping(value = "list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String list() {
-		return JsonMessage.getString(200, "", nodeScriptServer.list());
-	}
+    @RequestMapping(value = "list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String list() {
+        return JsonMessage.getString(200, "", nodeScriptServer.list());
+    }
 
-	@RequestMapping(value = "item.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String item(String id) {
-		return JsonMessage.getString(200, "", nodeScriptServer.getItem(id));
-	}
+    @RequestMapping(value = "item.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String item(String id) {
+        return JsonMessage.getString(200, "", nodeScriptServer.getItem(id));
+    }
 
-	@RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String save(NodeScriptModel nodeScriptModel, String type) {
-		Assert.notNull(nodeScriptModel, "没有数据");
-		Assert.hasText(nodeScriptModel.getContext(), "内容为空");
-		//
-		String autoExecCron = nodeScriptModel.getAutoExecCron();
-		if (StrUtil.isNotEmpty(autoExecCron)) {
-			try {
-				new CronPattern(autoExecCron);
-			} catch (Exception e) {
-				throw new IllegalArgumentException("定时执行表达式格式不正确");
-			}
-		}
-		nodeScriptModel.setWorkspaceId(getWorkspaceId());
-		//
-		nodeScriptModel.setContext(HtmlUtil.unescape(nodeScriptModel.getContext()));
-		NodeScriptModel eModel = nodeScriptServer.getItem(nodeScriptModel.getId());
-		boolean needCreate = false;
-		if ("add".equalsIgnoreCase(type)) {
-			Assert.isNull(eModel, "id已经存在啦");
+    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String save(NodeScriptModel nodeScriptModel, String type) {
+        Assert.notNull(nodeScriptModel, "没有数据");
+        Assert.hasText(nodeScriptModel.getContext(), "内容为空");
+        //
+        String autoExecCron = nodeScriptModel.getAutoExecCron();
+        if (StrUtil.isNotEmpty(autoExecCron)) {
+            try {
+                new CronPattern(autoExecCron);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("定时执行表达式格式不正确");
+            }
+        }
+        nodeScriptModel.setWorkspaceId(getWorkspaceId());
+        //
+        nodeScriptModel.setContext(HtmlUtil.unescape(nodeScriptModel.getContext()));
+        NodeScriptModel eModel = nodeScriptServer.getItem(nodeScriptModel.getId());
+        boolean needCreate = false;
+        if ("add".equalsIgnoreCase(type)) {
+            Assert.isNull(eModel, "id已经存在啦");
 
-			nodeScriptModel.setId(IdUtil.fastSimpleUUID());
-			File file = nodeScriptModel.getFile(true);
-			if (file.exists() || file.isDirectory()) {
-				return JsonMessage.getString(405, "当地id路径文件已经存在来，请修改");
-			}
-			nodeScriptServer.addItem(nodeScriptModel);
-			return JsonMessage.getString(200, "添加成功");
-		} else if ("sync".equalsIgnoreCase(type)) {
-			if (eModel == null) {
-				eModel = new NodeScriptModel();
-				eModel.setId(nodeScriptModel.getId());
-				needCreate = true;
-			}
-			eModel.setScriptType("server-sync");
-		}
-		Assert.notNull(eModel, "对应数据不存在");
-		eModel.setName(nodeScriptModel.getName());
-		eModel.setAutoExecCron(autoExecCron);
-		eModel.setDescription(nodeScriptModel.getDescription());
-		eModel.setContext(nodeScriptModel.getContext());
-		eModel.setDefArgs(nodeScriptModel.getDefArgs());
-		if (needCreate) {
-			nodeScriptServer.addItem(eModel);
-		} else {
-			nodeScriptServer.updateItem(eModel);
-		}
-		return JsonMessage.getString(200, "修改成功");
-	}
+            nodeScriptModel.setId(IdUtil.fastSimpleUUID());
+            File file = nodeScriptModel.getFile(true);
+            if (file.exists() || file.isDirectory()) {
+                return JsonMessage.getString(405, "当地id路径文件已经存在来，请修改");
+            }
+            nodeScriptServer.addItem(nodeScriptModel);
+            return JsonMessage.getString(200, "添加成功");
+        } else if ("sync".equalsIgnoreCase(type)) {
+            if (eModel == null) {
+                eModel = new NodeScriptModel();
+                eModel.setId(nodeScriptModel.getId());
+                needCreate = true;
+            }
+            eModel.setScriptType("server-sync");
+        }
+        Assert.notNull(eModel, "对应数据不存在");
+        eModel.setName(nodeScriptModel.getName());
+        eModel.setAutoExecCron(autoExecCron);
+        eModel.setDescription(nodeScriptModel.getDescription());
+        eModel.setContext(nodeScriptModel.getContext());
+        eModel.setDefArgs(nodeScriptModel.getDefArgs());
+        if (needCreate) {
+            nodeScriptServer.addItem(eModel);
+        } else {
+            nodeScriptServer.updateItem(eModel);
+        }
+        return JsonMessage.getString(200, "修改成功");
+    }
 
-	@RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String del(String id) {
-		nodeScriptServer.deleteItem(id);
-		return JsonMessage.getString(200, "删除成功");
-	}
+    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String del(String id) {
+        nodeScriptServer.deleteItem(id);
+        return JsonMessage.getString(200, "删除成功");
+    }
 
-	@RequestMapping(value = "upload.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String upload() throws IOException {
-		MultipartFileBuilder multipartFileBuilder = createMultipart()
-				.addFieldName("file").setFileExt("bat", "sh");
-		multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
-		multipartFileBuilder.setUseOriginalFilename(true);
-		String path = multipartFileBuilder.save();
-		File file = FileUtil.file(path);
-		String context = FileUtil.readString(path, ExtConfigBean.getInstance().getConsoleLogCharset());
-		Assert.hasText(context, "脚本内容为空");
+    @RequestMapping(value = "upload.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String upload() throws IOException {
+        MultipartFileBuilder multipartFileBuilder = createMultipart()
+            .addFieldName("file").setFileExt("bat", "sh");
+        multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
+        multipartFileBuilder.setUseOriginalFilename(true);
+        String path = multipartFileBuilder.save();
+        File file = FileUtil.file(path);
+        String context = FileUtil.readString(path, ExtConfigBean.getInstance().getConsoleLogCharset());
+        Assert.hasText(context, "脚本内容为空");
 
-		String name = file.getName();
-		String id = SecureUtil.sha1(name);
-		NodeScriptModel eModel = nodeScriptServer.getItem(id);
-		if (eModel != null) {
-			return JsonMessage.getString(405, "对应脚本模板已经存在啦");
-		}
-		eModel = new NodeScriptModel();
-		eModel.setId(id);
-		eModel.setName(name);
-		eModel.setWorkspaceId(getWorkspaceId());
-		eModel.setContext(context);
-		file = eModel.getFile(true);
-		if (file.exists() || file.isDirectory()) {
-			return JsonMessage.getString(405, "当地id路径文件已经存在来，请修改");
-		}
-		nodeScriptServer.addItem(eModel);
-		return JsonMessage.getString(200, "导入成功");
-	}
+        String name = file.getName();
+        String id = SecureUtil.sha1(name);
+        NodeScriptModel eModel = nodeScriptServer.getItem(id);
+        if (eModel != null) {
+            return JsonMessage.getString(405, "对应脚本模板已经存在啦");
+        }
+        eModel = new NodeScriptModel();
+        eModel.setId(id);
+        eModel.setName(name);
+        eModel.setWorkspaceId(getWorkspaceId());
+        eModel.setContext(context);
+        file = eModel.getFile(true);
+        if (file.exists() || file.isDirectory()) {
+            return JsonMessage.getString(405, "当地id路径文件已经存在来，请修改");
+        }
+        nodeScriptServer.addItem(eModel);
+        return JsonMessage.getString(200, "导入成功");
+    }
 
-	/**
-	 * 获取的日志
-	 *
-	 * @param id        id
-	 * @param executeId 执行ID
-	 * @param line      需要获取的行号
-	 * @return json
-	 */
-	@RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String getNowLog(@ValidatorItem() String id,
-							@ValidatorItem() String executeId,
-							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-		NodeScriptModel item = nodeScriptServer.getItem(id);
-		Assert.notNull(item, "没有对应数据");
-		File logFile = item.logFile(executeId);
-		Assert.state(FileUtil.isFile(logFile), "日志文件错误");
+    /**
+     * 获取的日志
+     *
+     * @param id        id
+     * @param executeId 执行ID
+     * @param line      需要获取的行号
+     * @return json
+     */
+    @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String getNowLog(@ValidatorItem() String id,
+                            @ValidatorItem() String executeId,
+                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+        NodeScriptModel item = nodeScriptServer.getItem(id);
+        Assert.notNull(item, "没有对应数据");
+        File logFile = item.logFile(executeId);
+        Assert.state(FileUtil.isFile(logFile), "日志文件错误");
 
-		JSONObject data = FileUtils.readLogFile(logFile, line);
-		// 运行中
-		data.put("run", ScriptProcessBuilder.isRun(executeId));
-		return JsonMessage.getString(200, "ok", data);
-	}
+        JSONObject data = FileUtils.readLogFile(logFile, line);
+        // 运行中
+        data.put("run", ScriptProcessBuilder.isRun(executeId));
+        return JsonMessage.getString(200, "ok", data);
+    }
 
-	/**
-	 * 删除日志
-	 *
-	 * @param id        id
-	 * @param executeId 执行ID
-	 * @return json
-	 */
-	@RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String delLog(@ValidatorItem() String id,
-						 @ValidatorItem() String executeId) {
-		NodeScriptModel item = nodeScriptServer.getItem(id);
-		if (item == null) {
-			return JsonMessage.getString(200, "对应的脚本模版已经不存在拉");
-		}
-		Assert.notNull(item, "没有对应数据");
-		File logFile = item.logFile(executeId);
-		boolean fastDel = CommandUtil.systemFastDel(logFile);
-		Assert.state(!fastDel, "删除日志文件失败");
-		return JsonMessage.getString(200, "删除成功");
-	}
+    /**
+     * 删除日志
+     *
+     * @param id        id
+     * @param executeId 执行ID
+     * @return json
+     */
+    @RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String delLog(@ValidatorItem() String id,
+                         @ValidatorItem() String executeId) {
+        NodeScriptModel item = nodeScriptServer.getItem(id);
+        if (item == null) {
+            return JsonMessage.getString(200, "对应的脚本模版已经不存在拉");
+        }
+        Assert.notNull(item, "没有对应数据");
+        File logFile = item.logFile(executeId);
+        boolean fastDel = CommandUtil.systemFastDel(logFile);
+        Assert.state(!fastDel, "删除日志文件失败");
+        return JsonMessage.getString(200, "删除成功");
+    }
 
-	/**
-	 * 同步定时执行日志
-	 *
-	 * @param pullCount 领取个数
-	 * @return json
-	 */
-	@RequestMapping(value = "pull_exec_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String pullExecLog(@ValidatorItem int pullCount) {
-		Assert.state(pullCount > 0, "pull count error");
-		List<NodeScriptExecLogModel> list = nodeScriptExecLogServer.list();
-		list = CollUtil.sub(list, 0, pullCount);
-		if (list == null) {
-			return JsonMessage.getString(200, "", Collections.EMPTY_LIST);
-		}
-		return JsonMessage.getString(200, "", list);
-	}
+    /**
+     * 执行
+     *
+     * @param id ID
+     * @return json
+     */
+    @RequestMapping(value = "exec", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String exec(@ValidatorItem() String id, String args) {
+        NodeScriptModel item = nodeScriptServer.getItem(id);
+        Assert.notNull(item, "对应脚本已经不存在啦");
+        String nowUserName = getNowUserName();
+        String execute = nodeScriptServer.execute(item, 2, nowUserName, args);
+        return JsonMessage.getString(200, "开始执行", execute);
+    }
 
-	/**
-	 * 删除定时执行日志
-	 *
-	 * @param jsonObject 拉起参数
-	 * @return json
-	 */
-	@RequestMapping(value = "del_exec_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String delExecLog(@RequestBody JSONObject jsonObject) {
-		JSONArray ids = jsonObject.getJSONArray("ids");
-		if (ids != null) {
-			for (Object id : ids) {
-				String idStr = (String) id;
-				nodeScriptExecLogServer.deleteItem(idStr);
-			}
-		}
-		return JsonMessage.getString(200, "删除成功");
-	}
+    /**
+     * 同步定时执行日志
+     *
+     * @param pullCount 领取个数
+     * @return json
+     */
+    @RequestMapping(value = "pull_exec_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String pullExecLog(@ValidatorItem int pullCount) {
+        Assert.state(pullCount > 0, "pull count error");
+        List<NodeScriptExecLogModel> list = nodeScriptExecLogServer.list();
+        list = CollUtil.sub(list, 0, pullCount);
+        if (list == null) {
+            return JsonMessage.getString(200, "", Collections.EMPTY_LIST);
+        }
+        return JsonMessage.getString(200, "", list);
+    }
+
+    /**
+     * 删除定时执行日志
+     *
+     * @param jsonObject 拉起参数
+     * @return json
+     */
+    @RequestMapping(value = "del_exec_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String delExecLog(@RequestBody JSONObject jsonObject) {
+        JSONArray ids = jsonObject.getJSONArray("ids");
+        if (ids != null) {
+            for (Object id : ids) {
+                String idStr = (String) id;
+                nodeScriptExecLogServer.deleteItem(idStr);
+            }
+        }
+        return JsonMessage.getString(200, "删除成功");
+    }
 }

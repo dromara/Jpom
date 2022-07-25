@@ -28,6 +28,8 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.File;
 
@@ -37,125 +39,84 @@ import java.io.File;
  * @author jiangzeyin
  * @since 2019/4/24
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class NodeScriptModel extends BaseWorkspaceModel {
-	/**
-	 * 最后执行人员
-	 */
-	private String lastRunUser;
-	/**
-	 * 脚本内容
-	 */
-	private String context;
-	/**
-	 * 自动执行的 cron
-	 */
-	private String autoExecCron;
-	/**
-	 * 默认参数
-	 */
-	private String defArgs;
-	/**
-	 * 描述
-	 */
-	private String description;
-	/**
-	 * 脚本类型
-	 */
-	private String scriptType;
+    /**
+     * 最后执行人员
+     */
+    private String lastRunUser;
+    /**
+     * 脚本内容
+     */
+    private String context;
+    /**
+     * 自动执行的 cron
+     */
+    private String autoExecCron;
+    /**
+     * 默认参数
+     */
+    private String defArgs;
+    /**
+     * 描述
+     */
+    private String description;
+    /**
+     * 脚本类型:server-sync
+     */
+    private String scriptType;
 
-	public String getScriptType() {
-		return scriptType;
-	}
 
-	public void setScriptType(String scriptType) {
-		this.scriptType = scriptType;
-	}
+    public String getLastRunUser() {
+        return StrUtil.emptyToDefault(lastRunUser, StrUtil.DASHED);
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public File getFile(boolean get) {
+        return this.scriptFile(StrUtil.EMPTY);
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public File scriptFile(String child) {
+        if (StrUtil.isEmpty(getId())) {
+            throw new IllegalArgumentException("id 为空");
+        }
+        File path = ConfigBean.getInstance().getScriptPath();
+        return FileUtil.file(path, getId(), StrUtil.format("script{}.{}", child, CommandUtil.SUFFIX));
+    }
 
-	public String getDefArgs() {
-		return defArgs;
-	}
+    public File logFile(String executeId) {
+        if (StrUtil.isEmpty(getId())) {
+            throw new IllegalArgumentException("id 为空");
+        }
+        File path = ConfigBean.getInstance().getScriptPath();
+        return FileUtil.file(path, getId(), "log", executeId + ".log");
+    }
 
-	public void setDefArgs(String defArgs) {
-		this.defArgs = defArgs;
-	}
-
-	public String getAutoExecCron() {
-		return autoExecCron;
-	}
-
-	public void setAutoExecCron(String autoExecCron) {
-		this.autoExecCron = autoExecCron;
-	}
-
-	public String getLastRunUser() {
-		return StrUtil.emptyToDefault(lastRunUser, StrUtil.DASHED);
-	}
-
-	public void setLastRunUser(String lastRunUser) {
-		this.lastRunUser = lastRunUser;
-	}
-
-	public String getContext() {
-		return context;
-	}
-
-	public void setContext(String context) {
-		this.context = context;
-	}
-
-	public File getFile(boolean get) {
-		return this.scriptFile(StrUtil.EMPTY);
-	}
-
-	public File scriptFile(String child) {
-		if (StrUtil.isEmpty(getId())) {
-			throw new IllegalArgumentException("id 为空");
-		}
-		File path = ConfigBean.getInstance().getScriptPath();
-		return FileUtil.file(path, getId(), StrUtil.format("script{}.{}", child, CommandUtil.SUFFIX));
-	}
-
-	public File logFile(String executeId) {
-		if (StrUtil.isEmpty(getId())) {
-			throw new IllegalArgumentException("id 为空");
-		}
-		File path = ConfigBean.getInstance().getScriptPath();
-		return FileUtil.file(path, getId(), "log", executeId + ".log");
-	}
-
-	public void saveFile() {
-		File file = this.getFile(true);
-		FileUtil.writeString(getContext(), file, ExtConfigBean.getInstance().getConsoleLogCharset());
+    public void saveFile() {
+        File file = this.getFile(true);
+        FileUtil.writeString(getContext(), file, ExtConfigBean.getInstance().getConsoleLogCharset());
 //        // 添加权限
 //        if (SystemUtil.getOsInfo().isLinux()) {
 //            CommandUtil.execCommand("chmod 755 " + FileUtil.getAbsolutePath(file));
 //        }
-	}
+    }
 
-	/**
-	 * 读取文件信息
-	 */
-	public void readFileTime() {
-		File file = this.getFile(true);
-		long lastModified = file.lastModified();
-		setModifyTime(DateUtil.date(lastModified).toString());
+    /**
+     * 读取文件信息
+     */
+    public void readFileTime() {
+        File file = this.getFile(true);
+        long lastModified = file.lastModified();
+        setModifyTime(DateUtil.date(lastModified).toString());
 
-	}
+    }
 
-	public void readFileContext() {
-		File file = getFile(true);
-		if (FileUtil.exist(file)) {
-			//
-			String context = FileUtil.readString(file, ExtConfigBean.getInstance().getConsoleLogCharset());
-			setContext(context);
-		}
-	}
+    public void readFileContext() {
+        File file = getFile(true);
+        if (FileUtil.exist(file)) {
+            //
+            String context = FileUtil.readString(file, ExtConfigBean.getInstance().getConsoleLogCharset());
+            setContext(context);
+        }
+    }
 }

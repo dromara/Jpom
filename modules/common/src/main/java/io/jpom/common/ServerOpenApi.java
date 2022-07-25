@@ -90,4 +90,14 @@ public class ServerOpenApi {
      * 服务端脚本执行 批量触发
      */
     public static final String SERVER_SCRIPT_TRIGGER_BATCH = API + "/server_script_batch";
+
+    /**
+     * 插件端脚本执行, 第一级脚本id,第二级token
+     */
+    public static final String NODE_SCRIPT_TRIGGER_URL = API + "/node_script/{id}/{token}";
+
+    /**
+     * 插件端脚本执行 批量触发
+     */
+    public static final String NODE_SCRIPT_TRIGGER_BATCH = API + "/node_script_batch";
 }

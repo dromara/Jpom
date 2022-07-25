@@ -73,11 +73,11 @@
   </div>
 </template>
 <script>
-import {getScriptLogList, scriptDel} from "@/api/node-other";
-import {triggerExecTypeMap} from "@/api/node-script";
+import { getScriptLogList, scriptDel, triggerExecTypeMap } from "@/api/node-other";
+// import {triggerExecTypeMap} from "@/api/node-script";
 import ScriptLogView from "@/pages/node/node-layout/other/script-log-view";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
-import {parseTime} from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { parseTime } from "@/utils/time";
 
 export default {
   components: {

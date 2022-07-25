@@ -328,6 +328,23 @@ export function syncScript(params) {
     params: params,
   });
 }
+export const triggerExecTypeMap = {
+  0: "手动",
+  1: "自动",
+  2: "触发器",
+};
+
+/**
+ * 获取触发器地址
+ * @param {*} id
+ */
+export function getTriggerUrl(data) {
+  return axios({
+    url: "/node/script/trigger-url",
+    method: "post",
+    data: data,
+  });
+}
 
 /**
  * 删除 Script

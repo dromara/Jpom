@@ -85,7 +85,9 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLog
             JSONObject jsonObject = (JSONObject) o;
             jsonObject.put("nodeId", nodeModel.getId());
             // 自动
-            jsonObject.put("triggerExecType", 1);
+            if (!jsonObject.containsKey("triggerExecType")) {
+                jsonObject.put("triggerExecType", 1);
+            }
         }
         return jsonArray;
 

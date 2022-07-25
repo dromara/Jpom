@@ -24,6 +24,8 @@ package io.jpom.model.node;
 
 import io.jpom.model.BaseNodeModel;
 import io.jpom.service.h2db.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 脚本模版实体
@@ -32,6 +34,8 @@ import io.jpom.service.h2db.TableName;
  * @since 2021/12/12
  **/
 @TableName(value = "SCRIPT_INFO", name = "节点脚本模版")
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class ScriptCacheModel extends BaseNodeModel {
     /**
      * 脚本ID
@@ -65,62 +69,6 @@ public class ScriptCacheModel extends BaseNodeModel {
      * 触发器 token
      */
     private String triggerToken;
-
-    public String getScriptType() {
-        return scriptType;
-    }
-
-    public void setScriptType(String scriptType) {
-        this.scriptType = scriptType;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getDefArgs() {
-        return defArgs;
-    }
-
-    public void setDefArgs(String defArgs) {
-        this.defArgs = defArgs;
-    }
-
-    public String getAutoExecCron() {
-        return autoExecCron;
-    }
-
-    public void setAutoExecCron(String autoExecCron) {
-        this.autoExecCron = autoExecCron;
-    }
-
-    public String getScriptId() {
-        return scriptId;
-    }
-
-    public void setScriptId(String scriptId) {
-        this.scriptId = scriptId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLastRunUser() {
-        return lastRunUser;
-    }
-
-    public void setLastRunUser(String lastRunUser) {
-        this.lastRunUser = lastRunUser;
-    }
 
     @Override
     public String dataId() {
