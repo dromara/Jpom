@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table :data-source="list" :columns="columns" size="middle" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :columns="columns" :pagination="false" size="middle" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
           <a-button type="primary" @click="handleAdd">新增</a-button>
@@ -15,12 +15,19 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editVisible" title="编辑runs"  width="80vw" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+    <a-modal v-model="editVisible" title="编辑runs" width="900px" @ok="handleEditOk" :maskClosable="false">
+      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="名称" prop="name">
-          <a-input v-model="temp.name" :maxLength="50" placeholder="runs 名称"/>
+          <a-input v-model="temp.name" :maxLength="50" placeholder="runs 名称" />
         </a-form-model-item>
-        <a-form-model-item label="基础运行环境 Dockerfile" prop="content">
+        <a-form-model-item prop="content">
+          <template slot="label">
+            Dockerfile
+            <a-tooltip v-show="!temp.id">
+              <template slot="title"> 基础运行环境 Dockerfile</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <div style="height: 40vh; overflow-y: scroll">
             <code-editor v-model="temp.content" :options="{ mode: 'dockerfile', tabSize: 2, theme: 'abcdef' }"></code-editor>
           </div>
@@ -31,7 +38,7 @@
 </template>
 <script>
 import codeEditor from "@/components/codeEditor";
-import {deleteRuns, getRuns, updateRuns} from "@/api/build-config";
+import { deleteRuns, getRuns, updateRuns } from "@/api/build-config";
 
 export default {
   components: {
@@ -44,14 +51,14 @@ export default {
       editVisible: false,
       temp: {},
       columns: [
-        {title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: {customRender: "name"}},
-        {title: "路径", dataIndex: "path", ellipsis: true, scopedSlots: {customRender: "path"}},
-        {title: "操作", dataIndex: "operation", align: "center", scopedSlots: {customRender: "operation"}, width: 180},
+        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "路径", dataIndex: "path", ellipsis: true, scopedSlots: { customRender: "path" } },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 180 },
       ],
       // 表单校验规则
       rules: {
-        name: [{required: true, message: "请输入名称", trigger: "blur"}],
-        content: [{required: true, message: "请输入内容", trigger: "blur"}],
+        name: [{ required: true, message: "请输入名称", trigger: "blur" }],
+        content: [{ required: true, message: "请输入内容", trigger: "blur" }],
       },
     };
   },
@@ -63,7 +70,7 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true;
-      getRuns().then(res => {
+      getRuns().then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
@@ -78,6 +85,7 @@ export default {
     handleEdit(record) {
       this.temp = record;
       this.editVisible = true;
+      this.$refs["editForm"] && this.$refs["editForm"].resetFields();
     },
 
     handleEditOk() {
@@ -91,7 +99,7 @@ export default {
             this.$notification.success({
               message: res.msg,
             });
-            this.$refs["editForm"].resetFields();
+
             this.editVisible = false;
             this.loadData();
           }
@@ -119,7 +127,6 @@ export default {
         },
       });
     },
-
   },
 };
 </script>
