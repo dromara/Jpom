@@ -173,6 +173,11 @@ postList: none
         <img :src="$withBase('/images/friends/northstar_logo.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="hertzbeat">
     </a>
 </span>
+<span style="width: 150px;text-align: left">
+    <a href="https://async.sizegang.cn/" target="_blank">
+        <img :src="$withBase('/images/friends/gobrs-async.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="hertzbeat">
+    </a>
+</span>
 
 ## 🧲友情链接
 <span style="width: 150px;text-align: left">
