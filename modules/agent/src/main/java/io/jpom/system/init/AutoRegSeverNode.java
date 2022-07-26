@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2019/8/6
  */
-@PreLoadClass
+@PreLoadClass(value = Integer.MIN_VALUE + 1)
 @Slf4j
 public class AutoRegSeverNode {
 

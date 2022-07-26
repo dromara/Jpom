@@ -41,38 +41,38 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2021/12/10
  */
-@PreLoadClass
+@PreLoadClass(value = Integer.MIN_VALUE + 2)
 @Slf4j
 public class AutoStartProject {
 
-	@PreLoadMethod
-	private static void start() {
-		ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-		List<NodeProjectInfoModel> list = projectInfoService.list();
-		if (CollUtil.isEmpty(list)) {
-			return;
-		}
-		list = list.stream().filter(nodeProjectInfoModel -> nodeProjectInfoModel.getAutoStart() != null && nodeProjectInfoModel.getAutoStart()).collect(Collectors.toList());
-		List<NodeProjectInfoModel> finalList = list;
-		ThreadUtil.execute(() -> {
-			AbstractProjectCommander instance = AbstractProjectCommander.getInstance();
-			for (NodeProjectInfoModel nodeProjectInfoModel : finalList) {
-				try {
-					if (!instance.isRun(nodeProjectInfoModel, null)) {
-						instance.start(nodeProjectInfoModel, null);
-					}
-					List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
-					if (javaCopyItemList != null) {
-						for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-							if (!instance.isRun(nodeProjectInfoModel, javaCopyItem)) {
-								instance.start(nodeProjectInfoModel, javaCopyItem);
-							}
-						}
-					}
-				} catch (Exception e) {
-					log.warn("自动启动项目失败：{} {}", nodeProjectInfoModel.getId(), e.getMessage());
-				}
-			}
-		});
-	}
+    @PreLoadMethod
+    private static void start() {
+        ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
+        List<NodeProjectInfoModel> list = projectInfoService.list();
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
+        list = list.stream().filter(nodeProjectInfoModel -> nodeProjectInfoModel.getAutoStart() != null && nodeProjectInfoModel.getAutoStart()).collect(Collectors.toList());
+        List<NodeProjectInfoModel> finalList = list;
+        ThreadUtil.execute(() -> {
+            AbstractProjectCommander instance = AbstractProjectCommander.getInstance();
+            for (NodeProjectInfoModel nodeProjectInfoModel : finalList) {
+                try {
+                    if (!instance.isRun(nodeProjectInfoModel, null)) {
+                        instance.start(nodeProjectInfoModel, null);
+                    }
+                    List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
+                    if (javaCopyItemList != null) {
+                        for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+                            if (!instance.isRun(nodeProjectInfoModel, javaCopyItem)) {
+                                instance.start(nodeProjectInfoModel, javaCopyItem);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("自动启动项目失败：{} {}", nodeProjectInfoModel.getId(), e.getMessage());
+                }
+            }
+        });
+    }
 }
