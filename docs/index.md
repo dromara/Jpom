@@ -168,6 +168,11 @@ postList: none
         <img :src="$withBase('/images/friends/hertzbeat_brand.jpg')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="hertzbeat">
     </a>
 </span>
+<span style="width: 150px;text-align: left">
+    <a href="https://gitee.com/dromara/northstar" target="_blank">
+        <img :src="$withBase('/images/friends/northstar_logo.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="hertzbeat">
+    </a>
+</span>
 
 ## 🧲友情链接
 <span style="width: 150px;text-align: left">
