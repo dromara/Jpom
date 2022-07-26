@@ -1,66 +1,60 @@
 <template>
   <div class="user-header">
-    <a-tooltip placement="left" title="切换工作空间">
-      <a-select v-model="selectWorkspace" class="workspace jpom-workspace" option-filter-prop="children" show-search placeholder="工作空间" @change="handleChange">
-        <a-icon slot="suffixIcon" type="swap" />
-        <a-select-option v-for="item in myWorkspaceList" :key="item.id">
-          <a-tooltip placement="left" :title="item.name">
-            {{ item.name }}
+    <a-button-group>
+      <a-button type="dashed" class="workspace jpom-workspace btn-group-item">
+        <div class="workspace-name">
+          <a-tooltip :title="selectWorkspace && myWorkspaceList.filter((item) => item.id === selectWorkspace)[0].name">
+            {{ selectWorkspace && myWorkspaceList.filter((item) => item.id === selectWorkspace)[0].name }}
           </a-tooltip>
-        </a-select-option>
-      </a-select>
-    </a-tooltip>
-    <a-dropdown>
-      <!--      <a-avatar-->
-      <!--        shape="square"-->
-      <!--        size="large"-->
-      <!--        :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle' ,fontSize:'40px'}">-->
-      <!--        -->
-      <!--      </a-avatar>-->
-      <a-tooltip placement="left" :title="this.getUserInfo.name">
-        <a-button
-          class="ant-dropdown-link jpom-user-operation"
-          :style="{ backgroundColor: '#1890ff', color: '#fff', verticalAlign: 'middle', marginRight: 0 }"
-          @click="(e) => e.preventDefault()"
-          :title="getUserInfo.name"
-        >
-          {{ avatarName }} <a-icon type="down" />
-        </a-button>
-      </a-tooltip>
-      <a-menu slot="overlay">
-        <a-menu-item @click="handleUpdatePwd">
-          <a-button type="link">
-            <a-space><a-icon type="lock" />安全管理</a-space>
-          </a-button>
-        </a-menu-item>
-        <!-- <a-menu-item>
-          <a href="javascript:;" @click="handleUpdateName">修改昵称</a>
-        </a-menu-item> -->
-        <a-menu-item @click="handleUpdateUser">
-          <a-button type="link">
-            <a-space><a-icon type="profile" />用户资料</a-space>
-          </a-button>
-        </a-menu-item>
-        <!-- <a-menu-item>
-          <a-button type="link" @click="toggleGuide" :disabled="this.getDisabledGuide">
-            <a-space> <a-icon :type="`${this.guideStatus ? 'question-circle' : 'issues-close'}`" /> {{ this.guideStatus ? "开启导航" : "关闭导航" }} </a-space>
-          </a-button>
-        </a-menu-item> -->
-        <!-- <a-menu-item>
-          <a-button @click="restGuide" type="link" :disabled="this.getDisabledGuide">
-            <a-space><a-icon type="rest" /> 重置导航</a-space>
-          </a-button>
-        </a-menu-item> -->
-        <a-menu-item>
-          <a-button @click="customize" type="link">
-            <a-space><a-icon type="skin" /> 个性配置</a-space>
-          </a-button>
-        </a-menu-item>
-        <a-menu-item @click="logOut">
-          <a-button type="link" icon="logout"> 退出登录 </a-button>
-        </a-menu-item>
-      </a-menu>
-    </a-dropdown>
+        </div>
+      </a-button>
+      <a-button type="primary" class="btn-group-item">
+        <div class="user-name">
+          <a-tooltip :title="this.getUserInfo.name"> {{ getUserInfo.name }} </a-tooltip>
+        </div>
+      </a-button>
+      <a-dropdown>
+        <a-button type="primary" class="jpom-user-operation btn-group-item" icon="down"> </a-button>
+        <a-menu slot="overlay">
+          <a-sub-menu>
+            <template #title>
+              <a-button type="link" icon="swap">切换工作空间</a-button>
+            </template>
+            <template v-for="item in myWorkspaceList">
+              <a-menu-item :disabled="item.id === selectWorkspace" @click="handleWorkspaceChange(item.id)" :key="item.id">
+                <a-button type="link" :disabled="item.id === selectWorkspace">
+                  {{ item.name }}
+                </a-button>
+              </a-menu-item>
+              <a-menu-divider :key="`${item.id}-divider`" />
+            </template>
+          </a-sub-menu>
+          <a-menu-divider />
+          <a-menu-item @click="handleUpdatePwd">
+            <a-button type="link">
+              <a-space><a-icon type="lock" />安全管理</a-space>
+            </a-button>
+          </a-menu-item>
+          <a-menu-divider />
+          <a-menu-item @click="handleUpdateUser">
+            <a-button type="link">
+              <a-space><a-icon type="profile" />用户资料</a-space>
+            </a-button>
+          </a-menu-item>
+          <a-menu-divider />
+          <a-menu-item>
+            <a-button @click="customize" type="link">
+              <a-space><a-icon type="skin" /> 个性配置</a-space>
+            </a-button>
+          </a-menu-item>
+          <a-menu-divider />
+          <a-menu-item @click="logOut">
+            <a-button type="link" icon="logout"> 退出登录 </a-button>
+          </a-menu-item>
+        </a-menu>
+      </a-dropdown>
+    </a-button-group>
+
     <!-- 修改密码区 -->
     <a-modal v-model="updateNameVisible" :width="'60vw'" title="安全管理" :footer="null" :maskClosable="false">
       <a-tabs v-model="temp.tabActiveKey" @change="tabChange">
@@ -171,7 +165,7 @@
     </a-modal>
     <!-- 修改用户资料区 -->
     <a-modal v-model="updateUserVisible" title="修改用户资料" @ok="handleUpdateUserOk" :maskClosable="false">
-      <a-form-model ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+      <a-form-model ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
         <a-form-model-item label="临时token" prop="token">
           <a-input disabled v-model="temp.token" placeholder="Token">
             <a-tooltip
@@ -274,12 +268,12 @@
   </div>
 </template>
 <script>
-import {mapGetters} from "vuex";
-import {bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd} from "@/api/user";
+import { mapGetters } from "vuex";
+import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd } from "@/api/user";
 import QRCode from "qrcodejs2";
 import sha1 from "sha1";
 import Vue from "vue";
-import {MFA_APP_TIP_ARRAY} from "@/utils/const";
+import { MFA_APP_TIP_ARRAY } from "@/utils/const";
 
 export default {
   data() {
@@ -321,15 +315,7 @@ export default {
   },
   computed: {
     ...mapGetters(["getToken", "getUserInfo", "getWorkspaceId", "getGuideCache", "getDisabledGuide"]),
-    // 处理展示的名称 中文 3 个字 其他 4 个字符
-    avatarName() {
-      const reg = new RegExp("[\u4E00-\u9FA5]+");
-      if (reg.test(this.getUserInfo.name)) {
-        return this.getUserInfo.name.substring(0, 3);
-      } else {
-        return this.getUserInfo.name.substring(0, 4);
-      }
-    },
+
     showCode() {
       return this.getUserInfo.email !== this.temp.email;
     },
@@ -371,7 +357,7 @@ export default {
         let wid = this.$route.query.wid;
         this.selectWorkspace = wid ? wid : this.getWorkspaceId;
         if (!this.selectWorkspace) {
-          this.handleChange(res.data[0]?.id);
+          this.handleWorkspaceChange(res.data[0]?.id);
         } else {
           this.$router.push({
             query: { ...this.$route.query, wid: this.selectWorkspace },
@@ -556,7 +542,7 @@ export default {
         });
       });
     },
-    handleChange(value) {
+    handleWorkspaceChange(value) {
       this.$store.dispatch("changeWorkspace", value);
       this.$router
         .push({
@@ -669,8 +655,26 @@ export default {
 };
 </script>
 <style scoped>
-.workspace {
-  width: 100px;
-  margin-right: 10px;
+.btn-group-item {
+  padding: 0 5px;
+}
+.workspace-name {
+  min-width: 30px;
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.user-name {
+  min-width: 30px;
+  max-width: 100px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/deep/ .ant-dropdown-menu-submenu-arrow {
+  position: relative;
 }
 </style>

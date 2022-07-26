@@ -7,7 +7,8 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 修复日志弹窗在部分屏幕下按钮重叠问题（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5IZ9H](https://gitee.com/dromara/Jpom/issues/I5IZ9H) ）
+1. 【server】修复日志弹窗在部分屏幕下按钮重叠问题（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5IZ9H](https://gitee.com/dromara/Jpom/issues/I5IZ9H) ）
+2. 【server】优化工作空间和用户昵称显示区域,支持显示更多文字（感谢@木迷榖）
 
 ------
 
