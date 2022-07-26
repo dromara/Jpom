@@ -1,5 +1,5 @@
 <p align="center">
-	<a href="https://jpom.io/"  target="_blank">
+	<a href="https://jpom-docs.keepbx.cn/"  target="_blank">
 	    <img src="https://jpom-docs.keepbx.cn/images/jpom_logo.png" width="400" alt="logo">
 	</a>
 </p>
@@ -183,7 +183,7 @@ apt install -y wget && \
 
 ### 方式二：📦 容器化安装
 
-> ⚠️ 注意：容器化安装方式需要先安装 docker，[点击跳转docker安装文档](https://jpom.io/pages/b63dc5/)
+> ⚠️ 注意：容器化安装方式需要先安装 docker，[点击跳转docker安装文档](https://jpom-docs.keepbx.cn/pages/b63dc5/)
 
 
 #### 使用挂载方式存储相关数据（在部分环境可能出现兼容性问题）
@@ -214,7 +214,7 @@ docker run -d -p 2122:2122 \
 
 > 容器化安装仅提供服务端版。由于容器和宿主机环境隔离，而导致插件端的很多功能无法正常使用，因此对插件端容器化意义不大。
 >
-> 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档 [https://jpom.io/pages/b63dc5/](https://jpom.io/pages/b63dc5/)
+> 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档 [https://jpom-docs.keepbx.cn/pages/b63dc5/](https://jpom-docs.keepbx.cn/pages/b63dc5/)
 
 ### 方式三：💾 下载安装
 
@@ -364,14 +364,6 @@ mvn -f xxxx/pom.xml clean package
 
 ## 📝 常见问题、操作说明
 
-### Github Pages
-
-- [文档主页](https://jpom.io/)
-- [FQA](https://jpom.io/pages/FQA/)
-- [名词解释](https://jpom.io/pages/FQA/proper-noun/)
-
-### Gitee Pages
-
 - [文档主页](https://jpom-docs.keepbx.cn/)
 - [FQA](https://jpom-docs.keepbx.cn/pages/FQA/)
 - [名词解释](https://jpom-docs.keepbx.cn/pages/FQA/proper-noun/)
@@ -380,14 +372,14 @@ mvn -f xxxx/pom.xml clean package
 
 > 里面有部分图片加载可能比较慢
 
-1. [本地构建 + SSH 发布 java 项目](https://jpom.io/pages/practice/build-java-ssh-release)
-2. [本地构建 + 项目发布 node 项目](https://jpom.io/pages/practice/build-node-release)
-3. [本地构建 + SSH 发布 node 项目](https://jpom.io/pages/practice/build-node-ssh-release)
-4. [本地构建 + 自定义管理 python 项目](https://jpom.io/pages/practice/project-dsl-python)
-5. [自定义管理 java 项目](https://jpom.io/pages/practice/project-dsl-java)
-6. [管理编译安装的 nginx](https://jpom.io/pages/practice/node-nginx)
-7. [管理 docker](https://jpom.io/pages/practice/docker-cli)
-8. [容器构建 + 项目发布 java 项目](https://jpom.io/pages/practice/build-docker-java-node-release)
+1. [本地构建 + SSH 发布 java 项目](https://jpom-docs.keepbx.cn/pages/practice/build-java-ssh-release)
+2. [本地构建 + 项目发布 node 项目](https://jpom-docs.keepbx.cn/pages/practice/build-node-release)
+3. [本地构建 + SSH 发布 node 项目](https://jpom-docs.keepbx.cn/pages/practice/build-node-ssh-release)
+4. [本地构建 + 自定义管理 python 项目](https://jpom-docs.keepbx.cn/pages/practice/project-dsl-python)
+5. [自定义管理 java 项目](https://jpom-docs.keepbx.cn/pages/practice/project-dsl-java)
+6. [管理编译安装的 nginx](https://jpom-docs.keepbx.cn/pages/practice/node-nginx)
+7. [管理 docker](https://jpom-docs.keepbx.cn/pages/practice/docker-cli)
+8. [容器构建 + 项目发布 java 项目](https://jpom-docs.keepbx.cn/pages/practice/build-docker-java-node-release)
 
 ## 🛠️ 整体架构
 
