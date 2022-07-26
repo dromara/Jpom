@@ -31,6 +31,7 @@ import io.jpom.DockerUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
+import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @author 魏宏斌
+ * @since 2022/7/25
+ */
 @RestController
 @RequestMapping(value = "build-config")
 @Feature(cls = ClassFeature.BUILD_CONFIG)
@@ -60,6 +65,7 @@ public class BuildConfigController extends BaseServerController {
 
     @SneakyThrows
     @GetMapping("runs")
+    @Feature(method = MethodFeature.LIST)
     public String getRuns() {
         // runs/%s/Dockerfile
         Map<String, String> runs = new HashMap<>();
@@ -99,18 +105,20 @@ public class BuildConfigController extends BaseServerController {
     }
 
     @PostMapping("runs")
+    @Feature(method = MethodFeature.EDIT)
     public String updateRuns(String name, String content) {
         String dataPath = DockerUtil.FILE_PATHS[0];
-        Path dockerfile = FileSystems.getDefault().getPath(dataPath, "runs", name, "Dockerfile");
-        FileUtil.writeString(content, dockerfile.toString(), StandardCharsets.UTF_8);
+        File dockerfile = FileUtil.file(dataPath, "runs", name, "Dockerfile");
+        FileUtil.writeString(content, dockerfile, StandardCharsets.UTF_8);
         return JsonMessage.getString(200, "ok");
     }
 
     @DeleteMapping("runs/{name}")
+    @Feature(method = MethodFeature.DEL)
     public String deleteRuns(@PathVariable String name) {
         String dataPath = DockerUtil.FILE_PATHS[0];
-        Path dockerfile = FileSystems.getDefault().getPath(dataPath, "runs", name);
-        if (!Files.exists(dockerfile)) {
+        File dockerfile = FileUtil.file(dataPath, "runs", name);
+        if (!FileUtil.exist(dockerfile)) {
             return JsonMessage.getString(400, "文件不存在");
         }
         FileUtil.del(dockerfile);
