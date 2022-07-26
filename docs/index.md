@@ -201,22 +201,28 @@ postList: none
     </a>
 </div>
 
+
 ## 🧲友情链接
-<span style="width: 150px;text-align: left">
+<div class="friends-item">
     <a href="https://shop108037867.taobao.com" target="_blank">
         <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom friends-item-img" alt="yuanlaiyishe">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
+    <a href="http://www.layui-vue.com" target="_blank">
+        <img :src="$withBase('/images/friends/layui-vue.png')" class="no-zoom friends-item-img" alt="layui-vue">
+    </a>
+</div>
+<div class="friends-item" style="max-width:70px !important;">
     <a href="https://weihongbin.com/" target="_blank">
-        <img :src="$withBase('/images/friends/weihongbin.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="weihongbin">
+        <img :src="$withBase('/images/friends/weihongbin.png')" class="no-zoom friends-item-img"  alt="weihongbin">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item" style="max-width:70px !important;">
     <a href="https://www.wxy97.com/" target="_blank">
-        <img :src="$withBase('/images/friends/wxy97.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="weihongbin">
+        <img :src="$withBase('/images/friends/wxy97.png')" class="no-zoom friends-item-img"  alt="weihongbin">
     </a>
-</span>
+</div>
 
 
 <div class="wwads-cn wwads-horizontal" style="max-width:350px;"> <link rel="stylesheet" href="https://cdn.wwads.cn/css/wwads.css">
