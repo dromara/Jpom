@@ -25,14 +25,23 @@ package io.jpom.controller.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.Resource;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.extra.validation.ValidationUtil;
 import cn.hutool.json.JSONObject;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import io.jpom.DockerUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
+import io.jpom.service.docker.DockerInfoService;
+import io.jpom.util.StringUtil;
+import lombok.Lombok;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -42,6 +51,8 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -63,65 +74,48 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BuildConfigController extends BaseServerController {
 
-    @SneakyThrows
     @GetMapping("runs")
     @Feature(method = MethodFeature.LIST)
-    public String getRuns() {
+    public String getRuns() throws Exception {
         // runs/%s/Dockerfile
-        Map<String, String> runs = new HashMap<>();
-        String folder = "runs";
-        for (String filePath : DockerUtil.FILE_PATHS) {
-            String dockerFileDir = filePath + folder;
-            try {
-                File directory = ResourceUtils.getFile(dockerFileDir);
-                if (directory.exists() && directory.isDirectory()) {
-                    File[] files = directory.listFiles((dir, name) -> dir.isDirectory() && Objects.requireNonNull(dir.listFiles((run_dir, run_name) -> run_dir.isDirectory())).length > 0);
-                    for (File file : files) {
-                        File dockerfile = new File(file, "Dockerfile");
-                        if (dockerfile.exists() && dockerfile.isFile()) {
-                            runs.putIfAbsent(file.getName(), dockerfile.getAbsolutePath());
-                        }
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+        Map<String, URI> runs = (Map<String, URI>) plugin.execute("listRuns");
+
+        List<JSONObject> collect = runs.entrySet()
+            .stream()
+            .map(e -> {
+                    URI value = e.getValue();
+                    String content;
+                    try {
+                        content = FileUtil.readString(value.toURL(), CharsetUtil.CHARSET_UTF_8);
+                    } catch (MalformedURLException ex) {
+                        throw Lombok.sneakyThrow(ex);
                     }
+                    return new JSONObject()
+                        .set("name", e.getKey())
+                        .set("path", value)
+                        .set("content", content);
                 }
-            } catch (FileNotFoundException e) {
-                log.debug("{} not found", dockerFileDir);
-            }
-        }
-        String defaultRuns = "ubuntu-latest";
-        if (Objects.isNull(runs.get(defaultRuns))) {
-            // jar内文件无法获取绝对路径，此处把jar 内 dockerfile 放到数据目录下
-            Path dockerfile = FileSystems.getDefault().getPath(DockerUtil.FILE_PATHS[0], "runs", defaultRuns, "Dockerfile");
-            String path = dockerfile.toString();
-            Resource resourceObj = ResourceUtil.getResourceObj("runs/" + defaultRuns + "/Dockerfile");
-            InputStream stream = resourceObj.getStream();
-            String content = IOUtils.toString(stream, StandardCharsets.UTF_8);
-            FileUtil.writeString(content, path, StandardCharsets.UTF_8);
-            runs.put(defaultRuns, path);
-        }
-        List<JSONObject> collect = runs.entrySet().stream().map(e ->
-            new JSONObject().set("name", e.getKey()).set("path", e.getValue()).set("content", FileUtil.readUtf8String(e.getValue()))
-        ).collect(Collectors.toList());
+            ).collect(Collectors.toList());
         return JsonMessage.getString(200, "ok", collect);
     }
 
     @PostMapping("runs")
     @Feature(method = MethodFeature.EDIT)
-    public String updateRuns(String name, String content) {
-        String dataPath = DockerUtil.FILE_PATHS[0];
-        File dockerfile = FileUtil.file(dataPath, "runs", name, "Dockerfile");
-        FileUtil.writeString(content, dockerfile, StandardCharsets.UTF_8);
-        return JsonMessage.getString(200, "ok");
+    public String updateRuns(@ValidatorItem String name, @ValidatorItem String content) throws Exception {
+        Validator.validateMatchRegex(StringUtil.GENERAL_STR, name, "镜像名称不合法");
+        //
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+        plugin.execute("updateRuns", "name", name, "content", content);
+        return JsonMessage.getString(200, "更新成功");
     }
 
     @DeleteMapping("runs/{name}")
     @Feature(method = MethodFeature.DEL)
-    public String deleteRuns(@PathVariable String name) {
-        String dataPath = DockerUtil.FILE_PATHS[0];
-        File dockerfile = FileUtil.file(dataPath, "runs", name);
-        if (!FileUtil.exist(dockerfile)) {
-            return JsonMessage.getString(400, "文件不存在");
-        }
-        FileUtil.del(dockerfile);
-        return JsonMessage.getString(200, "ok");
+    public String deleteRuns(@PathVariable String name) throws Exception {
+        Validator.validateMatchRegex(StringUtil.GENERAL_STR, name, "镜像名称不合法");
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+        plugin.execute("deleteRuns", "name", name);
+        return JsonMessage.getString(200, "删除成功");
     }
 }

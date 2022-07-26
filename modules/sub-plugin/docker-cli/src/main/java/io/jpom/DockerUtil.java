@@ -64,6 +64,27 @@ public class DockerUtil {
      */
     public static final String[] FILE_PATHS = new String[]{System.getProperty(IPlugin.DATE_PATH_KEY) + File.separator, "file:./config/", "file:./"};
 
+    /**
+     * 容器构建存放 dockerfile 目录
+     */
+    public static final String RUNS_FOLDER = "runs";
+    /**
+     * 默认镜像
+     */
+    public static final String DEFAULT_RUNS = "ubuntu-latest";
+    /**
+     * dockerfile 文件名称
+     */
+    public static final String DOCKER_FILE = "Dockerfile";
+
+    /**
+     * 获取 docker client ，会使用缓存
+     * <p>
+     * 如果参数包含 closeBefore 则重新创建
+     *
+     * @param parameter 参数
+     * @return DockerClient
+     */
     public static DockerClient get(Map<String, Object> parameter) {
         String host = (String) parameter.get("dockerHost");
         String dockerCertPath = (String) parameter.get("dockerCertPath");
@@ -141,17 +162,12 @@ public class DockerUtil {
     public static File getResourceToFile(String name, File tempDir) {
         try {
             for (String filePath : FILE_PATHS) {
-                File file;
-                try {
-                    file = ResourceUtils.getFile(filePath + name);
-                    if (!file.exists()) {
-                        throw new FileNotFoundException();
-                    }
-                } catch (FileNotFoundException e) {
+                File file = ResourceUtils.getFile(filePath + name);
+                if (!file.exists()) {
                     log.debug("{} not found", filePath + name);
                     continue;
                 }
-                log.debug("file:{}", file.getAbsolutePath());
+                log.debug("found file:{}", file.getAbsolutePath());
                 File tempFile = DockerUtil.createTemp(name, tempDir);
                 Files.copy(file.toPath(), tempFile.toPath());
                 return tempFile;
@@ -162,7 +178,7 @@ public class DockerUtil {
             FileUtil.writeFromStream(stream, tempFile);
             return tempFile;
         } catch (Exception e) {
-            log.error("{}", e.getMessage(), e);
+            log.error("获取 dockerfile 相关问题异常 {}", name, e);
         }
         return null;
     }

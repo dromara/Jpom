@@ -5,12 +5,14 @@
       <template slot="title">
         <a-space>
           <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="loadData">刷新</a-button>
         </a-space>
       </template>
+      <a-tooltip slot="path" slot-scope="text" :title="text">{{ text }}</a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+          <a-button size="small" :disabled="record.path.indexOf('file:/') !== 0" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
     </a-table>
