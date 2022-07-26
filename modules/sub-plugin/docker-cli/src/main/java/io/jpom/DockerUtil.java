@@ -43,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ResourceUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.time.Duration;
@@ -161,8 +162,14 @@ public class DockerUtil {
     public static File getResourceToFile(String name, File tempDir) {
         try {
             for (String filePath : FILE_PATHS) {
-                File file = ResourceUtils.getFile(filePath + name);
-                if (!file.exists()) {
+                File file;
+                try {
+                    file = ResourceUtils.getFile(filePath + name);
+                    if (!file.exists()) {
+                        log.debug("{} not found", filePath + name);
+                        continue;
+                    }
+                } catch (FileNotFoundException e) {
                     log.debug("{} not found", filePath + name);
                     continue;
                 }
