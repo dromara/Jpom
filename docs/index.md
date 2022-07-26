@@ -122,67 +122,84 @@ postList: none
 
 <br/>
 
+<style>
+.friends-item {
+  width: 150px;
+  height:40px;
+  flex:1;
+  text-align: left;
+  display: inline-block;
+  margin: 10px;
+}
+
+.friends-item-img {
+  object-fit: contain;
+  max-width:150px !important;
+  height: 100%;
+}
+</style>
+
 ## 🤝 dromara 组织项目
-<span style="width: 150px;flex:1;text-align: left">
+<div class="friends-item">
     <a href="https://hutool.cn/" target="_blank">
-        <img :src="$withBase('/images/friends/hutool-logo.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="hutool">
+        <img :src="$withBase('/images/friends/hutool-logo.png')" class="no-zoom friends-item-img" alt="hutool">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
     <a href="http://sa-token.dev33.cn/" target="_blank">
-        <img :src="$withBase('/images/friends/satoken-logo.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="satoken">
+        <img :src="$withBase('/images/friends/satoken-logo.png')" class="no-zoom friends-item-img" alt="satoken">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
     <a href="https://www.maxkey.top/" target="_blank">
-        <img :src="$withBase('/images/friends/maxkey.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="maxkey">
+        <img :src="$withBase('/images/friends/maxkey.png')" class="no-zoom friends-item-img" alt="maxkey">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
     <a href="https://liteflow.yomahub.com/" target="_blank">
-        <img :src="$withBase('/images/friends/liteflow-logo.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="liteflow">
+        <img :src="$withBase('/images/friends/liteflow-logo.png')" class="no-zoom friends-item-img" alt="liteflow">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
     <a href="https://tlog.yomahub.com/" target="_blank">
-        <img :src="$withBase('/images/friends/tlog-logo.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="tlog">
+        <img :src="$withBase('/images/friends/tlog-logo.png')" class="no-zoom friends-item-img"  alt="tlog">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
     <a href="https://forest.dtflyx.com/" target="_blank">
-        <img :src="$withBase('/images/friends/forest-logo.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="forest">
+        <img :src="$withBase('/images/friends/forest-logo.png')" class="no-zoom friends-item-img"  alt="forest">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
     <a href="https://easy-es.cn/" target="_blank">
-        <img :src="$withBase('/images/friends/easy-es2.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="easy-es">
+        <img :src="$withBase('/images/friends/easy-es2.png')" class="no-zoom friends-item-img"  alt="easy-es">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
     <a href="https://su.usthe.com/" target="_blank">
-        <img :src="$withBase('/images/friends/hor-brand128.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="hor-brand128">
+        <img :src="$withBase('/images/friends/hor-brand128.png')" class="no-zoom friends-item-img"  alt="hor-brand128">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
     <a href="https://hertzbeat.com/" target="_blank">
-        <img :src="$withBase('/images/friends/hertzbeat_brand.jpg')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="hertzbeat">
+        <img :src="$withBase('/images/friends/hertzbeat_brand.jpg')" class="no-zoom friends-item-img" alt="hertzbeat">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
     <a href="https://gitee.com/dromara/northstar" target="_blank">
-        <img :src="$withBase('/images/friends/northstar_logo.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="hertzbeat">
+        <img :src="$withBase('/images/friends/northstar_logo.png')" class="no-zoom friends-item-img" alt="northstar_logo">
     </a>
-</span>
-<span style="width: 150px;text-align: left">
+</div>
+<div class="friends-item">
     <a href="https://async.sizegang.cn/" target="_blank">
-        <img :src="$withBase('/images/friends/gobrs-async.png')" class="no-zoom" style="height:40px;width:150px;margin: 10px;" alt="hertzbeat">
+        <img :src="$withBase('/images/friends/gobrs-async.png')" class="no-zoom friends-item-img" alt="gobrs-async">
     </a>
-</span>
+</div>
 
 ## 🧲友情链接
 <span style="width: 150px;text-align: left">
     <a href="https://shop108037867.taobao.com" target="_blank">
-        <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom" style="height:40px;max-width:150px;margin: 10px;" alt="yuanlaiyishe">
+        <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom friends-item-img" alt="yuanlaiyishe">
     </a>
 </span>
 <span style="width: 150px;text-align: left">
