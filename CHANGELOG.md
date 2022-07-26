@@ -14,6 +14,7 @@
 2. 【server】触发器 token 机制调整,取消 SHA256 生成。采用数据表单独存储
 3. 【server】修复启动加载全局代理时机,避免（The database is not initialized）
 4. 管理脚本执行支持环境变量配置 jvm、端口等，`JPOM_AGENT_JVM`,`JPOM_AGENT_PORT`,`JPOM_AGENT_ARGS`、`JPOM_SERVER_JVM`,`JPOM_SERVER_PORT`,`JPOM_SERVER_ARGS` （ 感谢@飞儿 ）
+5. 【agent】兼容 `log.autoBackConsoleCron: none` 配置属性
 
 ------
 
@@ -53,6 +54,10 @@
 3. 【server】项目文件备份列表不能取消弹窗（点击关闭依然执行）问题（感谢@ʟᴊx💎💎）
 4. 【server】修复编辑构建仓库切换事件重复问题 （感谢[@五六](https://gitee.com/tutu-father) [Gitee issues I5F35E](https://gitee.com/dromara/Jpom/issues/I5F35E) ）
 5. 【server】修复 windows 执行脚本出现异常（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5FK0K](https://gitee.com/dromara/Jpom/issues/I5FK0K) ）
+
+### ❌ 不兼容事项
+
+1. 插件端 `log.autoBackConsoleCron` 配置属性替换为：`log.autoBackToFile`
 
 ------
 

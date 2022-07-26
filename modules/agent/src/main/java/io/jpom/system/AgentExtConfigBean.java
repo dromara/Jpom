@@ -186,7 +186,13 @@ public class AgentExtConfigBean {
      * @return 如果表达式配置为none 则不配置，重启也不备份
      */
     public boolean openLogBack() {
-        return Optional.ofNullable(autoBackToFile).orElse(true);
+        boolean newConfig = Optional.ofNullable(autoBackToFile).orElse(true);
+        if (newConfig) {
+            // 使用旧配置
+            String cron = StrUtil.emptyToDefault(autoBackConsoleCron, "none");
+            return !"none".equalsIgnoreCase(cron.trim());
+        }
+        return false;
 //        if(autoBackToFile==null || autoBackToFile){
 //            return
 //        }
