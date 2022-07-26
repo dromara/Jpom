@@ -7,8 +7,10 @@
     <div>
       <log-view :ref="`logView`" height="calc(100vh - 140px)">
         <template slot="before">
-          <a-button :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
-          <a-button :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
+          <a-space>
+            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
+            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
+          </a-space>
         </template>
       </log-view>
     </div>

@@ -13,11 +13,13 @@
       <div>
         <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none" />
       </div> -->
-      <log-view :ref="`logView`" height="calc(100vh - 165px)" searchWidth="260px">
+      <log-view :ref="`logView`" height="calc(100vh - 165px)">
         <template slot="before">
-          <a-button type="primary" size="small" @click="loadData">刷新</a-button>
-          <a-button type="danger" size="small" :disabled="!this.temp.path" @click="deleteLog">删除</a-button>
-          <a-button type="primary" size="small" :disabled="!this.temp.path" @click="downloadLog">下载</a-button>
+          <a-space>
+            <a-button type="primary" size="small" @click="loadData">刷新</a-button>
+            <a-button type="danger" size="small" :disabled="!this.temp.path" @click="deleteLog">删除</a-button>
+            <a-button type="primary" size="small" :disabled="!this.temp.path" @click="downloadLog">下载</a-button>
+          </a-space>
         </template>
       </log-view>
     </a-layout-content>
