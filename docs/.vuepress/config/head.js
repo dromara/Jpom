@@ -33,7 +33,7 @@ module.exports = [
         s.parentNode.insertBefore(bp, s);
         (function() {
             window.dataLayer = window.dataLayer || [];
-        
+
             function gtag() {
                 dataLayer.push(arguments);
             }
