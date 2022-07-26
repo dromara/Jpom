@@ -127,7 +127,7 @@ postList: none
   width: 150px;
   height:40px;
   flex:1;
-  text-align: left;
+  text-align: center;
   display: inline-block;
   margin: 10px;
 }
@@ -193,6 +193,11 @@ postList: none
 <div class="friends-item">
     <a href="https://async.sizegang.cn/" target="_blank">
         <img :src="$withBase('/images/friends/gobrs-async.png')" class="no-zoom friends-item-img" alt="gobrs-async">
+    </a>
+</div>
+<div class="friends-item">
+    <a href="https://dynamictp.cn/" target="_blank">
+        <img :src="$withBase('/images/friends/dynamictp.png')" class="no-zoom friends-item-img" alt="dynamictp">
     </a>
 </div>
 
