@@ -40,35 +40,35 @@ import java.io.File;
  * @author jiangzeyin
  * @since 2019/4/17
  */
-@PreLoadClass
+@PreLoadClass(value = Integer.MIN_VALUE)
 public class CheckAuthorize {
 
-	@PreLoadMethod
-	private static void checkAgentAuthorize() {
-		AgentAuthorize.getInstance();
-	}
+    @PreLoadMethod
+    private static void checkAgentAuthorize() {
+        AgentAuthorize.getInstance();
+    }
 
-	@PreLoadMethod
-	private static void checkJps() {
-		boolean exist = JvmUtil.exist(JpomManifest.getInstance().getPid());
-		JvmUtil.setJpsNormal(exist);
-	}
+    @PreLoadMethod
+    private static void checkJps() {
+        boolean exist = JvmUtil.exist(JpomManifest.getInstance().getPid());
+        JvmUtil.setJpsNormal(exist);
+    }
 
-	/**
-	 * 恢复脚本模板路径
-	 */
-	@PreLoadMethod
-	private static void repairScriptPath() {
-		if (!JpomManifest.getInstance().isDebug()) {
-			if (StrUtil.compareVersion(JpomManifest.getInstance().getVersion(), "2.4.2") < 0) {
-				return;
-			}
-		}
-		File oldDir = FileUtil.file(ExtConfigBean.getInstance().getPath(), ConfigBean.SCRIPT_DIRECTORY);
-		if (!oldDir.exists()) {
-			return;
-		}
-		File newDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), ConfigBean.SCRIPT_DIRECTORY);
-		FileUtil.move(oldDir, newDir, true);
-	}
+    /**
+     * 恢复脚本模板路径
+     */
+    @PreLoadMethod
+    private static void repairScriptPath() {
+        if (!JpomManifest.getInstance().isDebug()) {
+            if (StrUtil.compareVersion(JpomManifest.getInstance().getVersion(), "2.4.2") < 0) {
+                return;
+            }
+        }
+        File oldDir = FileUtil.file(ExtConfigBean.getInstance().getPath(), ConfigBean.SCRIPT_DIRECTORY);
+        if (!oldDir.exists()) {
+            return;
+        }
+        File newDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), ConfigBean.SCRIPT_DIRECTORY);
+        FileUtil.move(oldDir, newDir, true);
+    }
 }
