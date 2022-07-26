@@ -28,6 +28,8 @@
 
 # https://hub.docker.com/r/jpomdocker/jpom
 
+# docker buildx create --use
+
 # 服务端
 docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.9.5 -f ./modules/server/DockerfileRelease --push .
 #
