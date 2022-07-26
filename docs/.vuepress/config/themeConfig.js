@@ -70,7 +70,7 @@ module.exports = {
   },
   footer: { // 页脚信息
     createYear: 2017, //年份
-    copyrightInfo: 'MIT License', // 博客版权信息，支持a标签
+    copyrightInfo: '<span>MIT License &nbsp;<a target="_blank" href="https://beian.miit.gov.cn">京ICP备17044819号</a></span>', // 博客版权信息，支持a标签
   },
   htmlModules,
 }
