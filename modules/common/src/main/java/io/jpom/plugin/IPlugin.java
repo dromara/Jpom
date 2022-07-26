@@ -41,7 +41,7 @@ public interface IPlugin extends AutoCloseable {
     /**
      * 数据目录 key
      */
-    String DATE_PATH_KEY = "DATE_PATH";
+    String DATE_PATH_KEY = "JPOM_DATE_PATH";
     String JPOM_VERSION_KEY = "JPOM_VERSION";
 
 

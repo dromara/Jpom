@@ -35,6 +35,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * main 方法运行参数工具
@@ -43,6 +44,9 @@ import java.util.Set;
  * @since 2019/4/7
  */
 public class StringUtil {
+
+    public static final String GENERAL_STR = "^[a-zA-Z0-9_\\-]+$";
+    public static final Pattern GENERAL = Pattern.compile(GENERAL_STR);
 
     /**
      * 支持的压缩包格式
