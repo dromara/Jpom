@@ -83,11 +83,6 @@
         "role": "sys"
       },
       {
-        "id": "buildConfig",
-        "title": "构建配置",
-        "role": "system"
-      },
-      {
         "id": "sysConfig",
         "title": "系统配置",
         "role": "system"
