@@ -208,6 +208,9 @@
             </a-tooltip>
           </a-input>
         </a-form-model-item>
+        <a-form-model-item label="昵称" prop="name">
+          <a-input v-model="temp.name" placeholder="昵称" />
+        </a-form-model-item>
         <a-form-model-item label="邮箱地址" prop="email">
           <a-input v-model="temp.email" placeholder="邮箱地址" />
         </a-form-model-item>
@@ -289,6 +292,11 @@ export default {
       customizeVisible: false,
       // 表单校验规则
       rules: {
+        name: [
+          { required: true, message: "请输入昵称", trigger: "blur" },
+          { max: 10, message: "昵称长度为2-10", trigger: "blur" },
+          { min: 2, message: "昵称长度为2-10", trigger: "blur" },
+        ],
         oldPwd: [
           { required: true, message: "请输入原密码", trigger: "blur" },
           { max: 20, message: "密码长度为6-20", trigger: "blur" },
@@ -304,7 +312,9 @@ export default {
           { max: 20, message: "密码长度为6-20", trigger: "blur" },
           { min: 6, message: "密码长度为6-20", trigger: "blur" },
         ],
-        email: [{ required: true, message: "请输入邮箱", trigger: "blur" }],
+        email: [
+          // { required: true, message: "请输入邮箱", trigger: "blur" }
+        ],
         twoCode: [
           { required: true, message: "请输入两步验证码", trigger: ["change", "blur"] },
           { pattern: /^\d{6}$/, message: "验证码 6 为纯数字", trigger: ["change", "blur"] },
@@ -538,6 +548,7 @@ export default {
             // 清空表单校验
             this.$refs["userForm"].resetFields();
             this.updateUserVisible = false;
+            this.$store.dispatch("refreshUserInfo");
           }
         });
       });
