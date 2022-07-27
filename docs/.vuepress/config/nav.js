@@ -8,7 +8,7 @@ module.exports = [
             {text: 'v2.8.X迁移到v2.9.X指南', link: '/pages/upgrade/2.8.x-to-2.9.x/'},
         ]
     },
-    {text: '实践案例', link: '/pages/practice/'},
+    {text: '🔥实践案例', link: '/pages/practice/'},
     {
         text: '常见问题', link: '/pages/FQA/', items: [
             {text: '名词解释', link: '/pages/FQA/proper-noun/'},
