@@ -16,16 +16,20 @@ features: # 可选的
   details: 在浏览器中管理 SSH，方便进行日常运维,记录执行命令记录
 - title: 在线构建
   details: 在线拉取 GIT、SVN 仓库快速构建项目包，不用运维人员手动上传项目包
+  link: /pages/practice/build-java-ssh-release/
 - title: 项目监控
   details: 实时监控项目当前状态、如果异常自动触发邮件、钉钉报警通知
+  link: /pages/practice/monitor-notice/
 - title: 用户管理
   details: 多用户管理，实现不同用户不同权限，用户操作、管理日志完善记录
 - title: 白名单模式
   details: 为了数据安全防止用户随便查看、删除文件配置安全的白名单路径。
 - title: DOCKER 管理
-  details: 在线管理镜像、容器、SWARM 集群。界面化管理 DOCKER 
+  details: 在线管理镜像、容器、SWARM 集群。界面化管理 DOCKER
+  link: /pages/practice/docker-cli/
 - title: NGINX 配置、SSL 证书
   details: 在线快速方便的修改 NGINX 配置文件，SSL 证书统一管理
+  link: /pages/practice/node-nginx/
 
 # 文章列表显示方式: detailed 默认，显示详细版文章列表（包括作者、分类、标签、摘要、分页等）| simple => 显示简约版文章列表（仅标题和日期）| none 不显示文章列表
 postList: none
