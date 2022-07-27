@@ -57,7 +57,7 @@ postList: none
 
 ## 😭 日常开发中，您是否有以下痛点？
 
-- <font color="red">**团队中没有专门的运维，开发还要做运维的活**</font>，需要自己手动构建、部署项目。
+- <font color="red">**团队中没有专业的运维，开发还要做运维的活**</font>，需要自己手动构建、部署项目。
 - 不同的项目有不同的构建、部署命令。
 - 有开发、测试、生产等多环境打包的需求。
 - 需要同时监控多个项目的运行状态。
@@ -224,7 +224,7 @@ postList: none
 </div>
 <div class="friends-item" style="max-width:70px !important;">
     <a href="https://www.wxy97.com/" target="_blank">
-        <img :src="$withBase('/images/friends/wxy97.png')" class="no-zoom friends-item-img"  alt="weihongbin">
+        <img :src="$withBase('/images/friends/wxy97.png')" class="no-zoom friends-item-img"  alt="wxy97">
     </a>
 </div>
 
