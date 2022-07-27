@@ -119,23 +119,23 @@ Jpom 支持多种安装方式，满足不同用户的个性化需求，您只需
 ```shell
 # 仅安装服务端
 yum install -y wget && \
-	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
-	bash install.sh Server
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Server
 
 # 安装服务端和 jdk 环境
 yum install -y wget && \
-	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
-	bash install.sh Server jdk
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Server jdk
 
 # 安装服务端和 jdk、maven 环境
 yum install -y wget && \
-	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
-	bash install.sh Server jdk+mvn
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Server jdk+mvn
 
 # ubuntu
 apt install -y wget && \
-	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
-	bash install.sh Server jdk
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Server jdk
 ```
 
 启动成功后，服务端的端口为 `2122`，可通过 `http://127.0.0.1:2122/` 访问管理页面（如果不是本机访问，需要把 127.0.0.1 换成你安装的服务器 IP 地址）。
@@ -164,18 +164,18 @@ apt install -y wget && \
 ```shell
 # 仅安装插件端
 yum install -y wget && \
-	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
-	bash install.sh Agent
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Agent
 
 # 安装插件端和 jdk 环境
 yum install -y wget && \
-	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
-	bash install.sh Agent jdk
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Agent jdk
 
 # ubuntu
 apt install -y wget && \
-	wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
-	bash install.sh Agent jdk
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Agent jdk
 ```
 
 启动成功后，插件端的端口为 `2123`，插件端提供给服务端使用。

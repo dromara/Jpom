@@ -39,10 +39,10 @@ export default {
     };
   },
   computed: {
-    wordBreak() { 
+    wordBreak() {
       this.changeBuffer();
       return this.config.wordBreak || false;
-    }
+    },
   },
   mounted() {
     this.domId = this.id + new Date().getTime();
@@ -145,6 +145,7 @@ export default {
   overflow-y: auto;
   border: 1px solid #e2e2e2;
   border-radius: 5px 5px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 </style>
 

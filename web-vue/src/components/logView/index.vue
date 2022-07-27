@@ -72,7 +72,8 @@
                           <li><b>[\u4e00-\u9fa5]</b> - 汉字。</li>
                         </ul>
                       </template>
-                      <a-button type="link" style="padding: 0" icon="unordered-list"><span style="margin-left: 2px">正则语法参考</span></a-button>
+
+                      <a-button type="link" icon="question">正则语法参考</a-button>
                     </a-popover>
                   </a-menu-item>
                 </a-menu>
