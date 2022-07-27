@@ -142,6 +142,53 @@ postList: none
 }
 </style>
 
+## 快速体验
+
+### 一键安装插件端 [详细的安装说明文档](./文档/01.安装使用/01.安装说明.md)
+
+<code-group>
+  <code-block title="centos" active>
+```bash
+# 如果服务器中没有 jdk 会自动安装 jdk-8u251
+yum install -y wget && \
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Agent jdk
+```
+  </code-block>
+
+  <code-block title="ubuntu">
+```bash
+# 如果服务器中没有 jdk 会自动安装 jdk-8u251
+apt install -y wget && \
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Agent jdk
+```
+  </code-block>
+</code-group>
+
+
+### 一键安装服务端 [详细的安装说明文档](./文档/01.安装使用/01.安装说明.md)
+
+<code-group>
+  <code-block title="centos" active>
+```bash
+# 如果服务器中没有 jdk 会自动安装 jdk-8u251
+yum install -y wget && \
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Server jdk
+```
+  </code-block>
+
+  <code-block title="ubuntu">
+```bash
+# 如果服务器中没有 jdk 会自动安装 jdk-8u251
+apt install -y wget && \
+wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+bash install.sh Server jdk
+```
+  </code-block>
+</code-group>
+
 ## 🤝 dromara 组织项目
 <div class="friends-item">
     <a href="https://hutool.cn/" target="_blank">
