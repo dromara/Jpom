@@ -144,7 +144,7 @@ postList: none
 
 ## 快速体验
 
-### 一键安装插件端 [详细的安装说明文档](./文档/01.安装使用/01.安装说明.md)
+### 一键安装插件端 [详细的安装说明文档](/pages/install/)
 
 <code-group>
   <code-block title="centos" active>
@@ -167,7 +167,7 @@ bash install.sh Agent jdk
 </code-group>
 
 
-### 一键安装服务端 [详细的安装说明文档](./文档/01.安装使用/01.安装说明.md)
+### 一键安装服务端 [详细的安装说明文档](/pages/install/)
 
 <code-group>
   <code-block title="centos" active>
