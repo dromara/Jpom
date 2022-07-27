@@ -73,14 +73,13 @@ postList: none
 
 ### 😁 使用 [Jpom](https://gitee.com/dromara/Jpom) 后
 
-- **使用浏览器登录方便快捷管理项目**
 - **方便的用户管理**
   1. 用户操作监控，监控指定用户指定操作以邮件形式通知
   2. 多用户管理，用户项目权限独立（上传、删除权限可控制），完善的操作日志，使用工作空间隔离权限
   3. 账号可以开启 <mark>MFA 两步验证</mark>提高账号安全性
 - **界面形式实时查看项目运行状态、控制台日志、管理项目文件**
   1. 在线修改项目文本文件
-- **docker 容器管理、docker swarm 集群管理** <Badge text="Docker"/>
+- **Docker 容器管理、Docker swarm 集群管理** <Badge text="Docker UI"/>
 - **在线 SSH 终端，让您在没有 Xshell、FinalShell 等软件也能轻松管理服务器** <Badge text="SSH终端"/>
   1. 运维登录 Jpom 系统后不需要知道服务器密码
   2. 能指定 SSH 禁止执行的命令，避免执行高风险命令，并且能自动执行命令日志
