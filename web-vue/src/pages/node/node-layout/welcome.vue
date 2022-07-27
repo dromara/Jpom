@@ -3,7 +3,7 @@
     <a-divider>
       图表
       <!-- 历史监控数据 -->
-      <a-button size="small" v-show="node.cycle && node.cycle !== 0" type="primary" @click="handleHistory"><a-icon type="area-chart" />历史监控图表</a-button>
+      <a-button size="small" type="primary" @click="handleHistory"><a-icon type="area-chart" />历史监控图表</a-button>
     </a-divider>
     <!-- top 图表 -->
     <div id="top-chart">loading...</div>
