@@ -35,19 +35,21 @@ const user = {
     },
   },
   actions: {
+    refreshUserInfo({ commit }) {
+      // 加载用户信息
+      getUserInfo().then((res) => {
+        if (res.code === 200) {
+          commit("setUserInfo", res.data);
+          localStorage.setItem(USER_INFO_KEY, JSON.stringify(res.data));
+        }
+      });
+    },
     // 登录 data = {token: 'xxx', userName: 'name'}
     login({ dispatch, commit }, data) {
       return new Promise((resolve) => {
         commit("setToken", data);
         //commit('setUserName', data.userName);
-        // 加载用户信息
-        getUserInfo().then((res) => {
-          if (res.code === 200) {
-            commit("setUserInfo", res.data);
-            localStorage.setItem(USER_INFO_KEY, JSON.stringify(res.data));
-          }
-        });
-
+        dispatch("refreshUserInfo");
         // 加载系统菜单 这里需要等待 action 执行完毕返回 promise, 否则第一次登录可能会从 store 里面获取不到 menus 数据而报错
         dispatch("loadSystemMenus").then(() => {
           resolve();
