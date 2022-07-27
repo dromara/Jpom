@@ -20,6 +20,26 @@
 
 
 module.exports = {
+  homeSidebarB:
+    `<div style="padding: 0.95rem">
+    <p style="
+      color: var(--textColor);
+      opacity: 0.9;
+      font-size: 20px;
+      font-weight: bold;
+      margin: 0 0 8px 0;
+    ">社区讨论</p>
+    <img src="/images/wx_qrcode2.png"  style="width:100%;" />
+    添加小助手：备注 <b>Jpom</b> 进群
+    </p>
+
+    <div class="wwads-cn wwads-vertical" style="max-width:200px;"> <link rel="stylesheet" href="https://cdn.wwads.cn/css/wwads.css">
+    <a href="https://wwads.cn?aff_id=217" class="wwads-img" target="_blank" rel="nofollow">
+    <img src="https://cdn.wwads.cn/images/placeholder/wwads-friendly-ads.png" width="130" ></a>
+    <div class="wwads-content"><a href="https://wwads.cn?aff_id=217" class="wwads-text" target="_blank" rel="nofollow" >B2B Advertising Made Easy —— 我们帮助 to B 企业轻松投放更精准 & 友好的广告</a>
+    <a href="https://wwads.cn?aff_id=217" class="wwads-poweredby" title="万维广告——让广告交易像网购一样简单" target="_blank" rel="nofollow"><span><img class="wwads-logo"><span class="wwads-logo-text">广告</span></a> </div></div>
+
+   </div>`,
   //
   pageT: `
   `,
