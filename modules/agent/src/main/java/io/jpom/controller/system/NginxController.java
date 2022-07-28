@@ -365,12 +365,12 @@ public class NginxController extends BaseAgentController {
     }
 
     private String getNginxPath() {
-        String name = nginxService.getServiceName();
         AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
         return Optional.ofNullable(whitelist)
             .map(AgentWhitelist::getNginxPath)
             .orElseGet(() -> {
                 if (SystemUtil.getOsInfo().isWindows()) {
+                    String name = nginxService.getServiceName();
                     String path = this.findServerPath(name);
                     if (path != null) {
                         return FileUtil.file(path).getParentFile().getAbsolutePath();
