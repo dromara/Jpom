@@ -141,12 +141,24 @@ if [[ "${temp_result}" != "" ]] ; then
     JPOM_TYPE=`echo "${temp_result}"|awk -F '-' '{print $1}'`
     versions=`echo "${temp_result}"|awk -F '-' '{print $2}'`
 fi
-# 创建指定目录
 # 下载类型转小写
 url_type=`echo ${JPOM_TYPE} | tr 'A-Z' 'a-z'`
 # 记录下当前目录，用于后续删除 install.sh 脚本
 previous_dir=`pwd`
 jpom_dir=/usr/local/jpom-${url_type}
+# 提示用户安装目录
+read -p "默认安装目录 ${jpom_dir}, 是否使用此目录作为安装目录? 输入 y 确定, 否则请输入安装目录, 需要使用绝对路径 (注意: agent 和 server 不能装到同一个目录!)：" userInstallPath
+if [[ "$userInstallPath" != "y" ]]; then
+  jpom_dir=$userInstallPath
+  # 检测安装目录是否为空
+  if [[ -e "$userInstallPath" ]]; then
+    read -p "目录已存在, 你确定继续吗? 输入 y 继续(注意：agent 和 server 不能装到同一个目录!), 否则, 请指定一个新的安装路径：" userOption
+    if [[ "$userOption" != "y" ]]; then
+      jpom_dir=$userOption
+    fi
+  fi
+fi
+# 创建指定目录
 mkdir -p ${jpom_dir} && cd ${jpom_dir}
 now_dir=`pwd`
 echo "开始安装：${JPOM_TYPE}  ${versions}, 安装目录 ${now_dir}"
