@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * nginx 列表
@@ -203,8 +204,7 @@ public class NginxController extends BaseAgentController {
         String serviceName = nginxService.getServiceName();
         try {
             String format = StrUtil.format("{} -s reload", serviceName);
-            AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
-            String nginxPath = Optional.ofNullable(whitelist).map(AgentWhitelist::getNginxPath).orElse(null);
+            String nginxPath = this.getNginxPath();
             String msg = StrUtil.isEmpty(nginxPath) ? CommandUtil.execSystemCommand(format) : CommandUtil.execSystemCommand(format, FileUtil.file(nginxPath));
             if (StrUtil.isNotEmpty(msg)) {
                 log.info(msg);
@@ -347,6 +347,46 @@ public class NginxController extends BaseAgentController {
         return JsonMessage.getString(200, "nginx服务已停止 " + result);
     }
 
+    private String findServerPath(String name) {
+        String checkResult = CommandUtil.execSystemCommand("sc qc " + name);
+        List<String> strings = StrSplitter.splitTrim(checkResult, "\n", true);
+        //服务路径
+        for (String str : strings) {
+            str = str.toUpperCase().trim();
+            if (str.startsWith("BINARY_PATH_NAME")) {
+                String path = str.substring(str.indexOf(CharPool.COLON) + 1).replace("\"", "").trim();
+                //file = FileUtil.file(path).getParentFile();
+                if (FileUtil.exist(path)) {
+                    return path;
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getNginxPath() {
+        String name = nginxService.getServiceName();
+        AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
+        return Optional.ofNullable(whitelist)
+            .map(AgentWhitelist::getNginxPath)
+            .orElseGet(() -> {
+                if (SystemUtil.getOsInfo().isWindows()) {
+                    String path = this.findServerPath(name);
+                    if (path != null) {
+                        return FileUtil.file(path).getParentFile().getAbsolutePath();
+                    }
+                }
+                return null;
+            });
+    }
+
+    private String checkNginx() {
+        String nginxPath = this.getNginxPath();
+        String name = nginxService.getServiceName();
+        String format = StrUtil.format("{} -t", name);
+        return StrUtil.isNotEmpty(nginxPath) ? CommandUtil.execSystemCommand(format) : CommandUtil.execSystemCommand(format, FileUtil.file(nginxPath));
+    }
+
     /**
      * 重新加载
      *
@@ -354,32 +394,7 @@ public class NginxController extends BaseAgentController {
      */
     @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String reload() {
-        String name = nginxService.getServiceName();
-        AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
-        String nginxPath = Optional.ofNullable(whitelist).map(AgentWhitelist::getNginxPath).orElse(null);
-        File nginxPathFile = null;
-        if (StrUtil.isNotEmpty(nginxPath)) {
-            nginxPathFile = FileUtil.file(nginxPath);
-        }
-        String checkResult = StrUtil.EMPTY;
-        if (SystemUtil.getOsInfo().isLinux()) {
-            String format = StrUtil.format("{} -t", name);
-            checkResult = nginxPathFile == null ? CommandUtil.execSystemCommand(format) : CommandUtil.execSystemCommand(format, nginxPathFile);
-        } else if (SystemUtil.getOsInfo().isWindows()) {
-            checkResult = CommandUtil.execSystemCommand("sc qc " + name);
-            List<String> strings = StrSplitter.splitTrim(checkResult, "\n", true);
-            //服务路径
-            File file = null;
-            for (String str : strings) {
-                str = str.toUpperCase().trim();
-                if (str.startsWith("BINARY_PATH_NAME")) {
-                    String path = str.substring(str.indexOf(CharPool.COLON) + 1).replace("\"", "").trim();
-                    file = FileUtil.file(path).getParentFile();
-                    break;
-                }
-            }
-            checkResult = CommandUtil.execSystemCommand("nginx -t", nginxPathFile == null ? file : nginxPathFile);
-        }
+        String checkResult = this.checkNginx();
         if (StrUtil.isNotEmpty(checkResult) && !StrUtil.containsIgnoreCase(checkResult, "successful")) {
             return JsonMessage.getString(400, checkResult);
         }
