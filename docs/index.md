@@ -264,9 +264,6 @@ bash install.sh Server jdk
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/dante-cloud2.png')" alt="Dante-Cloud 是一款企业级微服务架构和服务能力开发平台。">
 </a>
 
-
-
-
 ## 🧲友情链接
 <div class="friends-item">
     <a href="https://shop108037867.taobao.com" target="_blank">
