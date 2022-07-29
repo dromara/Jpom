@@ -15,6 +15,11 @@ module.exports = [
   ['meta', {name: 'viewport', content: 'width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no'}],
   ['script', {src: 'https://unpkg.com/jquery@3.4.1/dist/jquery.min.js'}],
   ['script', {src: 'https://www.layuicdn.com/layer-v3.1.1/layer.js'}],
+  ['style', {}, `
+  .main-right{
+      display: none;
+  }
+  `],
   ['script', {}, `
   (function () {
         var bp = document.createElement('script');
@@ -45,7 +50,7 @@ module.exports = [
         $(function() {
          setTimeout(function () {
               imgHover();
-         }, 3000);
+         }, 2000);
        });
    function imgHover(){
      $(".friends-item-img[alt]").hover(function() {

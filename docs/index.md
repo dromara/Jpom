@@ -191,6 +191,11 @@ bash install.sh Server jdk
 
 ## 🤝 dromara 组织项目
 
+<p align="center">
+<b>为往圣继绝学，一个人或许能走的更快，但一群人会走的更远。</b>
+</p>
+
+<p align="center">
 <a class="friends-item" href="https://hutool.cn/" target="_blank">
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/hutool.jpg')" alt="🍬小而全的Java工具类库，使Java拥有函数式语言般的优雅，让Java语言也可以“甜甜的”。">
 </a>
@@ -263,6 +268,7 @@ bash install.sh Server jdk
 <a class="friends-item" href="https://www.herodotus.cn/" target="_blank">
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/dante-cloud2.png')" alt="Dante-Cloud 是一款企业级微服务架构和服务能力开发平台。">
 </a>
+</p>
 
 ## 🧲友情链接
 <div class="friends-item">
