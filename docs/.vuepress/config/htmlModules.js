@@ -39,9 +39,11 @@ module.exports = {
     <div class="wwads-content"><a href="https://wwads.cn?aff_id=217" class="wwads-text" target="_blank" rel="nofollow" >B2B Advertising Made Easy —— 我们帮助 to B 企业轻松投放更精准 & 友好的广告</a>
     <a href="https://wwads.cn?aff_id=217" class="wwads-poweredby" title="万维广告——让广告交易像网购一样简单" target="_blank" rel="nofollow"><span><img class="wwads-logo"><span class="wwads-logo-text">广告</span></a> </div></div>
 
-   </div>`,
+   </div>
+`,
   //
-  pageT: `
+  pageB: `
+
   `,
   // windowRB: `
 
