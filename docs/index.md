@@ -205,8 +205,8 @@ bash install.sh Server jdk
 <a class="friends-item" href="https://sa-token.dev33.cn/" target="_blank">
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/sa-token.png')" alt="一个轻量级 java 权限认证框架，让鉴权变得简单、优雅！">
 </a>
-<a class="friends-item" href="https://gitee.com/dromara/liteFlow" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/liteflow.png')" alt="轻量，快速，稳定，可编排的组件式流程引擎">
+<a class="friends-item" href="https://liteflow.yomahub.com/" target="_blank">
+	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/liteflow2.png')" alt="轻量，快速，稳定，可编排的组件式流程引擎">
 </a>
 <a class="friends-item" href="https://gitee.com/dromara/TLog" target="_blank">
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/tlog2.png')" alt="一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪">
