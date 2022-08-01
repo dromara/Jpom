@@ -119,4 +119,40 @@ done
 # checkZip
 
 
-ossutilmac64 sync ${DIR_PATH}/temp-github/ oss://jpom-releases/release/ --delete -f
+# ossutilmac64 sync ${DIR_PATH}/temp-github/ oss://jpom-releases/release/ --delete -f
+
+function updateDocUrlItem(){
+
+echo "" > ${DIR_PATH}/temp-docs.log
+echo "## $1" >> ${DIR_PATH}/temp-docs.log
+echo "- [jpom-$1](https://download.jpom.top/release/$1/jpom-$1.zip)" >> ${DIR_PATH}/temp-docs.log
+echo "- [server-$1-release.tar.gz](https://download.jpom.top/release/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.tar.gz.sha1)" >> ${DIR_PATH}/temp-docs.log
+echo "- [server-$1-release.zip](https://download.jpom.top/release/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.zip.sha1)" >> ${DIR_PATH}/temp-docs.log
+echo "- [agent-$1-release.tar.gz](https://download.jpom.top/release/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.tar.gz.sha1)" >> ${DIR_PATH}/temp-docs.log
+echo "- [agent-$1-release.zip](https://download.jpom.top/release/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.zip.sha1)" >> ${DIR_PATH}/temp-docs.log
+echo "" >> ${DIR_PATH}/temp-docs.log
+echo "--------" >> ${DIR_PATH}/temp-docs.log
+echo "" >> ${DIR_PATH}/temp-docs.log
+
+sed -i.bak "12r ${DIR_PATH}/temp-docs.log" ${DIR_PATH}/docs/docs/更新日志/02.下载链接/01.下载链接.md
+}
+
+
+function updateDocUrl(){
+i=16
+while((i<=25))
+do
+updateDocUrlItem 2.8.$i
+	((i++))
+done
+
+i=1
+while((i<=6))
+do
+	updateDocUrlItem 2.9.$i
+	((i++))
+done
+
+}
+
+updateDocUrl 2.9.6
