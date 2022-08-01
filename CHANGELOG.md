@@ -11,6 +11,7 @@
 3. 【server】修复节点首页历史监控图表按钮未显示问题（感谢@ʟᴊx💎💎）
 4. 【agent】优化加载 nginx 配置相关代码（感谢@伤感的风铃草🌿）
 5. 【server】修改 node welcome vue 中单词拼写错误（感谢[@dongge](https://gitee.com/gao-weidong) [Gitee issues I5JT9R](https://gitee.com/dromara/Jpom/issues/I5JT9R) ）
+6. 【server】修复 IP 字段长度不足,不能支持 IPV6 问题（感谢[@宋晶磊](https://gitee.com/songjingl) [Gitee issues I5JSEW](https://gitee.com/dromara/Jpom/issues/I5JSEW) ）
 
 ------
 
