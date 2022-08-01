@@ -10,7 +10,7 @@ TAB_NAME = 'tag_name'
 # 使用码云资源
 def ossDownload(environ, start_response):
     # 查询版本
-    result = requests.get('https://jpom-docs.keepbx.cn/docs/versions.json')
+    result = requests.get('https://jpom.top/docs/versions.json')
     json = result.json()
     return doJson(environ, start_response, json)
 
@@ -62,7 +62,7 @@ def doJson(environ, start_response, json):
         if par.startswith('type='):
             typeName = par.strip().split("=")[1]
     # 重定向到下载地址
-    url = "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/" + typeName.lower() + "-" + tag_name + "-release.zip"
+    url = "https://download.jpom.top/" + typeName.lower() + "-" + tag_name + "-release.zip"
     start_response(FOUND, [('Location', url)])
     return [bytes(url, encoding="utf8")]
 

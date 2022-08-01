@@ -72,13 +72,13 @@ public class RemoteVersion extends BaseJsonModel {
     /**
      * 主 url 用于拉取远程版本信息
      * <p>
-     * 1. https://jpom-docs.keepbx.cn/docs/release-versions.json
+     * 1. https://jpom.top/docs/release-versions.json
      * <p>
-     * 2. https://jpom.io/docs/release-versions.json
+     * 2. https://jpom.top/docs/release-versions.json
      * <p>
-     * 3. https://jpom-docs.keepbx.cn/docs/release-versions.json
+     * 3. https://jpom.top/docs/release-versions.json
      */
-    private static final String DEFAULT_URL = "https://jpom.io/docs/release-versions.json";
+    private static final String DEFAULT_URL = "https://jpom.top/docs/release-versions.json";
     /**
      * 检查间隔时间
      */
