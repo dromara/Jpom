@@ -38,7 +38,7 @@ postList: none
 <br/>
 
 <p align="center">
-  <a class="become-sponsor" href="https://jpom.keepbx.cn?from=site-middle">演示站点</a>
+  <a class="become-sponsor" href="https://demo.jpom.top?from=site-middle">演示站点</a>
   <a class="become-sponsor" href="/pages/praise/">支持这个项目</a>
 </p>
 
@@ -151,7 +151,7 @@ postList: none
 ```bash
 # 如果服务器中没有 jdk 会自动安装 jdk-8u251
 yum install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Agent jdk
 ```
   </code-block>
@@ -160,7 +160,7 @@ bash install.sh Agent jdk
 ```bash
 # 如果服务器中没有 jdk 会自动安装 jdk-8u251
 apt install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Agent jdk
 ```
   </code-block>
@@ -174,7 +174,7 @@ bash install.sh Agent jdk
 ```bash
 # 如果服务器中没有 jdk 会自动安装 jdk-8u251
 yum install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk
 ```
   </code-block>
@@ -183,7 +183,7 @@ bash install.sh Server jdk
 ```bash
 # 如果服务器中没有 jdk 会自动安装 jdk-8u251
 apt install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk
 ```
   </code-block>
@@ -205,7 +205,7 @@ bash install.sh Server jdk
 <a class="friends-item" href="https://liteflow.yomahub.com/" target="_blank">
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/liteflow2.png')" alt="轻量，快速，稳定，可编排的组件式流程引擎">
 </a>
-<a class="friends-item" href="https://jpom.io/" target="_blank">
+<a class="friends-item" href="https://jpom.top/" target="_blank">
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/jpom.png')" alt="一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
 </a>
 <a class="friends-item" href="https://gitee.com/dromara/TLog" target="_blank">

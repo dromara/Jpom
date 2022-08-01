@@ -1,4 +1,4 @@
 # robots.txt generated at http://www.jsons.cn/robots/
 User-agent: *
 Disallow:
-Sitemap: https://jpom-docs.keepbx.cn/sitemap.xml
+Sitemap: https://jpom.top/sitemap.xml

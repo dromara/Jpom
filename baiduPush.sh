@@ -4,6 +4,6 @@
 set -e
 
 # 百度链接推送
-curl -H 'Content-Type:text/plain' --data-binary @urls.txt "http://data.zz.baidu.com/urls?site=https://jpom-docs.keepbx.cn&token=nsCvuh521afD4tyA"
+curl -H 'Content-Type:text/plain' --data-binary @urls.txt "http://data.zz.baidu.com/urls?site=https://jpom.top&token=nsCvuh521afD4tyA"
 
 rm -rf urls.txt # 删除文件

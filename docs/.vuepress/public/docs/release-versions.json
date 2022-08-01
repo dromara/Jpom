@@ -1,7 +1,7 @@
 {
-    "url": "https://jpom-docs.keepbx.cn/docs/versions.json",
+    "url": "https://jpom.top/docs/versions.json",
     "tag_name": "v2.9.6",
-    "agentUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/agent-2.9.6-release.zip",
-    "serverUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/server-2.9.6-release.zip",
+    "agentUrl": "https://download.jpom.top/agent-2.9.6-release.zip",
+    "serverUrl": "https://download.jpom.top/server-2.9.6-release.zip",
     "changelogUrl": "https://gitee.com/dromara/Jpom/raw/master/CHANGELOG.md"
 }

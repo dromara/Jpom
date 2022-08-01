@@ -53,7 +53,7 @@ module.exports = [
   [
     'sitemap',
     {
-      hostname: 'https://jpom-docs.keepbx.cn'
+      hostname: 'https://jpom.top'
     }
   ]
 ];

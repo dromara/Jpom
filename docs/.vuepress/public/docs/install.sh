@@ -50,7 +50,7 @@ function installJdkFn() {
         if [[ ! -x "$JAVA" ]]; then
         	# 判断是否存在文件
 			if [[ ! -f "jdk-8u251-linux-x64.tar.gz" ]]; then
-			 wget -O jdk-8u251-linux-x64.tar.gz https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/jdk-8u251-linux-x64.tar.gz
+			 wget -O jdk-8u251-linux-x64.tar.gz https://download.jpom.top/jdk-8u251-linux-x64.tar.gz
 			fi
 			mkdir /usr/java/
 			#
@@ -166,9 +166,9 @@ echo "开始安装：${JPOM_TYPE}  ${versions}, 安装目录 ${now_dir}"
 if [[ ! -f "${JPOM_TYPE}.zip" ]]; then
   if [[ -z "${versions}" ]] ; then
     # 获取最新的版本号
-    versions=`curl -LfsS https://jpom-docs.keepbx.cn/docs/versions.tag`
+    versions=`curl -LfsS https://jpom.top/docs/versions.tag`
   fi
-  download_url="https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/${url_type}-${versions}-release.zip"
+  download_url="https://download.jpom.top/${url_type}-${versions}-release.zip"
   wget -O ${JPOM_TYPE}.zip ${download_url}
 fi
 # 解压

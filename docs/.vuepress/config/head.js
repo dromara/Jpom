@@ -6,7 +6,7 @@ module.exports = [
   ['meta', {name: 'theme-color', content: '#11a8cd'}], // 移动浏览器主题颜色
   ['meta', {name: 'og:type', content: 'website'}],
   ['meta', {name: 'og:title', content: 'Jpom 项目管理系统文档'}],
-  ['meta', {name: 'og:url', content: 'https://jpom.io/docs'}],
+  ['meta', {name: 'og:url', content: 'https://jpom.top/'}],
   ['meta', {name: 'og:site_name', content: 'Jpom 文档'}],
   ['meta', {name: 'og:description', content: 'Jpom-项目管理系统,一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件'}],
   // <meta name="baidu-site-verification" content="code-te8iliecTI" />
