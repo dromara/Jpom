@@ -14,7 +14,7 @@ export default ({
         router.afterEach(() => {
             //check if wwads' fire function was blocked after document is ready with 3s timeout (waiting the ad loading)
             docReady(function () {
-
+              console.log("\n %c Jpom %c https://jpom.top/ \n", "color: #ffffff; background: #f1404b; padding:5px 0;", "background: #030307; padding:5px 0;");
             });
 
 

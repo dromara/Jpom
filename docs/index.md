@@ -12,21 +12,22 @@ features: # 可选的
   details: 集群节点，统一管理多节点的项目，实现快速一键分发项目文件
 - title: 项目管理
   details: 创建、启动、停止、实时查看项目控制台日志，管理项目文件
-- title: SSH面板
-  details: 在浏览器中管理 SSH，方便进行日常运维,记录执行命令记录
+- title: SSH 终端
+  details: 在浏览器中执行 SSH 终端，方便进行日常运维,记录执行命令记录
 - title: 在线构建
   details: 在线拉取 GIT、SVN 仓库快速构建项目包，不用运维人员手动上传项目包
   link: /pages/practice/build-java-ssh-release/
-- title: 项目监控
-  details: 实时监控项目当前状态、如果异常自动触发邮件、钉钉报警通知
-  link: /pages/practice/monitor-notice/
-- title: 用户管理
-  details: 多用户管理，实现不同用户不同权限，用户操作、管理日志完善记录
-- title: 白名单模式
-  details: 为了数据安全防止用户随便查看、删除文件配置安全的白名单路径。
+- title: 在线脚本
+  details: 在线管理脚本、定时执行脚本、webhook 钩子执行、执行日志等
+  link: /pages/practice/node-script-backup-docker-mysql/
 - title: DOCKER 管理
   details: 在线管理镜像、容器、SWARM 集群。界面化管理 DOCKER
   link: /pages/practice/docker-cli/
+- title: 用户管理
+  details: 多用户管理,实现不同用户不同权限，用户操作、管理日志完善记录
+- title: 项目监控
+  details: 实时监控项目当前状态、如果异常自动触发邮件、钉钉报警通知
+  link: /pages/practice/monitor-notice/
 - title: NGINX 配置、SSL 证书
   details: 在线快速方便的修改 NGINX 配置文件，SSL 证书统一管理
   link: /pages/practice/node-nginx/
