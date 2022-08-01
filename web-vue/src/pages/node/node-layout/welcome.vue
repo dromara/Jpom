@@ -76,7 +76,7 @@ export default {
         emptyText: "",
       },
       processList: [],
-      delfatulProcessNames: ["java", "python", "mysql", "php", "docker"],
+      defaultProcessNames: ["java", "python", "mysql", "php", "docker"],
       processNames: [],
       monitorVisible: false,
       timeRange: "",
@@ -99,7 +99,7 @@ export default {
     };
   },
   mounted() {
-    this.processNames = Object.assign([], this.delfatulProcessNames);
+    this.processNames = Object.assign([], this.defaultProcessNames);
     this.initData();
   },
   destroyed() {
@@ -112,8 +112,8 @@ export default {
       this.cacheNodeProcess();
     },
     restProcessNames() {
-      this.processName = this.delfatulProcessNames[0];
-      this.processNames = this.delfatulProcessNames;
+      this.processName = this.defaultProcessNames[0];
+      this.processNames = this.defaultProcessNames;
       this.cacheNodeProcess();
       this.loadNodeProcess();
     },
