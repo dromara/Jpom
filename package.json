@@ -24,7 +24,7 @@
         "vuepress-plugin-sitemap": "^2.3.1",
         "vuepress-plugin-thirdparty-search": "^1.0.2",
         "vuepress-plugin-zooming": "^1.1.7",
-        "vuepress-theme-vdoing": "^1.12.5",
+        "vuepress-theme-vdoing": "^1.12.7",
         "yamljs": "^0.3.0"
     }
 }
