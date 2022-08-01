@@ -14,6 +14,7 @@ features: # 可选的
   details: 创建、启动、停止、实时查看项目控制台日志，管理项目文件
 - title: SSH 终端
   details: 在浏览器中执行 SSH 终端，方便进行日常运维,记录执行命令记录
+  link: /pages/practice/ssh-terminal/
 - title: 在线构建
   details: 在线拉取 GIT、SVN 仓库快速构建项目包，不用运维人员手动上传项目包
   link: /pages/practice/build-java-ssh-release/
