@@ -113,5 +113,10 @@ done
 
 }
 
+# download28
+# download29
+# checkSha1sum
+# checkZip
+
 
 ossutilmac64 sync ${DIR_PATH}/temp-github/ oss://jpom-releases/release/ --delete -f
