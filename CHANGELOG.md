@@ -135,7 +135,7 @@
 
 > 此版本为不兼容升级，需要手动升级操作数据相关迁移，操作流程如下：
 
-**（下述流程仅供简单思路参考，不同版本间存在部分差异，详细流程还请差异完整文档：[https://jpom.io/pages/upgrade/2.8.x-to-2.9.x](https://jpom.io/pages/upgrade/2.8.x-to-2.9.x) ）**
+**（下述流程仅供简单思路参考，不同版本间存在部分差异，详细流程还请差异完整文档：[https://jpom.top/pages/upgrade/2.8.x-to-2.9.x](https://jpom.top/pages/upgrade/2.8.x-to-2.9.x) ）**
 
 1. 导出低版本数据
 	1. 启动程序参数里面添加 --backup-h2
@@ -144,7 +144,7 @@
 	1. 启动程序参数里面添加 `--replace-import-h2-sql=/xxxx.sql --transform-sql` (路径需要替换为第一步控制台输出的 sql 文件保存路径)
 	2. linux 环境举例：`sh /xxxx/Server.sh restart --replace-import-h2-sql=/xxxx.sql --transform-sql`
 
-✈️ [更详细的升级说明文档](https://jpom.io/pages/upgrade/2.8.x-to-2.9.x)
+✈️ [更详细的升级说明文档](https://jpom.top/pages/upgrade/2.8.x-to-2.9.x)
 
 ------
 

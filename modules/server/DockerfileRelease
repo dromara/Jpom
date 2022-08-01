@@ -38,7 +38,7 @@ ENV TZ Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
 
 RUN mkdir -p ${JPOM_HOME} && \
-    curl -LfSo ${JPOM_HOME}/${JPOM_PKG} https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/${JPOM_PKG} && \
+    curl -LfSo ${JPOM_HOME}/${JPOM_PKG} https://download.jpom.top/${JPOM_PKG} && \
     tar -zxvf ${JPOM_HOME}/${JPOM_PKG} -C ${JPOM_HOME} && \
     rm -rf ${JPOM_HOME}/${JPOM_PKG}
 

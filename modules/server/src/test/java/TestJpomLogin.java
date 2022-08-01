@@ -30,7 +30,7 @@ public class TestJpomLogin {
 
 	@Test
 	public void test(){
-//		HttpRequest post = HttpUtil.createPost("https://jpom.keepbx.cn/userLogin");
+//		HttpRequest post = HttpUtil.createPost("https://demo.jpom.top/userLogin");
 
 	}
 }
