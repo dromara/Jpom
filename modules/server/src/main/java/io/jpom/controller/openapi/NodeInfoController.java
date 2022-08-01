@@ -84,7 +84,7 @@ public class NodeInfoController extends AbstractController {
 	/**
 	 * 接收节点推送的信息
 	 * <p>
-	 * yum install -y wget && wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && bash install.sh Agent jdk
+	 * yum install -y wget && wget -O install.sh https://jpom.top/docs/install.sh && bash install.sh Agent jdk
 	 * --auto-push-to-server http://127.0.0.1:3000/api/node/receive_push?token=462a47b8fba8da1f824370bb9fcdc01aa1a0fe20&workspaceId=DEFAULT
 	 *
 	 * @return json

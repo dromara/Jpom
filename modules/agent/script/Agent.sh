@@ -179,7 +179,7 @@ function usage() {
 
 # Create a self-starting service file
 function create() {
-	yum install -y wget && wget -O jpom-agent https://jpom-docs.keepbx.cn/docs/jpom-service.sh
+	yum install -y wget && wget -O jpom-agent https://jpom.top/docs/jpom-service.sh
 	# Determine whether the current script is an absolute path, matching all beginning with /
 	if [[ $0 =~ ^\/.* ]]
     then

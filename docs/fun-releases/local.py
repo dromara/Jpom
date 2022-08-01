@@ -19,7 +19,7 @@ class MainHandler(tornado.web.RequestHandler):
             return
         tag_name = tag_name.replace('v', '')
         print(tag_name)
-        url = "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/" + type + "-" + tag_name + "-release.zip"
+        url = "https://download.jpom.top/" + type + "-" + tag_name + "-release.zip"
         print(url)
         self.redirect(url)
 

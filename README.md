@@ -1,6 +1,6 @@
 <p align="center">
-	<a href="https://jpom-docs.keepbx.cn/"  target="_blank">
-	    <img src="https://jpom-docs.keepbx.cn/images/jpom_logo.png" width="400" alt="logo">
+	<a href="https://jpom.top/"  target="_blank">
+	    <img src="https://jpom.top/images/jpom_logo.png" width="400" alt="logo">
 	</a>
 </p>
 <p align="center">
@@ -29,18 +29,14 @@
     <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dromara/Jpom&amp;utm_campaign=Badge_Grade">
       <img src="https://app.codacy.com/project/badge/Grade/843b953f1446449c9a075e44ea778336" alt="codacy"/>
     </a>
-	<a target="_blank" href="https://jpom-docs.keepbx.cn/pages/praise/join/">
+	<a target="_blank" href="https://jpom.top/pages/praise/join/">
 		<img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
 	</a>
 </p>
 
 <p align="center">
-	👉 <a target="_blank" href="https://jpom.io/">https://jpom.io/</a> 👈
+	👉 <a target="_blank" href="https://jpom.top">https://jpom.top/</a> | <a target="_blank" href="https://demo.jpom.top/">https://demo.jpom.top</a> 👈
 </p>
-<p align="center">
-	备用地址：<a target="_blank" href="https://jpom-docs.keepbx.cn">https://jpom-docs.keepbx.cn</a> | <a target="_blank" href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
-</p>
-
 ## 😭 日常开发中，您是否有以下痛点？
 
 - <font color="red">**团队中没有专业的运维，开发还要做运维的活**</font>，需要自己手动构建、部署项目。
@@ -119,22 +115,22 @@ Jpom 支持多种安装方式，满足不同用户的个性化需求，您只需
 ```shell
 # 仅安装服务端
 yum install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server
 
 # 安装服务端和 jdk 环境
 yum install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk
 
 # 安装服务端和 jdk、maven 环境
 yum install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk+mvn
 
 # ubuntu
 apt install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk
 ```
 
@@ -164,17 +160,17 @@ bash install.sh Server jdk
 ```shell
 # 仅安装插件端
 yum install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Agent
 
 # 安装插件端和 jdk 环境
 yum install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Agent jdk
 
 # ubuntu
 apt install -y wget && \
-wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && \
+wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Agent jdk
 ```
 
@@ -182,7 +178,7 @@ bash install.sh Agent jdk
 
 ### 方式二：📦 容器化安装
 
-> ⚠️ 注意：容器化安装方式需要先安装 docker，[点击跳转docker安装文档](https://jpom-docs.keepbx.cn/pages/b63dc5/)
+> ⚠️ 注意：容器化安装方式需要先安装 docker，[点击跳转docker安装文档](https://jpom.top/pages/b63dc5/)
 
 
 #### 使用挂载方式存储相关数据（在部分环境可能出现兼容性问题）
@@ -213,7 +209,7 @@ docker run -d -p 2122:2122 \
 
 > 容器化安装仅提供服务端版。由于容器和宿主机环境隔离，而导致插件端的很多功能无法正常使用，因此对插件端容器化意义不大。
 >
-> 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档 [https://jpom-docs.keepbx.cn/pages/b63dc5/](https://jpom-docs.keepbx.cn/pages/b63dc5/)
+> 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档 [https://jpom.top/pages/b63dc5/](https://jpom.top/pages/b63dc5/)
 
 ### 方式三：💾 下载安装
 
@@ -329,7 +325,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 ## 💻 演示项目
 
-[https://jpom.keepbx.cn](https://jpom.keepbx.cn)
+[https://demo.jpom.top](https://demo.jpom.top)
 
 ```   
 账号：demo
@@ -363,27 +359,27 @@ mvn -f xxxx/pom.xml clean package
 
 ## 📝 常见问题、操作说明
 
-- [文档主页](https://jpom-docs.keepbx.cn/)
-- [FQA](https://jpom-docs.keepbx.cn/pages/FQA/)
-- [名词解释](https://jpom-docs.keepbx.cn/pages/FQA/proper-noun/)
+- [文档主页](https://jpom.top/)
+- [FQA](https://jpom.top/pages/FQA/)
+- [名词解释](https://jpom.top/pages/FQA/proper-noun/)
 
 ### 实践案例
 
 > 里面有部分图片加载可能比较慢
 
-1. [本地构建 + SSH 发布 java 项目](https://jpom-docs.keepbx.cn/pages/practice/build-java-ssh-release)
-2. [本地构建 + 项目发布 node 项目](https://jpom-docs.keepbx.cn/pages/practice/build-node-release)
-3. [本地构建 + SSH 发布 node 项目](https://jpom-docs.keepbx.cn/pages/practice/build-node-ssh-release)
-4. [本地构建 + 自定义管理 python 项目](https://jpom-docs.keepbx.cn/pages/practice/project-dsl-python)
-5. [自定义管理 java 项目](https://jpom-docs.keepbx.cn/pages/practice/project-dsl-java)
-6. [管理编译安装的 nginx](https://jpom-docs.keepbx.cn/pages/practice/node-nginx)
-7. [管理 docker](https://jpom-docs.keepbx.cn/pages/practice/docker-cli)
-8. [容器构建 + 项目发布 java 项目](https://jpom-docs.keepbx.cn/pages/practice/build-docker-java-node-release)
-9. [更新实践案例>>](https://jpom-docs.keepbx.cn/pages/practice/)
+1. [本地构建 + SSH 发布 java 项目](https://jpom.top/pages/practice/build-java-ssh-release)
+2. [本地构建 + 项目发布 node 项目](https://jpom.top/pages/practice/build-node-release)
+3. [本地构建 + SSH 发布 node 项目](https://jpom.top/pages/practice/build-node-ssh-release)
+4. [本地构建 + 自定义管理 python 项目](https://jpom.top/pages/practice/project-dsl-python)
+5. [自定义管理 java 项目](https://jpom.top/pages/practice/project-dsl-java)
+6. [管理编译安装的 nginx](https://jpom.top/pages/practice/node-nginx)
+7. [管理 docker](https://jpom.top/pages/practice/docker-cli)
+8. [容器构建 + 项目发布 java 项目](https://jpom.top/pages/practice/build-docker-java-node-release)
+9. [更新实践案例>>](https://jpom.top/pages/practice/)
 
 ## 🛠️ 整体架构
 
-![jpom-func-arch](https://jpom-docs.keepbx.cn/images/jpom-func-arch.jpg)
+![jpom-func-arch](https://jpom.top/images/jpom-func-arch.jpg)
 
 ## 🔨贡献指南
 
@@ -437,14 +433,14 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 ## 🐞 交流讨论 、反馈 BUG、提出建议等
 
 1. 快扫描下方左侧微信群二维码和我们一起交流讨论吧！（添加小助手：备注 Jpom 进群）
-2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐，欢迎扫描下方右侧[微信收款码赞赏](https://jpom-docs.keepbx.cn/images/wx-qrcode-praise.png)或通过[码云赞赏](https://gitee.com/dromara/Jpom)（在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom-docs.keepbx.cn/docs/index.html#/praise)
-3. 微信公众号：[CodeGzh](https://jpom-docs.keepbx.cn/images/CodeGzh-QrCode.jpg) 查看一些基础教程
+2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐，欢迎扫描下方右侧[微信收款码赞赏](https://jpom.top/images/wx-qrcode-praise.png)或通过[码云赞赏](https://gitee.com/dromara/Jpom)（在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/docs/index.html#/praise)
+3. 微信公众号：[CodeGzh](https://jpom.top/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
 6. 参与贡献，请查看[贡献指南](#🔨贡献指南)。
 
 感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
 
-![wx-qrcode-praise.png](https://jpom-docs.keepbx.cn/images/wx-qrcode-praise.png)
+![wx-qrcode-praise.png](https://jpom.top/images/wx-qrcode-praise.png)
 
 ## 🔔 精品项目推荐
 

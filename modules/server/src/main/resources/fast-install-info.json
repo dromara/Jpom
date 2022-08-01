@@ -1,10 +1,10 @@
 [
   {
     "name": "主地址",
-    "url": "yum install -y wget && wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && bash install.sh Agent jdk"
+    "url": "yum install -y wget && wget -O install.sh https://jpom.top/docs/install.sh && bash install.sh Agent jdk"
   },
   {
     "name": "备用地址",
-    "url": "yum install -y wget && wget -O install.sh https://jpom-docs.keepbx.cn/docs/install.sh && bash install.sh Agent jdk"
+    "url": "yum install -y wget && wget -O install.sh https://jpom.top/docs/install.sh && bash install.sh Agent jdk"
   }
 ]
