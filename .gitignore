@@ -46,3 +46,7 @@ functions/*
 screenshot
 .firebase
 .eslintcache
+
+*.zip
+*.tar.gz
+*.sha1
