@@ -56,9 +56,9 @@ sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/.vuepress/public/doc
 
 function updateDocUrlItem(){
 
-findStr=`cat ${pwd}/../docs/更新日志/02.下载链接/01.下载链接.md |grep "$1"`
+mdPath="${pwd}/../docs/更新日志/02.下载链接/01.下载链接.md"
 
-if [[ "$findStr" != ""  ]]; then
+if [[ `cat ${mdPath} |grep "$1"` != ""  ]]; then
 	echo "下载地址已经更新啦"
 else
 	echo "" > ${pwd}/temp-docs.log
@@ -72,7 +72,7 @@ else
 	echo "--------" >> ${pwd}/temp-docs.log
 	echo "" >> ${pwd}/temp-docs.log
 
-	sed -i.bak "12r ${pwd}/temp-docs.log" ${pwd}/../docs/更新日志/02.下载链接/01.下载链接.md
+	sed -i.bak "12r ${pwd}/temp-docs.log" ${mdPath}
 fi
 }
 
