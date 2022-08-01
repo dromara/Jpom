@@ -51,6 +51,25 @@ postList: none
   box-sizing: border-box;
   border: 2px solid #4274F4;
 }
+
+.main-right{
+  display: none;
+}
+
+.friends-item {
+  width: 150px;
+  height:40px;
+  flex:1;
+  text-align: center;
+  display: inline-block;
+  margin: 5px;
+}
+
+.friends-item-img {
+  object-fit: contain;
+  max-width:150px !important;
+  height: 100%;
+}
 </style>
 
 <br/>
@@ -124,23 +143,6 @@ postList: none
 <img :src="$withBase('/images/jpom-func-arch.jpg')" style="zoom: 120%" alt="jpom-func-arch">
 
 <br/>
-
-<style>
-.friends-item {
-  width: 150px;
-  height:40px;
-  flex:1;
-  text-align: center;
-  display: inline-block;
-  margin: 5px;
-}
-
-.friends-item-img {
-  object-fit: contain;
-  max-width:150px !important;
-  height: 100%;
-}
-</style>
 
 ## 快速体验
 

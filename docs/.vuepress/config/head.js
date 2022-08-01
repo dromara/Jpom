@@ -15,11 +15,6 @@ module.exports = [
   ['meta', {name: 'viewport', content: 'width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no'}],
   ['script', {src: '/assets/js/jquery.3.4.1.min.js'}],
   ['script', {src: '/assets/js/layer-3.1.1.js'}],
-  ['style', {}, `
-  .main-right{
-      display: none;
-  }
-  `],
   ['script', {}, `
   (function () {
         var bp = document.createElement('script');
