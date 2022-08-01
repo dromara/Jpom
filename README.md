@@ -213,7 +213,7 @@ docker run -d -p 2122:2122 \
 
 ### 方式三：💾 下载安装
 
-1. 下载安装包 [https://gitee.com/dromara/Jpom/attach_files](https://gitee.com/dromara/Jpom/attach_files)
+1. 下载安装包 [https://jpom.top/pages/all-downloads/](https://jpom.top/pages/all-downloads/)
 2. 解压文件
 3. 安装插件端
     1. agent-x.x.x-release 目录为插件端的全部安装文件
