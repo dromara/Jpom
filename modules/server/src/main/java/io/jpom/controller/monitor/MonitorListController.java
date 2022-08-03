@@ -33,7 +33,7 @@ import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.MonitorModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;

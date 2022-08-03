@@ -42,7 +42,7 @@ import io.jpom.model.PageResultDto;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.log.SshTerminalExecuteLog;
 import io.jpom.permission.ClassFeature;

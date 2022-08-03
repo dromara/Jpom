@@ -30,7 +30,7 @@ import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.crypto.digest.Digester;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.model.BaseIdModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.user.TriggerTokenLogBean;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.ITriggerToken;

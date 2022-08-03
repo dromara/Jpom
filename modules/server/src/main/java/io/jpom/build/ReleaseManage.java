@@ -48,7 +48,7 @@ import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;

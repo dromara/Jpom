@@ -36,7 +36,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;

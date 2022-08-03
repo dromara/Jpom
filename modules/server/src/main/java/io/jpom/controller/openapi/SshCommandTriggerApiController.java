@@ -32,7 +32,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.CommandModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.service.node.command.CommandService;
 import io.jpom.service.user.TriggerTokenLogServer;
 import lombok.extern.slf4j.Slf4j;

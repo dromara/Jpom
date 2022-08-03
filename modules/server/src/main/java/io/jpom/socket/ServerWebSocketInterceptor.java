@@ -31,7 +31,7 @@ import io.jpom.JpomApplication;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;

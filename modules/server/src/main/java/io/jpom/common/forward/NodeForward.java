@@ -38,7 +38,7 @@ import com.alibaba.fastjson.TypeReference;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;

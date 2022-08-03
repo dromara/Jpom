@@ -31,7 +31,7 @@ import io.jpom.common.BaseJpomController;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.service.script.ScriptExecuteLogServer;

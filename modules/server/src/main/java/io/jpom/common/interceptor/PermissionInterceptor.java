@@ -33,7 +33,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.permission.*;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.service.node.NodeService;

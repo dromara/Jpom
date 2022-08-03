@@ -39,7 +39,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.log.MonitorNotifyLog;
 import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.plugin.IPlugin;

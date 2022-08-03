@@ -24,8 +24,8 @@ package io.jpom.service.user;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import io.jpom.model.data.UserBindWorkspaceModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserBindWorkspaceModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.h2db.BaseDbService;

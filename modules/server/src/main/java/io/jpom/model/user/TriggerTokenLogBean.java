@@ -23,7 +23,6 @@
 package io.jpom.model.user;
 
 import io.jpom.model.BaseDbModel;
-import io.jpom.model.data.UserModel;
 import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.TableName;
 import lombok.Data;
