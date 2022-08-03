@@ -97,7 +97,7 @@ public class DockerInfoController extends BaseServerController {
     public String list() {
         // load list with page
         PageResultDto<DockerInfoModel> resultDto = dockerInfoService.listPage(getRequest());
-        resultDto.each(this::checkcertPath);
+        resultDto.each(this::checkCertPath);
         return JsonMessage.getString(200, "", resultDto);
     }
 
@@ -107,7 +107,7 @@ public class DockerInfoController extends BaseServerController {
      * @param dockerInfoModel docker
      * @return true 证书文件存在
      */
-    private boolean checkcertPath(DockerInfoModel dockerInfoModel) {
+    private boolean checkCertPath(DockerInfoModel dockerInfoModel) {
         if (dockerInfoModel == null) {
             return false;
         }
@@ -157,7 +157,7 @@ public class DockerInfoController extends BaseServerController {
                 multipart = createMultipart();
             } catch (Exception e) {
                 DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
-                certExist = this.checkcertPath(dockerInfoModel);
+                certExist = this.checkCertPath(dockerInfoModel);
                 Assert.state(certExist, "请上传证书文件");
             }
             if (multipart != null) {
