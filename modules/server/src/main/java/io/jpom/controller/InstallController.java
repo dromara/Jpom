@@ -34,7 +34,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.service.user.UserBindWorkspaceService;

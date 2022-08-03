@@ -35,7 +35,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.Const;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.IAsyncLoad;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.docker.DockerSwarmInfoMode;
 import io.jpom.plugin.IPlugin;

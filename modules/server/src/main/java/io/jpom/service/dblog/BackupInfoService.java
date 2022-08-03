@@ -35,7 +35,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.model.data.BackupInfoModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.enums.BackupStatusEnum;
 import io.jpom.model.enums.BackupTypeEnum;
 import io.jpom.plugin.IPlugin;

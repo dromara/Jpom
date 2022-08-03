@@ -35,7 +35,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.cron.IAsyncLoad;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.log.SystemMonitorLog;
 import io.jpom.model.stat.NodeStatModel;
 import io.jpom.service.dblog.DbSystemMonitorLogService;

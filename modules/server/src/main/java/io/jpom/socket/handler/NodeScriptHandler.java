@@ -27,7 +27,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.node.ScriptCacheModel;
 import io.jpom.model.node.ScriptExecuteLogCacheModel;
 import io.jpom.permission.ClassFeature;

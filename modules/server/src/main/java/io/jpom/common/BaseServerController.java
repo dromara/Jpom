@@ -28,7 +28,7 @@ import cn.hutool.cron.pattern.CronPattern;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.util.Assert;

@@ -35,7 +35,7 @@ import io.jpom.common.Const;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.MonitorUserOptModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.monitor.NotifyUtil;

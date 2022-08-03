@@ -27,7 +27,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.service.h2db.BaseDbService;
 import io.jpom.util.JwtUtil;

@@ -31,7 +31,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.PageResultDto;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.service.user.UserBindWorkspaceService;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.ServletRequestAttributes;

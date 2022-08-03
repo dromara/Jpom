@@ -39,7 +39,7 @@ import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.user.TriggerTokenLogServer;

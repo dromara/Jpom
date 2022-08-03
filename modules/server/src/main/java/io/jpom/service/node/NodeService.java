@@ -39,7 +39,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.node.ssh.SshService;

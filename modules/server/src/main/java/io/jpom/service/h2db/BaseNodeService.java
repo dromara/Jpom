@@ -38,7 +38,7 @@ import io.jpom.common.Const;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.WorkspaceService;

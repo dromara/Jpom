@@ -34,7 +34,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.MailAccountModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.monitor.EmailUtil;
 import io.jpom.service.system.SystemParametersServer;

@@ -37,7 +37,7 @@ import io.jpom.build.ReleaseManage;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.permission.ClassFeature;

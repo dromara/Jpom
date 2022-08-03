@@ -25,7 +25,7 @@ package io.jpom.model.log;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.service.h2db.TableName;
 
 /**

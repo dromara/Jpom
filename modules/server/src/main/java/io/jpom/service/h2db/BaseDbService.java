@@ -42,7 +42,7 @@ import io.jpom.common.Const;
 import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.model.PageResultDto;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.system.extconf.DbExtConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;

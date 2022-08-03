@@ -36,6 +36,7 @@ import io.jpom.common.Const;
 import io.jpom.model.data.*;
 import io.jpom.model.log.MonitorNotifyLog;
 import io.jpom.model.outgiving.OutGivingModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.service.dblog.DbMonitorNotifyLogService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.NodeService;

@@ -24,7 +24,7 @@ package io.jpom.build;
 
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.user.UserModel;
 import lombok.Builder;
 
 /**
