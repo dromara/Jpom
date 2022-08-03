@@ -136,9 +136,6 @@
           </a-row>
         </a-form-model-item>
 
-        <a-form-model-item label="心跳超时" prop="heartbeatTimeout">
-          <a-input-number style="width: 100%" v-model="temp.heartbeatTimeout" placeholder="心跳超时 单位秒" />
-        </a-form-model-item>
         <a-form-model-item label="标签" prop="tagInput">
           <template>
             <div>
@@ -174,6 +171,9 @@
 
         <a-collapse>
           <a-collapse-panel key="1" header="其他配置">
+            <a-form-model-item label="超时时间" prop="heartbeatTimeout">
+              <a-input-number style="width: 100%" v-model="temp.heartbeatTimeout" placeholder="超时时间 单位秒" />
+            </a-form-model-item>
             <a-form-model-item label="仓库地址" prop="registryUrl">
               <a-input v-model="temp.registryUrl" placeholder="仓库地址" />
             </a-form-model-item>
@@ -405,7 +405,7 @@ export default {
           const formData = new FormData();
           formData.append("file", this.uploadFileList[0]);
           for (let key in temp) {
-            formData.append(key, this.temp[key] || "");
+            formData.append(key, temp[key] || "");
           }
 
           // formData.append("name", this.temp.name || "");

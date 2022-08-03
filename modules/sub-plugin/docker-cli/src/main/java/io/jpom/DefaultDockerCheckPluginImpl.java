@@ -173,7 +173,6 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
      * @return info
      */
     private JSONObject infoCmd(Map<String, Object> parameter) {
-        parameter.putIfAbsent("timeout", 5);
         DockerClient dockerClient = DockerUtil.get(parameter);
         Info exec = dockerClient.infoCmd().exec();
         return (JSONObject) JSONObject.toJSON(exec);
@@ -186,7 +185,6 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
      * @return true 可以通讯
      */
     private Version pullVersion(Map<String, Object> parameter) {
-        parameter.putIfAbsent("timeout", 5);
         DockerClient dockerClient = DockerUtil.get(parameter);
         return dockerClient.versionCmd().exec();
 
@@ -200,7 +198,6 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
      */
     private boolean checkPing(Map<String, Object> parameter) {
         try {
-            parameter.putIfAbsent("timeout", 5);
             DockerClient dockerClient = DockerUtil.get(parameter);
             dockerClient.pingCmd().exec();
             return true;

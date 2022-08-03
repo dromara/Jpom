@@ -246,7 +246,7 @@ public class DockerInfoController extends BaseServerController {
             parameter.put("registryPassword", registryPassword);
             try {
                 JSONObject jsonObject = (JSONObject) plugin.execute("testAuth", parameter);
-                System.out.println(jsonObject);
+                log.info("{}", jsonObject);
             } catch (Exception e) {
                 log.warn("仓库授权信息错误", e);
                 throw new IllegalArgumentException("仓库账号或者密码错误：" + e.getMessage());

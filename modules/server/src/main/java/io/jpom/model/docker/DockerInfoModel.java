@@ -90,7 +90,7 @@ public class DockerInfoModel extends BaseWorkspaceModel {
      */
     private Long lastHeartbeatTime;
     /**
-     * 心跳超时时间，单位 秒
+     * 超时时间，单位 秒
      */
     private Integer heartbeatTimeout;
     /**
@@ -157,7 +157,7 @@ public class DockerInfoModel extends BaseWorkspaceModel {
         parameter.put("registryPassword", this.getRegistryPassword());
         parameter.put("registryEmail", this.getRegistryEmail());
         parameter.put("registryUrl", this.getRegistryUrl());
-
+        parameter.put("timeout", this.getHeartbeatTimeout());
         if (this.getTlsVerify()) {
             parameter.put("dockerCertPath", this.generateCertPath());
         }
