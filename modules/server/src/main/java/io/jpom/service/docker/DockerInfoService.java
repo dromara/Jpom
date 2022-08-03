@@ -127,7 +127,6 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
         try {
             IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
             Map<String, Object> parameter = dockerInfoModel.toParameter();
-            parameter.put("timeout", dockerInfoModel.getHeartbeatTimeout());
             //
             JSONObject info = plugin.execute("info", parameter, JSONObject.class);
             //

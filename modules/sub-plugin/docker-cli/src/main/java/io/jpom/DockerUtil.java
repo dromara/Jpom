@@ -117,8 +117,10 @@ public class DockerUtil {
             .withApiVersion(apiVersion)
             .withDockerCertPath(dockerCertPath)
             .withDockerHost(host)
-            .withRegistryUrl(registryUrl).withRegistryEmail(registryEmail)
-            .withRegistryUsername(registryUsername).withRegistryPassword(StrUtil.emptyToDefault(registryPassword, StrUtil.EMPTY))
+            .withRegistryUrl(registryUrl)
+            .withRegistryEmail(registryEmail)
+            .withRegistryUsername(registryUsername)
+            .withRegistryPassword(StrUtil.emptyToDefault(registryPassword, StrUtil.EMPTY))
             .build();
         //
         ApacheDockerHttpClient.Builder builder = new ApacheDockerHttpClient.Builder()
