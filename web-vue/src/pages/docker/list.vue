@@ -254,12 +254,12 @@
   </div>
 </template>
 <script>
-import {apiVersions, dcokerSwarmLeaveForce, deleteDcoker, dockerList, editDocker, editDockerByFile} from "@/api/docker-api";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
-import {dockerSwarmListAll, initDockerSwarm, joinDockerSwarm} from "@/api/docker-swarm";
-import {parseTime} from "@/utils/time";
+import { apiVersions, dcokerSwarmLeaveForce, deleteDcoker, dockerList, editDocker, editDockerByFile } from "@/api/docker-api";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { dockerSwarmListAll, initDockerSwarm, joinDockerSwarm } from "@/api/docker-swarm";
+import { parseTime } from "@/utils/time";
 import Console from "./console";
-import {mapGetters} from "vuex";
+import { mapGetters } from "vuex";
 
 export default {
   components: {
@@ -395,15 +395,24 @@ export default {
         if (!valid) {
           return false;
         }
+        const temp = Object.assign({}, this.temp);
+
+        temp.tags = (temp.tagsArray || []).join(",");
+        delete temp.tagsArray;
+        delete temp.inputVisible;
+        delete temp.tagInput;
         if (this.uploadFileList.length) {
           const formData = new FormData();
           formData.append("file", this.uploadFileList[0]);
-          formData.append("id", this.temp.id || "");
-          formData.append("name", this.temp.name || "");
-          formData.append("tlsVerify", this.temp.tlsVerify || "");
-          formData.append("host", this.temp.host || "");
-          formData.append("apiVersion", this.temp.apiVersion || "");
-          formData.append("heartbeatTimeout", this.temp.heartbeatTimeout || "");
+          for (let key in temp) {
+            formData.append(key, this.temp[key] || "");
+          }
+
+          // formData.append("name", this.temp.name || "");
+          // formData.append("tlsVerify", this.temp.tlsVerify || "");
+          // formData.append("host", this.temp.host || "");
+          // formData.append("apiVersion", this.temp.apiVersion || "");
+          // formData.append("heartbeatTimeout", this.temp.heartbeatTimeout || "");
           // 提交数据
           editDockerByFile(formData).then((res) => {
             if (res.code === 200) {
@@ -417,12 +426,6 @@ export default {
             }
           });
         } else {
-          const temp = Object.assign({}, this.temp);
-
-          temp.tags = (temp.tagsArray || []).join(",");
-          delete temp.tagsArray;
-          delete temp.inputVisible;
-          delete temp.tagInput;
           editDocker(temp).then((res) => {
             if (res.code === 200) {
               // 成功
