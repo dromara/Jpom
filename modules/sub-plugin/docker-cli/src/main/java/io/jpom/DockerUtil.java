@@ -27,6 +27,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.Resource;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -49,6 +50,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * @author bwcx_jzy
@@ -112,16 +114,19 @@ public class DockerUtil {
         String registryEmail = (String) parameter.get("registryEmail");
         String registryUrl = (String) parameter.get("registryUrl");
         //
-        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
+        DefaultDockerClientConfig.Builder defaultConfigBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
+        defaultConfigBuilder
             .withDockerTlsVerify(StrUtil.isNotEmpty(dockerCertPath))
             .withApiVersion(apiVersion)
             .withDockerCertPath(dockerCertPath)
-            .withDockerHost(host)
-            .withRegistryUrl(registryUrl)
-            .withRegistryEmail(registryEmail)
-            .withRegistryUsername(registryUsername)
-            .withRegistryPassword(StrUtil.emptyToDefault(registryPassword, StrUtil.EMPTY))
-            .build();
+            .withDockerHost(host);
+        //
+        Opt.ofBlankAble(registryUrl).ifPresent(s -> defaultConfigBuilder.withRegistryUrl(registryUrl));
+        Opt.ofBlankAble(registryEmail).ifPresent(s -> defaultConfigBuilder.withRegistryEmail(registryEmail));
+        Opt.ofBlankAble(registryUsername).ifPresent(s -> defaultConfigBuilder.withRegistryUsername(registryUsername));
+        Opt.ofBlankAble(registryPassword).ifPresent(s -> defaultConfigBuilder.withRegistryPassword(registryPassword));
+
+        DockerClientConfig config = defaultConfigBuilder.build();
         //
         ApacheDockerHttpClient.Builder builder = new ApacheDockerHttpClient.Builder()
             .dockerHost(config.getDockerHost())

@@ -60,6 +60,7 @@ public class TestLocal {
         logger.setLevel(Level.INFO);
 
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
+            .withRegistryUsername(null)
             // .withDockerHost("tcp://192.168.163.11:2376").build();
 //				.withApiVersion()
 //            .withDockerHost("tcp://127.0.0.1:2375")

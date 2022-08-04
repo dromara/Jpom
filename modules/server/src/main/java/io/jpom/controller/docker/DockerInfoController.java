@@ -168,7 +168,7 @@ public class DockerInfoController extends BaseServerController {
                 File file = new File(localPath);
                 CompressionFileUtil.unCompress(file, certPathFile);
                 boolean ok = (boolean) plugin.execute("certPath", "certPath", absolutePath);
-                Assert.state(ok, "证书信息不正确");
+                Assert.state(ok, "证书信息不正确,证书压缩包里面必须包含：ca.pem、key.pem、cert.pem");
                 certExist = true;
             }
         }
