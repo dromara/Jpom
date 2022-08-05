@@ -16,6 +16,7 @@
 6. 【server】修复 IP 字段长度不足,不能支持 IPV6 问题（感谢[@宋晶磊](https://gitee.com/songjingl) [Gitee issues I5JSEW](https://gitee.com/dromara/Jpom/issues/I5JSEW) ）
 7. 【server】修复在 docker 开启 TLS 时候配置私有仓库不生效问题（感谢@🐠）
 8. 【server】docker 心跳时间调整为超时时间
+9. 优化 windows 环境管理脚本,保存配置并重启
 
 ------
 
