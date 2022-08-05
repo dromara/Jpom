@@ -13,7 +13,7 @@
         <a-form-model-item :wrapper-col="{ span: 14, offset: 2 }">
           <a-space>
             <a-button type="primary" class="btn" @click="onSubmit(false)">保存</a-button>
-            <a-button type="primary" class="btn" @click="onSubmit(true)">保存并重启</a-button>
+            <a-button type="danger" class="btn" @click="onSubmit(true)">保存并重启</a-button>
           </a-space>
         </a-form-model-item>
       </a-form-model>

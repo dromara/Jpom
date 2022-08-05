@@ -22,7 +22,6 @@
  */
 package io.jpom.common;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -31,7 +30,6 @@ import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.ManifestUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.lang.Tuple;
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.GlobalHeaders;
@@ -363,7 +361,7 @@ public class JpomManifest {
             }
             String applicationClass = type.getApplicationClass();
             ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
-                    StrUtil.replace(applicationClass, ".", StrUtil.SLASH)));
+                StrUtil.replace(applicationClass, ".", StrUtil.SLASH)));
             if (entry == null) {
                 return new JsonMessage<>(405, "此包不是Jpom【" + type.name() + "】包");
             }
@@ -377,7 +375,7 @@ public class JpomManifest {
                 //
                 JpomManifest jpomManifest = JpomManifest.getInstance();
                 if (StrUtil.equals(version, jpomManifest.getVersion()) &&
-                        StrUtil.equals(timeStamp, jpomManifest.getTimeStamp())) {
+                    StrUtil.equals(timeStamp, jpomManifest.getTimeStamp())) {
                     return new JsonMessage<>(405, "新包和正在运行的包一致");
                 }
                 if (StrUtil.compareVersion(jpomManifest.getVersion(), minVersion) < 0) {
@@ -434,35 +432,18 @@ public class JpomManifest {
         jsonObject.put("updateTime", new DateTime().toString());
         // 更新管理命令
         List<String> newData = new LinkedList<>();
-        //
-        String typeName = JpomApplication.getAppType().name().toLowerCase();
-        final String[] oldName = new String[]{typeName + ".log"};
-        final boolean[] logBack = {true};
         File scriptFile = getScriptFile();
         Charset charset = ExtConfigBean.getInstance().getConsoleLogCharset();
         String finalNewFile = newFile;
         FileUtil.readLines(scriptFile, charset, (LineHandler) line -> {
             if (!line.startsWith(String.valueOf(StrUtil.C_TAB)) &&
-                    !line.startsWith(String.valueOf(StrUtil.C_SPACE))) {
+                !line.startsWith(String.valueOf(StrUtil.C_SPACE))) {
                 if (StrUtil.containsAny(line, "RUNJAR=")) {
                     // jar 包
                     if ("sh".equals(CommandUtil.SUFFIX)) {
                         newData.add(StrUtil.format("RUNJAR=\"{}\"", finalNewFile));
                     } else if ("bat".equals(CommandUtil.SUFFIX)) {
                         newData.add(StrUtil.format("set RUNJAR={}", finalNewFile));
-                    } else {
-                        newData.add(line);
-                    }
-                } else if (SystemUtil.getOsInfo().isWindows()) {
-                    // windows 控制台文件相关
-                    if (StrUtil.containsAny(line, "set LogName=")) {
-                        //
-                        oldName[0] = CharSequenceUtil.splitToArray(line, "=")[0];
-                        newData.add(StrUtil.format("set LogName={}_{}.log", typeName, System.currentTimeMillis()));
-                    } else if (StrUtil.containsAny(line, "set LogBack=")) {
-                        // 记忆logBack
-                        logBack[0] = Convert.toBool(CharSequenceUtil.splitToArray(line, "=")[1], true);
-                        newData.add(line);
                     } else {
                         newData.add(line);
                     }
@@ -475,8 +456,6 @@ public class JpomManifest {
         });
         // 新增升级次数 @author jzy 2021-08-04
         jsonObject.put("upgradeCount", jsonObject.getIntValue("upgradeCount"));
-        jsonObject.put("oldLogName", oldName[0]);
-        jsonObject.put("logBack", logBack[0]);
         //
         JsonFileUtil.saveJson(upgrade, jsonObject);
         FileUtil.writeLines(newData, scriptFile, charset);
