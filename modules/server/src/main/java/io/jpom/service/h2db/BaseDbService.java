@@ -65,6 +65,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonService<T> {
 
+    /**
+     * 默认排序规则
+     */
+    private static final Order[] DEFAULT_ORDERS = new Order[]{
+        new Order("createTimeMillis", Direction.DESC),
+        new Order("modifyTimeMillis", Direction.DESC)
+    };
+
     public BaseDbService() {
         super(null, Const.ID_STR);
     }
@@ -315,10 +323,15 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     @Override
     public PageResultDto<T> listPage(Entity where, Page page) {
         if (ArrayUtil.isEmpty(page.getOrders())) {
-            page.addOrder(new Order("createTimeMillis", Direction.DESC));
-            page.addOrder(new Order("modifyTimeMillis", Direction.DESC));
+            //page.addOrder(new Order("createTimeMillis", Direction.DESC));
+            //page.addOrder(new Order("modifyTimeMillis", Direction.DESC));
+            page.addOrder(this.defaultOrders());
         }
         return super.listPage(where, page);
+    }
+
+    protected Order[] defaultOrders() {
+        return DEFAULT_ORDERS;
     }
 
     /**

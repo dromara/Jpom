@@ -29,7 +29,7 @@ const routeMenuMap = {
   buildList: "/build/list-info",
   buildHistory: "/build/history",
   userList: "/user/list",
-  roleList: "/role/list",
+  permission_group: "/user/permission-group",
   user_log: "/operation/log",
   monitorConfigEmail: "/system/mail",
   cacheManage: "/system/cache",

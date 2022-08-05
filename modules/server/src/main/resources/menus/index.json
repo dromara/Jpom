@@ -147,6 +147,11 @@
         "title": "用户列表",
         "role": "system"
       },
+     {
+        "id": "permission_group",
+        "title": "权限组",
+        "role": "system"
+      },
       {
         "id": "user_log",
         "title": "操作日志",

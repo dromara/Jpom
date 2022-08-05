@@ -41,6 +41,7 @@ import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.service.system.WorkspaceService;
+import io.jpom.service.user.UserPermissionGroupServer;
 import io.jpom.service.user.UserService;
 import lombok.Getter;
 
@@ -83,6 +84,7 @@ public enum ClassFeature {
     BUILD_REPOSITORY("仓库信息", RepositoryService.class),
     USER("用户管理", UserService.class),
     USER_LOG("操作日志", DbUserOperateLogService.class),
+    USER_PERMISSION_GROUP("权限分组", UserPermissionGroupServer.class),
     SYSTEM_EMAIL("邮箱配置"),
     SYSTEM_CACHE("系统缓存"),
     SYSTEM_LOG("系统日志"),
