@@ -23,10 +23,7 @@
 package io.jpom.util;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RuntimeUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.system.SystemUtil;
 import io.jpom.system.ExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
@@ -186,6 +183,7 @@ public class CommandUtil {
      * @throws IOException IO
      */
     private static String exec(String[] cmd, File file) throws IOException {
+        log.debug("exec file {} {}", ArrayUtil.join(cmd, StrUtil.SPACE), file == null ? StrUtil.EMPTY : file);
         Process process = new ProcessBuilder(cmd).directory(file).redirectErrorStream(true).start();
         Charset charset;
         boolean isLog;

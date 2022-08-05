@@ -29,7 +29,6 @@ setlocal enabledelayedexpansion
 set PATH = %PATH%;C:\Windows\system32;C:\Windows;C:\Windows\system32\Wbem
 
 set Tag=KeepBx-Agent-System-JpomAgentApplication
-set MainClass=org.springframework.boot.loader.JarLauncher
 set basePath=%~dp0
 set Lib=%basePath%lib\
 @REM Do not modify----------------------------------↓
@@ -90,8 +89,8 @@ EXIT 0
     )
 
 	echo Starting..... Closing the window after a successful start does not affect the operation
-	echo Please check for startup details：%LogName%
-	javaw %JVM% -Djava.class.path="%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% %1 >> %basePath%%LogName%
+	echo Please check for startup details:%LogName%
+	start /b javaw %JVM% -Dapplication=%Tag% -Dbasedir=%basePath% -jar %RUNJAR% %ARGS% %1 >> %basePath%%LogName% 2>&1
 	timeout 3
 goto:eof
 
@@ -111,17 +110,17 @@ goto:eof
 	)else (
 		set RUNJAR=%Lib%%RUNJAR%
 	)
-	echo run：%RUNJAR%
+	echo run:%RUNJAR%
 goto:eof
 
 @REM stop Jpom
 :stop
-	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=stop
+	java -jar %RUNJAR% %ARGS% --event=stop
 goto:eof
 
 @REM view Jpom status
 :status
-	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=status
+	java -jar %RUNJAR% %ARGS% --event=status
 goto:eof
 
 @REM restart Jpom
@@ -137,5 +136,3 @@ goto:eof
 :use
 	echo please use (start、stop、restart、status)
 goto:eof
-
-
