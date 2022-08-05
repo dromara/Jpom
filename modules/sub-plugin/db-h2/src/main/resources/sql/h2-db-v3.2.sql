@@ -105,4 +105,19 @@ CREATE TABLE IF NOT EXISTS PUBLIC.TRIGGER_TOKEN_LOG
 );
 comment on table TRIGGER_TOKEN_LOG is '触发器 token';
 
+-- -- 用户权限组
+-- CREATE TABLE IF NOT EXISTS PUBLIC.USER_PERMISSION_GROUP
+-- (
+--     id               VARCHAR(50)  not null comment 'id',
+--     createTimeMillis BIGINT COMMENT '数据创建时间',
+--     modifyTimeMillis BIGINT COMMENT '数据修改时间',
+--     name             VARCHAR(250) not null COMMENT '名称',
+--     description      varchar(255) COMMENT '描述',
+--     prohibitExecute  CLOB comment '禁止执行的配置',
+--     allowExecute     CLOB comment '允许执行的配置',
+--     CONSTRAINT USER_PERMISSION_GROUP_PK PRIMARY KEY (id)
+-- );
+-- comment on table USER_PERMISSION_GROUP is '用户权限组';
+
+
 
