@@ -37,6 +37,7 @@
 <p align="center">
 	👉 <a target="_blank" href="https://jpom.top">https://jpom.top/</a> | <a target="_blank" href="https://demo.jpom.top/">https://demo.jpom.top</a> 👈
 </p>
+
 ## 😭 日常开发中，您是否有以下痛点？
 
 - <font color="red">**团队中没有专业的运维，开发还要做运维的活**</font>，需要自己手动构建、部署项目。
@@ -367,14 +368,14 @@ mvn -f xxxx/pom.xml clean package
 
 > 里面有部分图片加载可能比较慢
 
-1. [本地构建 + SSH 发布 java 项目](https://jpom.top/pages/practice/build-java-ssh-release)
-2. [本地构建 + 项目发布 node 项目](https://jpom.top/pages/practice/build-node-release)
-3. [本地构建 + SSH 发布 node 项目](https://jpom.top/pages/practice/build-node-ssh-release)
-4. [本地构建 + 自定义管理 python 项目](https://jpom.top/pages/practice/project-dsl-python)
-5. [自定义管理 java 项目](https://jpom.top/pages/practice/project-dsl-java)
-6. [管理编译安装的 nginx](https://jpom.top/pages/practice/node-nginx)
-7. [管理 docker](https://jpom.top/pages/practice/docker-cli)
-8. [容器构建 + 项目发布 java 项目](https://jpom.top/pages/practice/build-docker-java-node-release)
+1. [本地构建 + SSH 发布 java 项目](https://jpom.top/pages/practice/build-java-ssh-release/)
+2. [本地构建 + 项目发布 node 项目](https://jpom.top/pages/practice/build-node-release/)
+3. [本地构建 + SSH 发布 node 项目](https://jpom.top/pages/practice/build-node-ssh-release/)
+4. [本地构建 + 自定义管理 python 项目](https://jpom.top/pages/practice/project-dsl-python/)
+5. [自定义管理 java 项目](https://jpom.top/pages/practice/project-dsl-java/)
+6. [管理编译安装的 nginx](https://jpom.top/pages/practice/node-nginx/)
+7. [管理 docker](https://jpom.top/pages/practice/docker-cli/)
+8. [容器构建 + 项目发布 java 项目](https://jpom.top/pages/practice/build-docker-java-node-release/)
 9. [更新实践案例>>](https://jpom.top/pages/practice/)
 
 ## 🛠️ 整体架构
