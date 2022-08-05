@@ -35,7 +35,9 @@ import org.apache.commons.compress.compressors.bzip2.BZip2Utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 /**
  * 压缩文件工具
@@ -44,44 +46,40 @@ import java.nio.charset.Charset;
  */
 public class CompressionFileUtil {
 
-	/**
-	 * 解压文件
-	 *
-	 * @param compressFile 压缩文件
-	 * @param destDir      解压到的文件夹
-	 */
-	public static void unCompress(File compressFile, File destDir) {
-		Charset charset = CharsetUtil.CHARSET_GBK;
-		charset = ObjectUtil.defaultIfNull(charset, CharsetUtil.defaultCharset());
-		try {
-			try (Extractor extractor = CompressUtil.createExtractor(charset, compressFile)) {
-				extractor.extract(destDir);
-			}
-		} catch (Exception e) {
-			CompressorInputStream compressUtilIn = null;
-			FileInputStream fileInputStream = null;
-			try {
-				fileInputStream = new FileInputStream(compressFile);
-				compressUtilIn = CompressUtil.getIn(null, fileInputStream);
-				if (compressUtilIn instanceof BZip2CompressorInputStream) {
-					File file = FileUtil.file(destDir, BZip2Utils.getUncompressedFilename(compressFile.getName()));
-					IoUtil.copy(compressUtilIn, new FileOutputStream(file));
-				} else {
-					try (Extractor extractor = CompressUtil.createExtractor(charset, compressUtilIn)) {
-						extractor.extract(destDir);
-					}
-				}
-			} catch (Exception e2) {
-				//
-				e2.addSuppressed(e);
-				//
-				throw new RuntimeException(e2);
-			} finally {
-				IoUtil.close(fileInputStream);
-				IoUtil.close(compressUtilIn);
-			}
-		}
-	}
+    /**
+     * 解压文件
+     *
+     * @param compressFile 压缩文件
+     * @param destDir      解压到的文件夹
+     */
+    public static void unCompress(File compressFile, File destDir) {
+        Charset charset = CharsetUtil.CHARSET_GBK;
+        charset = ObjectUtil.defaultIfNull(charset, CharsetUtil.defaultCharset());
+        try {
+            try (Extractor extractor = CompressUtil.createExtractor(charset, compressFile)) {
+                extractor.extract(destDir);
+            }
+        } catch (Exception e) {
+            try (FileInputStream fileInputStream = new FileInputStream(compressFile);
+                 CompressorInputStream compressUtilIn = CompressUtil.getIn(null, fileInputStream);) {
+                if (compressUtilIn instanceof BZip2CompressorInputStream) {
+                    File file = FileUtil.file(destDir, BZip2Utils.getUncompressedFilename(compressFile.getName()));
+                    try (OutputStream outputStream = Files.newOutputStream(file.toPath())) {
+                        IoUtil.copy(compressUtilIn, outputStream);
+                    }
+                } else {
+                    try (Extractor extractor = CompressUtil.createExtractor(charset, compressUtilIn)) {
+                        extractor.extract(destDir);
+                    }
+                }
+            } catch (Exception e2) {
+                //
+                e2.addSuppressed(e);
+                //
+                throw new RuntimeException(e2);
+            }
+        }
+    }
 
 
 }
