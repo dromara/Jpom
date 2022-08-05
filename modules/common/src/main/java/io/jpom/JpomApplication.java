@@ -23,7 +23,10 @@
 package io.jpom;
 
 import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.lang.Console;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -41,6 +44,7 @@ import io.jpom.common.JpomApplicationEvent;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
 import io.jpom.plugin.PluginFactory;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -52,6 +56,8 @@ import org.springframework.util.Assert;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -193,13 +199,17 @@ public class JpomApplication extends ApplicationBuilder {
     public static void restart() {
         File scriptFile = JpomManifest.getScriptFile();
         ThreadUtil.execute(() -> {
+            //
+            prepareRestart(scriptFile);
             // Waiting for method caller,For example, the interface response
             ThreadUtil.sleep(2, TimeUnit.SECONDS);
             try {
                 String command = CommandUtil.generateCommand(scriptFile, "restart upgrade");
                 //CommandUtil.EXECUTE_PREFIX + StrUtil.SPACE + FileUtil.getAbsolutePath(scriptFile) + " ";
                 if (SystemUtil.getOsInfo().isWindows()) {
-                    CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
+                    //String result = CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
+                    //log.debug("windows restart {}", result);
+                    CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), "start /b" + command);
                 } else {
                     CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), command);
                 }
@@ -207,6 +217,33 @@ public class JpomApplication extends ApplicationBuilder {
                 log.error("重启自身异常", e);
             }
         });
+    }
+
+    private static void prepareRestart(File scriptFile) {
+        Charset charset = ExtConfigBean.getInstance().getConsoleLogCharset();
+        String typeName = JpomApplication.getAppType().name().toLowerCase();
+        final String[] oldName = new String[]{typeName + ".log"};
+        List<String> newData = new LinkedList<>();
+        FileUtil.readLines(scriptFile, charset, (LineHandler) line -> {
+            if (!line.startsWith(String.valueOf(StrUtil.C_TAB)) &&
+                !line.startsWith(String.valueOf(StrUtil.C_SPACE))) {
+                if (SystemUtil.getOsInfo().isWindows()) {
+                    // windows 控制台文件相关
+                    if (StrUtil.containsAny(line, "set LogName=")) {
+                        //
+                        oldName[0] = CharSequenceUtil.splitToArray(line, "=")[0];
+                        newData.add(StrUtil.format("set LogName={}_{}.log", typeName, System.currentTimeMillis()));
+                    } else {
+                        newData.add(line);
+                    }
+                } else {
+                    newData.add(line);
+                }
+            } else {
+                newData.add(line);
+            }
+        });
+        FileUtil.writeLines(newData, scriptFile, charset);
     }
 
     /**
