@@ -62,7 +62,7 @@ if "%1"=="" (
         echo.  [0] exit 0
     echo.
     @REM enter
-    echo.Please enter the selected serial number:
+    echo. Please enter the selected serial number:
     set /p ID=
     IF "!ID!"=="1" call:start
     IF "!ID!"=="2" call:stop
@@ -87,7 +87,7 @@ if "%2" NEQ "upgrade" (
 )
 EXIT 0
 
-@REM 启动
+@REM start
 :start
     if "%JAVA_HOME%"=="" (
         echo please configure [JAVA_HOME] environment variable
@@ -96,13 +96,13 @@ EXIT 0
     )
 
 	echo Starting..... Closing the window after a successful start does not affect the operation
-	echo Please check for startup details：%LogName%
-	javaw %JVM% -Djava.class.path="%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% %1 >> %basePath%%LogName%
+	echo Please check for startup details:%LogName%
+	start /b javaw %JVM% -Dapplication=%Tag% -Dbasedir=%basePath% -jar %RUNJAR% %ARGS% %1 >> %basePath%%LogName% 2>&1
 	timeout 3
 goto:eof
 
 
-@REM  get jar
+@REM get jar
 :listDir
 	if "%RUNJAR%"=="" (
 		for /f "delims=" %%I in ('dir /B %Lib%') do (
@@ -117,17 +117,17 @@ goto:eof
 	)else (
 		set RUNJAR=%Lib%%RUNJAR%
 	)
-	echo run：%RUNJAR%
+	echo run:%RUNJAR%
 goto:eof
 
-@REM  stop Jpom
+@REM stop Jpom
 :stop
-	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=stop
+	java -jar %RUNJAR% %ARGS% --event=stop
 goto:eof
 
 @REM view Jpom status
 :status
-	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=status
+	java -jar %RUNJAR% %ARGS% --event=status
 goto:eof
 
 @REM restart Jpom
@@ -143,5 +143,3 @@ goto:eof
 :use
 	echo please use (start、stop、restart、status)
 goto:eof
-
-
