@@ -182,6 +182,8 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
         list = list.stream()
             .map(s -> UserBindWorkspaceModel.getId(s, workspaceId))
             .collect(Collectors.toList());
+        // 兼容旧数据
+        list.add(UserBindWorkspaceModel.getId(userModel.getId(), workspaceId));
         return this.getByKey(list);
     }
 
