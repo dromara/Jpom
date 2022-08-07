@@ -5,8 +5,7 @@
     <a-table :data-source="list" size="middle" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-input v-model="listQuery.id" @pressEnter="loadData" placeholder="用户名ID" class="search-input-item" />
-          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="用户名" class="search-input-item" />
+          <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
@@ -19,20 +18,6 @@
           <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
-      <template slot="systemUser" slot-scope="text, record">
-        <a-switch size="small" checked-children="是" un-checked-children="否" disabled :checked="record.systemUser == 1" />
-      </template>
-      <template slot="twoFactorAuthKey" slot-scope="text, record">
-        <a-switch size="small" checked-children="开" un-checked-children="关" disabled :checked="record.twoFactorAuthKey ? true : false" />
-      </template>
-
-      <a-tooltip slot="id" slot-scope="text" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-
-      <a-tooltip slot="email" slot-scope="text" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
     </a-table>
     <!-- 编辑区 -->
     <a-modal v-model="editVisible" destroyOnClose width="60vw" title="编辑" @ok="handleEditUserOk" :maskClosable="false">
@@ -40,10 +25,24 @@
         <a-form-model-item label="名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="名称" />
         </a-form-model-item>
-        <a-form-model-item label="工作空间权限" prop="workspace">
+        <a-form-model-item prop="workspace">
+          <template slot="label">
+            工作空间
+            <a-tooltip v-if="!temp.id">
+              <template slot="title"> 配置工作空间权限,用户限制用户只能对应的工作空间里面操作对应的功能</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <transfer ref="transferRef" :tree-data="workspaceList" :editKey="temp.targetKeys" />
         </a-form-model-item>
-        <a-form-model-item label="禁用时段" prop="prohibitExecute">
+        <a-form-model-item prop="prohibitExecute">
+          <template slot="label">
+            禁用时段
+            <a-tooltip v-if="!temp.id">
+              <template slot="title"> 配置后可以控制想要在某个时间段禁止用户操作某些功能，优先判断禁用时段</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <div v-for="(item, index) in temp.prohibitExecuteArray" :key="item.key">
             <div class="item-info">
               <div>
@@ -100,7 +99,14 @@
             >添加</a-button
           >
         </a-form-model-item>
-        <a-form-model-item label="允许时段" prop="allowExecute">
+        <a-form-model-item prop="allowExecute">
+          <template slot="label">
+            允许时段
+            <a-tooltip v-if="!temp.id">
+              <template slot="title"> 优先判断禁用时段,再判断允许时段。配置允许时段后用户只能在对应的时段执行相应功能的操作</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <div v-for="(item, index) in temp.allowExecuteArray" :key="item.key">
             <div class="item-info">
               <div>
@@ -176,7 +182,7 @@ export default {
       loading: false,
       list: [],
       workspaceList: [],
-      targetKeys: [],
+
       methodFeature: [],
       temp: {},
       weeks: [
