@@ -336,7 +336,7 @@ public class IndexControl extends BaseServerController {
                     return true;
                 }
                 String workspaceId = ServletUtil.getHeader(getRequest(), Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
-                return userBindWorkspaceService.exists(userModel.getId(), workspaceId + UserBindWorkspaceService.SYSTEM_USER);
+                return userBindWorkspaceService.exists(userModel, workspaceId + UserBindWorkspaceService.SYSTEM_USER);
             }
         }
         return true;

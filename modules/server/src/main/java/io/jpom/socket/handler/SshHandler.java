@@ -131,7 +131,7 @@ public class SshHandler extends BaseTerminalHandler {
         UserModel userInfo = (UserModel) attributes.get("userInfo");
         // 判断是没有任何限制
         String workspaceId = handlerItem.sshItem.getWorkspaceId();
-        boolean sshCommandNotLimited = userBindWorkspaceService.exists(userInfo.getId(), workspaceId + UserBindWorkspaceService.SSH_COMMAND_NOT_LIMITED);
+        boolean sshCommandNotLimited = userBindWorkspaceService.exists(userInfo, workspaceId + UserBindWorkspaceService.SSH_COMMAND_NOT_LIMITED);
         try {
             this.sendCommand(handlerItem, payload, userInfo, sshCommandNotLimited);
         } catch (Exception e) {

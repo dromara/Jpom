@@ -40,6 +40,7 @@ import io.jpom.monitor.EmailUtil;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
+import io.jpom.system.ServerConfigBean;
 import io.jpom.util.TwoFactorAuthUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -90,6 +91,11 @@ public class UserBasicInfoController extends BaseServerController {
     public String getUserBasicInfo() {
         UserModel userModel = getUser();
         userModel = userService.getByKey(userModel.getId(), false);
+        if (userModel.getStatus() != null && userModel.getStatus() == 0) {
+            // 账号不能使用
+            getSession().invalidate();
+            return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "账号被锁定");
+        }
         // return basic info
         Map<String, Object> map = new HashMap<>(10);
         map.put("id", userModel.getId());

@@ -75,6 +75,12 @@ ALTER TABLE USER_BIND_WORKSPACE
 ALTER TABLE USER_INFO
     ADD IF NOT EXISTS twoFactorAuthKey VARCHAR(100) comment '两步验证';
 
+ALTER TABLE USER_INFO
+    ADD IF NOT EXISTS status TINYINT comment '状态 0 禁用  null、1 启用';
+
+ALTER TABLE USER_INFO
+    ADD IF NOT EXISTS permissionGroup CLOB comment '权限组';
+
 ALTER TABLE NODE_STAT
     ADD IF NOT EXISTS `group` VARCHAR(50) comment '分组名称';
 

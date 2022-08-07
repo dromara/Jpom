@@ -64,7 +64,7 @@
   </div>
 </template>
 <script>
-import { login, demoInfo, mfaVerify } from "@/api/user";
+import { login, demoInfo, mfaVerify } from "@/api/user/user";
 import { checkSystem } from "@/api/install";
 import sha1 from "sha1";
 

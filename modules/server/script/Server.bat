@@ -55,7 +55,6 @@ if "%1"=="" (
         echo.  [2] stop
         echo.  [3] status
         echo.  [4] restart
-        echo.  [5] use / help
         echo.  [6] clear ip config
         echo.  [7] load init db
         echo.  [8] rest super user pwd
@@ -68,7 +67,6 @@ if "%1"=="" (
     IF "!ID!"=="2" call:stop
     IF "!ID!"=="3" call:status
     IF "!ID!"=="4" call:restart
-    IF "!ID!"=="5" call:use
     IF "!ID!"=="6" call:restart --rest:ip_config
     IF "!ID!"=="7" call:restart --rest:load_init_db
     IF "!ID!"=="8" call:restart --rest:super_user_pwd
@@ -137,9 +135,4 @@ goto:eof
 	timeout 3
 	echo starting....
 	call:start %1
-goto:eof
-
-@REM use
-:use
-	echo please use (start、stop、restart、status)
 goto:eof

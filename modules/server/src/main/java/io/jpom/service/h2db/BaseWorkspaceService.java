@@ -218,7 +218,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
         }
         // 查询绑定的权限
         UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
-        boolean exists = userBindWorkspaceService.exists(userModel.getId(), workspaceId);
+        boolean exists = userBindWorkspaceService.exists(userModel, workspaceId);
         Assert.state(exists, "没有对应的工作空间权限");
     }
 
