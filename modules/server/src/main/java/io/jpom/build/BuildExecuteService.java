@@ -639,7 +639,7 @@ public class BuildExecuteService {
             try {
                 plugin.execute("build", map);
             } catch (Exception e) {
-                logRecorder.error("调用容器异常", e);
+                logRecorder.error("构建调用容器异常", e);
                 return false;
             }
             return true;
@@ -689,7 +689,7 @@ public class BuildExecuteService {
             if (status && buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
                 // 发布文件
                 ReleaseManage releaseManage = ReleaseManage.builder()
-                    .buildId(buildInfoModel.getBuildId())
+                    .buildNumberId(buildInfoModel.getBuildId())
                     .buildExtraModule(buildExtraModule)
                     .userModel(userModel)
                     .logId(logId)

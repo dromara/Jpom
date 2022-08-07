@@ -23,6 +23,7 @@
 package io.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
@@ -48,10 +49,10 @@ import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
-import io.jpom.model.user.UserModel;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
+import io.jpom.model.user.UserModel;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
@@ -87,7 +88,7 @@ import java.util.stream.Collectors;
 public class ReleaseManage implements Runnable {
 
     private final UserModel userModel;
-    private final int buildId;
+    private final Integer buildNumberId;
     private final BuildExtraModule buildExtraModule;
     private final String logId;
     private final BuildExecuteService buildExecuteService;
@@ -97,10 +98,10 @@ public class ReleaseManage implements Runnable {
 
     private void init() {
         if (this.logRecorder == null) {
-            File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), buildId);
+            File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), buildNumberId);
             this.logRecorder = LogRecorder.builder().file(logFile).build();
         }
-        this.resultFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildId, buildExtraModule.getResultDirFile());
+        this.resultFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, buildExtraModule.getResultDirFile());
     }
 
 //	/**
@@ -194,7 +195,7 @@ public class ReleaseManage implements Runnable {
         envFileMap.put("BUILD_ID", this.buildExtraModule.getId());
         envFileMap.put("BUILD_NAME", this.buildExtraModule.getName());
         envFileMap.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
-        envFileMap.put("BUILD_NUMBER_ID", this.buildId + StrUtil.EMPTY);
+        envFileMap.put("BUILD_NUMBER_ID", this.buildNumberId + StrUtil.EMPTY);
         //
         for (int i = 0; i < commands.length; i++) {
             commands[i] = StringUtil.formatStrByMap(commands[i], envFileMap);
@@ -224,18 +225,62 @@ public class ReleaseManage implements Runnable {
         return newTag[0];
     }
 
+    /**
+     * 版本号递增
+     *
+     * @param dockerTagIncrement 是否开启版本号递增
+     * @param dockerTag          当前版本号
+     * @return 递增后到版本号
+     */
+    private String dockerTagIncrement(Boolean dockerTagIncrement, String dockerTag) {
+        if (dockerTagIncrement == null || !dockerTagIncrement) {
+            return dockerTag;
+        }
+        List<String> list = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
+        return list.stream().map(s -> {
+            List<String> tag = StrUtil.splitTrim(s, StrUtil.COLON);
+            String version = CollUtil.getLast(tag);
+            List<String> versionList = StrUtil.splitTrim(version, StrUtil.DOT);
+            int tagSize = CollUtil.size(tag);
+            if (tagSize <= 1 || CollUtil.size(versionList) <= 1) {
+                logRecorder.info("Warning version number incrementing error, no match for . or :");
+                return s;
+            }
+            boolean match = false;
+            for (int i = versionList.size() - 1; i >= 0; i--) {
+                String versionParting = versionList.get(i);
+                int versionPartingInt = Convert.toInt(versionParting, Integer.MIN_VALUE);
+                if (versionPartingInt != Integer.MIN_VALUE) {
+                    versionList.set(i, this.buildNumberId + StrUtil.EMPTY);
+                    match = true;
+                    break;
+                }
+            }
+            tag.set(tagSize - 1, CollUtil.join(versionList, StrUtil.DOT));
+            String newVersion = CollUtil.join(tag, StrUtil.COLON);
+            if (match) {
+                logRecorder.info("dockerTag version number incrementing {} -> {}", s, newVersion);
+            } else {
+                logRecorder.info("Warning version number incrementing error,No numeric version number {} ", s);
+            }
+            return newVersion;
+        }).collect(Collectors.joining(StrUtil.COMMA));
+    }
+
     private void doDockerImage() {
         // 生成临时目录
-        File tempPath = FileUtil.file(ConfigBean.getInstance().getTempPath(), "build_temp", "docker_image", this.buildExtraModule.getId() + StrUtil.DASHED + this.buildId);
+        File tempPath = FileUtil.file(ConfigBean.getInstance().getTempPath(), "build_temp", "docker_image", this.buildExtraModule.getId() + StrUtil.DASHED + this.buildNumberId);
         try {
             File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
             FileUtil.copyContent(sourceFile, tempPath, true);
-            File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildId, StrUtil.SLASH);
+            File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, StrUtil.SLASH);
             FileUtil.copyContent(historyPackageFile, tempPath, true);
             // env file
             File envFile = FileUtil.file(tempPath, ".env");
             String dockerTag = this.buildExtraModule.getDockerTag();
             dockerTag = this.parseDockerTag(envFile, dockerTag);
+            //
+            dockerTag = this.dockerTagIncrement(this.buildExtraModule.getDockerTagIncrement(), dockerTag);
             // docker file
             String moduleDockerfile = this.buildExtraModule.getDockerfile();
             List<String> list = StrUtil.splitTrim(moduleDockerfile, StrUtil.COLON);
@@ -263,17 +308,20 @@ public class ReleaseManage implements Runnable {
             // 推送
             Boolean pushToRepository = this.buildExtraModule.getPushToRepository();
             if (pushToRepository != null && pushToRepository) {
-                logRecorder.info("start push to repository in({}),{}", dockerInfoModel.getName(), StrUtil.emptyToDefault(dockerInfoModel.getRegistryUrl(), StrUtil.EMPTY));
-                Map<String, Object> map = dockerInfoModel.toParameter();
-                //
-                map.put("repository", dockerTag);
-                Consumer<String> logConsumer = s -> logRecorder.info(s);
-                map.put("logConsumer", logConsumer);
-                IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-                try {
-                    plugin.execute("pushImage", map);
-                } catch (Exception e) {
-                    logRecorder.error("调用容器异常", e);
+                List<String> repositoryList = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
+                for (String repositoryItem : repositoryList) {
+                    logRecorder.info("start push to repository in({}),{} {}", dockerInfoModel.getName(), StrUtil.emptyToDefault(dockerInfoModel.getRegistryUrl(), StrUtil.EMPTY), repositoryItem);
+                    Map<String, Object> map = dockerInfoModel.toParameter();
+                    //
+                    map.put("repository", repositoryItem);
+                    Consumer<String> logConsumer = s -> logRecorder.info(s);
+                    map.put("logConsumer", logConsumer);
+                    IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+                    try {
+                        plugin.execute("pushImage", map);
+                    } catch (Exception e) {
+                        logRecorder.error("推送镜像调用容器异常", e);
+                    }
                 }
             }
             // 发布 docker 服务
@@ -297,7 +345,7 @@ public class ReleaseManage implements Runnable {
             IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
             plugin.execute("updateServiceImage", pluginMap);
         } catch (Exception e) {
-            logRecorder.error("调用容器异常", e);
+            logRecorder.error("更新容器服务调用容器异常", e);
         }
     }
 
@@ -314,7 +362,7 @@ public class ReleaseManage implements Runnable {
         try {
             plugin.execute("buildImage", map);
         } catch (Exception e) {
-            logRecorder.error("调用容器异常", e);
+            logRecorder.error("构建镜像调用容器异常", e);
         }
     }
 

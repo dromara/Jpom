@@ -493,11 +493,16 @@
               </a-form-model-item>
               <!-- docker -->
               <template v-if="temp.releaseMethod === 5">
-                <a-tooltip title="使用哪个 docker 构建,填写 docker 标签 默认查询可用的第一个,如果 tag 查询出多个将依次构建">
-                  <a-form-model-item prop="fromTag" label="执行容器">
-                    <a-input v-model="tempExtraData.fromTag" placeholder="执行容器 标签" />
-                  </a-form-model-item>
-                </a-tooltip>
+                <a-form-model-item prop="fromTag">
+                  <template #label>
+                    执行容器
+                    <a-tooltip v-show="!temp.id">
+                      <template slot="title"> 使用哪个 docker 构建,填写 docker 标签（ 标签在 docker 编辑页面配置） 默认查询可用的第一个,如果 tag 查询出多个将依次构建</template>
+                      <a-icon type="question-circle" theme="filled" />
+                    </a-tooltip>
+                  </template>
+                  <a-input v-model="tempExtraData.fromTag" placeholder="执行容器 标签" />
+                </a-form-model-item>
 
                 <a-tooltip title="需要在仓库里面 dockerfile,如果多文件夹查看可以指定二级目录如果 springboot-test-jar:springboot-test-jar/Dockerfile">
                   <a-form-model-item prop="dockerfile" label="Dockerfile">
@@ -539,6 +544,20 @@
                       <a-space>
                         <a-tooltip> 推送到仓库 </a-tooltip>
                         <a-switch v-model="tempExtraData.pushToRepository" checked-children="是" un-checked-children="否" />
+                      </a-space>
+                    </a-col>
+                    <a-col :span="5" style="text-align: right">
+                      <a-space>
+                        <a-tooltip v-if="!temp.id">
+                          <template slot="title">
+                            开启 dockerTag 版本递增后将在每次构建时自动将版本号最后一位数字同步为构建序号ID, 如：当前构建为第 100 次构建 testtag:1.0 -> testtag:1.100,testtag:1.0.release ->
+                            testtag:1.100.release。如果没有匹配到数字将忽略递增操作
+                          </template>
+                          <a-icon type="question-circle" theme="filled" />
+                        </a-tooltip>
+                        版本递增
+
+                        <a-switch v-model="tempExtraData.dockerTagIncrement" checked-children="是" un-checked-children="否" />
                       </a-space>
                     </a-col>
                   </a-row>

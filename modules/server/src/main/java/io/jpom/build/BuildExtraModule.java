@@ -124,6 +124,10 @@ public class BuildExtraModule extends BaseModel {
      * 是否执行推送到仓库中
      */
     private Boolean pushToRepository;
+    /**
+     * docker tag 版本字段递增
+     */
+    private Boolean dockerTagIncrement;
 
     public String getResultDirFile() {
         if (resultDirFile == null) {

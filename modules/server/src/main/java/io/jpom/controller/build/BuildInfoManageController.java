@@ -162,7 +162,7 @@ public class BuildInfoManageController extends BaseServerController {
             .buildExtraModule(buildExtraModule)
             .logId(buildHistoryLog.getId())
             .userModel(userModel)
-            .buildId(buildHistoryLog.getBuildNumberId())
+            .buildNumberId(buildHistoryLog.getBuildNumberId())
             .buildExecuteService(buildExecuteService)
             .build();
         //ReleaseManage releaseManage = new ReleaseManage(buildHistoryLog, userModel);
