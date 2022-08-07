@@ -22,9 +22,12 @@
  */
 package io.jpom.model.user;
 
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import io.jpom.model.BaseDbModel;
 import io.jpom.service.h2db.TableName;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -57,5 +60,45 @@ public class UserBindWorkspaceModel extends BaseDbModel {
      */
     public static String getId(String userId, String workspaceId) {
         return SecureUtil.sha1(userId + workspaceId);
+    }
+
+    @Builder
+    public static class PermissionResult {
+        /**
+         * 结果
+         */
+        private PermissionResultEnum state;
+        /**
+         * 不能执行的原因
+         */
+        private String msg;
+
+        public boolean isSuccess() {
+            return state == PermissionResultEnum.SUCCESS;
+        }
+
+        public String errorMsg(String... pars) {
+            String errorMsg = StrUtil.emptyToDefault(msg, "您没有对应权限");
+            return StrUtil.format("{} {}", ArrayUtil.join(pars, StrUtil.SPACE), errorMsg);
+        }
+    }
+
+    public enum PermissionResultEnum {
+        /**
+         * 允许执行
+         */
+        SUCCESS,
+        /**
+         * 没有权限
+         */
+        FAIL,
+        /**
+         * 当前禁止执行
+         */
+        MISS_PROHIBIT,
+        /**
+         * 不在计划允许时间段
+         */
+        MISS_PERIOD,
     }
 }

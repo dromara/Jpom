@@ -36,34 +36,37 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @Configuration
 @EnableWebSocket
 public class ServerWebSocketConfig implements WebSocketConfigurer {
-	private final ServerWebSocketInterceptor serverWebSocketInterceptor = new ServerWebSocketInterceptor();
-//    private final ServerNodeUpdateWebSocketInterceptor serverNodeUpdateWebSocketInterceptor = new ServerNodeUpdateWebSocketInterceptor();
+    private final ServerWebSocketInterceptor serverWebSocketInterceptor;
 
-	@Override
-	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		// 控制台
-		registry.addHandler(new ConsoleHandler(), "/socket/console")
-				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-		// 节点脚本模板
-		registry.addHandler(new NodeScriptHandler(), "/socket/node/script_run")
-				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-		// tomcat
-		registry.addHandler(new TomcatHandler(), "/socket/tomcat_log")
-				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-		// ssh
-		registry.addHandler(new SshHandler(), "/socket/ssh")
-				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-		// 节点升级
-		registry.addHandler(new NodeUpdateHandler(), "/socket/node_update")
-				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-		// 脚本模板
-		registry.addHandler(new ServerScriptHandler(), "/socket/script_run")
-				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-		// docker log
-		registry.addHandler(new DockerLogHandler(), "/socket/docker_log")
-				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-		// docker cli
-		registry.addHandler(new DockerCliHandler(), "/socket/docker_cli")
-				.addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-	}
+    public ServerWebSocketConfig(ServerWebSocketInterceptor serverWebSocketInterceptor) {
+        this.serverWebSocketInterceptor = serverWebSocketInterceptor;
+    }
+
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        // 控制台
+        registry.addHandler(new ConsoleHandler(), "/socket/console")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // 节点脚本模板
+        registry.addHandler(new NodeScriptHandler(), "/socket/node/script_run")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // tomcat
+        registry.addHandler(new TomcatHandler(), "/socket/tomcat_log")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // ssh
+        registry.addHandler(new SshHandler(), "/socket/ssh")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // 节点升级
+        registry.addHandler(new NodeUpdateHandler(), "/socket/node_update")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // 脚本模板
+        registry.addHandler(new ServerScriptHandler(), "/socket/script_run")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // docker log
+        registry.addHandler(new DockerLogHandler(), "/socket/docker_log")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // docker cli
+        registry.addHandler(new DockerCliHandler(), "/socket/docker_cli")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+    }
 }

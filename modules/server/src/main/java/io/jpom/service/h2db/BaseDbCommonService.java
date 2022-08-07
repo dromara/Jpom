@@ -44,10 +44,7 @@ import org.h2.jdbc.JdbcSQLNonTransientException;
 import org.h2.mvstore.MVStoreException;
 import org.springframework.util.Assert;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -233,6 +230,21 @@ public abstract class BaseDbCommonService<T> {
      */
     public T getByKey(String keyValue) {
         return this.getByKey(keyValue, true);
+    }
+
+    /**
+     * 根据主键查询实体
+     *
+     * @param collection 主键值
+     * @return 数据
+     */
+    public List<T> getByKey(Collection<String> collection) {
+        if (CollUtil.isEmpty(collection)) {
+            return new ArrayList<>();
+        }
+        Entity entity = Entity.create();
+        entity.set("id", collection);
+        return this.listByEntity(entity);
     }
 
     /**

@@ -41,7 +41,7 @@ public class UserPermissionGroupBean extends BaseUserModifyDbModel {
      * 允许执行的时间段
      * <pre>
      * [{
-     *     "week": "1,2",
+     *     "week": [1,2],
      *     "startTime":"08:00:00"
      *     "endTime": "18:00:00"
      * }]
