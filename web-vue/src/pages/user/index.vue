@@ -215,6 +215,7 @@ export default {
       this.temp = { ...record, permissionGroup: (record.permissionGroup || "").split("@").filter((item) => item), status: record.status === undefined ? 1 : record.status };
       this.listUserPermissionListAll();
       this.editUserVisible = true;
+      this.$refs["editUserForm"] && this.$refs["editUserForm"].resetFields();
     },
     // 提交用户数据
     handleEditUserOk() {
@@ -244,7 +245,7 @@ export default {
                 message: res.msg,
               });
             }
-            this.$refs["editUserForm"].resetFields();
+
             this.editUserVisible = false;
             this.loadData();
           }

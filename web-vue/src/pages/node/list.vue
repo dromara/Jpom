@@ -209,6 +209,7 @@
                   return triggerNode.parentNode || document.body;
                 }
               "
+              placeholder="选择协议类型"
               slot="addonBefore"
               v-model="temp.protocol"
               default-value="Http://"
@@ -276,6 +277,7 @@
                   "
                   slot="addonBefore"
                   v-model="temp.httpProxyType"
+                  placeholder="选择代理类型"
                   default-value="HTTP"
                   style="width: 100px"
                 >
@@ -474,7 +476,7 @@
   </div>
 </template>
 <script>
-import {mapGetters} from "vuex";
+import { mapGetters } from "vuex";
 import {
   confirmFastInstall,
   deleteNode,
@@ -489,13 +491,13 @@ import {
   unbind,
   unLockWorkspace,
 } from "@/api/node";
-import {getSshListAll} from "@/api/ssh";
-import {syncScript} from "@/api/node-other";
+import { getSshListAll } from "@/api/ssh";
+import { syncScript } from "@/api/node-other";
 import NodeLayout from "./node-layout";
 import Terminal from "@/pages/ssh/terminal";
-import {parseTime} from "@/utils/time";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
-import {getWorkSpaceListAll} from "@/api/workspace";
+import { parseTime } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { getWorkSpaceListAll } from "@/api/workspace";
 import CustomSelect from "@/components/customSelect";
 import Vue from "vue";
 
