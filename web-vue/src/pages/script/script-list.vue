@@ -106,7 +106,7 @@
           </a-auto-complete>
         </a-form-model-item>
         <a-form-model-item label="描述" prop="description">
-          <a-input v-model="temp.description" maxLength="200" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
+          <a-input v-model="temp.description" :maxLength="200" type="textarea" :rows="3" style="resize: none" placeholder="详细描述" />
         </a-form-model-item>
         <a-form-model-item>
           <template slot="label">

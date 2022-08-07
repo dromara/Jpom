@@ -272,7 +272,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd } from "@/api/user";
+import { bindMfa, closeMfa, editUserInfo, generateMfa, getUserInfo, myWorkspace, sendEmailCode, updatePwd } from "@/api/user/user";
 import QRCode from "qrcodejs2";
 import sha1 from "sha1";
 import Vue from "vue";

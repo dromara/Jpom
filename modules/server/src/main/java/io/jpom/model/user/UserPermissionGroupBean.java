@@ -1,6 +1,7 @@
 package io.jpom.model.user;
 
 import io.jpom.model.BaseDbModel;
+import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.service.h2db.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,7 +13,7 @@ import lombok.EqualsAndHashCode;
 @TableName(value = "USER_PERMISSION_GROUP", name = "用户权限组")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class UserPermissionGroupBean extends BaseDbModel {
+public class UserPermissionGroupBean extends BaseUserModifyDbModel {
 
     /**
      * 名称

@@ -29,6 +29,7 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
+import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.DbUserOperateLogService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/user/log")
 @Feature(cls = ClassFeature.USER_LOG)
+@SystemPermission
 public class UserOptLogController extends BaseServerController {
 
 	private final DbUserOperateLogService dbUserOperateLogService;

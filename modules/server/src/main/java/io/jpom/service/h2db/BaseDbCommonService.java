@@ -455,6 +455,17 @@ public abstract class BaseDbCommonService<T> {
     }
 
     /**
+     * 查询 list
+     *
+     * @param where 条件
+     * @return data
+     */
+    public List<T> listByEntity(Entity where) {
+        List<Entity> entity = this.queryList(where);
+        return this.entityToBeanList(entity);
+    }
+
+    /**
      * 查询列表
      *
      * @param where 条件

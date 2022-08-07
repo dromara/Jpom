@@ -55,10 +55,9 @@ public class CompressionFileUtil {
     public static void unCompress(File compressFile, File destDir) {
         Charset charset = CharsetUtil.CHARSET_GBK;
         charset = ObjectUtil.defaultIfNull(charset, CharsetUtil.defaultCharset());
-        try {
-            try (Extractor extractor = CompressUtil.createExtractor(charset, compressFile)) {
-                extractor.extract(destDir);
-            }
+
+        try (Extractor extractor = CompressUtil.createExtractor(charset, compressFile)) {
+            extractor.extract(destDir);
         } catch (Exception e) {
             try (FileInputStream fileInputStream = new FileInputStream(compressFile);
                  CompressorInputStream compressUtilIn = CompressUtil.getIn(null, fileInputStream);) {
@@ -80,6 +79,4 @@ public class CompressionFileUtil {
             }
         }
     }
-
-
 }

@@ -210,7 +210,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 		MethodFeature method = feature.method();
 		ClassFeature cls = feature.cls();
 		UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
-		boolean exists = userBindWorkspaceService.exists(userInfo.getId(), workspaceId + StrUtil.DASHED + method.name());
+		boolean exists = userBindWorkspaceService.exists(userInfo, workspaceId + StrUtil.DASHED + method.name());
 		if (exists) {
 			return StrUtil.EMPTY;
 		}

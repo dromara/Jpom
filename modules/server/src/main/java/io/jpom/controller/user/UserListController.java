@@ -22,12 +22,15 @@
  */
 package io.jpom.controller.user;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.PageResultDto;
@@ -72,7 +75,7 @@ public class UserListController extends BaseServerController {
      */
     @RequestMapping(value = "get_user_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getUserList() {
+    public JsonMessage<PageResultDto<UserModel>> getUserList() {
         PageResultDto<UserModel> userModelPageResultDto = userService.listPage(getRequest());
         userModelPageResultDto.each(userModel -> {
             boolean bindMfa = userService.hasBindMfa(userModel.getId());
@@ -80,7 +83,7 @@ public class UserListController extends BaseServerController {
                 userModel.setTwoFactorAuthKey("true");
             }
         });
-        return JsonMessage.getString(200, "", userModelPageResultDto);
+        return new JsonMessage<>(200, "", userModelPageResultDto);
     }
 
     /**
@@ -105,13 +108,18 @@ public class UserListController extends BaseServerController {
      */
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String addUser(String type) {
+    public JsonMessage<JSONObject> addUser(String type) {
         //
         boolean create = StrUtil.equals(type, "add");
         UserModel userModel = this.parseUser(create);
-
+        JSONObject result = new JSONObject();
         if (create) {
+            String randomPwd = RandomUtil.randomString(UserModel.SALT_LEN);
+            String sha1Pwd = SecureUtil.sha1(randomPwd);
+            userModel.setPassword(SecureUtil.sha1(sha1Pwd + userModel.getSalt()));
+            userModel.setSalt(userService.generateSalt());
             userService.insert(userModel);
+            result.put("randomPwd", randomPwd);
         } else {
             UserModel model = userService.getByKey(userModel.getId());
             Assert.notNull(model, "不存在对应的用户");
@@ -119,18 +127,18 @@ public class UserListController extends BaseServerController {
             if (!systemUser) {
                 Assert.state(!model.isSuperSystemUser(), "不能取消超级管理员的权限");
             }
+            if (model.isSystemUser()) {
+                Assert.state(userModel.getStatus() == 1, "不能禁用超级管理员");
+            }
             UserModel optUser = getUser();
             if (StrUtil.equals(model.getId(), optUser.getId())) {
                 Assert.state(optUser.isSuperSystemUser(), "不能修改自己的信息");
             }
             userService.update(userModel);
+            // 删除旧数据
+            userBindWorkspaceService.deleteByUserId(userModel.getId());
         }
-        //
-        String workspace = getParameter("workspace");
-        JSONArray jsonArray = JSONArray.parseArray(workspace);
-        List<String> workspaceList = jsonArray.toJavaList(String.class);
-        userBindWorkspaceService.updateUserWorkspace(userModel.getId(), workspaceList);
-        return JsonMessage.getString(200, "操作成功");
+        return new JsonMessage<>(200, "操作成功", result);
     }
 
     private UserModel parseUser(boolean create) {
@@ -164,16 +172,26 @@ public class UserListController extends BaseServerController {
 
         userModel.setName(name);
 
-        String password = getParameter("password");
-        if (create || StrUtil.isNotEmpty(password)) {
-            Assert.hasText(password, "密码不能为空");
-            // 修改用户
-            Assert.state(create || optUser.isSystemUser(), "只有系统管理员才能重置用户密码");
-            userModel.setSalt(userService.generateSalt());
-            userModel.setPassword(SecureUtil.sha1(password + userModel.getSalt()));
-        }
+//        String password = getParameter("password");
+//        if (create || StrUtil.isNotEmpty(password)) {
+//            Assert.hasText(password, "密码不能为空");
+//            // 修改用户
+//            Assert.state(create || optUser.isSystemUser(), "只有系统管理员才能重置用户密码");
+//            userModel.setSalt(userService.generateSalt());
+//            userModel.setPassword(SecureUtil.sha1(password + userModel.getSalt()));
+//        }
+
         int systemUser = getParameterInt("systemUser", 0);
         userModel.setSystemUser(systemUser);
+        //
+        String permissionGroup = getParameter("permissionGroup");
+        List<String> permissionGroupList = StrUtil.split(permissionGroup, StrUtil.AT);
+        Assert.notEmpty(permissionGroupList, "用户未选择权限组");
+        userModel.setPermissionGroup(CollUtil.join(permissionGroupList, StrUtil.AT, StrUtil.AT, StrUtil.AT));
+        //
+        int status = getParameterInt("status", 1);
+        Assert.state(status == 0 || status == 1, "选择的用户状态异常");
+        userModel.setStatus(status);
         return userModel;
     }
 
@@ -231,5 +249,28 @@ public class UserListController extends BaseServerController {
         update.setTwoFactorAuthKey(StrUtil.EMPTY);
         userService.update(update);
         return JsonMessage.getString(200, "关闭成功");
+    }
+
+    /**
+     * 重置用户密码
+     *
+     * @param id id
+     * @return json
+     */
+    @GetMapping(value = "rest-user-pwd", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public String restUserPwd(@ValidatorItem String id) {
+        UserModel userModel = userService.getByKey(id);
+        Assert.notNull(userModel, "账号不存在");
+        Assert.state(!userModel.isSuperSystemUser(), "超级管理员不能通过此方式重置密码");
+        //不支持重置演示账号
+        Assert.state(!userModel.isRealDemoUser(), "演示账号不支持重置密码");
+        String randomPwd = RandomUtil.randomString(UserModel.SALT_LEN);
+        String sha1Pwd = SecureUtil.sha1(randomPwd);
+        userService.updatePwd(id, sha1Pwd);
+        //
+        JSONObject result = new JSONObject();
+        result.put("randomPwd", randomPwd);
+        return JsonMessage.getString(200, "重置成功", result);
     }
 }

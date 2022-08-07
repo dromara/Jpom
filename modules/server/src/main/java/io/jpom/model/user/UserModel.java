@@ -30,6 +30,7 @@ import io.jpom.service.h2db.TableName;
 import io.jpom.system.ServerExtConfigBean;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -42,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "USER_INFO", name = "用户账号")
 @Data
+@NoArgsConstructor
 public class UserModel extends BaseStrikeDbModel {
     /**
      * 系统管理员
@@ -115,25 +117,23 @@ public class UserModel extends BaseStrikeDbModel {
      * 企业微信
      */
     private String workWx;
+    /**
+     * 状态 0 禁用  null、1 启用
+     */
+    private Integer status;
+
+    /**
+     * 权限组
+     */
+    private String permissionGroup;
 
     public UserModel(String id) {
         this.setId(id);
     }
 
-    public UserModel() {
-    }
-
     public void setSystemUser(Integer systemUser) {
         this.systemUser = ObjectUtil.defaultIfNull(systemUser, 0) == 1 ? systemUser : 0;
     }
-
-//	/**
-//	 * 解锁
-//	 */
-//	public UserModel unLock() {
-//		UserModel newModel = new UserModel(this.getId());
-//		return UserModel.unLock(newModel);
-//	}
 
     /**
      * 解锁
@@ -247,20 +247,4 @@ public class UserModel extends BaseStrikeDbModel {
     public boolean isRealDemoUser() {
         return UserModel.DEMO_USER.equals(getId());
     }
-
-//	/**
-//	 * 隐藏系统管理的真实id
-//	 *
-//	 * @param userModel 实体
-//	 * @return 系统管理员返回默认
-//	 */
-//	public static String getOptUserName(UserModel userModel) {
-//		String userId;
-//		if (userModel.isSystemUser()) {
-//			userId = UserModel.SYSTEM_OCCUPY_NAME;
-//		} else {
-//			userId = userModel.getId();
-//		}
-//		return userId;
-//	}
 }

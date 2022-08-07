@@ -16,14 +16,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-          <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
-            <a-menu slot="overlay">
-              <a-menu-item>
-                <a-button type="danger" size="small" :disabled="record.parent === 'sys'" @click="handleDelete(record)">删除</a-button>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
+          <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
         </a-space>
       </template>
       <template slot="systemUser" slot-scope="text, record">
@@ -42,47 +35,142 @@
       </a-tooltip>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editUserVisible" width="60vw" title="编辑" @ok="handleEditUserOk" :maskClosable="false">
-      <a-form-model ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+    <a-modal v-model="editVisible" destroyOnClose width="60vw" title="编辑" @ok="handleEditUserOk" :maskClosable="false">
+      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="名称" />
+        </a-form-model-item>
+        <a-form-model-item label="工作空间权限" prop="workspace">
+          <transfer ref="transferRef" :tree-data="workspaceList" :editKey="temp.targetKeys" />
+        </a-form-model-item>
+        <a-form-model-item label="禁用时段" prop="prohibitExecute">
+          <div v-for="(item, index) in temp.prohibitExecuteArray" :key="item.key">
+            <div class="item-info">
+              <div>
+                <a-range-picker
+                  style="width: 100%"
+                  v-model="item.moments"
+                  :disabled-date="
+                    (current) => {
+                      if (current < moment().subtract(1, 'days')) {
+                        return true;
+                      }
+
+                      return temp.prohibitExecuteArray.filter((arrayItem, arrayIndex) => {
+                        if (arrayIndex === index) {
+                          return false;
+                        }
+                        if (arrayItem.moments && arrayItem.moments.length === 2) {
+                          if (current > arrayItem.moments[0] && current < arrayItem.moments[1]) {
+                            return true;
+                          }
+                        }
+                        return false;
+                      }).length;
+                    }
+                  "
+                  :show-time="{ format: 'HH:mm:ss' }"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  valueFormat="YYYY-MM-DD HH:mm:ss"
+                  :placeholder="['开始时间', '结束时间']"
+                />
+              </div>
+              <div>
+                <a-input v-model="item.reason" placeholder="禁用原因" allow-clear />
+              </div>
+            </div>
+            <div
+              class="item-icon"
+              @click="
+                () => {
+                  temp.prohibitExecuteArray.splice(index, 1);
+                }
+              "
+            >
+              <a-icon type="minus-circle" style="color: #ff0000" />
+            </div>
+          </div>
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                temp.prohibitExecuteArray.push({});
+              }
+            "
+            >添加</a-button
+          >
+        </a-form-model-item>
+        <a-form-model-item label="允许时段" prop="allowExecute">
+          <div v-for="(item, index) in temp.allowExecuteArray" :key="item.key">
+            <div class="item-info">
+              <div>
+                <a-select placeholder="请选择可以执行的星期" v-model="item.week" mode="multiple" style="width: 100%">
+                  <a-select-option
+                    v-for="weekItem in weeks"
+                    :key="weekItem.value"
+                    :disabled="
+                      temp.allowExecuteArray.filter((arrayItem, arrayIndex) => {
+                        if (arrayIndex === index) {
+                          return false;
+                        }
+                        return arrayItem.week && arrayItem.week.includes(weekItem.value);
+                      }).length > 0
+                    "
+                  >
+                    {{ weekItem.name }}
+                  </a-select-option>
+                </a-select>
+              </div>
+              <div>
+                <a-space>
+                  <a-time-picker placeholder="开始时间" v-model="item.startTime" valueFormat="HH:mm:ss" :default-open-value="moment('00:00:00', 'HH:mm:ss')" />
+                  <a-time-picker placeholder="结束时间" v-model="item.endTime" valueFormat="HH:mm:ss" :default-open-value="moment('23:59:59', 'HH:mm:ss')" />
+                </a-space>
+              </div>
+            </div>
+            <div
+              class="item-icon"
+              @click="
+                () => {
+                  temp.allowExecuteArray.splice(index, 1);
+                }
+              "
+            >
+              <a-icon type="minus-circle" style="color: #ff0000" />
+            </div>
+          </div>
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                temp.allowExecuteArray.push({});
+              }
+            "
+            >添加</a-button
+          >
+        </a-form-model-item>
+
+        <a-form-model-item label="描述" prop="description">
+          <a-input v-model="temp.description" :maxLength="200" type="textarea" :rows="5" placeholder="变量描述" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
   </div>
 </template>
 <script>
-import { closeUserMfa, deleteUser, editUser, getUserList, unlockUser, workspaceList } from "@/api/user";
+import { workspaceList } from "@/api/user/user";
+import { getList, editPermissionGroup, deletePermissionGroup } from "@/api/user/user-permission";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import { getMonitorOperateTypeList } from "@/api/monitor";
 import { parseTime } from "@/utils/time";
-import sha1 from "sha1";
+import moment from "moment";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-
-function handleTreeData(data, targetKeys = [], left) {
-  if (left) {
-    data.forEach((item) => {
-      item["disabled"] = targetKeys.includes(item.key);
-      if (item.children) {
-        handleTreeData(item.children, targetKeys, left);
-      }
-    });
-    return data;
-  }
-  return data
-    .filter((item) => {
-      return targetKeys.includes(item.key);
-    })
-    .map((item) => {
-      if (item.children) {
-        handleTreeData(item.children, targetKeys, left);
-      }
-      return item;
-    });
-  // return data;
-}
+import Transfer from "@/components/compositionTransfer/composition-transfer.vue";
 
 export default {
+  components: {
+    Transfer,
+  },
   data() {
     return {
       loading: false,
@@ -91,17 +179,22 @@ export default {
       targetKeys: [],
       methodFeature: [],
       temp: {},
-      createOption: true,
-      editUserVisible: false,
+      weeks: [
+        { value: 1, name: "周一" },
+        { value: 2, name: "周二" },
+        { value: 3, name: "周三" },
+        { value: 4, name: "周四" },
+        { value: 5, name: "周五" },
+        { value: 6, name: "周六" },
+        { value: 7, name: "周末" },
+      ],
+      editVisible: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
-        { title: "ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "昵称", dataIndex: "name", ellipsis: true },
-        { title: "管理员", dataIndex: "systemUser", align: "center", ellipsis: true, width: 90, scopedSlots: { customRender: "systemUser" } },
-        { title: "两步验证", dataIndex: "twoFactorAuthKey", align: "center", ellipsis: true, width: 90, scopedSlots: { customRender: "twoFactorAuthKey" } },
+        { title: "名称", dataIndex: "name", ellipsis: true },
+        { title: "描述", dataIndex: "description", ellipsis: true },
 
-        { title: "邮箱", dataIndex: "email", ellipsis: true, scopedSlots: { customRender: "email" } },
-        { title: "创建人", dataIndex: "parent", ellipsis: true, width: 150 },
+        { title: "修改人", dataIndex: "modifyUser", ellipsis: true, width: 150 },
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
@@ -116,27 +209,13 @@ export default {
       ],
       // 表单校验规则
       rules: {
-        id: [{ required: true, message: "Please input login name", trigger: "blur" }],
-        name: [{ required: true, message: "Please input nickName", trigger: "blur" }],
-        password: [
-          { required: true, message: "Please input password", trigger: "blur" },
-          { max: 20, message: "密码长度为6-20", trigger: "blur" },
-          { min: 6, message: "密码长度为6-20", trigger: "blur" },
-        ],
+        name: [{ required: true, message: "请输入权限组名称", trigger: "blur" }],
       },
     };
   },
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
-    },
-    treeDataLeft() {
-      const str = JSON.stringify(this.workspaceList);
-      return handleTreeData(JSON.parse(str), this.targetKeys, true);
-    },
-    treeDataRight() {
-      const str = JSON.stringify(this.workspaceList);
-      return handleTreeData(JSON.parse(str), this.targetKeys, false);
     },
   },
   watch: {},
@@ -145,37 +224,12 @@ export default {
     this.loadOptTypeData();
   },
   methods: {
-    // // 页面引导
-    // introGuide() {
-    //   this.$store.dispatch("tryOpenGuide", {
-    //     key: "user-create",
-    //     options: {
-    //       hidePrev: true,
-    //       steps: [
-    //         {
-    //           title: "导航助手",
-    //           element: document.querySelector(".jpom-userWorkspace"),
-    //           intro: "如果这里面没有您想要的工作空间信息，您需要先去添加一个工作空间。选择工作空间后还可以展开选择绑定的权限奥,默认只有查看权限",
-    //         },
-    //       ],
-    //     },
-    //   });
-    // },
-    onCheckedLeft(_, e, checkedKeys, itemSelect) {
-      const { eventKey } = e.node;
-      const isChecked = checkedKeys.indexOf(eventKey) !== -1;
-      itemSelect(eventKey, !isChecked);
-    },
-    onCheckedRight(_, e, checkedKeys, itemSelect) {
-      const { eventKey } = e.node;
-      const isChecked = checkedKeys.indexOf(eventKey) !== -1;
-      itemSelect(eventKey, isChecked);
-    },
+    moment,
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-      getUserList(this.listQuery).then((res) => {
+      getList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
@@ -185,22 +239,30 @@ export default {
     },
     // 加载工作空间数据
     loadWorkSpaceListAll() {
-      this.workspaceList = [];
-      getWorkSpaceListAll().then((res) => {
-        if (res.code === 200) {
-          res.data.forEach((element) => {
-            const children = this.methodFeature.map((item) => {
-              return { key: element.id + "-" + item.value, title: item.title + "权限" };
+      return new Promise((callback) => {
+        this.workspaceList = [];
+        getWorkSpaceListAll().then((res) => {
+          if (res.code === 200) {
+            res.data.forEach((element) => {
+              const children = this.methodFeature.map((item) => {
+                return {
+                  key: element.id + "-" + item.value,
+                  title: item.title + "权限",
+                  parentId: element.id,
+                };
+              });
+              children.push({ key: element.id + "-systemUser", title: "节点管理员", parentId: element.id });
+              children.push({ key: element.id + "-sshCommandNotLimited", title: "SSH 终端命令无限制", parentId: element.id });
+              this.workspaceList.push({
+                key: element.id,
+                title: element.name,
+                children: children,
+                parentId: 0,
+              });
             });
-            children.push({ key: element.id + "-systemUser", title: "节点管理员" });
-            children.push({ key: element.id + "-sshCommandNotLimited", title: "SSH 终端命令无限制" });
-            this.workspaceList.push({
-              key: element.id,
-              title: element.name,
-              children: children,
-            });
-          });
-        }
+            callback();
+          }
+        });
       });
     },
     // 加载操作类型数据
@@ -208,113 +270,105 @@ export default {
       getMonitorOperateTypeList().then((res) => {
         if (res.code === 200) {
           this.methodFeature = res.data.methodFeature;
-          // .map((element) => {
-          //   return { key: element.value, title: element.title, disabled: false };
-          // });
         }
       });
     },
-    // 穿梭框筛选
-    filterOption(inputValue, option) {
-      return option.title.indexOf(inputValue) > -1;
-    },
-    // 穿梭框 change
-    handleChange(targetKeys) {
-      this.targetKeys = targetKeys;
-      //console.log(targetKeys);
-    },
-    // 新增用户
-    handleAdd() {
-      // setTimeout(() => {
-      //   this.introGuide();
-      // }, 500);
 
-      this.temp = { systemUser: 0 };
-      this.createOption = true;
-      this.targetKeys = [];
+    // 新增权限组
+    handleAdd() {
+      this.temp = { prohibitExecuteArray: [], allowExecuteArray: [], targetKeys: [] };
+
       this.loadWorkSpaceListAll();
-      this.editUserVisible = true;
-      this.$refs["editUserForm"] && this.$refs["editUserForm"].resetFields();
+      this.editVisible = true;
+      this.$refs["editForm"] && this.$refs["editForm"].resetFields();
     },
-    // 修改用户
+    // 修改权限组
     handleEdit(record) {
       workspaceList(record.id).then((res) => {
-        this.createOption = false;
-        this.temp = Object.assign({}, record);
-        // 设置选中 key
-        this.targetKeys = [];
-        res.data.forEach((element) => {
-          this.targetKeys.push(element.workspaceId);
+        this.loadWorkSpaceListAll().then(() => {
+          this.temp = {
+            ...record,
+            targetKeys: res.data.map((element) => {
+              return element.workspaceId;
+            }),
+            prohibitExecuteArray: JSON.parse(record.prohibitExecute).map((item) => {
+              return {
+                reason: item.reason,
+                moments: [item.startTime, item.endTime],
+              };
+            }),
+            allowExecuteArray: JSON.parse(record.allowExecute),
+          };
+          delete this.temp.prohibitExecute, delete this.temp.allowExecute;
+          this.editVisible = true;
+          console.log(this.temp);
         });
-        this.loadWorkSpaceListAll();
-        this.editUserVisible = true;
       });
     },
     // 提交用户数据
     handleEditUserOk() {
       // 检验表单
-      this.$refs["editUserForm"].validate((valid) => {
+      this.$refs["editForm"].validate((valid) => {
         if (!valid) {
           return false;
         }
-        // 判断是否选择了工作空间
-        if (this.targetKeys.length === 0) {
+        const transferRef = this.$refs.transferRef;
+        const emitKeys = transferRef && transferRef.emitKeys;
+        const temp = { ...this.temp };
+        //
+        temp.prohibitExecute = JSON.stringify(
+          (temp.prohibitExecuteArray || []).map((item) => {
+            return {
+              startTime: item.moments && item.moments[0],
+              endTime: item.moments && item.moments[1],
+              reason: item.reason,
+            };
+          })
+        );
+        delete temp.prohibitExecuteArray;
+        //
+        temp.allowExecute = JSON.stringify(
+          (temp.allowExecuteArray || []).map((item) => {
+            return {
+              endTime: item.endTime,
+              startTime: item.startTime,
+              week: item.week,
+            };
+          })
+        );
+        delete temp.allowExecuteArray;
+        if (!emitKeys || emitKeys.length <= 0) {
           this.$notification.error({
             message: "请选择工作空间",
           });
           return false;
         }
         //
-        const checkSelKey = this.targetKeys.filter((item) => {
-          if (!item.includes("-")) {
-            return false;
-          }
-          const temp = item.split("-");
-          return !this.targetKeys.includes(temp[0]);
-        });
-        if (checkSelKey.length) {
-          this.$notification.warn({
-            message: "存在没有选择父级(工作空间)的权限",
-          });
-          return false;
-        }
-        // 加密密码
-        const paramsTemp = Object.assign({}, this.temp);
-        if (paramsTemp.password) {
-          if (paramsTemp.password.length < 6 || paramsTemp.password.length > 20) {
-            this.$notification.warn({
-              message: "密码长度为6-20",
-            });
-            return;
-          }
-          paramsTemp.password = sha1(this.temp.password);
-        }
-        paramsTemp.type = this.createOption ? "add" : "edit";
-        // 设置选择的角色
-        paramsTemp.workspace = JSON.stringify(this.targetKeys);
+        temp.workspace = JSON.stringify(emitKeys);
+        console.log(temp, emitKeys);
         // 需要判断当前操作是【新增】还是【修改】
-        editUser(paramsTemp).then((res) => {
+        editPermissionGroup(temp).then((res) => {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
             });
-            this.$refs["editUserForm"].resetFields();
-            this.editUserVisible = false;
+            this.$refs["editForm"].resetFields();
+            this.editVisible = false;
             this.loadData();
           }
         });
       });
     },
-    // 删除用户
+    // 删除
     handleDelete(record) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除用户么？",
+        content: "真的要删除权限组么？",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
           // 删除
-          deleteUser(record.id).then((res) => {
+          deletePermissionGroup(record.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -325,46 +379,7 @@ export default {
         },
       });
     },
-    // 解锁
-    handleUnlock(record) {
-      this.$confirm({
-        title: "系统提示",
-        content: "真的要解锁用户么？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 解锁用户
-          unlockUser(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
-            }
-          });
-        },
-      });
-    },
-    //
-    handleCloseMfa(record) {
-      this.$confirm({
-        title: "系统提示",
-        content: "真的关闭当前用户的两步验证么？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 解锁用户
-          closeUserMfa(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-              });
-              this.loadData();
-            }
-          });
-        },
-      });
-    },
+
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
@@ -391,4 +406,14 @@ export default {
 /* .filter {
   margin-bottom: 10px;
 } */
+.item-info {
+  display: inline-block;
+  width: 90%;
+}
+
+.item-icon {
+  display: inline-block;
+  width: 10%;
+  text-align: center;
+}
 </style>

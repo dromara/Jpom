@@ -2,7 +2,7 @@
  * 路由鉴权
  * 比如某些路由必须要登录
  */
-import {notification} from "ant-design-vue";
+import { notification } from "ant-design-vue";
 import router from "./index";
 import store from "../store/index";
 
@@ -33,12 +33,15 @@ router.beforeEach((to, from, next) => {
     return;
   }
   // 如果存在 token (已经登录)
+  // 刷新菜单
   store.dispatch("loadSystemMenus").then(() => {
     // 存储 store
     store.dispatch("addTab", { key: to.name, path: to.path }).then((toMenu) => {
       toMenu ? next(toMenu.path) : next();
     });
   });
+  // 刷新用户信息
+  store.dispatch("refreshUserInfo");
 });
 
 // https://www.jb51.net/article/242702.htm

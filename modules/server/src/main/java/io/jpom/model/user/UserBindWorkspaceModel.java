@@ -25,42 +25,37 @@ package io.jpom.model.user;
 import cn.hutool.crypto.SecureUtil;
 import io.jpom.model.BaseDbModel;
 import io.jpom.service.h2db.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author bwcx_jzy
  * @since 2021/12/4
  */
-@TableName(value = "USER_BIND_WORKSPACE", name = "用户工作空间关系表")
+@TableName(value = "USER_BIND_WORKSPACE", name = "用户(权限组)工作空间关系表")
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class UserBindWorkspaceModel extends BaseDbModel {
 
-	private String userId;
+    /**
+     * 权限组ID
+     *
+     * @see UserPermissionGroupBean#getId()
+     * 兼容旧数据
+     * @see UserModel#getId()
+     */
+    private String userId;
 
-	private String workspaceId;
+    private String workspaceId;
 
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-
-	public String getWorkspaceId() {
-		return workspaceId;
-	}
-
-	public void setWorkspaceId(String workspaceId) {
-		this.workspaceId = workspaceId;
-	}
-
-	/**
-	 * 生产绑定关系表 主键 ID
-	 *
-	 * @param userId      用户ID
-	 * @param workspaceId 工作空间ID
-	 * @return id
-	 */
-	public static String getId(String userId, String workspaceId) {
-		return SecureUtil.sha1(userId + workspaceId);
-	}
+    /**
+     * 生产绑定关系表 主键 ID
+     *
+     * @param userId      用户ID
+     * @param workspaceId 工作空间ID
+     * @return id
+     */
+    public static String getId(String userId, String workspaceId) {
+        return SecureUtil.sha1(userId + workspaceId);
+    }
 }

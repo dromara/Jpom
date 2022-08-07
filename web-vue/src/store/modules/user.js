@@ -7,7 +7,7 @@
  */
 import { TOKEN_KEY, USER_INFO_KEY, MENU_KEY, LONG_TERM_TOKEN } from "@/utils/const";
 
-import { getUserInfo, loginOut } from "@/api/user";
+import { getUserInfo, loginOut } from "@/api/user/user";
 
 const user = {
   state: {

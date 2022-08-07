@@ -1,4 +1,4 @@
-import axios from "./config";
+import axios from "../config";
 
 // login
 export function login(params) {
@@ -182,6 +182,19 @@ export function unlockUser(id) {
 export function closeUserMfa(id) {
   return axios({
     url: "/user/close_user_mfa",
+    method: "get",
+    params: { id },
+  });
+}
+
+/**
+ * 重置用户密码
+ * @param {String} id 管理员 ID
+ * @returns
+ */
+export function restUserPwd(id) {
+  return axios({
+    url: "/user/rest-user-pwd",
     method: "get",
     params: { id },
   });

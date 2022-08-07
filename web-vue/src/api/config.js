@@ -4,7 +4,7 @@ import Qs from "qs";
 import store from "../store";
 import router from "../router";
 import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY, CACHE_WORKSPACE_ID, LOADING_TIP } from "@/utils/const";
-import { refreshToken } from "./user";
+import { refreshToken } from "./user/user";
 
 import { notification } from "ant-design-vue";
 
@@ -142,7 +142,10 @@ function wrapResult(response) {
   if (res.code === 800 || res.code === 801) {
     return checkJWTToken(res, response);
   }
-
+  // 账号禁用
+  if (res.code === 900) {
+    return toLogin(res, response, 5000);
+  }
   // 禁止访问
   if (res.code === 999) {
     notification.error({
@@ -168,19 +171,26 @@ function wrapResult(response) {
   return res;
 }
 
+function toLogin(res, response, timeout = 100) {
+  notification.warn({
+    message: "提示信息 " + (pro ? "" : response.config.url),
+    description: res.msg,
+  });
+  console.error(response.config.url, res);
+  store.dispatch("logOut").then(() => {
+    router.push("/login");
+    setTimeout(() => {
+      location.reload();
+    }, timeout);
+  });
+  return false;
+}
+
 // 判断 jwt token 状态
 function checkJWTToken(res, response) {
   // 如果是登录信息失效
   if (res.code === 800) {
-    notification.warn({
-      message: "提示信息 " + (pro ? "" : response.config.url),
-      description: res.msg,
-    });
-    console.error(response.config.url, res);
-    store.dispatch("logOut").then(() => {
-      router.push("/login");
-      location.reload();
-    });
+    toLogin(res, response);
     return false;
   }
   // 如果 jwt token 还可以续签

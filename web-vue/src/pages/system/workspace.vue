@@ -43,7 +43,7 @@
         </a-form-model-item>
 
         <a-form-model-item label="描述" prop="description">
-          <a-input v-model="temp.description" maxLength="200" type="textarea" :rows="5" placeholder="工作空间描述" />
+          <a-input v-model="temp.description" :maxLength="200" type="textarea" :rows="5" placeholder="工作空间描述" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -97,7 +97,7 @@
           <a-input v-model="envTemp.value" type="textarea" :rows="5" placeholder="变量值" />
         </a-form-model-item>
         <a-form-model-item label="描述" prop="description">
-          <a-input v-model="envTemp.description" maxLength="200" type="textarea" :rows="5" placeholder="变量描述" />
+          <a-input v-model="envTemp.description" :maxLength="200" type="textarea" :rows="5" placeholder="变量描述" />
         </a-form-model-item>
         <a-form-model-item prop="privacy">
           <template slot="label">
@@ -139,10 +139,10 @@
   </div>
 </template>
 <script>
-import {deleteWorkspace, deleteWorkspaceEnv, editWorkSpace, editWorkspaceEnv, getWorkspaceEnvList, getWorkSpaceList} from "@/api/workspace";
-import {parseTime} from "@/utils/time";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
-import {getNodeListByWorkspace} from "@/api/node";
+import { deleteWorkspace, deleteWorkspaceEnv, editWorkSpace, editWorkspaceEnv, getWorkspaceEnvList, getWorkSpaceList } from "@/api/workspace";
+import { parseTime } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { getNodeListByWorkspace } from "@/api/node";
 
 export default {
   data() {
