@@ -33,6 +33,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.model.data.NodeModel;
+import io.jpom.model.user.UserBindWorkspaceModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.*;
 import io.jpom.service.h2db.BaseNodeService;
@@ -132,9 +133,9 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
             if (StrUtil.isEmpty(workspaceId)) {
                 workspaceId = request.getParameter(Const.WORKSPACEID_REQ_HEADER);
             }
-            boolean exists = userBindWorkspaceService.exists(userModel, workspaceId + StrUtil.DASHED + method.name());
-            if (!exists) {
-                this.errorMsg(response, "您没有对应功能【" + classFeature.getName() + StrUtil.DASHED + method.getName() + "】管理权限");
+            UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, workspaceId + StrUtil.DASHED + method.name());
+            if (!permissionResult.isSuccess()) {
+                this.errorMsg(response, permissionResult.errorMsg("对应功能【" + classFeature.getName() + StrUtil.DASHED + method.getName() + "】"));
                 return false;
             }
         }
@@ -162,9 +163,10 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
             if (StrUtil.isNotEmpty(dataId)) {
                 BaseNodeModel data = baseNodeService.getData(node.getId(), dataId);
                 if (data != null) {
-                    boolean exists = userBindWorkspaceService.exists(userModel, data.getWorkspaceId());
-                    if (!exists) {
-                        this.errorMsg(response, "您没有对应到数据权限:-3");
+                    UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, data.getWorkspaceId());
+
+                    if (!permissionResult.isSuccess()) {
+                        this.errorMsg(response, permissionResult.errorMsg());
                         return false;
                     }
                 }
@@ -200,9 +202,9 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
         } else {
             // 判断节点管理权限
             String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
-            boolean exists = userBindWorkspaceService.exists(userModel, workspaceId + UserBindWorkspaceService.SYSTEM_USER);
-            if (!exists) {
-                this.errorMsg(response, "您没有对应节点管理权限:-3");
+            UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, workspaceId + UserBindWorkspaceService.SYSTEM_USER);
+            if (!permissionResult.isSuccess()) {
+                this.errorMsg(response, permissionResult.errorMsg("节点管理"));
                 return false;
             }
         }

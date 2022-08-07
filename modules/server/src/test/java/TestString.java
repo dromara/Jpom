@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
@@ -34,6 +35,7 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Created by jiangzeyin on 2019/3/1.
@@ -117,5 +119,12 @@ public class TestString {
     @Test
     public void testLen() {
         System.out.println(StrUtil.EMPTY.length() + "  " + StrUtil.EMPTY.isEmpty());
+    }
+
+    @Test
+    public void testStream() {
+        Stream<Integer> integerStream = Stream.of(1, 2, 3);
+        System.out.println(integerStream.count());
+        System.out.println(integerStream.count());
     }
 }

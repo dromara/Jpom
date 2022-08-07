@@ -58,6 +58,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -164,16 +165,19 @@ public class OperateLogController implements AopLogInterface {
         Map<String, Object> allData = new HashMap<>(30);
         String body = ServletFileUpload.isMultipartContent(request) ? null : ServletUtil.getBody(request);
         if (StrUtil.isNotEmpty(body)) {
-            JSONValidator jsonValidator = JSONValidator.from(body);
-            JSONValidator.Type type = jsonValidator.getType();
-            if (type == null || type == JSONValidator.Type.Value) {
-                allData.put("bodyData", body);
-            } else if (type == JSONValidator.Type.Object) {
-                JSONObject jsonObject = JSONObject.parseObject(body);
-                allData.putAll(jsonObject);
-                //
-            } else if (type == JSONValidator.Type.Array) {
-                allData.put("bodyData", JSONObject.toJSON(body));
+            try (JSONValidator jsonValidator = JSONValidator.from(body)) {
+                JSONValidator.Type type = jsonValidator.getType();
+                if (type == null || type == JSONValidator.Type.Value) {
+                    allData.put("bodyData", body);
+                } else if (type == JSONValidator.Type.Object) {
+                    JSONObject jsonObject = JSONObject.parseObject(body);
+                    allData.putAll(jsonObject);
+                    //
+                } else if (type == JSONValidator.Type.Array) {
+                    allData.put("bodyData", JSONObject.toJSON(body));
+                }
+            } catch (IOException e) {
+                log.warn("IO Exception", e);
             }
         }
         allData.putAll(map);

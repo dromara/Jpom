@@ -54,7 +54,6 @@ if "%1"=="" (
         echo.  [2] stop
         echo.  [3] status
         echo.  [4] restart
-        echo.  [5] use / help
         echo.  [0] exit 0
     echo.
     @REM enter
@@ -64,7 +63,6 @@ if "%1"=="" (
     IF "!ID!"=="2" call:stop
     IF "!ID!"=="3" call:status
     IF "!ID!"=="4" call:restart
-    IF "!ID!"=="5" call:use
     IF "!ID!"=="0" EXIT
 )else (
      if "%1"=="restart" (
@@ -130,9 +128,4 @@ goto:eof
 	timeout 3
 	echo starting....
 	call:start %1
-goto:eof
-
-@REM use
-:use
-	echo please use (start、stop、restart、status)
 goto:eof
