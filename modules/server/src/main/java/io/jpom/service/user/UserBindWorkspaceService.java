@@ -257,7 +257,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
             .filter(Objects::nonNull)
             .map(JSONArray::parseArray)
             .filter(CollUtil::isNotEmpty)
-            .flatMap((Function<JSONArray, Stream<JSONObject>>) jsonArray -> jsonArray.stream().map(o -> (JSONObject) o))
+            .flatMap(jsonArray -> jsonArray.stream().map(o -> (JSONObject) o))
             .collect(Collectors.toList());
         if (CollUtil.isEmpty(allowExecuteListRule)) {
             // 没有配置规则，直接放行
@@ -315,7 +315,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
             .filter(Objects::nonNull)
             .map(JSONArray::parseArray)
             .filter(CollUtil::isNotEmpty)
-            .flatMap((Function<JSONArray, Stream<JSONObject>>) jsonArray -> jsonArray.stream().map(o -> (JSONObject) o))
+            .flatMap(jsonArray -> jsonArray.stream().map(o -> (JSONObject) o))
             .filter(jsonObject -> {
                 String startTime = jsonObject.getString("startTime");
                 String endTime = jsonObject.getString("endTime");

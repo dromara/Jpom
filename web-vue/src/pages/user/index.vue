@@ -58,7 +58,7 @@
     <a-modal v-model="editUserVisible" width="60vw" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
       <a-form-model ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="登录名称" prop="id">
-          <a-input @change="checkTipUserName" :maxLength="50" v-model="temp.id" placeholder="登录名称,账号,邮箱,创建之后不能修改" :disabled="createOption == false" />
+          <a-input @change="checkTipUserName" :maxLength="50" v-model="temp.id" placeholder="登录名称,账号,创建之后不能修改" :disabled="createOption == false" />
         </a-form-model-item>
 
         <a-form-model-item label="昵称" prop="name">
@@ -132,9 +132,6 @@ export default {
     return {
       loading: false,
       list: [],
-      workspaceList: [],
-      targetKeys: [],
-      methodFeature: [],
       temp: {},
       createOption: true,
       editUserVisible: false,
