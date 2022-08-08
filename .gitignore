@@ -52,3 +52,4 @@ screenshot
 *.sha1
 
 .ossutil_checkpoint/
+ossutil_output/
