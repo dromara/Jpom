@@ -50,3 +50,5 @@ screenshot
 *.zip
 *.tar.gz
 *.sha1
+
+.ossutil_checkpoint/
