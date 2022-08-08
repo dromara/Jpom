@@ -154,10 +154,10 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
             map.putAll(dataMap);
         }
         List<String> list = map.entrySet()
-                .stream()
-                .filter(entry -> entry.getValue() != null)
-                .map(entry -> entry.getKey() + "：" + entry.getValue())
-                .collect(Collectors.toList());
+            .stream()
+            .filter(entry -> entry.getValue() != null)
+            .map(entry -> entry.getKey() + "：" + entry.getValue())
+            .collect(Collectors.toList());
         //
         return CollUtil.join(list, StrUtil.LF);
     }
@@ -180,9 +180,9 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 
         String optTypeMsg = StrUtil.format(" 【{}】->【{}】", classFeature.getName(), methodFeature.getName());
         List<MonitorUserOptModel> monitorUserOptModels = monitorUserOptService.listByType(userOperateLogV1.getWorkspaceId(),
-                classFeature,
-                methodFeature,
-                userOperateLogV1.getUserId());
+            classFeature,
+            methodFeature,
+            userOperateLogV1.getUserId());
         if (CollUtil.isEmpty(monitorUserOptModels)) {
             return;
         }
@@ -267,8 +267,9 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
     @Override
     public String getCheckUserWorkspace(HttpServletRequest request) {
         // 忽略检查
-        String header = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
-        return ObjectUtil.defaultIfNull(header, StrUtil.EMPTY);
+        return BaseWorkspaceService.getWorkspaceId(request);
+        // String header = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+        // return ObjectUtil.defaultIfNull(header, StrUtil.EMPTY);
     }
 
     @Override
