@@ -29,6 +29,8 @@ import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.service.h2db.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +40,8 @@ import java.util.Map;
  * 仓库地址实体类
  */
 @TableName(value = "REPOSITORY", name = "仓库信息")
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class RepositoryModel extends BaseWorkspaceModel {
     /**
      * 名称
@@ -75,29 +79,11 @@ public class RepositoryModel extends BaseWorkspaceModel {
      */
     private String rsaPrv;
 
-    public String getName() {
-        return name;
-    }
+    /**
+     * 排序
+     */
+    private Float sortValue;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getGitUrl() {
-        return gitUrl;
-    }
-
-    public void setGitUrl(String gitUrl) {
-        this.gitUrl = gitUrl;
-    }
-
-    public Integer getRepoType() {
-        return repoType;
-    }
-
-    public void setRepoType(Integer repoType) {
-        this.repoType = repoType;
-    }
 
     /**
      * 返回协议类型，如果为 null 会尝试识别 http
@@ -117,44 +103,6 @@ public class RepositoryModel extends BaseWorkspaceModel {
             return GitProtocolEnum.HTTP.getCode();
         }
         return null;
-    }
-
-    public void setProtocol(Integer protocol) {
-        this.protocol = protocol;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Deprecated
-    public String getRsaPub() {
-        return rsaPub;
-    }
-
-    @Deprecated
-    public void setRsaPub(String rsaPub) {
-        this.rsaPub = rsaPub;
-    }
-
-    public String getRsaPrv() {
-        return rsaPrv;
-    }
-
-    public void setRsaPrv(String rsaPrv) {
-        this.rsaPrv = rsaPrv;
     }
 
     /**

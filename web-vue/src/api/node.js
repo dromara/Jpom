@@ -104,12 +104,30 @@ export function syncToWorkspace(params) {
   });
 }
 
+//
+export function sortItem(params) {
+  return axios({
+    url: "/node/sort-item",
+    method: "get",
+    params: params,
+  });
+}
+
 // 删除节点项目缓存
 export function delAllProjectCache() {
   return axios({
     url: "/node/clear_all_project",
     method: "get",
     params: {},
+  });
+}
+
+// 项目排序
+export function sortItemProject(params) {
+  return axios({
+    url: "/node/project-sort-item",
+    method: "get",
+    params: params,
   });
 }
 

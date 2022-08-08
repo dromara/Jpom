@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.node;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONArray;
@@ -255,5 +256,29 @@ public class NodeEditController extends BaseServerController {
         nodeService.checkUserWorkspace(workspaceId);
         nodeService.syncToWorkspace(ids, nowWorkspaceId, workspaceId);
         return JsonMessage.getString(200, "操作成功");
+    }
+
+    /**
+     * 排序
+     *
+     * @param id        节点ID
+     * @param method    方法
+     * @param compareId 比较的ID
+     * @return msg
+     */
+    @GetMapping(value = "sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
+        HttpServletRequest request = getRequest();
+        if (StrUtil.equalsIgnoreCase(method, "top")) {
+            nodeService.sortToTop(id, request);
+        } else if (StrUtil.equalsIgnoreCase(method, "up")) {
+            nodeService.sortMoveUp(id, compareId, request);
+        } else if (StrUtil.equalsIgnoreCase(method, "down")) {
+            nodeService.sortMoveDown(id, compareId, request);
+        } else {
+            return new JsonMessage<>(400, "不支持的方式" + method);
+        }
+        return new JsonMessage<>(200, "操作成功");
     }
 }

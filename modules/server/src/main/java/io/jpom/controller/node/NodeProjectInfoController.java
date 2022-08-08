@@ -25,6 +25,7 @@ package io.jpom.controller.node;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -54,80 +56,102 @@ import java.util.List;
 @Feature(cls = ClassFeature.NODE)
 public class NodeProjectInfoController extends BaseServerController {
 
-	private final ProjectInfoCacheService projectInfoCacheService;
+    private final ProjectInfoCacheService projectInfoCacheService;
 
-	public NodeProjectInfoController(ProjectInfoCacheService projectInfoCacheService) {
-		this.projectInfoCacheService = projectInfoCacheService;
-	}
+    public NodeProjectInfoController(ProjectInfoCacheService projectInfoCacheService) {
+        this.projectInfoCacheService = projectInfoCacheService;
+    }
 
-	/**
-	 * @return json
-	 * @author Hotstrip
-	 * load node project list
-	 * 加载节点项目列表
-	 */
-	@PostMapping(value = "node_project_list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String nodeProjectList() {
-		PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPageNode(getRequest());
-		return JsonMessage.getString(200, "success", resultDto);
-	}
-
-
-	/**
-	 * load node project list
-	 * 加载节点项目列表
-	 *
-	 * @return json
-	 * @author Hotstrip
-	 */
-	@PostMapping(value = "project_list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String projectList() {
-		PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(getRequest());
-		return JsonMessage.getString(200, "success", resultDto);
-	}
-
-	/**
-	 * load node project list
-	 * 加载节点项目列表
-	 *
-	 * @return json
-	 * @author Hotstrip
-	 */
-	@GetMapping(value = "project_list_all", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String projectListAll() {
-		List<ProjectInfoCacheModel> projectInfoCacheModels = projectInfoCacheService.listByWorkspace(getRequest());
-		return JsonMessage.getString(200, "", projectInfoCacheModels);
-	}
-
-	/**
-	 * 同步节点项目
-	 *
-	 * @return json
-	 */
-	@GetMapping(value = "sync_project", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-	public String syncProject(String nodeId) {
-		NodeModel nodeModel = nodeService.getByKey(nodeId);
-		Assert.notNull(nodeModel, "对应的节点不存在");
-		int count = projectInfoCacheService.delCache(nodeId, getRequest());
-		String msg = projectInfoCacheService.syncExecuteNode(nodeModel);
-		return JsonMessage.getString(200, "主动清除：" + count + StrUtil.SPACE + msg);
-	}
-
-	/**
-	 * 删除节点缓存的所有项目
-	 *
-	 * @return json
-	 */
-	@GetMapping(value = "clear_all_project", produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission(superUser = true)
-	@Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-	public String clearAll() {
-		Entity where = Entity.create();
-		where.set("id", " <> id");
-		int del = projectInfoCacheService.del(where);
-		return JsonMessage.getString(200, "成功删除" + del + "条项目缓存");
-	}
+    /**
+     * @return json
+     * @author Hotstrip
+     * load node project list
+     * 加载节点项目列表
+     */
+    @PostMapping(value = "node_project_list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String nodeProjectList() {
+        PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPageNode(getRequest());
+        return JsonMessage.getString(200, "success", resultDto);
+    }
 
 
+    /**
+     * load node project list
+     * 加载节点项目列表
+     *
+     * @return json
+     * @author Hotstrip
+     */
+    @PostMapping(value = "project_list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String projectList() {
+        PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(getRequest());
+        return JsonMessage.getString(200, "success", resultDto);
+    }
+
+    /**
+     * load node project list
+     * 加载节点项目列表
+     *
+     * @return json
+     * @author Hotstrip
+     */
+    @GetMapping(value = "project_list_all", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String projectListAll() {
+        List<ProjectInfoCacheModel> projectInfoCacheModels = projectInfoCacheService.listByWorkspace(getRequest());
+        return JsonMessage.getString(200, "", projectInfoCacheModels);
+    }
+
+    /**
+     * 同步节点项目
+     *
+     * @return json
+     */
+    @GetMapping(value = "sync_project", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
+    public String syncProject(String nodeId) {
+        NodeModel nodeModel = nodeService.getByKey(nodeId);
+        Assert.notNull(nodeModel, "对应的节点不存在");
+        int count = projectInfoCacheService.delCache(nodeId, getRequest());
+        String msg = projectInfoCacheService.syncExecuteNode(nodeModel);
+        return JsonMessage.getString(200, "主动清除：" + count + StrUtil.SPACE + msg);
+    }
+
+    /**
+     * 删除节点缓存的所有项目
+     *
+     * @return json
+     */
+    @GetMapping(value = "clear_all_project", produces = MediaType.APPLICATION_JSON_VALUE)
+    @SystemPermission(superUser = true)
+    @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
+    public String clearAll() {
+        Entity where = Entity.create();
+        where.set("id", " <> id");
+        int del = projectInfoCacheService.del(where);
+        return JsonMessage.getString(200, "成功删除" + del + "条项目缓存");
+    }
+
+    /**
+     * 排序
+     *
+     * @param id        节点ID
+     * @param method    方法
+     * @param compareId 比较的ID
+     * @return msg
+     */
+    @GetMapping(value = "project-sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
+        HttpServletRequest request = getRequest();
+        if (StrUtil.equalsIgnoreCase(method, "top")) {
+            projectInfoCacheService.sortToTop(id, request);
+        } else if (StrUtil.equalsIgnoreCase(method, "up")) {
+            projectInfoCacheService.sortMoveUp(id, compareId, request);
+        } else if (StrUtil.equalsIgnoreCase(method, "down")) {
+            projectInfoCacheService.sortMoveDown(id, compareId, request);
+        } else {
+            return new JsonMessage<>(400, "不支持的方式" + method);
+        }
+        return new JsonMessage<>(200, "操作成功");
+    }
 }

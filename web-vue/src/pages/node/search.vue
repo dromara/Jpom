@@ -61,6 +61,7 @@
                 <ul>
                   <li>项目是存储在节点中的、创建需要到节点管理里面去操作</li>
                   <li>状态数据是异步获取有一定时间延迟</li>
+                  <li>在单页列表里面 file 类型项目将自动排序到最后</li>
                 </ul>
               </div>
             </template>
@@ -92,10 +93,29 @@
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
         <span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template slot="operation" slot-scope="text, record, index">
         <a-space>
           <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
           <a-button size="small" type="primary" @click="handleConsole(record)" v-show="noFileModes.includes(record.runMode)">控制台</a-button>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'up')">上移</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
+                  下移
+                </a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
     </a-table>
@@ -127,12 +147,12 @@
   </div>
 </template>
 <script>
-import {delAllProjectCache, getNodeListAll, getProjectList} from "@/api/node";
-import {getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject} from "@/api/node-project";
+import { delAllProjectCache, getNodeListAll, getProjectList, sortItemProject } from "@/api/node";
+import { getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject } from "@/api/node-project";
 import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
-import {itemGroupBy, parseTime} from "@/utils/time";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import { itemGroupBy, parseTime } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
 
 export default {
@@ -186,7 +206,7 @@ export default {
         },
         { title: "运行状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 140 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "180px" },
       ],
     };
   },
@@ -489,6 +509,44 @@ export default {
           });
         },
       });
+    },
+    // 排序
+    sortItemHander(record, index, method) {
+      const msgData = {
+        top: "确定要将此数据置顶吗？",
+        up: "确定要将此数上移吗？",
+        down: "确定要将此数据下移吗？",
+      };
+      let msg = msgData[method] || "确定要操作吗？";
+      if (!record.sortValue) {
+        msg += " 当前数据为默认状态,操后上移或者下移可能不会达到预期排序,还需要对相关数据都操作后才能达到预期排序";
+      }
+      // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
+      const compareId = this.projList[method === "top" ? index : method === "up" ? index - 1 : index + 1].id;
+      this.$confirm({
+        title: "系统提示",
+        content: msg,
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 解锁
+          sortItemProject({
+            id: record.id,
+            method: method,
+            compareId: compareId,
+          }).then((res) => {
+            if (res.code == 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              this.getNodeProjectData();
+              return false;
+            }
+          });
+        },
+      });
+      // console.log(record, index, method);
     },
   },
 };

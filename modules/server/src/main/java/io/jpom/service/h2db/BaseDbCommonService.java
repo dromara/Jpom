@@ -72,12 +72,6 @@ public abstract class BaseDbCommonService<T> {
      */
     protected final String key;
 
-    public BaseDbCommonService(String tableName, String key, Class<T> tClass) {
-        this.tableName = this.covetTableName(tableName, tClass);
-        this.tClass = tClass;
-        this.key = key;
-    }
-
     @SuppressWarnings("unchecked")
     public BaseDbCommonService(String tableName, String key) {
         this.tClass = (Class<T>) TypeUtil.getTypeArgument(this.getClass());

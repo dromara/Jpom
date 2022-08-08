@@ -57,6 +57,7 @@ import io.jpom.system.JpomRuntimeException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -448,6 +449,30 @@ public class RepositoryController extends BaseServerController {
         File rsaFile = BuildUtil.getRepositoryRsaFile(id + Const.ID_RSA);
         FileUtil.del(rsaFile);
         return JsonMessage.getString(200, "删除成功");
+    }
+
+    /**
+     * 排序
+     *
+     * @param id        节点ID
+     * @param method    方法
+     * @param compareId 比较的ID
+     * @return msg
+     */
+    @GetMapping(value = "/build/repository/sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
+        HttpServletRequest request = getRequest();
+        if (StrUtil.equalsIgnoreCase(method, "top")) {
+            repositoryService.sortToTop(id, request);
+        } else if (StrUtil.equalsIgnoreCase(method, "up")) {
+            repositoryService.sortMoveUp(id, compareId, request);
+        } else if (StrUtil.equalsIgnoreCase(method, "down")) {
+            repositoryService.sortMoveDown(id, compareId, request);
+        } else {
+            return new JsonMessage<>(400, "不支持的方式" + method);
+        }
+        return new JsonMessage<>(200, "操作成功");
     }
 
     /**

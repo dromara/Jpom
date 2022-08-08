@@ -114,6 +114,12 @@ ALTER TABLE COMMAND_INFO
 ALTER TABLE SERVER_SCRIPT_INFO
     ADD IF NOT EXISTS triggerToken VARCHAR(200) comment '触发器token';
 
+ALTER TABLE NODE_INFO
+    ADD IF NOT EXISTS `sortValue` REAL comment '排序值';
+
+ALTER TABLE PROJECT_INFO
+    ADD IF NOT EXISTS `sortValue` REAL comment '排序值';
+
 
 
 
