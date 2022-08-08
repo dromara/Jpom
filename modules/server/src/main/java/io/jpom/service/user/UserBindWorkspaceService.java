@@ -24,7 +24,6 @@ package io.jpom.service.user;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.convert.NumberChineseFormatter;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.Week;
@@ -33,9 +32,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.user.UserBindWorkspaceModel;
 import io.jpom.model.user.UserModel;
-import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.user.UserPermissionGroupBean;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.h2db.BaseDbService;
@@ -43,11 +42,9 @@ import io.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.time.DayOfWeek;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author bwcx_jzy
@@ -184,7 +181,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
             .collect(Collectors.toList());
         // 兼容旧数据
         list.add(UserBindWorkspaceModel.getId(userModel.getId(), workspaceId));
-        return this.getByKey(list);
+        return this.listById(list);
     }
 
     /**
@@ -217,7 +214,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
         List<String> permissionGroupIds = workspaceModels.stream()
             .map(UserBindWorkspaceModel::getUserId)
             .collect(Collectors.toList());
-        List<UserPermissionGroupBean> permissionGroups = userPermissionGroupServer.getByKey(permissionGroupIds);
+        List<UserPermissionGroupBean> permissionGroups = userPermissionGroupServer.listById(permissionGroupIds);
         if (CollUtil.isEmpty(permissionGroups)) {
             return UserBindWorkspaceModel.PermissionResult.builder()
                 .state(UserBindWorkspaceModel.PermissionResultEnum.FAIL)
@@ -291,7 +288,11 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
             JSONArray week = jsonObject.getJSONArray("week");
             String weekStr = week.stream()
                 .map(o -> Convert.toInt(o, 0))
-                .map(integer -> NumberChineseFormatter.format(integer, false))
+                .map(weekInt -> {
+                    DayOfWeek dayOfWeek = DayOfWeek.of(weekInt);
+                    return Week.of(dayOfWeek);
+                })
+                .map(week1 -> week1.toChinese(StrUtil.EMPTY))
                 .collect(Collectors.joining(StrUtil.COMMA));
             String startTime = jsonObject.getString("startTime");
             String endTime = jsonObject.getString("endTime");
