@@ -63,7 +63,7 @@ if [[ `cat ${mdPath} |grep "$1"` != ""  ]]; then
 else
 	echo "" > ${pwd}/temp-docs.log
 	echo "## $1" >> ${pwd}/temp-docs.log
-	echo "- [jpom-$1](https://download.jpom.top/release/$1/jpom-$1.zip)" >> ${pwd}/temp-docs.log
+	echo "- [jpom-$1.zip](https://download.jpom.top/release/$1/jpom-$1.zip)" >> ${pwd}/temp-docs.log
 	echo "- [server-$1-release.tar.gz](https://download.jpom.top/release/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.tar.gz.sha1)" >> ${pwd}/temp-docs.log
 	echo "- [server-$1-release.zip](https://download.jpom.top/release/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.zip.sha1)" >> ${pwd}/temp-docs.log
 	echo "- [agent-$1-release.tar.gz](https://download.jpom.top/release/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.tar.gz.sha1)" >> ${pwd}/temp-docs.log
