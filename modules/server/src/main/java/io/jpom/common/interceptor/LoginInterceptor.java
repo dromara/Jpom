@@ -63,9 +63,9 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     private static final Map<Integer, String> MSG_CACHE = new HashMap<>(3);
 
     static {
-        MSG_CACHE.put(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "登录信息已失效,重新登录");
-        MSG_CACHE.put(ServerConfigBean.RENEWAL_AUTHORIZE_CODE, "登录信息已失效,重新登录");
-        MSG_CACHE.put(900, "账号已经被禁用,不能使用");
+        MSG_CACHE.put(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, ServerConfigBean.LOGIN_TIP);
+        MSG_CACHE.put(ServerConfigBean.RENEWAL_AUTHORIZE_CODE, ServerConfigBean.LOGIN_TIP);
+        MSG_CACHE.put(ServerConfigBean.ACCOUNT_LOCKED, ServerConfigBean.ACCOUNT_LOCKED_TIP);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         }
         if (newUser.getStatus() != null && newUser.getStatus() == 0) {
             // 账号禁用
-            return 900;
+            return ServerConfigBean.ACCOUNT_LOCKED;
         }
         session.setAttribute(LoginInterceptor.SESSION_NAME, newUser);
         return 0;
@@ -168,7 +168,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         }
         if (userModel.getStatus() != null && userModel.getStatus() == 0) {
             // 账号禁用
-            return 900;
+            return ServerConfigBean.ACCOUNT_LOCKED;
         }
         session.setAttribute(LoginInterceptor.SESSION_NAME, userModel);
         return 0;
@@ -184,7 +184,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
      */
     private void responseLogin(HttpServletRequest request, HttpSession session, HttpServletResponse response, int code) throws IOException {
         session.removeAttribute(LoginInterceptor.SESSION_NAME);
-        String msg = MSG_CACHE.getOrDefault(code, "登录信息已失效,重新登录");
+        String msg = MSG_CACHE.getOrDefault(code, ServerConfigBean.LOGIN_TIP);
         ServletUtil.write(response, JsonMessage.getString(code, msg), MediaType.APPLICATION_JSON_VALUE);
     }
 

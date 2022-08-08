@@ -143,7 +143,7 @@ function wrapResult(response) {
     return checkJWTToken(res, response);
   }
   // 账号禁用
-  if (res.code === 900) {
+  if (res.code === 802) {
     return toLogin(res, response, 5000);
   }
   // 禁止访问
