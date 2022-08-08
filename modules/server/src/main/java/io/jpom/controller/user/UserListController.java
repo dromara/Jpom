@@ -116,8 +116,8 @@ public class UserListController extends BaseServerController {
         if (create) {
             String randomPwd = RandomUtil.randomString(UserModel.SALT_LEN);
             String sha1Pwd = SecureUtil.sha1(randomPwd);
-            userModel.setPassword(SecureUtil.sha1(sha1Pwd + userModel.getSalt()));
             userModel.setSalt(userService.generateSalt());
+            userModel.setPassword(SecureUtil.sha1(sha1Pwd + userModel.getSalt()));
             userService.insert(userModel);
             result.put("randomPwd", randomPwd);
         } else {
