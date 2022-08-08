@@ -47,10 +47,29 @@
         <!-- if no protocol value, get a default value from gitUrl -->
         <span v-else>{{ record.gitUrl.indexOf("http") > -1 ? "HTTP(S)" : "SSH" }}</span>
       </template>
-      <template slot="operation" slot-scope="text, record">
+      <template slot="operation" slot-scope="text, record, index">
         <a-space>
           <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
           <a-button type="danger" size="small" @click="handleDelete(record)">删除</a-button>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+              更多
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'up')">上移</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
+                  下移
+                </a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
     </a-table>
@@ -219,9 +238,9 @@
   </div>
 </template>
 <script>
-import {authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField} from "@/api/repository";
-import {parseTime} from "@/utils/time";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import { authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem } from "@/api/repository";
+import { parseTime } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {},
@@ -281,7 +300,7 @@ export default {
           title: "操作",
           dataIndex: "operation",
           align: "center",
-          width: 120,
+          width: "180px",
           scopedSlots: { customRender: "operation" },
         },
       ],
@@ -488,6 +507,43 @@ export default {
       } else {
         this.importTypePlaceholder = "请输入私人令牌";
       }
+    },
+    // 排序
+    sortItemHander(record, index, method) {
+      const msgData = {
+        top: "确定要将此数据置顶吗？",
+        up: "确定要将此数上移吗？",
+        down: "确定要将此数据下移吗？",
+      };
+      let msg = msgData[method] || "确定要操作吗？";
+      if (!record.sortValue) {
+        msg += " 当前数据为默认状态,操后上移或者下移可能不会达到预期排序,还需要对相关数据都操作后才能达到预期排序";
+      }
+      // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
+      const compareId = this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1].id;
+      this.$confirm({
+        title: "系统提示",
+        content: msg,
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 解锁
+          sortItem({
+            id: record.id,
+            method: method,
+            compareId: compareId,
+          }).then((res) => {
+            if (res.code == 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              this.loadData();
+              return false;
+            }
+          });
+        },
+      });
     },
   },
 };

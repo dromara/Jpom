@@ -86,7 +86,7 @@
       <!-- <a-tooltip slot="cycle" slot-scope="text" placement="topLeft" :title="nodeMonitorCycle[text]">
         <span>{{ nodeMonitorCycle[text] }}</span>
       </a-tooltip> -->
-      <template slot="operation" slot-scope="text, record">
+      <template slot="operation" slot-scope="text, record, index">
         <a-tooltip title="我在这里" :visible="showOptVisible[record.id]">
           <a-space>
             <a-button size="small" v-if="record.unLockType" type="primary" @click="unlock(record)"><a-icon type="unlock" />解锁</a-button>
@@ -105,18 +105,30 @@
               </a>
               <a-menu slot="overlay">
                 <a-menu-item>
-                  <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+                  <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
                 </a-menu-item>
 
                 <a-menu-item>
                   <a-tooltip placement="leftBottom" title="删除会检查数据关联性,并且节点不存在项目或者脚本">
-                    <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+                    <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
                   </a-tooltip>
                 </a-menu-item>
                 <a-menu-item>
                   <a-tooltip placement="leftBottom" title="解绑会检查数据关联性,同时将自动删除节点项目和脚本缓存信息,一般用于服务器无法连接且已经确定不再使用">
-                    <a-button type="danger" @click="handleUnbind(record)">解绑</a-button>
+                    <a-button size="small" type="danger" @click="handleUnbind(record)">解绑</a-button>
                   </a-tooltip>
+                </a-menu-item>
+                <a-menu-divider />
+                <a-menu-item>
+                  <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'up')">上移</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
+                    下移
+                  </a-button>
                 </a-menu-item>
               </a-menu>
             </a-dropdown>
@@ -490,6 +502,7 @@ import {
   syncToWorkspace,
   unbind,
   unLockWorkspace,
+  sortItem,
 } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import { syncScript } from "@/api/node-other";
@@ -986,6 +999,43 @@ export default {
           this.syncToWorkspaceVisible = false;
           return false;
         }
+      });
+    },
+    // 排序
+    sortItemHander(record, index, method) {
+      const msgData = {
+        top: "确定要将此数据置顶吗？",
+        up: "确定要将此数上移吗？",
+        down: "确定要将此数据下移吗？",
+      };
+      let msg = msgData[method] || "确定要操作吗？";
+      if (!record.sortValue) {
+        msg += " 当前数据为默认状态,操后上移或者下移可能不会达到预期排序,还需要对相关数据都操作后才能达到预期排序";
+      }
+      // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
+      const compareId = this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1].id;
+      this.$confirm({
+        title: "系统提示",
+        content: msg,
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 解锁
+          sortItem({
+            id: record.id,
+            method: method,
+            compareId: compareId,
+          }).then((res) => {
+            if (res.code == 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              this.loadData();
+              return false;
+            }
+          });
+        },
       });
     },
   },

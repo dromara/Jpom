@@ -91,3 +91,11 @@ export function authorizeRepos(param) {
     params: param,
   });
 }
+
+export function sortItem(params) {
+  return axios({
+    url: "/build/repository/sort-item",
+    method: "get",
+    params: params,
+  });
+}

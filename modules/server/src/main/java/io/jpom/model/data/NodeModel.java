@@ -90,6 +90,10 @@ public class NodeModel extends BaseGroupModel {
      * https 代理 类型
      */
     private String httpProxyType;
+    /**
+     * 排序
+     */
+    private Float sortValue;
 
     public boolean isOpenStatus() {
         return openStatus != null && openStatus == 1;

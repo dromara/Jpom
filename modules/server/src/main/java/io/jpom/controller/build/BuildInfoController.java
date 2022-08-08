@@ -463,4 +463,28 @@ public class BuildInfoController extends BaseServerController {
         return JsonMessage.getString(200, "清理成功");
     }
 
+    /**
+     * 排序
+     *
+     * @param id        节点ID
+     * @param method    方法
+     * @param compareId 比较的ID
+     * @return msg
+     */
+    @GetMapping(value = "/build/sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
+        HttpServletRequest request = getRequest();
+        if (StrUtil.equalsIgnoreCase(method, "top")) {
+            buildInfoService.sortToTop(id, request);
+        } else if (StrUtil.equalsIgnoreCase(method, "up")) {
+            buildInfoService.sortMoveUp(id, compareId, request);
+        } else if (StrUtil.equalsIgnoreCase(method, "down")) {
+            buildInfoService.sortMoveDown(id, compareId, request);
+        } else {
+            return new JsonMessage<>(400, "不支持的方式" + method);
+        }
+        return new JsonMessage<>(200, "操作成功");
+    }
+
 }

@@ -248,6 +248,14 @@ export function deleteBuildHistory(logId) {
   });
 }
 
+export function sortItem(params) {
+  return axios({
+    url: "/build/sort-item",
+    method: "get",
+    params: params,
+  });
+}
+
 export const statusMap = {
   1: "构建中",
   2: "构建完成",

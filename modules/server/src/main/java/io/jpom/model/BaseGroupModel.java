@@ -34,7 +34,7 @@ import lombok.EqualsAndHashCode;
 public abstract class BaseGroupModel extends BaseWorkspaceModel {
 
 	/**
-	 * 节点分组
+	 * 分组
 	 */
 	private String group;
 

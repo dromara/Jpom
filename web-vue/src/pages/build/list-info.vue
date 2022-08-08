@@ -63,7 +63,7 @@
         <!-- <a-icon type="edit" theme="twoTone" /> -->
         <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
       </a-tooltip>
-      <a-tooltip slot="branchName" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="branchName" slot-scope="text, record" placement="topLeft" :title="`分支名称：${text},上次构建基于 commitId：${record.repositoryLastCommitId}`">
         <span>{{ text }}</span>
       </a-tooltip>
       <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
@@ -99,7 +99,7 @@
       <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="operation" slot-scope="text, record">
+      <template slot="operation" slot-scope="text, record, index">
         <a-space>
           <a-button size="small" type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
           <a-button size="small" type="primary" v-else @click="handleConfirmStartBuild(record)">构建</a-button>
@@ -129,6 +129,18 @@
                 >
                   <a-button size="small" type="danger" :disabled="!record.sourceDirExist" @click="handleClear(record)">清除代码 </a-button>
                 </a-tooltip>
+              </a-menu-item>
+              <a-menu-divider />
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'up')">上移</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total" @click="sortItemHander(record, index, 'down')">
+                  下移
+                </a-button>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -928,6 +940,7 @@ import {
   startBuild,
   statusMap,
   stopBuild,
+  sortItem,
 } from "@/api/build-info";
 import { afterOptList, afterOptListSimple, getDishPatchListAll } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
@@ -1604,6 +1617,43 @@ export default {
       } else {
         this.swarmServiceListOptions = [];
       }
+    },
+    // 排序
+    sortItemHander(record, index, method) {
+      const msgData = {
+        top: "确定要将此数据置顶吗？",
+        up: "确定要将此数上移吗？",
+        down: "确定要将此数据下移吗？",
+      };
+      let msg = msgData[method] || "确定要操作吗？";
+      if (!record.sortValue) {
+        msg += " 当前数据为默认状态,操后上移或者下移可能不会达到预期排序,还需要对相关数据都操作后才能达到预期排序";
+      }
+      // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
+      const compareId = this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1].id;
+      this.$confirm({
+        title: "系统提示",
+        content: msg,
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 解锁
+          sortItem({
+            id: record.id,
+            method: method,
+            compareId: compareId,
+          }).then((res) => {
+            if (res.code == 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+
+              this.loadData();
+              return false;
+            }
+          });
+        },
+      });
     },
   },
 };

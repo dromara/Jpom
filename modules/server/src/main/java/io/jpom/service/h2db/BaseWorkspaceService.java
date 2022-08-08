@@ -22,9 +22,14 @@
  */
 package io.jpom.service.h2db;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
@@ -40,7 +45,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 工作空间 通用 service
@@ -49,6 +56,23 @@ import java.util.function.Consumer;
  * @since 2021/8/13
  */
 public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends BaseDbService<T> {
+    /**
+     * 是否可以进行排序
+     */
+    private final boolean canSort;
+    /**
+     * 有排序字段的默认排序规则
+     */
+    private static final Order[] SORT_DEFAULT_ORDERS = new Order[]{
+        new Order("sortValue", Direction.DESC),
+        new Order("createTimeMillis", Direction.DESC),
+        new Order("modifyTimeMillis", Direction.DESC)
+    };
+
+    public BaseWorkspaceService() {
+        super();
+        this.canSort = ReflectUtil.hasField(this.tClass, "sortValue");
+    }
 
     /**
      * 根据工作空间查询
@@ -238,5 +262,81 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
     public int updateById(T info, HttpServletRequest request) {
         String workspaceId = this.getCheckUserWorkspace(request);
         return super.updateById(info, entity -> entity.set("workspaceId", workspaceId));
+    }
+
+    // 排序相关方法 ---------
+
+
+    @Override
+    protected Order[] defaultOrders() {
+        if (canSort) {
+            return SORT_DEFAULT_ORDERS;
+        }
+        return super.defaultOrders();
+    }
+
+    /**
+     * 置顶
+     *
+     * @param id      数据ID
+     * @param request 请求
+     */
+    public void sortToTop(String id, HttpServletRequest request) {
+        Assert.state(canSort, "当前数据不支持排序");
+        String workspaceId = this.getCheckUserWorkspace(request);
+        String maxSql = "select max(sortValue) as sortValue from " + this.tableName + " where workspaceId=?";
+        List<Entity> query = this.query(maxSql, workspaceId);
+        float maxSortValue = Opt.ofEmptyAble(query)
+            .map(CollUtil::getFirst)
+            .map(entity -> entity.getFloat("sortValue"))
+            .orElse(1f);
+        //
+        String updateSql = "update " + this.tableName + " set sortValue=? where id=? and workspaceId=?";
+        this.execute(updateSql, maxSortValue + 0.0001f, id, workspaceId);
+    }
+
+    /**
+     * 向上移
+     *
+     * @param id       数据ID
+     * @param beforeId 前面一个数据的ID
+     * @param request  请求
+     */
+    public void sortMoveUp(String id, String beforeId, HttpServletRequest request) {
+        this.sortMove(id, beforeId, request, true);
+    }
+
+    /**
+     * 向下移
+     *
+     * @param id      数据ID
+     * @param afterId 后面一个数据的ID
+     * @param request 请求
+     */
+    public void sortMoveDown(String id, String afterId, HttpServletRequest request) {
+        this.sortMove(id, afterId, request, false);
+    }
+
+    /**
+     * 移动排序方法
+     *
+     * @param id        数据ID
+     * @param compareId 比较的数据ID
+     * @param request   请求
+     * @param up        true 上移
+     */
+    private void sortMove(String id, String compareId, HttpServletRequest request, boolean up) {
+        Assert.state(canSort, "当前数据不支持排序");
+        Assert.hasText(id, "数据id 不存在");
+        Assert.hasText(compareId, "比较 id 不存在");
+        String workspaceId = this.getCheckUserWorkspace(request);
+        String sql = "select sortValue as sortValue from " + this.tableName + " where id=? and workspaceId=?";
+        List<Entity> query = this.query(sql, compareId, workspaceId);
+        float compareSortValue = Opt.ofEmptyAble(query)
+            .map(CollUtil::getFirst)
+            .map(entity -> entity.getFloat("sortValue"))
+            .orElse(1f);
+        String updateSql = "update " + this.tableName + " set sortValue=? where id=? and workspaceId=?";
+        this.execute(updateSql, up ? compareSortValue + 0.0001f : compareSortValue - 0.0001f, id, workspaceId);
     }
 }

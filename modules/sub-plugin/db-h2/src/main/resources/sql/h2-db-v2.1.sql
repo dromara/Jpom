@@ -137,3 +137,9 @@ ALTER TABLE BUILD_INFO
 
 ALTER TABLE BUILD_INFO
     ADD IF NOT EXISTS repositoryLastCommitId varchar(255) comment '仓库代码最后一次变动信息（ID，git 为 commit hash, svn 最后的版本号）';
+
+ALTER TABLE BUILD_INFO
+    ADD IF NOT EXISTS `sortValue` REAL comment '排序值';
+
+ALTER TABLE REPOSITORY
+    ADD IF NOT EXISTS `sortValue` REAL comment '排序值';

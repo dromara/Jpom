@@ -115,6 +115,10 @@ public class BuildInfoModel extends BaseGroupModel {
      * 仓库代码最后一次变动信息（ID，git 为 commit hash, svn 最后的版本号）
      */
     private String repositoryLastCommitId;
+    /**
+     * 排序
+     */
+    private Float sortValue;
 
     @Tolerate
     public BuildInfoModel() {
