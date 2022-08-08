@@ -201,6 +201,14 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
         });
     }
 
+    public static String getWorkspaceId(HttpServletRequest request) {
+        String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+        if (StrUtil.isEmpty(workspaceId)) {
+            workspaceId = request.getParameter(Const.WORKSPACEID_REQ_HEADER);
+        }
+        return StrUtil.emptyToDefault(workspaceId, Const.WORKSPACE_DEFAULT_ID);
+    }
+
     /**
      * 获取 工作空间ID 并判断是否有权限
      *
@@ -208,7 +216,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
      * @return 工作空间ID
      */
     public String getCheckUserWorkspace(HttpServletRequest request) {
-        String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+        String workspaceId = getWorkspaceId(request);
         Assert.hasText(workspaceId, "请选择工作空间");
         //
         this.checkUserWorkspace(workspaceId);

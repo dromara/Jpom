@@ -37,6 +37,7 @@ import io.jpom.model.user.UserBindWorkspaceModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.*;
 import io.jpom.service.h2db.BaseNodeService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.system.AgentException;
@@ -129,10 +130,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
         }
         // 判断功能权限
         if (method != MethodFeature.LIST) {
-            String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
-            if (StrUtil.isEmpty(workspaceId)) {
-                workspaceId = request.getParameter(Const.WORKSPACEID_REQ_HEADER);
-            }
+            String workspaceId = BaseWorkspaceService.getWorkspaceId(request);
             UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, workspaceId + StrUtil.DASHED + method.name());
             if (!permissionResult.isSuccess()) {
                 this.errorMsg(response, permissionResult.errorMsg("对应功能【" + classFeature.getName() + StrUtil.DASHED + method.getName() + "】"));
@@ -201,7 +199,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
             }
         } else {
             // 判断节点管理权限
-            String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+            String workspaceId = BaseWorkspaceService.getWorkspaceId(request);
             UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, workspaceId + UserBindWorkspaceService.SYSTEM_USER);
             if (!permissionResult.isSuccess()) {
                 this.errorMsg(response, permissionResult.errorMsg("节点管理"));

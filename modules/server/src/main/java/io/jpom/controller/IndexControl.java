@@ -44,6 +44,7 @@ import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
@@ -335,7 +336,7 @@ public class IndexControl extends BaseServerController {
                 if (userModel.isSuperSystemUser()) {
                     return true;
                 }
-                String workspaceId = ServletUtil.getHeader(getRequest(), Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+                String workspaceId = BaseWorkspaceService.getWorkspaceId(getRequest());
                 return userBindWorkspaceService.exists(userModel, workspaceId + UserBindWorkspaceService.SYSTEM_USER);
             }
         }

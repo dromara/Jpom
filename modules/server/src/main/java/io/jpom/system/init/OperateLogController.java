@@ -45,6 +45,7 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.dblog.DbUserOperateLogService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.AopLogInterface;
 import io.jpom.system.WebAopLog;
 import lombok.Data;
@@ -134,7 +135,8 @@ public class OperateLogController implements AopLogInterface {
             cacheInfo.nodeModel = (NodeModel) request.getAttribute("node");
             //
             cacheInfo.userAgent = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.USER_AGENT);
-            cacheInfo.workspaceId = ServletUtil.getHeaderIgnoreCase(request, Const.WORKSPACEID_REQ_HEADER);
+            cacheInfo.workspaceId = BaseWorkspaceService.getWorkspaceId(request);
+            //ServletUtil.getHeaderIgnoreCase(request, Const.WORKSPACEID_REQ_HEADER);
             //
             Map<String, Object> allData = this.buildRequestParam(request);
             //
