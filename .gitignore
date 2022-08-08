@@ -67,3 +67,6 @@ _book/
 .DS_Store
 
 urls.txt
+
+.ossutil_checkpoint/
+ossutil_output/
