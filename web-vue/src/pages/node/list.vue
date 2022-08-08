@@ -1006,7 +1006,7 @@ export default {
       const msgData = {
         top: "确定要将此数据置顶吗？",
         up: "确定要将此数上移吗？",
-        down: "确定要将此数据下移吗？",
+        down: "确定要将此数据下移吗？下移操作可能因为列表后续数据没有排序值操作无效！",
       };
       let msg = msgData[method] || "确定要操作吗？";
       if (!record.sortValue) {
