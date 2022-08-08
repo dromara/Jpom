@@ -14,6 +14,7 @@ const user = {
     token: localStorage.getItem(TOKEN_KEY),
     longTermToken: localStorage.getItem(LONG_TERM_TOKEN),
     userInfo: JSON.parse(localStorage.getItem(USER_INFO_KEY)),
+    reloadUserInfo: false,
   },
   mutations: {
     setToken(state, data) {
@@ -37,11 +38,23 @@ const user = {
   actions: {
     refreshUserInfo({ commit }) {
       // 加载用户信息
-      getUserInfo().then((res) => {
-        if (res.code === 200) {
-          commit("setUserInfo", res.data);
-          localStorage.setItem(USER_INFO_KEY, JSON.stringify(res.data));
-        }
+      return new Promise((resolve) => {
+        getUserInfo().then((res) => {
+          if (res.code === 200) {
+            commit("setUserInfo", res.data);
+            localStorage.setItem(USER_INFO_KEY, JSON.stringify(res.data));
+            resolve();
+          }
+        });
+      });
+    },
+    // 页面刷新 加载用户信息
+    pageReloadRefreshUserInfo({ dispatch, state }) {
+      if (state.reloadUserInfo) {
+        return;
+      }
+      dispatch("refreshUserInfo").then(() => {
+        state.reloadUserInfo = true;
       });
     },
     // 登录 data = {token: 'xxx', userName: 'name'}

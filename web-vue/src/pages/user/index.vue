@@ -82,6 +82,7 @@
                       temp.systemUser = checked ? 1 : 0;
                     }
                   "
+                  :disabled="temp.parent === 'sys'"
                   checked-children="是"
                   un-checked-children="否"
                   default-checked
@@ -103,6 +104,7 @@
                     temp.status = checked ? 1 : 0;
                   }
                 "
+                :disabled="temp.parent === 'sys'"
                 checked-children="启用"
                 un-checked-children="禁用"
                 default-checked

@@ -41,7 +41,7 @@ router.beforeEach((to, from, next) => {
     });
   });
   // 刷新用户信息
-  store.dispatch("refreshUserInfo");
+  store.dispatch("pageReloadRefreshUserInfo");
 });
 
 // https://www.jb51.net/article/242702.htm

@@ -88,14 +88,14 @@ public class LoginInterceptor extends BaseJpomInterceptor {
                 // jwt token 检测机制
                 int code = this.checkHeaderUser(request, session);
                 if (code > 0) {
-                    this.responseLogin(request, response, handlerMethod, code);
+                    this.responseLogin(request, session, response, code);
                     return false;
                 }
             }
             // 老版本登录拦截
             int code = this.tryGetHeaderUser(request, session);
             if (code > 0) {
-                this.responseLogin(request, response, handlerMethod, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE);
+                this.responseLogin(request, session, response, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE);
                 return false;
             }
         }
@@ -177,12 +177,13 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     /**
      * 提示登录
      *
-     * @param request       req
-     * @param response      res
-     * @param handlerMethod 方法
+     * @param request  req
+     * @param session  回话
+     * @param response res
      * @throws IOException 异常
      */
-    private void responseLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod, int code) throws IOException {
+    private void responseLogin(HttpServletRequest request, HttpSession session, HttpServletResponse response, int code) throws IOException {
+        session.removeAttribute(LoginInterceptor.SESSION_NAME);
         String msg = MSG_CACHE.getOrDefault(code, "登录信息已失效,重新登录");
         ServletUtil.write(response, JsonMessage.getString(code, msg), MediaType.APPLICATION_JSON_VALUE);
     }
