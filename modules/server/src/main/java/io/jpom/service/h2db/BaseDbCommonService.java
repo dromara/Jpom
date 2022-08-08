@@ -229,21 +229,6 @@ public abstract class BaseDbCommonService<T> {
     /**
      * 根据主键查询实体
      *
-     * @param collection 主键值
-     * @return 数据
-     */
-    public List<T> getByKey(Collection<String> collection) {
-        if (CollUtil.isEmpty(collection)) {
-            return new ArrayList<>();
-        }
-        Entity entity = Entity.create();
-        entity.set("id", collection);
-        return this.listByEntity(entity);
-    }
-
-    /**
-     * 根据主键查询实体
-     *
      * @param keyValue 主键值
      * @return 数据
      */

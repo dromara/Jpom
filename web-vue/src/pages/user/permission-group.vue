@@ -192,7 +192,7 @@ export default {
         { value: 4, name: "周四" },
         { value: 5, name: "周五" },
         { value: 6, name: "周六" },
-        { value: 7, name: "周末" },
+        { value: 7, name: "周日" },
       ],
       editVisible: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
