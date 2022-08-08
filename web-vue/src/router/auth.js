@@ -2,7 +2,7 @@
  * 路由鉴权
  * 比如某些路由必须要登录
  */
-import { notification } from "ant-design-vue";
+// import { notification } from "ant-design-vue";
 import router from "./index";
 import store from "../store/index";
 
@@ -19,20 +19,23 @@ router.beforeEach((to, from, next) => {
   // 判断 token 是否存在
   if (!store.getters.getToken) {
     if (from.path !== "/") {
-      notification.error({
-        message: "未登录，无法访问！",
-        description: `from: ${from.path} ==> to: ${to.path}`,
-      });
+      // notification.error({
+      //   message: "未登录，无法访问！",
+      //   description: `from: ${from.path} ==> to: ${to.path}`,
+      // });
+      console.warn(`from: ${from.path} ==> to: ${to.path}`);
     }
     next("/login");
     return;
   }
-
+  // 如果存在 token (已经登录)
+  // 刷新用户信息
+  store.dispatch("pageReloadRefreshUserInfo");
+  // 没有 tabs 独立页面
   if (noTabs.indexOf(to.path) !== -1) {
     next();
     return;
   }
-  // 如果存在 token (已经登录)
   // 刷新菜单
   store.dispatch("loadSystemMenus").then(() => {
     // 存储 store
@@ -40,8 +43,6 @@ router.beforeEach((to, from, next) => {
       toMenu ? next(toMenu.path) : next();
     });
   });
-  // 刷新用户信息
-  store.dispatch("pageReloadRefreshUserInfo");
 });
 
 // https://www.jb51.net/article/242702.htm

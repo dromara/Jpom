@@ -229,7 +229,7 @@ export default {
         const paramsTemp = Object.assign({}, this.temp);
 
         paramsTemp.type = this.createOption ? "add" : "edit";
-        paramsTemp.permissionGroup = (paramsTemp.permissionGroup || []).join(",");
+        paramsTemp.permissionGroup = (paramsTemp.permissionGroup || []).join("@");
 
         // 需要判断当前操作是【新增】还是【修改】
         editUser(paramsTemp).then((res) => {

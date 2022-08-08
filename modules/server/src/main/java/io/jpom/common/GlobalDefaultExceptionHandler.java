@@ -108,7 +108,7 @@ public class GlobalDefaultExceptionHandler extends BaseExceptionHandler {
         }
         String message = e.getMessage();
         if (ObjectUtil.equals(message, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE)) {
-            ServletUtil.write(response, JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_VALUE);
+            ServletUtil.write(response, JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, ServerConfigBean.LOGIN_TIP), MediaType.APPLICATION_JSON_VALUE);
         } else {
             ServletUtil.write(response, JsonMessage.getString(405, message), MediaType.APPLICATION_JSON_VALUE);
         }
