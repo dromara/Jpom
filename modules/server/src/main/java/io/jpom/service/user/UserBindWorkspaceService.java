@@ -28,6 +28,7 @@ import cn.hutool.core.convert.NumberChineseFormatter;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.Week;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson.JSONArray;
@@ -42,10 +43,7 @@ import io.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -148,7 +146,9 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
         }
         String permissionGroup = userModel.getPermissionGroup();
         List<String> list = StrUtil.splitTrim(permissionGroup, StrUtil.AT);
-        Assert.notEmpty(list, "没有任何工作空间信息,请联系管理授权");
+        list = ObjectUtil.defaultIfNull(list, new ArrayList<>());
+        // 兼容旧代码
+        list.add(userModel.getId());
         Entity entity = Entity.create();
         entity.set("userId", list);
         List<UserBindWorkspaceModel> userBindWorkspaceModels = super.listByEntity(entity);
