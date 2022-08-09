@@ -62,7 +62,7 @@
         <skipTests>true</skipTests>
         <maven.test.skip>true</maven.test.skip>
         <!--        <maven.javadoc.skip>true</maven.javadoc.skip>-->
-        <hutool-all.version>5.8.4</hutool-all.version>
+        <hutool-all.version>5.8.5</hutool-all.version>
     </properties>
     <dependencies>
         <dependency>
