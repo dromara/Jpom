@@ -92,6 +92,7 @@ public class ReleaseManage implements Runnable {
     private final BuildExtraModule buildExtraModule;
     private final String logId;
     private final BuildExecuteService buildExecuteService;
+    private final Map<String, String> buildEnv;
 
     private LogRecorder logRecorder;
     private File resultFile;
@@ -102,6 +103,11 @@ public class ReleaseManage implements Runnable {
             this.logRecorder = LogRecorder.builder().file(logFile).build();
         }
         this.resultFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, buildExtraModule.getResultDirFile());
+        //
+//        envFileMap.put("BUILD_ID", this.buildExtraModule.getId());
+//        envFileMap.put("BUILD_NAME", this.buildExtraModule.getName());
+        buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
+//        envFileMap.put("BUILD_NUMBER_ID", this.buildNumberId + StrUtil.EMPTY);
     }
 
 //	/**
@@ -192,10 +198,7 @@ public class ReleaseManage implements Runnable {
         File envFile = FileUtil.file(sourceFile, ".env");
         Map<String, String> envFileMap = FileUtils.readEnvFile(envFile);
         //
-        envFileMap.put("BUILD_ID", this.buildExtraModule.getId());
-        envFileMap.put("BUILD_NAME", this.buildExtraModule.getName());
-        envFileMap.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
-        envFileMap.put("BUILD_NUMBER_ID", this.buildNumberId + StrUtil.EMPTY);
+        envFileMap.putAll(buildEnv);
         //
         for (int i = 0; i < commands.length; i++) {
             commands[i] = StringUtil.formatStrByMap(commands[i], envFileMap);
