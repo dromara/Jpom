@@ -1132,7 +1132,7 @@ export default {
         "# 使用哪个 docker 构建,填写 docker 标签 默认查询可用的第一个,如果 tag 查询出多个也选择第一个结果\n" +
         "fromTag: xxx\n" +
         "# version 需要在对应镜像源中存在\n" +
-        "# java 镜像源 https://mirrors.tuna.tsinghua.edu.cn/AdoptOpenJDK/\n" +
+        "# java 镜像源 https://mirrors.tuna.tsinghua.edu.cn/Adoptium/\n" +
         "# maven 镜像源 https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/\n" +
         "# node 镜像源 https://registry.npmmirror.com/-/binary/node/\n" +
         "steps:\n" +

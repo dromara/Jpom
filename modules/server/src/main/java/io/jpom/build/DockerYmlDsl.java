@@ -161,7 +161,7 @@ public class DockerYmlDsl extends BaseJsonModel {
     private void javaPluginCheck(Map<String, Object> step) {
         Assert.notNull(step.get("version"), "java 插件 version 不能为空");
         Integer version = Integer.valueOf(String.valueOf(step.get("version")));
-        List<Integer> supportedVersions = ListUtil.of(8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+        List<Integer> supportedVersions = ListUtil.of(8, 11, 17, 18);
         Assert.isTrue(supportedVersions.contains(version), String.format("目前java 插件支持的版本: %s", supportedVersions));
     }
 
