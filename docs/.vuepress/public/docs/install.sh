@@ -168,7 +168,7 @@ if [[ ! -f "${JPOM_TYPE}.zip" ]]; then
     # 获取最新的版本号
     versions=`curl -LfsS https://jpom.top/docs/versions.tag`
   fi
-  download_url="https://download.jpom.top/${url_type}-${versions}-release.zip"
+  download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.zip"
   wget -O ${JPOM_TYPE}.zip ${download_url}
 fi
 # 解压
