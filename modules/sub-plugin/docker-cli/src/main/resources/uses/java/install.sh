@@ -31,6 +31,7 @@ fi
 cd /tmp
 download_url=""
 ARCH_O=`uname -m`
+# https://mirrors.tuna.tsinghua.edu.cn/Adoptium/
 # https://github.com/AdoptOpenJDK/openjdk-docker/blob/master/8/jdk/ubuntu/Dockerfile.hotspot.nightly.full
 case "${ARCH_O}" in
 	aarch64|arm64)
@@ -53,21 +54,66 @@ case "${ARCH_O}" in
 	 	exit 1;
 	;;
 esac;
-case "${JAVA_VERSION}" in
-8)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/8/jdk/${ARCH}/linux/OpenJDK8U-jdk_${ARCH}_linux_hotspot_8u322b06.tar.gz"
+case "${JAVA_VERSION}_${ARCH}" in
+11_aarch64)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/11/jdk/aarch64/linux/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.16_8.tar.gz"
 	;;
-11)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/11/jdk/${ARCH}/linux/OpenJDK11U-jdk_${ARCH}_linux_hotspot_11.0.14_9.tar.gz"
+11_x64)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/11/jdk/x64/linux/OpenJDK11U-jdk_x64_linux_hotspot_11.0.16_8.tar.gz"
 	;;
-17)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/17/jdk/${ARCH}/linux/OpenJDK17U-jdk_${ARCH}_linux_hotspot_17.0.2_8.tar.gz"
+11_s390x)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/11/jdk/s390x/linux/OpenJDK11U-jdk_s390x_linux_hotspot_11.0.16_8.tar.gz"
 	;;
-18)
-	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/17/jdk/${ARCH}/linux/OpenJDK17U-jdk_${ARCH}_linux_hotspot_17.0.2_8.tar.gz"
+11_arm)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/11/jdk/arm/linux/OpenJDK11U-jdk_arm_linux_hotspot_11.0.16_8.tar.gz"
+	;;
+11_ppc64le)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/11/jdk/ppc64le/linux/OpenJDK11U-jdk_ppc64le_linux_hotspot_11.0.16_8.tar.gz"
+	;;
+17_aarch64)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/17/jdk/aarch64/linux/OpenJDK17U-jdk_aarch64_linux_hotspot_17.0.4_8.tar.gz"
+	;;
+17_x64)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/17/jdk/x64/linux/OpenJDK17U-jdk_x64_linux_hotspot_17.0.4_8.tar.gz"
+	;;
+17_s390x)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/17/jdk/s390x/linux/OpenJDK17U-jdk_s390x_linux_hotspot_17.0.4_8.tar.gz"
+	;;
+17_arm)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/17/jdk/arm/linux/OpenJDK17U-jdk_arm_linux_hotspot_17.0.4_8.tar.gz"
+	;;
+17_ppc64le)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/17/jdk/ppc64le/linux/OpenJDK17U-jdk_ppc64le_linux_hotspot_17.0.4_8.tar.gz"
+	;;
+18_aarch64)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/18/jdk/aarch64/linux/OpenJDK18U-jdk_aarch64_linux_hotspot_18.0.2_9.tar.gz"
+	;;
+18_x64)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/18/jdk/x64/linux/OpenJDK18U-jdk_x64_linux_hotspot_18.0.2_9.tar.gz"
+	;;
+18_s390x)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/18/jdk/s390x/linux/OpenJDK18U-jdk_s390x_linux_hotspot_18.0.2_9.tar.gz"
+	;;
+18_arm)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/18/jdk/arm/linux/OpenJDK18U-jdk_arm_linux_hotspot_18.0.2_9.tar.gz"
+	;;
+18_ppc64le)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/18/jdk/ppc64le/linux/OpenJDK18U-jdk_ppc64le_linux_hotspot_18.0.2_9.tar.gz"
+	;;
+8_aarch64)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/8/jdk/aarch64/linux/OpenJDK8U-jdk_aarch64_linux_hotspot_8u345b01.tar.gz"
+	;;
+8_x64)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/8/jdk/x64/linux/OpenJDK8U-jdk_x64_linux_hotspot_8u345b01.tar.gz"
+	;;
+8_arm)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/8/jdk/arm/linux/OpenJDK8U-jdk_arm_linux_hotspot_8u342b07.tar.gz"
+	;;
+8_ppc64le)
+	download_url="https://mirrors.tuna.tsinghua.edu.cn/Adoptium/8/jdk/ppc64le/linux/OpenJDK8U-jdk_ppc64le_linux_hotspot_8u342b07.tar.gz"
 	;;
 *)
-	echo "目前只支持 8,11,17,18"
+	echo "目前只支持 11(aarch64,x64,s390x,arm,ppc64le) 17(aarch64,x64,s390x,arm,ppc64le) 18(aarch64,x64,s390x,arm,ppc64le) 8(aarch64,x64,arm,ppc64le) "
 	exit 1
 	;;
 esac
