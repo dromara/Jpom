@@ -364,6 +364,8 @@ public class BuildExecuteService {
          */
         private Long submitTaskTime;
 
+        private final Map<String, String> buildEnv = new HashMap<>(10);
+
         /**
          * 提交任务
          */
@@ -498,6 +500,11 @@ public class BuildExecuteService {
                 logRecorder.info("clear cache");
                 CommandUtil.systemFastDel(this.gitFile);
             }
+            //
+            buildEnv.put("BUILD_ID", this.buildExtraModule.getId());
+            buildEnv.put("BUILD_NAME", this.buildExtraModule.getName());
+            buildEnv.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
+            buildEnv.put("BUILD_NUMBER_ID", this.taskData.buildInfoModel.getBuildId() + "");
             return true;
         }
 
@@ -545,12 +552,15 @@ public class BuildExecuteService {
                         }
                         map.put("branchName", newBranchName);
                         map.put("tagName", branchTagName);
+                        buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
+                        buildEnv.put("BUILD_TAG_NAME", branchTagName);
                         // 标签拉取模式
                         logRecorder.info("repository [" + branchName + "] [" + branchTagName + "] clone pull from " + newBranchName + "  " + newBranchTagName);
                         msg = (String) plugin.execute("pullByTag", map);
                     } else {
                         // 分支模式
                         map.put("branchName", newBranchName);
+                        buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
                         logRecorder.info("repository [" + branchName + "] clone pull from " + newBranchName);
                         String[] result = (String[]) plugin.execute("pull", map);
                         msg = result[1];
@@ -693,6 +703,7 @@ public class BuildExecuteService {
                     .buildExtraModule(buildExtraModule)
                     .userModel(userModel)
                     .logId(logId)
+                    .buildEnv(buildEnv)
                     .buildExecuteService(buildExecuteService)
                     .logRecorder(logRecorder).build();
                 releaseManage.start();
@@ -801,12 +812,8 @@ public class BuildExecuteService {
             // env file
             File envFile = FileUtil.file(this.gitFile, ".env");
             Map<String, String> envFileMap = FileUtils.readEnvFile(envFile);
-            //
-            envFileMap.put("BUILD_ID", this.buildExtraModule.getId());
-            envFileMap.put("BUILD_NAME", this.buildExtraModule.getName());
-            envFileMap.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
-            envFileMap.put("BUILD_NUMBER_ID", this.taskData.buildInfoModel.getBuildId() + "");
             environment.putAll(envFileMap);
+            environment.putAll(buildEnv);
             //
             process = processBuilder.start();
             //
