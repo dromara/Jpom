@@ -6,3 +6,7 @@
 	path = docs
 	url = git@gitee.com:dromara/Jpom.git
 	branch = docs
+[submodule "download-link"]
+	path = download-link
+	url = git@gitee.com:dromara/Jpom.git
+	branch = download_link

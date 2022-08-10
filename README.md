@@ -53,12 +53,17 @@
 	path = docs
 	url = git@gitee.com:dromara/Jpom.git
 	branch = docs
+[submodule "download-link"]
+	path = download-link
+	url = git@gitee.com:dromara/Jpom.git
+	branch = download_link
 ```
 
 ```shell
 git submodule add -b master git@gitee.com:dromara/Jpom.git jpom-parent
 
 git submodule add -b docs git@gitee.com:dromara/Jpom.git docs
+git submodule add -b download_link git@gitee.com:dromara/Jpom.git download-link
 ```
 
 ```shell
