@@ -11,6 +11,10 @@
 3. 【server】容器构建 JDK 依赖下载地址更新（感谢[@Yousinnmu](https://gitee.com/yang-xinwu) [Gitee issues I5LC3K](https://gitee.com/dromara/Jpom/issues/I5LC3K) ）
 4. 【server】构建相关环境变量 GIT 仓库时新增：`BUILD_BRANCH_NAME`,`BUILD_TAG_NAME` （感谢[@Yousinnmu](https://gitee.com/yang-xinwu)
 
+### 特别感谢
+
+感谢 [@💎ℳ๓₯㎕斌💎💘](https://weihongbin.com/)  贡献 `Adoptium JDK` 自动更新的解决方案
+
 ------
 
 ## 2.9.7 (2022-08-08)
