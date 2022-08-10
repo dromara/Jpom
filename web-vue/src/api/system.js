@@ -231,7 +231,7 @@ export function remoteUpgrade(nodeId) {
     method: "get",
     timeout: 0,
     headers: {},
-    data: { nodeId },
+    params: { nodeId },
   });
 }
 
