@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIR_PATH=$(cd `dirname $0`; pwd)""
+DIR_PATH=$(cd `dirname $0`; pwd)"/../"
 
 echo ${DIR_PATH}
 
