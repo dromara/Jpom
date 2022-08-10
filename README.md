@@ -115,4 +115,4 @@ git push --set-upstream origin docs-pages
 8. 更新文档版本号：`cd ./docs/script && sh replaceVersion.sh 2.x.x`
 9. 发布文档：`sh deploy-docs-pages.sh`
 10. 测试远程更新是否正常
-11. 发布服务端 docker 镜像包
+11. 发布服务端 docker 镜像包 `docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.x.x -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .`
