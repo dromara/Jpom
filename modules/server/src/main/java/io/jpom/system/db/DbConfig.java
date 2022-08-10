@@ -194,7 +194,7 @@ public class DbConfig {
             return;
         }
         String dbName = this.getDbName();
-        File recoverBackup = FileUtil.file(dbLocalPathFile, "recover_backup", DateTime.now().toString());
+        File recoverBackup = FileUtil.file(dbLocalPathFile, "recover_backup", DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT));
         //
         IPlugin plugin = PluginFactory.getPlugin("db-h2");
         Map<String, Object> map = new HashMap<>(10);
