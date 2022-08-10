@@ -22,6 +22,7 @@
  */
 package io.jpom.system.db;
 
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -215,7 +216,7 @@ public class DbConfig {
         if (!FileUtil.exist(dbLocalPathFile)) {
             return null;
         }
-        File deleteBackup = FileUtil.file(dbLocalPathFile, "recover_backup", DateTime.now().toString());
+        File deleteBackup = FileUtil.file(dbLocalPathFile, "recover_backup", DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT));
         //
         IPlugin plugin = PluginFactory.getPlugin("db-h2");
         Map<String, Object> map = new HashMap<>(10);
