@@ -10,6 +10,7 @@
 2. 【server】错别字：权限组周末改为周日、周七改为周日
 3. 【server】容器构建 JDK 依赖下载地址更新（感谢[@Yousinnmu](https://gitee.com/yang-xinwu) [Gitee issues I5LC3K](https://gitee.com/dromara/Jpom/issues/I5LC3K) ）
 4. 【server】构建相关环境变量 GIT 仓库时新增：`BUILD_BRANCH_NAME`,`BUILD_TAG_NAME` （感谢[@Yousinnmu](https://gitee.com/yang-xinwu)
+5. 【server】修复插件端管理页面中无法正常远程更新问题
 
 ### 特别感谢
 
