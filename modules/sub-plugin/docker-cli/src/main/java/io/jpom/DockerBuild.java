@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.text.StrFormatter;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -56,10 +57,12 @@ public class DockerBuild implements AutoCloseable {
 
     private final Map<String, Object> parameter;
     private final DockerClient dockerClient;
+    private final Map<String, String> env;
 
     public DockerBuild(Map<String, Object> parameter) {
         this.parameter = parameter;
         this.dockerClient = DockerUtil.get(parameter);
+        this.env = (Map<String, String>) parameter.get("env");
     }
 
     public void build() {
@@ -73,7 +76,7 @@ public class DockerBuild implements AutoCloseable {
         String resultFile = (String) parameter.get("resultFile");
         String resultFileOut = (String) parameter.get("resultFileOut");
         List<Map<String, Object>> steps = (List<Map<String, Object>>) parameter.get("steps");
-        Map<String, String> env = (Map<String, String>) parameter.get("env");
+
         String buildId = env.get("JPOM_BUILD_ID");
         String runsOn = (String) parameter.get("runsOn");
 
@@ -98,7 +101,7 @@ public class DockerBuild implements AutoCloseable {
                 .withRemotePath("/tmp/")
                 .exec();
             //
-            copy = this.replaceEnv(copy, env);
+            copy = this.replaceEnv(copy);
             this.copyArchiveToContainerCmd(dockerClient, containerId, copy, logRecorder);
             // 启动容器
             try {
@@ -120,18 +123,27 @@ public class DockerBuild implements AutoCloseable {
         }
     }
 
-    private List<String> replaceEnv(List<String> list, Map<String, String> env) {
-        return list.stream().map(s -> {
-            // 处理变量
-            for (Map.Entry<?, ?> envEntry : env.entrySet()) {
-                String envValue = StrUtil.utf8Str(envEntry.getValue());
-                if (null == envValue) {
-                    continue;
-                }
-                s = StrUtil.replace(s, "${" + envEntry.getKey() + "}", envValue);
+    private List<String> replaceEnv(List<String> list) {
+        if (env == null) {
+            return list;
+        }
+        // 处理变量
+        return list.stream().map(this::replaceEnv).collect(Collectors.toList());
+    }
+
+    private String replaceEnv(String value) {
+        if (env == null) {
+            return value;
+        }
+        // 处理变量
+        for (Map.Entry<?, ?> envEntry : env.entrySet()) {
+            String envValue = StrUtil.utf8Str(envEntry.getValue());
+            if (null == envValue) {
+                continue;
             }
-            return s;
-        }).collect(Collectors.toList());
+            value = StrUtil.replace(value, "${" + envEntry.getKey() + "}", envValue);
+        }
+        return value;
     }
 
 
@@ -155,7 +167,7 @@ public class DockerBuild implements AutoCloseable {
         //
         List<Bind> bindList = new ArrayList<>();
         if (CollUtil.isNotEmpty(binds)) {
-            bindList = this.replaceEnv(binds, env).stream()
+            bindList = this.replaceEnv(binds).stream()
                 .map(Bind::parse)
                 .collect(Collectors.toList());
         }
@@ -354,6 +366,7 @@ public class DockerBuild implements AutoCloseable {
             })
             .map(stringObjectMap -> {
                 String path = (String) stringObjectMap.get("path");
+                path = this.replaceEnv(path);
                 String name = String.format("jpom_cache_%s_%s", buildId, SecureUtil.md5(path));
                 try {
                     dockerClient.inspectVolumeCmd(name).exec();
