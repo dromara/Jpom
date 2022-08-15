@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
@@ -125,5 +126,11 @@ public class TestString {
         Stream<Integer> integerStream = Stream.of(1, 2, 3);
         System.out.println(integerStream.count());
         System.out.println(integerStream.count());
+    }
+
+    @Test
+    public void testBase64(){
+        String encode = Base64.decodeStr("YWJjZA");
+        System.out.println(encode);
     }
 }

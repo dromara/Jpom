@@ -60,6 +60,11 @@ db:
   autoBackupIntervalDay: 1
   # 自动备份保留天数 小于等于 0，不自动删除自动备份数据
   autoBackupReserveDay: 5
+  # 数据库连接池相关配置
+  maxActive: 100
+  initialSize: 10
+  maxWait: 10
+  minIdle: 1
 # spring 相关配置
 spring:
   h2:
