@@ -74,7 +74,7 @@ const user = {
       return new Promise((resolve) => {
         commit("setToken", {});
         commit("setMenus", "");
-        dispatch("changeWorkspace", "");
+
         localStorage.removeItem(MENU_KEY);
         // 调用其他 action
         dispatch("clearTabs", { key: "all" });
