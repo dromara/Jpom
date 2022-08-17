@@ -9,6 +9,7 @@
 1. 【server】容器构建 cache 插件支持使用环境变量替换值
 2. 【agent】优化检查 jps 异常,调整为实时检查（感谢[@傲梅科技](https://gitee.com/aomeitech) [Gitee issues I5MTA4](https://gitee.com/dromara/Jpom/issues/I5MTA4) ）
 3. 【server】修复登录后跳转到上次使用到工作空间中问题 （感谢@木迷榖）
+4. 【server】缓存日志弹窗相关操作配置 （感谢[@我已经没有头发了](https://gitee.com/christina204) [Gitee issues I5MANC](https://gitee.com/dromara/Jpom/issues/I5MANC) ）
 
 ------
 

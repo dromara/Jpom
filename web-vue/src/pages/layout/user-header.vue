@@ -20,13 +20,13 @@
             <template #title>
               <a-button type="link" icon="swap">切换工作空间</a-button>
             </template>
-            <template v-for="item in myWorkspaceList">
-              <a-menu-item :disabled="item.id === selectWorkspace" @click="handleWorkspaceChange(item.id)" :key="item.id">
+            <template v-for="(item, index) in myWorkspaceList">
+              <a-menu-item v-if="index != -1" :disabled="item.id === selectWorkspace" @click="handleWorkspaceChange(item.id)" :key="index">
                 <a-button type="link" :disabled="item.id === selectWorkspace">
                   {{ item.name }}
                 </a-button>
               </a-menu-item>
-              <a-menu-divider :key="`${item.id}-divider`" />
+              <a-menu-divider v-if="index != -1" :key="`${item.id}-divider`" />
             </template>
           </a-sub-menu>
           <a-menu-divider />
