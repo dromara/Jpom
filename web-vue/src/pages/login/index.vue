@@ -208,14 +208,17 @@ export default {
       this.$notification.success({
         message: res.msg,
       });
-      if (!this.getWorkspaceId) {
+      const existWorkspace = res.data.bindWorkspaceModels.filter((item) => item.id === this.getWorkspaceId);
+      if (existWorkspace.length) {
+        // 缓存的还存在
+        this.dispatchLogin(res.data);
+      } else {
+        // 之前的工作空间已经不存在,切换到当前列表的第一个
         // 还没有选择工作空间，默认选中第一个 用户加载菜单
         let firstWorkspace = res.data.bindWorkspaceModels[0];
         this.$store.dispatch("changeWorkspace", firstWorkspace.id).then(() => {
           this.dispatchLogin(res.data);
         });
-      } else {
-        this.dispatchLogin(res.data);
       }
     },
     dispatchLogin(data) {
