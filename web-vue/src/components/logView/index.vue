@@ -44,13 +44,13 @@
                 <a-menu slot="overlay">
                   <a-menu-item key="0">
                     <a-tooltip title="内容超过边界自动换行">
-                      <a-switch v-model="temp.wordBreak" checked-children="自动换行" un-checked-children="不换行" />
+                      <a-switch v-model="temp.wordBreak" checked-children="自动换行" un-checked-children="不换行" @change="onChange" />
                     </a-tooltip>
                   </a-menu-item>
                   <a-menu-divider />
                   <a-menu-item key="3">
                     <a-tooltip title="有新内容后是否自动滚动到底部">
-                      <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" />
+                      <a-switch v-model="temp.logScroll" checked-children="自动滚动" un-checked-children="不滚动" @change="onChange" />
                     </a-tooltip>
                   </a-menu-item>
                   <a-menu-divider />
@@ -159,6 +159,15 @@ export default {
     // this.id = this.defId + new Date().getTime();
     //let html = "<span><b><b style='color:OrangeRed;'>222</b></b></span>";
     //console.log(html.replace(this.regRemove, "$1").replace(this.regRemove, "$1").replace(this.regRemoveSpan, "$1"));
+
+    const cacehJson = localStorage.getItem("log-view-cache") || "{}";
+    try {
+      const cacheData = JSON.parse(cacehJson);
+      this.temp = Object.assign({}, this.temp, cacheData);
+      delete this.temp.searchValue;
+    } catch (e) {
+      console.error(e);
+    }
   },
   methods: {
     regModifierChange(checkedValues) {
@@ -190,6 +199,11 @@ export default {
       this.$nextTick(() => {
         this.$refs.viewPre.changeBuffer();
       });
+      localStorage.setItem("log-view-cache", JSON.stringify(this.temp));
+    },
+    //
+    onChange() {
+      localStorage.setItem("log-view-cache", JSON.stringify(this.temp));
     },
   },
 };
