@@ -7,6 +7,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】容器构建 cache 插件支持使用环境变量替换值
+2. 【agent】优化检查 jps 异常,调整为实时检查（感谢[@傲梅科技](https://gitee.com/aomeitech) [Gitee issues I5MTA4](https://gitee.com/dromara/Jpom/issues/I5MTA4) ）
 
 ------
 

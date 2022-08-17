@@ -81,7 +81,7 @@ public class ProjectStatusController extends BaseAgentController {
                 log.error("获取项目pid 失败", e);
             }
             if (pid <= 0) {
-                Assert.state(JvmUtil.jpsNormal, "当前服务器 jps 命令异常,请检查 jdk 是否完整,以及 java 环境变量是否配置正确");
+                Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
             }
             jsonObject.put("pId", pid);
             //
@@ -130,7 +130,7 @@ public class ProjectStatusController extends BaseAgentController {
                     continue;
                 }
                 if (pid <= 0) {
-                    Assert.state(JvmUtil.jpsNormal, "当前服务器 jps 命令异常,请检查 jdk 是否完整,以及 java 环境变量是否配置正确");
+                    Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
                     continue;
                 }
                 itemObj = new JSONObject();
@@ -172,7 +172,7 @@ public class ProjectStatusController extends BaseAgentController {
                 try {
                     pid = AbstractProjectCommander.getInstance().getPid(nodeProjectInfoModel, copyItem);
                     if (pid <= 0) {
-                        Assert.state(JvmUtil.jpsNormal, "当前服务器 jps 命令异常,请检查 jdk 是否完整,以及 java 环境变量是否配置正确");
+                        Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
                         continue;
                     }
                 } catch (Exception e) {

@@ -50,8 +50,9 @@ public class CheckAuthorize {
 
     @PreLoadMethod
     private static void checkJps() {
-        boolean exist = JvmUtil.exist(JpomManifest.getInstance().getPid());
-        JvmUtil.setJpsNormal(exist);
+        //boolean exist = JvmUtil.exist(JpomManifest.getInstance().getPid());
+        //JvmUtil.setJpsNormal(exist);
+        JvmUtil.checkJpsNormal();
     }
 
     /**
