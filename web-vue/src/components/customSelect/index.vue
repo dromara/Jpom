@@ -2,9 +2,11 @@
   <div @mousedown="setSelectOpen(true)">
     <Select
       :getPopupContainer="
-        (triggerNode) => {
-          return triggerNode.parentNode || document.body;
-        }
+        this.popupContainerParent
+          ? (triggerNode) => {
+              return triggerNode.parentNode || document.body;
+            }
+          : null
       "
       v-model="selected"
       :style="selStyle"
@@ -50,7 +52,7 @@
 </template>
 
 <script>
-import {Select} from "ant-design-vue";
+import { Select } from "ant-design-vue";
 
 export default {
   components: {
@@ -94,6 +96,10 @@ export default {
     maxLength: {
       type: Number,
       default: 200,
+    },
+    popupContainerParent: {
+      type: Boolean,
+      default: true,
     },
   },
   watch: {

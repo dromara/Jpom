@@ -9,29 +9,43 @@
     <div id="top-chart">loading...</div>
     <a-divider>进程监控表格</a-divider>
     <!-- 进程表格数据 -->
-    <div ref="filter" class="filter">
-      <a-space>
-        <custom-select
-          class="search-input-item"
-          selStyle="width: 200px !important"
-          @change="loadNodeProcess"
-          @addOption="addNodeProcess"
-          v-model="processName"
-          :data="processNames"
-          inputPlaceholder="自定义进程类型"
-          selectPlaceholder="选择进程名"
-          suffixIcon=""
-        >
-          <template slot="suffixIcon"> <a-icon type="down" /></template>
-        </custom-select>
-        <div>
-          <a-tooltip title="重置自定义的进程名信息">
-            <a-icon type="rest" @click="restProcessNames" />
-          </a-tooltip>
-        </div>
-      </a-space>
-    </div>
+
     <a-table size="middle" :locale="tableLocale" :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="pid" class="node-table" :pagination="false">
+      <template #title>
+        <a-row>
+          <a-col :span="18">
+            <a-space>
+              <custom-select
+                class="search-input-item"
+                selStyle="width: 200px !important"
+                @change="loadNodeProcess"
+                @addOption="addNodeProcess"
+                v-model="processName"
+                :data="processNames"
+                :popupContainerParent="false"
+                inputPlaceholder="自定义进程类型"
+                selectPlaceholder="选择进程名"
+                suffixIcon=""
+              >
+                <template slot="suffixIcon"> <a-icon type="down" /></template>
+              </custom-select>
+              <div>
+                <a-tooltip title="重置自定义的进程名信息">
+                  <a-icon type="rest" @click="restProcessNames" />
+                </a-tooltip>
+              </div>
+              <a-select placeholder="刷新周期" v-model="refreshInterval" style="width: 120px" @change="pullNodeData">
+                <a-select-option v-for="item in [5, 10, 15, 20, 25, 30]" :key="item"> {{ item }}秒 </a-select-option>
+              </a-select>
+            </a-space>
+          </a-col>
+          <a-col :span="6">
+            <a-row justify="end" type="flex">
+              <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="pullNodeData" />
+            </a-row>
+          </a-col>
+        </a-row>
+      </template>
       <!-- <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -70,7 +84,6 @@ export default {
   },
   data() {
     return {
-      topChartTimer: null,
       loading: false,
       tableLocale: {
         emptyText: "",
@@ -96,16 +109,27 @@ export default {
         { title: "共享内存", dataIndex: "shr", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 80, fixed: "right" },
       ],
+      refreshInterval: 20,
+      historyChart: null,
+      countdownTime: Date.now(),
     };
   },
   mounted() {
     this.processNames = Object.assign([], this.defaultProcessNames);
     this.initData();
+    window.addEventListener("resize", this.resize);
   },
   destroyed() {
-    clearInterval(this.topChartTimer);
+    window.removeEventListener("resize", this.resize);
   },
-  watch: {},
+  watch: {
+    refreshInterval: {
+      deep: false,
+      handler() {
+        this.cacheNodeProcess();
+      },
+    },
+  },
   methods: {
     addNodeProcess(v) {
       this.processNames = v;
@@ -119,27 +143,31 @@ export default {
     },
     // 初始化页面
     initData() {
-      const cacheJson = this.getCacheNodeProcess();
-      const nodeCache = cacheJson[this.node.id];
+      const nodeCache = this.getCacheNodeProcess();
+
       this.processName = nodeCache?.processName || this.processName;
       this.processNames = nodeCache?.processNames || this.processNames;
-      if (this.topChartTimer == null) {
-        this.loadNodeTop();
-        this.loadNodeProcess();
-        // 计算多久时间绘制图表
-        // const millis = this.node.cycle < 30000 ? 30000 : this.node.cycle;
-        // console.log(millis);
-        this.topChartTimer = setInterval(() => {
-          this.loadNodeTop();
-          this.loadNodeProcess();
-        }, 20000);
-      }
+      // 加载缓存信息
+      this.refreshInterval = this.getCacheNode("refreshInterval", this.refreshInterval);
+      //
+      // console.log(this.refreshInterval);
+      this.pullNodeData();
+    },
+    pullNodeData() {
+      this.loadNodeTop();
+      this.loadNodeProcess();
+      // 重新计算倒计时
+      this.countdownTime = Date.now() + this.refreshInterval * 1000;
+    },
+
+    resize() {
+      this.historyChart?.resize();
     },
     // 请求 top 命令绘制图表
     loadNodeTop() {
-      nodeMonitorData({ nodeId: this.node.id }).then((res) => {
+      nodeMonitorData({ nodeId: this.node.id }, false).then((res) => {
         if (res.code === 200) {
-          drawChart(res.data, "top-chart", generateNodeTopChart);
+          this.historyChart = drawChart(res.data, "top-chart", generateNodeTopChart);
         }
       });
     },
@@ -191,13 +219,18 @@ export default {
       this.monitorVisible = true;
     },
     cacheNodeProcess() {
-      const cacheJson = this.getCacheNodeProcess();
-      //console.log(this.processNames);
+      const cacheJson = this.getCacheAllNode();
+      // console.log(cacheJson);
       cacheJson[this.node.id].processNames = this.processNames;
       cacheJson[this.node.id].processName = this.processName;
+      cacheJson["refreshInterval"] = this.refreshInterval;
       localStorage.setItem("node-process-name", JSON.stringify(cacheJson));
     },
     getCacheNodeProcess() {
+      return this.getCacheNode(this.node.id, {});
+    },
+
+    getCacheAllNode() {
       const str = localStorage.getItem("node-process-name") || "";
       let cacheJson;
       try {
@@ -205,8 +238,13 @@ export default {
       } catch (e) {
         cacheJson = {};
       }
-      cacheJson[this.node.id] = cacheJson[this.node.id] || {};
       return cacheJson;
+    },
+
+    getCacheNode(key, defaultValue) {
+      const cacheJson = this.getCacheAllNode();
+
+      return cacheJson[key] || defaultValue;
     },
   },
 };
@@ -216,10 +254,6 @@ export default {
   height: calc((100vh - 70px) / 2);
 }
 
-.filter {
-  margin-bottom: 10px;
-}
-
 .search-input-item {
   width: 200px !important;
   margin-right: 10px;
@@ -227,5 +261,14 @@ export default {
 
 #history-chart {
   height: 60vh;
+}
+
+/deep/ .ant-statistic div {
+  display: inline-block;
+}
+
+/deep/ .ant-statistic-content-value,
+/deep/ .ant-statistic-content {
+  font-size: 16px;
 }
 </style>

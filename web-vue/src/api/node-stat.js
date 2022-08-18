@@ -195,6 +195,7 @@ export function drawChart(data, domId, parseFn) {
   // 绘制图表
   const historyChart = echarts.init(historyChartDom);
   historyChart.setOption(option);
+  return historyChart;
 }
 
 export const status = {

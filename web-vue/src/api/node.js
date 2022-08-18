@@ -210,6 +210,7 @@ export function getProcessList(data) {
     data: data,
     headers: {
       loading: "no",
+      tip: "no",
     },
   });
 }
@@ -233,11 +234,14 @@ export function killPid(params) {
  *  time: 时间段，格式：yyyy-MM-dd HH:mm:ss ~ yyyy-MM-dd HH:mm:ss
  * } params
  */
-export function nodeMonitorData(params) {
+export function nodeMonitorData(params, loading) {
   return axios({
     url: "/node/node_monitor_data.json",
     method: "post",
     data: params,
+    headers: {
+      loading: loading === false ? "no" : "",
+    },
   });
 }
 
