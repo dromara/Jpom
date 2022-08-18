@@ -57,6 +57,7 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
       </template>
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" @click="handleEdit(record)" :title="`名称：${text} 点击可以编辑`">
@@ -90,7 +91,10 @@
         <span>{{ releaseMethodMap[text] }}</span>
       </a-tooltip>
       <template slot="status" slot-scope="text">
-        <span>{{ statusMap[text] || "未知" }}</span>
+        <a-tag v-if="text === 2 || text === 5" color="green">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 1 || text === 4" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 3 || text === 6" color="red">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else>{{ statusMap[text] || "未知" }}</a-tag>
       </template>
       <a-tooltip slot="buildId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
         <span v-if="record.buildId <= 0"></span>
@@ -102,7 +106,17 @@
       <template slot="operation" slot-scope="text, record, index">
         <a-space>
           <a-button size="small" type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止 </a-button>
-          <a-button size="small" type="primary" v-else @click="handleConfirmStartBuild(record)">构建</a-button>
+          <a-dropdown v-else>
+            <a-button size="small" type="primary" @click="handleConfirmStartBuild(record)">构建<a-icon type="down" /></a-button>
+            <a-menu slot="overlay">
+              <a-menu-item key="1">
+                <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, true)">直接构建</a-button>
+              </a-menu-item>
+              <a-menu-item key="2">
+                <a-button size="small" type="primary" @click="reqStartBuild({ id: record.id }, false)">后台构建</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
           <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
               更多
@@ -1163,6 +1177,8 @@ export default {
         "# 给容器添加环境变量\n" +
         "env:\n" +
         "  NODE_OPTIONS: --max-old-space-size=900",
+      countdownTime: Date.now(),
+      refreshInterval: 5,
     };
   },
   computed: {
@@ -1195,6 +1211,8 @@ export default {
   created() {
     this.loadData();
     this.loadGroupList();
+    //
+    this.countdownTime = Date.now() + this.refreshInterval * 1000;
   },
   methods: {
     // 页面引导
@@ -1221,6 +1239,16 @@ export default {
           this.listQuery.total = res.data.total;
         }
         this.loading = false;
+      });
+    },
+    silenceLoadData() {
+      getBuildList(this.listQuery, false).then((res) => {
+        if (res.code === 200) {
+          this.list = res.data.result;
+          this.listQuery.total = res.data.total;
+          // 重新计算倒计时
+          this.countdownTime = Date.now() + this.refreshInterval * 1000;
+        }
       });
     },
     // 加载仓库列表
@@ -1544,25 +1572,37 @@ export default {
       // });
     },
     handleStartBuild() {
-      this.buildConfirmVisible = false;
-      startBuild({
-        id: this.temp.id,
-        buildRemark: this.temp.buildRemark,
-        resultDirFile: this.temp.resultDirFile,
-        branchTagName: this.temp.branchTagName,
-        branchName: this.temp.branchName,
-      }).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
-          });
-          this.handleFilter();
-          // 自动打开构建日志
-          this.handleBuildLog({
-            id: this.temp.id,
-            buildId: res.data,
-          });
-        }
+      this.reqStartBuild(
+        {
+          id: this.temp.id,
+          buildRemark: this.temp.buildRemark,
+          resultDirFile: this.temp.resultDirFile,
+          branchTagName: this.temp.branchTagName,
+          branchName: this.temp.branchName,
+        },
+        true
+      ).then(() => {
+        this.buildConfirmVisible = false;
+      });
+    },
+    reqStartBuild(data, openLog) {
+      return new Promise((resolve) => {
+        startBuild(data).then((res) => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+            });
+            this.handleFilter();
+            if (openLog) {
+              // 自动打开构建日志
+              this.handleBuildLog({
+                id: data.id,
+                buildId: res.data,
+              });
+            }
+            resolve();
+          }
+        });
       });
     },
     // 停止构建
@@ -1658,4 +1698,13 @@ export default {
   },
 };
 </script>
-<style scoped></style>
+<style scoped>
+/deep/ .ant-statistic div {
+  display: inline-block;
+}
+
+/deep/ .ant-statistic-content-value,
+/deep/ .ant-statistic-content {
+  font-size: 16px;
+}
+</style>
