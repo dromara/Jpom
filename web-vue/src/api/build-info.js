@@ -7,11 +7,14 @@ import { loadRouterBase } from "./config";
  *  group: 分组名称
  * } params
  */
-export function getBuildList(params) {
+export function getBuildList(params, loading) {
   return axios({
     url: "/build/list",
     method: "post",
     data: params,
+    headers: {
+      loading: loading === false ? "no" : "",
+    },
   });
 }
 

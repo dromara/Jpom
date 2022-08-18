@@ -11,6 +11,7 @@
 3. 【server】修复登录后跳转到上次使用到工作空间中问题 （感谢@木迷榖）
 4. 【server】缓存日志弹窗相关操作配置 （感谢[@我已经没有头发了](https://gitee.com/christina204) [Gitee issues I5MANC](https://gitee.com/dromara/Jpom/issues/I5MANC) ）
 5. 【server】优化节点首页：支持自定义刷新频率、图标自动缩放 （感谢@ccx2480）
+6. 【server】优化构建列表：支持自动刷新、构建状态添加标签颜色
 
 ------
 

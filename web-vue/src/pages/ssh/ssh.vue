@@ -395,14 +395,14 @@
   </div>
 </template>
 <script>
-import {deleteSsh, editSsh, getAgent, getSshCheckAgent, getSshList, getSshOperationLogList, installAgentNode, syncToWorkspace, uploadAgent} from "@/api/ssh";
+import { deleteSsh, editSsh, getAgent, getSshCheckAgent, getSshList, getSshOperationLogList, installAgentNode, syncToWorkspace, uploadAgent } from "@/api/ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
-import {parseTime} from "@/utils/time";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
-import {getWorkSpaceListAll} from "@/api/workspace";
+import { parseTime } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { getWorkSpaceListAll } from "@/api/workspace";
 import Vue from "vue";
-import {mapGetters} from "vuex";
+import { mapGetters } from "vuex";
 
 export default {
   components: {
