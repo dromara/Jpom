@@ -1077,7 +1077,7 @@ export default {
           scopedSlots: { customRender: "branchName" },
         },
         { title: "方式", dataIndex: "buildMode", align: "center", width: 80, ellipsis: true, scopedSlots: { customRender: "buildMode" } },
-        { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "状态", dataIndex: "status", align: "center", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         {
           title: "构建 ID",
           dataIndex: "buildId",
@@ -1237,6 +1237,8 @@ export default {
         if (res.code === 200) {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
+          // 重新计算倒计时
+          this.countdownTime = Date.now() + this.refreshInterval * 1000;
         }
         this.loading = false;
       });

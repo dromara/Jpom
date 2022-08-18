@@ -452,8 +452,6 @@ public class ReleaseManage implements Runnable {
                     }
                     sftp.syncUpload(this.resultFile, normalizePath);
                     logRecorder.info("{} ftp upload done", item.getName());
-                } catch (Exception e) {
-                    this.pubLog("执行ssh发布异常", e);
                 }
             }
         } finally {
