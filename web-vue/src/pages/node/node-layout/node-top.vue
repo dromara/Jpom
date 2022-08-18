@@ -39,12 +39,16 @@ export default {
     return {
       timeRange: null,
       historyData: [],
+      historyChart: null,
     };
   },
   mounted() {
     this.handleFilter();
+    window.addEventListener("resize", this.resize);
   },
-  destroyed() {},
+  destroyed() {
+    window.removeEventListener("resize", this.resize);
+  },
   watch: {},
   methods: {
     moment,
@@ -58,12 +62,15 @@ export default {
       nodeMonitorData(params).then((res) => {
         if (res.code === 200) {
           if (this.type === "networkTime") {
-            drawChart(res.data, "historyChart", generateNodeNetworkTimeChart);
+            this.historyChart = drawChart(res.data, "historyChart", generateNodeNetworkTimeChart);
           } else {
-            drawChart(res.data, "historyChart", generateNodeTopChart);
+            this.historyChart = drawChart(res.data, "historyChart", generateNodeTopChart);
           }
         }
       });
+    },
+    resize() {
+      this.historyChart?.resize();
     },
   },
 };
