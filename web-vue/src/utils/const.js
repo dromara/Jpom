@@ -43,7 +43,7 @@ export const PAGE_DEFAULT_SIZW_OPTIONS = ["5", "10", "15", "20", "25", "30", "35
  * @returns String
  */
 export function PAGE_DEFAULT_SHOW_TOTAL(total) {
-    return `总计 ${total} 条`;
+  return `总计 ${total} 条`;
 }
 
 export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: isNaN(cachePageLimit) ? 10 : cachePageLimit, total: 0 };
@@ -219,6 +219,9 @@ export const PROJECT_DSL_DEFATUL =
   "#  backupCount: 5\r\n" +
   "# 限制备份指定文件后缀（支持正则）\r\n" +
   "#  backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]\r\n" +
+  "config:\r\n" +
+  "# 是否开启日志备份功能\r\n" +
+  "#  autoBackToFile: true\r\n" +
   "\r\n";
 
 /**

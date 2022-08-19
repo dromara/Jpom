@@ -55,6 +55,10 @@ public class DslYmlDto extends BaseJsonModel {
      * 文件相关配置
      */
     private FileConfig file;
+    /**
+     * 配置
+     */
+    private Config config;
 
     /**
      * 构建对象
@@ -133,5 +137,13 @@ public class DslYmlDto extends BaseJsonModel {
          * 指定备份文件后缀，如果未指定则备份所有类型文件
          */
         private String[] backupSuffix;
+    }
+
+    @Data
+    public static class Config {
+        /**
+         * 是否自动将控制台日志文件备份
+         */
+        private Boolean autoBackToFile;
     }
 }
