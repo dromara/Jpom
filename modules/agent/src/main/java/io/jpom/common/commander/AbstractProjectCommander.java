@@ -59,10 +59,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -414,6 +411,24 @@ public abstract class AbstractProjectCommander {
     }
 
     /**
+     * 解析是否开启 日志备份功能
+     *
+     * @param nodeProjectInfoModel 项目实体
+     * @return true 开启日志备份
+     */
+    private boolean resolveOpenLogBack(NodeProjectInfoModel nodeProjectInfoModel) {
+        RunMode runMode = nodeProjectInfoModel.getRunMode();
+        if (runMode == RunMode.Dsl) {
+            DslYmlDto dslYmlDto = nodeProjectInfoModel.dslConfig();
+            return Optional.ofNullable(dslYmlDto)
+                .map(DslYmlDto::getConfig)
+                .map(DslYmlDto.Config::getAutoBackToFile)
+                .orElse(AgentExtConfigBean.getInstance().openLogBack());
+        }
+        return AgentExtConfigBean.getInstance().openLogBack();
+    }
+
+    /**
      * 清空日志信息
      *
      * @param nodeProjectInfoModel 项目
@@ -428,7 +443,8 @@ public abstract class AbstractProjectCommander {
         if (file.length() <= 1000) {
             return "ok";
         }
-        if (AgentExtConfigBean.getInstance().openLogBack()) {
+        boolean openLogBack = this.resolveOpenLogBack(nodeProjectInfoModel);
+        if (openLogBack) {
             // 开启日志备份才移动文件
             File backPath = javaCopyItem == null ? nodeProjectInfoModel.getLogBack() : nodeProjectInfoModel.getLogBack(javaCopyItem);
             backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
