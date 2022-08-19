@@ -292,7 +292,12 @@ bash install.sh Server jdk
 </div>
 <div class="friends-item" style="max-width:70px !important;">
     <a href="https://www.wxy97.com/" target="_blank">
-        <img :src="$withBase('/images/friends/wxy97.png')" class="no-zoom friends-item-img"  alt="wxy97">
+        <img :src="$withBase('/images/friends/wxy97.png')" class="no-zoom friends-item-img"  alt="王旭阳个人博客">
+    </a>
+</div>
+<div class="friends-item" style="max-width:70px !important;">
+    <a href="https://www.luckyhe.com/" target="_blank">
+        <img :src="$withBase('/images/friends/luckyhe.png')" class="no-zoom friends-item-img"  alt="牧码人博客">
     </a>
 </div>
 
