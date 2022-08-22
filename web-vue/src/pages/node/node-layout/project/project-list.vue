@@ -76,10 +76,17 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="status" slot-scope="text, record">
-        <a-tooltip v-if="noFileModes.includes(record.runMode)" title="状态操作请到控制台中控制">
-          <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
-        </a-tooltip>
-        <span v-else>-</span>
+        <template v-if="record.error">
+          <a-tooltip :title="record.error">
+            <a-icon type="warning" />
+          </a-tooltip>
+        </template>
+        <template v-else>
+          <a-tooltip v-if="noFileModes.includes(record.runMode)" title="状态操作请到控制台中控制">
+            <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
+          </a-tooltip>
+          <span v-else>-</span>
+        </template>
       </template>
 
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
@@ -431,9 +438,9 @@ import Console from "./project-console";
 import FileRead from "./project-file-read";
 import Monitor from "./project-monitor";
 // import Replica from "./project-replica";
-import {parseTime} from "@/utils/time";
+import { parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL} from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL } from "@/utils/const";
 
 import {
   deleteProject,
@@ -636,7 +643,8 @@ export default {
                   if (res2.data[element.projectId]) {
                     element.port = res2.data[element.projectId].port;
                     element.pid = res2.data[element.projectId].pid;
-                    element.status = true;
+                    element.status = element.pid > 0;
+                    element.error = res2.data[element.projectId].error;
                   }
                   return element;
                 });
@@ -1071,7 +1079,8 @@ export default {
                   // element.port = res.data[element.id].port;
                   // element.pid = res.data[element.id].pid;
                   // element.status = true;
-                  return { ...copyItem, status: true, pid: res.data[copyItem.id].pid, port: res.data[copyItem.id].port };
+
+                  return { ...copyItem, status: res.data[copyItem.id].pid > 0, pid: res.data[copyItem.id].pid, port: res.data[copyItem.id].port, error: res.data[copyItem.id].error };
                 }
                 return copyItem;
               });

@@ -56,6 +56,7 @@ import io.jpom.util.FileUtils;
 import io.jpom.util.JvmUtil;
 import io.jpom.util.ProjectCommanderUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -536,6 +537,9 @@ public abstract class AbstractProjectCommander {
      * @return 端口
      */
     public String getMainPort(int pid) {
+        if (pid <= 0) {
+            return StrUtil.DASHED;
+        }
         String cachePort = PID_PORT.get(pid);
         if (cachePort != null) {
             return cachePort;
@@ -634,6 +638,8 @@ public abstract class AbstractProjectCommander {
         int parsePid = ProjectCommanderUtil.parsePid(result);
         if (parsePid > 0) {
             PID_JPOM_NAME.put(parsePid, nodeProjectInfoModel.getName());
+        } else {
+            Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
         }
         return parsePid;
     }

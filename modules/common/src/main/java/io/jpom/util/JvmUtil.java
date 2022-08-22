@@ -31,12 +31,14 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.common.JpomManifest;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 /**
  * jvm jmx 工具
@@ -154,8 +156,12 @@ public class JvmUtil {
             return false;
         }
         String[] split = StrUtil.splitToArray(commandLine, StrUtil.SPACE);
+        String[] tags = Arrays.stream(JPOM_PID_TAG)
+            .map(s -> String.format("-%s=%s", s, tag))
+            .collect(Collectors.toList())
+            .toArray(new String[]{});
         for (String item : split) {
-            if (StrUtil.equalsAnyIgnoreCase(item, JPOM_PID_TAG)) {
+            if (StrUtil.equalsAnyIgnoreCase(item, tags)) {
                 return true;
             }
         }
@@ -173,8 +179,12 @@ public class JvmUtil {
             return null;
         }
         String[] split = StrUtil.splitToArray(commandLine, StrUtil.SPACE);
+        String[] tags = Arrays.stream(JPOM_PID_TAG)
+            .map(s -> String.format("-%s=", s))
+            .collect(Collectors.toList())
+            .toArray(new String[]{});
         for (String item : split) {
-            if (StrUtil.startWithAny(item, JPOM_PID_TAG)) {
+            if (StrUtil.startWithAny(item, tags)) {
                 List<String> split1 = StrUtil.split(item, "=");
                 return CollUtil.get(split1, 1);
             }
