@@ -193,6 +193,11 @@ bash install.sh Server jdk
   </code-block>
 </code-group>
 
+## 🌍 知识星球
+<p align="center">
+<img class="no-zoom" :src="$withBase('/images/zsxq.jpg')" alt="扫码加入知识星球，了解学习更多知识">
+</p>
+
 ## 🤝 dromara 组织项目
 
 <p align="center">
