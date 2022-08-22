@@ -443,6 +443,13 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 
 ![wx-qrcode-praise.png](https://jpom.top/images/wx-qrcode-praise.png)
 
+
+## 🌍 知识星球
+
+<p align="center">
+<img src="https://jpom.top/images/zsxq.jpg" alt="扫码加入知识星球，了解学习更多知识">
+</p>
+
 ## 🔔 精品项目推荐
 
 | 项目名称          | 项目地址                                                                       | 项目介绍                                          |
