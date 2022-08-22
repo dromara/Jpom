@@ -84,10 +84,17 @@
       </a-tooltip>
 
       <template slot="status" slot-scope="text, record">
-        <a-tooltip v-if="noFileModes.includes(record.runMode)" placement="topLeft" title="状态操作请到控制台中控制">
-          <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
-        </a-tooltip>
-        <span v-else>-</span>
+        <template v-if="record.error">
+          <a-tooltip :title="record.error">
+            <a-icon type="warning" />
+          </a-tooltip>
+        </template>
+        <template v-else>
+          <a-tooltip v-if="noFileModes.includes(record.runMode)" title="状态操作请到控制台中控制">
+            <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
+          </a-tooltip>
+          <span v-else>-</span>
+        </template>
       </template>
 
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
@@ -204,7 +211,7 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "modifyUser" },
         },
-        { title: "运行状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "运行状态", dataIndex: "status", align: "center", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
         { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "180px" },
       ],
@@ -278,7 +285,8 @@ export default {
             if (res2.data[element.projectId] && element.nodeId === data.type) {
               element.port = res2.data[element.projectId].port;
               element.pid = res2.data[element.projectId].pid;
-              element.status = true;
+              element.status = element.pid > 0;
+              element.error = res2.data[element.projectId].error;
             }
             return element;
           });

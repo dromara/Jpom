@@ -80,9 +80,6 @@ public class ProjectStatusController extends BaseAgentController {
             } catch (Exception e) {
                 log.error("获取项目pid 失败", e);
             }
-            if (pid <= 0) {
-                Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
-            }
             jsonObject.put("pId", pid);
             //
             if (StrUtil.isNotEmpty(getCopy)) {
@@ -116,24 +113,19 @@ public class ProjectStatusController extends BaseAgentController {
         Assert.hasText(ids, "没有要获取的信息");
         JSONArray jsonArray = JSONArray.parseArray(ids);
         JSONObject jsonObject = new JSONObject();
-        JSONObject itemObj;
         try {
             CommandUtil.openCache();
             for (Object object : jsonArray) {
                 String item = object.toString();
-                int pid;
+                int pid = 0;
+                JSONObject itemObj = new JSONObject();
                 try {
                     NodeProjectInfoModel projectInfoServiceItem = projectInfoService.getItem(item);
                     pid = AbstractProjectCommander.getInstance().getPid(projectInfoServiceItem, null);
                 } catch (Exception e) {
                     log.error("获取端口错误", e);
-                    continue;
+                    itemObj.put("error", e.getMessage());
                 }
-                if (pid <= 0) {
-                    Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
-                    continue;
-                }
-                itemObj = new JSONObject();
                 String port = AbstractProjectCommander.getInstance().getMainPort(pid);
                 itemObj.put("port", port);
                 itemObj.put("pid", pid);
@@ -162,27 +154,24 @@ public class ProjectStatusController extends BaseAgentController {
 
         JSONArray jsonArray = JSONArray.parseArray(copyIds);
         JSONObject jsonObject = new JSONObject();
-        JSONObject itemObj;
+
         try {
             CommandUtil.openCache();
             for (Object object : jsonArray) {
                 String item = object.toString();
                 NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(item);
-                int pid;
+                int pid = 0;
+                JSONObject itemObj = new JSONObject();
                 try {
                     pid = AbstractProjectCommander.getInstance().getPid(nodeProjectInfoModel, copyItem);
-                    if (pid <= 0) {
-                        Assert.state(JvmUtil.jpsNormal, JvmUtil.JPS_ERROR_MSG);
-                        continue;
-                    }
                 } catch (Exception e) {
                     log.error("获取端口错误", e);
-                    continue;
+                    itemObj.put("error", e.getMessage());
                 }
-                itemObj = new JSONObject();
                 String port = AbstractProjectCommander.getInstance().getMainPort(pid);
                 itemObj.put("port", port);
                 itemObj.put("pid", pid);
+
                 jsonObject.put(item, itemObj);
             }
         } finally {
