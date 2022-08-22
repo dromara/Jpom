@@ -363,15 +363,19 @@ export default {
     },
     init() {
       myWorkspace().then((res) => {
-        this.myWorkspaceList = res.data;
-        let wid = this.$route.query.wid;
-        this.selectWorkspace = wid ? wid : this.getWorkspaceId;
-        if (!this.selectWorkspace) {
-          this.handleWorkspaceChange(res.data[0]?.id);
-        } else {
-          this.$router.push({
-            query: { ...this.$route.query, wid: this.selectWorkspace },
-          });
+        if (res.code == 200 && res.data) {
+          this.myWorkspaceList = res.data;
+          let wid = this.$route.query.wid;
+          wid = wid ? wid : this.getWorkspaceId;
+          const existWorkspace = this.myWorkspaceList.filter((item) => item.id === wid);
+          if (existWorkspace.length) {
+            this.$router.push({
+              query: { ...this.$route.query, wid: wid },
+            });
+            this.selectWorkspace = wid;
+          } else {
+            this.handleWorkspaceChange(res.data[0]?.id);
+          }
         }
       });
     },
