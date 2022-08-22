@@ -291,7 +291,7 @@ Agent.bat
 
 2. Linux 系统中使用 sh 脚本文件。
 
-```
+```bash
 # 服务端
 Server.sh start     启动Jpom服务端
 Server.sh stop      停止Jpom服务端
@@ -328,7 +328,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 [https://demo.jpom.top](https://demo.jpom.top)
 
-```   
+```log
 账号：demo
 密码：jpom123
 ```
@@ -347,14 +347,14 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 > nodejs 编译指定目录：
 
-```
+```bash
 yarn --cwd xxxx/ install
 yarn --cwd xxxx/ build
 ```
 
 > maven 编译指定目录：
 
-```
+```bash
 mvn -f xxxx/pom.xml clean package
 ```
 
