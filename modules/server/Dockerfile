@@ -42,7 +42,8 @@ RUN set -eux; \
          ;; \
     esac; \
     curl -LfsSo /opt/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz https://npmmirror.com/mirrors/node/v16.13.1/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz \
-    && tar -zxvf /opt/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz -C /opt/ && export PATH=/opt/node-v16.13.1-linux-${BINARY_ARCH}/bin:$PATH \
+    && tar -zxvf /opt/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz -C /opt/  \
+    && export PATH=/opt/node-v16.13.1-linux-${BINARY_ARCH}/bin:$PATH \
     && npm config set registry https://registry.npmmirror.com/ \
     && cd web-vue && npm install && npm run build
 
