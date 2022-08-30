@@ -106,12 +106,26 @@
         </a-form-model-item>
         <!-- HTTP(S) protocol use password -->
         <template v-if="temp.protocol === 0">
-          <a-form-model-item label="账号" prop="userName">
+          <a-form-model-item prop="userName">
+            <template #label>
+              账号
+              <a-tooltip v-if="!temp.id">
+                <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </template>
             <a-input v-model="temp.userName" placeholder="登录用户">
               <a-icon slot="prefix" type="user" />
             </a-input>
           </a-form-model-item>
-          <a-form-model-item label="密码" prop="password">
+          <a-form-model-item prop="password">
+            <template #label>
+              密码
+              <a-tooltip v-if="!temp.id">
+                <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </template>
             <a-input-password v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
               <a-icon slot="prefix" type="lock" />
             </a-input-password>
@@ -127,7 +141,14 @@
         </a-form-model-item>
         <!-- SSH protocol use rsa private key -->
         <template v-if="temp.protocol === 1">
-          <a-form-model-item label="密码" prop="password">
+          <a-form-model-item prop="password">
+            <template #label>
+              密码
+              <a-tooltip v-if="!temp.id">
+                <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </template>
             <a-input-password v-model="temp.password" placeholder="证书密码">
               <a-icon slot="prefix" type="lock" />
             </a-input-password>

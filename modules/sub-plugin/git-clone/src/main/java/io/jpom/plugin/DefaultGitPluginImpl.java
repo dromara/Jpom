@@ -33,13 +33,16 @@ import java.util.Map;
  * @since 2022/2/22
  */
 @PluginConfig(name = "git-clone")
-public class DefaultGitPluginImpl implements IDefaultPlugin {
+public class DefaultGitPluginImpl implements IWorkspaceEnvPlugin {
 
     @Override
     public Object execute(Object main, Map<String, Object> parameter) throws Exception {
         String type = main.toString();
         File savePath = (File) parameter.get("savePath");
         String branchName = (String) parameter.get("branchName");
+        // 转化密码字段
+        parameter.put("password", convertRefEnvValue(parameter, "password"));
+        parameter.put("username", convertRefEnvValue(parameter, "username"));
         switch (type) {
 //            case "lastCommitMsg":
 //                return GitUtil.getLastCommitMsg(savePath, branchName);

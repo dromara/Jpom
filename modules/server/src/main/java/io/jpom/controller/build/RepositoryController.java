@@ -42,7 +42,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.Const;
+import io.jpom.common.ServerConst;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.enums.GitProtocolEnum;
@@ -270,7 +270,7 @@ public class RepositoryController extends BaseServerController {
             jsonObject.put("private", !StrUtil.equalsIgnoreCase("public", repo.getString("visibility")));
             jsonObject.put("description", repo.getString("description"));
             jsonObject.put("username", username);
-            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(null, htmlUrl));
+            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(htmlUrl));
             return jsonObject;
         }).collect(Collectors.toList());
 
@@ -301,7 +301,7 @@ public class RepositoryController extends BaseServerController {
             jsonObject.put("private", repo.getBooleanValue("private"));
             //
             jsonObject.put("username", gitHubUserInfo.getLogin());
-            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(null, cloneUrl));
+            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(cloneUrl));
             return jsonObject;
         }).collect(Collectors.toList());
         //
@@ -344,7 +344,7 @@ public class RepositoryController extends BaseServerController {
             jsonObject.put("description", repo.getString("description"));
 
             jsonObject.put("username", giteeUsername);
-            jsonObject.put("exists", this.checkRepositoryUrl(null, htmlUrl));
+            jsonObject.put("exists", this.checkRepositoryUrl(htmlUrl));
             return jsonObject;
         }).collect(Collectors.toList());
 
@@ -376,29 +376,43 @@ public class RepositoryController extends BaseServerController {
             // ssh
             repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), StrUtil.EMPTY));
         }
+        String workspaceId = repositoryService.getCheckUserWorkspace(getRequest());
         //
-        boolean repositoryUrl = this.checkRepositoryUrl(repositoryModelReq.getId(), repositoryModelReq.getGitUrl());
+        boolean repositoryUrl = this.checkRepositoryUrl(workspaceId, repositoryModelReq.getId(), repositoryModelReq.getGitUrl());
         Assert.state(!repositoryUrl, "已经存在对应的仓库信息啦");
+        // 提前处理工作空间ID
+        repositoryModelReq.setWorkspaceId(workspaceId);
     }
 
     /**
      * 判断仓库地址是否存在
      *
-     * @param id  仓库ID
-     * @param url 仓库 url
+     * @param workspaceId 工作空间ID
+     * @param id          仓库ID
+     * @param url         仓库 url
      * @return true 在当前工作空间已经存在拉
      */
-    private boolean checkRepositoryUrl(String id, String url) {
+    private boolean checkRepositoryUrl(String workspaceId, String id, String url) {
         // 判断仓库是否重复
         Entity entity = Entity.create();
         if (StrUtil.isNotEmpty(id)) {
             Validator.validateGeneral(id, "错误的ID");
             entity.set("id", "<> " + id);
         }
-        String workspaceId = repositoryService.getCheckUserWorkspace(getRequest());
         entity.set("workspaceId", workspaceId);
         entity.set("gitUrl", url);
         return repositoryService.exists(entity);
+    }
+
+    /**
+     * 判断仓库地址是否存在
+     *
+     * @param url 仓库 url
+     * @return true 在当前工作空间已经存在拉
+     */
+    private boolean checkRepositoryUrl(String url) {
+        String workspaceId = repositoryService.getCheckUserWorkspace(getRequest());
+        return this.checkRepositoryUrl(workspaceId, null, url);
     }
 
     /**
@@ -446,7 +460,7 @@ public class RepositoryController extends BaseServerController {
         Assert.state(!exists, "当前仓库被构建关联，不能直接删除");
 
         repositoryService.delByKey(id, getRequest());
-        File rsaFile = BuildUtil.getRepositoryRsaFile(id + Const.ID_RSA);
+        File rsaFile = BuildUtil.getRepositoryRsaFile(id + ServerConst.ID_RSA);
         FileUtil.del(rsaFile);
         return JsonMessage.getString(200, "删除成功");
     }
@@ -709,8 +723,9 @@ public class RepositoryController extends BaseServerController {
         private static GitLabVersionInfo getGitLabVersionInfo(String url, String token) {
             // 缓存中有的话，从缓存读取
             GitLabVersionInfo gitLabVersionInfo = gitlabVersionMap.get(url);
-            if (gitLabVersionInfo != null)
+            if (gitLabVersionInfo != null) {
                 return gitLabVersionInfo;
+            }
 
             // 获取 GitLab 版本号信息
             GitLabVersionInfo glvi = null;

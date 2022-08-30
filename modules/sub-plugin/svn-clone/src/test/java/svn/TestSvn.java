@@ -46,7 +46,7 @@ public class TestSvn {
 
         Map<String, Object> map = new HashMap<>(10);
         map.put("url", "svn://gitee.com/keepbx/Jpom-demo-case");
-        map.put("userName", "a");
+        map.put("username", "a");
         map.put("password", "a");
         map.put("protocol", "ssh");
         //File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel);

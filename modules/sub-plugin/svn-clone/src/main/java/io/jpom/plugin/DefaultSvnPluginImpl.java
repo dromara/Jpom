@@ -22,8 +22,6 @@
  */
 package io.jpom.plugin;
 
-import org.tmatesoft.svn.core.SVNException;
-
 import java.io.File;
 import java.util.Map;
 
@@ -32,11 +30,14 @@ import java.util.Map;
  * @since 2021/12/23
  */
 @PluginConfig(name = "svn-clone")
-public class DefaultSvnPluginImpl implements IDefaultPlugin {
+public class DefaultSvnPluginImpl implements IWorkspaceEnvPlugin {
 
     @Override
-    public Object execute(Object main, Map<String, Object> parameter) throws SVNException {
+    public Object execute(Object main, Map<String, Object> parameter) throws Exception {
         File savePath = (File) main;
+        // 转化密码字段
+        parameter.put("password", convertRefEnvValue(parameter, "password"));
+        parameter.put("username", convertRefEnvValue(parameter, "username"));
         return SvnKitUtil.checkOut(parameter, savePath);
     }
 }

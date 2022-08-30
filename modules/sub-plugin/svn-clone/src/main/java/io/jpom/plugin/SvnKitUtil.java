@@ -75,7 +75,7 @@ public class SvnKitUtil {
     public static SVNClientManager getAuthClient(Map<String, Object> map) {
         String protocol = (String) map.get("protocol");
         //repositoryModel.getProtocol();
-        String userName = (String) map.get("userName");
+        String userName = (String) map.get("username");
         String password = StrUtil.emptyToDefault((CharSequence) map.get("password"), StrUtil.EMPTY);
         //
         ISVNAuthenticationManager authManager;
