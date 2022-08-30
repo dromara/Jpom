@@ -34,10 +34,11 @@ import cn.hutool.db.sql.Order;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.ServerConst;
 import io.jpom.model.data.BackupInfoModel;
-import io.jpom.model.user.UserModel;
 import io.jpom.model.enums.BackupStatusEnum;
 import io.jpom.model.enums.BackupTypeEnum;
+import io.jpom.model.user.UserModel;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseDbService;
@@ -163,7 +164,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
         final String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
 
         // 设置默认备份 SQL 的文件地址
-        File file = FileUtil.file(DbConfig.getInstance().dbLocalPath(), Const.BACKUP_DIRECTORY_NAME, fileName + Const.SQL_FILE_SUFFIX);
+        File file = FileUtil.file(DbConfig.getInstance().dbLocalPath(), ServerConst.BACKUP_DIRECTORY_NAME, fileName + ServerConst.SQL_FILE_SUFFIX);
         final String backupSqlPath = FileUtil.getAbsolutePath(file);
 
         // 数据源参数
@@ -252,8 +253,8 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
         List<Entity> list = super.query(sql);
         // 筛选字段
         return list.stream()
-            .filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.TABLE_NAME))))
-            .flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.TABLE_NAME))))
+            .filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(ServerConst.TABLE_NAME))))
+            .flatMap(entity -> Stream.of(String.valueOf(entity.get(ServerConst.TABLE_NAME))))
             .distinct()
             .collect(Collectors.toList());
     }

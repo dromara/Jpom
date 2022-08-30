@@ -36,7 +36,7 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.Const;
+import io.jpom.common.ServerConst;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.enums.BackupStatusEnum;
@@ -171,7 +171,7 @@ public class BackupInfoController extends BaseServerController {
 		// 备份类型
 		//int backupType = Integer.parseInt(getParameter("backupType"));
 		// 存储目录
-		File directory = FileUtil.file(DbConfig.getInstance().dbLocalPath(), Const.BACKUP_DIRECTORY_NAME);
+		File directory = FileUtil.file(DbConfig.getInstance().dbLocalPath(), ServerConst.BACKUP_DIRECTORY_NAME);
 
 		// 保存文件
 		multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(directory))

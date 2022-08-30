@@ -32,13 +32,13 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.Const;
+import io.jpom.common.ServerConst;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.user.UserModel;
 import io.jpom.model.data.WorkspaceEnvVarModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -192,7 +192,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
         //
         Entity entity = Entity.create();
         entity.set("name", name);
-        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, Const.WORKSPACE_GLOBAL));
+        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
         if (StrUtil.isNotEmpty(id)) {
             entity.set("id", StrUtil.format(" <> {}", id));
         }

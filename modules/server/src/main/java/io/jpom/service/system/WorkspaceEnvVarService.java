@@ -24,8 +24,9 @@ package io.jpom.service.system;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import io.jpom.common.Const;
+import io.jpom.common.ServerConst;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.util.StringUtil;
@@ -42,15 +43,44 @@ import java.util.Map;
 @Service
 public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVarModel> {
 
+    /**
+     * 获取工作空间下面的所有环境变量
+     *
+     * @param workspaceId 工作空间ID
+     * @return map
+     */
     public Map<String, String> getEnv(String workspaceId) {
         Entity entity = Entity.create();
-        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, Const.WORKSPACE_GLOBAL));
+        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
         List<WorkspaceEnvVarModel> list = super.listByEntity(entity);
         Map<String, String> map = CollStreamUtil.toMap(list, WorkspaceEnvVarModel::getName, WorkspaceEnvVarModel::getValue);
         // java.lang.UnsupportedOperationException
         HashMap<String, String> hashMap = new HashMap<>(CollUtil.size(list) + 10);
         hashMap.putAll(map);
         return hashMap;
+    }
+
+    /**
+     * 转化 工作空间环境变量
+     *
+     * @param workspaceId 工作空间
+     * @param value       值
+     * @return 如果存在值，则返回环境变量值。不存在则返回原始值
+     */
+    public String convertRefEnvValue(String workspaceId, String value) {
+        //  "$ref.jpom."
+        if (StrUtil.isEmpty(value) || !StrUtil.startWithIgnoreCase(value, ServerConst.REF_WORKSPACE_ENV)) {
+            return value;
+        }
+        Entity entity = Entity.create();
+        entity.set("name", StrUtil.removePrefixIgnoreCase(value, ServerConst.REF_WORKSPACE_ENV));
+        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
+        List<WorkspaceEnvVarModel> modelList = super.listByEntity(entity);
+        WorkspaceEnvVarModel workspaceEnvVarModel = CollUtil.getFirst(modelList);
+        if (workspaceEnvVarModel == null) {
+            return value;
+        }
+        return workspaceEnvVarModel.getValue();
     }
 
     public void formatCommand(String workspaceId, String[] commands) {

@@ -25,6 +25,7 @@ package io.jpom.model.data;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import io.jpom.build.BuildUtil;
+import io.jpom.common.Const;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.enums.GitProtocolEnum;
@@ -32,6 +33,7 @@ import io.jpom.service.h2db.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,11 +113,13 @@ public class RepositoryModel extends BaseWorkspaceModel {
      * @return map
      */
     public Map<String, Object> toMap() {
+        //
         Map<String, Object> map = new HashMap<>(10);
         map.put("url", this.getGitUrl());
         map.put("protocol", this.getProtocol());
         map.put("username", this.getUserName());
         map.put("password", this.getPassword());
+        map.put(Const.WORKSPACEID_REQ_HEADER, this.getWorkspaceId());
         map.put("rsaFile", BuildUtil.getRepositoryRsaFile(this));
         return map;
     }

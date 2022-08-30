@@ -27,7 +27,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.crypto.SecureUtil;
-import io.jpom.common.Const;
+import io.jpom.common.ServerConst;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.system.ConfigBean;
@@ -152,7 +152,7 @@ public class BuildUtil {
 	 * @return file
 	 */
 	public static File getRepositoryRsaFile(String path) {
-		File sshDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), Const.SSH_KEY);
+		File sshDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConst.SSH_KEY);
 		return FileUtil.file(sshDir, path);
 	}
 
@@ -173,9 +173,9 @@ public class BuildUtil {
 			rsaFile = FileUtil.file(rsaPath);
 		} else {
 			if (StrUtil.isEmpty(repositoryModel.getId())) {
-				rsaFile = FileUtil.file(ConfigBean.getInstance().getTempPath(), Const.SSH_KEY, SecureUtil.sha1(repositoryModel.getGitUrl()) + Const.ID_RSA);
+				rsaFile = FileUtil.file(ConfigBean.getInstance().getTempPath(), ServerConst.SSH_KEY, SecureUtil.sha1(repositoryModel.getGitUrl()) + ServerConst.ID_RSA);
 			} else {
-				rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
+				rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + ServerConst.ID_RSA);
 			}
 			// 写入
 			FileUtil.writeUtf8String(repositoryModel.getRsaPrv(), rsaFile);

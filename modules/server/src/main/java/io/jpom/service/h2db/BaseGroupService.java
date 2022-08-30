@@ -23,7 +23,7 @@
 package io.jpom.service.h2db;
 
 import cn.hutool.db.Entity;
-import io.jpom.common.Const;
+import io.jpom.common.ServerConst;
 import io.jpom.model.BaseGroupModel;
 
 import javax.servlet.http.HttpServletRequest;
@@ -52,13 +52,13 @@ public abstract class BaseGroupService<T extends BaseGroupModel> extends BaseWor
         List<Entity> list = super.query(sql, workspaceId);
         // 筛选字段
         return list.stream().flatMap(entity -> {
-                    Object obj = entity.get(Const.GROUP_STR);
-                    if (obj == null) {
-                        return null;
-                    }
-                    return Stream.of(String.valueOf(obj));
-                }).filter(Objects::nonNull)
-                .distinct().collect(Collectors.toList());
+                Object obj = entity.get(ServerConst.GROUP_STR);
+                if (obj == null) {
+                    return null;
+                }
+                return Stream.of(String.valueOf(obj));
+            }).filter(Objects::nonNull)
+            .distinct().collect(Collectors.toList());
     }
 
     /**

@@ -38,7 +38,7 @@ import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.Const;
+import io.jpom.common.ServerConst;
 import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.model.PageResultDto;
@@ -74,7 +74,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     };
 
     public BaseDbService() {
-        super(null, Const.ID_STR);
+        super(null, ServerConst.ID_STR);
     }
 
     @Override
@@ -172,10 +172,10 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         //
         Entity entity = this.dataBeanToEntity(info);
         //
-        entity.remove(StrUtil.format("`{}`", Const.ID_STR));
+        entity.remove(StrUtil.format("`{}`", ServerConst.ID_STR));
         //
         Entity where = new Entity();
-        where.set(Const.ID_STR, id);
+        where.set(ServerConst.ID_STR, id);
         if (whereConsumer != null) {
             whereConsumer.accept(where);
         }
@@ -355,7 +355,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
             return null;
         }
         Entity entity = Entity.create();
-        entity.set(Const.ID_STR, ids);
+        entity.set(ServerConst.ID_STR, ids);
         if (consumer != null) {
             consumer.accept(entity);
         }
