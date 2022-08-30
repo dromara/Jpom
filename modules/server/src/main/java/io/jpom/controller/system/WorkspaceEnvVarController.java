@@ -32,6 +32,7 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
@@ -78,7 +79,6 @@ public class WorkspaceEnvVarController extends BaseServerController {
     @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public String list() {
-        workspaceEnvVarService.getCheckUserWorkspace(getRequest());
         PageResultDto<WorkspaceEnvVarModel> listPage = workspaceEnvVarService.listPage(getRequest());
         listPage.each(workspaceEnvVarModel -> {
             Integer privacy = workspaceEnvVarModel.getPrivacy();
@@ -192,7 +192,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
         //
         Entity entity = Entity.create();
         entity.set("name", name);
-        entity.set("workspaceId", workspaceId);
+        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, Const.WORKSPACE_GLOBAL));
         if (StrUtil.isNotEmpty(id)) {
             entity.set("id", StrUtil.format(" <> {}", id));
         }

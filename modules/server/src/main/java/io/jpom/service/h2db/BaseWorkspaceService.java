@@ -148,29 +148,24 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
     public PageResultDto<T> listPage(HttpServletRequest request) {
         // 验证工作空间权限
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        String workspaceId = request.getParameter("workspaceId");
-        if (StrUtil.isEmpty(workspaceId)) {
-            workspaceId = this.getCheckUserWorkspace(request);
-        }
-        Assert.hasText(workspaceId, "此接口需要传workspaceId！");
+        String workspaceId = this.getCheckUserWorkspace(request);
+        //Assert.hasText(workspaceId, "此接口需要传workspaceId！");
         paramMap.put("workspaceId", workspaceId);
         return super.listPage(paramMap);
     }
 
-
-    /**
-     * 根据 workspaceId获取空间变量列表
-     *
-     * @param workspaceId
-     * @return
-     */
-    public List<T> listByWorkspaceId(String workspaceId) {
-        Entity entity = Entity.create();
-        entity.set("workspaceId", workspaceId);
-        List<Entity> entities = super.queryList(entity);
-        return super.entityToBeanList(entities);
-    }
-
+//    /**
+//     * 根据 workspaceId获取空间变量列表
+//     *
+//     * @param workspaceId
+//     * @return
+//     */
+//    public List<T> listByWorkspaceId(String workspaceId) {
+//        Entity entity = Entity.create();
+//        entity.set("workspaceId", workspaceId);
+//        List<Entity> entities = super.queryList(entity);
+//        return super.entityToBeanList(entities);
+//    }
 
     /**
      * 删除
@@ -202,9 +197,9 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
     }
 
     public static String getWorkspaceId(HttpServletRequest request) {
-        String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+        String workspaceId = request.getParameter(Const.WORKSPACEID_REQ_HEADER);
         if (StrUtil.isEmpty(workspaceId)) {
-            workspaceId = request.getParameter(Const.WORKSPACEID_REQ_HEADER);
+            workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
         }
         return StrUtil.emptyToDefault(workspaceId, Const.WORKSPACE_DEFAULT_ID);
     }
@@ -246,6 +241,10 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
         }
         if (userModel.isSuperSystemUser()) {
             // 超级管理员
+            return;
+        }
+        if (StrUtil.equals(workspaceId, Const.WORKSPACE_GLOBAL)) {
+            // 全局 ID 忽略
             return;
         }
         // 查询绑定的权限
