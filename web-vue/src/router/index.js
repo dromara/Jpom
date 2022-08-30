@@ -180,6 +180,11 @@ const children = [
     name: "system-workspace",
     component: () => import("../pages/system/workspace"),
   },
+  {
+    path: "/system/global-env",
+    name: "global-env",
+    component: () => import("../pages/system/global-env"),
+  },
 ];
 
 const router = new Router({

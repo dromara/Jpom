@@ -27,64 +27,68 @@ package io.jpom.common;
  * Const class
  */
 public class Const {
-	/**
-	 * String const
-	 */
-	public static final String ID_STR = "id";
-	public static final String GROUP_STR = "group";
+    /**
+     * String const
+     */
+    public static final String ID_STR = "id";
+    public static final String GROUP_STR = "group";
 
-	/**
-	 * 应用程序类型的配置 key
-	 */
-	public static final String APPLICATION_NAME = "spring.application.name";
+    /**
+     * 应用程序类型的配置 key
+     */
+    public static final String APPLICATION_NAME = "spring.application.name";
 
-	/**
-	 * String get
-	 */
-	public static final String GET_STR = "get";
+    /**
+     * String get
+     */
+    public static final String GET_STR = "get";
 
 
-	/**
-	 * id_rsa
-	 */
-	public static final String ID_RSA = "_id_rsa";
-	/**
-	 * sshkey
-	 */
-	public static final String SSH_KEY = "sshkey";
+    /**
+     * id_rsa
+     */
+    public static final String ID_RSA = "_id_rsa";
+    /**
+     * sshkey
+     */
+    public static final String SSH_KEY = "sshkey";
 
-	/**
-	 * SQL backup default directory name
-	 * 数据库备份默认目录名称
-	 */
-	public static final String BACKUP_DIRECTORY_NAME = "backup";
-	/**
-	 * h2 数据库表名字段
-	 */
-	public static final String TABLE_NAME = "TABLE_NAME";
-	/**
-	 * 备份 SQL 文件 后缀
-	 */
-	public static final String SQL_FILE_SUFFIX = ".sql";
-	/**
-	 * 升级提示语
-	 */
-	public static final String UPGRADE_MSG = "升级(重启)中大约需要30秒～2分钟左右";
+    /**
+     * SQL backup default directory name
+     * 数据库备份默认目录名称
+     */
+    public static final String BACKUP_DIRECTORY_NAME = "backup";
+    /**
+     * h2 数据库表名字段
+     */
+    public static final String TABLE_NAME = "TABLE_NAME";
+    /**
+     * 备份 SQL 文件 后缀
+     */
+    public static final String SQL_FILE_SUFFIX = ".sql";
+    /**
+     * 升级提示语
+     */
+    public static final String UPGRADE_MSG = "升级(重启)中大约需要30秒～2分钟左右";
 
-	/**
-	 * 请求 header
-	 */
-	public static final String WORKSPACEID_REQ_HEADER = "workspaceId";
-	/**
-	 * 默认的工作空间
-	 */
-	public static final String WORKSPACE_DEFAULT_ID = "DEFAULT";
-	/**
-	 * websocket 传输 agent 包 buffer size
-	 */
-	public static final int DEFAULT_BUFFER_SIZE = 1024 * 1024;
-	/**
-	 * id 最大长度
-	 */
-	public static final int ID_MAX_LEN = 50;
+    /**
+     * 请求 header
+     */
+    public static final String WORKSPACEID_REQ_HEADER = "workspaceId";
+    /**
+     * 工作空间全局
+     */
+    public static final String WORKSPACE_GLOBAL = "GLOBAL";
+    /**
+     * 默认的工作空间
+     */
+    public static final String WORKSPACE_DEFAULT_ID = "DEFAULT";
+    /**
+     * websocket 传输 agent 包 buffer size
+     */
+    public static final int DEFAULT_BUFFER_SIZE = 1024 * 1024;
+    /**
+     * id 最大长度
+     */
+    public static final int ID_MAX_LEN = 50;
 }

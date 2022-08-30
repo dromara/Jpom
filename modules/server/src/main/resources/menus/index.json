@@ -170,6 +170,11 @@
         "role": "system"
       },
       {
+        "id": "globalEnv",
+        "title": "全局变量",
+        "role": "system"
+      },
+      {
         "id": "cacheManage",
         "title": "缓存管理",
         "role": "system"

@@ -41,6 +41,7 @@ const routeMenuMap = {
   // 数据库备份
   backup: "/system/backup",
   workspace: "/system/workspace",
+  globalEnv: "/system/global-env",
 };
 
 export default routeMenuMap;

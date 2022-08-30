@@ -24,6 +24,8 @@ package io.jpom.service.system;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.db.Entity;
+import io.jpom.common.Const;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.util.StringUtil;
@@ -41,9 +43,9 @@ import java.util.Map;
 public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVarModel> {
 
     public Map<String, String> getEnv(String workspaceId) {
-        WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceEnvVarModel();
-        workspaceEnvVarModel.setWorkspaceId(workspaceId);
-        List<WorkspaceEnvVarModel> list = super.listByBean(workspaceEnvVarModel);
+        Entity entity = Entity.create();
+        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, Const.WORKSPACE_GLOBAL));
+        List<WorkspaceEnvVarModel> list = super.listByEntity(entity);
         Map<String, String> map = CollStreamUtil.toMap(list, WorkspaceEnvVarModel::getName, WorkspaceEnvVarModel::getValue);
         // java.lang.UnsupportedOperationException
         HashMap<String, String> hashMap = new HashMap<>(CollUtil.size(list) + 10);
