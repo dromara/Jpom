@@ -37,10 +37,14 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import io.jpom.common.ServerConst;
 import io.jpom.model.data.SshModel;
+import io.jpom.plugin.IWorkspaceEnvPlugin;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.JschUtils;
+import lombok.Lombok;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -64,7 +68,11 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         if (data == null) {
             return;
         }
-        data.setPassword(null);
+        if (!StrUtil.startWithIgnoreCase(data.getPassword(), ServerConst.REF_WORKSPACE_ENV)) {
+            // 隐藏密码字段
+            data.setPassword(null);
+        }
+        //data.setPassword(null);
         data.setPrivateKey(null);
     }
 
@@ -89,12 +97,24 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         Session session = null;
         int timeout = sshModel.timeout();
         SshModel.ConnectType connectType = sshModel.connectType();
+        String user = sshModel.getUser();
+        String password = sshModel.getPassword();
+        // 转化密码字段
+        IWorkspaceEnvPlugin plugin = (IWorkspaceEnvPlugin) PluginFactory.getPlugin(IWorkspaceEnvPlugin.PLUGIN_NAME);
+        try {
+            user = plugin.convertRefEnvValue(sshModel.getWorkspaceId(), user);
+            password = plugin.convertRefEnvValue(sshModel.getWorkspaceId(), password);
+        } catch (Exception e) {
+            throw Lombok.sneakyThrow(e);
+        }
         if (connectType == SshModel.ConnectType.PASS) {
-            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword(), timeout);
+            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), user, password, timeout);
 
         } else if (connectType == SshModel.ConnectType.PUBKEY) {
             File rsaFile = null;
             String privateKey = sshModel.getPrivateKey();
+            byte[] passwordByte = StrUtil.isEmpty(password) ? null : StrUtil.bytes(password);
+            //sshModel.password();
             if (StrUtil.startWith(privateKey, URLUtil.FILE_URL_PREFIX)) {
                 String rsaPath = StrUtil.removePrefix(privateKey, URLUtil.FILE_URL_PREFIX);
                 rsaFile = FileUtil.file(rsaPath);
@@ -102,9 +122,9 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                 // 直接采用 private key content 登录，无需写入文件
                 session = JschUtils.createSession(sshModel.getHost(),
                     sshModel.getPort(),
-                    sshModel.getUser(),
+                    user,
                     StrUtil.trim(privateKey),
-                    sshModel.password());
+                    passwordByte);
             } else if (StrUtil.isEmpty(privateKey)) {
                 File home = FileUtil.getUserHomeDir();
                 Assert.notNull(home, "用户目录没有找到");
@@ -127,7 +147,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                 // 简要私钥文件是否存在
                 Assert.state(FileUtil.isFile(rsaFile), "私钥文件不存在：" + FileUtil.getAbsolutePath(rsaFile));
                 session = JschUtil.createSession(sshModel.getHost(),
-                    sshModel.getPort(), sshModel.getUser(), FileUtil.getAbsolutePath(rsaFile), sshModel.password());
+                    sshModel.getPort(), user, FileUtil.getAbsolutePath(rsaFile), passwordByte);
             }
             try {
                 session.connect(timeout);

@@ -68,7 +68,7 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
      * @return 如果存在值，则返回环境变量值。不存在则返回原始值
      */
     public String convertRefEnvValue(String workspaceId, String value) {
-        //  "$ref.jpom."
+        //  "$ref.wEnv."
         if (StrUtil.isEmpty(value) || !StrUtil.startWithIgnoreCase(value, ServerConst.REF_WORKSPACE_ENV)) {
             return value;
         }

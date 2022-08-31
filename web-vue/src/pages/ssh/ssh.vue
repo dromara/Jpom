@@ -120,7 +120,14 @@
         <a-form-model-item label="认证方式" prop="connectType">
           <a-radio-group v-model="temp.connectType" :options="options" />
         </a-form-model-item>
-        <a-form-model-item label="用户名" prop="user">
+        <a-form-model-item prop="user">
+          <template #label>
+            用户名
+            <a-tooltip v-if="!temp.id">
+              <template slot="title"> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-input v-model="temp.user" placeholder="用户" />
         </a-form-model-item>
         <!-- 新增时需要填写 -->
@@ -128,7 +135,14 @@
         <!--					<a-input-password v-model="temp.password" placeholder="密码"/>-->
         <!--				</a-form-model-item>-->
         <!-- 修改时可以不填写 -->
-        <a-form-model-item label="Password" :prop="`${temp.type === 'add' && temp.connectType === 'PASS' ? 'password' : 'password-update'}`">
+        <a-form-model-item :prop="`${temp.type === 'add' && temp.connectType === 'PASS' ? 'password' : 'password-update'}`">
+          <template #label>
+            密码
+            <a-tooltip v-if="!temp.id">
+              <template slot="title"> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />
         </a-form-model-item>
         <a-form-model-item v-if="temp.connectType === 'PUBKEY'" prop="privateKey">
