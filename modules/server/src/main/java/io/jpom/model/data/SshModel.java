@@ -115,14 +115,6 @@ public class SshModel extends BaseWorkspaceModel {
         }
     }
 
-    public byte[] password() {
-        byte[] pas = null;
-        if (StrUtil.isNotEmpty(this.getPassword())) {
-            pas = this.getPassword().getBytes();
-        }
-        return pas;
-    }
-
     /**
      * 超时时间
      *
