@@ -123,6 +123,9 @@ public class BuildInfoController extends BaseServerController {
             // 获取源码目录是否存在
             File source = BuildUtil.getSourceById(buildInfoModel.getId());
             buildInfoModel.setSourceDirExist(FileUtil.exist(source));
+            //
+            File file = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), buildInfoModel.getResultDirFile());
+            buildInfoModel.setResultHasFile(FileUtil.exist(file));
         });
         return JsonMessage.getString(200, "", page);
     }

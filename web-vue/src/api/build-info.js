@@ -227,6 +227,17 @@ export function downloadBuildFile(logId) {
 }
 
 /**
+ * 下载构建产物
+ * @param {*} logId
+ */
+export function downloadBuildFileByBuild(id, numberId) {
+  return loadRouterBase("/build/history/download_file_by_build", {
+    buildId: id,
+    buildNumberId: numberId,
+  });
+}
+
+/**
  * 回滚（重新发布）
  * @param {*} logId
  * @returns
