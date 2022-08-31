@@ -108,6 +108,11 @@ public class BuildInfoModel extends BaseGroupModel {
     @PropIgnore
     private Boolean sourceDirExist;
     /**
+     * 产物文件是否存在
+     */
+    @PropIgnore
+    private Boolean resultHasFile;
+    /**
      * 构建方式 0 本地构建 1 docker 构建
      */
     private Integer buildMode;

@@ -104,7 +104,7 @@
           </a-tooltip>
 
           <a-tooltip title="下载构建产物,如果按钮不可用表示产物文件不存在,一般是构建没有产生对应的文件或者构建历史相关文件被删除">
-            <a-button size="small" type="primary" :disabled="!record.hashFile" @click="handleFile(record)">
+            <a-button size="small" type="primary" :disabled="!record.hasFile" @click="handleFile(record)">
               <a-icon type="file-zip" />
             </a-button>
           </a-tooltip>
@@ -117,7 +117,7 @@
             <a-menu slot="overlay">
               <a-menu-item>
                 <template v-if="record.releaseMethod !== 5">
-                  <a-button :disabled="!record.hashFile || record.releaseMethod === 0" type="danger" @click="handleRollback(record)">回滚 </a-button>
+                  <a-button :disabled="!record.hasFile || record.releaseMethod === 0" type="danger" @click="handleRollback(record)">回滚 </a-button>
                 </template>
                 <template v-else>
                   <a-tooltip title="Dockerfile 构建方式不支持在这里回滚">
@@ -141,10 +141,10 @@
 </template>
 <script>
 import BuildLog from "./log";
-import {deleteBuildHistory, downloadBuildFile, downloadBuildLog, getBuildListAll, geteBuildHistory, releaseMethodMap, rollback, statusMap, triggerBuildTypeMap} from "@/api/build-info";
-import {formatDuration, parseTime} from "@/utils/time";
+import { deleteBuildHistory, downloadBuildFile, downloadBuildLog, getBuildListAll, geteBuildHistory, releaseMethodMap, rollback, statusMap, triggerBuildTypeMap } from "@/api/build-info";
+import { formatDuration, parseTime } from "@/utils/time";
 
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {

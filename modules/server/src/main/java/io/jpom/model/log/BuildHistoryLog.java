@@ -137,7 +137,7 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
 	 * 是否存在构建产物
 	 */
 	@PropIgnore
-	private Boolean hashFile;
+	private Boolean hasFile;
 	/**
 	 * 是否存在日志
 	 */

@@ -133,6 +133,9 @@
                 <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
               </a-menu-item>
               <a-menu-item>
+                <a-button size="small" :disabled="!record.resultHasFile" type="primary" @click="handleDownloadFile(record)">下载产物</a-button>
+              </a-menu-item>
+              <a-menu-item>
                 <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
               </a-menu-item>
 
@@ -950,7 +953,7 @@ import {
   getBuildList,
   getTriggerUrl,
   releaseMethodMap,
-  // resetTrigger,
+  downloadBuildFileByBuild,
   startBuild,
   statusMap,
   stopBuild,
@@ -1696,6 +1699,10 @@ export default {
           });
         },
       });
+    },
+    // 下载构建产物
+    handleDownloadFile(record) {
+      window.open(downloadBuildFileByBuild(record.id, record.buildId), "_self");
     },
   },
 };
