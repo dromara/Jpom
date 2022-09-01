@@ -11,6 +11,8 @@ module.exports = [
   ['meta', {name: 'og:description', content: 'Jpom-项目管理系统,一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件'}],
   // <meta name="baidu-site-verification" content="code-te8iliecTI" />
   ['meta', {name: 'baidu-site-verification', content: 'code-te8iliecTI'}],
+  // <meta name="360-site-verification" content="0a5e4a367ff77232a3c1e9bc83edf7ba" />
+  ['meta', {name: '360-site-verification', content: '0a5e4a367ff77232a3c1e9bc83edf7ba'}],
   // <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   ['meta', {name: 'viewport', content: 'width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no'}],
   ['script', {src: '/assets/js/jquery.3.4.1.min.js'}],
