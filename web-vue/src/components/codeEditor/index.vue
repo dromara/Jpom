@@ -5,39 +5,13 @@
       <a-space>
         <div>
           皮肤：
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="cmOptions.theme"
-            @select="handleSelectTheme"
-            show-search
-            option-filter-prop="children"
-            :filter-option="filterOption"
-            placeholder="请选择"
-            style="width: 150px"
-          >
+          <a-select v-model="cmOptions.theme" @select="handleSelectTheme" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
             <a-select-option v-for="item in cmThemeOptions" :key="item">{{ item }}</a-select-option>
           </a-select>
         </div>
         <div>
           语言：
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="cmOptions.mode"
-            @select="handleSelectMode"
-            show-search
-            option-filter-prop="children"
-            :filter-option="filterOption"
-            placeholder="请选择"
-            style="width: 150px"
-          >
+          <a-select v-model="cmOptions.mode" @select="handleSelectMode" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
             <a-select-option v-for="item in cmEditorModeOptions" :key="item">{{ item }}</a-select-option>
           </a-select>
         </div>
@@ -77,7 +51,7 @@
 </template>
 
 <script>
-import {codemirror} from "vue-codemirror";
+import { codemirror } from "vue-codemirror";
 import "codemirror/lib/codemirror.css";
 
 import "codemirror/theme/blackboard.css";
@@ -119,7 +93,7 @@ import "codemirror/addon/search/search.js";
 import "codemirror/addon/display/autorefresh.js";
 import "codemirror/addon/selection/mark-selection.js";
 import "codemirror/addon/search/match-highlighter.js";
-import {JSHINT} from "jshint";
+import { JSHINT } from "jshint";
 
 window.JSHINT = JSHINT;
 

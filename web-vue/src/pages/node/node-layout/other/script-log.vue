@@ -5,19 +5,7 @@
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" placeholder="名称" allowClear class="search-input-item" />
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            show-search
-            option-filter-prop="children"
-            v-model="listQuery.triggerExecType"
-            allowClear
-            placeholder="触发类型"
-            class="search-input-item"
-          >
+          <a-select show-search option-filter-prop="children" v-model="listQuery.triggerExecType" allowClear placeholder="触发类型" class="search-input-item">
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-range-picker

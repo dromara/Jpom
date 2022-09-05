@@ -390,17 +390,7 @@
       <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item> </a-form-model-item>
         <a-form-model-item label="选择工作空间" prop="workspaceId">
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            show-search
-            option-filter-prop="children"
-            v-model="temp.workspaceId"
-            placeholder="请选择工作空间"
-          >
+          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
             <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-model-item>

@@ -5,17 +5,7 @@
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="监控名称" class="search-input-item" />
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="listQuery.status"
-            allowClear
-            placeholder="开启状态"
-            class="search-input-item"
-          >
+          <a-select v-model="listQuery.status" allowClear placeholder="开启状态" class="search-input-item">
             <a-select-option :value="1">开启</a-select-option>
             <a-select-option :value="0">关闭</a-select-option>
           </a-select>

@@ -7,43 +7,13 @@
     <a-table size="middle" :data-source="list" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="listQuery.nodeId"
-            allowClear
-            placeholder="请选择节点"
-            class="search-input-item"
-          >
+          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
           </a-select>
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="listQuery.outGivingId"
-            allowClear
-            placeholder="分发项目"
-            class="search-input-item"
-          >
+          <a-select v-model="listQuery.outGivingId" allowClear placeholder="分发项目" class="search-input-item">
             <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
           </a-select>
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="listQuery.status"
-            allowClear
-            placeholder="请选择状态"
-            class="search-input-item"
-          >
+          <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
             <a-select-option v-for="(item, key) in dispatchStatusMap" :key="key" :value="key">{{ item }}</a-select-option>
           </a-select>
           <a-range-picker class="search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
@@ -81,11 +51,11 @@
   </div>
 </template>
 <script>
-import {getNodeListAll} from "@/api/node";
-import {dispatchStatusMap, getDishPatchListAll, getDishPatchLogList} from "@/api/dispatch";
-import {parseTime} from "@/utils/time";
+import { getNodeListAll } from "@/api/node";
+import { dispatchStatusMap, getDishPatchListAll, getDishPatchLogList } from "@/api/dispatch";
+import { parseTime } from "@/utils/time";
 
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   data() {

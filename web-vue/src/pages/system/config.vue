@@ -76,18 +76,7 @@
       <a-alert :message="`一键分发同步多个节点的白名单配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model ref="editWhiteForm" :model="tempWhite" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="分发节点">
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            show-search
-            option-filter-prop="children"
-            placeholder="请选择分发到的节点"
-            mode="multiple"
-            v-model="tempWhite.chooseNode"
-          >
+          <a-select show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="tempWhite.chooseNode">
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>
@@ -347,9 +336,9 @@ import {
   systemInfo,
 } from "@/api/system";
 import codeEditor from "@/components/codeEditor";
-import {RESTART_UPGRADE_WAIT_TIME_COUNT} from "@/utils/const";
+import { RESTART_UPGRADE_WAIT_TIME_COUNT } from "@/utils/const";
 import Vue from "vue";
-import {getNodeListAll} from "@/api/node";
+import { getNodeListAll } from "@/api/node";
 
 export default {
   components: {

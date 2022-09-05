@@ -6,17 +6,7 @@
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="请输入备份名称" class="search-input-item" />
           <a-input v-model="listQuery['%version%']" @pressEnter="loadData" placeholder="请输入版本" class="search-input-item" />
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="listQuery.backupType"
-            allowClear
-            placeholder="请选择备份类型"
-            class="search-input-item"
-          >
+          <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="search-input-item">
             <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
@@ -110,9 +100,9 @@
   </div>
 </template>
 <script>
-import {backupStatusMap, backupTypeArray, backupTypeMap, createBackup, deleteBackup, downloadBackupFile, getBackupList, getTableNameList, restoreBackup, uploadBackupFile} from "@/api/backup-info";
-import {parseTime, renderSize} from "@/utils/time";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import { backupStatusMap, backupTypeArray, backupTypeMap, createBackup, deleteBackup, downloadBackupFile, getBackupList, getTableNameList, restoreBackup, uploadBackupFile } from "@/api/backup-info";
+import { parseTime, renderSize } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import Vue from "vue";
 
 export default {

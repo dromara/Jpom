@@ -105,11 +105,7 @@
         </a-form-model-item>
         <!-- <a-form-model-item label="接口版本" prop="apiVersion">
           <a-select
-          :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            " show-search option-filter-prop="children" v-model="temp.apiVersion" allowClear placeholder="接口版本">
+           show-search option-filter-prop="children" v-model="temp.apiVersion" allowClear placeholder="接口版本">
             <a-select-option v-for="item in apiVersions" :key="item.version">{{ item.webVersion }}</a-select-option>
           </a-select>
         </a-form-model-item> -->

@@ -4,32 +4,12 @@
     <a-table :data-source="projList" :columns="columns" size="middle" bordered :pagination="pagination" @change="changePage" :row-selection="rowSelection" :rowKey="(record, index) => index">
       <template slot="title">
         <a-space>
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="listQuery.nodeId"
-            allowClear
-            placeholder="请选择节点"
-            class="search-input-item"
-          >
+          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
           <a-input v-model="listQuery['%name%']" @pressEnter="getNodeProjectData" placeholder="搜索项目" class="search-input-item" />
 
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="listQuery.runMode"
-            allowClear
-            placeholder="项目类型"
-            class="search-input-item"
-          >
+          <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
             <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">

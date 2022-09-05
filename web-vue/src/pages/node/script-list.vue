@@ -4,17 +4,7 @@
     <a-table :data-source="list" size="middle" :columns="columns" @change="changePage" :pagination="pagination" bordered rowKey="id">
       <template slot="title">
         <a-space>
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="listQuery.nodeId"
-            allowClear
-            placeholder="请选择节点"
-            class="search-input-item"
-          >
+          <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" allowClear class="search-input-item" />
