@@ -15,11 +15,7 @@
       rowKey="id"
     >
       <template slot="title">
-        <!-- <a-select   :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            " v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="loadData">
+        <!-- <a-select    v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="loadData">
         <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
       </a-select> -->
         <a-space>
@@ -170,15 +166,7 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="temp.runMode"
-            placeholder="请选择运行方式"
-          >
+          <a-select v-model="temp.runMode" placeholder="请选择运行方式">
             <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -268,15 +256,7 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="temp.logPath"
-            placeholder="请选择项目白名单路径"
-          >
+          <a-select v-model="temp.logPath" placeholder="请选择项目白名单路径">
             <a-select-option key="" value="">默认是在项目文件夹父级</a-select-option>
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
@@ -290,15 +270,7 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="temp.jdkId"
-            placeholder="请选择 JDK"
-          >
+          <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
             <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
           </a-select>
         </a-form-model-item>

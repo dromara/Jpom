@@ -36,16 +36,7 @@
           <a-input v-model="temp.name" placeholder="证书名称" />
         </a-form-model-item>
         <a-form-model-item label="证书路径" prop="path">
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="temp.path"
-            :disabled="temp.type === 'edit'"
-            placeholder="请选择证书路径"
-          >
+          <a-select v-model="temp.path" :disabled="temp.type === 'edit'" placeholder="请选择证书路径">
             <a-select-option v-for="element in whiteList" :key="element">{{ element }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -74,8 +65,8 @@
   </div>
 </template>
 <script>
-import {deleteCert, downloadCert, editCert, getCertList, getCertWhiteList} from "../../../../api/node-nginx";
-import {parseTime} from "../../../../utils/time";
+import { deleteCert, downloadCert, editCert, getCertList, getCertWhiteList } from "../../../../api/node-nginx";
+import { parseTime } from "../../../../utils/time";
 
 export default {
   props: {

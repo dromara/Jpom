@@ -8,17 +8,7 @@
         <a-space>
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="仓库名称" />
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%gitUrl%']" placeholder="仓库地址" />
-          <a-select
-            :getPopupContainer="
-              (triggerNode) => {
-                return triggerNode.parentNode || document.body;
-              }
-            "
-            v-model="listQuery.repoType"
-            allowClear
-            placeholder="仓库类型"
-            class="search-input-item"
-          >
+          <a-select v-model="listQuery.repoType" allowClear placeholder="仓库类型" class="search-input-item">
             <a-select-option :value="'0'">GIT</a-select-option>
             <a-select-option :value="'1'">SVN</a-select-option>
           </a-select>
