@@ -82,35 +82,16 @@ git rm -rf .
 git push --set-upstream origin docs-pages
 ```
 
-## idea modules 
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Jpom.iml" filepath="$PROJECT_DIR$/.idea/Jpom.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/agent/agent.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/agent/agent.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/sub-plugin/auto-charset-jchardet/auto-charset-jchardet.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/sub-plugin/auto-charset-jchardet/auto-charset-jchardet.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/common/common.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/common/common.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/sub-plugin/db-h2/db-h2.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/sub-plugin/db-h2/db-h2.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/sub-plugin/docker-cli/docker-cli.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/sub-plugin/docker-cli/docker-cli.iml" />
-      <module fileurl="file://$PROJECT_DIR$/docs/docs.iml" filepath="$PROJECT_DIR$/docs/docs.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/sub-plugin/email/email.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/sub-plugin/email/email.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/sub-plugin/git-clone/git-clone.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/sub-plugin/git-clone/git-clone.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/jpom-parent.iml" filepath="$PROJECT_DIR$/jpom-parent/jpom-parent.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/sub-plugin/jpom-plugins-parent.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/sub-plugin/jpom-plugins-parent.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/sub-plugin/maven-plugin/maven-plugin.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/sub-plugin/maven-plugin/maven-plugin.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/server/server.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/server/server.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/sub-plugin/svn-clone/svn-clone.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/sub-plugin/svn-clone/svn-clone.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jpom-parent/modules/sub-plugin/webhook/webhook.iml" filepath="$PROJECT_DIR$/jpom-parent/modules/sub-plugin/webhook/webhook.iml" />
-    </modules>
-  </component>
-</project>
-```
-
 ## 换行符不生效
 
 ```shell
+git config --global core.autocrlf false
+```
+
+## git config
+
+```shell
+git config --global user.name "bwcx_jzy"
+git config --global user.email bwcx_jzy@163.com 
 git config --global core.autocrlf false
 ```
