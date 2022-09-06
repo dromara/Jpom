@@ -28,13 +28,22 @@
 
 set -o errexit
 
-pwd=$(pwd)
+current_path=`pwd`
+case "`uname`" in
+    Linux)
+		bin_abs_path=$(readlink -f $(dirname $0))
+		;;
+	*)
+		bin_abs_path=`cd $(dirname $0); pwd`
+		;;
+esac
+base=${bin_abs_path}/../
 
-echo "当前路径：${pwd}"
+echo "当前路径：${current_path} 脚本路径：${base}"
 
 if [ -n "$1" ];then
     new_version="$1"
-    old_version=`cat ${pwd}/../docs/version.txt`
+    old_version=`cat ${base}/docs/version.txt`
     echo "$old_version 替换为新版本 $new_version"
 else
     # 参数错误，退出
@@ -51,25 +60,25 @@ fi
 cd ../ && mvn versions:set -DnewVersion=$1
 
 # 替换 docker 中的版本
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../.env
+sed -i.bak "s/${old_version}/${new_version}/g" $base/.env
 
 # 替换 Dockerfile 中的版本
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/server/Dockerfile
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/agent/Dockerfile
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../script/docker.sh
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/server/DockerfileRelease
+sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/Dockerfile
+sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/agent/Dockerfile
+sed -i.bak "s/${old_version}/${new_version}/g" $base/script/docker.sh
+sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/DockerfileRelease
 
 # logo
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../modules/common/src/main/resources/jpom-logo.txt
+sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/common/src/main/resources/jpom-logo.txt
 
 # vue version
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../web-vue/package.json
+sed -i.bak "s/${old_version}/${new_version}/g" $base/web-vue/package.json
 
 # release-sha1sum.sh
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/release-sha1sum.sh
+sed -i.bak "s/${old_version}/${new_version}/g" $base/script/release-sha1sum.sh
 
 # gitee go
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../.workflow/MasterPipeline.yml
+sed -i.bak "s/${old_version}/${new_version}/g" $base/.workflow/MasterPipeline.yml
 
 # 保留新版本号
-echo "$new_version" > $pwd/../docs/version.txt
+echo "$new_version" > $base/docs/version.txt
