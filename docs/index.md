@@ -74,6 +74,19 @@ postList: none
 }
 </style>
 
+## 🌈特别赞助
+
+::: cardList
+```yaml
+- name: Eoapi
+  desc: 开源 API 管理工具，接口文档、接口测试、Mock...
+  avatar: /images/friends/ad/eoapi.jpg
+  link: https://docs.eoapi.io/?utm_source=ZZ090101
+  bgColor: '#00785A'
+  textColor: '#FFFFFF'
+```
+:::
+
 <br/>
 
 ## 😭 日常开发中，您是否有以下痛点？

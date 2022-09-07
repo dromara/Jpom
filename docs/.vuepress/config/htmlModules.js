@@ -41,6 +41,11 @@ module.exports = {
 
    </div>
 `,
+  sidebarT: `
+    <a href="https://docs.eoapi.io/?utm_source=ZZ090102" target="_blank">
+      <img class="no-zoom" height="60" width="224" src="/images/friends/ad/eoapi.gif">
+    </a>
+  `,
   //
   pageB: `
 
