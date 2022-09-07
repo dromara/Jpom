@@ -28,13 +28,24 @@
 
 set -o errexit
 
-pwd=$(pwd)
 
-echo "当前路径：${pwd}"
+current_path=$(pwd)
+case "$(uname)" in
+    Linux)
+		bin_abs_path=$(readlink -f $(dirname "$0"))
+		;;
+	*)
+		bin_abs_path=`cd $(dirname $0) || exit; pwd`
+		;;
+esac
+
+pwd=${bin_abs_path}/../
+
+echo "当前路径：${current_path},脚本路径：${bin_abs_path}"
 
 if [ -n "$1" ];then
     new_version="$1"
-    old_version=`cat ${pwd}/../docs/.vuepress/public/docs/versions.tag`
+    old_version=`cat ${pwd}/docs/.vuepress/public/docs/versions.tag`
     echo "$old_version 替换为新版本 $new_version"
 else
     # 参数错误，退出
@@ -49,14 +60,13 @@ fi
 
 
 # 替换远程更新包的版本号
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/.vuepress/public/docs/versions.json
-sed -i.bak "s/${old_version}/${new_version}/g" $pwd/../docs/.vuepress/public/docs/release-versions.json
-
-
+sed -i.bak "s/${old_version}/${new_version}/g" ${pwd}/docs/.vuepress/public/docs/versions.json
+sed -i.bak "s/${old_version}/${new_version}/g" ${pwd}/docs/.vuepress/public/docs/release-versions.json
+sed -i.bak "s/${old_version}/${new_version}/g" ${pwd}/package.json
 
 function updateDocUrlItem(){
 
-mdPath="${pwd}/../docs/更新日志/02.下载链接/01.下载链接.md"
+mdPath="${pwd}/docs/更新日志/02.下载链接/01.下载链接.md"
 
 if [[ `cat ${mdPath} |grep "$1"` != ""  ]]; then
 	echo "下载地址已经更新啦"
@@ -79,4 +89,4 @@ fi
 updateDocUrlItem $new_version
 
 # 保留新版本号
-echo "$new_version" > $pwd/../docs/.vuepress/public/docs/versions.tag
+echo "$new_version" > ${pwd}/docs/.vuepress/public/docs/versions.tag
