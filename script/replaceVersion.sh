@@ -39,7 +39,7 @@ case "`uname`" in
 esac
 base=${bin_abs_path}/../
 
-echo "当前路径：${current_path} 脚本路径：${base}"
+echo "当前路径：${current_path} 脚本路径：${bin_abs_path}"
 
 if [ -n "$1" ];then
     new_version="$1"
@@ -57,7 +57,7 @@ if [ ! -n "$old_version" ]; then
 fi
 
 # 替换所有模块pom.xml中的版本
-cd ../ && mvn versions:set -DnewVersion=$1
+cd ${base} && mvn versions:set -DnewVersion=$1
 
 # 替换 docker 中的版本
 sed -i.bak "s/${old_version}/${new_version}/g" $base/.env
