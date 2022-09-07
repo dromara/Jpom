@@ -6,7 +6,7 @@
     <packaging>pom</packaging>
     <groupId>io.jpom.package</groupId>
     <artifactId>jpom</artifactId>
-    <version>1.0</version>
+    <version>2.9.10</version>
 
     <modules>
         <module>jpom-parent</module>
