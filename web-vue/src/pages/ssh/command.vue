@@ -490,9 +490,9 @@ export default {
       // 同步
       syncToWorkspace({
         ids: this.tableSelections.join(","),
-        workspaceId: this.temp.workspaceId,
+        toWorkspaceId: this.temp.workspaceId,
       }).then((res) => {
-        if (res.code == 200) {
+        if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
           });
