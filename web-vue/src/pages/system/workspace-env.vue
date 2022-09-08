@@ -141,6 +141,9 @@ export default {
       return COMPUTED_PAGINATION(this.envVarListQuery);
     },
   },
+  mounted() {
+    this.loadDataEnvVar();
+  },
   methods: {
     loadDataEnvVar(pointerEvent) {
       this.envVarLoading = true;

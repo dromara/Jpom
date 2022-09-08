@@ -302,17 +302,17 @@ public class SshController extends BaseServerController {
      * 同步到指定工作空间
      *
      * @param ids         节点ID
-     * @param workspaceId 分配到到工作空间ID
+     * @param toWorkspaceId 分配到到工作空间ID
      * @return msg
      */
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public String syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String workspaceId) {
+    public String syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
         //
-        sshService.checkUserWorkspace(workspaceId);
-        sshService.syncToWorkspace(ids, nowWorkspaceId, workspaceId);
+        sshService.checkUserWorkspace(toWorkspaceId);
+        sshService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
         return JsonMessage.getString(200, "操作成功");
     }
 }

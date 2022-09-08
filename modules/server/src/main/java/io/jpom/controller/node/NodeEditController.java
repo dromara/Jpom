@@ -28,6 +28,7 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.ServerConst;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
@@ -111,7 +112,9 @@ public class NodeEditController extends BaseServerController {
     public String listDataAll(@ValidatorItem String workspaceId) {
         nodeService.checkUserWorkspace(workspaceId);
         NodeModel nodeModel = new NodeModel();
-        nodeModel.setWorkspaceId(workspaceId);
+        if (!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL)) {
+            nodeModel.setWorkspaceId(workspaceId);
+        }
         List<NodeModel> list = nodeService.listByBean(nodeModel);
         return JsonMessage.getString(200, "", list);
     }
@@ -227,34 +230,34 @@ public class NodeEditController extends BaseServerController {
     /**
      * 解锁节点，通过插件端自动注册的节点默认未分配工作空间
      *
-     * @param id          节点ID
-     * @param workspaceId 分配到到工作空间ID
+     * @param id            节点ID
+     * @param toWorkspaceId 分配到到工作空间ID
      * @return msg
      */
     @GetMapping(value = "un_lock_workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public String unLockWorkspace(@ValidatorItem String id, @ValidatorItem String workspaceId) {
-        nodeService.checkUserWorkspace(workspaceId);
-        nodeService.unLock(id, workspaceId);
+    public String unLockWorkspace(@ValidatorItem String id, @ValidatorItem String toWorkspaceId) {
+        nodeService.checkUserWorkspace(toWorkspaceId);
+        nodeService.unLock(id, toWorkspaceId);
         return JsonMessage.getString(200, "操作成功");
     }
 
     /**
      * 同步到指定工作空间
      *
-     * @param ids         节点ID
-     * @param workspaceId 分配到到工作空间ID
+     * @param ids           节点ID
+     * @param toWorkspaceId 分配到到工作空间ID
      * @return msg
      */
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public String syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String workspaceId) {
+    public String syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
         //
-        nodeService.checkUserWorkspace(workspaceId);
-        nodeService.syncToWorkspace(ids, nowWorkspaceId, workspaceId);
+        nodeService.checkUserWorkspace(toWorkspaceId);
+        nodeService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
         return JsonMessage.getString(200, "操作成功");
     }
 
