@@ -192,7 +192,9 @@ public class WorkspaceEnvVarController extends BaseServerController {
         //
         Entity entity = Entity.create();
         entity.set("name", name);
-        entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
+        if (!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL)) {
+            entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
+        }
         if (StrUtil.isNotEmpty(id)) {
             entity.set("id", StrUtil.format(" <> {}", id));
         }
