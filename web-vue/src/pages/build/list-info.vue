@@ -631,7 +631,7 @@
                   <template slot="title">
                     <ul>
                       <li>构建过程请求对应的地址,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
-                      <li>传人参数有：buildId、buildName、type、error、triggerTime</li>
+                      <li>传入参数有：buildId、buildName、type、error、triggerTime</li>
                       <li>type 的值有：startReady、pull、executeCommand、release、done、stop、success</li>
                       <li>异步请求不能保证有序性</li>
                     </ul>
@@ -664,7 +664,7 @@
                   <template slot="title">
                     <ul>
                       <li>构建过程执行对应的脚本,开始构建,构建完成,开始发布,发布完成,构建异常,发布异常</li>
-                      <li>传人环境变量有：buildId、buildName、type、error、triggerTime、buildNumberId、buildSourceFile</li>
+                      <li>传入环境变量有：buildId、buildName、type、error、triggerTime、buildNumberId、buildSourceFile</li>
                       <li>执行脚本传入参数有：startReady、pull、executeCommand、release、done、stop、success</li>
                       <li><b>注意：为了避免不必要的事件执行脚本，选择的脚本的备注中包含需要实现的事件参数关键词，如果需要执行 success 事件,那么选择的脚本的备注中需要包含 success 关键词</b></li>
                     </ul>
@@ -713,7 +713,7 @@
                       批量构建全部参数举例 BODY json： [ { "id":"1", "token":"a", "delay":"0","branchName":"test","branchTagName":"1.*","script":"mvn clean
                       package","resultDirFile":"/target/","webhook":"http://test.com/webhook" } ]
                     </li>
-                    <li>批量构建传人其他参数将同步执行修改</li>
+                    <li>批量构建传入其他参数将同步执行修改</li>
                   </ul>
                 </template>
               </a-alert>

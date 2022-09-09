@@ -304,7 +304,7 @@ export default {
         "真的要还原备份信息么？<ul style='color:red;'>" +
         "<li>建议还原和当前版本一致的文件或者临近版本的文件</li>" +
         "<li>如果版本相差大需要重新初始化数据来保证和当前程序里面字段一致</li>" +
-        "<li>重置初始化在启动时候传人参数 <b> --rest:load_init_db </b> </li>" +
+        "<li>重置初始化在启动时候传入参数 <b> --rest:load_init_db </b> </li>" +
         " </ul>还原过程中不能操作哦...";
       const h = this.$createElement;
       this.$confirm({
