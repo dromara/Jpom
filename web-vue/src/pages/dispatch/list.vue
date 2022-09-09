@@ -416,7 +416,7 @@
                   <template slot="title">
                     <ul>
                       <li>项目启动,停止,重启都将请求对应的地址</li>
-                      <li>传人参数有：projectId、projectName、type、copyId、result</li>
+                      <li>传入参数有：projectId、projectName、type、copyId、result</li>
                       <li>type 的值有：stop、beforeStop、start、beforeRestart</li>
                     </ul>
                   </template>
