@@ -22,6 +22,7 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import io.jpom.build.BuildUtil;
@@ -117,6 +118,11 @@ public class RepositoryModel extends BaseWorkspaceModel {
         Map<String, Object> map = new HashMap<>(10);
         map.put("url", this.getGitUrl());
         map.put("protocol", this.getProtocol());
+        Integer protocolCode = this.getProtocol();
+        GitProtocolEnum protocol = EnumUtil.likeValueOf(GitProtocolEnum.class, protocolCode);
+        if (protocol != null) {
+            map.put("protocolStr", protocol.name());
+        }
         map.put("username", this.getUserName());
         map.put("password", this.getPassword());
         map.put(Const.WORKSPACEID_REQ_HEADER, this.getWorkspaceId());

@@ -520,8 +520,6 @@ public class BuildExecuteService {
                 String msg = "error";
                 Integer repoTypeCode = repositoryModel.getRepoType();
                 RepositoryModel.RepoType repoType = EnumUtil.likeValueOf(RepositoryModel.RepoType.class, repoTypeCode);
-                Integer protocolCode = repositoryModel.getProtocol();
-                GitProtocolEnum protocol = EnumUtil.likeValueOf(GitProtocolEnum.class, protocolCode);
                 Boolean checkRepositoryDiff = buildExtraModule.getCheckRepositoryDiff();
                 String repositoryLastCommitId = buildInfoModel.getRepositoryLastCommitId();
                 if (repoType == RepositoryModel.RepoType.Git) {
