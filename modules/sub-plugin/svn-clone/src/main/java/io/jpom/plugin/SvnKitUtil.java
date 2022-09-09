@@ -73,7 +73,7 @@ public class SvnKitUtil {
      * @param map 仓库
      */
     public static SVNClientManager getAuthClient(Map<String, Object> map) {
-        String protocol = (String) map.get("protocol");
+        String protocol = (String) map.get("protocolStr");
         //repositoryModel.getProtocol();
         String userName = (String) map.get("username");
         String password = StrUtil.emptyToDefault((CharSequence) map.get("password"), StrUtil.EMPTY);
