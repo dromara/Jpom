@@ -5,7 +5,8 @@ DIR_PATH=$(cd `dirname $0`; pwd)"/../"
 echo ${DIR_PATH}
 
 # 提交代码 docs
-cd ${DIR_PATH} && cd docs && git add . &&  git commit -m 'update docs pages' && git push
+cd ${DIR_PATH} && cd docs && git add . &&  git commit -m 'update docs pages'
+cd ${DIR_PATH} && git push
 
 # 打包
 cd ${DIR_PATH} && cd docs && yarn && yarn run build
