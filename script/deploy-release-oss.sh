@@ -11,9 +11,9 @@ case "$(uname)" in
 esac
 DIR_PATH=${bin_abs_path}/../
 
-now_version="$(cat "$DIR_PATH"/jpom-parent/docs/version.txt)"
+now_version="$(cat "${DIR_PATH}/jpom-parent/docs/version.txt" | sed ':a;N;$!ba;s/\n/ /g')"
 
-echo "当前路径：${current_path} 脚本路径：${DIR_PATH} 当前版本：${now_version}"
+echo "当前路径：${current_path} 脚本路径：${bin_abs_path},目录：${DIR_PATH} 当前版本：${now_version}"
 
 if [ ! -n "$now_version" ]; then
     echo "ERROR: 版本不存在，请确认 /jpom-parent/docs/version.txt 中信息正确"
@@ -46,11 +46,11 @@ ${ossUtil} cp ${DIR_PATH}/jpom-parent/modules/server/target/server-${now_version
 ${ossUtil} cp ${DIR_PATH}/jpom-parent/modules/server/target/server-${now_version}-release.zip oss://jpom-releases/release/${now_version}/ -f
 ${ossUtil} cp ${DIR_PATH}/jpom-parent/modules/server/target/server-${now_version}-release.zip.sha1 oss://jpom-releases/release/${now_version}/ -f
 
-rm -f jpom-${now_version}.zip
+rm -f ${DIR_PATH}/jpom-${now_version}.zip
 
-zip -rj jpom-${now_version}.zip ${DIR_PATH}/jpom-parent/modules/server/target/server-${now_version}-release.zip ${DIR_PATH}/jpom-parent/modules/agent/target/agent-${now_version}-release.zip
+zip -rj ${DIR_PATH}/jpom-${now_version}.zip ${DIR_PATH}/jpom-parent/modules/server/target/server-${now_version}-release.zip ${DIR_PATH}/jpom-parent/modules/agent/target/agent-${now_version}-release.zip
 
 # 完整的压缩包
 ${ossUtil} cp ${DIR_PATH}/jpom-${now_version}.zip oss://jpom-releases/release/${now_version}/ -f
 
-rm -f jpom-${now_version}.zip
+rm -f ${DIR_PATH}/jpom-${now_version}.zip
