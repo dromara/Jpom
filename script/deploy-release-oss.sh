@@ -11,7 +11,10 @@ case "$(uname)" in
 esac
 DIR_PATH=${bin_abs_path}/../
 
-now_version="$(cat "${DIR_PATH}/jpom-parent/docs/version.txt" | sed ':a;N;$!ba;s/\n/ /g')"
+now_version="$(cat "${DIR_PATH}/jpom-parent/docs/version.txt")"
+
+#
+now_version="$(echo $now_version |tr -d '\n\r')"
 
 echo "当前路径：${current_path} 脚本路径：${bin_abs_path},目录：${DIR_PATH} 当前版本：${now_version}"
 
@@ -33,6 +36,8 @@ Darwin)
 	exit 1
 	;;
 esac
+
+echo  "${OS} ${ossUtil} 开始上传"
 
 # 同步到 agent oss 中
 ${ossUtil} cp ${DIR_PATH}/jpom-parent/modules/agent/target/agent-${now_version}-release.tar.gz oss://jpom-releases/release/${now_version}/ -f
