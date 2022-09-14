@@ -45,7 +45,7 @@ RUNJAR=""
 Log="${Path}server.log"
 LogBack="${Path}log/"
 # Modify project port number Log path
-JVM="${JPOM_SERVER_JVM:=-server -XX:+UseG1GC -Xms254m -Xmx1024m}"
+JVM="${JPOM_SERVER_JVM:=-server -XX:+UseG1GC -Xms254m -Xmx1024m -Dfile.encoding=UTF-8}"
 port="${JPOM_SERVER_PORT:=2122}"
 default_args="--jpom.applicationTag=${Tag} --spring.profiles.active=pro --server.port=${port}  --jpom.log=${Path}log"
 ARGS="${JPOM_SERVER_ARGS:=${default_args}} $@"
