@@ -38,7 +38,7 @@ set RUNJAR=
 @REM Do not modify----------------------------------↑
 @REM Whether to enable console log file backup
 set LogBack=true
-set JVM=-server -Xms200m -Xmx400m
+set JVM=-server -Xms200m -Xmx400m -Dfile.encoding=UTF-8
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --spring.profiles.active=pro --server.port=2123
 
 @REM get list jar
