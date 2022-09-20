@@ -18,7 +18,7 @@
 
 ## 正确使用单词的大小写
 
-以下例子均为正例，下面列出经常用错的大小写单词。
+以下例子均为**正例**，下面列出经常用错的大小写单词。
 
 在使用的时候，如果你不确定单词正确的拼写，请前往官网查看。
 
@@ -36,6 +36,11 @@
 - [Android](https://www.android.com/)
 - [iOS](https://www.apple.com/ios/ios-15/)
 - [Google](https://www.google.com/)
+- [Docker](https://www.docker.com/)
+
+> 备注：
+>
+> 在 Docker 的 logo 中，使用的是小写的 docker，但是在文档中均使用的首字母大写的 Docker。可以参考 GitLab 官方中通过 Docker 方式安装 GitLab 的文档：[https://docs.gitlab.com/ee/install/docker.html](https://docs.gitlab.com/ee/install/docker.html)
 
 
 
