@@ -59,17 +59,7 @@
             </a-col>
             <a-col :span="11">
               <span>项目: </span>
-              <a-select
-                :getPopupContainer="
-                  (triggerNode) => {
-                    return triggerNode.parentNode || document.body;
-                  }
-                "
-                :disabled="!item.nodeId"
-                style="width: 80%"
-                v-model="item.projectId"
-                :placeholder="`请选择项目`"
-              >
+              <a-select :disabled="!item.nodeId" style="width: 80%" v-model="item.projectId" :placeholder="`请选择项目`">
                 <!-- <a-select-option value=""> 请先选择节点</a-select-option> -->
                 <template v-if="nodeProjectList[item.nodeId]">
                   <a-select-option
@@ -125,12 +115,12 @@
   </div>
 </template>
 <script>
-import {deleteLogRead, editLogRead, getLogReadList} from "@/api/log-read";
-import {itemGroupBy, parseTime} from "@/utils/time";
-import {getNodeListAll, getProjectListAll} from "@/api/node";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import { deleteLogRead, editLogRead, getLogReadList } from "@/api/log-read";
+import { itemGroupBy, parseTime } from "@/utils/time";
+import { getNodeListAll, getProjectListAll } from "@/api/node";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
-import {mapGetters} from "vuex";
+import { mapGetters } from "vuex";
 import logReadView from "./logReadView";
 
 export default {

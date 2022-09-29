@@ -9,15 +9,7 @@
           <a-col :span="8" style="padding-left: 10px">
             <a-tooltip title="关键词高亮,支持正则(正则可能影响性能请酌情使用)">
               <a-input addonBefore="正则:/" placeholder="关键词高亮,支持正则" v-model="temp.searchValue" @pressEnter="onSearch">
-                <a-select
-                  :getPopupContainer="
-                    (triggerNode) => {
-                      return triggerNode.parentNode || document.body;
-                    }
-                  "
-                  slot="addonAfter"
-                  :value="'/' + this.regModifier"
-                >
+                <a-select slot="addonAfter" :value="'/' + this.regModifier">
                   <div @mousedown="(e) => e.preventDefault()" slot="dropdownRender" style="width: 200px; max-width: 300px; padding: 10px; cursor: pointer; background-color: #fff; border-radius: 5px">
                     <a-checkbox-group @change="regModifierChange" :value="regModifiers" :options="modifiers"> </a-checkbox-group>
                   </div>
