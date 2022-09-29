@@ -140,19 +140,7 @@
           <a-col :span="11">
             <a-row type="flex" justify="center">
               <a-form-model-item label="模版节点">
-                <a-select
-                  :getPopupContainer="
-                    (triggerNode) => {
-                      return triggerNode.parentNode || document.body;
-                    }
-                  "
-                  style="width: 30vw"
-                  show-search
-                  @change="changeTemplateNode"
-                  option-filter-prop="children"
-                  placeholder="请选择模版节点"
-                  v-model="tempNodeConfig.templateNodeId"
-                >
+                <a-select style="width: 30vw" show-search @change="changeTemplateNode" option-filter-prop="children" placeholder="请选择模版节点" v-model="tempNodeConfig.templateNodeId">
                   <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
                     {{ item.name }}
                   </a-select-option>
@@ -166,19 +154,7 @@
           <a-col :span="11">
             <a-row type="flex" justify="center">
               <a-form-model-item label="分发节点">
-                <a-select
-                  :getPopupContainer="
-                    (triggerNode) => {
-                      return triggerNode.parentNode || document.body;
-                    }
-                  "
-                  style="width: 30vw"
-                  show-search
-                  option-filter-prop="children"
-                  placeholder="请选择分发到的节点"
-                  mode="multiple"
-                  v-model="tempNodeConfig.chooseNode"
-                >
+                <a-select style="width: 30vw" show-search option-filter-prop="children" placeholder="请选择分发到的节点" mode="multiple" v-model="tempNodeConfig.chooseNode">
                   <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
                     {{ item.name }}
                   </a-select-option>

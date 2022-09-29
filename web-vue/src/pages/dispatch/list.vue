@@ -276,16 +276,7 @@
             </a-tooltip>
           </template>
           <a-input-group compact>
-            <a-select
-              :getPopupContainer="
-                (triggerNode) => {
-                  return triggerNode.parentNode || document.body;
-                }
-              "
-              style="width: 50%"
-              v-model="temp.whitelistDirectory"
-              placeholder="请选择项目白名单路径"
-            >
+            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
               <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
             </a-select>
             <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹" />

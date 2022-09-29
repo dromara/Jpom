@@ -244,16 +244,7 @@
               <a-input v-model="tempNode.name" placeholder="节点名称" />
             </a-form-model-item>
             <a-form-model-item label="节点协议" prop="protocol">
-              <a-select
-                :getPopupContainer="
-                  (triggerNode) => {
-                    return triggerNode.parentNode || document.body;
-                  }
-                "
-                v-model="tempNode.protocol"
-                defaultValue="http"
-                placeholder="节点协议"
-              >
+              <a-select v-model="tempNode.protocol" defaultValue="http" placeholder="节点协议">
                 <a-select-option key="http">HTTP</a-select-option>
                 <a-select-option key="https">HTTPS</a-select-option>
               </a-select>

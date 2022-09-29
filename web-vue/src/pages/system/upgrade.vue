@@ -8,33 +8,12 @@
             <a-space>
               <a-input class="search-input-item" @pressEnter="refresh" v-model="listQuery['%name%']" placeholder="节点名称" />
               <a-input class="search-input-item" @pressEnter="refresh" v-model="listQuery['%url%']" placeholder="节点地址" />
-              <a-select
-                :getPopupContainer="
-                  (triggerNode) => {
-                    return triggerNode.parentNode || document.body;
-                  }
-                "
-                show-search
-                option-filter-prop="children"
-                v-model="listQuery.group"
-                allowClear
-                placeholder="分组"
-                class="search-input-item"
-              >
+              <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
               <a-button :loading="loading" type="primary" @click="refresh">搜索</a-button>
 
-              <a-select
-                :getPopupContainer="
-                  (triggerNode) => {
-                    return triggerNode.parentNode || document.body;
-                  }
-                "
-                v-model="temp.protocol"
-                placeholder="升级协议"
-                class="search-input-item"
-              >
+              <a-select v-model="temp.protocol" placeholder="升级协议" class="search-input-item">
                 <a-select-option value="WebSocket">WebSocket</a-select-option>
                 <a-select-option value="Http">Http</a-select-option>
               </a-select>
@@ -76,9 +55,9 @@
 </template>
 <script>
 import upgrade from "@/components/upgrade";
-import {checkVersion, downloadRemote, getNodeGroupAll, getNodeList, uploadAgentFile} from "@/api/node";
-import {mapGetters} from "vuex";
-import {CHANGE_PAGE, COMPUTED_PAGINATION, getWebSocketUrl, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
+import { checkVersion, downloadRemote, getNodeGroupAll, getNodeList, uploadAgentFile } from "@/api/node";
+import { mapGetters } from "vuex";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, getWebSocketUrl, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {

@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
@@ -91,12 +92,12 @@ public class CheckPath {
                 }
 
                 @Override
-                public void logError(String id, int status) {
+                public void logError(HttpServletResponse response, String id, int status) {
 
                 }
 
                 @Override
-                public void logTimeOut(String id, long time) {
+                public void logTimeOut(HttpServletResponse response, String id, long time) {
 
                 }
             });

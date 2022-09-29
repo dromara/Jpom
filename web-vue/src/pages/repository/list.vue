@@ -71,17 +71,7 @@
         </a-form-model-item>
         <a-form-model-item label="仓库地址" prop="gitUrl">
           <a-input-group compact>
-            <a-select
-              :getPopupContainer="
-                (triggerNode) => {
-                  return triggerNode.parentNode || document.body;
-                }
-              "
-              style="width: 20%"
-              v-model="temp.repoType"
-              name="repoType"
-              placeholder="仓库类型"
-            >
+            <a-select style="width: 20%" v-model="temp.repoType" name="repoType" placeholder="仓库类型">
               <a-select-option :value="0">GIT</a-select-option>
               <a-select-option :value="1">SVN</a-select-option>
             </a-select>
@@ -195,15 +185,7 @@
             </a-tooltip>
           </template>
           <a-input-group compact>
-            <a-select
-              :getPopupContainer="
-                (triggerNode) => {
-                  return triggerNode.parentNode || document.body;
-                }
-              "
-              v-model="giteeImportForm.type"
-              @change="importTypeChange"
-            >
+            <a-select v-model="giteeImportForm.type" @change="importTypeChange">
               <a-select-option value="gitee"> gitee </a-select-option>
               <a-select-option value="github"> github </a-select-option>
               <a-select-option value="gitlab"> gitlab </a-select-option>
