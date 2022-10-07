@@ -84,6 +84,12 @@ postList: none
   link: https://docs.eoapi.io/?utm_source=ZZ090101
   bgColor: '#00785A'
   textColor: '#FFFFFF'
+- name: MaxKey
+  desc: </br>业界领先的单点登录
+  avatar: /images/friends/ad/maxkey.png
+  link: https://gitee.com/dromara/MaxKey
+  bgColor: '#00785A'
+  textColor: '#FFFFFF'
 ```
 :::
 
@@ -271,7 +277,7 @@ bash install.sh Server jdk
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/hertzbeat_brand.jpg')" alt="易用友好的云监控系统">
 </a>
 <a class="friends-item" href="https://maxkey.top/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/maxkey.png')" alt="业界领先的身份管理和认证产品">
+	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/maxkey2.png')" alt="业界领先的身份管理和认证产品">
 </a>
 <a class="friends-item" href="https://plugins.sheng90.wang/fast-request/" target="_blank">
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/fast-request.gif')" alt="Idea 版 Postman，为简化调试API而生">
