@@ -277,7 +277,7 @@ bash install.sh Server jdk
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/hertzbeat_brand.jpg')" alt="易用友好的云监控系统">
 </a>
 <a class="friends-item" href="https://maxkey.top/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/maxkey2.png')" alt="业界领先的身份管理和认证产品">
+	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/maxkey3.png')" alt="业界领先的身份管理和认证产品">
 </a>
 <a class="friends-item" href="https://plugins.sheng90.wang/fast-request/" target="_blank">
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/fast-request.gif')" alt="Idea 版 Postman，为简化调试API而生">
@@ -323,6 +323,11 @@ bash install.sh Server jdk
 <div class="friends-item" style="max-width:70px !important;">
     <a href="https://www.luckyhe.com/" target="_blank">
         <img :src="$withBase('/images/friends/luckyhe.png')" class="no-zoom friends-item-img"  alt="牧码人博客">
+    </a>
+</div>
+<div class="friends-item" style="max-width:70px !important;">
+    <a href="https://www.xiaonuo.vip?from=jpom" target="_blank">
+        <img :src="$withBase('/images/friends/xiaonuo.png')" class="no-zoom friends-item-img"  alt="国内首个国密前后端分离快速开发平台">
     </a>
 </div>
 
