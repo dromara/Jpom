@@ -5,12 +5,42 @@
         <a-alert message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除" style="margin-top: 10px; margin-bottom: 40px" banner />
         <a-timeline>
           <a-timeline-item>
-            <span class="layui-elem-quote">数据目录占用空间：{{ temp.dataSize }} (10分钟刷新一次)</span>
+            <span class="layui-elem-quote">
+              数据目录占用空间：{{ temp.dataSize }} (10分钟刷新一次)
+              <a-tooltip>
+                <template slot="title">
+                  <ul>
+                    <li>数据目录是指程序在运行过程中产生的文件以及数据存储目录</li>
+                    <li>数据目录大小包含：临时文件、在线构建文件、数据库文件等</li>
+                  </ul>
+                </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </span>
           </a-timeline-item>
           <a-timeline-item v-if="temp.cacheFileSize">
             <a-space>
               <span class="layui-elem-quote">临时文件占用空间：{{ temp.cacheFileSize }} (10分钟刷新一次)</span>
               <a-button size="small" type="primary" v-if="temp.cacheFileSize !== '0'" class="btn" @click="clear('serviceCacheFileSize')">清空</a-button>
+            </a-space>
+          </a-timeline-item>
+          <a-timeline-item>
+            <span class="layui-elem-quote">
+              在线构建文件占用空间：{{ temp.cacheBuildFileSize }} (10分钟刷新一次)
+              <a-tooltip>
+                <template slot="title">
+                  <ul>
+                    <li>在线构建文件主要保存，仓库文件，构建历史产物等。不支持主动清除，如果文件占用过大可以配置保留规则和对单个构建配置是否保存仓库、产物文件等</li>
+                  </ul>
+                </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </span>
+          </a-timeline-item>
+          <a-timeline-item v-if="temp.oldJarsSize">
+            <a-space>
+              <span class="layui-elem-quote">旧版程序包占有空间：{{ temp.oldJarsSize }}</span>
+              <a-button size="small" v-if="temp.oldJarsSize !== '0'" type="primary" class="btn" @click="clear('serviceOldJarsSize')">清空</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
@@ -22,15 +52,7 @@
           <a-timeline-item>
             <span class="layui-elem-quote">在读取的日志文件数：{{ temp.readFileOnLineCount }}</span>
           </a-timeline-item>
-          <a-timeline-item>
-            <span class="layui-elem-quote">在线构建文件占用空间：{{ temp.cacheBuildFileSize }} (10分钟刷新一次)</span>
-          </a-timeline-item>
-          <a-timeline-item v-if="temp.oldJarsSize">
-            <a-space>
-              <span class="layui-elem-quote">旧版程序包占有空间：{{ temp.oldJarsSize }}</span>
-              <a-button size="small" v-if="temp.oldJarsSize !== '0'" type="primary" class="btn" @click="clear('serviceOldJarsSize')">清空</a-button>
-            </a-space>
-          </a-timeline-item>
+
           <a-timeline-item>
             <span class="layui-elem-quote">插件数：{{ temp.pluginSize || 0 }}</span>
           </a-timeline-item>
