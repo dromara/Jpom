@@ -212,6 +212,9 @@ bash install.sh Server jdk
   </code-block>
 </code-group>
 
+
+<div class="wwads-cn wwads-horizontal wwads-sticky" data-id="188" style="max-width:1100px"></div>
+
 ## 🌍 知识星球
 
 <p align="center">

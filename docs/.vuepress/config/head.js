@@ -110,11 +110,6 @@ module.exports = [
     });
   `],
   ['style', {}, `
-  .buttons{
-      bottom: 15.5rem !important;
-  }
-  .custom-html-window {
-      right: 2px !important;
-  }
+
   `],
 ];
