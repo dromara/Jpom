@@ -218,7 +218,7 @@ bash install.sh Server jdk
 <div>
 <img class="no-zoom" style="height:200px;display: inline-block;" :src="$withBase('/images/zsxq.jpg')" alt="扫码加入知识星球，了解学习更多知识">
 
-<div class="wwads-cn wwads-horizontal wwads-sticky" data-id="188" style="max-width:700px;display: inline-block;"></div>
+<div class="wwads-cn wwads-horizontal wwads-sticky" data-id="188" style="max-width:600px;display: inline-block;margin-top: 0px;"></div>
 
 </div>
 
