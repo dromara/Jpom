@@ -15,6 +15,7 @@ module.exports = [
   ['meta', {name: '360-site-verification', content: '0a5e4a367ff77232a3c1e9bc83edf7ba'}],
   // <meta name="wwads-cn-verify" content="6da9003b743b65f4c0ccd295cc484e57" />
   ['meta', {name: 'wwads-cn-verify', content: '6da9003b743b65f4c0ccd295cc484e57'}],
+  ['script', {async: true, src: 'https://cdn.wwads.cn/js/makemoney.js', type: 'text/javascript'}], // 广告相关，你可以去掉
   // <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   ['meta', {name: 'viewport', content: 'width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no'}],
   ['script', {src: '/assets/js/jquery.3.4.1.min.js'}],
@@ -68,4 +69,44 @@ module.exports = [
       });
    }
    `],
+  ['script', {}, `
+    // 万维广告“禁止”广告拦截
+    // function called if wwads is blocked
+    // https://github.com/bytegravity/whitelist-wwads
+    function ABDetected() {
+      var adBlockDetected_div = document.createElement("div");
+      document.body.appendChild(adBlockDetected_div);
+      var navbar = document.querySelector(".navbar");
+      navbar.style.cssText="transition:top 300ms;top:33px";
+      adBlockDetected_div.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; background: #E01E5A; color: #fff; z-index: 9999999999; font-size: 14px; text-align: center; line-height: 1.5; font-weight: bold; padding-top: 6px; padding-bottom: 6px;";
+      adBlockDetected_div.innerHTML = "我们的广告服务商 <a style='color:#fff;text-decoration:underline' target='_blank' href='https://wwads.cn/page/end-user-privacy'>并不跟踪您的隐私</a>，为了支持本站的长期运营，请将我们的网站 <a style='color: #fff;text-decoration:underline' target='_blank' href='https://wwads.cn/page/whitelist-wwads'>加入广告拦截器的白名单</a>。";
+      document.getElementsByTagName("body")[0].appendChild(adBlockDetected_div);
+      // add a close button to the right side of the div
+      var adBlockDetected_close = document.createElement("div");
+      adBlockDetected_close.style.cssText = "position: absolute; top: 0; right: 10px; width: 30px; height: 30px; background: #E01E5A; color: #fff; z-index: 9999999999; line-height: 30px; cursor: pointer;";
+      adBlockDetected_close.innerHTML = "×";
+      adBlockDetected_div.appendChild(adBlockDetected_close);
+      // add a click event to the close button
+      adBlockDetected_close.onclick = function() {
+      this.parentNode.parentNode.removeChild(this.parentNode);
+      navbar.style.cssText="transition:top 300ms;top:0";
+      };
+    }
+
+    function docReady(t) {
+      "complete" === document.readyState ||
+      "interactive" === document.readyState
+        ? setTimeout(t, 1)
+        : document.addEventListener("DOMContentLoaded", t);
+    }
+
+    //check if wwads' fire function was blocked after document is ready with 3s timeout (waiting the ad loading)
+    docReady(function () {
+      setTimeout(function () {
+        if( window._AdBlockInit === undefined ){
+            ABDetected();
+        }
+      }, 3000);
+    });
+  `]
 ];
