@@ -108,5 +108,13 @@ module.exports = [
         }
       }, 3000);
     });
-  `]
+  `],
+  ['style', {}, `
+  .buttons{
+      bottom: 15.5rem;
+  }
+  .custom-html-window {
+      right: 2px;
+  }
+  `],
 ];
