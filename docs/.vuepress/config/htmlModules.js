@@ -46,7 +46,7 @@ module.exports = {
 
   `,
   windowRB: `
-<div class="wwads-cn wwads-vertical" data-id="188" style="max-width:200px" data-sticky-width="1500"></div>
+<div class="wwads-cn wwads-vertical" data-id="188" style="max-width:200px" data-sticky-width="1700"></div>
   `
 }
 
