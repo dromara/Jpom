@@ -13,6 +13,8 @@ module.exports = [
   ['meta', {name: 'baidu-site-verification', content: 'code-te8iliecTI'}],
   // <meta name="360-site-verification" content="0a5e4a367ff77232a3c1e9bc83edf7ba" />
   ['meta', {name: '360-site-verification', content: '0a5e4a367ff77232a3c1e9bc83edf7ba'}],
+  // <meta name="wwads-cn-verify" content="6da9003b743b65f4c0ccd295cc484e57" />
+  ['meta', {name: 'wwads-cn-verify', content: '6da9003b743b65f4c0ccd295cc484e57'}],
   // <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   ['meta', {name: 'viewport', content: 'width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no'}],
   ['script', {src: '/assets/js/jquery.3.4.1.min.js'}],
