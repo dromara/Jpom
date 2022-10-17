@@ -213,13 +213,14 @@ bash install.sh Server jdk
 </code-group>
 
 
-<div class="wwads-cn wwads-horizontal wwads-sticky" data-id="188" style="max-width:1100px"></div>
+## 🌍 精彩分享
 
-## 🌍 知识星球
+<div>
+<img class="no-zoom" style="height:200px;display: inline-block;" :src="$withBase('/images/zsxq.jpg')" alt="扫码加入知识星球，了解学习更多知识">
 
-<p align="center">
-<img class="no-zoom" :src="$withBase('/images/zsxq.jpg')" alt="扫码加入知识星球，了解学习更多知识">
-</p>
+<div class="wwads-cn wwads-horizontal wwads-sticky" data-id="188" style="max-width:700px;display: inline-block;"></div>
+
+</div>
 
 ## 🤝 dromara 组织项目
 
