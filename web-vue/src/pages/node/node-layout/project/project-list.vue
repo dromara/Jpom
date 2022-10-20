@@ -58,8 +58,8 @@
           </a-tooltip>
         </template>
       </template>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="`名称：${text}`">
-        <span>{{ text }}</span>
+      <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}`" @click="handleEdit(record)">
+        <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
       </a-tooltip>
       <template slot="time" slot-scope="text, record" placement="topLeft">
         <a-tooltip :title="`创建时间：${parseTime(record.createTimeMillis)}，${record.modifyTimeMillis ? '修改时间：' + parseTime(record.modifyTimeMillis) : ''}`">
