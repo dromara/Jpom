@@ -375,7 +375,8 @@ export default {
       this.$refs["editCommandForm"] && this.$refs["editCommandForm"].resetFields();
     },
     // 修改
-    handleEdit(row) {
+    handleEdit(rowData) {
+      const row = Object.assign({}, rowData);
       this.editCommandVisible = true;
       this.$refs["editCommandForm"] && this.$refs["editCommandForm"].resetFields();
       this.commandParams = [];
@@ -387,7 +388,8 @@ export default {
       this.getAllSSHList();
     },
     // 执行命令
-    handleExecute(row) {
+    handleExecute(rowData) {
+      const row = Object.assign({}, rowData);
       if (typeof row.defParams === "string" && row.defParams) {
         this.commandParams = JSON.parse(row.defParams);
       } else {
