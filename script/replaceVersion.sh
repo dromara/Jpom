@@ -59,6 +59,8 @@ fi
 # 替换所有模块pom.xml中的版本
 cd ${base} && mvn versions:set -DnewVersion=$1
 
+echo "替换配置文件版本号 $new_version"
+
 # 替换 docker 中的版本
 sed -i.bak "s/${old_version}/${new_version}/g" $base/.env
 
@@ -82,3 +84,5 @@ sed -i.bak "s/${old_version}/${new_version}/g" $base/.workflow/MasterPipeline.ym
 
 # 保留新版本号
 echo "$new_version" > $base/docs/version.txt
+
+echo "版本号替换成功 $new_version"
