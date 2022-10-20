@@ -24,7 +24,7 @@
 FROM maven:3.8.5-jdk-8
 
 ENV JPOM_HOME	/usr/local/jpom-server
-ENV JPOM_PKG_VERSION	2.9.12
+ENV JPOM_PKG_VERSION	2.9.13
 ENV JPOM_PKG	server-${JPOM_PKG_VERSION}-release.tar.gz
 
 
