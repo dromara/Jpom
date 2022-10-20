@@ -68,10 +68,12 @@ import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -85,6 +87,7 @@ import java.util.stream.Collectors;
  * @since 2019/7/19
  */
 @Builder
+@Slf4j
 public class ReleaseManage implements Runnable {
 
     private final UserModel userModel;
@@ -92,7 +95,7 @@ public class ReleaseManage implements Runnable {
     private final BuildExtraModule buildExtraModule;
     private final String logId;
     private final BuildExecuteService buildExecuteService;
-    private final Map<String, String> buildEnv;
+    private Map<String, String> buildEnv;
 
     private LogRecorder logRecorder;
     private File resultFile;
@@ -104,6 +107,13 @@ public class ReleaseManage implements Runnable {
         }
         this.resultFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, buildExtraModule.getResultDirFile());
         //
+        if (buildEnv == null) {
+            this.buildEnv = new HashMap<>();
+            buildEnv.put("BUILD_ID", this.buildExtraModule.getId());
+            buildEnv.put("BUILD_NAME", this.buildExtraModule.getName());
+            //buildEnv.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
+            buildEnv.put("BUILD_NUMBER_ID", this.buildNumberId + StrUtil.EMPTY);
+        }
 //        envFileMap.put("BUILD_ID", this.buildExtraModule.getId());
 //        envFileMap.put("BUILD_NAME", this.buildExtraModule.getName());
         buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
@@ -610,6 +620,10 @@ public class ReleaseManage implements Runnable {
 
     @Override
     public void run() {
-        this.start();
+        try {
+            this.start();
+        } catch (Exception e) {
+            log.error("执行发布异常", e);
+        }
     }
 }
