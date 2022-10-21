@@ -12,8 +12,9 @@ module.exports = [
       {text: '实践案例目录', link: '/pages/practice/catalogue/'},
     ]},
   {
-    text: '❓常见问题', link: '/pages/FQA/', items: [
+    text: '❓常见问题', link: '/pages/FQA/more/', items: [
       {text: '名词解释', link: '/pages/FQA/proper-noun/'},
+      {text: '什么是 DSL', link: '/pages/FQA/DSL/'},
     ]
   },
   {

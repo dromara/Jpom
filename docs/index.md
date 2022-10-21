@@ -41,6 +41,7 @@ postList: none
 
 <p align="center">
   <a class="become-sponsor" href="https://demo.jpom.top?from=site-middle">演示站点</a>
+  <a class="become-sponsor" href="/pages/practice/">实践案例</a>
   <a class="become-sponsor" href="/pages/praise/">支持这个项目</a>
 </p>
 
@@ -232,7 +233,7 @@ bash install.sh Server jdk
 <a class="friends-item" href="https://hutool.cn/" target="_blank">
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/hutool2.png')" alt="🍬小而全的Java工具类库，使Java拥有函数式语言般的优雅，让Java语言也可以“甜甜的”。">
 </a>
-<a class="friends-item" href="https://sa-token.dev33.cn/" target="_blank">
+<a class="friends-item" href="https://sa-token.cc/" target="_blank">
 	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/sa-token.png')" alt="一个轻量级 java 权限认证框架，让鉴权变得简单、优雅！">
 </a>
 <a class="friends-item" href="https://liteflow.yomahub.com/" target="_blank">
