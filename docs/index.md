@@ -231,108 +231,108 @@ bash install.sh Server jdk
 
 <p >
 <a class="friends-item" href="https://hutool.cn/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/hutool2.png')" alt="🍬小而全的Java工具类库，使Java拥有函数式语言般的优雅，让Java语言也可以“甜甜的”。">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/hutool2.png')" alt="🍬小而全的Java工具类库，使Java拥有函数式语言般的优雅，让Java语言也可以“甜甜的”。">
 </a>
 <a class="friends-item" href="https://sa-token.cc/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/sa-token.png')" alt="一个轻量级 java 权限认证框架，让鉴权变得简单、优雅！">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/sa-token.png')" alt="一个轻量级 java 权限认证框架，让鉴权变得简单、优雅！">
 </a>
 <a class="friends-item" href="https://liteflow.yomahub.com/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/liteflow2.png')" alt="轻量，快速，稳定，可编排的组件式流程引擎">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/liteflow2.png')" alt="轻量，快速，稳定，可编排的组件式流程引擎">
 </a>
 <a class="friends-item" href="https://jpom.top/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/jpom.png')" alt="一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/jpom.png')" alt="一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件">
 </a>
 <a class="friends-item" href="https://gitee.com/dromara/TLog" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/tlog2.png')" alt="一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/tlog2.png')" alt="一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪">
 </a>
 <a class="friends-item" href="https://easy-es.cn/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/easy-es2.png')" alt="🚀傻瓜级ElasticSearch搜索引擎ORM框架">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/easy-es2.png')" alt="🚀傻瓜级ElasticSearch搜索引擎ORM框架">
 </a>
 <a class="friends-item" href="https://gitee.com/dromara/hmily" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/hmily.png')" alt="高性能一站式分布式事务解决方案。">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/hmily.png')" alt="高性能一站式分布式事务解决方案。">
 </a>
 <a class="friends-item" href="https://gitee.com/dromara/Raincat" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/raincat.png')" alt="强一致性分布式事务解决方案。">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/raincat.png')" alt="强一致性分布式事务解决方案。">
 </a>
 <a class="friends-item" href="https://gitee.com/dromara/myth" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/myth.png')" alt="可靠消息分布式事务解决方案。">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/myth.png')" alt="可靠消息分布式事务解决方案。">
 </a>
 <a class="friends-item" href="https://cubic.jiagoujishu.com/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/cubic.png')" alt="一站式问题定位平台，以agent的方式无侵入接入应用，完整集成arthas功能模块，致力于应用级监控，帮助开发人员快速定位问题">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/cubic.png')" alt="一站式问题定位平台，以agent的方式无侵入接入应用，完整集成arthas功能模块，致力于应用级监控，帮助开发人员快速定位问题">
 </a>
 <a class="friends-item" href="http://forest.dtflyx.com/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/forest-logo.png')" alt="Forest能够帮助您使用更简单的方式编写Java的HTTP客户端" nf>
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/forest-logo.png')" alt="Forest能够帮助您使用更简单的方式编写Java的HTTP客户端" nf>
 </a>
 <a class="friends-item" href="https://su.usthe.com/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/sureness.png')" alt="面向 REST API 的高性能认证鉴权框架">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/sureness.png')" alt="面向 REST API 的高性能认证鉴权框架">
 </a>
 <a class="friends-item" href="https://gitee.com/dromara/northstar" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/northstar_logo.png')" alt="Northstar盈富量化交易平台">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/northstar_logo.png')" alt="Northstar盈富量化交易平台">
 </a>
 <a class="friends-item" href="https://www.jeesuite.com/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/mendmix.png')" alt="开源分布式云原生架构一站式解决方案">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/mendmix.png')" alt="开源分布式云原生架构一站式解决方案">
 </a>
 <a class="friends-item" href="https://www.x-easypdf.cn" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/koalas-rpc2.png')" alt="企业生产级百亿日PV高可用可拓展的RPC框架。">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/koalas-rpc2.png')" alt="企业生产级百亿日PV高可用可拓展的RPC框架。">
 </a>
 <a class="friends-item" href="https://dynamictp.cn/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/dynamic-tp.png')" alt="🔥🔥🔥 基于配置中心的轻量级动态可监控线程池">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/dynamic-tp.png')" alt="🔥🔥🔥 基于配置中心的轻量级动态可监控线程池">
 </a>
 <a class="friends-item" href="https://hertzbeat.com/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/hertzbeat_brand.jpg')" alt="易用友好的云监控系统">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/hertzbeat_brand.jpg')" alt="易用友好的云监控系统">
 </a>
 <a class="friends-item" href="https://maxkey.top/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/maxkey3.png')" alt="业界领先的身份管理和认证产品">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/maxkey3.png')" alt="业界领先的身份管理和认证产品">
 </a>
 <a class="friends-item" href="https://plugins.sheng90.wang/fast-request/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/fast-request.gif')" alt="Idea 版 Postman，为简化调试API而生">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/fast-request.gif')" alt="Idea 版 Postman，为简化调试API而生">
 </a>
 <a class="friends-item" href="https://async.sizegang.cn/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/gobrs-async.png')" alt="🔥 配置极简功能强大的异步任务动态编排框架">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/gobrs-async.png')" alt="🔥 配置极简功能强大的异步任务动态编排框架">
 </a>
 <a class="friends-item" href="https://www.x-easypdf.cn" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/x-easypdf.png')" alt="一个用搭积木的方式构建pdf的框架（基于pdfbox）">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/x-easypdf.png')" alt="一个用搭积木的方式构建pdf的框架（基于pdfbox）">
 </a>
 <a class="friends-item" href="http://dromara.gitee.io/image-combiner" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/image-combiner.png')" alt="一个专门用于图片合成的工具，没有很复杂的功能，简单实用，却不失强大">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/image-combiner.png')" alt="一个专门用于图片合成的工具，没有很复杂的功能，简单实用，却不失强大">
 </a>
 <a class="friends-item" href="https://www.herodotus.cn/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/dante-cloud2.png')" alt="Dante-Cloud 是一款企业级微服务架构和服务能力开发平台。">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/dante-cloud2.png')" alt="Dante-Cloud 是一款企业级微服务架构和服务能力开发平台。">
 </a>
 <a class="friends-item" href="https://dromara.org/zh/projects/" target="_blank">
-	<img class="no-zoom friends-item-img" :src="$withBase('/images/friends/link/dromara.png')" alt="让每一位开源爱好者，体会到开源的快乐。">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/dromara.png')" alt="让每一位开源爱好者，体会到开源的快乐。">
 </a>
 </p>
 
 ## 🧲友情链接
 <div class="friends-item">
     <a href="https://shop108037867.taobao.com" target="_blank">
-        <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom friends-item-img" alt="yuanlaiyishe">
+        <img :src="$withBase('/images/friends/yuanlaiyishe.png')" class="no-zoom friends-item-img hover-alt" alt="yuanlaiyishe">
     </a>
 </div>
 <div class="friends-item">
     <a href="http://www.layui-vue.com" target="_blank">
-        <img :src="$withBase('/images/friends/layui-vue.png')" class="no-zoom friends-item-img" alt="layui-vue">
+        <img :src="$withBase('/images/friends/layui-vue.png')" class="no-zoom friends-item-img hover-alt" alt="layui-vue">
     </a>
 </div>
 <div class="friends-item" style="max-width:70px !important;">
     <a href="https://weihongbin.com/" target="_blank">
-        <img :src="$withBase('/images/friends/weihongbin.png')" class="no-zoom friends-item-img"  alt="weihongbin">
+        <img :src="$withBase('/images/friends/weihongbin.png')" class="no-zoom friends-item-img hover-alt"  alt="weihongbin">
     </a>
 </div>
 <div class="friends-item" style="max-width:70px !important;">
     <a href="https://www.wxy97.com/" target="_blank">
-        <img :src="$withBase('/images/friends/wxy97.png')" class="no-zoom friends-item-img"  alt="王旭阳个人博客">
+        <img :src="$withBase('/images/friends/wxy97.png')" class="no-zoom friends-item-img hover-alt"  alt="王旭阳个人博客">
     </a>
 </div>
 <div class="friends-item" style="max-width:70px !important;">
     <a href="https://www.luckyhe.com/" target="_blank">
-        <img :src="$withBase('/images/friends/luckyhe.png')" class="no-zoom friends-item-img"  alt="牧码人博客">
+        <img :src="$withBase('/images/friends/luckyhe.png')" class="no-zoom friends-item-img hover-alt"  alt="牧码人博客">
     </a>
 </div>
 <div class="friends-item" style="max-width:70px !important;">
     <a href="https://www.xiaonuo.vip?from=jpom" target="_blank">
-        <img :src="$withBase('/images/friends/xiaonuo.png')" class="no-zoom friends-item-img"  alt="国内首个国密前后端分离快速开发平台">
+        <img :src="$withBase('/images/friends/xiaonuo.png')" class="no-zoom friends-item-img hover-alt"  alt="国内首个国密前后端分离快速开发平台">
     </a>
 </div>
 

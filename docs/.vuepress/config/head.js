@@ -53,7 +53,7 @@ module.exports = [
          }, 2000);
        });
    function imgHover(){
-     $(".friends-item-img[alt]").hover(function() {
+     $(".hover-alt[alt]").hover(function() {
           var msg = $(this).attr("alt");
           if (msg) {
               window.msgLayer = layer.tips(msg, $(this), {
