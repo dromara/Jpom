@@ -25,7 +25,9 @@ module.exports = [
       {text: '加入社区讨论', link: '/pages/praise/join/'},
     ]
   },
-
+  {
+    text: '🤝用户', link: '/pages/user/'
+  },
   {
     text: '📰更新记录', link: '/pages/changelog/new/', items: [
       {text: '下载中心', link: '/pages/all-downloads/'},
