@@ -35,10 +35,10 @@
 </p>
 
 <p align="center">
-	👉 <a target="_blank" href="https://jpom.top/">https://jpom.top/</a> | <a target="_blank" href="https://demo.jpom.io/">https://demo.jpom.io/</a>👈
+	👉 <a target="_blank" href="https://jpom.top/">https://jpom.top/</a> 👈
 </p>
 <p align="center">
-	备用地址：<a target="_blank" href="https://jpom.top/">https://jpom.top/</a> | <a target="_blank" href="https://demo.jpom.top/">https://demo.jpom.top/</a>
+	备用地址：<a target="_blank" href="https://jpom.top/">https://jpom.top/</a> 
 </p>
 
 # 使用 git submodule 合并管理代码和文档仓库
