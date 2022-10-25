@@ -37,7 +37,7 @@ module.exports = {
    </div>
 `,
   sidebarT: `
-    <a href="https://docs.eoapi.io/?utm_source=ZZ090102" target="_blank">
+    <a href="https://www.eoapi.io/?utm_source=sponsor&utm_campaign=s-jpom" target="_blank">
       <img class="no-zoom" height="60" width="224" src="/images/friends/ad/eoapi.gif">
     </a>
     <a href="https://gitee.com/dromara/MaxKey" target="_blank">

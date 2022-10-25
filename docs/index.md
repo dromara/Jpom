@@ -81,7 +81,7 @@ postList: none
 - name: Eoapi
   desc: 开源 API 管理工具，接口文档、接口测试、Mock...
   avatar: /images/friends/ad/eoapi.jpg
-  link: https://docs.eoapi.io/?utm_source=ZZ090101
+  link: https://www.eoapi.io/?utm_source=sponsor&utm_campaign=s-jpom
   bgColor: '#00785A'
   textColor: '#FFFFFF'
 - name: MaxKey
