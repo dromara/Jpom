@@ -2,7 +2,7 @@ module.exports = [
   {
     text: '首页', link: '/'
   },
-  {text: '💻演示站点', link: 'https://demo.jpom.top?from=site-nav'},
+
   {
     text: '📖文档', link: '/pages/install/', items: [
       {text: 'v2.8.X迁移到v2.9.X指南', link: '/pages/upgrade/2.8.x-to-2.9.x/'},

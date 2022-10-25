@@ -40,7 +40,6 @@ postList: none
 <br/>
 
 <p align="center">
-  <a class="become-sponsor" href="https://demo.jpom.top?from=site-middle">演示站点</a>
   <a class="become-sponsor" href="/pages/practice/">实践案例</a>
   <a class="become-sponsor" href="/pages/praise/">支持这个项目</a>
 </p>
