@@ -35,7 +35,7 @@
 </p>
 
 <p align="center">
-	👉 <a target="_blank" href="https://jpom.top">https://jpom.top/</a> | <a target="_blank" href="https://demo.jpom.top/">https://demo.jpom.top</a> 👈
+	👉 <a target="_blank" href="https://jpom.top">https://jpom.top/</a>  👈
 </p>
 
 ## 😭 日常开发中，您是否有以下痛点？
@@ -331,19 +331,6 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 1. 插件端示例：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml)
 2. 服务端示例：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
-
-## 💻 演示项目
-
-[https://demo.jpom.top](https://demo.jpom.top)
-
-```log
-账号：demo
-密码：jpom123
-```
-
-> 演示系统有部分功能做了限制，完整功能请自行部署体验
->
-> 如果出现登录不上，请联系我们，联系方式在最底部
 
 ### 构建案例仓库代码
 
