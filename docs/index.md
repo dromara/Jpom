@@ -62,7 +62,7 @@ postList: none
   width: 150px;
   height:40px;
   flex:1;
-  text-align: center;
+  /*text-align: center;*/
   display: inline-block;
   margin: 5px;
 }
@@ -290,7 +290,7 @@ bash install.sh Server jdk
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/gobrs-async.png')" alt="🔥 配置极简功能强大的异步任务动态编排框架">
 </a>
 <a class="friends-item" href="https://www.x-easypdf.cn" target="_blank">
-	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/x-easypdf.png')" alt="一个用搭积木的方式构建pdf的框架（基于pdfbox）">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/xeasypdf-logo.png')" alt="一个用搭积木的方式构建pdf的框架（基于pdfbox）">
 </a>
 <a class="friends-item" href="http://dromara.gitee.io/image-combiner" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/image-combiner.png')" alt="一个专门用于图片合成的工具，没有很复杂的功能，简单实用，却不失强大">
@@ -298,8 +298,8 @@ bash install.sh Server jdk
 <a class="friends-item" href="https://www.herodotus.cn/" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/dante-cloud2.png')" alt="Dante-Cloud 是一款企业级微服务架构和服务能力开发平台。">
 </a>
-<a class="friends-item" href="https://dromara.org/zh/projects/" target="_blank">
-	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/dromara.png')" alt="让每一位开源爱好者，体会到开源的快乐。">
+<a class="friends-item" href="https://gitee.com/dromara/go-view" target="_blank">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/goview-logo.png')" alt="让每一位开源爱好者，体会到开源的快乐。">
 </a>
 </p>
 
