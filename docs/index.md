@@ -88,8 +88,14 @@ postList: none
   desc: </br>业界领先的单点登录
   avatar: /images/friends/ad/maxkey.png
   link: https://gitee.com/dromara/MaxKey
-  bgColor: '#00785A'
-  textColor: '#FFFFFF'
+  bgColor: '#9ed3e5'
+  textColor: '#1f2328'
+- name: Snowy
+  desc: 国内首个国密前后端分离快速开发平台，中国式工作流、独家双模式租户
+  avatar: /images/friends/ad/snowy.png
+  link: https://www.xiaonuo.vip
+  bgColor: '#1373CC'
+  textColor: '#ffffff'
 ```
 :::
 

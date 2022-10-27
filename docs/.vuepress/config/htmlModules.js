@@ -43,6 +43,9 @@ module.exports = {
     <a href="https://gitee.com/dromara/MaxKey" target="_blank">
       <img class="no-zoom" height="60" width="224" src="/images/friends/ad/maxkey-banner.png">
     </a>
+    <a href="https://www.xiaonuo.vip" target="_blank">
+      <img class="no-zoom" height="60" width="224" src="/images/friends/ad/snowy-banner.jpg">
+    </a>
   `,
   // 万维广告
   pageT: `
