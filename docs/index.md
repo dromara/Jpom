@@ -218,6 +218,12 @@ wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk
 ```
   </code-block>
+
+<code-block title="docker">
+```bash
+docker run -p 2122:2122 --name jpom jpomdocker/jpom
+```
+  </code-block>
 </code-group>
 
 
