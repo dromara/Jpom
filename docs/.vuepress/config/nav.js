@@ -1,6 +1,6 @@
 module.exports = [
   {
-    text: '首页', link: '/'
+    text: '🔖首页', link: '/'
   },
 
   {
@@ -8,9 +8,11 @@ module.exports = [
       {text: 'v2.8.X迁移到v2.9.X指南', link: '/pages/upgrade/2.8.x-to-2.9.x/'},
     ]
   },
-  {text: '🔥实践案例', link: '/pages/practice/',items:[
+  {
+    text: '🔥实践案例', link: '/pages/practice/', items: [
       {text: '实践案例目录', link: '/pages/practice/catalogue/'},
-    ]},
+    ]
+  },
   {
     text: '❓常见问题', link: '/pages/FQA/more/', items: [
       {text: '名词解释', link: '/pages/FQA/proper-noun/'},
@@ -35,7 +37,10 @@ module.exports = [
       {text: '下载中心', link: '/pages/all-downloads/'},
     ]
   },
-
-  {text: 'Gitee', link: 'https://gitee.com/dromara/Jpom'},
-  {text: 'Github', link: 'https://github.com/dromara/Jpom'},
+  {
+    text: '📦仓库', items: [
+      {text: 'Gitee', link: 'https://gitee.com/dromara/Jpom'},
+      {text: 'Github', link: 'https://github.com/dromara/Jpom'},
+    ]
+  },
 ];
