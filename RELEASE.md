@@ -1,5 +1,6 @@
 # 发布流程
 
+
 1. 将 dev 分支合并到 master
 2. changelog 版本增加发版日期
 3. 更新代码版本号：`cd ./jpom-parent/script && sh replaceVersion.sh 2.x.x`
