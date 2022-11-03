@@ -177,6 +177,8 @@ postList: none
 
 ### 一键安装插件端 [详细的安装说明文档](/pages/install/)
 
+默认端口：`2123`
+
 <code-group>
   <code-block title="centos" active>
 ```bash
@@ -199,6 +201,8 @@ bash install.sh Agent jdk
 
 
 ### 一键安装服务端 [详细的安装说明文档](/pages/install/)
+
+默认端口：`2122`
 
 <code-group>
   <code-block title="centos" active>
