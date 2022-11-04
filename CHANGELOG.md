@@ -1,6 +1,11 @@
 # 🚀 版本日志
 
-## dev
+## 2.9.14
+
+### 🐣 新增功能
+
+### 🐞 解决BUG、优化功能
+
 1. 【server】更新 Server.sh JVM 参数 -XX:+UnlockExperimentalVMOptions：该参数为解锁 JVM 实验性参数
 2. 【agent】更新 Server.sh JVM 参数 -XX:+UnlockExperimentalVMOptions：该参数为解锁 JVM 实验性参数
 
