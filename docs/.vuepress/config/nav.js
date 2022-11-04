@@ -41,7 +41,7 @@ module.exports = [
     ]
   },
   {
-    text: '📦仓库', items: [
+    text: '📦仓库', link: 'https://gitee.com/dromara/Jpom', items: [
       {text: 'Gitee', link: 'https://gitee.com/dromara/Jpom'},
       {text: 'Github', link: 'https://github.com/dromara/Jpom'},
     ]
