@@ -12,6 +12,7 @@ features: # 可选的
   details: 集群节点，统一管理多节点的项目，实现快速一键分发项目文件
 - title: 项目管理
   details: 创建、启动、停止、实时查看项目控制台日志，管理项目文件
+  link: /pages/practice/project-dsl-java/
 - title: SSH 终端
   details: 在浏览器中执行 SSH 终端，方便进行日常运维,记录执行命令记录
   link: /pages/practice/ssh-terminal/
