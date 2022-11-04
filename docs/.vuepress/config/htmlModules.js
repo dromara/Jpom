@@ -31,9 +31,6 @@ module.exports = {
     ">社区讨论</p>
     <img src="/images/wx_qrcode2.png"  style="width:100%;" />
     添加小助手：备注 <b>Jpom</b> 进群
-    </p>
-
-
    </div>
 `,
   sidebarT: `
