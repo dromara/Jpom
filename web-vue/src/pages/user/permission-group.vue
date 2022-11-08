@@ -157,7 +157,7 @@
         </a-form-model-item>
 
         <a-form-model-item label="描述" prop="description">
-          <a-input v-model="temp.description" :maxLength="200" type="textarea" :rows="5" placeholder="变量描述" />
+          <a-input v-model="temp.description" :maxLength="200" type="textarea" :rows="5" placeholder="描述" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
