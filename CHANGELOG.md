@@ -8,6 +8,7 @@
 
 1. 【server】更新 Server.sh JVM 参数 -XX:+UnlockExperimentalVMOptions：该参数为解锁 JVM 实验性参数
 2. 【agent】更新 Server.sh JVM 参数 -XX:+UnlockExperimentalVMOptions：该参数为解锁 JVM 实验性参数
+3. 【server】修复脚本执行日志名称搜索异常（感谢[@伤感的风铃草](https://gitee.com/bwy-flc) [Gitee issues I600OE](https://gitee.com/dromara/Jpom/issues/I600OE) ）
 
 ------
 
