@@ -163,7 +163,7 @@ public class NodeEditController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public String del(@ValidatorItem String id) {
         HttpServletRequest request = getRequest();
-        this.checkDataBind(id, request);
+        this.checkDataBind(id, request, "删除");
         //
         {
             ProjectInfoCacheModel projectInfoCacheModel = new ProjectInfoCacheModel();
@@ -185,17 +185,17 @@ public class NodeEditController extends BaseServerController {
         return JsonMessage.getString(200, "操作成功");
     }
 
-    private void checkDataBind(String id, HttpServletRequest request) {
+    private void checkDataBind(String id, HttpServletRequest request, String msg) {
         //  判断分发
         boolean checkNode = outGivingServer.checkNode(id, request);
-        Assert.state(!checkNode, "该节点存在分发项目，不能删除");
+        Assert.state(!checkNode, "该节点存在分发项目，不能" + msg);
         boolean checkLogRead = logReadServer.checkNode(id, request);
-        Assert.state(!checkLogRead, "该日志阅读项目，不能删除");
+        Assert.state(!checkLogRead, "该日志阅读项目，不能" + msg);
         // 监控
         boolean checkNode1 = monitorService.checkNode(id);
-        Assert.state(!checkNode1, "该节点存在监控项，不能删除");
+        Assert.state(!checkNode1, "该节点存在监控项，不能" + msg);
         boolean checkNode2 = buildService.checkNode(id, request);
-        Assert.state(!checkNode2, "该节点存在构建项，不能删除");
+        Assert.state(!checkNode2, "该节点存在构建项，不能" + msg);
     }
 
     private void delNodeData(String id, HttpServletRequest request) {
@@ -219,7 +219,7 @@ public class NodeEditController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public String unbind(String id) {
         HttpServletRequest request = getRequest();
-        this.checkDataBind(id, request);
+        this.checkDataBind(id, request, "解绑");
         //
         projectInfoCacheService.delCache(id, request);
         nodeScriptServer.delCache(id, request);

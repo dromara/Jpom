@@ -265,7 +265,8 @@ docker run -d -p 2122:2122 \
 yum install -y git
 git clone https://gitee.com/dromara/Jpom.git
 cd Jpom
-docker-compose up
+docker-compose -f docker-compose.yml up
+# docker-compose -f docker-compose-local.yml up
 ```
 
 ### 方式六：💻 编译运行
