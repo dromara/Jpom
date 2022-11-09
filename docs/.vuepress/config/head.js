@@ -19,5 +19,5 @@ module.exports = [
   ['meta', {name: 'viewport', content: 'width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no'}],
   ['script', {async: true, src: '/assets/js/jquery.3.4.1.min.js'}],
   ['script', {async: true, src: '/assets/js/layer-3.1.1.js'}],
-  ['script', {async: true, src: '/assets/js/common.js'}],
+  ['script', {src: '/assets/js/common.js'}],
 ];
