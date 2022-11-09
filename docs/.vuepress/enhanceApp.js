@@ -13,7 +13,7 @@ export default ({
   if (!isServer) {
     router.afterEach(() => {
       docReady(function () {
-        console.log("\n %c Jpom %c https://jpom.top/ \n", "color: #ffffff; background: #f1404b; padding:5px 0;", "background: #030307; padding:5px 0;");
+        console.log("\n %c Jpom %c " + `${location.protocol}//${location.host}` + " \n", "color: #ffffff; background: #f1404b; padding:5px 0;", "background: #030307; padding:5px 0;");
         //check if wwads' fire function was blocked after document is ready with 3s timeout (waiting the ad loading)
         setTimeout(function () {
           if (window._AdBlockInit === undefined) {
@@ -37,6 +37,9 @@ export default ({
           pageAD.style.display = 'flex';
         }
       }, 900);
+
+      // 检查域名
+      checkDomain();
     })
   }
 }
@@ -56,4 +59,14 @@ function docReady(t) {
   "interactive" === document.readyState
     ? setTimeout(t, 1)
     : document.addEventListener("DOMContentLoaded", t);
+}
+
+const localHosts = ['localhost', '127.0.0.1'];
+
+function checkDomain() {
+  if (localHosts.includes(location.hostname)) {
+    return;
+  }
+  console.log(location.host + '  =>  jpom.top')
+  location.href = `https://jpom.top${location.pathname}${location.search}${location.hash}`;
 }
