@@ -61,7 +61,7 @@ function docReady(t) {
     : document.addEventListener("DOMContentLoaded", t);
 }
 
-const localHosts = ['localhost', '127.0.0.1'];
+const localHosts = ['localhost', '127.0.0.1', 'jpom.top'];
 
 function checkDomain() {
   if (localHosts.includes(location.hostname)) {
