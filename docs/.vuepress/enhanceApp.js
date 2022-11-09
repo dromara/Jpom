@@ -37,9 +37,6 @@ export default ({
           pageAD.style.display = 'flex';
         }
       }, 900);
-
-      // 检查域名
-      checkDomain();
     })
   }
 }
@@ -51,22 +48,4 @@ function ABDetected() {
   if (wwadsEl[0] && !wwadsContentEl) {
     wwadsEl[0].innerHTML = h;
   }
-}
-
-//check document ready
-function docReady(t) {
-  "complete" === document.readyState ||
-  "interactive" === document.readyState
-    ? setTimeout(t, 1)
-    : document.addEventListener("DOMContentLoaded", t);
-}
-
-const localHosts = ['localhost', '127.0.0.1', 'jpom.top'];
-
-function checkDomain() {
-  if (localHosts.includes(location.hostname)) {
-    return;
-  }
-  console.log(location.host + '  =>  jpom.top')
-  location.href = `https://jpom.top${location.pathname}${location.search}${location.hash}`;
 }
