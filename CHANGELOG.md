@@ -6,6 +6,7 @@
 
 1. 【server】修复监控报警无法触发 webhook 类型的通知（感谢[@项勇祥](https://gitee.com/xiang-yong-xiang) [Gitee issues I61KRV](https://gitee.com/dromara/Jpom/issues/I61KRV) ）
 2. 优化获取程序实参的方法（main 方法参数、使用 SimpleCommandLinePropertySource）
+3. 【server】修复构建切换分支冲突后，手动清除代码(构建缓存)时文件被占用问题（感谢[@xuejun84](https://gitee.com/xuejun84) [Gitee issues I61ANL](https://gitee.com/dromara/Jpom/issues/I61ANL) ）
 ------
 
 ## 2.9.14 (2022-11-08)

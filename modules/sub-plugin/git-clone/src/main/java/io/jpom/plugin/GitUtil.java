@@ -176,18 +176,20 @@ public class GitUtil {
         if (FileUtil.file(file, Constants.DOT_GIT).exists()) {
             String url = (String) parameter.get("url");
             if (checkRemoteUrl(url, file)) {
-                git = Git.open(file);
                 //
                 if (branchName != null) {
-                    PullCommand pull = git.pull();
-                    if (printWriter != null) {
-                        pull.setProgressMonitor(new TextProgressMonitor(printWriter));
+                    try (Git pullGit = Git.open(file)) {
+                        PullCommand pull = pullGit.pull();
+                        if (printWriter != null) {
+                            pull.setProgressMonitor(new TextProgressMonitor(printWriter));
+                        }
+                        pull.setRemoteBranchName(branchName);
+                        // 更新凭证
+                        setCredentials(pull, parameter);
+                        pull.call();
                     }
-                    pull.setRemoteBranchName(branchName);
-                    // 更新凭证
-                    setCredentials(pull, parameter);
-                    pull.call();
                 }
+                git = Git.open(file);
             } else {
                 git = reClone(parameter, branchName, file, printWriter);
             }
