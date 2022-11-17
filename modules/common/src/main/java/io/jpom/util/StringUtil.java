@@ -30,6 +30,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSON;
+import org.springframework.core.env.SimpleCommandLinePropertySource;
 
 import java.io.File;
 import java.util.List;
@@ -61,16 +62,18 @@ public class StringUtil {
      * @return 值
      */
     public static String getArgsValue(String[] args, String name) {
-        if (args == null) {
-            return null;
-        }
-        for (String item : args) {
-            item = StrUtil.trim(item);
-            if (item.startsWith("--" + name + "=")) {
-                return item.substring(name.length() + 3);
-            }
-        }
-        return null;
+        SimpleCommandLinePropertySource simpleCommandLinePropertySource = new SimpleCommandLinePropertySource(args);
+        return simpleCommandLinePropertySource.getProperty(name);
+//        if (args == null) {
+//            return null;
+//        }
+//        for (String item : args) {
+//            item = StrUtil.trim(item);
+//            if (item.startsWith("--" + name + "=")) {
+//                return item.substring(name.length() + 3);
+//            }
+//        }
+//        return null;
     }
 
     /**

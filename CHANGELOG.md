@@ -1,5 +1,13 @@
 # 🚀 版本日志
 
+## 2.9.15
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复监控报警无法触发 webhook 类型的通知（感谢[@项勇祥](https://gitee.com/xiang-yong-xiang) [Gitee issues I61KRV](https://gitee.com/dromara/Jpom/issues/I61KRV) ）
+2. 优化获取程序实参的方法（main 方法参数、使用 SimpleCommandLinePropertySource）
+------
+
 ## 2.9.14 (2022-11-08)
 
 ### 🐞 解决BUG、优化功能
