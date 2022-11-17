@@ -76,7 +76,7 @@ git submodule update --remote
 ```
 
 ```shell
-# 创建空白分支 
+# 创建空白分支 (docs-pages)
 git checkout --orphan docs-pages
 git rm -rf .
 git push --set-upstream origin docs-pages
