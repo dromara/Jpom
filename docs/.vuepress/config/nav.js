@@ -20,6 +20,7 @@ module.exports = [
     text: '❓常见问题', link: '/pages/FQA/more/', items: [
       {text: '名词解释', link: '/pages/FQA/proper-noun/'},
       {text: '什么是 DSL', link: '/pages/FQA/DSL/'},
+      {text: '权限说明', link: '/pages/ca90a5/'},
     ]
   },
   {
