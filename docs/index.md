@@ -162,7 +162,7 @@ postList: none
 
 欢迎各路好汉一起来参与完善 <Badge text="Jpom"/>，我们期待你的 PR！
 
-如果想贡献，请先查看[贡献准则](/pages/ae4dd5/)。
+如果想贡献，请先查看[贡献准则](/pages/dc18b8/)。
 
 [贡献成员列表](/pages/praise/friends/)
 

@@ -29,8 +29,8 @@ module.exports = [
   {
     text: '💖支持', link: '/pages/praise/', items: [
       {text: '加入社区讨论', link: '/pages/praise/join/'},
-      {text: '贡献者们', link: '/pages/praise/friends/'},
-
+      {text: '如何贡献', link: '/pages/dc18b8/'},
+      {text: '贡献者们', link: '/pages/praise/friends/'}
     ]
   },
   {
