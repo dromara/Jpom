@@ -287,6 +287,7 @@ public class MonitorItem implements Task {
         map.put("title", monitorNotifyLog.getTitle());
         map.put("content", monitorNotifyLog.getContent());
         //
+        monitorNotifyLog.setId(IdUtil.fastSimpleUUID());
         monitorNotifyLog.setNotifyStyle(MonitorModel.NotifyType.webhook.getCode());
         monitorNotifyLog.setNotifyObject(webhook);
         //
