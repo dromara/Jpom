@@ -1,6 +1,6 @@
 {
     "name": "jpom-doc",
-    "version": "2.9.14",
+    "version": "2.9.15",
     "scripts": {
         "start": "vuepress dev docs",
         "build": "vuepress build docs",
