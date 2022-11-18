@@ -463,3 +463,4 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 | TLog GVP 项目   | [https://gitee.com/dromara/TLog](https://gitee.com/dromara/TLog)           | 一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪 |
 | Sa-Token      | [https://gitee.com/dromara/sa-token](https://gitee.com/dromara/sa-token)   | 这可能是史上功能最全的 Java 权限认证框架！                      |
 | Erupt         | [https://gitee.com/erupt/erupt](https://gitee.com/erupt/erupt)             | 零前端代码，纯注解开发 admin 管理后台                        |
+| hippo4j       | [https://gitee.com/magegoofy/hippo4j](https://gitee.com/magegoofy/hippo4j) | 强大的动态线程池框架，附带监控报警功能。 |
