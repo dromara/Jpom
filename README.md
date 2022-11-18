@@ -14,6 +14,9 @@
  	<a target="_blank" href="https://github.com/dromara/Jpom">
 		<img src="https://img.shields.io/github/stars/dromara/Jpom.svg?style=social" alt="github star"/>
     </a>
+<a target="_blank" href="https://hub.docker.com/repository/docker/jpomdocker/jpom">
+		<img src="https://img.shields.io/docker/pulls/jpomdocker/jpom.svg" alt="docker pull"/>
+    </a>
     <a target="_blank" href="https://gitee.com/dromara/Jpom">
         <img src='https://img.shields.io/github/license/dromara/Jpom?style=flat' alt='license'/>
     </a>
