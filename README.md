@@ -14,9 +14,6 @@
  	<a target="_blank" href="https://github.com/dromara/Jpom">
 		<img src="https://img.shields.io/github/stars/dromara/Jpom.svg?style=social" alt="github star"/>
     </a>
-<a target="_blank" href="https://hub.docker.com/repository/docker/jpomdocker/jpom">
-		<img src="https://img.shields.io/docker/pulls/jpomdocker/jpom.svg" alt="docker pull"/>
-    </a>
     <a target="_blank" href="https://gitee.com/dromara/Jpom">
         <img src='https://img.shields.io/github/license/dromara/Jpom?style=flat' alt='license'/>
     </a>
@@ -35,6 +32,15 @@
 	<a target="_blank" href="https://jpom.top/pages/praise/join/">
 		<img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
 	</a>
+</p>
+
+<p align="center">
+    <a target="_blank" href="https://jpom.top/pages/changelog/new/">
+		<img src="https://img.shields.io/github/v/release/dromara/Jpom.svg" alt="docker pull"/>
+    </a>
+    <a target="_blank" href="https://hub.docker.com/repository/docker/jpomdocker/jpom">
+		<img src="https://img.shields.io/docker/pulls/jpomdocker/jpom.svg" alt="docker pull"/>
+    </a>
 </p>
 
 <p align="center">
