@@ -464,3 +464,4 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 | Sa-Token      | [https://gitee.com/dromara/sa-token](https://gitee.com/dromara/sa-token)   | 这可能是史上功能最全的 Java 权限认证框架！                      |
 | Erupt         | [https://gitee.com/erupt/erupt](https://gitee.com/erupt/erupt)             | 零前端代码，纯注解开发 admin 管理后台                        |
 | hippo4j       | [https://gitee.com/magegoofy/hippo4j](https://gitee.com/magegoofy/hippo4j) | 强大的动态线程池框架，附带监控报警功能。 |
+| HertzBeat     | [https://gitee.com/dromara/hertzbeat](https://gitee.com/dromara/hertzbeat)  | 易用友好的云监控系统, 无需 Agent, 强大自定义监控能力。|
