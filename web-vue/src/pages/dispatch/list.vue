@@ -31,6 +31,7 @@
             </template>
             <a-icon type="question-circle" theme="filled" />
           </a-tooltip>
+          <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
       </template>
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
@@ -626,6 +627,8 @@ export default {
         afterOpt: [{ required: true, message: "请选择发布后操作", trigger: "blur" }],
         url: [{ required: true, message: "请输入远程地址", trigger: "blur" }],
       },
+      countdownTime: Date.now(),
+      refreshInterval: 5,
     };
   },
   computed: {
@@ -662,15 +665,20 @@ export default {
 
     // 加载数据
     loadData(pointerEvent) {
-      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-      this.loading = true;
-      this.childLoading = false;
-      getDishPatchList(this.listQuery).then((res) => {
-        if (res.code === 200) {
-          this.list = res.data.result;
-          this.listQuery.total = res.data.total;
-        }
-        this.loading = false;
+      return new Promise((resolve) => {
+        this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
+        this.loading = true;
+        this.childLoading = false;
+        getDishPatchList(this.listQuery).then((res) => {
+          if (res.code === 200) {
+            this.list = res.data.result;
+            this.listQuery.total = res.data.total;
+            // 重新计算倒计时
+            this.countdownTime = Date.now() + this.refreshInterval * 1000;
+          }
+          this.loading = false;
+          resolve();
+        });
       });
     },
     // 加载项目白名单列表
@@ -683,11 +691,28 @@ export default {
     },
     // 展开行
     expand(expanded, record) {
-      this.list_expanded[record.id] = expanded;
-      this.list_expanded = { ...this.list_expanded };
+      this.list_expanded = { ...this.list_expanded, [record.id]: expanded };
       if (expanded) {
         this.handleReload(record);
       }
+    },
+    // 静默
+    silenceLoadData() {
+      getDishPatchList(this.listQuery, false).then((res) => {
+        if (res.code === 200) {
+          this.list = res.data.result;
+          this.listQuery.total = res.data.total;
+          //
+          for (let item in this.list_expanded) {
+            if (this.list_expanded[item]) {
+              this.handleReloadById(item, false);
+            }
+            // console.log(item);
+          }
+          // 重新计算倒计时
+          this.countdownTime = Date.now() + this.refreshInterval * 1000;
+        }
+      });
     },
     // 关联分发
     handleLink() {
@@ -975,18 +1000,23 @@ export default {
     // 刷新
     handleReload(record) {
       this.childLoading = true;
-      getDispatchProject(record.id).then((res) => {
-        if (res.code === 200 && res.data) {
-          this.dispatchChildren = {
-            ...this.dispatchChildren,
-            [record.id]: res.data.map((item) => {
-              return { ...item, id: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}` };
-            }),
-            // [{ ...res.data[0], }],
-          };
-          // record.children = res.data;
-        }
+      this.handleReloadById(record.id).then(() => {
         this.childLoading = false;
+      });
+    },
+    handleReloadById(recordId, loading) {
+      return new Promise((resolve) => {
+        getDispatchProject(recordId, loading).then((res) => {
+          if (res.code === 200 && res.data) {
+            this.dispatchChildren = {
+              ...this.dispatchChildren,
+              [recordId]: res.data.map((item) => {
+                return { ...item, id: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}` };
+              }),
+            };
+          }
+          resolve();
+        });
       });
     },
     // 处理分发
@@ -1258,4 +1288,12 @@ export default {
   right: 0;
   top: 74px;
 } */
+/deep/ .ant-statistic div {
+  display: inline-block;
+}
+
+/deep/ .ant-statistic-content-value,
+/deep/ .ant-statistic-content {
+  font-size: 16px;
+}
 </style>

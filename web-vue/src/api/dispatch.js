@@ -1,11 +1,14 @@
 import axios from "./config";
 
 // 分发列表
-export function getDishPatchList(data) {
+export function getDishPatchList(data, loading) {
   return axios({
     url: "/outgiving/dispatch-list",
     method: "post",
     data: data,
+    headers: {
+      loading: loading === false ? "no" : "",
+    },
   });
 }
 
@@ -18,11 +21,14 @@ export function getDishPatchListAll() {
 }
 
 // 分发节点项目状态
-export function getDispatchProject(id) {
+export function getDispatchProject(id, loading) {
   return axios({
     url: "/outgiving/getItemData.json",
     method: "post",
     data: { id },
+    headers: {
+      loading: loading === false ? "no" : "",
+    },
   });
 }
 
