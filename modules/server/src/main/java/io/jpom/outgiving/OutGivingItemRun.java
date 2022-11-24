@@ -36,6 +36,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
+import io.jpom.common.BaseServerController;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
@@ -190,6 +191,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
             }
             // 更新日志数据
             OutGivingLog outGivingLog = new OutGivingLog();
+            outGivingLog.setWorkspaceId(outGivingModel.getWorkspaceId());
             outGivingLog.setId(StrUtil.emptyToDefault(logId, IdUtil.fastSimpleUUID()));
 
             if (finOutGivingNodeProject != null) {
@@ -200,13 +202,18 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
             outGivingLog.setOutGivingId(outGivingId);
             outGivingLog.setResult(msg);
             outGivingLog.setStatus(status.getCode());
-            DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
-            if (status == OutGivingNodeProject.Status.Ing || status == OutGivingNodeProject.Status.Cancel) {
-                // 开始或者 取消都还没有记录
-                dbOutGivingLogService.insert(outGivingLog);
-            } else {
-                outGivingLog.setEndTime(SystemClock.now());
-                dbOutGivingLogService.update(outGivingLog);
+            try {
+                BaseServerController.resetInfo(UserModel.EMPTY);
+                DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
+                if (status == OutGivingNodeProject.Status.Ing || status == OutGivingNodeProject.Status.Cancel) {
+                    // 开始或者 取消都还没有记录
+                    dbOutGivingLogService.insert(outGivingLog);
+                } else {
+                    outGivingLog.setEndTime(SystemClock.now());
+                    dbOutGivingLogService.update(outGivingLog);
+                }
+            } finally {
+                BaseServerController.removeEmpty();
             }
         }
     }
