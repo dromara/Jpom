@@ -98,14 +98,14 @@
       <!-- 嵌套表格 -->
       <a-table
         slot="expandedRowRender"
-        slot-scope="text"
+        slot-scope="record"
         :loading="childLoading"
         :columns="childColumns"
         size="middle"
         :bordered="false"
-        :data-source="text.children"
+        :data-source="dispatchChildren[record.id]"
         :pagination="false"
-        :rowKey="(record, index) => record.nodeId + record.projectId + index"
+        rowKey="id"
       >
         <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ nodeNameMap[text] || text }}</span>
@@ -575,6 +575,7 @@ export default {
       fileList: [],
       runModeList: runModeList,
       list_expanded: {},
+      dispatchChildren: {},
       linkDispatchVisible: false,
       editDispatchVisible: false,
       dispatchVisible: false,
@@ -588,9 +589,9 @@ export default {
       columns: [
         { title: "分发 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "分发名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "类型", dataIndex: "outGivingProject", width: 90, ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
-        { title: "分发后", dataIndex: "afterOpt", ellipsis: true, width: 100, scopedSlots: { customRender: "afterOpt" } },
-        { title: "清空发布", dataIndex: "clearOld", align: "center", ellipsis: true, width: 100, scopedSlots: { customRender: "clearOld" } },
+        { title: "类型", dataIndex: "outGivingProject", width: "90px", ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
+        { title: "分发后", dataIndex: "afterOpt", ellipsis: true, width: "150px", scopedSlots: { customRender: "afterOpt" } },
+        { title: "清空发布", dataIndex: "clearOld", align: "center", ellipsis: true, width: "100px", scopedSlots: { customRender: "clearOld" } },
         { title: "间隔时间", dataIndex: "intervalTime", width: 90, ellipsis: true, scopedSlots: { customRender: "intervalTime" } },
 
         { title: "状态", dataIndex: "status", ellipsis: true, width: 110, scopedSlots: { customRender: "status" } },
@@ -976,8 +977,15 @@ export default {
     handleReload(record) {
       this.childLoading = true;
       getDispatchProject(record.id).then((res) => {
-        if (res.code === 200) {
-          record.children = res.data;
+        if (res.code === 200 && res.data) {
+          this.dispatchChildren = {
+            ...this.dispatchChildren,
+            [record.id]: res.data.map((item) => {
+              return { ...item, id: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}` };
+            }),
+            // [{ ...res.data[0], }],
+          };
+          // record.children = res.data;
         }
         this.childLoading = false;
       });
