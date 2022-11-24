@@ -662,7 +662,6 @@ export default {
 
     // 加载数据
     loadData(pointerEvent) {
-      this.list = [];
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
       this.childLoading = false;
