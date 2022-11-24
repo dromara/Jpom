@@ -189,15 +189,22 @@ public class NodeForward {
         //
         if (jsonData != null) {
             JSONObject clone = jsonData.clone();
+            boolean hasFile = false;
             // 参数 URL 编码，避免 特殊符号 不生效
             Set<Map.Entry<String, Object>> entries = clone.entrySet();
             for (Map.Entry<String, Object> entry : entries) {
                 Object value = entry.getValue();
                 if (value instanceof String) {
                     entry.setValue(URLUtil.encodeAll((String) value));
+                } else if (value instanceof File) {
+                    // 标记上传文件
+                    hasFile = true;
                 }
             }
             httpRequest.form(clone);
+            if (hasFile) {
+                httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+            }
         }
         httpRequest.form(params);
         try (HttpResponse response = httpRequest.execute()) {
