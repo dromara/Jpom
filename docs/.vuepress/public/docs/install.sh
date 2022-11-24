@@ -107,13 +107,6 @@ function installMvnFn() {
   fi
 }
 
-# 解压命令
-if [[ ! -f "/usr/bin/unzip" ]];then
-	#rm -f /etc/yum.repos.d/epel.repo
-	yum install unzip -y
-fi
-
-
 module="$2"
 
 # 判断是否包含jdk
@@ -163,18 +156,18 @@ mkdir -p ${jpom_dir} && cd ${jpom_dir}
 now_dir=`pwd`
 echo "开始安装：${JPOM_TYPE}  ${versions}, 安装目录 ${now_dir}"
 # 判断是否存在文件
-if [[ ! -f "${JPOM_TYPE}.zip" ]]; then
+if [[ ! -f "${JPOM_TYPE}.tar.gz" ]]; then
   if [[ -z "${versions}" ]] ; then
     # 获取最新的版本号
     versions=`curl -LfsS https://jpom.top/docs/versions.tag`
   fi
-  download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.zip"
-  wget -O ${JPOM_TYPE}.zip ${download_url}
+  download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
+  wget -O ${JPOM_TYPE}.tar.gz ${download_url}
 fi
 # 解压
-unzip -o ${JPOM_TYPE}.zip
+tar -zxf ${JPOM_TYPE}.tar.gz  -C ${jpom_dir}
 # 删除安装包
-rm -f ${JPOM_TYPE}.zip
+rm -f ${JPOM_TYPE}.tar.gz
 # 删除安装命令
 rm -f ${previous_dir}/install.sh
 # 添加权限
