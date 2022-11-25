@@ -1274,7 +1274,8 @@ export default {
 
         this.tempRepository = this.repositoryList.filter((element) => this.temp.repositoryId === element.id)[0];
         this.editBuildVisible = true;
-        this.loadBranchList();
+        // by bwcxjzy 2022-11-25
+        //this.loadBranchList();
       });
 
       this.loadDispatchList();
