@@ -187,13 +187,14 @@
                     :value="project.projectId"
                     v-for="project in nodeProjectsList.filter((nitem) => nitem.id == item.nodeId)[0] && nodeProjectsList.filter((nitem) => nitem.id == item.nodeId)[0].projects"
                     :disabled="
+                      project.outGivingProject === 1 ||
                       dispatchList.filter((item, nowIndex) => {
                         return item.nodeId === project.nodeId && item.projectId === project.projectId && nowIndex !== index;
                       }).length > 0
                     "
                     :key="project.projectId"
                   >
-                    {{ project.name }}
+                    {{ project.outGivingProject === 1 ? "【独立分发】" : "" }} {{ project.name }}
                   </a-select-option>
                 </a-select>
                 <a-button type="danger" @click="delDispachList(index)" icon="delete" size="small"></a-button>
