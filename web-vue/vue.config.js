@@ -68,6 +68,7 @@ module.exports = {
       args[0].title = "Jpom项目管理系统";
       args[0].build = new Date().getTime();
       args[0].env = process.env.NODE_ENV;
+      args[0].buildVersion = process.env.npm_package_version;
       return args;
     });
   },
