@@ -34,6 +34,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import io.jpom.system.JpomRuntimeException;
+import lombok.Lombok;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -94,6 +95,29 @@ public class GitUtil {
     }
 
     /**
+     * 检查本地的仓库是否存在对应的分支
+     *
+     * @param branchName 要检查的 branchName
+     * @param file       本地仓库文件
+     * @return true 存在对应url
+     * @throws IOException     IO
+     * @throws GitAPIException E
+     */
+    private static boolean checkBranchName(String branchName, File file) throws IOException, GitAPIException {
+        try (Git pullGit = Git.open(file)) {
+            // 判断本地是否存在对应分支
+            List<Ref> list = pullGit.branchList().call();
+            for (Ref ref : list) {
+                String name = ref.getName();
+                if (StrUtil.equals(name, Constants.R_HEADS + branchName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * 删除重新clone
      *
      * @param parameter 参数
@@ -103,9 +127,10 @@ public class GitUtil {
      * @throws IOException     删除文件失败
      */
     private static Git reClone(Map<String, Object> parameter, String branchName, File file, PrintWriter printWriter) throws GitAPIException, IOException {
+        println(printWriter, StrUtil.EMPTY);
+        println(printWriter, "Automatically re-clones repositories");
         if (!FileUtil.clean(file)) {
             FileUtil.del(file.toPath());
-            //throw new IOException("del error:" + file.getPath());
         }
         CloneCommand cloneCommand = Git.cloneRepository();
         if (printWriter != null) {
@@ -171,32 +196,48 @@ public class GitUtil {
         }
     }
 
-    private static Git initGit(Map<String, Object> parameter, String branchName, File file, PrintWriter printWriter) throws IOException, GitAPIException {
-        Git git;
-        if (FileUtil.file(file, Constants.DOT_GIT).exists()) {
-            String url = (String) parameter.get("url");
-            if (checkRemoteUrl(url, file)) {
-                //
-                if (branchName != null) {
-                    try (Git pullGit = Git.open(file)) {
-                        PullCommand pull = pullGit.pull();
-                        if (printWriter != null) {
-                            pull.setProgressMonitor(new TextProgressMonitor(printWriter));
-                        }
-                        pull.setRemoteBranchName(branchName);
-                        // 更新凭证
-                        setCredentials(pull, parameter);
-                        pull.call();
-                    }
-                }
-                git = Git.open(file);
-            } else {
-                git = reClone(parameter, branchName, file, printWriter);
+    private static Git initGit(Map<String, Object> parameter, String branchName, File file, PrintWriter printWriter) {
+        String url = (String) parameter.get("url");
+        return Optional.of(file).flatMap(file12 -> {
+            // 文件信息
+            if (FileUtil.file(file12, Constants.DOT_GIT).exists()) {
+                return Optional.of(true);
             }
-        } else {
-            git = reClone(parameter, branchName, file, printWriter);
-        }
-        return git;
+            return Optional.empty();
+        }).flatMap(status -> {
+            try {
+                // 远程地址
+                if (checkRemoteUrl(url, file)) {
+                    return Optional.of(true);
+                }
+            } catch (IOException | GitAPIException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+            return Optional.empty();
+        }).flatMap(status -> {
+            // 本地分支
+            try {
+                // 远程地址
+                if (checkBranchName(branchName, file)) {
+                    return Optional.of(true);
+                }
+            } catch (IOException | GitAPIException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+            return Optional.empty();
+        }).map(aBoolean -> {
+            try {
+                return aBoolean ? Git.open(file) : reClone(parameter, branchName, file, printWriter);
+            } catch (IOException | GitAPIException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+        }).orElseGet(() -> {
+            try {
+                return reClone(parameter, branchName, file, printWriter);
+            } catch (GitAPIException | IOException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+        });
     }
 
     /**
@@ -321,28 +362,10 @@ public class GitUtil {
      * @throws Exception 异常
      */
     private static PullResult pull(Git git, Map<String, Object> parameter, String branchName, TagOpt tagOpt, PrintWriter printWriter) throws Exception {
-        // 判断本地是否存在对应分支
-        List<Ref> list = git.branchList().call();
-        boolean createBranch = true;
-        for (Ref ref : list) {
-            String name = ref.getName();
-            if (name.startsWith(Constants.R_HEADS + branchName)) {
-                createBranch = false;
-                break;
-            }
-        }
-        // 切换分支
         TextProgressMonitor progressMonitor = new TextProgressMonitor(printWriter);
-        if (tagOpt == null && !StrUtil.equals(git.getRepository().getBranch(), branchName)) {
-            println(printWriter, "start switch branch from {} to {}", git.getRepository().getBranch(), branchName);
-            git.checkout().
-                setCreateBranch(createBranch).
-                setName(branchName).
-                setForceRefUpdate(true).
-                setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
-                setProgressMonitor(progressMonitor).
-                call();
-        }
+        // 放弃本地修改
+        //git.checkout().setName(branchName).setForced(true).setProgressMonitor(progressMonitor).call();
+
         PullCommand pull = git.pull();
         if (tagOpt != null) {
             pull.setTagOpt(tagOpt);
