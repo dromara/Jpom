@@ -364,7 +364,7 @@ public class GitUtil {
     private static PullResult pull(Git git, Map<String, Object> parameter, String branchName, TagOpt tagOpt, PrintWriter printWriter) throws Exception {
         TextProgressMonitor progressMonitor = new TextProgressMonitor(printWriter);
         // 放弃本地修改
-        //git.checkout().setName(branchName).setForced(true).setProgressMonitor(progressMonitor).call();
+        git.checkout().setName(branchName).setForced(true).setProgressMonitor(progressMonitor).call();
 
         PullCommand pull = git.pull();
         if (tagOpt != null) {
