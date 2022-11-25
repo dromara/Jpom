@@ -156,13 +156,14 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                                     OutGivingNodeProject.Status status,
                                     String msg,
                                     String userId) {
+        OutGivingNodeProject finOutGivingNodeProject = null;
+        OutGivingModel outGivingModel;
+        OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         synchronized (outGivingId.intern()) {
-            OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
-            OutGivingModel outGivingModel = outGivingServer.getByKey(outGivingId);
+            outGivingModel = outGivingServer.getByKey(outGivingId);
 
             List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
             Assert.notEmpty(outGivingNodeProjects, "没有分发项目");
-            OutGivingNodeProject finOutGivingNodeProject = null;
             //
             for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
                 if (!outGivingNodeProject.getProjectId().equalsIgnoreCase(outGivingNodeProjectItem.getProjectId()) ||
@@ -189,32 +190,32 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                 outGivingModel1.outGivingNodeProjectList(outGivingNodeProjects);
                 outGivingServer.update(outGivingModel1);
             }
-            // 更新日志数据
-            OutGivingLog outGivingLog = new OutGivingLog();
-            outGivingLog.setWorkspaceId(outGivingModel.getWorkspaceId());
-            outGivingLog.setId(StrUtil.emptyToDefault(logId, IdUtil.fastSimpleUUID()));
+        }
+        // 更新日志数据
+        OutGivingLog outGivingLog = new OutGivingLog();
+        outGivingLog.setWorkspaceId(outGivingModel.getWorkspaceId());
+        outGivingLog.setId(StrUtil.emptyToDefault(logId, IdUtil.fastSimpleUUID()));
 
-            if (finOutGivingNodeProject != null) {
-                outGivingLog.setNodeId(finOutGivingNodeProject.getNodeId());
-                outGivingLog.setProjectId(finOutGivingNodeProject.getProjectId());
+        if (finOutGivingNodeProject != null) {
+            outGivingLog.setNodeId(finOutGivingNodeProject.getNodeId());
+            outGivingLog.setProjectId(finOutGivingNodeProject.getProjectId());
+        }
+        outGivingLog.setModifyUser(userId);
+        outGivingLog.setOutGivingId(outGivingId);
+        outGivingLog.setResult(msg);
+        outGivingLog.setStatus(status.getCode());
+        try {
+            BaseServerController.resetInfo(UserModel.EMPTY);
+            DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
+            if (status == OutGivingNodeProject.Status.Ing || status == OutGivingNodeProject.Status.Cancel) {
+                // 开始或者 取消都还没有记录
+                dbOutGivingLogService.insert(outGivingLog);
+            } else {
+                outGivingLog.setEndTime(SystemClock.now());
+                dbOutGivingLogService.update(outGivingLog);
             }
-            outGivingLog.setModifyUser(userId);
-            outGivingLog.setOutGivingId(outGivingId);
-            outGivingLog.setResult(msg);
-            outGivingLog.setStatus(status.getCode());
-            try {
-                BaseServerController.resetInfo(UserModel.EMPTY);
-                DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
-                if (status == OutGivingNodeProject.Status.Ing || status == OutGivingNodeProject.Status.Cancel) {
-                    // 开始或者 取消都还没有记录
-                    dbOutGivingLogService.insert(outGivingLog);
-                } else {
-                    outGivingLog.setEndTime(SystemClock.now());
-                    dbOutGivingLogService.update(outGivingLog);
-                }
-            } finally {
-                BaseServerController.removeEmpty();
-            }
+        } finally {
+            BaseServerController.removeEmpty();
         }
     }
 }
