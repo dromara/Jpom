@@ -221,6 +221,9 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
         } catch (Exception e) {
             return false;
         }
+        if (dockerHost == null) {
+            return false;
+        }
         switch (dockerHost.getScheme()) {
             case "tcp":
             case "unix":

@@ -155,13 +155,15 @@
                         <li>本地构建是指直接在服务端中的服务器执行构建命令</li>
                         <li>容器构建是指使用 docker 容器执行构建,这样可以达到和宿主机环境隔离不用安装依赖环境</li>
                         <li>使用容器构建，docker 容器所在的宿主机需要由公网,因为需要远程下载环境依赖的 sdk 和镜像</li>
+                        <li>创建后构建方式不支持修改</li>
+                        <li v-if="this.getInDocker">容器安装的服务端不能使用本地构建</li>
                       </ul>
                     </template>
                     <a-icon type="question-circle" theme="filled" />
                   </a-tooltip>
                 </template>
-                <a-radio-group v-model="temp.buildMode" name="buildMode">
-                  <a-radio v-for="(val, key) in buildModeMap" :key="key" :value="parseInt(key)">{{ val }}</a-radio>
+                <a-radio-group :disabled="temp.id ? true : false" v-model="temp.buildMode" name="buildMode">
+                  <a-radio v-for="item in buildModeArray" :disabled="item.disabled" :key="item.value" :value="item.value">{{ item.name }}</a-radio>
                 </a-radio-group>
               </a-form-model-item>
             </template>
@@ -561,7 +563,7 @@
               </template>
               <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
             </a-form-model-item>
-            <a-form-model-item label="自动构建" prop="autoBuildCron">
+            <a-form-model-item label="定时构建" prop="autoBuildCron">
               <a-auto-complete
                 v-model="temp.autoBuildCron"
                 placeholder="如果需要定时自动构建则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
@@ -841,6 +843,7 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_Q
 import Vue from "vue";
 import { dockerSwarmListAll, dockerSwarmServicesList } from "@/api/docker-swarm";
 import { getScriptListAll } from "@/api/server-script";
+import { mapGetters } from "vuex";
 
 export default {
   components: {
@@ -1058,6 +1061,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["getInDocker"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
     },
@@ -1081,6 +1085,15 @@ export default {
         });
       }
       return [];
+    },
+    buildModeArray() {
+      return Object.keys(this.buildModeMap).map((item) => {
+        return {
+          value: parseInt(item),
+          disabled: parseInt(item) === 0 && this.getInDocker ? true : false,
+          name: this.buildModeMap[item],
+        };
+      });
     },
   },
   watch: {},
@@ -1274,7 +1287,8 @@ export default {
 
         this.tempRepository = this.repositoryList.filter((element) => this.temp.repositoryId === element.id)[0];
         this.editBuildVisible = true;
-        this.loadBranchList();
+        // by bwcxjzy 2022-11-25
+        //this.loadBranchList();
       });
 
       this.loadDispatchList();
