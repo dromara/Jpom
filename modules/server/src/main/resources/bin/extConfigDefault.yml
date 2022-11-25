@@ -39,3 +39,6 @@ request:
   copyInputStream: true
 #在线编辑格式
 #fileFormat: txt|yml|conf|properties|ini
+
+db:
+  cacheSize: 50MB
