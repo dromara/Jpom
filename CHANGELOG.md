@@ -17,6 +17,7 @@
 7. 【server】修复节点分发日志未存储到对应的工作空间问题
 8. 【server】H2 缓存大小配置调整为 50MB，已经安装的版本需要手动修改配置：`db.cacheSize`
 9. 【server】修复编辑关联分发项目删除项目数据错乱问题（感谢[@DreamAgo](https://gitee.com/DreamAgo) [Gitee issues I631K2](https://gitee.com/dromara/Jpom/issues/I631K2) ）
+10. 【agent】修复 DSL 模式未运行的项目在部分场景下控制台按钮状态不正确（感谢@项勇祥）
 
 ------
 
