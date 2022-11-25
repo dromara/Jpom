@@ -155,12 +155,13 @@
                         <li>本地构建是指直接在服务端中的服务器执行构建命令</li>
                         <li>容器构建是指使用 docker 容器执行构建,这样可以达到和宿主机环境隔离不用安装依赖环境</li>
                         <li>使用容器构建，docker 容器所在的宿主机需要由公网,因为需要远程下载环境依赖的 sdk 和镜像</li>
+                        <li>创建后构建方式不支持修改</li>
                       </ul>
                     </template>
                     <a-icon type="question-circle" theme="filled" />
                   </a-tooltip>
                 </template>
-                <a-radio-group v-model="temp.buildMode" name="buildMode">
+                <a-radio-group :disabled="temp.id ? true : false" v-model="temp.buildMode" name="buildMode">
                   <a-radio v-for="(val, key) in buildModeMap" :key="key" :value="parseInt(key)">{{ val }}</a-radio>
                 </a-radio-group>
               </a-form-model-item>
