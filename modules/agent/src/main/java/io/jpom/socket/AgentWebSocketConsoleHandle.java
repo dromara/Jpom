@@ -37,6 +37,7 @@ import io.jpom.service.manage.ConsoleService;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.util.BaseFileTailWatcher;
 import io.jpom.util.FileSearchUtil;
+import io.jpom.util.ProjectCommanderUtil;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -170,8 +171,9 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     logUser = true;
                     // 停止项目
                     strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
-                    if (strResult.contains(AbstractProjectCommander.STOP_TAG)) {
-                        resultData = JsonMessage.toJson(200, "操作成功：" + strResult);
+                    int parsePid = ProjectCommanderUtil.parsePid(strResult);
+                    if (parsePid > 0) {
+                        resultData = JsonMessage.toJson(200, strResult);
                     } else {
                         resultData = JsonMessage.toJson(500, strResult);
                     }

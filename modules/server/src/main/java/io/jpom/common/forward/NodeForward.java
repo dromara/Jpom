@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -188,15 +189,22 @@ public class NodeForward {
         //
         if (jsonData != null) {
             JSONObject clone = jsonData.clone();
+            boolean hasFile = false;
             // 参数 URL 编码，避免 特殊符号 不生效
             Set<Map.Entry<String, Object>> entries = clone.entrySet();
             for (Map.Entry<String, Object> entry : entries) {
                 Object value = entry.getValue();
                 if (value instanceof String) {
                     entry.setValue(URLUtil.encodeAll((String) value));
+                } else if (value instanceof File) {
+                    // 标记上传文件
+                    hasFile = true;
                 }
             }
             httpRequest.form(clone);
+            if (hasFile) {
+                httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+            }
         }
         httpRequest.form(params);
         try (HttpResponse response = httpRequest.execute()) {
@@ -399,13 +407,21 @@ public class NodeForward {
         }
         httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
         httpRequest.header(Const.WORKSPACEID_REQ_HEADER, nodeModel.getWorkspaceId());
-        //
-        int timeOut = nodeModel.getTimeOut();
-        if (nodeUrl.getTimeOut() != -1 && timeOut > 0) {
-            //
-            timeOut = Math.max(timeOut, 2);
-            httpRequest.timeout(timeOut * 1000);
-        }
+        // 取最大的超时时间
+        Optional.of(nodeUrl.getTimeOut())
+            .flatMap(timeOut -> {
+                if (timeOut == 0) {
+                    // 读取节点配置的超时时间
+                    return Optional.ofNullable(nodeModel.getTimeOut());
+                }
+                // 值 < 0  url 指定不超时
+                return timeOut > 0 ? Optional.of(timeOut) : Optional.empty();
+            })
+            .map(integer -> {
+                // 超时时间不能小于 2 秒
+                return Math.max(integer, 2);
+            })
+            .ifPresent(timeOut -> httpRequest.timeout(timeOut * 1000));
         // 添加 http proxy
         Proxy proxy = nodeModel.proxy();
         httpRequest.setProxy(proxy);

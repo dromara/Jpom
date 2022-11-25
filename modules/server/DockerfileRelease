@@ -23,6 +23,11 @@
 
 FROM maven:3.8.5-jdk-8
 
+ARG BUILD_DATE
+LABEL build_info="dromara/Jpom build-date:- ${BUILD_DATE}"
+LABEL maintainer="bwcx-jzy <bwcx_jzy@163.com>"
+LABEL documentation="https://jpom.top"
+
 ENV JPOM_HOME	/usr/local/jpom-server
 ENV JPOM_PKG_VERSION	2.9.15
 ENV JPOM_PKG	server-${JPOM_PKG_VERSION}-release.tar.gz

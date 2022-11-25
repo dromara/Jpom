@@ -109,9 +109,11 @@ public class ProxySelectorConfig extends ProxySelector implements InitializingBe
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        defaultProxySelector = ProxySelector.getDefault();
-        //
-        ProxySelector.setDefault(this);
+        if (ProxySelector.getDefault() != this) {
+            defaultProxySelector = ProxySelector.getDefault();
+            //
+            ProxySelector.setDefault(this);
+        }
     }
 
 

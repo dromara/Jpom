@@ -34,11 +34,11 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.Const;
 import io.jpom.common.UrlRedirectUtil;
 import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
@@ -245,6 +245,8 @@ public class IndexControl extends BaseServerController {
         data.put("disabledGuide", instance.getDisabledGuide());
         data.put("disabledCaptcha", instance.getDisabledCaptcha());
         data.put("notificationPlacement", instance.getNotificationPlacement());
+        // 用于判断是否属于容器部署
+        data.put("inDocker", StrUtil.isNotEmpty(SystemUtil.get("JPOM_PKG")));
         if (userService.canUse()) {
             return JsonMessage.getString(200, "success", data);
         }

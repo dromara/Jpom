@@ -27,6 +27,8 @@ FROM maven:3.8.5-jdk-8-slim as builder
 WORKDIR /target/dependency
 COPY . .
 
+ENV NODE_VERSION 16.13.1
+
 RUN set -eux; \
     ARCH="$(dpkg --print-architecture)"; \
     case "${ARCH}" in \
@@ -41,15 +43,22 @@ RUN set -eux; \
          exit 1; \
          ;; \
     esac; \
-    curl -LfsSo /opt/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz https://npmmirror.com/mirrors/node/v16.13.1/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz \
-    && tar -zxvf /opt/node-v16.13.1-linux-${BINARY_ARCH}.tar.gz -C /opt/  \
-    && export PATH=/opt/node-v16.13.1-linux-${BINARY_ARCH}/bin:$PATH \
-    && npm config set registry https://registry.npmmirror.com/ \
-    && cd web-vue && npm install && npm run build
+    curl -LfsSo /opt/node-v${NODE_VERSION}-linux-${BINARY_ARCH}.tar.gz https://npmmirror.com/mirrors/node/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${BINARY_ARCH}.tar.gz \
+    && tar -zxvf /opt/node-v${NODE_VERSION}-linux-${BINARY_ARCH}.tar.gz -C /usr/local --strip-components=1  \
+    && ln -s /usr/local/bin/node /usr/local/bin/nodejs \
+    && npm config set registry https://registry.npmmirror.com/
 
-RUN mvn -B -e -T 1C clean package -pl modules/server -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
+RUN cd web-vue && npm install && npm run build
+
+RUN --mount=type=cache,target=/root/.m2 mvn -B -e -T 1C clean package -pl modules/server -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
 
 FROM maven:3.8.5-jdk-8
+
+ARG BUILD_DATE
+LABEL build_info="dromara/Jpom build-date:- ${BUILD_DATE}"
+LABEL maintainer="bwcx-jzy <bwcx_jzy@163.com>"
+LABEL documentation="https://jpom.top"
+
 ENV JPOM_HOME   /usr/local/jpom-server
 ARG JPOM_VERSION
 ENV JPOM_PKG    server-${JPOM_VERSION}-release
@@ -68,9 +77,9 @@ ENV jpom.path ${JPOM_DATA_PATH}
 
 VOLUME $JPOM_DATA_PATH $JPOM_LOG_PATH
 
-HEALTHCHECK CMD curl -X POST -f http://localhost:2122/check-system || exit 1
 EXPOSE 2122
 
+HEALTHCHECK CMD curl -X POST -f http://localhost:2122/check-system || exit 1
 
 ENTRYPOINT ["/bin/bash", "Server.sh", "start"]
 
