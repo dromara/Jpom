@@ -19,6 +19,7 @@
 9. 【server】修复编辑关联分发项目删除项目数据错乱问题（感谢[@DreamAgo](https://gitee.com/DreamAgo) [Gitee issues I631K2](https://gitee.com/dromara/Jpom/issues/I631K2) ）
 10. 【agent】修复 DSL 模式未运行的项目在部分场景下控制台按钮状态不正确（感谢@项勇祥）
 11. 【server】优化编辑在线构建弹窗默认不加载仓库分支 （感谢@阿超）
+12. 【server】构建切换分支时自动重新拉取仓库
 
 ------
 
