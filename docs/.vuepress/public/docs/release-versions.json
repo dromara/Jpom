@@ -1,7 +1,7 @@
 {
     "url": "https://jpom.top/docs/versions.json",
-    "tag_name": "v2.9.15",
-    "agentUrl": "https://download.jpom.top/release/2.9.15/agent-2.9.15-release.zip",
-    "serverUrl": "https://download.jpom.top/release/2.9.15/server-2.9.15-release.zip",
+    "tag_name": "v2.9.16",
+    "agentUrl": "https://download.jpom.top/release/2.9.16/agent-2.9.16-release.zip",
+    "serverUrl": "https://download.jpom.top/release/2.9.16/server-2.9.16-release.zip",
     "changelogUrl": "https://gitee.com/dromara/Jpom/raw/master/CHANGELOG.md"
 }
