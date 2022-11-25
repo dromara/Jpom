@@ -11,14 +11,16 @@ const app = {
     // 引导缓存
     guideCache: localStorage.getItem(key),
     disabledGuide: false,
+    inDocker: false,
   },
   mutations: {
     setGuideCache(state, guideCache) {
       state.guideCache = JSON.stringify(guideCache);
       localStorage.setItem(key, state.guideCache);
     },
-    setDisabledGuide(state, disabledGuide) {
-      state.disabledGuide = disabledGuide;
+    commitGuide(state, guideData) {
+      state.disabledGuide = guideData.disabledGuide;
+      state.inDocker = guideData.inDocker;
     },
   },
   actions: {
@@ -58,8 +60,8 @@ const app = {
         resolve(cache.close);
       });
     },
-    disabledGuide({ commit }, value) {
-      commit("setDisabledGuide", value);
+    commitGuide({ commit }, value) {
+      commit("commitGuide", value);
     },
     // 尝试打开引导
     tryOpenGuide({ commit, rootGetters }, { key, beforeKey, options }) {
@@ -109,6 +111,9 @@ const app = {
     },
     getDisabledGuide(state) {
       return state.disabledGuide;
+    },
+    getInDocker(state) {
+      return state.inDocker;
     },
   },
 };

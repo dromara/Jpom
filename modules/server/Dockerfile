@@ -50,7 +50,7 @@ RUN set -eux; \
 
 RUN cd web-vue && npm install && npm run build
 
-RUN mvn -B -e -T 1C clean package -pl modules/server -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
+RUN --mount=type=cache,target=/root/.m2 mvn -B -e -T 1C clean package -pl modules/server -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
 
 FROM maven:3.8.5-jdk-8
 
