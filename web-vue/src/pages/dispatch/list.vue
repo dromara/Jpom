@@ -87,10 +87,10 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button type="danger" v-if="!list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
+                <a-button type="danger" size="small" :disabled="list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="danger" @click="handleUnbind(record)">解绑</a-button>
+                <a-button type="danger" size="small" @click="handleUnbind(record)">解绑</a-button>
               </a-menu-item>
             </a-menu>
           </a-dropdown>

@@ -28,6 +28,11 @@
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <a-tooltip slot="nodeName" slot-scope="text, record" placement="topLeft" :title="text">
+        <span>{{
+          nodeList.filter((item) => item.id === record.nodeId) && nodeList.filter((item) => item.id === record.nodeId)[0] && nodeList.filter((item) => item.id === record.nodeId)[0].name
+        }}</span>
+      </a-tooltip>
       <a-tooltip slot="projectId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -73,6 +78,7 @@ export default {
       columns: [
         { title: "分发项目 ID", dataIndex: "outGivingId", ellipsis: true, scopedSlots: { customRender: "outGivingId" } },
         { title: "节点 ID", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "节点名称", dataIndex: "nodeName", ellipsis: true, scopedSlots: { customRender: "nodeName" } },
         { title: "项目 ID", dataIndex: "projectId", ellipsis: true, scopedSlots: { customRender: "projectId" } },
         {
           title: "开始时间",
@@ -81,7 +87,7 @@ export default {
             return parseTime(text);
           },
           sorter: true,
-          width: 170,
+          width: "170px",
         },
         {
           title: "结束时间",
@@ -90,11 +96,11 @@ export default {
           customRender: (text) => {
             return parseTime(text);
           },
-          width: 170,
+          width: "170px",
         },
         { title: "操作人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 100 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "100px" },
       ],
     };
   },
