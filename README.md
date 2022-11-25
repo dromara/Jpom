@@ -266,6 +266,7 @@ yum install -y git
 git clone https://gitee.com/dromara/Jpom.git
 cd Jpom
 docker-compose -f docker-compose.yml up
+# docker-compose -f docker-compose.yml up --build
 # docker-compose -f docker-compose-local.yml up
 ```
 
