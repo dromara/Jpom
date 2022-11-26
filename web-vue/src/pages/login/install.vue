@@ -154,7 +154,6 @@
         </template>
       </a-result>
     </div>
-    <!-- <a-alert class="card-box" :style="`${setpCurrent === 1 ? 'width: 60vw' : 'width: 550px'}`" v-else message="Success Text" type="success" /> -->
   </div>
 </template>
 <script>
