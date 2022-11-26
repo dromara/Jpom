@@ -25,6 +25,7 @@ package io.jpom;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.unit.DataSizeUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -255,6 +256,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         String name = (String) parameter.get("name");
         String exposedPorts = (String) parameter.get("exposedPorts");
         String volumes = (String) parameter.get("volumes");
+        String networkMode = (String) parameter.get("networkMode");
         Object autorunStr = parameter.get("autorun");
         Map<String, String> env = (Map<String, String>) parameter.get("env");
         //
@@ -276,6 +278,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
                 .collect(Collectors.toList());
             hostConfig.withBinds(binds);
         }
+        Opt.ofBlankAble(networkMode).ifPresent(hostConfig::withNetworkMode);
         // 环境变量
         if (env != null) {
             List<String> envList = env.entrySet()

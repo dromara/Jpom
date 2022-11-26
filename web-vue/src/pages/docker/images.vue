@@ -211,6 +211,7 @@
             </a-col>
           </a-row>
         </a-form-model-item>
+        <a-form-model-item label="网络"> <a-input v-model="temp.networkMode" placeholder="网络模式：bridge、container、host、container、none" /> </a-form-model-item>
         <a-form-model-item label="自动启动">
           <a-switch v-model="temp.autorun" checked-children="启动" un-checked-children="不启动" />
         </a-form-model-item>
@@ -376,6 +377,7 @@ export default {
           name: this.temp.name,
           env: {},
           commands: [],
+          networkMode: this.temp.networkMode,
         };
         temp.volumes = (this.temp.volumes || [])
           .filter((item) => {
