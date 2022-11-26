@@ -258,10 +258,11 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         String volumes = (String) parameter.get("volumes");
         String networkMode = (String) parameter.get("networkMode");
         Object autorunStr = parameter.get("autorun");
+        Object privileged = parameter.get("privileged");
         Map<String, String> env = (Map<String, String>) parameter.get("env");
         //
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(imageId);
-        CreateContainerCmd createContainerCmd = containerCmd.withName(name);
+        containerCmd.withName(name);
 
         HostConfig hostConfig = HostConfig.newHostConfig();
         if (StrUtil.isNotEmpty(exposedPorts)) {
@@ -279,6 +280,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
             hostConfig.withBinds(binds);
         }
         Opt.ofBlankAble(networkMode).ifPresent(hostConfig::withNetworkMode);
+        Optional.ofNullable(privileged).map(o -> Convert.toBool(o, false)).ifPresent(hostConfig::withPrivileged);
         // 环境变量
         if (env != null) {
             List<String> envList = env.entrySet()
@@ -292,7 +294,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         if (CollUtil.isNotEmpty(commands)) {
             containerCmd.withCmd(commands);
         }
-        createContainerCmd.withHostConfig(hostConfig);
+        containerCmd.withHostConfig(hostConfig);
         CreateContainerResponse containerResponse = containerCmd.exec();
         //
         boolean autorun = Convert.toBool(autorunStr, false);

@@ -213,7 +213,28 @@
         </a-form-model-item>
         <a-form-model-item label="网络"> <a-input v-model="temp.networkMode" placeholder="网络模式：bridge、container、host、container、none" /> </a-form-model-item>
         <a-form-model-item label="自动启动">
-          <a-switch v-model="temp.autorun" checked-children="启动" un-checked-children="不启动" />
+          <a-row>
+            <a-col :span="4"><a-switch v-model="temp.autorun" checked-children="启动" un-checked-children="不启动" /></a-col>
+            <a-col :span="4" style="text-align: right">
+              <a-tooltip>
+                <template slot="title">
+                  <p>--privileged</p>
+                  <ul>
+                    privileged=true|false 介绍
+                    <li>true container内的root拥有真正的root权限。</li>
+                    <li>false container内的root只是外部的一个普通用户权限。默认false</li>
+                    <li>privileged启动的容器 可以看到很多host上的设备 可以执行mount。 可以在docker容器中启动docker容器。</li>
+                  </ul>
+                </template>
+
+                <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                特权：
+              </a-tooltip>
+            </a-col>
+            <a-col :span="4">
+              <a-switch v-model="temp.privileged" checked-children="是" un-checked-children="否" />
+            </a-col>
+          </a-row>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -378,6 +399,7 @@ export default {
           env: {},
           commands: [],
           networkMode: this.temp.networkMode,
+          privileged: this.temp.privileged,
         };
         temp.volumes = (this.temp.volumes || [])
           .filter((item) => {
