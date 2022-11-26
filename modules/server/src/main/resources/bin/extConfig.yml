@@ -35,6 +35,8 @@ user:
   alwaysLoginError: 5
   # 当ip连续登录失败，锁定对应IP时长，单位毫秒
   ipErrorLockTime: 60*60*5*1000
+  # 是否强制提醒用户开启  mfa
+  forceMfa: false
 consoleLog:
   # 是否记录接口请求日志
   reqXss: true

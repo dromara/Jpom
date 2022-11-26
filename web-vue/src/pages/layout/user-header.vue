@@ -268,6 +268,15 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- mfa 提示 -->
+    <a-modal v-model="bindMfaTip" title="安全提醒" :footer="null" :maskClosable="false" :closable="false">
+      <a-space direction="vertical">
+        <a-alert message="安全提醒" description="为了您的账号安全系统要求必须开启两步验证来确保账号的安全性" type="error" :closable="false" />
+        <a-row align="middle" type="flex" justify="center">
+          <a-button type="danger" @click="toBindMfa"> 立即开启 </a-button>
+        </a-row>
+      </a-space>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -321,6 +330,7 @@ export default {
         ],
       },
       MFA_APP_TIP_ARRAY,
+      bindMfaTip: false,
     };
   },
   computed: {
@@ -376,8 +386,22 @@ export default {
           } else {
             this.handleWorkspaceChange(res.data[0]?.id);
           }
+          this.checkMfa();
         }
       });
+    },
+    checkMfa() {
+      if (!this.getUserInfo) {
+        return;
+      }
+      if (this.getUserInfo.forceMfa === true && this.getUserInfo.bindMfa === false) {
+        this.bindMfaTip = true;
+      }
+    },
+    toBindMfa() {
+      this.bindMfaTip = false;
+      this.updateNameVisible = true;
+      this.tabChange(2);
     },
     // 切换引导
     toggleGuide() {
@@ -465,10 +489,8 @@ export default {
     },
     // 加载修改密码对话框
     handleUpdatePwd() {
-      this.temp = {
-        tabActiveKey: 1,
-      };
       this.updateNameVisible = true;
+      this.tabChange(1);
       this.$refs["pwdForm"] && this.$refs["pwdForm"].resetFields();
     },
     // 修改密码

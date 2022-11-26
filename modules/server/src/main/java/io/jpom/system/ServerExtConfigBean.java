@@ -53,6 +53,11 @@ public class ServerExtConfigBean {
     public int userAlwaysLoginError;
 
     /**
+     * 是否强制提醒用户开启  mfa
+     */
+    @Value("${user.forceMfa:false}")
+    private boolean forceMfa;
+    /**
      * 当ip连续登录失败，锁定对应IP时长，单位毫秒
      */
     @Value("${user.ipErrorLockTime:60*60*5*1000}")
@@ -240,6 +245,10 @@ public class ServerExtConfigBean {
 
     public String getUserDemoTip() {
         return userDemoTip;
+    }
+
+    public boolean isForceMfa() {
+        return forceMfa;
     }
 
     /**
