@@ -4,9 +4,13 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增强制提示用户开启 MFA 认证（感谢[@长风](https://gitee.com/angh5) [Gitee issues I5ZBFU](https://gitee.com/dromara/Jpom/issues/I5ZBFU) ）
+1. 【server】新增强制提示用户开启 MFA 认证,新增配置属性：`user.forceMfa`（感谢[@长风](https://gitee.com/angh5) [Gitee issues I5ZBFU](https://gitee.com/dromara/Jpom/issues/I5ZBFU) ）
+
+https://gitee.com/dromara/Jpom/issues/I61LQH
 
 ### 🐞 解决BUG、优化功能
+
+1. 【server】优化系统已经初始化过进入初始化页面提示信息（感谢[@说一](https://gitee.com/aacsgaa) [Gitee issues I61LQH](https://gitee.com/dromara/Jpom/issues/I61LQH) ）
 
 ------
 
