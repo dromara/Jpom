@@ -40,6 +40,7 @@ import io.jpom.monitor.EmailUtil;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
+import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.TwoFactorAuthUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -101,6 +102,8 @@ public class UserBasicInfoController extends BaseServerController {
         map.put("md5Token", userModel.getPassword());
         boolean bindMfa = userService.hasBindMfa(userModel.getId());
         map.put("bindMfa", bindMfa);
+        boolean forceMfa = ServerExtConfigBean.getInstance().isForceMfa();
+        map.put("forceMfa", forceMfa);
         return JsonMessage.getString(200, "success", map);
     }
 
