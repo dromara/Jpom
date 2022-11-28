@@ -529,14 +529,7 @@ public class BuildExecuteService {
                     Tuple tuple = (Tuple) plugin.execute("branchAndTagList", map);
                     //GitUtil.getBranchAndTagList(repositoryModel);
                     Assert.notNull(tuple, "获取仓库分支失败");
-                    String branchName = buildInfoModel.getBranchName();
-                    // 模糊匹配分支
-                    String newBranchName = BuildExecuteService.fuzzyMatch(tuple.get(0), branchName);
-                    if (StrUtil.isEmpty(newBranchName)) {
-                        logRecorder.info(branchName + " Did not match the corresponding branch");
-                        buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
-                        return false;
-                    }
+
                     map.put("logWriter", logRecorder.getPrintWriter());
                     map.put("savePath", gitFile);
                     // 模糊匹配 标签
@@ -548,14 +541,22 @@ public class BuildExecuteService {
                             buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
                             return false;
                         }
-                        map.put("branchName", newBranchName);
-                        map.put("tagName", branchTagName);
-                        buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
-                        buildEnv.put("BUILD_TAG_NAME", branchTagName);
+                        // author bwcx_jzy 2022.11.28 map.put("branchName", newBranchName);
+                        map.put("tagName", newBranchTagName);
+                        //author bwcx_jzy 2022.11.28 buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
+                        buildEnv.put("BUILD_TAG_NAME", newBranchTagName);
                         // 标签拉取模式
-                        logRecorder.info("repository [" + branchName + "] [" + branchTagName + "] clone pull from " + newBranchName + "  " + newBranchTagName);
+                        logRecorder.info("repository tag [" + branchTagName + "] clone pull from " + newBranchTagName);
                         msg = (String) plugin.execute("pullByTag", map);
                     } else {
+                        String branchName = buildInfoModel.getBranchName();
+                        // 模糊匹配分支
+                        String newBranchName = BuildExecuteService.fuzzyMatch(tuple.get(0), branchName);
+                        if (StrUtil.isEmpty(newBranchName)) {
+                            logRecorder.info(branchName + " Did not match the corresponding branch");
+                            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
+                            return false;
+                        }
                         // 分支模式
                         map.put("branchName", newBranchName);
                         buildEnv.put("BUILD_BRANCH_NAME", newBranchName);

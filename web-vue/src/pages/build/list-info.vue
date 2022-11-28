@@ -29,7 +29,8 @@
         <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
       </a-tooltip>
       <a-tooltip slot="branchName" slot-scope="text, record" placement="topLeft" :title="`分支名称：${text},上次构建基于 commitId：${record.repositoryLastCommitId}`">
-        <span>{{ text }}</span>
+        <span v-if="record.branchTagName"><a-icon type="tag" />{{ record.branchTagName }}</span>
+        <span v-else>{{ text }}</span>
       </a-tooltip>
       <!-- <a-tooltip slot="resultDirFile" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -178,7 +179,14 @@
             <a-form-model-item v-if="temp.buildMode !== undefined && tempRepository.repoType === 0" label="分支" prop="branchName">
               <a-row>
                 <a-col :span="10">
-                  <custom-select v-model="temp.branchName" :data="branchList" @onRefreshSelect="loadBranchList" inputPlaceholder="自定义分支通配表达式" selectPlaceholder="请选择构建对应的分支,必选">
+                  <custom-select
+                    v-model="temp.branchName"
+                    :disabled="temp.branchTagName ? true : false"
+                    :data="branchList"
+                    @onRefreshSelect="loadBranchList"
+                    inputPlaceholder="自定义分支通配表达式"
+                    selectPlaceholder="请选择构建对应的分支,必选"
+                  >
                     <div slot="inputTips">
                       支持通配符(AntPathMatcher)
                       <ul>
@@ -743,6 +751,7 @@
           <custom-select
             v-model="temp.branchName"
             :data="branchList"
+            :disabled="temp.branchTagName ? true : false"
             @onRefreshSelect="loadBranchListById(temp.repositoryId)"
             inputPlaceholder="自定义分支通配表达式"
             selectPlaceholder="请选择构建对应的分支"

@@ -120,13 +120,16 @@ public class GitUtil {
     /**
      * 删除重新clone
      *
-     * @param parameter 参数
-     * @param file      文件
+     * @param parameter   参数
+     * @param branchName  分支
+     * @param tagName     标签
+     * @param printWriter 日志流
+     * @param file        文件
      * @return git
      * @throws GitAPIException api
      * @throws IOException     删除文件失败
      */
-    private static Git reClone(Map<String, Object> parameter, String branchName, File file, PrintWriter printWriter) throws GitAPIException, IOException {
+    private static Git reClone(Map<String, Object> parameter, String branchName, String tagName, File file, PrintWriter printWriter) throws GitAPIException, IOException {
         println(printWriter, StrUtil.EMPTY);
         println(printWriter, "Automatically re-clones repositories");
         if (!FileUtil.clean(file)) {
@@ -139,6 +142,9 @@ public class GitUtil {
         if (branchName != null) {
             cloneCommand.setBranch(Constants.R_HEADS + branchName);
             cloneCommand.setBranchesToClone(Collections.singletonList(Constants.R_HEADS + branchName));
+        }
+        if (tagName != null) {
+            cloneCommand.setBranch(Constants.R_TAGS + tagName);
         }
         String url = (String) parameter.get("url");
         CloneCommand command = cloneCommand.setURI(url)
@@ -196,48 +202,56 @@ public class GitUtil {
         }
     }
 
-    private static Git initGit(Map<String, Object> parameter, String branchName, File file, PrintWriter printWriter) {
+    private static Git initGit(Map<String, Object> parameter, String branchName, String tagName, File file, PrintWriter printWriter) {
         String url = (String) parameter.get("url");
         return Optional.of(file).flatMap(file12 -> {
-            // 文件信息
-            if (FileUtil.file(file12, Constants.DOT_GIT).exists()) {
-                return Optional.of(true);
-            }
-            return Optional.empty();
-        }).flatMap(status -> {
-            try {
-                // 远程地址
-                if (checkRemoteUrl(url, file)) {
+                // 文件信息
+                if (FileUtil.file(file12, Constants.DOT_GIT).exists()) {
                     return Optional.of(true);
                 }
-            } catch (IOException | GitAPIException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-            return Optional.empty();
-        }).flatMap(status -> {
-            // 本地分支
-            try {
-                // 远程地址
-                if (checkBranchName(branchName, file)) {
+                return Optional.empty();
+            }).flatMap(status -> {
+                try {
+                    // 远程地址
+                    if (checkRemoteUrl(url, file)) {
+                        return Optional.of(true);
+                    }
+                } catch (IOException | GitAPIException e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+                return Optional.empty();
+            }).flatMap(aBoolean -> {
+                if (StrUtil.isEmpty(tagName)) {
+                    // 分支模式，继续验证
                     return Optional.of(true);
                 }
-            } catch (IOException | GitAPIException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-            return Optional.empty();
-        }).map(aBoolean -> {
-            try {
-                return aBoolean ? Git.open(file) : reClone(parameter, branchName, file, printWriter);
-            } catch (IOException | GitAPIException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-        }).orElseGet(() -> {
-            try {
-                return reClone(parameter, branchName, file, printWriter);
-            } catch (GitAPIException | IOException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-        });
+                // 标签模式直接中断
+                return Optional.empty();
+            })
+            .flatMap(status -> {
+                // 本地分支
+                try {
+                    // 远程地址
+                    if (checkBranchName(branchName, file)) {
+                        return Optional.of(true);
+                    }
+                } catch (IOException | GitAPIException e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+                return Optional.empty();
+            }).map(aBoolean -> {
+                try {
+                    return aBoolean ? Git.open(file) : reClone(parameter, branchName, tagName, file, printWriter);
+                } catch (IOException | GitAPIException e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            }).orElseGet(() -> {
+                try {
+                    return reClone(parameter, branchName, tagName, file, printWriter);
+                } catch (GitAPIException | IOException e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            });
     }
 
     /**
@@ -338,9 +352,9 @@ public class GitUtil {
         String url = (String) parameter.get("url");
         String path = FileUtil.getAbsolutePath(file);
         synchronized (StrUtil.concat(false, url, path).intern()) {
-            try (Git git = initGit(parameter, branchName, file, printWriter)) {
+            try (Git git = initGit(parameter, branchName, null, file, printWriter)) {
                 // 拉取代码
-                PullResult pull = pull(git, parameter, branchName, null, printWriter);
+                PullResult pull = pull(git, parameter, branchName, printWriter);
                 // 最后一次提交记录
                 return getLastCommitMsg(file, branchName);
             } catch (Exception t) {
@@ -356,20 +370,16 @@ public class GitUtil {
      * @param git         仓库对象
      * @param branchName  分支
      * @param parameter   参数
-     * @param tagOpt      tag 操作
      * @param printWriter 日志流
      * @return pull result
      * @throws Exception 异常
      */
-    private static PullResult pull(Git git, Map<String, Object> parameter, String branchName, TagOpt tagOpt, PrintWriter printWriter) throws Exception {
+    private static PullResult pull(Git git, Map<String, Object> parameter, String branchName, PrintWriter printWriter) throws Exception {
         TextProgressMonitor progressMonitor = new TextProgressMonitor(printWriter);
         // 放弃本地修改
         git.checkout().setName(branchName).setForced(true).setProgressMonitor(progressMonitor).call();
 
         PullCommand pull = git.pull();
-        if (tagOpt != null) {
-            pull.setTagOpt(tagOpt);
-        }
         //
         setCredentials(pull, parameter);
         //
@@ -402,28 +412,18 @@ public class GitUtil {
     /**
      * 拉取对应分支最新代码
      *
-     * @param branchName  分支名
-     * @param printWriter 日志输出留
+     * @param printWriter 日志输出流
      * @param parameter   参数
      * @param file        仓库路径
      * @param tagName     标签名
      * @throws IOException     IO
      * @throws GitAPIException api
      */
-    public static String checkoutPullTag(Map<String, Object> parameter, File file, String branchName, String tagName, PrintWriter printWriter) throws Exception {
+    public static String checkoutPullTag(Map<String, Object> parameter, File file, String tagName, PrintWriter printWriter) throws Exception {
         String url = (String) parameter.get("url");
         String path = FileUtil.getAbsolutePath(file);
         synchronized (StrUtil.concat(false, url, path).intern()) {
-            try (Git git = initGit(parameter, null, file, printWriter)) {
-                // 拉取最新代码
-                PullResult pull = pull(git, parameter, branchName, TagOpt.FETCH_TAGS, printWriter);
-                // 切换到对应的 tag
-                git.checkout()
-                    .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
-                    .setForceRefUpdate(true)
-                    .setName(tagName)
-                    .setForced(true)
-                    .call();
+            try (Git git = initGit(parameter, null, tagName, file, printWriter)) {
                 // 获取最后提交信息
                 Collection<ReflogEntry> reflogEntries = git.reflog().setRef(Constants.HEAD).call();
                 ReflogEntry first = CollUtil.getFirst(reflogEntries);
