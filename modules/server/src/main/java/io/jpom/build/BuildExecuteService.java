@@ -763,7 +763,7 @@ public class BuildExecuteService {
                     CommandUtil.systemFastDel(historyPackageFile);
                 }
                 long allTime = SystemClock.now() - startTime;
-                logRecorder.info("构建完成 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
+                logRecorder.info("构建结束 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
                 this.asyncWebHooks("success");
 //                return true;
             } catch (RuntimeException runtimeException) {
