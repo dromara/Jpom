@@ -5,7 +5,7 @@
 ### 🐣 新增功能
 
 1. 【server】新增强制提示用户开启 MFA 认证,新增配置属性：`user.forceMfa`（感谢[@长风](https://gitee.com/angh5) [Gitee issues I5ZBFU](https://gitee.com/dromara/Jpom/issues/I5ZBFU) ）
-2. 【server】新增镜像创建容器支持配置网络模式属性、--privileged 属性
+2. 【server】新增镜像创建容器支持配置网络模式属性、--privileged、重启策略属性
 
 ### 🐞 解决BUG、优化功能
 
