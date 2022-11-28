@@ -169,7 +169,7 @@ public class BuildExecuteService {
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, status);
         Objects.requireNonNull(nowStatus);
         if (BuildStatus.Ing == nowStatus ||
-                BuildStatus.PubIng == nowStatus) {
+            BuildStatus.PubIng == nowStatus) {
             return "当前还在：" + nowStatus.getDesc();
         }
         return null;
@@ -204,12 +204,12 @@ public class BuildExecuteService {
             Assert.notNull(repositoryModel, "仓库信息不存在");
             Map<String, String> env = workspaceEnvVarService.getEnv(buildInfoModel.getWorkspaceId());
             BuildExecuteService.TaskData.TaskDataBuilder taskBuilder = BuildExecuteService.TaskData.builder()
-                    .buildInfoModel(buildInfoModel)
-                    .repositoryModel(repositoryModel)
-                    .userModel(userModel)
-                    .buildRemark(buildRemark)
-                    .delay(delay).env(env)
-                    .triggerBuildType(triggerBuildType);
+                .buildInfoModel(buildInfoModel)
+                .repositoryModel(repositoryModel)
+                .userModel(userModel)
+                .buildRemark(buildRemark)
+                .delay(delay).env(env)
+                .triggerBuildType(triggerBuildType);
             this.runTask(taskBuilder.build());
             String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
             return new JsonMessage<>(200, msg, buildInfoModel.getBuildId());
@@ -233,10 +233,10 @@ public class BuildExecuteService {
         initPool();
         //
         BuildInfoManage.BuildInfoManageBuilder builder = BuildInfoManage.builder()
-                .taskData(taskData)
-                .logId(logId)
-                .buildExtraModule(buildExtraModule)
-                .buildExecuteService(this);
+            .taskData(taskData)
+            .logId(logId)
+            .buildExtraModule(buildExtraModule)
+            .buildExecuteService(this);
         BuildInfoManage build = builder.build();
         //BuildInfoManage manage = new BuildInfoManage(taskData);
         BUILD_MANAGE_MAP.put(buildInfoModel.getId(), build);
@@ -378,7 +378,7 @@ public class BuildExecuteService {
             int queueSize = threadPoolExecutor.getQueue().size();
             int size = BUILD_MANAGE_MAP.size();
             logRecorder.info("当前构建中任务数：{},队列中任务数：{} {}", size, queueSize,
-                    size > buildExecuteService.buildExtConfig.getPoolSize() ? "构建任务开始进入队列等待...." : StrUtil.EMPTY);
+                size > buildExecuteService.buildExtConfig.getPoolSize() ? "构建任务开始进入队列等待...." : StrUtil.EMPTY);
             return this;
         }
 
@@ -449,9 +449,9 @@ public class BuildExecuteService {
                     for (String path : paths) {
                         File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), subBefore);
                         FileCopier.create(FileUtil.file(this.gitFile, path), FileUtil.file(toFile, path))
-                                .setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
-                                .setCopyFilter(file1 -> !file1.isHidden())
-                                .copy();
+                            .setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
+                            .setCopyFilter(file1 -> !file1.isHidden())
+                            .copy();
                     }
                 }
             }
@@ -463,9 +463,9 @@ public class BuildExecuteService {
                 }
                 File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
                 FileCopier.create(file, toFile)
-                        .setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
-                        .setCopyFilter(file1 -> !file1.isHidden())
-                        .copy();
+                    .setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
+                    .setCopyFilter(file1 -> !file1.isHidden())
+                    .copy();
             }
             logRecorder.info(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
             // 修改构建产物目录
@@ -604,8 +604,8 @@ public class BuildExecuteService {
             String fromTag = dockerYmlDsl.getFromTag();
             // 根据 tag 查询
             List<DockerInfoModel> dockerInfoModels = buildExecuteService
-                    .dockerInfoService
-                    .queryByTag(buildInfoModel.getWorkspaceId(), 1, fromTag);
+                .dockerInfoService
+                .queryByTag(buildInfoModel.getWorkspaceId(), 1, fromTag);
             DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
             Assert.notNull(dockerInfoModel, "没有可用的 docker server");
             logRecorder.info("use docker {}", dockerInfoModel.getName());
@@ -689,16 +689,20 @@ public class BuildExecuteService {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             UserModel userModel = taskData.userModel;
             boolean status = packageFile();
-            if (status && buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
+            if (!status) {
+                // 没有构建产物，将状态传递到后续流程
+                return false;
+            }
+            if (buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
                 // 发布文件
                 ReleaseManage releaseManage = ReleaseManage.builder()
-                        .buildNumberId(buildInfoModel.getBuildId())
-                        .buildExtraModule(buildExtraModule)
-                        .userModel(userModel)
-                        .logId(logId)
-                        .buildEnv(buildEnv)
-                        .buildExecuteService(buildExecuteService)
-                        .logRecorder(logRecorder).build();
+                    .buildNumberId(buildInfoModel.getBuildId())
+                    .buildExtraModule(buildExtraModule)
+                    .userModel(userModel)
+                    .logId(logId)
+                    .buildEnv(buildEnv)
+                    .buildExecuteService(buildExecuteService)
+                    .logRecorder(logRecorder).build();
                 releaseManage.start();
             } else {
                 //
