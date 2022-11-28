@@ -5,6 +5,6 @@
   },
   {
     "name": "备用地址",
-    "url": "yum install -y wget && wget -O install.sh https://jpom.top/docs/install.sh && bash install.sh Agent jdk"
+    "url": "yum install -y wget && wget -O install.sh https://gitee.com/dromara/Jpom/raw/docs/docs/.vuepress/public/docs/install.sh && bash install.sh Agent jdk"
   }
 ]
