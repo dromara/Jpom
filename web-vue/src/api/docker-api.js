@@ -305,3 +305,17 @@ export function dockerNetworksList(params) {
     data: params,
   });
 }
+
+/**
+ * 自动探测 docker
+ * @param {
+ *
+ * } params
+ */
+export function tryLocalDocker(params) {
+  return axios({
+    url: "/docker/try-local-docker",
+    method: "get",
+    params,
+  });
+}

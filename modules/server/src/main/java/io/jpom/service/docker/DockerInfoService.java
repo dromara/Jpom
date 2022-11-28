@@ -78,31 +78,6 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
     @Override
     public void startLoad() {
         CronUtils.add(CRON_ID, "0 0/1 * * * ?", () -> DockerInfoService.this);
-        //
-        localLocalDocker();
-    }
-
-    private void localLocalDocker() {
-        try {
-            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
-            String dockerHost = (String) plugin.execute("testLocal", new HashMap<>(1));
-            Entity entity = Entity.create();
-            entity.set("host", dockerHost);
-            entity.set("workspaceId", Const.WORKSPACE_DEFAULT_ID);
-            boolean exists = this.exists(entity);
-            if (exists) {
-                return;
-            }
-            DockerInfoModel.DockerInfoModelBuilder builder = DockerInfoModel.builder();
-            builder.host(dockerHost).name("localhost").status(1);
-            DockerInfoModel dockerInfoModel = builder.build();
-            dockerInfoModel.setWorkspaceId(Const.WORKSPACE_DEFAULT_ID);
-            dockerInfoModel.setModifyUser(UserModel.SYSTEM_ADMIN);
-            this.insert(dockerInfoModel);
-            Console.log("Automatically add local docker host: {}", dockerHost);
-        } catch (Throwable e) {
-            Console.error("There is no docker service local {}", e.getMessage());
-        }
     }
 
     @Override
