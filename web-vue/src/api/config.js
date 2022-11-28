@@ -91,7 +91,7 @@ request.interceptors.response.use(
       // 网络异常
       Vue.prototype.$setLoading(false);
       notification.error({
-        message: "Network Error",
+        message: "Network Error No response",
         description: "网络开了小差！请重试...:" + error,
       });
       return Promise.reject(error);

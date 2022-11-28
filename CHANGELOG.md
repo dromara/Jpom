@@ -15,6 +15,7 @@
 3. 【agent】修复未配置 nginx 路径时 reload 报错
 4. 【server】优化在线构建根据标签拉取代码（感谢@Tʀᴜsᴛ¹⁹⁹¹）
 5. 【server】优化克隆 git 仓库仅显示少量日志
+6. 【server】优化升级页面 loading 效果、全局 loading 关闭事件
 
 ### ❌ 不兼容功能
 

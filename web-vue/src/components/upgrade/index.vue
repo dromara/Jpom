@@ -181,8 +181,8 @@ export default {
           .then((res) => {
             let manifest = res.data?.manifest;
             if (res.code === 200 && manifest?.timeStamp !== this.temp.timeStamp) {
+              Vue.prototype.$setLoading("closeAll");
               clearInterval(this.timer);
-              Vue.prototype.$setLoading(false);
               this.$notification.success({
                 message: "升级成功",
               });
@@ -195,7 +195,7 @@ export default {
                 this.$notification.warning({
                   message: "未升级成功：" + (res.msg || ""),
                 });
-                Vue.prototype.$setLoading(false);
+                Vue.prototype.$setLoading("closeAll");
                 clearInterval(this.timer);
               }
             }
@@ -203,11 +203,16 @@ export default {
           .catch((error) => {
             console.error(error);
             if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
-              Vue.prototype.$setLoading(false);
+              Vue.prototype.$setLoading("closeAll");
+              clearInterval(this.timer);
               this.$notification.error({
                 message: "升级超时,请去服务器查看控制台日志排查问题",
               });
-              clearInterval(this.timer);
+            } else {
+              Vue.prototype.$setLoading({
+                spinning: true,
+                tip: (msg || "升级中，请稍候...") + ",请耐心等待暂时不用刷新页面,升级成功后会自动刷新",
+              });
             }
           });
         this.checkCount = this.checkCount + 1;
