@@ -12,6 +12,9 @@
             <a-button type="primary" @click="loadData" :loading="loading">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">添加</a-button>
+          <a-tooltip title="自动检测服务端所在服务器中是否存在 docker，如果存在将自动添加到列表中">
+            <a-button type="dashed" @click="handleTryLocalDocker"> <a-icon type="question-circle" theme="filled" />自动探测 </a-button>
+          </a-tooltip>
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -250,7 +253,7 @@
   </div>
 </template>
 <script>
-import { apiVersions, dcokerSwarmLeaveForce, deleteDcoker, dockerList, editDocker, editDockerByFile } from "@/api/docker-api";
+import { apiVersions, dcokerSwarmLeaveForce, deleteDcoker, dockerList, editDocker, editDockerByFile, tryLocalDocker } from "@/api/docker-api";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { dockerSwarmListAll, initDockerSwarm, joinDockerSwarm } from "@/api/docker-swarm";
 import { parseTime } from "@/utils/time";
@@ -572,6 +575,18 @@ export default {
             this.loadData();
           }
         });
+      });
+    },
+    //
+    handleTryLocalDocker() {
+      tryLocalDocker().then((res) => {
+        if (res.code === 200) {
+          // 成功
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.loadData();
+        }
       });
     },
   },

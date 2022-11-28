@@ -55,6 +55,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -305,5 +306,31 @@ public class DockerInfoController extends BaseServerController {
         //
         dockerInfoService.unbind(id);
         return new JsonMessage<>(200, "强制解绑成功");
+    }
+
+    @GetMapping(value = "try-local-docker", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> tryLocalDocker() {
+        try {
+            String workspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
+            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
+            String dockerHost = (String) plugin.execute("testLocal", new HashMap<>(1));
+            Entity entity = Entity.create();
+            entity.set("host", dockerHost);
+            entity.set("workspaceId", workspaceId);
+            boolean exists = dockerInfoService.exists(entity);
+            if (exists) {
+                return new JsonMessage<>(405, "已经存在本地 docker 信息啦，不要重复添加");
+            }
+            DockerInfoModel.DockerInfoModelBuilder builder = DockerInfoModel.builder();
+            builder.host(dockerHost).name("localhost").status(1);
+            DockerInfoModel dockerInfoModel = builder.build();
+            dockerInfoModel.setWorkspaceId(workspaceId);
+            dockerInfoService.insert(dockerInfoModel);
+            return new JsonMessage<>(200, "自动探测到本地 docker 并且自动添加：" + dockerHost);
+        } catch (Throwable e) {
+            log.error("探测本地 docker 异常", e);
+            return new JsonMessage<>(500, "探测本地 docker 异常：" + e.getMessage());
+        }
     }
 }

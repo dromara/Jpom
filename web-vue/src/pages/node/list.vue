@@ -869,7 +869,7 @@ export default {
             item.allText = `${item.url} ${this.fastInstallInfo.key} '${this.fastInstallInfo.host}'`;
             return item;
           });
-          this.fastInstallInfo.bindCommand = `sh /xxxx/Agent.sh restart ${this.fastInstallInfo.key} '${this.fastInstallInfo.host}'`;
+          this.fastInstallInfo.bindCommand = `sh ./Agent.sh restart ${this.fastInstallInfo.key} '${this.fastInstallInfo.host}'`;
           // 轮询 结果
           this.pullFastInstallResultTime = setInterval(() => {
             pullFastInstallResult().then((res) => {
