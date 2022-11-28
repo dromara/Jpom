@@ -384,7 +384,7 @@ public class NginxController extends BaseAgentController {
         String nginxPath = this.getNginxPath();
         String name = nginxService.getServiceName();
         String format = StrUtil.format("{} -t", name);
-        return StrUtil.isNotEmpty(nginxPath) ? CommandUtil.execSystemCommand(format) : CommandUtil.execSystemCommand(format, FileUtil.file(nginxPath));
+        return StrUtil.isEmpty(nginxPath) ? CommandUtil.execSystemCommand(format) : CommandUtil.execSystemCommand(format, FileUtil.file(nginxPath));
     }
 
     /**
