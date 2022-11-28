@@ -28,7 +28,17 @@
         <!-- <a-icon type="edit" theme="twoTone" /> -->
         <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
       </a-tooltip>
-      <a-tooltip slot="branchName" slot-scope="text, record" placement="topLeft" :title="`分支名称：${text},上次构建基于 commitId：${record.repositoryLastCommitId}`">
+      <a-tooltip slot="branchName" slot-scope="text, record" placement="topLeft">
+        <template slot="title">
+          <div v-if="record.branchTagName">
+            <div>标签名称：{{ record.branchTagName }}</div>
+            <div>上次构建基于 commitId：{{ record.repositoryLastCommitId }}</div>
+          </div>
+          <div v-else>
+            <div>分支名称：{{ text }}</div>
+            <div>上次构建基于 commitId：{{ record.repositoryLastCommitId }}</div>
+          </div>
+        </template>
         <span v-if="record.branchTagName"><a-icon type="tag" />{{ record.branchTagName }}</span>
         <span v-else>{{ text }}</span>
       </a-tooltip>
