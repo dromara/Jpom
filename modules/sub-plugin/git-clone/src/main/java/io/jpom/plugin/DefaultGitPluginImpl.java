@@ -55,7 +55,7 @@ public class DefaultGitPluginImpl implements IWorkspaceEnvPlugin {
             case "pullByTag": {
                 PrintWriter printWriter = (PrintWriter) parameter.get("logWriter");
                 String tagName = (String) parameter.get("tagName");
-                return GitUtil.checkoutPullTag(parameter, savePath, branchName, tagName, printWriter);
+                return GitUtil.checkoutPullTag(parameter, savePath, tagName, printWriter);
             }
             default:
                 break;

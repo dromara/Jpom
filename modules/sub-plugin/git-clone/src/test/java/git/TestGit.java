@@ -134,7 +134,7 @@ public class TestGit {
         map.put("password", "a");
 
 
-        GitUtil.checkoutPullTag(map, file, branchName, tagName, printWriter);
+        GitUtil.checkoutPullTag(map, file, tagName, printWriter);
 
         //GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
 
@@ -164,7 +164,7 @@ public class TestGit {
 //        repositoryModel.setRepoType(0);
 //        repositoryModel.setUserName("a");
 //        repositoryModel.setPassword("a");
-        String msg = GitUtil.checkoutPullTag(map, file, branchName, tagName, printWriter);
+        String msg = GitUtil.checkoutPullTag(map, file, tagName, printWriter);
         System.out.println(msg);
         //GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
 
