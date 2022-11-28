@@ -1246,6 +1246,7 @@ export default {
     handleAdd() {
       this.temp = {};
       this.branchList = [];
+      this.tempRepository = {};
       this.loadRepositoryList();
       this.loadDispatchList();
       this.loadNodeProjectList();
