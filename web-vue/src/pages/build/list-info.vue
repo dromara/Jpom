@@ -153,6 +153,53 @@
             </a-col>
           </a-row>
         </a-form-model-item>
+        <a-form-model-item label="构建源仓库" prop="repositoryId">
+          <a-select show-search option-filter-prop="children" v-model="temp.repositoryId" @change="changeRepositpry" placeholder="请选择仓库">
+            <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item v-if="tempRepository.repoType === 0" label="分支" prop="branchName">
+          <a-row>
+            <a-col :span="10">
+              <custom-select
+                v-model="temp.branchName"
+                :disabled="temp.branchTagName ? true : false"
+                :data="branchList"
+                @onRefreshSelect="loadBranchList"
+                inputPlaceholder="自定义分支通配表达式"
+                selectPlaceholder="请选择构建对应的分支,必选"
+              >
+                <div slot="inputTips">
+                  支持通配符(AntPathMatcher)
+                  <ul>
+                    <li>? 匹配一个字符</li>
+                    <li>* 匹配零个或多个字符</li>
+                    <li>** 匹配路径中的零个或多个目录</li>
+                  </ul>
+                </div>
+              </custom-select>
+            </a-col>
+            <a-col :span="4" style="text-align: right"> 标签(TAG)：</a-col>
+            <a-col :span="10">
+              <custom-select
+                v-model="temp.branchTagName"
+                :data="branchTagList"
+                @onRefreshSelect="loadBranchList"
+                inputPlaceholder="自定义标签通配表达式"
+                selectPlaceholder="选择构建的标签,不选为最新提交"
+              >
+                <div slot="inputTips">
+                  支持通配符(AntPathMatcher)
+                  <ul>
+                    <li>? 匹配一个字符</li>
+                    <li>* 匹配零个或多个字符</li>
+                    <li>** 匹配路径中的零个或多个目录</li>
+                  </ul>
+                </div>
+              </custom-select>
+            </a-col>
+          </a-row>
+        </a-form-model-item>
 
         <a-collapse :activeKey="['0', '1', '2']">
           <a-collapse-panel key="0">
@@ -179,55 +226,6 @@
               </a-form-model-item>
             </template>
             <div v-if="temp.buildMode === undefined" style="text-align: center">请选择构建方式</div>
-
-            <a-form-model-item v-if="temp.buildMode !== undefined" label="构建源仓库" prop="repositoryId">
-              <a-select show-search option-filter-prop="children" v-model="temp.repositoryId" @change="changeRepositpry" placeholder="请选择仓库">
-                <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
-              </a-select>
-            </a-form-model-item>
-
-            <a-form-model-item v-if="temp.buildMode !== undefined && tempRepository.repoType === 0" label="分支" prop="branchName">
-              <a-row>
-                <a-col :span="10">
-                  <custom-select
-                    v-model="temp.branchName"
-                    :disabled="temp.branchTagName ? true : false"
-                    :data="branchList"
-                    @onRefreshSelect="loadBranchList"
-                    inputPlaceholder="自定义分支通配表达式"
-                    selectPlaceholder="请选择构建对应的分支,必选"
-                  >
-                    <div slot="inputTips">
-                      支持通配符(AntPathMatcher)
-                      <ul>
-                        <li>? 匹配一个字符</li>
-                        <li>* 匹配零个或多个字符</li>
-                        <li>** 匹配路径中的零个或多个目录</li>
-                      </ul>
-                    </div>
-                  </custom-select>
-                </a-col>
-                <a-col :span="4" style="text-align: right"> 标签(TAG)：</a-col>
-                <a-col :span="10">
-                  <custom-select
-                    v-model="temp.branchTagName"
-                    :data="branchTagList"
-                    @onRefreshSelect="loadBranchList"
-                    inputPlaceholder="自定义标签通配表达式"
-                    selectPlaceholder="选择构建的标签,不选为最新提交"
-                  >
-                    <div slot="inputTips">
-                      支持通配符(AntPathMatcher)
-                      <ul>
-                        <li>? 匹配一个字符</li>
-                        <li>* 匹配零个或多个字符</li>
-                        <li>** 匹配路径中的零个或多个目录</li>
-                      </ul>
-                    </div>
-                  </custom-select>
-                </a-col>
-              </a-row>
-            </a-form-model-item>
 
             <a-form-model-item v-if="temp.buildMode === 0" prop="script">
               <template slot="label">
@@ -969,7 +967,7 @@ export default {
         { title: "名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
 
         {
-          title: "分支",
+          title: "分支/标签",
           dataIndex: "branchName",
           ellipsis: true,
           scopedSlots: { customRender: "branchName" },
