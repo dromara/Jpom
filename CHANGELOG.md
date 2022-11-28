@@ -12,6 +12,7 @@
 
 1. 【server】优化系统已经初始化过进入初始化页面提示信息（感谢[@说一](https://gitee.com/aacsgaa) [Gitee issues I61LQH](https://gitee.com/dromara/Jpom/issues/I61LQH) ）
 2. 【server】优化构建流程状态，不存在产物构建状态标记为构建失败
+3. 【agent】修复未配置 nginx 路径时 reload 报错
 
 ### ❌ 不兼容功能
 
