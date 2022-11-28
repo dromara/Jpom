@@ -211,7 +211,64 @@
             </a-col>
           </a-row>
         </a-form-model-item>
-        <a-form-model-item label="网络"> <a-input v-model="temp.networkMode" placeholder="网络模式：bridge、container、host、container、none" /> </a-form-model-item>
+        <a-form-model-item label="网络">
+          <a-auto-complete v-model="temp.networkMode" placeholder="网络模式：bridge、container:<name|id>、host、container、none" option-label-prop="value">
+            <template slot="dataSource">
+              <a-select-option
+                v-for="dataItem in [
+                  {
+                    title: '为 docker bridge 上的容器创建一个新的网络堆栈',
+                    value: 'bridge',
+                  },
+                  {
+                    title: '这个容器没有网络',
+                    value: 'none',
+                  },
+                  {
+                    title: '重用另一个容器网络堆栈',
+                    value: 'container:<name|id>',
+                  },
+                  {
+                    title: '使用容器内的主机网络堆栈。 注意：主机模式赋予容器对本地系统服务（如 D-bus）的完全访问权限，因此被认为是不安全的。',
+                    value: 'host',
+                  },
+                ]"
+                :key="dataItem.value"
+              >
+                {{ dataItem.title }}
+              </a-select-option>
+            </template>
+          </a-auto-complete>
+        </a-form-model-item>
+        <a-form-model-item label="重启策略">
+          <a-auto-complete v-model="temp.restartPolicy" placeholder="重启策略：no、always、unless-stopped、on-failure" option-label-prop="value">
+            <template slot="dataSource">
+              <a-select-option
+                v-for="dataItem in [
+                  {
+                    title: '不自动重启',
+                    value: 'no',
+                  },
+                  {
+                    title: '无论返回什么退出代码，始终重新启动容器。',
+                    value: 'always',
+                  },
+                  {
+                    title: '如果容器以非零退出代码退出，则重新启动容器。可以指定次数：on-failure:2',
+                    value: 'on-failure:1',
+                  },
+                  {
+                    title: '重新启动容器，除非它已被停止',
+                    value: 'unless-stopped',
+                  },
+                ]"
+                :key="dataItem.value"
+              >
+                {{ dataItem.title }}
+              </a-select-option>
+            </template>
+          </a-auto-complete>
+        </a-form-model-item>
         <a-form-model-item label="自动启动">
           <a-row>
             <a-col :span="4"><a-switch v-model="temp.autorun" checked-children="启动" un-checked-children="不启动" /></a-col>
@@ -400,6 +457,7 @@ export default {
           commands: [],
           networkMode: this.temp.networkMode,
           privileged: this.temp.privileged,
+          restartPolicy: this.temp.restartPolicy,
         };
         temp.volumes = (this.temp.volumes || [])
           .filter((item) => {

@@ -232,6 +232,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         return networks.stream().map(container -> (JSONObject) JSONObject.toJSON(container)).collect(Collectors.toList());
     }
 
+    @SuppressWarnings("unchecked")
     public void pullImageCmd(Map<String, Object> parameter) throws InterruptedException {
         DockerClient dockerClient = DockerUtil.get(parameter);
 
@@ -249,6 +250,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
     }
 
 
+    @SuppressWarnings(value = {"unchecked"})
     private void createContainerCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
 
@@ -259,6 +261,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         String networkMode = (String) parameter.get("networkMode");
         Object autorunStr = parameter.get("autorun");
         Object privileged = parameter.get("privileged");
+        String restartPolicy = (String) parameter.get("restartPolicy");
         Map<String, String> env = (Map<String, String>) parameter.get("env");
         //
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(imageId);
@@ -281,6 +284,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         }
         Opt.ofBlankAble(networkMode).ifPresent(hostConfig::withNetworkMode);
         Optional.ofNullable(privileged).map(o -> Convert.toBool(o, false)).ifPresent(hostConfig::withPrivileged);
+        Opt.ofBlankAble(restartPolicy).map(RestartPolicy::parse).ifPresent(hostConfig::withRestartPolicy);
         // 环境变量
         if (env != null) {
             List<String> envList = env.entrySet()
@@ -314,6 +318,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         return (JSONObject) JSONObject.toJSON(inspectImageResponse);
     }
 
+    @SuppressWarnings("unchecked")
     private void pushImageCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
@@ -331,6 +336,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void buildImageCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
@@ -356,6 +362,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void execCreateCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
@@ -387,6 +394,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void logContainerCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         Consumer<String> consumer = (Consumer<String>) parameter.get("consumer");
