@@ -137,7 +137,7 @@ public class GitUtil {
         }
         CloneCommand cloneCommand = Git.cloneRepository();
         if (printWriter != null) {
-            cloneCommand.setProgressMonitor(new TextProgressMonitor(printWriter));
+            cloneCommand.setProgressMonitor(new SmallTextProgressMonitor(printWriter));
         }
         if (branchName != null) {
             cloneCommand.setBranch(Constants.R_HEADS + branchName);
@@ -375,7 +375,7 @@ public class GitUtil {
      * @throws Exception 异常
      */
     private static PullResult pull(Git git, Map<String, Object> parameter, String branchName, PrintWriter printWriter) throws Exception {
-        TextProgressMonitor progressMonitor = new TextProgressMonitor(printWriter);
+        SmallTextProgressMonitor progressMonitor = new SmallTextProgressMonitor(printWriter);
         // 放弃本地修改
         git.checkout().setName(branchName).setForced(true).setProgressMonitor(progressMonitor).call();
 
