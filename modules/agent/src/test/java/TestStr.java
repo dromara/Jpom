@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.net.url.UrlBuilder;
@@ -79,5 +80,11 @@ public class TestStr {
         System.out.println(build);
         HttpRequest httpRequest = HttpUtil.createGet(build);
         System.out.println(httpRequest.form());
+    }
+
+    @Test
+    public void testNum(){
+        System.out.println(Convert.toInt("122+"));
+        System.out.println(NumberUtil.parseInt("1122+"));
     }
 }
