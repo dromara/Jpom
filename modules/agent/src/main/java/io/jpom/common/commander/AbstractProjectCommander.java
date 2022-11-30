@@ -55,6 +55,7 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import io.jpom.util.JvmUtil;
 import io.jpom.util.ProjectCommanderUtil;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
@@ -148,6 +149,18 @@ public abstract class AbstractProjectCommander {
      * @throws Exception 异常
      */
     public String start(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        return this.start(nodeProjectInfoModel, javaCopyItem, false);
+    }
+
+    /**
+     * 启动
+     *
+     * @param nodeProjectInfoModel 项目
+     * @param sync                 dsl 是否同步执行
+     * @return 结果
+     * @throws Exception 异常
+     */
+    public String start(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, boolean sync) throws Exception {
         String msg = checkStart(nodeProjectInfoModel, javaCopyItem);
         if (msg != null) {
             return msg;
@@ -157,7 +170,11 @@ public abstract class AbstractProjectCommander {
             //
             String startDsl = this.runDsl(nodeProjectInfoModel, "start", baseProcess -> {
                 String log = nodeProjectInfoModel.getAbsoluteLog(null);
-                return DslScriptBuilder.run(baseProcess, nodeProjectInfoModel, log);
+                try {
+                    return DslScriptBuilder.run(baseProcess, nodeProjectInfoModel, "start", log, sync);
+                } catch (Exception e) {
+                    throw Lombok.sneakyThrow(e);
+                }
             });
             if (startDsl != null) {
                 return startDsl;
@@ -221,6 +238,19 @@ public abstract class AbstractProjectCommander {
      * @throws Exception 异常
      */
     public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        return this.stop(nodeProjectInfoModel, javaCopyItem, false);
+    }
+
+    /**
+     * 停止
+     *
+     * @param nodeProjectInfoModel 项目
+     * @param javaCopyItem         副本信息
+     * @param sync                 dsl 是否同步执行
+     * @return 结果
+     * @throws Exception 异常
+     */
+    public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, boolean sync) throws Exception {
         Tuple tuple = this.stopBefore(nodeProjectInfoModel, javaCopyItem);
         String result = tuple.get(1);
         String webHook = tuple.get(0);
@@ -231,7 +261,11 @@ public abstract class AbstractProjectCommander {
                 //
                 String startDsl = this.runDsl(nodeProjectInfoModel, "stop", process -> {
                     String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
-                    return DslScriptBuilder.run(process, nodeProjectInfoModel, log);
+                    try {
+                        return DslScriptBuilder.run(process, nodeProjectInfoModel, "stop", log, sync);
+                    } catch (Exception e) {
+                        throw Lombok.sneakyThrow(e);
+                    }
                 });
                 boolean checkRun = this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false);
                 result = StrUtil.emptyToDefault(startDsl, checkRun ? "stop done,but unsuccessful" : "stop done");
@@ -337,7 +371,7 @@ public abstract class AbstractProjectCommander {
         boolean run = this.isRun(nodeProjectInfoModel, javaCopyItem);
         String stopMsg = StrUtil.EMPTY;
         if (run) {
-            stopMsg = this.stop(nodeProjectInfoModel, javaCopyItem);
+            stopMsg = this.stop(nodeProjectInfoModel, javaCopyItem, true);
         }
         String startMsg = this.start(nodeProjectInfoModel, javaCopyItem);
         return new Tuple(startMsg, stopMsg);
@@ -469,7 +503,7 @@ public abstract class AbstractProjectCommander {
     public String status(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.Dsl) {
-            String status = this.runDsl(nodeProjectInfoModel, "status", baseProcess -> DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel));
+            String status = this.runDsl(nodeProjectInfoModel, "status", baseProcess -> DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, "status"));
             String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
             FileUtil.appendString(status, FileUtil.file(log), CharsetUtil.CHARSET_UTF_8);
             List<String> split1 = StrUtil.split(status, StrUtil.CRLF);
