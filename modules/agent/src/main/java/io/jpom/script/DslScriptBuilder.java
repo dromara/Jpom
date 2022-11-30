@@ -100,7 +100,9 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             //
             int waitFor = process.waitFor();
             //
-            this.handle(StrUtil.format("execute done: {}", waitFor));
+            if (waitFor != 0) {
+                this.handle(StrUtil.format("execute done: {}", waitFor));
+            }
         } catch (Exception e) {
             log.error("执行异常", e);
             String msg = "执行异常：" + e.getMessage();
@@ -110,8 +112,11 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
     @Override
     protected void handle(String line) {
-        String formatLine = StrUtil.format("{} [{}] {}", DateUtil.now(), this.action, line);
-        super.handle(formatLine);
+        super.handle(this.formatLine(line));
+    }
+
+    private String formatLine(String line) {
+        return StrUtil.format("{} [{}] - {}", DateUtil.now(), this.action, line);
     }
 
     /**
@@ -124,25 +129,30 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     /**
      * 执行
      */
-    public String syncExecute() {
+    public List<String> syncExecute() {
         ProcessBuilder processBuilder = this.init();
+        List<String> result = new ArrayList<>();
         try {
             //
             process = processBuilder.start();
             inputStream = process.getInputStream();
-            List<String> result = new ArrayList<>();
-            IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) result::add);
+
+            IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) line -> result.add(this.formatLine(line)));
             //
             int waitFor = process.waitFor();
+            if (waitFor != 0) {
+                // 插入第一行
+                result.add(0, this.formatLine(StrUtil.format("execute done: {}", waitFor)));
+            }
             //
-            result.add(0, "" + waitFor);
-            return CollUtil.join(result, StrUtil.CRLF);
+            return result;
         } catch (Exception e) {
             log.error("执行异常", e);
-            return "执行异常：" + e.getMessage();
+            result.add(this.formatLine(StrUtil.format("执行异常：", e.getMessage())));
         } finally {
             this.close();
         }
+        return result;
     }
 
     @Override
@@ -173,10 +183,10 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
      *
      * @param scriptProcess 脚本流程
      */
-    public static String syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action) {
+    public static List<String> syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action) {
         DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, action, null);
         if (builder == null) {
-            return "脚本模版不存在:" + scriptProcess.getScriptId();
+            return CollUtil.newArrayList("脚本模版不存在:" + scriptProcess.getScriptId());
         }
         return builder.syncExecute();
     }
