@@ -71,6 +71,7 @@ public abstract class BaseRunScript implements AutoCloseable {
             // windows 中不能正常关闭
             IoUtil.close(inputStream);
             this.process.destroy();
+            this.process = null;
         }
     }
 }

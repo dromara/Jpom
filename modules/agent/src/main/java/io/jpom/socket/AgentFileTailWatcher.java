@@ -44,7 +44,7 @@ public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
     private static final ConcurrentHashMap<File, AgentFileTailWatcher<Session>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
 
-    private AgentFileTailWatcher(File logFile) throws IOException {
+    private AgentFileTailWatcher(File logFile) {
         super(logFile);
     }
 
