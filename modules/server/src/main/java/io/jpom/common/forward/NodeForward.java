@@ -417,9 +417,12 @@ public class NodeForward {
                 // 值 < 0  url 指定不超时
                 return timeOut > 0 ? Optional.of(timeOut) : Optional.empty();
             })
-            .map(integer -> {
+            .map(timeOut -> {
+                if (timeOut <= 0) {
+                    return null;
+                }
                 // 超时时间不能小于 2 秒
-                return Math.max(integer, 2);
+                return Math.max(timeOut, 2);
             })
             .ifPresent(timeOut -> httpRequest.timeout(timeOut * 1000));
         // 添加 http proxy

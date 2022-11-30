@@ -51,6 +51,7 @@ import io.jpom.plugin.PluginFactory;
 import io.jpom.script.DslScriptBuilder;
 import io.jpom.service.manage.JdkInfoService;
 import io.jpom.service.manage.ProjectInfoService;
+import io.jpom.socket.AgentFileTailWatcher;
 import io.jpom.system.AgentExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
@@ -503,6 +504,8 @@ public abstract class AbstractProjectCommander {
         if (StrUtil.isNotEmpty(r)) {
             log.info(r);
         }
+        // 重新监听
+        AgentFileTailWatcher.reWatcher(file);
         return "ok";
     }
 

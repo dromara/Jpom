@@ -73,8 +73,9 @@ public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
         if (agentFileTailWatcher == null) {
             throw new IOException("加载文件失败:" + file.getPath());
         }
-        agentFileTailWatcher.add(session, FileUtil.getName(file));
-        agentFileTailWatcher.start();
+        if (agentFileTailWatcher.add(session, FileUtil.getName(file))) {
+            agentFileTailWatcher.start();
+        }
     }
 
     /**

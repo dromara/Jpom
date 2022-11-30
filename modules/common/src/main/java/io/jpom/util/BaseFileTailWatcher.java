@@ -22,20 +22,22 @@
  */
 package io.jpom.util;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.io.file.Tailer;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.websocket.Session;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -56,7 +58,7 @@ public abstract class BaseFileTailWatcher<T> {
      * 缓存近x条
      */
     private final LimitQueue<String> limitQueue = new LimitQueue<>(ExtConfigBean.getInstance().getLogInitReadLine());
-    private final Tailer tailer;
+    private Tailer tailer;
 
     /**
      * 所有会话
@@ -65,12 +67,6 @@ public abstract class BaseFileTailWatcher<T> {
 
     public BaseFileTailWatcher(File logFile) {
         this.logFile = logFile;
-        //this.tailWatcherRun = new FileTailWatcherRun(logFile, this::sendAll);
-        Charset charset = detectorCharset(logFile);
-        tailer = new Tailer(logFile, charset, line -> {
-            limitQueue.offer(line);
-            this.sendAll(line);
-        }, ExtConfigBean.getInstance().getLogInitReadLine(), DateUnit.SECOND.getMillis());
     }
 
     public static Charset detectorCharset(File logFile) {
@@ -128,24 +124,46 @@ public abstract class BaseFileTailWatcher<T> {
      * @param name    文件名
      * @param session 会话
      */
-    protected void add(T session, String name) {
-        if (this.socketSessions.contains(session) || this.socketSessions.add(session)) {
-            if (CollUtil.isEmpty(limitQueue)) {
-                return;
-            }
+    protected boolean add(T session, String name) {
+        Method byName = ReflectUtil.getMethodByName(session.getClass(), "getId");
+        Assert.notNull(byName, "没有  getId 方法");
+        String id = ReflectUtil.invoke(session, byName);
+        boolean match = this.socketSessions.stream().anyMatch(t -> {
+            String itemId = ReflectUtil.invoke(t, byName);
+            return StrUtil.equals(id, itemId);
+        });
+        if (match) {
+            return false;
+        }
+        if (this.socketSessions.add(session)) {
             this.send(session, StrUtil.format("监听{}日志成功,目前共有{}人正在查看", name, this.socketSessions.size()));
             // 开发发送头信息
             for (String s : limitQueue) {
                 this.send(session, s);
             }
         }
+        return true;
         //        else {
         //            this.send(session, "添加日志监听失败");
         //        }
     }
 
     public void start() {
+        //this.tailWatcherRun = new FileTailWatcherRun(logFile, this::sendAll);
+        Charset charset = detectorCharset(logFile);
+        this.tailer = new Tailer(logFile, charset, line -> {
+            limitQueue.offer(line);
+            this.sendAll(line);
+        }, ExtConfigBean.getInstance().getLogInitReadLine(), DateUnit.SECOND.getMillis());
         this.tailer.start(true);
+    }
+
+    public void restart() {
+        if (this.tailer != null) {
+            this.tailer.stop();
+        }
+        this.sendAll("Relisten to the file............");
+        this.start();
     }
 
     /**

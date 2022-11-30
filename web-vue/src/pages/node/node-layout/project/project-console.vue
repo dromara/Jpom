@@ -73,9 +73,9 @@
   </div>
 </template>
 <script>
-import {deleteProjectLogBackFile, downloadProjectLogBackFile, downloadProjectLogFile, getLogBackList, getProjectData, getProjectLogSize} from "@/api/node-project";
-import {mapGetters} from "vuex";
-import {getWebSocketUrl} from "@/utils/const";
+import { deleteProjectLogBackFile, downloadProjectLogBackFile, downloadProjectLogFile, getLogBackList, getProjectData, getProjectLogSize } from "@/api/node-project";
+import { mapGetters } from "vuex";
+import { getWebSocketUrl } from "@/utils/const";
 import LogView from "@/components/logView";
 
 export default {
@@ -102,7 +102,7 @@ export default {
       optButtonLoading: true,
       loading: false,
       socket: null,
-
+      logExist: false,
       lobbackVisible: false,
       logBackList: [],
       columns: [
@@ -270,6 +270,10 @@ export default {
       getProjectLogSize(params).then((res) => {
         if (res.code === 200) {
           this.project = { ...this.project, logSize: res.data.logSize };
+          if (!this.logExist && res.data?.logSize) {
+            this.sendMsg("showlog");
+            this.logExist = true;
+          }
         }
       });
     },
