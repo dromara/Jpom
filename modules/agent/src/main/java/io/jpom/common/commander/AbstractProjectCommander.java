@@ -30,6 +30,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.text.StrPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -212,12 +213,19 @@ public abstract class AbstractProjectCommander {
             return errorMsg;
         }
         DslYmlDto.BaseProcess process = dslProcess.get(1);
-        if (process == null) {
-            return "yml 未配置 运行管理 " + opt;
-        }
+        Assert.notNull(process, "yml 未配置 运行管理 " + opt);
         return function.apply(process);
-        //	String log = nodeProjectInfoModel.getAbsoluteLog(null);
-        //	return DslScriptBuilder.run(process, log);
+    }
+
+    private List<String> runDslListResult(NodeProjectInfoModel nodeProjectInfoModel, String opt, Function<DslYmlDto.BaseProcess, List<String>> function) {
+        Tuple dslProcess = nodeProjectInfoModel.getDslProcess(opt);
+        String errorMsg = dslProcess.get(0);
+        if (errorMsg != null) {
+            return CollUtil.newArrayList(errorMsg);
+        }
+        DslYmlDto.BaseProcess process = dslProcess.get(1);
+        Assert.notNull(process, "yml 未配置 运行管理 " + opt);
+        return function.apply(process);
     }
 
     /**
@@ -503,11 +511,16 @@ public abstract class AbstractProjectCommander {
     public String status(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.Dsl) {
-            String status = this.runDsl(nodeProjectInfoModel, "status", baseProcess -> DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, "status"));
+            List<String> status = this.runDslListResult(nodeProjectInfoModel, "status", baseProcess -> DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, "status"));
             String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
-            FileUtil.appendString(status, FileUtil.file(log), CharsetUtil.CHARSET_UTF_8);
-            List<String> split1 = StrUtil.split(status, StrUtil.CRLF);
-            return CollUtil.getLast(split1);
+            FileUtil.appendLines(status, FileUtil.file(log), CharsetUtil.CHARSET_UTF_8);
+
+            return Optional.ofNullable(status)
+                .map(CollUtil::getLast)
+                // StrUtil.format("{} [{}] - {}", DateUtil.now(), this.action, line);
+                .map(s -> StrUtil.splitTrim(s, StrPool.DASHED))
+                .map(CollUtil::getLast).orElse(null);
+
         } else {
             String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
             return this.status(tag);
