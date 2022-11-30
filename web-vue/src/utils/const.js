@@ -206,6 +206,8 @@ export const PROJECT_DSL_DEFATUL =
   "#    scriptId: project.sh\r\n" +
   "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
   "    scriptArgs: start\r\n" +
+  "    scriptEnv:\r\n" +
+  '      "boot_active": test\r\n' +
   "  status:\r\n" +
   "#    scriptId: project.sh\r\n" +
   "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
@@ -214,6 +216,12 @@ export const PROJECT_DSL_DEFATUL =
   "#    scriptId: project.sh\r\n" +
   "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
   "    scriptArgs: stop\r\n" +
+  "#  restart:\r\n" +
+  "##    scriptId: project.sh\r\n" +
+  "#    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
+  "#    scriptArgs: restart\r\n" +
+  "#    scriptEnv:\r\n" +
+  '#      "boot_active": test\r\n' +
   "file:\r\n" +
   "# 备份文件保留个数\r\n" +
   "#  backupCount: 5\r\n" +
