@@ -31,7 +31,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
-import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.commander.CommandOpResult;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ConsoleService;
 import io.jpom.service.manage.ProjectInfoService;
@@ -152,7 +152,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         //
         NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
         JSONObject resultData = null;
-        String strResult;
+        CommandOpResult strResult;
         boolean logUser = false;
         try {
             // 执行相应命令
@@ -161,32 +161,34 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case restart:
                     logUser = true;
                     strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
-                    if (strResult.contains(AbstractProjectCommander.RUNNING_TAG)) {
-                        resultData = JsonMessage.toJson(200, "操作成功:" + strResult);
+                    if (strResult.isSuccess()) {
+                        resultData = JsonMessage.toJson(200, "操作成功", strResult);
                     } else {
-                        resultData = JsonMessage.toJson(400, strResult);
+                        resultData = JsonMessage.toJson(400, strResult.msgStr());
                     }
                     break;
-                case stop:
+                case stop: {
                     logUser = true;
                     // 停止项目
                     strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
-                    int parsePid = ProjectCommanderUtil.parsePid(strResult);
-                    if (parsePid > 0) {
-                        resultData = JsonMessage.toJson(200, strResult);
+                    if (strResult.isSuccess()) {
+                        resultData = JsonMessage.toJson(200, "操作成功", strResult);
                     } else {
-                        resultData = JsonMessage.toJson(500, strResult);
+                        resultData = JsonMessage.toJson(400, strResult.msgStr());
                     }
                     break;
-                case status:
+                }
+                case status: {
                     // 获取项目状态
                     strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
-                    if (strResult.contains(AbstractProjectCommander.RUNNING_TAG)) {
+                    int parsePid = ProjectCommanderUtil.parsePid(strResult.msgStr());
+                    if (parsePid > 0) {
                         resultData = JsonMessage.toJson(200, "运行中", strResult);
                     } else {
                         resultData = JsonMessage.toJson(404, "未运行", strResult);
                     }
                     break;
+                }
                 case showlog: {
                     // 进入管理页面后需要实时加载日志
                     String search = reqJson.getString("search");

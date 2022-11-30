@@ -29,6 +29,8 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.JvmUtil;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * unix
@@ -58,19 +60,28 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
     }
 
     @Override
-    public String stopJava(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int pid) throws Exception {
+    public CommandOpResult stopJava(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int pid) throws Exception {
         File file = FileUtil.file(nodeProjectInfoModel.allLib());
+        List<String> result = new ArrayList<>();
+        boolean success = false;
         String kill = AbstractSystemCommander.getInstance().kill(file, pid);
+        result.add(kill);
         if (this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false)) {
             // 强制杀进程
+            result.add("Kill not completed, test kill -9");
             String cmd = String.format("kill -9 %s", pid);
             CommandUtil.asyncExeLocalCommand(file, cmd);
             //
             if (this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, 5, false)) {
-                kill += " kill failed";
+                result.add("Kill -9 not completed, kill -9 failed ");
+            } else {
+                success = true;
             }
+        } else {
+            success = true;
         }
         String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
-        return status(tag) + StrUtil.SPACE + kill;
+        return CommandOpResult.of(success, status(tag)).appendMsg(result);
+//        return status(tag) + StrUtil.SPACE + kill;
     }
 }

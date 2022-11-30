@@ -30,11 +30,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.commander.CommandOpResult;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ConsoleService;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.util.CommandUtil;
-import io.jpom.util.JvmUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -185,19 +185,15 @@ public class ProjectStatusController extends BaseAgentController {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
-
-        String result;
         try {
-            result = consoleService.execCommand(ConsoleCommandOp.restart, item, copyItem);
-            boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
-            if (status) {
-                return JsonMessage.getString(200, result);
-            }
-            return JsonMessage.getString(201, "重启项目失败：" + result);
+            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, item, copyItem);
+            // boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
+
+            return JsonMessage.getString(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
+
         } catch (Exception e) {
-            log.error("获取项目pid 失败", e);
-            result = "error:" + e.getMessage();
-            return JsonMessage.getString(500, "重启项目异常：" + result);
+            log.error("重启项目异常", e);
+            return JsonMessage.getString(500, "重启项目异常:" + e.getMessage());
         }
     }
 
@@ -208,18 +204,12 @@ public class ProjectStatusController extends BaseAgentController {
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
 
-        String result;
         try {
-            result = consoleService.execCommand(ConsoleCommandOp.stop, item, copyItem);
-            boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
-            if (!status) {
-                return JsonMessage.getString(200, result);
-            }
-            return JsonMessage.getString(201, "关闭项目失败：" + result);
+            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.stop, item, copyItem);
+            return JsonMessage.getString(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
         } catch (Exception e) {
-            log.error("获取项目pid 失败", e);
-            result = "error:" + e.getMessage();
-            return JsonMessage.getString(500, "关闭项目异常：" + result);
+            log.error("关闭项目异常", e);
+            return JsonMessage.getString(500, "关闭项目异常：" + e.getMessage());
         }
     }
 
@@ -229,18 +219,13 @@ public class ProjectStatusController extends BaseAgentController {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
-        String result;
+
         try {
-            result = consoleService.execCommand(ConsoleCommandOp.start, item, copyItem);
-            boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
-            if (status) {
-                return JsonMessage.getString(200, result);
-            }
-            return JsonMessage.getString(201, "启动项目失败：" + result);
+            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.start, item, copyItem);
+            return JsonMessage.getString(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
         } catch (Exception e) {
             log.error("获取项目pid 失败", e);
-            result = "error:" + e.getMessage();
-            return JsonMessage.getString(500, "启动项目异常：" + result);
+            return JsonMessage.getString(500, "启动项目异常：" + e.getMessage());
         }
     }
 }

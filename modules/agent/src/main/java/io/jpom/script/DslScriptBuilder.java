@@ -172,13 +172,12 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
      * @param scriptProcess 脚本流程
      * @param log           日志
      */
-    public static String run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log, boolean sync) throws Exception {
+    public static void run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log, boolean sync) throws Exception {
         DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, action, log);
         Future<?> execute = ThreadUtil.execAsync(builder);
         if (sync) {
             execute.get();
         }
-        return null;
     }
 
     /**
