@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * dsl 执行脚本
@@ -57,11 +58,13 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
 
     private final String args;
+    private String action;
     private File scriptFile;
     private Map<String, String> environment;
 
-    private DslScriptBuilder(String args, String log) {
+    private DslScriptBuilder(String action, String args, String log) {
         super(FileUtil.file(log));
+        this.action = action;
         this.args = args;
     }
 
@@ -97,7 +100,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             //
             int waitFor = process.waitFor();
             //
-            this.handle("execute done:" + waitFor + " time:" + DateUtil.now());
+            this.handle(StrUtil.format("execute done: {}", waitFor));
         } catch (Exception e) {
             log.error("执行异常", e);
             String msg = "执行异常：" + e.getMessage();
@@ -105,11 +108,17 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         }
     }
 
+    @Override
+    protected void handle(String line) {
+        String formatLine = StrUtil.format("{} [{}] {}", DateUtil.now(), this.action, line);
+        super.handle(formatLine);
+    }
+
     /**
      * 执行
      */
-    public void execute() {
-        ThreadUtil.execute(this);
+    public Future<?> execute() {
+        return ThreadUtil.execAsync(this);
     }
 
     /**
@@ -147,12 +156,15 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
      * @param scriptProcess 脚本流程
      * @param log           日志
      */
-    public static String run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String log) {
-        DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, log);
+    public static String run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log, boolean sync) throws Exception {
+        DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, action, log);
         if (builder == null) {
             return "脚本模版不存在:" + scriptProcess.getScriptId();
         }
-        builder.execute();
+        Future<?> execute = builder.execute();
+        if (sync) {
+            execute.get();
+        }
         return null;
     }
 
@@ -161,15 +173,15 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
      *
      * @param scriptProcess 脚本流程
      */
-    public static String syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel) {
-        DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, null);
+    public static String syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action) {
+        DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, action, null);
         if (builder == null) {
             return "脚本模版不存在:" + scriptProcess.getScriptId();
         }
         return builder.syncExecute();
     }
 
-    private static DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String log) {
+    private static DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log) {
         NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
         String scriptId = scriptProcess.getScriptId();
         NodeScriptModel item = nodeScriptServer.getItem(scriptId);
@@ -182,7 +194,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         } else {
             scriptFile = DslScriptBuilder.initScriptFile(item, nodeProjectInfoModel);
         }
-        DslScriptBuilder builder = new DslScriptBuilder(scriptProcess.getScriptArgs(), log);
+        DslScriptBuilder builder = new DslScriptBuilder(action, scriptProcess.getScriptArgs(), log);
         builder.setEnvironment(DslScriptBuilder.environment(nodeProjectInfoModel));
         builder.setScriptFile(scriptFile);
         return builder;

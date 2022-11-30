@@ -4,6 +4,17 @@
 
 ### 🐣 新增功能
 
+### 🐞 解决BUG、优化功能
+
+1. 【agent】修复 DSL 项目重启操作被偶发异常（自动）关闭问题
+2. 【agent】优化 DSL 项目控制台日志输出格式
+
+------
+
+## 2.9.17 (2022-11-28)
+
+### 🐣 新增功能
+
 1. 【server】新增强制提示用户开启 MFA 认证,新增配置属性：`user.forceMfa`（感谢[@长风](https://gitee.com/angh5) [Gitee issues I5ZBFU](https://gitee.com/dromara/Jpom/issues/I5ZBFU) ）
 2. 【server】新增镜像创建容器支持配置网络模式属性、--privileged、重启策略属性
 3. 【server】新增自动探测本地 docker 按钮
