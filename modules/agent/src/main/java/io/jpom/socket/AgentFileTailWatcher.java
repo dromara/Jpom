@@ -75,8 +75,9 @@ public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
         if (agentFileTailWatcher == null) {
             throw new IOException("加载文件失败:" + file.getPath());
         }
-        agentFileTailWatcher.add(session, FileUtil.getName(file));
-        agentFileTailWatcher.start();
+        if (agentFileTailWatcher.add(session, FileUtil.getName(file))) {
+            agentFileTailWatcher.start();
+        }
         return true;
     }
 
@@ -110,6 +111,19 @@ public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
             offline(socketSession);
         }
         agentFileTailWatcher.close();
+    }
+
+    /**
+     * 重新监听
+     *
+     * @param fileName 文件名
+     */
+    public static void reWatcher(File fileName) {
+        AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
+        if (null == agentFileTailWatcher) {
+            return;
+        }
+        agentFileTailWatcher.restart();
     }
 
     /**

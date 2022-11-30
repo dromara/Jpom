@@ -23,7 +23,8 @@
 package io.jpom.script;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
@@ -128,7 +129,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     }
 
     private String formatLine(String line) {
-        return StrUtil.format("{} [{}] - {}", DateUtil.now(), this.action, line);
+        return StrUtil.format("{} [{}] - {}", DateTime.now().toString(DatePattern.NORM_DATETIME_MS_FORMAT), this.action, line);
     }
 
     /**
