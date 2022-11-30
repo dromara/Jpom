@@ -22,11 +22,9 @@
  */
 package io.jpom.service.manage;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.lang.Tuple;
-import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.commander.CommandOpResult;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.socket.ConsoleCommandOp;
 import org.springframework.stereotype.Service;
@@ -54,14 +52,13 @@ public class ConsoleService {
      * @return 执行结果
      * @throws Exception 异常
      */
-    public String execCommand(ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) throws Exception {
-        String result;
+    public CommandOpResult execCommand(ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) throws Exception {
+        CommandOpResult result;
         AbstractProjectCommander abstractProjectCommander = AbstractProjectCommander.getInstance();
         // 执行命令
         switch (consoleCommandOp) {
             case restart:
-                Tuple restart = abstractProjectCommander.restart(nodeProjectInfoModel, copyItem);
-                result = CollUtil.join(restart, StrUtil.COMMA);
+                result = abstractProjectCommander.restart(nodeProjectInfoModel, copyItem);
                 break;
             case start:
                 result = abstractProjectCommander.start(nodeProjectInfoModel, copyItem);

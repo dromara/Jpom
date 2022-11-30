@@ -39,6 +39,7 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.commander.CommandOpResult;
 import io.jpom.controller.manage.vo.DiffFileVo;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
@@ -226,7 +227,7 @@ public class ProjectFileControl extends BaseAgentController {
                 //
                 AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(after, AfterOpt.No.getCode()));
                 if ("restart".equalsIgnoreCase(after) || afterOpt == AfterOpt.Restart) {
-                    String result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
+                    CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
                     // 自动处理副本集
                     if (javaCopyItemList != null) {
                         ThreadUtil.execute(() -> javaCopyItemList.forEach(javaCopyItem -> {
@@ -237,7 +238,7 @@ public class ProjectFileControl extends BaseAgentController {
                             }
                         }));
                     }
-                    return JsonMessage.getString(200, "上传成功并重启：" + result);
+                    return JsonMessage.getString(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
                 }
                 if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
                     boolean restart = this.restart(pim, null, afterOpt);
@@ -267,8 +268,7 @@ public class ProjectFileControl extends BaseAgentController {
 
     private boolean restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, AfterOpt afterOpt) {
         try {
-            String result = consoleService.execCommand(ConsoleCommandOp.restart, nodeProjectInfoModel, javaCopyItem);
-            int pid = ProjectCommanderUtil.parsePid(result);
+            int pid = AbstractProjectCommander.getInstance().getPid(nodeProjectInfoModel, javaCopyItem);
             if (pid <= 0) {
                 // 完整重启，不再继续剩余的节点项目
                 return afterOpt != AfterOpt.Order_Must_Restart;
