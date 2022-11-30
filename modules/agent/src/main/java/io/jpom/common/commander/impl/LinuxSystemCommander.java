@@ -28,6 +28,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -114,7 +115,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
             processModel = new ProcessModel();
             String item = list.get(i);
             List<String> values = StrSplitter.splitTrim(item, StrUtil.SPACE, true);
-            processModel.setPid(Integer.parseInt(values.get(0)));
+            processModel.setPid(NumberUtil.parseInt(values.get(0)));
             processModel.setUser(values.get(1));
             processModel.setPr(values.get(2));
             processModel.setNi(values.get(3));
