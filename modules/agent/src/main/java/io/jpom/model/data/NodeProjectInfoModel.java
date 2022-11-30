@@ -24,8 +24,8 @@ package io.jpom.model.data;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HtmlUtil;
 import cn.jiangzeyin.common.request.XssFilter;
@@ -36,6 +36,7 @@ import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.system.JpomRuntimeException;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.util.*;
@@ -412,25 +413,29 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * @param opt 操作
      * @return 结果
      */
-    public Tuple getDslProcess(String opt) {
+    public DslYmlDto.BaseProcess tryDslProcess(String opt) {
         DslYmlDto build = dslConfig();
-        if (build == null) {
-            return new Tuple("yml 还未配置", null);
-        }
+        return Optional.ofNullable(build)
+            .map(DslYmlDto::getRun)
+            .map(run -> (DslYmlDto.BaseProcess) ReflectUtil.getFieldValue(run, opt))
+            .orElse(null);
+    }
+
+    /**
+     * 获取 dsl 流程信息
+     *
+     * @param opt 操作
+     * @return 结果
+     */
+    public DslYmlDto.BaseProcess getDslProcess(String opt) {
+        DslYmlDto build = dslConfig();
+        Assert.notNull(build, "yml 还未配置");
+
         DslYmlDto.Run run = build.getRun();
-        if (run == null) {
-            return new Tuple("yml 未配置 运行管理", null);
-        }
-        switch (opt) {
-            case "start":
-                return new Tuple(null, run.getStart());
-            case "stop":
-                return new Tuple(null, run.getStop());
-            case "status":
-                return new Tuple(null, run.getStatus());
-            default:
-                return new Tuple("不支持的类型", null);
-        }
+        Assert.notNull(run, "yml 未配置 运行管理");
+        DslYmlDto.BaseProcess baseProcess = (DslYmlDto.BaseProcess) ReflectUtil.getFieldValue(run, opt);
+        Assert.notNull(baseProcess, "未找到对应的类型或者未配置 " + opt);
+        return baseProcess;
     }
 
     @Data

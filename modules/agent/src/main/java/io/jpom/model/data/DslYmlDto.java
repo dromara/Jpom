@@ -30,6 +30,7 @@ import lombok.EqualsAndHashCode;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * dsl yml 配置
@@ -80,6 +81,7 @@ public class DslYmlDto extends BaseJsonModel {
         private Start start;
         private Status status;
         private Stop stop;
+        private Restart restart;
     }
 
 
@@ -104,6 +106,13 @@ public class DslYmlDto extends BaseJsonModel {
 
     }
 
+    /**
+     * 重启流程
+     */
+    public static class Restart extends BaseProcess {
+
+    }
+
     @Data
     @EqualsAndHashCode(callSuper = true)
     public static class BaseProcess extends BaseJsonModel {
@@ -115,6 +124,10 @@ public class DslYmlDto extends BaseJsonModel {
          * 执行参数
          */
         private String scriptArgs;
+        /**
+         * 执行脚本的环境变量
+         */
+        private Map<String, String> scriptEnv;
 
         /**
          * 通过 脚本模版运行

@@ -38,12 +38,10 @@ import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 
 /**
@@ -62,17 +60,32 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     private File scriptFile;
     private Map<String, String> environment;
 
-    private DslScriptBuilder(String action, String args, String log) {
+    private DslScriptBuilder(String action, Map<String, String> environment, String args, String log) {
         super(FileUtil.file(log));
         this.action = action;
+        this.environment = environment;
         this.args = args;
+    }
+
+    /**
+     * 添加环境变量
+     *
+     * @param environment 环境变量
+     */
+    public void putEnvironment(Map<String, String> environment) {
+        if (environment == null) {
+            return;
+        }
+        if (this.environment == null) {
+            this.environment = new HashMap<>(10);
+        }
+        this.environment.putAll(environment);
     }
 
     /**
      * 初始化
      */
     private ProcessBuilder init() {
-
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
         ProcessBuilder processBuilder = new ProcessBuilder();
@@ -80,9 +93,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         command.add(0, script);
         CommandUtil.paddingPrefix(command);
         log.debug(CollUtil.join(command, StrUtil.SPACE));
-        if (environment != null) {
-            processBuilder.environment().putAll(environment);
-        }
+        Optional.ofNullable(environment).ifPresent(map -> processBuilder.environment().putAll(map));
         processBuilder.directory(FileUtil.getParent(scriptFile, 1));
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
@@ -105,8 +116,9 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             }
         } catch (Exception e) {
             log.error("执行异常", e);
-            String msg = "执行异常：" + e.getMessage();
-            this.end(msg);
+            this.handle("执行异常：" + e.getMessage());
+        } finally {
+            this.close();
         }
     }
 
@@ -117,13 +129,6 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
     private String formatLine(String line) {
         return StrUtil.format("{} [{}] - {}", DateUtil.now(), this.action, line);
-    }
-
-    /**
-     * 执行
-     */
-    public Future<?> execute() {
-        return ThreadUtil.execAsync(this);
     }
 
     /**
@@ -168,10 +173,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
      */
     public static String run(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log, boolean sync) throws Exception {
         DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, action, log);
-        if (builder == null) {
-            return "脚本模版不存在:" + scriptProcess.getScriptId();
-        }
-        Future<?> execute = builder.execute();
+        Future<?> execute = ThreadUtil.execAsync(builder);
         if (sync) {
             execute.get();
         }
@@ -184,11 +186,9 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
      * @param scriptProcess 脚本流程
      */
     public static List<String> syncRun(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action) {
-        DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, action, null);
-        if (builder == null) {
-            return CollUtil.newArrayList("脚本模版不存在:" + scriptProcess.getScriptId());
+        try (DslScriptBuilder builder = DslScriptBuilder.create(scriptProcess, nodeProjectInfoModel, action, null)) {
+            return builder.syncExecute();
         }
-        return builder.syncExecute();
     }
 
     private static DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log) {
@@ -198,14 +198,12 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         File scriptFile;
         if (item == null) {
             scriptFile = FileUtil.file(nodeProjectInfoModel.allLib(), scriptId);
-            if (!FileUtil.isFile(scriptFile)) {
-                return null;
-            }
+            Assert.state(FileUtil.isFile(scriptFile), "脚本模版不存在:" + scriptProcess.getScriptId());
         } else {
             scriptFile = DslScriptBuilder.initScriptFile(item, nodeProjectInfoModel);
         }
-        DslScriptBuilder builder = new DslScriptBuilder(action, scriptProcess.getScriptArgs(), log);
-        builder.setEnvironment(DslScriptBuilder.environment(nodeProjectInfoModel));
+        DslScriptBuilder builder = new DslScriptBuilder(action, scriptProcess.getScriptEnv(), scriptProcess.getScriptArgs(), log);
+        builder.putEnvironment(DslScriptBuilder.environment(nodeProjectInfoModel));
         builder.setScriptFile(scriptFile);
         return builder;
     }
@@ -213,10 +211,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     private static File initScriptFile(NodeScriptModel scriptModel, NodeProjectInfoModel nodeProjectInfoModel) {
         String id = nodeProjectInfoModel.getId();
         File scriptFile = scriptModel.scriptFile("_" + id);
-        Map<String, String> dslEnv = new HashMap<>(10);
-        dslEnv.put("PROJECT_ID", id);
-        dslEnv.put("PROJECT_NAME", nodeProjectInfoModel.getName());
-        dslEnv.put("PROJECT_PATH", nodeProjectInfoModel.allLib());
+        Map<String, String> dslEnv = environment(nodeProjectInfoModel);
         // 替换内容
         String context = scriptModel.getContext();
         for (Map.Entry<String, String> envEntry : dslEnv.entrySet()) {
