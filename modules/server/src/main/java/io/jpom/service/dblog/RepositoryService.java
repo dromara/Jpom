@@ -23,7 +23,6 @@
 package io.jpom.service.dblog;
 
 import cn.hutool.core.util.StrUtil;
-import io.jpom.common.Const;
 import io.jpom.common.ServerConst;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.service.h2db.BaseWorkspaceService;

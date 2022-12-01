@@ -35,8 +35,6 @@ import io.jpom.model.data.NodeScriptModel;
 import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.service.BaseWorkspaceOptService;
 import io.jpom.system.AgentConfigBean;
-import io.jpom.system.ConfigBean;
-import io.jpom.util.CommandUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

@@ -22,7 +22,6 @@
  */
 package io.jpom.model.user;
 
-import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.service.h2db.TableName;
 import lombok.Data;
