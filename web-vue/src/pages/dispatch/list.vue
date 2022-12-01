@@ -106,7 +106,7 @@
         :bordered="false"
         :data-source="dispatchChildren[record.id]"
         :pagination="false"
-        rowKey="id"
+        rowKey="id_no"
       >
         <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ nodeNameMap[text] || text }}</span>
@@ -1013,7 +1013,7 @@ export default {
             this.dispatchChildren = {
               ...this.dispatchChildren,
               [recordId]: res.data.map((item) => {
-                return { ...item, id: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}` };
+                return { ...item, id_no: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}` };
               }),
             };
           }
