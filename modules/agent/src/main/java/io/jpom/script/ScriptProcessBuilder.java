@@ -30,6 +30,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -38,6 +39,7 @@ import io.jpom.model.data.NodeScriptModel;
 import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.service.system.AgentWorkspaceEnvVarService;
 import io.jpom.socket.ConsoleCommandOp;
+import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.SocketSessionUtil;
@@ -65,12 +67,15 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
     private final ProcessBuilder processBuilder;
     private final Set<Session> sessions = new HashSet<>();
     private final String executeId;
+    private final File scriptFile;
 
     private ScriptProcessBuilder(NodeScriptModel nodeScriptModel, String executeId, String args) {
         super(nodeScriptModel.logFile(executeId));
         this.executeId = executeId;
-
-        File scriptFile = nodeScriptModel.getFile(true);
+        //
+        String dataPath = ConfigBean.getInstance().getDataPath();
+        scriptFile = FileUtil.file(dataPath, ConfigBean.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
+        FileUtil.writeString(nodeScriptModel.getContext(), scriptFile, ExtConfigBean.getInstance().getConsoleLogCharset());
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
         processBuilder = new ProcessBuilder();
@@ -212,6 +217,17 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             iterator.remove();
         }
         FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.remove(this.executeId);
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        if (this.scriptFile != null) {
+            try {
+                FileUtil.del(this.scriptFile);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     /**

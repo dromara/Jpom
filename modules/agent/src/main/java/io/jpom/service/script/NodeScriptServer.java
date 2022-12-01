@@ -35,8 +35,11 @@ import io.jpom.model.data.NodeScriptModel;
 import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.service.BaseWorkspaceOptService;
 import io.jpom.system.AgentConfigBean;
+import io.jpom.system.ConfigBean;
+import io.jpom.util.CommandUtil;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -55,44 +58,28 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
     }
 
     @Override
-    public List<NodeScriptModel> list() {
-        List<NodeScriptModel> nodeScriptModels = super.list();
-        if (nodeScriptModels == null) {
-            return null;
-        }
-        // 读取文件内容
-        nodeScriptModels.forEach(NodeScriptModel::readFileTime);
-        return nodeScriptModels;
-    }
-
-    @Override
-    public NodeScriptModel getItem(String id) {
-        NodeScriptModel nodeScriptModel = super.getItem(id);
-        if (nodeScriptModel != null) {
-            nodeScriptModel.readFileContext();
-        }
-        return nodeScriptModel;
-    }
-
-    @Override
     public void addItem(NodeScriptModel nodeScriptModel) {
         super.addItem(nodeScriptModel);
-        nodeScriptModel.saveFile();
         this.checkCron(nodeScriptModel);
     }
 
     @Override
     public void updateItem(NodeScriptModel nodeScriptModel) {
         super.updateItem(nodeScriptModel);
-        nodeScriptModel.saveFile();
         this.checkCron(nodeScriptModel);
     }
 
+    /**
+     * @param id 数据id
+     * @see NodeScriptModel#logFile(String)
+     */
     @Override
     public void deleteItem(String id) {
         NodeScriptModel nodeScriptModel = getItem(id);
         if (nodeScriptModel != null) {
-            FileUtil.del(nodeScriptModel.getFile(true).getParentFile());
+            File path = ConfigBean.getInstance().getScriptPath();
+            File file = FileUtil.file(path, id);
+            FileUtil.del(file);
         }
         super.deleteItem(id);
         String taskId = "script:" + id;
