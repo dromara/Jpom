@@ -68,7 +68,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -541,7 +540,7 @@ public abstract class AbstractProjectCommander {
                 .map(s -> {
                     int pid = ProjectCommanderUtil.parsePid(s);
                     return CommandOpResult.of(pid > 0, s);
-                }).orElse(null);
+                }).orElseGet(() -> CommandOpResult.of(false, STOP_TAG));
 
         } else {
             String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();

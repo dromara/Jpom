@@ -35,6 +35,7 @@ import io.jpom.common.RemoteVersion;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.cron.CronUtils;
 import io.jpom.model.data.NodeProjectInfoModel;
+import io.jpom.script.DslScriptBuilder;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.system.AgentExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
@@ -121,8 +122,16 @@ public class AutoBackLog {
     private static void systemMonitor() {
         // 开启检测调度
         ThreadUtil.execute(() -> {
-            CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", RemoteVersion::loadRemoteInfo);
-            RemoteVersion.loadRemoteInfo();
+            // 定时任务
+            CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", AutoBackLog::systemTask);
+            systemTask();
         });
+    }
+
+    private static void systemTask() {
+        // 启动加载
+        RemoteVersion.loadRemoteInfo();
+        // 清空脚本缓存
+        DslScriptBuilder.clearRunScript();
     }
 }
