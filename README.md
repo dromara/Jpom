@@ -66,30 +66,30 @@
 ### 😁 使用 [Jpom](https://gitee.com/dromara/Jpom) 后
 
 - 方便的用户管理
-    1. 用户操作监控，监控指定用户指定操作以邮件形式通知
-    2. 多用户管理，用户项目权限独立（上传、删除权限可控制），完善的操作日志，使用工作空间隔离权限
-    3. 账号可以开启 **MFA 两步验证**提高账号安全性
+	1. 用户操作监控，监控指定用户指定操作以邮件形式通知
+	2. 多用户管理，用户项目权限独立（上传、删除权限可控制），完善的操作日志，使用工作空间隔离权限
+	3. 账号可以开启 **MFA 两步验证**提高账号安全性
 - 界面形式实时查看项目运行状态、控制台日志、管理项目文件
-    1. 在线修改项目文本文件
+	1. 在线修改项目文本文件
 - Docker 容器管理、Docker swarm 集群管理（**Docker ui**）
 - **在线 SSH 终端**，让您在没有 Xshell、FinalShell 等软件也能轻松管理服务器
-    1. 登录 Jpom 系统后不需要知道服务器密码
-    2. 能指定 SSH 禁止执行的命令，避免执行高风险命令，并且能自动执行命令日志
-    3. 设置文件目录，在线查看管理对应项目文件及配置文件
-    4. SSH 命令模版在线执行脚本还能定时执行
-    5. 在线修改文本文件
-    6. **轻量的实现了简单的"堡垒机"功能**
+	1. 登录 Jpom 系统后不需要知道服务器密码
+	2. 能指定 SSH 禁止执行的命令，避免执行高风险命令，并且能自动执行命令日志
+	3. 设置文件目录，在线查看管理对应项目文件及配置文件
+	4. SSH 命令模版在线执行脚本还能定时执行
+	5. 在线修改文本文件
+	6. **轻量的实现了简单的"堡垒机"功能**
 - 使用项目分发一键搞定集群项目多机部署
 - 在线构建不用手动更新升级项目
-    1. 支持拉取 GIT、SVN 仓库
-    2. **支持容器构建（docker）**
-    3. 支持 SSH 方式发布
-    4. 支持定时构建
-    5. 支持 WebHook 形式触发构建
+	1. 支持拉取 GIT、SVN 仓库
+	2. **支持容器构建（docker）**
+	3. 支持 SSH 方式发布
+	4. 支持定时构建
+	5. 支持 WebHook 形式触发构建
 - 支持在线编辑 nginx 配置文件并自动 reload 等操作
-    1. 管理 nginx 状态，管理 SSL 证书
+	1. 管理 nginx 状态，管理 SSL 证书
 - 项目状态监控异常自动报警、自动尝试重启
-    1. 支持邮件 + 钉钉群 + 微信群通知，主动感知项目运行状况
+	1. 支持邮件 + 钉钉群 + 微信群通知，主动感知项目运行状况
 - 节点脚本模版+定时执行或者触发器，拓展更多功能
 - 重要路径白名单模式，杜绝用户误操作系统文件
 
@@ -98,7 +98,8 @@
 > 1. 在 Windows 服务器中可能有部分功能因为系统特性造成兼容性问题，建议在实际使用中充分测试。Linux 目前兼容性良好
 > 2. 服务端和插件端请安装到不同目录中，切勿安装到同一目录中
 > 3. 卸载 Jpom 插件端或者服务端，先停止对应服务，然后删除对应的程序文件、日志文件夹、数据目录文件夹即可
-> 4. 本地构建依赖的是系统环境，如果构建命令需要使用 maven 或者 node 需要在构建项目的服务器安装好对应的环境。如果已经启动服务端再安装的对应环境需要通过命令行重启服务端后环境才会生效。
+> 4. 本地构建依赖的是系统环境，如果构建命令需要使用 maven 或者 node
+	 需要在构建项目的服务器安装好对应的环境。如果已经启动服务端再安装的对应环境需要通过命令行重启服务端后环境才会生效。
 > 5. 在 Ubuntu/Debian 服务器作为插件端可能会添加失败，请在当前用户的根目录创建 .bash_profile 文件
 > 6. 升级 2.7.x 后不建议降级操作，会涉及到数据不兼容的情况
 > 7. 由于目前 2.x.x 版本插件端和服务端主要采用 http 协议通讯，插件端和服务端网络要求互通，在使用的时候请注意。
@@ -120,7 +121,9 @@ Jpom 支持多种安装方式，满足不同用户的个性化需求，您只需
 >
 > ⚠️ 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即 Server 端和 Agent 端不可安装在同一目录下！
 >
-> 如果需要修改服务端数据、日志存储的路径请修改 [`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml) 文件中 `jpom.path` 配置属性。
+> 如果需要修改服务端数据、日志存储的路径请修改
+> [`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
+> 文件中 `jpom.path` 配置属性。
 
 ```shell
 # 仅安装服务端
@@ -144,9 +147,11 @@ wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk
 ```
 
-启动成功后，服务端的端口为 `2122`，可通过 `http://127.0.0.1:2122/` 访问管理页面（如果不是本机访问，需要把 127.0.0.1 换成你安装的服务器 IP 地址）。
+启动成功后，服务端的端口为 `2122`，可通过 `http://127.0.0.1:2122/`
+访问管理页面（如果不是本机访问，需要把 127.0.0.1 换成你安装的服务器 IP 地址）。
 
->如无法访问管理系统，执行命令 `systemctl status firewalld` 检查下是否开启了防火墙 ，如状态栏看到绿色显示 `Active: active (running)` 需要放行 `2122` 端口。
+> 如无法访问管理系统，执行命令 `systemctl status firewalld` 检查下是否开启了防火墙
+> ，如状态栏看到绿色显示 `Active: active (running)` 需要放行 `2122` 端口。
 >
 >```bash
 ># 放行管理系统的 2122 端口
@@ -165,7 +170,9 @@ bash install.sh Server jdk
 >
 > ⚠️ 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即 Server 端和 Agent 端不可安装在同一目录下！
 >
-> 如果需要修改插件端数据、日志存储的路径请修改 [`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) 文件中 `jpom.path` 配置属性。
+> 如果需要修改插件端数据、日志存储的路径请修改
+> [`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml)
+> 文件中 `jpom.path` 配置属性。
 
 ```shell
 # 仅安装插件端
@@ -224,9 +231,11 @@ docker run -d -p 2122:2122 \
 
 > 容器化安装仅提供服务端版。由于容器和宿主机环境隔离，而导致插件端的很多功能无法正常使用，因此对插件端容器化意义不大。
 >
-> 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档 [https://jpom.top/pages/b63dc5/](https://jpom.top/pages/b63dc5/)
-> 
-> 在低版本 docker 中运行可能出现 `ls: cannot access'/usr/local/jpom-server/lib/': Operation not permitted` 错误，此时需要添加 `--privileged` 参数
+> 安装docker、配置镜像、自动启动、查找安装后所在目录等可参考文档
+> [https://jpom.top/pages/b63dc5/](https://jpom.top/pages/b63dc5/)
+>
+> 在低版本 docker 中运行可能出现 `ls: cannot access'/usr/local/jpom-server/lib/': Operation not permitted`
+> 错误，此时需要添加 `--privileged` 参数
 > 如：`docker run -p 2122:2122 --name jpom jpomdocker/jpom --privileged`
 
 ### 方式三：💾 下载安装
@@ -234,15 +243,15 @@ docker run -d -p 2122:2122 \
 1. 下载安装包 [https://jpom.top/pages/all-downloads/](https://jpom.top/pages/all-downloads/)
 2. 解压文件
 3. 安装插件端
-    1. agent-x.x.x-release 目录为插件端的全部安装文件
-    2. 上传到对应服务器（整个目录）
-    3. 启动插件端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
-    4. 插件端默认运行端口：`2123`
+	1. agent-x.x.x-release 目录为插件端的全部安装文件
+	2. 上传到对应服务器（整个目录）
+	3. 启动插件端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
+	4. 插件端默认运行端口：`2123`
 4. 安装服务端
-    1. server-x.x.x-release 目录为服务端的全部安装文件
-    2. 上传到对应服务器（整个目录）
-    3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
-    4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成你的服务器 IP 地址）
+	1. server-x.x.x-release 目录为服务端的全部安装文件
+	2. 上传到对应服务器（整个目录）
+	3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
+	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成你的服务器 IP 地址）
 
 ### 方式四：⌨️ 编译安装
 
@@ -251,15 +260,15 @@ docker run -d -p 2122:2122 \
 3. 执行 `npm run build` 进行 vue 项目打包
 4. 切换到项目根目录执行：`mvn clean package`
 5. 安装插件端
-    1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
-    2. 打包上传服务器运行（整个目录）
-    3. 启动插件端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
-    4. 默认运行端口：`2123`
+	1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
+	2. 打包上传服务器运行（整个目录）
+	3. 启动插件端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
+	4. 默认运行端口：`2123`
 6. 安装服务端
-    1. 查看插件端安装包 modules/server/target/server-x.x.x-release
-    2. 打包上传服务器运行（整个目录）
-    3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
-    4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成你的服务器 IP 地址）
+	1. 查看插件端安装包 modules/server/target/server-x.x.x-release
+	2. 打包上传服务器运行（整个目录）
+	3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
+	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成你的服务器 IP 地址）
 
 > 也可以使用 `script/release.bat` 或 `script/release.sh` 快速打包。
 
@@ -280,14 +289,15 @@ docker-compose -f docker-compose.yml up
 
 ### 方式六：💻 编译运行
 
-1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页，拉取最新完整代码（建议使用 master 分支，如果想体验新功能可以使用 dev 分支）
+1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页 拉取最新完整代码 （建议使用 master 分支，如果想体验新功能可以使用
+   dev 分支）
 2. 运行插件端
-    1. 运行 `io.jpom.JpomAgentApplication`
-    2. 留意控制台打印的默认账号密码信息
-    3. 插件端默认运行端口：`2123`
+	1. 运行 `io.jpom.JpomAgentApplication`
+	2. 留意控制台打印的默认账号密码信息
+	3. 插件端默认运行端口：`2123`
 3. 运行服务端
-    1. 运行 `io.jpom.JpomServerApplication`
-    2. 服务端默认运行端口：`2122`
+	1. 运行 `io.jpom.JpomServerApplication`
+	2. 服务端默认运行端口：`2122`
 4. 构建 vue 页面，切换到 `web-vue` 目录（前提需要本地开发环境有 node、npm 环境）
 5. 安装项目 vue 依赖，控制台执行 `npm install`
 6. 启动开发模式，控制台执行 `npm run serve`
@@ -297,15 +307,16 @@ docker-compose -f docker-compose.yml up
 
 1. Windows 系统使用 bat 脚本文件。
 
-	```
-	# 服务端管理脚本，按照面板提示输入操作
-	Server.bat
-	
-	# 插件端管理脚本，按照面板提示输入操作
-	Agent.bat
-	```
-	
-	> Windows 系统中执行启动后需要根据日志去跟进启动的状态，如果出现乱码请检查或者修改编码格式，Windows 系统中 bat 编码格式推荐为 `GB2312`
+   ```
+   # 服务端管理脚本，按照面板提示输入操作
+   Server.bat
+   
+   # 插件端管理脚本，按照面板提示输入操作
+   Agent.bat
+   ```
+
+   > Windows 系统中执行启动后需要根据日志去跟进启动的状态，如果出现乱码请检查或者修改编码格式，Windows 系统中 bat
+   > 编码格式推荐为 `GB2312`
 
 2. Linux 系统中使用 sh 脚本文件。
 
@@ -339,8 +350,10 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 在项目运行的根路径下的 `extConfig.yml` 文件
 
-1. 插件端示例：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml)
-2. 服务端示例：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
+1. 插件端示例：
+   [`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml)
+2. 服务端示例：
+   [`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
 
 ### 构建案例仓库代码
 
@@ -407,7 +420,7 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
    注意替换掉链接中的`分支名`和`用户名`。
 
    如果是贡献代码，分支名填 `dev`；如果是贡献文档，分支名填 `docs`
-   
+
    ```bash
    git clone -b 分支名 https://gitee.com/用户名/Jpom.git
    ```
@@ -435,19 +448,20 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 
 > 目前用到的主要是 dev 和 docs 分支，接受 PR 修改，其他的分支为归档分支，贡献者可以不用管。
 
-
 ## 🐞 交流讨论 、反馈 BUG、提出建议等
 
 1. 快扫描下方左侧微信群二维码和我们一起交流讨论吧！（添加小助手：备注 Jpom 进群）
-2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐，欢迎扫描下方右侧[微信收款码赞赏](https://jpom.top/images/wx-qrcode-praise.png)或通过[码云赞赏](https://gitee.com/dromara/Jpom)（在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/docs/index.html#/praise)
+2. 开源项目离不开社区的支持，如果项目帮助到了你，并且想给我们加个餐。
+   欢迎扫描下方右侧[微信收款码赞赏](https://jpom.top/images/wx-qrcode-praise.png)
+   或通过[码云赞赏](https://gitee.com/dromara/Jpom)
+   （在项目首页下方点击捐赠，支持微信和支付宝）。[赞赏记录](https://jpom.top/docs/index.html#/praise)
 3. 微信公众号：[CodeGzh](https://jpom.top/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 4. 反馈 BUG、提出建议，欢迎新建：[issues](https://gitee.com/dromara/Jpom/issues)，开发人员会不定时查看回复。
-6. 参与贡献，请查看[贡献指南](#🔨贡献指南)。
+5. 参与贡献，请查看[贡献指南](#🔨贡献指南)。
 
 感谢所有赞赏以及参与贡献的小伙伴，你们的支持是我们不断更新前进的动力！
 
 ![wx-qrcode-praise.png](https://jpom.top/images/wx-qrcode-praise.png)
-
 
 ## 🌍 知识星球
 
