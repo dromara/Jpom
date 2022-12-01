@@ -35,6 +35,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.cron.CronUtils;
 import io.jpom.model.data.NodeModel;
+import io.jpom.script.BaseRunScript;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.node.NodeService;
@@ -69,14 +70,13 @@ public class CheckMonitor {
         });
         // 开启系统检测调度（自动备份数据）
         CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {
-            try {
-                BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
-                backupInfoService.checkAutoBackup();
-                //
-                RemoteVersion.loadRemoteInfo();
-            } catch (Exception e) {
-                log.error("系统调度执行出现错误", e);
-            }
+
+            BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
+            backupInfoService.checkAutoBackup();
+            //
+            RemoteVersion.loadRemoteInfo();
+            // 清空脚本缓存
+            BaseRunScript.clearRunScript();
         });
         // 拉取 脚本模版日志
         CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
@@ -139,6 +139,8 @@ public class CheckMonitor {
             });
             // 尝试获取版本更新信息
             RemoteVersion.loadRemoteInfo();
+            // 清空脚本缓存
+            BaseRunScript.clearRunScript();
         });
     }
 }

@@ -63,6 +63,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
     private final ProcessBuilder processBuilder;
     private final Set<WebSocketSession> sessions = new HashSet<>();
     private final String executeId;
+    private final File scriptFile;
 
 
     private ScriptProcessBuilder(ScriptModel nodeScriptModel, String executeId, String args) {
@@ -71,8 +72,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         //
         WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
         Map<String, String> env = workspaceEnvVarService.getEnv(nodeScriptModel.getWorkspaceId());
-
-        File scriptFile = nodeScriptModel.scriptFile();
+        scriptFile = nodeScriptModel.scriptFile();
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
         processBuilder = new ProcessBuilder();
@@ -223,6 +223,17 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             } catch (IOException e) {
                 log.error("发送消息失败", e);
                 iterator.remove();
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        if (this.scriptFile != null) {
+            try {
+                FileUtil.del(this.scriptFile);
+            } catch (Exception ignored) {
             }
         }
     }

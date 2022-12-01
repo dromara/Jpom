@@ -22,12 +22,9 @@
  */
 package io.jpom.model.data;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.ExtConfigBean;
-import io.jpom.util.CommandUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -70,6 +67,18 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 
     public String getLastRunUser() {
         return StrUtil.emptyToDefault(lastRunUser, StrUtil.DASHED);
+    }
+
+    public File scriptPath() {
+        return scriptPath(getId());
+    }
+
+    public static File scriptPath(String id) {
+        if (StrUtil.isEmpty(id)) {
+            throw new IllegalArgumentException("id 为空");
+        }
+        File path = ConfigBean.getInstance().getScriptPath();
+        return FileUtil.file(path, id);
     }
 
     public File logFile(String executeId) {

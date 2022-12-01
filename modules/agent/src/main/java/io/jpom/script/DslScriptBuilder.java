@@ -25,8 +25,6 @@ package io.jpom.script;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUnit;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
@@ -247,33 +245,6 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         }
         FileUtil.writeString(context, scriptFile, ExtConfigBean.getInstance().getConsoleLogCharset());
         return scriptFile;
-    }
-
-    /**
-     * 清理 脚本文件执行缓存
-     */
-    public static void clearRunScript() {
-        String dataPath = ConfigBean.getInstance().getDataPath();
-        File scriptFile = FileUtil.file(dataPath, ConfigBean.SCRIPT_RUN_CACHE_DIRECTORY);
-        if (!FileUtil.isDirectory(scriptFile)) {
-            return;
-        }
-        File[] files = scriptFile.listFiles(pathname -> {
-            Date lastModifiedTime = FileUtil.lastModifiedTime(pathname);
-            DateTime now = DateTime.now();
-            long between = DateUtil.between(lastModifiedTime, now, DateUnit.HOUR);
-            // 文件大于一个小时才能被删除
-            return between > 1;
-        });
-        if (files == null) {
-            return;
-        }
-        for (File file : files) {
-            try {
-                FileUtil.del(file);
-            } catch (Exception ignored) {
-            }
-        }
     }
 
     private static Map<String, String> environment(NodeProjectInfoModel nodeProjectInfoModel) {
