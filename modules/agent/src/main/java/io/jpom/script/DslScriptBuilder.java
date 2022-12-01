@@ -25,16 +25,20 @@ package io.jpom.script;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.service.script.NodeScriptServer;
+import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import lombok.Setter;
@@ -59,6 +63,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     private final String args;
     private String action;
     private File scriptFile;
+    private boolean autoDelete;
     private Map<String, String> environment;
 
     private DslScriptBuilder(String action, Map<String, String> environment, String args, String log) {
@@ -166,6 +171,18 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
     }
 
+    @Override
+    public void close() {
+        super.close();
+        //
+        if (autoDelete) {
+            try {
+                FileUtil.del(this.scriptFile);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
     /**
      * 异步执行
      *
@@ -195,23 +212,33 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
         String scriptId = scriptProcess.getScriptId();
         NodeScriptModel item = nodeScriptServer.getItem(scriptId);
+        Map<String, String> environment = DslScriptBuilder.environment(nodeProjectInfoModel);
         File scriptFile;
+        boolean autoDelete = false;
         if (item == null) {
             scriptFile = FileUtil.file(nodeProjectInfoModel.allLib(), scriptId);
             Assert.state(FileUtil.isFile(scriptFile), "脚本模版不存在:" + scriptProcess.getScriptId());
         } else {
-            scriptFile = DslScriptBuilder.initScriptFile(item, nodeProjectInfoModel);
+            scriptFile = DslScriptBuilder.initScriptFile(item, environment);
+            autoDelete = true;
         }
         DslScriptBuilder builder = new DslScriptBuilder(action, scriptProcess.getScriptEnv(), scriptProcess.getScriptArgs(), log);
-        builder.putEnvironment(DslScriptBuilder.environment(nodeProjectInfoModel));
+        builder.putEnvironment(environment);
         builder.setScriptFile(scriptFile);
+        builder.setAutoDelete(autoDelete);
         return builder;
     }
 
-    private static File initScriptFile(NodeScriptModel scriptModel, NodeProjectInfoModel nodeProjectInfoModel) {
-        String id = nodeProjectInfoModel.getId();
-        File scriptFile = scriptModel.scriptFile("_" + id);
-        Map<String, String> dslEnv = environment(nodeProjectInfoModel);
+    /**
+     * 创建脚本文件
+     *
+     * @param scriptModel 脚本对象
+     * @param dslEnv      环境变量
+     * @return file
+     */
+    private static File initScriptFile(NodeScriptModel scriptModel, Map<String, String> dslEnv) {
+        String dataPath = ConfigBean.getInstance().getDataPath();
+        File scriptFile = FileUtil.file(dataPath, ConfigBean.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
         // 替换内容
         String context = scriptModel.getContext();
         for (Map.Entry<String, String> envEntry : dslEnv.entrySet()) {
@@ -220,6 +247,33 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         }
         FileUtil.writeString(context, scriptFile, ExtConfigBean.getInstance().getConsoleLogCharset());
         return scriptFile;
+    }
+
+    /**
+     * 清理 脚本文件执行缓存
+     */
+    public static void clearRunScript() {
+        String dataPath = ConfigBean.getInstance().getDataPath();
+        File scriptFile = FileUtil.file(dataPath, ConfigBean.SCRIPT_RUN_CACHE_DIRECTORY);
+        if (!FileUtil.isDirectory(scriptFile)) {
+            return;
+        }
+        File[] files = scriptFile.listFiles(pathname -> {
+            Date lastModifiedTime = FileUtil.lastModifiedTime(pathname);
+            DateTime now = DateTime.now();
+            long between = DateUtil.between(lastModifiedTime, now, DateUnit.HOUR);
+            // 文件大于一个小时才能被删除
+            return between > 1;
+        });
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            try {
+                FileUtil.del(file);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     private static Map<String, String> environment(NodeProjectInfoModel nodeProjectInfoModel) {
