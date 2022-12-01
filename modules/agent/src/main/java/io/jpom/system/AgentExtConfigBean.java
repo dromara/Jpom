@@ -94,6 +94,12 @@ public class AgentExtConfigBean {
     private int stopWaitTime;
 
     /**
+     * 项目状态检测间隔时间 单位毫秒，最小为1毫秒
+     */
+    @Value("${project.statusDetectionInterval:500}")
+    private int statusDetectionInterval;
+
+    /**
      * 项目文件备份保留个数,大于 1 才会备份
      */
     @Value("${project.fileBackupCount:0}")
@@ -107,6 +113,10 @@ public class AgentExtConfigBean {
 
     public int getStopWaitTime() {
         return stopWaitTime;
+    }
+
+    public int getStatusDetectionInterval() {
+        return statusDetectionInterval;
     }
 
     public int getProjectFileBackupCount() {

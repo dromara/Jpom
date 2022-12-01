@@ -263,7 +263,7 @@ public abstract class AbstractProjectCommander {
                     return null;
                 });
                 boolean checkRun = this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false);
-                return CommandOpResult.of(!checkRun, checkRun ? "stop done,but unsuccessful" : "stop done")
+                return CommandOpResult.of(checkRun, checkRun ? "stop done" : "stop done,but unsuccessful")
                     .appendMsg(result)
                     .appendMsg(webHook);
 //                result = StrUtil.emptyToDefault(startDsl, checkRun ? "stop done,but unsuccessful" : "stop done");
@@ -764,14 +764,17 @@ public abstract class AbstractProjectCommander {
      */
     protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int stopWaitTime, boolean status) {
         stopWaitTime = Math.max(stopWaitTime, 1);
+        int statusDetectionInterval = AgentExtConfigBean.getInstance().getStatusDetectionInterval();
+        statusDetectionInterval = Math.max(statusDetectionInterval, 1);
         int loopCount = (int) (TimeUnit.SECONDS.toMillis(stopWaitTime) / 500);
         int count = 0;
         do {
             if (this.isRun(nodeProjectInfoModel, javaCopyItem) == status) {
-                return status;
+                // 是期望的结果
+                return true;
             }
-            ThreadUtil.sleep(500);
+            ThreadUtil.sleep(statusDetectionInterval);
         } while (count++ < loopCount);
-        return !status;
+        return false;
     }
 }

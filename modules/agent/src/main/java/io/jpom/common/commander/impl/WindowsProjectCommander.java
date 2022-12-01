@@ -70,9 +70,9 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
         result.add(kill);
         if (this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false)) {
-            result.add("Kill not completed");
-        } else {
             success = true;
+        } else {
+            result.add("Kill not completed");
         }
         return CommandOpResult.of(success, status(tag)).appendMsg(result);
         // return status(tag) + StrUtil.SPACE + kill;
