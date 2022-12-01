@@ -34,7 +34,6 @@ import io.jpom.service.h2db.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
