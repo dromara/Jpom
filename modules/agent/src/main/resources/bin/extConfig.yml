@@ -40,12 +40,14 @@ consoleLog:
   # 控制台编码格式
   charset:
 project:
-  # 停止项目等待的时长 单位秒
+  # 停止、启动项目(项目状态检测)等待的时长 单位秒
   stopWaitTime: 10
   # 项目文件备份保留个数,大于 0 才会备份
   fileBackupCount: 0
   # 限制备份指定文件后缀（支持正则）
   #fileBackupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]
+  # 项目状态检测间隔时间 单位毫秒，最小为1毫秒
+  statusDetectionInterval: 500
 system:
   # cron 定时器是否开启匹配秒
   timerMatchSecond: false

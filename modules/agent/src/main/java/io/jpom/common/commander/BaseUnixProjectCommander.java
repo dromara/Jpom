@@ -67,18 +67,18 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
         String kill = AbstractSystemCommander.getInstance().kill(file, pid);
         result.add(kill);
         if (this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, false)) {
+            success = true;
+        } else {
             // 强制杀进程
             result.add("Kill not completed, test kill -9");
             String cmd = String.format("kill -9 %s", pid);
             CommandUtil.asyncExeLocalCommand(file, cmd);
             //
             if (this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, 5, false)) {
-                result.add("Kill -9 not completed, kill -9 failed ");
-            } else {
                 success = true;
+            } else {
+                result.add("Kill -9 not completed, kill -9 failed ");
             }
-        } else {
-            success = true;
         }
         String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
         return CommandOpResult.of(success, status(tag)).appendMsg(result);

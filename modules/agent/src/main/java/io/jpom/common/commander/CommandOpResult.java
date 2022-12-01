@@ -52,19 +52,22 @@ public class CommandOpResult {
     public static CommandOpResult of(boolean success, String msg) {
         CommandOpResult commandOpResult = new CommandOpResult();
         commandOpResult.success = success;
-        if (msg != null) {
-            commandOpResult.appendMsg(msg);
-        }
+        commandOpResult.appendMsg(msg);
         return commandOpResult;
     }
 
     public CommandOpResult appendMsg(String msg) {
+        if (StrUtil.isEmpty(msg)) {
+            return this;
+        }
         msgs.add(msg);
         return this;
     }
 
     public CommandOpResult appendMsg(List<String> msgs) {
-        this.msgs.addAll(msgs);
+        for (String msg : msgs) {
+            this.appendMsg(msg);
+        }
         return this;
     }
 
