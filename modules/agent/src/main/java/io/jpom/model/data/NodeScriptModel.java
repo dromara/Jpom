@@ -72,51 +72,11 @@ public class NodeScriptModel extends BaseWorkspaceModel {
         return StrUtil.emptyToDefault(lastRunUser, StrUtil.DASHED);
     }
 
-    public File getFile(boolean get) {
-        return this.scriptFile(StrUtil.EMPTY);
-    }
-
-    public File scriptFile(String child) {
-        if (StrUtil.isEmpty(getId())) {
-            throw new IllegalArgumentException("id 为空");
-        }
-        File path = ConfigBean.getInstance().getScriptPath();
-        return FileUtil.file(path, getId(), StrUtil.format("script{}.{}", child, CommandUtil.SUFFIX));
-    }
-
     public File logFile(String executeId) {
         if (StrUtil.isEmpty(getId())) {
             throw new IllegalArgumentException("id 为空");
         }
         File path = ConfigBean.getInstance().getScriptPath();
         return FileUtil.file(path, getId(), "log", executeId + ".log");
-    }
-
-    public void saveFile() {
-        File file = this.getFile(true);
-        FileUtil.writeString(getContext(), file, ExtConfigBean.getInstance().getConsoleLogCharset());
-//        // 添加权限
-//        if (SystemUtil.getOsInfo().isLinux()) {
-//            CommandUtil.execCommand("chmod 755 " + FileUtil.getAbsolutePath(file));
-//        }
-    }
-
-    /**
-     * 读取文件信息
-     */
-    public void readFileTime() {
-        File file = this.getFile(true);
-        long lastModified = file.lastModified();
-        setModifyTime(DateUtil.date(lastModified).toString());
-
-    }
-
-    public void readFileContext() {
-        File file = getFile(true);
-        if (FileUtil.exist(file)) {
-            //
-            String context = FileUtil.readString(file, ExtConfigBean.getInstance().getConsoleLogCharset());
-            setContext(context);
-        }
     }
 }

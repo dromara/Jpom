@@ -760,7 +760,7 @@ public abstract class AbstractProjectCommander {
      * @param status 要检查的状态
      * @param stopWaitTime  检查等待时间
      *
-     * @return 和参数status相反
+     * @return 如果和期望一致则返回 true，反之 false
      */
     protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int stopWaitTime, boolean status) {
         stopWaitTime = Math.max(stopWaitTime, 1);

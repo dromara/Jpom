@@ -108,10 +108,7 @@ public class ScriptController extends BaseAgentController {
             Assert.isNull(eModel, "id已经存在啦");
 
             nodeScriptModel.setId(IdUtil.fastSimpleUUID());
-            File file = nodeScriptModel.getFile(true);
-            if (file.exists() || file.isDirectory()) {
-                return JsonMessage.getString(405, "当地id路径文件已经存在来，请修改");
-            }
+
             nodeScriptServer.addItem(nodeScriptModel);
             return JsonMessage.getString(200, "添加成功");
         } else if ("sync".equalsIgnoreCase(type)) {
@@ -164,10 +161,7 @@ public class ScriptController extends BaseAgentController {
         eModel.setName(name);
         eModel.setWorkspaceId(getWorkspaceId());
         eModel.setContext(context);
-        file = eModel.getFile(true);
-        if (file.exists() || file.isDirectory()) {
-            return JsonMessage.getString(405, "当地id路径文件已经存在来，请修改");
-        }
+
         nodeScriptServer.addItem(eModel);
         return JsonMessage.getString(200, "导入成功");
     }
