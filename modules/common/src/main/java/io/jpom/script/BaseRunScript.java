@@ -22,11 +22,17 @@
  */
 package io.jpom.script;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import io.jpom.system.ConfigBean;
 import io.jpom.util.LogRecorder;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Date;
 
 /**
  * 脚本模版执行父类
@@ -72,6 +78,33 @@ public abstract class BaseRunScript implements AutoCloseable {
             IoUtil.close(inputStream);
             this.process.destroy();
             this.process = null;
+        }
+    }
+
+    /**
+     * 清理 脚本文件执行缓存
+     */
+    public static void clearRunScript() {
+        String dataPath = ConfigBean.getInstance().getDataPath();
+        File scriptFile = FileUtil.file(dataPath, ConfigBean.SCRIPT_RUN_CACHE_DIRECTORY);
+        if (!FileUtil.isDirectory(scriptFile)) {
+            return;
+        }
+        File[] files = scriptFile.listFiles(pathname -> {
+            Date lastModifiedTime = FileUtil.lastModifiedTime(pathname);
+            DateTime now = DateTime.now();
+            long between = DateUtil.between(lastModifiedTime, now, DateUnit.HOUR);
+            // 文件大于一个小时才能被删除
+            return between > 1;
+        });
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            try {
+                FileUtil.del(file);
+            } catch (Exception ignored) {
+            }
         }
     }
 }

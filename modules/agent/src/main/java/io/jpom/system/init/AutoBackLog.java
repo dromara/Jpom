@@ -35,7 +35,7 @@ import io.jpom.common.RemoteVersion;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.cron.CronUtils;
 import io.jpom.model.data.NodeProjectInfoModel;
-import io.jpom.script.DslScriptBuilder;
+import io.jpom.script.BaseRunScript;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.system.AgentExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
@@ -132,6 +132,6 @@ public class AutoBackLog {
         // 启动加载
         RemoteVersion.loadRemoteInfo();
         // 清空脚本缓存
-        DslScriptBuilder.clearRunScript();
+        BaseRunScript.clearRunScript();
     }
 }

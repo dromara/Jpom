@@ -43,14 +43,13 @@ import io.jpom.common.BaseServerController;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
-import io.jpom.model.user.UserModel;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
-import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.dblog.BuildInfoService;
@@ -887,9 +886,10 @@ public class BuildExecuteService {
             logRecorder.info("[INFO] --- EXEC NOTICESCRIPT {}", type);
             ScriptExecuteLogModel logModel = buildExecuteService.scriptExecuteLogServer.create(scriptModel, 1);
             File logFile = scriptModel.logFile(logModel.getId());
+            File scriptFile = null;
             try (LogRecorder scriptLog = LogRecorder.builder().file(logFile).build()) {
                 // 创建执行器
-                File scriptFile = scriptModel.scriptFile();
+                scriptFile = scriptModel.scriptFile();
                 //
                 String script = FileUtil.getAbsolutePath(scriptFile);
                 ProcessBuilder processBuilder = new ProcessBuilder();
@@ -916,6 +916,13 @@ public class BuildExecuteService {
                 });
                 int waitFor = process.waitFor();
                 logRecorder.info("[INFO] --- NOTICESCRIPT PROCESS RESULT " + waitFor);
+            } finally {
+                if (scriptFile != null) {
+                    try {
+                        FileUtil.del(scriptFile);
+                    } catch (Exception ignored) {
+                    }
+                }
             }
         }
     }

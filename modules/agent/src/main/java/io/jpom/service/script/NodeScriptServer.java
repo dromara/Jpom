@@ -77,8 +77,7 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
     public void deleteItem(String id) {
         NodeScriptModel nodeScriptModel = getItem(id);
         if (nodeScriptModel != null) {
-            File path = ConfigBean.getInstance().getScriptPath();
-            File file = FileUtil.file(path, id);
+            File file = nodeScriptModel.scriptPath();
             FileUtil.del(file);
         }
         super.deleteItem(id);

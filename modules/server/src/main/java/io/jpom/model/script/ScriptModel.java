@@ -23,6 +23,7 @@
 package io.jpom.model.script;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
@@ -98,10 +99,14 @@ public class ScriptModel extends BaseWorkspaceModel {
     }
 
     public File scriptFile() {
-        File path = this.scriptPath();
-        File file = FileUtil.file(path, StrUtil.format("script.{}", CommandUtil.SUFFIX));
-        //
-        FileUtil.writeString(getContext(), file, ExtConfigBean.getInstance().getConsoleLogCharset());
-        return file;
+        String dataPath = ConfigBean.getInstance().getDataPath();
+
+        File scriptFile = FileUtil.file(dataPath, ConfigBean.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
+        FileUtil.writeString(this.getContext(), scriptFile, ExtConfigBean.getInstance().getConsoleLogCharset());
+//        File path = this.scriptPath();
+//        File file = FileUtil.file(path, StrUtil.format("script.{}", CommandUtil.SUFFIX));
+//        //
+//        FileUtil.writeString(getContext(), file, ExtConfigBean.getInstance().getConsoleLogCharset());
+        return scriptFile;
     }
 }

@@ -28,6 +28,7 @@ import cn.hutool.cron.Scheduler;
 import cn.hutool.cron.TaskExecutor;
 import cn.hutool.cron.TaskTable;
 import cn.hutool.cron.listener.TaskListener;
+import cn.hutool.cron.task.CronTask;
 import cn.hutool.cron.task.Task;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.system.ExtConfigBean;
@@ -106,9 +107,10 @@ public class CronUtils {
 
                 @Override
                 public void onFailed(TaskExecutor executor, Throwable exception) {
-                    TaskStat taskStat = TASK_STAT.computeIfAbsent(executor.getCronTask().getId(), s -> new TaskStat());
+                    CronTask cronTask = executor.getCronTask();
+                    TaskStat taskStat = TASK_STAT.computeIfAbsent(cronTask.getId(), s -> new TaskStat());
                     taskStat.failedCount++;
-                    log.error("定时任务异常", exception);
+                    log.error("定时任务异常 {}", cronTask.getId(), exception);
                 }
             });
         }
