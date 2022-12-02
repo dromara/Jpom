@@ -199,27 +199,37 @@ public class FileUtils {
     /**
      * 读取环境变量文件
      *
-     * @param envFile 文件
+     * @param baseFile  基础文件夹
+     * @param attachEnv 要读取的文件列表
      * @return map
      */
-    public static Map<String, String> readEnvFile(File envFile) {
+    public static Map<String, String> readEnvFile(File baseFile, String attachEnv) {
         HashMap<String, String> map = MapUtil.newHashMap(10);
-        if (FileUtil.isFile(envFile)) {
-            List<String> list = FileUtil.readLines(envFile, CharsetUtil.CHARSET_UTF_8);
-            List<Tuple> collect = list.stream()
-                .map(StrUtil::trim)
-                .filter(s -> !StrUtil.isEmpty(s) && !StrUtil.startWith(s, "#"))
-                .map(s -> {
-                    List<String> list1 = StrUtil.splitTrim(s, "=");
-                    if (CollUtil.size(list1) != 2) {
-                        return null;
-                    }
-                    return new Tuple(list1.get(0), list1.get(1));
-                }).filter(Objects::nonNull).collect(Collectors.toList());
-            Map<String, String> envMap = CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
-            // java.lang.UnsupportedOperationException
-            map.putAll(envMap);
+        if (StrUtil.isEmpty(attachEnv)) {
+            return map;
         }
+        List<String> list2 = StrUtil.splitTrim(attachEnv, StrUtil.COMMA);
+        for (String itemEnv : list2) {
+            File envFile = FileUtil.file(baseFile, itemEnv);
+
+            if (FileUtil.isFile(envFile)) {
+                List<String> list = FileUtil.readLines(envFile, CharsetUtil.CHARSET_UTF_8);
+                List<Tuple> collect = list.stream()
+                    .map(StrUtil::trim)
+                    .filter(s -> !StrUtil.isEmpty(s) && !StrUtil.startWith(s, "#"))
+                    .map(s -> {
+                        List<String> list1 = StrUtil.splitTrim(s, "=");
+                        if (CollUtil.size(list1) != 2) {
+                            return null;
+                        }
+                        return new Tuple(list1.get(0), list1.get(1));
+                    }).filter(Objects::nonNull).collect(Collectors.toList());
+                Map<String, String> envMap = CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
+                // java.lang.UnsupportedOperationException
+                map.putAll(envMap);
+            }
+        }
+
         return map;
     }
 
