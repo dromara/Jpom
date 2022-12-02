@@ -129,6 +129,11 @@ public class BuildExtraModule extends BaseModel {
      */
     private Boolean dockerTagIncrement;
 
+    /**
+     * 附加环境变量,比如常见的 .env 文件
+     */
+    private String attachEnv;
+
     public String getResultDirFile() {
         if (resultDirFile == null) {
             return null;

@@ -614,6 +614,22 @@
                 <a-select-option v-for="item2 in scriptList" :key="item2.id">{{ item2.name }}</a-select-option>
               </a-select>
             </a-form-model-item>
+            <a-form-model-item prop="attachEnv">
+              <template slot="label">
+                附加环境变量
+                <a-tooltip v-show="!temp.id">
+                  <template slot="title">
+                    <ul>
+                      <li>附加环境变量是指读取仓库指定环境变量文件来添加到执行构建运行时</li>
+                      <li>比如常见的 .env 文件</li>
+                      <li>文件内容格式要求：env_name=xxxxx 不满足格式的行将自动忽略</li>
+                    </ul>
+                  </template>
+                  <a-icon type="question-circle" theme="filled" />
+                </a-tooltip>
+              </template>
+              <a-input v-model="tempExtraData.attachEnv" placeholder="附加环境变量  .env 添加多个使用逗号分隔" />
+            </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
       </a-form-model>

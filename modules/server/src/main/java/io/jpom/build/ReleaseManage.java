@@ -205,8 +205,8 @@ public class ReleaseManage implements Runnable {
      */
     private Map<String, String> formatCommand(String[] commands) {
         File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
-        File envFile = FileUtil.file(sourceFile, ".env");
-        Map<String, String> envFileMap = FileUtils.readEnvFile(envFile);
+        //        File envFile = FileUtil.file(sourceFile, ".env");
+        Map<String, String> envFileMap = FileUtils.readEnvFile(sourceFile, this.buildExtraModule.getAttachEnv());
         //
         envFileMap.putAll(buildEnv);
         //
@@ -217,25 +217,6 @@ public class ReleaseManage implements Runnable {
         WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
         workspaceEnvVarService.formatCommand(this.buildExtraModule.getWorkspaceId(), commands);
         return envFileMap;
-    }
-
-    private String parseDockerTag(File envFile, String tag) {
-        if (!FileUtil.isFile(envFile)) {
-            return tag;
-        }
-        final String[] newTag = {tag};
-        FileUtil.readLines(envFile, StandardCharsets.UTF_8, (LineHandler) line -> {
-            line = StrUtil.trim(line);
-            if (StrUtil.startWith(line, "#")) {
-                return;
-            }
-            List<String> list = StrUtil.splitTrim(line, "=");
-            if (CollUtil.size(list) != 2) {
-                return;
-            }
-            newTag[0] = StrUtil.replace(newTag[0], "${" + list.get(0) + "}", list.get(1));
-        });
-        return newTag[0];
     }
 
     /**
@@ -289,9 +270,10 @@ public class ReleaseManage implements Runnable {
             File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, StrUtil.SLASH);
             FileUtil.copyContent(historyPackageFile, tempPath, true);
             // env file
-            File envFile = FileUtil.file(tempPath, ".env");
+            Map<String, String> envMap = FileUtils.readEnvFile(sourceFile, this.buildExtraModule.getAttachEnv());
+            //File envFile = FileUtil.file(tempPath, ".env");
             String dockerTag = this.buildExtraModule.getDockerTag();
-            dockerTag = this.parseDockerTag(envFile, dockerTag);
+            dockerTag = StringUtil.formatStrByMap(dockerTag, envMap);
             //
             dockerTag = this.dockerTagIncrement(this.buildExtraModule.getDockerTagIncrement(), dockerTag);
             // docker file

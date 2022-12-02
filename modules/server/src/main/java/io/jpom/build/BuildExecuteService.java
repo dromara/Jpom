@@ -807,8 +807,7 @@ public class BuildExecuteService {
             Map<String, String> environment = processBuilder.environment();
             environment.putAll(taskData.env);
             // env file
-            File envFile = FileUtil.file(this.gitFile, ".env");
-            Map<String, String> envFileMap = FileUtils.readEnvFile(envFile);
+            Map<String, String> envFileMap = FileUtils.readEnvFile(this.gitFile, this.buildExtraModule.getAttachEnv());
             environment.putAll(envFileMap);
             environment.putAll(buildEnv);
             //
