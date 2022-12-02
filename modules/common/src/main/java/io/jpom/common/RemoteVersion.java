@@ -51,7 +51,6 @@ import java.util.function.Consumer;
 /**
  * 远程的版本信息
  *
- *
  * <pre>
  * {
  * "tag_name": "v2.6.4",
