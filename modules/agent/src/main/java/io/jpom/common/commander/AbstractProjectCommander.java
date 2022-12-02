@@ -408,7 +408,7 @@ public abstract class AbstractProjectCommander {
     private String checkStart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
         int pid = this.getPid(nodeProjectInfoModel, javaCopyItem);
         if (pid > 0) {
-            return "当前程序正常运行中，不能重复启动,PID:" + pid;
+            return "当前程序正在运行中，不能重复启动,PID:" + pid;
         }
         String lib = nodeProjectInfoModel.allLib();
         File fileLib = new File(lib);
