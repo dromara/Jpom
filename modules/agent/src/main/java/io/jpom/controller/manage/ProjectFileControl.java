@@ -198,14 +198,15 @@ public class ProjectFileControl extends BaseAgentController {
         // 备份文件
         String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
         try {
-            // 判断是否需要清空
-            if ("clear".equalsIgnoreCase(clearType)) {
-                CommandUtil.systemFastDel(lib);
-            }
+            String tempPathName = AgentConfigBean.getInstance().getTempPathName();
             if ("unzip".equals(type)) {
                 multipartFileBuilder.setFileExt(StringUtil.PACKAGE_EXT);
-                multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
+                multipartFileBuilder.setSavePath(tempPathName);
                 String path = multipartFileBuilder.save();
+                // 判断是否需要清空
+                if ("clear".equalsIgnoreCase(clearType)) {
+                    CommandUtil.systemFastDel(lib);
+                }
                 // 解压
                 File file = new File(path);
                 try {
@@ -216,12 +217,18 @@ public class ProjectFileControl extends BaseAgentController {
                     }
                 }
             } else {
-                multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(lib));
+                // 先存储至临时文件夹
+                multipartFileBuilder.setSavePath(tempPathName);
                 // 保存
-                multipartFileBuilder.save();
+                String path = multipartFileBuilder.save();
+                // 判断是否需要清空
+                if ("clear".equalsIgnoreCase(clearType)) {
+                    CommandUtil.systemFastDel(lib);
+                }
+                // 移动文件到对应目录
+                FileUtil.mkdir(lib);
+                FileUtil.move(FileUtil.file(path), lib, true);
             }
-            // 修改使用状态
-            projectInfoService.updateItem(pim);
             //
             String after = getParameter("after");
             if (StrUtil.isNotEmpty(after)) {
