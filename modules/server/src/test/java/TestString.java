@@ -20,12 +20,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.lang.PatternPool;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.net.url.UrlQuery;
+import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.crypto.digest.Digester;
@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -129,8 +130,17 @@ public class TestString {
     }
 
     @Test
-    public void testBase64(){
+    public void testBase64() {
         String encode = Base64.decodeStr("YWJjZA");
         System.out.println(encode);
+    }
+
+    @Test
+    public void testMapStr() {
+        UrlQuery urlQuery = UrlQuery.of("xx=xx&xxx=xxx", CharsetUtil.CHARSET_UTF_8);
+//        urlQuery.getQueryMap()
+        HashMap<String, String> map = MapUtil.of("sss", "xxxxx");
+        map.put("ss", "23");
+        System.out.println(MapUtil.join(map, ";", "="));
     }
 }

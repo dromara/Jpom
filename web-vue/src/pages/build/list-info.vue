@@ -465,6 +465,11 @@
                     <a-input v-model="tempExtraData.dockerTag" placeholder="容器标签,如：xxxx:latest 多个使用逗号隔开" />
                   </a-tooltip>
                 </a-form-model-item>
+                <a-form-model-item prop="dockerBuildArgs" label="构建参数">
+                  <a-tooltip title="构建参数,如：key1=values1&keyvalue2 使用 URL 编码">
+                    <a-input v-model="tempExtraData.dockerBuildArgs" placeholder="构建参数,如：key1=values1&keyvalue2" />
+                  </a-tooltip>
+                </a-form-model-item>
                 <a-form-model-item prop="swarmId">
                   <template slot="label">
                     发布集群
