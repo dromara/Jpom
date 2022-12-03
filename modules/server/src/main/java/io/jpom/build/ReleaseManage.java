@@ -272,8 +272,7 @@ public class ReleaseManage implements Runnable {
             // env file
             Map<String, String> envMap = FileUtils.readEnvFile(sourceFile, this.buildExtraModule.getAttachEnv());
             //File envFile = FileUtil.file(tempPath, ".env");
-            String dockerTag = this.buildExtraModule.getDockerTag();
-            dockerTag = StringUtil.formatStrByMap(dockerTag, envMap);
+            String dockerTag = StringUtil.formatStrByMap(this.buildExtraModule.getDockerTag(), envMap);
             //
             dockerTag = this.dockerTagIncrement(this.buildExtraModule.getDockerTagIncrement(), dockerTag);
             // docker file
@@ -297,8 +296,9 @@ public class ReleaseManage implements Runnable {
                 logRecorder.info("没有可用的 docker server");
                 return;
             }
+            String dockerBuildArgs = this.buildExtraModule.getDockerBuildArgs();
             for (DockerInfoModel infoModel : dockerInfoModels) {
-                this.doDockerImage(infoModel, dockerfile, baseDir, dockerTag);
+                this.doDockerImage(infoModel, dockerfile, baseDir, dockerTag, dockerBuildArgs);
             }
             // 推送 - 只选择一个 docker 服务来推送到远程仓库
             Boolean pushToRepository = this.buildExtraModule.getPushToRepository();
@@ -344,13 +344,14 @@ public class ReleaseManage implements Runnable {
         }
     }
 
-    private void doDockerImage(DockerInfoModel dockerInfoModel, File dockerfile, File baseDir, String dockerTag) {
+    private void doDockerImage(DockerInfoModel dockerInfoModel, File dockerfile, File baseDir, String dockerTag, String dockerBuildArgs) {
         logRecorder.info("{} start build image {}", dockerInfoModel.getName(), dockerTag);
         Map<String, Object> map = dockerInfoModel.toParameter();
         map.put("Dockerfile", dockerfile);
         map.put("baseDirectory", baseDir);
         //
         map.put("tags", dockerTag);
+        map.put("buildArgs", dockerBuildArgs);
         Consumer<String> logConsumer = s -> logRecorder.append(s);
         map.put("logConsumer", logConsumer);
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);

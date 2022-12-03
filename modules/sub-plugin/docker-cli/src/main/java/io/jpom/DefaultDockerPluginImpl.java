@@ -27,6 +27,8 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.net.url.UrlQuery;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -343,13 +345,23 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         File dockerfile = (File) parameter.get("Dockerfile");
         File baseDirectory = (File) parameter.get("baseDirectory");
         String tags = (String) parameter.get("tags");
+        String buildArgs = (String) parameter.get("buildArgs");
 
         try {
+            AuthConfigurations authConfigurations = new AuthConfigurations();
+            authConfigurations.addConfig(dockerClient.authConfig());
+
             BuildImageCmd buildImageCmd = dockerClient.buildImageCmd();
             buildImageCmd
                 .withBaseDirectory(baseDirectory)
                 .withDockerfile(dockerfile)
+                .withBuildAuthConfigs(authConfigurations)
                 .withTags(CollUtil.newHashSet(StrUtil.splitTrim(tags, StrUtil.COMMA)));
+            // 添加构建参数
+            UrlQuery query = UrlQuery.of(buildArgs, CharsetUtil.CHARSET_UTF_8);
+            query.getQueryMap()
+                .forEach((key, value) -> buildImageCmd.withBuildArg(StrUtil.toString(key), StrUtil.toString(value)));
+
             buildImageCmd.exec(new InvocationBuilder.AsyncResultCallback<BuildResponseItem>() {
                 @Override
                 public void onNext(BuildResponseItem object) {

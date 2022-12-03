@@ -134,6 +134,11 @@ public class BuildExtraModule extends BaseModel {
      */
     private String attachEnv;
 
+    /**
+     * 容器构建参数 如：key1=values1&keyvalue2
+     */
+    private String dockerBuildArgs;
+
     public String getResultDirFile() {
         if (resultDirFile == null) {
             return null;
