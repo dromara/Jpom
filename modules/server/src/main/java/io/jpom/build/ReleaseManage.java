@@ -300,7 +300,7 @@ public class ReleaseManage implements Runnable {
             for (DockerInfoModel infoModel : dockerInfoModels) {
                 this.doDockerImage(infoModel, dockerfile, baseDir, dockerTag);
             }
-            // 推送
+            // 推送 - 只选择一个 docker 服务来推送到远程仓库
             Boolean pushToRepository = this.buildExtraModule.getPushToRepository();
             if (pushToRepository != null && pushToRepository) {
                 List<String> repositoryList = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
