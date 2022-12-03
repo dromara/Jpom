@@ -466,9 +466,19 @@
                   </a-tooltip>
                 </a-form-model-item>
                 <a-form-model-item prop="dockerBuildArgs" label="构建参数">
-                  <a-tooltip title="构建参数,如：key1=values1&keyvalue2 使用 URL 编码">
-                    <a-input v-model="tempExtraData.dockerBuildArgs" placeholder="构建参数,如：key1=values1&keyvalue2" />
-                  </a-tooltip>
+                  <a-row>
+                    <a-col :span="10">
+                      <a-tooltip title="构建参数,如：key1=values1&keyvalue2 使用 URL 编码">
+                        <a-input v-model="tempExtraData.dockerBuildArgs" placeholder="构建参数,如：key1=values1&keyvalue2" />
+                      </a-tooltip>
+                    </a-col>
+                    <a-col :span="4" style="text-align: right">镜像标签：</a-col>
+                    <a-col :span="10">
+                      <a-tooltip title="镜像标签,如：key1=values1&keyvalue2 使用 URL 编码">
+                        <a-input v-model="tempExtraData.dockerImagesLabels" placeholder="镜像标签,如：key1=values1&keyvalue2" />
+                      </a-tooltip>
+                    </a-col>
+                  </a-row>
                 </a-form-model-item>
                 <a-form-model-item prop="swarmId">
                   <template slot="label">
@@ -487,7 +497,11 @@
                   <a-row>
                     <a-col :span="5" style="text-align: right">
                       <a-space>
-                        <a-tooltip> 推送到仓库 </a-tooltip>
+                        <a-tooltip v-if="!temp.id">
+                          <template slot="title"> 镜像构建成功后是否需要推送到远程仓库 </template>
+                          <a-icon type="question-circle" theme="filled" />
+                        </a-tooltip>
+                        推送到仓库
                         <a-switch v-model="tempExtraData.pushToRepository" checked-children="是" un-checked-children="否" />
                       </a-space>
                     </a-col>
@@ -503,6 +517,26 @@
                         版本递增
 
                         <a-switch v-model="tempExtraData.dockerTagIncrement" checked-children="是" un-checked-children="否" />
+                      </a-space>
+                    </a-col>
+                    <a-col :span="5" style="text-align: right">
+                      <a-space>
+                        <a-tooltip v-if="!temp.id">
+                          <template slot="title">构建镜像的过程不使用缓存 </template>
+                          <a-icon type="question-circle" theme="filled" />
+                        </a-tooltip>
+                        no-cache
+                        <a-switch v-model="tempExtraData.dockerNoCache" checked-children="是" un-checked-children="否" />
+                      </a-space>
+                    </a-col>
+                    <a-col :span="5" style="text-align: right">
+                      <a-space>
+                        <a-tooltip v-if="!temp.id">
+                          <template slot="title">构建镜像尝试去更新基础镜像的新版本 </template>
+                          <a-icon type="question-circle" theme="filled" />
+                        </a-tooltip>
+                        更新镜像
+                        <a-switch v-model="tempExtraData.dockerBuildPull" checked-children="是" un-checked-children="否" />
                       </a-space>
                     </a-col>
                   </a-row>

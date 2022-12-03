@@ -139,6 +139,19 @@ public class BuildExtraModule extends BaseModel {
      */
     private String dockerBuildArgs;
 
+    /**
+     * 构建镜像尝试去更新基础镜像的新版本
+     */
+    private Boolean dockerBuildPull;
+    /**
+     * 构建镜像的过程不使用缓存
+     */
+    private Boolean dockerNoCache;
+    /**
+     * 镜像标签
+     */
+    private String dockerImagesLabels;
+
     public String getResultDirFile() {
         if (resultDirFile == null) {
             return null;
