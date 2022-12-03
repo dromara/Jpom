@@ -27,6 +27,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -44,10 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -338,6 +336,12 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         }
     }
 
+    /**
+     * http://edu.jb51.net/docker/docker-command-manual-build.html
+     * 构建镜像
+     *
+     * @param parameter 参数
+     */
     @SuppressWarnings("unchecked")
     private void buildImageCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
@@ -346,6 +350,9 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         File baseDirectory = (File) parameter.get("baseDirectory");
         String tags = (String) parameter.get("tags");
         String buildArgs = (String) parameter.get("buildArgs");
+        Object pull = parameter.get("pull");
+        Object noCache = parameter.get("noCache");
+        String labels = (String) parameter.get("labels");
 
         try {
             AuthConfigurations authConfigurations = new AuthConfigurations();
@@ -361,6 +368,14 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
             UrlQuery query = UrlQuery.of(buildArgs, CharsetUtil.CHARSET_UTF_8);
             query.getQueryMap()
                 .forEach((key, value) -> buildImageCmd.withBuildArg(StrUtil.toString(key), StrUtil.toString(value)));
+            // 标签
+            UrlQuery labelsQuery = UrlQuery.of(labels, CharsetUtil.CHARSET_UTF_8);
+            HashMap<String, String> labelMap = MapUtil.newHashMap();
+            labelsQuery.getQueryMap().forEach((key, value) -> labelMap.put(StrUtil.toString(key), StrUtil.toString(value)));
+            buildImageCmd.withLabels(labelMap);
+            //
+            Optional.ofNullable(pull).map(Convert::toBool).ifPresent(buildImageCmd::withPull);
+            Optional.ofNullable(noCache).map(Convert::toBool).ifPresent(buildImageCmd::withNoCache);
 
             buildImageCmd.exec(new InvocationBuilder.AsyncResultCallback<BuildResponseItem>() {
                 @Override

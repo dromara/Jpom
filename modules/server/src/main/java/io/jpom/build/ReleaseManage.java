@@ -298,7 +298,7 @@ public class ReleaseManage implements Runnable {
             }
             String dockerBuildArgs = this.buildExtraModule.getDockerBuildArgs();
             for (DockerInfoModel infoModel : dockerInfoModels) {
-                this.doDockerImage(infoModel, dockerfile, baseDir, dockerTag, dockerBuildArgs);
+                this.doDockerImage(infoModel, dockerfile, baseDir, dockerTag, this.buildExtraModule);
             }
             // 推送 - 只选择一个 docker 服务来推送到远程仓库
             Boolean pushToRepository = this.buildExtraModule.getPushToRepository();
@@ -344,14 +344,17 @@ public class ReleaseManage implements Runnable {
         }
     }
 
-    private void doDockerImage(DockerInfoModel dockerInfoModel, File dockerfile, File baseDir, String dockerTag, String dockerBuildArgs) {
+    private void doDockerImage(DockerInfoModel dockerInfoModel, File dockerfile, File baseDir, String dockerTag, BuildExtraModule extraModule) {
         logRecorder.info("{} start build image {}", dockerInfoModel.getName(), dockerTag);
         Map<String, Object> map = dockerInfoModel.toParameter();
         map.put("Dockerfile", dockerfile);
         map.put("baseDirectory", baseDir);
         //
         map.put("tags", dockerTag);
-        map.put("buildArgs", dockerBuildArgs);
+        map.put("buildArgs", extraModule.getDockerBuildArgs());
+        map.put("pull", extraModule.getDockerBuildPull());
+        map.put("noCache", extraModule.getDockerNoCache());
+        map.put("labels", extraModule.getDockerImagesLabels());
         Consumer<String> logConsumer = s -> logRecorder.append(s);
         map.put("logConsumer", logConsumer);
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
