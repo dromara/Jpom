@@ -100,6 +100,18 @@ export function dockerInfo(params) {
 }
 
 /**
+ * 修剪 docker
+ * @param {JSON} params
+ */
+export function dockerPrune(params) {
+  return axios({
+    url: "/docker/prune",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
  * 删除容器
  * @param {JSON} params
  */

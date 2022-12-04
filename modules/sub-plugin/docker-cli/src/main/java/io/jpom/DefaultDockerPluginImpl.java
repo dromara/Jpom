@@ -29,9 +29,7 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import com.alibaba.fastjson.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
@@ -40,10 +38,11 @@ import com.github.dockerjava.core.InvocationBuilder;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 import lombok.SneakyThrows;
+import org.springframework.util.Assert;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Consumer;
@@ -62,70 +61,43 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
     @Override
     public Object execute(Object main, Map<String, Object> parameter) throws Exception {
         String type = main.toString();
-        switch (type) {
-            case "build":
-                try (DockerBuild dockerBuild = new DockerBuild(parameter)) {
-                    dockerBuild.build();
-                }
-                return null;
-            case "listContainer":
-                return this.listContainerCmd(parameter);
-            case "stopContainer":
-                this.stopContainerCmd(parameter);
-                return null;
-            case "removeContainer":
-                this.removeContainerCmd(parameter);
-                return null;
-            case "startContainer":
-                this.startContainerCmd(parameter);
-                return null;
-            case "restartContainer":
-                this.restartContainerCmd(parameter);
-                return null;
-            case "listImages":
-                return this.listImagesCmd(parameter);
-            case "removeImage":
-                this.removeImageCmd(parameter);
-                return null;
-            case "listVolumes":
-                return this.listVolumesCmd(parameter);
-            case "removeVolume":
-                this.removeVolumeCmd(parameter);
-                return null;
-            case "logContainer":
-                this.logContainerCmd(parameter);
-                return null;
-            case "exec":
-                this.execCreateCmd(parameter);
-                return null;
-            case "buildImage":
-                this.buildImageCmd(parameter);
-                return null;
-            case "inspectImage":
-                return this.inspectImageCmd(parameter);
-            case "createContainer":
-                this.createContainerCmd(parameter);
-                return null;
-            case "pullImage":
-                this.pullImageCmd(parameter);
-                return null;
-            case "listNetworks":
-                return this.listNetworksCmd(parameter);
-            case "stats":
-                return this.statsCmd(parameter);
-            case "inspectContainer":
-                return this.inspectContainerCmd(parameter);
-            case "updateContainer":
-                return this.updateContainerCmd(parameter);
-            case "pushImage":
-                this.pushImageCmd(parameter);
-                return null;
-            default:
-                throw new IllegalArgumentException("不支持的类型");
+        if ("build".equals(type)) {
+            try (DockerBuild dockerBuild = new DockerBuild(parameter)) {
+                dockerBuild.build();
+            }
+            return null;
         }
+        Method method = ReflectUtil.getMethodByName(this.getClass(), type + "Cmd");
+        Assert.notNull(method, "不支持的类型:" + type);
+        return ReflectUtil.invoke(this, method, parameter);
     }
 
-    private Map<String, JSONObject> statsCmd(Map<String, Object> parameter) throws IOException {
+    /**
+     * 裁剪
+     * <a href="https://blog.csdn.net/zhanremo3062/article/details/120860327">https://blog.csdn.net/zhanremo3062/article/details/120860327</a>
+     *
+     * @param parameter 参数
+     * @return 回收空间
+     */
+    private Long pruneCmd(Map<String, Object> parameter) {
+        DockerClient dockerClient = DockerUtil.get(parameter);
+        String pruneTypeStr = (String) parameter.get("pruneType");
+
+        PruneType pruneType = EnumUtil.fromString(PruneType.class, pruneTypeStr, null);
+        Assert.notNull(pruneType, "pruneType 未知");
+        String until = (String) parameter.get("until");
+        String labels = (String) parameter.get("labels");
+        PruneCmd pruneCmd = dockerClient.pruneCmd(pruneType);
+        if (pruneType == PruneType.IMAGES) {
+            pruneCmd.withDangling(true);
+        }
+        Opt.ofBlankAble(until).ifPresent(pruneCmd::withUntilFilter);
+        Opt.ofBlankAble(labels).map(s -> StrUtil.splitToArray(s, StrUtil.COMMA)).ifPresent(pruneCmd::withLabelFilter);
+        PruneResponse pruneResponse = pruneCmd.exec();
+        return pruneResponse.getSpaceReclaimed();
+    }
+
+    private Map<String, JSONObject> statsCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         String containerId = (String) parameter.get("containerId");
         List<String> split = StrUtil.split(containerId, StrUtil.COMMA);
@@ -142,7 +114,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         }).collect(Collectors.toMap(tuple -> tuple.get(0), tuple -> tuple.get(1)));
     }
 
-    private JSONObject updateContainerCmd(Map<String, Object> parameter) throws IOException {
+    private JSONObject updateContainerCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         String containerId = (String) parameter.get("containerId");
         UpdateContainerCmd updateContainerCmd = dockerClient.updateContainerCmd(containerId);
@@ -207,7 +179,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         return (JSONObject) JSONObject.toJSON(updateContainerResponse);
     }
 
-    private JSONObject inspectContainerCmd(Map<String, Object> parameter) throws IOException {
+    private JSONObject inspectContainerCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         String containerId = (String) parameter.get("containerId");
         InspectContainerResponse containerResponse = dockerClient.inspectContainerCmd(containerId).withSize(true).exec();
@@ -339,7 +311,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
     }
 
     /**
-     * http://edu.jb51.net/docker/docker-command-manual-build.html
+     * <a href="http://edu.jb51.net/docker/docker-command-manual-build.html">http://edu.jb51.net/docker/docker-command-manual-build.html</a>
      * 构建镜像
      *
      * @param parameter 参数
@@ -392,7 +364,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
     }
 
     @SuppressWarnings("unchecked")
-    private void execCreateCmd(Map<String, Object> parameter) {
+    private void execCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
         Consumer<String> errorConsumer = (Consumer<String>) parameter.get("errorConsumer");
