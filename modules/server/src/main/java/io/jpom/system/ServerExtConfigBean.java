@@ -25,12 +25,12 @@ package io.jpom.system;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.script.ScriptUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.convert.DurationStyle;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 /**
  * 外部配置文件
@@ -53,6 +53,12 @@ public class ServerExtConfigBean {
     public int userAlwaysLoginError;
 
     /**
+     * IP连续登录失败次数，超过此数将自动不再被允许登录，零是不限制
+     */
+    @Value("${user.alwaysIpLoginError:10}")
+    public int userAlwaysIpLoginError;
+
+    /**
      * 是否强制提醒用户开启  mfa
      */
     @Value("${user.forceMfa:false}")
@@ -60,7 +66,7 @@ public class ServerExtConfigBean {
     /**
      * 当ip连续登录失败，锁定对应IP时长，单位毫秒
      */
-    @Value("${user.ipErrorLockTime:60*60*5*1000}")
+    @Value("${user.ipErrorLockTime:5h}")
     private String ipErrorLockTime;
     private long ipErrorLockTimeValue = -1;
     /**
@@ -192,8 +198,15 @@ public class ServerExtConfigBean {
 
     public long getIpErrorLockTime() {
         if (this.ipErrorLockTimeValue == -1) {
-            String str = StrUtil.emptyToDefault(this.ipErrorLockTime, "60*60*5*1000");
-            this.ipErrorLockTimeValue = Convert.toLong(ScriptUtil.eval(str), TimeUnit.HOURS.toMillis(5));
+            String str = StrUtil.emptyToDefault(this.ipErrorLockTime, "5h");
+            Duration duration;
+            try {
+                DurationStyle durationStyle = DurationStyle.detect(str);
+                duration = durationStyle.parse(str);
+            } catch (IllegalArgumentException ignored) {
+                duration = Duration.ofHours(5);
+            }
+            this.ipErrorLockTimeValue = duration.toMillis();
         }
         return this.ipErrorLockTimeValue;
     }

@@ -138,7 +138,7 @@ public class LoginControl extends BaseServerController {
      * @return true
      */
     private boolean ipLock() {
-        if (ServerExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
+        if (ServerExtConfigBean.getInstance().userAlwaysIpLoginError <= 0) {
             return false;
         }
         String ip = getIp();
@@ -147,7 +147,7 @@ public class LoginControl extends BaseServerController {
             count = 0;
         }
         // 大于10倍时 封ip
-        return count > ServerExtConfigBean.getInstance().userAlwaysLoginError * 10;
+        return count > ServerExtConfigBean.getInstance().userAlwaysIpLoginError;
     }
 
     /**

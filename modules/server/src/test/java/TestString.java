@@ -21,6 +21,9 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.convert.impl.DurationConverter;
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
@@ -29,8 +32,11 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.crypto.digest.Digester;
 import org.junit.Test;
+import org.springframework.boot.convert.DurationStyle;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.SortedMap;
@@ -141,5 +147,22 @@ public class TestString {
         HashMap<String, String> map = MapUtil.of("sss", "xxxxx");
         map.put("ss", "23");
         System.out.println(MapUtil.join(map, ";", "="));
+    }
+
+    @Test
+    public void testTime() {
+        String time = "5h";
+        DurationStyle durationStyle = DurationStyle.detect(time);
+        Duration duration = durationStyle.parse(time);
+        System.out.println(duration.toHours());
+
+        System.out.println(Duration.ofHours(5).toHours());
+//        Duration convert1 = DefaultConversionService.getSharedInstance().convert("18000", Duration.class);
+//        System.out.println(convert1);
+//        Duration convert = Convert.convert(Duration.class, "18000");
+//        System.out.println(convert);
+
+//        System.out.println(Duration.parse("18000"));
+//        DateUnit dateUnit = DateUnit.valueOf("18000");
     }
 }

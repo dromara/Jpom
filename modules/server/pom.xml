@@ -125,11 +125,6 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-captcha</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-script</artifactId>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
