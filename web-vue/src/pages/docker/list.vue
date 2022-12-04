@@ -237,17 +237,7 @@
       </a-form-model>
     </a-modal>
     <!-- 控制台 -->
-    <a-drawer
-      :title="`${temp.name} 控制台`"
-      placement="right"
-      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
-      :visible="consoleVisible"
-      @close="
-        () => {
-          this.consoleVisible = false;
-        }
-      "
-    >
+    <a-drawer :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose">
       <console v-if="consoleVisible" :visible="consoleVisible" :id="temp.id"></console>
     </a-drawer>
   </div>
@@ -349,6 +339,13 @@ export default {
         if (res.code === 200) {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
+          //
+          const dockerId = this.$route.query.dockerId;
+          this.list.map((item) => {
+            if (dockerId === item.id) {
+              this.handleConsole(item);
+            }
+          });
         }
         this.loading = false;
       });
@@ -362,12 +359,28 @@ export default {
     },
     // 控制台
     handleConsole(record) {
-      this.temp = record;
+      this.temp = { ...record };
       this.consoleVisible = true;
+
+      let dockerId = this.$route.query.dockerId;
+      if (dockerId !== record.id) {
+        this.$router.push({
+          query: { ...this.$route.query, dockerId: record.id },
+        });
+      }
+    },
+    // 关闭抽屉层
+    onClose() {
+      this.consoleVisible = false;
+      const query = Object.assign({}, this.$route.query);
+      delete query.dockerId;
+      this.$router.replace({
+        query: query,
+      });
     },
     // 修改
     handleEdit(record) {
-      this.temp = record;
+      this.temp = { ...record };
       this.editVisible = true;
       this.uploadFileList = [];
       let tagsArray = (record.tags || "").split(":");

@@ -25,6 +25,7 @@ package io.jpom.controller.docker;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
@@ -332,5 +333,20 @@ public class DockerInfoController extends BaseServerController {
             log.error("探测本地 docker 异常", e);
             return new JsonMessage<>(500, "探测本地 docker 异常：" + e.getMessage());
         }
+    }
+
+    @PostMapping(value = "prune", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public String prune(@ValidatorItem String id, @ValidatorItem String pruneType, String labels, String until) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("pruneType", pruneType);
+        parameter.put("labels", labels);
+        parameter.put("until", until);
+        //
+        Long spaceReclaimed = plugin.execute("prune", parameter, Long.class);
+        spaceReclaimed = ObjectUtil.defaultIfNull(spaceReclaimed, 0L);
+        return JsonMessage.getString(200, "修剪完成,总回收空间：" + FileUtil.readableFileSize(spaceReclaimed));
     }
 }

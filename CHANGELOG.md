@@ -7,12 +7,14 @@
 1. 【server】新增 在线构建新增附加环境变量配置 来实现定义构建运行环境变量
 2. 【server】新增 构建发布 docker 镜像新增构建参数,使构建镜像更灵活 （感谢@loyal）
 3. 【server】新增 构建发布 docker 镜像新增镜像标签、no-cache、更新镜像配置
+4. 【server】新增 修剪 docker 相关资源功能
 
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 在线构建仓库文件存在`.env`文件时带来构建结果异常问题（感谢@蹉跎岁月）
 2. 【agent】优化 项目`清空上传文件`等待文件上传完成后再清空、上传文件优先到临时目录完成后再移动至项目目录（感谢[@tiv-cloud_0](https://gitee.com/tiv-cloud_0) [Gitee issues I649NU](https://gitee.com/dromara/Jpom/issues/I649NU) ）
 3. 【server】修复 docker 创建容器部分场景端口无法正常暴露问题（感谢@李中原）
+4. 【server】优化 docker 控制台刷新自动打开控制台台
 
 ### ❌ 不兼容功能
 
