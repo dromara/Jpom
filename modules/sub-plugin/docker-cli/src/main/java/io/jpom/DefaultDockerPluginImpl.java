@@ -268,10 +268,12 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         containerCmd.withName(name);
 
         HostConfig hostConfig = HostConfig.newHostConfig();
+        List<ExposedPort> exposedPortList = new ArrayList<>();
         if (StrUtil.isNotEmpty(exposedPorts)) {
             List<PortBinding> portBindings = StrUtil.splitTrim(exposedPorts, StrUtil.COMMA)
                 .stream()
                 .map(PortBinding::parse)
+                .peek(portBinding -> exposedPortList.add(portBinding.getExposedPort()))
                 .collect(Collectors.toList());
             hostConfig.withPortBindings(portBindings);
         }
@@ -298,7 +300,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         if (CollUtil.isNotEmpty(commands)) {
             containerCmd.withCmd(commands);
         }
-        containerCmd.withHostConfig(hostConfig);
+        containerCmd.withHostConfig(hostConfig).withExposedPorts(exposedPortList);
         CreateContainerResponse containerResponse = containerCmd.exec();
         //
         boolean autorun = Convert.toBool(autorunStr, false);
