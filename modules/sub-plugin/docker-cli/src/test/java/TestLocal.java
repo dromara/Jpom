@@ -24,7 +24,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import cn.hutool.core.io.unit.DataSizeUtil;
-import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.dockerjava.api.DockerClient;
@@ -97,7 +96,7 @@ public class TestLocal {
         StatsCmd statsCmd = dockerClient.statsCmd("socat");
         Statistics statistics = statsCmd.exec(new InvocationBuilder.AsyncResultCallback<>()).awaitResult();
         System.out.println(statistics);
-        System.out.println(JSONUtil.toJsonStr(statistics));
+        System.out.println(JSONObject.toJSONString(statistics));
     }
 
     @Test
