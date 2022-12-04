@@ -8,6 +8,7 @@
 2. 【server】新增 构建发布 docker 镜像新增构建参数,使构建镜像更灵活 （感谢@loyal）
 3. 【server】新增 构建发布 docker 镜像新增镜像标签、no-cache、更新镜像配置
 4. 【server】新增 修剪 docker 相关资源功能
+5. 【server】新增 单 IP 登录失败指定次数将锁定对应 IP，默认 10 次 `user.alwaysIpLoginError`
 
 ### 🐞 解决BUG、优化功能
 
@@ -21,6 +22,7 @@
 ### ❌ 不兼容功能
 
 1. 【server】在线构建本地构建、本地发布、docker 镜像取消默认读取 `.env`文件,需要手动配置
+2. 【server】取消 `user.ipErrorLockTime` 属性表达式支持，改为 `Duration 风格`，转换异常默认值为 5h
 
 ------
 
