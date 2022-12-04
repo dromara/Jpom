@@ -55,6 +55,11 @@
             <artifactId>h2</artifactId>
             <version>${h2.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-db</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

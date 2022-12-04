@@ -62,7 +62,7 @@
         <skipTests>true</skipTests>
         <maven.test.skip>true</maven.test.skip>
         <!--        <maven.javadoc.skip>true</maven.javadoc.skip>-->
-        <hutool-all.version>5.8.5</hutool-all.version>
+        <hutool.version>5.8.10</hutool.version>
     </properties>
     <dependencies>
         <dependency>
@@ -84,7 +84,21 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+
+
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-bom</artifactId>
+                <version>${hutool.version}</version>
+                <type>pom</type>
+                <!-- 注意这里是import -->
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <plugins>
             <plugin>
