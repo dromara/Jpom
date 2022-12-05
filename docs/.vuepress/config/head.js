@@ -14,6 +14,8 @@ module.exports = [
   ['meta', {name: '360-site-verification', content: '0a5e4a367ff77232a3c1e9bc83edf7ba'}],
   // <meta name="wwads-cn-verify" content="6da9003b743b65f4c0ccd295cc484e57" />
   ['meta', {name: 'wwads-cn-verify', content: '6da9003b743b65f4c0ccd295cc484e57'}],
+  // <meta name="google-site-verification" content="MA1Gbd51TsfBQa-4bZiaJfOnFiufsvLf5groklfa138" />
+  ['meta', {name: 'google-site-verification', content: 'MA1Gbd51TsfBQa-4bZiaJfOnFiufsvLf5groklfa138'}],
   ['script', {async: true, src: 'https://cdn.wwads.cn/js/makemoney.js', type: 'text/javascript'}], // 广告相关，你可以去掉
   // <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   ['meta', {name: 'viewport', content: 'width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no'}],
