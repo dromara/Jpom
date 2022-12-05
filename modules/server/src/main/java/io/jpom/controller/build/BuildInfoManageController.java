@@ -23,6 +23,7 @@
 package io.jpom.controller.build;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -91,20 +92,16 @@ public class BuildInfoManageController extends BaseServerController {
                         String buildRemark,
                         String resultDirFile,
                         String branchName,
-                        String branchTagName) {
+                        String branchTagName,
+                        String checkRepositoryDiff) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         Assert.notNull(item, "没有对应数据");
         // 更新数据
         BuildInfoModel update = new BuildInfoModel();
-        if (StrUtil.isNotEmpty(resultDirFile)) {
-            update.setResultDirFile(resultDirFile);
-        }
-        if (StrUtil.isNotEmpty(branchName)) {
-            update.setBranchName(branchName);
-        }
-        if (StrUtil.isNotEmpty(branchTagName)) {
-            update.setBranchTagName(branchTagName);
-        }
+        Opt.ofBlankAble(resultDirFile).ifPresent(update::setResultDirFile);
+        Opt.ofBlankAble(branchName).ifPresent(update::setBranchName);
+        Opt.ofBlankAble(branchTagName).ifPresent(update::setBranchTagName);
+
         if (!StrUtil.isAllBlank(resultDirFile, branchName, branchTagName)) {
             update.setId(id);
             buildInfoService.update(update);
@@ -112,7 +109,7 @@ public class BuildInfoManageController extends BaseServerController {
         // userModel
         UserModel userModel = getUser();
         // 执行构建
-        return buildExecuteService.start(item.getId(), userModel, null, 0, buildRemark).toString();
+        return buildExecuteService.start(item.getId(), userModel, null, 0, buildRemark, checkRepositoryDiff).toString();
     }
 
     /**

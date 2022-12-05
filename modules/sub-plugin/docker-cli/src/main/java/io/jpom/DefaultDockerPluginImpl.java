@@ -99,10 +99,9 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         Assert.notNull(pruneType, "pruneType 未知");
         String until = (String) parameter.get("until");
         String labels = (String) parameter.get("labels");
+        String dangling = (String) parameter.get("dangling");
         PruneCmd pruneCmd = dockerClient.pruneCmd(pruneType);
-        if (pruneType == PruneType.IMAGES) {
-            pruneCmd.withDangling(true);
-        }
+        Opt.ofBlankAble(dangling).map(s -> Convert.toBool(s, true)).ifPresent(pruneCmd::withDangling);
         Opt.ofBlankAble(until).ifPresent(pruneCmd::withUntilFilter);
         Opt.ofBlankAble(labels).map(s -> StrUtil.splitToArray(s, StrUtil.COMMA)).ifPresent(pruneCmd::withLabelFilter);
         PruneResponse pruneResponse = pruneCmd.exec();

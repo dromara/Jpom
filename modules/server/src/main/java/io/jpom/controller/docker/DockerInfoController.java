@@ -337,13 +337,14 @@ public class DockerInfoController extends BaseServerController {
 
     @PostMapping(value = "prune", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String prune(@ValidatorItem String id, @ValidatorItem String pruneType, String labels, String until) throws Exception {
+    public String prune(@ValidatorItem String id, @ValidatorItem String pruneType, String labels, String until, String dangling) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("pruneType", pruneType);
         parameter.put("labels", labels);
         parameter.put("until", until);
+        parameter.put("dangling", dangling);
         //
         Long spaceReclaimed = plugin.execute("prune", parameter, Long.class);
         spaceReclaimed = ObjectUtil.defaultIfNull(spaceReclaimed, 0L);

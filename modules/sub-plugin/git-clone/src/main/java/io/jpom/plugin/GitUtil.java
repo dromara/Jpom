@@ -356,7 +356,7 @@ public class GitUtil {
                 // 拉取代码
                 PullResult pull = pull(git, parameter, branchName, printWriter);
                 // 最后一次提交记录
-                return getLastCommitMsg(file, branchName);
+                return getLastCommitMsg(file, false, branchName);
             } catch (Exception t) {
                 checkTransportException(t, file, printWriter);
             }
@@ -419,23 +419,18 @@ public class GitUtil {
      * @throws IOException     IO
      * @throws GitAPIException api
      */
-    public static String checkoutPullTag(Map<String, Object> parameter, File file, String tagName, PrintWriter printWriter) throws Exception {
+    public static String[] checkoutPullTag(Map<String, Object> parameter, File file, String tagName, PrintWriter printWriter) throws Exception {
         String url = (String) parameter.get("url");
         String path = FileUtil.getAbsolutePath(file);
         synchronized (StrUtil.concat(false, url, path).intern()) {
             try (Git git = initGit(parameter, null, tagName, file, printWriter)) {
                 // 获取最后提交信息
-                Collection<ReflogEntry> reflogEntries = git.reflog().setRef(Constants.HEAD).call();
-                ReflogEntry first = CollUtil.getFirst(reflogEntries);
-                if (first != null) {
-                    return getLastCommitMsg(file, tagName, first.getNewId());
-                }
-
+                return getLastCommitMsg(file, true, tagName);
             } catch (Exception t) {
                 checkTransportException(t, file, printWriter);
             }
         }
-        return StrUtil.EMPTY;
+        return new String[]{StrUtil.EMPTY, StrUtil.EMPTY};
     }
 
     /**
@@ -495,8 +490,8 @@ public class GitUtil {
      * @return objectID
      * @throws GitAPIException 异常
      */
-    private static ObjectId getAnyObjectId(Git git, String branchName) throws GitAPIException {
-        List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
+    private static ObjectId getBranchAnyObjectId(Git git, String branchName) throws GitAPIException {
+        List<Ref> list = git.branchList().call();
         for (Ref ref : list) {
             String name = ref.getName();
             if (name.startsWith(Constants.R_HEADS + branchName)) {
@@ -507,20 +502,39 @@ public class GitUtil {
     }
 
     /**
+     * 解析仓库指定分支最新提交
+     *
+     * @param git     仓库
+     * @param tagName 标签
+     * @return objectID
+     * @throws GitAPIException 异常
+     */
+    private static ObjectId getTagAnyObjectId(Git git, String tagName) throws GitAPIException {
+        List<Ref> list = git.tagList().call();
+        for (Ref ref : list) {
+            String name = ref.getName();
+            if (name.startsWith(Constants.R_TAGS + tagName)) {
+                return ref.getObjectId();
+            }
+        }
+        return null;
+    }
+
+    /**
      * 获取对应分支的最后一次提交记录
      *
-     * @param file       仓库文件夹
-     * @param branchName 分支
+     * @param file    仓库文件夹
+     * @param refName 名称
      * @return String[] 第一个元素为最后一次 hash 值， 第二个元素为描述
      * @throws IOException     IO
      * @throws GitAPIException api
      */
-    public static String[] getLastCommitMsg(File file, String branchName) throws IOException, GitAPIException {
+    public static String[] getLastCommitMsg(File file, boolean tag, String refName) throws IOException, GitAPIException {
         try (Git git = Git.open(file)) {
-            ObjectId anyObjectId = getAnyObjectId(git, branchName);
-            Objects.requireNonNull(anyObjectId, "没有" + branchName + "分支");
+            ObjectId anyObjectId = tag ? getTagAnyObjectId(git, refName) : getBranchAnyObjectId(git, refName);
+            Objects.requireNonNull(anyObjectId, "没有" + refName + "分支/标签");
             //System.out.println(anyObjectId.getName());
-            String lastCommitMsg = getLastCommitMsg(file, branchName, anyObjectId);
+            String lastCommitMsg = getLastCommitMsg(file, refName, anyObjectId);
             return new String[]{anyObjectId.getName(), lastCommitMsg};
         }
     }

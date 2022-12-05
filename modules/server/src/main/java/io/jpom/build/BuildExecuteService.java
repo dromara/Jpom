@@ -23,6 +23,7 @@
 package io.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
@@ -30,6 +31,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ExecutorBuilder;
@@ -174,7 +176,6 @@ public class BuildExecuteService {
         return null;
     }
 
-
     /**
      * start build
      *
@@ -182,9 +183,25 @@ public class BuildExecuteService {
      * @param userModel        用户信息
      * @param delay            延迟的时间
      * @param triggerBuildType 触发构建类型
+     * @param buildRemark      构建备注
      * @return json
      */
     public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType, String buildRemark) {
+        return this.start(buildInfoId, userModel, delay, triggerBuildType, buildRemark, null);
+    }
+
+    /**
+     * start build
+     *
+     * @param buildInfoId         构建Id
+     * @param userModel           用户信息
+     * @param delay               延迟的时间
+     * @param triggerBuildType    触发构建类型
+     * @param buildRemark         构建备注
+     * @param checkRepositoryDiff 差异构建
+     * @return json
+     */
+    public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType, String buildRemark, String checkRepositoryDiff) {
         synchronized (buildInfoId.intern()) {
             BuildInfoModel buildInfoModel = buildService.getByKey(buildInfoId);
             String e = this.checkStatus(buildInfoModel.getStatus());
@@ -209,6 +226,8 @@ public class BuildExecuteService {
                 .buildRemark(buildRemark)
                 .delay(delay).env(env)
                 .triggerBuildType(triggerBuildType);
+            //
+            Opt.ofBlankAble(checkRepositoryDiff).map(Convert::toBool).ifPresent(taskBuilder::checkRepositoryDiff);
             this.runTask(taskBuilder.build());
             String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
             return new JsonMessage<>(200, msg, buildInfoModel.getBuildId());
@@ -343,6 +362,10 @@ public class BuildExecuteService {
          * 仓库代码最后一次变动信息（ID，git 为 commit hash, svn 最后的版本号）
          */
         private String repositoryLastCommitId;
+        /**
+         * 是否差异构建
+         */
+        private Boolean checkRepositoryDiff;
     }
 
 
@@ -519,7 +542,7 @@ public class BuildExecuteService {
                 String msg = "error";
                 Integer repoTypeCode = repositoryModel.getRepoType();
                 RepositoryModel.RepoType repoType = EnumUtil.likeValueOf(RepositoryModel.RepoType.class, repoTypeCode);
-                Boolean checkRepositoryDiff = buildExtraModule.getCheckRepositoryDiff();
+                Boolean checkRepositoryDiff = Optional.ofNullable(taskData.checkRepositoryDiff).orElse(buildExtraModule.getCheckRepositoryDiff());
                 String repositoryLastCommitId = buildInfoModel.getRepositoryLastCommitId();
                 if (repoType == RepositoryModel.RepoType.Git) {
                     // git with password
@@ -533,6 +556,7 @@ public class BuildExecuteService {
                     map.put("savePath", gitFile);
                     // 模糊匹配 标签
                     String branchTagName = buildInfoModel.getBranchTagName();
+                    String[] result;
                     if (StrUtil.isNotEmpty(branchTagName)) {
                         String newBranchTagName = BuildExecuteService.fuzzyMatch(tuple.get(1), branchTagName);
                         if (StrUtil.isEmpty(newBranchTagName)) {
@@ -546,7 +570,7 @@ public class BuildExecuteService {
                         buildEnv.put("BUILD_TAG_NAME", newBranchTagName);
                         // 标签拉取模式
                         logRecorder.info("repository tag [" + branchTagName + "] clone pull from " + newBranchTagName);
-                        msg = (String) plugin.execute("pullByTag", map);
+                        result = (String[]) plugin.execute("pullByTag", map);
                     } else {
                         String branchName = buildInfoModel.getBranchName();
                         // 模糊匹配分支
@@ -560,18 +584,18 @@ public class BuildExecuteService {
                         map.put("branchName", newBranchName);
                         buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
                         logRecorder.info("repository [" + branchName + "] clone pull from " + newBranchName);
-                        String[] result = (String[]) plugin.execute("pull", map);
-                        msg = result[1];
-                        // 判断hash 码和上次构建是否一致
-                        if (checkRepositoryDiff != null && checkRepositoryDiff) {
-                            if (StrUtil.equals(repositoryLastCommitId, result[0])) {
-                                // 如果一致，则不构建
-                                logRecorder.info("仓库代码没有任何变动终止本次构建：{}", result[0]);
-                                return false;
-                            }
-                        }
-                        taskData.repositoryLastCommitId = result[0];
+                        result = (String[]) plugin.execute("pull", map);
                     }
+                    msg = result[1];
+                    // 判断hash 码和上次构建是否一致
+                    if (checkRepositoryDiff != null && checkRepositoryDiff) {
+                        if (StrUtil.equals(repositoryLastCommitId, result[0])) {
+                            // 如果一致，则不构建
+                            logRecorder.info("仓库代码没有任何变动终止本次构建：{} {}", result[0], msg);
+                            return false;
+                        }
+                    }
+                    taskData.repositoryLastCommitId = result[0];
                 } else if (repoType == RepositoryModel.RepoType.Svn) {
                     // svn
                     Map<String, Object> map = repositoryModel.toMap();
