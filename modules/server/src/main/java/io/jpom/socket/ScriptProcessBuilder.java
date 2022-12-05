@@ -66,7 +66,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
     private final File scriptFile;
 
 
-    private ScriptProcessBuilder(ScriptModel nodeScriptModel, String executeId, String args) {
+    private ScriptProcessBuilder(ScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
         super(nodeScriptModel.logFile(executeId));
         this.executeId = executeId;
         //
@@ -84,6 +84,9 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         processBuilder.command(command);
         Map<String, String> environment = processBuilder.environment();
         environment.putAll(env);
+        if (paramMap != null) {
+            environment.putAll(paramMap);
+        }
         processBuilder.directory(scriptFile.getParentFile());
     }
 
@@ -95,8 +98,20 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
      * @param args            参数
      */
     public static ScriptProcessBuilder create(ScriptModel nodeScriptModel, String executeId, String args) {
+        return create(nodeScriptModel, executeId, args, null);
+    }
+
+    /**
+     * 创建执行 并监听
+     *
+     * @param nodeScriptModel 脚本模版
+     * @param executeId       执行ID
+     * @param args            参数
+     * @param paramMap        环境变量参数
+     */
+    public static ScriptProcessBuilder create(ScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
         return FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.computeIfAbsent(executeId, file1 -> {
-            ScriptProcessBuilder scriptProcessBuilder1 = new ScriptProcessBuilder(nodeScriptModel, executeId, args);
+            ScriptProcessBuilder scriptProcessBuilder1 = new ScriptProcessBuilder(nodeScriptModel, executeId, args, paramMap);
             ThreadUtil.execute(scriptProcessBuilder1);
             return scriptProcessBuilder1;
         });

@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -91,6 +92,7 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
             NodeModel nodeModel = nodeService.getByKey(item.getNodeId());
             JSONObject reqData = new JSONObject();
             reqData.put("id", item.getScriptId());
+            reqData.put("params", JSONObject.toJSONString(ServletUtil.getParamMap(getRequest())));
             JsonMessage<String> jsonMessage = NodeForward.request(nodeModel, NodeUrl.SCRIPT_EXEC, userModel, reqData);
             //
             JSONObject jsonObject = new JSONObject();

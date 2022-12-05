@@ -50,6 +50,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 脚本执行
@@ -69,7 +71,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
     private final String executeId;
     private final File scriptFile;
 
-    private ScriptProcessBuilder(NodeScriptModel nodeScriptModel, String executeId, String args) {
+    private ScriptProcessBuilder(NodeScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
         super(nodeScriptModel.logFile(executeId));
         this.executeId = executeId;
         //
@@ -85,16 +87,14 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         log.debug(CollUtil.join(command, StrUtil.SPACE));
         String workspaceId = nodeScriptModel.getWorkspaceId();
         // 添加环境变量
+        Map<String, String> environment = processBuilder.environment();
         AgentWorkspaceEnvVarService workspaceService = SpringUtil.getBean(AgentWorkspaceEnvVarService.class);
         WorkspaceEnvVarModel item = workspaceService.getItem(workspaceId);
-        if (item != null) {
-            Map<String, WorkspaceEnvVarModel.WorkspaceEnvVarItemModel> varData = item.getVarData();
-            if (varData != null) {
-                Map<String, String> envMap = CollStreamUtil.toMap(varData.values(), WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getName, WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getValue);
-                Map<String, String> environment = processBuilder.environment();
-                environment.putAll(envMap);
-            }
-        }
+        Optional.ofNullable(item)
+            .map(WorkspaceEnvVarModel::getVarData)
+            .map(map -> CollStreamUtil.toMap(map.values(), WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getName, WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getValue))
+            .ifPresent(environment::putAll);
+        Optional.ofNullable(paramMap).ifPresent(environment::putAll);
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
         processBuilder.directory(scriptFile.getParentFile());
@@ -106,10 +106,11 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
      * @param nodeScriptModel 脚本模版
      * @param executeId       执行ID
      * @param args            参数
+     * @param paramMap        执行环境变量参数
      */
-    public static ScriptProcessBuilder create(NodeScriptModel nodeScriptModel, String executeId, String args) {
+    public static ScriptProcessBuilder create(NodeScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
         return FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.computeIfAbsent(executeId, file1 -> {
-            ScriptProcessBuilder scriptProcessBuilder1 = new ScriptProcessBuilder(nodeScriptModel, executeId, args);
+            ScriptProcessBuilder scriptProcessBuilder1 = new ScriptProcessBuilder(nodeScriptModel, executeId, args, paramMap);
             ThreadUtil.execute(scriptProcessBuilder1);
             return scriptProcessBuilder1;
         });
@@ -124,7 +125,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
      * @param session         会话
      */
     public static void addWatcher(NodeScriptModel nodeScriptModel, String executeId, String args, Session session) {
-        ScriptProcessBuilder scriptProcessBuilder = create(nodeScriptModel, executeId, args);
+        ScriptProcessBuilder scriptProcessBuilder = create(nodeScriptModel, executeId, args, null);
         //
         if (scriptProcessBuilder.sessions.add(session)) {
             if (FileUtil.exist(scriptProcessBuilder.logFile)) {

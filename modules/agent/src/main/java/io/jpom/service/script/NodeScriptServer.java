@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 脚本模板管理
@@ -125,7 +126,7 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
             nodeScriptExecLogModel.setTriggerExecType(1);
             execLogServer.addItem(nodeScriptExecLogModel);
             // 执行
-            ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs());
+            ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs(), null);
         }
     }
 
@@ -149,7 +150,31 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
         execLogServer.addItem(nodeScriptExecLogModel);
         String userArgs = StrUtil.emptyToDefault(args, scriptServerItem.getDefArgs());
         // 执行
-        ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), userArgs);
+        ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), userArgs, null);
+        return nodeScriptExecLogModel.getId();
+    }
+
+    /**
+     * 执行脚本
+     *
+     * @param scriptServerItem 脚本
+     * @param type             类型
+     * @param args             参数
+     * @return 执行记录ID
+     */
+    public String execute(NodeScriptModel scriptServerItem, int type, String uerName, String args, Map<String, String> paramMap) {
+        NodeScriptExecLogModel nodeScriptExecLogModel = new NodeScriptExecLogModel();
+        nodeScriptExecLogModel.setId(IdUtil.fastSimpleUUID());
+        nodeScriptExecLogModel.setCreateTimeMillis(SystemClock.now());
+        nodeScriptExecLogModel.setScriptId(scriptServerItem.getId());
+        nodeScriptExecLogModel.setScriptName(scriptServerItem.getName());
+        nodeScriptExecLogModel.setModifyUser(uerName);
+        nodeScriptExecLogModel.setWorkspaceId(scriptServerItem.getWorkspaceId());
+        nodeScriptExecLogModel.setTriggerExecType(type);
+        execLogServer.addItem(nodeScriptExecLogModel);
+        String userArgs = StrUtil.emptyToDefault(args, scriptServerItem.getDefArgs());
+        // 执行
+        ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), userArgs, paramMap);
         return nodeScriptExecLogModel.getId();
     }
 }
