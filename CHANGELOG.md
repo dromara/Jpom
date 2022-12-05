@@ -1,6 +1,6 @@
 # 🚀 版本日志
 
-## 2.9.19
+## 2.9.19 (2022-12-05)
 
 ### 🐣 新增功能
 
@@ -16,9 +16,9 @@
 1. 【server】修复 在线构建仓库文件存在`.env`文件时带来构建结果异常问题（感谢@蹉跎岁月）
 2. 【agent】优化 项目`清空上传文件`等待文件上传完成后再清空、上传文件优先到临时目录完成后再移动至项目目录（感谢[@tiv-cloud_0](https://gitee.com/tiv-cloud_0) [Gitee issues I649NU](https://gitee.com/dromara/Jpom/issues/I649NU) ）
 3. 【server】修复 docker 创建容器部分场景端口无法正常暴露问题（感谢@李中原）
-4. 【server】优化 docker 控制台刷新自动打开控制台台
+4. 【server】优化 docker 控制台刷新页面自动打开控制台
 5. 【server】优化 docker java 依赖包
-6. 【all】优化 取消 hutool-all 包，采集 bom 方式引入 
+6. 【all】优化 取消 hutool-all 包，采用 bom 方式引入 
 
 ### ❌ 不兼容功能
 
