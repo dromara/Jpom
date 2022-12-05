@@ -17,7 +17,7 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <a-button type="primary" @click="handleAddGitee">通过私人令牌导入仓库</a-button>
+          <a-button type="primary" @click="handleAddGitee">导入</a-button>
         </a-space>
       </template>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
@@ -170,7 +170,7 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <a-modal v-model="giteeImportVisible" title="导入仓库" width="80%" :footer="null" :maskClosable="false">
+    <a-modal v-model="giteeImportVisible" title="通过私人令牌导入仓库" width="80%" :footer="null" :maskClosable="false">
       <a-form-model :label-col="{ span: 4 }" :rules="giteeImportFormRules" :model="giteeImportForm" ref="giteeImportForm" :wrapper-col="{ span: 20 }">
         <a-form-model-item prop="token">
           <template slot="label">
