@@ -269,7 +269,7 @@
       </a-form-model>
     </a-modal>
     <!-- mfa 提示 -->
-    <a-modal v-model="bindMfaTip" title="安全提醒" :footer="null" :maskClosable="false" :closable="false">
+    <a-modal v-model="bindMfaTip" title="安全提醒" :footer="null" :maskClosable="false" :closable="false" :keyboard="false">
       <a-space direction="vertical">
         <a-alert message="安全提醒" description="为了您的账号安全系统要求必须开启两步验证来确保账号的安全性" type="error" :closable="false" />
         <a-row align="middle" type="flex" justify="center">
