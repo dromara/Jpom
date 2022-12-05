@@ -108,6 +108,7 @@ export function dockerPrune(params) {
     url: "/docker/prune",
     method: "post",
     data: params,
+    timeout: 0,
   });
 }
 

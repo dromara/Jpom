@@ -269,6 +269,7 @@
             </template>
           </a-auto-complete>
         </a-form-model-item>
+        <a-form-model-item label="容器标签"> <a-input v-model="temp.labels" placeholder="容器标签,如：key1=values1&keyvalue2" /> </a-form-model-item>
         <a-form-model-item label="自动启动">
           <a-row>
             <a-col :span="4"><a-switch v-model="temp.autorun" checked-children="启动" un-checked-children="不启动" /></a-col>
@@ -458,6 +459,7 @@ export default {
           networkMode: this.temp.networkMode,
           privileged: this.temp.privileged,
           restartPolicy: this.temp.restartPolicy,
+          labels: this.temp.labels,
         };
         temp.volumes = (this.temp.volumes || [])
           .filter((item) => {
