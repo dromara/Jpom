@@ -79,7 +79,9 @@
                   <a-select-option :key="key" v-for="(item, key) in pruneTypes"> {{ item.name }} </a-select-option>
                 </a-select>
               </a-form-model-item>
-
+              <a-form-model-item label="悬空类型" v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('dangling')">
+                <a-switch v-model="pruneForm.dangling" checked-children="悬空" un-checked-children="非悬空" />
+              </a-form-model-item>
               <a-form-model-item label="限定时间" v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('until')">
                 <template #help><a-tag color="#f50"> 建议添加指定时间范围,否则将删除满足条件的所有数据</a-tag> </template>
                 <a-tooltip title="可以是 Unix 时间戳、日期格式的时间戳或 Go 持续时间字符串（例如 10m、1h30m），相对于守护进程机器的时间计算。">
@@ -119,16 +121,15 @@ export default {
       temp: {},
       pruneForm: {
         pruneType: "IMAGES",
+        dangling: true,
       },
-      // label="限定时间" v-if="['IMAGES', 'BUILD', 'CONTAINERS', 'NETWORKS']
-      // label="指定标签" v-if="['CONTAINERS', 'VOLUMES']
       pruneTypes: {
         IMAGES: {
           value: "IMAGES",
           name: "镜像",
           command: "image",
           help: "仅修剪未使用和未标记的镜像",
-          filters: ["until"],
+          filters: ["until", "dangling"],
         },
         CONTAINERS: {
           value: "CONTAINERS",
@@ -188,12 +189,12 @@ export default {
           onOk: () => {
             // 组装参数
             const params = { id: this.id, pruneType: this.pruneForm.pruneType };
-            if (this.pruneTypes[params.pruneType] && this.pruneTypes[params.pruneType].filters.includes("until")) {
-              params.until = this.pruneForm.until;
-            }
-            if (this.pruneTypes[params.pruneType] && this.pruneTypes[params.pruneType].filters.includes("labels")) {
-              params.labels = this.pruneForm.labels;
-            }
+
+            this.pruneTypes[params.pruneType] &&
+              this.pruneTypes[params.pruneType].filters.forEach((element) => {
+                params[element] = this.pruneForm[element];
+              });
+
             dockerPrune(params).then((res) => {
               if (res.code === 200) {
                 this.$notification.success({

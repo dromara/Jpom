@@ -850,6 +850,19 @@
         <a-form-model-item prop="resultDirFile" label="产物目录">
           <a-input v-model="temp.resultDirFile" placeholder="不填写则不更新" />
         </a-form-model-item>
+        <a-form-model-item prop="checkRepositoryDiff" label="差异构建" help="">
+          <a-space>
+            <a-switch v-model="temp.checkRepositoryDiff" checked-children="是" un-checked-children="否" />
+            <span>
+              <a-tooltip>
+                <template slot="title"> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+              该选项仅本次构建生效
+            </span>
+          </a-space>
+        </a-form-model-item>
+
         <a-form-model-item label="构建备注" prop="buildRemark">
           <a-textarea v-model="temp.buildRemark" :maxLength="240" placeholder="请输入构建备注,长度小于 240" :auto-size="{ minRows: 3, maxRows: 5 }" />
         </a-form-model-item>
@@ -1527,14 +1540,11 @@ export default {
       this.buildConfirmVisible = true;
       this.branchList = [];
       this.branchTagList = [];
-      // this.$confirm({
-      //   title: "系统提示",
-      //   content: "确定要开始构建 【名称：" + record.name + "】 【分支：" + record.branchName + "】 吗？",
-      //   okText: "确认",
-      //   cancelText: "取消",
-      //   onOk: () => {
-
-      // });
+      try {
+        this.temp = { ...this.temp, checkRepositoryDiff: (JSON.parse(record.extraData) || {}).checkRepositoryDiff };
+      } catch (e) {
+        //
+      }
     },
     handleStartBuild() {
       this.reqStartBuild(
@@ -1544,6 +1554,7 @@ export default {
           resultDirFile: this.temp.resultDirFile,
           branchTagName: this.temp.branchTagName,
           branchName: this.temp.branchName,
+          checkRepositoryDiff: this.temp.checkRepositoryDiff,
         },
         true
       ).then(() => {

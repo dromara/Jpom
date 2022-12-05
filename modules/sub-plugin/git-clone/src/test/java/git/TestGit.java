@@ -41,10 +41,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author bwcx_jzy
@@ -164,8 +161,8 @@ public class TestGit {
 //        repositoryModel.setRepoType(0);
 //        repositoryModel.setUserName("a");
 //        repositoryModel.setPassword("a");
-        String msg = GitUtil.checkoutPullTag(map, file, tagName, printWriter);
-        System.out.println(msg);
+        String[] msg = GitUtil.checkoutPullTag(map, file, tagName, printWriter);
+        System.out.println(Arrays.toString(msg));
         //GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
 
 
