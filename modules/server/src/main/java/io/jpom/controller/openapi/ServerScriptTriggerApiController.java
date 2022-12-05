@@ -46,7 +46,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -89,10 +91,18 @@ public class ServerScriptTriggerApiController extends BaseJpomController {
 
         try {
             BaseServerController.resetInfo(userModel);
+            // 解析参数
+            Map<String, String> paramMap = ServletUtil.getParamMap(getRequest());
+            Map<String, String> newParamMap = new HashMap<>(10);
+            for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+                String key = StrUtil.format("trigger_{}", entry.getKey());
+                key = StrUtil.toUnderlineCase(key);
+                newParamMap.put(key, entry.getValue());
+            }
             // 创建记录
             ScriptExecuteLogModel nodeScriptExecLogModel = scriptExecuteLogServer.create(item, 2);
             // 执行
-            ScriptProcessBuilder.create(item, nodeScriptExecLogModel.getId(), item.getDefArgs());
+            ScriptProcessBuilder.create(item, nodeScriptExecLogModel.getId(), item.getDefArgs(), newParamMap);
             //
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("logId", nodeScriptExecLogModel.getId());

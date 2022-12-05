@@ -24,6 +24,7 @@ package io.jpom.controller.script;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.pattern.CronPattern;
@@ -55,7 +56,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 脚本管理
@@ -213,15 +216,32 @@ public class ScriptController extends BaseAgentController {
     /**
      * 执行
      *
-     * @param id ID
+     * @param id     ID
+     * @param args   执行参数
+     * @param params 环境变量参数
      * @return json
      */
     @RequestMapping(value = "exec", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String exec(@ValidatorItem() String id, String args) {
+    public String exec(@ValidatorItem() String id, String args, String params) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
         Assert.notNull(item, "对应脚本已经不存在啦");
         String nowUserName = getNowUserName();
-        String execute = nodeScriptServer.execute(item, 2, nowUserName, args);
+
+        Map<String, String> paramMap = Opt.ofBlankAble(params)
+            .map(JSONObject::parseObject)
+            .map(jsonObject -> {
+                Map<String, String> paramMap1 = new HashMap<>(10);
+                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                    String key = StrUtil.format("trigger_{}", entry.getKey());
+                    key = StrUtil.toUnderlineCase(key);
+                    paramMap1.put(key, StrUtil.toString(entry.getValue()));
+                }
+                return paramMap1;
+            })
+            .orElse(null);
+        //
+
+        String execute = nodeScriptServer.execute(item, 2, nowUserName, args, paramMap);
         return JsonMessage.getString(200, "开始执行", execute);
     }
 
