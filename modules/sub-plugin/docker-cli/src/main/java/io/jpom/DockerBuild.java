@@ -420,13 +420,15 @@ public class DockerBuild implements AutoCloseable {
         String pluginName = (String) usesMap.get("uses");
         String version = String.valueOf(usesMap.get("version"));
         String name = String.format("jpom_%s_%s", pluginName, version);
-
+        HashMap<String, String> labels = MapUtil.of("jpom_build_" + buildId, buildId);
+        labels.put("jpom_build_cache", "true");
         try {
             dockerClient.inspectVolumeCmd(name).exec();
         } catch (NotFoundException e) {
+
             dockerClient.createVolumeCmd()
                 .withName(name)
-                .withLabels(MapUtil.of("jpom_build_" + buildId, buildId))
+                .withLabels(labels)
                 .exec();
 
             Mount mount = new Mount().withType(MountType.VOLUME)
@@ -439,7 +441,7 @@ public class DockerBuild implements AutoCloseable {
                 .withHostConfig(hostConfig)
                 .withName(name)
                 .withEnv(pluginName.toUpperCase() + "_VERSION=" + version)
-                .withLabels(MapUtil.of("jpom_build_" + buildId, buildId))
+                .withLabels(labels)
                 .withEntrypoint("/bin/bash", "/tmp/install.sh").exec();
             String containerId = createContainerResponse.getId();
             // 将脚本 复制到容器

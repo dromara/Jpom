@@ -24,6 +24,7 @@ package io.jpom;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.exceptions.InvocationTargetRuntimeException;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
@@ -37,11 +38,13 @@ import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.InvocationBuilder;
 import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
+import lombok.Lombok;
 import lombok.SneakyThrows;
 import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -69,7 +72,16 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         }
         Method method = ReflectUtil.getMethodByName(this.getClass(), type + "Cmd");
         Assert.notNull(method, "不支持的类型:" + type);
-        return ReflectUtil.invoke(this, method, parameter);
+        try {
+            return ReflectUtil.invoke(this, method, parameter);
+        } catch (InvocationTargetRuntimeException exception) {
+            Throwable cause = exception.getCause();
+            if (cause instanceof InvocationTargetException) {
+                InvocationTargetException invocationTargetException = (InvocationTargetException) cause;
+                throw Lombok.sneakyThrow(invocationTargetException.getTargetException());
+            }
+            throw Lombok.sneakyThrow(cause);
+        }
     }
 
     /**
@@ -235,9 +247,21 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         Object privileged = parameter.get("privileged");
         String restartPolicy = (String) parameter.get("restartPolicy");
         Map<String, String> env = (Map<String, String>) parameter.get("env");
+        String labels = (String) parameter.get("labels");
         //
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(imageId);
         containerCmd.withName(name);
+        Opt.ofBlankAble(labels)
+            .map(s -> UrlQuery.of(s, CharsetUtil.CHARSET_UTF_8))
+            .map(UrlQuery::getQueryMap)
+            .map((Function<Map<CharSequence, CharSequence>, Map<String, String>>) map -> {
+                HashMap<String, String> labelMap = MapUtil.newHashMap();
+                for (Map.Entry<CharSequence, CharSequence> entry : map.entrySet()) {
+                    labelMap.put(StrUtil.toString(entry.getKey()), StrUtil.toString(entry.getValue()));
+                }
+                return labelMap;
+            })
+            .ifPresent(containerCmd::withLabels);
 
         HostConfig hostConfig = HostConfig.newHostConfig();
         List<ExposedPort> exposedPortList = new ArrayList<>();

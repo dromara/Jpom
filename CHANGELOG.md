@@ -9,6 +9,7 @@
 3. 【server】新增 构建发布 docker 镜像新增镜像标签、no-cache、更新镜像配置
 4. 【server】新增 修剪 docker 相关资源功能
 5. 【server】新增 单 IP 登录失败指定次数将锁定对应 IP，默认 10 次 `user.alwaysIpLoginError`
+6. 【server】新增 镜像创建容器支持配置 label 属性
 
 ### 🐞 解决BUG、优化功能
 

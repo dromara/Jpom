@@ -19,8 +19,12 @@
           <p>容器Id: {{ record.id }}</p>
           <p>镜像：{{ record.image }}</p>
           <p>镜像Id: {{ record.imageId }}</p>
-        </template>
 
+          <template v-if="record.labels">
+            <p v-for="(value, key) in record.labels" :key="key">{{ key }}<a-icon type="arrow-right" />{{ value }}</p>
+          </template>
+        </template>
+        <a-icon v-if="record.labels && Object.keys(record.labels).length" type="pushpin" />
         <span>{{ (text || []).join(",") }}</span>
       </a-popover>
 
@@ -324,7 +328,7 @@
   </div>
 </template>
 <script>
-import {parseTime, renderSize} from "@/utils/time";
+import { parseTime, renderSize } from "@/utils/time";
 import {
   dockerContainerList,
   dockerContainerRemove,
