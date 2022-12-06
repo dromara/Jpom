@@ -47,6 +47,7 @@ notices: # 可选的
     isHtmlContent: true
 ---
 
+<Notice :data="$frontmatter.notices"/>
 
 <br/>
 
