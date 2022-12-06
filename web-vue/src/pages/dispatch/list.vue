@@ -37,9 +37,13 @@
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
+      <template slot="name" slot-scope="text, record">
+        <a-tooltip placement="topLeft" @click="handleEdit(record)" :title="text">
+          <a-button size="small" style="padding: 0px" type="link" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">{{ text }}</a-button>
+          <a-button size="small" style="padding: 0px" type="link" v-else @click="handleEditDispatch(record)">{{ text }}</a-button>
+        </a-tooltip>
+      </template>
+
       <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="statusMap[text]">
         <span>{{ statusMap[text] }}</span>
       </a-tooltip>

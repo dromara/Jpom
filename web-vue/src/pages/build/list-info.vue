@@ -168,6 +168,11 @@
                 @onRefreshSelect="loadBranchList"
                 inputPlaceholder="自定义分支通配表达式"
                 selectPlaceholder="请选择构建对应的分支,必选"
+                @change="
+                  () => {
+                    this.$refs['editBuildForm'] && this.$refs['editBuildForm'].clearValidate();
+                  }
+                "
               >
                 <div slot="inputTips">
                   支持通配符(AntPathMatcher)
@@ -187,6 +192,11 @@
                 @onRefreshSelect="loadBranchList"
                 inputPlaceholder="自定义标签通配表达式"
                 selectPlaceholder="选择构建的标签,不选为最新提交"
+                @change="
+                  () => {
+                    this.$refs['editBuildForm'] && this.$refs['editBuildForm'].clearValidate();
+                  }
+                "
               >
                 <div slot="inputTips">
                   支持通配符(AntPathMatcher)
@@ -1303,8 +1313,9 @@ export default {
       this.repositoryList.forEach((element) => {
         if (element.id === value) {
           this.tempRepository = element;
-          this.temp.branchName = "";
-          this.temp.branchTagName = "";
+          this.temp = { ...this.temp, branchName: "", branchTagName: "" };
+          // this.temp.branchName = "";
+          // this.temp.branchTagName = "";
           // 刷新分支
           this.loadBranchList();
         }

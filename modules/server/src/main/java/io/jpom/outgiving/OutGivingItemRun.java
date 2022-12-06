@@ -69,6 +69,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
     private final UserModel userModel;
     private final boolean unzip;
     private final boolean clearOld;
+    private Integer sleepTime;
     /**
      * 数据库记录id
      */
@@ -78,7 +79,8 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                             OutGivingNodeProject outGivingNodeProject,
                             File file,
                             UserModel userModel,
-                            boolean unzip) {
+                            boolean unzip,
+                            Integer sleepTime) {
         this.outGivingId = item.getId();
         this.unzip = unzip;
         this.clearOld = item.clearOld();
@@ -91,6 +93,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
         //
         this.userModel = userModel;
         this.logId = IdUtil.fastSimpleUUID();
+        this.sleepTime = sleepTime;
     }
 
     @Override
@@ -106,7 +109,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                 this.outGivingNodeProject.getProjectId(),
                 unzip,
                 afterOpt,
-                this.nodeModel, this.userModel, this.clearOld);
+                this.nodeModel, this.userModel, this.clearOld, this.sleepTime);
             if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                 result = OutGivingNodeProject.Status.Ok;
             } else {
