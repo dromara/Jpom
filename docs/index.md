@@ -87,12 +87,16 @@ notices: # 可选的
 }
 
 .friends-item {
-  width: 150px;
-  height:40px;
+  width: 10em;
+  height:3em;
   flex:1;
-  /*text-align: center;*/
+  text-align: center;
   display: inline-block;
   margin: 5px;
+  border: 2px solid #EBEEF5;
+  box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+  border-radius: 8px;
+  padding: 10px;
 }
 
 .friends-item-img {
@@ -368,26 +372,27 @@ docker run -p 2122:2122 --name jpom jpomdocker/jpom
         <img :src="$withBase('/images/friends/layui-vue.png')" class="no-zoom friends-item-img hover-alt" alt="layui-vue">
     </a>
 </div>
-<div class="friends-item" style="max-width:70px !important;">
+<div class="friends-item" >
     <a href="https://weihongbin.com/" target="_blank">
         <img :src="$withBase('/images/friends/weihongbin.png')" class="no-zoom friends-item-img hover-alt"  alt="weihongbin">
     </a>
 </div>
-<div class="friends-item" style="max-width:70px !important;">
+<div class="friends-item">
     <a href="https://www.wxy97.com/" target="_blank">
         <img :src="$withBase('/images/friends/wxy97.png')" class="no-zoom friends-item-img hover-alt"  alt="王旭阳个人博客">
     </a>
 </div>
-<div class="friends-item" style="max-width:70px !important;">
+<div class="friends-item">
     <a href="https://www.luckyhe.com/" target="_blank">
         <img :src="$withBase('/images/friends/luckyhe.png')" class="no-zoom friends-item-img hover-alt"  alt="牧码人博客">
     </a>
 </div>
-<div class="friends-item" style="max-width:70px !important;">
+<div class="friends-item" >
     <a href="https://www.xiaonuo.vip?from=jpom" target="_blank">
         <img :src="$withBase('/images/friends/xiaonuo.png')" class="no-zoom friends-item-img hover-alt"  alt="国内首个国密前后端分离快速开发平台">
     </a>
 </div>
 
 
+<br/>
 <br/>
