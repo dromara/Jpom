@@ -323,8 +323,8 @@ export default {
         token: [{ required: true, message: "请输入私人令牌", trigger: "blur" }],
       },
       rules: {
-        name: [{ required: true, message: "Please input build name", trigger: "blur" }],
-        gitUrl: [{ required: true, message: "Please input git url", trigger: "blur" }],
+        name: [{ required: true, message: "请填写仓库名称", trigger: "blur" }],
+        gitUrl: [{ required: true, message: "请填写仓库地址", trigger: "blur" }],
       },
     };
   },

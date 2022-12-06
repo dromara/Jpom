@@ -249,24 +249,25 @@ public class ProjectFileControl extends BaseAgentController {
                         }));
                     }
                     return JsonMessage.getString(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
-                }
-                if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
-                    boolean restart = this.restart(pim, null, afterOpt);
+                } else if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
+                    CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
                     if (javaCopyItemList != null) {
+                        int sleepTime = getParameterInt("sleepTime", 30);
                         ThreadUtil.execute(() -> {
                             // 副本
                             for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
                                 if (!this.restart(pim, javaCopyItem, afterOpt)) {
                                     return;
                                 }
-                                // 休眠30秒 等待之前项目正常启动
+                                // 休眠x秒 等待之前项目正常启动
                                 try {
-                                    TimeUnit.SECONDS.sleep(30);
+                                    TimeUnit.SECONDS.sleep(sleepTime);
                                 } catch (InterruptedException ignored) {
                                 }
                             }
                         });
                     }
+                    return JsonMessage.getString(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
                 }
             }
         } finally {
@@ -278,17 +279,15 @@ public class ProjectFileControl extends BaseAgentController {
 
     private boolean restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, AfterOpt afterOpt) {
         try {
-            int pid = AbstractProjectCommander.getInstance().getPid(nodeProjectInfoModel, javaCopyItem);
-            if (pid <= 0) {
-                // 完整重启，不再继续剩余的节点项目
-                return afterOpt != AfterOpt.Order_Must_Restart;
+            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, nodeProjectInfoModel, javaCopyItem);
+            if (result.isSuccess()) {
+                return true;
             }
-            return true;
         } catch (Exception e) {
             log.error("重复失败", e);
-            // 完整重启，不再继续剩余的节点项目
-            return afterOpt != AfterOpt.Order_Must_Restart;
         }
+        // 完整重启，不再继续剩余的节点项目
+        return afterOpt != AfterOpt.Order_Must_Restart;
     }
 
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
