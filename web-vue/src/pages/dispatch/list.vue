@@ -544,11 +544,15 @@
     </a-modal>
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goConsole="goConsole" />
+      <file v-if="drawerFileVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goConsole="goConsole" @goReadFile="goReadFile" />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
       <console v-if="drawerConsoleVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goFile="goFile" />
+    </a-drawer>
+    <!-- 项目阅读文件组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReadFileVisible" @close="onReadFileClose">
+      <file-read v-if="drawerReadFileVisible" :nodeId="temp.nodeId" :readFilePath="temp.readFilePath" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
   </div>
 </template>
@@ -574,12 +578,14 @@ import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeList } from "@/api/node-project";
 import { itemGroupBy, parseTime } from "@/utils/time";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL } from "@/utils/const";
+import FileRead from "@/pages/node/node-layout/project/project-file-read";
 
 export default {
   components: {
     File,
     Console,
     codeEditor,
+    FileRead,
   },
   data() {
     return {
@@ -659,6 +665,7 @@ export default {
       },
       countdownTime: Date.now(),
       refreshInterval: 5,
+      drawerReadFileVisible: false,
     };
   },
   computed: {
@@ -1213,7 +1220,18 @@ export default {
     goFile() {
       // 关闭控制台
       this.onConsoleClose();
+      this.onReadFileClose();
       this.handleFile(this.temp);
+    },
+    // 阅读文件
+    goReadFile(path, filename) {
+      this.onFileClose();
+      this.drawerReadFileVisible = true;
+      this.temp.readFilePath = (path + "/" + filename).replace(new RegExp("//", "gm"), "/");
+      this.drawerTitle = `阅读文件(${filename})`;
+    },
+    onReadFileClose() {
+      this.drawerReadFileVisible = false;
     },
     loadProjectListAll(fn) {
       getProjectListAll().then((res) => {
