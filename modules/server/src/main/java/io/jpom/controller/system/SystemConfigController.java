@@ -59,6 +59,9 @@ import io.jpom.system.init.InitDb;
 import io.jpom.system.init.ProxySelectorConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.PropertySourcesPropertyResolver;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -73,6 +76,9 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * 系统配置
@@ -91,15 +97,18 @@ public class SystemConfigController extends BaseServerController {
     private final InitDb initDb;
     private final NodeService nodeService;
     private final ProxySelectorConfig proxySelectorConfig;
+    private final DbExtConfig dbExtConfig;
 
     public SystemConfigController(SystemParametersServer systemParametersServer,
                                   InitDb initDb,
                                   NodeService nodeService,
-                                  ProxySelectorConfig proxySelectorConfig) {
+                                  ProxySelectorConfig proxySelectorConfig,
+                                  DbExtConfig dbExtConfig) {
         this.systemParametersServer = systemParametersServer;
         this.initDb = initDb;
         this.nodeService = nodeService;
         this.proxySelectorConfig = proxySelectorConfig;
+        this.dbExtConfig = dbExtConfig;
     }
 
     /**
@@ -136,23 +145,37 @@ public class SystemConfigController extends BaseServerController {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemSaveConfig).toString();
         }
         Assert.hasText(content, "内容不能为空");
+        List<PropertySource<?>> propertySources;
         try {
             YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
             // @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格
             ByteArrayResource resource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
-            yamlPropertySourceLoader.load("test", resource);
+            propertySources = yamlPropertySourceLoader.load("test", resource);
         } catch (Exception e) {
             log.warn("内容格式错误，请检查修正", e);
             return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
         }
         boolean restartBool = Convert.toBool(restart, false);
         // 修改数据库密码
-        DbExtConfig oldDbExtConfig = DbExtConfig.parse(ExtConfigBean.getResource().getInputStream());
-        DbExtConfig newDbExtConfig = DbExtConfig.parse(content);
-        if (!StrUtil.equals(oldDbExtConfig.getUserName(), newDbExtConfig.getUserName()) || !StrUtil.equals(oldDbExtConfig.getUserPwd(), newDbExtConfig.getUserPwd())) {
+        MutablePropertySources mutablePropertySources = new MutablePropertySources();
+        propertySources.forEach(mutablePropertySources::addLast);
+        PropertySourcesPropertyResolver propertySourcesPropertyResolver = new PropertySourcesPropertyResolver(mutablePropertySources);
+
+        DbExtConfig dbExtConfig2 = Optional.of(propertySourcesPropertyResolver).map(propertyResolver -> {
+            DbExtConfig dbExtConfig1 = new DbExtConfig();
+            dbExtConfig1.setUserName(propertyResolver.getProperty("db.userName", String.class));
+            dbExtConfig1.setUserPwd(propertyResolver.getProperty("db.userPwd", String.class));
+            return dbExtConfig1;
+        }).orElseThrow(() -> new IllegalArgumentException("db 参数解析异常"));
+
+        String newDbExtConfigUserName = dbExtConfig2.getUserName();
+        String newDbExtConfigUserPwd = dbExtConfig2.getUserPwd();
+        String oldDbExtConfigUserName = dbExtConfig.getUserName();
+        String oldDbExtConfigUserPwd = dbExtConfig.getUserPwd();
+        if (!StrUtil.equals(oldDbExtConfigUserName, newDbExtConfigUserName) || !StrUtil.equals(oldDbExtConfigUserPwd, newDbExtConfigUserPwd)) {
             // 执行修改数据库账号密码
             Assert.state(restartBool, "修改数据库密码必须重启");
-            initDb.alterUser(oldDbExtConfig.getUserName(), newDbExtConfig.getUserName(), newDbExtConfig.getUserPwd());
+            initDb.alterUser(oldDbExtConfigUserName, newDbExtConfigUserName, newDbExtConfigUserPwd);
         }
         Assert.state(!JpomManifest.getInstance().isDebug(), "调试模式下不支持在线修改,请到resources目录下的bin目录修改extConfig.yml");
 

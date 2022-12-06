@@ -102,19 +102,4 @@ public class DbExtConfig {
     public String getUserPwd() {
         return StrUtil.emptyToDefault(this.userPwd, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
     }
-
-
-    public static DbExtConfig parse(String content) {
-        ByteArrayInputStream inputStream = IoUtil.toStream(content, CharsetUtil.CHARSET_UTF_8);
-        return parse(inputStream);
-    }
-
-    public static DbExtConfig parse(InputStream inputStream) {
-        Dict dict = YamlUtil.load(inputStream, Dict.class);
-        Object db = dict.get("db");
-        StringWriter writer = new StringWriter();
-        YamlUtil.dump(db, writer);
-        ByteArrayInputStream byteArrayInputStream = IoUtil.toStream(writer.toString(), CharsetUtil.CHARSET_UTF_8);
-        return YamlUtil.load(byteArrayInputStream, DbExtConfig.class);
-    }
 }
