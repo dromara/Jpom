@@ -18,7 +18,7 @@
           <!-- <a-button size="small" type="primary" @click="loadFileData">刷新目录</a-button> -->
         </div>
 
-        <a-directory-tree :replace-fields="treeReplaceFields" @select="nodeClick" :loadData="onTreeData" :treeData="treeList"></a-directory-tree>
+        <a-directory-tree :replace-fields="treeReplaceFields" @select="nodeClick" :loadData="onTreeData" :treeData="treeList"> </a-directory-tree>
       </a-layout-sider>
       <!-- 表格 -->
       <a-layout-content class="file-content">
@@ -324,13 +324,18 @@ export default {
         this.tempNode = node.dataRef;
         //this.loadFileList();
       } else {
-        this.tempFileNode = node.dataRef;
-        // let cacheData = ;
-        const cacheData = { ...this.temp.cacheData, logFile: this.selectFilePath };
-        this.temp = { ...this.temp, cacheData: cacheData };
-        this.$emit("changeTitle", this.selectFilePath);
-        //
-        this.sendSearchLog();
+        if (node.dataRef.textFileEdit) {
+          this.tempFileNode = node.dataRef;
+          // let cacheData = ;
+          const cacheData = { ...this.temp.cacheData, logFile: this.selectFilePath };
+          this.temp = { ...this.temp, cacheData: cacheData };
+          this.$emit("changeTitle", this.selectFilePath);
+          //
+          this.sendSearchLog();
+        } else {
+          //
+          this.$message.error("当前文件不可读");
+        }
       }
     },
     onTreeData(treeNode) {
@@ -386,6 +391,8 @@ export default {
               const treeData = res.data.map((ele) => {
                 ele.isLeaf = !ele.isDirectory;
                 ele.key = ele.filename + "-" + new Date().getTime();
+                //ele.disabled = ele.textFileEdit;
+
                 return ele;
               });
               data.children = treeData;

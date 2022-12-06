@@ -118,9 +118,19 @@
         <a-tooltip slot="projectName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="outGivingResult" slot-scope="text, item" placement="topLeft" :title="text">
-          <span>{{ text }} {{ item.errorMsg || "" }}</span>
+        <a-tooltip slot="outGivingResultMsg" slot-scope="text, item" placement="topLeft" :title="readJsonStrField(item.outGivingResult, 'msg')">
+          <span>{{ readJsonStrField(item.outGivingResult, "code") }}-{{ readJsonStrField(item.outGivingResult, "msg") || item.outGivingResult }}</span>
         </a-tooltip>
+        <a-tooltip slot="outGivingResultTime" slot-scope="text, item" placement="topLeft" :title="readJsonStrField(item.outGivingResult, 'upload_duration')">
+          <span>{{ readJsonStrField(item.outGivingResult, "upload_duration") }}</span>
+        </a-tooltip>
+        <a-tooltip slot="outGivingResultSize" slot-scope="text, item" placement="topLeft" :title="readJsonStrField(item.outGivingResult, 'upload_file_size')">
+          {{ readJsonStrField(item.outGivingResult, "upload_file_size") }}
+        </a-tooltip>
+        <a-tooltip slot="outGivingResultMsgData" slot-scope="text, item" placement="topLeft" :title="`${readJsonStrField(item.outGivingResult, 'data')}`">
+          {{ readJsonStrField(item.outGivingResult, "data") }}
+        </a-tooltip>
+
         <template slot="projectStatus" slot-scope="text, item">
           <a-tooltip v-if="item.errorMsg" :title="item.errorMsg">
             <span>{{ item.errorMsg }}</span>
@@ -628,8 +638,12 @@ export default {
         { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         { title: "项目名称", dataIndex: "projectName", ellipsis: true, scopedSlots: { customRender: "projectName" } },
         { title: "项目状态", dataIndex: "projectStatus", width: 120, ellipsis: true, scopedSlots: { customRender: "projectStatus" } },
-        { title: "分发状态", dataIndex: "outGivingStatus", width: 120 },
-        { title: "分发结果", dataIndex: "outGivingResult", ellipsis: true, scopedSlots: { customRender: "outGivingResult" } },
+        { title: "项目进程", dataIndex: "projectPid", width: "120px", ellipsis: true, scopedSlots: { customRender: "projectPid" } },
+        { title: "分发状态", dataIndex: "outGivingStatus", width: "120px" },
+        { title: "分发结果", dataIndex: "outGivingResultMsg", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsg" } },
+        { title: "分发状态消息", dataIndex: "outGivingResultMsgData", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsgData" } },
+        { title: "分发耗时", dataIndex: "outGivingResultTime", width: "120px", scopedSlots: { customRender: "outGivingResultTime" } },
+        { title: "文件大小", dataIndex: "outGivingResultSize", width: "100px", scopedSlots: { customRender: "outGivingResultSize" } },
         { title: "最后分发时间", dataIndex: "lastTime", width: 180, ellipsis: true, scopedSlots: { customRender: "lastTime" } },
         { title: "操作", dataIndex: "child-operation", scopedSlots: { customRender: "child-operation" }, width: 120, align: "center" },
       ],
@@ -1263,6 +1277,17 @@ export default {
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
+    },
+    readJsonStrField(json, key) {
+      try {
+        const data = JSON.parse(json)[key];
+        if (Object.prototype.toString.call(data) === "[object Object]") {
+          return JSON.stringify(data);
+        }
+        return data;
+      } catch (e) {
+        //
+      }
     },
   },
 };

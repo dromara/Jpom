@@ -64,6 +64,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -131,11 +132,11 @@ public class OutGivingProjectController extends BaseServerController {
                 jsonObject.put("errorMsg", "节点未启用");
             }
             JSONObject data = projectStatus.getJSONObject("data");
-            if (data != null && data.getInteger("pId") != null) {
-                jsonObject.put("projectStatus", data.getIntValue("pId") > 0);
-            } else {
-                jsonObject.put("projectStatus", false);
-            }
+            Integer pId = Optional.ofNullable(data).map(jsonObject1 -> jsonObject1.getInteger("pId")).orElse(null);
+
+            jsonObject.put("projectStatus", pId != null && pId > 0);
+            jsonObject.put("projectPid", pId);
+
             // BaseEnum.getDescByCode(Status.class, getStatus())
             jsonObject.put("outGivingStatus", BaseEnum.getDescByCode(OutGivingNodeProject.Status.class, outGivingNodeProject.getStatus()));
             jsonObject.put("outGivingResult", outGivingNodeProject.getResult());
