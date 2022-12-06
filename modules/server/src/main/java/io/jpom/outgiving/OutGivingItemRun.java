@@ -122,8 +122,10 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
         } catch (Exception e) {
             log.error("{} {} 分发异常保存", this.outGivingNodeProject.getNodeId(), this.outGivingNodeProject.getProjectId(), e);
             result = OutGivingNodeProject.Status.Fail;
-            this.updateStatus(this.outGivingId, this.outGivingNodeProject, result, StrUtil.format("error: {} upload_duration: {} upload_file_size: {}",
-                e.getMessage(), new BetweenFormatter(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND, 2).format(), fileSize));
+            JSONObject jsonObject = JsonMessage.toJson(500, e.getMessage());
+            jsonObject.put("upload_duration", new BetweenFormatter(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND, 2).format());
+            jsonObject.put("upload_file_size", fileSize);
+            this.updateStatus(this.outGivingId, this.outGivingNodeProject, result, jsonObject.toString());
         }
         return result;
     }
