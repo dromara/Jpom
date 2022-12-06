@@ -14,3 +14,4 @@
 11. 发布文档：`sh deploy-docs-pages.sh`
 12. 测试远程更新是否正常
 13. 发布服务端 docker 镜像包 `docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.x.x -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .`
+14. 添加 gitee、github 发行版
