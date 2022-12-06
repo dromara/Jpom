@@ -1,30 +1,36 @@
 {
-    "name": "jpom-doc",
-    "version": "2.9.20",
-    "scripts": {
-        "start": "vuepress dev docs",
-        "build": "vuepress build docs",
-        "deploy": "bash deploy.sh",
-        "updateTheme": "yarn remove vuepress-theme-vdoing && rm -rf node_modules && yarn && yarn add vuepress-theme-vdoing -D",
-        "editFm": "node utils/editFrontmatter.js",
-        "baiduPush": "node utils/baiduPush.js https://jpom.top && bash baiduPush.sh"
-    },
-    "license": "MIT",
-    "devDependencies": {
-        "@vuepress/plugin-nprogress": "^1.9.7",
-        "dayjs": "^1.9.7",
-        "inquirer": "^7.1.0",
-        "json2yaml": "^1.1.0",
-        "vuepress": "1.9.5",
-        "vuepress-plugin-baidu-autopush": "^1.0.1",
-        "vuepress-plugin-baidu-tongji": "^1.0.1",
-        "vuepress-plugin-demo-block": "^0.7.2",
-        "vuepress-plugin-fulltext-search": "^2.2.1",
-        "vuepress-plugin-one-click-copy": "^1.0.2",
-        "vuepress-plugin-sitemap": "^2.3.1",
-        "vuepress-plugin-thirdparty-search": "^1.0.2",
-        "vuepress-plugin-zooming": "^1.1.7",
-        "vuepress-theme-vdoing": "^1.12.7",
-        "yamljs": "^0.3.0"
-    }
+  "name": "jpom-doc",
+  "version": "2.9.20",
+  "scripts": {
+    "start": "vuepress dev docs",
+    "build": "vuepress build docs",
+    "deploy": "bash deploy.sh",
+    "updateTheme": "yarn remove vuepress-theme-vdoing && rm -rf node_modules && yarn && yarn add vuepress-theme-vdoing -D",
+    "editFm": "node utils/editFrontmatter.js",
+    "baiduPush": "node utils/baiduPush.js https://jpom.top && bash baiduPush.sh",
+    "postinstall": "patch-package"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@vuepress/plugin-nprogress": "^1.9.7",
+    "dayjs": "^1.9.7",
+    "inquirer": "^7.1.0",
+    "json2yaml": "^1.1.0",
+    "patch-package": "^6.5.0",
+    "vuepress": "1.9.5",
+    "vuepress-plugin-baidu-autopush": "^1.0.1",
+    "vuepress-plugin-baidu-tongji": "^1.0.1",
+    "vuepress-plugin-demo-block": "^0.7.2",
+    "vuepress-plugin-fulltext-search": "^2.2.1",
+    "vuepress-plugin-one-click-copy": "^1.0.2",
+    "vuepress-plugin-sitemap": "^2.3.1",
+    "vuepress-plugin-thirdparty-search": "^1.0.2",
+    "vuepress-plugin-zooming": "^1.1.7",
+    "vuepress-theme-vdoing": "^1.12.7",
+    "yamljs": "^0.3.0"
+  },
+  "dependencies": {
+    "core-js": "2.x",
+    "element-ui": "^2.15.9"
+  }
 }

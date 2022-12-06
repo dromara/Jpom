@@ -3,8 +3,12 @@ home: true
 heroImage: /images/jpom_logo.png
 heroText: 
 tagline: 🚀简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
-actionText: 开始使用 →
-actionLink: /pages/install/
+actions:
+  - actionText: 🛠️一键安装
+    actionLink: /pages/15b7a2/
+  - actionText: 🧩容器安装
+    actionLink: /pages/c846d3/
+    actionClass: action-button-diy 
 bannerBg: none # auto => 网格纹背景(有bodyBgImg时无背景)，默认 | none => 无 | '大图地址' | background: 自定义背景样式       提示：如发现文本颜色不适应你的背景时可以到palette.styl修改$bannerTextColor变量
 
 features: # 可选的
@@ -36,7 +40,13 @@ features: # 可选的
 
 # 文章列表显示方式: detailed 默认，显示详细版文章列表（包括作者、分类、标签、摘要、分页等）| simple => 显示简约版文章列表（仅标题和日期）| none 不显示文章列表
 postList: none
+notices: # 可选的
+  - id: jpom-2.9.20
+    title: 📢 Jpom v2.9.20 发布！
+    content: '<div><p>2022-12-06</p><ul><li>脚本触发器传入参数添加为执行环境变量</li><li>修复上传文件并重启不能正常重启</li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
+    isHtmlContent: true
 ---
+
 
 <br/>
 
@@ -44,6 +54,22 @@ postList: none
   <a class="become-sponsor" href="/pages/practice/">实践案例</a>
   <a class="become-sponsor" href="/pages/praise/">支持这个项目</a>
 </p>
+
+<style lang="stylus">
+.action-button-diy
+	margin-left 0.5rem
+	display inline-block
+	font-size 1.2rem
+	background-color $accentColor
+	padding 0.8rem 1.6rem
+	border-radius 4px
+	transition background-color 0.1s ease
+	box-sizing border-box
+	border-bottom 1px solid darken($accentColor, 10%)
+	color #fff
+	&:hover
+		background-color lighten($accentColor, 10%)
+</style>
 
 <style>
 .become-sponsor{
