@@ -336,7 +336,7 @@ docker run -p 2122:2122 --name jpom jpomdocker/jpom
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/dynamic-tp.png')" alt="🔥🔥🔥 基于配置中心的轻量级动态可监控线程池">
 </a>
 <a class="friends-item" href="https://hertzbeat.com/" target="_blank">
-	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/hertzbeat_brand.jpg')" alt="易用友好的云监控系统">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/hertzbeat-logo.png')" alt="易用友好的云监控系统">
 </a>
 <a class="friends-item" href="https://maxkey.top/" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/maxkey3.png')" alt="业界领先的身份管理和认证产品">
@@ -351,10 +351,10 @@ docker run -p 2122:2122 --name jpom jpomdocker/jpom
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/xeasypdf-logo.png')" alt="一个用搭积木的方式构建pdf的框架（基于pdfbox）">
 </a>
 <a class="friends-item" href="http://dromara.gitee.io/image-combiner" target="_blank">
-	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/image-combiner.png')" alt="一个专门用于图片合成的工具，没有很复杂的功能，简单实用，却不失强大">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/imagecombiner-logo.png')" alt="一个专门用于图片合成的工具，没有很复杂的功能，简单实用，却不失强大">
 </a>
 <a class="friends-item" href="https://www.herodotus.cn/" target="_blank">
-	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/dante-cloud2.png')" alt="Dante-Cloud 是一款企业级微服务架构和服务能力开发平台。">
+	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/dantecloud-logo.png')" alt="Dante-Cloud 是一款企业级微服务架构和服务能力开发平台。">
 </a>
 <a class="friends-item" href="https://gitee.com/dromara/go-view" target="_blank">
 	<img class="no-zoom friends-item-img hover-alt" :src="$withBase('/images/friends/link/goview-logo.png')" alt="让每一位开源爱好者，体会到开源的快乐。">
