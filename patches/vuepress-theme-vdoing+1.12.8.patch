@@ -22,7 +22,7 @@ index 7eececa..e920d99 100644
 +              :item="{text: action.actionText, link: action.actionLink}" />
            </p>
          </header>
-
+ 
          <!-- PC端features块 s -->
 -        <div class="features" v-if="hasFeatures && !isMQMobile">
 +        <div class="features" v-if="hasFeatures" v-show="!isMQMobile">
@@ -43,7 +43,7 @@ index 7eececa..e920d99 100644
      return {
 -      isMQMobile: false,
 +      isMQMobile: true,
-
+ 
        slide: null,
        currentPageIndex: 0,
 @@ -191,8 +193,30 @@ export default {
@@ -73,6 +73,7 @@ index 7eececa..e920d99 100644
 +      }
 +    },
      homeData() {
++      console.log('this.$page.frontmatter', this.$page.frontmatter)
        return {
          ...this.$page.frontmatter
        }
@@ -90,7 +91,7 @@ index 7eececa..e920d99 100644
 @@ -230,12 +258,6 @@ export default {
          return `background: url(${this.$withBase(bannerBg)}) center center / cover no-repeat`
        }
-
+ 
 -    },
 -    actionLink() {
 -      return {
@@ -148,7 +149,7 @@ index 93feac7..429934b 100644
 +      }
 +      return isExternal(this.link) ? '_blank' : ''
 +    },
-+
++    
 +    rel () {
 +      if (this.isNonHttpURI) {
 +        return null
@@ -162,17 +163,17 @@ index 93feac7..429934b 100644
 +      return this.isBlankTarget ? 'noopener noreferrer' : null
      }
    },
-
+ 
 diff --git a/node_modules/vuepress-theme-vdoing/layouts/Layout.vue b/node_modules/vuepress-theme-vdoing/layouts/Layout.vue
 index 62dda70..596eedd 100644
 --- a/node_modules/vuepress-theme-vdoing/layouts/Layout.vue
 +++ b/node_modules/vuepress-theme-vdoing/layouts/Layout.vue
 @@ -36,7 +36,7 @@
      </Sidebar>
-
+ 
      <!-- 首页 -->
 -    <Home v-if="$page.frontmatter.home" />
 +    <Home v-if="$page.frontmatter.home" :themeMode="themeMode" />
-
+ 
      <!-- 分类页 -->
      <CategoriesPage v-else-if="$page.frontmatter.categoriesPage" />
