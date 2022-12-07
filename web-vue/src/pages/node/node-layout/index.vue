@@ -25,7 +25,7 @@
     <a-layout-content :class="`layout-content jpom-node-content ${this.fullScreenFlag ? 'layout-content-scroll' : 'layout-content-full-screen'}`">
       <welcome v-if="currentId === 'welcome'" :node="node" />
       <project-list v-if="currentId === 'manageList'" :node="node" />
-      <jdk-list v-if="currentId === 'jdkList'" :node="node" />
+
       <recover v-if="currentId === 'projectRecover'" :node="node" />
       <tomcat v-if="currentId === 'tomcatManage'" :node="node" />
       <script-template v-if="currentId === 'script'" :node="node" />
@@ -41,10 +41,10 @@
   </a-layout>
 </template>
 <script>
-import {getNodeMenu} from "@/api/menu";
+import { getNodeMenu } from "@/api/menu";
 import Welcome from "@/pages/node/node-layout/welcome";
 import ProjectList from "@/pages/node/node-layout/project/project-list";
-import JdkList from "@/pages/node/node-layout/project/jdk-list";
+
 import Recover from "@/pages/node/node-layout/project/recover-list";
 import Tomcat from "@/pages/node/node-layout/other/tomcat-list";
 import ScriptTemplate from "@/pages/node/node-layout/other/script-list";
@@ -56,13 +56,12 @@ import Cache from "@/pages/node/node-layout/system/cache";
 import Log from "@/pages/node/node-layout/system/log.vue";
 import Upgrade from "@/pages/node/node-layout/system/upgrade.vue";
 import ConfigFile from "@/pages/node/node-layout/system/config-file.vue";
-import {mapGetters} from "vuex";
+import { mapGetters } from "vuex";
 
 export default {
   components: {
     Welcome,
     ProjectList,
-    JdkList,
     Recover,
     Tomcat,
     ScriptTemplate,
