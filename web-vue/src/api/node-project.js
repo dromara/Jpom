@@ -4,48 +4,6 @@
 import axios from "./config";
 
 /**
- * jdk 列表
- * @param {String} nodeId 节点 ID
- */
-export function getJdkList(nodeId) {
-  return axios({
-    url: "/node/manage/jdk/list",
-    method: "post",
-    data: { nodeId },
-  });
-}
-
-/**
- * jdk 编辑
- * @param {nodeId, id, name, path} params
- * params.nodeId 节点 ID
- * params.id 编辑修改时判断 ID
- * params.name 名称
- * params.path jdk 路径
- */
-export function editJdk(params) {
-  return axios({
-    url: "/node/manage/jdk/update",
-    method: "post",
-    data: params,
-  });
-}
-
-/**
- * 删除 JDK
- * @param {nodeId, id} params
- * params.nodeId 节点 ID
- * params.id 编辑修改时判断 ID
- */
-export function deleteJdk(params) {
-  return axios({
-    url: "/node/manage/jdk/delete",
-    method: "post",
-    data: params,
-  });
-}
-
-/**
  * 项目列表
  * @param {JSON} params {
  *  nodeId: 节点 ID
@@ -133,7 +91,6 @@ export function getProjectAccessList(nodeId) {
  *  whitelistDirectory: 项目白名单路径
  *  lib: 项目文件夹
  *  group: 分组名称
- *  jdkId: JDK
  *  ...
  * }
  * @param {JSON} replicaParams {
@@ -148,7 +105,6 @@ export function editProject(params, replicaParams) {
     id: params.id,
     name: params.name,
     group: params.group,
-    jdkId: params.jdkId,
     runMode: params.runMode,
     whitelistDirectory: params.whitelistDirectory,
     lib: params.lib,

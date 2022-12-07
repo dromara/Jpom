@@ -253,18 +253,6 @@
           </a-select>
         </a-form-model-item>
 
-        <a-form-model-item prop="jdkId" v-show="javaModes.includes(temp.runMode)" class="jpom-node-project-jdk">
-          <template slot="label">
-            JDK
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title"> JDK 需要在侧边栏菜单里手动添加，并非直接读取节点服务器里面的 JDK。 </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
-            <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
-          </a-select>
-        </a-form-model-item>
         <a-form-model-item label="Main Class" prop="mainClass" v-show="javaModes.includes(temp.runMode) && temp.runMode !== 'Jar'">
           <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
         </a-form-model-item>
@@ -408,7 +396,6 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_
 import {
   deleteProject,
   editProject,
-  getJdkList,
   getProjectAccessList,
   getProjectData,
   getProjectList,
@@ -442,7 +429,7 @@ export default {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       accessList: [],
-      jdkList: [],
+
       runModeList: runModeList,
       javaModes: javaModes,
       noFileModes: noFileModes,
@@ -548,14 +535,7 @@ export default {
         }
       });
     },
-    // 加载 JDK 列表
-    loadJdkList() {
-      getJdkList(this.node.id).then((res) => {
-        if (res.code === 200) {
-          this.jdkList = res.data;
-        }
-      });
-    },
+
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;
@@ -629,7 +609,7 @@ export default {
         javaCopyItemList: [],
       };
       this.loadAccesList();
-      this.loadJdkList();
+
       this.editProjectVisible = true;
       this.$nextTick(() => {
         setTimeout(() => {
@@ -644,7 +624,7 @@ export default {
         nodeId: this.node.id,
       };
       this.loadAccesList();
-      this.loadJdkList();
+
       getProjectData(params).then((res) => {
         if (res.code === 200) {
           this.temp = {
