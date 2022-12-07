@@ -41,7 +41,7 @@ $(function () {
   }, 20);
 
   // 检查域名
-  const localHosts = ['localhost', '127.0.0.1', 'jpom.top'];
+  const localHosts = ['localhost', '127.0.0.1', 'jpom.top', 'webcache.googleusercontent.com'];
 
   function checkDomain() {
     if (localHosts.includes(location.hostname)) {
