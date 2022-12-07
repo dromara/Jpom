@@ -8,6 +8,9 @@ export default {
   data() {
     return {
       notifyPromise: Promise.resolve(),
+      //使用messageId作为弹窗的key，用来获取弹窗的实例，以对对应弹窗进行操作
+      notifications: {},
+      destroying: true
     };
   },
   props: {
@@ -28,24 +31,39 @@ export default {
     },
   },
   mounted() {
+    this.destroying = false;
     this.data
       .filter(item => item.id != null && !this.isIgnoreNotice(item.id))
-      .filter(item => !(window["isShowed" + item.id] || false))
+      .filter(item => !(window["isShowedNotify_" + item.id] || false))
       .forEach((element) => {
         this.notifyPromise = this.notifyPromise.then(() => {
-          Notification({
+          const notify = Notification({
             title: element.title,
             message: element.content,
+            position: element.position || 'top-right',
             dangerouslyUseHTMLString: element.isHtmlContent || false,
             duration: 0,
             offset: this.initTop,
             onClose: () => {
+              if (this.destroying) {
+                return
+              }
               this.isShowAgain(element.id);
             },
           });
-          window["isShowed" + element.id] = true;
+          window["isShowedNotify_" + element.id] = true;
+          //将messageId和通知实例放入字典中
+          this.notifications[element.id] = notify;
         });
       });
+  },
+  beforeDestroy() {
+    this.destroying = true;
+    for (let key in this.notifications) {
+      this.notifications[key].close();
+      delete this.notifications[key];
+      delete window["isShowedNotify_" + key];
+    }
   },
   methods: {
     saveIgnoreNotice(id) {
