@@ -25,14 +25,14 @@ package io.jpom.common.interceptor;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.interceptor.BaseInterceptor;
-import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.system.ServerExtConfigBean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,42 +40,46 @@ import javax.servlet.http.HttpServletResponse;
  * @author bwcx_jzy
  * @since 2019/9/4
  */
-@InterceptorPattens(value = "/api/**")
-public class OpenApiInterceptor extends BaseInterceptor {
+//@InterceptorPattens(value = "/api/**")
+@Configuration
+public class OpenApiInterceptor implements HandlerMethodInterceptor {
 
-	@Override
-	protected boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+    @Resource
+    private ServerExtConfigBean serverExtConfigBean;
 
-		NotLogin methodAnnotation = handlerMethod.getMethodAnnotation(NotLogin.class);
-		if (methodAnnotation == null) {
-			if (handlerMethod.getBeanType().isAnnotationPresent(NotLogin.class)) {
-				return true;
-			}
-		} else {
-			return true;
-		}
-		String checkOpenApi = this.checkOpenApi(request);
-		if (checkOpenApi == null) {
-			return true;
-		}
-		ServletUtil.write(response, checkOpenApi, MediaType.APPLICATION_JSON_VALUE);
-		return false;
-	}
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
-	private String checkOpenApi(HttpServletRequest request) {
-		String header = request.getHeader(ServerOpenApi.HEAD);
-		if (StrUtil.isEmpty(header)) {
-			return JsonMessage.getString(300, "token empty");
-		}
-		String authorizeToken = ServerExtConfigBean.getInstance().getAuthorizeToken();
-		if (StrUtil.isEmpty(authorizeToken)) {
-			return JsonMessage.getString(300, "not config token");
-		}
-		String md5 = SecureUtil.md5(authorizeToken);
-		md5 = SecureUtil.sha1(md5 + ServerOpenApi.HEAD);
-		if (!StrUtil.equals(header, md5)) {
-			return JsonMessage.getString(300, "not config token");
-		}
-		return null;
-	}
+        NotLogin methodAnnotation = handlerMethod.getMethodAnnotation(NotLogin.class);
+        if (methodAnnotation == null) {
+            if (handlerMethod.getBeanType().isAnnotationPresent(NotLogin.class)) {
+                return true;
+            }
+        } else {
+            return true;
+        }
+        String checkOpenApi = this.checkOpenApi(request);
+        if (checkOpenApi == null) {
+            return true;
+        }
+        ServletUtil.write(response, checkOpenApi, MediaType.APPLICATION_JSON_VALUE);
+        return false;
+    }
+
+    private String checkOpenApi(HttpServletRequest request) {
+        String header = request.getHeader(ServerOpenApi.HEAD);
+        if (StrUtil.isEmpty(header)) {
+            return JsonMessage.getString(300, "token empty");
+        }
+        String authorizeToken = serverExtConfigBean.getAuthorizeToken();
+        if (StrUtil.isEmpty(authorizeToken)) {
+            return JsonMessage.getString(300, "not config token");
+        }
+        String md5 = SecureUtil.md5(authorizeToken);
+        md5 = SecureUtil.sha1(md5 + ServerOpenApi.HEAD);
+        if (!StrUtil.equals(header, md5)) {
+            return JsonMessage.getString(300, "not config token");
+        }
+        return null;
+    }
 }

@@ -25,14 +25,10 @@ package io.jpom.controller.node.script;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.JsonMessage;
-import io.jpom.common.ServerOpenApi;
-import io.jpom.common.UrlRedirectUtil;
+import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.node.ScriptCacheModel;
@@ -208,7 +204,7 @@ public class NodeScriptController extends BaseServerController {
     }
 
     private Map<String, String> getBuildToken(ScriptCacheModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());

@@ -27,9 +27,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HtmlUtil;
-import cn.jiangzeyin.common.request.XssFilter;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.model.RunMode;
 import io.jpom.service.WhitelistDirectoryService;
@@ -142,18 +141,14 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 
     public String getJvm() {
         String s = StrUtil.emptyToDefault(jvm, StrUtil.EMPTY);
-        if (XssFilter.isXSS()) {
-            s = HtmlUtil.unescape(s);
-        }
-        return s;
+
+        return HtmlUtil.unescape(s);
+
     }
 
     public void setJvm(String jvm) {
-        if (XssFilter.isXSS()) {
-            this.jvm = HtmlUtil.unescape(jvm);
-        } else {
-            this.jvm = jvm;
-        }
+
+        this.jvm = HtmlUtil.unescape(jvm);
     }
 
     public Boolean getAutoStart() {
@@ -357,18 +352,16 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 
     public String getArgs() {
         String s = StrUtil.emptyToDefault(args, StrUtil.EMPTY);
-        if (XssFilter.isXSS()) {
-            s = HtmlUtil.unescape(s);
-        }
+
+        s = HtmlUtil.unescape(s);
+
         return s;
     }
 
     public void setArgs(String args) {
-        if (XssFilter.isXSS()) {
-            this.args = HtmlUtil.unescape(args);
-        } else {
-            this.args = args;
-        }
+
+        this.args = HtmlUtil.unescape(args);
+
     }
 
 
@@ -514,33 +507,27 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         }
 
         public String getJvm() {
-            if (XssFilter.isXSS()) {
-                return HtmlUtil.unescape(jvm);
-            }
-            return jvm;
+
+            return HtmlUtil.unescape(jvm);
+
         }
 
         public void setJvm(String jvm) {
-            if (XssFilter.isXSS()) {
-                this.jvm = HtmlUtil.unescape(jvm);
-            } else {
-                this.jvm = jvm;
-            }
+
+            this.jvm = HtmlUtil.unescape(jvm);
+
         }
 
         public String getArgs() {
-            if (XssFilter.isXSS()) {
-                return HtmlUtil.unescape(args);
-            }
-            return args;
+
+            return HtmlUtil.unescape(args);
+
         }
 
         public void setArgs(String args) {
-            if (XssFilter.isXSS()) {
-                this.args = HtmlUtil.unescape(args);
-            } else {
-                this.args = args;
-            }
+
+            this.args = HtmlUtil.unescape(args);
+
         }
 
 

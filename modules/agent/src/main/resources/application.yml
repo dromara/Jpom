@@ -59,6 +59,13 @@ system:
 
 server:
   port: 2123
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+      forceRequest: true
+      forceResponse: true
 spring:
   application:
     name: jpomAgent
@@ -71,12 +78,11 @@ spring:
       # 上传文件大小限制 12KB -- parses as 12 kilobytes 5MB  -- parses as 5 megabytes 20  -- parses as 20 kilobytes
       max-request-size: 2GB
       max-file-size: 1GB
-banner:
-  msg: classpath:/jpom-logo.txt
-# 启动完成自动初始化指定包
-preload:
-  packageName: io.jpom.system.init
-# 强制去掉空格
-request:
-  trimAll: true
-  urlDecode: true
+
+## 启动完成自动初始化指定包
+#preload:
+#  packageName: io.jpom.system.init
+## 强制去掉空格
+#request:
+#  trimAll: true
+#  urlDecode: true

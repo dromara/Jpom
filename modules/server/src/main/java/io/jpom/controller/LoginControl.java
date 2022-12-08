@@ -33,15 +33,15 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.jwt.JWT;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
+import io.jpom.common.validator.ValidatorConfig;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.model.user.UserModel;
@@ -161,7 +161,7 @@ public class LoginControl extends BaseServerController {
     @PostMapping(value = "userLogin", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
     @Feature(method = MethodFeature.EXECUTE, resultCode = {200, 201}, logResponse = false)
-    public String userLogin(
+    public JsonMessage<Object> userLogin(
         @ValidatorConfig(value = {
             @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
         }) String userName,
@@ -170,13 +170,13 @@ public class LoginControl extends BaseServerController {
         }) String userPwd,
         String code) {
         if (this.ipLock()) {
-            return JsonMessage.getString(400, "尝试次数太多，请稍后再来");
+            return new JsonMessage<>(400, "尝试次数太多，请稍后再来");
         }
         synchronized (userName.intern()) {
             UserModel userModel = userService.getByKey(userName);
             if (userModel == null) {
                 this.ipError();
-                return JsonMessage.getString(400, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
+                return new JsonMessage<>(400, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
             }
             if (!ServerExtConfigBean.getInstance().getDisabledCaptcha()) {
                 // 获取验证码
@@ -191,7 +191,7 @@ public class LoginControl extends BaseServerController {
                     String msg = DateUtil.formatBetween(lockTime * 1000, BetweenFormatter.Level.SECOND);
                     updateModel = userModel.errorLock();
                     this.ipError();
-                    return JsonMessage.getString(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
+                    return new JsonMessage<>(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
                 }
                 // 验证
                 if (userService.simpleLogin(userName, userPwd) != null) {
@@ -205,14 +205,14 @@ public class LoginControl extends BaseServerController {
                         String uuid = IdUtil.fastSimpleUUID();
                         MFA_TOKEN.put(uuid, userName);
                         jsonObject.put("tempToken", uuid);
-                        return JsonMessage.getString(201, "请输入两步验证码", jsonObject);
+                        return new JsonMessage<>(201, "请输入两步验证码", jsonObject);
                     }
                     UserLoginDto userLoginDto = this.createToken(userModel);
-                    return JsonMessage.getString(200, "登录成功", userLoginDto);
+                    return new JsonMessage<>(200, "登录成功", userLoginDto);
                 } else {
                     updateModel = userModel.errorLock();
                     this.ipError();
-                    return JsonMessage.getString(501, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
+                    return new JsonMessage<>(501, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
                 }
             } finally {
                 if (updateModel != null) {

@@ -28,8 +28,8 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
 import lombok.Getter;
@@ -58,11 +58,7 @@ public class ExtConfigBean {
     public static final String FILE_NAME = "extConfig.yml";
 
     private static Resource resource;
-    /**
-     * 请求日志
-     */
-    @Value("${consoleLog.reqXss:true}")
-    private boolean consoleLogReqXss;
+
 
 
     /**
@@ -117,9 +113,7 @@ public class ExtConfigBean {
         return logFileCharset;
     }
 
-    public boolean isConsoleLogReqXss() {
-        return consoleLogReqXss;
-    }
+
 
     private static ExtConfigBean extConfigBean;
 

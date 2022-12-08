@@ -23,7 +23,7 @@
 package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.user.UserModel;

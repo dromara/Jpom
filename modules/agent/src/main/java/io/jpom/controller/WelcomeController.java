@@ -26,8 +26,8 @@ import cn.hutool.cache.impl.CacheObj;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.controller.base.AbstractController;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.BaseAgentController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.commander.AbstractSystemCommander;
@@ -51,7 +51,7 @@ import java.util.List;
  * @since 2019/4/16
  */
 @RestController
-public class WelcomeController extends AbstractController {
+public class WelcomeController extends BaseAgentController {
 
     @PostMapping(value = "getDirectTop", produces = MediaType.APPLICATION_JSON_VALUE)
     public String getDirectTop() {

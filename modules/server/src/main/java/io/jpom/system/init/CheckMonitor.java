@@ -23,10 +23,8 @@
 package io.jpom.system.init;
 
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.PreLoadClass;
-import cn.jiangzeyin.common.PreLoadMethod;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.JsonMessage;
@@ -43,6 +41,8 @@ import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.system.ConfigBean;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Collection;
 import java.util.List;
@@ -54,12 +54,13 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2019/7/14
  */
-@PreLoadClass(value = Integer.MAX_VALUE)
+//@PreLoadClass(value = Integer.MAX_VALUE)
+@Configuration
 @Slf4j
-public class CheckMonitor {
+public class CheckMonitor implements InitializingBean {
 
-    @PreLoadMethod
-    private static void init() {
+    //    @PreLoadMethod
+    private void init() {
         // 缓存检测调度
         CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
             BuildUtil.reloadCacheSize();
@@ -91,11 +92,11 @@ public class CheckMonitor {
                 if (nodeModel == null) {
                     continue;
                 }
-                ThreadUtil.execute(() -> CheckMonitor.pullScriptLogItem(nodeModel));
+                ThreadUtil.execute(() -> this.pullScriptLogItem(nodeModel));
             }
         });
         // 异步加载
-        CheckMonitor.asyncLoad();
+        this.asyncLoad();
     }
 
     /**
@@ -103,7 +104,7 @@ public class CheckMonitor {
      *
      * @param nodeModel 节点
      */
-    private static void pullScriptLogItem(NodeModel nodeModel) {
+    private void pullScriptLogItem(NodeModel nodeModel) {
         try {
             NodeScriptExecuteLogServer nodeScriptExecuteLogServer = SpringUtil.getBean(NodeScriptExecuteLogServer.class);
             Collection<String> strings = nodeScriptExecuteLogServer.syncExecuteNodeInc(nodeModel);
@@ -124,7 +125,7 @@ public class CheckMonitor {
     /**
      * 异步初始化
      */
-    private static void asyncLoad() {
+    private void asyncLoad() {
         ThreadUtil.execute(() -> {
             BuildUtil.reloadCacheSize();
             ConfigBean.getInstance().dataSize();
@@ -142,5 +143,10 @@ public class CheckMonitor {
             // 清空脚本缓存
             BaseRunScript.clearRunScript();
         });
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.init();
     }
 }

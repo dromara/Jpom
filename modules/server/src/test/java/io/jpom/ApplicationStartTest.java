@@ -22,7 +22,7 @@
  */
 package io.jpom;
 
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.extconf.DbExtConfig;

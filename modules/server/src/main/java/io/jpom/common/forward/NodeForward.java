@@ -52,6 +52,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -170,19 +171,22 @@ public class NodeForward {
         }
         //
         addUser(httpRequest, nodeModel, nodeUrl, userModel);
-        Map params = null;
+
         if (request != null) {
-            params = request.getParameterMap();
-            for (Map.Entry<String, String[]> entry : (Iterable<Map.Entry<String, String[]>>) params.entrySet()) {
+            Map<String, String[]> params = request.getParameterMap();
+            Map params2 = new HashMap<>(params.size());
+            for (Map.Entry<String, String[]> entry : params.entrySet()) {
                 String[] values = entry.getValue();
                 if (values != null) {
                     for (int i = 0, len = values.length; i < len; i++) {
                         // 参数 URL 编码，避免 特殊符号 不生效
                         values[i] = URLUtil.encodeAll(values[i]);
                     }
-                    entry.setValue(values);
+//                    entry.setValue(values);
                 }
+                params2.put(entry.getKey(), values);
             }
+            httpRequest.form(params2);
         }
         httpRequest.form(pName, pVal, val);
         //
@@ -205,7 +209,7 @@ public class NodeForward {
                 httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
             }
         }
-        httpRequest.form(params);
+
         try (HttpResponse response = httpRequest.execute()) {
             //
             return parseBody(httpRequest, response, nodeModel);
@@ -480,7 +484,7 @@ public class NodeForward {
         int status = response.getStatus();
         String body = response.body();
         if (log.isDebugEnabled()) {
-            log.debug("{} -> {} {} {} {}", nodeModel.getName(), httpRequest.getUrl(), httpRequest.getMethod(), httpRequest.form(), body);
+            log.debug("{} -> {} {} {} {}", nodeModel.getName(), httpRequest.getUrl(), httpRequest.getMethod(), Optional.ofNullable((Object) httpRequest.form()).orElse("-"), body);
         }
         if (status != HttpStatus.HTTP_OK) {
             log.warn("{} 响应异常 状态码错误：{} {}", nodeModel.getName(), status, body);

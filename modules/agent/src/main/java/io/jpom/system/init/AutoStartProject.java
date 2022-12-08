@@ -24,13 +24,13 @@ package io.jpom.system.init;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.jiangzeyin.common.PreLoadClass;
-import cn.jiangzeyin.common.PreLoadMethod;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ProjectInfoService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,12 +41,13 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2021/12/10
  */
-@PreLoadClass(value = Integer.MIN_VALUE + 2)
+//@PreLoadClass(value = Integer.MIN_VALUE + 2)
+@Configuration
 @Slf4j
-public class AutoStartProject {
+public class AutoStartProject implements InitializingBean {
 
-    @PreLoadMethod
-    private static void start() {
+    //    @PreLoadMethod
+    private void start() {
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         List<NodeProjectInfoModel> list = projectInfoService.list();
         if (CollUtil.isEmpty(list)) {
@@ -74,5 +75,10 @@ public class AutoStartProject {
                 }
             }
         });
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.start();
     }
 }

@@ -35,8 +35,6 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
-import cn.jiangzeyin.common.PreLoadClass;
-import cn.jiangzeyin.common.PreLoadMethod;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.JsonMessage;
@@ -47,6 +45,8 @@ import io.jpom.system.AgentExtConfigBean;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.JsonFileUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -63,15 +63,16 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2019/8/6
  */
-@PreLoadClass(value = Integer.MIN_VALUE + 1)
+//@PreLoadClass(value = Integer.MIN_VALUE + 1)
 @Slf4j
-public class AutoRegSeverNode {
+@Configuration
+public class AutoRegSeverNode implements InitializingBean {
 
     /**
      * 向服务端注册插件端
      */
-    @PreLoadMethod
-    private static void reg() {
+//    @PreLoadMethod
+    private void reg() {
         AgentExtConfigBean instance = AgentExtConfigBean.getInstance();
         String agentId = instance.getAgentId();
         String serverUrl = instance.getServerUrl();
@@ -169,5 +170,10 @@ public class AutoRegSeverNode {
             String body = execute.body();
             Console.log("push result:" + body);
         }
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.reg();
     }
 }

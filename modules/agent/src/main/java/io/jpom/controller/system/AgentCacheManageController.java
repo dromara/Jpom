@@ -23,13 +23,13 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.cron.CronUtils;
 import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.plugin.PluginFactory;

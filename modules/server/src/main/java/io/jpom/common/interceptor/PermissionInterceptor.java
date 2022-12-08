@@ -25,8 +25,7 @@ package io.jpom.common.interceptor;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.interceptor.InterceptorPattens;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.BaseNodeModel;
@@ -39,9 +38,11 @@ import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.system.AgentException;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -51,10 +52,13 @@ import javax.servlet.http.HttpServletResponse;
  * @author jiangzeyin
  * @since 2019/03/16.
  */
-@InterceptorPattens(sort = 1)
-public class PermissionInterceptor extends BaseJpomInterceptor {
+//@InterceptorPattens(sort = 1)
+@Configuration
+public class PermissionInterceptor implements HandlerMethodInterceptor {
 
+    @Resource
     private NodeService nodeService;
+    @Resource
     private UserBindWorkspaceService userBindWorkspaceService;
     public static final String DEMO_TIP = "演示账号不能使用该功能";
     /**
@@ -66,15 +70,6 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
         MethodFeature.REMOTE_DOWNLOAD,
         MethodFeature.EXECUTE};
 
-
-    private void init() {
-        if (nodeService == null) {
-            nodeService = SpringUtil.getBean(NodeService.class);
-        }
-        if (userBindWorkspaceService == null) {
-            userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
-        }
-    }
 
     private SystemPermission getSystemPermission(HandlerMethod handlerMethod) {
         SystemPermission systemPermission = handlerMethod.getMethodAnnotation(SystemPermission.class);
@@ -94,7 +89,6 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
-        this.init();
         this.addNode(request);
         UserModel userModel = BaseServerController.getUserModel();
         if (userModel == null || userModel.isSuperSystemUser()) {

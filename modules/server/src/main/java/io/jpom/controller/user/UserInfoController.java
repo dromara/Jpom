@@ -24,10 +24,10 @@ package io.jpom.controller.user;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.user.UserBindWorkspaceModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.user.UserBindWorkspaceService;

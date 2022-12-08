@@ -24,11 +24,7 @@ package io.jpom.controller.build;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.JsonMessage;
-import io.jpom.common.ServerOpenApi;
-import io.jpom.common.UrlRedirectUtil;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
+import io.jpom.common.*;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
@@ -89,7 +85,7 @@ public class BuildInfoTriggerController extends BaseServerController {
     }
 
     private Map<String, String> getBuildToken(BuildInfoModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = ServerOpenApi.BUILD_TRIGGER_BUILD2.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());

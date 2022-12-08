@@ -28,9 +28,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.PreLoadClass;
-import cn.jiangzeyin.common.PreLoadMethod;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.cron.CronUtils;
@@ -39,6 +36,8 @@ import io.jpom.script.BaseRunScript;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.system.AgentExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.util.List;
@@ -49,20 +48,23 @@ import java.util.List;
  * @author jiangzeyin
  * @since 2019/3/17
  */
-@PreLoadClass
+//@PreLoadClass
 @Slf4j
-public class AutoBackLog {
+@Configuration
+public class AutoBackLog implements InitializingBean {
 
     private static final String ID = "auto_back_log";
-    private static ProjectInfoService projectInfoService;
+    private final ProjectInfoService projectInfoService;
 
     private static FileSize MAX_SIZE;
 
-    @PreLoadMethod
-    private static void startAutoBackLog() {
-        if (projectInfoService == null) {
-            projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-        }
+    public AutoBackLog(ProjectInfoService projectInfoService) {
+        this.projectInfoService = projectInfoService;
+    }
+
+
+    private void startAutoBackLog() {
+
         // 获取cron 表达式
         String cron = StrUtil.emptyToDefault(AgentExtConfigBean.getInstance().autoBackConsoleCron, "none");
         if ("none".equalsIgnoreCase(cron.trim())) {
@@ -94,7 +96,7 @@ public class AutoBackLog {
         });
     }
 
-    private static void checkProject(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+    private void checkProject(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
         File file = javaCopyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(javaCopyItem);
         if (!file.exists()) {
             return;
@@ -118,8 +120,8 @@ public class AutoBackLog {
         files.forEach(FileUtil::del);
     }
 
-    @PreLoadMethod(value = Integer.MAX_VALUE)
-    private static void systemMonitor() {
+
+    private void systemMonitor() {
         // 开启检测调度
         ThreadUtil.execute(() -> {
             // 定时任务
@@ -133,5 +135,11 @@ public class AutoBackLog {
         RemoteVersion.loadRemoteInfo();
         // 清空脚本缓存
         BaseRunScript.clearRunScript();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.startAutoBackLog();
+        this.systemMonitor();
     }
 }

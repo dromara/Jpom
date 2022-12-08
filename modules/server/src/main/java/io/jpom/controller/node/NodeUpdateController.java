@@ -29,12 +29,11 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.*;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
+import io.jpom.common.multipart.MultipartFileBuilder;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.controller.openapi.NodeInfoController;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.data.NodeModel;
@@ -181,7 +180,7 @@ public class NodeUpdateController extends BaseServerController {
         JSONArray jsonArray = JSONArray.parseArray(json);
         jsonObject.put("shUrls", jsonArray);
         //
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = String.format("/%s/%s", contextPath, ServerOpenApi.RECEIVE_PUSH);
         jsonObject.put("url", FileUtil.normalize(url));
         return JsonMessage.getString(200, "", jsonObject);

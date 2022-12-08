@@ -25,15 +25,11 @@ package io.jpom.controller.script;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.JsonMessage;
-import io.jpom.common.ServerOpenApi;
-import io.jpom.common.UrlRedirectUtil;
+import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.script.ScriptModel;
@@ -217,7 +213,7 @@ public class ScriptController extends BaseServerController {
     /**
      * 同步到指定工作空间
      *
-     * @param ids         节点ID
+     * @param ids           节点ID
      * @param toWorkspaceId 分配到到工作空间ID
      * @return msg
      */
@@ -258,7 +254,7 @@ public class ScriptController extends BaseServerController {
     }
 
     private Map<String, String> getBuildToken(ScriptModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = ServerOpenApi.SERVER_SCRIPT_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());
