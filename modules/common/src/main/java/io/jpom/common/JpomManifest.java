@@ -449,10 +449,8 @@ public class JpomManifest {
     public static File getScriptFile() {
         File runPath = getRunPath().getParentFile().getParentFile();
         String type = JpomApplication.getAppType().name();
-        File scriptFile = FileUtil.file(runPath, StrUtil.format("{}.{}", type, CommandUtil.SUFFIX));
-        if (!scriptFile.exists() || scriptFile.isDirectory()) {
-            throw new JpomRuntimeException("当前服务中没有命令脚本：" + StrUtil.format("{}.{}", type, CommandUtil.SUFFIX));
-        }
+        File scriptFile = FileUtil.file(runPath, "bin", StrUtil.format("{}.{}", type, CommandUtil.SUFFIX));
+        Assert.state(FileUtil.isFile(scriptFile), StrUtil.format("当前服务中没有命令脚本：{}.{}", type, CommandUtil.SUFFIX));
         return scriptFile;
     }
 
