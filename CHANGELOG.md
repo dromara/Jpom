@@ -4,7 +4,7 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复 不能在线保存服务端配置
+1. 【server】修复 不能在线保存服务端配置（@迷了鹿）
 2. 【all】修复 服务端脚本分发节点工作空间错乱问题，需要再次保存自动修正（感谢[@mt-mored](https://gitee.com/mt-mored) [Gitee issues I65B19](https://gitee.com/dromara/Jpom/issues/I65B19) ）
 
 ### ❌ 不兼容功能
