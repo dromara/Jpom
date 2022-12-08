@@ -55,9 +55,9 @@ system:
   oldJarsCount: 2
   # Check the url for the new version
   remoteVersionUrl:
-#运行端口号
 
 server:
+  #运行端口号
   port: 2123
   servlet:
     encoding:
@@ -66,9 +66,13 @@ server:
       enabled: true
       forceRequest: true
       forceResponse: true
+  tomcat:
+    uri-encoding: UTF-8
 spring:
   application:
-    name: jpomAgent
+    name: jpom agent
+  profiles:
+    active: default
   servlet:
     session:
       timeout: 1H
@@ -78,11 +82,6 @@ spring:
       # 上传文件大小限制 12KB -- parses as 12 kilobytes 5MB  -- parses as 5 megabytes 20  -- parses as 20 kilobytes
       max-request-size: 2GB
       max-file-size: 1GB
-
-## 启动完成自动初始化指定包
-#preload:
-#  packageName: io.jpom.system.init
-## 强制去掉空格
-#request:
-#  trimAll: true
-#  urlDecode: true
+  mvc:
+    throw-exception-if-no-handler-found: true
+    log-request-details: true

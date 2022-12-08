@@ -60,7 +60,7 @@ pidfile="$base/bin/agent.pid"
 export JPOM_LOG=${LogPath}
 
 PID_TAG="JPOM_AGENT_APPLICATION"
-agent_log="${LogPath}/server.log"
+agent_log="${LogPath}/agent.log"
 
 ## set java path
 if [ -z "$JAVA" ]; then
@@ -171,6 +171,7 @@ function start() {
 		echo "silence auto exit 0,${pid}"
 		exit 0
 	fi
+	sleep 2s
 	tail -f --pid="$pid" "$agent_log"
 }
 
@@ -195,7 +196,7 @@ function stop() {
 	else
 		echo "jpom agent is stopped"
 	fi
-	$(rm $pidfile)
+	$(rm -f $pidfile)
 }
 
 function status() {

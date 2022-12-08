@@ -116,7 +116,6 @@ server:
     enabled: true
     #mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,image/png
     min-response-size: 2048
-
   tomcat:
     uri-encoding: UTF-8
 spring:
