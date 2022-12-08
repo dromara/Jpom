@@ -28,7 +28,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.system.AgentAutoUser;
 import io.jpom.util.JsonFileUtil;

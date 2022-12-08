@@ -31,7 +31,7 @@ import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.data.NodeScriptModel;

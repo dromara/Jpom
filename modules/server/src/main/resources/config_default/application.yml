@@ -30,16 +30,11 @@ spring:
       # 是否允许远程访问（开启此配置有安全风险），默认为 false（当部署到服务器上之后，是否可以通过其他浏览器访问数据库）
       settings:
         web-allow-others: false
-banner:
-  msg: classpath:/jpom-logo.txt
+
 # 静态资源配置
 interceptor:
   resourceHandler: /css/**,/fonts/**,/img/**,/js/**
   resourceLocation: classpath:/dist/css/,classpath:/dist/fonts/,classpath:/dist/img/,classpath:/dist/js/
-  initPackageName: io.jpom.common.interceptor
-# 启动完成自动初始化指定包
-preload:
-  packageName: io.jpom.system.init
 # 强制去掉空格
 request:
   trimAll: true

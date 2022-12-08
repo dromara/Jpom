@@ -22,7 +22,7 @@
  */
 package io.jpom.monitor;
 
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.MonitorModel;

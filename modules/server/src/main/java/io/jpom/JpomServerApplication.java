@@ -27,18 +27,14 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.jiangzeyin.common.EnableCommonBoot;
 import io.jpom.common.JpomAppType;
 import io.jpom.common.Type;
-import io.jpom.common.interceptor.IpInterceptor;
-import io.jpom.common.interceptor.LoginInterceptor;
-import io.jpom.common.interceptor.OpenApiInterceptor;
-import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
 /**
@@ -49,7 +45,6 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  */
 @SpringBootApplication
 @ServletComponentScan
-@EnableCommonBoot
 @Slf4j
 @JpomAppType(Type.Server)
 public class JpomServerApplication {
@@ -81,14 +76,8 @@ public class JpomServerApplication {
     public static void main(String[] args) throws Exception {
         long time = SystemClock.now();
         //
-        JpomApplication jpomApplication = new JpomApplication(JpomServerApplication.class);
-        jpomApplication
-            // 拦截器
-            .addInterceptor(IpInterceptor.class)
-            .addInterceptor(LoginInterceptor.class)
-            .addInterceptor(OpenApiInterceptor.class)
-            .addInterceptor(PermissionInterceptor.class)
-            .run(args);
+        SpringApplicationBuilder springApplicationBuilder = new SpringApplicationBuilder(JpomServerApplication.class);
+        springApplicationBuilder.run(args);
         // 重置 ip 白名单配置
         if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
             SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);

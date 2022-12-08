@@ -23,7 +23,7 @@
 package io.jpom.plugin;
 
 import cn.hutool.core.util.ReflectUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import lombok.Getter;
 
 /**

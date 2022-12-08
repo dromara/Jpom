@@ -24,9 +24,8 @@ package io.jpom.common.interceptor;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.jwt.JWT;
-import cn.jiangzeyin.common.interceptor.InterceptorPattens;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
@@ -36,9 +35,11 @@ import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import io.jpom.util.JwtUtil;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -53,14 +54,17 @@ import java.util.concurrent.TimeUnit;
  * @author jiangzeyin
  * @since 2017/2/4.
  */
-@InterceptorPattens(sort = -1, exclude = ServerOpenApi.API + "**")
-public class LoginInterceptor extends BaseJpomInterceptor {
+//@InterceptorPattens(sort = -1, exclude = ServerOpenApi.API + "**")
+@Configuration
+public class LoginInterceptor implements HandlerMethodInterceptor {
     /**
      * session
      */
     public static final String SESSION_NAME = "user";
 
     private static final Map<Integer, String> MSG_CACHE = new HashMap<>(3);
+    @Resource
+    private DbConfig dbConfig;
 
     static {
         MSG_CACHE.put(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, ServerConfigBean.LOGIN_TIP);
@@ -70,8 +74,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
-        HttpSession session = getSession();
-        DbConfig dbConfig = SpringUtil.getBean(DbConfig.class);
+        HttpSession session = request.getSession();
         boolean init = dbConfig.isInit();
         if (!init) {
             ServletUtil.write(response, JsonMessage.getString(100, "数据库还没有初始化成功,请耐心等待"), MediaType.APPLICATION_JSON_VALUE);
@@ -100,7 +103,6 @@ public class LoginInterceptor extends BaseJpomInterceptor {
                 return false;
             }
         }
-        reload();
         //
         return true;
     }
@@ -191,7 +193,6 @@ public class LoginInterceptor extends BaseJpomInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        super.afterCompletion(request, response, handler, ex);
         BaseServerController.removeAll();
     }
 }

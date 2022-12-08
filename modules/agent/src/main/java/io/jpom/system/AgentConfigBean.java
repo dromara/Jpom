@@ -24,7 +24,7 @@ package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.BaseAgentController;
 import org.springframework.context.annotation.Configuration;
 

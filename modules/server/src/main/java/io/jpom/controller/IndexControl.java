@@ -39,8 +39,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
+import io.jpom.common.ServerConst;
 import io.jpom.common.UrlRedirectUtil;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
@@ -112,7 +112,7 @@ public class IndexControl extends BaseServerController {
         }
 
         // <routerBase>
-        String proxyPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String proxyPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         html = StrUtil.replace(html, "<routerBase>", proxyPath);
         //
         html = StrUtil.replace(html, "<link rel=\"icon\" href=\"favicon.ico\">", "<link rel=\"icon\" href=\"" + proxyPath + "favicon.ico\">");
@@ -232,10 +232,10 @@ public class IndexControl extends BaseServerController {
      * @apiSuccess (222) {Object}  data 系统还没有超级管理员需要初始化
      */
     @NotLogin
-    @RequestMapping(value = "check-system", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "check-system", produces = MediaType.APPLICATION_JSON_VALUE)
     public String checkSystem() {
         JSONObject data = new JSONObject();
-        data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH));
+        data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH));
         //
         ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
         data.put("name", instance.getName());

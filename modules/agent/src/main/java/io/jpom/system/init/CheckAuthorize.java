@@ -24,13 +24,13 @@ package io.jpom.system.init;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.PreLoadClass;
-import cn.jiangzeyin.common.PreLoadMethod;
 import io.jpom.common.JpomManifest;
 import io.jpom.system.AgentAuthorize;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JvmUtil;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 
@@ -40,36 +40,25 @@ import java.io.File;
  * @author jiangzeyin
  * @since 2019/4/17
  */
-@PreLoadClass(value = Integer.MIN_VALUE)
-public class CheckAuthorize {
+//@PreLoadClass(value = Integer.MIN_VALUE)
+@Configuration
+public class CheckAuthorize implements InitializingBean {
 
-    @PreLoadMethod
-    private static void checkAgentAuthorize() {
+    //    @PreLoadMethod
+    private void checkAgentAuthorize() {
         AgentAuthorize.getInstance();
     }
 
-    @PreLoadMethod
-    private static void checkJps() {
+    //    @PreLoadMethod
+    private void checkJps() {
         //boolean exist = JvmUtil.exist(JpomManifest.getInstance().getPid());
         //JvmUtil.setJpsNormal(exist);
         JvmUtil.checkJpsNormal();
     }
 
-    /**
-     * 恢复脚本模板路径
-     */
-    @PreLoadMethod
-    private static void repairScriptPath() {
-        if (!JpomManifest.getInstance().isDebug()) {
-            if (StrUtil.compareVersion(JpomManifest.getInstance().getVersion(), "2.4.2") < 0) {
-                return;
-            }
-        }
-        File oldDir = FileUtil.file(ExtConfigBean.getInstance().getPath(), ConfigBean.SCRIPT_DIRECTORY);
-        if (!oldDir.exists()) {
-            return;
-        }
-        File newDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), ConfigBean.SCRIPT_DIRECTORY);
-        FileUtil.move(oldDir, newDir, true);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.checkJps();
+        this.checkAgentAuthorize();
     }
 }

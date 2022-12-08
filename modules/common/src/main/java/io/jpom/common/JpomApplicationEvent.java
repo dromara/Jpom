@@ -23,6 +23,7 @@
 package io.jpom.common;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.NetUtil;
@@ -30,9 +31,14 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.jpom.JpomApplication;
 import io.jpom.cron.IAsyncLoad;
 import io.jpom.cron.ICron;
@@ -44,17 +50,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -69,9 +74,12 @@ import java.util.Map;
 public class JpomApplicationEvent implements ApplicationListener<ApplicationEvent> {
 
     private final ExtConfigBean extConfigBean;
+    private final ConfigBean configBean;
 
-    public JpomApplicationEvent(ExtConfigBean extConfigBean) {
+    public JpomApplicationEvent(ExtConfigBean extConfigBean,
+                                ConfigBean configBean) {
         this.extConfigBean = extConfigBean;
+        this.configBean = configBean;
     }
 
     @Override
@@ -83,27 +91,25 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             //
             this.checkPath();
             JpomManifest jpomManifest = JpomManifest.getInstance();
-            ConfigBean instance = ConfigBean.getInstance();
+
             // 清理旧进程新文件
-            File dataDir = FileUtil.file(instance.getDataPath());
+            File dataDir = FileUtil.file(configBean.getDataPath());
             List<File> files = FileUtil.loopFiles(dataDir, 1, pathname -> pathname.getName().startsWith("pid."));
             files.forEach(FileUtil::del);
 
             // 写入Jpom 信息 、 写入全局信息
-            File appJpomFile = instance.getApplicationJpomInfo(JpomApplication.getAppType());
+            File appJpomFile = configBean.getApplicationJpomInfo(JpomApplication.getAppType());
             FileUtil.writeString(jpomManifest.toString(), appJpomFile, CharsetUtil.CHARSET_UTF_8);
             // 检查更新文件
             this.checkUpdate();
             //
-            this.reqXssLog();
             this.statLoad();
             this.success();
         } else if (event instanceof ContextClosedEvent) {
             //
-            ConfigBean instance = ConfigBean.getInstance();
-            FileUtil.del(instance.getPidFile());
+            FileUtil.del(configBean.getPidFile());
             //
-            File appJpomFile = instance.getApplicationJpomInfo(JpomApplication.getAppType());
+            File appJpomFile = configBean.getApplicationJpomInfo(JpomApplication.getAppType());
             FileUtil.del(appJpomFile);
         }
     }
@@ -234,38 +240,8 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
     }
 
 
-    private void reqXssLog() {
-        if (!ExtConfigBean.getInstance().isConsoleLogReqXss()) {
-            // 不在控制台记录请求日志信息
-            DefaultSystemLog.setLogCallback(new DefaultSystemLog.LogCallback() {
-                @Override
-                public void log(DefaultSystemLog.LogType type, Object... log) {
-                    //
-                    if (type == DefaultSystemLog.LogType.REQUEST_ERROR) {
-                        JpomApplicationEvent.log.info(Arrays.toString(log));
-                    }
-                }
-
-                @Override
-                public void logStart(HttpServletRequest request, String id, String url, HttpMethod httpMethod, String ip, Map<String, String> parameters, Map<String, String> header) {
-
-                }
-
-                @Override
-                public void logError(HttpServletResponse response, String id, int status) {
-
-                }
-
-                @Override
-                public void logTimeOut(HttpServletResponse response, String id, long time) {
-
-                }
-            });
-        }
-    }
-
     private void clearTemp() {
-        File file = ConfigBean.getInstance().getTempPath();
+        File file = configBean.getTempPath();
         /**
          * @author Hotstrip
          * use Hutool's FileUtil.del method just put file as param not file's path
@@ -293,4 +269,37 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         }
     }
 
+    @Bean
+    public MappingJackson2HttpMessageConverter objectMapper() {
+        ObjectMapper build = createJackson();
+        MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter(build);
+//        messageConverter.setDefaultCharset(CharsetUtil.CHARSET_UTF_8);
+        return messageConverter;
+    }
+
+
+    /**
+     * jackson 配置
+     *
+     * @return mapper
+     */
+    private ObjectMapper createJackson() {
+        Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder = Jackson2ObjectMapperBuilder.json();
+        jackson2ObjectMapperBuilder.simpleDateFormat(DatePattern.NORM_DATETIME_PATTERN);
+        ObjectMapper build = jackson2ObjectMapperBuilder.build();
+        // 忽略空
+        build.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        // 驼峰转下划线
+        //        build.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
+        // long to String
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
+        simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
+        build.registerModule(simpleModule);
+        //
+        build.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+//        build.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_ARRAY);
+
+        return build;
+    }
 }

@@ -28,14 +28,13 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.EnableCommonBoot;
 import io.jpom.common.JpomAppType;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.Type;
-import io.jpom.common.interceptor.AuthorizeInterceptor;
 import io.jpom.system.init.AutoRegSeverNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
 /**
@@ -46,7 +45,6 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  */
 @SpringBootApplication
 @ServletComponentScan
-@EnableCommonBoot
 @Slf4j
 @JpomAppType(Type.Agent)
 public class JpomAgentApplication {
@@ -59,13 +57,8 @@ public class JpomAgentApplication {
      */
     public static void main(String[] args) throws Exception {
         long time = SystemClock.now();
-        JpomApplication jpomApplication = new JpomApplication(JpomAgentApplication.class);
-        jpomApplication
-            // 拦截器
-            .addInterceptor(AuthorizeInterceptor.class)
-            // 添加 参数 url 解码
-            //				.addHandlerMethodArgumentResolver(UrlDecodeHandlerMethodArgumentResolver.class)
-            .run(args);
+        SpringApplicationBuilder springApplicationBuilder = new SpringApplicationBuilder(JpomAgentApplication.class);
+        springApplicationBuilder.run(args);
         // 自动向服务端推送
         autoPushToServer(args);
         log.info("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));

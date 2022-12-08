@@ -30,6 +30,7 @@ import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.JpomManifest;
 import io.jpom.system.ExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
@@ -190,7 +191,8 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
                 }
             }
         } else if (event instanceof ApplicationReadyEvent) {
-            System.setProperty(IPlugin.DATE_PATH_KEY, ExtConfigBean.getInstance().getPath());
+            ExtConfigBean extConfigBean = SpringUtil.getBean(ExtConfigBean.class);
+            System.setProperty(IPlugin.DATE_PATH_KEY, extConfigBean.getPath());
             System.setProperty(IPlugin.JPOM_VERSION_KEY, JpomManifest.getInstance().getVersion());
         }
 

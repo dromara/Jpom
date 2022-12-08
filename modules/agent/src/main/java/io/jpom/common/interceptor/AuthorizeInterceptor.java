@@ -24,11 +24,10 @@ package io.jpom.common.interceptor;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.interceptor.BaseInterceptor;
-import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import io.jpom.common.JsonMessage;
 import io.jpom.system.AgentAuthorize;
 import io.jpom.system.ConfigBean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
@@ -41,25 +40,22 @@ import javax.servlet.http.HttpServletResponse;
  * @author jiangzeyin
  * @since 2019/4/17
  */
-@InterceptorPattens()
-public class AuthorizeInterceptor extends BaseInterceptor {
+//@InterceptorPattens()
+@Configuration
+public class AuthorizeInterceptor implements HandlerMethodInterceptor {
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        super.preHandle(request, response, handler);
-        if (handler instanceof HandlerMethod) {
-            HandlerMethod handlerMethod = (HandlerMethod) handler;
-            NotAuthorize notAuthorize = handlerMethod.getMethodAnnotation(NotAuthorize.class);
-            if (notAuthorize == null) {
-                String authorize = ServletUtil.getHeaderIgnoreCase(request, ConfigBean.JPOM_AGENT_AUTHORIZE);
-                if (StrUtil.isEmpty(authorize)) {
-                    this.error(response);
-                    return false;
-                }
-                if (!AgentAuthorize.getInstance().checkAuthorize(authorize)) {
-                    this.error(response);
-                    return false;
-                }
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+        NotAuthorize notAuthorize = handlerMethod.getMethodAnnotation(NotAuthorize.class);
+        if (notAuthorize == null) {
+            String authorize = ServletUtil.getHeaderIgnoreCase(request, ConfigBean.JPOM_AGENT_AUTHORIZE);
+            if (StrUtil.isEmpty(authorize)) {
+                this.error(response);
+                return false;
+            }
+            if (!AgentAuthorize.getInstance().checkAuthorize(authorize)) {
+                this.error(response);
+                return false;
             }
         }
         return true;

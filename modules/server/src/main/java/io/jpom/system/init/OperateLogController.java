@@ -29,7 +29,6 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.request.XssFilter;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONValidator;
 import io.jpom.common.BaseServerController;
@@ -152,9 +151,9 @@ public class OperateLogController implements AopLogInterface {
         Set<Map.Entry<String, String>> entries = map.entrySet();
         for (Map.Entry<String, String> entry : entries) {
             String key = entry.getKey();
-            if (StrUtil.containsAnyIgnoreCase(key, XssFilter.logFilterPar)) {
-                entry.setValue("***");
-            }
+//            if (StrUtil.containsAnyIgnoreCase(key, XssFilter.logFilterPar)) {
+            entry.setValue("***");
+//            }
         }
         //
         Map<String, Object> allData = new HashMap<>(30);

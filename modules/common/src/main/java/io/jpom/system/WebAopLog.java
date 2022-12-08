@@ -22,17 +22,19 @@
  */
 package io.jpom.system;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.jiangzeyin.common.interceptor.BaseCallbackController;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * 自动记录日志
@@ -61,12 +63,12 @@ public class WebAopLog {
         // 接收到请求，记录请求内容
         Object proceed;
         Object logResult = null;
-        ServletRequestAttributes requestAttributes = BaseCallbackController.getRequestAttributes();
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         try {
             aopLogInterface.forEach(aopLogInterface -> aopLogInterface.before(joinPoint));
             proceed = joinPoint.proceed();
             logResult = proceed;
-            log.debug("{} {}", requestAttributes.getRequest().getRequestURI(), proceed);
+            log.debug("{} {}", requestAttributes.getRequest().getRequestURI(), Optional.ofNullable(proceed).orElse(StrUtil.EMPTY));
         } catch (Throwable e) {
             log.debug("{}", requestAttributes.getRequest().getRequestURI(), e);
             logResult = e;

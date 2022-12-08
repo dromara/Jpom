@@ -23,7 +23,6 @@
 package io.jpom;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.lang.Console;
@@ -32,14 +31,6 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.ApplicationBuilder;
-import cn.jiangzeyin.common.validator.ParameterInterceptor;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.jpom.common.JpomAppType;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
@@ -47,8 +38,6 @@ import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -65,49 +54,13 @@ import java.util.concurrent.TimeUnit;
  * @since 2019/4/16
  */
 @Slf4j
-public class JpomApplication extends ApplicationBuilder {
+public class JpomApplication {
 
     /**
      *
      */
     public static final String SYSTEM_ID = "system";
 
-
-    public JpomApplication(Class<?> appClass) throws Exception {
-        super(appClass);
-        //
-        ObjectMapper build = createJackson();
-        addHttpMessageConverter(new MappingJackson2HttpMessageConverter(build));
-
-        // 参数拦截器
-        addInterceptor(ParameterInterceptor.class);
-//        addInterceptor(PluginFeatureInterceptor.class);
-    }
-
-    /**
-     * jackson 配置
-     *
-     * @return mapper
-     */
-    private static ObjectMapper createJackson() {
-        Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder = Jackson2ObjectMapperBuilder.json();
-        jackson2ObjectMapperBuilder.simpleDateFormat(DatePattern.NORM_DATETIME_PATTERN);
-        ObjectMapper build = jackson2ObjectMapperBuilder.build();
-        // 忽略空
-        build.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        // 驼峰转下划线
-        //        build.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
-        // long to String
-        SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
-        simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
-        build.registerModule(simpleModule);
-        //
-        build.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-//        build.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_ARRAY);
-
-        return build;
-    }
 
 //    private void checkEvent(String[] args) throws Exception {
 //        new JpomClose().main(args);

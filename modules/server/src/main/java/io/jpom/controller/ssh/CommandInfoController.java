@@ -25,14 +25,11 @@ package io.jpom.controller.ssh;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.pattern.CronPattern;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.JsonMessage;
-import io.jpom.common.ServerOpenApi;
-import io.jpom.common.UrlRedirectUtil;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
+import io.jpom.common.*;
+
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.model.data.CommandModel;
@@ -243,7 +240,7 @@ public class CommandInfoController extends BaseServerController {
     }
 
     private Map<String, String> getBuildToken(CommandModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = ServerOpenApi.SSH_COMMAND_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());
