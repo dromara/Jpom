@@ -429,35 +429,16 @@ public class JpomManifest {
         FileUtil.move(new File(path), to, true);
         jsonObject.put("newJar", newFile);
         jsonObject.put("updateTime", new DateTime().toString());
-        // 更新管理命令
-        List<String> newData = new LinkedList<>();
-        File scriptFile = getScriptFile();
-        Charset charset = ExtConfigBean.getInstance().getConsoleLogCharset();
-        String finalNewFile = newFile;
-        FileUtil.readLines(scriptFile, charset, (LineHandler) line -> {
-            if (!line.startsWith(String.valueOf(StrUtil.C_TAB)) &&
-                !line.startsWith(String.valueOf(StrUtil.C_SPACE))) {
-                if (StrUtil.containsAny(line, "RUNJAR=")) {
-                    // jar 包
-                    if ("sh".equals(CommandUtil.SUFFIX)) {
-                        newData.add(StrUtil.format("RUNJAR=\"{}\"", finalNewFile));
-                    } else if ("bat".equals(CommandUtil.SUFFIX)) {
-                        newData.add(StrUtil.format("set RUNJAR={}", finalNewFile));
-                    } else {
-                        newData.add(line);
-                    }
-                } else {
-                    newData.add(line);
-                }
-            } else {
-                newData.add(line);
-            }
-        });
         // 新增升级次数 @author jzy 2021-08-04
         jsonObject.put("upgradeCount", jsonObject.getIntValue("upgradeCount"));
         //
         JsonFileUtil.saveJson(upgrade, jsonObject);
-        FileUtil.writeLines(newData, scriptFile, charset);
+        FileUtil.writeString(newFile, FileUtil.file(runPath, ConfigBean.RUN_JAR), CharsetUtil.CHARSET_UTF_8);
+        if (SystemUtil.getOsInfo().isWindows()) {
+            String typeName = JpomApplication.getAppType().name().toLowerCase();
+            String format = StrUtil.format("{}_{}.log", typeName, System.currentTimeMillis());
+            FileUtil.writeString(format, FileUtil.file(runPath, "run.log"), CharsetUtil.CHARSET_UTF_8);
+        }
     }
 
     /**

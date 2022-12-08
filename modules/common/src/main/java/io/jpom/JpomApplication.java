@@ -23,26 +23,17 @@
 package io.jpom;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.LineHandler;
-import cn.hutool.core.lang.Console;
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
 import io.jpom.common.JpomAppType;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
-import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.File;
-import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -61,28 +52,6 @@ public class JpomApplication {
      */
     public static final String SYSTEM_ID = "system";
 
-
-//    private void checkEvent(String[] args) throws Exception {
-//        new JpomClose().main(args);
-//    }
-
-//	/**
-//	 * 获取当前系统编码
-//	 *
-//	 * @return charset
-//	 */
-//	public static Charset getCharset() {
-//		if (charset == null) {
-//			if (SystemUtil.getOsInfo().isLinux()) {
-//				charset = CharsetUtil.CHARSET_UTF_8;
-//			} else if (SystemUtil.getOsInfo().isMac()) {
-//				charset = CharsetUtil.CHARSET_UTF_8;
-//			} else {
-//				charset = CharsetUtil.CHARSET_GBK;
-//			}
-//		}
-//		return charset;
-//	}
 
     /**
      * 获取当前程序的类型
@@ -114,8 +83,6 @@ public class JpomApplication {
     public static void restart() {
         File scriptFile = JpomManifest.getScriptFile();
         ThreadUtil.execute(() -> {
-            //
-            prepareRestart(scriptFile);
             // Waiting for method caller,For example, the interface response
             ThreadUtil.sleep(2, TimeUnit.SECONDS);
             try {
@@ -132,49 +99,5 @@ public class JpomApplication {
                 log.error("重启自身异常", e);
             }
         });
-    }
-
-    private static void prepareRestart(File scriptFile) {
-        Charset charset = ExtConfigBean.getInstance().getConsoleLogCharset();
-        String typeName = JpomApplication.getAppType().name().toLowerCase();
-        final String[] oldName = new String[]{typeName + ".log"};
-        List<String> newData = new LinkedList<>();
-        FileUtil.readLines(scriptFile, charset, (LineHandler) line -> {
-            if (!line.startsWith(String.valueOf(StrUtil.C_TAB)) &&
-                !line.startsWith(String.valueOf(StrUtil.C_SPACE))) {
-                if (SystemUtil.getOsInfo().isWindows()) {
-                    // windows 控制台文件相关
-                    if (StrUtil.containsAny(line, "set LogName=")) {
-                        //
-                        oldName[0] = CharSequenceUtil.splitToArray(line, "=")[0];
-                        newData.add(StrUtil.format("set LogName={}_{}.log", typeName, System.currentTimeMillis()));
-                    } else {
-                        newData.add(line);
-                    }
-                } else {
-                    newData.add(line);
-                }
-            } else {
-                newData.add(line);
-            }
-        });
-        FileUtil.writeLines(newData, scriptFile, charset);
-    }
-
-    /**
-     * 控制台输出并结束程序
-     *
-     * @param status   终止码
-     * @param template 输出消息
-     * @param args     参数
-     */
-    public static void consoleExit(int status, String template, Object... args) {
-        if (status == 0) {
-            Console.log(template, args);
-        } else {
-            Console.error(template, args);
-        }
-        Console.log("has stopped running automatically，Need to log out manually: Ctrl+C/Control+C ");
-        System.exit(status);
     }
 }

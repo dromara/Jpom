@@ -22,206 +22,219 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-if [ -f /etc/profile ]; then
-    . /etc/profile
-fi
-if [ -f /etc/bashrc ]; then
-    . /etc/bashrc
-fi
-if [ -f ~/.bash_profile ]; then
-    . ~/.bash_profile
-fi
-if [ -f ~/.bashrc ]; then
-    . ~/.bashrc
-fi
-# Please do not modify the value of the tag attribute, the modification will affect the stop and view status of the program
-default_tag="KeepBx-System-JpomServerApplication"
-Tag="${JPOM_SERVER_TAG:=${default_tag}}"
-# Obtain the current path automatically
-Path=$(cd `dirname $0`; pwd)"/"
-Lib="${Path}lib/"
-# Online upgrade will automatically modify this attribute
-RUNJAR=""
-Log="${Path}server.log"
-LogBack="${Path}log/"
-# Modify project port number Log path
-JVM="${JPOM_SERVER_JVM:=-server -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -Xms254m -Xmx1024m -Dfile.encoding=UTF-8}"
-port="${JPOM_SERVER_PORT:=2122}"
-default_args="--jpom.applicationTag=${Tag} --spring.profiles.active=pro --server.port=${port}  --jpom.log=${Path}log"
-ARGS="${JPOM_SERVER_ARGS:=${default_args}} $@"
+# description: Auto-starts boot
 
-echo ${Tag}
-echo ${Path}
-RETVAL="0"
-# upgrade tag
-upgrade="$2"
+case "$(uname)" in
+Linux)
+	bin_abs_path=$(readlink -f $(dirname $0))
+	;;
+*)
+	bin_abs_path=$(
+		cd $(dirname $0)
+		pwd
+	)
+	;;
+esac
 
-# now set the path to java
-if [[ -x "${JAVA_HOME}/bin/java" ]]; then
-  JAVA="${JAVA_HOME}/bin/java"
-  NOW_JAVA_HOME="${JAVA_HOME}"
+cygwin=false
+linux=false
+case "$(uname)" in
+CYGWIN*)
+	cygwin=true
+	;;
+Linux*)
+	linux=true
+	;;
+esac
+
+base=${bin_abs_path}/..
+
+conf_path="${base}/conf"
+Lib="${base}/lib/"
+LogPath="${base}/logs/"
+Log="${LogPath}/stdout.log"
+logback_configurationFile="${conf_path}/logback.xml"
+application_conf="${conf_path}/application.yml"
+pidfile="$base/bin/server.pid"
+
+export JPOM_LOG=${LogPath}
+
+PID_TAG="JPOM_SERVER_APPLICATION"
+server_log="${LogPath}/server.log"
+
+## set java path
+if [ -z "$JAVA" ]; then
+	JAVA=$(which java)
+fi
+if [ -z "$JAVA" ]; then
+	echo "Cannot find a Java JDK. Please set either set JAVA or put java (>=1.8) in your PATH." 2>&2
+	exit 1
+fi
+
+JavaVersion=$($JAVA -version 2>&1 | awk 'NR==1{ gsub(/"/,""); print $3 }' | awk -F '.' '{print $1}')
+str=$(file -L $JAVA | grep 64-bit)
+JAVA_OPTS="$JAVA_OPTS -Xss256k -XX:+AggressiveOpts -XX:-UseBiasedLocking -XX:-OmitStackTraceInFastThrow -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$LogPath/logs"
+
+if [ ${JavaVersion} -ge 11 ]; then
+	JAVA_OPTS="$JAVA_OPTS"
 else
-  set +e
-  JAVA=`which java`
-  NOW_JAVA_HOME="${JAVA}/../"
-  set -e
+	JAVA_OPTS="$JAVA_OPTS -XX:+UseFastAccessorMethods -XX:+PrintAdaptiveSizePolicy -XX:+PrintTenuringDistribution"
 fi
 
-if [[ ! -x "$JAVA" ]]; then
-  echo "JAVA file is not found, please configure [JAVA_HOME] environment variable"
-  exit 1
-fi
-
-# start
-function start() {
-    pid=`getPid`
-	if [[ "$pid" != "" ]]; then
-	   echo "Program is running：${pid}"
-	   exit 2
-	fi
-    echo  ${Log}
-    # Backup log
-    if [[ -f ${Log} ]]; then
-		if [[ ! -d ${LogBack} ]];then
-			mkdir ${LogBack}
-		fi
-		cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
-		mv ${Log}  ${LogBack}${cur_dateTime}
-		echo "mv to $LogBack$cur_dateTime"
-		touch ${Log}
-	fi
-	# jar
-	if [[ -z "${RUNJAR}" ]] ; then
-		RUNJAR=`listDir ${Lib}`
-		echo "automatic running：${RUNJAR}"
-	fi
-    # error
-	if [[ -z "${RUNJAR}" ]] ; then
-        echo "Jar not found"
-        exit 2
-	fi
-
-    nohup ${JAVA}  ${JVM} -jar ${Lib}${RUNJAR} -Dapplication=${Tag} -Dbasedir=${Path} ${ARGS}  >> ${Log} 2>&1 &
-    # The upgrade is not executed. View the log
-    if [[ ${upgrade} == "upgrade" ]] ; then
-        exit 0
-    fi
-    if [[ -f ${Log} ]]; then
-        tail -f ${Log}
-    else
-        sleep 3
-        if [[  -f ${Log} ]]; then
-           tail -f ${Log}
-        else
-           echo "No log files have been generated:${Log}"
-        fi
-    fi
-}
-
-# Find the first jar package
-function listDir()
-{
-    ALL=""
-	for file in `ls $1`
-	do
-		if [[ -f "${1}/${file}" ]] &&  [[ "${file##*.}"x = "jar"x ]] ; then
-			# Get the complete list of files
-			ALL="${file}"
-			break
-		fi
-	done
-	echo ${ALL}
-}
-
-# stop
-function stop() {
-	pid=`getPid`
-	if [[ "$pid" != "" ]]; then
-        echo -n "boot ( pid $pid) is running"
-        echo
-        echo -n $"Shutting down boot: wait"
-        kill $(pgrep -f ${Tag}) 2>/dev/null
-        sleep 3
-		pid=`getPid`
-		if [[ "$pid" != "" ]]; then
-			echo "kill boot process"
-			kill -9 "$pid"
-		fi
-    else
-        echo "boot is stopped"
-    fi
-
-	status
-}
-
-# status
-function status()
-{
-	pid=`getPid`
-	#echo "$pid"
-	if [[ "$pid" != "" ]]; then
-		echo "boot is running,pid is $pid"
+#-Xms1g -Xmx2g
+if [[ -z "${USR_JVM_SIZE}" ]]; then
+	if [ -n "$str" ]; then
+		USR_JVM_SIZE="-Xms1g -Xmx2g"
 	else
-		echo "boot is stopped"
+		USR_JVM_SIZE="-Xms1024m -Xmx2024m"
+	fi
+fi
+
+if [ -n "$str" ]; then
+	# For G1
+	JAVA_OPTS="-server ${USR_JVM_SIZE} -XX:+UseG1GC -XX:MaxGCPauseMillis=250 -XX:+UseGCOverheadLimit -XX:+ExplicitGCInvokesConcurrent $JAVA_OPTS"
+else
+	JAVA_OPTS="-server ${USR_JVM_SIZE} -XX:NewSize=256m -XX:MaxNewSize=256m -XX:MaxPermSize=128m $JAVA_OPTS"
+fi
+JAVA_OPTS=" $JAVA_OPTS -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Dfile.encoding=UTF-8"
+JAVA_OPTS="${JAVA_OPTS} -Dlogging.config=$logback_configurationFile -Dspring.config.location=$application_conf"
+
+MAIN_ARGS="$*"
+
+# mode -s
+mode="$2"
+
+RUN_JAR=""
+
+function checkConfig() {
+	if [ ! -d "$LogPath" ]; then
+		mkdir -p "$LogPath"
+	fi
+	if [[ ! -f "$logback_configurationFile" ]] || [[ ! -f "$application_conf" ]]; then
+		echo "Cannot find $application_conf or $logback_configurationFile"
+		exit 1
+	fi
+
+	if [[ -z "${RUN_JAR}" ]]; then
+		if [ -f "$Lib/run.bin" ]; then
+			RUN_JAR=$(cat $Lib/run.bin)
+			if [ ! -f "$Lib/$RUN_JAR" ]; then
+				echo "Cannot find $Lib/$RUN_JAR jar" 2>&2
+				exit 1
+			fi
+		fi
+		RUN_JAR=$(ls -t "${Lib}" | grep '.jar$' | head -1)
+		# error
+		if [[ -z "${RUN_JAR}" ]]; then
+			echo "Jar not found"
+			exit 2
+		fi
+		echo "automatic running：${RUN_JAR}"
 	fi
 }
 
-function getPid(){
-    pid=$(ps -ef | grep -v 'grep' | egrep ${Tag}| awk '{printf $2 " "}')
-    echo ${pid}
+function getPid() {
+	if $cygwin; then
+		JAVA_CMD="$JAVA_HOME\bin\java"
+		JAVA_CMD=$(cygpath --path --unix $JAVA_CMD)
+		JAVA_PID=$(ps | grep $JAVA_CMD | awk '{print $1}')
+	else
+		if $linux; then
+			JAVA_PID=$(ps -C java -f --width 1000 | grep "$PID_TAG" | grep -v grep | awk '{print $2}')
+		else
+			JAVA_PID=$(ps aux | grep "$PID_TAG" | grep -v grep | awk '{print $2}')
+		fi
+	fi
+	echo "$JAVA_PID"
 }
 
-# usage
-function usage()
-{
-   echo "Usage: $0 {start|stop|restart|status|create}"
-   RETVAL="2"
+# See how we were called.
+function start() {
+	echo $PID_TAG
+	# check running
+	pid=$(getPid)
+	#echo "$pid"
+	if [ "$pid" != "" ]; then
+		echo "Running, please do not run repeatedly:$pid"
+		exit 1
+	fi
+	checkConfig
+
+	if [ ! -f "$server_log" ]; then
+		touch "$server_log"
+	fi
+	# start
+	${JAVA} -Dapplication=${PID_TAG} ${JAVA_OPTS} -jar ${Lib}${RUN_JAR} ${MAIN_ARGS} >$Log 2>&1 &
+	echo $! >"$pidfile"
+
+	pid=$(cat "$pidfile")
+
+	if [ "${mode}" == "-s" ] || [ "${mode}" == "upgrade" ]; then
+		echo "silence auto exit 0,${pid}"
+		exit 0
+	fi
+	sleep 2s
+	tail -f --pid="$pid" "$server_log"
 }
 
+function stop() {
+	pid=$(getPid)
+	if [ "$pid" != "" ]; then
+		echo -n "jpom server ( pid $pid) is running"
+		echo
+		echo -n $"Shutting down jpom server: "
+		kill $pid
 
-# Create a self-starting service file
-function create() {
-	yum install -y wget && wget -O jpom-server https://jpom.top/docs/jpom-service.sh
-	# Determine whether the current script is an absolute path, matching all beginning with /
-	if [[ $0 =~ ^\/.* ]]
-    then
-      selfpath=$0
-    else
-      selfpath=$(pwd)/$0
-    fi
-    # Get the complete list of files
-    selfpath=`readlink -f $selfpath`
-    # Replacement path
-    sed -i "s|JPOM_RUN_PATH|${selfpath}|g" jpom-server
-    echo 'create jpom-server file done'
-    mv -f jpom-server /etc/init.d/jpom-server
-    chmod +x /etc/init.d/jpom-server
-    chkconfig --add jpom-server
-    echo 'create jpom-server success'
+		LOOPS=0
+		while (true); do
+			pid=$(getPid)
+			if [ "$pid" == "" ]; then
+				echo "Stop and end, in $LOOPS seconds"
+				break
+			fi
+			let LOOPS=LOOPS+1
+			sleep 1
+		done
+	else
+		echo "jpom server is stopped"
+	fi
+	$(rm $pidfile)
+}
+
+function status() {
+	pid=$(getPid)
+	#echo "$pid"
+	if [ "$pid" != "" ]; then
+		echo "jpom server running:$pid"
+	else
+		echo "jpom server is stopped"
+	fi
+}
+
+function usage() {
+	echo "Usage: $0 {start|stop|restart|status}"
+	RETVAL="2"
 }
 
 # See how we were called.
 RETVAL="0"
 case "$1" in
-    start)
-        start
-        ;;
-    stop)
-        stop
-        ;;
-    restart)
-        stop
-        start
-        ;;
-    status)
-        status
-        ;;
-    create)
-        create
-        ;;
-    *)
-      usage
-      ;;
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+restart)
+	stop
+	start
+	;;
+status)
+	status
+	;;
+*)
+	usage
+	;;
 esac
 
 exit $RETVAL
