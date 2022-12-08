@@ -35,7 +35,6 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.GlobalHeaders;
 import cn.hutool.http.Header;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;

@@ -123,9 +123,7 @@
               <a-menu-item>
                 <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="handleMonitor(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.status">监控 </a-button>
-              </a-menu-item>
+
               <!-- <a-menu-item>
                 <a-button size="small" type="primary" @click="handleReplica(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
               </a-menu-item> -->
@@ -362,10 +360,7 @@
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReadFileVisible" @close="onReadFileClose">
       <file-read v-if="drawerReadFileVisible" :nodeId="node.id" :readFilePath="temp.readFilePath" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
-    <!-- 项目监控组件 -->
-    <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerMonitorVisible" @close="onMonitorClose">
-      <monitor v-if="drawerMonitorVisible" :node="node" :project="temp" />
-    </a-drawer>
+
     <!-- 项目副本集组件 -->
     <!-- <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReplicaVisible" @close="onReplicaClose">
       <replica v-if="drawerReplicaVisible" :node="node" :project="temp" />
@@ -387,7 +382,7 @@
 import File from "./project-file";
 import Console from "./project-console";
 import FileRead from "./project-file-read";
-import Monitor from "./project-monitor";
+
 // import Replica from "./project-replica";
 import { parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
@@ -419,7 +414,7 @@ export default {
   components: {
     File,
     Console,
-    Monitor,
+
     // Replica,
     codeEditor,
     FileRead,
@@ -441,7 +436,7 @@ export default {
       drawerTitle: "",
       drawerFileVisible: false,
       drawerConsoleVisible: false,
-      drawerMonitorVisible: false,
+
       drawerReplicaVisible: false,
       drawerReadFileVisible: false,
       // addGroupvisible: false,
@@ -740,16 +735,7 @@ export default {
       this.drawerConsoleVisible = false;
       this.loadData();
     },
-    // 监控
-    handleMonitor(record) {
-      this.temp = Object.assign({}, record);
-      this.drawerTitle = `监控(${this.temp.name})`;
-      this.drawerMonitorVisible = true;
-    },
-    // 关闭监控
-    onMonitorClose() {
-      this.drawerMonitorVisible = false;
-    },
+
     // // 副本集
     // handleReplica(record) {
     //   this.temp = Object.assign({}, record);

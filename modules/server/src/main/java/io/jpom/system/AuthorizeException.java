@@ -22,7 +22,7 @@
  */
 package io.jpom.system;
 
-import cn.jiangzeyin.common.JsonMessage;
+import io.jpom.common.JsonMessage;
 
 /**
  * 授权错误

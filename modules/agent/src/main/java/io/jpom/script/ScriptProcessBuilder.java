@@ -32,9 +32,9 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.service.system.AgentWorkspaceEnvVarService;
@@ -50,8 +50,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * 脚本执行

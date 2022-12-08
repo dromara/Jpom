@@ -24,9 +24,9 @@ package io.jpom.common.interceptor;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.BaseInterceptor;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
+import io.jpom.common.JsonMessage;
 import io.jpom.system.AgentAuthorize;
 import io.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;

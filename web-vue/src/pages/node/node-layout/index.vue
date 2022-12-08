@@ -27,7 +27,7 @@
       <project-list v-if="currentId === 'manageList'" :node="node" />
 
       <recover v-if="currentId === 'projectRecover'" :node="node" />
-      <tomcat v-if="currentId === 'tomcatManage'" :node="node" />
+
       <script-template v-if="currentId === 'script'" :node="node" />
       <script-log v-if="currentId === 'script-log'" :nodeId="node.id" />
       <nginx-list v-if="currentId === 'nginxList'" :node="node" />
@@ -46,7 +46,7 @@ import Welcome from "@/pages/node/node-layout/welcome";
 import ProjectList from "@/pages/node/node-layout/project/project-list";
 
 import Recover from "@/pages/node/node-layout/project/recover-list";
-import Tomcat from "@/pages/node/node-layout/other/tomcat-list";
+
 import ScriptTemplate from "@/pages/node/node-layout/other/script-list";
 import ScriptLog from "@/pages/node/node-layout/other/script-log";
 import NginxList from "@/pages/node/node-layout/nginx/list";
@@ -63,7 +63,7 @@ export default {
     Welcome,
     ProjectList,
     Recover,
-    Tomcat,
+
     ScriptTemplate,
     NginxList,
     Cert,

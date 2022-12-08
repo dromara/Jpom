@@ -29,17 +29,15 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.Const;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.DslYmlDto;
-import io.jpom.model.data.JdkInfoModel;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.WhitelistDirectoryService;
-import io.jpom.service.manage.JdkInfoService;
 import io.jpom.system.ConfigBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -65,12 +63,9 @@ import java.util.List;
 public class ManageEditProjectController extends BaseAgentController {
 
     private final WhitelistDirectoryService whitelistDirectoryService;
-    private final JdkInfoService jdkInfoService;
 
-    public ManageEditProjectController(WhitelistDirectoryService whitelistDirectoryService,
-                                       JdkInfoService jdkInfoService) {
+    public ManageEditProjectController(WhitelistDirectoryService whitelistDirectoryService) {
         this.whitelistDirectoryService = whitelistDirectoryService;
-        this.jdkInfoService = jdkInfoService;
     }
 
     /**
@@ -205,10 +200,7 @@ public class ManageEditProjectController extends BaseAgentController {
         Assert.state(!id.contains(StrUtil.SPACE) && !allLib.contains(StrUtil.SPACE), "项目Id、项目路径不能包含空格");
 
         String jdkId = projectInfo.getJdkId();
-        if (StrUtil.isNotEmpty(jdkId)) {
-            JdkInfoModel item = jdkInfoService.getItem(jdkId);
-            Assert.notNull(item, "jdk 信息错误");
-        }
+
         // 判断 yml
         this.checkDslYml(projectInfo);
         //

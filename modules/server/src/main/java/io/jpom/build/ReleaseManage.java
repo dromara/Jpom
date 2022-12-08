@@ -29,7 +29,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.ArrayUtil;
@@ -38,11 +37,11 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.Session;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AfterOpt;
@@ -72,7 +71,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -379,7 +377,7 @@ public class ReleaseManage implements Runnable {
         logRecorder.info(DateUtil.now() + " start exec");
         InputStream templateInputStream = null;
         try {
-            templateInputStream = ResourceUtil.getStream("classpath:/bin/execTemplate." + CommandUtil.SUFFIX);
+            templateInputStream = ResourceUtil.getStream("classpath:/config_default/execTemplate." + CommandUtil.SUFFIX);
             if (templateInputStream == null) {
                 logRecorder.info("系统中没有命令模版");
                 return;

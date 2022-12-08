@@ -29,14 +29,11 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.PreLoadClass;
-import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.request.XssFilter;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONValidator;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.model.user.UserModel;
@@ -46,13 +43,13 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.service.dblog.DbUserOperateLogService;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.AopLogInterface;
-import io.jpom.system.WebAopLog;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -70,16 +67,15 @@ import java.util.Set;
  * @author jiangzeyin
  * @since 2019/4/19
  */
-@PreLoadClass
+@Configuration
 @Slf4j
 public class OperateLogController implements AopLogInterface {
     private static final ThreadLocal<CacheInfo> CACHE_INFO_THREAD_LOCAL = new ThreadLocal<>();
 
-    private DbUserOperateLogService dbUserOperateLogService;
+    private final DbUserOperateLogService dbUserOperateLogService;
 
-    @PreLoadMethod
-    private static void init() {
-        WebAopLog.setAopLogInterface(SpringUtil.getBean(OperateLogController.class));
+    public OperateLogController(DbUserOperateLogService dbUserOperateLogService) {
+        this.dbUserOperateLogService = dbUserOperateLogService;
     }
 
     private CacheInfo createCacheInfo(Method method) {
@@ -109,9 +105,7 @@ public class OperateLogController implements AopLogInterface {
         cacheInfo.setResultCode(feature.resultCode());
         cacheInfo.setLogResponse(feature.logResponse());
         //
-        if (dbUserOperateLogService == null) {
-            dbUserOperateLogService = SpringUtil.getBean(DbUserOperateLogService.class);
-        }
+
         return cacheInfo;
     }
 
@@ -278,7 +272,7 @@ public class OperateLogController implements AopLogInterface {
      * @param val   结果
      */
     public void updateLog(String reqId, String val) {
-        DbUserOperateLogService dbUserOperateLogService = SpringUtil.getBean(DbUserOperateLogService.class);
+
 
         Entity entity = new Entity();
         entity.set("resultMsg", val);

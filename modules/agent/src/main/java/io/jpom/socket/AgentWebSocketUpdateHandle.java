@@ -24,11 +24,11 @@ package io.jpom.socket;
 
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.Type;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.WebSocketMessageModel;

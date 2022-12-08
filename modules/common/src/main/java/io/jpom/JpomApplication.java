@@ -22,14 +22,15 @@
  */
 package io.jpom;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.validator.ParameterInterceptor;
@@ -39,25 +40,22 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import io.jpom.common.Const;
-import io.jpom.common.JpomApplicationEvent;
+import io.jpom.common.JpomAppType;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
-import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.SpringApplication;
-import org.springframework.core.env.Environment;
-import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.util.Assert;
 
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -74,37 +72,9 @@ public class JpomApplication extends ApplicationBuilder {
      */
     public static final String SYSTEM_ID = "system";
 
-    protected static String[] args;
-    /**
-     * 应用类型
-     */
-    private static Type appType;
-    private static Charset charset;
 
-    private static Class<?> appClass;
-
-    /**
-     * 获取程序命令行参数
-     *
-     * @return 数组
-     */
-    public static String[] getArgs() {
-        return args;
-    }
-
-    public JpomApplication(Type appType, Class<?> appClass, String[] args) throws Exception {
+    public JpomApplication(Class<?> appClass) throws Exception {
         super(appClass);
-        //
-        checkEvent(args);
-        JpomApplication.appType = appType;
-        JpomApplication.appClass = appClass;
-        JpomApplication.args = args;
-        // 检查 type 中的 applicationClass 配置是否正确
-        String applicationClass = appType.getApplicationClass();
-        Assert.state(StrUtil.equals(applicationClass, appClass.getName()), "The currently allowed classes are inconsistent with the configured class names：io.jpom.common.Type#getApplicationClass()");
-
-        addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8));
-
         //
         ObjectMapper build = createJackson();
         addHttpMessageConverter(new MappingJackson2HttpMessageConverter(build));
@@ -112,13 +82,6 @@ public class JpomApplication extends ApplicationBuilder {
         // 参数拦截器
         addInterceptor(ParameterInterceptor.class);
 //        addInterceptor(PluginFeatureInterceptor.class);
-        //
-        addApplicationEventClient(new JpomApplicationEvent());
-        // 添加初始化监听
-        PluginFactory pluginFactory = new PluginFactory();
-        SpringApplication application = this.application();
-        application.addListeners(pluginFactory);
-        application.addInitializers(pluginFactory);
     }
 
     /**
@@ -146,9 +109,9 @@ public class JpomApplication extends ApplicationBuilder {
         return build;
     }
 
-    private void checkEvent(String[] args) throws Exception {
-        new JpomClose().main(args);
-    }
+//    private void checkEvent(String[] args) throws Exception {
+//        new JpomClose().main(args);
+//    }
 
 //	/**
 //	 * 获取当前系统编码
@@ -174,22 +137,21 @@ public class JpomApplication extends ApplicationBuilder {
      * @return Agent 或者 Server
      */
     public static Type getAppType() {
-        if (appType == null) {
-            // 从配置文件中获取
-            Environment environment = JpomApplication.getEnvironment();
-            String property = environment.getProperty(Const.APPLICATION_NAME);
-            property = StrUtil.removeAll(property, "jpom");
-            Assert.hasLength(property, "Please configure the program type：" + Const.APPLICATION_NAME);
-            appType = Type.valueOf(property);
-        }
-        return appType;
+        Map<String, Object> beansWithAnnotation = SpringUtil.getApplicationContext().getBeansWithAnnotation(JpomAppType.class);
+        Class<?> jpomAppClass = Optional.of(beansWithAnnotation)
+            .map(map -> CollUtil.getFirst(map.values()))
+            .map(Object::getClass)
+            .orElseThrow(() -> new RuntimeException("没有找到 Jpom 类型配置"));
+        JpomAppType jpomAppType = jpomAppClass.getAnnotation(JpomAppType.class);
+        return jpomAppType.value();
     }
 
     public static Class<?> getAppClass() {
-        if (appClass == null) {
-            return JpomApplication.class;
-        }
-        return appClass;
+        Map<String, Object> beansWithAnnotation = SpringUtil.getApplicationContext().getBeansWithAnnotation(SpringBootApplication.class);
+        return Optional.of(beansWithAnnotation)
+            .map(map -> CollUtil.getFirst(map.values()))
+            .map(Object::getClass)
+            .orElseThrow(() -> new RuntimeException("没有找到运行的主类"));
     }
 
     /**

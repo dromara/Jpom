@@ -30,13 +30,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.*;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
@@ -400,7 +399,7 @@ public class NodeForward {
 //            httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, userModel.getUserRole(nodeModel).name());
         }
         if (StrUtil.isEmpty(nodeModel.getLoginPwd())) {
-            NodeService nodeService = SpringUtil.getBean(NodeService.class);
+            NodeService nodeService = cn.hutool.extra.spring.SpringUtil.getBean(NodeService.class);
             NodeModel model = nodeService.getByKey(nodeModel.getId(), false);
             nodeModel.setLoginPwd(model.getLoginPwd());
             nodeModel.setLoginName(model.getLoginName());
@@ -445,7 +444,7 @@ public class NodeForward {
             ws = "ws";
         }
         if (StrUtil.isEmpty(nodeModel.getLoginPwd())) {
-            NodeService nodeService = SpringUtil.getBean(NodeService.class);
+            NodeService nodeService = cn.hutool.extra.spring.SpringUtil.getBean(NodeService.class);
             NodeModel model = nodeService.getByKey(nodeModel.getId(), false);
             nodeModel.setLoginPwd(model.getLoginPwd());
             nodeModel.setLoginName(model.getLoginName());

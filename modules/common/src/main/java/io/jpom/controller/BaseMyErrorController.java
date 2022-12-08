@@ -22,7 +22,7 @@
  */
 package io.jpom.controller;
 
-import cn.jiangzeyin.common.JsonMessage;
+import io.jpom.common.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;

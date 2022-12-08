@@ -36,7 +36,6 @@ import cn.hutool.db.Page;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerConst;
 import io.jpom.model.BaseDbModel;
@@ -45,6 +44,8 @@ import io.jpom.model.PageResultDto;
 import io.jpom.model.user.UserModel;
 import io.jpom.system.extconf.DbExtConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,6 +65,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonService<T> {
+
+    @Autowired
+    @Lazy
+    private DbExtConfig extConfig;
 
     /**
      * 默认排序规则
@@ -367,8 +372,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * 执行清理
      */
     private void executeClear() {
-        DbExtConfig dbExtConfig = SpringUtil.getBean(DbExtConfig.class);
-        int h2DbLogStorageCount = dbExtConfig.getLogStorageCount();
+        int h2DbLogStorageCount = extConfig.getLogStorageCount();
         if (h2DbLogStorageCount <= 0) {
             return;
         }

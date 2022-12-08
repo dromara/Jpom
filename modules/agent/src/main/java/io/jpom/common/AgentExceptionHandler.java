@@ -24,7 +24,6 @@ package io.jpom.common;
 
 import cn.hutool.core.exceptions.ValidateException;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
