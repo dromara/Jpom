@@ -175,6 +175,7 @@ function start() {
 		echo "silence auto exit 0,${pid}"
 		exit 0
 	fi
+	sleep 2s
 	tail -f --pid="$pid" "$server_log"
 }
 
@@ -199,7 +200,7 @@ function stop() {
 	else
 		echo "jpom server is stopped"
 	fi
-	$(rm $pidfile)
+	$(rm -f $pidfile)
 }
 
 function status() {
