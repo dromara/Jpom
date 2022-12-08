@@ -138,6 +138,7 @@ public class ScriptController extends BaseServerController {
             oldNodeIds = byKey.getNodeIds();
             scriptServer.updateById(scriptModel, request);
         }
+        scriptModel.setWorkspaceId(scriptServer.getCheckUserWorkspace(getRequest()));
         this.syncNodeScript(scriptModel, oldNodeIds);
         return JsonMessage.getString(200, "修改成功");
     }
@@ -217,7 +218,7 @@ public class ScriptController extends BaseServerController {
     /**
      * 同步到指定工作空间
      *
-     * @param ids         节点ID
+     * @param ids           节点ID
      * @param toWorkspaceId 分配到到工作空间ID
      * @return msg
      */
