@@ -164,27 +164,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return StrUtil.emptyToDefault(mainClass, StrUtil.EMPTY);
     }
 
-    private void repairWhitelist() {
-        if (StrUtil.isEmpty(whitelistDirectory) && StrUtil.isEmpty(lib)) {
-            throw new JpomRuntimeException("当前项目lib数据异常");
-        }
-        if (StrUtil.isNotEmpty(whitelistDirectory)) {
-            return;
-        }
-        WhitelistDirectoryService whitelistDirectoryService = SpringUtil.getBean(WhitelistDirectoryService.class);
-        List<String> project = whitelistDirectoryService.getWhitelist().getProject();
-        for (String path : project) {
-            if (lib.startsWith(path)) {
-                String itemWhitelistDirectory = lib.substring(0, path.length());
-                lib = lib.substring(path.length());
-                setWhitelistDirectory(itemWhitelistDirectory);
-                setLib(lib);
-            }
-        }
-    }
-
     public String getWhitelistDirectory() {
-        this.repairWhitelist();
         if (StrUtil.isEmpty(whitelistDirectory)) {
             throw new JpomRuntimeException("恢复白名单数据异常");
         }
@@ -196,7 +176,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
     }
 
     public String getLib() {
-        this.repairWhitelist();
         return lib;
     }
 

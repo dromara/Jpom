@@ -134,6 +134,7 @@ public class ScriptController extends BaseServerController {
             oldNodeIds = byKey.getNodeIds();
             scriptServer.updateById(scriptModel, request);
         }
+        scriptModel.setWorkspaceId(scriptServer.getCheckUserWorkspace(getRequest()));
         this.syncNodeScript(scriptModel, oldNodeIds);
         return JsonMessage.getString(200, "修改成功");
     }

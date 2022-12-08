@@ -121,6 +121,7 @@ public class ScriptController extends BaseAgentController {
                 needCreate = true;
             }
             eModel.setScriptType("server-sync");
+            eModel.setWorkspaceId(nodeScriptModel.getWorkspaceId());
         }
         Assert.notNull(eModel, "对应数据不存在");
         eModel.setName(nodeScriptModel.getName());
