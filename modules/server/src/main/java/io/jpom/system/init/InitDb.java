@@ -105,7 +105,6 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
     private final DbExtConfig dbExtConfig;
 
     private void init() {
-
         //
         dbSecurityCheck(serverExtConfigBean, dbExtConfig);
         //
@@ -176,13 +175,12 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
             return;
         }
         dbConfig.initOk();
-        // json load to db
-        InitDb.loadJsonToDb();
         log.info("h2 db Successfully loaded, url is 【{}】", dbUrl);
-        syncAllNode();
+        this.loadJsonToDb();
+        this.syncAllNode();
     }
 
-    private static void tryInitSql(List<Resource> resourcesList, Set<String> executeSqlLog, DataSource dataSource, Consumer<String> eachSql) {
+    private void tryInitSql(List<Resource> resourcesList, Set<String> executeSqlLog, DataSource dataSource, Consumer<String> eachSql) {
         for (Resource resource : resourcesList) {
             try (InputStream inputStream = resource.getInputStream()) {
                 String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
@@ -218,7 +216,8 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
         if (!JpomManifest.getInstance().isDebug() && serverExtConfigBean.isH2ConsoleEnabled()
             && StrUtil.equals(dbExtConfig.getUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
             && StrUtil.equals(dbExtConfig.getUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
-            JpomApplication.consoleExit(-2, "【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
+            log.error("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
+            System.exit(-2);
         }
     }
 
@@ -239,18 +238,7 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
         Db.use().execute(sql);
     }
 
-    private static void loadJsonToDb() {
-		/*
-		  @author Hotstrip
-		  @since 2021-08-03
-		  load build.js data to DB
-		 */
-        //LoadBuildJsonToDB.getInstance().doJsonToSql();
-        // @author bwcx_jzy @since 2021-12-02
-        // LoadJsonConfigToDb instance = LoadJsonConfigToDb.getInstance();
-        // init workspace
-//        WorkspaceService workspaceService = SpringUtil.getBean(WorkspaceService.class);
-
+    private void loadJsonToDb() {
         //
         Map<String, BaseGroupService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseGroupService.class);
         for (BaseGroupService<?> value : groupServiceMap.values()) {
@@ -258,7 +246,7 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
         }
     }
 
-    private static void syncAllNode() {
+    private void syncAllNode() {
         //  同步项目
         Map<String, BaseNodeService> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeService.class);
         for (BaseNodeService<?> value : beansOfType.values()) {
@@ -301,8 +289,7 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
         }
     }
 
-    //    @Override
-    private void onApplicationEvent(Environment environment) {
+    private void prepareCallback(Environment environment) {
         Opt.ofBlankAble(environment.getProperty("rest:load_init_db")).ifPresent(s -> {
             // 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
             dbConfig.clearExecuteSqlLog();
@@ -312,8 +299,8 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
             try {
                 dbConfig.recoverDb();
             } catch (Exception e) {
-                e.printStackTrace();
-                JpomApplication.consoleExit(-2, "Failed to restore database：{}", e.getMessage());
+                log.error("Failed to restore database：{}", e.getMessage(), e);
+                System.exit(-2);
             }
         });
         Opt.ofBlankAble(environment.getProperty("backup-h2")).ifPresent(s -> {
@@ -324,10 +311,11 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
                 Future<BackupInfoModel> backupInfoModelFuture = backupInfoService.autoBackup();
                 try {
                     BackupInfoModel backupInfoModel = backupInfoModelFuture.get();
-                    JpomApplication.consoleExit(0, "Complete the backup database, save the path as {}", backupInfoModel.getFilePath());
+                    log.info("Complete the backup database, save the path as {}", backupInfoModel.getFilePath());
+                    System.exit(0);
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    JpomApplication.consoleExit(-2, "Backup database failed：{}", e.getMessage());
+                    log.error("Backup database failed：{}", e.getMessage(), e);
+                    System.exit(-2);
                 }
                 return false;
             });
@@ -343,8 +331,7 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
                         log.info("Automatically backup data files to {} path", dbFiles);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    JpomApplication.consoleExit(-2, "Failed to import according to sql,{}", s);
+                    log.error("Failed to import according to sql,{}", s, e);
                 }
             });
             // 导入数据
@@ -358,7 +345,8 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
             File file = FileUtil.file(importH2Sql);
             String sqlPath = FileUtil.getAbsolutePath(file);
             if (!FileUtil.isFile(file)) {
-                JpomApplication.consoleExit(2, "sql file does not exist :{}", sqlPath);
+                log.error("sql file does not exist :{}", sqlPath);
+                System.exit(2);
             }
             //
             Opt.ofBlankAble(environment.getProperty("transform-sql")).ifPresent(s -> dbConfig.transformSql(file));
@@ -367,7 +355,8 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
             BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
             boolean flag = backupInfoService.restoreWithSql(sqlPath);
             if (!flag) {
-                JpomApplication.consoleExit(2, "Failed to import according to sql,{}", sqlPath);
+                log.error("Failed to import according to sql,{}", sqlPath);
+                System.exit(2);
             }
             log.info("Import successfully according to sql,{}", sqlPath);
             return true;
@@ -376,8 +365,8 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.onApplicationEvent(applicationContext.getEnvironment());
-        init();
+        this.prepareCallback(applicationContext.getEnvironment());
+        this.init();
     }
 
 //    @Override

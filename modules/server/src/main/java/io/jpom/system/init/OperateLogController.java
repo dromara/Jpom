@@ -73,6 +73,9 @@ public class OperateLogController implements AopLogInterface {
 
     private final DbUserOperateLogService dbUserOperateLogService;
 
+    private String[] logFilterPar = new String[]{"pwd", "pass", "password"};
+
+
     public OperateLogController(DbUserOperateLogService dbUserOperateLogService) {
         this.dbUserOperateLogService = dbUserOperateLogService;
     }
@@ -151,9 +154,9 @@ public class OperateLogController implements AopLogInterface {
         Set<Map.Entry<String, String>> entries = map.entrySet();
         for (Map.Entry<String, String> entry : entries) {
             String key = entry.getKey();
-//            if (StrUtil.containsAnyIgnoreCase(key, XssFilter.logFilterPar)) {
-            entry.setValue("***");
-//            }
+            if (StrUtil.containsAnyIgnoreCase(key, logFilterPar)) {
+                entry.setValue("***");
+            }
         }
         //
         Map<String, Object> allData = new HashMap<>(30);

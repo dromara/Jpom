@@ -77,6 +77,7 @@ public class ConfigBean {
      * 程序升级信息文件
      */
     public static final String UPGRADE = "upgrade.json";
+    public static final String RUN_JAR = "run.bin";
     /**
      * 远程版本信息
      */

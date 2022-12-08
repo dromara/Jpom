@@ -62,9 +62,8 @@ public class CheckAuthorizeToken implements InitializingBean {
         PasswdStrength.PASSWD_LEVEL level = PasswdStrength.getLevel(authorizeToken);
 
         if (level == EASY || level == MIDIUM) {
-            JpomApplication.consoleExit(-1, "配置的授权token 需要包含数字，字母，符号的组合");
-            //log.error("配置的授权token 需要包含数字，字母，符号的组合", new JpomRuntimeException("配置的授权token 需要包含数字，字母，符号的组合"));
-            //System.exit(-1);
+            log.error("配置的授权token 需要包含数字，字母，符号的组合", new JpomRuntimeException("配置的授权token 需要包含数字，字母，符号的组合"));
+            System.exit(-1);
         }
     }
 
