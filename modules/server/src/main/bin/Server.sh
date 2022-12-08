@@ -117,19 +117,21 @@ function checkConfig() {
 
 	if [[ -z "${RUN_JAR}" ]]; then
 		if [ -f "$Lib/run.bin" ]; then
-			RUN_JAR=$(cat $Lib/run.bin)
+			RUN_JAR=$(cat "$Lib/run.bin")
 			if [ ! -f "$Lib/$RUN_JAR" ]; then
 				echo "Cannot find $Lib/$RUN_JAR jar" 2>&2
 				exit 1
 			fi
+			echo "specify running：${RUN_JAR}"
+		else
+			RUN_JAR=$(ls -t "${Lib}" | grep '.jar$' | head -1)
+			# error
+			if [[ -z "${RUN_JAR}" ]]; then
+				echo "Jar not found"
+				exit 2
+			fi
+			echo "automatic running：${RUN_JAR}"
 		fi
-		RUN_JAR=$(ls -t "${Lib}" | grep '.jar$' | head -1)
-		# error
-		if [[ -z "${RUN_JAR}" ]]; then
-			echo "Jar not found"
-			exit 2
-		fi
-		echo "automatic running：${RUN_JAR}"
 	fi
 }
 
@@ -173,7 +175,6 @@ function start() {
 		echo "silence auto exit 0,${pid}"
 		exit 0
 	fi
-	sleep 2s
 	tail -f --pid="$pid" "$server_log"
 }
 
