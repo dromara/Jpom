@@ -27,7 +27,6 @@ import cn.hutool.core.io.file.Tailer;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +38,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -71,17 +70,7 @@ public abstract class BaseFileTailWatcher<T> {
 
     public static Charset detectorCharset(File logFile) {
         Charset detSet = ExtConfigBean.getInstance().getLogFileCharset();
-        if (detSet == null) {
-            try {
-                String charsetName = (String) PluginFactory.getPlugin("charset-detector").execute(logFile);
-                detSet = StrUtil.isEmpty(charsetName) ? CharsetUtil.CHARSET_UTF_8 : CharsetUtil.charset(charsetName);
-            } catch (Exception e) {
-                log.warn("自动识别文件编码格式错误：{}", e.getMessage());
-                detSet = CharsetUtil.CHARSET_UTF_8;
-            }
-            detSet = (detSet == StandardCharsets.US_ASCII) ? CharsetUtil.CHARSET_UTF_8 : detSet;
-        }
-        return detSet;
+        return Optional.ofNullable(detSet).orElse(CharsetUtil.CHARSET_UTF_8);
     }
 
     protected void send(T session, String msg) {

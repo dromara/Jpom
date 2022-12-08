@@ -1,5 +1,3 @@
-
-
 ## 2.10.0
 
 ### 🐣 新增功能
@@ -20,3 +18,4 @@
 5. 【all】配置文件名称由 `extConfig.yml` 变更为 `application.yml`
 6. 【all】调整项目打包目录结构
 7. 【all】取消兼容低版本数据目录文件迁移（调试运行）
+8. 【all】取消自动识别文件编码格式模块 `auto-charset-jchardet`
