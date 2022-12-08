@@ -30,7 +30,7 @@ import java.lang.annotation.*;
  * 字段验证配置
  *
  * @author jiangzeyin
- * @date 2018/8/21.
+ * @since 2018/8/21.
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

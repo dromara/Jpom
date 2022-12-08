@@ -55,10 +55,7 @@ import java.util.function.Function;
 @Getter
 public class ExtConfigBean {
 
-    public static final String FILE_NAME = "extConfig.yml";
-
-    private static Resource resource;
-
+    public static final String FILE_NAME = "application.yml";
 
 
     /**
@@ -114,7 +111,6 @@ public class ExtConfigBean {
     }
 
 
-
     private static ExtConfigBean extConfigBean;
 
     /**
@@ -123,27 +119,16 @@ public class ExtConfigBean {
      * @return File
      */
     public static Resource getResource() {
-        if (resource != null) {
-            return resource;
-        }
-        String property = cn.hutool.extra.spring.SpringUtil.getApplicationContext().getEnvironment().getProperty(ConfigFileApplicationListener.CONFIG_LOCATION_PROPERTY);
+        String property = SpringUtil.getApplicationContext().getEnvironment().getProperty(ConfigFileApplicationListener.CONFIG_LOCATION_PROPERTY);
         Resource configResource = Opt.ofBlankAble(property)
             .map(FileSystemResource::new)
             .flatMap((Function<Resource, Opt<Resource>>) resource -> resource.exists() ? Opt.of(resource) : Opt.empty())
             .orElseGet(() -> {
-                ClassPathResource classPathResource = new ClassPathResource("application.yml");
-                return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/application.yml");
+                ClassPathResource classPathResource = new ClassPathResource(ExtConfigBean.FILE_NAME);
+                return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/" + FILE_NAME);
             });
         Assert.state(configResource.exists(), "均未找到配置文件");
-        resource = configResource;
-        return ExtConfigBean.resource;
-    }
-
-    public static File getResourceFile() {
-        File file = JpomManifest.getRunPath();
-        file = file.getParentFile().getParentFile();
-        file = FileUtil.file(file, FILE_NAME);
-        return file;
+        return configResource;
     }
 
     /**

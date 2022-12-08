@@ -69,7 +69,15 @@
     </root>
 
     <logger name="org.springframework.web.servlet.DispatcherServlet" additivity="false">
+        <!--  打印请求信息方式二-->
         <level value="debug"/>
+        <appender-ref ref="LOG-ROOT"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <!--请求响应日志-->
+    <logger name="io.jpom.system.WebAopLog" additivity="false">
+        <level value="INFO"/>
         <appender-ref ref="LOG-ROOT"/>
         <appender-ref ref="STDOUT"/>
     </logger>

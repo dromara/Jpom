@@ -49,7 +49,7 @@ import java.lang.reflect.Method;
  * 配置方法
  *
  * @author jiangzeyin
- * @date 2018/8/21.
+ * @since 2018/8/21.
  */
 @Slf4j
 @Configuration
