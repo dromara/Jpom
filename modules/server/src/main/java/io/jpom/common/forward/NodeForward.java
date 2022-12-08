@@ -47,15 +47,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * 节点请求转发
@@ -171,40 +172,22 @@ public class NodeForward {
         }
         //
         addUser(httpRequest, nodeModel, nodeUrl, userModel);
-
-        if (request != null) {
-            Map<String, String[]> params = request.getParameterMap();
-            Map params2 = new HashMap<>(params.size());
-            for (Map.Entry<String, String[]> entry : params.entrySet()) {
-                String[] values = entry.getValue();
-                if (values != null) {
-                    for (int i = 0, len = values.length; i < len; i++) {
-                        // 参数 URL 编码，避免 特殊符号 不生效
-                        values[i] = URLUtil.encodeAll(values[i]);
-                    }
-//                    entry.setValue(values);
-                }
-                params2.put(entry.getKey(), values);
-            }
-            httpRequest.form(params2);
-        }
+        Optional.ofNullable(request).map((Function<HttpServletRequest, Map>) ServletRequest::getParameterMap).ifPresent(httpRequest::form);
         httpRequest.form(pName, pVal, val);
         //
         if (jsonData != null) {
-            JSONObject clone = jsonData.clone();
             boolean hasFile = false;
             // 参数 URL 编码，避免 特殊符号 不生效
-            Set<Map.Entry<String, Object>> entries = clone.entrySet();
+            Set<Map.Entry<String, Object>> entries = jsonData.entrySet();
             for (Map.Entry<String, Object> entry : entries) {
                 Object value = entry.getValue();
-                if (value instanceof String) {
-                    entry.setValue(URLUtil.encodeAll((String) value));
-                } else if (value instanceof File) {
+                if (value instanceof File) {
                     // 标记上传文件
                     hasFile = true;
+                    break;
                 }
             }
-            httpRequest.form(clone);
+            httpRequest.form(jsonData);
             if (hasFile) {
                 httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
             }

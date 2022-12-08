@@ -104,7 +104,7 @@ public class ScriptController extends BaseAgentController {
         }
         nodeScriptModel.setWorkspaceId(getWorkspaceId());
         //
-        nodeScriptModel.setContext(HtmlUtil.unescape(nodeScriptModel.getContext()));
+        nodeScriptModel.setContext(nodeScriptModel.getContext());
         NodeScriptModel eModel = nodeScriptServer.getItem(nodeScriptModel.getId());
         boolean needCreate = false;
         if ("add".equalsIgnoreCase(type)) {
