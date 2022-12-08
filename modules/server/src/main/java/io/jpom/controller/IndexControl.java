@@ -57,6 +57,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -234,8 +235,9 @@ public class IndexControl extends BaseServerController {
     @NotLogin
     @RequestMapping(value = "check-system", produces = MediaType.APPLICATION_JSON_VALUE)
     public String checkSystem() {
+        HttpServletRequest request = getRequest();
         JSONObject data = new JSONObject();
-        data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH));
+        data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH));
         //
         ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
         data.put("name", instance.getName());

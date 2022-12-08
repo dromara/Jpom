@@ -26,7 +26,7 @@ package io.jpom.common.validator;
  * 错误条件
  *
  * @author jiangzeyin
- * @date 2018/12/25
+ * @since 2018/12/25
  */
 public enum ErrorCondition {
     /**

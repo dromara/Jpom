@@ -29,7 +29,7 @@ import cn.hutool.system.UserInfo;
  * 上传文件保存路径
  *
  * @author jiangzeyin
- * @date 2017/10/25
+ * @since 2017/10/25
  */
 public class MultipartFileConfig {
 

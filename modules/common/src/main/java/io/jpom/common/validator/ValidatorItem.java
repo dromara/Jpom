@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * 验证规则
  *
  * @author jiangzeyin
- * @date 2018/8/21
+ * @since 2018/8/21
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

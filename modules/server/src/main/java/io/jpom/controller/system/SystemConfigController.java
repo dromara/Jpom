@@ -138,7 +138,7 @@ public class SystemConfigController extends BaseServerController {
     @PostMapping(value = "save_config.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission(superUser = true)
-    public String saveConfig(String nodeId, String content, String restart) throws IOException, SQLException {
+    public String saveConfig(String nodeId, String content, String restart) throws SQLException, IOException {
         if (StrUtil.isNotEmpty(nodeId)) {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemSaveConfig).toString();
         }
@@ -175,10 +175,9 @@ public class SystemConfigController extends BaseServerController {
             Assert.state(restartBool, "修改数据库密码必须重启");
             initDb.alterUser(oldDbExtConfigUserName, newDbExtConfigUserName, newDbExtConfigUserPwd);
         }
-        Assert.state(!JpomManifest.getInstance().isDebug(), "调试模式下不支持在线修改,请到resources目录下的bin目录修改extConfig.yml");
-
-        File resourceFile = ExtConfigBean.getResourceFile();
-        FileUtil.writeString(content, resourceFile, CharsetUtil.CHARSET_UTF_8);
+        Resource resource = ExtConfigBean.getResource();
+        Assert.state(resource.isFile(), "当前环境下不支持在线修改配置文件");
+        FileUtil.writeString(content, resource.getFile(), CharsetUtil.CHARSET_UTF_8);
 
         if (restartBool) {
             // 重启

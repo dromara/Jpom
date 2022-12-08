@@ -26,7 +26,7 @@ package io.jpom.common.validator;
  * 验证规则
  *
  * @author jiangzeyin
- * @date 2018/8/21.
+ * @since  2018/8/21.
  */
 public enum ValidatorRule {
     /**
