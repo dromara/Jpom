@@ -22,22 +22,17 @@
  */
 package io.jpom.system;
 
-import ch.qos.logback.core.PropertyDefinerBase;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Console;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.jiangzeyin.common.interceptor.BaseCallbackController;
-import io.jpom.JpomApplication;
-import io.jpom.common.JpomManifest;
-import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.io.File;
+import java.util.Collection;
 
 /**
  * 自动记录日志
@@ -48,63 +43,38 @@ import java.io.File;
 @Aspect
 @Component
 @Slf4j
-public class WebAopLog extends PropertyDefinerBase {
+public class WebAopLog {
 
-	private static volatile AopLogInterface aopLogInterface;
+    private final Collection<AopLogInterface> aopLogInterface;
 
-	synchronized public static void setAopLogInterface(AopLogInterface aopLogInterface) {
-		WebAopLog.aopLogInterface = aopLogInterface;
-	}
+    public WebAopLog() {
+        this.aopLogInterface = SpringUtil.getBeansOfType(AopLogInterface.class).values();
+    }
 
-	@Pointcut("execution(public * io.jpom.controller..*.*(..))")
-	public void webLog() {
-		//
-	}
+    @Pointcut("execution(public * io.jpom.controller..*.*(..))")
+    public void webLog() {
+        //
+    }
 
-	@Around(value = "webLog()", argNames = "joinPoint")
-	public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-		// 接收到请求，记录请求内容
-		boolean consoleLogReqResponse = ExtConfigBean.getInstance().isConsoleLogReqResponse();
-		Object proceed;
-		Object logResult = null;
-		try {
-			if (aopLogInterface != null) {
-				aopLogInterface.before(joinPoint);
-			}
-			proceed = joinPoint.proceed();
-			logResult = proceed;
-		} catch (Throwable e) {
-			logResult = e;
-			throw e;
-		} finally {
-			if (aopLogInterface != null) {
-				aopLogInterface.afterReturning(logResult);
-			}
-		}
-		if (consoleLogReqResponse && logResult != null) {
-			log.info(BaseCallbackController.getRequestAttributes().getRequest().getRequestURI() + " :" + logResult);
-		}
-		return proceed;
-	}
-
-	@Override
-	public String getPropertyValue() {
-		String path = StringUtil.getArgsValue(JpomApplication.getArgs(), "jpom.log");
-		if (StrUtil.isEmpty(path)) {
-			//
-			File file = JpomManifest.getRunPath();
-			if (file.isFile()) {
-				// jar 运行模式
-				file = file.getParentFile().getParentFile();
-			} else {
-				// 本地调试模式 @author jzy 2021-08-02 程序运行时候不影响打包
-				file = FileUtil.file(FileUtil.getParent(file, 2), "log");
-				Console.log("log file save path ：" + FileUtil.getAbsolutePath(file));
-			}
-			path = FileUtil.getAbsolutePath(file);
-		}
-		// 配置默认日志路径
-		//        DefaultSystemLog.configPath(path, false);
-		return path;
-	}
+    @Around(value = "webLog()", argNames = "joinPoint")
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+        // 接收到请求，记录请求内容
+        Object proceed;
+        Object logResult = null;
+        ServletRequestAttributes requestAttributes = BaseCallbackController.getRequestAttributes();
+        try {
+            aopLogInterface.forEach(aopLogInterface -> aopLogInterface.before(joinPoint));
+            proceed = joinPoint.proceed();
+            logResult = proceed;
+            log.debug("{} {}", requestAttributes.getRequest().getRequestURI(), proceed);
+        } catch (Throwable e) {
+            log.debug("{}", requestAttributes.getRequest().getRequestURI(), e);
+            logResult = e;
+            throw e;
+        } finally {
+            Object finalLogResult = logResult;
+            aopLogInterface.forEach(aopLogInterface -> aopLogInterface.afterReturning(finalLogResult));
+        }
+        return proceed;
+    }
 }

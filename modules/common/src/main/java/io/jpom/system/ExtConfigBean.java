@@ -24,6 +24,7 @@ package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -33,13 +34,16 @@ import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.function.Function;
 
 /**
  * 外部资源配置
@@ -59,11 +63,7 @@ public class ExtConfigBean {
      */
     @Value("${consoleLog.reqXss:true}")
     private boolean consoleLogReqXss;
-    /**
-     * 请求响应
-     */
-    @Value("${consoleLog.reqResponse:true}")
-    private boolean consoleLogReqResponse;
+
 
     /**
      * 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
@@ -117,10 +117,6 @@ public class ExtConfigBean {
         return logFileCharset;
     }
 
-    public boolean isConsoleLogReqResponse() {
-        return consoleLogReqResponse;
-    }
-
     public boolean isConsoleLogReqXss() {
         return consoleLogReqXss;
     }
@@ -136,16 +132,16 @@ public class ExtConfigBean {
         if (resource != null) {
             return resource;
         }
-        File file = JpomManifest.getRunPath();
-        if (file.isFile()) {
-            file = file.getParentFile().getParentFile();
-            file = FileUtil.file(file, FILE_NAME);
-            if (file.exists() && file.isFile()) {
-                resource = new FileSystemResource(file);
-                return ExtConfigBean.resource;
-            }
-        }
-        resource = new ClassPathResource("/bin/" + FILE_NAME);
+        String property = cn.hutool.extra.spring.SpringUtil.getApplicationContext().getEnvironment().getProperty(ConfigFileApplicationListener.CONFIG_LOCATION_PROPERTY);
+        Resource configResource = Opt.ofBlankAble(property)
+            .map(FileSystemResource::new)
+            .flatMap((Function<Resource, Opt<Resource>>) resource -> resource.exists() ? Opt.of(resource) : Opt.empty())
+            .orElseGet(() -> {
+                ClassPathResource classPathResource = new ClassPathResource("application.yml");
+                return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/application.yml");
+            });
+        Assert.state(configResource.exists(), "均未找到配置文件");
+        resource = configResource;
         return ExtConfigBean.resource;
     }
 

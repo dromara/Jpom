@@ -22,20 +22,12 @@
  */
 package io.jpom.system.extconf;
 
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.lang.Dict;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.setting.yaml.YamlUtil;
 import io.jpom.system.db.DbConfig;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.StringWriter;
 
 /**
  * 数据库配置

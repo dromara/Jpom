@@ -25,10 +25,10 @@ package io.jpom.common.interceptor;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.jwt.JWT;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.user.UserService;
@@ -71,7 +71,8 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
         HttpSession session = getSession();
-        boolean init = DbConfig.getInstance().isInit();
+        DbConfig dbConfig = SpringUtil.getBean(DbConfig.class);
+        boolean init = dbConfig.isInit();
         if (!init) {
             ServletUtil.write(response, JsonMessage.getString(100, "数据库还没有初始化成功,请耐心等待"), MediaType.APPLICATION_JSON_VALUE);
             return false;

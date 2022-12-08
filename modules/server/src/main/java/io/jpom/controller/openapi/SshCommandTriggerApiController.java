@@ -24,11 +24,11 @@ package io.jpom.controller.openapi;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseJpomController;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.CommandModel;

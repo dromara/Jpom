@@ -147,7 +147,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
-        init();
+        //init();
         // 扫描插件 实现
         Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom", IPlugin.class::isAssignableFrom);
         List<PluginItemWrap> pluginItemWraps = classes

@@ -23,9 +23,9 @@
 package io.jpom.socket;
 
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.service.script.NodeScriptServer;

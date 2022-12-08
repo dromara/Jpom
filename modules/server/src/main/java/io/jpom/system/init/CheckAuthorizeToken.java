@@ -24,12 +24,12 @@ package io.jpom.system.init;
 
 import cn.hutool.core.text.PasswdStrength;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.PreLoadClass;
-import cn.jiangzeyin.common.PreLoadMethod;
 import io.jpom.JpomApplication;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.ServerExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Configuration;
 
 import static cn.hutool.core.text.PasswdStrength.PASSWD_LEVEL.EASY;
 import static cn.hutool.core.text.PasswdStrength.PASSWD_LEVEL.MIDIUM;
@@ -40,13 +40,18 @@ import static cn.hutool.core.text.PasswdStrength.PASSWD_LEVEL.MIDIUM;
  * @author bwcx_jzy
  * @since 2019/8/5
  */
-@PreLoadClass
+@Configuration
 @Slf4j
-public class CheckAuthorizeToken {
+public class CheckAuthorizeToken implements InitializingBean {
 
-    @PreLoadMethod
-    private static void check() {
-        String authorizeToken = ServerExtConfigBean.getInstance().getAuthorizeToken();
+    private final ServerExtConfigBean extConfigBean;
+
+    public CheckAuthorizeToken(ServerExtConfigBean extConfigBean) {
+        this.extConfigBean = extConfigBean;
+    }
+
+    private void check() {
+        String authorizeToken = extConfigBean.getAuthorizeToken();
         if (StrUtil.isEmpty(authorizeToken)) {
             return;
         }
@@ -61,5 +66,10 @@ public class CheckAuthorizeToken {
             //log.error("配置的授权token 需要包含数字，字母，符号的组合", new JpomRuntimeException("配置的授权token 需要包含数字，字母，符号的组合"));
             //System.exit(-1);
         }
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.check();
     }
 }

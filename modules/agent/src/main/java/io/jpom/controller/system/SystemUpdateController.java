@@ -29,7 +29,6 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import io.jpom.JpomApplication;
 import io.jpom.common.*;

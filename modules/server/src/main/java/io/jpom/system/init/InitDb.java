@@ -24,8 +24,9 @@ package io.jpom.system.init;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.CheckedUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.lang.Console;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -33,33 +34,34 @@ import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.ds.GlobalDSFactory;
 import cn.hutool.db.sql.SqlLog;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.setting.Setting;
-import cn.jiangzeyin.common.PreLoadClass;
-import cn.jiangzeyin.common.PreLoadMethod;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
-import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
-import io.jpom.model.user.UserModel;
+import io.jpom.model.data.BackupInfoModel;
+import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.h2db.BaseNodeService;
-import io.jpom.service.system.WorkspaceService;
-import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import io.jpom.system.extconf.DbExtConfig;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -70,15 +72,22 @@ import java.util.stream.Collectors;
  * @author jiangzeyin
  * @since 2019/4/19
  */
-@PreLoadClass(value = Integer.MIN_VALUE + 1)
 @Configuration
 @Slf4j
-public class InitDb implements DisposableBean, InitializingBean {
+public class InitDb implements DisposableBean, ApplicationContextAware {
 
-    private static final List<Runnable> BEFORE_CALLBACK = new LinkedList<>();
-    private static final List<Supplier<Boolean>> AFTER_CALLBACK = new LinkedList<>();
+    private final List<Runnable> BEFORE_CALLBACK = new LinkedList<>();
+    private final List<Supplier<Boolean>> AFTER_CALLBACK = new LinkedList<>();
 
-    public static void addBeforeCallback(Runnable consumer) {
+    public InitDb(DbConfig dbConfig,
+                  ServerExtConfigBean serverExtConfigBean,
+                  DbExtConfig dbExtConfig) {
+        this.dbConfig = dbConfig;
+        this.serverExtConfigBean = serverExtConfigBean;
+        this.dbExtConfig = dbExtConfig;
+    }
+
+    public void addBeforeCallback(Runnable consumer) {
         BEFORE_CALLBACK.add(consumer);
     }
 
@@ -87,22 +96,23 @@ public class InitDb implements DisposableBean, InitializingBean {
      *
      * @param supplier 回调，返回 true 需要重新初始化数据库
      */
-    public static void addCallback(Supplier<Boolean> supplier) {
+    public void addCallback(Supplier<Boolean> supplier) {
         AFTER_CALLBACK.add(supplier);
     }
 
-    @PreLoadMethod(value = Integer.MIN_VALUE)
-    private static void init() {
-        DbConfig instance = DbConfig.getInstance();
-        ServerExtConfigBean serverExtConfigBean = ServerExtConfigBean.getInstance();
-        DbExtConfig dbExtConfig = SpringUtil.getBean(DbExtConfig.class);
+    private final DbConfig dbConfig;
+    private final ServerExtConfigBean serverExtConfigBean;
+    private final DbExtConfig dbExtConfig;
+
+    private void init() {
+
         //
         dbSecurityCheck(serverExtConfigBean, dbExtConfig);
         //
         BEFORE_CALLBACK.forEach(Runnable::run);
         //
         Setting setting = new Setting();
-        String dbUrl = instance.getDbUrl();
+        String dbUrl = dbConfig.getDbUrl();
         setting.set("url", dbUrl);
         setting.set("user", dbExtConfig.getUserName());
         setting.set("pass", dbExtConfig.getUserPwd());
@@ -124,13 +134,13 @@ public class InitDb implements DisposableBean, InitializingBean {
             setting.set(SqlLog.KEY_SQL_LEVEL, "DEBUG");
             setting.set(SqlLog.KEY_SHOW_PARAMS, "true");
         }
-        Console.log("start load h2 db");
+        log.info("start load h2 db");
         final String[] sqlFileNow = {StrUtil.EMPTY};
         try {
             // 创建连接
             DSFactory dsFactory = DSFactory.create(setting);
             // 先执行恢复数据
-            instance.executeRecoverDbSql(dsFactory);
+            dbConfig.executeRecoverDbSql(dsFactory);
 			/*
 			  @author Hotstrip
 			  add another sql init file, if there are more sql file,
@@ -139,7 +149,7 @@ public class InitDb implements DisposableBean, InitializingBean {
             PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
             Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath:/sql/*.sql");
             // 加载 sql 变更记录，避免重复执行
-            Set<String> executeSqlLog = instance.loadExecuteSqlLog();
+            Set<String> executeSqlLog = dbConfig.loadExecuteSqlLog();
             // 过滤 temp sql
             List<Resource> resourcesList = Arrays.stream(resources)
                 .sorted((o1, o2) -> StrUtil.compare(o1.getFilename(), o2.getFilename(), true))
@@ -150,7 +160,7 @@ public class InitDb implements DisposableBean, InitializingBean {
             // 第一次初始化数据库
             tryInitSql(resourcesList, executeSqlLog, dataSource, s -> sqlFileNow[0] = s);
             //
-            instance.saveExecuteSqlLog(executeSqlLog);
+            dbConfig.saveExecuteSqlLog(executeSqlLog);
             GlobalDSFactory.set(dsFactory);
             // 执行回调方法
             long count = AFTER_CALLBACK.stream().mapToInt(value -> value.get() ? 1 : 0).count();
@@ -165,10 +175,10 @@ public class InitDb implements DisposableBean, InitializingBean {
             System.exit(0);
             return;
         }
-        instance.initOk();
+        dbConfig.initOk();
         // json load to db
         InitDb.loadJsonToDb();
-        Console.log("h2 db Successfully loaded, url is 【{}】", dbUrl);
+        log.info("h2 db Successfully loaded, url is 【{}】", dbUrl);
         syncAllNode();
     }
 
@@ -204,7 +214,7 @@ public class InitDb implements DisposableBean, InitializingBean {
      * @param serverExtConfigBean 服务端配置
      * @param dbExtConfig         外部配置
      */
-    private static void dbSecurityCheck(ServerExtConfigBean serverExtConfigBean, DbExtConfig dbExtConfig) {
+    private void dbSecurityCheck(ServerExtConfigBean serverExtConfigBean, DbExtConfig dbExtConfig) {
         if (!JpomManifest.getInstance().isDebug() && serverExtConfigBean.isH2ConsoleEnabled()
             && StrUtil.equals(dbExtConfig.getUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
             && StrUtil.equals(dbExtConfig.getUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
@@ -235,39 +245,12 @@ public class InitDb implements DisposableBean, InitializingBean {
 		  @since 2021-08-03
 		  load build.js data to DB
 		 */
-        LoadBuildJsonToDB.getInstance().doJsonToSql();
+        //LoadBuildJsonToDB.getInstance().doJsonToSql();
         // @author bwcx_jzy @since 2021-12-02
-        LoadJsonConfigToDb instance = LoadJsonConfigToDb.getInstance();
+        // LoadJsonConfigToDb instance = LoadJsonConfigToDb.getInstance();
         // init workspace
-        WorkspaceService workspaceService = SpringUtil.getBean(WorkspaceService.class);
-        try {
-            BaseServerController.resetInfo(UserModel.EMPTY);
-            //
-            instance.loadIpConfig();
-            instance.loadMailConfig();
-            instance.loadOutGivingWhitelistConfig();
-            //
-            instance.loadUserInfo();
-            workspaceService.checkInitDefault();
-            //
-            instance.loadNodeInfo();
-            instance.loadSshInfo();
-            instance.loadMonitorInfo();
-            instance.loadOutgivinInfo();
-        } catch (JpomRuntimeException jpomRuntimeException) {
-            Integer exitCode = jpomRuntimeException.getExitCode();
-            if (exitCode != null) {
-                Console.error(jpomRuntimeException.getMessage());
-                System.exit(exitCode);
-            } else {
-                throw Lombok.sneakyThrow(jpomRuntimeException);
-            }
-        } finally {
-            BaseServerController.removeEmpty();
-        }
-        //
-        workspaceService.convertNullWorkspaceId();
-        instance.convertMonitorLogField();
+//        WorkspaceService workspaceService = SpringUtil.getBean(WorkspaceService.class);
+
         //
         Map<String, BaseGroupService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseGroupService.class);
         for (BaseGroupService<?> value : groupServiceMap.values()) {
@@ -283,13 +266,14 @@ public class InitDb implements DisposableBean, InitializingBean {
         }
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-//        String[] signalArray = new String[]{"TERM"};
-//        for (String s : signalArray) {
-//            this.silenceSignalHandle(s);
-//        }
-    }
+//    @Override
+//    public void afterPropertiesSet() throws Exception {
+////        String[] signalArray = new String[]{"TERM"};
+////        for (String s : signalArray) {
+////            this.silenceSignalHandle(s);
+////        }
+//
+//    }
 
     @Override
     public void destroy() throws Exception {
@@ -306,15 +290,94 @@ public class InitDb implements DisposableBean, InitializingBean {
 //    }
 
     private void silenceDestroy() {
-        DbConfig.getInstance().close();
+        dbConfig.close();
         try {
             DSFactory dsFactory = GlobalDSFactory.get();
             GlobalDSFactory.set(null);
             dsFactory.destroy();
-            Console.log("h2 db destroy");
+            log.info("h2 db destroy");
         } catch (Throwable throwable) {
             //System.err.println(throwable.getMessage());
         }
+    }
+
+    //    @Override
+    private void onApplicationEvent(Environment environment) {
+        Opt.ofBlankAble(environment.getProperty("rest:load_init_db")).ifPresent(s -> {
+            // 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
+            dbConfig.clearExecuteSqlLog();
+        });
+        Opt.ofBlankAble(environment.getProperty("recover:h2db")).ifPresent(s -> {
+            // 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
+            try {
+                dbConfig.recoverDb();
+            } catch (Exception e) {
+                e.printStackTrace();
+                JpomApplication.consoleExit(-2, "Failed to restore database：{}", e.getMessage());
+            }
+        });
+        Opt.ofBlankAble(environment.getProperty("backup-h2")).ifPresent(s -> {
+            // 备份数据库
+            this.addCallback(() -> {
+                log.info("Start backing up the database");
+                BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
+                Future<BackupInfoModel> backupInfoModelFuture = backupInfoService.autoBackup();
+                try {
+                    BackupInfoModel backupInfoModel = backupInfoModelFuture.get();
+                    JpomApplication.consoleExit(0, "Complete the backup database, save the path as {}", backupInfoModel.getFilePath());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JpomApplication.consoleExit(-2, "Backup database failed：{}", e.getMessage());
+                }
+                return false;
+            });
+        });
+        // 导入数据
+        Opt.ofBlankAble(environment.getProperty("import-h2-sql")).ifPresent(this::importH2Sql);
+        Opt.ofBlankAble(environment.getProperty("replace-import-h2-sql")).ifPresent(s -> {
+            // 删除掉旧数据
+            this.addBeforeCallback(() -> {
+                try {
+                    String dbFiles = dbConfig.deleteDbFiles();
+                    if (dbFiles != null) {
+                        log.info("Automatically backup data files to {} path", dbFiles);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JpomApplication.consoleExit(-2, "Failed to import according to sql,{}", s);
+                }
+            });
+            // 导入数据
+            importH2Sql(s);
+        });
+    }
+
+    private void importH2Sql(String importH2Sql) {
+        Environment environment = SpringUtil.getApplicationContext().getEnvironment();
+        this.addCallback(() -> {
+            File file = FileUtil.file(importH2Sql);
+            String sqlPath = FileUtil.getAbsolutePath(file);
+            if (!FileUtil.isFile(file)) {
+                JpomApplication.consoleExit(2, "sql file does not exist :{}", sqlPath);
+            }
+            //
+            Opt.ofBlankAble(environment.getProperty("transform-sql")).ifPresent(s -> dbConfig.transformSql(file));
+            //
+            log.info("Start importing data:{}", sqlPath);
+            BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
+            boolean flag = backupInfoService.restoreWithSql(sqlPath);
+            if (!flag) {
+                JpomApplication.consoleExit(2, "Failed to import according to sql,{}", sqlPath);
+            }
+            log.info("Import successfully according to sql,{}", sqlPath);
+            return true;
+        });
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.onApplicationEvent(applicationContext.getEnvironment());
+        init();
     }
 
 //    @Override

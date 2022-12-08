@@ -30,11 +30,11 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
@@ -45,9 +45,11 @@ import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
@@ -63,11 +65,12 @@ import java.util.stream.Collectors;
 public class NodeService extends BaseGroupService<NodeModel> {
 
     private final SshService sshService;
-    private final WorkspaceService workspaceService;
+    @Resource
+    @Lazy
+    private WorkspaceService workspaceService;
 
-    public NodeService(SshService sshService, WorkspaceService workspaceService) {
+    public NodeService(SshService sshService) {
         this.sshService = sshService;
-        this.workspaceService = workspaceService;
     }
 
     @Override

@@ -25,12 +25,11 @@ package io.jpom.controller.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.permission.ClassFeature;
@@ -38,7 +37,7 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.socket.ServiceFileTailWatcher;
-import io.jpom.system.WebAopLog;
+import io.jpom.system.LogbackConfig;
 import io.jpom.util.LayuiTreeUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -68,8 +67,7 @@ public class LogManageController extends BaseServerController {
         if (StrUtil.isNotEmpty(nodeId)) {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemLog).toString();
         }
-        WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
-        JSONArray data = LayuiTreeUtil.getTreeData(webAopLog.getPropertyValue());
+        JSONArray data = LayuiTreeUtil.getTreeData(LogbackConfig.getPath());
         return JsonMessage.getString(200, "", data);
     }
 
@@ -87,8 +85,7 @@ public class LogManageController extends BaseServerController {
         if (StrUtil.isNotEmpty(nodeId)) {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.DelSystemLog).toString();
         }
-        WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
-        File file = FileUtil.file(webAopLog.getPropertyValue(), path);
+        File file = FileUtil.file(LogbackConfig.getPath(), path);
         // 判断修改时间
         long modified = file.lastModified();
         Assert.state(System.currentTimeMillis() - modified > TimeUnit.DAYS.toMillis(1), "不能删除近一天相关的日志(文件修改时间)");
@@ -110,8 +107,7 @@ public class LogManageController extends BaseServerController {
             NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.DownloadSystemLog);
             return;
         }
-        WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
-        File file = FileUtil.file(webAopLog.getPropertyValue(), path);
+        File file = FileUtil.file(LogbackConfig.getPath(), path);
         if (file.isFile()) {
             ServletUtil.write(getResponse(), file);
         }

@@ -22,9 +22,9 @@
  */
 package io.jpom.controller.node.system.nginx;
 
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.permission.ClassFeature;

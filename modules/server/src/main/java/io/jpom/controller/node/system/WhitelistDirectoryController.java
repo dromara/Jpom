@@ -23,8 +23,8 @@
 package io.jpom.controller.node.system;
 
 import cn.hutool.core.util.ReflectUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.AgentWhitelist;

@@ -35,10 +35,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.UrlRedirectUtil;
 import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
@@ -48,7 +48,6 @@ import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
@@ -304,13 +303,13 @@ public class IndexControl extends BaseServerController {
     }
 
     private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel, JSONArray showArray) {
-        String active = jsonObject.getString("active");
-        if (StrUtil.isNotEmpty(active)) {
-            String active1 = ConfigBean.getInstance().getActive();
-            if (!StrUtil.equals(active, active1)) {
-                return false;
-            }
-        }
+//        String active = jsonObject.getString("active");
+//        if (StrUtil.isNotEmpty(active)) {
+//            String active1 = ConfigBean.getInstance().getActive();
+//            if (!StrUtil.equals(active, active1)) {
+//                return false;
+//            }
+//        }
         String role = jsonObject.getString("role");
         if (StrUtil.equals(role, UserModel.SYSTEM_ADMIN) && !userModel.isSuperSystemUser()) {
             // 超级理员权限

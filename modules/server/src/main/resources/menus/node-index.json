@@ -12,11 +12,6 @@
       {
         "id": "manageList",
         "title": "项目列表"
-      },
-      {
-        "id": "jdkList",
-        "title": "JDK管理",
-        "role": "system"
       }
     ]
   },
@@ -25,11 +20,7 @@
     "title": "其他功能",
     "icon_v3": "more",
     "childs": [
-      {
-        "id": "tomcatManage",
-        "title": "Tomcat管理",
-        "role": "system"
-      },
+
       {
         "id": "script",
         "title": "脚本模板"

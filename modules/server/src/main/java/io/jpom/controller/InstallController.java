@@ -24,7 +24,6 @@ package io.jpom.controller;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
@@ -32,6 +31,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.WorkspaceModel;

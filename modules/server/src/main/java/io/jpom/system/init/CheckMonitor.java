@@ -24,12 +24,12 @@ package io.jpom.system.init;
 
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;

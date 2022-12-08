@@ -24,8 +24,8 @@ package io.jpom.controller.openapi;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;

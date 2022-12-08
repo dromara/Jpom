@@ -26,8 +26,10 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.exceptions.ValidateException;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import io.jpom.system.*;
+import io.jpom.system.AgentException;
+import io.jpom.system.AuthorizeException;
+import io.jpom.system.JpomRuntimeException;
+import io.jpom.system.ServerConfigBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -102,10 +104,8 @@ public class GlobalDefaultExceptionHandler extends BaseExceptionHandler {
      */
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ValidateException.class})
     public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        if (!ConfigBean.getInstance().isPro()) {
-            // 只是本地调试才输出日志
-            log.error("controller " + request.getRequestURI(), e);
-        }
+        // 默认不输出 参数异常相关信息
+        log.debug("controller " + request.getRequestURI(), e);
         String message = e.getMessage();
         if (ObjectUtil.equals(message, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE)) {
             ServletUtil.write(response, JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, ServerConfigBean.LOGIN_TIP), MediaType.APPLICATION_JSON_VALUE);

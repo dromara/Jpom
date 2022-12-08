@@ -32,7 +32,6 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.model.BaseJsonModel;

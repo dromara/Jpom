@@ -23,9 +23,9 @@
 package io.jpom.controller.monitor;
 
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.monitor.EmailUtil;
 import io.jpom.permission.ClassFeature;

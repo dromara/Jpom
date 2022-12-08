@@ -44,6 +44,7 @@ import org.h2.jdbc.JdbcSQLNonTransientException;
 import org.h2.mvstore.MVStoreException;
 import org.springframework.util.Assert;
 
+import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,6 +75,9 @@ public abstract class BaseDbCommonService<T> {
      * 主键
      */
     protected final String key;
+
+    @Resource
+    private DbConfig dbConfig;
 
     @SuppressWarnings("unchecked")
     public BaseDbCommonService(String tableName, String key) {
@@ -107,7 +111,7 @@ public abstract class BaseDbCommonService<T> {
      * @param t 数据
      */
     public void insert(T t) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return;
@@ -131,7 +135,7 @@ public abstract class BaseDbCommonService<T> {
         if (CollUtil.isEmpty(t)) {
             return;
         }
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return;
@@ -167,7 +171,7 @@ public abstract class BaseDbCommonService<T> {
      * @return 影响行数
      */
     public int insert(Entity entity) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
@@ -200,7 +204,7 @@ public abstract class BaseDbCommonService<T> {
      * @return 影响行数
      */
     public int update(Entity entity, Entity where) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
@@ -251,7 +255,7 @@ public abstract class BaseDbCommonService<T> {
         if (StrUtil.isEmpty(keyValue)) {
             return null;
         }
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return null;
@@ -333,7 +337,7 @@ public abstract class BaseDbCommonService<T> {
         //		if (ObjectUtil.isEmpty(keyValue)) {
         //			return 0;
         //		}
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
@@ -356,7 +360,7 @@ public abstract class BaseDbCommonService<T> {
      * @return 影响行数
      */
     public int del(Entity where) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
@@ -403,7 +407,7 @@ public abstract class BaseDbCommonService<T> {
      * @return count
      */
     public long count(Entity where) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
@@ -425,7 +429,7 @@ public abstract class BaseDbCommonService<T> {
      * @return count
      */
     public long count(String sql, Object... params) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;
@@ -466,7 +470,7 @@ public abstract class BaseDbCommonService<T> {
      * @return List
      */
     public List<Entity> queryList(Entity where) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return null;
@@ -488,7 +492,7 @@ public abstract class BaseDbCommonService<T> {
      * @return List
      */
     public List<T> findByCondition(Condition... wheres) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return null;
@@ -528,7 +532,7 @@ public abstract class BaseDbCommonService<T> {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public PageResultDto<T> listPage(Entity where, Page page) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return PageResultDto.EMPTY;
@@ -576,7 +580,7 @@ public abstract class BaseDbCommonService<T> {
      * @return list
      */
     public List<Entity> query(String sql, Object... params) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return null;
@@ -596,7 +600,7 @@ public abstract class BaseDbCommonService<T> {
      * @return list
      */
     public int execute(String sql, Object... params) {
-        if (!DbConfig.getInstance().isInit()) {
+        if (!dbConfig.isInit()) {
             // ignore
             log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
             return 0;

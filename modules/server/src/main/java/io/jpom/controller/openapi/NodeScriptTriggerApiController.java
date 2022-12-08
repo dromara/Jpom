@@ -24,10 +24,10 @@ package io.jpom.controller.openapi;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseJpomController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -47,7 +47,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
