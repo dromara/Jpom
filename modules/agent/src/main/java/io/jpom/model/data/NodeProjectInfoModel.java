@@ -139,26 +139,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return runMode;
     }
 
-    public String getJvm() {
-        String s = StrUtil.emptyToDefault(jvm, StrUtil.EMPTY);
-
-        return HtmlUtil.unescape(s);
-
-    }
-
-    public void setJvm(String jvm) {
-
-        this.jvm = HtmlUtil.unescape(jvm);
-    }
-
-    public Boolean getAutoStart() {
-        return autoStart;
-    }
-
-    public void setAutoStart(Boolean autoStart) {
-        this.autoStart = autoStart;
-    }
-
 
     public String getMainClass() {
         return StrUtil.emptyToDefault(mainClass, StrUtil.EMPTY);
@@ -175,9 +155,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         this.whitelistDirectory = whitelistDirectory;
     }
 
-    public String getLib() {
-        return lib;
-    }
 
     public String allLib() {
         return FileUtil.file(this.getWhitelistDirectory(), this.getLib()).getAbsolutePath();
@@ -329,21 +306,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return StrUtil.emptyToDefault(token, StrUtil.EMPTY);
     }
 
-    public String getArgs() {
-        String s = StrUtil.emptyToDefault(args, StrUtil.EMPTY);
-
-        s = HtmlUtil.unescape(s);
-
-        return s;
-    }
-
-    public void setArgs(String args) {
-
-        this.args = HtmlUtil.unescape(args);
-
-    }
-
-
     public JavaCopyItem findCopyItem(String copyId) {
         if (StrUtil.isEmpty(copyId)) {
             return null;
@@ -479,34 +441,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 
         public String getParentId() {
             return StrUtil.emptyToDefault(this.parentId, this.parendId);
-        }
-
-        public void setParentId(String parentId) {
-            this.parentId = parentId;
-        }
-
-        public String getJvm() {
-
-            return HtmlUtil.unescape(jvm);
-
-        }
-
-        public void setJvm(String jvm) {
-
-            this.jvm = HtmlUtil.unescape(jvm);
-
-        }
-
-        public String getArgs() {
-
-            return HtmlUtil.unescape(args);
-
-        }
-
-        public void setArgs(String args) {
-
-            this.args = HtmlUtil.unescape(args);
-
         }
 
 

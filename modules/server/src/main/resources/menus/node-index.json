@@ -17,8 +17,8 @@
   },
   {
     "id": "otherM",
-    "title": "其他功能",
-    "icon_v3": "more",
+    "title": "脚本管理",
+    "icon_v3": "code",
     "childs": [
 
       {

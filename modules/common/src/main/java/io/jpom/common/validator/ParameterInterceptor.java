@@ -28,6 +28,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.HtmlUtil;
+import io.jpom.common.BaseJpomController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.interceptor.HandlerMethodInterceptor;
 import lombok.extern.slf4j.Slf4j;
@@ -416,6 +417,11 @@ public class ParameterInterceptor implements HandlerMethodInterceptor {
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        BaseJpomController.clearResources();
     }
 
     /**
