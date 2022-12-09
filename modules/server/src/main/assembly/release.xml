@@ -44,7 +44,14 @@
             </includes>
             <lineEnding>unix</lineEnding>
         </fileSet>
-
+        <fileSet>
+            <directory>./src/main/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>BlockListener.sh</include>
+            </includes>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
         <fileSet>
             <directory>./src/main/bin</directory>
             <outputDirectory>bin</outputDirectory>

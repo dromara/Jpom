@@ -54,7 +54,7 @@ HEALTHCHECK CMD curl -X POST -f http://localhost:2122/check-system || exit 1
 
 EXPOSE 2122
 
-ENTRYPOINT ["/bin/bash", "Server.sh", "start"]
+ENTRYPOINT ["/bin/bash", "./bin/BlockListener.sh"]
 
 
 
