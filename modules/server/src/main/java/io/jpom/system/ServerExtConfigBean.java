@@ -85,12 +85,6 @@ public class ServerExtConfigBean {
     private boolean h2ConsoleEnabled;
 
     /**
-     * 服务端api token,长度要求大于等于6位，字母数字符号组合
-     */
-    @Value("${jpom.authorize.token:}")
-    private String authorizeToken;
-
-    /**
      * 登录token失效时间(单位：小时),默认为24
      */
     @Value("${jpom.authorize.expired:24}")
@@ -190,10 +184,6 @@ public class ServerExtConfigBean {
 
     public String getSshInitEnv() {
         return StrUtil.emptyToDefault(this.sshInitEnv, "source /etc/profile && source ~/.bash_profile && source ~/.bashrc");
-    }
-
-    public String getAuthorizeToken() {
-        return authorizeToken;
     }
 
     public long getIpErrorLockTime() {

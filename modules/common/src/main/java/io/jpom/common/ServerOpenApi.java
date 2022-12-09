@@ -29,9 +29,6 @@ package io.jpom.common;
  * @since 2019/8/5
  */
 public class ServerOpenApi {
-
-    public static final String HEAD = "JPOM-TOKEN";
-
     /**
      * 用户的token
      */
@@ -44,19 +41,12 @@ public class ServerOpenApi {
 
     public static final String API = "/api/";
 
-    public static final String UPDATE_NODE_INFO = API + "node/update";
     /**
      * 接收推送
      */
     public static final String RECEIVE_PUSH = API + "node/receive_push";
 
     public static final String PUSH_NODE_KEY = "--auto-push-to-server";
-
-    /**
-     * 安装id
-     */
-    public static final String INSTALL_ID = API + "/installId";
-
     /**
      * 触发构建(新), 第一级构建id,第二级token
      */

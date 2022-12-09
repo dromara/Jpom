@@ -64,8 +64,10 @@ cd ${base} && mvn versions:set -DnewVersion=$1
 
 echo "替换配置文件版本号 $new_version"
 
-# 替换 docker 中的版本
-sed -i.bak "s/${old_version}/${new_version}/g" $base/.env
+if [ -f "$base/.env" ]; then
+	# 替换 docker 中的版本
+	sed -i.bak "s/${old_version}/${new_version}/g" $base/.env
+fi
 
 # 替换 Dockerfile 中的版本
 sed -i.bak "s/${old_version}/${new_version}/g" $base/modules/server/Dockerfile

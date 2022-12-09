@@ -22,14 +22,9 @@
  */
 package io.jpom.system;
 
-import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpUtil;
-import io.jpom.common.ServerOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -75,18 +70,6 @@ public class AgentExtConfigBean {
     @Value("${log.saveDays:7}")
     private int logSaveDays;
 
-    @Value("${jpom.agent.id:}")
-    private String agentId;
-
-    @Value("${jpom.agent.url:}")
-    private String agentUrl;
-
-    @Value("${jpom.server.url:}")
-    private String serverUrl;
-
-    @Value("${jpom.server.token:}")
-    private String serverToken;
-
     /**
      * 停止项目等待的时长 单位秒，最小为1秒
      */
@@ -125,57 +108,6 @@ public class AgentExtConfigBean {
 
     public String[] getProjectFileBackupSuffix() {
         return projectFileBackupSuffix;
-    }
-
-    public String getAgentId() {
-        return agentId;
-    }
-
-    public String getServerUrl() {
-        return serverUrl;
-    }
-
-    public String getServerToken() {
-        return serverToken;
-    }
-
-    /**
-     * 获取当前的url
-     *
-     * @return 如果没有配置将自动生成：http://+本地IP+端口
-     */
-    public String getAgentUrl() {
-        if (StrUtil.isEmpty(agentUrl)) {
-            String localhostStr = NetUtil.getLocalhostStr();
-            int port = ConfigBean.getInstance().getPort();
-            agentUrl = String.format("http://%s:%s", localhostStr, port);
-        }
-        if (StrUtil.isEmpty(agentUrl)) {
-            throw new JpomRuntimeException("获取Agent url失败");
-        }
-        return agentUrl;
-    }
-
-    /**
-     * 创建请求对象
-     *
-     * @param openApi url
-     * @return HttpRequest
-     * @see ServerOpenApi
-     */
-    public HttpRequest createServerRequest(String openApi) {
-        if (StrUtil.isEmpty(getServerUrl())) {
-            throw new JpomRuntimeException("请先配置server端url");
-        }
-        if (StrUtil.isEmpty(getServerToken())) {
-            throw new JpomRuntimeException("请先配置server端Token");
-        }
-        // 加密
-        String md5 = SecureUtil.md5(getServerToken());
-        md5 = SecureUtil.sha1(md5 + ServerOpenApi.HEAD);
-        HttpRequest httpRequest = HttpUtil.createPost(String.format("%s%s", serverUrl, openApi));
-        httpRequest.header(ServerOpenApi.HEAD, md5);
-        return httpRequest;
     }
 
     /**

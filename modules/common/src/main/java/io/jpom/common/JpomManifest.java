@@ -26,9 +26,9 @@ import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.ManifestUtil;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
@@ -39,7 +39,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JsonFileUtil;
@@ -51,9 +50,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.jar.Attributes;
@@ -180,7 +176,9 @@ public class JpomManifest {
     }
 
     public String randomIdSign() {
-        return SecureUtil.sha1(this.getPid() + this.randomId);
+        String tempToken = SystemUtil.get("JPOM_SERVER_TEMP_TOKEN");
+        return Opt.ofBlankAble(tempToken).orElseGet(() -> SecureUtil.sha1(JpomManifest.this.getPid() + JpomManifest.this.randomId));
+
     }
 
     /**

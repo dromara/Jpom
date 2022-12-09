@@ -33,9 +33,12 @@ import io.jpom.common.ServerOpenApi;
 import io.jpom.common.Type;
 import io.jpom.system.init.AutoRegSeverNode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+
+import java.util.Arrays;
 
 /**
  * jpom 启动类
@@ -58,6 +61,7 @@ public class JpomAgentApplication {
     public static void main(String[] args) throws Exception {
         long time = SystemClock.now();
         SpringApplicationBuilder springApplicationBuilder = new SpringApplicationBuilder(JpomAgentApplication.class);
+        springApplicationBuilder.bannerMode(Banner.Mode.LOG);
         springApplicationBuilder.run(args);
         // 自动向服务端推送
         autoPushToServer(args);
@@ -76,10 +80,14 @@ public class JpomAgentApplication {
         }
         String arg = ArrayUtil.get(args, i + 1);
         if (StrUtil.isEmpty(arg)) {
-            Console.error("not found auto-push-to-server url");
+            log.error("not found auto-push-to-server url");
             return;
         }
-        AutoRegSeverNode.autoPushToServer(arg);
+        try {
+            AutoRegSeverNode.autoPushToServer(arg);
+        } catch (Exception e) {
+            log.error("向服务端推送注册失败 {}", arg, e);
+        }
     }
 
 }

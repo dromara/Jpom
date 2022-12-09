@@ -126,7 +126,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
      *
      * @param request 请求对象
      */
-    public void update(HttpServletRequest request, boolean autoReg) {
+    public void update(HttpServletRequest request) {
         String type = request.getParameter("type");
         boolean create = "add".equalsIgnoreCase(type);
         // 创建对象
@@ -140,19 +140,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
         //
         this.testHttpProxy(nodeModel.getHttpProxy());
         NodeModel existsNode = super.getByKey(id);
-        String workspaceId;
-        if (autoReg) {
-            if (create) {
-                Assert.isNull(existsNode, "对应的节点 id 已经存在啦");
-                // 绑定到默认工作空间
-                workspaceId = Const.WORKSPACE_DEFAULT_ID;
-            } else {
-                Assert.notNull(existsNode, "对应的节点不存在");
-                workspaceId = existsNode.getWorkspaceId();
-            }
-        } else {
-            workspaceId = this.getCheckUserWorkspace(request);
-        }
+        String workspaceId = this.getCheckUserWorkspace(request);
         nodeModel.setWorkspaceId(workspaceId);
 
         //nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
@@ -175,28 +163,14 @@ public class NodeService extends BaseGroupService<NodeModel> {
             this.checkLockType(existsNode);
             this.testNode(nodeModel);
         }
-        try {
-            if (autoReg) {
-                BaseServerController.resetInfo(UserModel.EMPTY);
-            }
-            if (create) {
-                if (autoReg) {
-                    // 自动注册节点默认关闭
-                    nodeModel.setOpenStatus(0);
-                    // 默认锁定 (原因未分配工作空间)
-                    nodeModel.setUnLockType("unassignedWorkspace");
-                }
-                this.insert(nodeModel);
-                // 同步项目
-                ProjectInfoCacheService projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
-                projectInfoCacheService.syncNode(nodeModel);
-            } else {
-                this.update(nodeModel);
-            }
-        } finally {
-            if (autoReg) {
-                BaseServerController.removeEmpty();
-            }
+        if (create) {
+
+            this.insert(nodeModel);
+            // 同步项目
+            ProjectInfoCacheService projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
+            projectInfoCacheService.syncNode(nodeModel);
+        } else {
+            this.update(nodeModel);
         }
     }
 

@@ -2,36 +2,41 @@ jpom:
   # jpom 数据存储路径, 如果调试模式运行默认路径为【${user.home}/jpom/】,安装运行默认为jar包文件的父级
   path:
   authorize:
-    # agent 端管理账号，必填。
-    agentName: jpomAgent
-    # agent 端管理密码，非必填，如果为空Jpom 会自动生成一串随机字符串当密码
-    agentPwd:
-  agent:
-    # 设置插件端id，配置自动注册服务端需要
-    id:
-    # 当前节点插件端可以访问的url ,如果不设置将使用http://+本地IP+端口
-    url:
-  server:
-    # 设置服务端的url
-    url:
-    # 服务器接口请求token
-    token:
-whitelistDirectory:
-  # 白名单目录是否验证包含关系
-  checkStartsWith: true
-log:
-  # 检测控制台日志周期，防止日志文件过大，目前暂只支持linux 不停服备份
-  autoBackConsoleCron: 0 0/10 * * * ?
-  # 控制台日志文件保留大小
-  autoBackSize: 50MB
-  # 是否自动将控制台日志文件备份
-  autoBackToFile: true
-  # 保存天数 配置错误或者没有，默认是7天
-  saveDays: 7
-  # 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
-  fileCharset:
-  # 查看日志时初始读取最后多少行（默认10，0不读取）
-  intiReadLine: 10
+    #登录token失效时间(单位：小时),默认为24
+    expired: 24
+    #登录token失效后自动续签时间（单位：分钟），默认为60，不自动续签
+    renewal: 60
+    # jwt 签名(加密)的key 长度建议控制到 16位
+    key:
+  # 前端接口 超时时间 单位秒
+  webApiTimeout: 20
+  # 系统名称
+  name:
+  # 副标题
+  subTitle:
+  # 登录页名称
+  loginTitle:
+  # logo 文件路径（绝对路径、http） 文件限制后缀:jpg、png、gif
+  logoFile:
+  # icon 文件路径（绝对路径、http），建议规格 12×12、16×16、24×24、32×32、48×48 , 文件限制后缀 ico、png
+  iconFile:
+  # 禁用页面引导导航
+  disabledGuide: false
+  # 禁用登录图形验证码 （一般用于服务器没有字体或者开启了两部验证后才关闭图形验证码）
+  disabledCaptcha: false
+  # 前端消息弹出位置，可选 topLeft topRight bottomLeft bottomRight
+  notificationPlacement:
+user:
+  # 最多能创建多少个用户
+  maxCount: 10
+  # 用户连续登录失败次数，超过此数将被限制登录
+  alwaysLoginError: 5
+  # IP连续登录失败次数，超过此数将被限制登录
+  alwaysIpLoginError: 10
+  # 当ip连续登录失败，锁定对应IP时长，5h、1d
+  ipErrorLockTime: 5h
+  # 是否强制提醒用户开启  mfa
+  forceMfa: false
 consoleLog:
   # 是否记录接口请求日志
   reqXss: true
@@ -39,49 +44,98 @@ consoleLog:
   reqResponse: true
   # 控制台编码格式
   charset:
-project:
-  # 停止、启动项目(项目状态检测)等待的时长 单位秒
-  stopWaitTime: 10
-  # 项目文件备份保留个数,大于 0 才会备份
-  fileBackupCount: 0
-  # 限制备份指定文件后缀（支持正则）
-  #fileBackupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]
-  # 项目状态检测间隔时间 单位毫秒，最小为1毫秒
-  statusDetectionInterval: 500
+log:
+  # 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
+  fileCharset:
+  # 查看日志时初始读取最后多少行（默认10，0不读取）
+  intiReadLine: 10
+db:
+  # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
+  logStorageCount: 10000
+  # 数据库账号 默认 jpom
+  userName: jpom
+  # 数据库密码 默认 jpom 如果自行配置请保证密码强度
+  userPwd: jpom
+  # h2 数据库缓存大小  kilobyte 1KB 1,024 megabyte 1MB 1,048,576
+  cacheSize: 50MB
+  # 自动备份间隔天数 小于等于 0 不自动备份
+  autoBackupIntervalDay: 1
+  # 自动备份保留天数 小于等于 0，不自动删除自动备份数据
+  autoBackupReserveDay: 5
+  # 数据库连接池相关配置
+  maxActive: 100
+  initialSize: 10
+  maxWait: 10
+  minIdle: 1
+
+# 构建相关配置
+build:
+  # 最多保存多少份历史记录
+  maxHistoryCount: 1000
+  # 单个最多保存多少份历史记录
+  itemMaxHistoryCount: 50
+  # 构建命令是否检查 存在删除命令
+  checkDeleteCommand: true
+  # 构建线程池大小,小于 1 则为不限制，默认大小为 5
+  poolSize: 5
+  # 构建任务等待数量，超过此数量将取消构建任务，值最小为 1
+  poolWaitQueue: 10
+ssh:
+  # ssh 执行命令的 默认加载的环境变量
+  initEnv: source /etc/profile && source ~/.bash_profile && source ~/.bashrc
+node:
+  # 上传文件的超时时间 单位秒,最短5秒钟
+  uploadFileTimeOut: 300
 system:
   # cron 定时器是否开启匹配秒
   timerMatchSecond: false
+  # 节点心跳监控时间 （需要大于零） 单位秒 最小配置 5秒
+  nodeHeartSecond: 30
   # 旧包文件保留个数
   oldJarsCount: 2
   # Check the url for the new version
   remoteVersionUrl:
-#运行端口号
-
 server:
-  port: 2123
+  #运行端口号
+  port: 2122
   servlet:
+    session:
+      cookie:
+        name: JPOMID-SERVER
+      timeout: 1H
     encoding:
       charset: UTF-8
       force: true
       enabled: true
       forceRequest: true
       forceResponse: true
+  compression:
+    # gzip 压缩
+    enabled: true
+    #mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,image/png
+    min-response-size: 2048
   tomcat:
     uri-encoding: UTF-8
 spring:
+  web:
+    resources:
+      static-locations: classpath:/dist/
   application:
-    name: jpom agent
+    name: jpom server
   profiles:
     active: default
-  servlet:
-    session:
-      timeout: 1H
-      cookie:
-        name: JPOMID-AGENT
-    multipart:
-      # 上传文件大小限制 12KB -- parses as 12 kilobytes 5MB  -- parses as 5 megabytes 20  -- parses as 20 kilobytes
-      max-request-size: 2GB
-      max-file-size: 1GB
   mvc:
     throw-exception-if-no-handler-found: true
     log-request-details: true
+  servlet:
+    multipart:
+      # 上传文件大小限制
+      max-request-size: 2GB
+      max-file-size: 1GB
+  h2:
+    console:
+      # 是否开启 web 访问数据库（url: http://${ip}:${port}/h2-console）
+      enabled: false
+      # 是否允许远程访问（开启此配置有安全风险），默认为 false（当部署到服务器上之后，是否可以通过其他浏览器访问数据库）
+      settings:
+        web-allow-others: false

@@ -33,6 +33,7 @@ import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
@@ -77,6 +78,7 @@ public class JpomServerApplication {
         long time = SystemClock.now();
         //
         SpringApplicationBuilder springApplicationBuilder = new SpringApplicationBuilder(JpomServerApplication.class);
+        springApplicationBuilder.bannerMode(Banner.Mode.LOG);
         springApplicationBuilder.run(args);
         // 重置 ip 白名单配置
         if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
