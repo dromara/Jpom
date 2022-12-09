@@ -23,9 +23,7 @@
 
 @echo off
 @if not "%ECHO%" == ""  echo %ECHO%
-@if "%OS%" == "Windows_NT"  setlocal
 setlocal enabledelayedexpansion
-
 set ENV_PATH=.\
 if "%OS%" == "Windows_NT" set ENV_PATH=%~dp0%
 
@@ -52,7 +50,8 @@ set logback_configurationFile=%conf_dir%\logback.xml
 set application_conf=%conf_dir%\application.yml
 
 set Lib=%ENV_PATH%\..\lib\
-set RUN_JAR=
+set "RUN_JAR="
+set "JAR_MSG="
 set agent_log="%log_dir%\agent.log"
 set stdout_log="%log_dir%\stdout.log"
 
@@ -72,25 +71,32 @@ if "%1"=="" (
     color 0a
     TITLE Jpom management system BAT console
     echo. ***** Jpom management system BAT console *****
+    echo. !JAR_MSG!
     ::*************************************************************************************************************
     echo.
         echo.  [1] start
-        echo.  [2] stop
-        echo.  [3] status
-        echo.  [4] restart
+        echo.  [2] status
+        echo.  [3] restart
+        echo.  [4] stop
         echo.  [0] exit 0
     echo.
     @REM enter
     echo. Please enter the selected serial number:
     set /p ID=
     IF "!ID!"=="1" call:start
-    IF "!ID!"=="2" call:stop
-    IF "!ID!"=="3" call:status
-    IF "!ID!"=="4" call:restart
+    IF "!ID!"=="2" call:status
+    IF "!ID!"=="3" call:restart
+    IF "!ID!"=="4" call:stop
     IF "!ID!"=="0" EXIT
 )else (
      if "%1"=="restart" (
         call:restart
+     )else if "%1"=="start" (
+     	call:start
+     )else if "%1"=="status" (
+		call:status
+	 )else if "%1"=="stop" (
+		call:stop
      )else (
         call:use
      )
@@ -105,8 +111,8 @@ EXIT 0
 @REM start
 :start
 	echo Starting..... Closing the window after a successful start does not affect the operation
-	echo Please check for startup details:%agent_log% or %stdout_log%
-	start /b javaw %JAVA_OPTS% -jar %RUN_JAR% %ARGS% > "%stdout_log%" 2>&1
+	echo Please check for startup details:%agent_log% or !stdout_log!
+	start /b javaw %JAVA_OPTS% -jar %Lib%!RUN_JAR! %ARGS% > "!stdout_log!" 2>&1
 	@REM timeout 3 > NUL
 	ping 127.0.0.1 -n 3 > nul
 goto:eof
@@ -115,20 +121,35 @@ goto:eof
 @REM get jar
 :listDir
 	if "%RUN_JAR%"=="" (
-
-		for /f "delims=" %%I in ('dir /B %Lib%') do (
-			if exist %Lib%%%I if not exist %Lib%%%I\nul (
-			    if "%%~xI" ==".jar" (
-                    if "%RUN_JAR%"=="" (
-				        set RUN_JAR=%Lib%%%I
-                    )
-                )
+		if exist "%Lib%\run.bin" (
+			set /P RUN_JAR=<"%Lib%\run.bin"
+			set JAR_MSG=specify running !RUN_JAR!
+		)else (
+			for /f "delims=" %%I in ('dir /B %Lib%') do (
+				if exist %Lib%%%I if not exist %Lib%%%I\nul (
+					if "%%~xI" ==".jar" (
+						if "%RUN_JAR%"=="" (
+							set "RUN_JAR=%%I"
+						)
+					)
+				)
 			)
+			set JAR_MSG=auto running !RUN_JAR!
 		)
 	)else (
-		set RUN_JAR=%Lib%%RUN_JAR%
+		set JAR_MSG=specify2 running %RUN_JAR%
 	)
-	echo run:%RUN_JAR%
+	if not exist %Lib%!RUN_JAR! (
+	 	echo %JAR_MSG%
+		echo file not exist %Lib%!RUN_JAR!
+		PAUSE
+		EXIT -1
+	)
+	@REM stdout_log
+	if exist "%Lib%\run.bin" (
+		set /P RUN_LOG=<"%Lib%\run.log"
+		set stdout_log="%log_dir%\!RUN_LOG!"
+	)
 goto:eof
 
 @REM stop Jpom
