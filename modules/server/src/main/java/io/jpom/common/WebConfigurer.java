@@ -24,7 +24,6 @@ package io.jpom.common;
 
 import io.jpom.common.interceptor.IpInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
-import io.jpom.common.interceptor.OpenApiInterceptor;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.common.validator.ParameterInterceptor;
 import org.springframework.boot.web.server.MimeMappings;
@@ -51,8 +50,6 @@ public class WebConfigurer implements WebMvcConfigurer, WebServerFactoryCustomiz
     @Resource
     private LoginInterceptor loginInterceptor;
     @Resource
-    private OpenApiInterceptor openApiInterceptor;
-    @Resource
     private PermissionInterceptor permissionInterceptor;
 
 
@@ -61,7 +58,6 @@ public class WebConfigurer implements WebMvcConfigurer, WebServerFactoryCustomiz
         registry.addInterceptor(ipInterceptor).excludePathPatterns(ServerOpenApi.API + "**");
         registry.addInterceptor(loginInterceptor).excludePathPatterns(ServerOpenApi.API + "**");
         registry.addInterceptor(parameterInterceptor).addPathPatterns("/**");
-        registry.addInterceptor(openApiInterceptor).addPathPatterns(ServerOpenApi.API + "**");
         registry.addInterceptor(permissionInterceptor).excludePathPatterns(ServerOpenApi.API + "**");
     }
 

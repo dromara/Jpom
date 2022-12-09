@@ -63,79 +63,9 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2019/8/6
  */
-//@PreLoadClass(value = Integer.MIN_VALUE + 1)
 @Slf4j
 @Configuration
 public class AutoRegSeverNode implements InitializingBean {
-
-    /**
-     * 向服务端注册插件端
-     */
-//    @PreLoadMethod
-    private void reg() {
-        AgentExtConfigBean instance = AgentExtConfigBean.getInstance();
-        String agentId = instance.getAgentId();
-        String serverUrl = instance.getServerUrl();
-        if (StrUtil.isEmpty(agentId) || StrUtil.isEmpty(serverUrl)) {
-            //  如果二者缺一不注册
-            return;
-        }
-        String oldInstallId = null;
-        File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), AgentConfigBean.SERVER_ID);
-        JSONObject serverJson = null;
-        if (file.exists()) {
-            try {
-                serverJson = (JSONObject) JsonFileUtil.readJson(file.getAbsolutePath());
-            } catch (FileNotFoundException e) {
-                serverJson = new JSONObject();
-            }
-            oldInstallId = serverJson.getString("installId");
-        }
-        HttpRequest installRequest = instance.createServerRequest(ServerOpenApi.INSTALL_ID);
-        try (HttpResponse execute = installRequest.execute()) {
-            String body1 = execute.body();
-            JsonMessage<?> jsonMessage = JSON.parseObject(body1, JsonMessage.class);
-            if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-                log.error("获取Server 安装id失败:" + jsonMessage);
-                return;
-            }
-            String installId = jsonMessage.dataToString();
-            boolean eqInstall = StrUtil.equals(oldInstallId, installId);
-            //
-            URL url = URLUtil.toUrlForHttp(instance.getAgentUrl());
-            String protocol = url.getProtocol();
-
-            HttpRequest serverRequest = instance.createServerRequest(ServerOpenApi.UPDATE_NODE_INFO);
-            serverRequest.form("id", agentId);
-            serverRequest.form("name", "节点：" + agentId);
-            serverRequest.form("openStatus", 1);
-            serverRequest.form("protocol", protocol);
-            serverRequest.form("url", url.getHost() + CharPool.COLON + url.getPort());
-            AgentAuthorize agentAuthorize = AgentAuthorize.getInstance();
-            serverRequest.form("loginName", agentAuthorize.getAgentName());
-            serverRequest.form("loginPwd", agentAuthorize.getAgentPwd());
-            serverRequest.form("type", eqInstall ? "update" : "add");
-            try (HttpResponse httpResponse = serverRequest.execute()) {
-                String body = httpResponse.body();
-                log.info("自动注册Server:" + body);
-                JsonMessage<?> regJsonMessage = JSON.parseObject(body, JsonMessage.class);
-                if (regJsonMessage.getCode() == HttpStatus.HTTP_OK) {
-                    if (serverJson == null) {
-                        serverJson = new JSONObject();
-                    }
-                    if (!eqInstall) {
-                        serverJson.put("installId", installId);
-                        serverJson.put("regTime", DateTime.now().toString());
-                    } else {
-                        serverJson.put("updateTime", DateTime.now().toString());
-                    }
-                    JsonFileUtil.saveJson(file.getAbsolutePath(), serverJson);
-                } else {
-                    log.error("自动注册插件端失败：{}", body);
-                }
-            }
-        }
-    }
 
     /**
      * 自动推送插件端信息到服务端
@@ -168,12 +98,12 @@ public class AutoRegSeverNode implements InitializingBean {
         String build = urlBuilder.build();
         try (HttpResponse execute = HttpUtil.createGet(build, true).execute()) {
             String body = execute.body();
-            Console.log("push result:" + body);
+            log.info("push result:" + body);
         }
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.reg();
+
     }
 }

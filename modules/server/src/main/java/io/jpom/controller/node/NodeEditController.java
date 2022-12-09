@@ -148,7 +148,7 @@ public class NodeEditController extends BaseServerController {
     @PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public String save() {
-        nodeService.update(getRequest(), false);
+        nodeService.update(getRequest());
         return JsonMessage.getString(200, "操作成功");
     }
 

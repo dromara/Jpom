@@ -27,6 +27,13 @@ FROM maven:3.8.5-jdk-8-slim as builder
 WORKDIR /target/dependency
 COPY . .
 
+VOLUME ["/root/.m2","/target/dependency/web-vue/node_modules"]
+# 多次 builder 不同的版本号
+ARG TEMP_VERSION=""
+ARG JPOM_VERSION
+ENV USE_JPOM_VERSION=${JPOM_VERSION}${TEMP_VERSION}
+RUN --mount=type=cache,target=/root/.m2 sh ./script/replaceVersion.sh ${USE_JPOM_VERSION}
+
 ENV NODE_VERSION 16.13.1
 
 RUN set -eux; \
@@ -48,24 +55,29 @@ RUN set -eux; \
     && ln -s /usr/local/bin/node /usr/local/bin/nodejs \
     && npm config set registry https://registry.npmmirror.com/
 
-RUN cd web-vue && npm install && npm run build
+RUN --mount=type=cache,target=/target/dependency/web-vue/node_modules cd web-vue && npm install && npm run build
 
 RUN --mount=type=cache,target=/root/.m2 mvn -B -e -T 1C clean package -pl modules/server -am -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
 
 FROM maven:3.8.5-jdk-8
 
 ARG BUILD_DATE
+ARG JPOM_VERSION
+ARG TEMP_VERSION=""
+ARG DEPENDENCY=/target/dependency
+
 LABEL build_info="dromara/Jpom build-date:- ${BUILD_DATE}"
 LABEL maintainer="bwcx-jzy <bwcx_jzy@163.com>"
 LABEL documentation="https://jpom.top"
 
 ENV JPOM_HOME   /usr/local/jpom-server
-ARG JPOM_VERSION
-ENV JPOM_PKG    server-${JPOM_VERSION}-release
+ENV JPOM_PKG_VERSION	${JPOM_VERSION}${TEMP_VERSION}
+ENV JPOM_PKG    server-${JPOM_PKG_VERSION}-release
+
 ENV JPOM_DATA_PATH ${JPOM_HOME}/data
 ENV JPOM_LOG_PATH ${JPOM_HOME}/log
 WORKDIR $JPOM_HOME
-ARG DEPENDENCY=/target/dependency
+
 COPY --from=builder ${DEPENDENCY}/modules/server/target/${JPOM_PKG} ${JPOM_HOME}
 
 # 时区
@@ -81,6 +93,6 @@ EXPOSE 2122
 
 HEALTHCHECK CMD curl -X POST -f http://localhost:2122/check-system || exit 1
 
-ENTRYPOINT ["/bin/bash", "Server.sh", "start"]
+ENTRYPOINT ["/bin/bash", "./bin/Server.sh", "start"]
 
 

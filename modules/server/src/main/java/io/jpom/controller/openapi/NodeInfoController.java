@@ -71,17 +71,6 @@ public class NodeInfoController extends BaseServerController {
     }
 
     /**
-     * 添加或者更新节点信息
-     *
-     * @return json
-     */
-    @RequestMapping(value = ServerOpenApi.UPDATE_NODE_INFO, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String update() {
-        nodeService.update(getRequest(), true);
-        return JsonMessage.getString(200, "操作成功");
-    }
-
-    /**
      * 接收节点推送的信息
      * <p>
      * yum install -y wget && wget -O install.sh https://jpom.top/docs/install.sh && bash install.sh Agent jdk

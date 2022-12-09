@@ -22,24 +22,48 @@
 @REM
 
 @echo off
-CHCP 65001
+@if not "%ECHO%" == ""  echo %ECHO%
+@if "%OS%" == "Windows_NT"  setlocal
 setlocal enabledelayedexpansion
+
+set ENV_PATH=.\
+if "%OS%" == "Windows_NT" set ENV_PATH=%~dp0%
 
 @REM Set environment variables to prevent some servers from failing to taskkill
 set PATH = %PATH%;C:\Windows\system32;C:\Windows;C:\Windows\system32\Wbem
 
-set Tag=KeepBx-Agent-System-JpomAgentApplication
-set basePath=%~dp0
-set Lib=%basePath%lib\
-@REM Do not modify----------------------------------↓
-set LogName=agent.log
-@REM Online upgrade will automatically modify this attribute
-set RUNJAR=
-@REM Do not modify----------------------------------↑
-@REM Whether to enable console log file backup
-set LogBack=true
-set JVM=-server -Xms200m -Xmx400m -Dfile.encoding=UTF-8
-set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --spring.profiles.active=pro --server.port=2123
+if "%JAVA_HOME%"=="" (
+	echo please configure [JAVA_HOME] environment variable
+	PAUSE
+	EXIT 2
+)
+
+set PID_TAG="JPOM_AGENT_APPLICATION"
+set conf_dir="%ENV_PATH%/../conf/"
+
+@REM see org.springframework.util.StringUtils.cleanPath
+@REM set org.springframework.boot.context.config.StandardConfigDataLocationResolver.getResourceLocation
+cd %conf_dir%
+set conf_dir=%cd%
+cd %ENV_PATH%
+
+set log_dir=%ENV_PATH%\..\logs
+set logback_configurationFile=%conf_dir%\logback.xml
+set application_conf=%conf_dir%\application.yml
+
+set Lib=%ENV_PATH%\..\lib\
+set RUN_JAR=
+set agent_log="%log_dir%\agent.log"
+set stdout_log="%log_dir%\stdout.log"
+
+set JAVA_MEM_OPTS= -Xms200m -Xmx600m -XX:PermSize=128m -XX:+UseG1GC
+set JAVA_OPTS_EXT= -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Dapplication.codeset=UTF-8 -Dfile.encoding=UTF-8
+set APP_OPTS= -Dapplication="%PID_TAG%" -Dlogging.config="%logback_configurationFile%" -Dspring.config.location="%application_conf%"
+set JAVA_OPTS= %JAVA_MEM_OPTS% %JAVA_OPTS_EXT% %APP_OPTS%
+
+set ARGS=%*
+set JPOM_LOG=%log_dir%
+if not exist %log_dir% md %log_dir%
 
 @REM get list jar
 call:listDir
@@ -80,52 +104,53 @@ EXIT 0
 
 @REM start
 :start
-    if "%JAVA_HOME%"=="" (
-        echo please configure [JAVA_HOME] environment variable
-        PAUSE
-        EXIT 2
-    )
-
 	echo Starting..... Closing the window after a successful start does not affect the operation
-	echo Please check for startup details:%LogName%
-	start /b javaw %JVM% -Dapplication=%Tag% -Dbasedir=%basePath% -jar %RUNJAR% %ARGS% %1 >> %basePath%%LogName% 2>&1
-	timeout 3
+	echo Please check for startup details:%agent_log% or %stdout_log%
+	start /b javaw %JAVA_OPTS% -jar %RUN_JAR% %ARGS% > "%stdout_log%" 2>&1
+	@REM timeout 3 > NUL
+	ping 127.0.0.1 -n 3 > nul
 goto:eof
 
 
 @REM get jar
 :listDir
-	if "%RUNJAR%"=="" (
+	if "%RUN_JAR%"=="" (
+
 		for /f "delims=" %%I in ('dir /B %Lib%') do (
 			if exist %Lib%%%I if not exist %Lib%%%I\nul (
 			    if "%%~xI" ==".jar" (
-                    if "%RUNJAR%"=="" (
-				        set RUNJAR=%Lib%%%I
+                    if "%RUN_JAR%"=="" (
+				        set RUN_JAR=%Lib%%%I
                     )
                 )
 			)
 		)
 	)else (
-		set RUNJAR=%Lib%%RUNJAR%
+		set RUN_JAR=%Lib%%RUN_JAR%
 	)
-	echo run:%RUNJAR%
+	echo run:%RUN_JAR%
 goto:eof
 
 @REM stop Jpom
 :stop
-	java -jar %RUNJAR% %ARGS% --event=stop
+	echo "jpom agent stop "
+	for /f "tokens=1 delims= " %%I in ('jps -v ^| findstr "%PID_TAG%"') do taskkill /F /PID %%I
 goto:eof
 
 @REM view Jpom status
 :status
-	java -jar %RUNJAR% %ARGS% --event=status
+	echo "jpom agent status "
+	set pid=
+	for /f "tokens=1 delims= " %%I in ('jps -v ^| findstr "%PID_TAG%"') do set pid=%%I
+	echo "running: %pid%"
 goto:eof
 
 @REM restart Jpom
 :restart
 	echo Stopping....
 	call:stop
-	timeout 3
+	@REM timeout 3 > NUL
+	ping 127.0.0.1 -n 3 > nul
 	echo starting....
 	call:start %1
 goto:eof

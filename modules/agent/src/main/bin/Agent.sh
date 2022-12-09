@@ -59,7 +59,7 @@ pidfile="$base/bin/agent.pid"
 
 export JPOM_LOG=${LogPath}
 
-PID_TAG="JPOM_AGENT_APPLICATION"
+PID_TAG="JPOM_AGENT_APPLICATION1"
 agent_log="${LogPath}/agent.log"
 
 ## set java path
@@ -72,10 +72,10 @@ if [ -z "$JAVA" ]; then
 fi
 
 JavaVersion=$($JAVA -version 2>&1 | awk 'NR==1{ gsub(/"/,""); print $3 }' | awk -F '.' '{print $1}')
-str=$(file -L $JAVA | grep 64-bit)
+Java64Str=$($JAVA -version 2>&1 | grep -E '64-bit|64-Bit')
 JAVA_OPTS="$JAVA_OPTS -Xss256k -XX:+AggressiveOpts -XX:-UseBiasedLocking -XX:-OmitStackTraceInFastThrow -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$LogPath/logs"
 
-if [ ${JavaVersion} -ge 11 ]; then
+if [ "${JavaVersion}" -ge 11 ]; then
 	JAVA_OPTS="$JAVA_OPTS"
 else
 	JAVA_OPTS="$JAVA_OPTS -XX:+UseFastAccessorMethods -XX:+PrintAdaptiveSizePolicy -XX:+PrintTenuringDistribution"
@@ -86,7 +86,7 @@ if [[ -z "${USR_JVM_SIZE}" ]]; then
 	USR_JVM_SIZE="-Xms200m -Xmx600m"
 fi
 
-if [ -n "$str" ]; then
+if [ -n "$Java64Str" ]; then
 	# For G1
 	JAVA_OPTS="-server ${USR_JVM_SIZE} -XX:+UseG1GC -XX:MaxGCPauseMillis=250 -XX:+UseGCOverheadLimit -XX:+ExplicitGCInvokesConcurrent $JAVA_OPTS"
 else
@@ -95,7 +95,12 @@ fi
 JAVA_OPTS=" $JAVA_OPTS -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Dfile.encoding=UTF-8"
 JAVA_OPTS="${JAVA_OPTS} -Dlogging.config=$logback_configurationFile -Dspring.config.location=$application_conf"
 
-MAIN_ARGS="$*"
+if [[ -z "${RUN_ARG}" ]]; then
+	MAIN_ARGS="$*"
+else
+	# docker run
+	MAIN_ARGS="${RUN_ARG}"
+fi
 
 # mode -s
 mode="$2"
