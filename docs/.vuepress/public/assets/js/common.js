@@ -123,6 +123,13 @@ function loopExecute(fn, loopCount = 20) {
       useFmp: true,
       enableSPA: true
     };
-  with (b) with (body) with (insertBefore(createElement("script"), firstChild)) setAttribute("crossorigin", "", src = d)
+  var bp = document.createElement('script');
+  bp.type = 'text/javascript';
+  bp.async = true;
+  bp.src = d;
+  bp.crossorigin = '';
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(bp, s);
+  // with (b) with (body) with (insertBefore(createElement("script"), firstChild)) setAttribute("crossorigin", "", src = d)
 })(window, document, "https://retcode.alicdn.com/retcode/bl.js", "__bl");
 
