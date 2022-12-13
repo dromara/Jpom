@@ -166,6 +166,9 @@ function start() {
 	if [ ! -f "$server_log" ]; then
 		touch "$server_log"
 	fi
+	if [ -f "$Log" ]; then
+		cp /dev/null "$Log"
+	fi
 	# start
 	${JAVA} -Dapplication=${PID_TAG} ${JAVA_OPTS} -jar ${Lib}${RUN_JAR} ${MAIN_ARGS} >>$Log 2>&1 &
 	echo $! >"$pidfile"
