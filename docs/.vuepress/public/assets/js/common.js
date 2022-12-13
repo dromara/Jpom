@@ -83,6 +83,7 @@ $(function () {
     setTimeout(function () {
       if (window._AdBlockInit === undefined) {
         ABDetected();
+        console.error("_AdBlockInit")
       }
     }, 3000);
   });
