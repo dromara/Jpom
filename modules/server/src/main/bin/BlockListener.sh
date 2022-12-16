@@ -69,11 +69,46 @@ function wait_term_pid() {
 function tail_log() {
 	if [ -f "$stdout_log" ]; then
 		PID="$(cat "${pidfile}")"
-		tail -f --pid="$PID" "$stdout_log"
+		tail -fn 0 --pid="$PID" "$stdout_log"
 	else
-		echo stdout_log not found $stdout_log
+		echo "stdout_log not found $stdout_log"
 	fi
 }
+
+function check_conf() {
+
+	conf_path=$base/conf
+	conf_default_path=$base/conf_default
+	release_conf=$conf_path/application.yml
+	logback_configurationFile=$conf_path/logback.xml
+	release_default_conf=$conf_default_path/application.yml
+	logback_default_configurationFile=$conf_default_path/logback.xml
+
+	if [[ ! -d "$conf_path" ]]; then
+		mkdir -p "${conf_path}"
+	fi
+	if [[ ! -f "$release_conf" ]]; then
+		if [[ ! -f "$release_default_conf" ]]; then
+			echo "Cannot find $release_conf && not found default conf in : $release_default_conf" 2>&2
+			exit 1
+		else
+			echo "copy default conf to $release_conf"
+			cp -r "$release_default_conf" "$release_conf"
+		fi
+	fi
+
+	if [[ ! -f "$logback_configurationFile" ]]; then
+		if [[ ! -f "$logback_default_configurationFile" ]]; then
+			echo "Cannot find $logback_configurationFile && not found default logback conf in : $logback_default_configurationFile" 2>&2
+			exit 1
+		else
+			echo "copy default logback conf to $logback_configurationFile"
+			cp -r "$logback_default_configurationFile" "$logback_configurationFile"
+		fi
+	fi
+}
+
+check_conf
 
 bash $bin_abs_path/Server.sh start -s
 

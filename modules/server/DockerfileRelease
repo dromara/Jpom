@@ -49,6 +49,9 @@ RUN mkdir -p ${JPOM_HOME} && \
     tar -zxvf ${JPOM_HOME}/${JPOM_PKG} -C ${JPOM_HOME} && \
     rm -rf ${JPOM_HOME}/${JPOM_PKG}
 
+# 将配置文件暂存默认目录，避免无法挂载
+RUN mv $JPOM_HOME/conf $JPOM_HOME/conf_default
+
 # 健康检查
 HEALTHCHECK CMD curl -X POST -f http://localhost:2122/check-system || exit 1
 
