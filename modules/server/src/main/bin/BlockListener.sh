@@ -110,14 +110,14 @@ function check_conf() {
 
 check_conf
 
-bash $bin_abs_path/Server.sh start -s
+bash "$bin_abs_path/Server.sh" start -s
 
 while (true); do
 	if [ -f "$pidfile" ]; then
 		tail_log
 		wait_term_pid "$pidfile"
 	else
-		echo pidfile not found $pidfile
+		echo "pidfile not found $pidfile"
 	fi
 
 	if [ $LOOPS -gt 120 ]; then
