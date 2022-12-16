@@ -81,13 +81,15 @@ if "%1"=="" (
         echo.  [0] exit 0
     echo.
     @REM enter
-    echo. Please enter the selected serial number:
-    set /p ID=
-    IF "!ID!"=="1" call:start
-    IF "!ID!"=="2" call:status
-    IF "!ID!"=="3" call:restart
-    IF "!ID!"=="4" call:stop
-    IF "!ID!"=="0" EXIT
+    for /l %%i in (1,1,10000) do (
+		echo. Please enter the selected serial number:
+		set /p ID=
+		IF "!ID!"=="1" call:start
+		IF "!ID!"=="2" call:status
+		IF "!ID!"=="3" call:restart
+		IF "!ID!"=="4" call:stop
+		IF "!ID!"=="0" EXIT
+    )
 )else (
      if "%1"=="restart" (
         call:restart
@@ -101,12 +103,13 @@ if "%1"=="" (
         call:use
      )
 )
-if "%2" NEQ "upgrade" (
-    PAUSE
-)else (
- @REM The upgrade ends directly
+if "%2" == "upgrade" (
+    @REM The upgrade ends directly
+    EXIT 0
 )
-EXIT 0
+
+:end
+goto:eof
 
 @REM start
 :start
