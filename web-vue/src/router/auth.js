@@ -36,13 +36,23 @@ router.beforeEach((to, from, next) => {
     next();
     return;
   }
-  // 刷新菜单
-  store.dispatch("loadSystemMenus").then(() => {
-    // 存储 store
-    store.dispatch("addTab", { key: to.name, path: to.path }).then((toMenu) => {
-      toMenu ? next(toMenu.path) : next();
+  if (to.meta?.mode === "management") {
+    // 刷新菜单
+    store.dispatch("loadManagementSystemMenus").then(() => {
+      // 存储 store
+      store.dispatch("addManagementTab", { key: to.name, path: to.path }).then((toMenu) => {
+        toMenu ? next(toMenu.path) : next();
+      });
     });
-  });
+  } else {
+    // 刷新菜单
+    store.dispatch("loadSystemMenus").then(() => {
+      // 存储 store
+      store.dispatch("addTab", { key: to.name, path: to.path }).then((toMenu) => {
+        toMenu ? next(toMenu.path) : next();
+      });
+    });
+  }
 });
 
 // https://www.jb51.net/article/242702.htm

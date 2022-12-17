@@ -304,6 +304,43 @@ public class IndexControl extends BaseServerController {
         return JsonMessage.success("", collect1);
     }
 
+    /**
+     * @return json
+     * @api {post} menus_data.json 获取系统菜单相关数据
+     * @apiGroup index
+     * @apiUse loginUser
+     * @apiParam {String} nodeId 节点ID
+     * @apiSuccess {JSON}  data 菜单相关字段
+     */
+    @RequestMapping(value = "system_menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<Object>> systemMenusData() {
+        UserModel userModel = getUserModel();
+        // 菜单
+        InputStream inputStream = ResourceUtil.getStream("classpath:/menus/system.json");
+        String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
+        JSONArray jsonArray = JSONArray.parseArray(json);
+        List<Object> collect1 = jsonArray.stream().filter(o -> {
+            JSONObject jsonObject = (JSONObject) o;
+            if (!testMenus(jsonObject, userModel, null, null)) {
+                return false;
+            }
+            JSONArray childs = jsonObject.getJSONArray("childs");
+            if (childs != null) {
+                List<Object> collect = childs.stream().filter(o1 -> {
+                    JSONObject jsonObject1 = (JSONObject) o1;
+                    return testMenus(jsonObject1, userModel, null, null);
+                }).collect(Collectors.toList());
+                if (collect.isEmpty()) {
+                    return false;
+                }
+                jsonObject.put("childs", collect);
+            }
+            return true;
+        }).collect(Collectors.toList());
+        Assert.notEmpty(jsonArray, "没有任何菜单,请联系管理员");
+        return JsonMessage.success("", collect1);
+    }
+
     private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel, JSONArray showArray) {
 //        String active = jsonObject.getString("active");
 //        if (StrUtil.isNotEmpty(active)) {

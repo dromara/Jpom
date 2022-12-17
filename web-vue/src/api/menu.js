@@ -1,11 +1,19 @@
-import axios from './config';
+import axios from "./config";
+
+// 获取系统菜单列表
+export function getMenu() {
+  return axios({
+    url: "/menus_data.json",
+    method: "post",
+  });
+}
 
 // 获取系统菜单列表
 export function getSystemMenu() {
   return axios({
-    url: '/menus_data.json',
-    method: 'post'
-  })
+    url: "/system_menus_data.json",
+    method: "post",
+  });
 }
 
 /**
@@ -14,8 +22,8 @@ export function getSystemMenu() {
  */
 export function getNodeMenu(nodeId) {
   return axios({
-    url: '/menus_data.json',
-    method: 'post',
-    data: {nodeId}
-  })
+    url: "/menus_data.json",
+    method: "post",
+    data: { nodeId },
+  });
 }
