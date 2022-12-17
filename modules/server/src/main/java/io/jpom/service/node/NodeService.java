@@ -67,6 +67,10 @@ public class NodeService extends BaseGroupService<NodeModel> {
     @Lazy
     private WorkspaceService workspaceService;
 
+    @Resource
+    @Lazy
+    private ProjectInfoCacheService projectInfoCacheService;
+
     public NodeService(SshService sshService) {
         this.sshService = sshService;
     }
@@ -89,7 +93,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
         // 检查是否可用默认为5秒，避免太长时间无法连接一直等待
         nodeModel.setTimeOut(5);
         //
-        JsonMessage<Object> objectJsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Info, "nodeId", nodeModel.getId());
+        JsonMessage<JpomManifest> objectJsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Info, "nodeId", nodeModel.getId());
         try {
             JpomManifest jpomManifest = objectJsonMessage.getData(JpomManifest.class);
             Assert.notNull(jpomManifest, "节点连接失败，请检查节点是否在线");
@@ -152,9 +156,10 @@ public class NodeService extends BaseGroupService<NodeModel> {
             SshModel byKey = sshService.getByKey(sshId, request);
             Assert.notNull(byKey, "对应的 SSH 不存在");
             List<NodeModel> nodeBySshId = this.getNodeBySshId(sshId);
-            nodeBySshId = ObjectUtil.defaultIfNull(nodeBySshId, Collections.EMPTY_LIST);
-            Optional<NodeModel> any = nodeBySshId.stream().filter(nodeModel2 -> !StrUtil.equals(id, nodeModel2.getId())).findAny();
-            Assert.state(!any.isPresent(), "对应的SSH已经被其他节点绑定啦");
+            nodeBySshId = ObjectUtil.defaultIfNull(nodeBySshId, Collections.emptyList());
+            boolean anyMatch = nodeBySshId.stream().anyMatch(nodeModel2 -> !StrUtil.equals(id, nodeModel2.getId()));
+            //            Optional<NodeModel> any = anyMatch.findAny();
+            Assert.state(!anyMatch, "对应的SSH已经被其他节点绑定啦");
         }
         if (nodeModel.isOpenStatus()) {
             //
@@ -165,7 +170,6 @@ public class NodeService extends BaseGroupService<NodeModel> {
 
             this.insert(nodeModel);
             // 同步项目
-            ProjectInfoCacheService projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
             projectInfoCacheService.syncNode(nodeModel);
         } else {
             this.update(nodeModel);
@@ -292,7 +296,6 @@ public class NodeService extends BaseGroupService<NodeModel> {
      */
     private void fillNodeInfo(NodeModel nodeModel) {
         nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
-        nodeModel.setCycle(0);
         nodeModel.setOpenStatus(ObjectUtil.defaultIfNull(nodeModel.getOpenStatus(), 0));
     }
 

@@ -56,10 +56,6 @@ server:
   tomcat:
     uri-encoding: UTF-8
 spring:
-  application:
-    name: jpom agent
-  profiles:
-    active: default
   servlet:
     session:
       timeout: 1H
