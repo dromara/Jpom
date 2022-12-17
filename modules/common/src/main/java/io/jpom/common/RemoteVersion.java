@@ -73,6 +73,7 @@ public class RemoteVersion extends BaseJsonModel {
      * 1. https://jpom.top/docs/release-versions.json
      */
     private static final String DEFAULT_URL = "https://jpom.top/docs/release-versions.json";
+    private static String remoteVersionUrl;
     /**
      * 检查间隔时间
      */
@@ -113,6 +114,10 @@ public class RemoteVersion extends BaseJsonModel {
         return super.toString();
     }
 
+    public static void setRemoteVersionUrl(String remoteVersionUrl) {
+        RemoteVersion.remoteVersionUrl = remoteVersionUrl;
+    }
+
     /**
      * 获取远程最新版本
      *
@@ -121,8 +126,7 @@ public class RemoteVersion extends BaseJsonModel {
     public static RemoteVersion loadRemoteInfo() {
         String body = StrUtil.EMPTY;
         try {
-            String remoteVersionUrl = ExtConfigBean.getInstance().getRemoteVersionUrl();
-            remoteVersionUrl = StrUtil.emptyToDefault(remoteVersionUrl, DEFAULT_URL);
+            String remoteVersionUrl = StrUtil.emptyToDefault(RemoteVersion.remoteVersionUrl, DEFAULT_URL);
             remoteVersionUrl = Validator.isUrl(remoteVersionUrl) ? remoteVersionUrl : DEFAULT_URL;
             // 获取缓存中到信息
             RemoteVersion remoteVersion = RemoteVersion.loadTransitUrl(remoteVersionUrl);

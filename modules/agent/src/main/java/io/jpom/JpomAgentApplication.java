@@ -25,20 +25,18 @@ package io.jpom;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.JpomAppType;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.Type;
-import io.jpom.system.init.AutoRegSeverNode;
+import io.jpom.system.AgentStartInit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-
-import java.util.Arrays;
 
 /**
  * jpom 启动类
@@ -84,7 +82,8 @@ public class JpomAgentApplication {
             return;
         }
         try {
-            AutoRegSeverNode.autoPushToServer(arg);
+            AgentStartInit autoRegSeverNode = SpringUtil.getBean(AgentStartInit.class);
+            autoRegSeverNode.autoPushToServer(arg);
         } catch (Exception e) {
             log.error("向服务端推送注册失败 {}", arg, e);
         }

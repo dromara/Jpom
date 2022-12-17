@@ -32,9 +32,10 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.DslYmlDto;
-import io.jpom.system.AgentExtConfigBean;
+import io.jpom.system.AgentConfig;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.StringUtil;
@@ -82,7 +83,9 @@ public class ProjectFileBackupUtil {
      * @param projectPath 项目路径
      */
     public static String backup(String pathId, String projectPath) {
-        int backupCount = AgentExtConfigBean.getInstance().getProjectFileBackupCount();
+        AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
+        AgentConfig.ProjectConfig project = agentConfig.getProject();
+        int backupCount = project.getFileBackupCount();
         if (backupCount <= 0) {
             // 未开启备份
             return null;
@@ -109,7 +112,11 @@ public class ProjectFileBackupUtil {
         int backupCount = Optional.ofNullable(dslYmlDto)
             .map(DslYmlDto::getFile)
             .map(DslYmlDto.FileConfig::getBackupCount)
-            .orElse(AgentExtConfigBean.getInstance().getProjectFileBackupCount());
+            .orElseGet(() -> {
+                AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
+                AgentConfig.ProjectConfig project = agentConfig.getProject();
+                return project.getFileBackupCount();
+            });
         //
         if (!FileUtil.isDirectory(backupPath)) {
             return;
@@ -162,7 +169,11 @@ public class ProjectFileBackupUtil {
             String[] backupSuffix = Optional.ofNullable(dslYmlDto)
                 .map(DslYmlDto::getFile)
                 .map(DslYmlDto.FileConfig::getBackupSuffix)
-                .orElse(AgentExtConfigBean.getInstance().getProjectFileBackupSuffix());
+                .orElseGet(() -> {
+                    AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
+                    AgentConfig.ProjectConfig project = agentConfig.getProject();
+                    return project.getFileBackupSuffix();
+                });
             if (ArrayUtil.isNotEmpty(backupSuffix)) {
                 backupFiles.values()
                     .stream()

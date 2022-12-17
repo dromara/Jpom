@@ -127,23 +127,3 @@ export function delAllCache() {
     params: {},
   });
 }
-
-/**
- * 上传 Script 文件
- * @param {
- *  file: 文件 multipart/form-data
- *  nodeId: 节点 ID
- * } formData
- */
-export function uploadScriptFile(formData) {
-  return axios({
-    url: "/node/script/upload",
-    headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
-    },
-    method: "post",
-    // 0 表示无超时时间
-    timeout: 0,
-    data: formData,
-  });
-}

@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.websocket.Session;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,8 +45,8 @@ public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
     private static final ConcurrentHashMap<File, AgentFileTailWatcher<Session>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
 
-    private AgentFileTailWatcher(File logFile) {
-        super(logFile);
+    private AgentFileTailWatcher(File logFile, Charset charset) {
+        super(logFile, charset);
     }
 
     public static int getOneLineCount() {
@@ -56,17 +57,18 @@ public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
      * 添加文件监听
      *
      * @param file    文件
+     * @param charset 编码格式
      * @param session 会话
      * @throws IOException 异常
      */
-    public static boolean addWatcher(File file, Session session) throws IOException {
+    public static boolean addWatcher(File file, Charset charset, Session session) throws IOException {
         if (!FileUtil.isFile(file)) {
             log.warn("文件不存在或者是目录:" + file.getPath());
             return false;
         }
         AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
             try {
-                return new AgentFileTailWatcher<>(file);
+                return new AgentFileTailWatcher<>(file, charset);
             } catch (Exception e) {
                 log.error("创建文件监听失败", e);
                 return null;

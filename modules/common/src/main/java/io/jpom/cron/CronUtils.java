@@ -75,9 +75,6 @@ public class CronUtils {
      * 开始
      */
     public static void start() {
-        boolean matchSecond = ExtConfigBean.getInstance().getTimerMatchSecond();
-        // 开启秒级
-        CronUtil.setMatchSecond(matchSecond);
         //
         Scheduler scheduler = CronUtil.getScheduler();
         //

@@ -99,12 +99,6 @@ public class ConfigBean {
 
     private volatile static ConfigBean configBean;
 
-    private final ExtConfigBean extConfigBean;
-
-    public ConfigBean(ExtConfigBean extConfigBean) {
-        this.extConfigBean = extConfigBean;
-    }
-
     /**
      * 单利模式
      *
@@ -131,7 +125,7 @@ public class ConfigBean {
      * @return 文件夹路径
      */
     public String getDataPath() {
-        String dataPath = FileUtil.normalize(extConfigBean.getPath() + StrUtil.SLASH + DATA);
+        String dataPath = FileUtil.normalize(ExtConfigBean.getPath() + StrUtil.SLASH + DATA);
         FileUtil.mkdir(dataPath);
         return dataPath;
     }

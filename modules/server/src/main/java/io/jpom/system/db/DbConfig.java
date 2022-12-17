@@ -59,7 +59,6 @@ public class DbConfig {
      */
     public static final String DEFAULT_USER_OR_AUTHORIZATION = "jpom";
 
-    private final ExtConfigBean extConfigBean;
     private final DbExtConfig dbExtConfig;
     @Resource
     @Lazy
@@ -74,9 +73,7 @@ public class DbConfig {
      */
     private File recoverSqlFile;
 
-    public DbConfig(ExtConfigBean extConfigBean,
-                    DbExtConfig dbExtConfig) {
-        this.extConfigBean = extConfigBean;
+    public DbConfig(DbExtConfig dbExtConfig) {
         this.dbExtConfig = dbExtConfig;
     }
 
@@ -102,7 +99,7 @@ public class DbConfig {
      * @author bwcx_jzy
      */
     public File dbLocalPath() {
-        return FileUtil.file(extConfigBean.getPath(), DB);
+        return FileUtil.file(ExtConfigBean.getPath(), DB);
     }
 
     /**

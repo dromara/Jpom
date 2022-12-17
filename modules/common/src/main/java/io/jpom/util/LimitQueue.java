@@ -34,7 +34,7 @@ public class LimitQueue<E> extends ConcurrentLinkedDeque<E> {
     private final int limit;
 
     public LimitQueue(int limit) {
-        this.limit = limit;
+        this.limit = Math.max(limit, 0);
     }
 
     @Override

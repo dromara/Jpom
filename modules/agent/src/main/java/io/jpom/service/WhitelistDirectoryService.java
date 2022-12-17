@@ -24,7 +24,7 @@ package io.jpom.service;
 
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.AgentWhitelist;
-import io.jpom.system.AgentConfigBean;
+import io.jpom.common.AgentConst;
 import io.jpom.util.JsonFileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,7 @@ public class WhitelistDirectoryService extends BaseDataService {
 	 */
 	public AgentWhitelist getWhitelist() {
 		try {
-			JSONObject jsonObject = getJSONObject(AgentConfigBean.WHITELIST_DIRECTORY);
+			JSONObject jsonObject = getJSONObject(AgentConst.WHITELIST_DIRECTORY);
 			if (jsonObject == null) {
 				return new AgentWhitelist();
 			}
@@ -118,7 +118,7 @@ public class WhitelistDirectoryService extends BaseDataService {
 	 * @param jsonObject 实体
 	 */
 	public void saveWhitelistDirectory(AgentWhitelist jsonObject) {
-		String path = getDataFilePath(AgentConfigBean.WHITELIST_DIRECTORY);
+		String path = getDataFilePath(AgentConst.WHITELIST_DIRECTORY);
 		JsonFileUtil.saveJson(path, jsonObject.toJson());
 	}
 }

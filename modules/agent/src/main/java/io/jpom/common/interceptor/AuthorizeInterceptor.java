@@ -44,6 +44,12 @@ import javax.servlet.http.HttpServletResponse;
 @Configuration
 public class AuthorizeInterceptor implements HandlerMethodInterceptor {
 
+    private final AgentAuthorize agentAuthorize;
+
+    public AuthorizeInterceptor(AgentAuthorize agentAuthorize) {
+        this.agentAuthorize = agentAuthorize;
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
         NotAuthorize notAuthorize = handlerMethod.getMethodAnnotation(NotAuthorize.class);
@@ -53,7 +59,7 @@ public class AuthorizeInterceptor implements HandlerMethodInterceptor {
                 this.error(response);
                 return false;
             }
-            if (!AgentAuthorize.getInstance().checkAuthorize(authorize)) {
+            if (!agentAuthorize.checkAuthorize(authorize)) {
                 this.error(response);
                 return false;
             }

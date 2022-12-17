@@ -31,7 +31,7 @@ import io.jpom.common.BaseJpomController;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.service.WhitelistDirectoryService;
-import io.jpom.system.AgentExtConfigBean;
+import io.jpom.system.AgentConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,9 +50,12 @@ import java.util.List;
 public class WhitelistDirectoryController extends BaseJpomController {
 
     private final WhitelistDirectoryService whitelistDirectoryService;
+    private final AgentConfig agentConfig;
 
-    public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService) {
+    public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService,
+                                        AgentConfig agentConfig) {
         this.whitelistDirectoryService = whitelistDirectoryService;
+        this.agentConfig = agentConfig;
     }
 
     @RequestMapping(value = "whitelistDirectory_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -144,7 +147,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
      * @return null 正常
      */
     private String findStartsWith(List<String> jsonArray, int start) {
-        if (jsonArray == null || !AgentExtConfigBean.getInstance().whitelistDirectoryCheckStartsWith) {
+        if (jsonArray == null || !agentConfig.getWhitelist().isCheckStartsWith()) {
             return null;
         }
         String str = jsonArray.get(start);

@@ -73,12 +73,15 @@ import java.util.Map;
 @Configuration
 public class JpomApplicationEvent implements ApplicationListener<ApplicationEvent> {
 
-    private final ExtConfigBean extConfigBean;
     private final ConfigBean configBean;
 
-    public JpomApplicationEvent(ExtConfigBean extConfigBean,
-                                ConfigBean configBean) {
-        this.extConfigBean = extConfigBean;
+    private static int oldJarsCount = 2;
+
+    public static void setOldJarsCount(int oldJarsCount) {
+        JpomApplicationEvent.oldJarsCount = oldJarsCount;
+    }
+
+    public JpomApplicationEvent(ConfigBean configBean) {
         this.configBean = configBean;
     }
 
@@ -115,7 +118,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
     }
 
     private void checkPath() {
-        String path = extConfigBean.getPath();
+        String path = ExtConfigBean.getPath();
         String extConfigPath = null;
         try {
             extConfigPath = ExtConfigBean.getResource().getURL().toString();
@@ -183,7 +186,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         files.sort((o1, o2) -> FileUtil.lastModifiedTime(o2).compareTo(FileUtil.lastModifiedTime(o1)));
         // 截取
         int size = CollUtil.size(files);
-        files = CollUtil.sub(files, ExtConfigBean.getInstance().getOldJarsCount(), size);
+        files = CollUtil.sub(files, oldJarsCount, size);
         // 删除文件
         files.forEach(FileUtil::del);
     }

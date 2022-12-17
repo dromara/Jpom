@@ -27,6 +27,7 @@ import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.JsonMessage;
+import io.jpom.system.AgentConfig;
 import io.jpom.system.LogbackConfig;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 插件端,控制台socket
+ * 系统日志
  *
  * @author jiangzeyin
  * @since 2019/4/16
@@ -51,7 +52,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 
 
+    private final AgentConfig.SystemConfig systemConfig;
+
     private static final Map<String, File> CACHE_FILE = new ConcurrentHashMap<>();
+
+    public AgentWebSocketTomcatHandle(AgentConfig agentConfig) {
+        this.systemConfig = agentConfig.getSystem();
+    }
 
     @OnOpen
     public void onOpen(Session session) {
@@ -103,7 +110,7 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
                 AgentFileTailWatcher.offlineFile(file, session);
             }
             try {
-                AgentFileTailWatcher.addWatcher(file, session);
+                AgentFileTailWatcher.addWatcher(file, systemConfig.getLogCharset(), session);
                 CACHE_FILE.put(session.getId(), file);
             } catch (IOException io) {
                 log.error("监听日志变化", io);

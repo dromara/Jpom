@@ -133,22 +133,6 @@ public class NodeScriptController extends BaseServerController {
     }
 
     /**
-     * 导入脚本
-     *
-     * @return json
-     */
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.UPLOAD)
-    public String upload() {
-        NodeModel node = getNode();
-        JsonMessage<String> stringJsonMessage = NodeForward.requestMultipart(node, getMultiRequest(), NodeUrl.Script_Upload);
-        if (stringJsonMessage.getCode() == HttpStatus.OK.value()) {
-            nodeScriptServer.syncNode(node);
-        }
-        return stringJsonMessage.toString();
-    }
-
-    /**
      * 同步脚本模版
      *
      * @return json

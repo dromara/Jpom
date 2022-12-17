@@ -838,7 +838,7 @@ public class BuildExecuteService {
             process = processBuilder.start();
             //
             InputStream inputStream = process.getInputStream();
-            IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) line -> {
+            IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> {
                 logRecorder.info(line);
                 status[0] = true;
             });
@@ -933,7 +933,7 @@ public class BuildExecuteService {
                 Process process = processBuilder.start();
                 //
                 InputStream inputStream = process.getInputStream();
-                IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) line -> {
+                IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> {
                     logRecorder.info(line);
                     scriptLog.info(line);
                 });

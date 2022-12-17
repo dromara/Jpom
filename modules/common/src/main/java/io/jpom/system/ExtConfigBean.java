@@ -51,67 +51,31 @@ import java.util.function.Function;
  * @author jiangzeyin
  * @since 2019/4/16
  */
-@Configuration
-@Getter
 public class ExtConfigBean {
 
     public static final String FILE_NAME = "application.yml";
 
-
-    /**
-     * 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
-     */
-    @Value("${log.fileCharset:}")
-    private String logFileCharsetStr;
-    /**
-     * 初始读取日志文件行号
-     */
-    @Value("${log.intiReadLine:10}")
-    private int logInitReadLine;
-    /**
-     * 控制台编码格式
-     */
-    @Value("${consoleLog.charset:}")
-    private String consoleLogCharsetStr;
     /**
      *
      */
-    private Charset consoleLogCharset;
-    /**
-     * 是否开启秒级匹配
-     */
-    @Value("${system.timerMatchSecond:false}")
-    private Boolean timerMatchSecond;
-    /**
-     * 旧包文件保留个数
-     */
-    @Value("${system.oldJarsCount:2}")
-    private Integer oldJarsCount;
+    private static Charset consoleLogCharset;
 
-    @Value("${system.remoteVersionUrl:}")
-    private String remoteVersionUrl;
-    /**
-     *
-     */
-    private Charset logFileCharset;
-
-    public int getLogInitReadLine() {
-        return Math.max(logInitReadLine, 10);
+    public static void setConsoleLogCharset(Charset consoleLogCharset) {
+        ExtConfigBean.consoleLogCharset = consoleLogCharset;
     }
 
-    public Charset getLogFileCharset() {
-        // 读取配置的编码格式
-        if (logFileCharset == null && StrUtil.isNotBlank(logFileCharsetStr)) {
-            try {
-                logFileCharset = CharsetUtil.charset(logFileCharsetStr);
-            } catch (Exception ignored) {
-            }
-        }
-        return logFileCharset;
+    public static Charset getConsoleLogCharset() {
+        return ObjectUtil.defaultIfNull(consoleLogCharset, CharsetUtil.systemCharset());
     }
 
+    /**
+     * 项目运行存储路径
+     */
+    private static String path;
 
-    private static ExtConfigBean extConfigBean;
+    public static void setPath(String path) {
+        ExtConfigBean.path = path;
+    }
 
     /**
      * 动态获取外部配置文件的 resource
@@ -131,25 +95,8 @@ public class ExtConfigBean {
         return configResource;
     }
 
-    /**
-     * 单例
-     *
-     * @return this
-     */
-    public static ExtConfigBean getInstance() {
-        if (extConfigBean == null) {
-            extConfigBean = SpringUtil.getBean(ExtConfigBean.class);
-        }
-        return extConfigBean;
-    }
 
-    /**
-     * 项目运行存储路径
-     */
-    @Value("${jpom.path}")
-    private String path;
-
-    public String getPath() {
+    public static String getPath() {
         if (StrUtil.isEmpty(path)) {
             if (JpomManifest.getInstance().isDebug()) {
                 // 调试模式 为根路径的 jpom文件
@@ -175,23 +122,5 @@ public class ExtConfigBean {
         return path;
     }
 
-    public Charset getConsoleLogCharset() {
-        if (consoleLogCharset == null) {
-            consoleLogCharset = CharsetUtil.parse(consoleLogCharsetStr, CharsetUtil.systemCharset());
-        }
-        return consoleLogCharset;
-    }
 
-    public boolean getTimerMatchSecond() {
-        return ObjectUtil.defaultIfNull(timerMatchSecond, false);
-    }
-
-    /**
-     * 旧包文件保留个数
-     *
-     * @return 默认 2 个，0 保留所有
-     */
-    public int getOldJarsCount() {
-        return Math.max(oldJarsCount, 0);
-    }
 }

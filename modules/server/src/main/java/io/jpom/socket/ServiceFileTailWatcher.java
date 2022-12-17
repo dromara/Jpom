@@ -29,6 +29,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,8 +44,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
     private static final ConcurrentHashMap<File, ServiceFileTailWatcher<WebSocketSession>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
+    private static Charset charset;
+
+    public static void setCharset(Charset charset) {
+        ServiceFileTailWatcher.charset = charset;
+    }
+
     private ServiceFileTailWatcher(File logFile) {
-        super(logFile);
+        super(logFile, charset);
     }
 
     public static int getOneLineCount() {

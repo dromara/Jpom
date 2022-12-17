@@ -25,7 +25,7 @@ package io.jpom.service.manage;
 import cn.hutool.core.date.DateUtil;
 import io.jpom.model.data.ProjectRecoverModel;
 import io.jpom.service.BaseOperService;
-import io.jpom.system.AgentConfigBean;
+import io.jpom.common.AgentConst;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 public class ProjectRecoverService extends BaseOperService<ProjectRecoverModel> {
 
     public ProjectRecoverService() {
-        super(AgentConfigBean.PROJECT_RECOVER);
+        super(AgentConst.PROJECT_RECOVER);
     }
 
 

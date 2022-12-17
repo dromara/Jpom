@@ -36,7 +36,7 @@ import com.github.odiszapc.nginxparser.NgxParam;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.service.BaseDataService;
 import io.jpom.service.WhitelistDirectoryService;
-import io.jpom.system.AgentConfigBean;
+import io.jpom.common.AgentConst;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -308,7 +308,7 @@ public class NginxService extends BaseDataService {
      * status 状态：开启 open/ 关闭close
      */
     public JSONObject getNgxConf() {
-        JSONObject object = getJSONObject(AgentConfigBean.NGINX_CONF);
+        JSONObject object = getJSONObject(AgentConst.NGINX_CONF);
         if (object == null) {
             object = new JSONObject();
             object.put("name", "nginx");
@@ -324,7 +324,7 @@ public class NginxService extends BaseDataService {
     }
 
     public void save(JSONObject object) {
-        String dataFilePath = getDataFilePath(AgentConfigBean.NGINX_CONF);
+        String dataFilePath = getDataFilePath(AgentConst.NGINX_CONF);
         JsonFileUtil.saveJson(dataFilePath, object);
     }
 

@@ -28,13 +28,10 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.pattern.CronPattern;
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.http.HtmlUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.JsonMessage;
-import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.data.NodeScriptExecLogModel;
@@ -42,8 +39,6 @@ import io.jpom.model.data.NodeScriptModel;
 import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.service.script.NodeScriptExecLogServer;
 import io.jpom.service.script.NodeScriptServer;
-import io.jpom.system.AgentConfigBean;
-import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
@@ -54,7 +49,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -141,33 +135,6 @@ public class ScriptController extends BaseAgentController {
     public String del(String id) {
         nodeScriptServer.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");
-    }
-
-    @RequestMapping(value = "upload.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String upload() throws IOException {
-        MultipartFileBuilder multipartFileBuilder = createMultipart()
-            .addFieldName("file").setFileExt("bat", "sh");
-        multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
-        multipartFileBuilder.setUseOriginalFilename(true);
-        String path = multipartFileBuilder.save();
-        File file = FileUtil.file(path);
-        String context = FileUtil.readString(path, ExtConfigBean.getInstance().getConsoleLogCharset());
-        Assert.hasText(context, "脚本内容为空");
-
-        String name = file.getName();
-        String id = SecureUtil.sha1(name);
-        NodeScriptModel eModel = nodeScriptServer.getItem(id);
-        if (eModel != null) {
-            return JsonMessage.getString(405, "对应脚本模板已经存在啦");
-        }
-        eModel = new NodeScriptModel();
-        eModel.setId(id);
-        eModel.setName(name);
-        eModel.setWorkspaceId(getWorkspaceId());
-        eModel.setContext(context);
-
-        nodeScriptServer.addItem(eModel);
-        return JsonMessage.getString(200, "导入成功");
     }
 
     /**

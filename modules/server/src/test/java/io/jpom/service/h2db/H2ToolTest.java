@@ -70,7 +70,7 @@ public class H2ToolTest extends ApplicationStartTest {
         String pass = dbExtConfig.getUserPwd();
 
         // 备份 SQL 的目录
-        File file = FileUtil.file(ExtConfigBean.getInstance().getPath(), "db", JpomApplication.getAppType().name());
+        File file = FileUtil.file(ExtConfigBean.getPath(), "db", JpomApplication.getAppType().name());
         String path = FileUtil.getAbsolutePath(file);
 
         log.info("url: {}", url);
@@ -121,7 +121,7 @@ public class H2ToolTest extends ApplicationStartTest {
         testH2DropAllObjects();
 
         // 备份 SQL 的目录
-        File file = FileUtil.file(ExtConfigBean.getInstance().getPath(), "db", JpomApplication.getAppType().name());
+        File file = FileUtil.file(ExtConfigBean.getPath(), "db", JpomApplication.getAppType().name());
         String path = FileUtil.getAbsolutePath(file) + "/backup.sql";
 
         FileReader fileReader = new FileReader(path);

@@ -79,33 +79,22 @@ function check_conf() {
 
 	conf_path=$base/conf
 	conf_default_path=$base/conf_default
-	release_conf=$conf_path/application.yml
-	logback_configurationFile=$conf_path/logback.xml
-	release_default_conf=$conf_default_path/application.yml
-	logback_default_configurationFile=$conf_default_path/logback.xml
+	conf_array=(application.yml logback.xml)
 
 	if [[ ! -d "$conf_path" ]]; then
 		mkdir -p "${conf_path}"
 	fi
-	if [[ ! -f "$release_conf" ]]; then
-		if [[ ! -f "$release_default_conf" ]]; then
-			echo "Cannot find $release_conf && not found default conf in : $release_default_conf" 2>&2
-			exit 1
-		else
-			echo "copy default conf to $release_conf"
-			cp -r "$release_default_conf" "$release_conf"
+	for element in "${conf_array[@]}"; do
+		if [[ ! -f "$conf_path/$element" ]]; then
+			if [[ ! -f "$conf_default_path/$element" ]]; then
+				echo "Cannot find $conf_path/$element && not found default conf in : $conf_default_path/$element" 2>&2
+				exit 1
+			else
+				echo "copy default conf to $conf_path/$element"
+				cp -r "$conf_default_path/$element" "$conf_path/$element"
+			fi
 		fi
-	fi
-
-	if [[ ! -f "$logback_configurationFile" ]]; then
-		if [[ ! -f "$logback_default_configurationFile" ]]; then
-			echo "Cannot find $logback_configurationFile && not found default logback conf in : $logback_default_configurationFile" 2>&2
-			exit 1
-		else
-			echo "copy default logback conf to $logback_configurationFile"
-			cp -r "$logback_default_configurationFile" "$logback_configurationFile"
-		fi
-	fi
+	done
 }
 
 check_conf
