@@ -1,7 +1,7 @@
 <template>
   <div class="user-header">
     <a-button-group>
-      <a-button type="dashed" class="workspace jpom-workspace btn-group-item">
+      <a-button v-if="this.mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
           <a-tooltip :title="selectWorkspace && myWorkspaceList.filter((item) => item.id === selectWorkspace)[0].name">
             {{ selectWorkspace && myWorkspaceList.filter((item) => item.id === selectWorkspace)[0].name }}
@@ -288,6 +288,11 @@ import Vue from "vue";
 import { MFA_APP_TIP_ARRAY } from "@/utils/const";
 
 export default {
+  props: {
+    mode: {
+      type: String,
+    },
+  },
   data() {
     return {
       collapsed: false,

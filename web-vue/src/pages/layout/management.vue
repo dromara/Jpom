@@ -1,5 +1,5 @@
 <template>
-  <defaultIndex mode="normal"></defaultIndex>
+  <defaultIndex mode="management"></defaultIndex>
 </template>
 <script>
 import defaultIndex from "./default-index.vue";
