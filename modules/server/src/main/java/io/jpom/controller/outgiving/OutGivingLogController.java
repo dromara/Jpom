@@ -46,17 +46,17 @@ import org.springframework.web.bind.annotation.RestController;
 @Feature(cls = ClassFeature.OUTGIVING_LOG)
 public class OutGivingLogController extends BaseServerController {
 
-	private final DbOutGivingLogService dbOutGivingLogService;
+    private final DbOutGivingLogService dbOutGivingLogService;
 
-	public OutGivingLogController(DbOutGivingLogService dbOutGivingLogService) {
-		this.dbOutGivingLogService = dbOutGivingLogService;
-	}
+    public OutGivingLogController(DbOutGivingLogService dbOutGivingLogService) {
+        this.dbOutGivingLogService = dbOutGivingLogService;
+    }
 
 
-	@RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String listData() {
-		PageResultDto<OutGivingLog> pageResult = dbOutGivingLogService.listPage(getRequest());
-		return JsonMessage.getString(200, "获取成功", pageResult);
-	}
+    @RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<PageResultDto<OutGivingLog>> listData() {
+        PageResultDto<OutGivingLog> pageResult = dbOutGivingLogService.listPage(getRequest());
+        return JsonMessage.success("获取成功", pageResult);
+    }
 }

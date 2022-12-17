@@ -57,63 +57,63 @@ import java.util.List;
 @NodeDataPermission(cls = ProjectInfoCacheService.class)
 public class EditProjectController extends BaseServerController {
 
-	private final ProjectInfoCacheService projectInfoCacheService;
-	private final WhitelistDirectoryService whitelistDirectoryService;
+    private final ProjectInfoCacheService projectInfoCacheService;
+    private final WhitelistDirectoryService whitelistDirectoryService;
 
-	public EditProjectController(ProjectInfoCacheService projectInfoCacheService,
-								 WhitelistDirectoryService whitelistDirectoryService) {
-		this.projectInfoCacheService = projectInfoCacheService;
-		this.whitelistDirectoryService = whitelistDirectoryService;
-	}
+    public EditProjectController(ProjectInfoCacheService projectInfoCacheService,
+                                 WhitelistDirectoryService whitelistDirectoryService) {
+        this.projectInfoCacheService = projectInfoCacheService;
+        this.whitelistDirectoryService = whitelistDirectoryService;
+    }
 
-	@RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String getProjectData(@ValidatorItem String id) {
-		JSONObject projectInfo = projectInfoCacheService.getItem(getNode(), id);
-		return JsonMessage.getString(200, "", projectInfo);
-	}
+    @RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<JSONObject> getProjectData(@ValidatorItem String id) {
+        JSONObject projectInfo = projectInfoCacheService.getItem(getNode(), id);
+        return JsonMessage.success("", projectInfo);
+    }
 
-	/**
-	 * get project access list
-	 * 获取项目的白名单
-	 *
-	 * @return json
-	 * @author Hotstrip
-	 */
-	@RequestMapping(value = "project-access-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String projectAccessList() {
-		List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
-		return JsonMessage.getString(200, "success", jsonArray);
-	}
+    /**
+     * get project access list
+     * 获取项目的白名单
+     *
+     * @return json
+     * @author Hotstrip
+     */
+    @RequestMapping(value = "project-access-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<String>> projectAccessList() {
+        List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
+        return JsonMessage.success("success", jsonArray);
+    }
 
-	/**
-	 * 保存项目
-	 *
-	 * @param id id
-	 * @return json
-	 */
-	@RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EDIT)
-	public String saveProject(String id) {
-		// 防止和Jpom冲突
-		if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
-			return JsonMessage.getString(401, "当前项目id已经被Jpom占用");
-		}
-		NodeModel node = getNode();
-		JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.Manage_SaveProject);
-		if (request.getCode() == HttpStatus.OK.value()) {
-			projectInfoCacheService.syncNode(node, id);
-		}
-		return request.toString();
-	}
+    /**
+     * 保存项目
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> saveProject(String id) {
+        // 防止和Jpom冲突
+        if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
+            return new JsonMessage<>(401, "当前项目id已经被Jpom占用");
+        }
+        NodeModel node = getNode();
+        JsonMessage<String> request = NodeForward.request(node, getRequest(), NodeUrl.Manage_SaveProject);
+        if (request.getCode() == HttpStatus.OK.value()) {
+            projectInfoCacheService.syncNode(node, id);
+        }
+        return request;
+    }
 
 
-	/**
-	 * 验证lib 暂时用情况
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String saveProject() {
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Jude_Lib).toString();
-	}
+    /**
+     * 验证lib 暂时用情况
+     *
+     * @return json
+     */
+    @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String saveProject() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Jude_Lib).toString();
+    }
 }

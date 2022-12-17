@@ -87,12 +87,12 @@ public class NodeUpdateController extends BaseServerController {
      */
     @GetMapping(value = "download_remote.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-    public String downloadRemote() throws IOException {
+    public JsonMessage<String> downloadRemote() throws IOException {
         String saveDir = serverConfig.getAgentPath().getAbsolutePath();
         Tuple download = RemoteVersion.download(saveDir, Type.Agent, false);
         // 保存文件
         this.saveAgentFile(download);
-        return JsonMessage.getString(200, "下载成功");
+        return JsonMessage.success("下载成功");
     }
 
     /**
@@ -103,7 +103,7 @@ public class NodeUpdateController extends BaseServerController {
      * @see AgentFileModel
      */
     @GetMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String checkVersion() {
+    public JsonMessage<JSONObject> checkVersion() {
         RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
         AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class, agentFileModel1 -> {
             if (agentFileModel1 == null || !FileUtil.exist(agentFileModel1.getSavePath())) {
@@ -124,13 +124,13 @@ public class NodeUpdateController extends BaseServerController {
                 jsonObject.put("upgrade", StrUtil.compareVersion(version, tagName) < 0);
             }
         }
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     @RequestMapping(value = "upload_agent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @Feature(method = MethodFeature.UPLOAD)
-    public String uploadAgent() throws IOException {
+    public JsonMessage<String> uploadAgent() throws IOException {
         String saveDir = serverConfig.getAgentPath().getAbsolutePath();
         MultipartFileBuilder multipartFileBuilder = createMultipart();
         multipartFileBuilder
@@ -146,11 +146,12 @@ public class NodeUpdateController extends BaseServerController {
         JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Agent, false);
         if (error.getCode() != HttpStatus.HTTP_OK) {
             FileUtil.del(path);
-            return error.toString();
+            return new JsonMessage<>(error.getCode(), error.getMsg());
+            //error.toString();
         }
         // 保存文件
         this.saveAgentFile(error.getData());
-        return JsonMessage.getString(200, "上传成功");
+        return JsonMessage.success("上传成功");
     }
 
     private void saveAgentFile(Tuple data) {
@@ -172,7 +173,7 @@ public class NodeUpdateController extends BaseServerController {
     }
 
     @GetMapping(value = "fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String fastInstall() {
+    public JsonMessage<JSONObject> fastInstall() {
         InputStream inputStream = ResourceUtil.getStream("classpath:/config_default/fast-install-info.json");
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         JSONObject jsonObject = new JSONObject();
@@ -186,22 +187,22 @@ public class NodeUpdateController extends BaseServerController {
         String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = String.format("/%s/%s", contextPath, ServerOpenApi.RECEIVE_PUSH);
         jsonObject.put("url", FileUtil.normalize(url));
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     @GetMapping(value = "pull_fast_install_result.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String pullFastInstallResult(String removeId) {
+    public JsonMessage<Collection<JSONObject>> pullFastInstallResult(String removeId) {
         Collection<JSONObject> jsonObjects = NodeInfoController.listReceiveCache(removeId);
         jsonObjects = jsonObjects.stream().map(jsonObject -> {
             JSONObject clone = jsonObject.clone();
             clone.remove("canUseNode");
             return clone;
         }).collect(Collectors.toList());
-        return JsonMessage.getString(200, "", jsonObjects);
+        return JsonMessage.success("", jsonObjects);
     }
 
     @GetMapping(value = "confirm_fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String confirmFastInstall(@ValidatorItem String id, @ValidatorItem String ip, int port) {
+    public JsonMessage<Collection<JSONObject>> confirmFastInstall(@ValidatorItem String id, @ValidatorItem String ip, int port) {
         JSONObject receiveCache = NodeInfoController.getReceiveCache(id);
         Assert.notNull(receiveCache, "没有对应的缓存信息");
         JSONArray jsonArray = receiveCache.getJSONArray("canUseNode");
@@ -219,7 +220,7 @@ public class NodeUpdateController extends BaseServerController {
             nodeService.testNode(nodeModel);
         } catch (Exception e) {
             log.warn("测试结果：{} {}", nodeModel.getUrl(), e.getMessage());
-            return JsonMessage.getString(500, "节点连接失败：" + e.getMessage());
+            return new JsonMessage<>(500, "节点连接失败：" + e.getMessage());
         }
         // 插入
         boolean exists = nodeService.existsByUrl(nodeModel.getUrl(), nodeModel.getWorkspaceId(), null);
@@ -227,7 +228,7 @@ public class NodeUpdateController extends BaseServerController {
         nodeService.insert(nodeModel);
         // 更新结果
         receiveCache.put("type", "success");
-        return JsonMessage.getString(200, "安装成功", NodeInfoController.listReceiveCache(null));
+        return JsonMessage.success("安装成功", NodeInfoController.listReceiveCache(null));
     }
 
 

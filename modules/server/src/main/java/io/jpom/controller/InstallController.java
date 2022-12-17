@@ -85,13 +85,13 @@ public class InstallController extends BaseServerController {
      */
     @PostMapping(value = "install_submit.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public String installSubmit(
-            @ValidatorConfig(value = {
-                    @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "登录名不能为空"),
-                    @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = UserModel.USER_NAME_MIN_LEN + ":" + Const.ID_MAX_LEN, msg = "登录名长度范围" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN),
-                    @ValidatorItem(value = ValidatorRule.WORD, msg = "登录名不能包含汉字并且不能包含特殊字符")
-            }) String userName,
-            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String userPwd) {
+    public JsonMessage<JSONObject> installSubmit(
+        @ValidatorConfig(value = {
+            @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "登录名不能为空"),
+            @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = UserModel.USER_NAME_MIN_LEN + ":" + Const.ID_MAX_LEN, msg = "登录名长度范围" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN),
+            @ValidatorItem(value = ValidatorRule.WORD, msg = "登录名不能包含汉字并且不能包含特殊字符")
+        }) String userName,
+        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String userPwd) {
         //
         Assert.state(!userService.canUse(), "系统已经初始化过啦，请勿重复初始化");
 
@@ -110,7 +110,7 @@ public class InstallController extends BaseServerController {
             userService.insert(userModel);
         } catch (Exception e) {
             log.error("初始化用户失败", e);
-            return JsonMessage.getString(400, "初始化失败:" + e.getMessage());
+            return new JsonMessage<>(400, "初始化失败:" + e.getMessage());
         }
         //自动登录
         setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
@@ -123,7 +123,7 @@ public class InstallController extends BaseServerController {
         jsonObject.put("mfaKey", tfaKey);
         jsonObject.put("url", TwoFactorAuthUtils.generateOtpAuthUrl(userName, tfaKey));
         jsonObject.put("tokenData", userLoginDto);
-        return JsonMessage.getString(200, "初始化成功", jsonObject);
+        return JsonMessage.success("初始化成功", jsonObject);
     }
 
 }

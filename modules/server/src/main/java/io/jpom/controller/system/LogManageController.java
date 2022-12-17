@@ -63,12 +63,12 @@ public class LogManageController extends BaseServerController {
 
     @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String logData(String nodeId) {
+    public JsonMessage<JSONArray> logData(String nodeId) {
         if (StrUtil.isNotEmpty(nodeId)) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemLog).toString();
+            return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemLog);
         }
         JSONArray data = LayuiTreeUtil.getTreeData(LogbackConfig.getPath());
-        return JsonMessage.getString(200, "", data);
+        return JsonMessage.success("", data);
     }
 
     /**
@@ -80,10 +80,10 @@ public class LogManageController extends BaseServerController {
      */
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String logData(String nodeId,
-                          @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
+    public JsonMessage<String> logData(String nodeId,
+                                       @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
         if (StrUtil.isNotEmpty(nodeId)) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.DelSystemLog).toString();
+            return NodeForward.request(getNode(), getRequest(), NodeUrl.DelSystemLog);
         }
         File file = FileUtil.file(LogbackConfig.getPath(), path);
         // 判断修改时间
@@ -93,9 +93,9 @@ public class LogManageController extends BaseServerController {
         if (FileUtil.del(file)) {
             // 离线上一个日志
             ServiceFileTailWatcher.offlineFile(file);
-            return JsonMessage.getString(200, "删除成功");
+            return JsonMessage.success("删除成功");
         }
-        return JsonMessage.getString(500, "删除失败");
+        return new JsonMessage<>(500, "删除失败");
     }
 
 

@@ -80,7 +80,7 @@ public class WorkspaceController extends BaseServerController {
      */
     @PostMapping(value = "/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String create(String id, @ValidatorItem String name, @ValidatorItem String description) {
+    public JsonMessage<Object> create(String id, @ValidatorItem String name, @ValidatorItem String description) {
         this.checkInfo(id, name);
         //
         WorkspaceModel workspaceModel = new WorkspaceModel();
@@ -93,7 +93,7 @@ public class WorkspaceController extends BaseServerController {
             workspaceModel.setId(id);
             workspaceService.update(workspaceModel);
         }
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     private void checkInfo(String id, String name) {
@@ -113,9 +113,9 @@ public class WorkspaceController extends BaseServerController {
      */
     @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String list() {
+    public JsonMessage<PageResultDto<WorkspaceModel>> list() {
         PageResultDto<WorkspaceModel> listPage = workspaceService.listPage(getRequest());
-        return JsonMessage.getString(200, "", listPage);
+        return JsonMessage.success("", listPage);
     }
 
     /**
@@ -125,9 +125,9 @@ public class WorkspaceController extends BaseServerController {
      */
     @GetMapping(value = "/list_all")
     @Feature(method = MethodFeature.LIST)
-    public String listAll() {
+    public JsonMessage<List<WorkspaceModel>> listAll() {
         List<WorkspaceModel> list = workspaceService.list();
-        return JsonMessage.getString(200, "", list);
+        return JsonMessage.success("", list);
     }
 
     /**
@@ -139,7 +139,7 @@ public class WorkspaceController extends BaseServerController {
     @GetMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     @SystemPermission(superUser = true)
-    public Object delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public JsonMessage<String> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
         //
         Assert.state(!StrUtil.equals(id, Const.WORKSPACE_DEFAULT_ID), "不能删除默认工作空间");
         // 判断是否存在关联数据
@@ -173,6 +173,6 @@ public class WorkspaceController extends BaseServerController {
         Assert.state(!workspace, "当前工作空间下还绑定着用户信息");
         // 删除信息
         workspaceService.delByKey(id);
-        return JsonMessage.toJson(200, "删除成功 " + autoDelete);
+        return new JsonMessage<>(200, "删除成功 " + autoDelete);
     }
 }

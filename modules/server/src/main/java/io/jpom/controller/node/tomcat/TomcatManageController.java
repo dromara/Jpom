@@ -90,7 +90,7 @@
 //	@Feature(method = MethodFeature.LIST)
 //	public String tomcatList() {
 //		JSONArray jsonArray = tomcatService.getTomcatList(getNode());
-//		return JsonMessage.getString(200, "success", jsonArray);
+//		return JsonMessage.success( "success", jsonArray);
 //	}
 //
 //	/**
@@ -104,7 +104,7 @@
 //	public String getTomcatProject(String id) {
 //		// 查询tomcat管理的项目的列表
 //		JSONArray tomcatProjects = tomcatService.getTomcatProjectList(getNode(), id);
-//		return JsonMessage.getString(200, "查询成功", tomcatProjects);
+//		return JsonMessage.success( "查询成功", tomcatProjects);
 //	}
 //
 //	/**

@@ -22,28 +22,13 @@
  */
 package io.jpom.common;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.exceptions.ValidateException;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
-import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConversionException;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.nio.file.AccessDeniedException;
 
 /**
  * 全局异常处理

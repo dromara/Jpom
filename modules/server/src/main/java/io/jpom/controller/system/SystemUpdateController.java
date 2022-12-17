@@ -78,10 +78,10 @@ public class SystemUpdateController extends BaseServerController {
 
     @PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String info() {
+    public JsonMessage<JSONObject> info() {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.Info).toString();
+            return NodeForward.request(getNode(), getRequest(), NodeUrl.Info);
         }
         JpomManifest instance = JpomManifest.getInstance();
         RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
@@ -89,7 +89,7 @@ public class SystemUpdateController extends BaseServerController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("manifest", instance);
         jsonObject.put("remoteVersion", remoteVersion);
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     /**
@@ -98,10 +98,10 @@ public class SystemUpdateController extends BaseServerController {
      * @return changelog md
      */
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String changeLog() {
+    public JsonMessage<String> changeLog() {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.CHANGE_LOG).toString();
+            return NodeForward.request(getNode(), getRequest(), NodeUrl.CHANGE_LOG);
         }
         //
         URL resource = ResourceUtil.getResource("CHANGELOG.md");
@@ -110,15 +110,15 @@ public class SystemUpdateController extends BaseServerController {
             InputStream stream = URLUtil.getStream(resource);
             log = IoUtil.readUtf8(stream);
         }
-        return JsonMessage.getString(200, "", log);
+        return JsonMessage.success("", log);
     }
 
     @PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String uploadJar() throws IOException {
+    public JsonMessage<String> uploadJar() throws IOException {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
-            return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar).toString();
+            return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar);
         }
         //
         Objects.requireNonNull(JpomManifest.getScriptFile());
@@ -136,7 +136,7 @@ public class SystemUpdateController extends BaseServerController {
         // 基础检查
         JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Server);
         if (error.getCode() != HttpStatus.HTTP_OK) {
-            return error.toString();
+            return new JsonMessage<>(error.getCode(), error.getMsg());
         }
         Tuple data = error.getData();
         String version = data.get(0);
@@ -145,7 +145,7 @@ public class SystemUpdateController extends BaseServerController {
         backupInfoService.autoBackup();
         //
         JpomApplication.restart();
-        return JsonMessage.getString(200, Const.UPGRADE_MSG);
+        return JsonMessage.success(Const.UPGRADE_MSG);
     }
 
     /**
@@ -155,13 +155,13 @@ public class SystemUpdateController extends BaseServerController {
      * @see RemoteVersion
      */
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String checkVersion() {
+    public JsonMessage<RemoteVersion> checkVersion() {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.CHECK_VERSION).toString();
+            return NodeForward.request(getNode(), getRequest(), NodeUrl.CHECK_VERSION);
         }
         RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
-        return JsonMessage.getString(200, "", remoteVersion);
+        return JsonMessage.success("", remoteVersion);
     }
 
     /**
@@ -172,12 +172,12 @@ public class SystemUpdateController extends BaseServerController {
      */
     @GetMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public String upgrade() throws IOException {
+    public JsonMessage<String> upgrade() throws IOException {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.REMOTE_UPGRADE).toString();
+            return NodeForward.request(getNode(), getRequest(), NodeUrl.REMOTE_UPGRADE);
         }
         RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath(), objects -> backupInfoService.autoBackup());
-        return JsonMessage.getString(200, Const.UPGRADE_MSG);
+        return JsonMessage.success(Const.UPGRADE_MSG);
     }
 }

@@ -95,28 +95,28 @@ public class NodeEditController extends BaseServerController {
 
     @PostMapping(value = "list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String listJson() {
+    public JsonMessage<PageResultDto<NodeModel>> listJson() {
         PageResultDto<NodeModel> nodeModelPageResultDto = nodeService.listPage(getRequest());
-        return JsonMessage.getString(200, "", nodeModelPageResultDto);
+        return JsonMessage.success("", nodeModelPageResultDto);
     }
 
     @GetMapping(value = "list_data_all.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String listDataAll() {
+    public JsonMessage<List<NodeModel>> listDataAll() {
         List<NodeModel> list = nodeService.listByWorkspace(getRequest());
-        return JsonMessage.getString(200, "", list);
+        return JsonMessage.success("", list);
     }
 
     @GetMapping(value = "list_data_by_workspace_id.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String listDataAll(@ValidatorItem String workspaceId) {
+    public JsonMessage<List<NodeModel>> listDataAll(@ValidatorItem String workspaceId) {
         nodeService.checkUserWorkspace(workspaceId);
         NodeModel nodeModel = new NodeModel();
         if (!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL)) {
             nodeModel.setWorkspaceId(workspaceId);
         }
         List<NodeModel> list = nodeService.listByBean(nodeModel);
-        return JsonMessage.getString(200, "", list);
+        return JsonMessage.success("", list);
     }
 
     /**
@@ -126,14 +126,14 @@ public class NodeEditController extends BaseServerController {
      */
     @GetMapping(value = "list_group_all.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String listGroupAll() {
+    public JsonMessage<List<String>> listGroupAll() {
         List<String> listGroup = nodeService.listGroup(getRequest());
-        return JsonMessage.getString(200, "", listGroup);
+        return JsonMessage.success("", listGroup);
     }
 
     @RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String nodeStatus() {
+    public JsonMessage<JSONArray> nodeStatus() {
         long timeMillis = System.currentTimeMillis();
         NodeModel node = getNode();
         JSONObject jsonObject = NodeForward.requestData(node, NodeUrl.Status, getRequest(), JSONObject.class);
@@ -142,14 +142,14 @@ public class NodeEditController extends BaseServerController {
         jsonObject.put("timeOut", System.currentTimeMillis() - timeMillis);
         jsonObject.put("nodeId", node.getId());
         jsonArray.add(jsonObject);
-        return JsonMessage.getString(200, "", jsonArray);
+        return JsonMessage.success("", jsonArray);
     }
 
     @PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String save() {
+    public JsonMessage<String> save() {
         nodeService.update(getRequest());
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
 
@@ -161,7 +161,7 @@ public class NodeEditController extends BaseServerController {
      */
     @PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String del(@ValidatorItem String id) {
+    public JsonMessage<String> del(@ValidatorItem String id) {
         HttpServletRequest request = getRequest();
         this.checkDataBind(id, request, "删除");
         //
@@ -182,7 +182,7 @@ public class NodeEditController extends BaseServerController {
         }
         //
         this.delNodeData(id, request);
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     private void checkDataBind(String id, HttpServletRequest request, String msg) {
@@ -217,14 +217,14 @@ public class NodeEditController extends BaseServerController {
      */
     @GetMapping(value = "unbind.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String unbind(String id) {
+    public JsonMessage<String> unbind(String id) {
         HttpServletRequest request = getRequest();
         this.checkDataBind(id, request, "解绑");
         //
         projectInfoCacheService.delCache(id, request);
         nodeScriptServer.delCache(id, request);
         this.delNodeData(id, request);
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     /**
@@ -237,10 +237,10 @@ public class NodeEditController extends BaseServerController {
     @GetMapping(value = "un_lock_workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public String unLockWorkspace(@ValidatorItem String id, @ValidatorItem String toWorkspaceId) {
+    public JsonMessage<String> unLockWorkspace(@ValidatorItem String id, @ValidatorItem String toWorkspaceId) {
         nodeService.checkUserWorkspace(toWorkspaceId);
         nodeService.unLock(id, toWorkspaceId);
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     /**
@@ -253,12 +253,12 @@ public class NodeEditController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public String syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
+    public JsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
         //
         nodeService.checkUserWorkspace(toWorkspaceId);
         nodeService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     /**
@@ -282,6 +282,6 @@ public class NodeEditController extends BaseServerController {
         } else {
             return new JsonMessage<>(400, "不支持的方式" + method);
         }
-        return new JsonMessage<>(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 }

@@ -31,6 +31,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.multipart.MultipartFileBuilder;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.data.CertModel;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.service.system.CertService;
@@ -38,6 +39,7 @@ import io.jpom.system.AgentConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,7 +80,7 @@ public class CertificateController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String saveCertificate() {
+    public JsonMessage<String> saveCertificate() {
         String data = getParameter("data");
         JSONObject jsonObject = JSONObject.parseObject(data);
         String type = jsonObject.getString("type");
@@ -87,15 +89,15 @@ public class CertificateController extends BaseAgentController {
             CertModel certModel;
             if ("add".equalsIgnoreCase(type)) {
                 if (certService.getItem(id) != null) {
-                    return JsonMessage.getString(405, "证书id已经存在啦");
+                    return new JsonMessage<>(405, "证书id已经存在啦");
                 }
                 certModel = new CertModel();
-                String error = getCertModel(certModel, jsonObject);
+                JsonMessage<String> error = getCertModel(certModel, jsonObject);
                 if (error != null) {
                     return error;
                 }
                 if (!hasFile()) {
-                    return JsonMessage.getString(405, "请选择证书包文件");
+                    return new JsonMessage<>(405, "请选择证书包文件");
                 }
                 error = getCertFile(certModel, true);
                 if (error != null) {
@@ -104,16 +106,14 @@ public class CertificateController extends BaseAgentController {
                 certService.addItem(certModel);
             } else {
                 certModel = certService.getItem(id);
-                if (certModel == null) {
-                    return JsonMessage.getString(404, "没有找到对应证书文件");
-                }
+                Assert.notNull(certModel, "没有找到对应证书文件");
+
                 String name = jsonObject.getString("name");
-                if (StrUtil.isEmpty(name)) {
-                    return JsonMessage.getString(400, "请填写证书名称");
-                }
+                Assert.hasText(name, "请填写证书名称");
+
                 certModel.setName(name);
                 if (ServletFileUpload.isMultipartContent(getRequest()) && hasFile()) {
-                    String error = getCertFile(certModel, false);
+                    JsonMessage<String> error = getCertFile(certModel, false);
                     if (error != null) {
                         return error;
                     }
@@ -122,9 +122,9 @@ public class CertificateController extends BaseAgentController {
             }
         } catch (Exception e) {
             log.error("证书文件", e);
-            return JsonMessage.getString(400, "解析证书文件失败：" + e.getMessage());
+            return new JsonMessage<>(400, "解析证书文件失败：" + e.getMessage());
         }
-        return JsonMessage.getString(200, "提交成功");
+        return JsonMessage.success("提交成功");
     }
 
 
@@ -135,21 +135,21 @@ public class CertificateController extends BaseAgentController {
      * @param jsonObject json对象
      * @return 错误消息
      */
-    private String getCertModel(CertModel certModel, JSONObject jsonObject) {
+    private JsonMessage<String> getCertModel(CertModel certModel, JSONObject jsonObject) {
         String id = jsonObject.getString("id");
         String path = jsonObject.getString("path");
         String name = jsonObject.getString("name");
         if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(400, "请填写证书id");
+            return new JsonMessage<>(400, "请填写证书id");
         }
         if (Validator.isChinese(id)) {
-            return JsonMessage.getString(400, "证书id不能使用中文");
+            return new JsonMessage<>(400, "证书id不能使用中文");
         }
         if (StrUtil.isEmpty(name)) {
-            return JsonMessage.getString(400, "请填写证书名称");
+            return new JsonMessage<>(400, "请填写证书名称");
         }
         if (!whitelistDirectoryService.checkCertificateDirectory(path)) {
-            return JsonMessage.getString(400, "请选择正确的项目路径,或者还没有配置白名单");
+            return new JsonMessage<>(400, "请选择正确的项目路径,或者还没有配置白名单");
         }
         certModel.setId(id);
         certModel.setWhitePath(path);
@@ -190,25 +190,25 @@ public class CertificateController extends BaseAgentController {
                 }
             }
             if (pemPath == null || keyPath == null) {
-                return JsonMessage.getString(405, "证书包中文件不完整，需要包含key、pem");
+                return new JsonMessage<>(405, "证书包中文件不完整，需要包含key、pem");
             }
             JSONObject jsonObject = CertModel.decodeCert(pemPath, keyPath);
             if (jsonObject == null) {
-                return JsonMessage.getString(405, "解析证书失败");
+                return new JsonMessage<>(405, "解析证书失败");
             }
             return jsonObject;
         }
     }
 
-    private String getCertFile(CertModel certModel, boolean add) throws IOException {
+    private JsonMessage<String> getCertFile(CertModel certModel, boolean add) throws IOException {
         String certPath = null;
         try {
             String path = agentConfig.getTempPathName();
             MultipartFileBuilder cert = createMultipart().addFieldName("file").setSavePath(path);
             certPath = cert.save();
             Object val = getUpdateFileInfo(certModel, certPath);
-            if (val instanceof String) {
-                return val.toString();
+            if (val instanceof JsonMessage) {
+                return (JsonMessage<String>) val;
             }
             JSONObject jsonObject = (JSONObject) val;
             String domain = jsonObject.getString("domain");
@@ -217,13 +217,13 @@ public class CertificateController extends BaseAgentController {
                 if (array != null) {
                     for (CertModel certModel1 : array) {
                         if (StrUtil.emptyToDefault(domain, "").equals(certModel1.getDomain())) {
-                            return JsonMessage.getString(405, "证书的域名已经存在啦");
+                            return new JsonMessage<>(405, "证书的域名已经存在啦");
                         }
                     }
                 }
             } else {
                 if (!StrUtil.emptyToDefault(domain, "").equals(certModel.getDomain())) {
-                    return JsonMessage.getString(405, "新证书的域名不一致");
+                    return new JsonMessage<>(405, "新证书的域名不一致");
                 }
             }
             // 移动位置
@@ -232,10 +232,10 @@ public class CertificateController extends BaseAgentController {
             File keyFile = FileUtil.file(temporary + certModel.getId() + ".key");
             if (add) {
                 if (pemFile.exists()) {
-                    return JsonMessage.getString(405, pemFile.getAbsolutePath() + " 已经被占用啦");
+                    return new JsonMessage<>(405, pemFile.getAbsolutePath() + " 已经被占用啦");
                 }
                 if (keyFile.exists()) {
-                    return JsonMessage.getString(405, keyFile.getAbsolutePath() + " 已经被占用啦");
+                    return new JsonMessage<>(405, keyFile.getAbsolutePath() + " 已经被占用啦");
                 }
             }
             String pemPath = jsonObject.getString("pemPath");
@@ -263,9 +263,9 @@ public class CertificateController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getCertList() {
+    public JsonMessage<List<CertModel>> getCertList() {
         List<CertModel> array = certService.list();
-        return JsonMessage.getString(200, "", array);
+        return JsonMessage.success("", array);
     }
 
     /**
@@ -275,12 +275,9 @@ public class CertificateController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String delete(String id) {
-        if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(400, "删除失败");
-        }
+    public JsonMessage<String> delete(@ValidatorItem String id) {
         certService.deleteItem(id);
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 
 
@@ -288,18 +285,14 @@ public class CertificateController extends BaseAgentController {
      * 导出证书
      *
      * @param id 项目id
-     * @return 结果
      */
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String export(String id) {
+    public void export(String id) {
         CertModel item = certService.getItem(id);
-        if (null == item) {
-            return JsonMessage.getString(400, "导出失败");
-        }
+        Assert.notNull(item, "导出失败");
         String parent = FileUtil.file(item.getCert()).getParent();
         File zip = ZipUtil.zip(parent);
         ServletUtil.write(getResponse(), zip);
         FileUtil.del(zip);
-        return JsonMessage.getString(400, "导出成功");
     }
 }

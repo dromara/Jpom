@@ -80,7 +80,7 @@ public class ServerScriptTriggerApiController extends BaseJpomController {
      * @return json
      */
     @RequestMapping(value = ServerOpenApi.SERVER_SCRIPT_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String trigger2(@PathVariable String id, @PathVariable String token) {
+    public JsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
         ScriptModel item = scriptServer.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
@@ -106,10 +106,10 @@ public class ServerScriptTriggerApiController extends BaseJpomController {
             //
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("logId", nodeScriptExecLogModel.getId());
-            return JsonMessage.getString(200, "开始执行", jsonObject);
+            return JsonMessage.success("开始执行", jsonObject);
         } catch (Exception e) {
             log.error("触发自动执行服务器脚本异常", e);
-            return JsonMessage.getString(500, "执行异常：" + e.getMessage());
+            return new JsonMessage<>(500, "执行异常：" + e.getMessage());
         }
     }
 
@@ -136,7 +136,7 @@ public class ServerScriptTriggerApiController extends BaseJpomController {
      * @return json
      */
     @PostMapping(value = ServerOpenApi.SERVER_SCRIPT_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String triggerBatch() {
+    public JsonMessage<List<Object>> triggerBatch() {
         try {
             String body = ServletUtil.getBody(getRequest());
             JSONArray jsonArray = JSONArray.parseArray(body);
@@ -172,10 +172,10 @@ public class ServerScriptTriggerApiController extends BaseJpomController {
                 }
                 //
             }).collect(Collectors.toList());
-            return JsonMessage.getString(200, "触发成功", collect);
+            return JsonMessage.success("触发成功", collect);
         } catch (Exception e) {
             log.error("服务端脚本批量触发异常", e);
-            return JsonMessage.getString(500, "触发异常", e.getMessage());
+            return new JsonMessage<>(500, "触发异常" + e.getMessage());
         }
     }
 }

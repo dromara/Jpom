@@ -103,7 +103,7 @@ public class OutGivingProjectController extends BaseServerController {
 
 
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) {
+    public JsonMessage<List<JSONObject>> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) {
         HttpServletRequest request = getRequest();
         String workspaceId = outGivingServer.getCheckUserWorkspace(request);
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
@@ -147,7 +147,7 @@ public class OutGivingProjectController extends BaseServerController {
             jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());
             return jsonObject;
         }).collect(Collectors.toList());
-        return JsonMessage.getString(200, "", collect);
+        return JsonMessage.success("", collect);
     }
 
     private File checkZip(String path, boolean unzip) {
@@ -181,7 +181,7 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public String upload(String id, String afterOpt, String clearOld, String autoUnzip) throws IOException {
+    public JsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip) throws IOException {
         OutGivingModel outGivingModel = this.check(id);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
@@ -205,7 +205,7 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingServer.update(outGivingModel);
         // 开启
         OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip);
-        return JsonMessage.getString(200, "分发成功");
+        return JsonMessage.success("分发成功");
     }
 
     private OutGivingModel check(String id) {
@@ -228,7 +228,7 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @RequestMapping(value = "remote_download", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-    public String remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip) {
+    public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip) {
         OutGivingModel outGivingModel = this.check(id);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
@@ -252,10 +252,10 @@ public class OutGivingProjectController extends BaseServerController {
             this.checkZip(downloadFile, unzip);
             // 开启
             OutGivingRun.startRun(outGivingModel.getId(), downloadFile, getUser(), unzip);
-            return JsonMessage.getString(200, "分发成功");
+            return JsonMessage.success("分发成功");
         } catch (Exception e) {
             log.error("下载远程文件异常", e);
-            return JsonMessage.getString(500, "下载远程文件失败:" + e.getMessage());
+            return new JsonMessage<>(500, "下载远程文件失败:" + e.getMessage());
         }
     }
 }

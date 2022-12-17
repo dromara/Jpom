@@ -68,7 +68,7 @@ public class ProjectStatusController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getProjectStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String getCopy) {
+    public JsonMessage<JSONObject> getProjectStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String getCopy) {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
         Assert.notNull(nodeProjectInfoModel, "项目id不存在");
         JSONObject jsonObject = new JSONObject();
@@ -99,7 +99,7 @@ public class ProjectStatusController extends BaseAgentController {
         } finally {
             CommandUtil.closeCache();
         }
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ProjectStatusController extends BaseAgentController {
      * @return obj
      */
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getProjectPort(String ids) {
+    public JsonMessage<JSONObject> getProjectPort(String ids) {
         Assert.hasText(ids, "没有要获取的信息");
         JSONArray jsonArray = JSONArray.parseArray(ids);
         JSONObject jsonObject = new JSONObject();
@@ -134,7 +134,7 @@ public class ProjectStatusController extends BaseAgentController {
         } finally {
             CommandUtil.closeCache();
         }
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
 
@@ -146,9 +146,9 @@ public class ProjectStatusController extends BaseAgentController {
      * @return obj
      */
     @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getProjectPort(String id, String copyIds) {
+    public JsonMessage<JSONObject> getProjectPort(String id, String copyIds) {
         if (StrUtil.isEmpty(copyIds) || StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(400, "");
+            return new JsonMessage<>(400, "参数异常");
         }
         NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
 
@@ -177,11 +177,11 @@ public class ProjectStatusController extends BaseAgentController {
         } finally {
             CommandUtil.closeCache();
         }
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String restart(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public JsonMessage<String> restart(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
@@ -189,43 +189,43 @@ public class ProjectStatusController extends BaseAgentController {
             CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, item, copyItem);
             // boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
 
-            return JsonMessage.getString(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
+            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
 
         } catch (Exception e) {
             log.error("重启项目异常", e);
-            return JsonMessage.getString(500, "重启项目异常:" + e.getMessage());
+            return new JsonMessage<>(500, "重启项目异常:" + e.getMessage());
         }
     }
 
 
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String stop(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public JsonMessage<String> stop(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
 
         try {
             CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.stop, item, copyItem);
-            return JsonMessage.getString(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
+            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
         } catch (Exception e) {
             log.error("关闭项目异常", e);
-            return JsonMessage.getString(500, "关闭项目异常：" + e.getMessage());
+            return new JsonMessage<>(500, "关闭项目异常：" + e.getMessage());
         }
     }
 
 
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public JsonMessage<String> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
 
         try {
             CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.start, item, copyItem);
-            return JsonMessage.getString(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
+            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
         } catch (Exception e) {
             log.error("获取项目pid 失败", e);
-            return JsonMessage.getString(500, "启动项目异常：" + e.getMessage());
+            return new JsonMessage<>(500, "启动项目异常：" + e.getMessage());
         }
     }
 }

@@ -59,7 +59,7 @@ public abstract class BaseExceptionHandler {
     @ResponseBody
     public JsonMessage<String> defExceptionHandler(HttpServletRequest request, Exception e) {
         if (e instanceof JpomRuntimeException) {
-            log.error("global handle exception: {}", request.getRequestURI(), e.getCause());
+            log.error("global handle exception: {} {}", request.getRequestURI(), e.getMessage(), e.getCause());
             return new JsonMessage<>(500, e.getMessage());
         } else {
             log.error("global handle exception: {}", request.getRequestURI(), e);

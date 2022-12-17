@@ -70,8 +70,8 @@ public class UserInfoController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updatePwd(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String oldPwd,
-                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String newPwd) {
+    public JsonMessage<String> updatePwd(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String oldPwd,
+                                         @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String newPwd) {
         Assert.state(!StrUtil.equals(oldPwd, newPwd), "新旧密码一致");
         UserModel userName = getUser();
         Assert.state(!userName.isDemoUser(), "当前账户为演示账号，不支持修改密码");
@@ -83,10 +83,10 @@ public class UserInfoController extends BaseServerController {
             userService.updatePwd(userName.getId(), newPwd);
             // 如果修改成功，则销毁会话
             getSession().invalidate();
-            return JsonMessage.getString(200, "修改密码成功！");
+            return JsonMessage.success("修改密码成功！");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return JsonMessage.getString(500, "系统异常：" + e.getMessage());
+            return new JsonMessage<>(500, "系统异常：" + e.getMessage());
         }
     }
 
@@ -96,8 +96,8 @@ public class UserInfoController extends BaseServerController {
      * @return json
      */
     @GetMapping(value = "workspace_list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String workspaceList(@ValidatorItem String userId) {
+    public JsonMessage<List<UserBindWorkspaceModel>> workspaceList(@ValidatorItem String userId) {
         List<UserBindWorkspaceModel> workspaceModels = userBindWorkspaceService.listUserWorkspace(userId);
-        return JsonMessage.getString(200, "", workspaceModels);
+        return JsonMessage.success("", workspaceModels);
     }
 }

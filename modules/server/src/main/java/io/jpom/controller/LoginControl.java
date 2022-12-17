@@ -106,7 +106,7 @@ public class LoginControl extends BaseServerController {
     @NotLogin
     public void randCode() throws IOException {
         if (webConfig.isDisabledCaptcha()) {
-            ServletUtil.write(getResponse(), JsonMessage.getString(200, "验证码已禁用"), MediaType.APPLICATION_JSON_VALUE);
+            ServletUtil.write(getResponse(), JsonMessage.success("验证码已禁用").toString(), MediaType.APPLICATION_JSON_VALUE);
             return;
         }
         int height = 50;
@@ -239,10 +239,10 @@ public class LoginControl extends BaseServerController {
 
     @GetMapping(value = "mfa_verify", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public String mfaVerify(String token, String code) {
+    public JsonMessage<UserLoginDto> mfaVerify(String token, String code) {
         String userId = MFA_TOKEN.get(token);
         if (StrUtil.isEmpty(userId)) {
-            return JsonMessage.getString(201, "登录信息已经过期请重新登录");
+            return new JsonMessage<>(201, "登录信息已经过期请重新登录");
         }
         boolean mfaCode = userService.verifyMfaCode(userId, code);
         Assert.state(mfaCode, "验证码不正确,请重新输入");
@@ -250,7 +250,7 @@ public class LoginControl extends BaseServerController {
         //
         UserLoginDto userLoginDto = this.createToken(userModel);
         MFA_TOKEN.remove(token);
-        return JsonMessage.getString(200, "登录成功", userLoginDto);
+        return JsonMessage.success("登录成功", userLoginDto);
     }
 
     /**
@@ -260,9 +260,9 @@ public class LoginControl extends BaseServerController {
      */
     @RequestMapping(value = "logout2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public String logout() {
+    public JsonMessage<Object> logout() {
         getSession().invalidate();
-        return JsonMessage.getString(200, "退出成功");
+        return JsonMessage.success("退出成功");
     }
 
     /**
@@ -272,24 +272,24 @@ public class LoginControl extends BaseServerController {
      */
     @RequestMapping(value = "renewal", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public String renewalToken() {
+    public JsonMessage<UserLoginDto> renewalToken() {
         String token = getRequest().getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
         if (StrUtil.isEmpty(token)) {
-            return JsonMessage.getString(ServerConst.AUTHORIZE_TIME_OUT_CODE, "刷新token失败");
+            return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, "刷新token失败");
         }
         JWT jwt = JwtUtil.readBody(token);
         if (JwtUtil.expired(jwt, 0)) {
             int renewal = userConfig.getTokenRenewal();
             if (jwt == null || renewal <= 0 || JwtUtil.expired(jwt, TimeUnit.MINUTES.toSeconds(renewal))) {
-                return JsonMessage.getString(ServerConst.AUTHORIZE_TIME_OUT_CODE, "刷新token超时");
+                return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, "刷新token超时");
             }
         }
         UserModel userModel = userService.checkUser(JwtUtil.getId(jwt));
         if (userModel == null) {
-            return JsonMessage.getString(ServerConst.AUTHORIZE_TIME_OUT_CODE, "没有对应的用户");
+            return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, "没有对应的用户");
         }
         UserLoginDto userLoginDto = userService.getUserJwtId(userModel);
-        return JsonMessage.getString(200, "", userLoginDto);
+        return JsonMessage.success("", userLoginDto);
     }
 
     /**
@@ -297,15 +297,15 @@ public class LoginControl extends BaseServerController {
      */
     @GetMapping(value = "user_demo_info", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public String demoInfo() {
+    public JsonMessage<JSONObject> demoInfo() {
         String userDemoTip = userConfig.getDemoTip();
         userDemoTip = StringUtil.convertFileStr(userDemoTip, StrUtil.EMPTY);
 
         if (StrUtil.isEmpty(userDemoTip) || !userService.hasDemoUser()) {
-            return JsonMessage.getString(200, "");
+            return JsonMessage.success("");
         }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("user", UserModel.DEMO_USER);
-        return JsonMessage.getString(200, userDemoTip, jsonObject);
+        return JsonMessage.success(userDemoTip, jsonObject);
     }
 }

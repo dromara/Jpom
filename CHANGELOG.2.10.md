@@ -29,6 +29,7 @@
 12. 【all】下架 节点脚本导入功能
 13. 【server】取消限制创建用户最大数配置：`user.maxCount`
 14. 【server】删除 node_info 表 cycle 字段
+15. 【agent】删除项目回收记录功能
 
 ### ❌ 不兼容的属性配置变更
 

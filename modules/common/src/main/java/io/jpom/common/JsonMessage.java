@@ -24,7 +24,6 @@ package io.jpom.common;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.ToStringSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -95,29 +94,11 @@ public class JsonMessage<T> implements Serializable {
      */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
         return JSONObject.toJSONString(this);
     }
 
     public JSONObject toJson() {
         return (JSONObject) JSONObject.toJSON(this);
-    }
-
-    public String dataToString() {
-        T object = getData();
-        if (object == null) {
-            return null;
-        }
-        return object.toString();
-    }
-
-    /**
-     * 输出格式化后的json 字符串
-     *
-     * @return 字符串
-     */
-    public String toFormatJson() {
-        return JSONObject.toJSONString(this, SerializerFeature.PrettyFormat);
     }
 
     public static JSONObject toJson(int code, String msg) {
@@ -139,6 +120,14 @@ public class JsonMessage<T> implements Serializable {
         return getString(code, msg, null);
     }
 
+    public static <T> JsonMessage<T> success(String msg) {
+        return success(msg, null);
+    }
+
+    public static <T> JsonMessage<T> success(String msg, T data) {
+        return new JsonMessage<>(DEFAULT_SUCCESS_CODE, msg, data);
+    }
+
     /**
      * @param code code
      * @param msg  msg
@@ -148,21 +137,5 @@ public class JsonMessage<T> implements Serializable {
      */
     public static String getString(int code, String msg, Object data) {
         return toJson(code, msg, data).toString();
-    }
-
-    /**
-     * json字符串转 jsonMessage对象
-     *
-     * @param json   json字符串
-     * @param tClass data类型
-     * @param <T>    泛型
-     * @return jsonMessage
-     */
-    public static <T> JsonMessage<T> toJsonMessage(String json, Class<T> tClass) {
-        JsonMessage<T> jsonMessage = JSONObject.parseObject(json, JsonMessage.class);
-        // 自动转换
-        T data = jsonMessage.getData(tClass);
-        jsonMessage.setData(data);
-        return jsonMessage;
     }
 }

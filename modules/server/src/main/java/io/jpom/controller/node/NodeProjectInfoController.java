@@ -69,9 +69,9 @@ public class NodeProjectInfoController extends BaseServerController {
      * 加载节点项目列表
      */
     @PostMapping(value = "node_project_list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String nodeProjectList() {
+    public JsonMessage<PageResultDto<ProjectInfoCacheModel>> nodeProjectList() {
         PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPageNode(getRequest());
-        return JsonMessage.getString(200, "success", resultDto);
+        return JsonMessage.success("success", resultDto);
     }
 
 
@@ -83,9 +83,9 @@ public class NodeProjectInfoController extends BaseServerController {
      * @author Hotstrip
      */
     @PostMapping(value = "project_list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String projectList() {
+    public JsonMessage<PageResultDto<ProjectInfoCacheModel>> projectList() {
         PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(getRequest());
-        return JsonMessage.getString(200, "success", resultDto);
+        return JsonMessage.success("success", resultDto);
     }
 
     /**
@@ -96,9 +96,9 @@ public class NodeProjectInfoController extends BaseServerController {
      * @author Hotstrip
      */
     @GetMapping(value = "project_list_all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String projectListAll() {
+    public JsonMessage<List<ProjectInfoCacheModel>> projectListAll() {
         List<ProjectInfoCacheModel> projectInfoCacheModels = projectInfoCacheService.listByWorkspace(getRequest());
-        return JsonMessage.getString(200, "", projectInfoCacheModels);
+        return JsonMessage.success("", projectInfoCacheModels);
     }
 
     /**
@@ -108,12 +108,12 @@ public class NodeProjectInfoController extends BaseServerController {
      */
     @GetMapping(value = "sync_project", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-    public String syncProject(String nodeId) {
+    public JsonMessage<Object> syncProject(String nodeId) {
         NodeModel nodeModel = nodeService.getByKey(nodeId);
         Assert.notNull(nodeModel, "对应的节点不存在");
         int count = projectInfoCacheService.delCache(nodeId, getRequest());
         String msg = projectInfoCacheService.syncExecuteNode(nodeModel);
-        return JsonMessage.getString(200, "主动清除：" + count + StrUtil.SPACE + msg);
+        return JsonMessage.success("主动清除：" + count + StrUtil.SPACE + msg);
     }
 
     /**
@@ -124,11 +124,11 @@ public class NodeProjectInfoController extends BaseServerController {
     @GetMapping(value = "clear_all_project", produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission(superUser = true)
     @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-    public String clearAll() {
+    public JsonMessage<Object> clearAll() {
         Entity where = Entity.create();
         where.set("id", " <> id");
         int del = projectInfoCacheService.del(where);
-        return JsonMessage.getString(200, "成功删除" + del + "条项目缓存");
+        return JsonMessage.success("成功删除" + del + "条项目缓存");
     }
 
     /**

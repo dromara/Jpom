@@ -124,15 +124,15 @@ public class SshInstallAgentController extends BaseServerController {
 
     @GetMapping(value = "get_agent.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
-    public String getAgent() throws IOException {
+    public JsonMessage<JSONObject> getAgent() throws IOException {
         JSONObject agentFile = this.getAgentFile();
-        return JsonMessage.getString(200, "", agentFile);
+        return JsonMessage.success("", agentFile);
     }
 
     @RequestMapping(value = "upload_agent.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     @SystemPermission
-    public String uploadAgent() throws Exception {
+    public JsonMessage<Object> uploadAgent() throws Exception {
 
         String tempFilePath = serverConfig.getUserTempPath().getAbsolutePath();
         MultipartFileBuilder multipartFileBuilder = createMultipart()
@@ -154,7 +154,7 @@ public class SshInstallAgentController extends BaseServerController {
             // 保存插件包
             File agentZipPath = serverConfig.getAgentZipPath();
             FileUtil.copy(FileUtil.file(filePath), agentZipPath, true);
-            return JsonMessage.getString(200, "上传成功");
+            return JsonMessage.success("上传成功");
         } finally {
             FileUtil.del(filePath);
             FileUtil.del(jarFile);
@@ -187,9 +187,9 @@ public class SshInstallAgentController extends BaseServerController {
     @RequestMapping(value = "installAgentSubmit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     @SystemPermission
-    public String installAgentSubmit(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
-                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "节点数据") String nodeData,
-                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "安装路径") String path) throws Exception {
+    public JsonMessage<Object> installAgentSubmit(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
+                                                  @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "节点数据") String nodeData,
+                                                  @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "安装路径") String path) throws Exception {
         //
         SshModel sshModel = sshService.getByKey(id, false);
         Objects.requireNonNull(sshModel, "没有找到对应ssh");
@@ -228,7 +228,7 @@ public class SshInstallAgentController extends BaseServerController {
             nodeModel.setSshId(sshModel.getId());
             nodeService.insert(nodeModel);
             //
-            return JsonMessage.getString(200, "操作成功:" + result);
+            return JsonMessage.success("操作成功:" + result);
         } finally {
             // 清理资源
             FileUtil.del(outFle);

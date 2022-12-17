@@ -58,70 +58,70 @@ import java.util.Map;
 @Feature(cls = ClassFeature.OUTGIVING_CONFIG_WHITELIST)
 public class OutGivingWhitelistController extends BaseServerController {
 
-	private final SystemParametersServer systemParametersServer;
-	private final OutGivingWhitelistService outGivingWhitelistService;
+    private final SystemParametersServer systemParametersServer;
+    private final OutGivingWhitelistService outGivingWhitelistService;
 
-	public OutGivingWhitelistController(SystemParametersServer systemParametersServer,
-										OutGivingWhitelistService outGivingWhitelistService) {
-		this.systemParametersServer = systemParametersServer;
-		this.outGivingWhitelistService = outGivingWhitelistService;
-	}
-
-
-	/**
-	 * get whiteList data
-	 * 白名单数据接口
-	 *
-	 * @return json
-	 * @author Hotstrip
-	 */
-	@RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String whiteList() {
-		ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(getRequest());
-		Field[] fields = ReflectUtil.getFields(ServerWhitelist.class);
-		Map<String, Object> map = new HashMap<>(8);
-		for (Field field : fields) {
-			Object value = ReflectUtil.getFieldValue(serverWhitelist, field);
-			if (value instanceof Collection) {
-				Collection<String> fieldValue = (Collection<String>) value;
-				map.put(field.getName(), AgentWhitelist.convertToLine(fieldValue));
-				map.put(field.getName() + "Array", fieldValue);
-			}
-		}
-		return JsonMessage.getString(200, "ok", map);
-	}
+    public OutGivingWhitelistController(SystemParametersServer systemParametersServer,
+                                        OutGivingWhitelistService outGivingWhitelistService) {
+        this.systemParametersServer = systemParametersServer;
+        this.outGivingWhitelistService = outGivingWhitelistService;
+    }
 
 
-	/**
-	 * 保存节点白名单
-	 *
-	 * @param outGiving 数据
-	 * @return json
-	 */
-	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
-	@Feature(method = MethodFeature.EDIT)
-	public String whitelistDirectorySubmit(String outGiving, String allowRemoteDownloadHost) {
-		List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");
-		list = AgentWhitelist.covertToArray(list, "项目路径白名单不能位于Jpom目录下");
+    /**
+     * get whiteList data
+     * 白名单数据接口
+     *
+     * @return json
+     * @author Hotstrip
+     */
+    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<Map<String, Object>> whiteList() {
+        ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(getRequest());
+        Field[] fields = ReflectUtil.getFields(ServerWhitelist.class);
+        Map<String, Object> map = new HashMap<>(8);
+        for (Field field : fields) {
+            Object value = ReflectUtil.getFieldValue(serverWhitelist, field);
+            if (value instanceof Collection) {
+                Collection<String> fieldValue = (Collection<String>) value;
+                map.put(field.getName(), AgentWhitelist.convertToLine(fieldValue));
+                map.put(field.getName() + "Array", fieldValue);
+            }
+        }
+        return JsonMessage.success("ok", map);
+    }
 
-		ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(getRequest());
-		serverWhitelist.setOutGiving(list);
-		//
-		List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
-		//
-		if (CollUtil.isNotEmpty(allowRemoteDownloadHostList)) {
-			for (String s : allowRemoteDownloadHostList) {
-				Assert.state(ReUtil.isMatch(RegexPool.URL_HTTP, s), "配置的远程地址不规范,请重新填写：" + s);
-			}
-		}
-		serverWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHostList == null ? null : CollUtil.newHashSet(allowRemoteDownloadHostList));
-		//
-		String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
-		String id = ServerWhitelist.workspaceId(workspaceId);
-		systemParametersServer.upsert(id, serverWhitelist, id);
 
-		String resultData = AgentWhitelist.convertToLine(list);
-		return JsonMessage.getString(200, "保存成功", resultData);
-	}
+    /**
+     * 保存节点白名单
+     *
+     * @param outGiving 数据
+     * @return json
+     */
+    @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @SystemPermission
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<String> whitelistDirectorySubmit(String outGiving, String allowRemoteDownloadHost) {
+        List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");
+        list = AgentWhitelist.covertToArray(list, "项目路径白名单不能位于Jpom目录下");
+
+        ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(getRequest());
+        serverWhitelist.setOutGiving(list);
+        //
+        List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
+        //
+        if (CollUtil.isNotEmpty(allowRemoteDownloadHostList)) {
+            for (String s : allowRemoteDownloadHostList) {
+                Assert.state(ReUtil.isMatch(RegexPool.URL_HTTP, s), "配置的远程地址不规范,请重新填写：" + s);
+            }
+        }
+        serverWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHostList == null ? null : CollUtil.newHashSet(allowRemoteDownloadHostList));
+        //
+        String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
+        String id = ServerWhitelist.workspaceId(workspaceId);
+        systemParametersServer.upsert(id, serverWhitelist, id);
+
+        String resultData = AgentWhitelist.convertToLine(list);
+        return JsonMessage.success("保存成功", resultData);
+    }
 }

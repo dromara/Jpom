@@ -94,7 +94,7 @@ public class BackupInfoController extends BaseServerController {
         // 查询数据库
         PageResultDto<BackupInfoModel> pageResult = backupInfoService.listPage(getRequest());
 
-        return JsonMessage.getString(200, "获取成功", pageResult);
+        return JsonMessage.success("获取成功", pageResult);
     }
 
     /**
@@ -106,10 +106,10 @@ public class BackupInfoController extends BaseServerController {
     @PostMapping(value = "/system/backup/delete")
     @Feature(method = MethodFeature.DEL)
     @SystemPermission(superUser = true)
-    public Object deleteBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public JsonMessage<String> deleteBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
         // 删除备份信息
         backupInfoService.delByKey(id);
-        return JsonMessage.toJson(200, "删除成功");
+        return new JsonMessage<>(200, "删除成功");
     }
 
     /**
@@ -121,7 +121,7 @@ public class BackupInfoController extends BaseServerController {
      */
     @PostMapping(value = "/system/backup/restore")
     @Feature(method = MethodFeature.EXECUTE)
-    public Object restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public JsonMessage<String> restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
         // 根据 id 查询备份信息
         BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
         Objects.requireNonNull(backupInfoModel, "备份数据不存在");
@@ -129,7 +129,7 @@ public class BackupInfoController extends BaseServerController {
         // 检查备份文件是否存在
         File file = new File(backupInfoModel.getFilePath());
         if (!FileUtil.exist(file)) {
-            return JsonMessage.toJson(400, "备份文件不存在");
+            return new JsonMessage<>(400, "备份文件不存在");
         }
         // 清空 sql 加载记录
         dbConfig.clearExecuteSqlLog();
@@ -141,9 +141,9 @@ public class BackupInfoController extends BaseServerController {
             backupInfoModel.setSha1Sum(SecureUtil.sha1(file));
             backupInfoModel.setStatus(BackupStatusEnum.SUCCESS.getCode());
             backupInfoService.update(backupInfoModel);
-            return JsonMessage.toJson(200, "还原备份数据成功");
+            return new JsonMessage<>(200, "还原备份数据成功");
         }
-        return JsonMessage.toJson(400, "还原备份数据失败");
+        return new JsonMessage<>(400, "还原备份数据失败");
     }
 
     /**
@@ -154,10 +154,10 @@ public class BackupInfoController extends BaseServerController {
      */
     @PostMapping(value = "/system/backup/create")
     @Feature(method = MethodFeature.EDIT)
-    public Object backup(@RequestBody Map<String, Object> map) {
+    public JsonMessage<String> backup(@RequestBody Map<String, Object> map) {
         List<String> tableNameList = JSON.parseArray(JSON.toJSONString(map.get("tableNameList")), String.class);
         backupInfoService.backupToSql(tableNameList);
-        return JsonMessage.toJson(200, "操作成功，请稍后刷新查看备份状态");
+        return new JsonMessage<>(200, "操作成功，请稍后刷新查看备份状态");
     }
 
     /**
@@ -168,7 +168,7 @@ public class BackupInfoController extends BaseServerController {
     @PostMapping(value = "/system/backup/upload")
     @Feature(method = MethodFeature.UPLOAD)
     @SystemPermission(superUser = true)
-    public Object uploadBackupFile() throws IOException {
+    public JsonMessage<String> uploadBackupFile() throws IOException {
         MultipartFileBuilder multipartFileBuilder = createMultipart()
             .addFieldName("file");
         // 备份类型
@@ -188,7 +188,7 @@ public class BackupInfoController extends BaseServerController {
         boolean exists = backupInfoService.exists(backupInfoModel);
         if (exists) {
             FileUtil.del(file);
-            return JsonMessage.getString(400, "导入的数据已经存在啦");
+            return new JsonMessage<>(400, "导入的数据已经存在啦");
         }
 
 //		backupInfoModel.setId(IdUtil.fastSimpleUUID());
@@ -201,7 +201,7 @@ public class BackupInfoController extends BaseServerController {
         backupInfoModel.setFilePath(backupSqlPath);
         backupInfoService.insert(backupInfoModel);
 
-        return JsonMessage.toJson(200, "导入成功");
+        return new JsonMessage<>(200, "导入成功");
     }
 
     /**
@@ -235,7 +235,7 @@ public class BackupInfoController extends BaseServerController {
      */
     @PostMapping(value = "/system/backup/table-name-list")
     @Feature(method = MethodFeature.LIST)
-    public Object loadTableNameList() {
+    public JsonMessage<List<JSONObject>> loadTableNameList() {
         // 从数据库加载表名称列表
         List<String> tableNameList = backupInfoService.h2TableNameList();
         // 扫描程序，拿到表名称和别名
@@ -255,7 +255,7 @@ public class BackupInfoController extends BaseServerController {
             jsonObject.put("tableDesc", StrUtil.emptyToDefault(TABLE_NAME_MAP.get(s), s));
             return jsonObject;
         }).collect(Collectors.toList());
-        return JsonMessage.toJson(200, "", list);
+        return new JsonMessage<>(200, "", list);
     }
 
 }

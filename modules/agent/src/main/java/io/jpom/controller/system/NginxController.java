@@ -81,23 +81,23 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String list(String whitePath, String name, String showAll) {
+    public JsonMessage<List<JSONObject>> list(String whitePath, String name, String showAll) {
         boolean checkNgxDirectory = whitelistDirectoryService.checkNgxDirectory(whitePath);
         Assert.state(checkNgxDirectory, "文件路径错误,非白名单路径");
         if (StrUtil.isEmpty(name)) {
             name = StrUtil.SLASH;
         }
         List<JSONObject> array = nginxService.list(whitePath, name, showAll);
-        return JsonMessage.getString(200, "", array);
+        return JsonMessage.success("", array);
     }
 
     /**
      * nginx列表
      */
     @RequestMapping(value = "tree.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String tree() {
+    public JsonMessage<JSONArray> tree() {
         JSONArray array = nginxService.tree();
-        return JsonMessage.getString(200, "", array);
+        return JsonMessage.success("", array);
     }
 
     /**
@@ -108,7 +108,7 @@ public class NginxController extends BaseAgentController {
      * @return 页面
      */
     @RequestMapping(value = "item_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String itemData(String path, String name) {
+    public JsonMessage<JSONObject> itemData(String path, String name) {
         boolean ngxDirectory = whitelistDirectoryService.checkNgxDirectory(path);
         Assert.state(ngxDirectory, "文件路径错误,非白名单路径");
 
@@ -121,7 +121,7 @@ public class NginxController extends BaseAgentController {
         // nginxService.paresName(path, file.getAbsolutePath())
         jsonObject.put("name", rName);
         jsonObject.put("whitePath", path);
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
 //            setAttribute("data", jsonObject);
     }
 
@@ -139,7 +139,7 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updateNgx(String name, String whitePath, String genre, String context) {
+    public JsonMessage<String> updateNgx(String name, String whitePath, String genre, @ValidatorItem(msg = "请填写配置信息") String context) {
         this.checkName(name);
         //
         boolean ngxDirectory = whitelistDirectoryService.checkNgxDirectory(whitePath);
@@ -147,12 +147,9 @@ public class NginxController extends BaseAgentController {
         //nginx文件
         File file = FileUtil.file(whitePath, name);
         if ("add".equals(genre) && file.exists()) {
-            return JsonMessage.getString(400, "该文件已存在");
+            return new JsonMessage<>(400, "该文件已存在");
         }
-        //String context = getUnescapeParameter("context");
-        if (StrUtil.isEmpty(context)) {
-            return JsonMessage.getString(400, "请填写配置信息");
-        }
+
         InputStream inputStream = new ByteArrayInputStream(context.getBytes());
         try {
             NgxConfig conf = NgxConfig.read(inputStream);
@@ -175,28 +172,25 @@ public class NginxController extends BaseAgentController {
                 // 检查证书文件
                 NgxParam sslCertificate = ngxBlock.findParam("ssl_certificate");
                 if (sslCertificate != null && !FileUtil.exist(sslCertificate.getValue())) {
-                    return JsonMessage.getString(404, "证书文件ssl_certificate,不存在");
+                    return new JsonMessage<>(404, "证书文件ssl_certificate,不存在");
                 }
                 NgxParam sslCertificateKey = ngxBlock.findParam("ssl_certificate_key");
                 if (sslCertificateKey != null && !FileUtil.exist(sslCertificateKey.getValue())) {
-                    return JsonMessage.getString(404, "证书文件ssl_certificate_key,不存在");
+                    return new JsonMessage<>(404, "证书文件ssl_certificate_key,不存在");
                 }
                 if (!checkRootRole(ngxBlock)) {
-                    return JsonMessage.getString(405, "非系统管理员，不能配置静态资源代理");
+                    return new JsonMessage<>(405, "非系统管理员，不能配置静态资源代理");
                 }
             }
         } catch (IOException e) {
             log.error("解析失败", e);
-            return JsonMessage.getString(500, "解析失败");
+            return new JsonMessage<>(500, "解析失败");
         }
-        try {
-            FileUtil.writeString(context, file, CharsetUtil.UTF_8);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return JsonMessage.getString(400, "操作失败:" + e.getMessage());
-        }
+
+        FileUtil.writeString(context, file, CharsetUtil.UTF_8);
+
         String msg = this.reloadNginx();
-        return JsonMessage.getString(200, "提交成功" + msg);
+        return JsonMessage.success("提交成功" + msg);
     }
 
     private String reloadNginx() {
@@ -245,9 +239,9 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String delete(String path, String name, String type, String from) {
+    public JsonMessage<String> delete(String path, String name, String type, String from) {
         if (!whitelistDirectoryService.checkNgxDirectory(path)) {
-            return JsonMessage.getString(400, "非法操作");
+            return new JsonMessage<>(400, "非法操作");
         }
         Assert.hasText(name, "请填写文件名");
         if (StrUtil.equals(from, "back")) {
@@ -272,11 +266,11 @@ public class NginxController extends BaseAgentController {
                 }
             } catch (Exception e) {
                 log.error("删除nginx", e);
-                return JsonMessage.getString(400, "操作失败:" + e.getMessage());
+                return new JsonMessage<>(400, "操作失败:" + e.getMessage());
             }
         }
         String msg = this.reloadNginx();
-        return JsonMessage.getString(200, "删除成功" + msg);
+        return JsonMessage.success("删除成功" + msg);
     }
 
     /**
@@ -285,16 +279,16 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String status() {
+    public JsonMessage<JSONObject> status() {
         String name = nginxService.getServiceName();
         if (StrUtil.isEmpty(name)) {
-            return JsonMessage.getString(500, "服务名错误");
+            return new JsonMessage<>(500, "服务名错误");
         }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", name);
         boolean serviceStatus = AbstractSystemCommander.getInstance().getServiceStatus(name);
         jsonObject.put("status", serviceStatus);
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     /**
@@ -304,11 +298,11 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updateConf(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "服务名称错误") String name) {
+    public JsonMessage<Object> updateConf(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "服务名称错误") String name) {
         JSONObject ngxConf = nginxService.getNgxConf();
         ngxConf.put("name", name);
         nginxService.save(ngxConf);
-        return JsonMessage.getString(200, "修改成功");
+        return JsonMessage.success("修改成功");
     }
 
     /**
@@ -317,9 +311,9 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String config() {
+    public JsonMessage<JSONObject> config() {
         JSONObject ngxConf = nginxService.getNgxConf();
-        return JsonMessage.getString(200, "", ngxConf);
+        return JsonMessage.success("", ngxConf);
     }
 
     /**
@@ -328,10 +322,10 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String open() {
+    public JsonMessage<Object> open() {
         String name = nginxService.getServiceName();
         String result = AbstractSystemCommander.getInstance().startService(name);
-        return JsonMessage.getString(200, "nginx服务已启动 " + result);
+        return JsonMessage.success("nginx服务已启动 " + result);
     }
 
     /**
@@ -340,10 +334,10 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String close() {
+    public JsonMessage<Object> close() {
         String name = nginxService.getServiceName();
         String result = AbstractSystemCommander.getInstance().stopService(name);
-        return JsonMessage.getString(200, "nginx服务已停止 " + result);
+        return JsonMessage.success("nginx服务已停止 " + result);
     }
 
     private String findServerPath(String name) {
@@ -392,12 +386,12 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String reload() {
+    public JsonMessage<String> reload() {
         String checkResult = this.checkNginx();
         if (StrUtil.isNotEmpty(checkResult) && !StrUtil.containsIgnoreCase(checkResult, "successful")) {
-            return JsonMessage.getString(400, checkResult);
+            return new JsonMessage<>(400, checkResult);
         }
         String reloadMsg = this.reloadNginx();
-        return JsonMessage.getString(200, "重新加载成功:" + reloadMsg, checkResult);
+        return JsonMessage.success("重新加载成功:" + reloadMsg, checkResult);
     }
 }
