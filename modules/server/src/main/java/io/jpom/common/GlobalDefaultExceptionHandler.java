@@ -53,32 +53,16 @@ import java.nio.file.AccessDeniedException;
  */
 @RestControllerAdvice
 @Slf4j
-public class GlobalDefaultExceptionHandler {
+public class GlobalDefaultExceptionHandler extends BaseExceptionHandler {
 
     /**
      * 声明要捕获的异常
      *
-     * @param request  请求
-     * @param response 响应
-     * @param e        异常
+     * @param e 异常
      */
-    @ExceptionHandler({AuthorizeException.class, RuntimeException.class, Exception.class})
-    public void delExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        if (e instanceof AuthorizeException) {
-            AuthorizeException authorizeException = (AuthorizeException) e;
-            ServletUtil.write(response, authorizeException.getJsonMessage().toString(), MediaType.APPLICATION_JSON_VALUE);
-        } else if (e instanceof JpomRuntimeException) {
-            log.error("global handle exception: {}", request.getRequestURI(), e.getCause());
-            ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
-        } else {
-            log.error("global handle exception: {}", request.getRequestURI(), e);
-            boolean causedBy = ExceptionUtil.isCausedBy(e, AccessDeniedException.class);
-            if (causedBy) {
-                ServletUtil.write(response, JsonMessage.getString(500, "操作文件权限异常,请手动处理：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
-                return;
-            }
-            ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
-        }
+    @ExceptionHandler({AuthorizeException.class})
+    public JsonMessage<String> delExceptionHandler(AuthorizeException e) {
+        return e.getJsonMessage();
     }
 
     /**
@@ -86,58 +70,17 @@ public class GlobalDefaultExceptionHandler {
      * <p>
      * 避免重复记录堆栈
      *
-     * @param request  请求
-     * @param response 响应
-     * @param e        异常
+     * @param request 请求
+     * @param e       异常
      * @author jzy
      * @since 2021-08-01
      */
     @ExceptionHandler({AgentException.class})
-    public void agentExceptionHandler(HttpServletRequest request, HttpServletResponse response, AgentException e) {
+    public JsonMessage<String> agentExceptionHandler(HttpServletRequest request, AgentException e) {
         Throwable cause = e.getCause();
         if (cause != null) {
-            log.error("controller " + request.getRequestURI(), cause);
+            log.error("controller {}", request.getRequestURI(), cause);
         }
-        ServletUtil.write(response, JsonMessage.getString(405, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+        return new JsonMessage<>(405, e.getMessage());
     }
-
-    /**
-     * 声明要捕获的异常 (参数，状态，验证异常)
-     *
-     * @param request  请求
-     * @param response 响应
-     * @param e        异常
-     */
-    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ValidateException.class})
-    public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        // 默认不输出 参数异常相关信息
-        log.debug("controller " + request.getRequestURI(), e);
-        String message = e.getMessage();
-        if (ObjectUtil.equals(message, ServerConst.AUTHORIZE_TIME_OUT_CODE)) {
-            ServletUtil.write(response, JsonMessage.getString(ServerConst.AUTHORIZE_TIME_OUT_CODE, ServerConst.LOGIN_TIP), MediaType.APPLICATION_JSON_VALUE);
-        } else {
-            ServletUtil.write(response, JsonMessage.getString(405, message), MediaType.APPLICATION_JSON_VALUE);
-        }
-    }
-
-    @ExceptionHandler({HttpMessageNotReadableException.class, HttpMessageConversionException.class})
-    @ResponseBody
-    public JsonMessage<String> handleHttpMessageNotReadableException(Exception e) {
-        log.warn("参数解析异常:{}", e.getMessage());
-        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "传入的参数格式不正确");
-    }
-
-    @ExceptionHandler({HttpRequestMethodNotSupportedException.class, HttpMediaTypeNotSupportedException.class})
-    @ResponseBody
-    public JsonMessage<String> handleHttpRequestMethodNotSupportedException(Exception e) {
-        return new JsonMessage<>(HttpStatus.METHOD_NOT_ALLOWED.value(), "不被支持的请求方式", e.getMessage());
-    }
-
-    @ExceptionHandler({NoHandlerFoundException.class})
-    @ResponseBody
-    public JsonMessage<String> handleNoHandlerFoundException(NoHandlerFoundException e) {
-
-        return new JsonMessage<>(HttpStatus.NOT_FOUND.value(), "没有找到对应的资源", e.getMessage());
-    }
-
 }

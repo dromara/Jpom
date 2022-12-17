@@ -22,16 +22,8 @@
  */
 package io.jpom.common;
 
-import cn.hutool.core.exceptions.ValidateException;
-import cn.hutool.extra.servlet.ServletUtil;
-import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * 全局异常处理
@@ -39,37 +31,9 @@ import javax.servlet.http.HttpServletResponse;
  * @author jiangzeyin
  * @since 2019/04/17
  */
-@ControllerAdvice
+@RestControllerAdvice
 @Slf4j
 public class AgentExceptionHandler extends BaseExceptionHandler {
 
-    /**
-     * 声明要捕获的异常
-     *
-     * @param request  请求
-     * @param response 响应
-     * @param e        异常
-     */
-    @ExceptionHandler({JpomRuntimeException.class, RuntimeException.class, Exception.class})
-    public void defExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        log.error("controller " + request.getRequestURI(), e);
-        if (e instanceof JpomRuntimeException) {
-            ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
-        } else {
-            ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
-        }
-    }
 
-    /**
-     * 声明要捕获的异常 (参数或者状态异常)
-     *
-     * @param request  请求
-     * @param response 响应
-     * @param e        异常
-     */
-    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ValidateException.class})
-    public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        log.error("controller " + request.getRequestURI(), e);
-        ServletUtil.write(response, JsonMessage.getString(405, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
-    }
 }
