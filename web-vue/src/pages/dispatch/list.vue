@@ -735,6 +735,11 @@ export default {
     },
     // 静默
     silenceLoadData() {
+      if (this.$attrs.routerUrl !== this.$route.path) {
+        // 重新计算倒计时
+        this.countdownTime = Date.now() + this.refreshInterval * 1000;
+        return;
+      }
       getDishPatchList(this.listQuery, false).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;

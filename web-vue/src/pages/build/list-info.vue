@@ -1,4 +1,3 @@
-/** * 这是新版本的构建列表页面，主要是分离了部分数据到【仓库管理】，以及数据会存储到数据库 */
 <template>
   <div class="full-content">
     <!-- <div ref="filter" class="filter"></div> -->
@@ -1228,6 +1227,11 @@ export default {
       });
     },
     silenceLoadData() {
+      if (this.$attrs.routerUrl !== this.$route.path) {
+        // 重新计算倒计时
+        this.countdownTime = Date.now() + this.refreshInterval * 1000;
+        return;
+      }
       getBuildList(this.listQuery, false).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
