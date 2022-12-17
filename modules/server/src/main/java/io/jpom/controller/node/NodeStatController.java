@@ -63,14 +63,14 @@ public class NodeStatController extends BaseServerController {
 
     @PostMapping(value = "list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String listJson() {
+    public JsonMessage<PageResultDto<NodeStatModel>> listJson() {
         PageResultDto<NodeStatModel> nodeModelPageResultDto = nodeStatService.listPage(getRequest());
-        return JsonMessage.getString(200, "", nodeModelPageResultDto);
+        return JsonMessage.success("", nodeModelPageResultDto);
     }
 
     @GetMapping(value = "status_stat.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String statusStat() {
+    public JsonMessage<JSONObject> statusStat() {
         String workspaceId = nodeStatService.getCheckUserWorkspace(getRequest());
         //
         JSONObject jsonObject = new JSONObject();
@@ -89,6 +89,6 @@ public class NodeStatController extends BaseServerController {
 //			Map<String, Integer> map = CollStreamUtil.toMap(list, entity -> entity.getStr("openStatus"), entity -> entity.getInt("cunt"));
 //			jsonObject.put("openStatus", map);
 //		}
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 }

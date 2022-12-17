@@ -55,55 +55,53 @@ import java.util.List;
 @Feature(cls = ClassFeature.SSH_COMMAND_LOG)
 public class CommandLogController extends BaseServerController {
 
-	private final CommandExecLogService commandExecLogService;
+    private final CommandExecLogService commandExecLogService;
 
-	public CommandLogController(CommandExecLogService commandExecLogService) {
-		this.commandExecLogService = commandExecLogService;
-	}
+    public CommandLogController(CommandExecLogService commandExecLogService) {
+        this.commandExecLogService = commandExecLogService;
+    }
 
-	/**
-	 * 分页获取命令信息
-	 *
-	 * @return result
-	 */
-	@RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String page() {
-		PageResultDto<CommandExecLogModel> page = commandExecLogService.listPage(getRequest());
-		return JsonMessage.getString(200, "", page);
-	}
-
-	/**
-	 * 删除日志记录
-	 *
-	 * @param id id
-	 * @return result
+    /**
+     * 分页获取命令信息
      *
+     * @return result
+     */
+    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<PageResultDto<CommandExecLogModel>> page() {
+        PageResultDto<CommandExecLogModel> page = commandExecLogService.listPage(getRequest());
+        return JsonMessage.success("", page);
+    }
+
+    /**
+     * 删除日志记录
+     *
+     * @param id id
+     * @return result
      * @api {POST} node/ssh_command_log/del 删除日志记录
      * @apiGroup node/ssh_command_log
      * @apiUse defResultJson
      * @apiParam {String} id 记录 id
-	 */
-	@RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.DEL)
-	public String del(String id) {
-		CommandExecLogModel execLogModel = commandExecLogService.getByKey(id);
-		Assert.notNull(execLogModel, "没有对应的记录");
-		File logFile = execLogModel.logFile();
-		boolean fastDel = CommandUtil.systemFastDel(logFile);
-		Assert.state(!fastDel, "清理日志文件失败");
-		//
-		commandExecLogService.delByKey(id);
-		return JsonMessage.getString(200, "操作成功");
-	}
+     */
+    @RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public JsonMessage<String> del(String id) {
+        CommandExecLogModel execLogModel = commandExecLogService.getByKey(id);
+        Assert.notNull(execLogModel, "没有对应的记录");
+        File logFile = execLogModel.logFile();
+        boolean fastDel = CommandUtil.systemFastDel(logFile);
+        Assert.state(!fastDel, "清理日志文件失败");
+        //
+        commandExecLogService.delByKey(id);
+        return JsonMessage.success("操作成功");
+    }
 
-	/**
-	 * 命令执行记录
-	 *
-	 * @param commandId 命令ID
-	 * @param batchId   批次ID
-	 * @return result
+    /**
+     * 命令执行记录
      *
+     * @param commandId 命令ID
+     * @param batchId   批次ID
+     * @return result
      * @api {GET}  node/ssh_command_log/batch_list 命令执行记录
      * @apiGroup node/ssh_command_log
      * @apiUse defResultJson
@@ -119,76 +117,74 @@ public class CommandLogController extends BaseServerController {
      * @apiSuccess {String} commandExecLogModels.params 参数
      * @apiSuccess {Number} commandExecLogModels.triggerExecType 触发类型 {0，手动，1 自动触发}
      * @apiSuccess {Boolean} commandExecLogModels.hasLog 日志文件是否存在
-	 */
-	@GetMapping(value = "batch_list", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String batchList(@ValidatorItem String commandId, @ValidatorItem String batchId) {
-		CommandExecLogModel commandExecLogModel = new CommandExecLogModel();
-		commandExecLogModel.setCommandId(commandId);
-		commandExecLogModel.setBatchId(batchId);
-		List<CommandExecLogModel> commandExecLogModels = commandExecLogService.listByBean(commandExecLogModel);
+     */
+    @GetMapping(value = "batch_list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<CommandExecLogModel>> batchList(@ValidatorItem String commandId, @ValidatorItem String batchId) {
+        CommandExecLogModel commandExecLogModel = new CommandExecLogModel();
+        commandExecLogModel.setCommandId(commandId);
+        commandExecLogModel.setBatchId(batchId);
+        List<CommandExecLogModel> commandExecLogModels = commandExecLogService.listByBean(commandExecLogModel);
 
-		return JsonMessage.getString(200, "", commandExecLogModels);
-	}
+        return JsonMessage.success("", commandExecLogModels);
+    }
 
-	/**
-	 * 获取日志
-	 *
-	 * @param id   id
-	 * @param line 需要获取的行号
-	 * @return json
+    /**
+     * 获取日志
      *
+     * @param id   id
+     * @param line 需要获取的行号
+     * @return json
      * @api {POST} node/ssh_command_log/log 获取日志
      * @apiGroup node/ssh_command_log
      * @apiUse defResultJson
      * @apiParam {String} id 日志 id
      * @apiParam {Number} line 需要获取的行号
      * @apiSuccess {Boolean} run 运行状态
-	 */
-	@RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-					  @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-		CommandExecLogModel item = commandExecLogService.getByKey(id, getRequest());
-		Assert.notNull(item, "没有对应数据");
+     */
+    @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<JSONObject> log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+                                       @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+        CommandExecLogModel item = commandExecLogService.getByKey(id, getRequest());
+        Assert.notNull(item, "没有对应数据");
 
-		File file = item.logFile();
-		if (!FileUtil.exist(file)) {
-			return JsonMessage.getString(200, "还没有日志信息");
-		}
-		Assert.state(FileUtil.isFile(file), "日志文件错误");
+        File file = item.logFile();
+        if (!FileUtil.exist(file)) {
+            return JsonMessage.success("还没有日志信息");
+        }
+        Assert.state(FileUtil.isFile(file), "日志文件错误");
 
-		JSONObject data = FileUtils.readLogFile(file, line);
-		// 运行中
-		Integer status = item.getStatus();
-		data.put("run", status != null && status == CommandExecLogModel.Status.ING.getCode());
+        JSONObject data = FileUtils.readLogFile(file, line);
+        // 运行中
+        Integer status = item.getStatus();
+        data.put("run", status != null && status == CommandExecLogModel.Status.ING.getCode());
 
-		return JsonMessage.getString(200, "", data);
-	}
+        return JsonMessage.success("", data);
+    }
 
     /**
      * 下载日志
      *
      * @param logId 日志 id
-     *
      * @api {GET} node/ssh_command_log/download_log 下载日志
      * @apiGroup node/ssh_command_log
      * @apiUse defResultJson
      * @apiParam {String} logId 日志 id
      * @apiSuccess {File} file 日志文件
      */
-	@RequestMapping(value = "download_log", method = RequestMethod.GET)
-	@ResponseBody
-	@Feature(method = MethodFeature.DOWNLOAD)
-	public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId) {
-		CommandExecLogModel item = commandExecLogService.getByKey(logId);
-		Assert.notNull(item, "没有对应数据");
-		File logFile = item.logFile();
-		if (!FileUtil.exist(logFile)) {
-			return;
-		}
-		if (logFile.isFile()) {
-			ServletUtil.write(getResponse(), logFile);
-		}
-	}
+    @RequestMapping(value = "download_log", method = RequestMethod.GET)
+    @ResponseBody
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId) {
+        CommandExecLogModel item = commandExecLogService.getByKey(logId);
+        Assert.notNull(item, "没有对应数据");
+        File logFile = item.logFile();
+        if (!FileUtil.exist(logFile)) {
+            return;
+        }
+        if (logFile.isFile()) {
+            ServletUtil.write(getResponse(), logFile);
+        }
+    }
 }

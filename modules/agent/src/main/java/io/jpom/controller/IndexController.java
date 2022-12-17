@@ -53,61 +53,61 @@ import java.util.List;
 @RestController
 public class IndexController extends BaseAgentController {
 
-	private final ProjectInfoService projectInfoService;
-	private final NodeScriptServer nodeScriptServer;
+    private final ProjectInfoService projectInfoService;
+    private final NodeScriptServer nodeScriptServer;
 
-	public IndexController(ProjectInfoService projectInfoService,
-						   NodeScriptServer nodeScriptServer) {
-		this.projectInfoService = projectInfoService;
-		this.nodeScriptServer = nodeScriptServer;
-	}
+    public IndexController(ProjectInfoService projectInfoService,
+                           NodeScriptServer nodeScriptServer) {
+        this.projectInfoService = projectInfoService;
+        this.nodeScriptServer = nodeScriptServer;
+    }
 
-	@RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
-	@NotAuthorize
-	public String index() {
-		return "Jpom-Agent,Can't access directly,Please configure it to JPOM server";
-	}
+    @RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
+    @NotAuthorize
+    public String index() {
+        return "Jpom-Agent,Can't access directly,Please configure it to JPOM server";
+    }
 
-	@RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String info() {
+    @RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<JSONObject> info() {
 
-		JpomManifest instance = JpomManifest.getInstance();
-		RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
-		//
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("manifest", instance);
-		jsonObject.put("remoteVersion", remoteVersion);
-		jsonObject.put("pluginSize", PluginFactory.size());
-		return JsonMessage.getString(200, "", jsonObject);
-	}
+        JpomManifest instance = JpomManifest.getInstance();
+        RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+        //
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("manifest", instance);
+        jsonObject.put("remoteVersion", remoteVersion);
+        jsonObject.put("pluginSize", PluginFactory.size());
+        return JsonMessage.success("", jsonObject);
+    }
 
-	/**
-	 * 返回节点项目状态信息
-	 *
-	 * @return array
-	 */
-	@RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String status() {
-		List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
-		List<NodeScriptModel> list = nodeScriptServer.list();
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
-		JpomManifest instance = JpomManifest.getInstance();
-		jsonObject.put("osName", instance.getOsName());
-		jsonObject.put("jpomVersion", instance.getVersion());
-		jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
-		//  获取JVM中内存总大小
-		long totalMemory = SystemUtil.getTotalMemory();
-		jsonObject.put("totalMemory", FileUtil.readableFileSize(totalMemory));
-		//
-		long freeMemory = SystemUtil.getFreeMemory();
-		jsonObject.put("freeMemory", FileUtil.readableFileSize(freeMemory));
-		//
-		jsonObject.put("count", CollUtil.size(nodeProjectInfoModels));
-		jsonObject.put("scriptCount", CollUtil.size(list));
-		// 运行时间
-		jsonObject.put("runTime", instance.getUpTimeStr());
-		jsonObject.put("runTimeLong", instance.getUpTime());
-		return JsonMessage.getString(200, "", jsonObject);
-	}
+    /**
+     * 返回节点项目状态信息
+     *
+     * @return array
+     */
+    @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<JSONObject> status() {
+        List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
+        List<NodeScriptModel> list = nodeScriptServer.list();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
+        JpomManifest instance = JpomManifest.getInstance();
+        jsonObject.put("osName", instance.getOsName());
+        jsonObject.put("jpomVersion", instance.getVersion());
+        jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
+        //  获取JVM中内存总大小
+        long totalMemory = SystemUtil.getTotalMemory();
+        jsonObject.put("totalMemory", FileUtil.readableFileSize(totalMemory));
+        //
+        long freeMemory = SystemUtil.getFreeMemory();
+        jsonObject.put("freeMemory", FileUtil.readableFileSize(freeMemory));
+        //
+        jsonObject.put("count", CollUtil.size(nodeProjectInfoModels));
+        jsonObject.put("scriptCount", CollUtil.size(list));
+        // 运行时间
+        jsonObject.put("runTime", instance.getUpTimeStr());
+        jsonObject.put("runTimeLong", instance.getUpTime());
+        return JsonMessage.success("", jsonObject);
+    }
 }

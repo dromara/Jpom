@@ -78,7 +78,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String list() {
+    public JsonMessage<PageResultDto<WorkspaceEnvVarModel>> list() {
         PageResultDto<WorkspaceEnvVarModel> listPage = workspaceEnvVarService.listPage(getRequest());
         listPage.each(workspaceEnvVarModel -> {
             Integer privacy = workspaceEnvVarModel.getPrivacy();
@@ -86,7 +86,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
                 workspaceEnvVarModel.setValue(StrUtil.EMPTY);
             }
         });
-        return JsonMessage.getString(200, "", listPage);
+        return JsonMessage.success("", listPage);
     }
 
     /**
@@ -100,13 +100,13 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @PostMapping(value = "/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String edit(String id,
-                       @ValidatorItem String workspaceId,
-                       @ValidatorItem String name,
-                       String value,
-                       @ValidatorItem String description,
-                       String privacy,
-                       String nodeIds) {
+    public JsonMessage<Object> edit(String id,
+                                    @ValidatorItem String workspaceId,
+                                    @ValidatorItem String name,
+                                    String value,
+                                    @ValidatorItem String description,
+                                    String privacy,
+                                    String nodeIds) {
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
 
         this.checkInfo(id, name, workspaceId);
@@ -146,7 +146,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
             workspaceEnvVarService.update(workspaceModel);
         }
         this.syncNodeEnvVar(workspaceModel, oldNodeIds);
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     private void syncDelNodeEnvVar(String name, UserModel user, Collection<String> delNode, String workspaceId) {
@@ -211,8 +211,8 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @GetMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id,
-                         @ValidatorItem String workspaceId) {
+    public JsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id,
+                                      @ValidatorItem String workspaceId) {
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
         WorkspaceEnvVarModel byKey = workspaceEnvVarService.getByKey(id);
         Assert.notNull(byKey, "没有对应的数据");
@@ -222,6 +222,6 @@ public class WorkspaceEnvVarController extends BaseServerController {
         this.syncDelNodeEnvVar(byKey.getName(), getUser(), delNode, workspaceId);
         // 删除信息
         workspaceEnvVarService.delByKey(id);
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 }

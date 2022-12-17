@@ -140,7 +140,7 @@ public class BuildInfoHistoryController extends BaseServerController {
 
     @RequestMapping(value = "/build/history/history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String historyList() {
+    public JsonMessage<PageResultDto<BuildHistoryLog>> historyList() {
         PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(getRequest());
         pageResultTemp.each(buildHistoryLog -> {
             File file = BuildUtil.getHistoryPackageFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
@@ -149,7 +149,7 @@ public class BuildInfoHistoryController extends BaseServerController {
             File logFile = BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId());
             buildHistoryLog.setHasLog(FileUtil.exist(logFile));
         });
-        return JsonMessage.getString(200, "获取成功", pageResultTemp);
+        return JsonMessage.success("获取成功", pageResultTemp);
     }
 
     /**

@@ -93,9 +93,9 @@ public class UserListController extends BaseServerController {
      */
     @RequestMapping(value = "get_user_list_all", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getUserListAll() {
+    public JsonMessage<List<UserModel>> getUserListAll() {
         List<UserModel> list = userService.list();
-        return JsonMessage.getString(200, "success", list);
+        return JsonMessage.success("success", list);
     }
 
     /**
@@ -199,7 +199,7 @@ public class UserListController extends BaseServerController {
      */
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String deleteUser(String id) {
+    public JsonMessage<Object> deleteUser(String id) {
         UserModel userName = getUser();
         Assert.state(!StrUtil.equals(userName.getId(), id), "不能删除自己");
 
@@ -214,7 +214,7 @@ public class UserListController extends BaseServerController {
         userService.delByKey(id);
         // 删除工作空间
         userBindWorkspaceService.deleteByUserId(id);
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 
     /**
@@ -225,10 +225,10 @@ public class UserListController extends BaseServerController {
      */
     @GetMapping(value = "unlock", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String unlock(@ValidatorItem String id) {
+    public JsonMessage<Object> unlock(@ValidatorItem String id) {
         UserModel update = UserModel.unLock(id);
         userService.update(update);
-        return JsonMessage.getString(200, "解锁成功");
+        return JsonMessage.success("解锁成功");
     }
 
     /**
@@ -240,11 +240,11 @@ public class UserListController extends BaseServerController {
     @GetMapping(value = "close_user_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission(superUser = true)
-    public String closeMfa(@ValidatorItem String id) {
+    public JsonMessage<Object> closeMfa(@ValidatorItem String id) {
         UserModel update = new UserModel(id);
         update.setTwoFactorAuthKey(StrUtil.EMPTY);
         userService.update(update);
-        return JsonMessage.getString(200, "关闭成功");
+        return JsonMessage.success("关闭成功");
     }
 
     /**
@@ -255,7 +255,7 @@ public class UserListController extends BaseServerController {
      */
     @GetMapping(value = "rest-user-pwd", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String restUserPwd(@ValidatorItem String id) {
+    public JsonMessage<JSONObject> restUserPwd(@ValidatorItem String id) {
         UserModel userModel = userService.getByKey(id);
         Assert.notNull(userModel, "账号不存在");
         Assert.state(!userModel.isSuperSystemUser(), "超级管理员不能通过此方式重置密码");
@@ -267,6 +267,6 @@ public class UserListController extends BaseServerController {
         //
         JSONObject result = new JSONObject();
         result.put("randomPwd", randomPwd);
-        return JsonMessage.getString(200, "重置成功", result);
+        return JsonMessage.success("重置成功", result);
     }
 }

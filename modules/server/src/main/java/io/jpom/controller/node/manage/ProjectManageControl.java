@@ -122,10 +122,10 @@ public class ProjectManageControl extends BaseServerController {
      */
     @PostMapping(value = "get_project_info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getProjectInfo() {
+    public JsonMessage<PageResultDto<ProjectInfoCacheModel>> getProjectInfo() {
         PageResultDto<ProjectInfoCacheModel> modelPageResultDto = projectInfoCacheService.listPage(getRequest());
 //		JSONArray jsonArray = projectInfoService.listAll(nodeModel, getRequest());
-        return JsonMessage.getString(200, "", modelPageResultDto);
+        return JsonMessage.success("", modelPageResultDto);
     }
 
     /**

@@ -52,40 +52,40 @@ import java.util.Map;
 @RequestMapping(value = "/docker/volumes")
 public class DockerVolumeController extends BaseServerController {
 
-	private final DockerInfoService dockerInfoService;
+    private final DockerInfoService dockerInfoService;
 
-	public DockerVolumeController(DockerInfoService dockerInfoService) {
-		this.dockerInfoService = dockerInfoService;
-	}
-
-
-	/**
-	 * @return json
-	 */
-	@PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String list(@ValidatorItem String id) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("name", getParameter("name"));
-		parameter.put("dangling", getParameter("dangling"));
-		List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listVolumes", parameter);
-		return JsonMessage.getString(200, "", listContainer);
-	}
+    public DockerVolumeController(DockerInfoService dockerInfoService) {
+        this.dockerInfoService = dockerInfoService;
+    }
 
 
-	/**
-	 * @return json
-	 */
-	@GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.DEL)
-	public String del(@ValidatorItem String id, String volumeName) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("volumeName", volumeName);
-		plugin.execute("removeVolume", parameter);
-		return JsonMessage.getString(200, "执行成功");
-	}
+    /**
+     * @return json
+     */
+    @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<JSONObject>> list(@ValidatorItem String id) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("name", getParameter("name"));
+        parameter.put("dangling", getParameter("dangling"));
+        List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listVolumes", parameter);
+        return JsonMessage.success("", listContainer);
+    }
+
+
+    /**
+     * @return json
+     */
+    @GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public JsonMessage<Object> del(@ValidatorItem String id, String volumeName) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("volumeName", volumeName);
+        plugin.execute("removeVolume", parameter);
+        return JsonMessage.success("执行成功");
+    }
 }

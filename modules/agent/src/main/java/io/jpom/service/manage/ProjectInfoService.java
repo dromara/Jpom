@@ -25,13 +25,10 @@ package io.jpom.service.manage;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import io.jpom.common.AgentConst;
-import io.jpom.common.BaseAgentController;
 import io.jpom.model.data.NodeProjectInfoModel;
-import io.jpom.model.data.ProjectRecoverModel;
 import io.jpom.service.BaseWorkspaceOptService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.File;
 
 /**
@@ -41,12 +38,11 @@ import java.io.File;
  */
 @Service
 public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoModel> {
-	@Resource
-	private ProjectRecoverService projectRecoverService;
 
-	public ProjectInfoService() {
-		super(AgentConst.PROJECT);
-	}
+
+    public ProjectInfoService() {
+        super(AgentConst.PROJECT);
+    }
 
 //    public HashSet<String> getAllGroup() {
 //        //获取所有分组
@@ -62,48 +58,31 @@ public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoM
 //    }
 
 
-	/**
-	 * 删除项目
-	 *
-	 * @param id 项目
-	 */
-	@Override
-	public void deleteItem(String id) {
-		NodeProjectInfoModel projectInfo = getItem(id);
-		String userId = BaseAgentController.getNowUserName();
-		super.deleteItem(id);
-		// 添加回收记录
-		ProjectRecoverModel projectRecoverModel = new ProjectRecoverModel(projectInfo);
-		projectRecoverModel.setDelUser(userId);
-		projectRecoverService.addItem(projectRecoverModel);
-	}
+    @Override
+    public void addItem(NodeProjectInfoModel nodeProjectInfoModel) {
+        nodeProjectInfoModel.setCreateTime(DateUtil.now());
+        super.addItem(nodeProjectInfoModel);
+    }
 
-
-	@Override
-	public void addItem(NodeProjectInfoModel nodeProjectInfoModel) {
-		nodeProjectInfoModel.setCreateTime(DateUtil.now());
-		super.addItem(nodeProjectInfoModel);
-	}
-
-	/**
-	 * 查看项目控制台日志文件大小
-	 *
-	 * @param nodeProjectInfoModel 项目
-	 * @param copyItem             副本
-	 * @return 文件大小
-	 */
-	public String getLogSize(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) {
-		if (nodeProjectInfoModel == null) {
-			return null;
-		}
-		File file = copyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(copyItem);
-		if (file.exists()) {
-			long fileSize = file.length();
-			if (fileSize <= 0) {
-				return null;
-			}
-			return FileUtil.readableFileSize(fileSize);
-		}
-		return null;
-	}
+    /**
+     * 查看项目控制台日志文件大小
+     *
+     * @param nodeProjectInfoModel 项目
+     * @param copyItem             副本
+     * @return 文件大小
+     */
+    public String getLogSize(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) {
+        if (nodeProjectInfoModel == null) {
+            return null;
+        }
+        File file = copyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(copyItem);
+        if (file.exists()) {
+            long fileSize = file.length();
+            if (fileSize <= 0) {
+                return null;
+            }
+            return FileUtil.readableFileSize(fileSize);
+        }
+        return null;
+    }
 }

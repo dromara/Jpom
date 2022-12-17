@@ -91,7 +91,7 @@ public class UserBasicInfoController extends BaseServerController {
      * @author Hotstrip
      */
     @RequestMapping(value = "user-basic-info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getUserBasicInfo() {
+    public JsonMessage<Map<String, Object>> getUserBasicInfo() {
         UserModel userModel = getUser();
         userModel = userService.getByKey(userModel.getId(), false);
         // return basic info
@@ -106,13 +106,13 @@ public class UserBasicInfoController extends BaseServerController {
         boolean bindMfa = userService.hasBindMfa(userModel.getId());
         map.put("bindMfa", bindMfa);
         map.put("forceMfa", userConfig.isForceMfa());
-        return JsonMessage.getString(200, "success", map);
+        return JsonMessage.success("success", map);
     }
 
     @RequestMapping(value = "save_basicInfo.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String saveBasicInfo(String email,
-                                String dingDing, String workWx, String code,
-                                @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "2:10", msg = "昵称长度只能是2-10") String name) {
+    public JsonMessage<String> saveBasicInfo(String email,
+                                             String dingDing, String workWx, String code,
+                                             @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "2:10", msg = "昵称长度只能是2-10") String name) {
         UserModel user = getUser();
         UserModel userModel = userService.getByKey(user.getId());
         UserModel updateModel = new UserModel(user.getId());
@@ -121,7 +121,7 @@ public class UserBasicInfoController extends BaseServerController {
             Validator.validateEmail(email, "邮箱格式不正确");
             Integer cacheCode = CACHE.get(email);
             if (cacheCode == null || !Objects.equals(cacheCode.toString(), code)) {
-                return JsonMessage.getString(405, "请输入正确验证码");
+                return new JsonMessage<>(405, "请输入正确验证码");
             }
             updateModel.setEmail(email);
         }
@@ -137,7 +137,7 @@ public class UserBasicInfoController extends BaseServerController {
         }
         updateModel.setWorkWx(workWx);
         userService.update(updateModel);
-        return JsonMessage.getString(200, "修改成功");
+        return JsonMessage.success("修改成功");
     }
 
     /**
@@ -147,7 +147,7 @@ public class UserBasicInfoController extends BaseServerController {
      * @return msg
      */
     @RequestMapping(value = "sendCode.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String sendCode(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email) {
+    public JsonMessage<String> sendCode(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email) {
         MailAccountModel config = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
         Assert.notNull(config, "管理员还没有配置系统邮箱,请联系管理配置发件信息");
         int randomInt = RandomUtil.randomInt(1000, 9999);
@@ -155,10 +155,10 @@ public class UserBasicInfoController extends BaseServerController {
             EmailUtil.send(email, "Jpom 验证码", "验证码是：" + randomInt);
         } catch (Exception e) {
             log.error("发送失败", e);
-            return JsonMessage.getString(500, "发送邮件失败：" + e.getMessage());
+            return new JsonMessage<>(500, "发送邮件失败：" + e.getMessage());
         }
         CACHE.put(email, randomInt);
-        return JsonMessage.getString(200, "发送成功");
+        return JsonMessage.success("发送成功");
     }
 
     /**
@@ -167,11 +167,11 @@ public class UserBasicInfoController extends BaseServerController {
      * @return msg
      */
     @GetMapping(value = "my_workspace", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String myWorkspace() {
+    public JsonMessage<List<WorkspaceModel>> myWorkspace() {
         UserModel user = getUser();
         List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user);
         Assert.notEmpty(models, "当前账号没有绑定任何工作空间，请联系管理员处理");
-        return JsonMessage.getString(200, "", models);
+        return JsonMessage.success("", models);
     }
 
     /**
@@ -180,24 +180,24 @@ public class UserBasicInfoController extends BaseServerController {
      * @return json
      */
     @GetMapping(value = "close_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String closeMfa(@ValidatorItem String code) {
+    public JsonMessage<Object> closeMfa(@ValidatorItem String code) {
         UserModel user = getUser();
         boolean mfaCode = userService.verifyMfaCode(user.getId(), code);
         Assert.state(mfaCode, "验证码不正确");
         UserModel userModel = new UserModel(user.getId());
         userModel.setTwoFactorAuthKey(StrUtil.EMPTY);
         userService.update(userModel);
-        return JsonMessage.getString(200, "关闭成功");
+        return JsonMessage.success("关闭成功");
     }
 
     @GetMapping(value = "generate_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String generateMfa() {
+    public JsonMessage<JSONObject> generateMfa() {
         UserModel user = getUser();
         JSONObject jsonObject = new JSONObject();
         String tfaKey = TwoFactorAuthUtils.generateTFAKey();
         jsonObject.put("mfaKey", tfaKey);
         jsonObject.put("url", TwoFactorAuthUtils.generateOtpAuthUrl(user.getId(), tfaKey));
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     /**
@@ -208,7 +208,7 @@ public class UserBasicInfoController extends BaseServerController {
      * @return json
      */
     @GetMapping(value = "bind_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String bindMfa(String mfa, String twoCode) {
+    public JsonMessage<Object> bindMfa(String mfa, String twoCode) {
         //
         UserModel user = getUser();
         boolean bindMfa = userService.hasBindMfa(user.getId());
@@ -219,6 +219,6 @@ public class UserBasicInfoController extends BaseServerController {
         boolean tfaCode = TwoFactorAuthUtils.validateTFACode(mfa, twoCode);
         Assert.state(tfaCode, " mfa 验证码不正确");
         userService.bindMfa(user.getId(), mfa);
-        return JsonMessage.getString(200, "绑定成功");
+        return JsonMessage.success("绑定成功");
     }
 }

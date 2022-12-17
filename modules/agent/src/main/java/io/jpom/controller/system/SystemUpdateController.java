@@ -62,7 +62,7 @@ public class SystemUpdateController extends BaseAgentController {
     }
 
     @PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String uploadJar() throws IOException {
+    public JsonMessage<String> uploadJar() throws IOException {
         //
         Objects.requireNonNull(JpomManifest.getScriptFile());
         MultipartFileBuilder multipartFileBuilder = createMultipart();
@@ -79,18 +79,18 @@ public class SystemUpdateController extends BaseAgentController {
         // 基础检查
         JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Agent);
         if (error.getCode() != HttpStatus.HTTP_OK) {
-            return error.toString();
+            return new JsonMessage<>(error.getCode(), error.getMsg());
         }
         Tuple data = error.getData();
         String version = data.get(0);
         JpomManifest.releaseJar(path, version);
         //
         JpomApplication.restart();
-        return JsonMessage.getString(200, Const.UPGRADE_MSG);
+        return JsonMessage.success(Const.UPGRADE_MSG);
     }
 
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String changeLog() {
+    public JsonMessage<String> changeLog() {
         //
         URL resource = ResourceUtil.getResource("CHANGELOG.md");
         String log = StrUtil.EMPTY;
@@ -98,7 +98,7 @@ public class SystemUpdateController extends BaseAgentController {
             InputStream stream = URLUtil.getStream(resource);
             log = IoUtil.readUtf8(stream);
         }
-        return JsonMessage.getString(200, "", log);
+        return JsonMessage.success("", log);
     }
 
     /**
@@ -108,9 +108,9 @@ public class SystemUpdateController extends BaseAgentController {
      * @see RemoteVersion
      */
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String checkVersion() {
+    public JsonMessage<RemoteVersion> checkVersion() {
         RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
-        return JsonMessage.getString(200, "", remoteVersion);
+        return JsonMessage.success("", remoteVersion);
     }
 
     /**
@@ -120,8 +120,8 @@ public class SystemUpdateController extends BaseAgentController {
      * @see RemoteVersion
      */
     @PostMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String upgrade() throws IOException {
+    public JsonMessage<Object> upgrade() throws IOException {
         RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath());
-        return JsonMessage.getString(200, Const.UPGRADE_MSG);
+        return JsonMessage.success(Const.UPGRADE_MSG);
     }
 }

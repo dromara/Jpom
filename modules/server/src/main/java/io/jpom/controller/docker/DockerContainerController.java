@@ -61,7 +61,7 @@ public class DockerContainerController extends BaseServerController {
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String list(@ValidatorItem String id) throws Exception {
+    public JsonMessage<List<JSONObject>> list(@ValidatorItem String id) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
@@ -70,7 +70,7 @@ public class DockerContainerController extends BaseServerController {
         parameter.put("imageId", getParameter("imageId"));
         parameter.put("showAll", getParameter("showAll"));
         List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listContainer", parameter);
-        return JsonMessage.getString(200, "", listContainer);
+        return JsonMessage.success("", listContainer);
     }
 
     /**
@@ -78,13 +78,13 @@ public class DockerContainerController extends BaseServerController {
      */
     @GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String del(@ValidatorItem String id, String containerId) throws Exception {
+    public JsonMessage<Object> del(@ValidatorItem String id, String containerId) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("containerId", containerId);
         plugin.execute("removeContainer", parameter);
-        return JsonMessage.getString(200, "执行成功");
+        return JsonMessage.success("执行成功");
     }
 
     /**
@@ -92,13 +92,13 @@ public class DockerContainerController extends BaseServerController {
      */
     @GetMapping(value = "start", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String start(@ValidatorItem String id, String containerId) throws Exception {
+    public JsonMessage<Object> start(@ValidatorItem String id, String containerId) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("containerId", containerId);
         plugin.execute("startContainer", parameter);
-        return JsonMessage.getString(200, "执行成功");
+        return JsonMessage.success("执行成功");
     }
 
 
@@ -107,13 +107,13 @@ public class DockerContainerController extends BaseServerController {
      */
     @GetMapping(value = "stop", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String stop(@ValidatorItem String id, String containerId) throws Exception {
+    public JsonMessage<Object> stop(@ValidatorItem String id, String containerId) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("containerId", containerId);
         plugin.execute("stopContainer", parameter);
-        return JsonMessage.getString(200, "执行成功");
+        return JsonMessage.success("执行成功");
     }
 
 
@@ -122,13 +122,13 @@ public class DockerContainerController extends BaseServerController {
      */
     @GetMapping(value = "restart", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String restart(@ValidatorItem String id, String containerId) throws Exception {
+    public JsonMessage<Object> restart(@ValidatorItem String id, String containerId) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("containerId", containerId);
         plugin.execute("restartContainer", parameter);
-        return JsonMessage.getString(200, "执行成功");
+        return JsonMessage.success("执行成功");
     }
 
     /**
@@ -136,13 +136,13 @@ public class DockerContainerController extends BaseServerController {
      */
     @GetMapping(value = "stats", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String stats(@ValidatorItem String id, String containerId) throws Exception {
+    public JsonMessage<Map<String, JSONObject>> stats(@ValidatorItem String id, String containerId) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("containerId", containerId);
         Map<String, JSONObject> stats = (Map<String, JSONObject>) plugin.execute("stats", parameter);
-        return JsonMessage.getString(200, "执行成功", stats);
+        return JsonMessage.success("执行成功", stats);
     }
 
     /**
@@ -150,13 +150,13 @@ public class DockerContainerController extends BaseServerController {
      */
     @GetMapping(value = "inspect-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String inspectContainer(@ValidatorItem String id, String containerId) throws Exception {
+    public JsonMessage<JSONObject> inspectContainer(@ValidatorItem String id, String containerId) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("containerId", containerId);
         JSONObject results = (JSONObject) plugin.execute("inspectContainer", parameter);
-        return JsonMessage.getString(200, "执行成功", results);
+        return JsonMessage.success("执行成功", results);
     }
 
     /**
@@ -166,7 +166,7 @@ public class DockerContainerController extends BaseServerController {
      */
     @PostMapping(value = "update-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String updateContainer(@RequestBody JSONObject jsonObject) throws Exception {
+    public JsonMessage<JSONObject> updateContainer(@RequestBody JSONObject jsonObject) throws Exception {
         // @ValidatorItem String id, String containerId
         String id = jsonObject.getString("id");
         Assert.hasText(id, "id 不能为空");
@@ -177,6 +177,6 @@ public class DockerContainerController extends BaseServerController {
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.putAll(jsonObject);
         JSONObject results = (JSONObject) plugin.execute("updateContainer", parameter);
-        return JsonMessage.getString(200, "执行成功", results);
+        return JsonMessage.success("执行成功", results);
     }
 }

@@ -67,7 +67,7 @@ public class BuildInfoTriggerController extends BaseServerController {
      */
     @RequestMapping(value = "/build/trigger/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String getTriggerUrl(String id, String rest) {
+    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         UserModel user = getUser();
         BuildInfoModel updateInfo;
@@ -81,7 +81,7 @@ public class BuildInfoTriggerController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo);
-        return JsonMessage.getString(200, StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
     private Map<String, String> getBuildToken(BuildInfoModel item) {
@@ -121,6 +121,6 @@ public class BuildInfoTriggerController extends BaseServerController {
 //            item.getId(), user.getId()));
 //        buildInfoService.update(updateInfo);
 //        Map<String, String> map = this.getBuildToken(updateInfo);
-//        return JsonMessage.getString(200, "重置成功", map);
+//        return JsonMessage.success( "重置成功", map);
 //    }
 }

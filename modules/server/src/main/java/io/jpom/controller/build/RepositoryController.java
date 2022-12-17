@@ -103,7 +103,7 @@ public class RepositoryController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public Object loadRepositoryList() {
         PageResultDto<RepositoryModel> pageResult = repositoryService.listPage(getRequest());
-        return JsonMessage.getString(200, "获取成功", pageResult);
+        return JsonMessage.success("获取成功", pageResult);
     }
 
     /**
@@ -119,7 +119,7 @@ public class RepositoryController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public Object loadRepositoryListAll() {
         List<RepositoryModel> repositoryModels = repositoryService.listByWorkspace(getRequest());
-        return JsonMessage.getString(200, "", repositoryModels);
+        return JsonMessage.success("", repositoryModels);
     }
 
     /**
@@ -130,7 +130,7 @@ public class RepositoryController extends BaseServerController {
      */
     @PostMapping(value = "/build/repository/edit")
     @Feature(method = MethodFeature.EDIT)
-    public Object editRepository(RepositoryModel repositoryModelReq) {
+    public JsonMessage<String> editRepository(RepositoryModel repositoryModelReq) {
         this.checkInfo(repositoryModelReq);
         // 检查 rsa 私钥
         boolean andUpdateSshKey = this.checkAndUpdateSshKey(repositoryModelReq);
@@ -152,7 +152,7 @@ public class RepositoryController extends BaseServerController {
                 throw jpomRuntimeException;
             } catch (Exception e) {
                 log.warn("获取仓库分支失败", e);
-                return JsonMessage.toJson(500, "无法连接此仓库，" + e.getMessage());
+                return new JsonMessage<>(500, "无法连接此仓库，" + e.getMessage());
             }
         }
         if (StrUtil.isEmpty(repositoryModelReq.getId())) {
@@ -164,7 +164,7 @@ public class RepositoryController extends BaseServerController {
             repositoryService.updateById(repositoryModelReq, getRequest());
         }
 
-        return JsonMessage.toJson(200, "操作成功");
+        return new JsonMessage<>(200, "操作成功");
     }
 
     /**
@@ -175,7 +175,7 @@ public class RepositoryController extends BaseServerController {
      */
     @PostMapping(value = "/build/repository/rest_hide_field")
     @Feature(method = MethodFeature.EDIT)
-    public Object restHideField(@ValidatorItem String id) {
+    public JsonMessage<String> restHideField(@ValidatorItem String id) {
         RepositoryModel repositoryModel = new RepositoryModel();
         repositoryModel.setId(id);
         repositoryModel.setPassword(StrUtil.EMPTY);
@@ -183,12 +183,12 @@ public class RepositoryController extends BaseServerController {
         repositoryModel.setRsaPub(StrUtil.EMPTY);
         repositoryModel.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
         repositoryService.updateById(repositoryModel);
-        return JsonMessage.toJson(200, "操作成功");
+        return new JsonMessage<>(200, "操作成功");
     }
 
     @GetMapping(value = "/build/repository/authorize_repos")
     @Feature(method = MethodFeature.LIST)
-    public Object authorizeRepos() {
+    public JsonMessage<PageResultDto<JSONObject>> authorizeRepos() {
         // 获取分页信息
         HttpServletRequest request = getRequest();
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
@@ -215,7 +215,7 @@ public class RepositoryController extends BaseServerController {
             default:
                 throw new IllegalArgumentException("不支持的类型");
         }
-        return JsonMessage.toJson(HttpStatus.OK.value(), HttpStatus.OK.name(), pageResultDto);
+        return new JsonMessage<>(HttpStatus.OK.value(), HttpStatus.OK.name(), pageResultDto);
     }
 
     /**
@@ -462,7 +462,7 @@ public class RepositoryController extends BaseServerController {
         repositoryService.delByKey(id, getRequest());
         File rsaFile = BuildUtil.getRepositoryRsaFile(id + ServerConst.ID_RSA);
         FileUtil.del(rsaFile);
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 
     /**

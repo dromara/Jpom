@@ -70,7 +70,7 @@ public class WhitelistDirectoryController extends BaseServerController {
      */
     @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
-    public String whiteList() {
+    public JsonMessage<Map<String, String>> whiteList() {
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
         Map<String, String> map = new HashMap<>(8);
         if (agentWhitelist != null) {
@@ -89,7 +89,7 @@ public class WhitelistDirectoryController extends BaseServerController {
                 }
             }
         }
-        return JsonMessage.getString(200, "ok", map);
+        return JsonMessage.success("ok", map);
     }
 
 

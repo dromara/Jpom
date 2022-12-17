@@ -59,21 +59,21 @@ public class WhitelistDirectoryController extends BaseJpomController {
     }
 
     @RequestMapping(value = "whitelistDirectory_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String whiteListDirectoryData() {
+    public JsonMessage<AgentWhitelist> whiteListDirectoryData() {
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
-        return JsonMessage.getString(200, "", agentWhitelist);
+        return JsonMessage.success("", agentWhitelist);
     }
 
 
     @PostMapping(value = "whitelistDirectory_submit", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String whitelistDirectorySubmit(String project, String certificate, String nginx, String nginxPath, String allowEditSuffix, String allowRemoteDownloadHost) {
+    public JsonMessage<String> whitelistDirectorySubmit(String project, String certificate, String nginx, String nginxPath, String allowEditSuffix, String allowRemoteDownloadHost) {
         List<String> list = AgentWhitelist.parseToList(project, true, "项目路径白名单不能为空");
         //
         List<String> certificateList = AgentWhitelist.parseToList(certificate, "证书路径白名单不能为空");
         List<String> nList = AgentWhitelist.parseToList(nginx, "nginx路径白名单不能为空");
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
         List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "允许远程下载的 host 不能配置为空");
-        return save(list, certificateList, nList, nginxPath, allowEditSuffixList, allowRemoteDownloadHostList).toString();
+        return save(list, certificateList, nList, nginxPath, allowEditSuffixList, allowRemoteDownloadHostList);
     }
 //
 //	private JsonMessage<String> save(String project, List<String> certificate, List<String> nginx, List<String> allowEditSuffixList) {

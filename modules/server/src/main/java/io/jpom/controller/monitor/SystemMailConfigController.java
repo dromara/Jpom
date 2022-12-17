@@ -71,18 +71,18 @@ public class SystemMailConfigController extends BaseServerController {
      */
     @PostMapping(value = "mail-config-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String mailConfigData() {
+    public JsonMessage<MailAccountModel> mailConfigData() {
         MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
         if (item != null) {
             item.setPass(null);
         }
-        return JsonMessage.getString(200, "success", item);
+        return JsonMessage.success("success", item);
     }
 
     @PostMapping(value = "mailConfig_save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission(superUser = true)
-    public String listData(MailAccountModel mailAccountModel) throws Exception {
+    public JsonMessage<Object> listData(MailAccountModel mailAccountModel) throws Exception {
         Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");
         Assert.hasText(mailAccountModel.getHost(), "请填写host");
         Assert.hasText(mailAccountModel.getUser(), "请填写user");
@@ -103,6 +103,6 @@ public class SystemMailConfigController extends BaseServerController {
         systemParametersServer.upsert(MailAccountModel.ID, mailAccountModel, MailAccountModel.ID);
         //
         EmailUtil.refreshConfig();
-        return JsonMessage.getString(200, "保存成功");
+        return JsonMessage.success("保存成功");
     }
 }

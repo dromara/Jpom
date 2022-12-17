@@ -73,7 +73,7 @@ public class DockerImagesController extends BaseServerController {
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String list(@ValidatorItem String id) throws Exception {
+    public JsonMessage<List<JSONObject>> list(@ValidatorItem String id) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
@@ -81,7 +81,7 @@ public class DockerImagesController extends BaseServerController {
         parameter.put("showAll", getParameter("showAll"));
         parameter.put("dangling", getParameter("dangling"));
         List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listImages", parameter);
-        return JsonMessage.getString(200, "", listContainer);
+        return JsonMessage.success("", listContainer);
     }
 
 
@@ -90,13 +90,13 @@ public class DockerImagesController extends BaseServerController {
      */
     @GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String del(@ValidatorItem String id, String imageId) throws Exception {
+    public JsonMessage<Object> del(@ValidatorItem String id, String imageId) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("imageId", imageId);
         plugin.execute("removeImage", parameter);
-        return JsonMessage.getString(200, "执行成功");
+        return JsonMessage.success("执行成功");
     }
 
     /**
@@ -104,13 +104,13 @@ public class DockerImagesController extends BaseServerController {
      */
     @GetMapping(value = "inspect", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String inspect(@ValidatorItem String id, String imageId) throws Exception {
+    public JsonMessage<JSONObject> inspect(@ValidatorItem String id, String imageId) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.put("imageId", imageId);
         JSONObject inspectImage = (JSONObject) plugin.execute("inspectImage", parameter);
-        return JsonMessage.getString(200, "", inspectImage);
+        return JsonMessage.success("", inspectImage);
     }
 
     /**
@@ -118,7 +118,7 @@ public class DockerImagesController extends BaseServerController {
      */
     @GetMapping(value = "pull-image", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String pullImage(@ValidatorItem String id, String repository) throws Exception {
+    public JsonMessage<String> pullImage(@ValidatorItem String id, String repository) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
@@ -138,7 +138,7 @@ public class DockerImagesController extends BaseServerController {
             }
             logRecorder.info("pull end");
         });
-        return JsonMessage.getString(200, "开始拉取", uuid);
+        return JsonMessage.success("开始拉取", uuid);
     }
 
     /**
@@ -150,14 +150,14 @@ public class DockerImagesController extends BaseServerController {
      */
     @GetMapping(value = "pull-image-log", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+    public JsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-log", id + ".log");
         if (!file.exists()) {
-            return JsonMessage.getString(201, "还没有日志文件");
+            return new JsonMessage<>(201, "还没有日志文件");
         }
         JSONObject data = FileUtils.readLogFile(file, line);
-        return JsonMessage.getString(200, "ok", data);
+        return JsonMessage.success("ok", data);
     }
 
     /**
@@ -165,7 +165,7 @@ public class DockerImagesController extends BaseServerController {
      */
     @PostMapping(value = "create-container", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String createContainer(@RequestBody JSONObject jsonObject) throws Exception {
+    public JsonMessage<Object> createContainer(@RequestBody JSONObject jsonObject) throws Exception {
         Assert.hasText(jsonObject.getString("id"), "id 不能为空");
         Assert.hasText(jsonObject.getString("imageId"), "镜像不能为空");
         Assert.hasText(jsonObject.getString("name"), "容器名称不能为空");
@@ -174,6 +174,6 @@ public class DockerImagesController extends BaseServerController {
         Map<String, Object> parameter = dockerInfoModel.toParameter();
         parameter.putAll(jsonObject);
         plugin.execute("createContainer", parameter);
-        return JsonMessage.getString(200, "创建成功");
+        return JsonMessage.success("创建成功");
     }
 }

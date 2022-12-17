@@ -235,7 +235,7 @@ public class IndexControl extends BaseServerController {
      */
     @NotLogin
     @RequestMapping(value = "check-system", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String checkSystem() {
+    public JsonMessage<JSONObject> checkSystem() {
         HttpServletRequest request = getRequest();
         JSONObject data = new JSONObject();
         data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH));
@@ -249,9 +249,9 @@ public class IndexControl extends BaseServerController {
         // 用于判断是否属于容器部署
         data.put("inDocker", StrUtil.isNotEmpty(SystemUtil.get("JPOM_PKG")));
         if (userService.canUse()) {
-            return JsonMessage.getString(200, "success", data);
+            return JsonMessage.success("success", data);
         }
-        return JsonMessage.getString(222, "需要初始化系统", data);
+        return new JsonMessage<>(222, "需要初始化系统", data);
     }
 
 
@@ -264,7 +264,7 @@ public class IndexControl extends BaseServerController {
      * @apiSuccess {JSON}  data 菜单相关字段
      */
     @RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String menusData() {
+    public JsonMessage<List<Object>> menusData() {
         NodeModel nodeModel = tryGetNode();
         UserModel userModel = getUserModel();
         String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
@@ -301,7 +301,7 @@ public class IndexControl extends BaseServerController {
             return true;
         }).collect(Collectors.toList());
         Assert.notEmpty(jsonArray, "没有任何菜单,请联系管理员");
-        return JsonMessage.getString(200, "", collect1);
+        return JsonMessage.success("", collect1);
     }
 
     private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel, JSONArray showArray) {

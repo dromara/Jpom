@@ -130,7 +130,7 @@ public class DockerSwarmServiceController extends BaseServerController {
      */
     @GetMapping(value = "start-log", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String pullImage(@ValidatorItem String id, @ValidatorItem String type, @ValidatorItem String dataId) throws Exception {
+    public JsonMessage<String> pullImage(@ValidatorItem String id, @ValidatorItem String type, @ValidatorItem String dataId) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoService.getBySwarmPluginMap(id, getRequest());
         parameter.put(StrUtil.equalsIgnoreCase(type, "service") ? "serviceId" : "taskId", dataId);
@@ -152,7 +152,7 @@ public class DockerSwarmServiceController extends BaseServerController {
                 logRecorder.info("pull end");
             });
         }
-        return JsonMessage.getString(200, "开始拉取", uuid);
+        return JsonMessage.success("开始拉取", uuid);
     }
 
     /**
@@ -164,13 +164,13 @@ public class DockerSwarmServiceController extends BaseServerController {
      */
     @GetMapping(value = "pull-log", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+    public JsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-swarm-log", id + ".log");
         if (!file.exists()) {
-            return JsonMessage.getString(201, "还没有日志文件");
+            return new JsonMessage<>(201, "还没有日志文件");
         }
         JSONObject data = FileUtils.readLogFile(file, line);
-        return JsonMessage.getString(200, "ok", data);
+        return JsonMessage.success("ok", data);
     }
 }

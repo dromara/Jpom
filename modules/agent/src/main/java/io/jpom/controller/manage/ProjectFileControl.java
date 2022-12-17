@@ -92,7 +92,7 @@ public class ProjectFileControl extends BaseAgentController {
     }
 
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getFileList(String id, String path) {
+    public JsonMessage<List<JSONObject>> getFileList(String id, String path) {
         // 查询项目路径
         NodeProjectInfoModel pim = projectInfoService.getItem(id);
         Assert.notNull(pim, "查询失败：项目不存在");
@@ -100,12 +100,12 @@ public class ProjectFileControl extends BaseAgentController {
         File fileDir = FileUtil.file(lib, StrUtil.emptyToDefault(path, FileUtil.FILE_SEPARATOR));
         boolean exist = FileUtil.exist(fileDir);
         if (!exist) {
-            return JsonMessage.getString(200, "查询成功", Collections.EMPTY_LIST);
+            return JsonMessage.success("查询成功", Collections.emptyList());
         }
         //
         File[] filesAll = fileDir.listFiles();
         if (ArrayUtil.isEmpty(filesAll)) {
-            return JsonMessage.getString(200, "查询成功", Collections.EMPTY_LIST);
+            return JsonMessage.success("查询成功", Collections.emptyList());
         }
         List<JSONObject> arrayFile = FileUtils.parseInfo(filesAll, false, lib);
         AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
@@ -113,7 +113,7 @@ public class ProjectFileControl extends BaseAgentController {
             String filename = jsonObject.getString("filename");
             jsonObject.put("textFileEdit", AgentWhitelist.checkSilentFileSuffix(whitelist.getAllowEditSuffix(), filename));
         }
-        return JsonMessage.getString(200, "查询成功", arrayFile);
+        return JsonMessage.success("查询成功", arrayFile);
     }
 
     /**
@@ -123,7 +123,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "diff_file", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String diffFile(@RequestBody DiffFileVo diffFileVo) {
+    public JsonMessage<JSONObject> diffFile(@RequestBody DiffFileVo diffFileVo) {
         String id = diffFileVo.getId();
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
         //
@@ -182,12 +182,12 @@ public class ProjectFileControl extends BaseAgentController {
         JSONObject result = new JSONObject();
         result.put("diff", canSync);
         result.put("del", delArray);
-        return JsonMessage.getString(200, "", result);
+        return JsonMessage.success("", result);
     }
 
 
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String upload() throws Exception {
+    public JsonMessage<CommandOpResult> upload() throws Exception {
         NodeProjectInfoModel pim = getProjectInfoModel();
         MultipartFileBuilder multipartFileBuilder = createMultipart()
             .addFieldName("file")
@@ -251,7 +251,7 @@ public class ProjectFileControl extends BaseAgentController {
                             }
                         }));
                     }
-                    return JsonMessage.getString(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
+                    return new JsonMessage<>(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
                 } else if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
                     CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
                     if (javaCopyItemList != null) {
@@ -270,13 +270,13 @@ public class ProjectFileControl extends BaseAgentController {
                             }
                         });
                     }
-                    return JsonMessage.getString(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
+                    return new JsonMessage<>(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
                 }
             }
         } finally {
             ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
         }
-        return JsonMessage.getString(200, "上传成功");
+        return JsonMessage.success("上传成功");
     }
 
 
@@ -294,7 +294,7 @@ public class ProjectFileControl extends BaseAgentController {
     }
 
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String deleteFile(String filename, String type, String levelName) {
+    public JsonMessage<String> deleteFile(String filename, String type, String levelName) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, StrUtil.SLASH));
 //        if (StrUtil.isEmpty(levelName)) {
@@ -308,11 +308,11 @@ public class ProjectFileControl extends BaseAgentController {
             if ("clear".equalsIgnoreCase(type)) {
                 // 清空文件
                 if (FileUtil.clean(file)) {
-                    return JsonMessage.getString(200, "清除成功");
+                    return JsonMessage.success("清除成功");
                 }
                 boolean run = AbstractProjectCommander.getInstance().isRun(pim, null);
                 Assert.state(!run, "文件被占用，请先停止项目");
-                return JsonMessage.getString(500, "删除失败：" + file.getAbsolutePath());
+                return new JsonMessage<>(500, "删除失败：" + file.getAbsolutePath());
             } else {
                 // 删除文件
                 Assert.hasText(filename, "请选择要删除的文件");
@@ -320,12 +320,12 @@ public class ProjectFileControl extends BaseAgentController {
 
                 if (file.exists()) {
                     if (FileUtil.del(file)) {
-                        return JsonMessage.getString(200, "删除成功");
+                        return JsonMessage.success("删除成功");
                     }
                 } else {
-                    return JsonMessage.getString(404, "文件不存在");
+                    return new JsonMessage<>(404, "文件不存在");
                 }
-                return JsonMessage.getString(500, "删除失败");
+                return new JsonMessage<>(500, "删除失败");
             }
         } finally {
             ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
@@ -334,7 +334,7 @@ public class ProjectFileControl extends BaseAgentController {
 
 
     @RequestMapping(value = "batch_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String batchDelete(@RequestBody DiffFileVo diffFileVo) {
+    public JsonMessage<String> batchDelete(@RequestBody DiffFileVo diffFileVo) {
         String id = diffFileVo.getId();
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
         // 备份文件
@@ -350,9 +350,9 @@ public class ProjectFileControl extends BaseAgentController {
                 if (FileUtil.del(file)) {
                     continue;
                 }
-                return JsonMessage.getString(500, "删除失败");
+                return new JsonMessage<>(500, "删除失败");
             }
-            return JsonMessage.getString(200, "删除成功");
+            return JsonMessage.success("删除成功");
         } finally {
             ProjectFileBackupUtil.checkDiff(projectInfoModel.getId(), projectInfoModel.allLib(), backupId, projectInfoModel.dslConfig());
         }
@@ -367,7 +367,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "read_file", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String readFile(String filePath, String filename) {
+    public JsonMessage<String> readFile(String filePath, String filename) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         filePath = StrUtil.emptyToDefault(filePath, File.separator);
         // 判断文件后缀
@@ -375,7 +375,7 @@ public class ProjectFileControl extends BaseAgentController {
         Charset charset = AgentWhitelist.checkFileSuffix(whitelist.getAllowEditSuffix(), filename);
         File file = FileUtil.file(pim.allLib(), filePath, filename);
         String ymlString = FileUtil.readString(file, charset);
-        return JsonMessage.getString(200, "", ymlString);
+        return JsonMessage.success("", ymlString);
     }
 
     /**
@@ -387,7 +387,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "update_config_file", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updateConfigFile(String filePath, String filename, String fileText) {
+    public JsonMessage<Object> updateConfigFile(String filePath, String filename, String fileText) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         filePath = StrUtil.emptyToDefault(filePath, File.separator);
         // 判断文件后缀
@@ -397,7 +397,7 @@ public class ProjectFileControl extends BaseAgentController {
         String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
         try {
             FileUtil.writeString(fileText, FileUtil.file(pim.allLib(), filePath, filename), charset);
-            return JsonMessage.getString(200, "文件写入成功");
+            return JsonMessage.success("文件写入成功");
         } finally {
             ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
         }
@@ -442,7 +442,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String remoteDownload(String id, String url, String levelName, String unzip) {
+    public JsonMessage<String> remoteDownload(String id, String url, String levelName, String unzip) {
         Assert.hasText(url, "请输入正确的远程地址");
         AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
         Set<String> allowRemoteDownloadHost = whitelist.getAllowRemoteDownloadHost();
@@ -465,10 +465,10 @@ public class ProjectFileControl extends BaseAgentController {
                     }
                 }
             }
-            return JsonMessage.getString(200, "下载成功文件大小：" + FileUtil.readableFileSize(downloadFile));
+            return JsonMessage.success("下载成功文件大小：" + FileUtil.readableFileSize(downloadFile));
         } catch (Exception e) {
             log.error("下载远程文件异常", e);
-            return JsonMessage.getString(500, "下载远程文件失败:" + e.getMessage());
+            return new JsonMessage<>(500, "下载远程文件失败:" + e.getMessage());
         } finally {
             ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
         }
@@ -484,7 +484,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "new_file_folder.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String newFileFolder(String id, String levelName, @ValidatorItem String filename, String unFolder) {
+    public JsonMessage<Object> newFileFolder(String id, String levelName, @ValidatorItem String filename, String unFolder) {
         NodeProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         Assert.notNull(projectInfoModel, "没有对应到项目");
         File file = FileUtil.file(projectInfoModel.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
@@ -495,7 +495,7 @@ public class ProjectFileControl extends BaseAgentController {
         } else {
             FileUtil.mkdir(file);
         }
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     /**
@@ -508,7 +508,7 @@ public class ProjectFileControl extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "rename.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String rename(String id, String levelName, @ValidatorItem String filename, String newname) {
+    public JsonMessage<Object> rename(String id, String levelName, @ValidatorItem String filename, String newname) {
         NodeProjectInfoModel projectInfoModel = getProjectInfoModel();
         File file = FileUtil.file(projectInfoModel.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
         File newFile = FileUtil.file(projectInfoModel.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), newname);
@@ -518,7 +518,7 @@ public class ProjectFileControl extends BaseAgentController {
 
         FileUtil.rename(file, newname, false);
 
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
 }

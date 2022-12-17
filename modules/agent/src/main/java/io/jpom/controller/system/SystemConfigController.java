@@ -58,17 +58,17 @@ import java.nio.charset.StandardCharsets;
 public class SystemConfigController extends BaseAgentController {
 
     @RequestMapping(value = "getConfig.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String config() throws IOException {
+    public JsonMessage<JSONObject> config() throws IOException {
         Resource resource = ExtConfigBean.getResource();
         String content = IoUtil.read(resource.getInputStream(), CharsetUtil.CHARSET_UTF_8);
         JSONObject json = new JSONObject();
         json.put("content", content);
         json.put("file", FileUtil.getAbsolutePath(resource.getFile()));
-        return JsonMessage.getString(200, "ok", json);
+        return JsonMessage.success("ok", json);
     }
 
     @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String saveConfig(@ValidatorItem(msg = "内容不能为空") String content, String restart) throws IOException {
+    public JsonMessage<String> saveConfig(@ValidatorItem(msg = "内容不能为空") String content, String restart) throws IOException {
         try {
             YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
             // @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格
@@ -76,7 +76,7 @@ public class SystemConfigController extends BaseAgentController {
             yamlPropertySourceLoader.load("test", resource);
         } catch (Exception e) {
             log.warn("内容格式错误，请检查修正", e);
-            return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
+            return new JsonMessage<>(500, "内容格式错误，请检查修正:" + e.getMessage());
         }
         Resource resource = ExtConfigBean.getResource();
         Assert.state(resource.isFile(), "当前环境下不支持在线修改配置文件");
@@ -85,8 +85,8 @@ public class SystemConfigController extends BaseAgentController {
         if (Convert.toBool(restart, false)) {
             // 重启
             JpomApplication.restart();
-            return JsonMessage.getString(200, Const.UPGRADE_MSG);
+            return JsonMessage.success(Const.UPGRADE_MSG);
         }
-        return JsonMessage.getString(200, "修改成功");
+        return JsonMessage.success("修改成功");
     }
 }

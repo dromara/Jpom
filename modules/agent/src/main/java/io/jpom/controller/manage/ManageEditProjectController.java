@@ -162,7 +162,7 @@ public class ManageEditProjectController extends BaseAgentController {
 
 
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String saveProject(NodeProjectInfoModel projectInfo) {
+    public JsonMessage<String> saveProject(NodeProjectInfoModel projectInfo) {
         // 预检查数据
         String strPreviewData = getParameter("previewData");
         boolean previewData = Convert.toBool(strPreviewData, false);
@@ -178,7 +178,7 @@ public class ManageEditProjectController extends BaseAgentController {
         if (list != null) {
             for (NodeProjectInfoModel nodeProjectInfoModel : list) {
                 if (!nodeProjectInfoModel.getId().equals(id) && nodeProjectInfoModel.allLib().equals(allLib)) {
-                    return JsonMessage.getString(401, "当前项目路径已经被【" + nodeProjectInfoModel.getName() + "】占用,请检查");
+                    return new JsonMessage<>(401, "当前项目路径已经被【" + nodeProjectInfoModel.getName() + "】占用,请检查");
                 }
             }
         }
@@ -198,8 +198,6 @@ public class ManageEditProjectController extends BaseAgentController {
         }
         // 判断空格
         Assert.state(!id.contains(StrUtil.SPACE) && !allLib.contains(StrUtil.SPACE), "项目Id、项目路径不能包含空格");
-
-        String jdkId = projectInfo.getJdkId();
 
         // 判断 yml
         this.checkDslYml(projectInfo);
@@ -223,7 +221,7 @@ public class ManageEditProjectController extends BaseAgentController {
      * @param previewData 是否是预检查
      * @return 错误信息
      */
-    private String save(NodeProjectInfoModel projectInfo, boolean previewData) {
+    private JsonMessage<String> save(NodeProjectInfoModel projectInfo, boolean previewData) {
         projectInfo.setWorkspaceId(getWorkspaceId());
         NodeProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
         try {
@@ -236,15 +234,15 @@ public class ManageEditProjectController extends BaseAgentController {
                 }
                 if (previewData) {
                     // 预检查数据
-                    return JsonMessage.getString(200, "检查通过");
+                    return JsonMessage.success("检查通过");
                 } else {
                     projectInfoService.addItem(projectInfo);
-                    return JsonMessage.getString(200, "新增成功！");
+                    return JsonMessage.success("新增成功！");
                 }
             }
             if (previewData) {
                 // 预检查数据
-                return JsonMessage.getString(200, "检查通过");
+                return JsonMessage.success("检查通过");
             } else {
                 exits.setLog(projectInfo.getLog());
                 exits.setLogPath(projectInfo.getLogPath());
@@ -261,24 +259,24 @@ public class ManageEditProjectController extends BaseAgentController {
                 exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
                 exits.setToken(projectInfo.getToken());
                 exits.setDslContent(projectInfo.getDslContent());
-                exits.setJdkId(projectInfo.getJdkId());
+
                 // 检查是否非法删除副本集
                 List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = exits.getJavaCopyItemList();
                 List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList1 = projectInfo.getJavaCopyItemList();
                 if (CollUtil.isNotEmpty(javaCopyItemList) && !CollUtil.containsAll(javaCopyItemList1, javaCopyItemList)) {
                     // 重写了 equals
-                    return JsonMessage.getString(405, "修改中不能删除副本集、请到副本集中删除");
+                    return new JsonMessage<>(405, "修改中不能删除副本集、请到副本集中删除");
                 }
                 exits.setJavaCopyItemList(javaCopyItemList1);
                 exits.setJavaExtDirsCp(projectInfo.getJavaExtDirsCp());
                 //
                 moveTo(exits, projectInfo);
                 projectInfoService.updateItem(exits);
-                return JsonMessage.getString(200, "修改成功");
+                return JsonMessage.success("修改成功");
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return JsonMessage.getString(500, "保存数据异常:" + e.getMessage());
+            log.error("保存数据异常", e);
+            return new JsonMessage<>(500, "保存数据异常:" + e.getMessage());
         }
     }
 
@@ -344,10 +342,10 @@ public class ManageEditProjectController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String deleteProject(String copyId) {
+    public JsonMessage<String> deleteProject(String copyId) {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
         if (nodeProjectInfoModel == null) {
-            return JsonMessage.getString(200, "项目不存在");
+            return JsonMessage.success("项目不存在");
         }
         try {
             NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
@@ -364,21 +362,21 @@ public class ManageEditProjectController extends BaseAgentController {
                 Assert.state(removeCopyItem, "删除对应副本集不存在");
                 projectInfoService.updateItem(nodeProjectInfoModel);
             }
-            return JsonMessage.getString(200, "删除成功！");
+            return JsonMessage.success("删除成功！");
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return JsonMessage.getString(500, "删除异常：" + e.getMessage());
+            log.error("删除异常", e);
+            return new JsonMessage<>(500, "删除异常：" + e.getMessage());
         }
     }
 
     @RequestMapping(value = "releaseOutGiving", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String releaseOutGiving() {
+    public JsonMessage<Object> releaseOutGiving() {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
         if (nodeProjectInfoModel != null) {
             nodeProjectInfoModel.setOutGivingProject(false);
             projectInfoService.updateItem(nodeProjectInfoModel);
         }
-        return JsonMessage.getString(200, "ok");
+        return JsonMessage.success("ok");
     }
 
     /**
@@ -389,7 +387,7 @@ public class ManageEditProjectController extends BaseAgentController {
      * @return 状态码，400是一定不能操作的，401 是提醒
      */
     @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String saveProject(String id, String newLib) {
+    public JsonMessage<String> saveProject(String id, String newLib) {
         File file = FileUtil.file(newLib);
         // new File(newLib);
         //  填写的jar路径是一个存在的文件
@@ -406,7 +404,7 @@ public class ManageEditProjectController extends BaseAgentController {
             Path oldPath = oldLib.toPath();
             if (newPath.equals(oldPath)) {
                 // 新 旧没有变更
-                return JsonMessage.getString(200, "");
+                return JsonMessage.success("");
             }
             if (file.exists()) {
                 String msg;
@@ -416,11 +414,11 @@ public class ManageEditProjectController extends BaseAgentController {
                 } else {
                     msg = "填写jar目录当前已经在,创建成功后会自动同步文件";
                 }
-                return JsonMessage.getString(401, msg);
+                return new JsonMessage<>(401, msg);
             }
         }
         Assert.state(!Validator.isChinese(newLib), "不建议使用中文目录");
 
-        return JsonMessage.getString(200, "");
+        return JsonMessage.success("");
     }
 }

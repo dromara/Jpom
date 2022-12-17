@@ -54,15 +54,15 @@ import java.util.List;
 public class WelcomeController extends BaseAgentController {
 
     @PostMapping(value = "getDirectTop", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getDirectTop() {
+    public JsonMessage<JSONObject> getDirectTop() {
         JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
         //
         topInfo.put("time", SystemClock.now());
-        return JsonMessage.getString(200, "ok", topInfo);
+        return JsonMessage.success("ok", topInfo);
     }
 
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getTop(Long millis) {
+    public JsonMessage<JSONObject> getTop(Long millis) {
         Iterator<CacheObj<String, JSONObject>> cacheObjIterator = TopManager.get();
         List<JSONObject> series = new ArrayList<>();
         List<String> scale = new ArrayList<>();
@@ -91,30 +91,30 @@ public class WelcomeController extends BaseAgentController {
         JSONObject object = new JSONObject();
         object.put("scales", scale);
         object.put("series", series);
-        return JsonMessage.getString(200, "", object);
+        return JsonMessage.success("", object);
     }
 
 
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getProcessList(String processName) {
+    public JsonMessage getProcessList(String processName) {
         processName = StrUtil.emptyToDefault(processName, "java");
         List<ProcessModel> array = AbstractSystemCommander.getInstance().getProcessList(processName);
         if (array != null && !array.isEmpty()) {
             array.sort(Comparator.comparingInt(ProcessModel::getPid));
-            return JsonMessage.getString(200, "", array);
+            return JsonMessage.success("", array);
         }
-        return JsonMessage.getString(402, "没有获取到进程信息");
+        return new JsonMessage<>(402, "没有获取到进程信息");
     }
 
 
     @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String kill(int pid) {
+    public JsonMessage<Object> kill(int pid) {
         long jpomAgentId = JpomManifest.getInstance().getPid();
         Assert.state(!StrUtil.equals(StrUtil.toString(jpomAgentId), StrUtil.toString(pid)), "不支持在线关闭 Agent 进程");
         String result = AbstractSystemCommander.getInstance().kill(null, pid);
         if (StrUtil.isEmpty(result)) {
             result = "成功kill";
         }
-        return JsonMessage.getString(200, result);
+        return JsonMessage.success(result);
     }
 }

@@ -51,25 +51,25 @@ import java.util.Map;
 @RequestMapping(value = "/docker/networks")
 public class DockerNetworkController extends BaseServerController {
 
-	private final DockerInfoService dockerInfoService;
+    private final DockerInfoService dockerInfoService;
 
-	public DockerNetworkController(DockerInfoService dockerInfoService) {
-		this.dockerInfoService = dockerInfoService;
-	}
+    public DockerNetworkController(DockerInfoService dockerInfoService) {
+        this.dockerInfoService = dockerInfoService;
+    }
 
 
-	/**
-	 * @return json
-	 */
-	@PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String list(@ValidatorItem String id, String name, String networkId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("name", name);
-		parameter.put("id", networkId);
-		List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listNetworks", parameter);
-		return JsonMessage.getString(200, "", listContainer);
-	}
+    /**
+     * @return json
+     */
+    @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<JSONObject>> list(@ValidatorItem String id, String name, String networkId) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("name", name);
+        parameter.put("id", networkId);
+        List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listNetworks", parameter);
+        return JsonMessage.success("", listContainer);
+    }
 }

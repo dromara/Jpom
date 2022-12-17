@@ -128,15 +128,15 @@ public class SshController extends BaseServerController {
      */
     @PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
-                       @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "host不能为空") String host,
-                       @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "user不能为空") String user,
-                       String password,
-                       SshModel.ConnectType connectType,
-                       String privateKey,
-                       @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
-                       String charset, String fileDirs,
-                       String id, String notAllowedCommand) {
+    public JsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
+                                    @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "host不能为空") String host,
+                                    @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "user不能为空") String user,
+                                    String password,
+                                    SshModel.ConnectType connectType,
+                                    String privateKey,
+                                    @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
+                                    String charset, String fileDirs,
+                                    String id, String notAllowedCommand) {
         SshModel sshModel;
         boolean add = StrUtil.isEmpty(getParameter("id"));
         if (add) {
@@ -194,7 +194,7 @@ public class SshController extends BaseServerController {
             Charset.forName(charset);
             sshModel.setCharset(charset);
         } catch (Exception e) {
-            return JsonMessage.getString(405, "请填写正确的编码格式");
+            return new JsonMessage<>(405, "请填写正确的编码格式");
         }
         // 判断重复
         HttpServletRequest request = getRequest();
@@ -220,14 +220,14 @@ public class SshController extends BaseServerController {
             JschUtil.close(session);
         } catch (Exception e) {
             log.warn("ssh连接失败", e);
-            return JsonMessage.getString(505, "ssh连接失败：" + e.getMessage());
+            return new JsonMessage<>(505, "ssh连接失败：" + e.getMessage());
         }
         if (add) {
             sshService.insert(sshModel);
         } else {
             sshService.update(sshModel);
         }
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
 
@@ -239,7 +239,7 @@ public class SshController extends BaseServerController {
      */
     @GetMapping(value = "check_agent.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String checkAgent(String ids) {
+    public JsonMessage<JSONObject> checkAgent(String ids) {
         List<SshModel> sshModels = sshService.listById(StrUtil.split(ids, StrUtil.COMMA), getRequest());
         Assert.notEmpty(sshModels, "没有任何节点信息");
 
@@ -267,12 +267,12 @@ public class SshController extends BaseServerController {
             }
             result.put(sshModel.getId(), data);
         }
-        return JsonMessage.getString(200, "", result);
+        return JsonMessage.success("", result);
     }
 
     @PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
+    public JsonMessage<Object> del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
         HttpServletRequest request = getRequest();
         boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, request, BuildReleaseMethod.Ssh);
         Assert.state(!checkSsh, "当前ssh存在构建项，不能删除");
@@ -283,7 +283,7 @@ public class SshController extends BaseServerController {
         sshService.delByKey(id, request);
         //
         int logCount = sshTerminalExecuteLogService.delByWorkspace(request, entity -> entity.set("sshId", id));
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     /**
@@ -293,26 +293,26 @@ public class SshController extends BaseServerController {
      */
     @PostMapping(value = "log_list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.SSH_TERMINAL_LOG, method = MethodFeature.LIST)
-    public String logListData() {
+    public JsonMessage<PageResultDto<SshTerminalExecuteLog>> logListData() {
         PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(getRequest());
-        return JsonMessage.getString(200, "获取成功", pageResult);
+        return JsonMessage.success("获取成功", pageResult);
     }
 
     /**
      * 同步到指定工作空间
      *
-     * @param ids         节点ID
+     * @param ids           节点ID
      * @param toWorkspaceId 分配到到工作空间ID
      * @return msg
      */
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public String syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
+    public JsonMessage<Object> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
         //
         sshService.checkUserWorkspace(toWorkspaceId);
         sshService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 }

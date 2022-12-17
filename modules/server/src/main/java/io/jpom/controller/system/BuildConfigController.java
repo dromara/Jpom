@@ -60,7 +60,7 @@ public class BuildConfigController extends BaseServerController {
 
     @GetMapping("runs")
     @Feature(method = MethodFeature.LIST)
-    public String getRuns() throws Exception {
+    public JsonMessage<List<JSONObject>> getRuns() throws Exception {
         // runs/%s/Dockerfile
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         Map<String, URI> runs = (Map<String, URI>) plugin.execute("listRuns");
@@ -81,25 +81,25 @@ public class BuildConfigController extends BaseServerController {
                         .set("content", content);
                 }
             ).collect(Collectors.toList());
-        return JsonMessage.getString(200, "ok", collect);
+        return JsonMessage.success("ok", collect);
     }
 
     @PostMapping("runs")
     @Feature(method = MethodFeature.EDIT)
-    public String updateRuns(@ValidatorItem String name, @ValidatorItem String content) throws Exception {
+    public JsonMessage<Object> updateRuns(@ValidatorItem String name, @ValidatorItem String content) throws Exception {
         Validator.validateMatchRegex(StringUtil.GENERAL_STR, name, "镜像名称不合法");
         //
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         plugin.execute("updateRuns", "name", name, "content", content);
-        return JsonMessage.getString(200, "更新成功");
+        return JsonMessage.success("更新成功");
     }
 
     @DeleteMapping("runs/{name}")
     @Feature(method = MethodFeature.DEL)
-    public String deleteRuns(@PathVariable String name) throws Exception {
+    public JsonMessage<Object> deleteRuns(@PathVariable String name) throws Exception {
         Validator.validateMatchRegex(StringUtil.GENERAL_STR, name, "镜像名称不合法");
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         plugin.execute("deleteRuns", "name", name);
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 }

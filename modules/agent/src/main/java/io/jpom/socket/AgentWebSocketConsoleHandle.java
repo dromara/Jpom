@@ -156,7 +156,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
     private void runMsg(ConsoleCommandOp consoleCommandOp, Session session, NodeProjectInfoModel nodeProjectInfoModel, String copyId, JSONObject reqJson) throws Exception {
         //
         NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
-        JSONObject resultData = null;
+        JsonMessage<Object> resultData = null;
         CommandOpResult strResult;
         boolean logUser = false;
         try {
@@ -167,9 +167,9 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     logUser = true;
                     strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
                     if (strResult.isSuccess()) {
-                        resultData = JsonMessage.toJson(200, "操作成功", strResult);
+                        resultData = new JsonMessage<>(200, "操作成功", strResult);
                     } else {
-                        resultData = JsonMessage.toJson(400, strResult.msgStr());
+                        resultData = new JsonMessage<>(400, strResult.msgStr());
                     }
                     break;
                 case stop: {
@@ -177,9 +177,9 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     // 停止项目
                     strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
                     if (strResult.isSuccess()) {
-                        resultData = JsonMessage.toJson(200, "操作成功", strResult);
+                        resultData = new JsonMessage<>(200, "操作成功", strResult);
                     } else {
-                        resultData = JsonMessage.toJson(400, strResult.msgStr());
+                        resultData = new JsonMessage<>(400, strResult.msgStr());
                     }
                     break;
                 }
@@ -188,9 +188,9 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     strResult = consoleService.execCommand(consoleCommandOp, nodeProjectInfoModel, copyItem);
                     int parsePid = ProjectCommanderUtil.parsePid(strResult.msgStr());
                     if (parsePid > 0) {
-                        resultData = JsonMessage.toJson(200, "运行中", strResult);
+                        resultData = new JsonMessage<>(200, "运行中", strResult);
                     } else {
-                        resultData = JsonMessage.toJson(404, "未运行", strResult);
+                        resultData = new JsonMessage<>(404, "未运行", strResult);
                     }
                     break;
                 }
@@ -205,7 +205,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     break;
                 }
                 default:
-                    resultData = JsonMessage.toJson(404, "不支持的方式：" + consoleCommandOp.name());
+                    resultData = new JsonMessage<>(404, "不支持的方式：" + consoleCommandOp.name());
                     break;
             }
         } catch (Exception e) {
@@ -224,7 +224,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         }
         // 返回数据
         if (resultData != null) {
-            reqJson.putAll(resultData);
+            reqJson.putAll(resultData.toJson());
             reqJson.put("JPOM_MSG", "JPOM_MSG");
             log.info(reqJson.toString());
             SocketSessionUtil.send(session, reqJson.toString());
@@ -251,12 +251,12 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
      * @param reqJson              请求参数
      * @return 返回信息
      */
-    private JSONObject searchLog(Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) {
+    private JsonMessage<Object> searchLog(Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) {
         //
         String fileName = reqJson.getString("logFile");
         File file = FileUtil.file(nodeProjectInfoModel.allLib(), fileName);
         if (!FileUtil.isFile(file)) {
-            return JsonMessage.toJson(404, "文件不存在");
+            return new JsonMessage<>(404, "文件不存在");
         }
         ThreadUtil.execute(() -> {
             try {

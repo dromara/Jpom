@@ -126,13 +126,13 @@ public class SshFileController extends BaseServerController {
      */
     @RequestMapping(value = "root_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String rootFileList(String id) {
+    public JsonMessage<JSONArray> rootFileList(String id) {
         SshModel sshModel = sshService.getByKey(id, false);
         Assert.notNull(sshModel, "不存在对应ssh");
         List<String> fileDirs = sshModel.fileDirs();
         Assert.notEmpty(fileDirs, "未设置授权目录");
         JSONArray jsonArray = this.listDir(sshModel, fileDirs);
-        return JsonMessage.getString(200, "ok", jsonArray);
+        return JsonMessage.success("ok", jsonArray);
     }
 
     private SshModel check(String id, String path, String children) {
@@ -152,28 +152,28 @@ public class SshFileController extends BaseServerController {
 
     @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String listData(String id, String path, String children) throws SftpException {
+    public JsonMessage<JSONArray> listData(String id, String path, String children) throws SftpException {
         SshModel sshModel = this.check(id, path, children);
         //
         JSONArray jsonArray = listDir(sshModel, path, children);
-        return JsonMessage.getString(200, "ok", jsonArray);
+        return JsonMessage.success("ok", jsonArray);
     }
 
     @RequestMapping(value = "read_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String readFileData(String id, String path, String children) {
+    public JsonMessage<String> readFileData(String id, String path, String children) {
         SshModel sshModel = this.check(id, path, children);
         //
         List<String> allowEditSuffix = sshModel.allowEditSuffix();
         Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, children);
         //
         String content = this.readFile(sshModel, path, children, charset);
-        return JsonMessage.getString(200, "ok", content);
+        return JsonMessage.success("ok", content);
     }
 
     @RequestMapping(value = "update_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String updateFileData(String id, String path, String children, String content) {
+    public JsonMessage<String> updateFileData(String id, String path, String children, String content) {
         SshModel sshModel = this.check(id, path, children);
         //
         List<String> allowEditSuffix = sshModel.allowEditSuffix();
@@ -185,7 +185,7 @@ public class SshFileController extends BaseServerController {
         this.syncFile(sshModel, path, children, file);
         //
         FileUtil.del(file);
-        return JsonMessage.getString(200, "修改成功");
+        return JsonMessage.success("修改成功");
     }
 
     /**
@@ -356,7 +356,7 @@ public class SshFileController extends BaseServerController {
 
     @RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String delete(String id, String path, String name) {
+    public JsonMessage<String> delete(String id, String path, String name) {
         Assert.hasText(name, "name error");
         SshModel sshModel = this.check(id, path, name);
         name = FileUtil.normalize(name);
@@ -374,12 +374,12 @@ public class SshFileController extends BaseServerController {
             boolean dirOrFile = this.tryDelDirOrFile(sftp, normalize);
             if (dirOrFile) {
                 String parent = FileUtil.getParent(name, 1);
-                return JsonMessage.getString(200, "删除成功", parent);
+                return JsonMessage.success("删除成功", parent);
             }
-            return JsonMessage.getString(200, "删除成功");
+            return JsonMessage.success("删除成功");
         } catch (Exception e) {
             log.error("ssh删除文件异常", e);
-            return JsonMessage.getString(400, "删除失败:" + e.getMessage());
+            return new JsonMessage<>(400, "删除失败:" + e.getMessage());
         } finally {
             IoUtil.close(sftp);
             JschUtil.close(session);
@@ -388,7 +388,7 @@ public class SshFileController extends BaseServerController {
 
     @RequestMapping(value = "rename.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String rename(String id, String path, String name, String newname) {
+    public JsonMessage<String> rename(String id, String path, String name, String newname) {
         Assert.hasText(name, "name error");
         Assert.hasText(newname, "newname error");
         SshModel sshModel = this.check(id, path, name);
@@ -403,12 +403,12 @@ public class SshFileController extends BaseServerController {
             channel.rename(FileUtil.normalize(path + StrUtil.SLASH + name), FileUtil.normalize(path + StrUtil.SLASH + newname));
         } catch (Exception e) {
             log.error("ssh重命名失败异常", e);
-            return JsonMessage.getString(400, "重命名失败:" + e.getMessage());
+            return new JsonMessage<>(400, "重命名失败:" + e.getMessage());
         } finally {
             JschUtil.close(channel);
             JschUtil.close(session);
         }
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     /**
@@ -464,7 +464,7 @@ public class SshFileController extends BaseServerController {
 
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public String upload(String id, String path, String name, String unzip) {
+    public JsonMessage<String> upload(String id, String path, String name, String unzip) {
         SshModel sshModel = sshService.getByKey(id, false);
         Assert.notNull(sshModel, "ssh error");
         List<String> fileDirs = sshModel.fileDirs();
@@ -510,13 +510,13 @@ public class SshFileController extends BaseServerController {
 
         } catch (Exception e) {
             log.error("ssh上传文件异常", e);
-            return JsonMessage.getString(400, "上传失败:" + e.getMessage());
+            return new JsonMessage<>(400, "上传失败:" + e.getMessage());
         } finally {
             JschUtil.close(channel);
             JschUtil.close(session);
             FileUtil.del(localPath);
         }
-        return JsonMessage.getString(200, "上传成功");
+        return JsonMessage.success("上传成功");
     }
 
     /**
@@ -531,7 +531,7 @@ public class SshFileController extends BaseServerController {
      * @apiSuccess {JSON}  data
      */
     @RequestMapping(value = "new_file_folder.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String newFileFolder(String id, @ValidatorItem String path, @ValidatorItem String name, String unFolder) throws IOException {
+    public JsonMessage<String> newFileFolder(String id, @ValidatorItem String path, @ValidatorItem String name, String unFolder) throws IOException {
         SshModel sshModel = sshService.getByKey(id, false);
         Assert.notNull(sshModel, "ssh error");
         Session session = SshService.getSessionByModel(sshModel);
@@ -542,7 +542,7 @@ public class SshFileController extends BaseServerController {
         String remotePath = FileUtil.normalize(path + StrUtil.SLASH + name);
         try (Sftp sftp = new Sftp(session, sshModel.charset(), sshModel.timeout())) {
             if (sftp.exist(remotePath)) {
-                return JsonMessage.getString(400, "文件夹或者文件已存在");
+                return new JsonMessage<>(400, "文件夹或者文件已存在");
             }
             StringBuilder command = new StringBuilder();
             if (Convert.toBool(unFolder, false)) {
@@ -554,15 +554,15 @@ public class SshFileController extends BaseServerController {
                 try {
                     if (sftp.mkdir(remotePath)) {
                         // 创建成功
-                        return JsonMessage.getString(200, "操作成功");
+                        return JsonMessage.success("操作成功");
                     }
                 } catch (Exception e) {
                     log.error("ssh创建文件夹异常", e);
-                    return JsonMessage.getString(500, "创建文件夹失败（文件夹名可能已经存在啦）:" + e.getMessage());
+                    return new JsonMessage<>(500, "创建文件夹失败（文件夹名可能已经存在啦）:" + e.getMessage());
                 }
             }
             String result = sshService.exec(sshModel, String.valueOf(command));
-            return JsonMessage.getString(200, "操作成功 " + result);
+            return JsonMessage.success("操作成功 " + result);
         }
     }
 

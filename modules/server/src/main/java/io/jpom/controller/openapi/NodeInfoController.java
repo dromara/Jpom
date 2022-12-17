@@ -80,13 +80,13 @@ public class NodeInfoController extends BaseServerController {
      */
     @RequestMapping(value = ServerOpenApi.RECEIVE_PUSH, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public String receivePush(@ValidatorItem(msg = "token empty") String token,
-                              @ValidatorItem(msg = "ips empty") String ips,
-                              @ValidatorItem(msg = "loginName empty") String loginName,
-                              @ValidatorItem(msg = "loginPwd empty") String loginPwd,
-                              @ValidatorItem(msg = "workspaceId empty") String workspaceId,
-                              @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "port error") int port,
-                              String ping) {
+    public JsonMessage<JSONObject> receivePush(@ValidatorItem(msg = "token empty") String token,
+                                               @ValidatorItem(msg = "ips empty") String ips,
+                                               @ValidatorItem(msg = "loginName empty") String loginName,
+                                               @ValidatorItem(msg = "loginPwd empty") String loginPwd,
+                                               @ValidatorItem(msg = "workspaceId empty") String workspaceId,
+                                               @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "port error") int port,
+                                               String ping) {
         Assert.state(StrUtil.equals(token, JpomManifest.getInstance().randomIdSign()), "token error");
         boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
         Assert.state(exists, "workspaceId error");
@@ -140,7 +140,7 @@ public class NodeInfoController extends BaseServerController {
             }
         }
         CACHE_RECEIVE_PUSH.put(sha1Id, jsonObject);
-        return JsonMessage.getString(200, "done", jsonObject);
+        return JsonMessage.success("done", jsonObject);
     }
 
     /**
