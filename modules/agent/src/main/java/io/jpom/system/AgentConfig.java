@@ -27,10 +27,8 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.BaseAgentController;
-import io.jpom.util.BaseFileTailWatcher;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
@@ -49,7 +47,7 @@ import java.util.Optional;
 @Configuration
 @ConfigurationProperties("jpom")
 @Data
-public class AgentConfig extends BaseExtConfig implements InitializingBean {
+public class AgentConfig extends BaseExtConfig {
 
     /**
      * 白名单配置
@@ -75,10 +73,6 @@ public class AgentConfig extends BaseExtConfig implements InitializingBean {
         });
     }
 
-    /**
-     * 初始读取日志文件行号
-     */
-    private int initReadLine = 10;
 
     /**
      * 系统配置参数
@@ -117,11 +111,6 @@ public class AgentConfig extends BaseExtConfig implements InitializingBean {
         file = FileUtil.file(file, userName);
         FileUtil.mkdir(file);
         return file;
-    }
-
-    @Override
-    public void afterPropertiesSet() {
-        BaseFileTailWatcher.setInitReadLine(this.getInitReadLine());
     }
 
     @Data

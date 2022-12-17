@@ -35,7 +35,7 @@ import java.io.File;
  * @author bwcx_jzy
  * @since 2022/12/7
  */
-public class LogbackConfig extends PropertyDefinerBase {
+public abstract class LogbackConfig extends PropertyDefinerBase {
 
     public static String getPath() {
         String jpomLog = SystemUtil.get("JPOM_LOG");

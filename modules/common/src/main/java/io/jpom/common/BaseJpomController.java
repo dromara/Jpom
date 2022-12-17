@@ -27,7 +27,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.HtmlUtil;
 import cn.hutool.http.HttpUtil;
 import io.jpom.common.multipart.MultipartFileBuilder;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;

@@ -30,7 +30,6 @@ import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
-import io.jpom.system.ServerConfigBean;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -85,11 +84,6 @@ public abstract class BaseServerController extends BaseJpomController {
         return ObjectUtil.defaultIfNull(cron, StrUtil.EMPTY);
     }
 
-//    @Override
-//    public void resetInfo() {
-//        //USER_MODEL_THREAD_LOCAL.set(getUserModel());
-//    }
-
     /**
      * 为线程设置 用户
      *
@@ -106,7 +100,7 @@ public abstract class BaseServerController extends BaseJpomController {
 
     protected UserModel getUser() {
         UserModel userByThreadLocal = getUserByThreadLocal();
-        Assert.notNull(userByThreadLocal, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE + StrUtil.EMPTY);
+        Assert.notNull(userByThreadLocal, ServerConst.AUTHORIZE_TIME_OUT_CODE + StrUtil.EMPTY);
         return userByThreadLocal;
     }
 

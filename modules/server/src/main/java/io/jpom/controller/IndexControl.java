@@ -49,7 +49,7 @@ import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ExtConfigBean;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -78,13 +78,16 @@ public class IndexControl extends BaseServerController {
     private final UserService userService;
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final SystemParametersServer systemParametersServer;
+    private final ServerConfig.WebConfig webConfig;
 
     public IndexControl(UserService userService,
                         UserBindWorkspaceService userBindWorkspaceService,
-                        SystemParametersServer systemParametersServer) {
+                        SystemParametersServer systemParametersServer,
+                        ServerConfig serverConfig) {
         this.userService = userService;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.systemParametersServer = systemParametersServer;
+        this.webConfig = serverConfig.getWeb();
     }
 
 
@@ -95,7 +98,7 @@ public class IndexControl extends BaseServerController {
      * @apiGroup index
      * @apiSuccess {String} BODY HTML
      */
-    @GetMapping(value = {"index", "", "/"}, produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping(value = {"index", "", "/", "index.html"}, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
     public void index(HttpServletResponse response) {
         InputStream inputStream = ResourceUtil.getStream("classpath:/dist/index.html");
@@ -118,12 +121,12 @@ public class IndexControl extends BaseServerController {
         //
         html = StrUtil.replace(html, "<link rel=\"icon\" href=\"favicon.ico\">", "<link rel=\"icon\" href=\"" + proxyPath + "favicon.ico\">");
         // <apiTimeOut>
-        int webApiTimeout = ServerExtConfigBean.getInstance().getWebApiTimeout();
+        int webApiTimeout = webConfig.getApiTimeout();
         html = StrUtil.replace(html, "<apiTimeout>", TimeUnit.SECONDS.toMillis(webApiTimeout) + "");
         // 修改网页标题
         String title = ReUtil.get("<title>.*?</title>", html, 0);
         if (StrUtil.isNotEmpty(title)) {
-            html = StrUtil.replace(html, title, "<title>" + ServerExtConfigBean.getInstance().getName() + "</title>");
+            html = StrUtil.replace(html, title, "<title>" + webConfig.getName() + "</title>");
         }
         ServletUtil.write(response, html, ContentType.TEXT_HTML.getValue());
     }
@@ -138,8 +141,7 @@ public class IndexControl extends BaseServerController {
     @RequestMapping(value = "logo_image", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
     @NotLogin
     public void logoImage(HttpServletResponse response) throws IOException {
-        ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
-        String logoFile = instance.getLogoFile();
+        String logoFile = webConfig.getLogoFile();
         this.loadImage(response, logoFile, "classpath:/logo/jpom.png", "jpg", "png", "gif");
 //        if (StrUtil.isNotEmpty(logoFile)) {
 //            if (Validator.isMatchRegex(RegexPool.URL_HTTP, logoFile)) {
@@ -171,8 +173,7 @@ public class IndexControl extends BaseServerController {
     @RequestMapping(value = "favicon.ico", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
     @NotLogin
     public void favicon(HttpServletResponse response) throws IOException {
-        ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
-        String iconFile = instance.getIconFile();
+        String iconFile = webConfig.getIconFile();
         this.loadImage(response, iconFile, "classpath:/logo/favicon.ico", "ico", "png");
 //        if (StrUtil.isNotEmpty(iconFile)) {
 //            if (Validator.isMatchRegex(RegexPool.URL_HTTP, iconFile)) {
@@ -239,13 +240,12 @@ public class IndexControl extends BaseServerController {
         JSONObject data = new JSONObject();
         data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH));
         //
-        ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
-        data.put("name", instance.getName());
-        data.put("subTitle", instance.getSubTitle());
-        data.put("loginTitle", instance.getLoginTitle());
-        data.put("disabledGuide", instance.getDisabledGuide());
-        data.put("disabledCaptcha", instance.getDisabledCaptcha());
-        data.put("notificationPlacement", instance.getNotificationPlacement());
+        data.put("name", webConfig.getName());
+        data.put("subTitle", webConfig.getSubTitle());
+        data.put("loginTitle", webConfig.getLoginTitle());
+        data.put("disabledGuide", webConfig.isDisabledGuide());
+        data.put("disabledCaptcha", webConfig.isDisabledCaptcha());
+        data.put("notificationPlacement", webConfig.getNotificationPlacement());
         // 用于判断是否属于容器部署
         data.put("inDocker", StrUtil.isNotEmpty(SystemUtil.get("JPOM_PKG")));
         if (userService.canUse()) {

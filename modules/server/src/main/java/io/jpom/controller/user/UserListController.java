@@ -40,7 +40,6 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
-import io.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -155,8 +154,6 @@ public class UserListController extends BaseServerController {
         UserModel userModel = new UserModel();
         UserModel optUser = getUser();
         if (create) {
-            long size = userService.count();
-            Assert.state(size <= ServerExtConfigBean.getInstance().userMaxCount, "当前用户个数超过系统上限");
             // 登录名重复
             boolean exists = userService.exists(new UserModel(id));
             Assert.state(!exists, "登录名已经存在");

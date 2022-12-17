@@ -44,7 +44,7 @@ import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.docker.DockerSwarmInfoService;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.util.CompressionFileUtil;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -73,11 +73,14 @@ public class DockerInfoController extends BaseServerController {
 
     private final DockerInfoService dockerInfoService;
     private final DockerSwarmInfoService dockerSwarmInfoService;
+    private final ServerConfig serverConfig;
 
     public DockerInfoController(DockerInfoService dockerInfoService,
-                                DockerSwarmInfoService dockerSwarmInfoService) {
+                                DockerSwarmInfoService dockerSwarmInfoService,
+                                ServerConfig serverConfig) {
         this.dockerInfoService = dockerInfoService;
         this.dockerSwarmInfoService = dockerSwarmInfoService;
+        this.serverConfig = serverConfig;
     }
 
     /**
@@ -204,7 +207,7 @@ public class DockerInfoController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public String edit(String id, String host) throws Exception {
         // 保存路径
-        File tempPath = ServerConfigBean.getInstance().getUserTempPath();
+        File tempPath = serverConfig.getUserTempPath();
         File savePath = FileUtil.file(tempPath, "docker", SecureUtil.sha1(host));
         DockerInfoModel dockerInfoModel = this.takeOverModel(savePath);
         boolean certExist = dockerInfoModel.getCertExist();

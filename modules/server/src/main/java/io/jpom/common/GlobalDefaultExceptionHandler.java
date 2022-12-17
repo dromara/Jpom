@@ -29,7 +29,6 @@ import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.JpomRuntimeException;
-import io.jpom.system.ServerConfigBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -114,8 +113,8 @@ public class GlobalDefaultExceptionHandler {
         // 默认不输出 参数异常相关信息
         log.debug("controller " + request.getRequestURI(), e);
         String message = e.getMessage();
-        if (ObjectUtil.equals(message, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE)) {
-            ServletUtil.write(response, JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, ServerConfigBean.LOGIN_TIP), MediaType.APPLICATION_JSON_VALUE);
+        if (ObjectUtil.equals(message, ServerConst.AUTHORIZE_TIME_OUT_CODE)) {
+            ServletUtil.write(response, JsonMessage.getString(ServerConst.AUTHORIZE_TIME_OUT_CODE, ServerConst.LOGIN_TIP), MediaType.APPLICATION_JSON_VALUE);
         } else {
             ServletUtil.write(response, JsonMessage.getString(405, message), MediaType.APPLICATION_JSON_VALUE);
         }

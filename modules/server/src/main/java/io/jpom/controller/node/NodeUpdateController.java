@@ -42,7 +42,7 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.SystemParametersServer;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -71,9 +71,12 @@ import java.util.stream.Collectors;
 public class NodeUpdateController extends BaseServerController {
 
     private final SystemParametersServer systemParametersServer;
+    private final ServerConfig serverConfig;
 
-    public NodeUpdateController(SystemParametersServer systemParametersServer) {
+    public NodeUpdateController(SystemParametersServer systemParametersServer,
+                                ServerConfig serverConfig) {
         this.systemParametersServer = systemParametersServer;
+        this.serverConfig = serverConfig;
     }
 
     /**
@@ -85,7 +88,7 @@ public class NodeUpdateController extends BaseServerController {
     @GetMapping(value = "download_remote.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
     public String downloadRemote() throws IOException {
-        String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();
+        String saveDir = serverConfig.getAgentPath().getAbsolutePath();
         Tuple download = RemoteVersion.download(saveDir, Type.Agent, false);
         // 保存文件
         this.saveAgentFile(download);
@@ -128,7 +131,7 @@ public class NodeUpdateController extends BaseServerController {
     @SystemPermission
     @Feature(method = MethodFeature.UPLOAD)
     public String uploadAgent() throws IOException {
-        String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();
+        String saveDir = serverConfig.getAgentPath().getAbsolutePath();
         MultipartFileBuilder multipartFileBuilder = createMultipart();
         multipartFileBuilder
             .setFileExt("jar", "zip")
@@ -161,7 +164,7 @@ public class NodeUpdateController extends BaseServerController {
         agentFileModel.setTimeStamp(data.get(1));
         systemParametersServer.upsert(AgentFileModel.ID, agentFileModel, AgentFileModel.ID);
         // 删除历史包  @author jzy 2021-08-03
-        String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();
+        String saveDir = serverConfig.getAgentPath().getAbsolutePath();
         List<File> files = FileUtil.loopFiles(saveDir, pathname -> !FileUtil.equals(pathname, file));
         for (File file1 : files) {
             FileUtil.del(file1);

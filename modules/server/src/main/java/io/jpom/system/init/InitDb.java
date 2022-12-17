@@ -36,19 +36,18 @@ import cn.hutool.db.ds.GlobalDSFactory;
 import cn.hutool.db.sql.SqlLog;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.setting.Setting;
-import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.h2db.BaseNodeService;
-import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import io.jpom.system.extconf.DbExtConfig;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
@@ -79,11 +78,18 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
     private final List<Runnable> BEFORE_CALLBACK = new LinkedList<>();
     private final List<Supplier<Boolean>> AFTER_CALLBACK = new LinkedList<>();
 
+    /**
+     * author Hotstrip
+     * 是否开启 web 访问数据库
+     *
+     * @see <a href=http://${ip}:${port}/h2-console>http://${ip}:${port}/h2-console</a>
+     */
+    @Value("${spring.h2.console.enabled:false}")
+    private boolean h2ConsoleEnabled;
+
     public InitDb(DbConfig dbConfig,
-                  ServerExtConfigBean serverExtConfigBean,
                   DbExtConfig dbExtConfig) {
         this.dbConfig = dbConfig;
-        this.serverExtConfigBean = serverExtConfigBean;
         this.dbExtConfig = dbExtConfig;
     }
 
@@ -101,12 +107,11 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
     }
 
     private final DbConfig dbConfig;
-    private final ServerExtConfigBean serverExtConfigBean;
     private final DbExtConfig dbExtConfig;
 
     private void init() {
         //
-        dbSecurityCheck(serverExtConfigBean, dbExtConfig);
+        dbSecurityCheck(dbExtConfig);
         //
         BEFORE_CALLBACK.forEach(Runnable::run);
         //
@@ -209,11 +214,10 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
     /**
      * 数据库是否开启 web 配置检查
      *
-     * @param serverExtConfigBean 服务端配置
-     * @param dbExtConfig         外部配置
+     * @param dbExtConfig 外部配置
      */
-    private void dbSecurityCheck(ServerExtConfigBean serverExtConfigBean, DbExtConfig dbExtConfig) {
-        if (!JpomManifest.getInstance().isDebug() && serverExtConfigBean.isH2ConsoleEnabled()
+    private void dbSecurityCheck(DbExtConfig dbExtConfig) {
+        if (!JpomManifest.getInstance().isDebug() && h2ConsoleEnabled
             && StrUtil.equals(dbExtConfig.getUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
             && StrUtil.equals(dbExtConfig.getUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
             log.error("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");

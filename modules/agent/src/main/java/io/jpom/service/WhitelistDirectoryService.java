@@ -23,8 +23,8 @@
 package io.jpom.service;
 
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.model.data.AgentWhitelist;
 import io.jpom.common.AgentConst;
+import io.jpom.model.data.AgentWhitelist;
 import io.jpom.util.JsonFileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

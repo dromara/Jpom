@@ -43,7 +43,7 @@ import io.jpom.service.node.NodeService;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.ServerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -190,7 +190,9 @@ public class NodeForward {
             }
             httpRequest.form(jsonData);
             if (hasFile) {
-                httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+                ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+                ServerConfig.NodeConfig configNode = serverConfig.getNode();
+                httpRequest.timeout(configNode.getUploadFileTimeoutMilliseconds());
             }
         }
 
@@ -301,7 +303,9 @@ public class NodeForward {
             }
         });
         // @author jzy add  timeout
-        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+        ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+        ServerConfig.NodeConfig configNode = serverConfig.getNode();
+        httpRequest.timeout(configNode.getUploadFileTimeoutMilliseconds());
         try (HttpResponse response = httpRequest.execute()) {
             return parseBody(httpRequest, response, nodeModel);
         } catch (Exception e) {
@@ -326,7 +330,9 @@ public class NodeForward {
         //
         httpRequest.form(fileName, file);
         // @author jzy add  timeout
-        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+        ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+        ServerConfig.NodeConfig configNode = serverConfig.getNode();
+        httpRequest.timeout(configNode.getUploadFileTimeoutMilliseconds());
         try (HttpResponse response = httpRequest.execute()) {
             return parseBody(httpRequest, response, nodeModel);
         } catch (Exception e) {
@@ -352,7 +358,9 @@ public class NodeForward {
         Map params = ServletUtil.getParams(request);
         httpRequest.form(params);
         // @author jzy add  timeout
-        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+        ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+        ServerConfig.NodeConfig configNode = serverConfig.getNode();
+        httpRequest.timeout(configNode.getUploadFileTimeoutMilliseconds());
         //
         try (HttpResponse response1 = httpRequest.execute()) {
             String contentDisposition = response1.header("Content-Disposition");

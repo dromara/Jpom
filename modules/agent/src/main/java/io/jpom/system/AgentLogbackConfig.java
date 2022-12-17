@@ -20,41 +20,11 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.system.extconf;
-
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+package io.jpom.system;
 
 /**
  * @author bwcx_jzy
- * @since 2022/7/7
+ * @since 2022/12/17
  */
-@Configuration
-@ConfigurationProperties(prefix = "jpom.build")
-@Data
-public class BuildExtConfig {
-
-    /**
-     * 构建最多保存多少份历史记录
-     */
-    private int maxHistoryCount = 1000;
-
-    /**
-     * 每一项构建最多保存的历史份数
-     */
-    private int itemMaxHistoryCount = 50;
-
-    private boolean checkDeleteCommand = true;
-
-    /**
-     * 构建线程池大小,小于 1 则为不限制，默认大小为 5
-     */
-    private int poolSize = 5;
-
-    /**
-     * 构建任务等待数量，超过此数量将取消构建任务，值最小为 1
-     */
-    private int poolWaitQueue = 10;
-
+public class AgentLogbackConfig extends LogbackConfig {
 }

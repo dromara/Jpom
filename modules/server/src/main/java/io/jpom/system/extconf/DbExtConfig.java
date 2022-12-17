@@ -36,7 +36,7 @@ import org.springframework.util.unit.DataSize;
  * @since 2022/2/9
  */
 @Configuration
-@ConfigurationProperties(prefix = "db")
+@ConfigurationProperties(prefix = "jpom.db")
 @Data
 public class DbExtConfig {
 
@@ -73,15 +73,15 @@ public class DbExtConfig {
     /**
      * 自动备份保留天数 小于等于 0，不自动删除自动备份数据
      */
-    private Integer autoBackupReserveDay = 5;
+    private int autoBackupReserveDay = 5;
 
-    private Integer maxActive = 100;
+    private int maxActive = 100;
 
-    private Integer initialSize = 10;
+    private int initialSize = 10;
 
-    private Integer maxWait = 10;
+    private int maxWait = 10;
 
-    private Integer minIdle = 1;
+    private int minIdle = 1;
     /**
      * @see cn.hutool.db.sql.SqlLog#KEY_SHOW_SQL
      */

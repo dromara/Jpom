@@ -39,7 +39,7 @@ import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.docker.DockerSwarmInfoService;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import lombok.extern.slf4j.Slf4j;
@@ -62,9 +62,12 @@ import java.util.function.Consumer;
 public class DockerSwarmServiceController extends BaseServerController {
 
     private final DockerInfoService dockerInfoService;
+    private final ServerConfig serverConfig;
 
-    public DockerSwarmServiceController(DockerInfoService dockerInfoService) {
+    public DockerSwarmServiceController(DockerInfoService dockerInfoService,
+                                        ServerConfig serverConfig) {
         this.dockerInfoService = dockerInfoService;
+        this.serverConfig = serverConfig;
     }
 
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -133,7 +136,7 @@ public class DockerSwarmServiceController extends BaseServerController {
         parameter.put(StrUtil.equalsIgnoreCase(type, "service") ? "serviceId" : "taskId", dataId);
         //
         String uuid = IdUtil.fastSimpleUUID();
-        File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), "docker-swarm-log", uuid + ".log");
+        File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-swarm-log", uuid + ".log");
         try (LogRecorder logRecorder = LogRecorder.builder().file(file).build()) {
             logRecorder.info("start pull {}", dataId);
             Consumer<String> logConsumer = logRecorder::append;
@@ -163,7 +166,7 @@ public class DockerSwarmServiceController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-        File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), "docker-swarm-log", id + ".log");
+        File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-swarm-log", id + ".log");
         if (!file.exists()) {
             return JsonMessage.getString(201, "还没有日志文件");
         }

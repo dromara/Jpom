@@ -30,12 +30,12 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.ServerConst;
 import io.jpom.common.Type;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.system.AgentAutoUser;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.ServerConfigBean;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.JvmUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +65,7 @@ public class AutoImportLocalNode implements InitializingBean {
 
 
     private void install() {
-        File file = FileUtil.file(configBean.getDataPath(), ServerConfigBean.INSTALL);
+        File file = FileUtil.file(configBean.getDataPath(), ServerConst.INSTALL);
         if (file.exists()) {
             return;
         }
