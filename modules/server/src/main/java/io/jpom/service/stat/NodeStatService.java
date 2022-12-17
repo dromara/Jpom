@@ -43,7 +43,7 @@ import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.ServerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -64,16 +64,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class NodeStatService extends BaseWorkspaceService<NodeStatModel> implements IAsyncLoad, Runnable {
 
-    private final ServerExtConfigBean serverExtConfigBean;
     private final DbSystemMonitorLogService dbSystemMonitorLogService;
     private final NodeService nodeService;
+    private final ServerConfig.NodeConfig nodeConfig;
 
-    public NodeStatService(ServerExtConfigBean serverExtConfigBean,
-                           DbSystemMonitorLogService dbSystemMonitorLogService,
-                           NodeService nodeService) {
-        this.serverExtConfigBean = serverExtConfigBean;
+    public NodeStatService(DbSystemMonitorLogService dbSystemMonitorLogService,
+                           NodeService nodeService,
+                           ServerConfig serverConfig) {
         this.dbSystemMonitorLogService = dbSystemMonitorLogService;
         this.nodeService = nodeService;
+        this.nodeConfig = serverConfig.getNode();
     }
 
     /**
@@ -93,7 +93,7 @@ public class NodeStatService extends BaseWorkspaceService<NodeStatModel> impleme
     @Override
     public void startLoad() {
         // 启动心跳检测
-        int heartSecond = serverExtConfigBean.getNodeHeartSecond();
+        int heartSecond = nodeConfig.getHeartSecond();
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "Jpom Node Monitor"));
         scheduler.scheduleAtFixedRate(this, 10, heartSecond, TimeUnit.SECONDS);
         //  清理 错误的节点统计数据

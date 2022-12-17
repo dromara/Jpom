@@ -36,7 +36,6 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.ExtConfigBean;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;

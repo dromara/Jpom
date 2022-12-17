@@ -25,8 +25,11 @@
 10. 【all】取消插件端配置化向服务端注册功能（采用快速导入方式替代）
 11. 【server】取消服务端授权 token 配置
 12. 【all】下架 节点脚本导入功能
+13. 【server】取消限制创建用户最大数配置：`user.maxCount`
 
 ### ❌ 不兼容的属性配置变更
+
+> 属性配置支持驼峰和下划线
 
 1. 【agent】`whitelistDirectory.checkStartsWith` -> `jpom.whitelist-directory.check-starts-with`
 2. 【agent】`project.stopWaitTime` -> `jpom.project.statusWaitTime`
@@ -36,7 +39,18 @@
 6. 【agent】`log.intiReadLine` -> `jpom.init-read-line`
 7. 【agent】 `log.autoBackConsoleCron` 不支持配置 none (none 使用 `jpom.project.log.autoBackupToFile` 代替)
 8. 【all】删除 `consoleLog.reqXss` 、`consoleLog.reqResponse`
-9. 【all】`consoleLog.charset` ->
+9. 【all】`consoleLog.charset` -> `jpom.system.console-charset`
+10. 【server】`node.uploadFileTimeOut` -> `jpom.node.uploadFileTimeout`
+11. 【server】`system.nodeHeartSecond` -> `jpom.node.heartSecond`
+12. 【server】`user.*` -> `jpom.user.*`
+13. 【server】`jpom.authorize.expired` -> `jpom.user.tokenExpired`
+14. 【server】`jpom.authorize.renewal` -> `jpom.user.tokenRenewal`
+15. 【server】`jpom.authorize.key` -> `jpom.user.tokenJwtKey`
+16. 【server】`jpom.webApiTimeout` -> `jpom.web.api-timeout`
+17. 【server】删除 `ssh.initEnv`
+18. 【server】批量修正前端相关配置属性均修改到 `jpom.web.*`
+19. 【server】`db.*` -> `jpom.db.*`
+20. 【server】`build.*` -> `jpom.build.*`
 
 ### TODO
 

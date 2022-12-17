@@ -31,6 +31,7 @@ import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
+import io.jpom.common.ServerConst;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.multipart.MultipartFileBuilder;
@@ -50,7 +51,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -83,13 +84,16 @@ public class OutGivingProjectController extends BaseServerController {
     private final OutGivingServer outGivingServer;
     private final ProjectInfoCacheService projectInfoCacheService;
     private final OutGivingWhitelistService outGivingWhitelistService;
+    private final ServerConfig serverConfig;
 
     public OutGivingProjectController(OutGivingServer outGivingServer,
                                       ProjectInfoCacheService projectInfoCacheService,
-                                      OutGivingWhitelistService outGivingWhitelistService) {
+                                      OutGivingWhitelistService outGivingWhitelistService,
+                                      ServerConfig serverConfig) {
         this.outGivingServer = outGivingServer;
         this.projectInfoCacheService = projectInfoCacheService;
         this.outGivingWhitelistService = outGivingWhitelistService;
+        this.serverConfig = serverConfig;
     }
 
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -183,7 +187,7 @@ public class OutGivingProjectController extends BaseServerController {
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         //
         boolean unzip = Convert.toBool(autoUnzip, false);
-        File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.OUTGIVING_FILE, id);
+        File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConst.OUTGIVING_FILE, id);
         MultipartFileBuilder multipartFileBuilder = createMultipart();
         multipartFileBuilder
             .setUseOriginalFilename(true)
@@ -240,7 +244,7 @@ public class OutGivingProjectController extends BaseServerController {
             outGivingModel.setAfterOpt(afterOpt1.getCode());
             outGivingServer.update(outGivingModel);
             //下载
-            File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), ServerConfigBean.OUTGIVING_FILE, id);
+            File file = FileUtil.file(serverConfig.getUserTempPath(), ServerConst.OUTGIVING_FILE, id);
             FileUtil.mkdir(file);
             File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
             boolean unzip = BooleanUtil.toBoolean(autoUnzip);

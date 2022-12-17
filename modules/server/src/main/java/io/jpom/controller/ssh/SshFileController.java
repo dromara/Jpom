@@ -48,7 +48,7 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.node.ssh.SshService;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.CompressionFileUtil;
 import io.jpom.util.StringUtil;
@@ -81,9 +81,12 @@ import java.util.Vector;
 public class SshFileController extends BaseServerController {
 
     private final SshService sshService;
+    private final ServerConfig serverConfig;
 
-    public SshFileController(SshService sshService) {
+    public SshFileController(SshService sshService,
+                             ServerConfig serverConfig) {
         this.sshService = sshService;
+        this.serverConfig = serverConfig;
     }
 
     @RequestMapping(value = "download.html", method = RequestMethod.GET)
@@ -176,7 +179,7 @@ public class SshFileController extends BaseServerController {
         List<String> allowEditSuffix = sshModel.allowEditSuffix();
         Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, children);
         // 缓存到本地
-        File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), sshModel.getId(), children);
+        File file = FileUtil.file(serverConfig.getUserTempPath(), sshModel.getId(), children);
         FileUtil.writeString(content, file, charset);
         // 上传
         this.syncFile(sshModel, path, children, file);
@@ -475,7 +478,7 @@ public class SshFileController extends BaseServerController {
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
             MultipartFileBuilder multipart = createMultipart();
             // 保存路径
-            File tempPath = ServerConfigBean.getInstance().getUserTempPath();
+            File tempPath = serverConfig.getUserTempPath();
             File savePath = FileUtil.file(tempPath, "ssh", sshModel.getId());
             multipart.setSavePath(FileUtil.getAbsolutePath(savePath));
             multipart.addFieldName("file")

@@ -50,7 +50,7 @@ import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.env.YamlPropertySourceLoader;
@@ -85,19 +85,22 @@ public class SshInstallAgentController extends BaseServerController {
 
     private final SshService sshService;
     private final NodeService nodeService;
+    private final ServerConfig serverConfig;
 
     public SshInstallAgentController(SshService sshService,
-                                     NodeService nodeService) {
+                                     NodeService nodeService,
+                                     ServerConfig serverConfig) {
         this.sshService = sshService;
         this.nodeService = nodeService;
+        this.serverConfig = serverConfig;
     }
 
 
     private JSONObject getAgentFile() throws IOException {
-        ServerConfigBean instance = ServerConfigBean.getInstance();
-        File agentZipPath = instance.getAgentZipPath();
+
+        File agentZipPath = serverConfig.getAgentZipPath();
         Assert.state(FileUtil.exist(agentZipPath), "插件包文件不存在,需要重新上传");
-        String tempFilePath = instance.getUserTempPath().getAbsolutePath();
+        String tempFilePath = serverConfig.getUserTempPath().getAbsolutePath();
         //
         File tempAgent = FileUtil.file(tempFilePath, "temp_agent");
         FileUtil.del(tempAgent);
@@ -130,8 +133,8 @@ public class SshInstallAgentController extends BaseServerController {
     @Feature(method = MethodFeature.EXECUTE)
     @SystemPermission
     public String uploadAgent() throws Exception {
-        ServerConfigBean instance = ServerConfigBean.getInstance();
-        String tempFilePath = instance.getUserTempPath().getAbsolutePath();
+
+        String tempFilePath = serverConfig.getUserTempPath().getAbsolutePath();
         MultipartFileBuilder multipartFileBuilder = createMultipart()
             .setFileExt("zip")
             .addFieldName("file")
@@ -149,7 +152,7 @@ public class SshInstallAgentController extends BaseServerController {
         try {
             this.unZipGetTag(filePath, outFle);
             // 保存插件包
-            File agentZipPath = instance.getAgentZipPath();
+            File agentZipPath = serverConfig.getAgentZipPath();
             FileUtil.copy(FileUtil.file(filePath), agentZipPath, true);
             return JsonMessage.getString(200, "上传成功");
         } finally {
@@ -193,8 +196,8 @@ public class SshInstallAgentController extends BaseServerController {
         // 判断输入的节点信息
         NodeModel nodeModel = this.getNodeModel(nodeData, sshModel);
         //
-        ServerConfigBean instance = ServerConfigBean.getInstance();
-        String tempFilePath = instance.getUserTempPath().getAbsolutePath();
+
+        String tempFilePath = serverConfig.getUserTempPath().getAbsolutePath();
         JSONObject agentFile = this.getAgentFile();
         String filePath = agentFile.getString("path");
         //
@@ -273,7 +276,7 @@ public class SshInstallAgentController extends BaseServerController {
     private String getAuthorize(SshModel sshModel, NodeModel nodeModel, String path) {
         File saveFile = null;
         try {
-            String tempFilePath = ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath();
+            String tempFilePath = serverConfig.getUserTempPath().getAbsolutePath();
             //  获取远程的授权信息
             String normalize = FileUtil.normalize(StrUtil.format("{}/{}/{}", path, ConfigBean.DATA, ConfigBean.AUTHORIZE));
             saveFile = FileUtil.file(tempFilePath, IdUtil.fastSimpleUUID() + ConfigBean.AUTHORIZE);

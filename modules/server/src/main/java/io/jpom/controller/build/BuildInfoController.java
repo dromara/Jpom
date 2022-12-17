@@ -199,7 +199,7 @@ public class BuildInfoController extends BaseServerController {
             // 验证 dsl 内容
             this.checkDocker(script);
         }
-        if (buildExtConfig.checkDeleteCommand()) {
+        if (buildExtConfig.isCheckDeleteCommand()) {
             // 判断删除命令
             Assert.state(!CommandUtil.checkContainsDel(script), "不能包含删除命令");
         }

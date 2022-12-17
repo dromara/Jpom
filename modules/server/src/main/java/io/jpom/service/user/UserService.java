@@ -28,10 +28,10 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
+import io.jpom.common.ServerConst;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.h2db.BaseDbService;
-import io.jpom.system.ServerConfigBean;
 import io.jpom.util.JwtUtil;
 import io.jpom.util.TwoFactorAuthUtils;
 import org.springframework.stereotype.Service;
@@ -106,7 +106,7 @@ public class UserService extends BaseDbService<UserModel> {
     public UserLoginDto getUserJwtId(UserModel userModel) {
         // 判断是否禁用
         Integer status = userModel.getStatus();
-        Assert.state(status == null || status == 1, ServerConfigBean.ACCOUNT_LOCKED_TIP);
+        Assert.state(status == null || status == 1, ServerConst.ACCOUNT_LOCKED_TIP);
         String id = userModel.getId();
         String sql = "select password from " + this.tableName + " where id=?";
         List<Entity> query = super.query(sql, id);
