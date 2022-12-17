@@ -205,7 +205,12 @@ const router = new Router({
       name: "home",
       component: () => import("../pages/layout"),
       redirect: "/node/list",
-      children: children,
+      children: children.map((item) => {
+        const props = item.props || {};
+        props.routerUrl = item.path;
+        item.props = props;
+        return item;
+      }),
     },
     {
       path: "/install",

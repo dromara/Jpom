@@ -10,6 +10,8 @@
 2. 【all】节点管理中 `其他功能` 菜单更名为 `脚本管理`
 3. 【all】优化版本升级修改管理脚本里变量,采用文件记录方式
 4. 【server】优化容器启动脚本，支持监听进程已经终端重启操作
+5. 【server】修复 自动刷新页面已经关闭的标签页，后台仍然在发送请求
+   （感谢[@苏生不语](https://gitee.com/sushengbuyu) [Gitee issues I664OP](https://gitee.com/dromara/Jpom/issues/I664OP) ）
 
 ### ❌ 不兼容功能
 

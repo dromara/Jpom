@@ -245,6 +245,7 @@ export default {
       deadline: 0,
       temp: {},
       groupList: [],
+      refreshInterval: 5,
     };
   },
   computed: {},
@@ -283,7 +284,8 @@ export default {
             nodeCount2 += element;
           });
           this.nodeCount = nodeCount2;
-          this.deadline = Date.now() + res.data.heartSecond * 1000;
+          this.refreshInterval = res.data.heartSecond;
+          this.deadline = Date.now() + this.refreshInterval * 1000;
           //
           // this.openStatusMap = res.data.openStatus;
         }
@@ -291,6 +293,11 @@ export default {
     },
 
     onFinish() {
+      if (this.$attrs.routerUrl !== this.$route.path) {
+        // 重新计算倒计时
+        this.deadline = Date.now() + this.refreshInterval * 1000;
+        return;
+      }
       this.loadData();
     },
 
