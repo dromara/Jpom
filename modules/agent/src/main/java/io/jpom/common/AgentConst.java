@@ -20,45 +20,50 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.system.init;
-
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
-import io.jpom.common.JpomManifest;
-import io.jpom.system.AgentAuthorize;
-import io.jpom.system.ConfigBean;
-import io.jpom.system.ExtConfigBean;
-import io.jpom.util.JvmUtil;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.annotation.Configuration;
-
-import java.io.File;
+package io.jpom.common;
 
 /**
- * 检查授权信息
+ * 插件端配置
  *
  * @author jiangzeyin
- * @since 2019/4/17
+ * @since 2019/4/16
  */
-//@PreLoadClass(value = Integer.MIN_VALUE)
-@Configuration
-public class CheckAuthorize implements InitializingBean {
+public class AgentConst {
+    /**
+     * 白名单文件
+     */
+    public static final String WHITELIST_DIRECTORY = "whitelistDirectory.json";
+    /**
+     * 项目数据文件
+     */
+    public static final String PROJECT = "project.json";
 
-    //    @PreLoadMethod
-    private void checkAgentAuthorize() {
-        AgentAuthorize.getInstance();
-    }
+    /**
+     * 项目回收文件
+     */
+    public static final String PROJECT_RECOVER = "project_recover.json";
+    /**
+     * 证书文件
+     */
+    public static final String CERT = "cert.json";
+    /**
+     * 脚本管理数据文件
+     */
+    public static final String SCRIPT = "script.json";
+    /**
+     * 脚本管理执行记录数据文件
+     */
+    public static final String SCRIPT_LOG = "script_log.json";
 
-    //    @PreLoadMethod
-    private void checkJps() {
-        //boolean exist = JvmUtil.exist(JpomManifest.getInstance().getPid());
-        //JvmUtil.setJpsNormal(exist);
-        JvmUtil.checkJpsNormal();
-    }
+    /**
+     * nginx配置信息
+     */
+    public static final String NGINX_CONF = "nginx_conf.json";
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.checkJps();
-        this.checkAgentAuthorize();
-    }
+    /**
+     * 环境变量列表信息
+     */
+    public static final String WORKSPACE_ENV_VAR = "workspace_env_var.json";
+
+
 }

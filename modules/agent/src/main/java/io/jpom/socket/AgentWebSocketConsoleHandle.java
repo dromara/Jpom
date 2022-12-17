@@ -26,8 +26,8 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.JsonMessage;
@@ -35,7 +35,7 @@ import io.jpom.common.commander.CommandOpResult;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ConsoleService;
 import io.jpom.service.manage.ProjectInfoService;
-import io.jpom.util.BaseFileTailWatcher;
+import io.jpom.system.AgentConfig;
 import io.jpom.util.FileSearchUtil;
 import io.jpom.util.ProjectCommanderUtil;
 import io.jpom.util.SocketSessionUtil;
@@ -59,7 +59,17 @@ import java.nio.charset.Charset;
 @Slf4j
 public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
-    private static ProjectInfoService projectInfoService;
+    private final ProjectInfoService projectInfoService;
+    private final ConsoleService consoleService;
+    private final AgentConfig.ProjectConfig.LogConfig logConfig;
+
+    public AgentWebSocketConsoleHandle(ProjectInfoService projectInfoService,
+                                       ConsoleService consoleService,
+                                       AgentConfig agentConfig) {
+        this.projectInfoService = projectInfoService;
+        this.consoleService = consoleService;
+        this.logConfig = agentConfig.getProject().getLog();
+    }
 
     @OnOpen
     public void onOpen(Session session) {
@@ -72,9 +82,6 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             copyId = StrUtil.nullToDefault(copyId, StrUtil.EMPTY);
             // 判断项目
             if (!JpomApplication.SYSTEM_ID.equals(projectId)) {
-                if (projectInfoService == null) {
-                    projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-                }
                 NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, copyId, session);
                 if (nodeProjectInfoModel == null) {
                     return;
@@ -148,7 +155,6 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
     }
 
     private void runMsg(ConsoleCommandOp consoleCommandOp, Session session, NodeProjectInfoModel nodeProjectInfoModel, String copyId, JSONObject reqJson) throws Exception {
-        ConsoleService consoleService = SpringUtil.getBean(ConsoleService.class);
         //
         NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
         JSONObject resultData = null;
@@ -261,7 +267,8 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 int beforeCount = reqJson.getIntValue("beforeCount");
                 int afterCount = reqJson.getIntValue("afterCount");
                 String keyword = reqJson.getString("keyword");
-                Charset charset = BaseFileTailWatcher.detectorCharset(file);
+                Charset charset = logConfig.getFileCharset();
+                //BaseFileTailWatcher.detectorCharset(file);
                 String resultMsg = FileSearchUtil.searchList(file, charset, keyword, beforeCount, afterCount, head, tail, first, objects -> {
                     try {
                         String line = objects.get(1);
@@ -292,7 +299,8 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             file = FileUtil.file(nodeProjectInfoModel.allLib(), fileName);
         }
         try {
-            boolean watcher = AgentFileTailWatcher.addWatcher(file, session);
+            Charset charset = logConfig.getFileCharset();
+            boolean watcher = AgentFileTailWatcher.addWatcher(file, charset, session);
             if (!watcher) {
                 SocketSessionUtil.send(session, "监听文件失败,可能文件不存在");
             }

@@ -111,7 +111,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             //
             process = processBuilder.start();
             inputStream = process.getInputStream();
-            IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) DslScriptBuilder.this::handle);
+            IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) DslScriptBuilder.this::handle);
             //
             int waitFor = process.waitFor();
             //
@@ -146,7 +146,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             process = processBuilder.start();
             inputStream = process.getInputStream();
 
-            IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) line -> result.add(this.formatLine(line)));
+            IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> result.add(this.formatLine(line)));
             //
             int waitFor = process.waitFor();
             if (waitFor != 0) {
@@ -243,7 +243,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             String envValue = envEntry.getValue();
             context = StrUtil.replace(context, "#{" + envEntry.getKey() + "}", envValue);
         }
-        FileUtil.writeString(context, scriptFile, ExtConfigBean.getInstance().getConsoleLogCharset());
+        FileUtil.writeString(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
         return scriptFile;
     }
 

@@ -101,7 +101,7 @@ public class IndexControl extends BaseServerController {
         InputStream inputStream = ResourceUtil.getStream("classpath:/dist/index.html");
         String html = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         //<div id="jpomCommonJs"></div>
-        String path = ExtConfigBean.getInstance().getPath();
+        String path = ExtConfigBean.getPath();
         File file = FileUtil.file(String.format("%s/script/common.js", path));
         if (file.exists()) {
             String jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);

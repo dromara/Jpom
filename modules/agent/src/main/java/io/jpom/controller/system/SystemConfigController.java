@@ -34,6 +34,7 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.system.ExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.env.YamlPropertySourceLoader;
@@ -71,10 +72,7 @@ public class SystemConfigController extends BaseAgentController {
     }
 
     @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String saveConfig(String content, String restart) throws IOException {
-        if (StrUtil.isEmpty(content)) {
-            return JsonMessage.getString(405, "内容不能为空");
-        }
+    public String saveConfig(@ValidatorItem(msg = "内容不能为空") String content, String restart) throws IOException {
         try {
             YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
             // @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格
@@ -83,9 +81,6 @@ public class SystemConfigController extends BaseAgentController {
         } catch (Exception e) {
             log.warn("内容格式错误，请检查修正", e);
             return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
-        }
-        if (JpomManifest.getInstance().isDebug()) {
-            return JsonMessage.getString(405, "调试模式下不支持在线修改,请到resources目录下的bin目录修改extConfig.yml");
         }
         Resource resource = ExtConfigBean.getResource();
         Assert.state(resource.isFile(), "当前环境下不支持在线修改配置文件");

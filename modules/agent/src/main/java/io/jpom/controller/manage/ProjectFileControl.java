@@ -49,7 +49,7 @@ import io.jpom.script.ProjectFileBackupUtil;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.service.manage.ConsoleService;
 import io.jpom.socket.ConsoleCommandOp;
-import io.jpom.system.AgentConfigBean;
+import io.jpom.system.AgentConfig;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.CompressionFileUtil;
 import io.jpom.util.FileUtils;
@@ -81,11 +81,14 @@ public class ProjectFileControl extends BaseAgentController {
 
     private final ConsoleService consoleService;
     private final WhitelistDirectoryService whitelistDirectoryService;
+    private final AgentConfig agentConfig;
 
     public ProjectFileControl(ConsoleService consoleService,
-                              WhitelistDirectoryService whitelistDirectoryService) {
+                              WhitelistDirectoryService whitelistDirectoryService,
+                              AgentConfig agentConfig) {
         this.consoleService = consoleService;
         this.whitelistDirectoryService = whitelistDirectoryService;
+        this.agentConfig = agentConfig;
     }
 
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -198,7 +201,7 @@ public class ProjectFileControl extends BaseAgentController {
         // 备份文件
         String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
         try {
-            String tempPathName = AgentConfigBean.getInstance().getTempPathName();
+            String tempPathName = agentConfig.getTempPathName();
             if ("unzip".equals(type)) {
                 multipartFileBuilder.setFileExt(StringUtil.PACKAGE_EXT);
                 multipartFileBuilder.setSavePath(tempPathName);

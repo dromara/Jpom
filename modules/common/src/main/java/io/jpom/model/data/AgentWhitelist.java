@@ -98,7 +98,7 @@ public class AgentWhitelist extends BaseJsonModel {
                 continue;
             }
             // 判断是否保护jpom 路径
-            if (val == null || val.startsWith(ExtConfigBean.getInstance().getPath())) {
+            if (val == null || val.startsWith(ExtConfigBean.getPath())) {
                 throw new IllegalArgumentException(errorMsg);
             }
             array.add(val);

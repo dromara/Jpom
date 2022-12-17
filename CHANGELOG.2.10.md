@@ -24,6 +24,19 @@
 9. 【all】更新管理脚本，进程标识更新（已经存在的需要手动停止）
 10. 【all】取消插件端配置化向服务端注册功能（采用快速导入方式替代）
 11. 【server】取消服务端授权 token 配置
+12. 【all】下架 节点脚本导入功能
+
+### ❌ 不兼容的属性配置变更
+
+1. 【agent】`whitelistDirectory.checkStartsWith` -> `jpom.whitelist-directory.check-starts-with`
+2. 【agent】`project.stopWaitTime` -> `jpom.project.statusWaitTime`
+3. 【agent】`project.*` -> `jpom.project.*`
+4. 【agent】修正拼写错误 `log.*back` -> `jpom.project.log.*backup`
+5. 【agent】`log.*` -> `jpom.project.log.*`
+6. 【agent】`log.intiReadLine` -> `jpom.init-read-line`
+7. 【agent】 `log.autoBackConsoleCron` 不支持配置 none (none 使用 `jpom.project.log.autoBackupToFile` 代替)
+8. 【all】删除 `consoleLog.reqXss` 、`consoleLog.reqResponse`
+9. 【all】`consoleLog.charset` ->
 
 ### TODO
 

@@ -23,17 +23,18 @@
 package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.system.AgentAutoUser;
 import io.jpom.util.JsonFileUtil;
+import io.jpom.util.JvmUtil;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -42,51 +43,34 @@ import org.springframework.context.annotation.Configuration;
  * @author jiangzeyin
  * @since 2019/4/17
  */
-@Configuration
 @Slf4j
-public class AgentAuthorize {
-
-    private static AgentAuthorize agentAuthorize;
+@Data
+@Configuration
+@ConfigurationProperties("jpom.authorize")
+public class AgentAuthorize implements InitializingBean {
     /**
      * 账号
      */
-    @Value("${" + ConfigBean.AUTHORIZE_USER_KEY + "}")
     private String agentName;
     /**
      * 密码
      */
-    @Value("${" + ConfigBean.AUTHORIZE_AUTHORIZE_KEY + ":}")
     private String agentPwd;
     /**
      * 授权加密字符串
      */
     private String authorize;
 
+    private final ConfigBean configBean;
     /**
-     * 单例
-     *
-     * @return this
+     * 注入控制加载顺序，必须先加载数据目录才能初始化
      */
-    public static AgentAuthorize getInstance() {
-        if (agentAuthorize == null) {
-            agentAuthorize = SpringUtil.getBean(AgentAuthorize.class);
-            // 登录名不能为空
-            if (StrUtil.isEmpty(agentAuthorize.agentName)) {
-                throw new JpomRuntimeException("The agent login name cannot be empty");
-            }
-            agentAuthorize.checkPwd();
-            // 生成密码授权字符串
-            agentAuthorize.authorize = SecureUtil.sha1(agentAuthorize.agentName + "@" + agentAuthorize.agentPwd);
-        }
-        return agentAuthorize;
-    }
+    private final AgentConfig agentConfig;
 
-    public String getAgentName() {
-        return agentName;
-    }
-
-    public String getAgentPwd() {
-        return agentPwd;
+    public AgentAuthorize(ConfigBean configBean,
+                          AgentConfig agentConfig) {
+        this.configBean = configBean;
+        this.agentConfig = agentConfig;
     }
 
     /**
@@ -103,11 +87,11 @@ public class AgentAuthorize {
      * 检查是否配置密码
      */
     private void checkPwd() {
-        String path = ConfigBean.getInstance().getAgentAutoAuthorizeFile(ConfigBean.getInstance().getDataPath());
+        String path = configBean.getAgentAutoAuthorizeFile(configBean.getDataPath());
         if (StrUtil.isNotEmpty(agentPwd)) {
             // 有指定密码 清除旧密码信息
             FileUtil.del(path);
-            Console.log("Authorization information has been customized,account：{}", this.agentName);
+            log.info("Authorization information has been customized,account：{}", this.agentName);
             return;
         }
         if (FileUtil.exist(path)) {
@@ -135,6 +119,19 @@ public class AgentAuthorize {
         autoUser.setAgentPwd(this.agentPwd);
         // 写入文件中
         JsonFileUtil.saveJson(path, autoUser.toJson());
-        Console.log("Automatically generate authorized account:{}  password:{}  Authorization information storage location：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
+        log.info("Automatically generate authorized account:{}  password:{}  Authorization information storage location：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        // 登录名不能为空
+        if (StrUtil.isEmpty(this.agentName)) {
+            throw new JpomRuntimeException("The agent login name cannot be empty");
+        }
+        this.checkPwd();
+        // 生成密码授权字符串
+        this.authorize = SecureUtil.sha1(this.agentName + "@" + this.agentPwd);
+        //
+        JvmUtil.checkJpsNormal();
     }
 }

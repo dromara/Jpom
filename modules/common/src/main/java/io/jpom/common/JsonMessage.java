@@ -26,6 +26,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.ToStringSerializer;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -37,10 +39,14 @@ import java.math.BigInteger;
  * @since 2017/2/6.
  * @since 1.0
  */
+@Data
+@NoArgsConstructor
 public class JsonMessage<T> implements Serializable {
     public static final String CODE = "code";
     public static final String MSG = "msg";
     public static final String DATA = "data";
+
+    public static int DEFAULT_SUCCESS_CODE = 200;
 
     static {
         // long 类型自动转String
@@ -55,8 +61,6 @@ public class JsonMessage<T> implements Serializable {
     private String msg;
     private T data;
 
-    public JsonMessage() {
-    }
 
     public JsonMessage(int code, String msg, T data) {
         this.code = code;
@@ -66,10 +70,6 @@ public class JsonMessage<T> implements Serializable {
 
     public JsonMessage(int code, String msg) {
         this(code, msg, null);
-    }
-
-    public T getData() {
-        return data;
     }
 
     /**
@@ -87,26 +87,6 @@ public class JsonMessage<T> implements Serializable {
             return (E) data;
         }
         return JSONObject.parseObject(data.toString(), tClass);
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
     }
 
     /**

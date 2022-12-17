@@ -180,7 +180,7 @@ public enum NodeUrl {
     SCRIPT_LOG("/script/log"),
     SCRIPT_EXEC("/script/exec"),
     SCRIPT_DEL_LOG("/script/del_log"),
-    Script_Upload("/script/upload.json"),
+//    Script_Upload("/script/upload.json"),
     Script_Del("/script/del.json"),
 
 //    Tomcat_List("/tomcat/list"),

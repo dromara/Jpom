@@ -28,7 +28,7 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.data.ProjectRecoverModel;
 import io.jpom.service.BaseWorkspaceOptService;
-import io.jpom.system.AgentConfigBean;
+import io.jpom.common.AgentConst;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -45,7 +45,7 @@ public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoM
 	private ProjectRecoverService projectRecoverService;
 
 	public ProjectInfoService() {
-		super(AgentConfigBean.PROJECT);
+		super(AgentConst.PROJECT);
 	}
 
 //    public HashSet<String> getAllGroup() {

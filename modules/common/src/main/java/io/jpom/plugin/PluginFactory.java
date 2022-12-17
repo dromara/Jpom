@@ -191,8 +191,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
                 }
             }
         } else if (event instanceof ApplicationReadyEvent) {
-            ExtConfigBean extConfigBean = SpringUtil.getBean(ExtConfigBean.class);
-            System.setProperty(IPlugin.DATE_PATH_KEY, extConfigBean.getPath());
+            System.setProperty(IPlugin.DATE_PATH_KEY, ExtConfigBean.getPath());
             System.setProperty(IPlugin.JPOM_VERSION_KEY, JpomManifest.getInstance().getVersion());
         }
 

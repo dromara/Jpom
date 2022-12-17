@@ -185,7 +185,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             process = processBuilder.start();
             {
                 inputStream = process.getInputStream();
-                IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) ScriptProcessBuilder.this::handle);
+                IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) ScriptProcessBuilder.this::handle);
             }
             int waitFor = process.waitFor();
             JsonMessage<String> jsonMessage = new JsonMessage<>(200, "执行完毕:" + waitFor);
