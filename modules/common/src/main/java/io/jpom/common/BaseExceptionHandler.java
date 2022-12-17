@@ -22,11 +22,12 @@
  */
 package io.jpom.common;
 
-import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.exceptions.ValidateException;
 import io.jpom.controller.BaseMyErrorController;
+import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -38,7 +39,8 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.yaml.snakeyaml.constructor.ConstructorException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import java.nio.file.AccessDeniedException;
 
 /**
  * @author bwcx_jzy
@@ -46,6 +48,41 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Slf4j
 public abstract class BaseExceptionHandler {
+
+    /**
+     * 声明要捕获的异常
+     *
+     * @param request 请求
+     * @param e       异常
+     */
+    @ExceptionHandler({JpomRuntimeException.class, RuntimeException.class, Exception.class})
+    @ResponseBody
+    public JsonMessage<String> defExceptionHandler(HttpServletRequest request, Exception e) {
+        if (e instanceof JpomRuntimeException) {
+            log.error("global handle exception: {}", request.getRequestURI(), e.getCause());
+            return new JsonMessage<>(500, e.getMessage());
+        } else {
+            log.error("global handle exception: {}", request.getRequestURI(), e);
+            boolean causedBy = ExceptionUtil.isCausedBy(e, AccessDeniedException.class);
+            if (causedBy) {
+                return new JsonMessage<>(500, "操作文件权限异常,请手动处理：" + e.getMessage());
+            }
+            return new JsonMessage<>(500, "服务异常：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 声明要捕获的异常 (参数或者状态异常)
+     *
+     * @param request 请求
+     * @param e       异常
+     */
+    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ValidateException.class})
+    @ResponseBody
+    public JsonMessage<String> paramExceptionHandler(HttpServletRequest request, Exception e) {
+        log.warn("controller {} {}", request.getRequestURI(), e.getMessage());
+        return new JsonMessage<>(405, e.getMessage());
+    }
 
 
     @ExceptionHandler({HttpMessageNotReadableException.class, HttpMessageConversionException.class})
@@ -62,32 +99,35 @@ public abstract class BaseExceptionHandler {
     }
 
     @ExceptionHandler({NoHandlerFoundException.class})
-    public void handleNoHandlerFoundException(HttpServletResponse response, NoHandlerFoundException e) {
-        ServletUtil.write(response, JsonMessage.getString(HttpStatus.NOT_FOUND.value(), "没有找到对应的资源", e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+    @ResponseBody
+    public JsonMessage<String> handleNoHandlerFoundException(NoHandlerFoundException e) {
+        return new JsonMessage<>(HttpStatus.NOT_FOUND.value(), "没有找到对应的资源", e.getMessage());
     }
 
     /**
      * 上传文件大小超出限制
      *
-     * @param response 响应
-     * @param e        异常
+     * @param e 异常
      */
     @ExceptionHandler({MaxUploadSizeExceededException.class})
-    public void handleMaxUploadSizeExceededException(HttpServletResponse response, MaxUploadSizeExceededException e) {
-        log.warn(e.getMessage());
-        ServletUtil.write(response, JsonMessage.getString(HttpStatus.NOT_ACCEPTABLE.value(), BaseMyErrorController.FILE_MAX_SIZE_MSG, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+    @ResponseBody
+    public JsonMessage<String> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        log.error("上传文件大小超出限制", e);
+        return new JsonMessage<>(HttpStatus.NOT_ACCEPTABLE.value(), BaseMyErrorController.FILE_MAX_SIZE_MSG, e.getMessage());
     }
 
     @ExceptionHandler({ConstructorException.class})
-    public void handleConstructorException(HttpServletResponse response, ConstructorException e) {
-        log.warn(e.getMessage());
-        ServletUtil.write(response, JsonMessage.getString(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（请检查是否有非法字段）：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+    @ResponseBody
+    public JsonMessage<String> handleConstructorException(ConstructorException e) {
+        log.warn("yml 配置内容错误", e);
+        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（请检查是否有非法字段）：" + e.getMessage());
     }
 
     @ExceptionHandler({ScannerException.class})
-    public void handleScannerException(HttpServletResponse response, ScannerException e) {
-        log.warn(e.getMessage());
-        ServletUtil.write(response, JsonMessage.getString(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（不要使用 \\t(TAB) 缩进）：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+    @ResponseBody
+    public JsonMessage<String> handleScannerException(ScannerException e) {
+        log.warn("ScannerException", e);
+        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（不要使用 \\t(TAB) 缩进）：" + e.getMessage());
     }
 
 }

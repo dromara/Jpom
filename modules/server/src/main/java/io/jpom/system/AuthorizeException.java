@@ -31,14 +31,14 @@ import io.jpom.common.JsonMessage;
  * @since 2019/4/17
  */
 public class AuthorizeException extends RuntimeException {
-	private final JsonMessage<?> jsonMessage;
+    private final JsonMessage<String> jsonMessage;
 
-	public AuthorizeException(JsonMessage<?> jsonMessage, String msg) {
-		super(msg);
-		this.jsonMessage = jsonMessage;
-	}
+    public AuthorizeException(JsonMessage<String> jsonMessage) {
+        super(jsonMessage.getMsg());
+        this.jsonMessage = jsonMessage;
+    }
 
-	public JsonMessage<?> getJsonMessage() {
-		return jsonMessage;
-	}
+    public JsonMessage<String> getJsonMessage() {
+        return jsonMessage;
+    }
 }

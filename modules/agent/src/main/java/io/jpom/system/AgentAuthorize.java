@@ -96,21 +96,16 @@ public class AgentAuthorize implements InitializingBean {
         }
         if (FileUtil.exist(path)) {
             // 读取旧密码
-            try {
-                String json = FileUtil.readString(path, CharsetUtil.CHARSET_UTF_8);
-                AgentAutoUser autoUser = JSONObject.parseObject(json, AgentAutoUser.class);
-                if (!StrUtil.equals(autoUser.getAgentName(), this.agentName)) {
-                    throw new JpomRuntimeException("The existing login name is inconsistent with the configured login name");
-                }
-                String oldAgentPwd = autoUser.getAgentPwd();
-                if (StrUtil.isNotEmpty(oldAgentPwd)) {
-                    this.agentPwd = oldAgentPwd;
-                    log.info("Already authorized account:{}  password:{}  Authorization information storage location：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
-                    return;
-                }
-            } catch (JpomRuntimeException e) {
-                throw e;
-            } catch (Exception ignored) {
+            String json = FileUtil.readString(path, CharsetUtil.CHARSET_UTF_8);
+            AgentAutoUser autoUser = JSONObject.parseObject(json, AgentAutoUser.class);
+            if (!StrUtil.equals(autoUser.getAgentName(), this.agentName)) {
+                throw new JpomRuntimeException("The existing login name is inconsistent with the configured login name");
+            }
+            String oldAgentPwd = autoUser.getAgentPwd();
+            if (StrUtil.isNotEmpty(oldAgentPwd)) {
+                this.agentPwd = oldAgentPwd;
+                log.info("Already authorized account:{} password:{} Authorization information storage location：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
+                return;
             }
         }
         this.agentPwd = RandomUtil.randomString(10);

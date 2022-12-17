@@ -476,7 +476,7 @@ public class NodeForward {
         int status = response.getStatus();
         String body = response.body();
         if (log.isDebugEnabled()) {
-            log.debug("{} -> {} {} {} {}", nodeModel.getName(), httpRequest.getUrl(), httpRequest.getMethod(), Optional.ofNullable((Object) httpRequest.form()).orElse("-"), body);
+            log.debug("{}[{}] -> {} {} {} {}", nodeModel.getName(), nodeModel.getWorkspaceId(), httpRequest.getUrl(), httpRequest.getMethod(), Optional.ofNullable((Object) httpRequest.form()).orElse("-"), body);
         }
         if (status != HttpStatus.HTTP_OK) {
             log.warn("{} 响应异常 状态码错误：{} {}", nodeModel.getName(), status, body);
@@ -492,7 +492,7 @@ public class NodeForward {
         JsonMessage<T> jsonMessage = JSON.parseObject(body, new TypeReference<JsonMessage<T>>() {
         });
         if (jsonMessage.getCode() == ConfigBean.AUTHORIZE_ERROR) {
-            throw new AuthorizeException(jsonMessage, jsonMessage.getMsg());
+            throw new AuthorizeException(new JsonMessage<>(jsonMessage.getCode(), jsonMessage.getMsg()));
         }
         return jsonMessage;
     }
