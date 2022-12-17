@@ -109,10 +109,6 @@ spring:
   web:
     resources:
       static-locations: classpath:/dist/
-  application:
-    name: jpom server
-  profiles:
-    active: default
   mvc:
     throw-exception-if-no-handler-found: true
     log-request-details: true
@@ -124,7 +120,7 @@ spring:
   h2:
     console:
       # 是否开启 web 访问数据库（url: http://${ip}:${port}/h2-console）
-      enabled: false
+      enabled: true
       # 是否允许远程访问（开启此配置有安全风险），默认为 false（当部署到服务器上之后，是否可以通过其他浏览器访问数据库）
       settings:
         web-allow-others: false

@@ -176,8 +176,7 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
             //
         } catch (Exception e) {
             log.error("初始化数据库失败 {}", sqlFileNow[0], e);
-            System.exit(0);
-            return;
+            throw Lombok.sneakyThrow(e);
         }
         dbConfig.initOk();
         log.info("h2 db Successfully loaded, url is 【{}】", dbUrl);
