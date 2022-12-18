@@ -33,6 +33,7 @@
         <module>modules/server</module>
         <module>modules/common</module>
         <module>modules/sub-plugin</module>
+        <module>modules/agent-transport</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
