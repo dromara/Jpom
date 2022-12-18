@@ -39,6 +39,7 @@ import io.jpom.util.FileSearchUtil;
 import io.jpom.util.ProjectCommanderUtil;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -58,16 +59,17 @@ import java.nio.charset.Charset;
 @Slf4j
 public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
-    private final ProjectInfoService projectInfoService;
-    private final ConsoleService consoleService;
-    private final AgentConfig.ProjectConfig.LogConfig logConfig;
+    private static ProjectInfoService projectInfoService;
+    private static ConsoleService consoleService;
+    private static AgentConfig.ProjectConfig.LogConfig logConfig;
 
-    public AgentWebSocketConsoleHandle(ProjectInfoService projectInfoService,
-                                       ConsoleService consoleService,
-                                       AgentConfig agentConfig) {
-        this.projectInfoService = projectInfoService;
-        this.consoleService = consoleService;
-        this.logConfig = agentConfig.getProject().getLog();
+    @Autowired
+    public void init(ProjectInfoService projectInfoService,
+                     ConsoleService consoleService,
+                     AgentConfig agentConfig) {
+        AgentWebSocketConsoleHandle.projectInfoService = projectInfoService;
+        AgentWebSocketConsoleHandle.consoleService = consoleService;
+        AgentWebSocketConsoleHandle.logConfig = agentConfig.getProject().getLog();
     }
 
     @OnOpen

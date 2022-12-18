@@ -36,6 +36,7 @@ import io.jpom.model.data.UploadFileModel;
 import io.jpom.system.AgentConfig;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -56,10 +57,11 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 
     private static final Map<String, UploadFileModel> UPLOAD_FILE_INFO = new HashMap<>();
 
-    private final AgentConfig agentConfig;
+    private static AgentConfig agentConfig;
 
-    public AgentWebSocketUpdateHandle(AgentConfig agentConfig) {
-        this.agentConfig = agentConfig;
+    @Autowired
+    public void init(AgentConfig agentConfig) {
+        AgentWebSocketUpdateHandle.agentConfig = agentConfig;
     }
 
     @OnOpen
