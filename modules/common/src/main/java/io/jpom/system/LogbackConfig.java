@@ -36,24 +36,24 @@ import java.io.File;
  * @since 2022/12/7
  */
 public abstract class LogbackConfig extends PropertyDefinerBase {
+    static String JPOM_LOG = "JPOM_LOG";
 
     public static String getPath() {
-        String jpomLog = SystemUtil.get("JPOM_LOG");
+        String jpomLog = SystemUtil.get(JPOM_LOG);
         Assert.hasText(jpomLog, "没有配置 JPOM_LOG");
         return jpomLog;
     }
 
     @Override
     public String getPropertyValue() {
-        String jpomLog = SystemUtil.get("JPOM_LOG");
-        jpomLog = Opt.ofBlankAble(jpomLog).orElseGet(() -> {
-            String locationPath = ClassUtil.getLocationPath(LogbackConfig.class);
+        String jpomLog = SystemUtil.get(JPOM_LOG);
+        return Opt.ofBlankAble(jpomLog).orElseGet(() -> {
+            String locationPath = ClassUtil.getLocationPath(this.getClass());
             File file = FileUtil.file(FileUtil.getParent(locationPath, 2), "logs");
             String path = FileUtil.getAbsolutePath(file);
             System.out.println(path);
+            SystemUtil.set(JPOM_LOG, path);
             return path;
         });
-        SystemUtil.set("JPOM_LOG", jpomLog);
-        return jpomLog;
     }
 }

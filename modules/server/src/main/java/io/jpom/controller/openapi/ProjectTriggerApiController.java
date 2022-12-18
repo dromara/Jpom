@@ -27,13 +27,16 @@ import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseJpomController;
-import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
+import io.jpom.common.forward.NodeForward;
+import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.NotLogin;
-import io.jpom.model.data.CommandModel;
+import io.jpom.model.data.NodeModel;
+import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.model.user.UserModel;
-import io.jpom.service.node.command.CommandService;
+import io.jpom.service.node.NodeService;
+import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.user.TriggerTokenLogServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -47,23 +50,48 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * ssh 脚本触发器
+ * 项目触发器
  *
  * @author bwcx_jzy
- * @since 2022/7/25
+ * @since 2022/12/18
  */
 @RestController
+@RequestMapping
 @NotLogin
 @Slf4j
-public class SshCommandTriggerApiController extends BaseJpomController {
+public class ProjectTriggerApiController extends BaseJpomController {
 
-    private final CommandService commandService;
+    private final ProjectInfoCacheService projectInfoCacheService;
     private final TriggerTokenLogServer triggerTokenLogServer;
+    private final NodeService nodeService;
 
-    public SshCommandTriggerApiController(CommandService commandService,
-                                          TriggerTokenLogServer triggerTokenLogServer) {
-        this.commandService = commandService;
+    public ProjectTriggerApiController(ProjectInfoCacheService projectInfoCacheService,
+                                       TriggerTokenLogServer triggerTokenLogServer,
+                                       NodeService nodeService) {
+        this.projectInfoCacheService = projectInfoCacheService;
         this.triggerTokenLogServer = triggerTokenLogServer;
+        this.nodeService = nodeService;
+    }
+
+    private NodeUrl resolveAction(String action) {
+        if (StrUtil.equalsIgnoreCase(action, "stop")) {
+            return NodeUrl.Manage_Stop;
+        }
+        if (StrUtil.equalsIgnoreCase(action, "start")) {
+            return NodeUrl.Manage_Start;
+        }
+        if (StrUtil.equalsIgnoreCase(action, "restart")) {
+            return NodeUrl.Manage_Restart;
+        }
+        return NodeUrl.Manage_GetProjectStatus;
+    }
+
+    private JsonMessage<Object> execAction(ProjectInfoCacheModel item, String action) {
+        NodeUrl resolveAction = this.resolveAction(action);
+        //
+        NodeModel nodeModel = nodeService.getByKey(item.getNodeId());
+        return NodeForward.requestBySys(nodeModel, resolveAction,
+            "id", item.getProjectId(), "getCopy", "true");
     }
 
     /**
@@ -73,28 +101,22 @@ public class SshCommandTriggerApiController extends BaseJpomController {
      * @param token 构建的token
      * @return json
      */
-    @RequestMapping(value = ServerOpenApi.SSH_COMMAND_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
-        CommandModel item = commandService.getByKey(id);
+    @RequestMapping(value = ServerOpenApi.SERVER_PROJECT_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<Object> trigger(@PathVariable String id, @PathVariable String token, String action) {
+        ProjectInfoCacheModel item = projectInfoCacheService.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
         //
-        Assert.hasText(item.getSshIds(), "当前脚本未绑定 SSH 节点，不能使用触发器执行");
-        UserModel userModel = triggerTokenLogServer.getUserByToken(token, commandService.typeName());
+        UserModel userModel = triggerTokenLogServer.getUserByToken(token, projectInfoCacheService.typeName());
         //
         Assert.notNull(userModel, "触发token错误,或者已经失效:-1");
 
-        String batchId;
         try {
-            BaseServerController.resetInfo(userModel);
-            batchId = commandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
+            return this.execAction(item, action);
         } catch (Exception e) {
-            log.error("触发自动执行SSH命令模版异常", e);
+            log.error("触发自动执行服务器脚本异常", e);
             return new JsonMessage<>(500, "执行异常：" + e.getMessage());
         }
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("batchId", batchId);
-        return JsonMessage.success("开始执行", jsonObject);
     }
 
 
@@ -104,7 +126,8 @@ public class SshCommandTriggerApiController extends BaseJpomController {
      * 参数 <code>[
      * {
      * "id":"1",
-     * "token":"a"
+     * "token":"a",
+     * "action":"status"
      * }
      * ]</code>
      * <p>
@@ -112,51 +135,48 @@ public class SshCommandTriggerApiController extends BaseJpomController {
      * {
      * "id":"1",
      * "token":"a",
-     * "batchId":"1",
+     * "code":"1",
+     * "data":{},
      * "msg":"没有对应数据",
      * }
      * ]</code>
      *
      * @return json
      */
-    @PostMapping(value = ServerOpenApi.SSH_COMMAND_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<Object>> triggerBatch() {
+    @PostMapping(value = ServerOpenApi.SERVER_PROJECT_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<JSONObject>> triggerBatch() {
         try {
             String body = ServletUtil.getBody(getRequest());
             JSONArray jsonArray = JSONArray.parseArray(body);
-            List<Object> collect = jsonArray.stream().peek(o -> {
+            List<JSONObject> collect = jsonArray.stream().map(o -> {
                 JSONObject jsonObject = (JSONObject) o;
                 String id = jsonObject.getString("id");
                 String token = jsonObject.getString("token");
-                CommandModel item = commandService.getByKey(id);
+                String action = jsonObject.getString("action");
+                ProjectInfoCacheModel item = projectInfoCacheService.getByKey(id);
                 if (item == null) {
                     jsonObject.put("msg", "没有对应数据");
-                    return;
+                    return jsonObject;
                 }
-                UserModel userModel = triggerTokenLogServer.getUserByToken(token, commandService.typeName());
+                UserModel userModel = triggerTokenLogServer.getUserByToken(token, projectInfoCacheService.typeName());
                 if (userModel == null) {
                     jsonObject.put("msg", "对应的用户不存在,触发器已失效");
-                    return;
+                    return jsonObject;
                 }
                 //
                 if (!StrUtil.equals(token, item.getTriggerToken())) {
                     jsonObject.put("msg", "触发token错误,或者已经失效");
-                    return;
+                    return jsonObject;
                 }
-                BaseServerController.resetInfo(userModel);
-                String batchId = null;
-                try {
-                    batchId = commandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
-                } catch (Exception e) {
-                    log.error("触发自动执行命令模版异常", e);
-                    jsonObject.put("msg", "执行异常：" + e.getMessage());
-                }
-                jsonObject.put("batchId", batchId);
-                //
+                JsonMessage<Object> message = this.execAction(item, action);
+                jsonObject.put("msg", message.getMsg());
+                jsonObject.put("data", message.getData());
+                jsonObject.put("code", message.getCode());
+                return jsonObject;
             }).collect(Collectors.toList());
             return JsonMessage.success("触发成功", collect);
         } catch (Exception e) {
-            log.error("SSH 脚本批量触发异常", e);
+            log.error("项目批量触发异常", e);
             return new JsonMessage<>(500, "触发异常" + e.getMessage());
         }
     }

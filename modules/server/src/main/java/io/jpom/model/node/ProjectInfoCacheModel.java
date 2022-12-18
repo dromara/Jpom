@@ -82,6 +82,11 @@ public class ProjectInfoCacheModel extends BaseNodeModel {
      */
     private Float sortValue;
 
+    /**
+     * 触发器 token
+     */
+    private String triggerToken;
+
     @Override
     public String dataId() {
         return getProjectId();

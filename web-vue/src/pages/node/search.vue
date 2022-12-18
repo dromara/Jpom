@@ -91,6 +91,9 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
+                <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+              </a-menu-item>
+              <a-menu-item>
                 <a-button size="small" type="primary" :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1" @click="sortItemHander(record, index, 'top')">置顶</a-button>
               </a-menu-item>
               <a-menu-item>
@@ -131,16 +134,85 @@
         </a-list-item>
       </a-list>
     </a-modal>
+    <!-- 触发器 -->
+    <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+      <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+        <a-tabs default-active-key="1">
+          <template slot="tabBarExtraContent">
+            <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
+              <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+            </a-tooltip>
+          </template>
+          <a-tab-pane key="1" tab="执行">
+            <a-space style="display: block" direction="vertical" align="baseline">
+              <a-alert message="温馨提示" type="warning">
+                <template slot="description">
+                  <ul>
+                    <li>单个触发器地址中：第一个随机字符串为项目ID(服务端)，第二个随机字符串为 token</li>
+                    <li>重置为重新生成触发地址,重置成功后之前的触发器地址将失效,触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效</li>
+                    <li>批量触发参数 BODY json： [ { "id":"1", "token":"a","action":"status" } ]</li>
+                  </ul>
+                </template>
+              </a-alert>
+              <template v-for="item in triggerUses">
+                <a-alert
+                  v-clipboard:copy="`${temp.triggerUrl}?action=${item.value}`"
+                  v-clipboard:success="
+                    () => {
+                      tempVue.prototype.$notification.success({ message: '复制成功' });
+                    }
+                  "
+                  v-clipboard:error="
+                    () => {
+                      tempVue.prototype.$notification.error({ message: '复制失败' });
+                    }
+                  "
+                  type="info"
+                  :message="`${item.desc}触发器地址(点击可以复制)`"
+                  :key="item.value"
+                >
+                  <template slot="description">
+                    <a-tag>GET</a-tag> <span>{{ `${temp.triggerUrl}?action=${item.value}` }} </span>
+                    <a-icon type="copy" />
+                  </template>
+                </a-alert>
+              </template>
+              <a-alert
+                v-clipboard:copy="temp.batchTriggerUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`批量触发器地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+            </a-space>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
 import { delAllProjectCache, getNodeListAll, getProjectList, sortItemProject } from "@/api/node";
-import { getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject } from "@/api/node-project";
+import { getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject, getProjectTriggerUrl } from "@/api/node-project";
 import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { itemGroupBy, parseTime } from "@/utils/time";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
+import Vue from "vue";
 
 export default {
   components: {
@@ -194,6 +266,13 @@ export default {
         { title: "运行状态", dataIndex: "status", align: "center", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
         { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "180px" },
+      ],
+      triggerVisible: false,
+      triggerUses: [
+        { desc: "查看状态", value: "status" },
+        { desc: "启动项目", value: "start" },
+        { desc: "停止项目", value: "stop" },
+        { desc: "重启项目", value: "restart" },
       ],
     };
   },
@@ -536,30 +615,40 @@ export default {
       });
       // console.log(record, index, method);
     },
+    // 触发器
+    handleTrigger(record) {
+      this.temp = Object.assign({}, record);
+      this.tempVue = Vue;
+      getProjectTriggerUrl({
+        id: record.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.fillTriggerResult(res);
+          this.triggerVisible = true;
+        }
+      });
+    },
+    // 重置触发器
+    resetTrigger() {
+      getProjectTriggerUrl({
+        id: this.temp.id,
+        rest: "rest",
+      }).then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.fillTriggerResult(res);
+        }
+      });
+    },
+    fillTriggerResult(res) {
+      this.temp.triggerUrl = `${location.protocol}//${location.host}${res.data.triggerUrl}`;
+      this.temp.batchTriggerUrl = `${location.protocol}//${location.host}${res.data.batchTriggerUrl}`;
+
+      this.temp = { ...this.temp };
+    },
   },
 };
 </script>
-<style scoped>
-/* .filter {
-  margin-bottom: 10px;
-}
-
-.btn-add {
-  margin-left: 10px;
-  margin-right: 0;
-}
-
-.replica-area {
-  width: 340px;
-}
-
-.replica-btn-del {
-  position: absolute;
-  right: 120px;
-  top: 74px;
-}
-
-.lib-exist {
-  color: #faad14;
-}*/
-</style>
+<style scoped></style>

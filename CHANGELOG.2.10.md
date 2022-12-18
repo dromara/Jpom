@@ -4,6 +4,7 @@
 
 1. 【all】外置 `logback` 配置文件
 2. 【server】服务端管理相关功能独立页面菜单
+3. 【server】新增项目触发器用于管理项目状态
 
 ### 🐞 解决BUG、优化功能
 
@@ -13,6 +14,7 @@
 4. 【server】优化容器启动脚本，支持监听进程已经终端重启操作
 5. 【server】修复 自动刷新页面已经关闭的标签页，后台仍然在发送请求
    （感谢[@苏生不语](https://gitee.com/sushengbuyu) [Gitee issues I664OP](https://gitee.com/dromara/Jpom/issues/I664OP) ）
+6. 【server】修正触发器说明错别字
 
 ### ❌ 不兼容功能
 

@@ -97,7 +97,7 @@ public class NodeInfoController extends BaseServerController {
         if (!ipsList.contains(clientIp)) {
             ipsList.add(clientIp);
         }
-        List<String> canUseIps = ipsList.stream().filter(s -> this.testIpProt(s, ping)).collect(Collectors.toList());
+        List<String> canUseIps = ipsList.stream().filter(s -> this.testIpPort(s, ping)).collect(Collectors.toList());
         List<NodeModel> canUseNode = canUseIps.stream().map(s -> {
             NodeModel model = NodeInfoController.this.createModel(s, loginName, loginPwd, port, workspaceId);
             try {
@@ -166,7 +166,7 @@ public class NodeInfoController extends BaseServerController {
      * @param ping ping 时间
      * @return true
      */
-    private boolean testIpProt(String ip, String ping) {
+    private boolean testIpPort(String ip, String ping) {
         int pingTime = Convert.toInt(ping, 5);
         if (pingTime <= 0) {
             return true;

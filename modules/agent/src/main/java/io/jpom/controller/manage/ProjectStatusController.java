@@ -181,7 +181,7 @@ public class ProjectStatusController extends BaseAgentController {
     }
 
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> restart(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public JsonMessage<CommandOpResult> restart(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
@@ -189,7 +189,7 @@ public class ProjectStatusController extends BaseAgentController {
             CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, item, copyItem);
             // boolean status = AbstractProjectCommander.getInstance().isRun(item, copyItem);
 
-            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
+            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
 
         } catch (Exception e) {
             log.error("重启项目异常", e);
@@ -199,14 +199,14 @@ public class ProjectStatusController extends BaseAgentController {
 
 
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> stop(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public JsonMessage<CommandOpResult> stop(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
 
         try {
             CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.stop, item, copyItem);
-            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
+            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
         } catch (Exception e) {
             log.error("关闭项目异常", e);
             return new JsonMessage<>(500, "关闭项目异常：" + e.getMessage());
@@ -215,14 +215,14 @@ public class ProjectStatusController extends BaseAgentController {
 
 
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
+    public JsonMessage<CommandOpResult> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String copyId) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, "没有找到对应的项目");
         NodeProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
 
         try {
             CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.start, item, copyItem);
-            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr());
+            return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
         } catch (Exception e) {
             log.error("获取项目pid 失败", e);
             return new JsonMessage<>(500, "启动项目异常：" + e.getMessage());

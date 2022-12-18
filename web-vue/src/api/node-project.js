@@ -522,6 +522,18 @@ export function stopProject(params) {
 }
 
 /**
+ * 获取触发器地址
+ * @param {*} id
+ */
+export function getProjectTriggerUrl(data) {
+  return axios({
+    url: "/node/project-trigger-url",
+    method: "post",
+    data: data,
+  });
+}
+
+/**
  * 新增目录  或文件
  * @param params
  * @returns {id, path, name,unFolder} params x

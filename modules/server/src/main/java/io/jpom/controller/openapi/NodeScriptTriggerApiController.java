@@ -50,6 +50,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * 节点脚本触发器
+ *
  * @author bwcx_jzy
  * @since 2022/7/25
  */
