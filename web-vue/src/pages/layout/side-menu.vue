@@ -1,12 +1,12 @@
 <template>
   <div>
-    <a-menu theme="dark" mode="inline" v-model="mangerMenuOpenkeys" @click="mangerMenuClick" :openKeys="mangerMenuOpenkeys">
+    <a-menu v-if="this.getUserInfo && this.getUserInfo.systemUser" theme="dark" mode="inline" v-model="mangerMenuOpenkeys" @click="mangerMenuClick" :openKeys="mangerMenuOpenkeys">
       <a-menu-item key="admin-manager">
         <template v-if="this.mode === 'normal'">
           <a-icon type="setting" :style="{ fontSize: '18px' }" />
           <span>系统管理</span>
         </template>
-        <template v-else>
+        <template v-if="this.mode === 'management'">
           <a-icon type="desktop" :style="{ fontSize: '18px' }" />
           <span>功能管理</span>
         </template>
@@ -40,7 +40,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getMenus", "getManagementMenus", "getActiveMenuKey", "getManagementActiveMenuKey", "getMenuOpenKeys", "getManagementMenuOpenKeys", "getCollapsed", "getGuideCache"]),
+    ...mapGetters(["getMenus", "getManagementMenus", "getActiveMenuKey", "getManagementActiveMenuKey", "getMenuOpenKeys", "getManagementMenuOpenKeys", "getCollapsed", "getGuideCache", "getUserInfo"]),
     selectedKeys: {
       get() {
         return this.mode == "normal" ? [this.getActiveMenuKey] : [this.getManagementActiveMenuKey];

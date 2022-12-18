@@ -13,6 +13,11 @@
         "id": "outgivingWhitelistDirectory",
         "title": "白名单配置",
         "role": "system"
+      },
+      {
+        "id": "buildConfig",
+        "title": "构建配置",
+        "role": "system"
       }
     ]
   },
@@ -67,11 +72,6 @@
         "id": "update",
         "title": "在线升级",
         "role": "sys"
-      },
-      {
-        "id": "buildConfig",
-        "title": "构建配置",
-        "role": "system"
       },
       {
         "id": "sysConfig",
