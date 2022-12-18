@@ -22,28 +22,29 @@
  */
 package io.jpom.controller.node;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.JsonMessage;
+import io.jpom.common.*;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.node.ProjectInfoCacheModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.node.ProjectInfoCacheService;
+import io.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 节点管理
@@ -57,9 +58,12 @@ import java.util.List;
 public class NodeProjectInfoController extends BaseServerController {
 
     private final ProjectInfoCacheService projectInfoCacheService;
+    private final TriggerTokenLogServer triggerTokenLogServer;
 
-    public NodeProjectInfoController(ProjectInfoCacheService projectInfoCacheService) {
+    public NodeProjectInfoController(ProjectInfoCacheService projectInfoCacheService,
+                                     TriggerTokenLogServer triggerTokenLogServer) {
         this.projectInfoCacheService = projectInfoCacheService;
+        this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
     /**
@@ -153,5 +157,46 @@ public class NodeProjectInfoController extends BaseServerController {
             return new JsonMessage<>(400, "不支持的方式" + method);
         }
         return new JsonMessage<>(200, "操作成功");
+    }
+
+    /**
+     * get a trigger url
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "project-trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
+        ProjectInfoCacheModel item = projectInfoCacheService.getByKey(id, getRequest());
+        UserModel user = getUser();
+        ProjectInfoCacheModel updateItem;
+        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
+            updateItem = new ProjectInfoCacheModel();
+            updateItem.setId(id);
+            updateItem.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), projectInfoCacheService.typeName(),
+                item.getId(), user.getId()));
+            projectInfoCacheService.update(updateItem);
+        } else {
+            updateItem = item;
+        }
+        Map<String, String> map = this.getBuildToken(updateItem);
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+    }
+
+    private Map<String, String> getBuildToken(ProjectInfoCacheModel item) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+        String url = ServerOpenApi.SERVER_PROJECT_TRIGGER_URL.
+            replace("{id}", item.getId()).
+            replace("{token}", item.getTriggerToken());
+        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
+        Map<String, String> map = new HashMap<>(10);
+        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
+        String batchTriggerBuildUrl = String.format("/%s/%s", contextPath, ServerOpenApi.SERVER_PROJECT_TRIGGER_BATCH);
+        map.put("batchTriggerUrl", FileUtil.normalize(batchTriggerBuildUrl));
+
+        map.put("id", item.getId());
+        map.put("token", item.getTriggerToken());
+        return map;
     }
 }

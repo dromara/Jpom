@@ -175,7 +175,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<String> restart() {
+    public JsonMessage<Object> restart() {
         NodeModel nodeModel = getNode();
         return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Restart);
     }
@@ -190,7 +190,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<String> start() {
+    public JsonMessage<Object> start() {
         NodeModel nodeModel = getNode();
         return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Start);
     }
@@ -205,7 +205,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<String> stop() {
+    public JsonMessage<Object> stop() {
         NodeModel nodeModel = getNode();
         return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Stop);
     }

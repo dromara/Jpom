@@ -207,7 +207,6 @@ const app = {
       return state.menus;
     },
     getTabList(state) {
-      console.log(state);
       return state.tabList;
     },
     getActiveTabKey(state) {

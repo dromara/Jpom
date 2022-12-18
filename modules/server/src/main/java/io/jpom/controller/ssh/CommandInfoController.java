@@ -245,9 +245,9 @@ public class CommandInfoController extends BaseServerController {
             replace("{token}", item.getTriggerToken());
         String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
         Map<String, String> map = new HashMap<>(10);
-        map.put("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
+        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
         String batchTriggerBuildUrl = String.format("/%s/%s", contextPath, ServerOpenApi.SSH_COMMAND_TRIGGER_BATCH);
-        map.put("batchTriggerBuildUrl", FileUtil.normalize(batchTriggerBuildUrl));
+        map.put("batchTriggerUrl", FileUtil.normalize(batchTriggerBuildUrl));
 
         map.put("id", item.getId());
         map.put("token", item.getTriggerToken());

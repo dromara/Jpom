@@ -52,6 +52,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * 服务端脚本触发器
+ *
  * @author bwcx_jzy
  * @since 2022/7/25
  */
