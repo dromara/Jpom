@@ -23,7 +23,6 @@
 package io.jpom.socket;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeScriptModel;
@@ -31,6 +30,7 @@ import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.service.script.NodeScriptServer;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -48,99 +48,101 @@ import java.io.IOException;
 @Slf4j
 public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
 
-	private NodeScriptServer nodeScriptServer;
+    private static NodeScriptServer nodeScriptServer;
 
-	@OnOpen
-	public void onOpen(Session session) {
-		if (nodeScriptServer == null) {
-			nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
-		}
-		try {
-			if (super.checkAuthorize(session)) {
-				return;
-			}
-			String id = this.getParameters(session, "id");
-			if (StrUtil.isEmpty(id)) {
-				SocketSessionUtil.send(session, "脚本模板未知");
-				return;
-			}
-			NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(id);
-			if (nodeScriptModel == null) {
-				SocketSessionUtil.send(session, "没有找到对应的脚本模板");
-				return;
-			}
-			SocketSessionUtil.send(session, "连接成功：" + nodeScriptModel.getName());
-		} catch (Exception e) {
-			log.error("socket 错误", e);
-			try {
-				SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
-				session.close();
-			} catch (IOException e1) {
-				log.error(e1.getMessage(), e1);
-			}
-		}
-	}
+    @Autowired
+    public void init(NodeScriptServer nodeScriptServer) {
+        AgentWebSocketScriptHandle.nodeScriptServer = nodeScriptServer;
+    }
 
-	@OnMessage
-	public void onMessage(String message, Session session) throws Exception {
-		JSONObject json = JSONObject.parseObject(message);
-		String scriptId = json.getString("scriptId");
-		NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(scriptId);
-		if (nodeScriptModel == null) {
-			SocketSessionUtil.send(session, "没有对应脚本模板:" + scriptId);
-			session.close();
-			return;
-		}
-		String op = json.getString("op");
-		ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
-		switch (consoleCommandOp) {
-			case start: {
-				String args = json.getString("args");
-				String executeId = json.getString("executeId");
-				if (StrUtil.isEmpty(executeId)) {
-					SocketSessionUtil.send(session, "没有执行ID");
-					session.close();
-					return;
-				}
-				ScriptProcessBuilder.addWatcher(nodeScriptModel, executeId, args, session);
-				break;
-			}
-			case stop: {
-				String executeId = json.getString("executeId");
-				if (StrUtil.isEmpty(executeId)) {
-					SocketSessionUtil.send(session, "没有执行ID");
-					session.close();
-					return;
-				}
-				ScriptProcessBuilder.stopRun( executeId);
-				break;
-			}
-			case heart:
-			default:
-				return;
-		}
-		// 记录操作人
-		nodeScriptModel = nodeScriptServer.getItem(scriptId);
-		String name = getOptUserName(session);
-		nodeScriptModel.setLastRunUser(name);
-		nodeScriptServer.updateItem(nodeScriptModel);
-		json.put("code", 200);
-		json.put("msg", "执行成功");
-		log.info(json.toString());
-		SocketSessionUtil.send(session, json.toString());
-	}
+    @OnOpen
+    public void onOpen(Session session) {
+        try {
+            if (super.checkAuthorize(session)) {
+                return;
+            }
+            String id = this.getParameters(session, "id");
+            if (StrUtil.isEmpty(id)) {
+                SocketSessionUtil.send(session, "脚本模板未知");
+                return;
+            }
+            NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(id);
+            if (nodeScriptModel == null) {
+                SocketSessionUtil.send(session, "没有找到对应的脚本模板");
+                return;
+            }
+            SocketSessionUtil.send(session, "连接成功：" + nodeScriptModel.getName());
+        } catch (Exception e) {
+            log.error("socket 错误", e);
+            try {
+                SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
+                session.close();
+            } catch (IOException e1) {
+                log.error(e1.getMessage(), e1);
+            }
+        }
+    }
+
+    @OnMessage
+    public void onMessage(String message, Session session) throws Exception {
+        JSONObject json = JSONObject.parseObject(message);
+        String scriptId = json.getString("scriptId");
+        NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(scriptId);
+        if (nodeScriptModel == null) {
+            SocketSessionUtil.send(session, "没有对应脚本模板:" + scriptId);
+            session.close();
+            return;
+        }
+        String op = json.getString("op");
+        ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
+        switch (consoleCommandOp) {
+            case start: {
+                String args = json.getString("args");
+                String executeId = json.getString("executeId");
+                if (StrUtil.isEmpty(executeId)) {
+                    SocketSessionUtil.send(session, "没有执行ID");
+                    session.close();
+                    return;
+                }
+                ScriptProcessBuilder.addWatcher(nodeScriptModel, executeId, args, session);
+                break;
+            }
+            case stop: {
+                String executeId = json.getString("executeId");
+                if (StrUtil.isEmpty(executeId)) {
+                    SocketSessionUtil.send(session, "没有执行ID");
+                    session.close();
+                    return;
+                }
+                ScriptProcessBuilder.stopRun(executeId);
+                break;
+            }
+            case heart:
+            default:
+                return;
+        }
+        // 记录操作人
+        nodeScriptModel = nodeScriptServer.getItem(scriptId);
+        String name = getOptUserName(session);
+        nodeScriptModel.setLastRunUser(name);
+        nodeScriptServer.updateItem(nodeScriptModel);
+        json.put("code", 200);
+        json.put("msg", "执行成功");
+        log.info(json.toString());
+        SocketSessionUtil.send(session, json.toString());
+    }
 
 
-	@Override
-	@OnClose
-	public void onClose(Session session) {
-		super.onClose(session);
-		ScriptProcessBuilder.stopWatcher(session);
-	}
+    @Override
+    @OnClose
+    public void onClose(Session session) {
+        super.onClose(session);
+        ScriptProcessBuilder.stopWatcher(session);
+    }
 
-	@OnError
-	@Override
-	public void onError(Session session, Throwable thr) {
-		super.onError(session, thr);
-	}
+    @OnError
+    @Override
+    public void onError(Session session, Throwable thr) {
+        super.onError(session, thr);
+    }
 }

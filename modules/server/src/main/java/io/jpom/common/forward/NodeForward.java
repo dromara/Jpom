@@ -153,7 +153,7 @@ public class NodeForward {
      * @param <T>       泛型
      * @return JSON
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     private static <T> JsonMessage<T> request(NodeModel nodeModel,
                                               HttpServletRequest request,
                                               NodeUrl nodeUrl,

@@ -31,6 +31,7 @@ import io.jpom.system.AgentConfig;
 import io.jpom.system.LogbackConfig;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -51,13 +52,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 
-
-    private final AgentConfig.SystemConfig systemConfig;
+    private static AgentConfig.SystemConfig systemConfig;
 
     private static final Map<String, File> CACHE_FILE = new ConcurrentHashMap<>();
 
-    public AgentWebSocketTomcatHandle(AgentConfig agentConfig) {
-        this.systemConfig = agentConfig.getSystem();
+    @Autowired
+    public void init(AgentConfig agentConfig) {
+        AgentWebSocketTomcatHandle.systemConfig = agentConfig.getSystem();
     }
 
     @OnOpen
