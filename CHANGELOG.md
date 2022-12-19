@@ -5,7 +5,8 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 不能在线保存服务端配置（@迷了鹿）
-2. 【all】修复 服务端脚本分发节点工作空间错乱问题，需要再次保存自动修正（感谢[@mt-mored](https://gitee.com/mt-mored) [Gitee issues I65B19](https://gitee.com/dromara/Jpom/issues/I65B19) ）
+2. 【all】修复 服务端脚本分发节点工作空间错乱问题，需要再次保存自动修正
+   （感谢[@mt-mored](https://gitee.com/mt-mored) [Gitee issues I65B19](https://gitee.com/dromara/Jpom/issues/I65B19) ）
 
 ### ❌ 不兼容功能
 
@@ -45,11 +46,13 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 在线构建仓库文件存在`.env`文件时带来构建结果异常问题（感谢@蹉跎岁月）
-2. 【agent】优化 项目`清空上传文件`等待文件上传完成后再清空、上传文件优先到临时目录完成后再移动至项目目录（感谢[@tiv-cloud_0](https://gitee.com/tiv-cloud_0) [Gitee issues I649NU](https://gitee.com/dromara/Jpom/issues/I649NU) ）
+2. 【agent】优化 项目`清空上传文件`
+   等待文件上传完成后再清空、上传文件优先到临时目录完成后再移动至项目目录
+   （感谢[@tiv-cloud_0](https://gitee.com/tiv-cloud_0) [Gitee issues I649NU](https://gitee.com/dromara/Jpom/issues/I649NU) ）
 3. 【server】修复 docker 创建容器部分场景端口无法正常暴露问题（感谢@李中原）
 4. 【server】优化 docker 控制台刷新页面自动打开控制台
 5. 【server】优化 docker java 依赖包
-6. 【all】优化 取消 hutool-all 包，采用 bom 方式引入 
+6. 【all】优化 取消 hutool-all 包，采用 bom 方式引入
 
 ### ❌ 不兼容功能
 
@@ -85,13 +88,15 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增强制提示用户开启 MFA 认证,新增配置属性：`user.forceMfa`（感谢[@长风](https://gitee.com/angh5) [Gitee issues I5ZBFU](https://gitee.com/dromara/Jpom/issues/I5ZBFU) ）
+1. 【server】新增强制提示用户开启 MFA 认证,新增配置属性：`user.forceMfa`
+   （感谢[@长风](https://gitee.com/angh5) [Gitee issues I5ZBFU](https://gitee.com/dromara/Jpom/issues/I5ZBFU) ）
 2. 【server】新增镜像创建容器支持配置网络模式属性、--privileged、重启策略属性
 3. 【server】新增自动探测本地 docker 按钮
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】优化系统已经初始化过进入初始化页面提示信息（感谢[@说一](https://gitee.com/aacsgaa) [Gitee issues I61LQH](https://gitee.com/dromara/Jpom/issues/I61LQH) ）
+1. 【server】优化系统已经初始化过进入初始化页面提示信息
+   （感谢[@说一](https://gitee.com/aacsgaa) [Gitee issues I61LQH](https://gitee.com/dromara/Jpom/issues/I61LQH) ）
 2. 【server】优化构建流程状态，不存在产物构建状态标记为构建失败
 3. 【agent】修复未配置 nginx 路径时 reload 报错
 4. 【server】优化在线构建根据标签拉取代码（感谢@Tʀᴜsᴛ¹⁹⁹¹）
@@ -122,7 +127,8 @@
 6. 优化安装脚本支持 Ubuntu 系统快速安装 （感谢@阿超）
 7. 【server】修复节点分发日志未存储到对应的工作空间问题
 8. 【server】H2 缓存大小配置调整为 50MB，已经安装的版本需要手动修改配置：`db.cacheSize`
-9. 【server】修复编辑关联分发项目删除项目数据错乱问题（感谢[@DreamAgo](https://gitee.com/DreamAgo) [Gitee issues I631K2](https://gitee.com/dromara/Jpom/issues/I631K2) ）
+9. 【server】修复编辑关联分发项目删除项目数据错乱问题
+   （感谢[@DreamAgo](https://gitee.com/DreamAgo) [Gitee issues I631K2](https://gitee.com/dromara/Jpom/issues/I631K2) ）
 10. 【agent】修复 DSL 模式未运行的项目在部分场景下控制台按钮状态不正确（感谢@项勇祥）
 11. 【server】优化编辑在线构建弹窗默认不加载仓库分支 （感谢@阿超）
 12. 【server】优化构建切换分支时自动重新拉取仓库
@@ -138,9 +144,11 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复监控报警无法触发 webhook 类型的通知（感谢[@项勇祥](https://gitee.com/xiang-yong-xiang) [Gitee issues I61KRV](https://gitee.com/dromara/Jpom/issues/I61KRV) ）
+1. 【server】修复监控报警无法触发 webhook 类型的通知
+   （感谢[@项勇祥](https://gitee.com/xiang-yong-xiang) [Gitee issues I61KRV](https://gitee.com/dromara/Jpom/issues/I61KRV) ）
 2. 优化获取程序实参的方法（main 方法参数、使用 SimpleCommandLinePropertySource）
-3. 【server】修复构建切换分支冲突后，手动清除代码(构建缓存)时文件被占用问题（感谢[@xuejun84](https://gitee.com/xuejun84) [Gitee issues I61ANL](https://gitee.com/dromara/Jpom/issues/I61ANL) ）
+3. 【server】修复构建切换分支冲突后，手动清除代码(构建缓存)
+   时文件被占用问题（感谢[@xuejun84](https://gitee.com/xuejun84) [Gitee issues I61ANL](https://gitee.com/dromara/Jpom/issues/I61ANL) ）
 
 ------
 
@@ -150,7 +158,8 @@
 
 1. 【server】更新 Server.sh JVM 参数 -XX:+UnlockExperimentalVMOptions：该参数为解锁 JVM 实验性参数
 2. 【agent】更新 Server.sh JVM 参数 -XX:+UnlockExperimentalVMOptions：该参数为解锁 JVM 实验性参数
-3. 【server】修复脚本执行日志名称搜索异常（感谢[@伤感的风铃草](https://gitee.com/bwy-flc) [Gitee issues I600OE](https://gitee.com/dromara/Jpom/issues/I600OE) ）
+3. 【server】修复脚本执行日志名称搜索异常
+   （感谢[@伤感的风铃草](https://gitee.com/bwy-flc) [Gitee issues I600OE](https://gitee.com/dromara/Jpom/issues/I600OE) ）
 
 ------
 
@@ -189,7 +198,8 @@
 ### 🐣 新增功能
 
 1. 【server】新增全局工作空间变量
-2. 【server】构建仓库中密码支持引用工作空间变量值（统一配置账号密码）（感谢 @G、 @[hjk2008](https://gitee.com/hjk2008) [Gitee issues I4SH8V](https://gitee.com/dromara/Jpom/issues/I4SH8V) ）
+2. 【server】构建仓库中密码支持引用工作空间变量值（统一配置账号密码） （感谢
+   @G、 @[hjk2008](https://gitee.com/hjk2008) [Gitee issues I4SH8V](https://gitee.com/dromara/Jpom/issues/I4SH8V) ）
 3. 【server】ssh 账号密码支持引用工作空间变量值
 4. 【server】构建列表新增下载最新产物方式（感谢@奇奇）
 
@@ -209,9 +219,11 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】容器构建 cache 插件支持使用环境变量替换值
-2. 【agent】优化检查 jps 异常,调整为实时检查（感谢[@傲梅科技](https://gitee.com/aomeitech) [Gitee issues I5MTA4](https://gitee.com/dromara/Jpom/issues/I5MTA4) ）
+2. 【agent】优化检查 jps 异常,调整为实时检查
+   （感谢[@傲梅科技](https://gitee.com/aomeitech) [Gitee issues I5MTA4](https://gitee.com/dromara/Jpom/issues/I5MTA4) ）
 3. 【server】修复登录后跳转到上次使用到工作空间中问题 （感谢@木迷榖）
-4. 【server】缓存日志弹窗相关操作配置 （感谢[@我已经没有头发了](https://gitee.com/christina204) [Gitee issues I5MANC](https://gitee.com/dromara/Jpom/issues/I5MANC) ）
+4. 【server】缓存日志弹窗相关操作配置
+   （感谢[@我已经没有头发了](https://gitee.com/christina204) [Gitee issues I5MANC](https://gitee.com/dromara/Jpom/issues/I5MANC) ）
 5. 【server】优化节点首页：支持自定义刷新频率、图标自动缩放 （感谢@ccx2480）
 6. 【server】优化构建列表：支持自动刷新、构建状态添加标签颜色
 7. 【server】优化 SSH 发布上传异常没有抛出导致构建状态不一致问题（感谢@print(1)）
@@ -224,8 +236,10 @@
 
 1. 【server】修复创建账号默认密码无法正常登录问题（感谢@ʟᴊx💎💎）
 2. 【server】错别字：权限组周末改为周日、周七改为周日
-3. 【server】容器构建 JDK 依赖下载地址更新（感谢[@Yousinnmu](https://gitee.com/yang-xinwu) [Gitee issues I5LC3K](https://gitee.com/dromara/Jpom/issues/I5LC3K) ）
-4. 【server】构建相关环境变量 GIT 仓库时新增：`BUILD_BRANCH_NAME`,`BUILD_TAG_NAME` （感谢[@Yousinnmu](https://gitee.com/yang-xinwu)
+3. 【server】容器构建 JDK
+   依赖下载地址更新（感谢[@Yousinnmu](https://gitee.com/yang-xinwu) [Gitee issues I5LC3K](https://gitee.com/dromara/Jpom/issues/I5LC3K) ）
+4. 【server】构建相关环境变量 GIT 仓库时新增：`BUILD_BRANCH_NAME`,`BUILD_TAG_NAME`
+   （感谢[@Yousinnmu](https://gitee.com/yang-xinwu)
 5. 【server】修复插件端管理页面中无法正常远程更新问题
 
 ### 特别感谢
@@ -242,7 +256,8 @@
 2. 【server】账号新增状态字段,用于控制禁用账号
 3. 【server】重置密码使用系统生成
 4. 【server】构建 docker 镜像支持使用构建序号 ID 为 tag 版本号递增（感谢@Y.）
-5. 【server】部分列表新增排序功能(置顶、上移、下移)（感谢[@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I5KBN9](https://gitee.com/dromara/Jpom/issues/I5KBN9) ）
+5. 【server】部分列表新增排序功能(置顶、上移、下移)
+   （感谢[@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I5KBN9](https://gitee.com/dromara/Jpom/issues/I5KBN9) ）
 
 ### 🐞 解决BUG、优化功能
 
@@ -250,8 +265,10 @@
 2. 【server】修复节点管理中【系统设置】菜单重复显示菜单项问题（感谢@ʟᴊx💎💎）
 3. 【server】修复节点首页历史监控图表按钮未显示问题（感谢@ʟᴊx💎💎）
 4. 【agent】优化加载 nginx 配置相关代码（感谢@伤感的风铃草🌿）
-5. 【server】修改 node welcome vue 中单词拼写错误（感谢[@dongge](https://gitee.com/gao-weidong) [Gitee issues I5JT9R](https://gitee.com/dromara/Jpom/issues/I5JT9R) ）
-6. 【server】修复 IP 字段长度不足,不能支持 IPV6 问题（感谢[@宋晶磊](https://gitee.com/songjingl) [Gitee issues I5JSEW](https://gitee.com/dromara/Jpom/issues/I5JSEW) ）
+5. 【server】修改 node welcome vue 中单词拼写错误
+   （感谢[@dongge](https://gitee.com/gao-weidong) [Gitee issues I5JT9R](https://gitee.com/dromara/Jpom/issues/I5JT9R) ）
+6. 【server】修复 IP 字段长度不足,不能支持 IPV6 问题
+   （感谢[@宋晶磊](https://gitee.com/songjingl) [Gitee issues I5JSEW](https://gitee.com/dromara/Jpom/issues/I5JSEW) ）
 7. 【server】修复在 docker 开启 TLS 时候配置私有仓库不生效问题（感谢@🐠）
 8. 【server】docker 心跳时间调整为超时时间
 9. 【server】修改在未配置 docker 私有仓库信息,部分功能出现 NPE（感谢@🐠、Y.）
@@ -269,7 +286,8 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复日志弹窗在部分屏幕下按钮重叠问题（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5IZ9H](https://gitee.com/dromara/Jpom/issues/I5IZ9H) ）
+1. 【server】修复日志弹窗在部分屏幕下按钮重叠问题
+   （感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5IZ9H](https://gitee.com/dromara/Jpom/issues/I5IZ9H) ）
 2. 【server】优化工作空间和用户昵称显示区域,支持显示更多文字（感谢@木迷榖）
 
 ------
@@ -280,7 +298,8 @@
 
 1. 【server】新增配置容器构建基础镜像相关功能（ 感谢[@💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) ）
 2. 【server】SSH 脚本、服务端脚本新增执行触发器
-3. 节点脚本新增执行触发器 （感谢[@田良](https://gitee.com/tian8liang) [Gitee issues I5HB6F](https://gitee.com/dromara/Jpom/issues/I5HB6F) ）
+3. 节点脚本新增执行触发器
+   （感谢[@田良](https://gitee.com/tian8liang) [Gitee issues I5HB6F](https://gitee.com/dromara/Jpom/issues/I5HB6F) ）
 4. 【server】查看日志组件新增是否换行（感谢@hjk2008 [Gitee issues I5CYQK](https://gitee.com/dromara/Jpom/issues/I5CYQK) ）
 
 ### 🐞 解决BUG、优化功能
@@ -288,7 +307,9 @@
 1. 优化 HTTP GET 请求打开重定向
 2. 【server】触发器 token 机制调整,取消 SHA256 生成。采用数据表单独存储
 3. 【server】修复启动加载全局代理时机,避免（The database is not initialized）
-4. 管理脚本执行支持环境变量配置 jvm、端口等，`JPOM_AGENT_JVM`,`JPOM_AGENT_PORT`,`JPOM_AGENT_ARGS`、`JPOM_SERVER_JVM`,`JPOM_SERVER_PORT`,`JPOM_SERVER_ARGS` （ 感谢@飞儿 ）
+4. 管理脚本执行支持环境变量配置
+   jvm、端口等，`JPOM_AGENT_JVM`,`JPOM_AGENT_PORT`,`JPOM_AGENT_ARGS`、`JPOM_SERVER_JVM`,`JPOM_SERVER_PORT`,`JPOM_SERVER_ARGS`
+   （ 感谢@飞儿 ）
 5. 【agent】兼容 `log.autoBackConsoleCron: none` 配置属性
 
 ------
@@ -313,12 +334,16 @@
 
 1. 【server】新增容器 stats ,方便实时查看容器内存、网络信息
 2. 【server】SSH 文件管理新增重命名文件功能
-3. 【server】新增全局配置,解决 git httpProxy （感谢[@五六](https://gitee.com/tutu-father) [Gitee issues I5EY03](https://gitee.com/dromara/Jpom/issues/I5EY03) ）
+3. 【server】新增全局配置,解决 git httpProxy
+   （感谢[@五六](https://gitee.com/tutu-father) [Gitee issues I5EY03](https://gitee.com/dromara/Jpom/issues/I5EY03) ）
 4. 【server】新增更新容器配置（CPU、内存等）
-5. 【server】新增页面 ICON 配置属性：`jpom.iconFile` （感谢[@flyhigh318](https://gitee.com/flyhigh318) [Gitee issues I5FKMW](https://gitee.com/dromara/Jpom/issues/I5FKMW) ）
-6. 【server】SSH 脚本新增跨工作空间同步功能 （感谢[@flyhigh318](https://gitee.com/flyhigh318) [Gitee issues I5FC9R](https://gitee.com/dromara/Jpom/issues/I5FC9R) ）
+5. 【server】新增页面 ICON 配置属性：`jpom.iconFile`
+   （感谢[@flyhigh318](https://gitee.com/flyhigh318) [Gitee issues I5FKMW](https://gitee.com/dromara/Jpom/issues/I5FKMW) ）
+6. 【server】SSH 脚本新增跨工作空间同步功能
+   （感谢[@flyhigh318](https://gitee.com/flyhigh318) [Gitee issues I5FC9R](https://gitee.com/dromara/Jpom/issues/I5FC9R) ）
 7. 【server】服务端脚本模版新增跨工作空间同步功能
-8. 【server】构建新增事件脚本属性,在构建环节可以执行指定脚本来实现部分功能（感谢[@沈世举](https://gitee.com/shen-shiju) [Gitee issues I5FKFM](https://gitee.com/dromara/Jpom/issues/I5FKFM) ）
+8. 【server】构建新增事件脚本属性,在构建环节可以执行指定脚本来实现部分功能
+   （感谢[@沈世举](https://gitee.com/shen-shiju) [Gitee issues I5FKFM](https://gitee.com/dromara/Jpom/issues/I5FKFM) ）
 9. 【server】优化构建任务独立线程池,并且新增配置属性 `build.poolSize`、`build.poolWaitQueue` （感谢@小翼哥）
 10. 【agent】配置项目是否备份控制台日志属性独立：`log.autoBackToFile` （感谢@Vergil。）
 
@@ -327,8 +352,10 @@
 1. 升级 SpringBoot、Hutool、jgit、svnkit
 2. 【server】docker 加入集群无法正常使用问题
 3. 【server】项目文件备份列表不能取消弹窗（点击关闭依然执行）问题（感谢@ʟᴊx💎💎）
-4. 【server】修复编辑构建仓库切换事件重复问题 （感谢[@五六](https://gitee.com/tutu-father) [Gitee issues I5F35E](https://gitee.com/dromara/Jpom/issues/I5F35E) ）
-5. 【server】修复 windows 执行脚本出现异常（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5FK0K](https://gitee.com/dromara/Jpom/issues/I5FK0K) ）
+4. 【server】修复编辑构建仓库切换事件重复问题
+   （感谢[@五六](https://gitee.com/tutu-father) [Gitee issues I5F35E](https://gitee.com/dromara/Jpom/issues/I5F35E) ）
+5. 【server】修复 windows 执行脚本出现异常
+   （感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5FK0K](https://gitee.com/dromara/Jpom/issues/I5FK0K) ）
 
 ### ❌ 不兼容事项
 
@@ -340,23 +367,30 @@
 
 ### 🐣 新增功能
 
-1. 【agent】插件端白名单新增 nginx 安装路径,解决 nginx reload 问题（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5CJR7](https://gitee.com/dromara/Jpom/issues/I5CJR7) ）
+1. 【agent】插件端白名单新增 nginx 安装路径,解决 nginx reload 问题
+   （感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5CJR7](https://gitee.com/dromara/Jpom/issues/I5CJR7) ）
 2. 【server】通过私人令牌导入仓库支持自建 GitLab
 3. 【agent】项目文件管理新增重命名文件功能
 4. 快速安装节点支持配置网卡名称（感谢@Elliot）
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】构建历史分页查询不生效（感谢[@PQ宝剑](https://gitee.com/pqbaojian) [Gitee issues I5CYOD](https://gitee.com/dromara/Jpom/issues/I5CYOD) ）
-2. 【server】优化编辑 ssh 判断重复,支持多账号配置SSH（感谢[@xiaofangkang](https://gitee.com/xiaofangkang) [Gitee issues I5D0EY](https://gitee.com/dromara/Jpom/issues/I5D0EY) ）
+1. 【server】构建历史分页查询不生效
+   （感谢[@PQ宝剑](https://gitee.com/pqbaojian) [Gitee issues I5CYOD](https://gitee.com/dromara/Jpom/issues/I5CYOD) ）
+
+2. 【server】优化编辑 ssh 判断重复,支持多账号配置SSH
+   （感谢[@xiaofangkang](https://gitee.com/xiaofangkang) [Gitee issues I5D0EY](https://gitee.com/dromara/Jpom/issues/I5D0EY) ）
 3. 【agent】文件备份对比流程异步处理,避免大文件对比耗时阻塞（感谢@ʟᴊx💎💎）
 4. 【server】修复通过私人令牌导入仓库表格主键指定错误
 5. 【server】修复 GitLab 通过私人令牌导入仓库接口分页错误
-6. 【agent】优化新增文件、删除文件目录加载两次问题（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5DMKG](https://gitee.com/dromara/Jpom/issues/I5DMKG) ）
-7. 【server】优化下拉菜单、下拉框跟随页面滚动 （感谢[@pl.com](https://gitee.com/pl.com) [Gitee issues I5D6I0](https://gitee.com/dromara/Jpom/issues/I5D6I0) ）
+6. 【agent】优化新增文件、删除文件目录加载两次问题
+   （感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5DMKG](https://gitee.com/dromara/Jpom/issues/I5DMKG) ）
+7. 【server】优化下拉菜单、下拉框跟随页面滚动
+   （感谢[@pl.com](https://gitee.com/pl.com) [Gitee issues I5D6I0](https://gitee.com/dromara/Jpom/issues/I5D6I0) ）
 8. 【server】导入仓库支持按仓库名搜索
 9. 【server】修复导入仓库 GitLab 私有列显示错误
-10. 副本功能优化,新增名称字段,项目列表快速查看 （感谢[@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I5E52A](https://gitee.com/dromara/Jpom/issues/I5E52A) ）
+10. 副本功能优化,新增名称字段,项目列表快速查看
+	（感谢[@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I5E52A](https://gitee.com/dromara/Jpom/issues/I5E52A) ）
 11. 【server】修复非默认工作空间快速安装节点未正常绑定到对应工作空间问题
 
 ------
@@ -372,7 +406,8 @@
 1. 【server】db 安全检查时机前置(是否开启 web 访问),避免突然关闭数据库（感谢@信徒）
 2. 【server】修复部分终端弹窗太小问题（感谢@syso）
 3. 【server】修复重新初始化数据库异常问题（感谢@Dream、hu丶向...🤡）
-4. 【server】修复系统管理中查看白名单配置报错（感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5CGO7](https://gitee.com/dromara/Jpom/issues/I5CGO7) ）
+4. 【server】修复系统管理中查看白名单配置报错
+   （感谢[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I5CGO7](https://gitee.com/dromara/Jpom/issues/I5CGO7) ）
 5. 【server】优化监听到路由错误 刷新页面
 6. 【server】修复控制台按钮不能正常使用的情况（感谢@😱 会 🎉、ccx2480）
 
@@ -397,13 +432,17 @@
 
 > 此版本为不兼容升级，需要手动升级操作数据相关迁移，操作流程如下：
 
-**（下述流程仅供简单思路参考，不同版本间存在部分差异，详细流程还请差异完整文档：[https://jpom.top/pages/upgrade/2.8.x-to-2.9.x](https://jpom.top/pages/upgrade/2.8.x-to-2.9.x) ）**
+
+> 下述流程仅供简单思路参考， 不同版本间存在部分差异，
+> 详细流程还请差异完整文档：
+> [https://jpom.top/pages/upgrade/2.8.x-to-2.9.x](https://jpom.top/pages/upgrade/2.8.x-to-2.9.x)
 
 1. 导出低版本数据
 	1. 启动程序参数里面添加 --backup-h2
 	2. linux 环境举例：`sh /xxxx/Server.sh restart --backup-h2`
 2. 将导出的低版本数据( sql 文件) 导入到新版本中
-	1. 启动程序参数里面添加 `--replace-import-h2-sql=/xxxx.sql --transform-sql` (路径需要替换为第一步控制台输出的 sql 文件保存路径)
+	1. 启动程序参数里面添加 `--replace-import-h2-sql=/xxxx.sql --transform-sql` (路径需要替换为第一步控制台输出的 sql
+	   文件保存路径)
 	2. linux 环境举例：`sh /xxxx/Server.sh restart --replace-import-h2-sql=/xxxx.sql --transform-sql`
 
 ✈️ [更详细的升级说明文档](https://jpom.top/pages/upgrade/2.8.x-to-2.9.x/)
@@ -423,7 +462,8 @@
 ### 🐣 新增功能
 
 1. 【server】新增命令行创建数据库备份参数 `--backup-h2` `sh /xxxx/Server.sh restart --backup-h2`
-2. 【server】新增命令行导入 sql 数据文件参数 `--import-h2-sql=/xxxx.sql` `sh /xxxx/Server.sh restart --import-h2-sql=/xxxx.sql`
+2. 【server】新增命令行导入 sql 数据文件参数
+   `--import-h2-sql=/xxxx.sql` `sh /xxxx/Server.sh restart --import-h2-sql=/xxxx.sql`
 
 ### 🐞 解决BUG、优化功能
 
@@ -457,8 +497,8 @@
 
 ### 🐣 新增功能
 
-1. 新增日志查询功能 （感谢 @
-   、 [@漫步青春的日子](https://gitee.com/imoom) [Gitee issues I54GDY](https://gitee.com/dromara/Jpom/issues/I54GDY) ）
+1. 新增日志查询功能 （感谢
+   @ 、 [@漫步青春的日子](https://gitee.com/imoom) [Gitee issues I54GDY](https://gitee.com/dromara/Jpom/issues/I54GDY) ）
 
 ### 🐞 解决BUG、优化功能
 
@@ -487,12 +527,9 @@
 
 1. 【server】节点新增代理配置，实现使用代理访问插件端（感谢@背着砍刀的诗人）
 2. 【server】构建新增差异构建配置选择（如果仓库代码未变动则不执行构建）
-3.
-
-项目管理文件新增备份，自动备份变动的文件（感谢[@少爷123](https://gitee.com/58753101) [Gitee issues I54ZFM](https://gitee.com/dromara/Jpom/issues/I54ZFM)
-）
-
-4. 【server】SH配置和节点配置新增跨工作空间同步功能，方便快速同步信息（感谢[@陈旭](https://gitee.com/chenxu8989)
+3. 项目管理文件新增备份，自动备份变动的文件
+   （感谢[@少爷123](https://gitee.com/58753101) [Gitee issues I54ZFM](https://gitee.com/dromara/Jpom/issues/I54ZFM) ）
+4. 【server】SH配置和节点配置新增跨工作空间同步功能，方便快速同步信息 （感谢[@陈旭](https://gitee.com/chenxu8989)
    ） [Gitee issues I56YTU](https://gitee.com/dromara/Jpom/issues/I56YTU)
 
 ### 🐞 解决BUG、优化功能
@@ -501,12 +538,10 @@
 2. 【server】新增配置前端消息弹窗位置属性 `jpom.notificationPlacement`
    （感谢[@Eibons](https://gitee.com/eibons) [Gitee issues I53V8B](https://gitee.com/dromara/Jpom/issues/I53V8B) ）
 3. 【server】构建历史新增批量删除
-4.
-
-【server】修复关联分发项目，无法选择不同节点下相同的项目的问题（感谢[@宋建平](https://gitee.com/sjping) [Gitee issues I5680N](https://gitee.com/dromara/Jpom/issues/I5680N)
-）
-
-5. 【server】调整 docker-compose 使用卷方式存储数据，避免在部分环境中出现无法正常使用情况 (感谢 [@💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) 贡献解决方案)
+4. 【server】修复关联分发项目，无法选择不同节点下相同的项目的问题
+   （感谢[@宋建平](https://gitee.com/sjping) [Gitee issues I5680N](https://gitee.com/dromara/Jpom/issues/I5680N) ）
+5. 【server】调整 docker-compose 使用卷方式存储数据，避免在部分环境中出现无法正常使用情况 (
+   感谢 [@💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) 贡献解决方案)
    （感谢[@笨笨巫师](https://gitee.com/zhangxin_gitosc) [Gitee issues I52OAV](https://gitee.com/dromara/Jpom/issues/I52OAV) ）
 6. 【server】调整节点里面在部分情况下会出现空白行 （感谢[@💎ℳ๓₯㎕斌💎💘](https://gitee.com/weihongbin) ）
 7. 【server】前端部分输入框添加`maxLength` 限制避免出现数据库字段长度不足问题（感谢@ccx2480 ）
@@ -532,8 +567,7 @@
 - 节点上传失败,请优先检查限制上传大小配置是否合理
 - 上传文件太大了,请重新选择一个较小的文件上传吧
 
-出现如上提示信息需要对插件端或者服务端进行配置合理对上传文件大小限制。
-配置方式：在对应端的 `extConfig.yml` 配置文件中配置如下代码
+出现如上提示信息需要对插件端或者服务端进行配置合理对上传文件大小限制。 配置方式：在对应端的 `extConfig.yml` 配置文件中配置如下代码
 
 ```yaml
 spring:
@@ -649,8 +683,10 @@ spring:
 3. 【server】在线构建 ssh 发布选择授权目录切换不生效问题（感谢@天天）
 4. 【server】在线构建本地构建命令不能换行问题（感谢@华仔）
 5. 【server】日志弹窗新增行号
-6. 【server】在线升级执行脚本、脚本模版等兼容 `debian` （感谢@wxyShine [Gitee issues I4UQBD](https://gitee.com/dromara/Jpom/issues/I4UQBD) ）
-7. 【agent】修复 windows 环境，节点首页进程列表切换不生效问题（感谢@neoch [Gitee issues I4UZA7](https://gitee.com/dromara/Jpom/issues/I4UZA7) ）
+6. 【server】在线升级执行脚本、脚本模版等兼容 `debian`
+   （感谢@wxyShine [Gitee issues I4UQBD](https://gitee.com/dromara/Jpom/issues/I4UQBD) ）
+7. 【agent】修复 windows 环境，节点首页进程列表切换不生效问题
+   （感谢@neoch [Gitee issues I4UZA7](https://gitee.com/dromara/Jpom/issues/I4UZA7) ）
 8. 【server】脚本模版补充权限
 
 ------
@@ -738,9 +774,11 @@ spring:
 3. 【server】节点脚本列表新增快速查看日志入口（感谢@ʟᴊx💎💎）
 4. 【server】构建新增备注字段,可以用于记录版本日志或者本次构建备注（感谢@Alex）
 5. 【server】新增解绑节点、节点分发功能 用于服务器过期或者已经确定不在使用直接删除节点相关数据（感谢@🐠）
-6. 【server】构建命令新增预设命令提示输入,减少用户输入（感谢@hjk2008 [Gitee issues I4SHC9](https://gitee.com/dromara/Jpom/issues/I4SHC9) ）
-7. 【server】批量构建支持指定部分参数使构建更灵活（感谢@hjk2008 [Gitee issues I4SHB4](https://gitee.com/dromara/Jpom/issues/I4SHB4) ）
-8. 【server】用户账号新增两步验证(MFA) 提升账号安全性(感谢@💎ℳ๓₯㎕斌💎💘)
+6. 【server】构建命令新增预设命令提示输入,减少用户输入
+7. （感谢@hjk2008 [Gitee issues I4SHC9](https://gitee.com/dromara/Jpom/issues/I4SHC9) ）
+8. 【server】批量构建支持指定部分参数使构建更灵活
+   （感谢@hjk2008 [Gitee issues I4SHB4](https://gitee.com/dromara/Jpom/issues/I4SHB4) ）
+9. 【server】用户账号新增两步验证(MFA) 提升账号安全性(感谢@💎ℳ๓₯㎕斌💎💘)
 
 ### 🐞 解决BUG、优化功能
 
@@ -752,9 +790,10 @@ spring:
 6. 升级 SpringBoot 到 2.6.3 (感谢@💎ℳ๓₯㎕斌💎💘)
 7. 【server】解除 SSH 终端禁止命令权限保存失败（感谢@Alex）
 8. 【server】本地构建模式模糊匹配支持匹配多个结果
-9. 【server】修复节点分发不能删除节点问题（感谢@a19920714liou [Gitee issues I4SHSP](https://gitee.com/dromara/Jpom/issues/I4SHSP) ）
-10. 【server】ssh 快捷安装插件端保存安装包避免多次上传 （感谢@a19920714liou [Gitee issues I4SHJC](https://gitee.com/dromara/Jpom/issues/I4SHJC)
-	）
+9. 【server】修复节点分发不能删除节点问题
+   （感谢@a19920714liou [Gitee issues I4SHSP](https://gitee.com/dromara/Jpom/issues/I4SHSP) ）
+10. 【server】ssh 快捷安装插件端保存安装包避免多次上传
+	（感谢@a19920714liou [Gitee issues I4SHJC](https://gitee.com/dromara/Jpom/issues/I4SHJC) ）
 11. 【server】ssh 快捷安装插件端权限改为管理员
 12. 【server】构建 ssh 发布授权目录采用下拉模式,提升用户操作感知 (
 	感谢@hjk2008 [Gitee issues I4SICE](https://gitee.com/dromara/Jpom/issues/I4SICE) )
@@ -888,7 +927,8 @@ spring:
 1. 【server】nginx 列表显示不全，无法滚动问题（感谢@）
 2. 【server】独立节点分发显示节点名称（感谢@奥特曼打猪）
 3. 【server】用户ID（登录名）支持邮箱格式（感谢@陈力）
-4. 【server】优化清除构建和删除构建时候删除相关文件操作（使用系统命令快速删除）（感谢@大土豆、[Gitee PR](https://gitee.com/dromara/Jpom/pulls/155) ）
+4. 【server】优化清除构建和删除构建时候删除相关文件操作（使用系统命令快速删除）
+   （感谢@大土豆、[Gitee PR](https://gitee.com/dromara/Jpom/pulls/155) ）
 5. 【server】项目搜索菜单名变更为项目列表
 6. 【server】调整自动清理日志数据逻辑、默认保留日志数据条数修改为 `10000`
 7. 【server】脚本模版在服务端统一查看、编辑、执行（感谢@ʟᴊx）
@@ -940,7 +980,8 @@ spring:
 6. 【server】新增通过命令行重置超级管理员参数 `--rest:super_user_pwd`
 7. 【server】新增通过命令行重新加载数据库初始化操作参数 `--rest:load_init_db`
 8. 【server】构建新增`本地命令`发布方式 用户在服务端执行相关命令进行发布操作
-9. 【server】发布命令（SSH发布命令、本地命令）支持变量替换：`#{BUILD_ID}`、`#{BUILD_NAME}`、`#{BUILD_RESULT_FILE}`、`#{BUILD_NUMBER_ID}`
+9. 【server】发布命令（SSH发布命令、本地命令）
+   支持变量替换：`#{BUILD_ID}`、`#{BUILD_NAME}`、`#{BUILD_RESULT_FILE}`、`#{BUILD_NUMBER_ID}`
 10. 【server】新增自动备份全量数据配置 `db.autoBackupIntervalDay` 默认一天备份一次,执行备份时间 凌晨0点或者中午12点
 11. 【agent】项目的 webhook 新增项目启动成功后通知，并且参数新增 `type` 指包括：`beforeStop`,`start`,`stop`,`beforeRestart`
 12. 【agent】项目新增自启动配置项,在 agent
@@ -977,7 +1018,8 @@ spring:
 >
 > 【特别说明】：分组字段将失效，目前所有数据在升级后都将默认跟随`默认工作空间`。
 >
-> 1: 升级该版本会自动将原 JSON 文件数据转存到 h2 中，如果转存成功旧数据文件将自动移动到数据目录中的 `backup_old_data` 文件夹中
+> 1: 升级该版本会自动将原 JSON 文件数据转存到 h2 中，如果转存成功旧数据文件将自动移动到数据目录中的 `backup_old_data`
+> 文件夹中
 >
 > 2: 升级过程请注意控制台日志是否出现异常
 >

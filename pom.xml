@@ -54,7 +54,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <!--当前程序兼容 jpom 最新版本号-->
-        <jpom-min-version>2.9.0</jpom-min-version>
+        <jpom-min-version>2.10.0</jpom-min-version>
         <spring-boot.version>2.7.6</spring-boot.version>
 
         <common-boot.version>2.4.0</common-boot.version>
