@@ -167,7 +167,7 @@ function start() {
 		touch "$agent_log"
 	fi
 	# start
-	${JAVA} -Dapplication=${PID_TAG} ${JAVA_OPTS} -jar ${Lib}${RUN_JAR} ${MAIN_ARGS} >$Log 2>&1 &
+	${JAVA} -Djpom.application.tag=${PID_TAG} ${JAVA_OPTS} -jar ${Lib}${RUN_JAR} ${MAIN_ARGS} >$Log 2>&1 &
 	echo $! >"$pidfile"
 
 	pid=$(cat "$pidfile")
@@ -189,7 +189,11 @@ function stop() {
 		echo -n "jpom agent ( pid $pid) is running"
 		echo
 		echo -n $"Shutting down (kill $mode $pid) jpom server: "
-		kill "$mode $pid"
+		if [ "$mode" == "" ]; then
+			kill "$pid"
+		else
+			kill "$mode" "$pid"
+		fi
 		LOOPS=0
 		while (true); do
 			pid=$(getPid)

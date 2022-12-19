@@ -83,11 +83,6 @@ public class ConfigBean {
      */
     public static final String REMOTE_VERSION = "remote_version.json";
     /**
-     * Jpom 程序运行的 application 标识
-     */
-    @Value("${jpom.applicationTag:}")
-    public String applicationTag;
-    /**
      * 程序端口
      */
     @Value("${server.port}")
