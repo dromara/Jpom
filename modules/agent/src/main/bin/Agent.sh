@@ -102,7 +102,7 @@ else
 	MAIN_ARGS="${RUN_ARG}"
 fi
 
-# mode -s
+# mode -s -9
 mode="$2"
 
 RUN_JAR=""
@@ -184,9 +184,8 @@ function stop() {
 	if [ "$pid" != "" ]; then
 		echo -n "jpom agent ( pid $pid) is running"
 		echo
-		echo -n $"Shutting down jpom server: "
-		kill $pid
-
+		echo -n $"Shutting down (kill $mode $pid) jpom server: "
+		kill "$mode $pid"
 		LOOPS=0
 		while (true); do
 			pid=$(getPid)
