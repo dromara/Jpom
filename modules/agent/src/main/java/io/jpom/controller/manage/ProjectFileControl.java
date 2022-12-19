@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.BooleanUtil;
@@ -130,7 +131,7 @@ public class ProjectFileControl extends BaseAgentController {
         List<DiffFileVo.DiffItem> data = diffFileVo.getData();
         Assert.notEmpty(data, "没有要对比的数据");
         // 扫描项目目录下面的所有文件
-        String path = projectInfoModel.allLib();
+        String path = FileUtil.file(projectInfoModel.allLib(), Opt.ofBlankAble(diffFileVo.getDir()).orElse(StrUtil.SLASH)).getAbsolutePath();
         List<File> files = FileUtil.loopFiles(path);
         // 将所有的文件信息组装并签名
         List<JSONObject> collect = files.stream().map(file -> {
@@ -336,6 +337,7 @@ public class ProjectFileControl extends BaseAgentController {
     @RequestMapping(value = "batch_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<String> batchDelete(@RequestBody DiffFileVo diffFileVo) {
         String id = diffFileVo.getId();
+        String dir = diffFileVo.getDir();
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
         // 备份文件
         String backupId = ProjectFileBackupUtil.backup(projectInfoModel.getId(), projectInfoModel.allLib());
@@ -344,13 +346,13 @@ public class ProjectFileControl extends BaseAgentController {
             List<DiffFileVo.DiffItem> data = diffFileVo.getData();
             Assert.notEmpty(data, "没有要对比的数据");
             //
-            String path = projectInfoModel.allLib();
+            File path = FileUtil.file(projectInfoModel.allLib(), Opt.ofBlankAble(dir).orElse(StrUtil.SLASH));
             for (DiffFileVo.DiffItem datum : data) {
                 File file = FileUtil.file(path, datum.getName());
                 if (FileUtil.del(file)) {
                     continue;
                 }
-                return new JsonMessage<>(500, "删除失败");
+                return new JsonMessage<>(500, "删除失败：" + file.getAbsolutePath());
             }
             return JsonMessage.success("删除成功");
         } finally {

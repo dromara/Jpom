@@ -61,6 +61,14 @@ public class AgentAuthorize implements InitializingBean {
      */
     private String authorize;
 
+    public void setAuthorize(String authorize) {
+        // 不能外部 set
+    }
+
+    public String getAuthorize() {
+        throw new UnsupportedOperationException("不能调用此方法");
+    }
+
     private final ConfigBean configBean;
     /**
      * 注入控制加载顺序，必须先加载数据目录才能初始化
@@ -123,9 +131,13 @@ public class AgentAuthorize implements InitializingBean {
         if (StrUtil.isEmpty(this.agentName)) {
             throw new JpomRuntimeException("The agent login name cannot be empty");
         }
-        this.checkPwd();
-        // 生成密码授权字符串
-        this.authorize = SecureUtil.sha1(this.agentName + "@" + this.agentPwd);
+        if (StrUtil.isEmpty(this.authorize)) {
+            this.checkPwd();
+            // 生成密码授权字符串
+            this.authorize = SecureUtil.sha1(this.agentName + "@" + this.agentPwd);
+        } else {
+            log.warn("authorized 不能重复加载");
+        }
         //
         JvmUtil.checkJpsNormal();
     }

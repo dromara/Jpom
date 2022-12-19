@@ -93,7 +93,8 @@ public class BuildInfoManageController extends BaseServerController {
                         String resultDirFile,
                         String branchName,
                         String branchTagName,
-                        String checkRepositoryDiff) {
+                        String checkRepositoryDiff,
+                        String projectSecondaryDirectory) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         Assert.notNull(item, "没有对应数据");
         // 更新数据
@@ -101,8 +102,16 @@ public class BuildInfoManageController extends BaseServerController {
         Opt.ofBlankAble(resultDirFile).ifPresent(update::setResultDirFile);
         Opt.ofBlankAble(branchName).ifPresent(update::setBranchName);
         Opt.ofBlankAble(branchTagName).ifPresent(update::setBranchTagName);
+        Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> {
+            FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage()));
+            //
+            String extraData = item.getExtraData();
+            JSONObject jsonObject = JSONObject.parseObject(extraData);
+            jsonObject.put("projectSecondaryDirectory", s);
+            update.setExtraData(jsonObject.toString());
+        });
 
-        if (!StrUtil.isAllBlank(resultDirFile, branchName, branchTagName)) {
+        if (!StrUtil.isAllBlank(resultDirFile, branchName, branchTagName, projectSecondaryDirectory)) {
             update.setId(id);
             buildInfoService.update(update);
         }

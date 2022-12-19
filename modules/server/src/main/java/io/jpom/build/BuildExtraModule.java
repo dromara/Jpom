@@ -151,6 +151,10 @@ public class BuildExtraModule extends BaseModel {
      * 镜像标签
      */
     private String dockerImagesLabels;
+    /**
+     * 项目二级目录
+     */
+    private String projectSecondaryDirectory;
 
     public String getResultDirFile() {
         if (resultDirFile == null) {

@@ -120,7 +120,7 @@
         </a-form-model-item>
 
         <a-form-model-item label="SSH节点" required>
-          <a-select show-search option-filter-prop="children" mode="multiple" v-model="chooseSsh">
+          <a-select show-search option-filter-prop="children" mode="multiple" v-model="chooseSsh" placeholder="请选择 SSH节点">
             <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>

@@ -30,6 +30,7 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
@@ -494,6 +495,9 @@ public class ReleaseManage implements Runnable {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", projectId);
         jsonObject.put("data", collect);
+        String directory = this.buildExtraModule.getProjectSecondaryDirectory();
+        directory = Opt.ofBlankAble(directory).orElse(StrUtil.SLASH);
+        jsonObject.put("dir", directory);
         JsonMessage<JSONObject> requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_DIFF_FILE, this.userModel, jsonObject);
         if (requestBody.getCode() != HttpStatus.HTTP_OK) {
             throw new JpomRuntimeException("对比项目文件失败：" + requestBody);
@@ -523,6 +527,7 @@ public class ReleaseManage implements Runnable {
             File file = FileUtil.file(resultFileParent, name);
             //
             String startPath = StringUtil.delStartPath(file, resultFileParent, false);
+            startPath = FileUtil.normalize(startPath + StrUtil.SLASH + directory);
             //
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
                 projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, this.userModel, false);
@@ -540,7 +545,7 @@ public class ReleaseManage implements Runnable {
      * 发布项目
      */
     private void doProject() {
-//		AfterOpt afterOpt, boolean clearOld, boolean diffSync
+        //AfterOpt afterOpt, boolean clearOld, boolean diffSync
         AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.buildExtraModule.getAfterOpt(), AfterOpt.No);
         boolean clearOld = this.buildExtraModule.isClearOld();
         boolean diffSync = this.buildExtraModule.isDiffSync();
@@ -563,7 +568,7 @@ public class ReleaseManage implements Runnable {
             zipFile = this.resultFile;
             unZip = false;
         }
-        JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile, null,
+        JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile, this.buildExtraModule.getProjectSecondaryDirectory(),
             projectId,
             unZip,
             afterOpt,

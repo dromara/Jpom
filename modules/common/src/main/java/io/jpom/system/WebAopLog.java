@@ -64,13 +64,15 @@ public class WebAopLog {
         Object proceed;
         Object logResult = null;
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        String requestUri = requestAttributes.getRequest().getRequestURI();
         try {
             aopLogInterface.forEach(aopLogInterface -> aopLogInterface.before(joinPoint));
             proceed = joinPoint.proceed();
             logResult = proceed;
-            log.debug("{} {}", requestAttributes.getRequest().getRequestURI(), Optional.ofNullable(proceed).orElse(StrUtil.EMPTY));
+            log.debug("{} {}", requestUri, Optional.ofNullable(proceed).orElse(StrUtil.EMPTY));
         } catch (Throwable e) {
-            log.debug("{}", requestAttributes.getRequest().getRequestURI(), e);
+            // 不用记录异常日志，全局异常拦截里面会记录，此处不用重复记录
+            // log.debug("发生异常 {}", requestUri, e);
             logResult = e;
             throw e;
         } finally {

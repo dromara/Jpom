@@ -24,6 +24,7 @@ package io.jpom.controller.build;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
@@ -60,6 +61,7 @@ import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -210,12 +212,7 @@ public class BuildInfoController extends BaseServerController {
         if (StrUtil.isNotEmpty(webhook)) {
             Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
         }
-        try {
-            File userHomeDir = FileUtil.getUserHomeDir();
-            FileUtil.checkSlip(userHomeDir, FileUtil.file(userHomeDir, resultDirFile));
-        } catch (Exception e) {
-            return new JsonMessage<>(405, "产物目录不能越级：" + e.getMessage());
-        }
+        FileUtils.checkSlip(resultDirFile, e -> new IllegalArgumentException("产物目录不能越级：" + e.getMessage()));
         buildInfoModel.setAutoBuildCron(this.checkCron(autoBuildCron));
         buildInfoModel.setWebhook(webhook);
         buildInfoModel.setRepositoryId(repositoryId);
@@ -230,7 +227,7 @@ public class BuildInfoController extends BaseServerController {
         BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
         Assert.notNull(releaseMethod1, "发布方法不正确");
         buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
-        // 把 extraData 信息转换成 JSON 字符串
+        // 把 extraData 信息转换成 JSON 字符串 ,不能直接使用 io.jpom.build.BuildExtraModule
         JSONObject jsonObject = JSON.parseObject(extraData);
 
         // 验证发布方式 和 extraData 信息
@@ -389,6 +386,11 @@ public class BuildInfoController extends BaseServerController {
         String clearOld = jsonObject.getString("clearOld");
         jsonObject.put("afterOpt", afterOpt1.getCode());
         jsonObject.put("clearOld", Convert.toBool(clearOld, false));
+        //
+        String projectSecondaryDirectory = jsonObject.getString("projectSecondaryDirectory");
+        Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> {
+            FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage()));
+        });
     }
 
     /**

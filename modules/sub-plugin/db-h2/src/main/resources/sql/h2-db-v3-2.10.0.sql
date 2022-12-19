@@ -25,3 +25,6 @@ ALTER TABLE NODE_INFO DROP COLUMN IF EXISTS `cycle`;
 
 ALTER TABLE PROJECT_INFO
     ADD IF NOT EXISTS triggerToken VARCHAR (100) comment '触发器token';
+
+ALTER TABLE OUT_GIVING
+    ADD IF NOT EXISTS secondaryDirectory VARCHAR (200) comment '二级目录';

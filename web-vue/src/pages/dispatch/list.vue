@@ -235,6 +235,9 @@
           </template>
           <a-input-number :min="0" v-model="temp.intervalTime" placeholder="分发间隔时间 （顺序重启、完整顺序重启）方式才生效" style="width: 100%" />
         </a-form-model-item>
+        <a-form-model-item prop="secondaryDirectory" label="二级目录">
+          <a-input v-model="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
+        </a-form-model-item>
         <a-form-model-item prop="clearOld">
           <template slot="label">
             清空发布
@@ -392,6 +395,9 @@
           </template>
           <a-input-number :min="0" v-model="temp.intervalTime" placeholder="分发间隔时间 （顺序重启、完整顺序重启）方式才生效" style="width: 100%" />
         </a-form-model-item>
+        <a-form-model-item prop="secondaryDirectory" label="二级目录">
+          <a-input v-model="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
+        </a-form-model-item>
         <a-form-model-item prop="clearOld">
           <template slot="label">
             清空发布
@@ -539,6 +545,9 @@
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
+        </a-form-model-item>
+        <a-form-model-item prop="secondaryDirectory" label="二级目录">
+          <a-input v-model="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -800,6 +809,7 @@ export default {
             id: record.id,
             intervalTime: record.intervalTime,
             clearOld: record.clearOld,
+            secondaryDirectory: record.secondaryDirectory,
           };
           // console.log(this.temp);
           this.linkDispatchVisible = true;
@@ -927,6 +937,7 @@ export default {
                 nodeIdList: [],
                 intervalTime: record.intervalTime,
                 clearOld: record.clearOld,
+                secondaryDirectory: record.secondaryDirectory,
               };
             }
             // 添加 nodeIdList
@@ -1094,6 +1105,7 @@ export default {
           formData.append("afterOpt", this.temp.afterOpt);
           formData.append("clearOld", this.temp.clearOld);
           formData.append("autoUnzip", this.temp.autoUnzip);
+          formData.append("secondaryDirectory", this.temp.secondaryDirectory);
           uploadDispatchFile(formData).then((res) => {
             if (res.code === 200) {
               this.$notification.success({

@@ -69,7 +69,8 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
     private final UserModel userModel;
     private final boolean unzip;
     private final boolean clearOld;
-    private Integer sleepTime;
+    private final Integer sleepTime;
+    private final String secondaryDirectory;
     /**
      * 数据库记录id
      */
@@ -82,8 +83,9 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                             boolean unzip,
                             Integer sleepTime) {
         this.outGivingId = item.getId();
-        this.unzip = unzip;
+        this.secondaryDirectory = item.getSecondaryDirectory();
         this.clearOld = item.clearOld();
+        this.unzip = unzip;
         this.outGivingNodeProject = outGivingNodeProject;
         this.file = file;
         this.afterOpt = ObjectUtil.defaultIfNull(EnumUtil.likeValueOf(AfterOpt.class, item.getAfterOpt()), AfterOpt.No);
@@ -105,7 +107,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
             this.updateStatus(this.outGivingId, this.outGivingNodeProject,
                 OutGivingNodeProject.Status.Ing, "开始分发");
             //
-            JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, null,
+            JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, this.secondaryDirectory,
                 this.outGivingNodeProject.getProjectId(),
                 unzip,
                 afterOpt,
