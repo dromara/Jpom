@@ -59,7 +59,7 @@ pidfile="$base/bin/agent.pid"
 
 export JPOM_LOG=${LogPath}
 
-PID_TAG="JPOM_AGENT_APPLICATION1"
+PID_TAG="JPOM_AGENT_APPLICATION"
 agent_log="${LogPath}/agent.log"
 
 ## set java path
