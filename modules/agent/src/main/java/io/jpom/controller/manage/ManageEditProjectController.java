@@ -38,7 +38,6 @@ import io.jpom.model.RunMode;
 import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.WhitelistDirectoryService;
-import io.jpom.system.ConfigBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -80,9 +79,6 @@ public class ManageEditProjectController extends BaseAgentController {
         String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
         Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "项目id 长度范围2-20（英文字母 、数字和下划线）");
         Assert.state(!JpomApplication.SYSTEM_ID.equals(id), "项目id " + JpomApplication.SYSTEM_ID + " 关键词被系统占用");
-        // 防止和Jpom冲突
-        ConfigBean instance = ConfigBean.getInstance();
-        Assert.state(!instance.applicationTag.equalsIgnoreCase(id), "当前项目id已经被Jpom占用");
         // 运行模式
         String runMode = getParameter("runMode");
         RunMode runMode1 = RunMode.ClassPath;

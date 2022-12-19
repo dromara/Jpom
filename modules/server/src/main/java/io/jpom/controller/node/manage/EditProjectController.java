@@ -22,7 +22,6 @@
  */
 package io.jpom.controller.node.manage;
 
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
@@ -36,7 +35,6 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.NodeDataPermission;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.system.WhitelistDirectoryService;
-import io.jpom.system.ConfigBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -94,10 +92,6 @@ public class EditProjectController extends BaseServerController {
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> saveProject(String id) {
-        // 防止和Jpom冲突
-        if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
-            return new JsonMessage<>(401, "当前项目id已经被Jpom占用");
-        }
         NodeModel node = getNode();
         JsonMessage<String> request = NodeForward.request(node, getRequest(), NodeUrl.Manage_SaveProject);
         if (request.getCode() == HttpStatus.OK.value()) {
