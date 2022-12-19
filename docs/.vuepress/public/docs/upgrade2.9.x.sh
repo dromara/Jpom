@@ -68,18 +68,20 @@ function check_jar_version() {
 }
 
 function download() {
-	# 获取最新的版本号
-	url_type=$(echo "${type}" | tr 'A-Z' 'a-z')
-	versions=$(curl -LfsS https://jpom.top/docs/versions.tag)
-	download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
-	wget -O "${type}.tar.gz" "${download_url}"
-	tar -zxf "${type}.tar.gz" -C "${bin_abs_path}"
+	if [ ! -f "${type}.tar.gz" ]; then
+		# 获取最新的版本号
+		url_type=$(echo "${type}" | tr 'A-Z' 'a-z')
+		versions=$(curl -LfsS https://jpom.top/docs/versions.tag)
+		download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
+		wget -O "${type}.tar.gz" "${download_url}"
+		tar -zxf "${type}.tar.gz" -C "${bin_abs_path}"
+	fi
 	# 删除安装包
 	rm -f "${type}.tar.gz"
 }
 
 function upgrade_server() {
-	echo "开始初始检查"
+	echo "开始初始检查 $type"
 	check_jar_version "$bin_abs_path/lib" "Server-2.9|server-2.9"
 	dir_array=(Server.sh extConfig.yml)
 	for element in "${dir_array[@]}"; do
@@ -112,7 +114,7 @@ function upgrade_server() {
 }
 
 function upgrade_agent() {
-	echo "开始初始检查"
+	echo "开始初始检查 $type"
 	check_jar_version "$bin_abs_path/lib" "agent-2.9|Agent-2.9"
 	dir_array=(Agent.sh extConfig.yml)
 	for element in "${dir_array[@]}"; do
