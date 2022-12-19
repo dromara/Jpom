@@ -75,6 +75,11 @@ public class OutGivingModel extends BaseWorkspaceModel {
      */
     private Integer status;
 
+    /**
+     * 二级目录
+     */
+    private String secondaryDirectory;
+
 
     public boolean clearOld() {
         return clearOld != null && clearOld;

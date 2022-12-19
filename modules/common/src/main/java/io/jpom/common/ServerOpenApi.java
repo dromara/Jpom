@@ -29,9 +29,6 @@ package io.jpom.common;
  * @since 2019/8/5
  */
 public class ServerOpenApi {
-
-    public static final String HEAD = "JPOM-TOKEN";
-
     /**
      * 用户的token
      */
@@ -44,60 +41,63 @@ public class ServerOpenApi {
 
     public static final String API = "/api/";
 
-    public static final String UPDATE_NODE_INFO = API + "node/update";
     /**
      * 接收推送
      */
     public static final String RECEIVE_PUSH = API + "node/receive_push";
 
     public static final String PUSH_NODE_KEY = "--auto-push-to-server";
-
-    /**
-     * 安装id
-     */
-    public static final String INSTALL_ID = API + "/installId";
-
     /**
      * 触发构建(新), 第一级构建id,第二级token
      */
-    public static final String BUILD_TRIGGER_BUILD2 = API + "/build2/{id}/{token}";
+    public static final String BUILD_TRIGGER_BUILD2 = API + "build2/{id}/{token}";
 
     /**
      * 触发构建 批量触发
      */
-    public static final String BUILD_TRIGGER_BUILD_BATCH = API + "/build_batch";
+    public static final String BUILD_TRIGGER_BUILD_BATCH = API + "build_batch";
     /**
      * 获取当前构建状态和日志
      */
-    public static final String BUILD_TRIGGER_STATUS = API + "/build_status";
+    public static final String BUILD_TRIGGER_STATUS = API + "build_status";
 
     /**
      * SSH 脚本执行, 第一级脚本id,第二级token
      */
-    public static final String SSH_COMMAND_TRIGGER_URL = API + "/ssh_command/{id}/{token}";
+    public static final String SSH_COMMAND_TRIGGER_URL = API + "ssh_command/{id}/{token}";
 
     /**
      * SSH 脚本执行 批量触发
      */
-    public static final String SSH_COMMAND_TRIGGER_BATCH = API + "/ssh_command_batch";
+    public static final String SSH_COMMAND_TRIGGER_BATCH = API + "ssh_command_batch";
 
     /**
      * 服务端脚本执行, 第一级脚本id,第二级token
      */
-    public static final String SERVER_SCRIPT_TRIGGER_URL = API + "/server_script/{id}/{token}";
+    public static final String SERVER_SCRIPT_TRIGGER_URL = API + "server_script/{id}/{token}";
 
     /**
      * 服务端脚本执行 批量触发
      */
-    public static final String SERVER_SCRIPT_TRIGGER_BATCH = API + "/server_script_batch";
+    public static final String SERVER_SCRIPT_TRIGGER_BATCH = API + "server_script_batch";
 
     /**
      * 插件端脚本执行, 第一级脚本id,第二级token
      */
-    public static final String NODE_SCRIPT_TRIGGER_URL = API + "/node_script/{id}/{token}";
+    public static final String NODE_SCRIPT_TRIGGER_URL = API + "node_script/{id}/{token}";
 
     /**
      * 插件端脚本执行 批量触发
      */
-    public static final String NODE_SCRIPT_TRIGGER_BATCH = API + "/node_script_batch";
+    public static final String NODE_SCRIPT_TRIGGER_BATCH = API + "node_script_batch";
+
+    /**
+     * 项目触发器, 第一级项目id（服务端存储）,第二级token
+     */
+    public static final String SERVER_PROJECT_TRIGGER_URL = API + "project/{id}/{token}";
+
+    /**
+     * 项目触发器,批量触发
+     */
+    public static final String SERVER_PROJECT_TRIGGER_BATCH = API + "project_batch";
 }

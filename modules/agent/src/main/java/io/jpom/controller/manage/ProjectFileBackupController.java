@@ -27,10 +27,10 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.script.ProjectFileBackupUtil;
 import io.jpom.util.CommandUtil;
@@ -69,7 +69,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @return list
      */
     @RequestMapping(value = "list-backup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String listBackup(String id) {
+    public JsonMessage<JSONObject> listBackup(String id) {
         //
         super.getProjectInfoModel(id);
         File path = ProjectFileBackupUtil.path(id);
@@ -78,14 +78,14 @@ public class ProjectFileBackupController extends BaseAgentController {
             .filter(FileUtil::isDirectory)
             .collect(Collectors.toList());
         if (CollUtil.isEmpty(collect)) {
-            return JsonMessage.getString(200, "查询成功", Collections.EMPTY_LIST);
+            return JsonMessage.success("查询成功");
         }
         List<JSONObject> arrayFile = FileUtils.parseInfo(collect, true, path.getAbsolutePath());
         //
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("path", FileUtil.getAbsolutePath(path));
         jsonObject.put("list", arrayFile);
-        return JsonMessage.getString(200, "查询成功", jsonObject);
+        return JsonMessage.success("查询成功", jsonObject);
     }
 
     /**
@@ -97,7 +97,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @return list
      */
     @RequestMapping(value = "backup-item-files", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String backupItemFiles(String id, String path, @ValidatorItem String backupId) {
+    public JsonMessage<List<JSONObject>> backupItemFiles(String id, String path, @ValidatorItem String backupId) {
         // 查询项目路径
         super.getProjectInfoModel();
 
@@ -106,10 +106,10 @@ public class ProjectFileBackupController extends BaseAgentController {
         //
         File[] filesAll = FileUtil.exist(fileDir) ? fileDir.listFiles() : new File[]{};
         if (ArrayUtil.isEmpty(filesAll)) {
-            return JsonMessage.getString(200, "查询成功", Collections.EMPTY_LIST);
+            return JsonMessage.success("查询成功", Collections.emptyList());
         }
         List<JSONObject> arrayFile = FileUtils.parseInfo(filesAll, false, lib.getAbsolutePath());
-        return JsonMessage.getString(200, "查询成功", arrayFile);
+        return JsonMessage.success("查询成功", arrayFile);
     }
 
     /**
@@ -148,12 +148,12 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @return msg
      */
     @RequestMapping(value = "backup-delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
+    public JsonMessage<Object> deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
         super.getProjectInfoModel();
         File lib = ProjectFileBackupUtil.path(id, backupId);
         File file = FileUtil.file(lib, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
         CommandUtil.systemFastDel(file);
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 
     /**
@@ -167,7 +167,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @return msg
      */
     @RequestMapping(value = "backup-recover", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName) {
+    public JsonMessage<Object> recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName) {
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
         File backupPath = ProjectFileBackupUtil.path(id, backupId);
         String projectPath = projectInfoModel.allLib();
@@ -194,7 +194,7 @@ public class ProjectFileBackupController extends BaseAgentController {
             projectFile = FileUtil.file(projectPath, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
             FileUtil.copy(backupFile, projectFile, true);
         }
-        return JsonMessage.getString(200, "还原成功");
+        return JsonMessage.success("还原成功");
     }
 
 

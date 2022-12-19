@@ -162,14 +162,14 @@
               <a-alert message="温馨提示" type="warning">
                 <template slot="description">
                   <ul>
-                    <li>单个触发器地址中：第一个随机字符串为构建ID，第二个随机字符串为 token</li>
-                    <li>重置为重新生成触发地址,重置成功后之前的触发器地址将失效,构建触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效</li>
-                    <li>批量构建参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
+                    <li>单个触发器地址中：第一个随机字符串为脚本ID，第二个随机字符串为 token</li>
+                    <li>重置为重新生成触发地址,重置成功后之前的触发器地址将失效,触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效</li>
+                    <li>批量触发参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
                   </ul>
                 </template>
               </a-alert>
               <a-alert
-                v-clipboard:copy="temp.triggerBuildUrl"
+                v-clipboard:copy="temp.triggerUrl"
                 v-clipboard:success="
                   () => {
                     tempVue.prototype.$notification.success({ message: '复制成功' });
@@ -184,12 +184,12 @@
                 :message="`单个触发器地址(点击可以复制)`"
               >
                 <template slot="description">
-                  <a-tag>GET</a-tag> <span>{{ temp.triggerBuildUrl }} </span>
+                  <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   <a-icon type="copy" />
                 </template>
               </a-alert>
               <a-alert
-                v-clipboard:copy="temp.batchTriggerBuildUrl"
+                v-clipboard:copy="temp.batchTriggerUrl"
                 v-clipboard:success="
                   () => {
                     tempVue.prototype.$notification.success({ message: '复制成功' });
@@ -204,7 +204,7 @@
                 :message="`批量触发器地址(点击可以复制)`"
               >
                 <template slot="description">
-                  <a-tag>POST</a-tag> <span>{{ temp.batchTriggerBuildUrl }} </span>
+                  <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
                   <a-icon type="copy" />
                 </template>
               </a-alert>
@@ -468,8 +468,8 @@ export default {
       });
     },
     fillTriggerResult(res) {
-      this.temp.triggerBuildUrl = `${location.protocol}//${location.host}${res.data.triggerBuildUrl}`;
-      this.temp.batchTriggerBuildUrl = `${location.protocol}//${location.host}${res.data.batchTriggerBuildUrl}`;
+      this.temp.triggerUrl = `${location.protocol}//${location.host}${res.data.triggerUrl}`;
+      this.temp.batchTriggerUrl = `${location.protocol}//${location.host}${res.data.batchTriggerUrl}`;
 
       this.temp = { ...this.temp };
     },

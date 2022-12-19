@@ -24,21 +24,22 @@ package io.jpom.controller.build;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildExecuteService;
 import io.jpom.build.BuildUtil;
 import io.jpom.build.DockerYmlDsl;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorConfig;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.PageResultDto;
@@ -60,6 +61,7 @@ import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -116,7 +118,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @RequestMapping(value = "/build/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getBuildList() {
+    public JsonMessage<PageResultDto<BuildInfoModel>> getBuildList() {
         // load list with page
         PageResultDto<BuildInfoModel> page = buildInfoService.listPage(getRequest());
         page.each(buildInfoModel -> {
@@ -127,7 +129,7 @@ public class BuildInfoController extends BaseServerController {
             File file = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), buildInfoModel.getResultDirFile());
             buildInfoModel.setResultHasFile(FileUtil.exist(file));
         });
-        return JsonMessage.getString(200, "", page);
+        return JsonMessage.success("", page);
     }
 
     /**
@@ -137,10 +139,10 @@ public class BuildInfoController extends BaseServerController {
      */
     @GetMapping(value = "/build/list_all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getBuildListAll() {
+    public JsonMessage<List<BuildInfoModel>> getBuildListAll() {
         // load list with page
         List<BuildInfoModel> modelList = buildInfoService.listByWorkspace(getRequest());
-        return JsonMessage.getString(200, "", modelList);
+        return JsonMessage.success("", modelList);
     }
 
     /**
@@ -150,10 +152,10 @@ public class BuildInfoController extends BaseServerController {
      */
     @GetMapping(value = "/build/list_group_all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getBuildGroupAll() {
+    public JsonMessage<List<String>> getBuildGroupAll() {
         // load list with page
         List<String> group = buildInfoService.listGroup(getRequest());
-        return JsonMessage.getString(200, "", group);
+        return JsonMessage.success("", group);
     }
 
     /**
@@ -174,15 +176,15 @@ public class BuildInfoController extends BaseServerController {
      */
     @RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String updateBuild(String id,
-                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空") String name,
-                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库信息不能为空") String repositoryId,
-                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200") String resultDirFile,
-                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空") String script,
-                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
-                              String branchName, String branchTagName, String webhook, String autoBuildCron,
-                              String extraData, String group,
-                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "构建方式不正确") int buildMode) {
+    public JsonMessage<String> updateBuild(String id,
+                                           @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空") String name,
+                                           @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库信息不能为空") String repositoryId,
+                                           @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200") String resultDirFile,
+                                           @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空") String script,
+                                           @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
+                                           String branchName, String branchTagName, String webhook, String autoBuildCron,
+                                           String extraData, String group,
+                                           @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "构建方式不正确") int buildMode) {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, getRequest());
         Assert.notNull(repositoryModel, "无效的仓库信息");
@@ -199,7 +201,7 @@ public class BuildInfoController extends BaseServerController {
             // 验证 dsl 内容
             this.checkDocker(script);
         }
-        if (buildExtConfig.checkDeleteCommand()) {
+        if (buildExtConfig.isCheckDeleteCommand()) {
             // 判断删除命令
             Assert.state(!CommandUtil.checkContainsDel(script), "不能包含删除命令");
         }
@@ -210,12 +212,7 @@ public class BuildInfoController extends BaseServerController {
         if (StrUtil.isNotEmpty(webhook)) {
             Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
         }
-        try {
-            File userHomeDir = FileUtil.getUserHomeDir();
-            FileUtil.checkSlip(userHomeDir, FileUtil.file(userHomeDir, resultDirFile));
-        } catch (Exception e) {
-            return JsonMessage.getString(405, "产物目录不能越级：" + e.getMessage());
-        }
+        FileUtils.checkSlip(resultDirFile, e -> new IllegalArgumentException("产物目录不能越级：" + e.getMessage()));
         buildInfoModel.setAutoBuildCron(this.checkCron(autoBuildCron));
         buildInfoModel.setWebhook(webhook);
         buildInfoModel.setRepositoryId(repositoryId);
@@ -230,7 +227,7 @@ public class BuildInfoController extends BaseServerController {
         BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
         Assert.notNull(releaseMethod1, "发布方法不正确");
         buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
-        // 把 extraData 信息转换成 JSON 字符串
+        // 把 extraData 信息转换成 JSON 字符串 ,不能直接使用 io.jpom.build.BuildExtraModule
         JSONObject jsonObject = JSON.parseObject(extraData);
 
         // 验证发布方式 和 extraData 信息
@@ -268,11 +265,11 @@ public class BuildInfoController extends BaseServerController {
             // set default buildId
             buildInfoModel.setBuildId(0);
             buildInfoService.insert(buildInfoModel);
-            return JsonMessage.getString(200, "添加成功");
+            return JsonMessage.success("添加成功");
         }
 
         buildInfoService.updateById(buildInfoModel, getRequest());
-        return JsonMessage.getString(200, "修改成功");
+        return JsonMessage.success("修改成功");
     }
 
     private void checkDocker(String script) {
@@ -389,6 +386,11 @@ public class BuildInfoController extends BaseServerController {
         String clearOld = jsonObject.getString("clearOld");
         jsonObject.put("afterOpt", afterOpt1.getCode());
         jsonObject.put("clearOld", Convert.toBool(clearOld, false));
+        //
+        String projectSecondaryDirectory = jsonObject.getString("projectSecondaryDirectory");
+        Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> {
+            FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage()));
+        });
     }
 
     /**
@@ -400,7 +402,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String branchList(
+    public JsonMessage<Object[]> branchList(
         @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空")) String repositoryId) throws Exception {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, false);
@@ -412,7 +414,7 @@ public class BuildInfoController extends BaseServerController {
         Tuple branchAndTagList = (Tuple) plugin.execute("branchAndTagList", map);
         Assert.notNull(branchAndTagList, "没有任何分支");
         Object[] members = branchAndTagList.getMembers();
-        return JsonMessage.getString(200, "ok", members);
+        return JsonMessage.success("ok", members);
     }
 
 
@@ -424,7 +426,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @PostMapping(value = "/build/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
+    public JsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
         // 查询构建信息
         HttpServletRequest request = getRequest();
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
@@ -442,7 +444,7 @@ public class BuildInfoController extends BaseServerController {
         Assert.state(!fastDel, "清理历史构建产物失败,已经重新尝试");
         // 删除构建信息数据
         buildInfoService.delByKey(buildInfoModel.getId(), request);
-        return JsonMessage.getString(200, "清理历史构建产物成功");
+        return JsonMessage.success("清理历史构建产物成功");
     }
 
 
@@ -454,7 +456,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @PostMapping(value = "/build/clean-source", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
+    public JsonMessage<Object> cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
         Objects.requireNonNull(buildInfoModel, "没有对应数据");
@@ -463,7 +465,7 @@ public class BuildInfoController extends BaseServerController {
         boolean fastDel = CommandUtil.systemFastDel(source);
         //
         Assert.state(!fastDel, "删除文件失败,请检查");
-        return JsonMessage.getString(200, "清理成功");
+        return JsonMessage.success("清理成功");
     }
 
     /**

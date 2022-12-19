@@ -22,20 +22,12 @@
  */
 package io.jpom.system.extconf;
 
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.lang.Dict;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.setting.yaml.YamlUtil;
 import io.jpom.system.db.DbConfig;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.StringWriter;
 
 /**
  * 数据库配置
@@ -44,7 +36,7 @@ import java.io.StringWriter;
  * @since 2022/2/9
  */
 @Configuration
-@ConfigurationProperties(prefix = "db")
+@ConfigurationProperties(prefix = "jpom.db")
 @Data
 public class DbExtConfig {
 
@@ -69,7 +61,7 @@ public class DbExtConfig {
     /**
      * 缓存大小
      * <p>
-     * http://www.h2database.com/html/features.html#cache_settings
+     * <a href="http://www.h2database.com/html/features.html#cache_settings">http://www.h2database.com/html/features.html#cache_settings</a>
      */
     private DataSize cacheSize = DataSize.ofMegabytes(10);
 
@@ -81,15 +73,15 @@ public class DbExtConfig {
     /**
      * 自动备份保留天数 小于等于 0，不自动删除自动备份数据
      */
-    private Integer autoBackupReserveDay = 5;
+    private int autoBackupReserveDay = 5;
 
-    private Integer maxActive = 100;
+    private int maxActive = 100;
 
-    private Integer initialSize = 10;
+    private int initialSize = 10;
 
-    private Integer maxWait = 10;
+    private int maxWait = 10;
 
-    private Integer minIdle = 1;
+    private int minIdle = 1;
     /**
      * @see cn.hutool.db.sql.SqlLog#KEY_SHOW_SQL
      */

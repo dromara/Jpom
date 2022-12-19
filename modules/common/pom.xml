@@ -40,16 +40,14 @@
     <dependencies>
 
         <dependency>
-            <groupId>cn.jiangzeyin.fast-boot</groupId>
-            <artifactId>common-boot</artifactId>
-            <version>${common-boot.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
 
-            <exclusions>
-                <exclusion>
-                    <groupId>cn.hutool</groupId>
-                    <artifactId>hutool-all</artifactId>
-                </exclusion>
-            </exclusions>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>[1.2.76,1.2.99]</version>
         </dependency>
 
         <dependency>

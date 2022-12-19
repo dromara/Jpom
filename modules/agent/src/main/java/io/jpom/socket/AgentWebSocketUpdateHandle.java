@@ -24,18 +24,19 @@ package io.jpom.socket;
 
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.Type;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.UploadFileModel;
-import io.jpom.system.AgentConfigBean;
+import io.jpom.system.AgentConfig;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -54,91 +55,98 @@ import java.util.Map;
 @Slf4j
 public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 
-	private static final Map<String, UploadFileModel> UPLOAD_FILE_INFO = new HashMap<>();
+    private static final Map<String, UploadFileModel> UPLOAD_FILE_INFO = new HashMap<>();
 
-	@OnOpen
-	public void onOpen(Session session) {
-		if (super.checkAuthorize(session)) {
-			return;
-		}
-		session.setMaxBinaryMessageBufferSize(Const.DEFAULT_BUFFER_SIZE);
-		//
-	}
+    private static AgentConfig agentConfig;
+
+    @Autowired
+    public void init(AgentConfig agentConfig) {
+        AgentWebSocketUpdateHandle.agentConfig = agentConfig;
+    }
+
+    @OnOpen
+    public void onOpen(Session session) {
+        if (super.checkAuthorize(session)) {
+            return;
+        }
+        session.setMaxBinaryMessageBufferSize(Const.DEFAULT_BUFFER_SIZE);
+        //
+    }
 
 
-	@OnMessage
-	public void onMessage(String message, Session session) throws Exception {
-		WebSocketMessageModel model = WebSocketMessageModel.getInstance(message);
-		switch (model.getCommand()) {
-			case "getVersion":
-				model.setData(JSONObject.toJSONString(JpomManifest.getInstance()));
-				break;
-			case "upload":
-				AgentFileModel agentFileModel = ((JSONObject) model.getParams()).toJavaObject(AgentFileModel.class);
-				UploadFileModel uploadFileModel = new UploadFileModel();
-				uploadFileModel.setId(model.getNodeId());
-				uploadFileModel.setName(agentFileModel.getName());
-				uploadFileModel.setSize(agentFileModel.getSize());
-				uploadFileModel.setVersion(agentFileModel.getVersion());
-				uploadFileModel.setSavePath(AgentConfigBean.getInstance().getTempPath().getAbsolutePath());
-				uploadFileModel.remove();
-				UPLOAD_FILE_INFO.put(session.getId(), uploadFileModel);
-				break;
-			case "restart":
-				model.setData(restart(session));
-				break;
-			default:
-				break;
-		}
-		SocketSessionUtil.send(session, model.toString());
-		//session.sendMessage(new TextMessage(model.toString()));
-	}
+    @OnMessage
+    public void onMessage(String message, Session session) throws Exception {
+        WebSocketMessageModel model = WebSocketMessageModel.getInstance(message);
+        switch (model.getCommand()) {
+            case "getVersion":
+                model.setData(JSONObject.toJSONString(JpomManifest.getInstance()));
+                break;
+            case "upload":
+                AgentFileModel agentFileModel = ((JSONObject) model.getParams()).toJavaObject(AgentFileModel.class);
+                UploadFileModel uploadFileModel = new UploadFileModel();
+                uploadFileModel.setId(model.getNodeId());
+                uploadFileModel.setName(agentFileModel.getName());
+                uploadFileModel.setSize(agentFileModel.getSize());
+                uploadFileModel.setVersion(agentFileModel.getVersion());
+                uploadFileModel.setSavePath(agentConfig.getTempPath().getAbsolutePath());
+                uploadFileModel.remove();
+                UPLOAD_FILE_INFO.put(session.getId(), uploadFileModel);
+                break;
+            case "restart":
+                model.setData(restart(session));
+                break;
+            default:
+                break;
+        }
+        SocketSessionUtil.send(session, model.toString());
+        //session.sendMessage(new TextMessage(model.toString()));
+    }
 
-	@OnMessage
-	public void onMessage(byte[] message, Session session) throws Exception {
-		UploadFileModel uploadFileModel = UPLOAD_FILE_INFO.get(session.getId());
-		uploadFileModel.save(message);
-		// 更新进度
-		WebSocketMessageModel model = new WebSocketMessageModel("updateNode", uploadFileModel.getId());
-		model.setData(uploadFileModel);
-		SocketSessionUtil.send(session, model.toString());
+    @OnMessage
+    public void onMessage(byte[] message, Session session) throws Exception {
+        UploadFileModel uploadFileModel = UPLOAD_FILE_INFO.get(session.getId());
+        uploadFileModel.save(message);
+        // 更新进度
+        WebSocketMessageModel model = new WebSocketMessageModel("updateNode", uploadFileModel.getId());
+        model.setData(uploadFileModel);
+        SocketSessionUtil.send(session, model.toString());
 //		session.sendMessage(new TextMessage(model.toString()));
-	}
+    }
 
-	/**
-	 * 重启
-	 *
-	 * @param session 回话
-	 * @return 结果
-	 */
-	public String restart(Session session) {
-		String result = Const.UPGRADE_MSG;
-		try {
-			UploadFileModel uploadFile = UPLOAD_FILE_INFO.get(session.getId());
-			String filePath = uploadFile.getFilePath();
-			JsonMessage<Tuple> error = JpomManifest.checkJpomJar(filePath, Type.Agent);
-			if (error.getCode() != HttpStatus.HTTP_OK) {
-				return error.getMsg();
-			}
-			JpomManifest.releaseJar(filePath, uploadFile.getVersion());
-			JpomApplication.restart();
-		} catch (Exception e) {
-			result = "重启失败" + e.getMessage();
-			log.error("重启失败", e);
-		}
-		return result;
-	}
+    /**
+     * 重启
+     *
+     * @param session 回话
+     * @return 结果
+     */
+    public String restart(Session session) {
+        String result = Const.UPGRADE_MSG;
+        try {
+            UploadFileModel uploadFile = UPLOAD_FILE_INFO.get(session.getId());
+            String filePath = uploadFile.getFilePath();
+            JsonMessage<Tuple> error = JpomManifest.checkJpomJar(filePath, Type.Agent);
+            if (error.getCode() != HttpStatus.HTTP_OK) {
+                return error.getMsg();
+            }
+            JpomManifest.releaseJar(filePath, uploadFile.getVersion());
+            JpomApplication.restart();
+        } catch (Exception e) {
+            result = "重启失败" + e.getMessage();
+            log.error("重启失败", e);
+        }
+        return result;
+    }
 
-	@Override
-	@OnClose
-	public void onClose(Session session) {
-		super.onClose(session);
-		UPLOAD_FILE_INFO.remove(session.getId());
-	}
+    @Override
+    @OnClose
+    public void onClose(Session session) {
+        super.onClose(session);
+        UPLOAD_FILE_INFO.remove(session.getId());
+    }
 
-	@OnError
-	@Override
-	public void onError(Session session, Throwable thr) {
-		super.onError(session, thr);
-	}
+    @OnError
+    @Override
+    public void onError(Session session, Throwable thr) {
+        super.onError(session, thr);
+    }
 }

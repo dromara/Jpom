@@ -70,9 +70,12 @@ import java.util.stream.Stream;
 public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 
     private final DbExtConfig dbExtConfig;
+    private final DbConfig dbConfig;
 
-    public BackupInfoService(DbExtConfig dbExtConfig) {
+    public BackupInfoService(DbExtConfig dbExtConfig,
+                             DbConfig dbConfig) {
         this.dbExtConfig = dbExtConfig;
+        this.dbConfig = dbConfig;
     }
 
     /**
@@ -163,11 +166,11 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
         final String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
 
         // 设置默认备份 SQL 的文件地址
-        File file = FileUtil.file(DbConfig.getInstance().dbLocalPath(), ServerConst.BACKUP_DIRECTORY_NAME, fileName + ServerConst.SQL_FILE_SUFFIX);
+        File file = FileUtil.file(dbConfig.dbLocalPath(), ServerConst.BACKUP_DIRECTORY_NAME, fileName + ServerConst.SQL_FILE_SUFFIX);
         final String backupSqlPath = FileUtil.getAbsolutePath(file);
 
         // 数据源参数
-        final String url = DbConfig.getInstance().getDbUrl();
+        final String url = dbConfig.getDbUrl();
 
         final String user = dbExtConfig.getUserName();
         final String pass = dbExtConfig.getUserPwd();

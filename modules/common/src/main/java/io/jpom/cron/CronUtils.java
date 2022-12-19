@@ -31,7 +31,6 @@ import cn.hutool.cron.listener.TaskListener;
 import cn.hutool.cron.task.CronTask;
 import cn.hutool.cron.task.Task;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.system.ExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -75,9 +74,6 @@ public class CronUtils {
      * 开始
      */
     public static void start() {
-        boolean matchSecond = ExtConfigBean.getInstance().getTimerMatchSecond();
-        // 开启秒级
-        CronUtil.setMatchSecond(matchSecond);
         //
         Scheduler scheduler = CronUtil.getScheduler();
         //

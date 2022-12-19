@@ -23,8 +23,8 @@
 package io.jpom.controller.node.system;
 
 import cn.hutool.core.util.ReflectUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.AgentWhitelist;
@@ -70,7 +70,7 @@ public class WhitelistDirectoryController extends BaseServerController {
      */
     @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
-    public String whiteList() {
+    public JsonMessage<Map<String, String>> whiteList() {
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
         Map<String, String> map = new HashMap<>(8);
         if (agentWhitelist != null) {
@@ -89,7 +89,7 @@ public class WhitelistDirectoryController extends BaseServerController {
                 }
             }
         }
-        return JsonMessage.getString(200, "ok", map);
+        return JsonMessage.success("ok", map);
     }
 
 

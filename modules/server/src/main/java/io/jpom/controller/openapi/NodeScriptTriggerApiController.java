@@ -24,10 +24,10 @@ package io.jpom.controller.openapi;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseJpomController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -47,10 +47,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * 节点脚本触发器
+ *
  * @author bwcx_jzy
  * @since 2022/7/25
  */
@@ -79,7 +80,7 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
      * @return json
      */
     @RequestMapping(value = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String trigger2(@PathVariable String id, @PathVariable String token) {
+    public JsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
         ScriptCacheModel item = nodeScriptServer.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
@@ -101,10 +102,10 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
             } else {
                 jsonObject.put("msg", jsonMessage.getMsg());
             }
-            return JsonMessage.getString(200, "开始执行", jsonObject);
+            return JsonMessage.success("开始执行", jsonObject);
         } catch (Exception e) {
             log.error("触发自动执行服务器脚本异常", e);
-            return JsonMessage.getString(500, "执行异常：" + e.getMessage());
+            return new JsonMessage<>(500, "执行异常：" + e.getMessage());
         }
     }
 
@@ -131,7 +132,7 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
      * @return json
      */
     @PostMapping(value = ServerOpenApi.NODE_SCRIPT_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String triggerBatch() {
+    public JsonMessage<List<Object>> triggerBatch() {
         try {
             String body = ServletUtil.getBody(getRequest());
             JSONArray jsonArray = JSONArray.parseArray(body);
@@ -165,10 +166,10 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
                     jsonObject.put("msg", jsonMessage.getMsg());
                 }
             }).collect(Collectors.toList());
-            return JsonMessage.getString(200, "触发成功", collect);
+            return JsonMessage.success("触发成功", collect);
         } catch (Exception e) {
             log.error("服务端脚本批量触发异常", e);
-            return JsonMessage.getString(500, "触发异常", e.getMessage());
+            return new JsonMessage<>(500, "触发异常" + e.getMessage());
         }
     }
 }

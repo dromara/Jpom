@@ -24,9 +24,9 @@ package io.jpom.controller.manage.log;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.util.FileUtils;
@@ -52,7 +52,7 @@ import java.util.List;
 public class LogBackController extends BaseAgentController {
 
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String logSize(String id, String copyId) {
+    public JsonMessage<JSONObject> logSize(String id, String copyId) {
         NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
         JSONObject jsonObject = new JSONObject();
         //
@@ -63,27 +63,27 @@ public class LogBackController extends BaseAgentController {
         jsonObject.put("logBack", logBackBool);
         String info = projectInfoService.getLogSize(nodeProjectInfoModel, copyItem);
         jsonObject.put("logSize", info);
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String resetLog(String copyId) {
+    public JsonMessage<String> resetLog(String copyId) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
         try {
             String msg = AbstractProjectCommander.getInstance().backLog(pim, copyItem);
             if (msg.contains("ok")) {
-                return JsonMessage.getString(200, "重置成功");
+                return JsonMessage.success("重置成功");
             }
-            return JsonMessage.getString(201, "重置失败：" + msg);
+            return new JsonMessage<>(201, "重置失败：" + msg);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return JsonMessage.getString(500, "重置日志失败");
+            log.error("重置日志失败", e);
+            return new JsonMessage<>(500, "重置日志失败");
         }
     }
 
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String clear(String name, String copyId) {
+    public JsonMessage<String> clear(String name, String copyId) {
         Assert.hasText(name, "没有对应到文件");
         NodeProjectInfoModel pim = getProjectInfoModel();
         NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
@@ -92,11 +92,11 @@ public class LogBackController extends BaseAgentController {
             logBack = FileUtil.file(logBack, name);
             if (logBack.exists()) {
                 FileUtil.del(logBack);
-                return JsonMessage.getString(200, "删除成功");
+                return JsonMessage.success("删除成功");
             }
-            return JsonMessage.getString(500, "没有对应文件");
+            return new JsonMessage<>(500, "没有对应文件");
         } else {
-            return JsonMessage.getString(500, "没有对应文件夹");
+            return new JsonMessage<>(500, "没有对应文件夹");
         }
     }
 
@@ -120,7 +120,7 @@ public class LogBackController extends BaseAgentController {
     }
 
     @RequestMapping(value = "logBack", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String console(String copyId) {
+    public JsonMessage<JSONObject> console(String copyId) {
         // 查询项目路径
         NodeProjectInfoModel pim = getProjectInfoModel();
         NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
@@ -137,20 +137,20 @@ public class LogBackController extends BaseAgentController {
         jsonObject.put("id", pim.getId());
         jsonObject.put("logPath", copyItem == null ? pim.getLog() : pim.getLog(copyItem));
         jsonObject.put("logBackPath", logBack.getAbsolutePath());
-        return JsonMessage.getString(200, "", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
     @ResponseBody
-    public String export(String copyId) {
+    public JsonMessage<String> export(String copyId) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
         File file = copyItem == null ? new File(pim.getLog()) : pim.getLog(copyItem);
         if (!file.exists()) {
-            return JsonMessage.getString(400, "没有日志文件:" + file.getPath());
+            return new JsonMessage<>(400, "没有日志文件:" + file.getPath());
         }
         HttpServletResponse response = getResponse();
         ServletUtil.write(response, file);
-        return JsonMessage.getString(200, "");
+        return JsonMessage.success("");
     }
 }

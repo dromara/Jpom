@@ -24,13 +24,12 @@ package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
@@ -78,6 +77,7 @@ public class ConfigBean {
      * 程序升级信息文件
      */
     public static final String UPGRADE = "upgrade.json";
+    public static final String RUN_JAR = "run.bin";
     /**
      * 远程版本信息
      */
@@ -92,11 +92,6 @@ public class ConfigBean {
      */
     @Value("${server.port}")
     private int port;
-    /**
-     * 环境
-     */
-    @Value("${" + ConfigFileApplicationListener.ACTIVE_PROFILES_PROPERTY + "}")
-    private String active;
     /**
      * 数据目录缓存大小
      */
@@ -130,7 +125,7 @@ public class ConfigBean {
      * @return 文件夹路径
      */
     public String getDataPath() {
-        String dataPath = FileUtil.normalize(ExtConfigBean.getInstance().getPath() + StrUtil.SLASH + DATA);
+        String dataPath = FileUtil.normalize(ExtConfigBean.getPath() + StrUtil.SLASH + DATA);
         FileUtil.mkdir(dataPath);
         return dataPath;
     }
@@ -166,25 +161,12 @@ public class ConfigBean {
     }
 
     /**
-     * 是否为 pro 模式运行
-     *
-     * @return pro
-     */
-    public boolean isPro() {
-        return StrUtil.equals(this.active, "pro");
-    }
-
-    public String getActive() {
-        return active;
-    }
-
-    /**
      * 获取临时文件存储路径
      *
      * @return file
      */
     public File getTempPath() {
-        File file = new File(ConfigBean.getInstance().getDataPath());
+        File file = new File(this.getDataPath());
         file = FileUtil.file(file, "temp");
         FileUtil.mkdir(file);
         return file;

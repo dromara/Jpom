@@ -29,8 +29,8 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
-import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
@@ -55,47 +55,47 @@ import java.util.List;
 @RequestMapping(value = "/node")
 public class NodeWelcomeController extends BaseServerController {
 
-	private final DbSystemMonitorLogService dbSystemMonitorLogService;
+    private final DbSystemMonitorLogService dbSystemMonitorLogService;
 
-	public NodeWelcomeController(DbSystemMonitorLogService dbSystemMonitorLogService) {
-		this.dbSystemMonitorLogService = dbSystemMonitorLogService;
-	}
+    public NodeWelcomeController(DbSystemMonitorLogService dbSystemMonitorLogService) {
+        this.dbSystemMonitorLogService = dbSystemMonitorLogService;
+    }
 
-	@PostMapping(value = "node_monitor_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String nodeMonitorJson() {
-		List<SystemMonitorLog> list = this.getList();
-		Assert.notEmpty(list, "没有查询到任何数据");
-		return JsonMessage.getString(200, "ok", list);
-	}
+    @PostMapping(value = "node_monitor_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<SystemMonitorLog>> nodeMonitorJson() {
+        List<SystemMonitorLog> list = this.getList();
+        Assert.notEmpty(list, "没有查询到任何数据");
+        return JsonMessage.success("ok", list);
+    }
 
-	private List<SystemMonitorLog> getList() {
-		NodeModel node = getNode();
-		String startDateStr = getParameter("time[0]");
-		String endDateStr = getParameter("time[1]");
-		if (StrUtil.hasEmpty(startDateStr, endDateStr)) {
-			SystemMonitorLog systemMonitorLog = new SystemMonitorLog();
-			systemMonitorLog.setNodeId(node.getId());
-			return dbSystemMonitorLogService.queryList(systemMonitorLog, 500, new Order("monitorTime", Direction.DESC));
-		}
-		//  处理时间
-		DateTime startDate = DateUtil.parse(startDateStr);
-		long startTime = startDate.getTime();
-		DateTime endDate = DateUtil.parse(endDateStr);
-		if (startDate.equals(endDate)) {
-			// 时间相等
-			endDate = DateUtil.endOfDay(endDate);
-		}
-		long endTime = endDate.getTime();
+    private List<SystemMonitorLog> getList() {
+        NodeModel node = getNode();
+        String startDateStr = getParameter("time[0]");
+        String endDateStr = getParameter("time[1]");
+        if (StrUtil.hasEmpty(startDateStr, endDateStr)) {
+            SystemMonitorLog systemMonitorLog = new SystemMonitorLog();
+            systemMonitorLog.setNodeId(node.getId());
+            return dbSystemMonitorLogService.queryList(systemMonitorLog, 500, new Order("monitorTime", Direction.DESC));
+        }
+        //  处理时间
+        DateTime startDate = DateUtil.parse(startDateStr);
+        long startTime = startDate.getTime();
+        DateTime endDate = DateUtil.parse(endDateStr);
+        if (startDate.equals(endDate)) {
+            // 时间相等
+            endDate = DateUtil.endOfDay(endDate);
+        }
+        long endTime = endDate.getTime();
 
-		// 开启了节点信息采集
-		Page pageObj = new Page(1, 5000);
-		pageObj.addOrder(new Order("monitorTime", Direction.DESC));
-		Entity entity = Entity.create();
-		entity.set("nodeId", node.getId());
-		entity.set(" MONITORTIME", ">= " + startTime);
-		entity.set("MONITORTIME", "<= " + endTime);
-		return dbSystemMonitorLogService.listPageOnlyResult(entity, pageObj);
-	}
+        // 开启了节点信息采集
+        Page pageObj = new Page(1, 5000);
+        pageObj.addOrder(new Order("monitorTime", Direction.DESC));
+        Entity entity = Entity.create();
+        entity.set("nodeId", node.getId());
+        entity.set(" MONITORTIME", ">= " + startTime);
+        entity.set("MONITORTIME", "<= " + endTime);
+        return dbSystemMonitorLogService.listPageOnlyResult(entity, pageObj);
+    }
 
 //	private JSONObject getData() {
 //		List<SystemMonitorLog> list = getList();
@@ -122,7 +122,7 @@ public class NodeWelcomeController extends BaseServerController {
 //	@PostMapping(value = "getTop", produces = MediaType.APPLICATION_JSON_VALUE)
 //	public String getTop() {
 //		JSONObject object = getData();
-//		return JsonMessage.getString(200, "ok", object);
+//		return JsonMessage.success( "ok", object);
 //	}
 
 //	@RequestMapping(value = "exportTop")
@@ -149,14 +149,14 @@ public class NodeWelcomeController extends BaseServerController {
 //		}
 //	}
 
-	@RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String getProcessList() {
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.ProcessList).toString();
-	}
+    @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public String getProcessList() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.ProcessList).toString();
+    }
 
-	@RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
-	public String kill() {
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.Kill).toString();
-	}
+    @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @SystemPermission
+    public String kill() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Kill).toString();
+    }
 }

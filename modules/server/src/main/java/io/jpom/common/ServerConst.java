@@ -71,4 +71,36 @@ public class ServerConst extends Const {
      * 引用工作空间环境变量的前缀
      */
     public static final String REF_WORKSPACE_ENV = "$ref.wEnv.";
+
+    public static final String PROXY_PATH = "Jpom-ProxyPath";
+
+
+    /**
+     * 分发包存储路径
+     */
+    public static final String OUTGIVING_FILE = "outgiving";
+
+
+    /**
+     * 第一次服务端安装信息
+     */
+    public static final String INSTALL = "INSTALL.json";
+
+
+    /**
+     * token自动续签状态码
+     */
+    public static final int RENEWAL_AUTHORIZE_CODE = 801;
+
+    /**
+     * token 失效
+     */
+    public static final int AUTHORIZE_TIME_OUT_CODE = 800;
+
+    /**
+     * 账号被锁定
+     */
+    public static final int ACCOUNT_LOCKED = 802;
+    public static final String LOGIN_TIP = "登录信息已失效,重新登录";
+    public static final String ACCOUNT_LOCKED_TIP = "账号已经被禁用,不能使用";
 }

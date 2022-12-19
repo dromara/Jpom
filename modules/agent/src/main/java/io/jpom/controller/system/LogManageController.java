@@ -24,14 +24,13 @@ package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseAgentController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.socket.AgentFileTailWatcher;
-import io.jpom.system.WebAopLog;
+import io.jpom.system.LogbackConfig;
 import io.jpom.util.LayuiTreeUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -55,34 +54,31 @@ public class LogManageController extends BaseAgentController {
 
 
     @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String logData() {
-        WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
-        JSONArray data = LayuiTreeUtil.getTreeData(webAopLog.getPropertyValue());
-        return JsonMessage.getString(200, "", data);
+    public JsonMessage<JSONArray> logData() {
+        JSONArray data = LayuiTreeUtil.getTreeData(LogbackConfig.getPath());
+        return JsonMessage.success("", data);
     }
 
 
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String logData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
-        WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
-        File file = FileUtil.file(webAopLog.getPropertyValue(), path);
+    public JsonMessage<String> logData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
+        File file = FileUtil.file(LogbackConfig.getPath(), path);
         // 判断修改时间
         long modified = file.lastModified();
         Assert.state(System.currentTimeMillis() - modified > TimeUnit.DAYS.toMillis(1), "不能删除近一天相关的日志(文件修改时间)");
         if (FileUtil.del(file)) {
             AgentFileTailWatcher.offlineFile(file);
-            return JsonMessage.getString(200, "删除成功");
+            return JsonMessage.success("删除成功");
         }
-        return JsonMessage.getString(500, "删除失败");
+        return new JsonMessage<>(500, "删除失败");
     }
 
 
     @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public void logDownload(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
-        WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
-        File file = FileUtil.file(webAopLog.getPropertyValue(), path);
+        File file = FileUtil.file(LogbackConfig.getPath(), path);
         if (file.isFile()) {
             ServletUtil.write(getResponse(), file);
         }

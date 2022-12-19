@@ -22,9 +22,7 @@
  */
 package io.jpom;
 
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.plugin.PluginFactory;
-import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.extconf.DbExtConfig;
 import io.jpom.system.init.InitDb;
 import lombok.extern.slf4j.Slf4j;
@@ -63,8 +61,8 @@ public class ApplicationStartTest {
 
     @Test
     public void testServerExtConfigBean() {
-        ServerExtConfigBean serverExtConfigBean = SpringUtil.getBean(ServerExtConfigBean.class);
-        System.out.println(serverExtConfigBean);
+        //  ServerExtConfigBean serverExtConfigBean = SpringUtil.getBean(ServerExtConfigBean.class);
+        //System.out.println(serverExtConfigBean);
     }
 
 }

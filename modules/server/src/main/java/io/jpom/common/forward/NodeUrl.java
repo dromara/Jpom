@@ -22,8 +22,6 @@
  */
 package io.jpom.common.forward;
 
-import io.jpom.system.ServerExtConfigBean;
-
 /**
  * agent 端的请求地址枚举
  *
@@ -106,7 +104,7 @@ public enum NodeUrl {
     /**
      * jzy add  timeout
      */
-    Manage_File_Upload("/manage/file/upload", ServerExtConfigBean.getInstance().getUploadFileTimeOut()),
+    Manage_File_Upload("/manage/file/upload"),
 
     Manage_File_DeleteFile("/manage/file/deleteFile"),
     /**
@@ -146,12 +144,12 @@ public enum NodeUrl {
     Manage_internal_ram("/manage/internal_ram"),
     Manage_internal_threadInfos("/manage/threadInfos"),
 
-    /**
-     * jdk
-     */
-    Manage_jdk_list("/manage/jdk/list"),
-    Manage_jdk_update("/manage/jdk/update"),
-    Manage_jdk_delete("/manage/jdk/delete"),
+//    /**
+//     * jdk
+//     */
+//    Manage_jdk_list("/manage/jdk/list"),
+//    Manage_jdk_update("/manage/jdk/update"),
+//    Manage_jdk_delete("/manage/jdk/delete"),
 
     System_Nginx_list_data("/system/nginx/list_data.json"),
     System_Nginx_Tree("/system/nginx/tree.json"),
@@ -182,26 +180,26 @@ public enum NodeUrl {
     SCRIPT_LOG("/script/log"),
     SCRIPT_EXEC("/script/exec"),
     SCRIPT_DEL_LOG("/script/del_log"),
-    Script_Upload("/script/upload.json"),
+//    Script_Upload("/script/upload.json"),
     Script_Del("/script/del.json"),
 
-    Tomcat_List("/tomcat/list"),
-    Tomcat_Add("/tomcat/add"),
-    Tomcat_Update("/tomcat/update"),
-    Tomcat_Delete("/tomcat/delete"),
-    Tomcat_Start("/tomcat/start"),
-    Tomcat_Stop("/tomcat/stop"),
-    Tomcat_Restart("/tomcat/restart"),
-    Tomcat_GetItem("/tomcat/getItem"),
-    Tomcat_LOG_List("/tomcat/logList"),
-    Tomcat_GetTomcatProjectList("/tomcat/getTomcatProjectList"),
-    Tomcat_GetTomcatStatus("/tomcat/getTomcatStatus"),
-    Tomcat_TomcatProjectManage("/tomcat/tomcatProjectManage"),
-    Tomcat_File_GetFileList("/tomcat/getFileList"),
-    Tomcat_File_DeleteFile("/tomcat/deleteFile"),
-    Tomcat_File_Download("/tomcat/download"),
-    Tomcat_File_Upload("/tomcat/upload"),
-    Tomcat_File_UploadWar("/tomcat/uploadWar"),
+//    Tomcat_List("/tomcat/list"),
+//    Tomcat_Add("/tomcat/add"),
+//    Tomcat_Update("/tomcat/update"),
+//    Tomcat_Delete("/tomcat/delete"),
+//    Tomcat_Start("/tomcat/start"),
+//    Tomcat_Stop("/tomcat/stop"),
+//    Tomcat_Restart("/tomcat/restart"),
+//    Tomcat_GetItem("/tomcat/getItem"),
+//    Tomcat_LOG_List("/tomcat/logList"),
+//    Tomcat_GetTomcatProjectList("/tomcat/getTomcatProjectList"),
+//    Tomcat_GetTomcatStatus("/tomcat/getTomcatStatus"),
+//    Tomcat_TomcatProjectManage("/tomcat/tomcatProjectManage"),
+//    Tomcat_File_GetFileList("/tomcat/getFileList"),
+//    Tomcat_File_DeleteFile("/tomcat/deleteFile"),
+//    Tomcat_File_Download("/tomcat/download"),
+//    Tomcat_File_Upload("/tomcat/upload"),
+//    Tomcat_File_UploadWar("/tomcat/uploadWar"),
 
     /**
      * Workspace

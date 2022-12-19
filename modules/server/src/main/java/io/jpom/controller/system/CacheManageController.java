@@ -23,14 +23,14 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.controller.LoginControl;
 import io.jpom.cron.CronUtils;
 import io.jpom.permission.ClassFeature;
@@ -64,77 +64,77 @@ import java.util.Map;
 @SystemPermission
 public class CacheManageController extends BaseServerController {
 
-	/**
-	 * get server's cache data
-	 * 获取 Server 的缓存数据
-	 *
-	 * @return json
-	 * @author Hotstrip
-	 */
-	@PostMapping(value = "server-cache", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String serverCache() {
-		Map<String, Object> map = new HashMap<>(10);
-		String fileSize = FileUtil.readableFileSize(BuildUtil.tempFileCacheSize);
-		map.put("cacheFileSize", fileSize);
-		map.put("dataSize", FileUtil.readableFileSize(ConfigBean.getInstance().getDataSizeCache()));
-		int size = LoginControl.LFU_CACHE.size();
-		File oldJarsPath = JpomManifest.getOldJarsPath();
-		map.put("oldJarsSize", FileUtil.readableFileSize(FileUtil.size(oldJarsPath)));
-		map.put("ipSize", size);
-		int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
-		map.put("readFileOnLineCount", oneLineCount);
+    /**
+     * get server's cache data
+     * 获取 Server 的缓存数据
+     *
+     * @return json
+     * @author Hotstrip
+     */
+    @PostMapping(value = "server-cache", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<Map<String, Object>> serverCache() {
+        Map<String, Object> map = new HashMap<>(10);
+        String fileSize = FileUtil.readableFileSize(BuildUtil.tempFileCacheSize);
+        map.put("cacheFileSize", fileSize);
+        map.put("dataSize", FileUtil.readableFileSize(ConfigBean.getInstance().getDataSizeCache()));
+        int size = LoginControl.LFU_CACHE.size();
+        File oldJarsPath = JpomManifest.getOldJarsPath();
+        map.put("oldJarsSize", FileUtil.readableFileSize(FileUtil.size(oldJarsPath)));
+        map.put("ipSize", size);
+        int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
+        map.put("readFileOnLineCount", oneLineCount);
 
 
-		fileSize = FileUtil.readableFileSize(BuildUtil.buildCacheSize);
-		map.put("cacheBuildFileSize", fileSize);
+        fileSize = FileUtil.readableFileSize(BuildUtil.buildCacheSize);
+        map.put("cacheBuildFileSize", fileSize);
 
-		map.put("taskList", CronUtils.list());
-		map.put("pluginSize", PluginFactory.size());
+        map.put("taskList", CronUtils.list());
+        map.put("pluginSize", PluginFactory.size());
 
-		return JsonMessage.getString(200, "ok", map);
-	}
+        return JsonMessage.success("ok", map);
+    }
 
-	/**
-	 * 获取节点中的缓存
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "node_cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String nodeCache() {
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.Cache).toString();
-	}
+    /**
+     * 获取节点中的缓存
+     *
+     * @return json
+     */
+    @RequestMapping(value = "node_cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String nodeCache() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Cache).toString();
+    }
 
-	/**
-	 * 清空缓存
-	 *
-	 * @param type 类型
-	 * @return json
-	 */
-	@RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.DEL)
-	public String clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
-		switch (type) {
-			case "serviceCacheFileSize": {
-				File tempPath = ConfigBean.getInstance().getTempPath();
-				boolean clean = CommandUtil.systemFastDel(tempPath);
-				Assert.state(!clean, "清空文件缓存失败");
-				break;
-			}
-			case "serviceIpSize":
-				LoginControl.LFU_CACHE.clear();
-				break;
-			case "serviceOldJarsSize": {
-				File oldJarsPath = JpomManifest.getOldJarsPath();
-				boolean clean = CommandUtil.systemFastDel(oldJarsPath);
-				Assert.state(!clean, "清空旧版本重新包失败");
-				break;
-			}
-			default:
-				return NodeForward.request(getNode(), getRequest(), NodeUrl.ClearCache).toString();
+    /**
+     * 清空缓存
+     *
+     * @param type 类型
+     * @return json
+     */
+    @RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public JsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
+        switch (type) {
+            case "serviceCacheFileSize": {
+                File tempPath = ConfigBean.getInstance().getTempPath();
+                boolean clean = CommandUtil.systemFastDel(tempPath);
+                Assert.state(!clean, "清空文件缓存失败");
+                break;
+            }
+            case "serviceIpSize":
+                LoginControl.LFU_CACHE.clear();
+                break;
+            case "serviceOldJarsSize": {
+                File oldJarsPath = JpomManifest.getOldJarsPath();
+                boolean clean = CommandUtil.systemFastDel(oldJarsPath);
+                Assert.state(!clean, "清空旧版本重新包失败");
+                break;
+            }
+            default:
+                return NodeForward.request(getNode(), getRequest(), NodeUrl.ClearCache);
 
-		}
-		return JsonMessage.getString(200, "清空成功");
-	}
+        }
+        return JsonMessage.success("清空成功");
+    }
 }

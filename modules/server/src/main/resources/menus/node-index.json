@@ -12,24 +12,15 @@
       {
         "id": "manageList",
         "title": "项目列表"
-      },
-      {
-        "id": "jdkList",
-        "title": "JDK管理",
-        "role": "system"
       }
     ]
   },
   {
     "id": "otherM",
-    "title": "其他功能",
-    "icon_v3": "more",
+    "title": "脚本管理",
+    "icon_v3": "code",
     "childs": [
-      {
-        "id": "tomcatManage",
-        "title": "Tomcat管理",
-        "role": "system"
-      },
+
       {
         "id": "script",
         "title": "脚本模板"

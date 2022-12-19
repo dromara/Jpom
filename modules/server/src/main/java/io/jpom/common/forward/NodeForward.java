@@ -29,25 +29,26 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.*;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.ServerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -56,6 +57,7 @@ import java.net.Proxy;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * 节点请求转发
@@ -151,7 +153,7 @@ public class NodeForward {
      * @param <T>       泛型
      * @return JSON
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     private static <T> JsonMessage<T> request(NodeModel nodeModel,
                                               HttpServletRequest request,
                                               NodeUrl nodeUrl,
@@ -171,42 +173,29 @@ public class NodeForward {
         }
         //
         addUser(httpRequest, nodeModel, nodeUrl, userModel);
-        Map params = null;
-        if (request != null) {
-            params = request.getParameterMap();
-            for (Map.Entry<String, String[]> entry : (Iterable<Map.Entry<String, String[]>>) params.entrySet()) {
-                String[] values = entry.getValue();
-                if (values != null) {
-                    for (int i = 0, len = values.length; i < len; i++) {
-                        // 参数 URL 编码，避免 特殊符号 不生效
-                        values[i] = URLUtil.encodeAll(values[i]);
-                    }
-                    entry.setValue(values);
-                }
-            }
-        }
+        Optional.ofNullable(request).map((Function<HttpServletRequest, Map>) ServletRequest::getParameterMap).ifPresent(httpRequest::form);
         httpRequest.form(pName, pVal, val);
         //
         if (jsonData != null) {
-            JSONObject clone = jsonData.clone();
             boolean hasFile = false;
             // 参数 URL 编码，避免 特殊符号 不生效
-            Set<Map.Entry<String, Object>> entries = clone.entrySet();
+            Set<Map.Entry<String, Object>> entries = jsonData.entrySet();
             for (Map.Entry<String, Object> entry : entries) {
                 Object value = entry.getValue();
-                if (value instanceof String) {
-                    entry.setValue(URLUtil.encodeAll((String) value));
-                } else if (value instanceof File) {
+                if (value instanceof File) {
                     // 标记上传文件
                     hasFile = true;
+                    break;
                 }
             }
-            httpRequest.form(clone);
+            httpRequest.form(jsonData);
             if (hasFile) {
-                httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+                ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+                ServerConfig.NodeConfig configNode = serverConfig.getNode();
+                httpRequest.timeout(configNode.getUploadFileTimeoutMilliseconds());
             }
         }
-        httpRequest.form(params);
+
         try (HttpResponse response = httpRequest.execute()) {
             //
             return parseBody(httpRequest, response, nodeModel);
@@ -314,7 +303,9 @@ public class NodeForward {
             }
         });
         // @author jzy add  timeout
-        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+        ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+        ServerConfig.NodeConfig configNode = serverConfig.getNode();
+        httpRequest.timeout(configNode.getUploadFileTimeoutMilliseconds());
         try (HttpResponse response = httpRequest.execute()) {
             return parseBody(httpRequest, response, nodeModel);
         } catch (Exception e) {
@@ -339,7 +330,9 @@ public class NodeForward {
         //
         httpRequest.form(fileName, file);
         // @author jzy add  timeout
-        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+        ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+        ServerConfig.NodeConfig configNode = serverConfig.getNode();
+        httpRequest.timeout(configNode.getUploadFileTimeoutMilliseconds());
         try (HttpResponse response = httpRequest.execute()) {
             return parseBody(httpRequest, response, nodeModel);
         } catch (Exception e) {
@@ -365,7 +358,9 @@ public class NodeForward {
         Map params = ServletUtil.getParams(request);
         httpRequest.form(params);
         // @author jzy add  timeout
-        httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
+        ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+        ServerConfig.NodeConfig configNode = serverConfig.getNode();
+        httpRequest.timeout(configNode.getUploadFileTimeoutMilliseconds());
         //
         try (HttpResponse response1 = httpRequest.execute()) {
             String contentDisposition = response1.header("Content-Disposition");
@@ -481,7 +476,7 @@ public class NodeForward {
         int status = response.getStatus();
         String body = response.body();
         if (log.isDebugEnabled()) {
-            log.debug("{} -> {} {} {} {}", nodeModel.getName(), httpRequest.getUrl(), httpRequest.getMethod(), httpRequest.form(), body);
+            log.debug("{}[{}] -> {} {} {} {}", nodeModel.getName(), nodeModel.getWorkspaceId(), httpRequest.getUrl(), httpRequest.getMethod(), Optional.ofNullable((Object) httpRequest.form()).orElse("-"), body);
         }
         if (status != HttpStatus.HTTP_OK) {
             log.warn("{} 响应异常 状态码错误：{} {}", nodeModel.getName(), status, body);
@@ -497,7 +492,7 @@ public class NodeForward {
         JsonMessage<T> jsonMessage = JSON.parseObject(body, new TypeReference<JsonMessage<T>>() {
         });
         if (jsonMessage.getCode() == ConfigBean.AUTHORIZE_ERROR) {
-            throw new AuthorizeException(jsonMessage, jsonMessage.getMsg());
+            throw new AuthorizeException(new JsonMessage<>(jsonMessage.getCode(), jsonMessage.getMsg()));
         }
         return jsonMessage;
     }

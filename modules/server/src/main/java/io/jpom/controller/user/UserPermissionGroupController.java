@@ -28,12 +28,12 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.user.UserPermissionGroupBean;
 import io.jpom.permission.ClassFeature;
@@ -189,7 +189,7 @@ public class UserPermissionGroupController extends BaseServerController {
      */
     @GetMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String delete(String id) {
+    public JsonMessage<Object> delete(String id) {
         UserPermissionGroupBean groupBean = userPermissionGroupServer.getByKey(id);
         Assert.notNull(groupBean, "数据不存在");
         // 判断是否绑定用户
@@ -201,6 +201,6 @@ public class UserPermissionGroupController extends BaseServerController {
         userPermissionGroupServer.delByKey(id);
         // 删除工作空间
         userBindWorkspaceService.deleteByUserId(id);
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 }

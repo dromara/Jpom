@@ -29,13 +29,12 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.model.data.NodeModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -43,7 +42,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,114 +67,117 @@ import java.util.Objects;
 @SystemPermission(superUser = true)
 public class SystemUpdateController extends BaseServerController {
 
-	private final BackupInfoService backupInfoService;
+    private final BackupInfoService backupInfoService;
+    private final ServerConfig serverConfig;
 
-	public SystemUpdateController(BackupInfoService backupInfoService) {
-		this.backupInfoService = backupInfoService;
-	}
+    public SystemUpdateController(BackupInfoService backupInfoService,
+                                  ServerConfig serverConfig) {
+        this.backupInfoService = backupInfoService;
+        this.serverConfig = serverConfig;
+    }
 
-	@PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String info() {
-		NodeModel nodeModel = tryGetNode();
-		if (nodeModel != null) {
-			return NodeForward.request(getNode(), getRequest(), NodeUrl.Info).toString();
-		}
-		JpomManifest instance = JpomManifest.getInstance();
-		RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
-		//
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("manifest", instance);
-		jsonObject.put("remoteVersion", remoteVersion);
-		return JsonMessage.getString(200, "", jsonObject);
-	}
+    @PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<JSONObject> info() {
+        NodeModel nodeModel = tryGetNode();
+        if (nodeModel != null) {
+            return NodeForward.request(getNode(), getRequest(), NodeUrl.Info);
+        }
+        JpomManifest instance = JpomManifest.getInstance();
+        RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+        //
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("manifest", instance);
+        jsonObject.put("remoteVersion", remoteVersion);
+        return JsonMessage.success("", jsonObject);
+    }
 
-	/**
-	 * 更新日志
-	 *
-	 * @return changelog md
-	 */
-	@PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String changeLog() {
-		NodeModel nodeModel = tryGetNode();
-		if (nodeModel != null) {
-			return NodeForward.request(getNode(), getRequest(), NodeUrl.CHANGE_LOG).toString();
-		}
-		//
-		URL resource = ResourceUtil.getResource("CHANGELOG.md");
-		String log = StrUtil.EMPTY;
-		if (resource != null) {
-			InputStream stream = URLUtil.getStream(resource);
-			log = IoUtil.readUtf8(stream);
-		}
-		return JsonMessage.getString(200, "", log);
-	}
+    /**
+     * 更新日志
+     *
+     * @return changelog md
+     */
+    @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> changeLog() {
+        NodeModel nodeModel = tryGetNode();
+        if (nodeModel != null) {
+            return NodeForward.request(getNode(), getRequest(), NodeUrl.CHANGE_LOG);
+        }
+        //
+        URL resource = ResourceUtil.getResource("CHANGELOG.md");
+        String log = StrUtil.EMPTY;
+        if (resource != null) {
+            InputStream stream = URLUtil.getStream(resource);
+            log = IoUtil.readUtf8(stream);
+        }
+        return JsonMessage.success("", log);
+    }
 
-	@PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
-	public String uploadJar() throws IOException {
-		NodeModel nodeModel = tryGetNode();
-		if (nodeModel != null) {
-			return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar).toString();
-		}
-		//
-		Objects.requireNonNull(JpomManifest.getScriptFile());
-		MultipartFileBuilder multipartFileBuilder = createMultipart();
-		String absolutePath = ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath();
-		multipartFileBuilder
-				.setFileExt("jar", "zip")
-				.addFieldName("file")
-				.setUseOriginalFilename(true)
-				.setSavePath(absolutePath);
-		String path = multipartFileBuilder.save();
-		// 解析压缩包
-		File file = JpomManifest.zipFileFind(path, Type.Server, absolutePath);
-		path = FileUtil.getAbsolutePath(file);
-		// 基础检查
-		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Server);
-		if (error.getCode() != HttpStatus.HTTP_OK) {
-			return error.toString();
-		}
-		Tuple data = error.getData();
-		String version = data.get(0);
-		JpomManifest.releaseJar(path, version);
-		//
-		backupInfoService.autoBackup();
-		//
-		JpomApplication.restart();
-		return JsonMessage.getString(200, Const.UPGRADE_MSG);
-	}
+    @PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public JsonMessage<String> uploadJar() throws IOException {
+        NodeModel nodeModel = tryGetNode();
+        if (nodeModel != null) {
+            return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar);
+        }
+        //
+        Objects.requireNonNull(JpomManifest.getScriptFile());
+        MultipartFileBuilder multipartFileBuilder = createMultipart();
+        String absolutePath = serverConfig.getUserTempPath().getAbsolutePath();
+        multipartFileBuilder
+            .setFileExt("jar", "zip")
+            .addFieldName("file")
+            .setUseOriginalFilename(true)
+            .setSavePath(absolutePath);
+        String path = multipartFileBuilder.save();
+        // 解析压缩包
+        File file = JpomManifest.zipFileFind(path, Type.Server, absolutePath);
+        path = FileUtil.getAbsolutePath(file);
+        // 基础检查
+        JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Server);
+        if (error.getCode() != HttpStatus.HTTP_OK) {
+            return new JsonMessage<>(error.getCode(), error.getMsg());
+        }
+        Tuple data = error.getData();
+        String version = data.get(0);
+        JpomManifest.releaseJar(path, version);
+        //
+        backupInfoService.autoBackup();
+        //
+        JpomApplication.restart();
+        return JsonMessage.success(Const.UPGRADE_MSG);
+    }
 
-	/**
-	 * 检查是否存在新版本
-	 *
-	 * @return json
-	 * @see RemoteVersion
-	 */
-	@PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String checkVersion() {
-		NodeModel nodeModel = tryGetNode();
-		if (nodeModel != null) {
-			return NodeForward.request(getNode(), getRequest(), NodeUrl.CHECK_VERSION).toString();
-		}
-		RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
-		return JsonMessage.getString(200, "", remoteVersion);
-	}
+    /**
+     * 检查是否存在新版本
+     *
+     * @return json
+     * @see RemoteVersion
+     */
+    @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<RemoteVersion> checkVersion() {
+        NodeModel nodeModel = tryGetNode();
+        if (nodeModel != null) {
+            return NodeForward.request(getNode(), getRequest(), NodeUrl.CHECK_VERSION);
+        }
+        RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
+        return JsonMessage.success("", remoteVersion);
+    }
 
-	/**
-	 * 远程下载升级
-	 *
-	 * @return json
-	 * @see RemoteVersion
-	 */
-	@GetMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.DOWNLOAD)
-	public String upgrade() throws IOException {
-		NodeModel nodeModel = tryGetNode();
-		if (nodeModel != null) {
-			return NodeForward.request(getNode(), getRequest(), NodeUrl.REMOTE_UPGRADE).toString();
-		}
-		RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath(), objects -> backupInfoService.autoBackup());
-		return JsonMessage.getString(200, Const.UPGRADE_MSG);
-	}
+    /**
+     * 远程下载升级
+     *
+     * @return json
+     * @see RemoteVersion
+     */
+    @GetMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public JsonMessage<String> upgrade() throws IOException {
+        NodeModel nodeModel = tryGetNode();
+        if (nodeModel != null) {
+            return NodeForward.request(getNode(), getRequest(), NodeUrl.REMOTE_UPGRADE);
+        }
+        RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath(), objects -> backupInfoService.autoBackup());
+        return JsonMessage.success(Const.UPGRADE_MSG);
+    }
 }

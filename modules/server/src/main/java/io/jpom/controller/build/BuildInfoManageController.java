@@ -26,16 +26,16 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildExecuteService;
 import io.jpom.build.BuildExtraModule;
 import io.jpom.build.BuildUtil;
 import io.jpom.build.ReleaseManage;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorConfig;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildStatus;
@@ -93,7 +93,8 @@ public class BuildInfoManageController extends BaseServerController {
                         String resultDirFile,
                         String branchName,
                         String branchTagName,
-                        String checkRepositoryDiff) {
+                        String checkRepositoryDiff,
+                        String projectSecondaryDirectory) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         Assert.notNull(item, "没有对应数据");
         // 更新数据
@@ -101,8 +102,16 @@ public class BuildInfoManageController extends BaseServerController {
         Opt.ofBlankAble(resultDirFile).ifPresent(update::setResultDirFile);
         Opt.ofBlankAble(branchName).ifPresent(update::setBranchName);
         Opt.ofBlankAble(branchTagName).ifPresent(update::setBranchTagName);
+        Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> {
+            FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage()));
+            //
+            String extraData = item.getExtraData();
+            JSONObject jsonObject = JSONObject.parseObject(extraData);
+            jsonObject.put("projectSecondaryDirectory", s);
+            update.setExtraData(jsonObject.toString());
+        });
 
-        if (!StrUtil.isAllBlank(resultDirFile, branchName, branchTagName)) {
+        if (!StrUtil.isAllBlank(resultDirFile, branchName, branchTagName, projectSecondaryDirectory)) {
             update.setId(id);
             buildInfoService.update(update);
         }
@@ -120,20 +129,20 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
+    public JsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         Objects.requireNonNull(item, "没有对应数据");
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
         Objects.requireNonNull(nowStatus);
         if (BuildStatus.Ing != nowStatus && BuildStatus.PubIng != nowStatus) {
-            return JsonMessage.getString(501, "当前状态不在进行中");
+            return new JsonMessage<>(501, "当前状态不在进行中");
         }
         boolean status = buildExecuteService.cancelTask(item.getId());
         if (!status) {
             // 缓存中可能不存在数据,还是需要执行取消
             buildInfoService.updateStatus(id, BuildStatus.Cancel);
         }
-        return JsonMessage.getString(200, "取消成功");
+        return JsonMessage.success("取消成功");
     }
 
     /**
@@ -144,7 +153,7 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
+    public JsonMessage<Object> reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
         Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
         BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
@@ -166,7 +175,7 @@ public class BuildInfoManageController extends BaseServerController {
         // 标记发布中
         //releaseManage.updateStatus(BuildStatus.PubIng);
         ThreadUtil.execute(manage);
-        return JsonMessage.getString(200, "重新发布中");
+        return JsonMessage.success("重新发布中");
     }
 
     /**
@@ -179,9 +188,9 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/get-now-log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
-                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+    public JsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
+                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         Assert.notNull(item, "没有对应数据");
         Assert.state(buildId <= item.getBuildId(), "还没有对应的构建记录");
@@ -197,9 +206,9 @@ public class BuildInfoManageController extends BaseServerController {
 
         if (!file.exists()) {
             if (buildId == item.getBuildId()) {
-                return JsonMessage.getString(201, "还没有日志文件");
+                return new JsonMessage<>(201, "还没有日志文件");
             }
-            return JsonMessage.getString(300, "日志文件不存在");
+            return new JsonMessage<>(300, "日志文件不存在");
         }
         JSONObject data = FileUtils.readLogFile(file, line);
         // 运行中
@@ -208,6 +217,6 @@ public class BuildInfoManageController extends BaseServerController {
         // 构建中
         data.put("buildRun", status == BuildStatus.Ing.getCode());
 
-        return JsonMessage.getString(200, "ok", data);
+        return JsonMessage.success("ok", data);
     }
 }

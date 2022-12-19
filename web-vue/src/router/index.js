@@ -88,11 +88,7 @@ const children = [
     name: "dispatch-log-read",
     component: () => import("../pages/dispatch/logRead"),
   },
-  {
-    path: "/dispatch/white-list",
-    name: "dispatch-white-list",
-    component: () => import("../pages/dispatch/white-list"),
-  },
+
   {
     path: "/monitor/list",
     name: "monitor-list",
@@ -123,20 +119,39 @@ const children = [
     name: "build-history",
     component: () => import("../pages/build/history"),
   },
-  {
-    path: "/user/list",
-    name: "user-list",
-    component: () => import("../pages/user"),
-  },
+];
+
+const management = [
   {
     path: "/user/permission-group",
     name: "permission-group",
     component: () => import("../pages/user/permission-group"),
   },
   {
+    path: "/user/list",
+    name: "user-list",
+    component: () => import("../pages/user"),
+  },
+  {
     path: "/operation/log",
     name: "operation-log",
     component: () => import("../pages/user/operation-log"),
+  },
+  {
+    path: "/dispatch/white-list",
+    name: "dispatch-white-list",
+    component: () => import("../pages/dispatch/white-list"),
+  },
+  // 工作空间
+  {
+    path: "/system/workspace",
+    name: "system-workspace",
+    component: () => import("../pages/system/workspace"),
+  },
+  {
+    path: "/system/global-env",
+    name: "global-env",
+    component: () => import("../pages/system/global-env"),
   },
   {
     path: "/system/mail",
@@ -174,27 +189,16 @@ const children = [
     name: "system-backup",
     component: () => import("../pages/system/backup"),
   },
-  // 工作空间
-  {
-    path: "/system/workspace",
-    name: "system-workspace",
-    component: () => import("../pages/system/workspace"),
-  },
-  {
-    path: "/system/global-env",
-    name: "global-env",
-    component: () => import("../pages/system/global-env"),
-  },
 ];
 
 const router = new Router({
   mode: "hash",
   routes: [
-    {
-      path: "/test",
-      name: "test",
-      component: () => import("../pages/test"),
-    },
+    // {
+    //   path: "/test",
+    //   name: "test",
+    //   component: () => import("../pages/test"),
+    // },
     {
       path: "/login",
       name: "login",
@@ -205,7 +209,12 @@ const router = new Router({
       name: "home",
       component: () => import("../pages/layout"),
       redirect: "/node/list",
-      children: children,
+      children: children.map((item) => {
+        const props = item.props || {};
+        props.routerUrl = item.path;
+        item.props = props;
+        return item;
+      }),
     },
     {
       path: "/install",
@@ -226,6 +235,23 @@ const router = new Router({
       path: "/system/ipAccess",
       name: "ipAccess",
       component: () => import("../pages/system/ipAccess"),
+    },
+    {
+      path: "/system/management",
+      name: "sys-management",
+      component: () => import("../pages/layout/management"),
+      redirect: "/system/workspace",
+      children: management.map((item) => {
+        const props = item.props || {};
+        props.routerUrl = item.path;
+        props.mode = "management";
+        item.props = props;
+        //
+        const meta = item.meta || {};
+        meta.mode = props.mode;
+        item.meta = meta;
+        return item;
+      }),
     },
   ],
 });

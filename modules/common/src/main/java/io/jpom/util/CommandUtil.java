@@ -188,7 +188,7 @@ public class CommandUtil {
         Charset charset;
         boolean isLog;
         try {
-            charset = ExtConfigBean.getInstance().getConsoleLogCharset();
+            charset = ExtConfigBean.getConsoleLogCharset();
             isLog = true;
         } catch (Exception e) {
             // 直接执行，使用默认编码格式

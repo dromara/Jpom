@@ -257,7 +257,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
             if (ArrayUtil.contains(command, "#disabled-template-auto-evn")) {
                 sshExecTemplate = StrUtil.EMPTY;
             } else {
-                sshExecTemplateInputStream = ResourceUtil.getStream("classpath:/bin/execTemplate.sh");
+                sshExecTemplateInputStream = ResourceUtil.getStream("classpath:/config_default/execTemplate.sh");
                 sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
             }
             StringBuilder stringBuilder = new StringBuilder(sshExecTemplate);

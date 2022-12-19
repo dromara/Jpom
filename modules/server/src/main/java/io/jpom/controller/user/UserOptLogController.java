@@ -22,8 +22,8 @@
  */
 package io.jpom.controller.user;
 
-import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.ClassFeature;
@@ -48,21 +48,21 @@ import org.springframework.web.bind.annotation.RestController;
 @SystemPermission
 public class UserOptLogController extends BaseServerController {
 
-	private final DbUserOperateLogService dbUserOperateLogService;
+    private final DbUserOperateLogService dbUserOperateLogService;
 
-	public UserOptLogController(DbUserOperateLogService dbUserOperateLogService) {
-		this.dbUserOperateLogService = dbUserOperateLogService;
-	}
+    public UserOptLogController(DbUserOperateLogService dbUserOperateLogService) {
+        this.dbUserOperateLogService = dbUserOperateLogService;
+    }
 
-	/**
-	 * 展示用户列表
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String listData() {
-		PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPage(getRequest());
-		return JsonMessage.getString(200, "获取成功", pageResult);
-	}
+    /**
+     * 展示用户列表
+     *
+     * @return json
+     */
+    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<PageResultDto<UserOperateLogV1>> listData() {
+        PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPage(getRequest());
+        return JsonMessage.success("获取成功", pageResult);
+    }
 }

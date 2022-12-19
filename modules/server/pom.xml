@@ -53,12 +53,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.jpom.plugins</groupId>
-            <artifactId>auto-charset-jchardet</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <!--websocket作为客户端-->
         <dependency>
             <groupId>org.java-websocket</groupId>
@@ -125,35 +119,14 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-captcha</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>${start-class}</mainClass>
-                            <!-- 是否指定项目classpath下的依赖 -->
-                            <addClasspath>true</addClasspath>
-                            <!-- 指定依赖的时候声明前缀 -->
-                            <classpathPrefix>./</classpathPrefix>
-                        </manifest>
-                        <manifestEntries>
-                            <!-- 项目版本号 -->
-                            <Jpom-Project-Version>${project.version}</Jpom-Project-Version>
-                            <!-- 打包时间 -->
-                            <Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
-                            <Jpom-Type>${project.artifactId}</Jpom-Type>
-                            <Implementation-URL>https://gitee.com/dromara/Jpom</Implementation-URL>
-                            <Jpom-Min-Version>${jpom-min-version}</Jpom-Min-Version>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
         <resources>
             <!--版权文件,更新日志-->
             <resource>
@@ -180,6 +153,37 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>${start-class}</mainClass>
+                                    <!-- 是否指定项目classpath下的依赖 -->
+                                    <addClasspath>true</addClasspath>
+                                    <!-- 指定依赖的时候声明前缀 -->
+                                    <classpathPrefix>./</classpathPrefix>
+                                </manifest>
+                                <manifestEntries>
+                                    <!-- 项目版本号 -->
+                                    <Jpom-Project-Version>${project.version}</Jpom-Project-Version>
+                                    <!-- 打包时间 -->
+                                    <Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
+                                    <Jpom-Type>${project.artifactId}</Jpom-Type>
+                                    <Implementation-URL>https://gitee.com/dromara/Jpom</Implementation-URL>
+                                    <Jpom-Min-Version>${jpom-min-version}</Jpom-Min-Version>
+                                </manifestEntries>
+                                <addMavenDescriptor>true</addMavenDescriptor>
+                            </archive>
+                            <excludes>
+                                <exclude>logback.xml</exclude>
+                                <exclude>application.yml</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <configuration>
@@ -203,7 +207,7 @@
                         <configuration>
                             <encoding>${project.build.sourceEncoding}</encoding>
                             <descriptors>
-                                <descriptor>script/release.xml</descriptor>
+                                <descriptor>${basedir}/src/main/assembly/release.xml</descriptor>
                             </descriptors>
                             <outputDirectory>target</outputDirectory>
                         </configuration>
@@ -266,17 +270,6 @@
                 <!--                    <artifactId>netty</artifactId>-->
                 <!--                    <version>LATEST</version>-->
                 <!--                </dependency>-->
-            </dependencies>
-        </profile>
-
-        <profile>
-            <id>jna-mac</id>
-            <dependencies>
-                <dependency>
-                    <groupId>net.java.dev.jna</groupId>
-                    <artifactId>jna</artifactId>
-                    <version>5.11.0</version>
-                </dependency>
             </dependencies>
         </profile>
     </profiles>

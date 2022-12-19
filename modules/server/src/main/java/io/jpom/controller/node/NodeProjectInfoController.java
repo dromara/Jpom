@@ -22,28 +22,29 @@
  */
 package io.jpom.controller.node;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import io.jpom.common.BaseServerController;
+import io.jpom.common.*;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.node.ProjectInfoCacheModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.node.ProjectInfoCacheService;
+import io.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 节点管理
@@ -57,9 +58,12 @@ import java.util.List;
 public class NodeProjectInfoController extends BaseServerController {
 
     private final ProjectInfoCacheService projectInfoCacheService;
+    private final TriggerTokenLogServer triggerTokenLogServer;
 
-    public NodeProjectInfoController(ProjectInfoCacheService projectInfoCacheService) {
+    public NodeProjectInfoController(ProjectInfoCacheService projectInfoCacheService,
+                                     TriggerTokenLogServer triggerTokenLogServer) {
         this.projectInfoCacheService = projectInfoCacheService;
+        this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
     /**
@@ -69,9 +73,9 @@ public class NodeProjectInfoController extends BaseServerController {
      * 加载节点项目列表
      */
     @PostMapping(value = "node_project_list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String nodeProjectList() {
+    public JsonMessage<PageResultDto<ProjectInfoCacheModel>> nodeProjectList() {
         PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPageNode(getRequest());
-        return JsonMessage.getString(200, "success", resultDto);
+        return JsonMessage.success("success", resultDto);
     }
 
 
@@ -83,9 +87,9 @@ public class NodeProjectInfoController extends BaseServerController {
      * @author Hotstrip
      */
     @PostMapping(value = "project_list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String projectList() {
+    public JsonMessage<PageResultDto<ProjectInfoCacheModel>> projectList() {
         PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(getRequest());
-        return JsonMessage.getString(200, "success", resultDto);
+        return JsonMessage.success("success", resultDto);
     }
 
     /**
@@ -96,9 +100,9 @@ public class NodeProjectInfoController extends BaseServerController {
      * @author Hotstrip
      */
     @GetMapping(value = "project_list_all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String projectListAll() {
+    public JsonMessage<List<ProjectInfoCacheModel>> projectListAll() {
         List<ProjectInfoCacheModel> projectInfoCacheModels = projectInfoCacheService.listByWorkspace(getRequest());
-        return JsonMessage.getString(200, "", projectInfoCacheModels);
+        return JsonMessage.success("", projectInfoCacheModels);
     }
 
     /**
@@ -108,12 +112,12 @@ public class NodeProjectInfoController extends BaseServerController {
      */
     @GetMapping(value = "sync_project", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-    public String syncProject(String nodeId) {
+    public JsonMessage<Object> syncProject(String nodeId) {
         NodeModel nodeModel = nodeService.getByKey(nodeId);
         Assert.notNull(nodeModel, "对应的节点不存在");
         int count = projectInfoCacheService.delCache(nodeId, getRequest());
         String msg = projectInfoCacheService.syncExecuteNode(nodeModel);
-        return JsonMessage.getString(200, "主动清除：" + count + StrUtil.SPACE + msg);
+        return JsonMessage.success("主动清除：" + count + StrUtil.SPACE + msg);
     }
 
     /**
@@ -124,11 +128,11 @@ public class NodeProjectInfoController extends BaseServerController {
     @GetMapping(value = "clear_all_project", produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission(superUser = true)
     @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
-    public String clearAll() {
+    public JsonMessage<Object> clearAll() {
         Entity where = Entity.create();
         where.set("id", " <> id");
         int del = projectInfoCacheService.del(where);
-        return JsonMessage.getString(200, "成功删除" + del + "条项目缓存");
+        return JsonMessage.success("成功删除" + del + "条项目缓存");
     }
 
     /**
@@ -153,5 +157,46 @@ public class NodeProjectInfoController extends BaseServerController {
             return new JsonMessage<>(400, "不支持的方式" + method);
         }
         return new JsonMessage<>(200, "操作成功");
+    }
+
+    /**
+     * get a trigger url
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "project-trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
+        ProjectInfoCacheModel item = projectInfoCacheService.getByKey(id, getRequest());
+        UserModel user = getUser();
+        ProjectInfoCacheModel updateItem;
+        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
+            updateItem = new ProjectInfoCacheModel();
+            updateItem.setId(id);
+            updateItem.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), projectInfoCacheService.typeName(),
+                item.getId(), user.getId()));
+            projectInfoCacheService.update(updateItem);
+        } else {
+            updateItem = item;
+        }
+        Map<String, String> map = this.getBuildToken(updateItem);
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+    }
+
+    private Map<String, String> getBuildToken(ProjectInfoCacheModel item) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+        String url = ServerOpenApi.SERVER_PROJECT_TRIGGER_URL.
+            replace("{id}", item.getId()).
+            replace("{token}", item.getTriggerToken());
+        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
+        Map<String, String> map = new HashMap<>(10);
+        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
+        String batchTriggerBuildUrl = String.format("/%s/%s", contextPath, ServerOpenApi.SERVER_PROJECT_TRIGGER_BATCH);
+        map.put("batchTriggerUrl", FileUtil.normalize(batchTriggerBuildUrl));
+
+        map.put("id", item.getId());
+        map.put("token", item.getTriggerToken());
+        return map;
     }
 }

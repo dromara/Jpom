@@ -26,7 +26,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.BaseWorkspaceModel;

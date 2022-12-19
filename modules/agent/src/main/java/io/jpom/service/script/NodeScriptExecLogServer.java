@@ -22,9 +22,9 @@
  */
 package io.jpom.service.script;
 
+import io.jpom.common.AgentConst;
 import io.jpom.model.data.NodeScriptExecLogModel;
 import io.jpom.service.BaseOperService;
-import io.jpom.system.AgentConfigBean;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,6 +35,6 @@ import org.springframework.stereotype.Service;
 public class NodeScriptExecLogServer extends BaseOperService<NodeScriptExecLogModel> {
 
 	public NodeScriptExecLogServer() {
-		super(AgentConfigBean.SCRIPT_LOG);
+		super(AgentConst.SCRIPT_LOG);
 	}
 }

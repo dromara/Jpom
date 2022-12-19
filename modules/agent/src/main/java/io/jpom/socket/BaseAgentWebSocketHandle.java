@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.system.AgentAuthorize;
 import io.jpom.system.ConfigBean;
@@ -50,78 +51,79 @@ import static javax.websocket.CloseReason.CloseCodes.CANNOT_ACCEPT;
 @Slf4j
 public abstract class BaseAgentWebSocketHandle {
 
-	private static final ConcurrentHashMap<String, String> USER = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, String> USER = new ConcurrentHashMap<>();
 
-	protected String getParameters(Session session, String name) {
-		Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
-		Map<String, String> parameters = session.getPathParameters();
-		log.debug("web socket parameters: {} {}", JSONObject.toJSONString(requestParameterMap), parameters);
-		List<String> strings = requestParameterMap.get(name);
-		String value = CollUtil.join(strings, StrUtil.COMMA);
-		if (StrUtil.isEmpty(value)) {
-			value = parameters.get(name);
-		}
-		return URLUtil.decode(value);
-	}
+    protected String getParameters(Session session, String name) {
+        Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
+        Map<String, String> parameters = session.getPathParameters();
+        log.debug("web socket parameters: {} {}", JSONObject.toJSONString(requestParameterMap), parameters);
+        List<String> strings = requestParameterMap.get(name);
+        String value = CollUtil.join(strings, StrUtil.COMMA);
+        if (StrUtil.isEmpty(value)) {
+            value = parameters.get(name);
+        }
+        return URLUtil.decode(value);
+    }
 
-	/**
-	 * 判断授权信息是否正确
-	 *
-	 * @param session session
-	 * @return true 需要结束回话
-	 */
-	public boolean checkAuthorize(Session session) {
-		String authorize = this.getParameters(session, ConfigBean.JPOM_AGENT_AUTHORIZE);
-		boolean ok = AgentAuthorize.getInstance().checkAuthorize(authorize);
-		if (!ok) {
-			try {
-				session.close(new CloseReason(CANNOT_ACCEPT, "授权信息错误"));
-			} catch (Exception e) {
-				log.error("socket 错误", e);
-			}
-			return true;
-		}
-		this.addUser(session, this.getParameters(session, "optUser"));
-		return false;
-	}
+    /**
+     * 判断授权信息是否正确
+     *
+     * @param session session
+     * @return true 需要结束回话
+     */
+    public boolean checkAuthorize(Session session) {
+        String authorize = this.getParameters(session, ConfigBean.JPOM_AGENT_AUTHORIZE);
+        AgentAuthorize agentAuthorize = SpringUtil.getBean(AgentAuthorize.class);
+        boolean ok = agentAuthorize.checkAuthorize(authorize);
+        if (!ok) {
+            try {
+                session.close(new CloseReason(CANNOT_ACCEPT, "授权信息错误"));
+            } catch (Exception e) {
+                log.error("socket 错误", e);
+            }
+            return true;
+        }
+        this.addUser(session, this.getParameters(session, "optUser"));
+        return false;
+    }
 
-	/**
-	 * 添加用户监听的
-	 *
-	 * @param session session
-	 * @param name    用户名
-	 */
-	private void addUser(Session session, String name) {
-		String optUser = URLUtil.decode(name);
-		if (optUser == null) {
-			return;
-		}
-		USER.put(session.getId(), optUser);
-	}
+    /**
+     * 添加用户监听的
+     *
+     * @param session session
+     * @param name    用户名
+     */
+    private void addUser(Session session, String name) {
+        String optUser = URLUtil.decode(name);
+        if (optUser == null) {
+            return;
+        }
+        USER.put(session.getId(), optUser);
+    }
 
-	public void onError(Session session, Throwable thr) {
-		// java.io.IOException: Broken pipe
-		try {
-			SocketSessionUtil.send(session, "服务端发生异常" + ExceptionUtil.stacktraceToString(thr));
-		} catch (IOException ignored) {
-		}
-		log.error(session.getId() + "socket 异常", thr);
-	}
+    public void onError(Session session, Throwable thr) {
+        // java.io.IOException: Broken pipe
+        try {
+            SocketSessionUtil.send(session, "服务端发生异常" + ExceptionUtil.stacktraceToString(thr));
+        } catch (IOException ignored) {
+        }
+        log.error(session.getId() + "socket 异常", thr);
+    }
 
-	protected String getOptUserName(Session session) {
-		String name = USER.get(session.getId());
-		return StrUtil.emptyToDefault(name, StrUtil.DASHED);
-	}
+    protected String getOptUserName(Session session) {
+        String name = USER.get(session.getId());
+        return StrUtil.emptyToDefault(name, StrUtil.DASHED);
+    }
 
-	public void onClose(Session session) {
-		// 清理日志监听
-		try {
-			AgentFileTailWatcher.offline(session);
-		} catch (Exception e) {
-			log.error("关闭异常", e);
-		}
-		// top
-		//        TopManager.removeMonitor(session);
-		USER.remove(session.getId());
-	}
+    public void onClose(Session session) {
+        // 清理日志监听
+        try {
+            AgentFileTailWatcher.offline(session);
+        } catch (Exception e) {
+            log.error("关闭异常", e);
+        }
+        // top
+        //        TopManager.removeMonitor(session);
+        USER.remove(session.getId());
+    }
 }

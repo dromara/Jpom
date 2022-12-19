@@ -24,11 +24,8 @@ package io.jpom.util;
 
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.io.file.Tailer;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.plugin.PluginFactory;
-import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
@@ -39,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -53,11 +49,18 @@ import java.util.Set;
 @Slf4j
 public abstract class BaseFileTailWatcher<T> {
 
+    private static int initReadLine = 10;
+
+    public static void setInitReadLine(int initReadLine) {
+        BaseFileTailWatcher.initReadLine = initReadLine;
+    }
+
     protected File logFile;
+    private final Charset charset;
     /**
      * 缓存近x条
      */
-    private final LimitQueue<String> limitQueue = new LimitQueue<>(ExtConfigBean.getInstance().getLogInitReadLine());
+    private final LimitQueue<String> limitQueue = new LimitQueue<>(initReadLine);
     private Tailer tailer;
 
     /**
@@ -65,23 +68,9 @@ public abstract class BaseFileTailWatcher<T> {
      */
     protected final Set<T> socketSessions = new HashSet<>();
 
-    public BaseFileTailWatcher(File logFile) {
+    public BaseFileTailWatcher(File logFile, Charset charset) {
         this.logFile = logFile;
-    }
-
-    public static Charset detectorCharset(File logFile) {
-        Charset detSet = ExtConfigBean.getInstance().getLogFileCharset();
-        if (detSet == null) {
-            try {
-                String charsetName = (String) PluginFactory.getPlugin("charset-detector").execute(logFile);
-                detSet = StrUtil.isEmpty(charsetName) ? CharsetUtil.CHARSET_UTF_8 : CharsetUtil.charset(charsetName);
-            } catch (Exception e) {
-                log.warn("自动识别文件编码格式错误：{}", e.getMessage());
-                detSet = CharsetUtil.CHARSET_UTF_8;
-            }
-            detSet = (detSet == StandardCharsets.US_ASCII) ? CharsetUtil.CHARSET_UTF_8 : detSet;
-        }
-        return detSet;
+        this.charset = charset;
     }
 
     protected void send(T session, String msg) {
@@ -150,11 +139,10 @@ public abstract class BaseFileTailWatcher<T> {
 
     public void start() {
         //this.tailWatcherRun = new FileTailWatcherRun(logFile, this::sendAll);
-        Charset charset = detectorCharset(logFile);
         this.tailer = new Tailer(logFile, charset, line -> {
             limitQueue.offer(line);
             this.sendAll(line);
-        }, ExtConfigBean.getInstance().getLogInitReadLine(), DateUnit.SECOND.getMillis());
+        }, initReadLine, DateUnit.SECOND.getMillis());
         this.tailer.start(true);
     }
 

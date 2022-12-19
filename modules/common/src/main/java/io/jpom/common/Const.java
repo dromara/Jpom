@@ -28,10 +28,6 @@ package io.jpom.common;
  */
 public class Const {
     /**
-     * 应用程序类型的配置 key
-     */
-    public static final String APPLICATION_NAME = "spring.application.name";
-    /**
      * 升级提示语
      */
     public static final String UPGRADE_MSG = "升级(重启)中大约需要30秒～2分钟左右";

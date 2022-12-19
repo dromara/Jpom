@@ -102,12 +102,12 @@ public class TestRun {
 					});
 					System.out.println("123");
 					//用于存储执行命令的错误信息
-					BufferedReader errors = new BufferedReader(new InputStreamReader(p.getErrorStream(), ExtConfigBean.getInstance().getConsoleLogCharset()));
+					BufferedReader errors = new BufferedReader(new InputStreamReader(p.getErrorStream(), ExtConfigBean.getConsoleLogCharset()));
 					IoUtil.readLines(errors, new LineHandler() {
 						@Override
 						public void handle(String line) {
 
-							String result = CharsetUtil.convert(line, null, ExtConfigBean.getInstance().getConsoleLogCharset());
+							String result = CharsetUtil.convert(line, null, ExtConfigBean.getConsoleLogCharset());
 							System.out.println("error:" + result);
 						}
 					});

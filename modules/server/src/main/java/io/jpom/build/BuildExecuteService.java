@@ -40,8 +40,8 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
@@ -838,7 +838,7 @@ public class BuildExecuteService {
             process = processBuilder.start();
             //
             InputStream inputStream = process.getInputStream();
-            IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) line -> {
+            IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> {
                 logRecorder.info(line);
                 status[0] = true;
             });
@@ -933,7 +933,7 @@ public class BuildExecuteService {
                 Process process = processBuilder.start();
                 //
                 InputStream inputStream = process.getInputStream();
-                IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) line -> {
+                IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> {
                     logRecorder.info(line);
                     scriptLog.info(line);
                 });

@@ -24,18 +24,18 @@ package io.jpom.common.interceptor;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.jwt.JWT;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.interceptor.InterceptorPattens;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.ServerConst;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.user.UserService;
-import io.jpom.system.ServerConfigBean;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.system.db.DbConfig;
 import io.jpom.util.JwtUtil;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
@@ -53,8 +53,8 @@ import java.util.concurrent.TimeUnit;
  * @author jiangzeyin
  * @since 2017/2/4.
  */
-@InterceptorPattens(sort = -1, exclude = ServerOpenApi.API + "**")
-public class LoginInterceptor extends BaseJpomInterceptor {
+@Configuration
+public class LoginInterceptor implements HandlerMethodInterceptor {
     /**
      * session
      */
@@ -62,16 +62,25 @@ public class LoginInterceptor extends BaseJpomInterceptor {
 
     private static final Map<Integer, String> MSG_CACHE = new HashMap<>(3);
 
+    private final DbConfig dbConfig;
+    private final ServerConfig.UserConfig userConfig;
+
     static {
-        MSG_CACHE.put(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, ServerConfigBean.LOGIN_TIP);
-        MSG_CACHE.put(ServerConfigBean.RENEWAL_AUTHORIZE_CODE, ServerConfigBean.LOGIN_TIP);
-        MSG_CACHE.put(ServerConfigBean.ACCOUNT_LOCKED, ServerConfigBean.ACCOUNT_LOCKED_TIP);
+        MSG_CACHE.put(ServerConst.AUTHORIZE_TIME_OUT_CODE, ServerConst.LOGIN_TIP);
+        MSG_CACHE.put(ServerConst.RENEWAL_AUTHORIZE_CODE, ServerConst.LOGIN_TIP);
+        MSG_CACHE.put(ServerConst.ACCOUNT_LOCKED, ServerConst.ACCOUNT_LOCKED_TIP);
+    }
+
+    public LoginInterceptor(DbConfig dbConfig,
+                            ServerConfig serverConfig) {
+        this.dbConfig = dbConfig;
+        this.userConfig = serverConfig.getUser();
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
-        HttpSession session = getSession();
-        boolean init = DbConfig.getInstance().isInit();
+        HttpSession session = request.getSession();
+        boolean init = dbConfig.isInit();
         if (!init) {
             ServletUtil.write(response, JsonMessage.getString(100, "数据库还没有初始化成功,请耐心等待"), MediaType.APPLICATION_JSON_VALUE);
             return false;
@@ -95,11 +104,10 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             // 老版本登录拦截
             int code = this.tryGetHeaderUser(request, session);
             if (code > 0) {
-                this.responseLogin(request, session, response, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE);
+                this.responseLogin(request, session, response, ServerConst.AUTHORIZE_TIME_OUT_CODE);
                 return false;
             }
         }
-        reload();
         //
         return true;
     }
@@ -114,33 +122,33 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     private int checkHeaderUser(HttpServletRequest request, HttpSession session) {
         String token = request.getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
         if (StrUtil.isEmpty(token)) {
-            return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+            return ServerConst.AUTHORIZE_TIME_OUT_CODE;
         }
         JWT jwt = JwtUtil.readBody(token);
         if (JwtUtil.expired(jwt, 0)) {
-            int renewal = ServerExtConfigBean.getInstance().getAuthorizeRenewal();
+            int renewal = userConfig.getTokenRenewal();
             if (jwt == null || renewal <= 0 || JwtUtil.expired(jwt, TimeUnit.MINUTES.toSeconds(renewal))) {
-                return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+                return ServerConst.AUTHORIZE_TIME_OUT_CODE;
             }
-            return ServerConfigBean.RENEWAL_AUTHORIZE_CODE;
+            return ServerConst.RENEWAL_AUTHORIZE_CODE;
         }
         UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
         UserService userService = SpringUtil.getBean(UserService.class);
         String id = JwtUtil.getId(jwt);
         UserModel newUser = userService.checkUser(id);
         if (newUser == null) {
-            return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+            return ServerConst.AUTHORIZE_TIME_OUT_CODE;
         }
         if (null != user) {
             String tokenUserId = JwtUtil.readUserId(jwt);
             boolean b = user.getId().equals(tokenUserId);
             if (!b) {
-                return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+                return ServerConst.AUTHORIZE_TIME_OUT_CODE;
             }
         }
         if (newUser.getStatus() != null && newUser.getStatus() == 0) {
             // 账号禁用
-            return ServerConfigBean.ACCOUNT_LOCKED;
+            return ServerConst.ACCOUNT_LOCKED;
         }
         session.setAttribute(LoginInterceptor.SESSION_NAME, newUser);
         return 0;
@@ -159,16 +167,16 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         if (StrUtil.isEmpty(header)) {
             // 兼容就版本 登录状态
             UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
-            return user != null ? 0 : ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+            return user != null ? 0 : ServerConst.AUTHORIZE_TIME_OUT_CODE;
         }
         UserService userService = SpringUtil.getBean(UserService.class);
         UserModel userModel = userService.checkUser(header);
         if (userModel == null) {
-            return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+            return ServerConst.AUTHORIZE_TIME_OUT_CODE;
         }
         if (userModel.getStatus() != null && userModel.getStatus() == 0) {
             // 账号禁用
-            return ServerConfigBean.ACCOUNT_LOCKED;
+            return ServerConst.ACCOUNT_LOCKED;
         }
         session.setAttribute(LoginInterceptor.SESSION_NAME, userModel);
         return 0;
@@ -184,13 +192,12 @@ public class LoginInterceptor extends BaseJpomInterceptor {
      */
     private void responseLogin(HttpServletRequest request, HttpSession session, HttpServletResponse response, int code) throws IOException {
         session.removeAttribute(LoginInterceptor.SESSION_NAME);
-        String msg = MSG_CACHE.getOrDefault(code, ServerConfigBean.LOGIN_TIP);
+        String msg = MSG_CACHE.getOrDefault(code, ServerConst.LOGIN_TIP);
         ServletUtil.write(response, JsonMessage.getString(code, msg), MediaType.APPLICATION_JSON_VALUE);
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        super.afterCompletion(request, response, handler, ex);
         BaseServerController.removeAll();
     }
 }

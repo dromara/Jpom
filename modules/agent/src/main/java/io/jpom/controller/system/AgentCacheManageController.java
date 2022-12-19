@@ -23,13 +23,13 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.cron.CronUtils;
 import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.plugin.PluginFactory;
@@ -69,7 +69,7 @@ public class AgentCacheManageController extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "cache", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String cache() {
+    public JsonMessage<JSONObject> cache() {
         JSONObject jsonObject = new JSONObject();
         //
         ConfigBean instance = ConfigBean.getInstance();
@@ -96,7 +96,7 @@ public class AgentCacheManageController extends BaseAgentController {
             }
         }
         //
-        return JsonMessage.getString(200, "ok", jsonObject);
+        return JsonMessage.success("ok", jsonObject);
     }
 
     /**
@@ -106,7 +106,7 @@ public class AgentCacheManageController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "clearCache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
+    public JsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
         switch (type) {
             case "pidPort":
                 AbstractProjectCommander.PID_PORT.clear();
@@ -127,9 +127,9 @@ public class AgentCacheManageController extends BaseAgentController {
                 break;
             }
             default:
-                return JsonMessage.getString(405, "没有对应类型：" + type);
+                return new JsonMessage<>(405, "没有对应类型：" + type);
 
         }
-        return JsonMessage.getString(200, "清空成功");
+        return JsonMessage.success("清空成功");
     }
 }

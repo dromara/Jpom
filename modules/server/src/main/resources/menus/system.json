@@ -1,0 +1,88 @@
+[
+  {
+    "title": "配置管理",
+    "icon_v3": "save",
+    "id": "config",
+    "childs": [
+      {
+        "id": "monitorConfigEmail",
+        "title": "邮箱配置",
+        "role": "system"
+      },
+      {
+        "id": "outgivingWhitelistDirectory",
+        "title": "白名单配置",
+        "role": "system"
+      },
+      {
+        "id": "buildConfig",
+        "title": "构建配置",
+        "role": "system"
+      }
+    ]
+  },
+  {
+    "title": "用户管理",
+    "icon_v3": "user",
+    "id": "user",
+    "childs": [
+      {
+        "id": "userList",
+        "title": "用户列表",
+        "role": "system"
+      },
+      {
+        "id": "permission_group",
+        "title": "权限组",
+        "role": "system"
+      },
+      {
+        "id": "user_log",
+        "title": "操作日志",
+        "role": "system"
+      }
+    ]
+  },
+  {
+    "title": "系统管理",
+    "icon_v3": "setting",
+    "id": "setting",
+    "childs": [
+      {
+        "id": "workspace",
+        "title": "工作空间",
+        "role": "system"
+      },
+      {
+        "id": "globalEnv",
+        "title": "全局变量",
+        "role": "system"
+      },
+      {
+        "id": "cacheManage",
+        "title": "缓存管理",
+        "role": "system"
+      },
+      {
+        "id": "logManage",
+        "title": "系统日志",
+        "role": "system"
+      },
+      {
+        "id": "update",
+        "title": "在线升级",
+        "role": "sys"
+      },
+      {
+        "id": "sysConfig",
+        "title": "系统配置",
+        "role": "system"
+      },
+      {
+        "id": "backup",
+        "title": "数据库备份",
+        "role": "system"
+      }
+    ]
+  }
+]

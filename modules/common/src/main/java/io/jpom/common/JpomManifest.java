@@ -26,21 +26,19 @@ import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.ManifestUtil;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.GlobalHeaders;
 import cn.hutool.http.Header;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JsonFileUtil;
@@ -52,9 +50,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.jar.Attributes;
@@ -181,7 +176,9 @@ public class JpomManifest {
     }
 
     public String randomIdSign() {
-        return SecureUtil.sha1(this.getPid() + this.randomId);
+        String tempToken = SystemUtil.get("JPOM_SERVER_TEMP_TOKEN");
+        return Opt.ofBlankAble(tempToken).orElseGet(() -> SecureUtil.sha1(JpomManifest.this.getPid() + JpomManifest.this.randomId));
+
     }
 
     /**
@@ -430,35 +427,15 @@ public class JpomManifest {
         FileUtil.move(new File(path), to, true);
         jsonObject.put("newJar", newFile);
         jsonObject.put("updateTime", new DateTime().toString());
-        // 更新管理命令
-        List<String> newData = new LinkedList<>();
-        File scriptFile = getScriptFile();
-        Charset charset = ExtConfigBean.getInstance().getConsoleLogCharset();
-        String finalNewFile = newFile;
-        FileUtil.readLines(scriptFile, charset, (LineHandler) line -> {
-            if (!line.startsWith(String.valueOf(StrUtil.C_TAB)) &&
-                !line.startsWith(String.valueOf(StrUtil.C_SPACE))) {
-                if (StrUtil.containsAny(line, "RUNJAR=")) {
-                    // jar 包
-                    if ("sh".equals(CommandUtil.SUFFIX)) {
-                        newData.add(StrUtil.format("RUNJAR=\"{}\"", finalNewFile));
-                    } else if ("bat".equals(CommandUtil.SUFFIX)) {
-                        newData.add(StrUtil.format("set RUNJAR={}", finalNewFile));
-                    } else {
-                        newData.add(line);
-                    }
-                } else {
-                    newData.add(line);
-                }
-            } else {
-                newData.add(line);
-            }
-        });
         // 新增升级次数 @author jzy 2021-08-04
         jsonObject.put("upgradeCount", jsonObject.getIntValue("upgradeCount"));
         //
         JsonFileUtil.saveJson(upgrade, jsonObject);
-        FileUtil.writeLines(newData, scriptFile, charset);
+        FileUtil.writeString(newFile, FileUtil.file(runPath, ConfigBean.RUN_JAR), CharsetUtil.CHARSET_UTF_8);
+        if (SystemUtil.getOsInfo().isWindows()) {
+            String format = StrUtil.format("stdout_{}.log", System.currentTimeMillis());
+            FileUtil.writeString(format, FileUtil.file(runPath, "run.log"), CharsetUtil.CHARSET_UTF_8);
+        }
     }
 
     /**
@@ -469,10 +446,8 @@ public class JpomManifest {
     public static File getScriptFile() {
         File runPath = getRunPath().getParentFile().getParentFile();
         String type = JpomApplication.getAppType().name();
-        File scriptFile = FileUtil.file(runPath, StrUtil.format("{}.{}", type, CommandUtil.SUFFIX));
-        if (!scriptFile.exists() || scriptFile.isDirectory()) {
-            throw new JpomRuntimeException("当前服务中没有命令脚本：" + StrUtil.format("{}.{}", type, CommandUtil.SUFFIX));
-        }
+        File scriptFile = FileUtil.file(runPath, "bin", StrUtil.format("{}.{}", type, CommandUtil.SUFFIX));
+        Assert.state(FileUtil.isFile(scriptFile), StrUtil.format("当前服务中没有命令脚本：{}.{}", type, CommandUtil.SUFFIX));
         return scriptFile;
     }
 

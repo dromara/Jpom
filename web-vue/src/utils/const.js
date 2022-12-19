@@ -17,6 +17,12 @@ export const TAB_LIST_KEY = "Jpom-TabList";
 
 export const ACTIVE_MENU_KEY = "Jpom-ActiveMenu";
 
+export const MANAGEMENT_ACTIVE_TAB_KEY = "Jpom-management-ActiveTab";
+
+export const MANAGEMENT_TAB_LIST_KEY = "Jpom-management-TabList";
+
+export const MANAGEMENT_ACTIVE_MENU_KEY = "Jpom-management-ActiveMenu";
+
 // export const GUIDE_FLAG_KEY = "Jpom-GuideFlag";
 
 // export const GUIDE_HOME_USED_KEY = "Jpom-Home-Guide-Used";

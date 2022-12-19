@@ -31,12 +31,12 @@ import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.log.OutGivingLog;
@@ -69,7 +69,8 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
     private final UserModel userModel;
     private final boolean unzip;
     private final boolean clearOld;
-    private Integer sleepTime;
+    private final Integer sleepTime;
+    private final String secondaryDirectory;
     /**
      * 数据库记录id
      */
@@ -82,8 +83,9 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                             boolean unzip,
                             Integer sleepTime) {
         this.outGivingId = item.getId();
-        this.unzip = unzip;
+        this.secondaryDirectory = item.getSecondaryDirectory();
         this.clearOld = item.clearOld();
+        this.unzip = unzip;
         this.outGivingNodeProject = outGivingNodeProject;
         this.file = file;
         this.afterOpt = ObjectUtil.defaultIfNull(EnumUtil.likeValueOf(AfterOpt.class, item.getAfterOpt()), AfterOpt.No);
@@ -105,7 +107,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
             this.updateStatus(this.outGivingId, this.outGivingNodeProject,
                 OutGivingNodeProject.Status.Ing, "开始分发");
             //
-            JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, null,
+            JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, this.secondaryDirectory,
                 this.outGivingNodeProject.getProjectId(),
                 unzip,
                 afterOpt,

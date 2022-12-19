@@ -32,12 +32,14 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.DslYmlDto;
-import io.jpom.system.AgentExtConfigBean;
+import io.jpom.system.AgentConfig;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -50,6 +52,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2022/5/10
  */
+@Slf4j
 public class ProjectFileBackupUtil {
 
     /**
@@ -82,7 +85,9 @@ public class ProjectFileBackupUtil {
      * @param projectPath 项目路径
      */
     public static String backup(String pathId, String projectPath) {
-        int backupCount = AgentExtConfigBean.getInstance().getProjectFileBackupCount();
+        AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
+        AgentConfig.ProjectConfig project = agentConfig.getProject();
+        int backupCount = project.getFileBackupCount();
         if (backupCount <= 0) {
             // 未开启备份
             return null;
@@ -109,7 +114,11 @@ public class ProjectFileBackupUtil {
         int backupCount = Optional.ofNullable(dslYmlDto)
             .map(DslYmlDto::getFile)
             .map(DslYmlDto.FileConfig::getBackupCount)
-            .orElse(AgentExtConfigBean.getInstance().getProjectFileBackupCount());
+            .orElseGet(() -> {
+                AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
+                AgentConfig.ProjectConfig project = agentConfig.getProject();
+                return project.getFileBackupCount();
+            });
         //
         if (!FileUtil.isDirectory(backupPath)) {
             return;
@@ -145,43 +154,51 @@ public class ProjectFileBackupUtil {
         }
         // 考虑到大文件对比，比较耗时。需要异步对比文件
         ThreadUtil.execute(() -> {
-            File backupItemPath = ProjectFileBackupUtil.path(pathId, backupId);
-            File backupPath = ProjectFileBackupUtil.path(pathId);
-            // 获取文件列表
-            Map<String, File> backupFiles = ProjectFileBackupUtil.listFiles(backupItemPath.getAbsolutePath());
-            Map<String, File> nowFiles = ProjectFileBackupUtil.listFiles(projectPath);
-            nowFiles.forEach((fileSha1, file) -> {
-                // 当前目录存在的，但是备份目录也存在的相同文件则删除
-                File backupFile = backupFiles.get(fileSha1);
-                if (backupFile != null) {
-                    CommandUtil.systemFastDel(backupFile);
-                    backupFiles.remove(fileSha1);
-                }
-            });
-            // 判断保存指定后缀
-            String[] backupSuffix = Optional.ofNullable(dslYmlDto)
-                .map(DslYmlDto::getFile)
-                .map(DslYmlDto.FileConfig::getBackupSuffix)
-                .orElse(AgentExtConfigBean.getInstance().getProjectFileBackupSuffix());
-            if (ArrayUtil.isNotEmpty(backupSuffix)) {
-                backupFiles.values()
-                    .stream()
-                    .filter(file -> {
-                        String name = FileUtil.getName(file);
-                        for (String reg : backupSuffix) {
-                            if (ReUtil.isMatch(reg, name)) {
-                                // 满足正则条件
-                                return false;
+            try {
+                File backupItemPath = ProjectFileBackupUtil.path(pathId, backupId);
+                File backupPath = ProjectFileBackupUtil.path(pathId);
+                // 获取文件列表
+                Map<String, File> backupFiles = ProjectFileBackupUtil.listFiles(backupItemPath.getAbsolutePath());
+                Map<String, File> nowFiles = ProjectFileBackupUtil.listFiles(projectPath);
+                nowFiles.forEach((fileSha1, file) -> {
+                    // 当前目录存在的，但是备份目录也存在的相同文件则删除
+                    File backupFile = backupFiles.get(fileSha1);
+                    if (backupFile != null) {
+                        CommandUtil.systemFastDel(backupFile);
+                        backupFiles.remove(fileSha1);
+                    }
+                });
+                // 判断保存指定后缀
+                String[] backupSuffix = Optional.ofNullable(dslYmlDto)
+                    .map(DslYmlDto::getFile)
+                    .map(DslYmlDto.FileConfig::getBackupSuffix)
+                    .orElseGet(() -> {
+                        AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
+                        AgentConfig.ProjectConfig project = agentConfig.getProject();
+                        return project.getFileBackupSuffix();
+                    });
+                if (ArrayUtil.isNotEmpty(backupSuffix)) {
+                    backupFiles.values()
+                        .stream()
+                        .filter(file -> {
+                            String name = FileUtil.getName(file);
+                            for (String reg : backupSuffix) {
+                                if (ReUtil.isMatch(reg, name)) {
+                                    // 满足正则条件
+                                    return false;
+                                }
                             }
-                        }
-                        return !StrUtil.endWithAny(name, backupSuffix);
-                    })
-                    .forEach(CommandUtil::systemFastDel);
+                            return !StrUtil.endWithAny(name, backupSuffix);
+                        })
+                        .forEach(CommandUtil::systemFastDel);
+                }
+                // 删除空文件夹
+                loopClean(backupItemPath);
+                // 检查备份保留个数
+                clearOldBackup(backupPath, dslYmlDto);
+            } catch (Exception e) {
+                log.warn("对比清空项目文件备份失败", e);
             }
-            // 删除空文件夹
-            loopClean(backupItemPath);
-            // 检查备份保留个数
-            clearOldBackup(backupPath, dslYmlDto);
         });
     }
 

@@ -29,11 +29,10 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpStatus;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import io.jpom.JpomApplication;
 import io.jpom.common.*;
-import io.jpom.system.AgentConfigBean;
+import io.jpom.common.multipart.MultipartFileBuilder;
+import io.jpom.system.AgentConfig;
 import io.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,67 +55,73 @@ import java.util.Objects;
 @RequestMapping(value = "system")
 public class SystemUpdateController extends BaseAgentController {
 
-	@PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String uploadJar() throws IOException {
-		//
-		Objects.requireNonNull(JpomManifest.getScriptFile());
-		MultipartFileBuilder multipartFileBuilder = createMultipart();
-		String absolutePath = AgentConfigBean.getInstance().getTempPath().getAbsolutePath();
-		multipartFileBuilder
-				.setFileExt("jar", "zip")
-				.addFieldName("file")
-				.setUseOriginalFilename(true)
-				.setSavePath(absolutePath);
-		String path = multipartFileBuilder.save();
-		// 解析压缩包
-		File file = JpomManifest.zipFileFind(path, Type.Agent, absolutePath);
-		path = FileUtil.getAbsolutePath(file);
-		// 基础检查
-		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Agent);
-		if (error.getCode() != HttpStatus.HTTP_OK) {
-			return error.toString();
-		}
-		Tuple data = error.getData();
-		String version = data.get(0);
-		JpomManifest.releaseJar(path, version);
-		//
-		JpomApplication.restart();
-		return JsonMessage.getString(200, Const.UPGRADE_MSG);
-	}
+    private final AgentConfig agentConfig;
 
-	@PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String changeLog() {
-		//
-		URL resource = ResourceUtil.getResource("CHANGELOG.md");
-		String log = StrUtil.EMPTY;
-		if (resource != null) {
-			InputStream stream = URLUtil.getStream(resource);
-			log = IoUtil.readUtf8(stream);
-		}
-		return JsonMessage.getString(200, "", log);
-	}
+    public SystemUpdateController(AgentConfig agentConfig) {
+        this.agentConfig = agentConfig;
+    }
 
-	/**
-	 * 检查是否存在新版本
-	 *
-	 * @return json
-	 * @see RemoteVersion
-	 */
-	@PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String checkVersion() {
-		RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
-		return JsonMessage.getString(200, "", remoteVersion);
-	}
+    @PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> uploadJar() throws IOException {
+        //
+        Objects.requireNonNull(JpomManifest.getScriptFile());
+        MultipartFileBuilder multipartFileBuilder = createMultipart();
+        String absolutePath = agentConfig.getTempPath().getAbsolutePath();
+        multipartFileBuilder
+            .setFileExt("jar", "zip")
+            .addFieldName("file")
+            .setUseOriginalFilename(true)
+            .setSavePath(absolutePath);
+        String path = multipartFileBuilder.save();
+        // 解析压缩包
+        File file = JpomManifest.zipFileFind(path, Type.Agent, absolutePath);
+        path = FileUtil.getAbsolutePath(file);
+        // 基础检查
+        JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Agent);
+        if (error.getCode() != HttpStatus.HTTP_OK) {
+            return new JsonMessage<>(error.getCode(), error.getMsg());
+        }
+        Tuple data = error.getData();
+        String version = data.get(0);
+        JpomManifest.releaseJar(path, version);
+        //
+        JpomApplication.restart();
+        return JsonMessage.success(Const.UPGRADE_MSG);
+    }
 
-	/**
-	 * 远程下载升级
-	 *
-	 * @return json
-	 * @see RemoteVersion
-	 */
-	@PostMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String upgrade() throws IOException {
-		RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath());
-		return JsonMessage.getString(200, Const.UPGRADE_MSG);
-	}
+    @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> changeLog() {
+        //
+        URL resource = ResourceUtil.getResource("CHANGELOG.md");
+        String log = StrUtil.EMPTY;
+        if (resource != null) {
+            InputStream stream = URLUtil.getStream(resource);
+            log = IoUtil.readUtf8(stream);
+        }
+        return JsonMessage.success("", log);
+    }
+
+    /**
+     * 检查是否存在新版本
+     *
+     * @return json
+     * @see RemoteVersion
+     */
+    @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<RemoteVersion> checkVersion() {
+        RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
+        return JsonMessage.success("", remoteVersion);
+    }
+
+    /**
+     * 远程下载升级
+     *
+     * @return json
+     * @see RemoteVersion
+     */
+    @PostMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<Object> upgrade() throws IOException {
+        RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath());
+        return JsonMessage.success(Const.UPGRADE_MSG);
+    }
 }

@@ -36,26 +36,23 @@ import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.commander.impl.LinuxProjectCommander;
 import io.jpom.common.commander.impl.MacOsProjectCommander;
 import io.jpom.common.commander.impl.WindowsProjectCommander;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.DslYmlDto;
-import io.jpom.model.data.JdkInfoModel;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.script.DslScriptBuilder;
-import io.jpom.service.manage.JdkInfoService;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.socket.AgentFileTailWatcher;
-import io.jpom.system.AgentExtConfigBean;
+import io.jpom.system.AgentConfig;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
-import io.jpom.util.FileUtils;
 import io.jpom.util.JvmUtil;
 import io.jpom.util.ProjectCommanderUtil;
 import lombok.Lombok;
@@ -131,19 +128,18 @@ public abstract class AbstractProjectCommander {
     public abstract String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem);
 
     protected String getRunJavaPath(NodeProjectInfoModel nodeProjectInfoModel, boolean w) {
-        if (StrUtil.isEmpty(nodeProjectInfoModel.getJdkId())) {
-            return w ? "javaw" : "java";
-        }
-        JdkInfoService bean = SpringUtil.getBean(JdkInfoService.class);
-        JdkInfoModel item = bean.getItem(nodeProjectInfoModel.getJdkId());
-        if (item == null) {
-            return w ? "javaw" : "java";
-        }
-        String jdkJavaPath = FileUtils.getJdkJavaPath(item.getPath(), w);
-        if (jdkJavaPath.contains(StrUtil.SPACE)) {
-            jdkJavaPath = String.format("\"%s\"", jdkJavaPath);
-        }
-        return jdkJavaPath;
+//        if (StrUtil.isEmpty(nodeProjectInfoModel.getJdkId())) {
+//            return w ? "javaw" : "java";
+//        }
+//
+//        if (item == null) {
+        return w ? "javaw" : "java";
+//        }
+//        String jdkJavaPath = FileUtils.getJdkJavaPath(item.getPath(), w);
+//        if (jdkJavaPath.contains(StrUtil.SPACE)) {
+//            jdkJavaPath = String.format("\"%s\"", jdkJavaPath);
+//        }
+//        return jdkJavaPath;
     }
 
     /**
@@ -474,14 +470,16 @@ public abstract class AbstractProjectCommander {
      */
     private boolean resolveOpenLogBack(NodeProjectInfoModel nodeProjectInfoModel) {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
+        AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
+        boolean autoBackToFile = agentConfig.getProject().getLog().isAutoBackupToFile();
         if (runMode == RunMode.Dsl) {
             DslYmlDto dslYmlDto = nodeProjectInfoModel.dslConfig();
             return Optional.ofNullable(dslYmlDto)
                 .map(DslYmlDto::getConfig)
                 .map(DslYmlDto.Config::getAutoBackToFile)
-                .orElse(AgentExtConfigBean.getInstance().openLogBack());
+                .orElse(autoBackToFile);
         }
-        return AgentExtConfigBean.getInstance().openLogBack();
+        return autoBackToFile;
     }
 
     /**
@@ -749,8 +747,8 @@ public abstract class AbstractProjectCommander {
      * @return 和参数status相反
      */
     protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, boolean status) {
-        int stopWaitTime = AgentExtConfigBean.getInstance().getStopWaitTime();
-        return this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, stopWaitTime, status);
+        int statusWaitTime = AgentConfig.ProjectConfig.getInstance().getStatusWaitTime();
+        return this.loopCheckRun(nodeProjectInfoModel, javaCopyItem, statusWaitTime, status);
     }
 
     /***
@@ -758,15 +756,15 @@ public abstract class AbstractProjectCommander {
      * @param nodeProjectInfoModel 项目
      * @param javaCopyItem  副本
      * @param status 要检查的状态
-     * @param stopWaitTime  检查等待时间
+     * @param waitTime  检查等待时间
      *
      * @return 如果和期望一致则返回 true，反之 false
      */
-    protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int stopWaitTime, boolean status) {
-        stopWaitTime = Math.max(stopWaitTime, 1);
-        int statusDetectionInterval = AgentExtConfigBean.getInstance().getStatusDetectionInterval();
+    protected boolean loopCheckRun(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, int waitTime, boolean status) {
+        waitTime = Math.max(waitTime, 1);
+        int statusDetectionInterval = AgentConfig.ProjectConfig.getInstance().getStatusDetectionInterval();
         statusDetectionInterval = Math.max(statusDetectionInterval, 1);
-        int loopCount = (int) (TimeUnit.SECONDS.toMillis(stopWaitTime) / 500);
+        int loopCount = (int) (TimeUnit.SECONDS.toMillis(waitTime) / 500);
         int count = 0;
         do {
             if (this.isRun(nodeProjectInfoModel, javaCopyItem) == status) {

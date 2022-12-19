@@ -25,11 +25,11 @@ package io.jpom.controller.docker;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -37,7 +37,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import org.springframework.http.MediaType;
@@ -58,119 +58,122 @@ import java.util.function.Consumer;
 @RequestMapping(value = "/docker/images")
 public class DockerImagesController extends BaseServerController {
 
-	private final DockerInfoService dockerInfoService;
+    private final DockerInfoService dockerInfoService;
+    private final ServerConfig serverConfig;
 
-	public DockerImagesController(DockerInfoService dockerInfoService) {
-		this.dockerInfoService = dockerInfoService;
-	}
-
-
-	/**
-	 * @return json
-	 */
-	@PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String list(@ValidatorItem String id) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("name", getParameter("name"));
-		parameter.put("showAll", getParameter("showAll"));
-		parameter.put("dangling", getParameter("dangling"));
-		List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listImages", parameter);
-		return JsonMessage.getString(200, "", listContainer);
-	}
+    public DockerImagesController(DockerInfoService dockerInfoService,
+                                  ServerConfig serverConfig) {
+        this.dockerInfoService = dockerInfoService;
+        this.serverConfig = serverConfig;
+    }
 
 
-	/**
-	 * @return json
-	 */
-	@GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.DEL)
-	public String del(@ValidatorItem String id, String imageId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("imageId", imageId);
-		plugin.execute("removeImage", parameter);
-		return JsonMessage.getString(200, "执行成功");
-	}
+    /**
+     * @return json
+     */
+    @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<JSONObject>> list(@ValidatorItem String id) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("name", getParameter("name"));
+        parameter.put("showAll", getParameter("showAll"));
+        parameter.put("dangling", getParameter("dangling"));
+        List<JSONObject> listContainer = (List<JSONObject>) plugin.execute("listImages", parameter);
+        return JsonMessage.success("", listContainer);
+    }
 
-	/**
-	 * @return json
-	 */
-	@GetMapping(value = "inspect", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String inspect(@ValidatorItem String id, String imageId) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("imageId", imageId);
-		JSONObject inspectImage = (JSONObject) plugin.execute("inspectImage", parameter);
-		return JsonMessage.getString(200, "", inspectImage);
-	}
 
-	/**
-	 * @return json
-	 */
-	@GetMapping(value = "pull-image", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
-	public String pullImage(@ValidatorItem String id, String repository) throws Exception {
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.put("repository", repository);
-		//
-		String uuid = IdUtil.fastSimpleUUID();
-		File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), "docker-log", uuid + ".log");
-		LogRecorder logRecorder = LogRecorder.builder().file(file).build();
-		logRecorder.info("start pull {}", repository);
-		Consumer<String> logConsumer = logRecorder::info;
-		parameter.put("logConsumer", logConsumer);
-		ThreadUtil.execute(() -> {
-			try {
-				plugin.execute("pullImage", parameter);
-			} catch (Exception e) {
-				logRecorder.error("拉取异常", e);
-			}
-			logRecorder.info("pull end");
-		});
-		return JsonMessage.getString(200, "开始拉取", uuid);
-	}
+    /**
+     * @return json
+     */
+    @GetMapping(value = "remove", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public JsonMessage<Object> del(@ValidatorItem String id, String imageId) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("imageId", imageId);
+        plugin.execute("removeImage", parameter);
+        return JsonMessage.success("执行成功");
+    }
 
-	/**
-	 * 获取拉取的日志
-	 *
-	 * @param id   id
-	 * @param line 需要获取的行号
-	 * @return json
-	 */
-	@GetMapping(value = "pull-image-log", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-		File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), "docker-log", id + ".log");
-		if (!file.exists()) {
-			return JsonMessage.getString(201, "还没有日志文件");
-		}
-		JSONObject data = FileUtils.readLogFile(file, line);
-		return JsonMessage.getString(200, "ok", data);
-	}
+    /**
+     * @return json
+     */
+    @GetMapping(value = "inspect", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<JSONObject> inspect(@ValidatorItem String id, String imageId) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("imageId", imageId);
+        JSONObject inspectImage = (JSONObject) plugin.execute("inspectImage", parameter);
+        return JsonMessage.success("", inspectImage);
+    }
 
-	/**
-	 * @return json
-	 */
-	@PostMapping(value = "create-container", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
-	public String createContainer(@RequestBody JSONObject jsonObject) throws Exception {
-		Assert.hasText(jsonObject.getString("id"), "id 不能为空");
-		Assert.hasText(jsonObject.getString("imageId"), "镜像不能为空");
-		Assert.hasText(jsonObject.getString("name"), "容器名称不能为空");
-		DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(jsonObject.getString("id"), getRequest());
-		IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-		Map<String, Object> parameter = dockerInfoModel.toParameter();
-		parameter.putAll(jsonObject);
-		plugin.execute("createContainer", parameter);
-		return JsonMessage.getString(200, "创建成功");
-	}
+    /**
+     * @return json
+     */
+    @GetMapping(value = "pull-image", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public JsonMessage<String> pullImage(@ValidatorItem String id, String repository) throws Exception {
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.put("repository", repository);
+        //
+        String uuid = IdUtil.fastSimpleUUID();
+        File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-log", uuid + ".log");
+        LogRecorder logRecorder = LogRecorder.builder().file(file).build();
+        logRecorder.info("start pull {}", repository);
+        Consumer<String> logConsumer = logRecorder::info;
+        parameter.put("logConsumer", logConsumer);
+        ThreadUtil.execute(() -> {
+            try {
+                plugin.execute("pullImage", parameter);
+            } catch (Exception e) {
+                logRecorder.error("拉取异常", e);
+            }
+            logRecorder.info("pull end");
+        });
+        return JsonMessage.success("开始拉取", uuid);
+    }
+
+    /**
+     * 获取拉取的日志
+     *
+     * @param id   id
+     * @param line 需要获取的行号
+     * @return json
+     */
+    @GetMapping(value = "pull-image-log", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+        File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-log", id + ".log");
+        if (!file.exists()) {
+            return new JsonMessage<>(201, "还没有日志文件");
+        }
+        JSONObject data = FileUtils.readLogFile(file, line);
+        return JsonMessage.success("ok", data);
+    }
+
+    /**
+     * @return json
+     */
+    @PostMapping(value = "create-container", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public JsonMessage<Object> createContainer(@RequestBody JSONObject jsonObject) throws Exception {
+        Assert.hasText(jsonObject.getString("id"), "id 不能为空");
+        Assert.hasText(jsonObject.getString("imageId"), "镜像不能为空");
+        Assert.hasText(jsonObject.getString("name"), "容器名称不能为空");
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(jsonObject.getString("id"), getRequest());
+        IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+        Map<String, Object> parameter = dockerInfoModel.toParameter();
+        parameter.putAll(jsonObject);
+        plugin.execute("createContainer", parameter);
+        return JsonMessage.success("创建成功");
+    }
 }

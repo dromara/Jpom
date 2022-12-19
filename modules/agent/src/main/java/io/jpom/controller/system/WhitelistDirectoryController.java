@@ -27,11 +27,11 @@ import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseJpomController;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.service.WhitelistDirectoryService;
-import io.jpom.system.AgentExtConfigBean;
+import io.jpom.system.AgentConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,27 +50,30 @@ import java.util.List;
 public class WhitelistDirectoryController extends BaseJpomController {
 
     private final WhitelistDirectoryService whitelistDirectoryService;
+    private final AgentConfig agentConfig;
 
-    public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService) {
+    public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService,
+                                        AgentConfig agentConfig) {
         this.whitelistDirectoryService = whitelistDirectoryService;
+        this.agentConfig = agentConfig;
     }
 
     @RequestMapping(value = "whitelistDirectory_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String whiteListDirectoryData() {
+    public JsonMessage<AgentWhitelist> whiteListDirectoryData() {
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
-        return JsonMessage.getString(200, "", agentWhitelist);
+        return JsonMessage.success("", agentWhitelist);
     }
 
 
     @PostMapping(value = "whitelistDirectory_submit", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String whitelistDirectorySubmit(String project, String certificate, String nginx, String nginxPath, String allowEditSuffix, String allowRemoteDownloadHost) {
+    public JsonMessage<String> whitelistDirectorySubmit(String project, String certificate, String nginx, String nginxPath, String allowEditSuffix, String allowRemoteDownloadHost) {
         List<String> list = AgentWhitelist.parseToList(project, true, "项目路径白名单不能为空");
         //
         List<String> certificateList = AgentWhitelist.parseToList(certificate, "证书路径白名单不能为空");
         List<String> nList = AgentWhitelist.parseToList(nginx, "nginx路径白名单不能为空");
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
         List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "允许远程下载的 host 不能配置为空");
-        return save(list, certificateList, nList, nginxPath, allowEditSuffixList, allowRemoteDownloadHostList).toString();
+        return save(list, certificateList, nList, nginxPath, allowEditSuffixList, allowRemoteDownloadHostList);
     }
 //
 //	private JsonMessage<String> save(String project, List<String> certificate, List<String> nginx, List<String> allowEditSuffixList) {
@@ -144,7 +147,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
      * @return null 正常
      */
     private String findStartsWith(List<String> jsonArray, int start) {
-        if (jsonArray == null || !AgentExtConfigBean.getInstance().whitelistDirectoryCheckStartsWith) {
+        if (jsonArray == null || !agentConfig.getWhitelist().isCheckStartsWith()) {
             return null;
         }
         String str = jsonArray.get(start);

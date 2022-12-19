@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
  * @since 2022/7/7
  */
 @Configuration
-@ConfigurationProperties(prefix = "build")
+@ConfigurationProperties(prefix = "jpom.build")
 @Data
 public class BuildExtConfig {
 
@@ -45,7 +45,7 @@ public class BuildExtConfig {
      */
     private int itemMaxHistoryCount = 50;
 
-    private Boolean checkDeleteCommand;
+    private boolean checkDeleteCommand = true;
 
     /**
      * 构建线程池大小,小于 1 则为不限制，默认大小为 5
@@ -56,10 +56,5 @@ public class BuildExtConfig {
      * 构建任务等待数量，超过此数量将取消构建任务，值最小为 1
      */
     private int poolWaitQueue = 10;
-
-
-    public boolean checkDeleteCommand() {
-        return checkDeleteCommand != null && checkDeleteCommand;
-    }
 
 }
