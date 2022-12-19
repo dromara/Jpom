@@ -32,6 +32,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import lombok.Lombok;
 import org.springframework.util.AntPathMatcher;
 
 import java.io.File;
@@ -41,6 +42,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -259,5 +261,20 @@ public class FileUtils {
             }
         });
         return paths;
+    }
+
+    /**
+     * 判断目录是否有越级问题
+     *
+     * @param dir      目录
+     * @param function 异常
+     */
+    public static void checkSlip(String dir, Function<Exception, Exception> function) {
+        try {
+            File userHomeDir = FileUtil.getUserHomeDir();
+            FileUtil.checkSlip(userHomeDir, FileUtil.file(userHomeDir, dir));
+        } catch (IllegalArgumentException e) {
+            throw Lombok.sneakyThrow(function.apply(e));
+        }
     }
 }

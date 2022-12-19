@@ -73,7 +73,7 @@ public class OperateLogController implements AopLogInterface {
 
     private final DbUserOperateLogService dbUserOperateLogService;
 
-    private String[] logFilterPar = new String[]{"pwd", "pass", "password"};
+    private final String[] logFilterPar = new String[]{"pwd", "pass", "password"};
 
 
     public OperateLogController(DbUserOperateLogService dbUserOperateLogService) {

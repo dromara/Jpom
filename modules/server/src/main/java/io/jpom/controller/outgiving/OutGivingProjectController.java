@@ -181,7 +181,7 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip) throws IOException {
+    public JsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip, String secondaryDirectory) throws IOException {
         OutGivingModel outGivingModel = this.check(id);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
@@ -201,6 +201,7 @@ public class OutGivingProjectController extends BaseServerController {
         //outGivingModel = outGivingServer.getItem(id);
         outGivingModel.setClearOld(Convert.toBool(clearOld, false));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
+        outGivingModel.setSecondaryDirectory(secondaryDirectory);
 
         outGivingServer.update(outGivingModel);
         // 开启
@@ -228,7 +229,7 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @RequestMapping(value = "remote_download", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-    public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip) {
+    public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip, String secondaryDirectory) {
         OutGivingModel outGivingModel = this.check(id);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
@@ -242,6 +243,7 @@ public class OutGivingProjectController extends BaseServerController {
             //outGivingModel = outGivingServer.getItem(id);
             outGivingModel.setClearOld(Convert.toBool(clearOld, false));
             outGivingModel.setAfterOpt(afterOpt1.getCode());
+            outGivingModel.setSecondaryDirectory(secondaryDirectory);
             outGivingServer.update(outGivingModel);
             //下载
             File file = FileUtil.file(serverConfig.getUserTempPath(), ServerConst.OUTGIVING_FILE, id);

@@ -61,7 +61,7 @@ public class DbExtConfig {
     /**
      * 缓存大小
      * <p>
-     * http://www.h2database.com/html/features.html#cache_settings
+     * <a href="http://www.h2database.com/html/features.html#cache_settings">http://www.h2database.com/html/features.html#cache_settings</a>
      */
     private DataSize cacheSize = DataSize.ofMegabytes(10);
 
