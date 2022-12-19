@@ -176,8 +176,7 @@ function start() {
 		echo "silence auto exit 0,${pid}"
 		exit 0
 	fi
-	sleep 2s
-	tail -f --pid="$pid" "$agent_log"
+	tail -fn 0 --pid="$pid" "$agent_log"
 }
 
 function stop() {

@@ -68,7 +68,7 @@
     </root>
 
     <logger name="org.springframework.web.servlet.DispatcherServlet" additivity="false">
-        <!--  打印请求信息方式二-->
+        <!--  打印请求信息-->
         <level value="debug"/>
         <appender-ref ref="LOG-ROOT"/>
         <appender-ref ref="STDOUT"/>
