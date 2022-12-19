@@ -102,7 +102,7 @@ JAVA_OPTS="${JAVA_OPTS} -Dlogging.config=$logback_configurationFile -Dspring.con
 
 MAIN_ARGS="$*"
 
-# mode -s
+# mode -s -9
 mode="$2"
 
 RUN_JAR=""
@@ -187,9 +187,8 @@ function stop() {
 	if [ "$pid" != "" ]; then
 		echo -n "jpom server ( pid $pid) is running"
 		echo
-		echo -n $"Shutting down jpom server: "
-		kill $pid
-
+		echo -n $"Shutting down (kill $mode $pid) jpom server: "
+		kill "$mode $pid"
 		LOOPS=0
 		while (true); do
 			pid=$(getPid)
