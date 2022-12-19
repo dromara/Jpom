@@ -181,6 +181,10 @@ function start() {
 
 function stop() {
 	pid=$(getPid)
+	if [ "${mode}" == "upgrade" ]; then
+		#	Compatible with online upgrade ./Agent.sh restart upgrade
+		mode=""
+	fi
 	if [ "$pid" != "" ]; then
 		echo -n "jpom agent ( pid $pid) is running"
 		echo
