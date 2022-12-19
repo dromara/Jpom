@@ -53,6 +53,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
@@ -131,7 +132,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         } catch (Exception e) {
             log.error(StrUtil.format("Jpom Failed to create data directory, directory location：{}," +
                 "Please check whether the current user has permission to this directory or modify the configuration file：{} jpom.path in is the path where the directory can be created", path, extConfigPath), e);
-            System.exit(-1);
+            asyncExit(-1);
         }
         FileUtil.del(file);
         log.info("Jpom[{}] Current data path：{} External configuration file path：{}", JpomManifest.getInstance().getVersion(), path, extConfigPath);
@@ -304,5 +305,17 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
 //        build.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_ARRAY);
 
         return build;
+    }
+
+    /**
+     * 异步退出，避免 springboot 锁 synchronized (this.startupShutdownMonitor)
+     *
+     * @param code 退出码
+     * @see AbstractApplicationContext#refresh()
+     * @see AbstractApplicationContext#close()
+     */
+
+    public static void asyncExit(int code) {
+        ThreadUtil.execute(() -> System.exit(code));
     }
 }

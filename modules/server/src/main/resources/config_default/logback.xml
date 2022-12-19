@@ -69,7 +69,7 @@
 
     <logger name="org.springframework.web.servlet.DispatcherServlet" additivity="false">
         <!--  打印请求信息 debug 才输出 -->
-        <level value="debug"/>
+        <level value="INFO"/>
         <appender-ref ref="LOG-ROOT"/>
     </logger>
 

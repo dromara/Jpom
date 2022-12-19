@@ -36,11 +36,13 @@ import cn.hutool.db.ds.GlobalDSFactory;
 import cn.hutool.db.sql.SqlLog;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.setting.Setting;
+import io.jpom.common.JpomApplicationEvent;
 import io.jpom.common.JpomManifest;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.h2db.BaseNodeService;
+import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.db.DbConfig;
 import io.jpom.system.extconf.DbExtConfig;
 import lombok.Lombok;
@@ -111,8 +113,6 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
 
     private void init() {
         //
-        dbSecurityCheck(dbExtConfig);
-        //
         BEFORE_CALLBACK.forEach(Runnable::run);
         //
         Setting setting = new Setting();
@@ -141,6 +141,8 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
         log.info("start load h2 db");
         final String[] sqlFileNow = {StrUtil.EMPTY};
         try {
+            // 安全检查
+            dbSecurityCheck(dbExtConfig);
             // 创建连接
             DSFactory dsFactory = DSFactory.create(setting);
             // 先执行恢复数据
@@ -176,6 +178,7 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
             //
         } catch (Exception e) {
             log.error("初始化数据库失败 {}", sqlFileNow[0], e);
+            JpomApplicationEvent.asyncExit(2);
             throw Lombok.sneakyThrow(e);
         }
         dbConfig.initOk();
@@ -219,8 +222,7 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
         if (!JpomManifest.getInstance().isDebug() && h2ConsoleEnabled
             && StrUtil.equals(dbExtConfig.getUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
             && StrUtil.equals(dbExtConfig.getUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
-            log.error("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
-            System.exit(-2);
+            throw new JpomRuntimeException("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
         }
     }
 
@@ -293,20 +295,19 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
     }
 
     private void prepareCallback(Environment environment) {
-        Opt.ofBlankAble(environment.getProperty("rest:load_init_db")).ifPresent(s -> {
+        Opt.ofNullable(environment.getProperty("rest:load_init_db")).ifPresent(s -> {
             // 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
             dbConfig.clearExecuteSqlLog();
         });
-        Opt.ofBlankAble(environment.getProperty("recover:h2db")).ifPresent(s -> {
+        Opt.ofNullable(environment.getProperty("recover:h2db")).ifPresent(s -> {
             // 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
             try {
                 dbConfig.recoverDb();
             } catch (Exception e) {
-                log.error("Failed to restore database：{}", e.getMessage(), e);
-                System.exit(-2);
+                throw new JpomRuntimeException("Failed to restore database", e);
             }
         });
-        Opt.ofBlankAble(environment.getProperty("backup-h2")).ifPresent(s -> {
+        Opt.ofNullable(environment.getProperty("backup-h2")).ifPresent(s -> {
             // 备份数据库
             this.addCallback(() -> {
                 log.info("Start backing up the database");
@@ -315,10 +316,8 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
                 try {
                     BackupInfoModel backupInfoModel = backupInfoModelFuture.get();
                     log.info("Complete the backup database, save the path as {}", backupInfoModel.getFilePath());
-                    System.exit(0);
                 } catch (Exception e) {
-                    log.error("Backup database failed：{}", e.getMessage(), e);
-                    System.exit(-2);
+                    throw new JpomRuntimeException(StrUtil.format("Backup database failed：{}", e.getMessage()), e);
                 }
                 return false;
             });
@@ -348,18 +347,16 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
             File file = FileUtil.file(importH2Sql);
             String sqlPath = FileUtil.getAbsolutePath(file);
             if (!FileUtil.isFile(file)) {
-                log.error("sql file does not exist :{}", sqlPath);
-                System.exit(2);
+                throw new JpomRuntimeException(StrUtil.format("sql file does not exist :{}", sqlPath));
             }
             //
-            Opt.ofBlankAble(environment.getProperty("transform-sql")).ifPresent(s -> dbConfig.transformSql(file));
+            Opt.ofNullable(environment.getProperty("transform-sql")).ifPresent(s -> dbConfig.transformSql(file));
             //
             log.info("Start importing data:{}", sqlPath);
             BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
             boolean flag = backupInfoService.restoreWithSql(sqlPath);
             if (!flag) {
-                log.error("Failed to import according to sql,{}", sqlPath);
-                System.exit(2);
+                throw new JpomRuntimeException(StrUtil.format("Failed to import according to sql,{}", sqlPath));
             }
             log.info("Import successfully according to sql,{}", sqlPath);
             return true;
