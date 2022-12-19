@@ -1,100 +1,89 @@
 jpom:
   # jpom 数据存储路径, 如果调试模式运行默认路径为【${user.home}/jpom/】,安装运行默认为jar包文件的父级
   path:
-  authorize:
+  node:
+    # 节点心跳监控时间 （需要大于零） 单位秒 最小配置 5秒
+    heart-second: 30
+    # 上传文件的超时时间 单位秒,最短5秒钟
+    upload-file-timeout: 300
+  system:
+    # cron 定时器是否开启匹配秒
+    timer-match-second: false
+    # 旧包文件保留个数
+    old-jars-count: 2
+    # Check the url for the new version
+    remote-version-url:
+    # 系统日志编码格式
+    log-charset: UTF-8
+    # 控制台编码格式
+    console-charset:
+  user:
+    # 用户连续登录失败次数，超过此数将被限制登录
+    always-login-error: 5
+    # IP连续登录失败次数，超过此数将被限制登录
+    always-ip-login-error: 10
+    # 当ip连续登录失败，锁定对应IP时长，5h、1d
+    ip-error-lock-time: 5h
+    # 是否强制提醒用户开启  mfa
+    force-mfa: false
     #登录token失效时间(单位：小时),默认为24
-    expired: 24
+    token-expired: 24
     #登录token失效后自动续签时间（单位：分钟），默认为60，不自动续签
-    renewal: 60
+    token-renewal: 60
     # jwt 签名(加密)的key 长度建议控制到 16位
-    key:
-  # 前端接口 超时时间 单位秒
-  webApiTimeout: 20
-  # 系统名称
-  name:
-  # 副标题
-  subTitle:
-  # 登录页名称
-  loginTitle:
-  # logo 文件路径（绝对路径、http） 文件限制后缀:jpg、png、gif
-  logoFile:
-  # icon 文件路径（绝对路径、http），建议规格 12×12、16×16、24×24、32×32、48×48 , 文件限制后缀 ico、png
-  iconFile:
-  # 禁用页面引导导航
-  disabledGuide: false
-  # 禁用登录图形验证码 （一般用于服务器没有字体或者开启了两部验证后才关闭图形验证码）
-  disabledCaptcha: false
-  # 前端消息弹出位置，可选 topLeft topRight bottomLeft bottomRight
-  notificationPlacement:
-user:
-  # 最多能创建多少个用户
-  maxCount: 10
-  # 用户连续登录失败次数，超过此数将被限制登录
-  alwaysLoginError: 5
-  # IP连续登录失败次数，超过此数将被限制登录
-  alwaysIpLoginError: 10
-  # 当ip连续登录失败，锁定对应IP时长，5h、1d
-  ipErrorLockTime: 5h
-  # 是否强制提醒用户开启  mfa
-  forceMfa: false
-consoleLog:
-  # 是否记录接口请求日志
-  reqXss: true
-  # 是否记录接口响应日志
-  reqResponse: true
-  # 控制台编码格式
-  charset:
-log:
-  # 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
-  fileCharset:
+    token-jwt-key:
+  web:
+    # 前端接口 超时时间 单位秒(最小 5 秒)
+    api-timeout: 20
+    # 系统名称
+    name:
+    # 副标题
+    sub-title:
+    # 登录页名称
+    login-title:
+    # logo 文件路径（绝对路径、http） 文件限制后缀:jpg、png、gif
+    logo-file:
+    # icon 文件路径（绝对路径、http），建议规格 12×12、16×16、24×24、32×32、48×48 , 文件限制后缀 ico、png
+    icon-file:
+    # 禁用页面引导导航
+    disabled-guide: false
+    # 禁用登录图形验证码 （一般用于服务器没有字体或者开启了两部验证后才关闭图形验证码）
+    disabled-captcha: false
+    # 前端消息弹出位置，可选 topLeft topRight bottomLeft bottomRight
+    notification-placement:
   # 查看日志时初始读取最后多少行（默认10，0不读取）
-  intiReadLine: 10
-db:
-  # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
-  logStorageCount: 10000
-  # 数据库账号 默认 jpom
-  userName: jpom
-  # 数据库密码 默认 jpom 如果自行配置请保证密码强度
-  userPwd: jpom
-  # h2 数据库缓存大小  kilobyte 1KB 1,024 megabyte 1MB 1,048,576
-  cacheSize: 50MB
-  # 自动备份间隔天数 小于等于 0 不自动备份
-  autoBackupIntervalDay: 1
-  # 自动备份保留天数 小于等于 0，不自动删除自动备份数据
-  autoBackupReserveDay: 5
-  # 数据库连接池相关配置
-  maxActive: 100
-  initialSize: 10
-  maxWait: 10
-  minIdle: 1
+  init-read-line: 10
+  db:
+    # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
+    log-storage-count: 10000
+    # 数据库账号 默认 jpom
+    user-name: jpom
+    # 数据库密码 默认 jpom 如果自行配置请保证密码强度
+    user-pwd: jpom
+    # h2 数据库缓存大小  kilobyte 1KB 1,024 megabyte 1MB 1,048,576
+    cache-size: 50MB
+    # 自动备份间隔天数 小于等于 0 不自动备份
+    auto-backup-interval-day: 1
+    # 自动备份保留天数 小于等于 0，不自动删除自动备份数据
+    auto-backup-reserve-day: 5
+    # 数据库连接池相关配置
+    max-active: 100
+    initial-size: 10
+    max-wait: 10
+    min-idle: 1
+  # 构建相关配置
+  build:
+    # 最多保存多少份历史记录
+    max-history-count: 1000
+    # 单个最多保存多少份历史记录
+    item-max-history-count: 50
+    # 构建命令是否检查 存在删除命令
+    check-delete-command: true
+    # 构建线程池大小,小于 1 则为不限制，默认大小为 5
+    pool-size: 5
+    # 构建任务等待数量，超过此数量将取消构建任务，值最小为 1
+    pool-wait-queue: 10
 
-# 构建相关配置
-build:
-  # 最多保存多少份历史记录
-  maxHistoryCount: 1000
-  # 单个最多保存多少份历史记录
-  itemMaxHistoryCount: 50
-  # 构建命令是否检查 存在删除命令
-  checkDeleteCommand: true
-  # 构建线程池大小,小于 1 则为不限制，默认大小为 5
-  poolSize: 5
-  # 构建任务等待数量，超过此数量将取消构建任务，值最小为 1
-  poolWaitQueue: 10
-ssh:
-  # ssh 执行命令的 默认加载的环境变量
-  initEnv: source /etc/profile && source ~/.bash_profile && source ~/.bashrc
-node:
-  # 上传文件的超时时间 单位秒,最短5秒钟
-  uploadFileTimeOut: 300
-system:
-  # cron 定时器是否开启匹配秒
-  timerMatchSecond: false
-  # 节点心跳监控时间 （需要大于零） 单位秒 最小配置 5秒
-  nodeHeartSecond: 30
-  # 旧包文件保留个数
-  oldJarsCount: 2
-  # Check the url for the new version
-  remoteVersionUrl:
 server:
   #运行端口号
   port: 2122
@@ -120,10 +109,6 @@ spring:
   web:
     resources:
       static-locations: classpath:/dist/
-  application:
-    name: jpom server
-  profiles:
-    active: default
   mvc:
     throw-exception-if-no-handler-found: true
     log-request-details: true
