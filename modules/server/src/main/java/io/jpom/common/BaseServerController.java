@@ -30,12 +30,12 @@ import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
-import io.jpom.system.ServerConfigBean;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import java.util.Optional;
 
 /**
  * Jpom server 端
@@ -44,99 +44,95 @@ import javax.annotation.Resource;
  * @since 2019/4/16
  */
 public abstract class BaseServerController extends BaseJpomController {
-	private static final ThreadLocal<UserModel> USER_MODEL_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<UserModel> USER_MODEL_THREAD_LOCAL = new ThreadLocal<>();
 
-	public static final String NODE_ID = "nodeId";
+    public static final String NODE_ID = "nodeId";
 
-	@Resource
-	protected NodeService nodeService;
+    @Resource
+    protected NodeService nodeService;
 
-	protected NodeModel getNode() {
-		NodeModel nodeModel = tryGetNode();
-		Assert.notNull(nodeModel, "节点信息不正确,对应对节点不存在");
-		return nodeModel;
-	}
+    protected NodeModel getNode() {
+        NodeModel nodeModel = tryGetNode();
+        Assert.notNull(nodeModel, "节点信息不正确,对应对节点不存在");
+        return nodeModel;
+    }
 
-	protected NodeModel tryGetNode() {
-		String nodeId = getParameter(NODE_ID);
-		if (StrUtil.isEmpty(nodeId)) {
-			return null;
-		}
-		return nodeService.getByKey(nodeId);
-	}
+    protected NodeModel tryGetNode() {
+        String nodeId = getParameter(NODE_ID);
+        if (StrUtil.isEmpty(nodeId)) {
+            return null;
+        }
+        return nodeService.getByKey(nodeId);
+    }
 
-	/**
-	 * 验证 cron 表达式, demo 账号不能开启 cron
-	 *
-	 * @param cron cron
-	 * @return 原样返回
-	 */
-	protected String checkCron(String cron) {
-		if (StrUtil.isNotEmpty(cron)) {
-			UserModel user = getUser();
-			Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
-			try {
-				new CronPattern(cron);
-			} catch (Exception e) {
-				throw new IllegalArgumentException("cron 表达式格式不正确");
-			}
-		}
-		return ObjectUtil.defaultIfNull(cron, StrUtil.EMPTY);
-	}
+    /**
+     * 验证 cron 表达式, demo 账号不能开启 cron
+     *
+     * @param cron cron
+     * @return 原样返回
+     */
+    protected String checkCron(String cron) {
+        if (StrUtil.isNotEmpty(cron)) {
+            UserModel user = getUser();
+            Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
+            try {
+                new CronPattern(cron);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("cron 表达式格式不正确");
+            }
+        }
+        return ObjectUtil.defaultIfNull(cron, StrUtil.EMPTY);
+    }
 
-	@Override
-	public void resetInfo() {
-		USER_MODEL_THREAD_LOCAL.set(getUserModel());
-	}
+    /**
+     * 为线程设置 用户
+     *
+     * @param userModel 用户
+     */
+    public static void resetInfo(UserModel userModel) {
+        UserModel userModel1 = USER_MODEL_THREAD_LOCAL.get();
+        if (userModel1 != null && userModel == UserModel.EMPTY) {
+            // 已经存在，更新为 empty 、跳过
+            return;
+        }
+        USER_MODEL_THREAD_LOCAL.set(userModel);
+    }
 
-	/**
-	 * 为线程设置 用户
-	 *
-	 * @param userModel 用户
-	 */
-	public static void resetInfo(UserModel userModel) {
-		UserModel userModel1 = USER_MODEL_THREAD_LOCAL.get();
-		if (userModel1 != null && userModel == UserModel.EMPTY) {
-			// 已经存在，更新为 empty 、跳过
-			return;
-		}
-		USER_MODEL_THREAD_LOCAL.set(userModel);
-	}
+    protected UserModel getUser() {
+        UserModel userByThreadLocal = getUserByThreadLocal();
+        Assert.notNull(userByThreadLocal, ServerConst.AUTHORIZE_TIME_OUT_CODE + StrUtil.EMPTY);
+        return userByThreadLocal;
+    }
 
-	protected UserModel getUser() {
-		UserModel userByThreadLocal = getUserByThreadLocal();
-		Assert.notNull(userByThreadLocal, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE + StrUtil.EMPTY);
-		return userByThreadLocal;
-	}
+    /**
+     * 从线程 缓存中获取 用户信息
+     *
+     * @return 用户
+     */
+    public static UserModel getUserByThreadLocal() {
+        return Optional.ofNullable(USER_MODEL_THREAD_LOCAL.get()).orElseGet(BaseServerController::getUserModel);
+//		return ;
+    }
 
-	/**
-	 * 从线程 缓存中获取 用户信息
-	 *
-	 * @return 用户
-	 */
-	public static UserModel getUserByThreadLocal() {
-		return USER_MODEL_THREAD_LOCAL.get();
-	}
+    public static void removeAll() {
+        USER_MODEL_THREAD_LOCAL.remove();
+    }
 
-	public static void removeAll() {
-		USER_MODEL_THREAD_LOCAL.remove();
-	}
+    /**
+     * 只清理 是 empty 对象
+     */
+    public static void removeEmpty() {
+        UserModel userModel = USER_MODEL_THREAD_LOCAL.get();
+        if (userModel == UserModel.EMPTY) {
+            USER_MODEL_THREAD_LOCAL.remove();
+        }
+    }
 
-	/**
-	 * 只清理 是 empty 对象
-	 */
-	public static void removeEmpty() {
-		UserModel userModel = USER_MODEL_THREAD_LOCAL.get();
-		if (userModel == UserModel.EMPTY) {
-			USER_MODEL_THREAD_LOCAL.remove();
-		}
-	}
-
-	public static UserModel getUserModel() {
-		ServletRequestAttributes servletRequestAttributes = tryGetRequestAttributes();
-		if (servletRequestAttributes == null) {
-			return null;
-		}
-		return (UserModel) servletRequestAttributes.getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
-	}
+    public static UserModel getUserModel() {
+        ServletRequestAttributes servletRequestAttributes = tryGetRequestAttributes();
+        if (servletRequestAttributes == null) {
+            return null;
+        }
+        return (UserModel) servletRequestAttributes.getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
+    }
 }

@@ -27,7 +27,6 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseStrikeDbModel;
 import io.jpom.service.h2db.TableName;
-import io.jpom.system.ServerExtConfigBean;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -151,8 +150,8 @@ public class UserModel extends BaseStrikeDbModel {
      *
      * @return 0是未锁定
      */
-    public long overLockTime() {
-        if (ServerExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
+    public long overLockTime(int alwaysLoginError) {
+        if (alwaysLoginError <= 0) {
             return 0;
         }
         // 不限制演示账号的登录
@@ -182,11 +181,12 @@ public class UserModel extends BaseStrikeDbModel {
 
     /**
      * 登录失败，重新计算锁定时间
+     *
+     * @return 返回的信息需要更新到数据库
      */
-    public UserModel errorLock() {
+    public UserModel errorLock(int alwaysLoginError) {
         // 未开启锁定功能
-        int userAlwaysLoginError = ServerExtConfigBean.getInstance().userAlwaysLoginError;
-        if (userAlwaysLoginError <= 0) {
+        if (alwaysLoginError <= 0) {
             return null;
         }
         UserModel newModel = new UserModel(this.getId());
@@ -194,11 +194,11 @@ public class UserModel extends BaseStrikeDbModel {
         int count = newModel.getPwdErrorCount();
         // 记录错误时间
         newModel.setLastPwdErrorTime(DateUtil.currentSeconds());
-        if (count < userAlwaysLoginError) {
+        if (count < alwaysLoginError) {
             // 还未达到锁定条件
             return newModel;
         }
-        int level = count / userAlwaysLoginError;
+        int level = count / alwaysLoginError;
         switch (level) {
             case 1:
                 // 在错误倍数 为1 锁定 30分钟

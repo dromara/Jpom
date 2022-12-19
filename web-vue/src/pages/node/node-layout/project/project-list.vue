@@ -123,9 +123,7 @@
               <a-menu-item>
                 <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               </a-menu-item>
-              <a-menu-item>
-                <a-button size="small" type="primary" @click="handleMonitor(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.status">监控 </a-button>
-              </a-menu-item>
+
               <!-- <a-menu-item>
                 <a-button size="small" type="primary" @click="handleReplica(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
               </a-menu-item> -->
@@ -253,18 +251,6 @@
           </a-select>
         </a-form-model-item>
 
-        <a-form-model-item prop="jdkId" v-show="javaModes.includes(temp.runMode)" class="jpom-node-project-jdk">
-          <template slot="label">
-            JDK
-            <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title"> JDK 需要在侧边栏菜单里手动添加，并非直接读取节点服务器里面的 JDK。 </template>
-              <a-icon type="question-circle" theme="filled" />
-            </a-tooltip>
-          </template>
-          <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
-            <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
-          </a-select>
-        </a-form-model-item>
         <a-form-model-item label="Main Class" prop="mainClass" v-show="javaModes.includes(temp.runMode) && temp.runMode !== 'Jar'">
           <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
         </a-form-model-item>
@@ -374,10 +360,7 @@
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReadFileVisible" @close="onReadFileClose">
       <file-read v-if="drawerReadFileVisible" :nodeId="node.id" :readFilePath="temp.readFilePath" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
-    <!-- 项目监控组件 -->
-    <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerMonitorVisible" @close="onMonitorClose">
-      <monitor v-if="drawerMonitorVisible" :node="node" :project="temp" />
-    </a-drawer>
+
     <!-- 项目副本集组件 -->
     <!-- <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReplicaVisible" @close="onReplicaClose">
       <replica v-if="drawerReplicaVisible" :node="node" :project="temp" />
@@ -399,7 +382,7 @@
 import File from "./project-file";
 import Console from "./project-console";
 import FileRead from "./project-file-read";
-import Monitor from "./project-monitor";
+
 // import Replica from "./project-replica";
 import { parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
@@ -408,7 +391,6 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_
 import {
   deleteProject,
   editProject,
-  getJdkList,
   getProjectAccessList,
   getProjectData,
   getProjectList,
@@ -432,7 +414,7 @@ export default {
   components: {
     File,
     Console,
-    Monitor,
+
     // Replica,
     codeEditor,
     FileRead,
@@ -442,7 +424,7 @@ export default {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       accessList: [],
-      jdkList: [],
+
       runModeList: runModeList,
       javaModes: javaModes,
       noFileModes: noFileModes,
@@ -454,7 +436,7 @@ export default {
       drawerTitle: "",
       drawerFileVisible: false,
       drawerConsoleVisible: false,
-      drawerMonitorVisible: false,
+
       drawerReplicaVisible: false,
       drawerReadFileVisible: false,
       // addGroupvisible: false,
@@ -548,14 +530,7 @@ export default {
         }
       });
     },
-    // 加载 JDK 列表
-    loadJdkList() {
-      getJdkList(this.node.id).then((res) => {
-        if (res.code === 200) {
-          this.jdkList = res.data;
-        }
-      });
-    },
+
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;
@@ -629,7 +604,7 @@ export default {
         javaCopyItemList: [],
       };
       this.loadAccesList();
-      this.loadJdkList();
+
       this.editProjectVisible = true;
       this.$nextTick(() => {
         setTimeout(() => {
@@ -644,7 +619,7 @@ export default {
         nodeId: this.node.id,
       };
       this.loadAccesList();
-      this.loadJdkList();
+
       getProjectData(params).then((res) => {
         if (res.code === 200) {
           this.temp = {
@@ -760,16 +735,7 @@ export default {
       this.drawerConsoleVisible = false;
       this.loadData();
     },
-    // 监控
-    handleMonitor(record) {
-      this.temp = Object.assign({}, record);
-      this.drawerTitle = `监控(${this.temp.name})`;
-      this.drawerMonitorVisible = true;
-    },
-    // 关闭监控
-    onMonitorClose() {
-      this.drawerMonitorVisible = false;
-    },
+
     // // 副本集
     // handleReplica(record) {
     //   this.temp = Object.assign({}, record);

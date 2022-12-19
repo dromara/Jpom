@@ -24,22 +24,23 @@ package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.function.Function;
 
 /**
  * 外部资源配置
@@ -47,85 +48,31 @@ import java.nio.charset.Charset;
  * @author jiangzeyin
  * @since 2019/4/16
  */
-@Configuration
-@Getter
 public class ExtConfigBean {
 
-    public static final String FILE_NAME = "extConfig.yml";
+    public static final String FILE_NAME = "application.yml";
 
-    private static Resource resource;
-    /**
-     * 请求日志
-     */
-    @Value("${consoleLog.reqXss:true}")
-    private boolean consoleLogReqXss;
-    /**
-     * 请求响应
-     */
-    @Value("${consoleLog.reqResponse:true}")
-    private boolean consoleLogReqResponse;
-
-    /**
-     * 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
-     */
-    @Value("${log.fileCharset:}")
-    private String logFileCharsetStr;
-    /**
-     * 初始读取日志文件行号
-     */
-    @Value("${log.intiReadLine:10}")
-    private int logInitReadLine;
-    /**
-     * 控制台编码格式
-     */
-    @Value("${consoleLog.charset:}")
-    private String consoleLogCharsetStr;
     /**
      *
      */
-    private Charset consoleLogCharset;
+    private static Charset consoleLogCharset;
+
+    public static void setConsoleLogCharset(Charset consoleLogCharset) {
+        ExtConfigBean.consoleLogCharset = consoleLogCharset;
+    }
+
+    public static Charset getConsoleLogCharset() {
+        return ObjectUtil.defaultIfNull(consoleLogCharset, CharsetUtil.systemCharset());
+    }
+
     /**
-     * 是否开启秒级匹配
+     * 项目运行存储路径
      */
-    @Value("${system.timerMatchSecond:false}")
-    private Boolean timerMatchSecond;
-    /**
-     * 旧包文件保留个数
-     */
-    @Value("${system.oldJarsCount:2}")
-    private Integer oldJarsCount;
+    private static String path;
 
-    @Value("${system.remoteVersionUrl:}")
-    private String remoteVersionUrl;
-    /**
-     *
-     */
-    private Charset logFileCharset;
-
-    public int getLogInitReadLine() {
-        return Math.max(logInitReadLine, 10);
+    public static void setPath(String path) {
+        ExtConfigBean.path = path;
     }
-
-    public Charset getLogFileCharset() {
-        // 读取配置的编码格式
-        if (logFileCharset == null && StrUtil.isNotBlank(logFileCharsetStr)) {
-            try {
-                logFileCharset = CharsetUtil.charset(logFileCharsetStr);
-            } catch (Exception ignored) {
-            }
-        }
-        return logFileCharset;
-    }
-
-    public boolean isConsoleLogReqResponse() {
-        return consoleLogReqResponse;
-    }
-
-    public boolean isConsoleLogReqXss() {
-        return consoleLogReqXss;
-    }
-
-    private static ExtConfigBean extConfigBean;
 
     /**
      * 动态获取外部配置文件的 resource
@@ -133,48 +80,20 @@ public class ExtConfigBean {
      * @return File
      */
     public static Resource getResource() {
-        if (resource != null) {
-            return resource;
-        }
-        File file = JpomManifest.getRunPath();
-        if (file.isFile()) {
-            file = file.getParentFile().getParentFile();
-            file = FileUtil.file(file, FILE_NAME);
-            if (file.exists() && file.isFile()) {
-                resource = new FileSystemResource(file);
-                return ExtConfigBean.resource;
-            }
-        }
-        resource = new ClassPathResource("/bin/" + FILE_NAME);
-        return ExtConfigBean.resource;
+        String property = SpringUtil.getApplicationContext().getEnvironment().getProperty(ConfigFileApplicationListener.CONFIG_LOCATION_PROPERTY);
+        Resource configResource = Opt.ofBlankAble(property)
+            .map(FileSystemResource::new)
+            .flatMap((Function<Resource, Opt<Resource>>) resource -> resource.exists() ? Opt.of(resource) : Opt.empty())
+            .orElseGet(() -> {
+                ClassPathResource classPathResource = new ClassPathResource(ExtConfigBean.FILE_NAME);
+                return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/" + FILE_NAME);
+            });
+        Assert.state(configResource.exists(), "均未找到配置文件");
+        return configResource;
     }
 
-    public static File getResourceFile() {
-        File file = JpomManifest.getRunPath();
-        file = file.getParentFile().getParentFile();
-        file = FileUtil.file(file, FILE_NAME);
-        return file;
-    }
 
-    /**
-     * 单例
-     *
-     * @return this
-     */
-    public static ExtConfigBean getInstance() {
-        if (extConfigBean == null) {
-            extConfigBean = SpringUtil.getBean(ExtConfigBean.class);
-        }
-        return extConfigBean;
-    }
-
-    /**
-     * 项目运行存储路径
-     */
-    @Value("${jpom.path}")
-    private String path;
-
-    public String getPath() {
+    public static String getPath() {
         if (StrUtil.isEmpty(path)) {
             if (JpomManifest.getInstance().isDebug()) {
                 // 调试模式 为根路径的 jpom文件
@@ -200,23 +119,5 @@ public class ExtConfigBean {
         return path;
     }
 
-    public Charset getConsoleLogCharset() {
-        if (consoleLogCharset == null) {
-            consoleLogCharset = CharsetUtil.parse(consoleLogCharsetStr, CharsetUtil.systemCharset());
-        }
-        return consoleLogCharset;
-    }
 
-    public boolean getTimerMatchSecond() {
-        return ObjectUtil.defaultIfNull(timerMatchSecond, false);
-    }
-
-    /**
-     * 旧包文件保留个数
-     *
-     * @return 默认 2 个，0 保留所有
-     */
-    public int getOldJarsCount() {
-        return Math.max(oldJarsCount, 0);
-    }
 }

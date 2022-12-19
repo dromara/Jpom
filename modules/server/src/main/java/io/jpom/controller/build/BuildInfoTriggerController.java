@@ -24,11 +24,7 @@ package io.jpom.controller.build;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.ServerOpenApi;
-import io.jpom.common.UrlRedirectUtil;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
+import io.jpom.common.*;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
@@ -71,7 +67,7 @@ public class BuildInfoTriggerController extends BaseServerController {
      */
     @RequestMapping(value = "/build/trigger/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String getTriggerUrl(String id, String rest) {
+    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         UserModel user = getUser();
         BuildInfoModel updateInfo;
@@ -85,11 +81,11 @@ public class BuildInfoTriggerController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo);
-        return JsonMessage.getString(200, StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
     private Map<String, String> getBuildToken(BuildInfoModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = ServerOpenApi.BUILD_TRIGGER_BUILD2.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());
@@ -125,6 +121,6 @@ public class BuildInfoTriggerController extends BaseServerController {
 //            item.getId(), user.getId()));
 //        buildInfoService.update(updateInfo);
 //        Map<String, String> map = this.getBuildToken(updateInfo);
-//        return JsonMessage.getString(200, "重置成功", map);
+//        return JsonMessage.success( "重置成功", map);
 //    }
 }

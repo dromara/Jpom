@@ -31,7 +31,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.ServerConst;

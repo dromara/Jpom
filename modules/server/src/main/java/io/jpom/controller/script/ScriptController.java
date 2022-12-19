@@ -25,15 +25,11 @@ package io.jpom.controller.script;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.ServerOpenApi;
-import io.jpom.common.UrlRedirectUtil;
+import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.script.ScriptModel;
@@ -91,9 +87,9 @@ public class ScriptController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String scriptList() {
+    public JsonMessage<PageResultDto<ScriptModel>> scriptList() {
         PageResultDto<ScriptModel> pageResultDto = scriptServer.listPage(getRequest());
-        return JsonMessage.getString(200, "success", pageResultDto);
+        return JsonMessage.success("success", pageResultDto);
     }
 
     /**
@@ -103,19 +99,19 @@ public class ScriptController extends BaseServerController {
      */
     @GetMapping(value = "list-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String scriptListAll() {
+    public JsonMessage<List<ScriptModel>> scriptListAll() {
         List<ScriptModel> pageResultDto = scriptServer.listByWorkspace(getRequest());
-        return JsonMessage.getString(200, "success", pageResultDto);
+        return JsonMessage.success("success", pageResultDto);
     }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String save(String id,
-                       @ValidatorItem String context,
-                       @ValidatorItem String name,
-                       String autoExecCron,
-                       String defArgs,
-                       String description, String nodeIds) {
+    public JsonMessage<String> save(String id,
+                                    @ValidatorItem String context,
+                                    @ValidatorItem String name,
+                                    String autoExecCron,
+                                    String defArgs,
+                                    String description, String nodeIds) {
         ScriptModel scriptModel = new ScriptModel();
         scriptModel.setId(id);
         scriptModel.setContext(context);
@@ -140,7 +136,7 @@ public class ScriptController extends BaseServerController {
         }
         scriptModel.setWorkspaceId(scriptServer.getCheckUserWorkspace(getRequest()));
         this.syncNodeScript(scriptModel, oldNodeIds);
-        return JsonMessage.getString(200, "修改成功");
+        return JsonMessage.success("修改成功");
     }
 
     private void syncDelNodeScript(ScriptModel scriptModel, UserModel user, Collection<String> delNode) {
@@ -181,7 +177,7 @@ public class ScriptController extends BaseServerController {
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String del(String id) {
+    public JsonMessage<String> del(String id) {
         HttpServletRequest request = getRequest();
         ScriptModel server = scriptServer.getByKey(id, request);
         if (server != null) {
@@ -196,7 +192,7 @@ public class ScriptController extends BaseServerController {
             //
             scriptExecuteLogServer.delByWorkspace(request, entity -> entity.set("scriptId", id));
         }
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 
     /**
@@ -207,12 +203,12 @@ public class ScriptController extends BaseServerController {
      */
     @RequestMapping(value = "unbind.json", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String unbind(@ValidatorItem String id) {
+    public JsonMessage<String> unbind(@ValidatorItem String id) {
         ScriptModel update = new ScriptModel();
         update.setId(id);
         update.setNodeIds(StrUtil.EMPTY);
         scriptServer.updateById(update, getRequest());
-        return JsonMessage.getString(200, "解绑成功");
+        return JsonMessage.success("解绑成功");
     }
 
     /**
@@ -225,12 +221,12 @@ public class ScriptController extends BaseServerController {
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public String syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
+    public JsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
         //
         scriptServer.checkUserWorkspace(toWorkspaceId);
         scriptServer.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     /**
@@ -241,7 +237,7 @@ public class ScriptController extends BaseServerController {
      */
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String getTriggerUrl(String id, String rest) {
+    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
         ScriptModel item = scriptServer.getByKey(id, getRequest());
         UserModel user = getUser();
         ScriptModel updateInfo;
@@ -255,19 +251,19 @@ public class ScriptController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo);
-        return JsonMessage.getString(200, StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
     private Map<String, String> getBuildToken(ScriptModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = ServerOpenApi.SERVER_SCRIPT_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());
         String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
         Map<String, String> map = new HashMap<>(10);
-        map.put("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
+        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
         String batchTriggerBuildUrl = String.format("/%s/%s", contextPath, ServerOpenApi.SERVER_SCRIPT_TRIGGER_BATCH);
-        map.put("batchTriggerBuildUrl", FileUtil.normalize(batchTriggerBuildUrl));
+        map.put("batchTriggerUrl", FileUtil.normalize(batchTriggerBuildUrl));
 
         map.put("id", item.getId());
         map.put("token", item.getTriggerToken());

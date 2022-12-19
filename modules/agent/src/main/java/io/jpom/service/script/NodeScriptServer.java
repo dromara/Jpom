@@ -27,14 +27,14 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
+import io.jpom.common.AgentConst;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
 import io.jpom.model.data.NodeScriptExecLogModel;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.service.BaseWorkspaceOptService;
-import io.jpom.system.AgentConfigBean;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -52,7 +52,7 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
     private final NodeScriptExecLogServer execLogServer;
 
     public NodeScriptServer(NodeScriptExecLogServer execLogServer) {
-        super(AgentConfigBean.SCRIPT);
+        super(AgentConst.SCRIPT);
         this.execLogServer = execLogServer;
     }
 

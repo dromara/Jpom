@@ -22,7 +22,7 @@
  */
 package io.jpom.controller;
 
-import cn.jiangzeyin.common.JsonMessage;
+import io.jpom.common.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -38,8 +38,8 @@ import java.util.Map;
 
 /**
  * @author bwcx_jzy
- * @since 2021/3/17
  * @see org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
+ * @since 2021/3/17
  */
 @Slf4j
 public abstract class BaseMyErrorController extends AbstractErrorController {
@@ -58,7 +58,6 @@ public abstract class BaseMyErrorController extends AbstractErrorController {
         }
         Integer statusCode = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         String requestUri = (String) request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-        log.error("发生异常：" + statusCode + "  " + requestUri);
         // 判断异常信息
         Object attribute = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
         Map<String, Object> body = new HashMap<>(5);
@@ -67,9 +66,12 @@ public abstract class BaseMyErrorController extends AbstractErrorController {
         if (attribute instanceof MaxUploadSizeExceededException) {
             // 上传文件大小异常
             msg = FILE_MAX_SIZE_MSG;
+            log.error("发生异常：" + statusCode + "  " + requestUri);
         } else if (status == HttpStatus.NOT_FOUND) {
             msg = "没有找到对应的资源";
             body.put(JsonMessage.DATA, requestUri);
+        } else {
+            log.error("发生异常：" + statusCode + "  " + requestUri);
         }
         body.put(JsonMessage.MSG, msg);
 

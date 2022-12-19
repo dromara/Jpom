@@ -25,26 +25,24 @@ package io.jpom.controller.system;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.Const;
-import io.jpom.common.JpomManifest;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.system.ExtConfigBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -59,44 +57,36 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class SystemConfigController extends BaseAgentController {
 
-	@RequestMapping(value = "getConfig.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String config() throws IOException {
-		Resource resource = ExtConfigBean.getResource();
-		String content = IoUtil.read(resource.getInputStream(), CharsetUtil.CHARSET_UTF_8);
-		JSONObject json = new JSONObject();
-		json.put("content", content);
-		json.put("file", FileUtil.getAbsolutePath(resource.getFile()));
-		return JsonMessage.getString(200, "ok", json);
-	}
+    @RequestMapping(value = "getConfig.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<JSONObject> config() throws IOException {
+        Resource resource = ExtConfigBean.getResource();
+        String content = IoUtil.read(resource.getInputStream(), CharsetUtil.CHARSET_UTF_8);
+        JSONObject json = new JSONObject();
+        json.put("content", content);
+        json.put("file", FileUtil.getAbsolutePath(resource.getFile()));
+        return JsonMessage.success("ok", json);
+    }
 
-	@RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String saveConfig(String content, String restart) {
-		if (StrUtil.isEmpty(content)) {
-			return JsonMessage.getString(405, "内容不能为空");
-		}
-		try {
-			YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
-			// @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格
-			ByteArrayResource resource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
-			yamlPropertySourceLoader.load("test", resource);
-		} catch (Exception e) {
-			log.warn("内容格式错误，请检查修正", e);
-			return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
-		}
-		if (JpomManifest.getInstance().isDebug()) {
-			return JsonMessage.getString(405, "调试模式下不支持在线修改,请到resources目录下的bin目录修改extConfig.yml");
-		}
-		File resourceFile = ExtConfigBean.getResourceFile();
-		FileUtil.writeString(content, resourceFile, CharsetUtil.CHARSET_UTF_8);
+    @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> saveConfig(@ValidatorItem(msg = "内容不能为空") String content, String restart) throws IOException {
+        try {
+            YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
+            // @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格
+            ByteArrayResource resource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
+            yamlPropertySourceLoader.load("test", resource);
+        } catch (Exception e) {
+            log.warn("内容格式错误，请检查修正", e);
+            return new JsonMessage<>(500, "内容格式错误，请检查修正:" + e.getMessage());
+        }
+        Resource resource = ExtConfigBean.getResource();
+        Assert.state(resource.isFile(), "当前环境下不支持在线修改配置文件");
+        FileUtil.writeString(content, resource.getFile(), CharsetUtil.CHARSET_UTF_8);
 
-		if (Convert.toBool(restart, false)) {
-			// 重启
-			ThreadUtil.execute(() -> {
-				ThreadUtil.sleep(2000);
-				JpomApplication.restart();
-			});
-			return JsonMessage.getString(200, Const.UPGRADE_MSG);
-		}
-		return JsonMessage.getString(200, "修改成功");
-	}
+        if (Convert.toBool(restart, false)) {
+            // 重启
+            JpomApplication.restart();
+            return JsonMessage.success(Const.UPGRADE_MSG);
+        }
+        return JsonMessage.success("修改成功");
+    }
 }

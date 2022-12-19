@@ -33,15 +33,16 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.jwt.JWT;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.ServerConst;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
+import io.jpom.common.validator.ValidatorConfig;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.model.user.UserModel;
@@ -50,8 +51,7 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
-import io.jpom.system.ServerConfigBean;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.util.JwtUtil;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
@@ -85,11 +85,16 @@ public class LoginControl extends BaseServerController {
 
     private final UserService userService;
     private final UserBindWorkspaceService userBindWorkspaceService;
+    private final ServerConfig.UserConfig userConfig;
+    private final ServerConfig.WebConfig webConfig;
 
     public LoginControl(UserService userService,
-                        UserBindWorkspaceService userBindWorkspaceService) {
+                        UserBindWorkspaceService userBindWorkspaceService,
+                        ServerConfig serverConfig) {
         this.userService = userService;
         this.userBindWorkspaceService = userBindWorkspaceService;
+        this.userConfig = serverConfig.getUser();
+        this.webConfig = serverConfig.getWeb();
     }
 
     /**
@@ -100,8 +105,8 @@ public class LoginControl extends BaseServerController {
     @RequestMapping(value = "randCode.png", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
     @NotLogin
     public void randCode() throws IOException {
-        if (ServerExtConfigBean.getInstance().getDisabledCaptcha()) {
-            ServletUtil.write(getResponse(), JsonMessage.getString(200, "验证码已禁用"), MediaType.APPLICATION_JSON_VALUE);
+        if (webConfig.isDisabledCaptcha()) {
+            ServletUtil.write(getResponse(), JsonMessage.success("验证码已禁用").toString(), MediaType.APPLICATION_JSON_VALUE);
             return;
         }
         int height = 50;
@@ -119,12 +124,9 @@ public class LoginControl extends BaseServerController {
      * 记录 ip 登录失败
      */
     private void ipError() {
-        if (ServerExtConfigBean.getInstance().getIpErrorLockTime() <= 0) {
-            return;
-        }
         String ip = getIp();
         int count = ObjectUtil.defaultIfNull(LFU_CACHE.get(ip), 0) + 1;
-        LFU_CACHE.put(ip, count, ServerExtConfigBean.getInstance().getIpErrorLockTime());
+        LFU_CACHE.put(ip, count, userConfig.getIpErrorLockTime().toMillis());
     }
 
     private void ipSuccess() {
@@ -138,7 +140,7 @@ public class LoginControl extends BaseServerController {
      * @return true
      */
     private boolean ipLock() {
-        if (ServerExtConfigBean.getInstance().userAlwaysIpLoginError <= 0) {
+        if (userConfig.getAlwaysIpLoginError() <= 0) {
             return false;
         }
         String ip = getIp();
@@ -146,8 +148,7 @@ public class LoginControl extends BaseServerController {
         if (count == null) {
             count = 0;
         }
-        // 大于10倍时 封ip
-        return count > ServerExtConfigBean.getInstance().userAlwaysIpLoginError;
+        return count > userConfig.getAlwaysIpLoginError();
     }
 
     /**
@@ -161,7 +162,7 @@ public class LoginControl extends BaseServerController {
     @PostMapping(value = "userLogin", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
     @Feature(method = MethodFeature.EXECUTE, resultCode = {200, 201}, logResponse = false)
-    public String userLogin(
+    public JsonMessage<Object> userLogin(
         @ValidatorConfig(value = {
             @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
         }) String userName,
@@ -170,15 +171,15 @@ public class LoginControl extends BaseServerController {
         }) String userPwd,
         String code) {
         if (this.ipLock()) {
-            return JsonMessage.getString(400, "尝试次数太多，请稍后再来");
+            return new JsonMessage<>(400, "尝试次数太多，请稍后再来");
         }
         synchronized (userName.intern()) {
             UserModel userModel = userService.getByKey(userName);
             if (userModel == null) {
                 this.ipError();
-                return JsonMessage.getString(400, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
+                return new JsonMessage<>(400, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
             }
-            if (!ServerExtConfigBean.getInstance().getDisabledCaptcha()) {
+            if (!webConfig.isDisabledGuide()) {
                 // 获取验证码
                 String sCode = getSessionAttribute(LOGIN_CODE);
                 Assert.state(StrUtil.equalsIgnoreCase(code, sCode), "请输入正确的验证码");
@@ -186,12 +187,12 @@ public class LoginControl extends BaseServerController {
             }
             UserModel updateModel = null;
             try {
-                long lockTime = userModel.overLockTime();
+                long lockTime = userModel.overLockTime(userConfig.getAlwaysLoginError());
                 if (lockTime > 0) {
                     String msg = DateUtil.formatBetween(lockTime * 1000, BetweenFormatter.Level.SECOND);
-                    updateModel = userModel.errorLock();
+                    updateModel = userModel.errorLock(userConfig.getAlwaysLoginError());
                     this.ipError();
-                    return JsonMessage.getString(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
+                    return new JsonMessage<>(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
                 }
                 // 验证
                 if (userService.simpleLogin(userName, userPwd) != null) {
@@ -205,14 +206,14 @@ public class LoginControl extends BaseServerController {
                         String uuid = IdUtil.fastSimpleUUID();
                         MFA_TOKEN.put(uuid, userName);
                         jsonObject.put("tempToken", uuid);
-                        return JsonMessage.getString(201, "请输入两步验证码", jsonObject);
+                        return new JsonMessage<>(201, "请输入两步验证码", jsonObject);
                     }
                     UserLoginDto userLoginDto = this.createToken(userModel);
-                    return JsonMessage.getString(200, "登录成功", userLoginDto);
+                    return new JsonMessage<>(200, "登录成功", userLoginDto);
                 } else {
-                    updateModel = userModel.errorLock();
+                    updateModel = userModel.errorLock(userConfig.getAlwaysLoginError());
                     this.ipError();
-                    return JsonMessage.getString(501, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
+                    return new JsonMessage<>(501, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
                 }
             } finally {
                 if (updateModel != null) {
@@ -238,10 +239,10 @@ public class LoginControl extends BaseServerController {
 
     @GetMapping(value = "mfa_verify", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public String mfaVerify(String token, String code) {
+    public JsonMessage<UserLoginDto> mfaVerify(String token, String code) {
         String userId = MFA_TOKEN.get(token);
         if (StrUtil.isEmpty(userId)) {
-            return JsonMessage.getString(201, "登录信息已经过期请重新登录");
+            return new JsonMessage<>(201, "登录信息已经过期请重新登录");
         }
         boolean mfaCode = userService.verifyMfaCode(userId, code);
         Assert.state(mfaCode, "验证码不正确,请重新输入");
@@ -249,7 +250,7 @@ public class LoginControl extends BaseServerController {
         //
         UserLoginDto userLoginDto = this.createToken(userModel);
         MFA_TOKEN.remove(token);
-        return JsonMessage.getString(200, "登录成功", userLoginDto);
+        return JsonMessage.success("登录成功", userLoginDto);
     }
 
     /**
@@ -259,9 +260,9 @@ public class LoginControl extends BaseServerController {
      */
     @RequestMapping(value = "logout2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public String logout() {
+    public JsonMessage<Object> logout() {
         getSession().invalidate();
-        return JsonMessage.getString(200, "退出成功");
+        return JsonMessage.success("退出成功");
     }
 
     /**
@@ -271,24 +272,24 @@ public class LoginControl extends BaseServerController {
      */
     @RequestMapping(value = "renewal", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public String renewalToken() {
+    public JsonMessage<UserLoginDto> renewalToken() {
         String token = getRequest().getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
         if (StrUtil.isEmpty(token)) {
-            return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "刷新token失败");
+            return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, "刷新token失败");
         }
         JWT jwt = JwtUtil.readBody(token);
         if (JwtUtil.expired(jwt, 0)) {
-            int renewal = ServerExtConfigBean.getInstance().getAuthorizeRenewal();
+            int renewal = userConfig.getTokenRenewal();
             if (jwt == null || renewal <= 0 || JwtUtil.expired(jwt, TimeUnit.MINUTES.toSeconds(renewal))) {
-                return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "刷新token超时");
+                return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, "刷新token超时");
             }
         }
         UserModel userModel = userService.checkUser(JwtUtil.getId(jwt));
         if (userModel == null) {
-            return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "没有对应的用户");
+            return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, "没有对应的用户");
         }
         UserLoginDto userLoginDto = userService.getUserJwtId(userModel);
-        return JsonMessage.getString(200, "", userLoginDto);
+        return JsonMessage.success("", userLoginDto);
     }
 
     /**
@@ -296,15 +297,15 @@ public class LoginControl extends BaseServerController {
      */
     @GetMapping(value = "user_demo_info", produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public String demoInfo() {
-        String userDemoTip = ServerExtConfigBean.getInstance().getUserDemoTip();
+    public JsonMessage<JSONObject> demoInfo() {
+        String userDemoTip = userConfig.getDemoTip();
         userDemoTip = StringUtil.convertFileStr(userDemoTip, StrUtil.EMPTY);
 
         if (StrUtil.isEmpty(userDemoTip) || !userService.hasDemoUser()) {
-            return JsonMessage.getString(200, "");
+            return JsonMessage.success("");
         }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("user", UserModel.DEMO_USER);
-        return JsonMessage.getString(200, userDemoTip, jsonObject);
+        return JsonMessage.success(userDemoTip, jsonObject);
     }
 }

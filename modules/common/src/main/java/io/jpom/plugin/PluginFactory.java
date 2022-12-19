@@ -147,7 +147,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
-        init();
+        //init();
         // 扫描插件 实现
         Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom", IPlugin.class::isAssignableFrom);
         List<PluginItemWrap> pluginItemWraps = classes
@@ -190,7 +190,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
                 }
             }
         } else if (event instanceof ApplicationReadyEvent) {
-            System.setProperty(IPlugin.DATE_PATH_KEY, ExtConfigBean.getInstance().getPath());
+            System.setProperty(IPlugin.DATE_PATH_KEY, ExtConfigBean.getPath());
             System.setProperty(IPlugin.JPOM_VERSION_KEY, JpomManifest.getInstance().getVersion());
         }
 

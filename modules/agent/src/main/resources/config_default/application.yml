@@ -1,0 +1,70 @@
+jpom:
+  # jpom 数据存储路径, 如果调试模式运行默认路径为【${user.home}/jpom/】,安装运行默认为jar包文件的父级
+  path:
+  authorize:
+    # agent 端管理账号，必填。
+    agent-name: jpomAgent
+    # agent 端管理密码，非必填，如果为空Jpom 会自动生成一串随机字符串当密码
+    agent-pwd:
+  whitelist:
+    # 白名单目录是否验证包含关系
+    check-starts-with: true
+  project:
+    # 停止、启动项目(项目状态检测)等待的时长 单位秒
+    status-wait-time: 10
+    # 项目文件备份保留个数,大于 0 才会备份
+    file-backup-count: 0
+    # 限制备份指定文件后缀（支持正则）
+    file-backup-suffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]
+    # 项目状态检测间隔时间 单位毫秒，最小为1毫秒
+    status-detection-interval: 500
+    log:
+      # 检测控制台日志周期，防止日志文件过大，目前暂只支持linux 不停服备份
+      auto-backup-console-cron: 0 0/10 * * * ?
+      # 控制台日志文件保留大小
+      auto-backup-size: 50MB
+      # 是否自动将控制台日志文件备份
+      auto-backup-to-file: true
+      # 保存天数 配置错误或者没有，默认是7天
+      save-days: 7
+      # 日志文件的编码格式
+      file-charset:
+  # 查看日志时初始读取最后多少行（默认10，0不读取）
+  init-read-line: 10
+  system:
+    # cron 定时器是否开启匹配秒
+    timer-match-second: false
+    # 旧包文件保留个数
+    old-jars-count: 2
+    # Check the url for the new version
+    remote-version-url:
+    # 系统日志编码格式
+    log-charset: UTF-8
+    # 控制台编码格式
+    console-charset:
+
+server:
+  #运行端口号
+  port: 2123
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+      forceRequest: true
+      forceResponse: true
+  tomcat:
+    uri-encoding: UTF-8
+spring:
+  servlet:
+    session:
+      timeout: 1H
+      cookie:
+        name: JPOMID-AGENT
+    multipart:
+      # 上传文件大小限制 12KB -- parses as 12 kilobytes 5MB  -- parses as 5 megabytes 20  -- parses as 20 kilobytes
+      max-request-size: 2GB
+      max-file-size: 1GB
+  mvc:
+    throw-exception-if-no-handler-found: true
+    log-request-details: true

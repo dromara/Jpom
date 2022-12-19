@@ -24,11 +24,11 @@ package io.jpom.controller.openapi;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseJpomController;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.CommandModel;
@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * ssh 脚本触发器
+ *
  * @author bwcx_jzy
  * @since 2022/7/25
  */
@@ -72,7 +74,7 @@ public class SshCommandTriggerApiController extends BaseJpomController {
      * @return json
      */
     @RequestMapping(value = ServerOpenApi.SSH_COMMAND_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String trigger2(@PathVariable String id, @PathVariable String token) {
+    public JsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token) {
         CommandModel item = commandService.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
@@ -82,17 +84,17 @@ public class SshCommandTriggerApiController extends BaseJpomController {
         //
         Assert.notNull(userModel, "触发token错误,或者已经失效:-1");
 
-        String batchId = null;
+        String batchId;
         try {
             BaseServerController.resetInfo(userModel);
             batchId = commandService.executeBatch(item, item.getDefParams(), item.getSshIds(), 2);
         } catch (Exception e) {
             log.error("触发自动执行SSH命令模版异常", e);
-            return JsonMessage.getString(500, "执行异常：" + e.getMessage());
+            return new JsonMessage<>(500, "执行异常：" + e.getMessage());
         }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("batchId", batchId);
-        return JsonMessage.getString(200, "开始执行", jsonObject);
+        return JsonMessage.success("开始执行", jsonObject);
     }
 
 
@@ -118,7 +120,7 @@ public class SshCommandTriggerApiController extends BaseJpomController {
      * @return json
      */
     @PostMapping(value = ServerOpenApi.SSH_COMMAND_TRIGGER_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String triggerBatch() {
+    public JsonMessage<List<Object>> triggerBatch() {
         try {
             String body = ServletUtil.getBody(getRequest());
             JSONArray jsonArray = JSONArray.parseArray(body);
@@ -152,10 +154,10 @@ public class SshCommandTriggerApiController extends BaseJpomController {
                 jsonObject.put("batchId", batchId);
                 //
             }).collect(Collectors.toList());
-            return JsonMessage.getString(200, "触发成功", collect);
+            return JsonMessage.success("触发成功", collect);
         } catch (Exception e) {
             log.error("SSH 脚本批量触发异常", e);
-            return JsonMessage.getString(500, "触发异常", e.getMessage());
+            return new JsonMessage<>(500, "触发异常" + e.getMessage());
         }
     }
 }

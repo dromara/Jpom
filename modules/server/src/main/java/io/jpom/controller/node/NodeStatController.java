@@ -24,16 +24,16 @@ package io.jpom.controller.node;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.db.Entity;
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.stat.NodeStatModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.stat.NodeStatService;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,34 +52,36 @@ import java.util.Map;
 @Feature(cls = ClassFeature.NODE_STAT)
 public class NodeStatController extends BaseServerController {
 
-	private final NodeStatService nodeStatService;
+    private final NodeStatService nodeStatService;
+    private final ServerConfig.NodeConfig nodeConfig;
 
-	public NodeStatController(NodeStatService nodeStatService) {
-		this.nodeStatService = nodeStatService;
-	}
+    public NodeStatController(NodeStatService nodeStatService,
+                              ServerConfig serverConfig) {
+        this.nodeStatService = nodeStatService;
+        this.nodeConfig = serverConfig.getNode();
+    }
 
-	@PostMapping(value = "list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String listJson() {
-		PageResultDto<NodeStatModel> nodeModelPageResultDto = nodeStatService.listPage(getRequest());
-		return JsonMessage.getString(200, "", nodeModelPageResultDto);
-	}
+    @PostMapping(value = "list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<PageResultDto<NodeStatModel>> listJson() {
+        PageResultDto<NodeStatModel> nodeModelPageResultDto = nodeStatService.listPage(getRequest());
+        return JsonMessage.success("", nodeModelPageResultDto);
+    }
 
-	@GetMapping(value = "status_stat.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LIST)
-	public String statusStat() {
-		String workspaceId = nodeStatService.getCheckUserWorkspace(getRequest());
-		//
-		int heartSecond = ServerExtConfigBean.getInstance().getNodeHeartSecond();
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("heartSecond", heartSecond);
-		{
-			// 节点状态
-			String sql = "select `status`,count(1) as cunt from " + nodeStatService.getTableName() + " where workspaceId=? group by `status`";
-			List<Entity> list = nodeStatService.query(sql, workspaceId);
-			Map<String, Integer> map = CollStreamUtil.toMap(list, entity -> entity.getStr("status"), entity -> entity.getInt("cunt"));
-			jsonObject.put("status", map);
-		}
+    @GetMapping(value = "status_stat.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<JSONObject> statusStat() {
+        String workspaceId = nodeStatService.getCheckUserWorkspace(getRequest());
+        //
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("heartSecond", nodeConfig.getHeartSecond());
+        {
+            // 节点状态
+            String sql = "select `status`,count(1) as cunt from " + nodeStatService.getTableName() + " where workspaceId=? group by `status`";
+            List<Entity> list = nodeStatService.query(sql, workspaceId);
+            Map<String, Integer> map = CollStreamUtil.toMap(list, entity -> entity.getStr("status"), entity -> entity.getInt("cunt"));
+            jsonObject.put("status", map);
+        }
 //		{
 //			// 启用状态
 //			String sql = "select `openStatus`,count(1) as cunt from " + nodeService.getTableName() + " where workspaceId=? group by `openStatus`";
@@ -87,6 +89,6 @@ public class NodeStatController extends BaseServerController {
 //			Map<String, Integer> map = CollStreamUtil.toMap(list, entity -> entity.getStr("openStatus"), entity -> entity.getInt("cunt"));
 //			jsonObject.put("openStatus", map);
 //		}
-		return JsonMessage.getString(200, "", jsonObject);
-	}
+        return JsonMessage.success("", jsonObject);
+    }
 }

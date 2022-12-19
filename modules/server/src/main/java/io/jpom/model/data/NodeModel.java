@@ -75,13 +75,7 @@ public class NodeModel extends BaseGroupModel {
      * 锁定类型
      */
     private String unLockType;
-    /**
-     * 监控周期
-     *
-     * @see io.jpom.model.Cycle
-     */
-    @Deprecated
-    private Integer cycle;
+
     /**
      * http 代理
      */

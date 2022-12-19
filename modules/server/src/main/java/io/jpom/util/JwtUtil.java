@@ -27,12 +27,13 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTHeader;
 import cn.hutool.jwt.JWTValidator;
 import cn.hutool.jwt.signers.JWTSignerUtil;
 import io.jpom.model.user.UserModel;
-import io.jpom.system.ServerExtConfigBean;
+import io.jpom.system.ServerConfig;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -54,24 +55,14 @@ public class JwtUtil {
     private static byte[] KEY;
     public static final String KEY_USER_ID = "userId";
 
-    /**
-     * 配置的加密 key
-     *
-     * @return byte
-     */
-    public static byte[] getKey() {
-        if (KEY == null) {
-            KEY = ServerExtConfigBean.getInstance().getAuthorizeKey();
-        }
-        return KEY;
-    }
-
     public static JWT parseBody(String token) {
         if (StrUtil.isEmpty(token)) {
             return null;
         }
+        ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+        ServerConfig.UserConfig user = serverConfig.getUser();
         JWT jwt = JWT.of(token);
-        if (jwt.verify(JWTSignerUtil.hs256(getKey()))) {
+        if (jwt.verify(JWTSignerUtil.hs256(user.getTokenJwtKeyByte()))) {
             return jwt;
         }
         return null;
@@ -143,7 +134,9 @@ public class JwtUtil {
      * @return token
      */
     public static String builder(UserModel userModel, String jwtId) {
-        int authorizeExpired = ServerExtConfigBean.getInstance().getAuthorizeExpired();
+        ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+        ServerConfig.UserConfig user = serverConfig.getUser();
+        //
         DateTime now = DateTime.now();
         JWT jwt = JWT.create();
         jwt.setHeader(JWTHeader.ALGORITHM, ALGORITHM);
@@ -151,8 +144,8 @@ public class JwtUtil {
             .setJWTId(jwtId)
             .setIssuer("Jpom")
             .setIssuedAt(now)
-            .setExpiresAt(now.offsetNew(DateField.HOUR, authorizeExpired));
-        return jwt.sign(JWTSignerUtil.hs256(getKey()));
+            .setExpiresAt(now.offsetNew(DateField.HOUR, user.getTokenExpired()));
+        return jwt.sign(JWTSignerUtil.hs256(user.getTokenJwtKeyByte()));
     }
 
 

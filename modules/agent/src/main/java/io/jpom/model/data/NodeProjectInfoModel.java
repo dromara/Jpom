@@ -27,8 +27,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HtmlUtil;
-import cn.jiangzeyin.common.request.XssFilter;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.model.RunMode;
 import io.jpom.system.JpomRuntimeException;
@@ -80,8 +78,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
     private String token;
 
     private String createTime;
-
-    private String jdkId;
 
     private RunMode runMode;
     /**
@@ -138,30 +134,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return runMode;
     }
 
-    public String getJvm() {
-        String s = StrUtil.emptyToDefault(jvm, StrUtil.EMPTY);
-        if (XssFilter.isXSS()) {
-            s = HtmlUtil.unescape(s);
-        }
-        return s;
-    }
-
-    public void setJvm(String jvm) {
-        if (XssFilter.isXSS()) {
-            this.jvm = HtmlUtil.unescape(jvm);
-        } else {
-            this.jvm = jvm;
-        }
-    }
-
-    public Boolean getAutoStart() {
-        return autoStart;
-    }
-
-    public void setAutoStart(Boolean autoStart) {
-        this.autoStart = autoStart;
-    }
-
 
     public String getMainClass() {
         return StrUtil.emptyToDefault(mainClass, StrUtil.EMPTY);
@@ -178,9 +150,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         this.whitelistDirectory = whitelistDirectory;
     }
 
-    public String getLib() {
-        return lib;
-    }
 
     public String allLib() {
         return FileUtil.file(this.getWhitelistDirectory(), this.getLib()).getAbsolutePath();
@@ -332,23 +301,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
         return StrUtil.emptyToDefault(token, StrUtil.EMPTY);
     }
 
-    public String getArgs() {
-        String s = StrUtil.emptyToDefault(args, StrUtil.EMPTY);
-        if (XssFilter.isXSS()) {
-            s = HtmlUtil.unescape(s);
-        }
-        return s;
-    }
-
-    public void setArgs(String args) {
-        if (XssFilter.isXSS()) {
-            this.args = HtmlUtil.unescape(args);
-        } else {
-            this.args = args;
-        }
-    }
-
-
     public JavaCopyItem findCopyItem(String copyId) {
         if (StrUtil.isEmpty(copyId)) {
             return null;
@@ -484,40 +436,6 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 
         public String getParentId() {
             return StrUtil.emptyToDefault(this.parentId, this.parendId);
-        }
-
-        public void setParentId(String parentId) {
-            this.parentId = parentId;
-        }
-
-        public String getJvm() {
-            if (XssFilter.isXSS()) {
-                return HtmlUtil.unescape(jvm);
-            }
-            return jvm;
-        }
-
-        public void setJvm(String jvm) {
-            if (XssFilter.isXSS()) {
-                this.jvm = HtmlUtil.unescape(jvm);
-            } else {
-                this.jvm = jvm;
-            }
-        }
-
-        public String getArgs() {
-            if (XssFilter.isXSS()) {
-                return HtmlUtil.unescape(args);
-            }
-            return args;
-        }
-
-        public void setArgs(String args) {
-            if (XssFilter.isXSS()) {
-                this.args = HtmlUtil.unescape(args);
-            } else {
-                this.args = args;
-            }
         }
 
 

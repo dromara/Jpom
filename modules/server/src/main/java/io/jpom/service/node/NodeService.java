@@ -30,24 +30,24 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
-import io.jpom.common.BaseServerController;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.WorkspaceModel;
-import io.jpom.model.user.UserModel;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
@@ -63,11 +63,16 @@ import java.util.stream.Collectors;
 public class NodeService extends BaseGroupService<NodeModel> {
 
     private final SshService sshService;
-    private final WorkspaceService workspaceService;
+    @Resource
+    @Lazy
+    private WorkspaceService workspaceService;
 
-    public NodeService(SshService sshService, WorkspaceService workspaceService) {
+    @Resource
+    @Lazy
+    private ProjectInfoCacheService projectInfoCacheService;
+
+    public NodeService(SshService sshService) {
         this.sshService = sshService;
-        this.workspaceService = workspaceService;
     }
 
     @Override
@@ -88,7 +93,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
         // 检查是否可用默认为5秒，避免太长时间无法连接一直等待
         nodeModel.setTimeOut(5);
         //
-        JsonMessage<Object> objectJsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Info, "nodeId", nodeModel.getId());
+        JsonMessage<JpomManifest> objectJsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Info, "nodeId", nodeModel.getId());
         try {
             JpomManifest jpomManifest = objectJsonMessage.getData(JpomManifest.class);
             Assert.notNull(jpomManifest, "节点连接失败，请检查节点是否在线");
@@ -123,7 +128,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
      *
      * @param request 请求对象
      */
-    public void update(HttpServletRequest request, boolean autoReg) {
+    public void update(HttpServletRequest request) {
         String type = request.getParameter("type");
         boolean create = "add".equalsIgnoreCase(type);
         // 创建对象
@@ -137,19 +142,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
         //
         this.testHttpProxy(nodeModel.getHttpProxy());
         NodeModel existsNode = super.getByKey(id);
-        String workspaceId;
-        if (autoReg) {
-            if (create) {
-                Assert.isNull(existsNode, "对应的节点 id 已经存在啦");
-                // 绑定到默认工作空间
-                workspaceId = Const.WORKSPACE_DEFAULT_ID;
-            } else {
-                Assert.notNull(existsNode, "对应的节点不存在");
-                workspaceId = existsNode.getWorkspaceId();
-            }
-        } else {
-            workspaceId = this.getCheckUserWorkspace(request);
-        }
+        String workspaceId = this.getCheckUserWorkspace(request);
         nodeModel.setWorkspaceId(workspaceId);
 
         //nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
@@ -163,37 +156,23 @@ public class NodeService extends BaseGroupService<NodeModel> {
             SshModel byKey = sshService.getByKey(sshId, request);
             Assert.notNull(byKey, "对应的 SSH 不存在");
             List<NodeModel> nodeBySshId = this.getNodeBySshId(sshId);
-            nodeBySshId = ObjectUtil.defaultIfNull(nodeBySshId, Collections.EMPTY_LIST);
-            Optional<NodeModel> any = nodeBySshId.stream().filter(nodeModel2 -> !StrUtil.equals(id, nodeModel2.getId())).findAny();
-            Assert.state(!any.isPresent(), "对应的SSH已经被其他节点绑定啦");
+            nodeBySshId = ObjectUtil.defaultIfNull(nodeBySshId, Collections.emptyList());
+            boolean anyMatch = nodeBySshId.stream().anyMatch(nodeModel2 -> !StrUtil.equals(id, nodeModel2.getId()));
+            //            Optional<NodeModel> any = anyMatch.findAny();
+            Assert.state(!anyMatch, "对应的SSH已经被其他节点绑定啦");
         }
         if (nodeModel.isOpenStatus()) {
             //
             this.checkLockType(existsNode);
             this.testNode(nodeModel);
         }
-        try {
-            if (autoReg) {
-                BaseServerController.resetInfo(UserModel.EMPTY);
-            }
-            if (create) {
-                if (autoReg) {
-                    // 自动注册节点默认关闭
-                    nodeModel.setOpenStatus(0);
-                    // 默认锁定 (原因未分配工作空间)
-                    nodeModel.setUnLockType("unassignedWorkspace");
-                }
-                this.insert(nodeModel);
-                // 同步项目
-                ProjectInfoCacheService projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
-                projectInfoCacheService.syncNode(nodeModel);
-            } else {
-                this.update(nodeModel);
-            }
-        } finally {
-            if (autoReg) {
-                BaseServerController.removeEmpty();
-            }
+        if (create) {
+
+            this.insert(nodeModel);
+            // 同步项目
+            projectInfoCacheService.syncNode(nodeModel);
+        } else {
+            this.update(nodeModel);
         }
     }
 
@@ -317,7 +296,6 @@ public class NodeService extends BaseGroupService<NodeModel> {
      */
     private void fillNodeInfo(NodeModel nodeModel) {
         nodeModel.setProtocol(StrUtil.emptyToDefault(nodeModel.getProtocol(), "http"));
-        nodeModel.setCycle(0);
         nodeModel.setOpenStatus(ObjectUtil.defaultIfNull(nodeModel.getOpenStatus(), 0));
     }
 

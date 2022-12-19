@@ -29,11 +29,11 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.multipart.MultipartFileBuilder;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.docker.DockerSwarmInfoMode;
@@ -44,7 +44,7 @@ import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.docker.DockerSwarmInfoService;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.util.CompressionFileUtil;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -73,11 +73,14 @@ public class DockerInfoController extends BaseServerController {
 
     private final DockerInfoService dockerInfoService;
     private final DockerSwarmInfoService dockerSwarmInfoService;
+    private final ServerConfig serverConfig;
 
     public DockerInfoController(DockerInfoService dockerInfoService,
-                                DockerSwarmInfoService dockerSwarmInfoService) {
+                                DockerSwarmInfoService dockerSwarmInfoService,
+                                ServerConfig serverConfig) {
         this.dockerInfoService = dockerInfoService;
         this.dockerSwarmInfoService = dockerSwarmInfoService;
+        this.serverConfig = serverConfig;
     }
 
     /**
@@ -85,10 +88,10 @@ public class DockerInfoController extends BaseServerController {
      */
     @GetMapping(value = "api-versions", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String apiVersions() throws Exception {
+    public JsonMessage<List<JSONObject>> apiVersions() throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         List<JSONObject> data = (List<JSONObject>) plugin.execute("apiVersions");
-        return JsonMessage.getString(200, "", data);
+        return JsonMessage.success("", data);
     }
 
     /**
@@ -96,11 +99,11 @@ public class DockerInfoController extends BaseServerController {
      */
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String list() {
+    public JsonMessage<PageResultDto<DockerInfoModel>> list() {
         // load list with page
         PageResultDto<DockerInfoModel> resultDto = dockerInfoService.listPage(getRequest());
         resultDto.each(this::checkCertPath);
-        return JsonMessage.getString(200, "", resultDto);
+        return JsonMessage.success("", resultDto);
     }
 
     /**
@@ -202,9 +205,9 @@ public class DockerInfoController extends BaseServerController {
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String edit(String id, String host) throws Exception {
+    public JsonMessage<Object> edit(String id, String host) throws Exception {
         // 保存路径
-        File tempPath = ServerConfigBean.getInstance().getUserTempPath();
+        File tempPath = serverConfig.getUserTempPath();
         File savePath = FileUtil.file(tempPath, "docker", SecureUtil.sha1(host));
         DockerInfoModel dockerInfoModel = this.takeOverModel(savePath);
         boolean certExist = dockerInfoModel.getCertExist();
@@ -222,7 +225,7 @@ public class DockerInfoController extends BaseServerController {
             dockerInfoService.updateById(dockerInfoModel, getRequest());
         }
         //
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     private void check(DockerInfoModel dockerInfoModel, boolean certExist, File savePath) throws Exception {
@@ -259,7 +262,7 @@ public class DockerInfoController extends BaseServerController {
 
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String del(@ValidatorItem String id) throws Exception {
+    public JsonMessage<Object> del(@ValidatorItem String id) throws Exception {
         DockerInfoModel infoModel = dockerInfoService.getByKey(id, getRequest());
         if (infoModel != null) {
             // 检查是否为最后一个 docker 需要删除证书文件
@@ -272,16 +275,16 @@ public class DockerInfoController extends BaseServerController {
             }
             dockerInfoService.delByKey(id);
         }
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 
     @GetMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String info(@ValidatorItem String id) throws Exception {
+    public JsonMessage<JSONObject> info(@ValidatorItem String id) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         JSONObject info = plugin.execute("info", dockerInfoModel.toParameter(), JSONObject.class);
-        return JsonMessage.getString(200, "", info);
+        return JsonMessage.success("", info);
     }
 
     /**
@@ -337,7 +340,7 @@ public class DockerInfoController extends BaseServerController {
 
     @PostMapping(value = "prune", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String prune(@ValidatorItem String id, @ValidatorItem String pruneType, String labels, String until, String dangling) throws Exception {
+    public JsonMessage<Object> prune(@ValidatorItem String id, @ValidatorItem String pruneType, String labels, String until, String dangling) throws Exception {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoModel.toParameter();
@@ -348,6 +351,6 @@ public class DockerInfoController extends BaseServerController {
         //
         Long spaceReclaimed = plugin.execute("prune", parameter, Long.class);
         spaceReclaimed = ObjectUtil.defaultIfNull(spaceReclaimed, 0L);
-        return JsonMessage.getString(200, "修剪完成,总回收空间：" + FileUtil.readableFileSize(spaceReclaimed));
+        return JsonMessage.success("修剪完成,总回收空间：" + FileUtil.readableFileSize(spaceReclaimed));
     }
 }

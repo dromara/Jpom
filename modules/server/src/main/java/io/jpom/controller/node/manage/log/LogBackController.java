@@ -22,9 +22,9 @@
  */
 package io.jpom.controller.node.manage.log;
 
-import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.permission.ClassFeature;
@@ -50,64 +50,64 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @NodeDataPermission(cls = ProjectInfoCacheService.class)
 public class LogBackController extends BaseServerController {
 
-	private final ProjectInfoCacheService projectInfoCacheService;
+    private final ProjectInfoCacheService projectInfoCacheService;
 
-	public LogBackController(ProjectInfoCacheService projectInfoCacheService) {
-		this.projectInfoCacheService = projectInfoCacheService;
-	}
+    public LogBackController(ProjectInfoCacheService projectInfoCacheService) {
+        this.projectInfoCacheService = projectInfoCacheService;
+    }
 
-	@RequestMapping(value = "export.html", method = RequestMethod.GET)
-	@ResponseBody
-	@Feature(method = MethodFeature.DOWNLOAD)
-	public void export() {
-		NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_export);
-	}
+    @RequestMapping(value = "export.html", method = RequestMethod.GET)
+    @ResponseBody
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void export() {
+        NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_export);
+    }
 
-	/**
-	 * get log back list
-	 * 日志备份列表接口
-	 *
-	 * @return json
-	 * @author Hotstrip
-	 */
-	@RequestMapping(value = "log-back-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.LIST)
-	public String logBackList() {
-		JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
-		return JsonMessage.getString(200, "success", jsonObject);
-	}
+    /**
+     * get log back list
+     * 日志备份列表接口
+     *
+     * @return json
+     * @author Hotstrip
+     */
+    @RequestMapping(value = "log-back-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<JSONObject> logBackList() {
+        JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
+        return JsonMessage.success("success", jsonObject);
+    }
 
-	@RequestMapping(value = "logBack_download", method = RequestMethod.GET)
-	@ResponseBody
-	@Feature(method = MethodFeature.DOWNLOAD)
-	public void download() {
-		NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_logBack_download);
-	}
+    @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
+    @ResponseBody
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void download() {
+        NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_logBack_download);
+    }
 
-	@RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.DEL)
-	public String clear() {
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_logBack_delete).toString();
-	}
+    @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.DEL)
+    public String clear() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_logBack_delete).toString();
+    }
 
-	@RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public String logSize(String id, String copyId) {
-		JSONObject info = projectInfoCacheService.getLogSize(getNode(), id, copyId);
-		return JsonMessage.getString(200, "", info);
-	}
+    @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public JsonMessage<JSONObject> logSize(String id, String copyId) {
+        JSONObject info = projectInfoCacheService.getLogSize(getNode(), id, copyId);
+        return JsonMessage.success("", info);
+    }
 
-	/**
-	 * 重置日志
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.DEL)
-	public String resetLog() {
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_ResetLog).toString();
-	}
+    /**
+     * 重置日志
+     *
+     * @return json
+     */
+    @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.DEL)
+    public String resetLog() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_ResetLog).toString();
+    }
 }

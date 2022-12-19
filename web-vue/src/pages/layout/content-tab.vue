@@ -1,6 +1,6 @@
 <template>
   <a-tabs v-model="activeKey" class="my-tabs" hide-add type="editable-card" @edit="onEdit" @change="changeTab">
-    <a-tab-pane v-for="(tab, index) in getTabList" :key="tab.key" :closable="getTabList.length > 1">
+    <a-tab-pane v-for="(tab, index) in nowTabList" :key="tab.key" :closable="nowTabList.length > 1">
       <template slot="tab">
         <a-dropdown :trigger="['contextmenu']">
           <span style="display: inline-table">{{ tab.title }}</span>
@@ -12,7 +12,7 @@
                 })
               "
             >
-              <a-button type="link" :disabled="getTabList.length <= 1">关闭其他</a-button>
+              <a-button type="link" :disabled="nowTabList.length <= 1">关闭其他</a-button>
             </a-menu-item>
             <a-menu-item
               @click="
@@ -22,7 +22,7 @@
                 })
               "
             >
-              <a-button type="link" :disabled="getTabList.length <= 1 || index === 0">关闭左侧</a-button>
+              <a-button type="link" :disabled="nowTabList.length <= 1 || index === 0">关闭左侧</a-button>
             </a-menu-item>
             <a-menu-item
               @click="
@@ -32,19 +32,24 @@
                 })
               "
             >
-              <a-button type="link" :disabled="getTabList.length <= 1 || index === getTabList.length - 1">关闭右侧</a-button>
+              <a-button type="link" :disabled="nowTabList.length <= 1 || index === nowTabList.length - 1">关闭右侧</a-button>
             </a-menu-item>
           </a-menu>
         </a-dropdown>
       </template>
     </a-tab-pane>
-    <template slot="tabBarExtraContent"> <user-header /> </template>
+    <template slot="tabBarExtraContent"> <user-header :mode="this.mode" /> </template>
   </a-tabs>
 </template>
 <script>
 import { mapGetters } from "vuex";
 import UserHeader from "./user-header";
 export default {
+  props: {
+    mode: {
+      type: String,
+    },
+  },
   components: {
     UserHeader,
   },
@@ -52,14 +57,17 @@ export default {
     return {};
   },
   computed: {
-    ...mapGetters(["getActiveTabKey", "getTabList", "getCollapsed"]),
+    ...mapGetters(["getActiveTabKey", "getManagementActiveTabKey", "getTabList", "getManagementTabList", "getCollapsed"]),
     activeKey: {
       get() {
-        return this.getActiveTabKey;
+        return this.mode === "normal" ? this.getActiveTabKey : this.getManagementActiveTabKey;
       },
       set(value) {
         this.activeTab(value);
       },
+    },
+    nowTabList() {
+      return this.mode === "normal" ? this.getTabList : this.getManagementTabList;
     },
   },
   created() {},
@@ -67,13 +75,13 @@ export default {
     // 编辑 Tab
     onEdit(key, action) {
       if (action === "remove") {
-        if (this.getTabList.length === 1) {
+        if (this.nowTabList.length === 1) {
           this.$notification.warn({
             message: "不能关闭了",
           });
           return;
         }
-        this.$store.dispatch("removeTab", key).then(() => {
+        this.$store.dispatch(this.mode === "normal" ? "removeTab" : "removeManagementTab", key).then(() => {
           this.activeTab();
         });
       }
@@ -85,18 +93,18 @@ export default {
       this.$notification.success({
         message: "操作成功",
       });
-      this.$store.dispatch("clearTabs", data).then(() => {
+      this.$store.dispatch(this.mode === "normal" ? "clearTabs" : "clearManagementTabs", data).then(() => {
         this.activeTab();
       });
     },
     activeTab(key) {
       key = key || this.activeKey;
-      const index = this.getTabList.findIndex((ele) => ele.key === key);
-      const activeTab = this.getTabList[index];
+      const index = this.nowTabList.findIndex((ele) => ele.key === key);
+      const activeTab = this.nowTabList[index];
       this.$router.push({ query: { ...this.$route.query, sPid: activeTab.parentId, sId: activeTab.id }, path: activeTab.path });
       //
-      this.$store.dispatch("activeMenu", activeTab.id);
-      this.$store.dispatch("menuOpenKeys", activeTab.parentId);
+      this.$store.dispatch(this.mode === "normal" ? "activeMenu" : "activeManagementMenu", activeTab.id);
+      this.$store.dispatch(this.mode === "normal" ? "menuOpenKeys" : "menuManagementOpenKeys", activeTab.parentId);
       return activeTab;
     },
   },

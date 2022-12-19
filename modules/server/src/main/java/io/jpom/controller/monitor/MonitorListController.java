@@ -26,11 +26,11 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.user.UserModel;
@@ -84,9 +84,9 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getMonitorList() {
+    public JsonMessage<PageResultDto<MonitorModel>> getMonitorList() {
         PageResultDto<MonitorModel> pageResultDto = monitorService.listPage(getRequest());
-        return JsonMessage.getString(200, "", pageResultDto);
+        return JsonMessage.success("", pageResultDto);
     }
 
     /**
@@ -97,7 +97,7 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) throws SQLException {
+    public JsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) throws SQLException {
         //
         HttpServletRequest request = getRequest();
         int delByKey = monitorService.delByKey(id, request);
@@ -105,7 +105,7 @@ public class MonitorListController extends BaseServerController {
             // 删除日志
             dbMonitorNotifyLogService.delByWorkspace(request, entity -> entity.set("monitorId", id));
         }
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 
 
@@ -119,10 +119,10 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String updateMonitor(String id,
-                                @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
-                                @ValidatorItem(msg = "请配置监控周期") String execCron,
-                                String notifyUser, String webhook) {
+    public JsonMessage<Object> updateMonitor(String id,
+                                             @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
+                                             @ValidatorItem(msg = "请配置监控周期") String execCron,
+                                             String notifyUser, String webhook) {
         String status = getParameter("status");
         String autoRestart = getParameter("autoRestart");
 
@@ -168,10 +168,10 @@ public class MonitorListController extends BaseServerController {
         if (StrUtil.isEmpty(id)) {
             //添加监控
             monitorService.insert(monitorModel);
-            return JsonMessage.getString(200, "添加成功");
+            return JsonMessage.success("添加成功");
         }
         HttpServletRequest request = getRequest();
         monitorService.updateById(monitorModel, request);
-        return JsonMessage.getString(200, "修改成功");
+        return JsonMessage.success("修改成功");
     }
 }

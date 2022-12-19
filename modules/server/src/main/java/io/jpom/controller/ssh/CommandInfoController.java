@@ -25,14 +25,10 @@ package io.jpom.controller.ssh;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.pattern.CronPattern;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.ServerOpenApi;
-import io.jpom.common.UrlRedirectUtil;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
+import io.jpom.common.*;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.model.data.CommandModel;
@@ -86,9 +82,9 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String page() {
+    public JsonMessage<PageResultDto<CommandModel>> page() {
         PageResultDto<CommandModel> page = commandService.listPage(getRequest());
-        return JsonMessage.getString(200, "", page);
+        return JsonMessage.success("", page);
     }
 
     /**
@@ -109,7 +105,7 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String edit(@RequestBody JSONObject data) {
+    public JsonMessage<Object> edit(@RequestBody JSONObject data) {
         String name = data.getString("name");
         String command = data.getString("command");
         String desc = data.getString("desc");
@@ -150,7 +146,7 @@ public class CommandInfoController extends BaseServerController {
             commandModel.setId(id);
             commandService.updateById(commandModel, getRequest());
         }
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     /**
@@ -165,7 +161,7 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String del(String id) {
+    public JsonMessage<Object> del(String id) {
         File logFileDir = CommandExecLogModel.logFileDir(id);
         boolean fastDel = CommandUtil.systemFastDel(logFileDir);
         Assert.state(!fastDel, "清理日志文件失败");
@@ -173,7 +169,7 @@ public class CommandInfoController extends BaseServerController {
         HttpServletRequest request = getRequest();
         commandService.delByKey(id, request);
         commandExecLogService.delByWorkspace(request, entity -> entity.set("commandId", id));
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     /**
@@ -190,31 +186,31 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "batch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String batch(String id,
-                        String params,
-                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "运行节点不能为空") String nodes) throws IOException {
+    public JsonMessage<String> batch(String id,
+                                     String params,
+                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "运行节点不能为空") String nodes) throws IOException {
         Assert.hasText(id, "请选择执行的命令");
         Assert.hasText(nodes, "请选择执行节点");
         String batchId = commandService.executeBatch(id, params, nodes);
-        return JsonMessage.getString(200, "操作成功", batchId);
+        return JsonMessage.success("操作成功", batchId);
     }
 
     /**
      * 同步到指定工作空间
      *
-     * @param ids         节点ID
+     * @param ids           节点ID
      * @param toWorkspaceId 分配到到工作空间ID
      * @return msg
      */
     @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission()
-    public String syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
+    public JsonMessage<Object> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
         String nowWorkspaceId = nodeService.getCheckUserWorkspace(getRequest());
         //
         commandService.checkUserWorkspace(toWorkspaceId);
         commandService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
-        return JsonMessage.getString(200, "操作成功");
+        return JsonMessage.success("操作成功");
     }
 
     /**
@@ -225,7 +221,7 @@ public class CommandInfoController extends BaseServerController {
      */
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String getTriggerUrl(String id, String rest) {
+    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
         CommandModel item = commandService.getByKey(id, getRequest());
         UserModel user = getUser();
         CommandModel updateInfo;
@@ -239,19 +235,19 @@ public class CommandInfoController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo);
-        return JsonMessage.getString(200, StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
     private Map<String, String> getBuildToken(CommandModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = ServerOpenApi.SSH_COMMAND_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());
         String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
         Map<String, String> map = new HashMap<>(10);
-        map.put("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
+        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
         String batchTriggerBuildUrl = String.format("/%s/%s", contextPath, ServerOpenApi.SSH_COMMAND_TRIGGER_BATCH);
-        map.put("batchTriggerBuildUrl", FileUtil.normalize(batchTriggerBuildUrl));
+        map.put("batchTriggerUrl", FileUtil.normalize(batchTriggerBuildUrl));
 
         map.put("id", item.getId());
         map.put("token", item.getTriggerToken());

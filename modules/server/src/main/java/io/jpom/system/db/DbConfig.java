@@ -28,14 +28,16 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.ds.DSFactory;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.extconf.DbExtConfig;
 import io.jpom.system.init.ProxySelectorConfig;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -47,6 +49,7 @@ import java.util.stream.Collectors;
  * @author jiangzeyin
  * @since 2019/4/19
  */
+@Configuration
 public class DbConfig {
 
     private static final String DB = "db";
@@ -56,8 +59,10 @@ public class DbConfig {
      */
     public static final String DEFAULT_USER_OR_AUTHORIZATION = "jpom";
 
-    private static DbConfig dbConfig;
-
+    private final DbExtConfig dbExtConfig;
+    @Resource
+    @Lazy
+    private ProxySelectorConfig selectorConfig;
     /**
      * 是否初始化成功
      */
@@ -68,22 +73,14 @@ public class DbConfig {
      */
     private File recoverSqlFile;
 
-    /**
-     * 单利模式
-     *
-     * @return config
-     */
-    public static DbConfig getInstance() {
-        if (dbConfig == null) {
-            dbConfig = new DbConfig();
-        }
-        return dbConfig;
+    public DbConfig(DbExtConfig dbExtConfig) {
+        this.dbExtConfig = dbExtConfig;
     }
+
 
     public void initOk() {
         init = true;
         // 立马配置 全局代理
-        ProxySelectorConfig selectorConfig = SpringUtil.getBean(ProxySelectorConfig.class);
         selectorConfig.refresh();
     }
 
@@ -102,7 +99,7 @@ public class DbConfig {
      * @author bwcx_jzy
      */
     public File dbLocalPath() {
-        return FileUtil.file(ExtConfigBean.getInstance().getPath(), DB);
+        return FileUtil.file(ExtConfigBean.getPath(), DB);
     }
 
     /**
@@ -111,7 +108,6 @@ public class DbConfig {
      * @return jdbc
      */
     public String getDbUrl() {
-        DbExtConfig dbExtConfig = SpringUtil.getBean(DbExtConfig.class);
         String dbUrl = dbExtConfig.getUrl();
         if (StrUtil.isNotEmpty(dbUrl)) {
             return dbUrl;

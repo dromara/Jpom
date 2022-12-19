@@ -32,9 +32,9 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.service.system.AgentWorkspaceEnvVarService;
@@ -50,8 +50,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * 脚本执行
@@ -77,7 +75,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         //
         String dataPath = ConfigBean.getInstance().getDataPath();
         scriptFile = FileUtil.file(dataPath, ConfigBean.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
-        FileUtil.writeString(nodeScriptModel.getContext(), scriptFile, ExtConfigBean.getInstance().getConsoleLogCharset());
+        FileUtil.writeString(nodeScriptModel.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
         processBuilder = new ProcessBuilder();
@@ -184,7 +182,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             process = processBuilder.start();
             {
                 inputStream = process.getInputStream();
-                IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) ScriptProcessBuilder.this::handle);
+                IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) ScriptProcessBuilder.this::handle);
             }
             int waitFor = process.waitFor();
             JsonMessage<String> jsonMessage = new JsonMessage<>(200, "执行完毕:" + waitFor);

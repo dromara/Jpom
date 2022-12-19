@@ -28,21 +28,22 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildExecuteService;
 import io.jpom.common.BaseJpomController;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.user.TriggerTokenLogServer;
+import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -119,7 +120,7 @@ public class BuildTriggerApiController extends BaseJpomController {
      * @return json
      */
     @PostMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String triggerBatch() {
+    public JsonMessage<List<Object>> triggerBatch() {
         try {
             String body = ServletUtil.getBody(getRequest());
             JSONArray jsonArray = JSONArray.parseArray(body);
@@ -156,10 +157,11 @@ public class BuildTriggerApiController extends BaseJpomController {
                 jsonObject.put("msg", start.getMsg());
                 jsonObject.put("buildId", start.getData());
             }).collect(Collectors.toList());
-            return JsonMessage.getString(200, "触发成功", collect);
+            return JsonMessage.success("触发成功", collect);
         } catch (Exception e) {
-            log.error("构建触发批量触发异常", e);
-            return JsonMessage.getString(500, "触发异常", e.getMessage());
+            throw new JpomRuntimeException("构建触发批量触发异常", e);
+            //log.error("构建触发批量触发异常", e);
+            //return JsonMessage.getString(500, "触发异常", e.getMessage());
         }
     }
 
@@ -210,9 +212,9 @@ public class BuildTriggerApiController extends BaseJpomController {
      * @return json
      */
     @GetMapping(value = ServerOpenApi.BUILD_TRIGGER_STATUS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String buildStatusGet(@ValidatorItem String id, @ValidatorItem String token) {
+    public JsonMessage<JSONObject> buildStatusGet(@ValidatorItem String id, @ValidatorItem String token) {
         JSONObject statusData = this.getStatusData(id, token);
-        return JsonMessage.getString(200, "", statusData);
+        return JsonMessage.success("", statusData);
     }
 
     /**
@@ -221,7 +223,7 @@ public class BuildTriggerApiController extends BaseJpomController {
      * @return json
      */
     @PostMapping(value = ServerOpenApi.BUILD_TRIGGER_STATUS, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String buildStatusPost() {
+    public JsonMessage<List<JSONObject>> buildStatusPost() {
         try {
             String body = ServletUtil.getBody(getRequest());
             JSONArray jsonArray = JSONArray.parseArray(body);
@@ -231,10 +233,10 @@ public class BuildTriggerApiController extends BaseJpomController {
                 String token = data.getString("token");
                 return this.getStatusData(id, token);
             }).collect(Collectors.toList());
-            return JsonMessage.getString(200, "", collect);
+            return JsonMessage.success("", collect);
         } catch (Exception e) {
             log.error("获取构建状态异常", e);
-            return JsonMessage.getString(500, "发生异常", e.getMessage());
+            return new JsonMessage<>(500, "发生异常" + e.getMessage());
         }
     }
 

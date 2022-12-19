@@ -58,6 +58,8 @@ public class TestFile {
     public void testFile() {
         File file = FileUtil.file("D:\\Idea\\hutool\\.git");
         System.out.println(file.isHidden());
+
+        System.out.println(new File("../").getAbsoluteFile());
     }
 
     @Test

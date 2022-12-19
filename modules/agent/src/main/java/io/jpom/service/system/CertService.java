@@ -24,9 +24,9 @@ package io.jpom.service.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import io.jpom.common.AgentConst;
 import io.jpom.model.data.CertModel;
 import io.jpom.service.BaseOperService;
-import io.jpom.system.AgentConfigBean;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -38,7 +38,7 @@ import java.io.File;
 public class CertService extends BaseOperService<CertModel> {
 
     public CertService() {
-        super(AgentConfigBean.CERT);
+        super(AgentConst.CERT);
     }
 
 

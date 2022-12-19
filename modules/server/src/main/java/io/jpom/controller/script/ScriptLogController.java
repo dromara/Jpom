@@ -23,11 +23,11 @@
 package io.jpom.controller.script;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
@@ -73,9 +73,9 @@ public class ScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String scriptList() {
+    public JsonMessage<PageResultDto<ScriptExecuteLogModel>> scriptList() {
         PageResultDto<ScriptExecuteLogModel> pageResultDto = scriptExecuteLogServer.listPage(getRequest());
-        return JsonMessage.getString(200, "success", pageResultDto);
+        return JsonMessage.success("success", pageResultDto);
     }
 
     /**
@@ -87,15 +87,15 @@ public class ScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String delLog(@ValidatorItem() String id,
-                         @ValidatorItem() String executeId) {
+    public JsonMessage<Object> delLog(@ValidatorItem() String id,
+                                      @ValidatorItem() String executeId) {
         ScriptModel item = scriptServer.getByKey(id, getRequest());
         Assert.notNull(item, "没有对应数据");
         File logFile = item.logFile(executeId);
         boolean fastDel = CommandUtil.systemFastDel(logFile);
         Assert.state(!fastDel, "删除日志文件失败");
         scriptExecuteLogServer.delByKey(executeId);
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 
     /**
@@ -108,9 +108,9 @@ public class ScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getNowLog(@ValidatorItem() String id,
-                            @ValidatorItem() String executeId,
-                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+    public JsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
+                                             @ValidatorItem() String executeId,
+                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         ScriptModel item = scriptServer.getByKey(id, getRequest());
         Assert.notNull(item, "没有对应数据");
         File logFile = item.logFile(executeId);
@@ -118,6 +118,6 @@ public class ScriptLogController extends BaseServerController {
         JSONObject data = FileUtils.readLogFile(logFile, line);
         // 运行中
         data.put("run", ScriptProcessBuilder.isRun(executeId));
-        return JsonMessage.getString(200, "ok", data);
+        return JsonMessage.success("ok", data);
     }
 }

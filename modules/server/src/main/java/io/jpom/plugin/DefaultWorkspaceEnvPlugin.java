@@ -22,7 +22,7 @@
  */
 package io.jpom.plugin;
 
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.Const;
 import io.jpom.service.system.WorkspaceEnvVarService;
 

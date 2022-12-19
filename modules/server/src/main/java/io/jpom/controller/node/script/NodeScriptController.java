@@ -25,14 +25,10 @@ package io.jpom.controller.node.script;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.ServerOpenApi;
-import io.jpom.common.UrlRedirectUtil;
+import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.node.ScriptCacheModel;
@@ -80,9 +76,9 @@ public class NodeScriptController extends BaseServerController {
      * @author Hotstrip
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String scriptList() {
+    public JsonMessage<PageResultDto<ScriptCacheModel>> scriptList() {
         PageResultDto<ScriptCacheModel> pageResultDto = nodeScriptServer.listPageNode(getRequest());
-        return JsonMessage.getString(200, "success", pageResultDto);
+        return JsonMessage.success("success", pageResultDto);
     }
 
     /**
@@ -93,9 +89,9 @@ public class NodeScriptController extends BaseServerController {
      * @author Hotstrip
      */
     @PostMapping(value = "list_all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String listAll() {
+    public JsonMessage<PageResultDto<ScriptCacheModel>> listAll() {
         PageResultDto<ScriptCacheModel> modelPageResultDto = nodeScriptServer.listPage(getRequest());
-        return JsonMessage.getString(200, "", modelPageResultDto);
+        return JsonMessage.success("", modelPageResultDto);
     }
 
 
@@ -124,7 +120,7 @@ public class NodeScriptController extends BaseServerController {
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String del(@ValidatorItem String id) {
+    public JsonMessage<Object> del(@ValidatorItem String id) {
         NodeModel node = getNode();
         HttpServletRequest request = getRequest();
         JsonMessage<Object> requestData = NodeForward.request(node, request, NodeUrl.Script_Del);
@@ -133,23 +129,7 @@ public class NodeScriptController extends BaseServerController {
             // 删除日志
             nodeScriptExecuteLogServer.delCache(id, node.getId(), request);
         }
-        return requestData.toString();
-    }
-
-    /**
-     * 导入脚本
-     *
-     * @return json
-     */
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.UPLOAD)
-    public String upload() {
-        NodeModel node = getNode();
-        JsonMessage<String> stringJsonMessage = NodeForward.requestMultipart(node, getMultiRequest(), NodeUrl.Script_Upload);
-        if (stringJsonMessage.getCode() == HttpStatus.OK.value()) {
-            nodeScriptServer.syncNode(node);
-        }
-        return stringJsonMessage.toString();
+        return requestData;
     }
 
     /**
@@ -159,12 +139,12 @@ public class NodeScriptController extends BaseServerController {
      */
     @GetMapping(value = "sync", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public String syncProject() {
+    public JsonMessage<Object> syncProject() {
         //
         NodeModel node = getNode();
         int cache = nodeScriptServer.delCache(node.getId(), getRequest());
         String msg = nodeScriptServer.syncExecuteNode(node);
-        return JsonMessage.getString(200, "主动清除 " + cache + StrUtil.SPACE + msg);
+        return JsonMessage.success("主动清除 " + cache + StrUtil.SPACE + msg);
     }
 
     /**
@@ -175,11 +155,11 @@ public class NodeScriptController extends BaseServerController {
     @GetMapping(value = "clear_all", produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission(superUser = true)
     @Feature(method = MethodFeature.DEL)
-    public String clearAll() {
+    public JsonMessage<Object> clearAll() {
         Entity where = Entity.create();
         where.set("id", " <> id");
         int del = nodeScriptServer.del(where);
-        return JsonMessage.getString(200, "成功删除" + del + "条脚本模版缓存");
+        return JsonMessage.success("成功删除" + del + "条脚本模版缓存");
     }
 
     /**
@@ -190,7 +170,7 @@ public class NodeScriptController extends BaseServerController {
      */
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String getTriggerUrl(String id, String rest) {
+    public JsonMessage<Map<String, String>> getTriggerUrl(String id, String rest) {
         ScriptCacheModel item = nodeScriptServer.getByKey(id, getRequest());
         UserModel user = getUser();
         ScriptCacheModel updateInfo;
@@ -204,19 +184,19 @@ public class NodeScriptController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo);
-        return JsonMessage.getString(200, StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
     }
 
     private Map<String, String> getBuildToken(ScriptCacheModel item) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
         String url = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL.
             replace("{id}", item.getId()).
             replace("{token}", item.getTriggerToken());
         String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
         Map<String, String> map = new HashMap<>(10);
-        map.put("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
+        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
         String batchTriggerBuildUrl = String.format("/%s/%s", contextPath, ServerOpenApi.NODE_SCRIPT_TRIGGER_BATCH);
-        map.put("batchTriggerBuildUrl", FileUtil.normalize(batchTriggerBuildUrl));
+        map.put("batchTriggerUrl", FileUtil.normalize(batchTriggerBuildUrl));
 
         map.put("id", item.getId());
         map.put("token", item.getTriggerToken());

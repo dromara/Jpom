@@ -23,9 +23,9 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.map.MapUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
 import io.jpom.common.BaseAgentController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.service.system.AgentWorkspaceEnvVarService;
 import org.springframework.http.MediaType;
@@ -56,9 +56,9 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updateWorkspaceEnvVar(@ValidatorItem String name,
-                                        @ValidatorItem String value,
-                                        @ValidatorItem String description) {
+    public JsonMessage<Object> updateWorkspaceEnvVar(@ValidatorItem String name,
+                                                     @ValidatorItem String value,
+                                                     @ValidatorItem String description) {
         String workspaceId = getWorkspaceId();
         synchronized (AgentWorkspaceEnvVarController.class) {
             WorkspaceEnvVarModel.WorkspaceEnvVarItemModel workspaceEnvVarModel = new WorkspaceEnvVarModel.WorkspaceEnvVarItemModel();
@@ -78,7 +78,7 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
                 agentWorkspaceEnvVarService.updateItem(item);
             }
         }
-        return JsonMessage.getString(200, "更新成功");
+        return JsonMessage.success("更新成功");
     }
 
 
@@ -89,7 +89,7 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String delete(@ValidatorItem String name) {
+    public JsonMessage<Object> delete(@ValidatorItem String name) {
         String workspaceId = getWorkspaceId();
         synchronized (AgentWorkspaceEnvVarController.class) {
             //
@@ -99,7 +99,7 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
                 agentWorkspaceEnvVarService.updateItem(item);
             }
         }
-        return JsonMessage.getString(200, "删除成功");
+        return JsonMessage.success("删除成功");
     }
 
 }

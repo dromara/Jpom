@@ -22,7 +22,7 @@
  */
 //package io.jpom.controller.node.manage.recover;
 //
-//import cn.jiangzeyin.common.JsonMessage;
+//import io.jpom.common.JsonMessage;
 //import io.jpom.common.BaseServerController;
 //import io.jpom.common.forward.NodeForward;
 //import io.jpom.common.forward.NodeUrl;
@@ -73,7 +73,7 @@
 //    @Feature(method = MethodFeature.LIST)
 //    public String recoverList() throws IOException {
 //        List list = NodeForward.requestData(getNode(), NodeUrl.Manage_Recover_List_Data, getRequest(), List.class);
-//        return JsonMessage.getString(200, "success", list);
+//        return JsonMessage.success( "success", list);
 //    }
 //
 //    @RequestMapping(value = "data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

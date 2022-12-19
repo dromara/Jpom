@@ -1,4 +1,3 @@
-/** * 这是新版本的构建列表页面，主要是分离了部分数据到【仓库管理】，以及数据会存储到数据库 */
 <template>
   <div class="full-content">
     <!-- <div ref="filter" class="filter"></div> -->
@@ -362,14 +361,19 @@
                 </a-select>
               </a-form-model-item>
               <!-- 项目 -->
-              <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataIdList">
-                <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="请选择节点项目" />
-              </a-form-model-item>
-              <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
-                <a-select show-search allowClear v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
-                  <a-select-option v-for="opt in afterOptListSimple" :key="opt.value">{{ opt.title }}</a-select-option>
-                </a-select>
-              </a-form-model-item>
+              <template v-if="temp.releaseMethod === 2">
+                <a-form-model-item label="发布项目" prop="releaseMethodDataIdList">
+                  <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="请选择节点项目" />
+                </a-form-model-item>
+                <a-form-model-item label="发布后操作" prop="afterOpt">
+                  <a-select show-search allowClear v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
+                    <a-select-option v-for="opt in afterOptListSimple" :key="opt.value">{{ opt.title }}</a-select-option>
+                  </a-select>
+                </a-form-model-item>
+                <a-form-model-item prop="projectSecondaryDirectory" label="二级目录">
+                  <a-input v-model="tempExtraData.projectSecondaryDirectory" placeholder="不填写则发布至项目的根目录" />
+                </a-form-model-item>
+              </template>
               <!-- SSH -->
               <template v-if="temp.releaseMethod === 3">
                 <a-form-model-item prop="releaseMethodDataId">
@@ -873,6 +877,10 @@
           </a-space>
         </a-form-model-item>
 
+        <a-form-model-item v-if="temp.releaseMethod === 2" prop="projectSecondaryDirectory" label="二级目录">
+          <a-input v-model="temp.projectSecondaryDirectory" placeholder="不填写则发布至项目的根目录" />
+        </a-form-model-item>
+
         <a-form-model-item label="构建备注" prop="buildRemark">
           <a-textarea v-model="temp.buildRemark" :maxLength="240" placeholder="请输入构建备注,长度小于 240" :auto-size="{ minRows: 3, maxRows: 5 }" />
         </a-form-model-item>
@@ -1228,6 +1236,11 @@ export default {
       });
     },
     silenceLoadData() {
+      if (this.$attrs.routerUrl !== this.$route.path) {
+        // 重新计算倒计时
+        this.countdownTime = Date.now() + this.refreshInterval * 1000;
+        return;
+      }
       getBuildList(this.listQuery, false).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
@@ -1551,8 +1564,10 @@ export default {
       this.buildConfirmVisible = true;
       this.branchList = [];
       this.branchTagList = [];
+      //
       try {
-        this.temp = { ...this.temp, checkRepositoryDiff: (JSON.parse(record.extraData) || {}).checkRepositoryDiff };
+        const extraData = JSON.parse(record.extraData) || {};
+        this.temp = { ...this.temp, checkRepositoryDiff: extraData.checkRepositoryDiff, projectSecondaryDirectory: extraData.projectSecondaryDirectory };
       } catch (e) {
         //
       }
@@ -1566,6 +1581,7 @@ export default {
           branchTagName: this.temp.branchTagName,
           branchName: this.temp.branchName,
           checkRepositoryDiff: this.temp.checkRepositoryDiff,
+          projectSecondaryDirectory: this.temp.projectSecondaryDirectory,
         },
         true
       ).then(() => {

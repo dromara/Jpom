@@ -28,7 +28,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.crypto.digest.Digester;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.model.BaseIdModel;
 import io.jpom.model.user.TriggerTokenLogBean;
 import io.jpom.model.user.UserModel;

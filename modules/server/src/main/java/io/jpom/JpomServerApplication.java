@@ -25,31 +25,18 @@ package io.jpom;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.EnableCommonBoot;
-import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.jiangzeyin.common.spring.event.ApplicationEventLoad;
+import cn.hutool.extra.spring.SpringUtil;
+import io.jpom.common.JpomAppType;
 import io.jpom.common.Type;
-import io.jpom.common.interceptor.IpInterceptor;
-import io.jpom.common.interceptor.LoginInterceptor;
-import io.jpom.common.interceptor.OpenApiInterceptor;
-import io.jpom.common.interceptor.PermissionInterceptor;
-import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.data.SystemIpConfigModel;
-import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;
-import io.jpom.system.db.DbConfig;
-import io.jpom.system.init.InitDb;
-import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-
-import java.io.File;
-import java.util.concurrent.Future;
 
 /**
  * jpom 启动类
@@ -59,13 +46,9 @@ import java.util.concurrent.Future;
  */
 @SpringBootApplication
 @ServletComponentScan
-@EnableCommonBoot
-public class JpomServerApplication implements ApplicationEventLoad {
-
-    /**
-     * 参数
-     */
-    private static String[] ARGS;
+@Slf4j
+@JpomAppType(Type.Server)
+public class JpomServerApplication {
 
     /**
      * 启动执行
@@ -93,30 +76,24 @@ public class JpomServerApplication implements ApplicationEventLoad {
      */
     public static void main(String[] args) throws Exception {
         long time = SystemClock.now();
-        ARGS = args;
         //
-        JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
-        jpomApplication
-            // 拦截器
-            .addInterceptor(IpInterceptor.class)
-            .addInterceptor(LoginInterceptor.class)
-            .addInterceptor(OpenApiInterceptor.class)
-            .addInterceptor(PermissionInterceptor.class)
-            .run(args);
+        SpringApplicationBuilder springApplicationBuilder = new SpringApplicationBuilder(JpomServerApplication.class);
+        springApplicationBuilder.bannerMode(Banner.Mode.LOG);
+        springApplicationBuilder.run(args);
         // 重置 ip 白名单配置
         if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
             SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
             parametersServer.delByKey(SystemIpConfigModel.ID);
-            Console.log("Clear IP whitelist configuration successfully");
+            log.info("Clear IP whitelist configuration successfully");
         }
         //  重置超级管理员密码
         if (ArrayUtil.containsIgnoreCase(args, "--rest:super_user_pwd")) {
             UserService userService = SpringUtil.getBean(UserService.class);
             String restResult = userService.restSuperUserPwd();
             if (restResult != null) {
-                Console.log(restResult);
+                log.info(restResult);
             } else {
-                Console.log("There is no super administrator account in the system");
+                log.error("There is no super administrator account in the system");
             }
         }
         // 关闭超级管理员 mfa
@@ -124,91 +101,13 @@ public class JpomServerApplication implements ApplicationEventLoad {
             UserService userService = SpringUtil.getBean(UserService.class);
             String restResult = userService.closeSuperUserMfa();
             if (restResult != null) {
-                Console.log(restResult);
+                log.info(restResult);
             } else {
-                Console.log("There is no super administrator account in the system");
+                log.error("There is no super administrator account in the system");
             }
         }
-        Console.log("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
-    }
 
-    @Override
-    public void applicationLoad() {
-        DbConfig instance = DbConfig.getInstance();
-        if (ArrayUtil.containsIgnoreCase(ARGS, "--rest:load_init_db")) {
-            // 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
-            instance.clearExecuteSqlLog();
-        }
-        if (ArrayUtil.containsIgnoreCase(ARGS, "--recover:h2db")) {
-            // 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
-            try {
-                instance.recoverDb();
-            } catch (Exception e) {
-                e.printStackTrace();
-                JpomApplication.consoleExit(-2, "Failed to restore database：{}", e.getMessage());
-            }
-        }
-        if (ArrayUtil.containsIgnoreCase(ARGS, "--backup-h2")) {
-            // 备份数据库
-            InitDb.addCallback(() -> {
-                Console.log("Start backing up the database");
-                BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
-                Future<BackupInfoModel> backupInfoModelFuture = backupInfoService.autoBackup();
-                try {
-                    BackupInfoModel backupInfoModel = backupInfoModelFuture.get();
-                    JpomApplication.consoleExit(0, "Complete the backup database, save the path as {}", backupInfoModel.getFilePath());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    JpomApplication.consoleExit(-2, "Backup database failed：{}", e.getMessage());
-                }
-                return false;
-            });
-        }
-        String importH2Sql = StringUtil.getArgsValue(ARGS, "import-h2-sql");
-        if (StrUtil.isNotEmpty(importH2Sql)) {
-            // 导入数据
-            importH2Sql(importH2Sql);
-        }
-        String replaceImportH2Sql = StringUtil.getArgsValue(ARGS, "replace-import-h2-sql");
-        if (StrUtil.isNotEmpty(replaceImportH2Sql)) {
-            // 删除掉旧数据
-            InitDb.addBeforeCallback(() -> {
-                try {
-                    String dbFiles = instance.deleteDbFiles();
-                    if (dbFiles != null) {
-                        Console.log("Automatically backup data files to {} path", dbFiles);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    JpomApplication.consoleExit(-2, "Failed to import according to sql,{}", replaceImportH2Sql);
-                }
-            });
-            // 导入数据
-            importH2Sql(replaceImportH2Sql);
-        }
-        //
-    }
 
-    private static void importH2Sql(String importH2Sql) {
-        InitDb.addCallback(() -> {
-            File file = FileUtil.file(importH2Sql);
-            String sqlPath = FileUtil.getAbsolutePath(file);
-            if (!FileUtil.isFile(file)) {
-                JpomApplication.consoleExit(2, "sql file does not exist :{}", sqlPath);
-            }
-            //
-            if (ArrayUtil.containsIgnoreCase(ARGS, "--transform-sql")) {
-                DbConfig.getInstance().transformSql(file);
-            }
-            //
-            Console.log("Start importing data:{}", sqlPath);
-            BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
-            boolean flag = backupInfoService.restoreWithSql(sqlPath);
-            if (!flag) {
-                JpomApplication.consoleExit(2, "Failed to import according to sql,{}", sqlPath);
-            }
-            Console.log("Import successfully according to sql,{}", sqlPath);
-            return true;
-        });
+        log.info("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
     }
 }

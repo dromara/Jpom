@@ -30,9 +30,9 @@ import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.JsonMessage;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.script.BaseRunScript;
 import io.jpom.service.system.WorkspaceEnvVarService;
@@ -185,7 +185,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             process = processBuilder.start();
             {
                 inputStream = process.getInputStream();
-                IoUtil.readLines(inputStream, ExtConfigBean.getInstance().getConsoleLogCharset(), (LineHandler) ScriptProcessBuilder.this::handle);
+                IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) ScriptProcessBuilder.this::handle);
             }
             int waitFor = process.waitFor();
             JsonMessage<String> jsonMessage = new JsonMessage<>(200, "执行完毕:" + waitFor);

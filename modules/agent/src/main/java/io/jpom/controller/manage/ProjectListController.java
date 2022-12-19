@@ -23,8 +23,8 @@
 package io.jpom.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseAgentController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.NodeProjectInfoModel;
@@ -49,73 +49,73 @@ import java.util.List;
 @Slf4j
 public class ProjectListController extends BaseAgentController {
 
-	/**
-	 * 获取项目的信息
-	 *
-	 * @param id id
-	 * @return item
-	 * @see NodeProjectInfoModel
-	 */
-	@RequestMapping(value = "getProjectItem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String getProjectItem(String id) {
-		NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(id);
-		if (nodeProjectInfoModel != null) {
-			RunMode runMode = nodeProjectInfoModel.getRunMode();
-			if (runMode != RunMode.Dsl && runMode != RunMode.File) {
-				// 返回实际执行的命令
-				String command = AbstractProjectCommander.getInstance().buildJavaCommand(nodeProjectInfoModel, null);
-				nodeProjectInfoModel.setRunCommand(command);
-			}
-			//
-			List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
-			if (javaCopyItemList != null) {
-				for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-					File logBack = nodeProjectInfoModel.getLogBack(javaCopyItem);
-					File log = nodeProjectInfoModel.getLog(javaCopyItem);
-					javaCopyItem.setLogBack(FileUtil.getAbsolutePath(logBack));
-					javaCopyItem.setLog(FileUtil.getAbsolutePath(log));
-				}
-			}
-		}
+    /**
+     * 获取项目的信息
+     *
+     * @param id id
+     * @return item
+     * @see NodeProjectInfoModel
+     */
+    @RequestMapping(value = "getProjectItem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<NodeProjectInfoModel> getProjectItem(String id) {
+        NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(id);
+        if (nodeProjectInfoModel != null) {
+            RunMode runMode = nodeProjectInfoModel.getRunMode();
+            if (runMode != RunMode.Dsl && runMode != RunMode.File) {
+                // 返回实际执行的命令
+                String command = AbstractProjectCommander.getInstance().buildJavaCommand(nodeProjectInfoModel, null);
+                nodeProjectInfoModel.setRunCommand(command);
+            }
+            //
+            List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
+            if (javaCopyItemList != null) {
+                for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+                    File logBack = nodeProjectInfoModel.getLogBack(javaCopyItem);
+                    File log = nodeProjectInfoModel.getLog(javaCopyItem);
+                    javaCopyItem.setLogBack(FileUtil.getAbsolutePath(logBack));
+                    javaCopyItem.setLog(FileUtil.getAbsolutePath(log));
+                }
+            }
+        }
 
 
-		return JsonMessage.getString(200, "", nodeProjectInfoModel);
-	}
+        return JsonMessage.success("", nodeProjectInfoModel);
+    }
 
-	/**
-	 * 程序项目信息
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String getProjectInfo() {
-		try {
-			// 查询数据
-			List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
-			return JsonMessage.getString(200, "查询成功！", nodeProjectInfoModels);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			return JsonMessage.getString(500, "查询异常：" + e.getMessage());
-		}
-	}
+    /**
+     * 程序项目信息
+     *
+     * @return json
+     */
+    @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<NodeProjectInfoModel>> getProjectInfo() {
+        try {
+            // 查询数据
+            List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
+            return JsonMessage.success("查询成功！", nodeProjectInfoModels);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return new JsonMessage<>(500, "查询异常：" + e.getMessage());
+        }
+    }
 
-	/**
-	 * 展示项目页面
-	 */
-	@RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String projectCopyList(String id) {
-		NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(id);
-		Assert.notNull(nodeProjectInfoModel, "没有对应项目");
+    /**
+     * 展示项目页面
+     */
+    @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<NodeProjectInfoModel.JavaCopyItem>> projectCopyList(String id) {
+        NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(id);
+        Assert.notNull(nodeProjectInfoModel, "没有对应项目");
 
-		List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
-		Assert.notEmpty(javaCopyItemList, "对应项目没有副本集");
-		//		JSONArray array = new JSONArray();
-		//		for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-		//			JSONObject object = javaCopyItem.toJson();
-		//			boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, javaCopyItem);
-		//			object.put("status", run);
-		//			array.add(object);
-		//		}
-		return JsonMessage.getString(200, "", javaCopyItemList);
-	}
+        List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
+        Assert.notEmpty(javaCopyItemList, "对应项目没有副本集");
+        //		JSONArray array = new JSONArray();
+        //		for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+        //			JSONObject object = javaCopyItem.toJson();
+        //			boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, javaCopyItem);
+        //			object.put("status", run);
+        //			array.add(object);
+        //		}
+        return JsonMessage.success("", javaCopyItemList);
+    }
 }

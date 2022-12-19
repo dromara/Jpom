@@ -27,11 +27,11 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -39,7 +39,7 @@ import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.docker.DockerSwarmInfoService;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import lombok.extern.slf4j.Slf4j;
@@ -62,9 +62,12 @@ import java.util.function.Consumer;
 public class DockerSwarmServiceController extends BaseServerController {
 
     private final DockerInfoService dockerInfoService;
+    private final ServerConfig serverConfig;
 
-    public DockerSwarmServiceController(DockerInfoService dockerInfoService) {
+    public DockerSwarmServiceController(DockerInfoService dockerInfoService,
+                                        ServerConfig serverConfig) {
         this.dockerInfoService = dockerInfoService;
+        this.serverConfig = serverConfig;
     }
 
     @PostMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -127,13 +130,13 @@ public class DockerSwarmServiceController extends BaseServerController {
      */
     @GetMapping(value = "start-log", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public String pullImage(@ValidatorItem String id, @ValidatorItem String type, @ValidatorItem String dataId) throws Exception {
+    public JsonMessage<String> pullImage(@ValidatorItem String id, @ValidatorItem String type, @ValidatorItem String dataId) throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = dockerInfoService.getBySwarmPluginMap(id, getRequest());
         parameter.put(StrUtil.equalsIgnoreCase(type, "service") ? "serviceId" : "taskId", dataId);
         //
         String uuid = IdUtil.fastSimpleUUID();
-        File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), "docker-swarm-log", uuid + ".log");
+        File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-swarm-log", uuid + ".log");
         try (LogRecorder logRecorder = LogRecorder.builder().file(file).build()) {
             logRecorder.info("start pull {}", dataId);
             Consumer<String> logConsumer = logRecorder::append;
@@ -149,7 +152,7 @@ public class DockerSwarmServiceController extends BaseServerController {
                 logRecorder.info("pull end");
             });
         }
-        return JsonMessage.getString(200, "开始拉取", uuid);
+        return JsonMessage.success("开始拉取", uuid);
     }
 
     /**
@@ -161,13 +164,13 @@ public class DockerSwarmServiceController extends BaseServerController {
      */
     @GetMapping(value = "pull-log", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-        File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), "docker-swarm-log", id + ".log");
+    public JsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+                                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+        File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-swarm-log", id + ".log");
         if (!file.exists()) {
-            return JsonMessage.getString(201, "还没有日志文件");
+            return new JsonMessage<>(201, "还没有日志文件");
         }
         JSONObject data = FileUtils.readLogFile(file, line);
-        return JsonMessage.getString(200, "ok", data);
+        return JsonMessage.success("ok", data);
     }
 }

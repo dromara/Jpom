@@ -23,7 +23,7 @@
 package io.jpom.socket.handler;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.forward.NodeUrl;
@@ -34,6 +34,7 @@ import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.ProxySession;
 import io.jpom.socket.ServiceFileTailWatcher;
+import io.jpom.system.LogbackConfig;
 import io.jpom.system.WebAopLog;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +78,7 @@ public class TomcatHandler extends BaseProxyHandler {
 		if (consoleCommandOp == ConsoleCommandOp.showlog && JpomApplication.SYSTEM_ID.equals(tomcatId)) {
 			WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
 			// 进入管理页面后需要实时加载日志
-			File file = FileUtil.file(webAopLog.getPropertyValue(), fileName);
+			File file = FileUtil.file(LogbackConfig.getPath(), fileName);
 			//
 			File nowFile = (File) attributes.get("nowFile");
 			if (nowFile != null && !nowFile.equals(file)) {

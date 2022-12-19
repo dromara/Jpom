@@ -9,7 +9,7 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
-          <a-button type="primary" @click="handleUpload">上传文件</a-button>
+
           <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的脚步模版信息并重新同步">
             <a-icon @click="sync()" type="sync" spin />
           </a-tooltip>
@@ -77,20 +77,10 @@
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
       <script-console v-if="drawerConsoleVisible" :nodeId="node.id" :defArgs="temp.defArgs" :id="temp.id" :scriptId="temp.scriptId" />
     </a-drawer>
-    <!-- 上传文件 -->
-    <a-modal v-model="uploadFileVisible" width="300px" title="上传 bat|bash 文件" :footer="null" :maskClosable="true">
-      <a-alert message=" 导入文件将自动安装文件名去重、如果已经存在的将自动覆盖内容" banner />
-      <br />
-      <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.bat,.sh'">
-        <a-button><a-icon type="upload" />选择 bat|bash 文件</a-button>
-      </a-upload>
-      <br />
-      <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
-    </a-modal>
   </div>
 </template>
 <script>
-import { getScriptList, editScript, deleteScript, uploadScriptFile, itemScript, syncScript } from "@/api/node-other";
+import { getScriptList, editScript, deleteScript, itemScript, syncScript } from "@/api/node-other";
 import codeEditor from "@/components/codeEditor";
 import ScriptConsole from "./script-console";
 import { CRON_DATA_SOURCE, COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
@@ -115,10 +105,7 @@ export default {
       editScriptVisible: false,
       drawerTitle: "",
       drawerConsoleVisible: false,
-      // 上传脚本文件相关属性
-      fileList: [],
-      uploadFileList: [],
-      uploadFileVisible: false,
+
       columns: [
         // { title: "Script ID", dataIndex: "id", width: 200, ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -241,41 +228,6 @@ export default {
     // 关闭 console
     onConsoleClose() {
       this.drawerConsoleVisible = false;
-    },
-    // 准备上传文件
-    handleUpload(record) {
-      this.temp = Object.assign({}, record);
-      this.uploadFileVisible = true;
-    },
-    handleRemove(file) {
-      const index = this.uploadFileList.indexOf(file);
-      const newFileList = this.uploadFileList.slice();
-      newFileList.splice(index, 1);
-      this.uploadFileList = newFileList;
-    },
-    beforeUpload(file) {
-      this.uploadFileList = [...this.uploadFileList, file];
-      return false;
-    },
-    // 开始上传文件
-    startUpload() {
-      this.uploadFileList.forEach((file) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("nodeId", this.node.id);
-        // 上传文件
-        uploadScriptFile(formData).then((res) => {
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg,
-            });
-          }
-        });
-      });
-      setTimeout(() => {
-        this.loadData();
-      }, 2000);
-      this.uploadFileList = [];
     },
 
     // 分页、排序、筛选变化时触发

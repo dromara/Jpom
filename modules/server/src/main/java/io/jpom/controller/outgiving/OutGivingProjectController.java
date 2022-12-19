@@ -28,14 +28,15 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
-import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.ServerConst;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.common.multipart.MultipartFileBuilder;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseNodeModel;
@@ -50,7 +51,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerConfig;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -83,13 +84,16 @@ public class OutGivingProjectController extends BaseServerController {
     private final OutGivingServer outGivingServer;
     private final ProjectInfoCacheService projectInfoCacheService;
     private final OutGivingWhitelistService outGivingWhitelistService;
+    private final ServerConfig serverConfig;
 
     public OutGivingProjectController(OutGivingServer outGivingServer,
                                       ProjectInfoCacheService projectInfoCacheService,
-                                      OutGivingWhitelistService outGivingWhitelistService) {
+                                      OutGivingWhitelistService outGivingWhitelistService,
+                                      ServerConfig serverConfig) {
         this.outGivingServer = outGivingServer;
         this.projectInfoCacheService = projectInfoCacheService;
         this.outGivingWhitelistService = outGivingWhitelistService;
+        this.serverConfig = serverConfig;
     }
 
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -99,7 +103,7 @@ public class OutGivingProjectController extends BaseServerController {
 
 
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) {
+    public JsonMessage<List<JSONObject>> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) {
         HttpServletRequest request = getRequest();
         String workspaceId = outGivingServer.getCheckUserWorkspace(request);
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
@@ -143,7 +147,7 @@ public class OutGivingProjectController extends BaseServerController {
             jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());
             return jsonObject;
         }).collect(Collectors.toList());
-        return JsonMessage.getString(200, "", collect);
+        return JsonMessage.success("", collect);
     }
 
     private File checkZip(String path, boolean unzip) {
@@ -177,13 +181,13 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public String upload(String id, String afterOpt, String clearOld, String autoUnzip) throws IOException {
+    public JsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip, String secondaryDirectory) throws IOException {
         OutGivingModel outGivingModel = this.check(id);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         //
         boolean unzip = Convert.toBool(autoUnzip, false);
-        File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.OUTGIVING_FILE, id);
+        File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConst.OUTGIVING_FILE, id);
         MultipartFileBuilder multipartFileBuilder = createMultipart();
         multipartFileBuilder
             .setUseOriginalFilename(true)
@@ -197,11 +201,12 @@ public class OutGivingProjectController extends BaseServerController {
         //outGivingModel = outGivingServer.getItem(id);
         outGivingModel.setClearOld(Convert.toBool(clearOld, false));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
+        outGivingModel.setSecondaryDirectory(secondaryDirectory);
 
         outGivingServer.update(outGivingModel);
         // 开启
         OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip);
-        return JsonMessage.getString(200, "分发成功");
+        return JsonMessage.success("分发成功");
     }
 
     private OutGivingModel check(String id) {
@@ -224,7 +229,7 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @RequestMapping(value = "remote_download", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-    public String remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip) {
+    public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip, String secondaryDirectory) {
         OutGivingModel outGivingModel = this.check(id);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
@@ -238,9 +243,10 @@ public class OutGivingProjectController extends BaseServerController {
             //outGivingModel = outGivingServer.getItem(id);
             outGivingModel.setClearOld(Convert.toBool(clearOld, false));
             outGivingModel.setAfterOpt(afterOpt1.getCode());
+            outGivingModel.setSecondaryDirectory(secondaryDirectory);
             outGivingServer.update(outGivingModel);
             //下载
-            File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), ServerConfigBean.OUTGIVING_FILE, id);
+            File file = FileUtil.file(serverConfig.getUserTempPath(), ServerConst.OUTGIVING_FILE, id);
             FileUtil.mkdir(file);
             File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
             boolean unzip = BooleanUtil.toBoolean(autoUnzip);
@@ -248,10 +254,10 @@ public class OutGivingProjectController extends BaseServerController {
             this.checkZip(downloadFile, unzip);
             // 开启
             OutGivingRun.startRun(outGivingModel.getId(), downloadFile, getUser(), unzip);
-            return JsonMessage.getString(200, "分发成功");
+            return JsonMessage.success("分发成功");
         } catch (Exception e) {
             log.error("下载远程文件异常", e);
-            return JsonMessage.getString(500, "下载远程文件失败:" + e.getMessage());
+            return new JsonMessage<>(500, "下载远程文件失败:" + e.getMessage());
         }
     }
 }

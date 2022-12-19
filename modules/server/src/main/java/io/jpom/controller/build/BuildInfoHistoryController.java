@@ -26,12 +26,12 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
-import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorConfig;
+import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.log.BuildHistoryLog;
@@ -140,7 +140,7 @@ public class BuildInfoHistoryController extends BaseServerController {
 
     @RequestMapping(value = "/build/history/history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String historyList() {
+    public JsonMessage<PageResultDto<BuildHistoryLog>> historyList() {
         PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(getRequest());
         pageResultTemp.each(buildHistoryLog -> {
             File file = BuildUtil.getHistoryPackageFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
@@ -149,7 +149,7 @@ public class BuildInfoHistoryController extends BaseServerController {
             File logFile = BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId());
             buildHistoryLog.setHasLog(FileUtil.exist(logFile));
         });
-        return JsonMessage.getString(200, "获取成功", pageResultTemp);
+        return JsonMessage.success("获取成功", pageResultTemp);
     }
 
     /**

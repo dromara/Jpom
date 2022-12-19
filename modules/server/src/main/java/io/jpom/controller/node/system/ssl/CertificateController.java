@@ -22,8 +22,8 @@
  */
 package io.jpom.controller.node.system.ssl;
 
-import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.permission.ClassFeature;
@@ -51,72 +51,72 @@ import java.util.List;
 @SystemPermission
 public class CertificateController extends BaseServerController {
 
-	private final WhitelistDirectoryService whitelistDirectoryService;
+    private final WhitelistDirectoryService whitelistDirectoryService;
 
-	public CertificateController(WhitelistDirectoryService whitelistDirectoryService) {
-		this.whitelistDirectoryService = whitelistDirectoryService;
-	}
+    public CertificateController(WhitelistDirectoryService whitelistDirectoryService) {
+        this.whitelistDirectoryService = whitelistDirectoryService;
+    }
 
-	/**
-	 * @return
-	 * @author Hotstrip
-	 * load Cert white list data
-	 */
-	@RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public String loadWhiteList() {
-		List<String> list = whitelistDirectoryService.getCertificateDirectory(getNode());
-		return JsonMessage.getString(200, "success", list);
-	}
+    /**
+     * @return
+     * @author Hotstrip
+     * load Cert white list data
+     */
+    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public JsonMessage<List<String>> loadWhiteList() {
+        List<String> list = whitelistDirectoryService.getCertificateDirectory(getNode());
+        return JsonMessage.success("success", list);
+    }
 
-	/**
-	 * 保存证书
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.EDIT)
-	public String saveCertificate() {
-		if (ServletFileUpload.isMultipartContent(getRequest())) {
-			return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
-		}
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
-	}
-
-
-	/**
-	 * 证书列表
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.LIST)
-	public String getCertList() {
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_getCertList).toString();
-	}
-
-	/**
-	 * 删除证书
-	 *
-	 * @return json
-	 */
-	@RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.DEL)
-	public String delete() {
-		return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_delete).toString();
-	}
+    /**
+     * 保存证书
+     *
+     * @return json
+     */
+    @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.EDIT)
+    public String saveCertificate() {
+        if (ServletFileUpload.isMultipartContent(getRequest())) {
+            return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
+        }
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
+    }
 
 
-	/**
-	 * 导出证书
-	 */
-	@RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.DOWNLOAD)
-	public void export() {
-		NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.System_Certificate_export);
-	}
+    /**
+     * 证书列表
+     *
+     * @return json
+     */
+    @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LIST)
+    public String getCertList() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_getCertList).toString();
+    }
+
+    /**
+     * 删除证书
+     *
+     * @return json
+     */
+    @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.DEL)
+    public String delete() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_delete).toString();
+    }
+
+
+    /**
+     * 导出证书
+     */
+    @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.DOWNLOAD)
+    public void export() {
+        NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.System_Certificate_export);
+    }
 }
