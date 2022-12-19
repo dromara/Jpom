@@ -184,6 +184,10 @@ function start() {
 
 function stop() {
 	pid=$(getPid)
+	if [ "${mode}" == "upgrade" ]; then
+		#	Compatible with online upgrade ./Server.sh restart upgrade
+		mode=""
+	fi
 	if [ "$pid" != "" ]; then
 		echo -n "jpom server ( pid $pid) is running"
 		echo

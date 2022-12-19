@@ -69,7 +69,7 @@ public abstract class BaseAgentController extends BaseJpomController {
      * @return name
      */
     public static String getNowUserName() {
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (servletRequestAttributes == null) {
             return StrUtil.DASHED;
         }
