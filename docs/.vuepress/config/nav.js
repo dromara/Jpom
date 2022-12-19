@@ -8,6 +8,7 @@ module.exports = [
       {text: '一键安装教程', link: '/pages/15b7a2/'},
       {text: 'Docker 容器安装教程', link: '/pages/c846d3/'},
       {text: '离线安装教程', link: '/pages/af288b/'},
+      {text: 'v2.9.X迁移到v2.10.X指南', link: '/pages/upgrade/2.9.x-to-2.10.x/'},
       {text: 'v2.8.X迁移到v2.9.X指南', link: '/pages/upgrade/2.8.x-to-2.9.x/'},
     ]
   },
