@@ -116,7 +116,10 @@
         rowKey="id_no"
       >
         <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ nodeNameMap[text] || text }}</span>
+          <a-button type="link" style="padding: 0px" size="small" @click="toNode(text)">
+            <span>{{ nodeNameMap[text] || text }}</span>
+            <a-icon type="fullscreen" />
+          </a-button>
         </a-tooltip>
         <a-tooltip slot="projectName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
@@ -812,7 +815,7 @@ export default {
             id: record.id,
             intervalTime: record.intervalTime,
             clearOld: record.clearOld,
-            secondaryDirectory: record.secondaryDirectory,
+            secondaryDirectory: record.secondaryDirectory || "",
           };
           // console.log(this.temp);
           this.linkDispatchVisible = true;
@@ -1108,7 +1111,7 @@ export default {
           formData.append("afterOpt", this.temp.afterOpt);
           formData.append("clearOld", this.temp.clearOld);
           formData.append("autoUnzip", this.temp.autoUnzip);
-          formData.append("secondaryDirectory", this.temp.secondaryDirectory);
+          formData.append("secondaryDirectory", this.temp.secondaryDirectory || "");
           uploadDispatchFile(formData).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
@@ -1328,6 +1331,19 @@ export default {
       } catch (e) {
         //
       }
+    },
+    toNode(nodeId) {
+      const newpage = this.$router.resolve({
+        name: "node_" + nodeId,
+        path: "/node/list",
+        query: {
+          ...this.$route.query,
+          nodeId: nodeId,
+          pId: "manage",
+          id: "manageList",
+        },
+      });
+      window.open(newpage.href, "_blank");
     },
   },
 };
