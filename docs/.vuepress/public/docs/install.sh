@@ -171,6 +171,6 @@ rm -f ${JPOM_TYPE}.tar.gz
 # 删除安装命令
 rm -f ${previous_dir}/install.sh
 # 添加权限
-chmod 755 ${JPOM_TYPE}.sh
+chmod 755 ./bin/${JPOM_TYPE}.sh
 # 启动
-bash ${JPOM_TYPE}.sh start $@
+bash ./bin/${JPOM_TYPE}.sh start $@
