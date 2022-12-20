@@ -74,8 +74,8 @@ function download() {
 		versions=$(curl -LfsS https://jpom.top/docs/versions.tag)
 		download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
 		wget -O "${type}.tar.gz" "${download_url}"
-		tar -zxf "${type}.tar.gz" -C "${bin_abs_path}"
 	fi
+	tar -zxf "${type}.tar.gz" -C "${bin_abs_path}"
 	# 删除安装包
 	rm -f "${type}.tar.gz"
 }
