@@ -153,6 +153,7 @@ public class RemoteVersion extends BaseJsonModel {
         try {
             log.debug("use remote version url: {}", remoteVersionUrl);
             HttpRequest request = HttpUtil.createGet(remoteVersionUrl, true);
+            request.timeout(10 * 1000);
             try (HttpResponse execute = request.execute()) {
                 body = execute.body();
             }
