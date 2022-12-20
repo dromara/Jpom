@@ -69,11 +69,14 @@ function check_jar_version() {
 
 function download() {
 	if [ ! -f "${type}.tar.gz" ]; then
+		echo "下载新的安装包"
 		# 获取最新的版本号
 		url_type=$(echo "${type}" | tr 'A-Z' 'a-z')
 		versions=$(curl -LfsS https://jpom.top/docs/versions.tag)
 		download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
 		wget -O "${type}.tar.gz" "${download_url}"
+	else
+		echo "解压离线安装包"
 	fi
 	tar -zxf "${type}.tar.gz" -C "${bin_abs_path}"
 	# 删除安装包
@@ -103,7 +106,6 @@ function upgrade_server() {
 		mv "$bin_abs_path"/Server.bat "$bin_abs_path"/upgrade_backup/Server.bat
 	fi
 	mv "$bin_abs_path/Server.sh" "$bin_abs_path/upgrade_backup/Server.sh"
-	echo "下载新的安装包"
 	download
 	mv "$bin_abs_path/extConfig.yml" "$bin_abs_path/conf/extConfig.yml"
 	# 删除自己
