@@ -103,7 +103,6 @@
           <template v-for="item in temp.projectList">
             <a-tab-pane forceRender v-if="nodeName[item.nodeId]" :key="`${item.nodeId},${item.projectId}`" :tab="nodeName[item.nodeId] && nodeName[item.nodeId].name">
               <viewPre
-                :searchReg="searchReg"
                 :ref="`pre-dom-${item.nodeId},${item.projectId}`"
                 :id="`pre-dom-${item.nodeId},${item.projectId}`"
                 height="calc(100vh - 80px - 85px - 43px)"
@@ -174,14 +173,6 @@ export default {
         return "";
       } else {
         return (this.tempFileNode.levelName || "") + "/" + this.tempFileNode.filename;
-      }
-    },
-    searchReg() {
-      try {
-        return this.temp?.cacheData?.keyword ? new RegExp("(" + this.temp.cacheData.keyword + ")", "ig") : null;
-      } catch (e) {
-        // console.error(e);
-        return null;
       }
     },
   },

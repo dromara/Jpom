@@ -20,6 +20,8 @@
 3. 【server】修复 节点分发手动上传文件二级目录出现 `undefined`
 4. 【agent】修复 默认项目模式执行命令存在 `null` 字符串
 5. 【server】修复 初次安装服务端初始化数据库失败问题 （感谢@lg）
+6. 【server】优化 日志显示组件（取消正则搜索），日志删除 `ansi` 颜色
+   （感谢[@苏生不语](https://gitee.com/sushengbuyu) [Gitee issues I657JR](https://gitee.com/dromara/Jpom/issues/I657JR) ）
 
 ### ❌ 不兼容功能
 

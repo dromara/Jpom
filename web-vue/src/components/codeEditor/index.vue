@@ -175,9 +175,11 @@ export default {
       cmOptions: {
         theme: localStorage.getItem("editorTheme") || "idea",
         mode: "json",
+        // // 是否应滚动或换行以显示长行
         lineWrapping: true,
         lineNumbers: true,
         autofocus: true,
+        // 自动缩进，设置是否根据上下文自动缩进（和上一行相同的缩进量）。默认为true
         smartIndent: false,
         autocorrect: true,
         spellcheck: true,
@@ -342,6 +344,12 @@ export default {
     // 过滤选项
     filterOption(input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+    },
+    scrollToBottom() {
+      // 获取滚动信息  注意是两个codemirror.codemirror
+      const sc = this.$refs.myCm.codemirror.getScrollInfo();
+      // 滚动 注意是两个codemirror.codemirror
+      this.$refs.myCm.codemirror.scrollTo(sc.left, sc.height + sc.top);
     },
   },
 };
