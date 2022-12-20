@@ -121,7 +121,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      */
     @RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<String> delete(String id) {
+    public JsonMessage<String> delete(String id, String thorough) {
         HttpServletRequest request = getRequest();
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingModel, "没有对应的分发项目");
@@ -138,7 +138,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             // 删除实际的项目
             for (OutGivingNodeProject outGivingNodeProject1 : deleteNodeProject) {
                 NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject1.getNodeId());
-                JsonMessage<String> jsonMessage = this.deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
+                JsonMessage<String> jsonMessage = this.deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId(), thorough);
                 if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                     return new JsonMessage<>(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
                 }
@@ -221,7 +221,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             if (fail) {
                 try {
                     for (Tuple entry : success) {
-                        deleteNodeProject(entry.get(0), userModel, outGivingModel.getId());
+                        deleteNodeProject(entry.get(0), userModel, outGivingModel.getId(), null);
                     }
                 } catch (Exception e) {
                     log.error("还原项目失败", e);
@@ -239,9 +239,10 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param project   判断id
      * @return json
      */
-    private JsonMessage<String> deleteNodeProject(NodeModel nodeModel, UserModel userModel, String project) {
+    private JsonMessage<String> deleteNodeProject(NodeModel nodeModel, UserModel userModel, String project, String thorough) {
         JSONObject data = new JSONObject();
         data.put("id", project);
+        data.put("thorough", thorough);
         JsonMessage<String> request = NodeForward.request(nodeModel, NodeUrl.Manage_DeleteProject, userModel, data);
         if (request.getCode() == HttpStatus.HTTP_OK) {
             // 同步项目信息
@@ -432,7 +433,8 @@ public class OutGivingProjectEditController extends BaseServerController {
             for (OutGivingNodeProject outGivingNodeProject1 : deleteNodeProject) {
                 NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject1.getNodeId());
                 //outGivingNodeProject1.getNodeData(true);
-                jsonMessage = this.deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
+                // 调用彻底删除
+                jsonMessage = this.deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId(), "thorough");
                 Assert.state(jsonMessage.getCode() == HttpStatus.HTTP_OK, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
             }
         }

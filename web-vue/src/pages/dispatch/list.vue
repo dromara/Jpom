@@ -93,6 +93,9 @@
               <a-menu-item>
                 <a-button type="danger" size="small" :disabled="list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
               </a-menu-item>
+              <a-menu-item v-if="record.outGivingProject">
+                <a-button type="danger" size="small" :disabled="list_expanded[record.id]" @click="handleDelete(record, 'thorough')"> 彻底删除</a-button>
+              </a-menu-item>
               <a-menu-item>
                 <a-button type="danger" size="small" @click="handleUnbind(record)">解绑</a-button>
               </a-menu-item>
@@ -1148,16 +1151,18 @@ export default {
       });
     },
     // 删除
-    handleDelete(record) {
+    handleDelete(record, thorough) {
       if (record.outGivingProject) {
         this.$confirm({
           title: "系统提示",
-          content: "真的要删除分发信息么？删除后节点下面的项目也都将删除",
+          content: thorough
+            ? "真的要彻底删除分发信息么？删除后节点下面的项目也都将彻底删除，彻底项目会自动删除项目相关文件奥(包含项目日志，日志备份，项目文件)"
+            : "真的要删除分发信息么？删除后节点下面的项目也都将删除",
           okText: "确认",
           cancelText: "取消",
           onOk: () => {
             // 删除
-            delDisPatchProject(record.id).then((res) => {
+            delDisPatchProject({ id: record.id, thorough: thorough }).then((res) => {
               if (res.code === 200) {
                 this.$notification.success({
                   message: res.msg,
