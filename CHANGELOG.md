@@ -22,6 +22,8 @@
 5. 【server】修复 初次安装服务端初始化数据库失败问题 （感谢@lg）
 6. 【server】优化 日志显示组件（取消正则搜索），日志删除 `ansi` 颜色
    （感谢[@苏生不语](https://gitee.com/sushengbuyu) [Gitee issues I657JR](https://gitee.com/dromara/Jpom/issues/I657JR) ）
+7. 【server】优化 编辑组件可能出现行错和内容错乱问题
+8. 【server】优化 查看系统日志的多次切换内容返回错乱问题
 
 ### ❌ 不兼容功能
 
