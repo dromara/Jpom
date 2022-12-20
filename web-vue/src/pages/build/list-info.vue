@@ -148,7 +148,7 @@
             </a-col>
             <a-col :span="4" style="text-align: right">分组名称：</a-col>
             <a-col :span="10">
-              <custom-select suffixIcon="" :maxLength="50" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder=""> </custom-select>
+              <custom-select suffixIcon="" :maxLength="50" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder="选择分组"> </custom-select>
             </a-col>
           </a-row>
         </a-form-model-item>
@@ -450,8 +450,18 @@
                       </a-tooltip>
                       差异发布：
                     </a-col>
-                    <a-col :span="10">
+                    <a-col :span="4">
                       <a-switch v-model="tempExtraData.diffSync" checked-children="是" un-checked-children="否" />
+                    </a-col>
+                    <a-col :span="4" style="text-align: right">
+                      <a-tooltip v-if="!temp.id">
+                        <template slot="title"> 发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows 环境下出现文件被占用的情况 </template>
+                        <a-icon type="question-circle" theme="filled" />
+                      </a-tooltip>
+                      发布前停止：
+                    </a-col>
+                    <a-col :span="4">
+                      <a-switch v-model="tempExtraData.projectUploadCloseFirst" checked-children="是" un-checked-children="否" />
                     </a-col>
                   </div>
                 </a-row>

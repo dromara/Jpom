@@ -71,6 +71,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
     private final boolean clearOld;
     private final Integer sleepTime;
     private final String secondaryDirectory;
+    private final Boolean closeFirst;
     /**
      * 数据库记录id
      */
@@ -85,6 +86,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
         this.outGivingId = item.getId();
         this.secondaryDirectory = item.getSecondaryDirectory();
         this.clearOld = item.clearOld();
+        this.closeFirst = item.getUploadCloseFirst();
         this.unzip = unzip;
         this.outGivingNodeProject = outGivingNodeProject;
         this.file = file;
@@ -111,7 +113,8 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                 this.outGivingNodeProject.getProjectId(),
                 unzip,
                 afterOpt,
-                this.nodeModel, this.userModel, this.clearOld, this.sleepTime);
+                this.nodeModel, this.userModel, this.clearOld,
+                this.sleepTime, this.closeFirst);
             if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                 result = OutGivingNodeProject.Status.Ok;
             } else {

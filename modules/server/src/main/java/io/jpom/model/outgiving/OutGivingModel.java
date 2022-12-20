@@ -79,7 +79,10 @@ public class OutGivingModel extends BaseWorkspaceModel {
      * 二级目录
      */
     private String secondaryDirectory;
-
+    /**
+     * 保存项目文件前先关闭
+     */
+    private Boolean uploadCloseFirst;
 
     public boolean clearOld() {
         return clearOld != null && clearOld;

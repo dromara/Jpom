@@ -241,12 +241,15 @@ public abstract class AbstractProjectCommander {
      * @throws Exception 异常
      */
     public CommandOpResult stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem, boolean sync) throws Exception {
+        RunMode runMode = nodeProjectInfoModel.getRunMode();
+        if (runMode == RunMode.File) {
+            return CommandOpResult.of(true, "file 类型项目没有 stop");
+        }
         Tuple tuple = this.stopBefore(nodeProjectInfoModel, javaCopyItem);
         String result = tuple.get(1);
         String webHook = tuple.get(0);
         int pid = ProjectCommanderUtil.parsePid(result);
         if (pid > 0) {
-            RunMode runMode = nodeProjectInfoModel.getRunMode();
             if (runMode == RunMode.Dsl) {
                 //
                 this.runDsl(nodeProjectInfoModel, "stop", (process, action) -> {
@@ -361,8 +364,12 @@ public abstract class AbstractProjectCommander {
      * @throws Exception 异常
      */
     public CommandOpResult restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        RunMode runMode = nodeProjectInfoModel.getRunMode();
+        if (runMode == RunMode.File) {
+            return CommandOpResult.of(true, "file 类型项目没有 restart");
+        }
         this.asyncWebHooks(nodeProjectInfoModel, javaCopyItem, "beforeRestart");
-        if (nodeProjectInfoModel.getRunMode() == RunMode.Dsl) {
+        if (runMode == RunMode.Dsl) {
             DslYmlDto.BaseProcess dslProcess = nodeProjectInfoModel.tryDslProcess("restart");
             if (dslProcess != null) {
                 //

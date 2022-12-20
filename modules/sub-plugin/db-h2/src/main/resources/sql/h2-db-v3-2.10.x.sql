@@ -28,3 +28,7 @@ ALTER TABLE PROJECT_INFO
 
 ALTER TABLE OUT_GIVING
     ADD IF NOT EXISTS secondaryDirectory VARCHAR (200) comment '二级目录';
+
+ALTER TABLE OUT_GIVING
+    ADD IF NOT EXISTS uploadCloseFirst TINYINT DEFAULT 0 comment '是否清空旧包发布';
+
