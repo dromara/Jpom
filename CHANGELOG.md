@@ -10,7 +10,7 @@
 3. 【agent】新增 DSL 项目模式执行脚本支持节点环境变量
    （感谢[@苏生不语](https://gitee.com/sushengbuyu) [Gitee issues I66MNP](https://gitee.com/dromara/Jpom/issues/I66MNP) ）
 4. 【all】新增 构建项目发布、节点分发支持配置发布前先停止（避免 windows 环境文件被占用）
-   （感谢[@yiziyu](https://gitee.com/yiziyu) [Gitee issues I65MS1](https://gitee.com/dromara/Jpom/issues/I65MS1) ）
+   （感谢 [@yiziyu](https://gitee.com/yiziyu) [Gitee issues I65MS1](https://gitee.com/dromara/Jpom/issues/I65MS1)、[@all-around-badass](https://gitee.com/all-around-badass) [Gitee issues I66PYU](https://gitee.com/dromara/Jpom/issues/I66PYU) ）
 
 ### 🐞 解决BUG、优化功能
 
@@ -19,6 +19,7 @@
    （感谢[@苏生不语](https://gitee.com/sushengbuyu) [Gitee issues I66R73](https://gitee.com/dromara/Jpom/issues/I66R73) ）
 3. 【server】修复 节点分发手动上传文件二级目录出现 `undefined`
 4. 【agent】修复 默认项目模式执行命令存在 `null` 字符串
+5. 【server】修复 初次安装服务端初始化数据库失败问题 （感谢@lg）
 
 ### ❌ 不兼容功能
 
