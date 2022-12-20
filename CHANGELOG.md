@@ -4,6 +4,9 @@
 
 ### 🐣 新增功能
 
+1. 【server】新增 节点项目支持快速复制操作
+   （感谢[@mt-mored](https://gitee.com/mt-mored) [Gitee issues I653O3](https://gitee.com/dromara/Jpom/issues/I653O3) ）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】节点分发菜单更名为项目管理

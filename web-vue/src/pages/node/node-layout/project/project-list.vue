@@ -123,7 +123,9 @@
               <a-menu-item>
                 <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
               </a-menu-item>
-
+              <a-menu-item>
+                <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
+              </a-menu-item>
               <!-- <a-menu-item>
                 <a-button size="small" type="primary" @click="handleReplica(record)" v-if="javaModes.includes(record.runMode)" :disabled="!record.javaCopyItemList">副本集 </a-button>
               </a-menu-item> -->
@@ -611,6 +613,17 @@ export default {
           this.introGuide();
         }, 500);
       });
+    },
+    // 复制
+    copyItem(record) {
+      const temp = Object.assign({}, record);
+      delete temp.id;
+      delete temp.createTimeMillis;
+      delete temp.outGivingProject;
+      this.temp = { ...temp, name: temp.name + "副本", id: temp.projectId + "_copy", javaCopyItemList: [], lib: temp.lib + "_copy" };
+
+      this.loadAccesList();
+      this.editProjectVisible = true;
     },
     // 编辑
     handleEdit(record) {
