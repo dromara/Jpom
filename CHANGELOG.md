@@ -29,6 +29,24 @@
 
 1. 【agent】取消 DSL 项目脚本的 #{} 替换变量
 
+### ⚠️ 注意
+
+Linux 环境 已经安装 2.10.0 的需要手动更新一下管理脚本，2.10.0 管理脚本存在在线升级和在线重启日志输出重复问题
+
+> 建议先更新脚本再升级插件端或者服务端
+
+**服务端**：(需要到安装目录的 bin 下执行)
+
+```shell
+curl -LfsSo Server.sh https://gitee.com/dromara/Jpom/raw/master/modules/server/src/main/bin/Server.sh
+```
+
+**插件端** ：(需要到安装目录的 bin 下执行)
+
+```shell
+curl -LfsSo Agent.sh https://gitee.com/dromara/Jpom/raw/master/modules/agent/src/main/bin/Agent.sh
+```
+
 ------
 
 ## 2.10.0 (2022-12-19)
