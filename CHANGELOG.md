@@ -7,6 +7,8 @@
 1. 【server】新增 节点项目支持快速复制操作
    （感谢[@mt-mored](https://gitee.com/mt-mored) [Gitee issues I653O3](https://gitee.com/dromara/Jpom/issues/I653O3) ）
 2. 【all】新增 节点项目、独立节点分发支持彻底删除
+3. 【agent】新增 DSL 项目模式执行脚本支持节点环境变量
+   （感谢[@苏生不语](https://gitee.com/sushengbuyu) [Gitee issues I66MNP](https://gitee.com/dromara/Jpom/issues/I66MNP) ）
 
 ### 🐞 解决BUG、优化功能
 
