@@ -102,7 +102,7 @@
           <template slot="operation" slot-scope="text, copyRecord">
             <a-space>
               <a-button size="small" type="primary" @click="handleConsoleCopy(record, copyRecord)">控制台</a-button>
-              <a-button size="small" type="danger" @click="handleDeleteCopy(record, copyRecord)">删除</a-button>
+              <a-button size="small" type="danger" @click="handleDeleteCopy(record, copyRecord, 'thorough')">删除</a-button>
             </a-space>
           </template>
         </a-table>
@@ -134,6 +134,12 @@
                   <a-button size="small" type="danger" :disabled="record.outGivingProject === 1">删除</a-button>
                 </a-tooltip>
                 <a-button v-else size="small" type="danger" @click="handleDelete(record)">删除</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-tooltip v-if="record.outGivingProject" title="节点分发项目需要到节点分发中去删除">
+                  <a-button size="small" type="danger" :disabled="record.outGivingProject === 1">彻底删除</a-button>
+                </a-tooltip>
+                <a-button v-else size="small" type="danger" @click="handleDelete(record, 'thorough')">彻底删除</a-button>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -760,10 +766,12 @@ export default {
     //   this.drawerReplicaVisible = false;
     // },
     // 删除
-    handleDelete(record) {
+    handleDelete(record, thorough) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除项目么？删除项目不会删除项目相关文件奥,建议先清理项目相关文件再删除项目",
+        content: thorough
+          ? "真的要彻底删除项目么？彻底项目会自动删除项目相关文件奥(包含项目日志，日志备份，项目文件)"
+          : "真的要删除项目么？删除项目不会删除项目相关文件奥,建议先清理项目相关文件再删除项目",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -771,6 +779,7 @@ export default {
           const params = {
             nodeId: this.node.id,
             id: record.projectId,
+            thorough: thorough,
           };
           deleteProject(params).then((res) => {
             if (res.code === 200) {
@@ -1037,10 +1046,10 @@ export default {
       });
     },
     // 删除
-    handleDeleteCopy(project, record) {
+    handleDeleteCopy(project, record, thorough) {
       this.$confirm({
         title: "系统提示",
-        content: "真的要删除副本项目么？",
+        content: thorough ? "真的要彻底删除项目副本么?彻底删除项目会自动删除副本相关文件奥(包含项目日志，日志备份)" : "真的要删除项目副本么？",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
@@ -1049,6 +1058,7 @@ export default {
             nodeId: this.node.id,
             id: project.projectId,
             copyId: record.id,
+            thorough: thorough,
           };
           deleteProject(params).then((res) => {
             if (res.code === 200) {

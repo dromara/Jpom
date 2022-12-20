@@ -269,19 +269,25 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      * @return file
      */
     public File getLog(JavaCopyItem javaCopyItem) {
-        File file = FileUtil.file(getLog());
+        String log1 = getLog();
+        Assert.hasText(log1, "log path error");
+        File file = FileUtil.file(log1);
         return FileUtil.file(file.getParentFile(), getId() + "_" + javaCopyItem.getId() + ".log");
     }
 
     public String getAbsoluteLog(JavaCopyItem javaCopyItem) {
-        File file = javaCopyItem == null ? new File(getLog()) : getLog(javaCopyItem);
+        String pathname = getLog();
+        Assert.hasText(pathname, "log path error");
+        File file = javaCopyItem == null ? new File(pathname) : getLog(javaCopyItem);
         // auto create dir
         FileUtil.mkParentDirs(file);
         return file.getAbsolutePath();
     }
 
     public File getLogBack() {
-        return new File(getLog() + "_back");
+        String log1 = getLog();
+        Assert.hasText(log1, "log path error");
+        return new File(log1 + "_back");
     }
 
     public File getLogBack(JavaCopyItem javaCopyItem) {

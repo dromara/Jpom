@@ -38,6 +38,7 @@ import io.jpom.model.RunMode;
 import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.WhitelistDirectoryService;
+import io.jpom.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -338,22 +339,30 @@ public class ManageEditProjectController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> deleteProject(String copyId) {
+    public JsonMessage<String> deleteProject(String copyId, String thorough) {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
         if (nodeProjectInfoModel == null) {
+            // 返回正常 200 状态码，考虑节点分发重复操作
             return JsonMessage.success("项目不存在");
         }
         try {
             NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
 
             if (copyItem == null) {
+                List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
+                Assert.state(CollUtil.isEmpty(javaCopyItemList), "当前项目存在副本不能直接删除");
                 // 运行判断
                 boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, null);
                 Assert.state(!run, "不能删除正在运行的项目");
+                this.thorough(thorough, nodeProjectInfoModel, null);
+                //
                 projectInfoService.deleteItem(nodeProjectInfoModel.getId());
             } else {
                 boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, copyItem);
                 Assert.state(!run, "不能删除正在运行的项目副本");
+                //
+                this.thorough(thorough, nodeProjectInfoModel, copyItem);
+                //
                 boolean removeCopyItem = nodeProjectInfoModel.removeCopyItem(copyId);
                 Assert.state(removeCopyItem, "删除对应副本集不存在");
                 projectInfoService.updateItem(nodeProjectInfoModel);
@@ -362,6 +371,38 @@ public class ManageEditProjectController extends BaseAgentController {
         } catch (Exception e) {
             log.error("删除异常", e);
             return new JsonMessage<>(500, "删除异常：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 彻底删除项目文件
+     *
+     * @param thorough             是否彻底
+     * @param nodeProjectInfoModel 项目
+     * @param copyItem             副本
+     */
+    private void thorough(String thorough, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) {
+        if (StrUtil.isEmpty(thorough)) {
+            return;
+        }
+        if (copyItem != null) {
+            File logBack = nodeProjectInfoModel.getLogBack(copyItem);
+            boolean fastDel = CommandUtil.systemFastDel(logBack);
+            Assert.state(!fastDel, "删除日志文件失败:" + logBack.getAbsolutePath());
+            File log = nodeProjectInfoModel.getLog(copyItem);
+            fastDel = CommandUtil.systemFastDel(log);
+            Assert.state(!fastDel, "删除日志文件失败:" + log.getAbsolutePath());
+        } else {
+            File logBack = nodeProjectInfoModel.getLogBack();
+            boolean fastDel = CommandUtil.systemFastDel(logBack);
+            Assert.state(!fastDel, "删除日志文件失败:" + logBack.getAbsolutePath());
+            File log = FileUtil.file(nodeProjectInfoModel.getAbsoluteLog(null));
+            fastDel = CommandUtil.systemFastDel(log);
+            Assert.state(!fastDel, "删除日志文件失败:" + log.getAbsolutePath());
+            //
+            File allLib = FileUtil.file(nodeProjectInfoModel.allLib());
+            fastDel = CommandUtil.systemFastDel(allLib);
+            Assert.state(!fastDel, "删除项目文件失败:" + allLib.getAbsolutePath());
         }
     }
 

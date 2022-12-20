@@ -143,11 +143,11 @@ export function releaseDelDisPatch(id) {
  * 删除分发
  * @param {*} id 分发 ID
  */
-export function delDisPatchProject(id) {
+export function delDisPatchProject(data) {
   return axios({
     url: "/outgiving/delete_project",
     method: "post",
-    data: { id },
+    data: data,
   });
 }
 
