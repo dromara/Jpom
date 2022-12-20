@@ -181,18 +181,21 @@ function start() {
 
 function stop() {
 	pid=$(getPid)
+	killMode=""
 	if [ "${mode}" == "upgrade" ]; then
 		#	Compatible with online upgrade ./Agent.sh restart upgrade
-		mode=""
+		killMode=""
+	else
+		killMode=${mode}
 	fi
 	if [ "$pid" != "" ]; then
 		echo -n "jpom agent ( pid $pid) is running"
 		echo
 		echo -n $"Shutting down (kill $mode $pid) jpom server: "
-		if [ "$mode" == "" ]; then
+		if [ "$killMode" == "" ]; then
 			kill "$pid"
 		else
-			kill "$mode" "$pid"
+			kill "$killMode" "$pid"
 		fi
 		LOOPS=0
 		while (true); do
