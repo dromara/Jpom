@@ -4,7 +4,7 @@
       ref="codemirror"
       :style="`height:${this.height}`"
       v-model="showContext"
-      :options="{ theme: 'panda-syntax', mode: 'verilog', tabSize: 2, readOnly: true, styleActiveLine: true, lineWrapping: this.config.wordBreak }"
+      :options="{ theme: 'panda-syntax', mode: 'verilog', cursorBlinkRate: -1, tabSize: 2, readOnly: true, styleActiveLine: true, lineWrapping: this.config.wordBreak }"
     ></code-editor>
   </div>
 </template>
@@ -67,10 +67,13 @@ export default {
           );
         })
         .join("");
-
       if (this.config.logScroll) {
-        // 获取滚动
-        this.$refs.codemirror.scrollToBottom();
+        setTimeout(() => {
+          // 延迟触发滚动
+          this.$nextTick(() => {
+            this.$refs.codemirror.scrollToBottom();
+          });
+        }, 500);
       }
     },
 

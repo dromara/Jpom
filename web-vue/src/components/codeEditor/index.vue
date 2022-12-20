@@ -182,7 +182,13 @@ export default {
         // 自动缩进，设置是否根据上下文自动缩进（和上一行相同的缩进量）。默认为true
         smartIndent: false,
         autocorrect: true,
+        dragDrop: false,
         spellcheck: true,
+        // scrollbarStyle: "Addons",
+        // 指定当前滚动到视图中的文档部分的上方和下方呈现的行数。默认为10 - [integer]
+        // // 有点类似于虚拟滚动显示
+        // Infinity - 无限制，始终显示全部内容，但是数据量大的时候会造成页面卡顿
+        viewportMargin: 10,
         hintOptions: this.cmHintOptions || {},
         extraKeys: {
           "Alt-Q": "autocomplete",
@@ -257,13 +263,16 @@ export default {
       immediate: true,
     },
     code(n) {
-      if (n != this.editorValue) {
-        try {
-          this.editorValue = this.formatStrInJson(n);
-        } catch (error) {
-          this.editorValue = n;
-          // 啥也不做
-        }
+      if (n !== this.editorValue) {
+        setTimeout(() => {
+          // 延迟赋值,避免行号错乱
+          try {
+            this.editorValue = this.formatStrInJson(n);
+          } catch (error) {
+            this.editorValue = n;
+            // 啥也不做
+          }
+        }, 100);
       }
     },
   },
@@ -346,10 +355,9 @@ export default {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0;
     },
     scrollToBottom() {
-      // 获取滚动信息  注意是两个codemirror.codemirror
-      const sc = this.$refs.myCm.codemirror.getScrollInfo();
-      // 滚动 注意是两个codemirror.codemirror
-      this.$refs.myCm.codemirror.scrollTo(sc.left, sc.height + sc.top);
+      this.$nextTick(() => {
+        this.$refs.myCm.codemirror.execCommand("goDocEnd");
+      });
     },
   },
 };

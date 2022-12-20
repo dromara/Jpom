@@ -134,6 +134,9 @@ export default {
       if (this.temp?.path === node.dataRef?.path) {
         return;
       }
+      if (!node.dataRef.isLeaf) {
+        return;
+      }
       const data = {
         op: "showlog",
         tomcatId: this.tomcatId,
@@ -141,9 +144,10 @@ export default {
       };
       this.temp = node.dataRef;
       this.$refs.logView.clearLogCache();
-      if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
-        this.socket = new WebSocket(this.socketUrl);
-      }
+
+      this.socket?.close();
+
+      this.socket = new WebSocket(this.socketUrl);
       // 连接成功后
       this.socket.onopen = () => {
         this.socket.send(JSON.stringify(data));
