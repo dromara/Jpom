@@ -846,8 +846,8 @@ export default {
           return false;
         }
         // 校验分发节点数据
-        if (this.dispatchList.length < 2) {
-          this.$notification.error({ message: "至少选择2个节点项目" });
+        if (this.dispatchList.length < 1) {
+          this.$notification.error({ message: "至少选择1个节点项目" });
           return false;
         }
         this.dispatchList.forEach((item, index) => {
@@ -994,9 +994,9 @@ export default {
         }
         const tempData = Object.assign({}, this.temp);
         // 检查
-        if (tempData.nodeIdList.length < 2) {
+        if (tempData.nodeIdList.length < 1) {
           this.$notification.warn({
-            message: "请至少选择 2 个节点",
+            message: "请至少选择 1 个节点",
           });
           return false;
         }

@@ -11,10 +11,29 @@
       {
         "title": "节点统计",
         "id": "nodeStat"
-      },
+      }
+    ]
+  },
+  {
+    "title": "项目管理",
+    "icon_v3": "apartment",
+    "id": "outgiving",
+    "childs": [
       {
         "title": "项目列表",
         "id": "projectSearch"
+      },
+      {
+        "id": "outgivingList",
+        "title": "分发列表"
+      },
+      {
+        "id": "outgivingLog",
+        "title": "分发日志"
+      },
+      {
+        "id": "logRead",
+        "title": "日志阅读"
       }
     ]
   },
@@ -68,25 +87,6 @@
       {
         "title": "集群列表",
         "id": "dockerSwarm"
-      }
-    ]
-  },
-  {
-    "title": "节点分发",
-    "icon_v3": "apartment",
-    "id": "outgiving",
-    "childs": [
-      {
-        "id": "outgivingList",
-        "title": "分发列表"
-      },
-      {
-        "id": "outgivingLog",
-        "title": "分发日志"
-      },
-      {
-        "id": "logRead",
-        "title": "日志阅读"
       }
     ]
   },

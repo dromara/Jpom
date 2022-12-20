@@ -4,6 +4,18 @@
 
 ### 🐣 新增功能
 
+### 🐞 解决BUG、优化功能
+
+1. 【server】节点分发菜单更名为项目管理
+2. 【server】节点分发添加项目限制数量由 2 调整为 1
+   （感谢[@苏生不语](https://gitee.com/sushengbuyu) [Gitee issues I66R73](https://gitee.com/dromara/Jpom/issues/I66R73) ）
+
+------
+
+## 2.10.0
+
+### 🐣 新增功能
+
 1. 【all】外置 `logback` 配置文件
 2. 【server】服务端管理相关功能独立页面菜单
 3. 【server】新增项目触发器用于管理项目状态
@@ -45,7 +57,7 @@
 1. 【agent】`whitelistDirectory.checkStartsWith` -> `jpom.whitelist-directory.check-starts-with`
 2. 【agent】`project.stopWaitTime` -> `jpom.project.statusWaitTime`
 3. 【agent】`project.*` -> `jpom.project.*`
-4. 【agent】修正拼写错误 `log.*back` -> `jpom.project.log.*backup`
+4. 【agent】修正拼写错误 `log.*back*` -> `jpom.project.log.*backup*`
 5. 【agent】`log.*` -> `jpom.project.log.*`
 6. 【agent】`log.intiReadLine` -> `jpom.init-read-line`
 7. 【agent】 `log.autoBackConsoleCron` 不支持配置 none (none 使用 `jpom.project.log.autoBackupToFile` 代替)
@@ -67,12 +79,11 @@
 
 > 此版本为不兼容升级，需要手动升级修改相关配置才能正常使用
 
-
 #### 简洁的升级流程
 
 1. 停止正在运行的程序插件端或者服务端
 2. 备份已经存在的插件端或者服务端的数据目录
-3. 手动安装新版本 `2.10.0+` 
+3. 手动安装新版本 `2.10.0+`
 4. 还原数据：将备份的数据目录迁移到新安装的数据目录（需要再未运行的状态下操作）
 5. 重启程序
 

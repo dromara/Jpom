@@ -423,7 +423,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param userModel             用户
      */
     private void deleteProject(OutGivingModel outGivingModel, List<OutGivingNodeProject> outGivingNodeProjects, UserModel userModel) {
-        Assert.state(CollUtil.size(outGivingNodeProjects) >= 2, "至少选择两个节点及以上");
+        Assert.state(CollUtil.size(outGivingNodeProjects) >= 1, "至少选择一个节点及以上");
         // 删除
         List<OutGivingNodeProject> deleteNodeProject = outGivingModel.getDelete(outGivingNodeProjects);
         if (deleteNodeProject != null) {

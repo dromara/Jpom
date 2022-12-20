@@ -196,7 +196,7 @@ public class OutGivingController extends BaseServerController {
                 }
             }).collect(Collectors.toList());
 
-        Assert.state(CollUtil.size(outGivingNodeProjects) >= 2, "至少选择2个节点项目");
+        Assert.state(CollUtil.size(outGivingNodeProjects) >= 1, "至少选择1个节点项目");
 
         outGivingModel.outGivingNodeProjectList(outGivingNodeProjects);
         //
