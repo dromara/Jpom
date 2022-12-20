@@ -131,6 +131,9 @@ export default {
     },
     // 选择节点
     select(selectedKeys, { node }) {
+      if (this.temp?.path === node.dataRef?.path) {
+        return;
+      }
       const data = {
         op: "showlog",
         tomcatId: this.tomcatId,

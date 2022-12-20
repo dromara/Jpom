@@ -216,28 +216,6 @@ export default {
           }
         }
         this.$refs.logView.appendLine(msg.data);
-        // if (this.searchReg) {
-        //   this.logContextArray.push(msg.data.replace(this.searchReg, this.regReplaceText));
-        // } else {
-        //   this.logContextArray.push(msg.data);
-        // }
-        // let logShowLineTemp = parseInt(this.logShowLine);
-        // logShowLineTemp = isNaN(logShowLineTemp) ? this.defLogShowLine : logShowLineTemp;
-        // logShowLineTemp = logShowLineTemp > 0 ? logShowLineTemp : 1;
-        // if (this.logScroll === "true") {
-        //   this.logContextArray = this.logContextArray.slice(-logShowLineTemp);
-        // }
-
-        // // 自动滚动到底部
-        // this.$nextTick(() => {
-        //   const projectConsole = document.getElementById("project-console");
-        //   projectConsole.innerHTML = this.logContextArray.join("</br>");
-        //   if (this.logScroll === "true") {
-        //     setTimeout(() => {
-        //       projectConsole.scrollTop = projectConsole.scrollHeight;
-        //     }, 100);
-        //   }
-        // });
 
         clearInterval(this.heart);
         // 创建心跳，防止掉线
