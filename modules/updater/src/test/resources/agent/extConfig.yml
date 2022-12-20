@@ -1,0 +1,64 @@
+jpom:
+  # jpom 数据存储路径, 如果调试模式运行默认路径为【${user.home}/jpom/】,安装运行默认为jar包文件的父级
+  path:
+  authorize:
+    # agent 端管理账号，必填。
+    agentName: jpomAgent
+    # agent 端管理密码，非必填，如果为空Jpom 会自动生成一串随机字符串当密码
+    agentPwd:
+  agent:
+    # 设置插件端id，配置自动注册服务端需要
+    id:
+    # 当前节点插件端可以访问的url ,如果不设置将使用http://+本地IP+端口
+    url:
+  server:
+    # 设置服务端的url
+    url:
+    # 服务器接口请求token
+    token:
+whitelistDirectory:
+  # 白名单目录是否验证包含关系
+  checkStartsWith: true
+log:
+  # 检测控制台日志周期，防止日志文件过大，目前暂只支持linux 不停服备份
+  autoBackConsoleCron: 0 0/10 * * * ?
+  # 控制台日志文件保留大小
+  autoBackSize: 50MB
+  # 是否自动将控制台日志文件备份
+  autoBackToFile: true
+  # 保存天数 配置错误或者没有，默认是7天
+  saveDays: 7
+  # 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
+  fileCharset:
+  # 查看日志时初始读取最后多少行（默认10，0不读取）
+  intiReadLine: 10
+consoleLog:
+  # 是否记录接口请求日志
+  reqXss: true
+  # 是否记录接口响应日志
+  reqResponse: true
+  # 控制台编码格式
+  charset:
+project:
+  # 停止、启动项目(项目状态检测)等待的时长 单位秒
+  stopWaitTime: 10
+  # 项目文件备份保留个数,大于 0 才会备份
+  fileBackupCount: 0
+  # 限制备份指定文件后缀（支持正则）
+  #fileBackupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]
+  # 项目状态检测间隔时间 单位毫秒，最小为1毫秒
+  statusDetectionInterval: 500
+system:
+  # cron 定时器是否开启匹配秒
+  timerMatchSecond: false
+  # 旧包文件保留个数
+  oldJarsCount: 2
+  # Check the url for the new version
+  remoteVersionUrl:
+# spring 相关配置
+spring:
+  servlet:
+    multipart:
+      # 上传文件大小限制 12KB -- parses as 12 kilobytes 5MB  -- parses as 5 megabytes 20  -- parses as 20 kilobytes
+      max-request-size: 2GB
+      max-file-size: 1GB
