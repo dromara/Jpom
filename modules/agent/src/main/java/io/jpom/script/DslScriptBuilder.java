@@ -22,12 +22,14 @@
  */
 package io.jpom.script;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -35,7 +37,9 @@ import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.data.NodeScriptModel;
+import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.service.script.NodeScriptServer;
+import io.jpom.service.system.AgentWorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
@@ -69,21 +73,6 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         this.action = action;
         this.environment = environment;
         this.args = args;
-    }
-
-    /**
-     * 添加环境变量
-     *
-     * @param environment 环境变量
-     */
-    public void putEnvironment(Map<String, String> environment) {
-        if (environment == null) {
-            return;
-        }
-        if (this.environment == null) {
-            this.environment = new HashMap<>(10);
-        }
-        this.environment.putAll(environment);
     }
 
     /**
@@ -210,18 +199,17 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
         String scriptId = scriptProcess.getScriptId();
         NodeScriptModel item = nodeScriptServer.getItem(scriptId);
-        Map<String, String> environment = DslScriptBuilder.environment(nodeProjectInfoModel);
+        Map<String, String> environment = DslScriptBuilder.environment(nodeProjectInfoModel, scriptProcess);
         File scriptFile;
         boolean autoDelete = false;
         if (item == null) {
             scriptFile = FileUtil.file(nodeProjectInfoModel.allLib(), scriptId);
             Assert.state(FileUtil.isFile(scriptFile), "脚本模版不存在:" + scriptProcess.getScriptId());
         } else {
-            scriptFile = DslScriptBuilder.initScriptFile(item, environment);
+            scriptFile = DslScriptBuilder.initScriptFile(item);
             autoDelete = true;
         }
-        DslScriptBuilder builder = new DslScriptBuilder(action, scriptProcess.getScriptEnv(), scriptProcess.getScriptArgs(), log);
-        builder.putEnvironment(environment);
+        DslScriptBuilder builder = new DslScriptBuilder(action, environment, scriptProcess.getScriptArgs(), log);
         builder.setScriptFile(scriptFile);
         builder.setAutoDelete(autoDelete);
         return builder;
@@ -231,27 +219,32 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
      * 创建脚本文件
      *
      * @param scriptModel 脚本对象
-     * @param dslEnv      环境变量
      * @return file
      */
-    private static File initScriptFile(NodeScriptModel scriptModel, Map<String, String> dslEnv) {
+    private static File initScriptFile(NodeScriptModel scriptModel) {
         String dataPath = ConfigBean.getInstance().getDataPath();
         File scriptFile = FileUtil.file(dataPath, ConfigBean.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
         // 替换内容
         String context = scriptModel.getContext();
-        for (Map.Entry<String, String> envEntry : dslEnv.entrySet()) {
-            String envValue = envEntry.getValue();
-            context = StrUtil.replace(context, "#{" + envEntry.getKey() + "}", envValue);
-        }
         FileUtil.writeString(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
         return scriptFile;
     }
 
-    private static Map<String, String> environment(NodeProjectInfoModel nodeProjectInfoModel) {
-        Map<String, String> dslEnv = new HashMap<>(10);
-        dslEnv.put("PROJECT_ID", nodeProjectInfoModel.getId());
-        dslEnv.put("PROJECT_NAME", nodeProjectInfoModel.getName());
-        dslEnv.put("PROJECT_PATH", nodeProjectInfoModel.allLib());
-        return dslEnv;
+    private static Map<String, String> environment(NodeProjectInfoModel nodeProjectInfoModel, DslYmlDto.BaseProcess scriptProcess) {
+        HashMap<String, String> env = MapUtil.newHashMap();
+        //
+        AgentWorkspaceEnvVarService workspaceService = SpringUtil.getBean(AgentWorkspaceEnvVarService.class);
+        WorkspaceEnvVarModel item = workspaceService.getItem(nodeProjectInfoModel.getWorkspaceId());
+        Optional.ofNullable(item)
+            .map(WorkspaceEnvVarModel::getVarData)
+            .map(map -> CollStreamUtil.toMap(map.values(), WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getName, WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getValue))
+            .ifPresent(env::putAll);
+        //
+        Optional.ofNullable(scriptProcess.getScriptEnv()).ifPresent(env::putAll);
+        //
+        env.put("PROJECT_ID", nodeProjectInfoModel.getId());
+        env.put("PROJECT_NAME", nodeProjectInfoModel.getName());
+        env.put("PROJECT_PATH", nodeProjectInfoModel.allLib());
+        return env;
     }
 }
