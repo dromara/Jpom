@@ -57,7 +57,10 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ nodeMap[text] }}</span>
+        <a-button type="link" style="padding: 0px" size="small" @click="toNode(text)">
+          <span>{{ nodeMap[text] }}</span
+          ><a-icon type="fullscreen" />
+        </a-button>
       </a-tooltip>
       <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
         <span>{{ item.whitelistDirectory + item.lib }}</span>
@@ -647,6 +650,19 @@ export default {
       this.temp.batchTriggerUrl = `${location.protocol}//${location.host}${res.data.batchTriggerUrl}`;
 
       this.temp = { ...this.temp };
+    },
+    toNode(nodeId) {
+      const newpage = this.$router.resolve({
+        name: "node_" + nodeId,
+        path: "/node/list",
+        query: {
+          ...this.$route.query,
+          nodeId: nodeId,
+          pId: "manage",
+          id: "manageList",
+        },
+      });
+      window.open(newpage.href, "_blank");
     },
   },
 };

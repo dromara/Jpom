@@ -542,6 +542,22 @@ export default {
   },
   watch: {
     $route() {
+      this.findTipNode();
+    },
+  },
+  created() {
+    this.loadData().then(() => {
+      this.findTipNode();
+    });
+    this.loadGroupList();
+  },
+  destroyed() {
+    if (this.pullFastInstallResultTime) {
+      clearInterval(this.pullFastInstallResultTime);
+    }
+  },
+  methods: {
+    findTipNode() {
       if (this.$route.query.tipNodeId) {
         this.showOptVisible[this.$route.query.tipNodeId] = true;
         this.showOptVisible = { ...this.showOptVisible };
@@ -556,17 +572,6 @@ export default {
         }, 10000);
       }
     },
-  },
-  created() {
-    this.loadData();
-    this.loadGroupList();
-  },
-  destroyed() {
-    if (this.pullFastInstallResultTime) {
-      clearInterval(this.pullFastInstallResultTime);
-    }
-  },
-  methods: {
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {
@@ -622,24 +627,27 @@ export default {
     },
     // 加载数据
     loadData(pointerEvent) {
-      this.list = [];
-      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
-      this.loading = true;
-      getNodeList(this.listQuery).then((res) => {
-        if (res.code === 200) {
-          this.list = res.data.result;
-          this.listQuery.total = res.data.total;
-          let nodeId = this.$route.query.nodeId;
-          this.list.map((item) => {
-            if (nodeId === item.id) {
-              this.handleNode(item);
-            }
-          });
-          this.$nextTick(() => {
-            this.introGuideList();
-          });
-        }
-        this.loading = false;
+      return new Promise((resolve) => {
+        this.list = [];
+        this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
+        this.loading = true;
+        getNodeList(this.listQuery).then((res) => {
+          if (res.code === 200) {
+            this.list = res.data.result;
+            this.listQuery.total = res.data.total;
+            let nodeId = this.$route.query.nodeId;
+            this.list.map((item) => {
+              if (nodeId === item.id) {
+                this.handleNode(item);
+              }
+            });
+            this.$nextTick(() => {
+              this.introGuideList();
+            });
+            resolve();
+          }
+          this.loading = false;
+        });
       });
     },
     // 展开行
