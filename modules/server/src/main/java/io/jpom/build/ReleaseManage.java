@@ -530,7 +530,8 @@ public class ReleaseManage implements Runnable {
             startPath = FileUtil.normalize(startPath + StrUtil.SLASH + directory);
             //
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
-                projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, this.userModel, false);
+                projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, this.userModel, false,
+                this.buildExtraModule.getProjectUploadCloseFirst());
             if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                 throw new JpomRuntimeException("同步项目文件失败：" + jsonMessage);
             }
@@ -568,11 +569,12 @@ public class ReleaseManage implements Runnable {
             zipFile = this.resultFile;
             unZip = false;
         }
-        JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile, this.buildExtraModule.getProjectSecondaryDirectory(),
+        JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile,
+            this.buildExtraModule.getProjectSecondaryDirectory(),
             projectId,
             unZip,
             afterOpt,
-            nodeModel, this.userModel, clearOld);
+            nodeModel, this.userModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst());
         if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
             logRecorder.info("发布项目包成功：" + jsonMessage);
         } else {

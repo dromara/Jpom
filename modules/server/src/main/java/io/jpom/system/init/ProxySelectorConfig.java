@@ -57,7 +57,7 @@ public class ProxySelectorConfig extends ProxySelector implements InitializingBe
 
     private final SystemParametersServer systemParametersServer;
     private volatile List<ProxyConfigItem> proxyConfigItems;
-    private static ProxySelector defaultProxySelector;
+    private ProxySelector defaultProxySelector;
 
     public ProxySelectorConfig(SystemParametersServer systemParametersServer) {
         this.systemParametersServer = systemParametersServer;

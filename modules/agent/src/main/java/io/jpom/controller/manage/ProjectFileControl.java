@@ -55,6 +55,7 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.CompressionFileUtil;
 import io.jpom.util.FileUtils;
 import io.jpom.util.StringUtil;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -62,10 +63,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -187,6 +185,32 @@ public class ProjectFileControl extends BaseAgentController {
     }
 
 
+    private void saveProjectFileBefore(File lib, NodeProjectInfoModel projectInfoModel) throws Exception {
+        String closeFirstStr = getParameter("closeFirst");
+        // 判断是否需要先关闭项目
+        boolean closeFirst = BooleanUtil.toBoolean(closeFirstStr);
+        if (closeFirst) {
+            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.stop, projectInfoModel, null);
+            Assert.state(result.isSuccess(), "关闭项目失败：" + result.msgStr());
+            List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = projectInfoModel.getJavaCopyItemList();
+            Optional.ofNullable(javaCopyItemList).ifPresent(javaCopyItems -> {
+                try {
+                    for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItems) {
+                        CommandOpResult result1 = consoleService.execCommand(ConsoleCommandOp.stop, projectInfoModel, javaCopyItem);
+                        Assert.state(result1.isSuccess(), "关闭项目副本" + javaCopyItem.getName() + " - " + javaCopyItem.getId() + "失败：" + result1.msgStr());
+                    }
+                } catch (Exception e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            });
+        }
+        String clearType = getParameter("clearType");
+        // 判断是否需要清空
+        if ("clear".equalsIgnoreCase(clearType)) {
+            CommandUtil.systemFastDel(lib);
+        }
+    }
+
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<CommandOpResult> upload() throws Exception {
         NodeProjectInfoModel pim = getProjectInfoModel();
@@ -195,8 +219,7 @@ public class ProjectFileControl extends BaseAgentController {
             .setUseOriginalFilename(true);
         // 压缩文件
         String type = getParameter("type");
-        // 是否清空
-        String clearType = getParameter("clearType");
+
         String levelName = getParameter("levelName");
         File lib = StrUtil.isEmpty(levelName) ? new File(pim.allLib()) : FileUtil.file(pim.allLib(), levelName);
         // 备份文件
@@ -207,10 +230,8 @@ public class ProjectFileControl extends BaseAgentController {
                 multipartFileBuilder.setFileExt(StringUtil.PACKAGE_EXT);
                 multipartFileBuilder.setSavePath(tempPathName);
                 String path = multipartFileBuilder.save();
-                // 判断是否需要清空
-                if ("clear".equalsIgnoreCase(clearType)) {
-                    CommandUtil.systemFastDel(lib);
-                }
+                //
+                this.saveProjectFileBefore(lib, pim);
                 // 解压
                 File file = new File(path);
                 try {
@@ -225,10 +246,8 @@ public class ProjectFileControl extends BaseAgentController {
                 multipartFileBuilder.setSavePath(tempPathName);
                 // 保存
                 String path = multipartFileBuilder.save();
-                // 判断是否需要清空
-                if ("clear".equalsIgnoreCase(clearType)) {
-                    CommandUtil.systemFastDel(lib);
-                }
+                //
+                this.saveProjectFileBefore(lib, pim);
                 // 移动文件到对应目录
                 FileUtil.mkdir(lib);
                 FileUtil.move(FileUtil.file(path), lib, true);

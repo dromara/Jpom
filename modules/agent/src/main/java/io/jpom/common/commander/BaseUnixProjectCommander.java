@@ -31,6 +31,7 @@ import io.jpom.util.JvmUtil;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * unix
@@ -48,14 +49,13 @@ public abstract class BaseUnixProjectCommander extends AbstractProjectCommander 
             return null;
         }
         String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
-        return String.format("nohup %s %s %s" +
-                " %s  %s  %s >> %s 2>&1 &",
+        return StrUtil.format("nohup {} {} {} {} {} {} >> {} 2>&1 &",
             getRunJavaPath(nodeProjectInfoModel, false),
-            javaCopyItem == null ? nodeProjectInfoModel.getJvm() : javaCopyItem.getJvm(),
+            Optional.ofNullable(javaCopyItem == null ? nodeProjectInfoModel.getJvm() : javaCopyItem.getJvm()).orElse(StrUtil.EMPTY),
             JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
             path,
-            nodeProjectInfoModel.getMainClass(),
-            javaCopyItem == null ? nodeProjectInfoModel.getArgs() : javaCopyItem.getArgs(),
+            Optional.ofNullable(nodeProjectInfoModel.getMainClass()).orElse(StrUtil.EMPTY),
+            Optional.ofNullable(javaCopyItem == null ? nodeProjectInfoModel.getArgs() : javaCopyItem.getArgs()).orElse(StrUtil.EMPTY),
             nodeProjectInfoModel.getAbsoluteLog(javaCopyItem));
     }
 

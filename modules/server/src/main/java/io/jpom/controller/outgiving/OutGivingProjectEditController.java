@@ -413,6 +413,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage()));
             outGivingModel.setSecondaryDirectory(secondaryDirectory);
         });
+        outGivingModel.setUploadCloseFirst(Convert.toBool(getParameter("uploadCloseFirst"), false));
         return tuples;
     }
 

@@ -156,6 +156,11 @@ public class BuildExtraModule extends BaseModel {
      */
     private String projectSecondaryDirectory;
 
+    /**
+     * 保存项目文件前先关闭
+     */
+    private Boolean projectUploadCloseFirst;
+
     public String getResultDirFile() {
         if (resultDirFile == null) {
             return null;

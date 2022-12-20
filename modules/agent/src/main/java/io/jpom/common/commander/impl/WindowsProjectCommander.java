@@ -35,6 +35,7 @@ import io.jpom.util.JvmUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * windows 版
@@ -54,11 +55,14 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
         String mainClass = nodeProjectInfoModel.getMainClass();
         String args = javaCopyItem == null ? nodeProjectInfoModel.getArgs() : javaCopyItem.getArgs();
-        return String.format("%s %s %s " +
-                "%s  %s  %s >> %s &",
+        return StrUtil.format("{} {} {} {} {} {} >> {} &",
             getRunJavaPath(nodeProjectInfoModel, true),
-            jvm, JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
-            classPath, mainClass, args, nodeProjectInfoModel.getAbsoluteLog(javaCopyItem));
+            Optional.ofNullable(jvm).orElse(StrUtil.EMPTY),
+            JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
+            classPath,
+            Optional.ofNullable(mainClass).orElse(StrUtil.EMPTY),
+            Optional.ofNullable(args).orElse(StrUtil.EMPTY),
+            nodeProjectInfoModel.getAbsoluteLog(javaCopyItem));
     }
 
     @Override

@@ -153,7 +153,7 @@
       </a-table>
     </a-table>
     <!-- 添加/编辑关联项目 -->
-    <a-modal v-model="linkDispatchVisible" width="700px" :title="temp.type === 'edit' ? '编辑关联项目' : '添加关联项目'" @ok="handleLinkDispatchOk" :maskClosable="false" @cancel="clearDispatchList">
+    <a-modal v-model="linkDispatchVisible" width="800px" :title="temp.type === 'edit' ? '编辑关联项目' : '添加关联项目'" @ok="handleLinkDispatchOk" :maskClosable="false" @cancel="clearDispatchList">
       <a-form-model ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item prop="id">
           <template slot="label">
@@ -252,7 +252,22 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
+          <a-row>
+            <a-col :span="4">
+              <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
+            </a-col>
+
+            <a-col :span="4" style="text-align: right">
+              <a-tooltip v-if="temp.type !== 'edit'">
+                <template slot="title"> 发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows 环境下出现文件被占用的情况 </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+              发布前停止：
+            </a-col>
+            <a-col :span="4">
+              <a-switch v-model="temp.uploadCloseFirst" checked-children="是" un-checked-children="否" />
+            </a-col>
+          </a-row>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -407,12 +422,26 @@
         <a-form-model-item prop="clearOld">
           <template slot="label">
             清空发布
-            <a-tooltip v-show="temp.type !== 'edit'">
+            <a-tooltip v-if="temp.type !== 'edit'">
               <template slot="title"> 清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件 </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
+          <a-row>
+            <a-col :span="4">
+              <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
+            </a-col>
+            <a-col :span="4" style="text-align: right">
+              <a-tooltip v-if="temp.type !== 'edit'">
+                <template slot="title"> 发布前停止是指在发布文件到项目文件时先将项目关闭，再进行文件替换。避免 windows 环境下出现文件被占用的情况 </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+              发布前停止：
+            </a-col>
+            <a-col :span="4">
+              <a-switch v-model="temp.uploadCloseFirst" checked-children="是" un-checked-children="否" />
+            </a-col>
+          </a-row>
         </a-form-model-item>
         <!-- 节点 -->
         <a-form-model-item label="分发节点" prop="nodeId">
@@ -816,6 +845,7 @@ export default {
             intervalTime: record.intervalTime,
             clearOld: record.clearOld,
             secondaryDirectory: record.secondaryDirectory || "",
+            uploadCloseFirst: record.uploadCloseFirst,
           };
           // console.log(this.temp);
           this.linkDispatchVisible = true;
@@ -944,6 +974,7 @@ export default {
                 intervalTime: record.intervalTime,
                 clearOld: record.clearOld,
                 secondaryDirectory: record.secondaryDirectory,
+                uploadCloseFirst: record.uploadCloseFirst,
               };
             }
             // 添加 nodeIdList

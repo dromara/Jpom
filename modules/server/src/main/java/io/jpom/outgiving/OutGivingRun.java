@@ -109,14 +109,15 @@ public class OutGivingRun {
     /**
      * 上传项目文件
      *
-     * @param file      需要上传的文件
-     * @param projectId 项目id
-     * @param unzip     是否需要解压
-     * @param afterOpt  是否需要重启
-     * @param nodeModel 节点
-     * @param userModel 操作用户
-     * @param clearOld  清空发布
-     * @param levelName 文件夹层级
+     * @param file       需要上传的文件
+     * @param projectId  项目id
+     * @param unzip      是否需要解压
+     * @param afterOpt   是否需要重启
+     * @param nodeModel  节点
+     * @param userModel  操作用户
+     * @param clearOld   清空发布
+     * @param levelName  文件夹层级
+     * @param closeFirst 保存项目文件前先关闭项目
      * @return json
      */
     public static JsonMessage<String> fileUpload(File file, String levelName, String projectId,
@@ -124,22 +125,23 @@ public class OutGivingRun {
                                                  AfterOpt afterOpt,
                                                  NodeModel nodeModel,
                                                  UserModel userModel,
-                                                 boolean clearOld) {
-        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, userModel, clearOld, null);
+                                                 boolean clearOld, Boolean closeFirst) {
+        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, userModel, clearOld, null, closeFirst);
     }
 
     /**
      * 上传项目文件
      *
-     * @param file      需要上传的文件
-     * @param projectId 项目id
-     * @param unzip     是否需要解压
-     * @param afterOpt  是否需要重启
-     * @param nodeModel 节点
-     * @param userModel 操作用户
-     * @param clearOld  清空发布
-     * @param levelName 文件夹层级
-     * @param sleepTime 休眠时间
+     * @param file       需要上传的文件
+     * @param projectId  项目id
+     * @param unzip      是否需要解压
+     * @param afterOpt   是否需要重启
+     * @param nodeModel  节点
+     * @param userModel  操作用户
+     * @param clearOld   清空发布
+     * @param levelName  文件夹层级
+     * @param sleepTime  休眠时间
+     * @param closeFirst 保存项目文件前先关闭项目
      * @return json
      */
     public static JsonMessage<String> fileUpload(File file, String levelName, String projectId,
@@ -147,7 +149,9 @@ public class OutGivingRun {
                                                  AfterOpt afterOpt,
                                                  NodeModel nodeModel,
                                                  UserModel userModel,
-                                                 boolean clearOld, Integer sleepTime) {
+                                                 boolean clearOld,
+                                                 Integer sleepTime,
+                                                 Boolean closeFirst) {
         JSONObject data = new JSONObject();
         data.put("file", file);
         data.put("id", projectId);
@@ -166,6 +170,7 @@ public class OutGivingRun {
         if (afterOpt != AfterOpt.No) {
             data.put("after", afterOpt.getCode());
         }
+        data.put("closeFirst", closeFirst);
         return NodeForward.request(nodeModel, NodeUrl.Manage_File_Upload, userModel, data);
     }
 }
