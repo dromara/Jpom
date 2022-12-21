@@ -23,16 +23,36 @@
 # https://github.com/AdoptOpenJDK/openjdk-docker/blob/master/8/jdk/centos/Dockerfile.hotspot.releases.full
 # https://github.com/carlossg/docker-maven/blob/master/openjdk-8/Dockerfile
 
+case "$(uname)" in
+Linux)
+	bin_abs_path=$(readlink -f "$(dirname "$0")")
+	;;
+*)
+	bin_abs_path=$(
+		cd "$(dirname "$0")" || exit
+		pwd
+	)
+	;;
+esac
+
 JPOM_TYPE="$1"
 ARGS="$*"
 module="$2"
+
+function errorExit() {
+	msg="$1"
+	echo "$msg" 2>&2
+	# 删除安装命令
+	rm -f "${bin_abs_path}/install.sh"
+	exit 1
+}
 
 # 安装 jdk
 function installJdkFn() {
 	if [[ ! -x "${JAVA_HOME}/bin/java" ]]; then
 		JAVA=$(which java)
 		if [[ ! -x "$JAVA" ]]; then
-			# 判断是否存在文件
+
 			download_url=""
 			ARCH_O=$(uname -m)
 			# 判断系统架构
@@ -53,22 +73,20 @@ function installJdkFn() {
 				ARCH='x64'
 				;;
 			*)
-				echo "Unsupported arch: ${ARCH_O}"
-				exit 1
+				errorExit "Unsupported arch: ${ARCH_O}"
 				;;
 			esac
 
 			download_url=$(curl -s https://gitee.com/dromara/Jpom/raw/download_link/jdk/8/${ARCH})
 
-			wget -O jdk.tar.gz "${download_url}" --no-check-certificate
+			curl -LfSo jdk.tar.gz "${download_url}" --no-check-certificate
 			mkdir -p /usr/java/
 			#
 			jdk_name=$(tar -tf jdk.tar.gz | grep 'jdk' | head -1)
 
 			#	检查环境变量
 			if grep -q "/usr/java/${jdk_name}" /etc/profile; then
-				echo "系统环境变量中已经存在 jdk 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source /etc/profile"
-				exit 1
+				errorExit "系统环境变量中已经存在 jdk 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source /etc/profile"
 			else
 				tar -zxf jdk.tar.gz -C /usr/java/
 				echo "安装jdk,路径 /usr/java/${jdk_name}"
@@ -99,12 +117,11 @@ function installMvnFn() {
 		MVN=$(which mvn)
 		if [[ ! -x "$MVN" ]]; then
 			if grep -q "/usr/maven/apache-maven-3.6.3/" /etc/profile; then
-				echo "系统环境变量中已经存在 mvn 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source /etc/profile"
-				exit 1
+				errorExit "系统环境变量中已经存在 mvn 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source /etc/profile"
 			fi
-			wget -O apache-maven-3.6.3-bin.tar.gz https://mirrors.aliyun.com/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+			curl -LfSo apache-maven-3.6.3-bin.tar.gz https://mirrors.aliyun.com/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
 
-			mkdir /usr/maven/
+			mkdir -p /usr/maven/
 			#
 			tar -zxf apache-maven-3.6.3-bin.tar.gz -C /usr/maven/
 			#
@@ -128,6 +145,52 @@ function installMvnFn() {
 	fi
 }
 
+function installNodeFn() {
+	NODE=$(which node)
+	if [[ ! -x "$NODE" ]]; then
+		ARCH_O=$(uname -m)
+		case "${ARCH_O}" in
+		aarch64 | arm64)
+			BINARY_ARCH='arm64'
+			;;
+		amd64 | x86_64)
+			BINARY_ARCH='x64'
+			;;
+		*)
+			errorExit "Unsupported arch: ${ARCH_O}"
+			;;
+		esac
+
+		NODE_VERSION="16.13.1"
+
+		curl -LfSo node.tar.gz https://npmmirror.com/mirrors/node/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${BINARY_ARCH}.tar.gz
+		#
+		node_name=$(tar -tf node.tar.gz | grep 'node' | head -1)
+		#	检查环境变量
+		if grep -q "/usr/node/${node_name}" /etc/profile; then
+			errorExit "系统环境变量中已经存在 node 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source /etc/profile"
+		else
+			mkdir -p /usr/node/
+			tar -zxf node.tar.gz -C /usr/node
+			echo "安装node,路径 /usr/node/${node_name}"
+			# 修改环境变量
+			{
+				echo ""
+				echo "export NODE_HOME=/usr/node/${node_name}"
+				echo "export PATH=\$NODE_HOME/bin:\$PATH"
+			} >>"/etc/profile"
+
+			# 更新环境变量
+			source /etc/profile
+			npm config set registry https://registry.npmmirror.com/
+			# 删除 node 压缩包
+			rm -f node.tar.gz
+		fi
+	else
+		echo "已经存在node环境${NODE}"
+	fi
+}
+
 function checkModule() {
 	# 判断是否包含jdk
 	temp_result=$(echo "$module" | grep "jdk")
@@ -141,6 +204,18 @@ function checkModule() {
 	if [[ "$temp_result" != "" ]]; then
 		echo "开始检查 mvn"
 		installMvnFn
+	fi
+
+	# 判断是否包含 node
+	temp_result=$(echo "$module" | grep "node")
+	if [[ "$temp_result" != "" ]]; then
+		echo "开始检查 node"
+		installNodeFn
+	fi
+
+	temp_result=$(echo "$module" | grep "only-module")
+	if [[ "$temp_result" != "" ]]; then
+		errorExit "检查依赖结束"
 	fi
 }
 
@@ -164,15 +239,12 @@ if [ "$url_type" == "server" ]; then
 elif [ "$url_type" == "agent" ]; then
 	JPOM_TYPE="Agent"
 else
-	echo "不支持的 $url_type 类型,请检查是否填写正确的参数" 2>&2
-	exit 1
+	errorExit "不支持的 $url_type 类型,请检查是否填写正确的参数"
 fi
 
 #开始准备安装相关依赖
 checkModule
 
-# 记录下当前目录，用于后续删除 install.sh 脚本
-previous_dir=$(pwd)
 jpom_dir=/usr/local/jpom-${url_type}
 # 提示用户安装目录
 echo ">>>>>默认安装目录 ${jpom_dir}<<<<<"
@@ -227,8 +299,7 @@ if [[ -z "${versions}" ]]; then
 fi
 
 if [[ -z "${versions}" ]]; then
-	echo "没有可以的版本号" 2>&2
-	exit 1
+	errorExit "没有可以的版本号"
 fi
 
 echo "开始安装：${JPOM_TYPE} ${versions}, 安装目录 ${jpom_dir}"
@@ -236,8 +307,7 @@ echo "开始安装：${JPOM_TYPE} ${versions}, 安装目录 ${jpom_dir}"
 mkdir -p "${jpom_dir}" && cd "${jpom_dir}" || exit
 
 if [ -f "./bin/${JPOM_TYPE}.sh" ] || [ -f "./${JPOM_TYPE}.sh" ]; then
-	echo "${jpom_dir} 目录下已经存在管理命令,请不要重复安装" 2>&2
-	exit 1
+	errorExit "${jpom_dir} 目录下已经存在管理命令,请不要重复安装"
 fi
 
 # 判断是否存在文件
@@ -249,16 +319,14 @@ fi
 tar -zxf "${JPOM_TYPE}.tar.gz" -C "${jpom_dir}"
 # 删除安装包
 rm -f "${JPOM_TYPE}.tar.gz"
-# 删除安装命令
-rm -f "${previous_dir}/install.sh"
+
 shName=""
 if [ -f "./bin/${JPOM_TYPE}.sh" ]; then
 	shName="./bin/${JPOM_TYPE}.sh"
 elif [ -f "./${JPOM_TYPE}.sh" ]; then
 	shName="./${JPOM_TYPE}.sh"
 else
-	echo "没有找到对应的管理命令" 2>&2
-	exit 1
+	errorExit "没有找到对应的管理命令"
 fi
 
 # 添加权限
