@@ -27,6 +27,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
 import io.jpom.JpomApplication;
+import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,46 +43,6 @@ import java.io.File;
  */
 @Configuration
 public class ConfigBean {
-
-    /**
-     * 用户名header
-     */
-    public static final String JPOM_SERVER_USER_NAME = "Jpom-Server-UserName";
-
-    public static final String JPOM_AGENT_AUTHORIZE = "Jpom-Agent-Authorize";
-
-    public static final String DATA = "data";
-
-    public static final int AUTHORIZE_ERROR = 900;
-    /**
-     * 脚本模板存放路径
-     */
-    public static final String SCRIPT_DIRECTORY = "script";
-    /**
-     * 脚本默认运行缓存执行文件路径，考虑 windows 文件被占用情况
-     */
-    public static final String SCRIPT_RUN_CACHE_DIRECTORY = "script_run_cache";
-    /**
-     * 授权信息
-     */
-    public static final String AUTHORIZE = "agent_authorize.json";
-    /**
-     *
-     */
-    public static final String AUTHORIZE_USER_KEY = "jpom.authorize.agentName";
-    /**
-     *
-     */
-    public static final String AUTHORIZE_AUTHORIZE_KEY = "jpom.authorize.agentPwd";
-    /**
-     * 程序升级信息文件
-     */
-    public static final String UPGRADE = "upgrade.json";
-    public static final String RUN_JAR = "run.bin";
-    /**
-     * 远程版本信息
-     */
-    public static final String REMOTE_VERSION = "remote_version.json";
     /**
      * 程序端口
      */
@@ -120,7 +81,7 @@ public class ConfigBean {
      * @return 文件夹路径
      */
     public String getDataPath() {
-        String dataPath = FileUtil.normalize(ExtConfigBean.getPath() + StrUtil.SLASH + DATA);
+        String dataPath = FileUtil.normalize(ExtConfigBean.getPath() + StrUtil.SLASH + Const.DATA);
         FileUtil.mkdir(dataPath);
         return dataPath;
     }
@@ -152,7 +113,7 @@ public class ConfigBean {
      * @return file
      */
     public String getAgentAutoAuthorizeFile(String dataPath) {
-        return FileUtil.normalize(dataPath + StrUtil.SLASH + ConfigBean.AUTHORIZE);
+        return FileUtil.normalize(dataPath + StrUtil.SLASH + Const.AUTHORIZE);
     }
 
     /**
@@ -185,7 +146,7 @@ public class ConfigBean {
      * @return file
      */
     public File getScriptPath() {
-        return FileUtil.file(this.getDataPath(), SCRIPT_DIRECTORY);
+        return FileUtil.file(this.getDataPath(), Const.SCRIPT_DIRECTORY);
     }
 
     public long getDataSizeCache() {

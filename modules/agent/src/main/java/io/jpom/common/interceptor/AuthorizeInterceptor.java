@@ -24,9 +24,9 @@ package io.jpom.common.interceptor;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
 import io.jpom.system.AgentAuthorize;
-import io.jpom.system.ConfigBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
@@ -54,7 +54,7 @@ public class AuthorizeInterceptor implements HandlerMethodInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
         NotAuthorize notAuthorize = handlerMethod.getMethodAnnotation(NotAuthorize.class);
         if (notAuthorize == null) {
-            String authorize = ServletUtil.getHeaderIgnoreCase(request, ConfigBean.JPOM_AGENT_AUTHORIZE);
+            String authorize = ServletUtil.getHeaderIgnoreCase(request, Const.JPOM_AGENT_AUTHORIZE);
             if (StrUtil.isEmpty(authorize)) {
                 this.error(response);
                 return false;
@@ -68,6 +68,6 @@ public class AuthorizeInterceptor implements HandlerMethodInterceptor {
     }
 
     private void error(HttpServletResponse response) {
-        ServletUtil.write(response, JsonMessage.getString(ConfigBean.AUTHORIZE_ERROR, "授权信息错误"), MediaType.APPLICATION_JSON_VALUE);
+        ServletUtil.write(response, JsonMessage.getString(Const.AUTHORIZE_ERROR, "授权信息错误"), MediaType.APPLICATION_JSON_VALUE);
     }
 }

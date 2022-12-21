@@ -27,6 +27,7 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import io.jpom.common.Const;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.LogRecorder;
 
@@ -86,7 +87,7 @@ public abstract class BaseRunScript implements AutoCloseable {
      */
     public static void clearRunScript() {
         String dataPath = ConfigBean.getInstance().getDataPath();
-        File scriptFile = FileUtil.file(dataPath, ConfigBean.SCRIPT_RUN_CACHE_DIRECTORY);
+        File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY);
         if (!FileUtil.isDirectory(scriptFile)) {
             return;
         }

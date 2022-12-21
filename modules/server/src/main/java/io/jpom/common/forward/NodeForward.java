@@ -42,7 +42,6 @@ import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
@@ -391,7 +390,7 @@ public class NodeForward {
             throw new AgentException(nodeModel.getName() + "节点未启用");
         }
         if (userModel != null) {
-            httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, URLUtil.encode(userModel.getId()));
+            httpRequest.header(Const.JPOM_SERVER_USER_NAME, URLUtil.encode(userModel.getId()));
 //            httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, userModel.getUserRole(nodeModel).name());
         }
         if (StrUtil.isEmpty(nodeModel.getLoginPwd())) {
@@ -400,7 +399,7 @@ public class NodeForward {
             nodeModel.setLoginPwd(model.getLoginPwd());
             nodeModel.setLoginName(model.getLoginName());
         }
-        httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
+        httpRequest.header(Const.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
         httpRequest.header(Const.WORKSPACEID_REQ_HEADER, nodeModel.getWorkspaceId());
         // 取最大的超时时间
         Optional.of(nodeUrl.getTimeOut())
@@ -446,7 +445,7 @@ public class NodeForward {
             nodeModel.setLoginName(model.getLoginName());
         }
         UrlQuery urlQuery = new UrlQuery();
-        urlQuery.add(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
+        urlQuery.add(Const.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
         //
         String optUser = userInfo.getId();
         optUser = URLUtil.encode(optUser);
@@ -491,7 +490,7 @@ public class NodeForward {
         }
         JsonMessage<T> jsonMessage = JSON.parseObject(body, new TypeReference<JsonMessage<T>>() {
         });
-        if (jsonMessage.getCode() == ConfigBean.AUTHORIZE_ERROR) {
+        if (jsonMessage.getCode() == Const.AUTHORIZE_ERROR) {
             throw new AuthorizeException(new JsonMessage<>(jsonMessage.getCode(), jsonMessage.getMsg()));
         }
         return jsonMessage;

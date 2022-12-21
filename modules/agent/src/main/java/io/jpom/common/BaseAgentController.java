@@ -28,7 +28,6 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ProjectInfoService;
-import io.jpom.system.ConfigBean;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -57,7 +56,7 @@ public abstract class BaseAgentController extends BaseJpomController {
      * @return name
      */
     private static String getUserName(HttpServletRequest request) {
-        String name = ServletUtil.getHeaderIgnoreCase(request, ConfigBean.JPOM_SERVER_USER_NAME);
+        String name = ServletUtil.getHeaderIgnoreCase(request, Const.JPOM_SERVER_USER_NAME);
         name = CharsetUtil.convert(name, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.CHARSET_UTF_8);
         name = StrUtil.emptyToDefault(name, StrUtil.DASHED);
         return URLUtil.decode(name, CharsetUtil.CHARSET_UTF_8);
