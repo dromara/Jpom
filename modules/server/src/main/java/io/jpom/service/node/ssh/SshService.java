@@ -26,7 +26,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.ssh.ChannelType;
@@ -43,6 +42,7 @@ import io.jpom.plugin.IWorkspaceEnvPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ConfigBean;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JschUtils;
 import lombok.Lombok;
 import org.springframework.stereotype.Service;
@@ -248,18 +248,13 @@ public class SshService extends BaseWorkspaceService<SshModel> {
             return "没有任何命令";
         }
         Session session = null;
-        InputStream sshExecTemplateInputStream = null;
         Sftp sftp = null;
         try {
             String tempId = SecureUtil.sha1(sshModel.getId() + ArrayUtil.join(command, StrUtil.COMMA));
             File buildSsh = FileUtil.file(ConfigBean.getInstance().getTempPath(), "ssh_temp", tempId + ".sh");
-            String sshExecTemplate;
-            if (ArrayUtil.contains(command, "#disabled-template-auto-evn")) {
-                sshExecTemplate = StrUtil.EMPTY;
-            } else {
-                sshExecTemplateInputStream = ResourceUtil.getStream("classpath:/config_default/execTemplate.sh");
-                sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
-            }
+            InputStream sshExecTemplateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template.sh");
+            String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
+
             StringBuilder stringBuilder = new StringBuilder(sshExecTemplate);
             for (String s : command) {
                 stringBuilder.append(s).append(StrUtil.LF);
@@ -270,9 +265,8 @@ public class SshService extends BaseWorkspaceService<SshModel> {
             session = getSessionByModel(sshModel);
             // 上传文件
             sftp = new Sftp(session, charset, sshModel.timeout());
-            String home = sftp.home();
-            String path = home + "/.jpom/";
-            String destFile = path + IdUtil.fastSimpleUUID() + ".sh";
+            String path = StrUtil.format("{}/.jpom/", sftp.home());
+            String destFile = StrUtil.format("{}{}.sh", path, IdUtil.fastSimpleUUID());
             sftp.mkDirs(path);
             sftp.upload(destFile, buildSsh);
             // 执行命令
@@ -290,7 +284,6 @@ public class SshService extends BaseWorkspaceService<SshModel> {
             }
         } finally {
             IoUtil.close(sftp);
-            IoUtil.close(sshExecTemplateInputStream);
             JschUtil.close(session);
         }
     }

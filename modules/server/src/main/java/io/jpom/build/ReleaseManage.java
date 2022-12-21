@@ -29,7 +29,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.ArrayUtil;
@@ -62,15 +61,18 @@ import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ConfigBean;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -369,40 +371,29 @@ public class ReleaseManage implements Runnable {
      */
     private void localCommand() {
         // 执行命令
-        String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
-        if (ArrayUtil.isEmpty(commands)) {
+        String releaseCommand = this.buildExtraModule.getReleaseCommand();
+        if (StrUtil.isEmpty(releaseCommand)) {
             logRecorder.info("没有需要执行的命令");
             return;
         }
-        String command = StrUtil.EMPTY;
         logRecorder.info(DateUtil.now() + " start exec");
-        InputStream templateInputStream = null;
-        try {
-            templateInputStream = ResourceUtil.getStream("classpath:/config_default/execTemplate." + CommandUtil.SUFFIX);
-            if (templateInputStream == null) {
-                logRecorder.info("系统中没有命令模版");
-                return;
-            }
-            String sshExecTemplate = IoUtil.readUtf8(templateInputStream);
-            StringBuilder stringBuilder = new StringBuilder(sshExecTemplate);
-            // 替换变量
-            this.formatCommand(commands);
-            //
-            stringBuilder.append(ArrayUtil.join(commands, StrUtil.LF));
-            File tempPath = ConfigBean.getInstance().getTempPath();
-            File commandFile = FileUtil.file(tempPath, "build", this.buildExtraModule.getId() + StrUtil.DOT + CommandUtil.SUFFIX);
-            FileUtil.writeUtf8String(stringBuilder.toString(), commandFile);
-            //
-            //			command = SystemUtil.getOsInfo().isWindows() ? StrUtil.EMPTY : CommandUtil.SUFFIX;
-            command = CommandUtil.generateCommand(commandFile, "");
-            //CommandUtil.EXECUTE_PREFIX + StrUtil.SPACE + FileUtil.getAbsolutePath(commandFile);
-            String result = CommandUtil.execSystemCommand(command);
-            logRecorder.info(result);
-        } catch (Exception e) {
-            this.pubLog("执行本地命令异常：" + command, e);
-        } finally {
-            IoUtil.close(templateInputStream);
-        }
+
+
+        File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
+        Map<String, String> envFileMap = FileUtils.readEnvFile(sourceFile, this.buildExtraModule.getAttachEnv());
+        //
+        envFileMap.putAll(buildEnv);
+
+        InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
+        String s1 = IoUtil.readUtf8(templateInputStream);
+        ConfigBean.getInstance()
+            .execScript(s1 + releaseCommand, file -> {
+                try {
+                    return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
+                } catch (IOException | InterruptedException e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            });
     }
 
     /**
