@@ -862,6 +862,9 @@ public class BuildExecuteService {
         private void asyncWebHooks(String type, Object... other) {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             String webhook = buildInfoModel.getWebhook();
+            if (StrUtil.isEmpty(webhook)) {
+                return;
+            }
             IPlugin plugin = PluginFactory.getPlugin("webhook");
             Map<String, Object> map = new HashMap<>(10);
             long triggerTime = SystemClock.now();

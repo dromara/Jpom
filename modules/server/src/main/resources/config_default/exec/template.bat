@@ -21,6 +21,9 @@
 @REM CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 @REM
 
+@REM Mistakenly deleted !!!!!!
+@REM Init script templates for local build, local publish, script templates and other related functions
+
 @echo off
 
 @REM Set environment variables to prevent some servers from failing to taskkill
