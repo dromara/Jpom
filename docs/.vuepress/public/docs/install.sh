@@ -38,12 +38,15 @@ esac
 JPOM_TYPE="$1"
 ARGS="$*"
 module="$2"
+offline=$(echo "$module" | grep "offline")
 
 function errorExit() {
 	msg="$1"
 	echo "$msg" 2>&2
-	# 删除安装命令
-	rm -f "${bin_abs_path}/install.sh"
+	if [ "$offline" == "" ]; then
+		# 删除安装命令
+		rm -f "${bin_abs_path}/install.sh"
+	fi
 	exit 1
 }
 
@@ -242,8 +245,21 @@ else
 	errorExit "不支持的 $url_type 类型,请检查是否填写正确的参数"
 fi
 
-#开始准备安装相关依赖
-checkModule
+fileName="${JPOM_TYPE}.tar.gz"
+
+#开始准备安装相关依赖、判断是否未离线安装
+
+if [ "$offline" == "" ]; then
+	checkModule
+else
+	fileName="$3"
+	if [ "$fileName" == "" ]; then
+		errorExit "请指定离线安装包参数：./install.sh $JPOM_TYPE offline $JPOM_TYPE.tar.gz"
+	fi
+	if [[ ! -f "$fileName" ]]; then
+		errorExit "安装包文件不存在"
+	fi
+fi
 
 jpom_dir=/usr/local/jpom-${url_type}
 # 提示用户安装目录
@@ -293,13 +309,15 @@ if [[ "$temp_result" == "" ]]; then
 	askInstallPath
 fi
 
-if [[ -z "${versions}" ]]; then
-	# 获取最新的版本号
-	versions=$(curl -LfsS https://jpom.top/docs/versions.tag)
-fi
+if [ "$offline" == "" ]; then
+	if [[ -z "${versions}" ]]; then
+		# 获取最新的版本号
+		versions=$(curl -LfsS https://jpom.top/docs/versions.tag)
+	fi
 
-if [[ -z "${versions}" ]]; then
-	errorExit "没有可以的版本号"
+	if [[ -z "${versions}" ]]; then
+		errorExit "没有可以的版本号"
+	fi
 fi
 
 echo "开始安装：${JPOM_TYPE} ${versions}, 安装目录 ${jpom_dir}"
@@ -311,14 +329,14 @@ if [ -f "./bin/${JPOM_TYPE}.sh" ] || [ -f "./${JPOM_TYPE}.sh" ]; then
 fi
 
 # 判断是否存在文件
-if [[ ! -f "${JPOM_TYPE}.tar.gz" ]]; then
+if [[ ! -f "${fileName}" ]]; then
 	download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
-	wget -O "${JPOM_TYPE}.tar.gz" "${download_url}"
+	wget -O "${fileName}" "${download_url}"
 fi
 # 解压
-tar -zxf "${JPOM_TYPE}.tar.gz" -C "${jpom_dir}"
+tar -zxf "${fileName}" -C "${jpom_dir}"
 # 删除安装包
-rm -f "${JPOM_TYPE}.tar.gz"
+rm -f "${fileName}"
 
 shName=""
 if [ -f "./bin/${JPOM_TYPE}.sh" ]; then
@@ -328,8 +346,10 @@ elif [ -f "./${JPOM_TYPE}.sh" ]; then
 else
 	errorExit "没有找到对应的管理命令"
 fi
-# 删除安装命令
-rm -f "${bin_abs_path}/install.sh"
+if [ "$offline" == "" ]; then
+	# 删除安装命令
+	rm -f "${bin_abs_path}/install.sh"
+fi
 # 添加权限
 chmod 755 "$shName"
 # 启动
