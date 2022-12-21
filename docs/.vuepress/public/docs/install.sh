@@ -221,7 +221,17 @@ if [[ "$temp_result" == "" ]]; then
 	askInstallPath
 fi
 
-echo "开始安装：${JPOM_TYPE}  ${versions}, 安装目录 ${jpom_dir}"
+if [[ -z "${versions}" ]]; then
+	# 获取最新的版本号
+	versions=$(curl -LfsS https://jpom.top/docs/versions.tag)
+fi
+
+if [[ -z "${versions}" ]]; then
+	echo "没有可以的版本号" 2>&2
+	exit 1
+fi
+
+echo "开始安装：${JPOM_TYPE} ${versions}, 安装目录 ${jpom_dir}"
 # 创建指定目录
 mkdir -p "${jpom_dir}" && cd "${jpom_dir}" || exit
 
@@ -232,10 +242,6 @@ fi
 
 # 判断是否存在文件
 if [[ ! -f "${JPOM_TYPE}.tar.gz" ]]; then
-	if [[ -z "${versions}" ]]; then
-		# 获取最新的版本号
-		versions=$(curl -LfsS https://jpom.top/docs/versions.tag)
-	fi
 	download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
 	wget -O "${JPOM_TYPE}.tar.gz" "${download_url}"
 fi
