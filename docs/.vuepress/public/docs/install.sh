@@ -176,42 +176,50 @@ previous_dir=$(pwd)
 jpom_dir=/usr/local/jpom-${url_type}
 # 提示用户安装目录
 echo ">>>>>默认安装目录 ${jpom_dir}<<<<<"
-echo "是否使用此目录作为安装目录? "
-echo "需要使用绝对路径 (注意: agent 和 server 不能装到同一个目录!)"
-while (true); do
-	echo "输入 y 确定使用默认路径, 否则请输入安装目录："
-	read -r userInstallPath
-	if [ "$userInstallPath" == "" ]; then
-		continue
-	else
-		if [ "$userInstallPath" == "y" ]; then
-			jpom_dir=$jpom_dir
-			if [ -e "$userInstallPath" ]; then
-				echo "$jpom_dir 目录已经被占用请输入其他路径"
-				continue
-			fi
-			break
+
+function askInstallPath() {
+	echo "是否使用此目录作为安装目录? "
+	echo "需要使用绝对路径 (注意: agent 和 server 不能装到同一个目录!)"
+	while (true); do
+		echo "输入 y 确定使用默认路径, 否则请输入安装目录："
+		read -r userInstallPath
+		if [ "$userInstallPath" == "" ]; then
+			continue
 		else
-			# 检测安装目录是否为空
-			while (true); do
-				if [[ -e "$userInstallPath" ]]; then
-					echo "目录已存在, 你确定继续吗? 输入 y 继续(注意：agent 和 server 不能装到同一个目录!), 否则, 请指定一个新的安装路径："
-					read -r userOption
-					if [[ "$userOption" == "" ]]; then
-						continue
-					fi
-					if [[ "$userOption" == "y" ]]; then
-						jpom_dir=$userInstallPath
-						break
-					else
-						userInstallPath=$userOption
-					fi
+			if [ "$userInstallPath" == "y" ]; then
+				jpom_dir=$jpom_dir
+				if [ -e "$userInstallPath" ]; then
+					echo "$jpom_dir 目录已经被占用请输入其他路径"
+					continue
 				fi
-			done
-			break
+				break
+			else
+				# 检测安装目录是否为空
+				while (true); do
+					if [[ -e "$userInstallPath" ]]; then
+						echo "目录已存在, 你确定继续吗? 输入 y 继续(注意：agent 和 server 不能装到同一个目录!), 否则, 请指定一个新的安装路径："
+						read -r userOption
+						if [[ "$userOption" == "" ]]; then
+							continue
+						fi
+						if [[ "$userOption" == "y" ]]; then
+							jpom_dir=$userInstallPath
+							break
+						else
+							userInstallPath=$userOption
+						fi
+					fi
+				done
+				break
+			fi
 		fi
-	fi
-done
+	done
+}
+
+temp_result=$(echo "$module" | grep "default")
+if [[ "$temp_result" == "" ]]; then
+	askInstallPath
+fi
 
 echo "开始安装：${JPOM_TYPE}  ${versions}, 安装目录 ${jpom_dir}"
 # 创建指定目录
