@@ -33,7 +33,6 @@ import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ExecutorBuilder;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
@@ -69,6 +68,7 @@ import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.AntPathMatcher;
@@ -684,22 +684,33 @@ public class BuildExecuteService {
                 // 容器构建
                 return this.dockerCommand();
             }
-            String[] commands = CharSequenceUtil.splitToArray(buildInfoModel.getScript(), StrUtil.LF);
-            if (commands == null || commands.length <= 0) {
+            if (StrUtil.isEmpty(buildInfoModel.getScript())) {
                 logRecorder.info("没有需要执行的命令");
                 this.buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
                 return false;
             }
-            for (String item : commands) {
-                try {
-                    boolean s = runCommand(item);
-                    if (!s) {
-                        logRecorder.info("命令执行存在error");
-                    }
-                } catch (Exception e) {
-                    logRecorder.error(item + " 执行异常", e);
-                    return false;
-                }
+            Map<String, String> environment = new HashMap<>(10);
+            environment.putAll(taskData.env);
+            // env file
+            Map<String, String> envFileMap = FileUtils.readEnvFile(this.gitFile, this.buildExtraModule.getAttachEnv());
+            environment.putAll(envFileMap);
+            environment.putAll(buildEnv);
+
+            InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
+            String s1 = IoUtil.readUtf8(templateInputStream);
+            try {
+                int waitFor = ConfigBean.getInstance()
+                    .execScript(s1 + buildInfoModel.getScript(), file -> {
+                        try {
+                            return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
+                        } catch (IOException | InterruptedException e) {
+                            throw Lombok.sneakyThrow(e);
+                        }
+                    });
+                logRecorder.info("[INFO] --- PROCESS RESULT " + waitFor);
+            } catch (Exception e) {
+                logRecorder.error("执行异常", e);
+                return false;
             }
             return true;
         }
@@ -828,12 +839,7 @@ public class BuildExecuteService {
             processBuilder.command(commands);
             final boolean[] status = new boolean[1];
             processBuilder.redirectErrorStream(true);
-            Map<String, String> environment = processBuilder.environment();
-            environment.putAll(taskData.env);
-            // env file
-            Map<String, String> envFileMap = FileUtils.readEnvFile(this.gitFile, this.buildExtraModule.getAttachEnv());
-            environment.putAll(envFileMap);
-            environment.putAll(buildEnv);
+
             //
             process = processBuilder.start();
             //
@@ -843,7 +849,7 @@ public class BuildExecuteService {
                 status[0] = true;
             });
             int waitFor = process.waitFor();
-            logRecorder.info("[INFO] --- PROCESS RESULT " + waitFor);
+
             return status[0];
         }
 

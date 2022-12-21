@@ -22,7 +22,10 @@
  */
 package io.jpom.util;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.util.*;
 import cn.hutool.system.SystemUtil;
 import io.jpom.system.ExtConfigBean;
@@ -30,12 +33,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 /**
  * 命令行工具
@@ -293,5 +295,27 @@ public class CommandUtil {
             }
         }
         return false;
+    }
+
+    public static int execWaitFor(File scriptFile, File baseDir, Map<String, String> env, String args, BiConsumer<String, Process> consumer) throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        //
+        List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
+        String script = FileUtil.getAbsolutePath(scriptFile);
+        command.add(0, script);
+        CommandUtil.paddingPrefix(command);
+        log.debug(CollUtil.join(command, StrUtil.SPACE));
+        processBuilder.redirectErrorStream(true);
+        processBuilder.command(command);
+        processBuilder.directory(baseDir);
+        Map<String, String> environment = processBuilder.environment();
+        // 环境变量
+        Optional.ofNullable(env).ifPresent(environment::putAll);
+        //
+        Process process = processBuilder.start();
+        try (InputStream inputStream = process.getInputStream()) {
+            IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> consumer.accept(line, process));
+        }
+        return process.waitFor();
     }
 }

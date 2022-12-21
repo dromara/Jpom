@@ -23,6 +23,8 @@
 package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
@@ -30,10 +32,13 @@ import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
+import io.jpom.util.CommandUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
+import java.io.InputStream;
+import java.util.function.Function;
 
 /**
  * 配置项
@@ -84,6 +89,38 @@ public class ConfigBean {
         String dataPath = FileUtil.normalize(ExtConfigBean.getPath() + StrUtil.SLASH + Const.DATA);
         FileUtil.mkdir(dataPath);
         return dataPath;
+    }
+
+    /**
+     * 执行脚本
+     *
+     * @param inputStream 脚本内容
+     * @param function    回调分发
+     * @param <T>         值类型
+     * @return 返回值
+     */
+    public <T> T execScript(InputStream inputStream, Function<File, T> function) {
+        String sshExecTemplate = IoUtil.readUtf8(inputStream);
+        return this.execScript(sshExecTemplate, function);
+    }
+
+    /**
+     * 执行脚本
+     *
+     * @param context  脚本内容
+     * @param function 回调分发
+     * @param <T>      值类型
+     * @return 返回值
+     */
+    public <T> T execScript(String context, Function<File, T> function) {
+        String dataPath = this.getDataPath();
+        File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
+        FileUtil.writeString(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
+        try {
+            return function.apply(scriptFile);
+        } finally {
+            FileUtil.del(scriptFile);
+        }
     }
 
     /**

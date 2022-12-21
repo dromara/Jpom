@@ -71,14 +71,7 @@ public class Const {
      * 授权信息
      */
     public static final String AUTHORIZE = "agent_authorize.json";
-    /**
-     *
-     */
-    public static final String AUTHORIZE_USER_KEY = "jpom.authorize.agentName";
-    /**
-     *
-     */
-    public static final String AUTHORIZE_AUTHORIZE_KEY = "jpom.authorize.agentPwd";
+
     /**
      * 程序升级信息文件
      */

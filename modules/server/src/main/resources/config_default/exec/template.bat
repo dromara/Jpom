@@ -22,7 +22,6 @@
 @REM
 
 @echo off
-CHCP 65001
 
 @REM Set environment variables to prevent some servers from failing to taskkill
 set PATH = %PATH%;C:\Windows\system32;C:\Windows;C:\Windows\system32\Wbem

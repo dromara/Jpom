@@ -26,7 +26,6 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.setting.yaml.YamlUtil;
-import io.jpom.common.Const;
 import io.jpom.system.extconf.DbExtConfig;
 import org.junit.Test;
 import org.springframework.boot.env.YamlPropertySourceLoader;
@@ -71,7 +70,7 @@ public class TestYml {
         PropertySource<?> propertySource = test.get(0);
         System.out.println(propertySource);
 
-        Object user = propertySource.getProperty(Const.AUTHORIZE_USER_KEY);
-        System.out.println(user);
+//        Object user = propertySource.getProperty(Const.AUTHORIZE_USER_KEY);
+//        System.out.println(user);
     }
 }

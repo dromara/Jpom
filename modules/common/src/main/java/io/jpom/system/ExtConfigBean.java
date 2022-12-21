@@ -33,6 +33,8 @@ import cn.hutool.system.SystemUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
+import io.jpom.util.FileUtils;
+import lombok.Lombok;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -40,6 +42,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.function.Function;
 
@@ -92,6 +96,37 @@ public class ExtConfigBean {
         return configResource;
     }
 
+    /**
+     * 动态获取外部配置文件的 resource
+     *
+     * @return File
+     */
+    public static InputStream getConfigResourceInputStream(String name) {
+        FileUtils.checkSlip(name);
+        String property = SpringUtil.getApplicationContext().getEnvironment().getProperty(ConfigFileApplicationListener.CONFIG_LOCATION_PROPERTY);
+        InputStream inputStream = Opt.ofBlankAble(property)
+            .map((Function<String, InputStream>) s -> {
+                File file = FileUtil.file(s);
+                File configDir = FileUtil.getParent(file, 1);
+                file = FileUtil.file(configDir, name);
+                if (FileUtil.isFile(file)) {
+                    return FileUtil.getInputStream(file);
+                }
+                return null;
+            })
+            .orElseGet(() -> {
+                ClassPathResource classPathResource = new ClassPathResource("/config_default/" + name);
+                Assert.state(classPathResource.exists(), "配置文件不存在");
+                try {
+                    return classPathResource.getInputStream();
+                } catch (IOException e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            });
+        Assert.notNull(inputStream, "均未找到配置文件");
+        return inputStream;
+    }
+
 
     public static String getPath() {
         if (StrUtil.isEmpty(path)) {
@@ -118,6 +153,4 @@ public class ExtConfigBean {
         }
         return path;
     }
-
-
 }

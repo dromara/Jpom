@@ -69,6 +69,14 @@
                 <include>application.yml</include>
             </includes>
         </fileSet>
+        <!--复制执行脚本模板-->
+        <fileSet>
+            <directory>./src/main/resources/config_default/exec/</directory>
+            <outputDirectory>/conf/exec</outputDirectory>
+            <includes>
+                <include>template.*</include>
+            </includes>
+        </fileSet>
         <!--版权文件-->
         <fileSet>
             <directory>../../</directory>

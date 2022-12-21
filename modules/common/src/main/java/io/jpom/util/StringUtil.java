@@ -213,7 +213,7 @@ public class StringUtil {
         String replace = command;
         Set<Map.Entry<String, String>> entries = evn.entrySet();
         for (Map.Entry<String, String> entry : entries) {
-            replace = StrUtil.replace(replace, StrUtil.format("#{{}}", entry.getKey()), entry.getValue());
+            //replace = StrUtil.replace(replace, StrUtil.format("#{{}}", entry.getKey()), entry.getValue());
             replace = StrUtil.replace(replace, StrUtil.format("${{}}", entry.getKey()), entry.getValue());
         }
         return replace;

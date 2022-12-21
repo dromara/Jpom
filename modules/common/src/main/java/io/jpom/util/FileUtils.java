@@ -277,4 +277,13 @@ public class FileUtils {
             throw Lombok.sneakyThrow(function.apply(e));
         }
     }
+
+    /**
+     * 判断目录是否有越级问题
+     *
+     * @param dir 目录
+     */
+    public static void checkSlip(String dir) {
+        checkSlip(dir, e -> new IllegalArgumentException("目录不能越级：" + e.getMessage()));
+    }
 }
