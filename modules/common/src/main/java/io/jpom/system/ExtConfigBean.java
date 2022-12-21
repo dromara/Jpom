@@ -39,6 +39,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,7 +116,8 @@ public class ExtConfigBean {
                 return null;
             })
             .orElseGet(() -> {
-                ClassPathResource classPathResource = new ClassPathResource("/config_default/" + name);
+                String normalize = FileUtil.normalize("/config_default/" + name);
+                ClassPathResource classPathResource = new ClassPathResource(ResourceUtils.CLASSPATH_URL_PREFIX + normalize);
                 Assert.state(classPathResource.exists(), "配置文件不存在");
                 log.debug("外置配置不存在或者未配置：{},使用默认配置", name);
                 try {
