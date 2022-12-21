@@ -807,10 +807,10 @@ public class BuildExecuteService {
                 logRecorder.error("构建失败:" + processName, e);
                 this.asyncWebHooks(processName, "error", e.getMessage());
             } finally {
-                BUILD_MANAGE_MAP.remove(taskData.buildInfoModel.getId());
                 this.asyncWebHooks("done");
                 long allTime = SystemClock.now() - startTime;
                 logRecorder.info("构建结束 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
+                BUILD_MANAGE_MAP.remove(taskData.buildInfoModel.getId());
                 BaseServerController.removeAll();
             }
 //            return false;
