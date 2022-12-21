@@ -58,9 +58,12 @@ import java.util.Map;
 public class AgentCacheManageController extends BaseAgentController {
 
     private final AgentWorkspaceEnvVarService agentWorkspaceEnvVarService;
+    private final ConfigBean configBean;
 
-    public AgentCacheManageController(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService) {
+    public AgentCacheManageController(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService,
+                                      ConfigBean configBean) {
         this.agentWorkspaceEnvVarService = agentWorkspaceEnvVarService;
+        this.configBean = configBean;
     }
 
     /**
@@ -72,11 +75,10 @@ public class AgentCacheManageController extends BaseAgentController {
     public JsonMessage<JSONObject> cache() {
         JSONObject jsonObject = new JSONObject();
         //
-        ConfigBean instance = ConfigBean.getInstance();
-        File file = instance.getTempPath();
+        File file = configBean.getTempPath();
         String fileSize = FileUtil.readableFileSize(FileUtil.size(file));
         jsonObject.put("fileSize", fileSize);
-        jsonObject.put("dataSize", FileUtil.readableFileSize(instance.dataSize()));
+        jsonObject.put("dataSize", FileUtil.readableFileSize(configBean.dataSize()));
         File oldJarsPath = JpomManifest.getOldJarsPath();
         jsonObject.put("oldJarsSize", FileUtil.readableFileSize(FileUtil.size(oldJarsPath)));
         //
@@ -121,7 +123,7 @@ public class AgentCacheManageController extends BaseAgentController {
                 break;
             }
             case "fileSize": {
-                File tempPath = ConfigBean.getInstance().getTempPath();
+                File tempPath = configBean.getTempPath();
                 boolean clean = CommandUtil.systemFastDel(tempPath);
                 Assert.state(!clean, "清空文件缓存失败");
                 break;

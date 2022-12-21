@@ -206,85 +206,20 @@
       </a-form-model>
     </a-modal>
     <!-- 安装节点 -->
-    <a-modal v-model="nodeVisible" width="600px" title="安装节点" @ok="handleEditNodeOk" :maskClosable="false">
-      <a-collapse :defaultActiveKey="['1', '2']">
-        <a-collapse-panel key="1" header="插件端安装包管理">
-          <a-form-model :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-            <a-form-model-item label="安装文件" style="margin-bottom: 0px">
-              <a-row>
-                <a-col :span="8">
-                  <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".zip">
-                    <a-button>
-                      <a-icon type="upload" />
-                      选择文件
-                    </a-button>
-                  </a-upload>
-                </a-col>
-                <a-col :span="6">
-                  <a-button type="primary" :disabled="!fileList || !fileList.length" @click="handleUploadAgent">上传</a-button>
-                </a-col>
-                <a-col :span="8">
-                  <div v-if="agentData">
-                    <a-tooltip :title="`打包时间：${agentData.timeStamp} 文件路径：${agentData.path}`">
-                      当前版本：<a-tag>{{ agentData.version }}</a-tag>
-                    </a-tooltip>
-                  </div>
-                  <div v-else><a-tag color="orange">需要上传</a-tag></div>
-                </a-col>
-              </a-row>
-            </a-form-model-item>
-          </a-form-model>
-        </a-collapse-panel>
-        <a-collapse-panel key="2" header="快速安装">
-          <a-form-model ref="nodeForm" :rules="rules" :model="tempNode" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-            <!-- <a-form-model-item label="节点 ID" prop="id">
-            <a-input v-model="tempNode.id" placeholder="节点 ID" />
-          </a-form-model-item> -->
-            <a-form-model-item label="节点名称" prop="name">
-              <a-input v-model="tempNode.name" placeholder="节点名称" />
-            </a-form-model-item>
-            <a-form-model-item label="节点协议" prop="protocol">
-              <a-select v-model="tempNode.protocol" defaultValue="http" placeholder="节点协议">
-                <a-select-option key="http">HTTP</a-select-option>
-                <a-select-option key="https">HTTPS</a-select-option>
-              </a-select>
-            </a-form-model-item>
-            <a-form-model-item label="节点地址" prop="url">
-              <a-input v-model="tempNode.url" placeholder="节点地址 (127.0.0.1:2123)" />
-            </a-form-model-item>
-            <a-form-model-item label="安装路径" prop="path">
-              <a-input v-model="tempNode.path" placeholder="安装路径" />
-            </a-form-model-item>
-            <a-form-model-item label="脚本权限" prop="chmod">
-              <a-input v-model="tempNode.chmod" placeholder="非 root 状态下，需要给脚本文件添加权限的命令(非阻塞的命令)">
-                <a-tooltip slot="suffix">
-                  <template slot="title">
-                    <div>非 root 状态下，需要给脚本文件添加权限的命令</div>
-                    <div><br /></div>
-                    <div>
-                      例如
-                      <ul>
-                        <li>chmod 755</li>
-                        <li>chmod u=rwx</li>
-                        <li>chmod u+x</li>
-                      </ul>
-                    </div>
-                  </template>
-                  <a-icon type="question-circle" theme="filled" />
-                </a-tooltip>
-              </a-input>
-            </a-form-model-item>
-            <a-form-model-item label="等待次数" prop="waitCount">
-              <a-input v-model="tempNode.waitCount" placeholder="上传插件端后,等待插件端启动成功次数，1次5秒。默认5次" />
-            </a-form-model-item>
-
-            <!-- <template slot="footer">
-              <a-button key="back" @click="nodeVisible = false">Cancel</a-button>
-              <a-button key="submit" type="primary" :loadingg="formLoading" @click="handleEditNodeOk">Ok</a-button>
-            </template> -->
-          </a-form-model>
-        </a-collapse-panel>
-      </a-collapse>
+    <a-modal
+      v-model="nodeVisible"
+      width="80%"
+      title="安装插件端"
+      :footer="null"
+      @cancel="
+        () => {
+          this.nodeVisible = false;
+          this.loadData();
+        }
+      "
+      :maskClosable="false"
+    >
+      <fastInstall v-if="nodeVisible"></fastInstall>
     </a-modal>
     <!-- 文件管理 -->
     <a-drawer :title="drawerTitle" placement="right" width="90vw" :visible="drawerVisible" @close="onClose">
@@ -390,7 +325,7 @@
   </div>
 </template>
 <script>
-import { deleteSsh, editSsh, getAgent, getSshCheckAgent, getSshList, getSshOperationLogList, installAgentNode, syncToWorkspace, uploadAgent } from "@/api/ssh";
+import { deleteSsh, editSsh, getSshCheckAgent, getSshList, getSshOperationLogList, syncToWorkspace } from "@/api/ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
 import { parseTime } from "@/utils/time";
@@ -398,11 +333,13 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/uti
 import { getWorkSpaceListAll } from "@/api/workspace";
 import Vue from "vue";
 import { mapGetters } from "vuex";
+import fastInstall from "@/pages/node/fast-install.vue";
 
 export default {
   components: {
     SshFile,
     Terminal,
+    fastInstall,
   },
   data() {
     return {
@@ -709,97 +646,10 @@ export default {
       });
     },
     // 安装节点
-    install(record) {
-      this.getAgentFn().then(() => {
-        this.temp = Object.assign({}, record);
-        this.tempNode = {
-          url: `${this.temp.host}:2123`,
-          protocol: "http",
-        };
-        //this.agentData = res.data;
-        this.nodeVisible = true;
-        this.formLoading = false;
-        this.$refs["nodeForm"] && this.$refs["nodeForm"].resetFields();
-      });
+    install() {
+      this.nodeVisible = true;
     },
-    getAgentFn() {
-      return new Promise((resolve) => {
-        getAgent().then((res) => {
-          this.agentData = res.data;
-          resolve();
-        });
-      });
-    },
-    // 处理文件移除
-    handleRemove(file) {
-      const index = this.fileList.indexOf(file);
-      const newFileList = this.fileList.slice();
-      newFileList.splice(index, 1);
-      this.fileList = newFileList;
-    },
-    // 准备上传文件
-    beforeUpload(file) {
-      // 只允许上传单个文件
-      this.fileList = [file];
-      return false;
-    },
-    // 上传文件
-    handleUploadAgent() {
-      // 检测文件是否选择了
-      if (this.fileList.length === 0) {
-        this.$notification.error({
-          message: "请选择 zip 文件",
-        });
-        return false;
-      }
-      const formData = new FormData();
-      formData.append("file", this.fileList[0]);
-      uploadAgent(formData).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
-          });
-          this.fileList = [];
-          this.getAgentFn();
-        }
-      });
-    },
-    // 提交节点数据
-    handleEditNodeOk() {
-      // 检验表单
-      this.$refs["nodeForm"].validate((valid) => {
-        if (!valid) {
-          return false;
-        }
 
-        this.formLoading = true;
-        const tempData = {
-          nodeData: JSON.stringify({ ...this.tempNode }),
-          id: this.temp.id,
-          path: this.tempNode.path,
-          waitCount: this.tempNode.waitCount || "",
-          chmod: this.tempNode.chmod || "",
-        };
-        // formData.append("file", this.fileList[0]);
-        // formData.append("id", this.temp.id);
-        // // formData.append(");
-        // formData.append("path", this.tempNode.path);
-        // formData.append("waitCount", this.tempNode.waitCount || "");
-        // formData.append("chmod", this.tempNode.chmod || "");
-        // 提交数据
-        installAgentNode(tempData).then((res) => {
-          if (res.code === 200) {
-            this.$notification.success({
-              message: "操作成功",
-            });
-            //this.$refs['nodeForm'].resetFields();
-            this.nodeVisible = false;
-            this.loadData();
-          }
-          this.formLoading = false;
-        });
-      });
-    },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });

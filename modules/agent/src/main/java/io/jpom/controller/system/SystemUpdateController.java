@@ -56,9 +56,12 @@ import java.util.Objects;
 public class SystemUpdateController extends BaseAgentController {
 
     private final AgentConfig agentConfig;
+    private final ConfigBean configBean;
 
-    public SystemUpdateController(AgentConfig agentConfig) {
+    public SystemUpdateController(AgentConfig agentConfig,
+                                  ConfigBean configBean) {
         this.agentConfig = agentConfig;
+        this.configBean = configBean;
     }
 
     @PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -121,7 +124,7 @@ public class SystemUpdateController extends BaseAgentController {
      */
     @PostMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<Object> upgrade() throws IOException {
-        RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath());
+        RemoteVersion.upgrade(configBean.getTempPath().getAbsolutePath());
         return JsonMessage.success(Const.UPGRADE_MSG);
     }
 }

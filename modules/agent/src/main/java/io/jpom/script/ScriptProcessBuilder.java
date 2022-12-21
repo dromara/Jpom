@@ -34,6 +34,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.model.system.WorkspaceEnvVarModel;
@@ -74,7 +75,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         this.executeId = executeId;
         //
         String dataPath = ConfigBean.getInstance().getDataPath();
-        scriptFile = FileUtil.file(dataPath, ConfigBean.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
+        scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
         FileUtil.writeString(nodeScriptModel.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
         //
         String script = FileUtil.getAbsolutePath(scriptFile);

@@ -48,4 +48,47 @@ public class Const {
      * id 最大长度
      */
     public static final int ID_MAX_LEN = 50;
+
+    /**
+     * 用户名header
+     */
+    public static final String JPOM_SERVER_USER_NAME = "Jpom-Server-UserName";
+
+    public static final String JPOM_AGENT_AUTHORIZE = "Jpom-Agent-Authorize";
+
+    public static final String DATA = "data";
+
+    public static final int AUTHORIZE_ERROR = 900;
+    /**
+     * 脚本模板存放路径
+     */
+    public static final String SCRIPT_DIRECTORY = "script";
+    /**
+     * 脚本默认运行缓存执行文件路径，考虑 windows 文件被占用情况
+     */
+    public static final String SCRIPT_RUN_CACHE_DIRECTORY = "script_run_cache";
+    /**
+     * 授权信息
+     */
+    public static final String AUTHORIZE = "agent_authorize.json";
+    /**
+     *
+     */
+    public static final String AUTHORIZE_USER_KEY = "jpom.authorize.agentName";
+    /**
+     *
+     */
+    public static final String AUTHORIZE_AUTHORIZE_KEY = "jpom.authorize.agentPwd";
+    /**
+     * 程序升级信息文件
+     */
+    public static final String UPGRADE = "upgrade.json";
+    public static final String RUN_JAR = "run.bin";
+    /**
+     * 远程版本信息
+     */
+    public static final String REMOTE_VERSION = "remote_version.json";
+
+    public static final String FILE_NAME = "application.yml";
+
 }

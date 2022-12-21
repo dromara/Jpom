@@ -31,6 +31,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
 import io.jpom.JpomApplication;
+import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.core.io.ClassPathResource;
@@ -50,7 +51,6 @@ import java.util.function.Function;
  */
 public class ExtConfigBean {
 
-    public static final String FILE_NAME = "application.yml";
 
     /**
      *
@@ -85,8 +85,8 @@ public class ExtConfigBean {
             .map(FileSystemResource::new)
             .flatMap((Function<Resource, Opt<Resource>>) resource -> resource.exists() ? Opt.of(resource) : Opt.empty())
             .orElseGet(() -> {
-                ClassPathResource classPathResource = new ClassPathResource(ExtConfigBean.FILE_NAME);
-                return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/" + FILE_NAME);
+                ClassPathResource classPathResource = new ClassPathResource(Const.FILE_NAME);
+                return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/" + Const.FILE_NAME);
             });
         Assert.state(configResource.exists(), "均未找到配置文件");
         return configResource;

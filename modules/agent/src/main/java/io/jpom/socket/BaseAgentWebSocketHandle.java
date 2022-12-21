@@ -28,8 +28,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.Const;
 import io.jpom.system.AgentAuthorize;
-import io.jpom.system.ConfigBean;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -72,7 +72,7 @@ public abstract class BaseAgentWebSocketHandle {
      * @return true 需要结束回话
      */
     public boolean checkAuthorize(Session session) {
-        String authorize = this.getParameters(session, ConfigBean.JPOM_AGENT_AUTHORIZE);
+        String authorize = this.getParameters(session, Const.JPOM_AGENT_AUTHORIZE);
         AgentAuthorize agentAuthorize = SpringUtil.getBean(AgentAuthorize.class);
         boolean ok = agentAuthorize.checkAuthorize(authorize);
         if (!ok) {

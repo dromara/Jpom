@@ -398,7 +398,7 @@ public class JpomManifest {
         if (!runPath.isDirectory()) {
             throw new JpomRuntimeException(runPath.getAbsolutePath() + " error");
         }
-        String upgrade = FileUtil.file(runPath, ConfigBean.UPGRADE).getAbsolutePath();
+        String upgrade = FileUtil.file(runPath, Const.UPGRADE).getAbsolutePath();
         JSONObject jsonObject = null;
         try {
             jsonObject = (JSONObject) JsonFileUtil.readJson(upgrade);
@@ -431,7 +431,7 @@ public class JpomManifest {
         jsonObject.put("upgradeCount", jsonObject.getIntValue("upgradeCount"));
         //
         JsonFileUtil.saveJson(upgrade, jsonObject);
-        FileUtil.writeString(newFile, FileUtil.file(runPath, ConfigBean.RUN_JAR), CharsetUtil.CHARSET_UTF_8);
+        FileUtil.writeString(newFile, FileUtil.file(runPath, Const.RUN_JAR), CharsetUtil.CHARSET_UTF_8);
         if (SystemUtil.getOsInfo().isWindows()) {
             String format = StrUtil.format("stdout_{}.log", System.currentTimeMillis());
             FileUtil.writeString(format, FileUtil.file(runPath, "run.log"), CharsetUtil.CHARSET_UTF_8);

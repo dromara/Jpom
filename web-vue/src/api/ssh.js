@@ -89,57 +89,6 @@ export function deleteSsh(id) {
 }
 
 /**
- * 上传安装文件
- * @param {
- *  file: 文件 multipart/form-data,
- *  id: ssh ID,
- *  nodeData: 节点数据 json 字符串 `{"url":"121.42.160.109:2123","protocol":"http","id":"test","name":"tesst","path":"/seestech"}`,
- *  path: 文件保存的路径
- * } formData
- */
-export function installAgentNode(formData) {
-  return axios({
-    url: "/node/ssh/installAgentSubmit.json",
-    headers: {
-      // "Content-Type": "multipart/form-data;charset=UTF-8",
-    },
-    method: "post",
-    // 0 表示无超时时间
-    timeout: 0,
-    data: formData,
-  });
-}
-/**
- *  获取插件端信息
- * @returns json
- */
-export function getAgent() {
-  return axios({
-    url: "/node/ssh/get_agent.json",
-    headers: {},
-    method: "get",
-  });
-}
-
-/**
- * 上传插件包
- * @param {form} formData
- * @returns
- */
-export function uploadAgent(formData) {
-  return axios({
-    url: "/node/ssh/upload_agent.json",
-    headers: {
-      "Content-Type": "multipart/form-data;charset=UTF-8",
-    },
-    method: "post",
-    // 0 表示无超时时间
-    timeout: 0,
-    data: formData,
-  });
-}
-
-/**
  * 上传文件到 SSH 节点
  * @param {
  *  file: 文件 multipart/form-data,

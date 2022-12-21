@@ -313,6 +313,6 @@ public class RemoteVersion extends BaseJsonModel {
      * @return file
      */
     private static File getFile() {
-        return FileUtil.file(ConfigBean.getInstance().getDataPath(), ConfigBean.REMOTE_VERSION);
+        return FileUtil.file(ConfigBean.getInstance().getDataPath(), Const.REMOTE_VERSION);
     }
 }

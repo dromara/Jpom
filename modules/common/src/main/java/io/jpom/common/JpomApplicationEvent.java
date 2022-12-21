@@ -143,7 +143,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
      */
     private void checkUpdate() {
         File runFile = JpomManifest.getRunPath().getParentFile();
-        String upgrade = FileUtil.file(runFile, ConfigBean.UPGRADE).getAbsolutePath();
+        String upgrade = FileUtil.file(runFile, Const.UPGRADE).getAbsolutePath();
         JSONObject jsonObject = null;
         try {
             jsonObject = (JSONObject) JsonFileUtil.readJson(upgrade);
@@ -215,7 +215,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
      */
     private void success() {
         Type type = JpomManifest.getInstance().getType();
-        int port = ConfigBean.getInstance().getPort();
+        int port = configBean.getPort();
         String localhostStr = NetUtil.getLocalhostStr();
         String url = StrUtil.format("http://{}:{}", localhostStr, port);
         if (type == Type.Server) {
