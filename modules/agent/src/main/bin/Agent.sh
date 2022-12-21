@@ -125,7 +125,7 @@ function checkConfig() {
 			fi
 			echo "specify running：${RUN_JAR}"
 		else
-			RUN_JAR=$(ls -t "${Lib}" | grep '.jar$' | head -1)
+			RUN_JAR=$(find "${Lib}" -type f -name "*.jar" -exec ls -t {} + | head -1 | sed 's#.*/##')
 			# error
 			if [[ -z "${RUN_JAR}" ]]; then
 				echo "Jar not found"
@@ -139,8 +139,8 @@ function checkConfig() {
 function getPid() {
 	if $cygwin; then
 		JAVA_CMD="$JAVA_HOME\bin\java"
-		JAVA_CMD=$(cygpath --path --unix $JAVA_CMD)
-		JAVA_PID=$(ps | grep $JAVA_CMD | awk '{print $1}')
+		JAVA_CMD=$(cygpath --path --unix "$JAVA_CMD")
+		JAVA_PID=$(ps | grep "$JAVA_CMD" | awk '{print $1}')
 	else
 		if $linux; then
 			JAVA_PID=$(ps -C java -f --width 1000 | grep "$PID_TAG" | grep -v grep | awk '{print $2}')
@@ -167,7 +167,9 @@ function start() {
 		touch "$agent_log"
 	fi
 	# start
-	${JAVA} -Djpom.application.tag=${PID_TAG} ${JAVA_OPTS} -jar ${Lib}${RUN_JAR} ${MAIN_ARGS} >$Log 2>&1 &
+	command="${JAVA} -Djpom.application.tag=${PID_TAG} ${JAVA_OPTS} -jar ${Lib}${RUN_JAR} ${MAIN_ARGS} >$Log 2>&1 &"
+	echo "$command" >>"$Log"
+	eval "$command"
 	echo $! >"$pidfile"
 
 	pid=$(cat "$pidfile")
@@ -182,8 +184,8 @@ function start() {
 function stop() {
 	pid=$(getPid)
 	killMode=""
-	if [ "${mode}" == "upgrade" ]; then
-		#	Compatible with online upgrade ./Agent.sh restart upgrade
+	if [ "${mode}" == "-s" ] || [ "${mode}" == "upgrade" ]; then
+		#	Compatible with online upgrade ./Agent.sh restart upgrade or ./Agent.sh restart -s
 		killMode=""
 	else
 		killMode=${mode}
@@ -204,13 +206,13 @@ function stop() {
 				echo "Stop and end, in $LOOPS seconds"
 				break
 			fi
-			let LOOPS=LOOPS+1
+			((LOOPS++)) || true
 			sleep 1
 		done
 	else
 		echo "jpom agent is stopped"
 	fi
-	$(rm -f $pidfile)
+	eval "$(rm -f "$pidfile")"
 }
 
 function status() {
