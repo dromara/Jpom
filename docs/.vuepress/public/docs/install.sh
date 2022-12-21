@@ -79,7 +79,7 @@ function installJdkFn() {
 
 			download_url=$(curl -s https://gitee.com/dromara/Jpom/raw/download_link/jdk/8/${ARCH})
 
-			curl -LfSo jdk.tar.gz "${download_url}" --no-check-certificate
+			curl -LfSo jdk.tar.gz "${download_url}"
 			mkdir -p /usr/java/
 			#
 			jdk_name=$(tar -tf jdk.tar.gz | grep 'jdk' | head -1)

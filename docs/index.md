@@ -211,10 +211,15 @@ notices: # 可选的
 
 默认端口：`2123`
 
+如果服务器中没有 jdk 会自动安装 jdk8
+
 <code-group>
   <code-block title="centos" active>
 ```bash
-# 如果服务器中没有 jdk 会自动安装 jdk-8u251
+# 一键安装 使用默认的安装路径
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Agent jdk+default
+
+# 自定义安装路径
 yum install -y wget && \
 wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Agent jdk
@@ -223,7 +228,10 @@ bash install.sh Agent jdk
 
   <code-block title="ubuntu">
 ```bash
-# 如果服务器中没有 jdk 会自动安装 jdk-8u251
+# 一键安装 使用默认的安装路径
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Agent jdk+default
+
+# 自定义安装路径
 apt install -y wget && \
 wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Agent jdk
@@ -236,10 +244,15 @@ bash install.sh Agent jdk
 
 默认端口：`2122`
 
+如果服务器中没有 jdk 会自动安装 jdk8
+
 <code-group>
   <code-block title="centos" active>
 ```bash
-# 如果服务器中没有 jdk 会自动安装 jdk-8u251
+# 一键安装 使用默认的安装路径
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Server jdk+default
+
+# 自定义安装路径
 yum install -y wget && \
 wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk
@@ -248,7 +261,10 @@ bash install.sh Server jdk
 
   <code-block title="ubuntu">
 ```bash
-# 如果服务器中没有 jdk 会自动安装 jdk-8u251
+# 一键安装 使用默认的安装路径
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Server jdk+default
+
+# 自定义安装路径
 apt install -y wget && \
 wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk
@@ -257,6 +273,7 @@ bash install.sh Server jdk
 
 <code-block title="docker">
 ```bash
+# 此方式未挂载数据目录（不推荐）
 docker run -p 2122:2122 --name jpom jpomdocker/jpom
 ```
   </code-block>
