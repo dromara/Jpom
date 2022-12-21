@@ -307,7 +307,8 @@ public class CommandUtil {
         log.debug(CollUtil.join(command, StrUtil.SPACE));
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
-        processBuilder.directory(baseDir);
+        Optional.ofNullable(baseDir).ifPresent(processBuilder::directory);
+
         Map<String, String> environment = processBuilder.environment();
         // 环境变量
         Optional.ofNullable(env).ifPresent(environment::putAll);

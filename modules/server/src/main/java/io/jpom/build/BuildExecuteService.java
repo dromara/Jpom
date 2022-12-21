@@ -29,7 +29,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
@@ -823,37 +822,6 @@ public class BuildExecuteService {
 //		}
 
         /**
-         * 执行命令
-         *
-         * @param command 命令
-         * @return 是否存在错误
-         * @throws IOException IO
-         */
-        private boolean runCommand(String command) throws IOException, InterruptedException {
-            logRecorder.info("[INFO] --- EXEC COMMAND {}", command);
-            //
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.directory(this.gitFile);
-            List<String> commands = CommandUtil.getCommand();
-            commands.add(command);
-            processBuilder.command(commands);
-            final boolean[] status = new boolean[1];
-            processBuilder.redirectErrorStream(true);
-
-            //
-            process = processBuilder.start();
-            //
-            InputStream inputStream = process.getInputStream();
-            IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> {
-                logRecorder.info(line);
-                status[0] = true;
-            });
-            int waitFor = process.waitFor();
-
-            return status[0];
-        }
-
-        /**
          * 执行 webhooks 通知
          *
          * @param type  类型
@@ -861,10 +829,7 @@ public class BuildExecuteService {
          */
         private void asyncWebHooks(String type, Object... other) {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
-            String webhook = buildInfoModel.getWebhook();
-            if (StrUtil.isEmpty(webhook)) {
-                return;
-            }
+
             IPlugin plugin = PluginFactory.getPlugin("webhook");
             Map<String, Object> map = new HashMap<>(10);
             long triggerTime = SystemClock.now();
@@ -875,17 +840,19 @@ public class BuildExecuteService {
             map.put("type", type);
             map.put("triggerBuildType", taskData.triggerBuildType);
             map.put("triggerTime", triggerTime);
+            map.put("buildResultFile", BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), this.taskData.buildInfoModel.getBuildId(), buildExtraModule.getResultDirFile()));
             //
             for (int i = 0; i < other.length; i += 2) {
                 map.put(other[i].toString(), other[i + 1]);
             }
-            ThreadUtil.execute(() -> {
+            String webhook = buildInfoModel.getWebhook();
+            Opt.ofBlankAble(webhook).ifPresent(s -> ThreadUtil.execute(() -> {
                 try {
-                    plugin.execute(webhook, map);
+                    plugin.execute(s, map);
                 } catch (Exception e) {
                     log.error("WebHooks 调用错误", e);
                 }
-            });
+            }));
             // 执行对应的事件脚本
             try {
                 this.noticeScript(type, map);
@@ -913,41 +880,36 @@ public class BuildExecuteService {
             }
             // 判断是否包含需要执行的事件
             if (!StrUtil.contains(scriptModel.getDescription(), type)) {
+                log.warn("忽略执行事件脚本 {} {} {}", type, scriptModel.getName(), noticeScriptId);
                 return;
             }
             logRecorder.info("[INFO] --- EXEC NOTICESCRIPT {}", type);
+            // 环境变量
+            Map<String, String> environment = new HashMap<>(map.size());
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object value = entry.getValue();
+                if (value == null) {
+                    continue;
+                }
+                environment.put(entry.getKey(), StrUtil.toStringOrNull(value));
+            }
             ScriptExecuteLogModel logModel = buildExecuteService.scriptExecuteLogServer.create(scriptModel, 1);
             File logFile = scriptModel.logFile(logModel.getId());
             File scriptFile = null;
             try (LogRecorder scriptLog = LogRecorder.builder().file(logFile).build()) {
                 // 创建执行器
                 scriptFile = scriptModel.scriptFile();
-                //
-                String script = FileUtil.getAbsolutePath(scriptFile);
-                ProcessBuilder processBuilder = new ProcessBuilder();
-                List<String> command = StrUtil.splitTrim(type, StrUtil.SPACE);
-                command.add(0, script);
-                CommandUtil.paddingPrefix(command);
-                log.debug(CollUtil.join(command, StrUtil.SPACE));
-                processBuilder.redirectErrorStream(true).command(command).directory(scriptFile.getParentFile());
-                // 环境变量
-                Map<String, String> environment = processBuilder.environment();
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    Object value = entry.getValue();
-                    if (value == null) {
-                        continue;
+                int waitFor = ConfigBean.getInstance().execScript(scriptModel.getContext(), file -> {
+                    try {
+                        return CommandUtil.execWaitFor(file, null, environment, null, (s, process) -> {
+                            logRecorder.info(s);
+                            scriptLog.info(s);
+                        });
+                    } catch (IOException | InterruptedException e) {
+                        throw Lombok.sneakyThrow(e);
                     }
-                    environment.put(entry.getKey(), StrUtil.toStringOrNull(value));
-                }
-                Process process = processBuilder.start();
-                //
-                InputStream inputStream = process.getInputStream();
-                IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> {
-                    logRecorder.info(line);
-                    scriptLog.info(line);
                 });
-                int waitFor = process.waitFor();
-                logRecorder.info("[INFO] --- NOTICESCRIPT PROCESS RESULT " + waitFor);
+                logRecorder.info("[INFO] {} --- NOTICESCRIPT PROCESS RESULT {}", type, waitFor);
             } finally {
                 if (scriptFile != null) {
                     try {
