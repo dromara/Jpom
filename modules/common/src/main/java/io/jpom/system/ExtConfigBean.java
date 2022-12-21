@@ -23,18 +23,17 @@
 package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.system.SystemUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.util.FileUtils;
 import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -53,6 +52,7 @@ import java.util.function.Function;
  * @author jiangzeyin
  * @since 2019/4/16
  */
+@Slf4j
 public class ExtConfigBean {
 
 
@@ -117,6 +117,7 @@ public class ExtConfigBean {
             .orElseGet(() -> {
                 ClassPathResource classPathResource = new ClassPathResource("/config_default/" + name);
                 Assert.state(classPathResource.exists(), "配置文件不存在");
+                log.debug("外置配置不存在或者未配置：{},使用默认配置", name);
                 try {
                     return classPathResource.getInputStream();
                 } catch (IOException e) {
@@ -132,15 +133,8 @@ public class ExtConfigBean {
         if (StrUtil.isEmpty(path)) {
             if (JpomManifest.getInstance().isDebug()) {
                 // 调试模式 为根路径的 jpom文件
-                String oldPath = ((SystemUtil.getOsInfo().isMac() ? "~" : "") + "/jpom/" + JpomApplication.getAppType().name() + StrUtil.SLASH).toLowerCase();
                 File newFile = FileUtil.file(FileUtil.getUserHomeDir(), "jpom", JpomApplication.getAppType().name().toLowerCase());
-                String absolutePath = FileUtil.getAbsolutePath(newFile);
-                if (FileUtil.exist(oldPath) && !FileUtil.equals(newFile, FileUtil.file(oldPath))) {
-                    FileUtil.move(FileUtil.file(oldPath), newFile, true);
-                    Console.log("数据目录位置发生变化：{} => {}", oldPath, absolutePath);
-                }
-                //Console.log("本地运行存储的数据：{}", absolutePath);
-                path = absolutePath;
+                path = FileUtil.getAbsolutePath(newFile);
             } else {
                 // 获取当前项目运行路径的父级
                 File file = JpomManifest.getRunPath();

@@ -45,7 +45,7 @@ public class DefaultWebhookPluginImpl implements IDefaultPlugin {
 
     @Override
     public Object execute(Object main, Map<String, Object> parameter) {
-        String webhook = StrUtil.toString(main);
+        String webhook = StrUtil.toStringOrNull(main);
         if (StrUtil.isEmpty(webhook)) {
             return null;
         }
