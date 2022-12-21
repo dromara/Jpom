@@ -796,10 +796,7 @@ public class BuildExecuteService {
                     File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), taskData.buildInfoModel.getBuildId(), StrUtil.SLASH);
                     CommandUtil.systemFastDel(historyPackageFile);
                 }
-                long allTime = SystemClock.now() - startTime;
-                logRecorder.info("构建结束 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
                 this.asyncWebHooks("success");
-//                return true;
             } catch (RuntimeException runtimeException) {
                 buildExecuteService.updateStatus(taskData.buildInfoModel.getId(), this.logId, BuildStatus.Error);
                 Throwable cause = runtimeException.getCause();
@@ -812,6 +809,8 @@ public class BuildExecuteService {
             } finally {
                 BUILD_MANAGE_MAP.remove(taskData.buildInfoModel.getId());
                 this.asyncWebHooks("done");
+                long allTime = SystemClock.now() - startTime;
+                logRecorder.info("构建结束 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
                 BaseServerController.removeAll();
             }
 //            return false;
