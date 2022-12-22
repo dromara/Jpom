@@ -2,12 +2,17 @@
 
 ## 2.10.3 (2022-12-22)
 
+### 🐣 新增功能
+
+1. 【server】新增 在线构建新增 `packageFile` 流程 编译 webhook 或者事件脚本调用
+
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 快速导入节点工作空间id `undefined`
 2. 【server】修复 本地运行脚本默认找不到的情况
 3. 【agent】优化 项目控制台日志文件默认编码格式判断系统 windows 默认 GBK,其他默认 UTF-8
    （感谢 [@gf_666](https://gitee.com/gf_666) [Gitee issues I66ZZZ](https://gitee.com/dromara/Jpom/issues/I66ZZZ) ）
+4. 【server】优化 在线构建 ssh 清空产物异常不标记发布异常
 
 ### ⚠️ 注意
 

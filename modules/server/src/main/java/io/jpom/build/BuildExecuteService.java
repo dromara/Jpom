@@ -719,30 +719,24 @@ public class BuildExecuteService {
          *
          * @return false 执行需要结束
          */
-        private boolean packageRelease() {
+        private boolean release() {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             UserModel userModel = taskData.userModel;
-            boolean status = packageFile();
-            if (!status) {
-                // 没有构建产物，将状态传递到后续流程
-                return false;
+
+            // 发布文件
+            ReleaseManage releaseManage = ReleaseManage.builder()
+                .buildNumberId(buildInfoModel.getBuildId())
+                .buildExtraModule(buildExtraModule)
+                .userModel(userModel)
+                .logId(logId)
+                .buildEnv(buildEnv)
+                .buildExecuteService(buildExecuteService)
+                .logRecorder(logRecorder).build();
+            try {
+                return releaseManage.start();
+            } catch (Exception e) {
+                throw Lombok.sneakyThrow(e);
             }
-            if (buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
-                // 发布文件
-                ReleaseManage releaseManage = ReleaseManage.builder()
-                    .buildNumberId(buildInfoModel.getBuildId())
-                    .buildExtraModule(buildExtraModule)
-                    .userModel(userModel)
-                    .logId(logId)
-                    .buildEnv(buildEnv)
-                    .buildExecuteService(buildExecuteService)
-                    .logRecorder(logRecorder).build();
-                releaseManage.start();
-            } else {
-                //
-                buildExecuteService.updateStatus(buildInfoModel.getId(), logId, BuildStatus.Success);
-            }
-            return true;
         }
 
         /**
@@ -751,7 +745,11 @@ public class BuildExecuteService {
          * @return 流程执行是否成功
          */
         private boolean finish() {
-            buildExecuteService.updateLastCommitId(taskData.buildInfoModel.getId(), taskData.repositoryLastCommitId);
+            BuildInfoModel buildInfoModel1 = taskData.buildInfoModel;
+            buildExecuteService.updateLastCommitId(buildInfoModel1.getId(), taskData.repositoryLastCommitId);
+            //
+            BuildStatus buildStatus = buildInfoModel1.getReleaseMethod() != BuildReleaseMethod.No.getCode() ? BuildStatus.PubSuccess : BuildStatus.Success;
+            buildExecuteService.updateStatus(buildInfoModel1.getId(), this.logId, buildStatus);
             return true;
         }
 
@@ -764,7 +762,8 @@ public class BuildExecuteService {
             suppliers.put("startReady", BuildInfoManage.this::startReady);
             suppliers.put("pull", BuildInfoManage.this::pull);
             suppliers.put("executeCommand", BuildInfoManage.this::executeCommand);
-            suppliers.put("release", BuildInfoManage.this::packageRelease);
+            suppliers.put("packageFile", BuildInfoManage.this::packageFile);
+            suppliers.put("release", BuildInfoManage.this::release);
             suppliers.put("finish", BuildInfoManage.this::finish);
             // 依次执行流程，发生异常结束整个流程
             String processName = StrUtil.EMPTY;
