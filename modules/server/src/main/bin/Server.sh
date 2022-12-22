@@ -22,32 +22,45 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-# description: Auto-starts boot
+# description: Auto-starts jpom server
 
-case "$(uname)" in
-Linux)
-	bin_abs_path=$(readlink -f "$(dirname "$0")")
-	;;
-*)
-	bin_abs_path=$(
-		cd "$(dirname "$0")" || exit
-		pwd
-	)
-	;;
-esac
+function absPath() {
+	dir="$1"
+	case "$(uname)" in
+	Linux)
+		abs_path=$(readlink -f "$dir")
+		;;
+	*)
+		abs_path=$(
+			cd "$dir" || exit
+			pwd
+		)
+		;;
+	esac
+	#
+	echo "$abs_path"
+}
 
-cygwin=false
-linux=false
-case "$(uname)" in
-CYGWIN*)
-	cygwin=true
-	;;
-Linux*)
-	linux=true
-	;;
-esac
+function errorExit() {
+	echo "$1" 2>&2
+	if [ "${mode}" == "-s" ]; then
+		logStdout "$1"
+	fi
+	exit 1
+}
 
-base=${bin_abs_path}/..
+function logStdout() {
+	#		out stdout
+	if [ ! -f "$Log" ]; then
+		touch "$Log"
+	fi
+	echo "$1" >"$Log"
+}
+
+bin_abs_path=$(absPath "$(dirname "$0")")
+bin_abs_name=$(absPath "$0")
+base=$(absPath "$bin_abs_path/../")
+serverFile="/etc/systemd/system/jpom-server.service"
 
 conf_path="${base}/conf"
 Lib="${base}/lib/"
@@ -57,8 +70,6 @@ logback_configurationFile="${conf_path}/logback.xml"
 application_conf="${conf_path}/application.yml"
 pidfile="$base/bin/server.pid"
 
-export JPOM_LOG=${LogPath}
-
 PID_TAG="JPOM_SERVER_APPLICATION"
 server_log="${LogPath}/server.log"
 
@@ -67,8 +78,7 @@ if [ -z "$JAVA" ]; then
 	JAVA=$(which java)
 fi
 if [ -z "$JAVA" ]; then
-	echo "Cannot find a Java JDK. Please set either set JAVA or put java (>=1.8) in your PATH." 2>&2
-	exit 1
+	errorExit "Cannot find a Java JDK. Please set either set JAVA or put java (>=1.8) in your PATH."
 fi
 
 JavaVersion=$($JAVA -version 2>&1 | awk 'NR==1{ gsub(/"/,""); print $3 }' | awk -F '.' '{print $1}')
@@ -101,7 +111,7 @@ JAVA_OPTS=" $JAVA_OPTS -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true 
 JAVA_OPTS="${JAVA_OPTS} -Dlogging.config=$logback_configurationFile -Dspring.config.location=$application_conf"
 
 MAIN_ARGS="$*"
-
+action="$1"
 # mode -s -9
 mode="$2"
 
@@ -112,31 +122,40 @@ function checkConfig() {
 		mkdir -p "$LogPath"
 	fi
 	if [[ ! -f "$logback_configurationFile" ]] || [[ ! -f "$application_conf" ]]; then
-		echo "Cannot find $application_conf or $logback_configurationFile"
-		exit 1
+		errorExit "Cannot find $application_conf or $logback_configurationFile"
 	fi
 
 	if [[ -z "${RUN_JAR}" ]]; then
 		if [ -f "$Lib/run.bin" ]; then
 			RUN_JAR=$(cat "$Lib/run.bin")
 			if [ ! -f "$Lib/$RUN_JAR" ]; then
-				echo "Cannot find $Lib/$RUN_JAR jar" 2>&2
-				exit 1
+				errorExit "Cannot find $Lib/$RUN_JAR jar"
 			fi
 			echo "specify running：${RUN_JAR}"
 		else
 			RUN_JAR=$(find "${Lib}" -type f -name "*.jar" -exec ls -t {} + | head -1 | sed 's#.*/##')
 			# error
 			if [[ -z "${RUN_JAR}" ]]; then
-				echo "Jar not found"
-				exit 2
+				errorExit "Jar not found"
 			fi
 			echo "automatic running：${RUN_JAR}"
 		fi
 	fi
+
+	export JPOM_LOG=${LogPath}
 }
 
 function getPid() {
+	cygwin=false
+	linux=false
+	case "$(uname)" in
+	CYGWIN*)
+		cygwin=true
+		;;
+	Linux*)
+		linux=true
+		;;
+	esac
 	if $cygwin; then
 		JAVA_CMD="$JAVA_HOME\bin\java"
 		JAVA_CMD=$(cygpath --path --unix "$JAVA_CMD")
@@ -159,7 +178,7 @@ function start() {
 	#echo "$pid"
 	if [ "$pid" != "" ]; then
 		echo "Running, please do not run repeatedly:$pid"
-		exit 1
+		exit 0
 	fi
 	checkConfig
 
@@ -169,7 +188,9 @@ function start() {
 	# start
 	command="${JAVA} -Djpom.application.tag=${PID_TAG} ${JAVA_OPTS} -jar ${Lib}${RUN_JAR} ${MAIN_ARGS}"
 	echo "$command" >"$Log"
-	eval "$command" >>"$Log" 2>&1 &
+
+	eval "nohup $command >>$Log 2>&1 &"
+
 	echo $! >"$pidfile"
 
 	pid=$(cat "$pidfile")
@@ -193,7 +214,7 @@ function stop() {
 	if [ "$pid" != "" ]; then
 		echo -n "jpom server ( pid $pid) is running"
 		echo
-		echo -n $"Shutting down (kill $mode $pid) jpom server: "
+		echo -n $"Shutting down (kill $killMode $pid) jpom server: "
 		if [ "$killMode" == "" ]; then
 			kill "$pid"
 		else
@@ -224,31 +245,160 @@ function status() {
 		echo "jpom server is stopped"
 	fi
 }
+command_exists() {
+	command -v "$@" >/dev/null 2>&1
+}
+
+function service() {
+	#
+	user="$(id -un 2>/dev/null || true)"
+	user_group="$(id -gn 2>/dev/null || true)"
+
+	sh_c='sh -c'
+	exec_user=""
+	if [ "$user" != 'root' ]; then
+		if command_exists sudo; then
+			sh_c='sudo -E sh -c'
+		elif command_exists su; then
+			sh_c='su -c'
+		else
+			cat >&2 <<-'EOF'
+				Error: this installer needs the ability to run commands as root.
+				We are unable to find either "sudo" or "su" available to make this happen.
+			EOF
+			exit 1
+		fi
+		exec_user="$user"
+	fi
+
+	case "$mode" in
+	install)
+		install
+		;;
+	uninstall)
+		uninstall
+		;;
+	reinstall)
+		uninstall
+		echo "--------------------------------------"
+		install
+		;;
+	*)
+		echo "Usage: $0 service {install|uninstall|reinstall}" 2>&2
+		exit 1
+		;;
+	esac
+}
+
+function install() {
+
+	if [ -f "$serverFile" ]; then
+		echo "service file already exists" 2>&2
+		exit 2
+	fi
+	if [ -z "$JAVA_HOME" ]; then
+		echo "JAVA_HOME variable not found" 2>&2
+		exit 2
+	fi
+	if [ -z "$CLASSPATH" ]; then
+		echo "CLASSPATH variable not found" 2>&2
+		exit 2
+	fi
+
+	$sh_c "cat >$serverFile" <<EOF
+[Unit]
+Description=jpom server service
+After=network.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+Environment="JAVA_HOME=$JAVA_HOME"
+Environment="PATH=$PATH"
+Environment="CLASSPATH=$CLASSPATH"
+ExecStart=/bin/bash $bin_abs_name start -s
+ExecStop=/bin/bash $bin_abs_name stop
+ExecReload=/bin/bash $bin_abs_name restart
+User=$exec_user
+Group=$user_group
+PIDFile=$pidfile
+
+[Install]
+WantedBy=multi-user.target
+EOF
+	if [ ! -f "$serverFile" ]; then
+		cat >&2 <<-'EOF'
+			ERROR: jpom-server.service write failed Installing the service requires the ability to run commands as root.
+		EOF
+		exit 1
+	fi
+
+	echo "jpom-server.service write success :$serverFile"
+
+	$sh_c 'systemctl daemon-reload'
+	$sh_c 'systemctl start jpom-server'
+	cat >&2 <<-'EOF'
+		INFO: You can execute the following commands to manage jpom-server.service.
+		INFO: systemctl start jpom-server.service　(Start the jpom service )
+		INFO: systemctl stop jpom-server.service　(Stop the jpom service)
+		INFO: systemctl enable jpom-server.service (Set up autostart)
+		INFO: systemctl disable jpom-server.service (stop autostart)
+		INFO: systemctl status jpom-server.service (View the current status of the jpom service)
+		INFO: systemctl restart jpom-server.service　(Restart the jpom service）
+	EOF
+}
+
+function uninstall() {
+	if [ -f "$serverFile" ]; then
+		$sh_c 'systemctl disable jpom-server.service'
+		$sh_c 'systemctl stop jpom-server.service'
+		$sh_c "rm -f $serverFile"
+		if [ -f "$serverFile" ]; then
+			cat >&2 <<-'EOF'
+				ERROR: jpom-server.service write uninstall .
+			EOF
+			exit 1
+		fi
+		echo "jpom-server.service uninstalled successfully"
+		$sh_c 'systemctl daemon-reload'
+	else
+		echo "$serverFile not found"
+	fi
+}
 
 function usage() {
-	echo "Usage: $0 {start|stop|restart|status}"
+	echo "Usage: $0 {start|stop|restart|status|service(install|uninstall|reinstall)}" 2>&2
 	RETVAL="2"
 }
 
 # See how we were called.
 RETVAL="0"
-case "$1" in
-start)
-	start
-	;;
-stop)
-	stop
-	;;
-restart)
-	stop
-	start
-	;;
-status)
-	status
-	;;
-*)
-	usage
-	;;
-esac
+
+function execAction() {
+	case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	status)
+		status
+		;;
+	service)
+		service
+		;;
+	*)
+		usage
+		;;
+	esac
+}
+
+execAction "$action"
 
 exit $RETVAL
