@@ -95,3 +95,7 @@ git config --global user.name "bwcx_jzy"
 git config --global user.email bwcx_jzy@163.com 
 git config --global core.autocrlf false
 ```
+
+```shell
+chmod 600 ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
+```
