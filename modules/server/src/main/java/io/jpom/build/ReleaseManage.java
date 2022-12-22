@@ -163,39 +163,38 @@ public class ReleaseManage implements Runnable {
     /**
      * 不修改为发布中状态
      */
-    public void start() {
+    public boolean start() throws IOException {
         init();
-        updateStatus(BuildStatus.PubIng);
+        this.updateStatus(BuildStatus.PubIng);
         logRecorder.info("start release：" + FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
         if (!this.resultFile.exists()) {
             logRecorder.info("不存在构建产物");
-            updateStatus(BuildStatus.PubError);
-            return;
+            return false;
         }
         long time = SystemClock.now();
         int releaseMethod = this.buildExtraModule.getReleaseMethod();
         logRecorder.info("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
-        try {
-            if (releaseMethod == BuildReleaseMethod.Outgiving.getCode()) {
-                //
-                this.doOutGiving();
-            } else if (releaseMethod == BuildReleaseMethod.Project.getCode()) {
-                this.doProject();
-            } else if (releaseMethod == BuildReleaseMethod.Ssh.getCode()) {
-                this.doSsh();
-            } else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
-                this.localCommand();
-            } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
-                this.doDockerImage();
-            } else {
-                logRecorder.info(" 没有实现的发布分发:" + releaseMethod);
-            }
-        } catch (Exception e) {
-            this.pubLog("发布异常", e);
-            return;
+
+        if (releaseMethod == BuildReleaseMethod.Outgiving.getCode()) {
+            //
+            this.doOutGiving();
+        } else if (releaseMethod == BuildReleaseMethod.Project.getCode()) {
+            this.doProject();
+        } else if (releaseMethod == BuildReleaseMethod.Ssh.getCode()) {
+            this.doSsh();
+        } else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
+            this.localCommand();
+        } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
+            this.doDockerImage();
+        } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
+            return true;
+        } else {
+            logRecorder.info(" 没有实现的发布分发:" + releaseMethod);
+            return false;
         }
         logRecorder.info("release complete : " + DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
-        updateStatus(BuildStatus.PubSuccess);
+
+        return true;
     }
 
 
@@ -297,7 +296,7 @@ public class ReleaseManage implements Runnable {
                 logRecorder.info("没有可用的 docker server");
                 return;
             }
-            String dockerBuildArgs = this.buildExtraModule.getDockerBuildArgs();
+            //String dockerBuildArgs = this.buildExtraModule.getDockerBuildArgs();
             for (DockerInfoModel infoModel : dockerInfoModels) {
                 this.doDockerImage(infoModel, dockerfile, baseDir, dockerTag, this.buildExtraModule);
             }
@@ -342,6 +341,7 @@ public class ReleaseManage implements Runnable {
             plugin.execute("updateServiceImage", pluginMap);
         } catch (Exception e) {
             logRecorder.error("更新容器服务调用容器异常", e);
+            throw Lombok.sneakyThrow(e);
         }
     }
 
@@ -399,7 +399,7 @@ public class ReleaseManage implements Runnable {
     /**
      * ssh 发布
      */
-    private void doSsh() {
+    private void doSsh() throws IOException {
         String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
         SshService sshService = SpringUtil.getBean(SshService.class);
         List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
@@ -413,7 +413,7 @@ public class ReleaseManage implements Runnable {
         }
     }
 
-    private void doSsh(SshModel item, SshService sshService) {
+    private void doSsh(SshModel item, SshService sshService) throws IOException {
         Session session = SshService.getSessionByModel(item);
         try {
             String releasePath = this.buildExtraModule.getReleasePath();
@@ -429,10 +429,12 @@ public class ReleaseManage implements Runnable {
                     String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
                     if (this.buildExtraModule.isClearOld()) {
                         try {
-                            sftp.delDir(normalizePath);
+                            if (sftp.exist(normalizePath)) {
+                                sftp.delDir(normalizePath);
+                            }
                         } catch (Exception e) {
                             if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
-                                this.pubLog("清除构建产物失败", e);
+                                logRecorder.error("清除构建产物失败", e);
                             }
                         }
                     }
@@ -454,12 +456,8 @@ public class ReleaseManage implements Runnable {
         this.formatCommand(commands);
         //
         logRecorder.info("{} {} start exec", DateUtil.now(), item.getName());
-        try {
-            String s = sshService.exec(item, commands);
-            logRecorder.info(s);
-        } catch (Exception e) {
-            this.pubLog(item.getName() + " 执行异常", e);
-        }
+        String s = sshService.exec(item, commands);
+        logRecorder.info(s);
     }
 
     /**
@@ -588,24 +586,19 @@ public class ReleaseManage implements Runnable {
         logRecorder.info("开始执行分发包啦,请到分发中查看当前状态");
     }
 
-
-    /**
-     * 发布异常日志
-     *
-     * @param title     描述
-     * @param throwable 异常
-     */
-    private void pubLog(String title, Throwable throwable) {
-        logRecorder.error(title, throwable);
-        this.updateStatus(BuildStatus.PubError);
-    }
-
     @Override
     public void run() {
         try {
-            this.start();
+            boolean start = this.start();
+            if (start) {
+                this.updateStatus(BuildStatus.PubSuccess);
+            } else {
+                this.updateStatus(BuildStatus.PubError);
+            }
         } catch (Exception e) {
             log.error("执行发布异常", e);
+            logRecorder.error("执行发布异常", e);
+            this.updateStatus(BuildStatus.PubError);
         }
     }
 }
