@@ -111,8 +111,12 @@
 </template>
 <script>
 import Vue from "vue";
+import { mapGetters } from "vuex";
 import { confirmFastInstall, fastInstall, pullFastInstallResult } from "@/api/node";
 export default {
+  computed: {
+    ...mapGetters(["getCollapsed", "getWorkspaceId"]),
+  },
   data() {
     return {
       fastInstallActiveKey: ["1", "2", "4"],
@@ -153,7 +157,7 @@ export default {
             item.allText = `${item.url} ${this.fastInstallInfo.key} '${this.fastInstallInfo.host}'`;
             return item;
           });
-          this.fastInstallInfo.bindCommand = `sh ./bin/Agent.sh restart ${this.fastInstallInfo.key} '${this.fastInstallInfo.host}'`;
+          this.fastInstallInfo.bindCommand = `sh ./bin/Agent.sh restart -s ${this.fastInstallInfo.key} '${this.fastInstallInfo.host}' && tail -f ./logs/agent.log`;
           // 轮询 结果
           this.pullFastInstallResultTime = setInterval(() => {
             pullFastInstallResult().then((res) => {
