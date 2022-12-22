@@ -26,6 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.system.SystemUtil;
 import io.jpom.common.BaseAgentController;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -178,7 +179,9 @@ public class AgentConfig extends BaseExtConfig {
             private Charset fileCharset;
 
             public Charset getFileCharset() {
-                return Optional.ofNullable(this.fileCharset).orElse(CharsetUtil.defaultCharset());
+                return Optional.ofNullable(this.fileCharset).orElseGet(() ->
+                    SystemUtil.getOsInfo().isWindows() ?
+                        CharsetUtil.CHARSET_GBK : CharsetUtil.CHARSET_UTF_8);
             }
         }
 

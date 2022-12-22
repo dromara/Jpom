@@ -27,7 +27,7 @@ jpom:
       auto-backup-to-file: true
       # 保存天数 配置错误或者没有，默认是7天
       save-days: 7
-      # 日志文件的编码格式
+      # 日志文件的编码格式 （windows 的默认值为 GBK，其他系统默认均为 UTF8）
       file-charset:
   # 查看日志时初始读取最后多少行（默认10，0不读取）
   init-read-line: 10

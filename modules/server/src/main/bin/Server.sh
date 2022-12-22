@@ -26,11 +26,11 @@
 
 case "$(uname)" in
 Linux)
-	bin_abs_path=$(readlink -f $(dirname $0))
+	bin_abs_path=$(readlink -f "$(dirname "$0")")
 	;;
 *)
 	bin_abs_path=$(
-		cd $(dirname $0)
+		cd "$(dirname "$0")" || exit
 		pwd
 	)
 	;;
@@ -166,13 +166,10 @@ function start() {
 	if [ ! -f "$server_log" ]; then
 		touch "$server_log"
 	fi
-	if [ -f "$Log" ]; then
-		cp /dev/null "$Log"
-	fi
 	# start
-	command="${JAVA} -Djpom.application.tag=${PID_TAG} ${JAVA_OPTS} -jar ${Lib}${RUN_JAR} ${MAIN_ARGS} >>$Log 2>&1 &"
-	echo "$command" >>"$Log"
-	eval "$command"
+	command="${JAVA} -Djpom.application.tag=${PID_TAG} ${JAVA_OPTS} -jar ${Lib}${RUN_JAR} ${MAIN_ARGS}"
+	echo "$command" >"$Log"
+	eval "$command" >>"$Log" 2>&1 &
 	echo $! >"$pidfile"
 
 	pid=$(cat "$pidfile")

@@ -21,7 +21,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-FROM maven:3.8.5-jdk-8
+FROM maven:3.8.6-jdk-8
 
 ARG BUILD_DATE
 LABEL build_info="dromara/Jpom build-date:- ${BUILD_DATE}"
@@ -31,7 +31,7 @@ LABEL documentation="https://jpom.top"
 ENV JPOM_HOME	/usr/local/jpom-server
 ENV JPOM_PKG_VERSION	2.10.2
 ENV JPOM_PKG	server-${JPOM_PKG_VERSION}-release.tar.gz
-
+ENV SHA1_NAME server-${JPOM_PKG_VERSION}-release.tar.gz.sha1
 
 ENV JPOM_DATA_PATH ${JPOM_HOME}/data
 ENV JPOM_LOG_PATH ${JPOM_HOME}/log
@@ -45,7 +45,11 @@ ENV TZ Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
 
 RUN mkdir -p ${JPOM_HOME}
+#
 RUN curl -LfSo ${JPOM_HOME}/${JPOM_PKG} https://download.jpom.top/release/${JPOM_PKG_VERSION}/${JPOM_PKG}
+RUN curl -LfsSo ${JPOM_HOME}/${SHA1_NAME} https://download.jpom.top/release/${JPOM_PKG_VERSION}/${SHA1_NAME} && \
+    ESUM=`cat ${JPOM_HOME}/${SHA1_NAME}` && \
+    echo "${ESUM} ${JPOM_HOME}/${JPOM_PKG}" | sha1sum -c -;
 RUN tar -zxvf ${JPOM_HOME}/${JPOM_PKG} -C ${JPOM_HOME}
 RUN rm -rf ${JPOM_HOME}/${JPOM_PKG}
 
