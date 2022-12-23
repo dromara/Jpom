@@ -167,7 +167,7 @@ function start() {
 	#echo "$pid"
 	if [ "$pid" != "" ]; then
 		echo "Running, please do not run repeatedly:$pid"
-		exit 1
+		exit 0
 	fi
 	checkConfig
 
@@ -201,7 +201,7 @@ function stop() {
 	if [ "$pid" != "" ]; then
 		echo -n "jpom agent ( pid $pid) is running"
 		echo
-		echo -n $"Shutting down (kill $mode $pid) jpom server: "
+		echo -n $"Shutting down (kill $killMode $pid) jpom server: "
 		if [ "$killMode" == "" ]; then
 			kill "$pid"
 		else
@@ -234,7 +234,7 @@ function status() {
 }
 
 function usage() {
-	echo "Usage: $0 {start|stop|restart|status}"
+	echo "Usage: $0 {start|stop|restart|status}" 2>&2
 	RETVAL="2"
 }
 
