@@ -22,7 +22,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-# description: Auto-starts boot
+# description: Auto-starts jpom agent
 
 case "$(uname)" in
 Linux)
@@ -36,16 +36,9 @@ Linux)
 	;;
 esac
 
-cygwin=false
-linux=false
-case "$(uname)" in
-CYGWIN*)
-	cygwin=true
-	;;
-Linux*)
-	linux=true
-	;;
-esac
+command_exists() {
+	command -v "$@" >/dev/null 2>&1
+}
 
 base=${bin_abs_path}/..
 
@@ -65,6 +58,11 @@ agent_log="${LogPath}/agent.log"
 ## set java path
 if [ -z "$JAVA" ]; then
 	JAVA=$(which java)
+fi
+if [ -z "$JAVA" ]; then
+	if command_exists java; then
+		JAVA="java"
+	fi
 fi
 if [ -z "$JAVA" ]; then
 	echo "Cannot find a Java JDK. Please set either set JAVA or put java (>=1.8) in your PATH." 2>&2
@@ -137,6 +135,16 @@ function checkConfig() {
 }
 
 function getPid() {
+	cygwin=false
+	linux=false
+	case "$(uname)" in
+	CYGWIN*)
+		cygwin=true
+		;;
+	Linux*)
+		linux=true
+		;;
+	esac
 	if $cygwin; then
 		JAVA_CMD="$JAVA_HOME\bin\java"
 		JAVA_CMD=$(cygpath --path --unix "$JAVA_CMD")
