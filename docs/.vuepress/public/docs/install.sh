@@ -132,7 +132,7 @@ function mustMkdir() {
 function installJdkFn() {
 	javaCommand=$(checkCommand java)
 	if [[ "$javaCommand" == "not found" ]]; then
-		download_url=""
+		echo "不存在 java 环境,开始尝试安装"
 		ARCH_O=$(uname -m)
 		# 判断系统架构
 		case "${ARCH_O}" in
@@ -164,6 +164,7 @@ function installJdkFn() {
 		if grep -q "JAVA_HOME" "$userProfileName"; then
 			errorExit "系统环境变量中已经存在 JAVA_HOME，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
 		fi
+
 		download_url=$(curl -s https://gitee.com/dromara/Jpom/raw/download_link/jdk/8/${ARCH})
 
 		curl -LfSo jdk.tar.gz "${download_url}"
@@ -198,6 +199,7 @@ EOF
 function installMvnFn() {
 	mvnCommand=$(checkCommand mvn)
 	if [[ "$mvnCommand" == "not found" ]]; then
+		echo "不存在 mvn 环境,开始尝试安装"
 		useDir=$(mustMkdir /usr/maven/ maven)
 		userProfileName=$(findProfile)
 		if grep -q "$useDir/apache-maven-3.6.3/" /etc/profile; then
@@ -228,8 +230,9 @@ EOF
 }
 
 function installNodeFn() {
-	nodeCommand=$(checkCommand mvn)
+	nodeCommand=$(checkCommand node)
 	if [[ "$nodeCommand" == "not found" ]]; then
+		echo "不存在 node 环境,开始尝试安装"
 		ARCH_O=$(uname -m)
 		case "${ARCH_O}" in
 		aarch64 | arm64)
