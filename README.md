@@ -304,16 +304,27 @@ docker-compose -f docker-compose.yml up
 
 1. Windows 系统使用 bat 脚本文件。
 
-   ```
-   # 服务端管理脚本，按照面板提示输入操作
-   Server.bat
-   
-   # 插件端管理脚本，按照面板提示输入操作
-   Agent.bat
-   ```
+```bash
+# 服务端管理脚本 （命令行）
+./bin/Server.bat start 启动Jpom服务端
+./bin/Server.bat stop 停止Jpom服务端
+./bin/Server.bat restart 重启Jpom服务端
+./bin/Server.bat status 查看Jpom服务端运行状态
+# 服务端管理脚本 （控制面板），按照面板提示输入操作
+./bin/Server.bat
 
-   > Windows 系统中执行启动后需要根据日志去跟进启动的状态，如果出现乱码请检查或者修改编码格式，Windows 系统中 bat
-   > 编码格式推荐为 `GB2312`
+# 插件端管理脚本
+./bin/Agent.bat start 启动Jpom插件端
+./bin/Agent.bat stop 停止Jpom插件端
+./bin/Agent.bat restart 重启Jpom插件端
+./bin/Agent.bat status 查看Jpom插件端运行状态
+# 插件端管理脚本（控制面板），按照面板提示输入操作
+./bin/Agent.bat
+
+```
+
+> Windows 系统中执行启动后需要根据日志去跟进启动的状态，如果出现乱码请检查或者修改编码格式，Windows 系统中 bat
+> 编码格式推荐为 `GB2312`
 
 2. Linux 系统中使用 sh 脚本文件。
 
