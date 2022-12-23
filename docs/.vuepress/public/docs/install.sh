@@ -433,8 +433,8 @@ done
 
 # 判断是否存在文件
 if [[ ! -f "${fileName}" ]]; then
-	download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
-	wget -O "${fileName}" "${download_url}"
+	echo "================开始下载 $fileName================"
+	curl -LfSo "${fileName}" "https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
 fi
 # 解压
 tar -zxf "${fileName}" -C "${jpom_dir}"
