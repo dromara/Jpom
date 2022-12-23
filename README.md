@@ -122,14 +122,12 @@ Jpom 支持多种安装方式，满足不同用户的个性化需求，您只需
 > ⚠️ 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即 Server 端和 Agent 端不可安装在同一目录下！
 >
 > 如果需要修改服务端数据、日志存储的路径请修改
-> [`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
+> [`application.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/config_default/application.yml)
 > 文件中 `jpom.path` 配置属性。
 
 ```shell
-# 仅安装服务端
-yum install -y wget && \
-wget -O install.sh https://jpom.top/docs/install.sh && \
-bash install.sh Server
+# 一键默认安装
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Server jdk+default
 
 # 安装服务端和 jdk 环境
 yum install -y wget && \
@@ -142,7 +140,7 @@ wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk+mvn
 
 # ubuntu
-apt install -y wget && \
+apt-get install -y wget && \
 wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk
 ```
@@ -171,14 +169,12 @@ bash install.sh Server jdk
 > ⚠️ 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即 Server 端和 Agent 端不可安装在同一目录下！
 >
 > 如果需要修改插件端数据、日志存储的路径请修改
-> [`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml)
+> [`application.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/config_default/application.yml)
 > 文件中 `jpom.path` 配置属性。
 
 ```shell
-# 仅安装插件端
-yum install -y wget && \
-wget -O install.sh https://jpom.top/docs/install.sh && \
-bash install.sh Agent
+# 一键默认安装
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Agent jdk+default
 
 # 安装插件端和 jdk 环境
 yum install -y wget && \
@@ -186,7 +182,7 @@ wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Agent jdk
 
 # ubuntu
-apt install -y wget && \
+apt-get install -y wget && \
 wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Agent jdk
 ```
@@ -323,40 +319,49 @@ docker-compose -f docker-compose.yml up
 
 ```bash
 # 服务端
-Server.sh start     启动Jpom服务端
-Server.sh stop      停止Jpom服务端
-Server.sh restart   重启Jpom服务端
-Server.sh status    查看Jpom服务端运行状态
-Server.sh create    创建Jpom服务端的应用服务（jpom-server）
+./bin/Server.sh start     启动Jpom服务端
+./bin/Server.sh stop      停止Jpom服务端
+./bin/Server.sh restart   重启Jpom服务端
+./bin/Server.sh status    查看Jpom服务端运行状态
+./bin/Service.sh install    创建Jpom服务端的应用服务（jpom-server）
 
 # 插件端
-Agent.sh start     启动Jpom插件端
-Agent.sh stop      停止Jpom插件端
-Agent.sh restart   重启Jpom插件端
-Agent.sh status    查看Jpom插件端运行状态
-Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
+./bin/Agent.sh start     启动Jpom插件端
+./bin/Agent.sh stop      停止Jpom插件端
+./bin/Agent.sh restart   重启Jpom插件端
+./bin/Agent.sh status    查看Jpom插件端运行状态
+./bin/Service.sh install     创建Jpom插件端的应用服务（jpom-agent）
 ```
 
 ## Linux 服务方式管理
 
 > 这里安装服务仅供参考，实际中可以根据需求自定义配置
 
-> 在使用 `Server.sh create`/`Agent.sh create` 成功后
+> 在使用 `./bin/Service.sh install` 成功后
 >
-> service jpom-server {status | start | stop}
+> systemctl {status | start | stop | restart} jpom-server
 >
-> service jpom-agent {status | start | stop}
+> systemctl {status | start | stop | restart} jpom-agent
 
 ## ⚙️ Jpom 的参数配置
 
-在项目运行的根路径下的 `extConfig.yml` 文件
+在项目运行的根路径下的 ：
+
+### 程序配置  `./conf/application.yml`
 
 1. 插件端示例：
-   [`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml)
+   [`application.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/config_default/application.yml)
 2. 服务端示例：
-   [`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
+   [`application.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/config_default/application.yml)
 
-### 构建案例仓库代码
+### 项目日志  `./conf/logback.xml`
+
+1. 插件端示例：
+   [`logback.xml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/config_default/logback.xml)
+2. 服务端示例：
+   [`logback.xml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/config_default/logback.xml)
+
+## 构建案例仓库代码
 
 1. [Jboot 案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
 2. [SpringBoot 案例代码(ClassPath)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)

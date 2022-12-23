@@ -57,6 +57,10 @@ function logStdout() {
 	echo "$1" >"$Log"
 }
 
+command_exists() {
+	command -v "$@" >/dev/null 2>&1
+}
+
 bin_abs_path=$(absPath "$(dirname "$0")")
 base=$(absPath "$bin_abs_path/../")
 
@@ -74,6 +78,11 @@ server_log="${LogPath}/server.log"
 ## set java path
 if [ -z "$JAVA" ]; then
 	JAVA=$(which java)
+fi
+if [ -z "$JAVA" ]; then
+	if command_exists java; then
+		JAVA="java"
+	fi
 fi
 if [ -z "$JAVA" ]; then
 	errorExit "Cannot find a Java JDK. Please set either set JAVA or put java (>=1.8) in your PATH."

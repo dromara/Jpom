@@ -22,7 +22,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-# description: manage jpom server Service
+# description: manage jpom agent Service
 
 function absPath() {
 	dir="$1"
