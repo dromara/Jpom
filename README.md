@@ -128,6 +128,8 @@ Jpom 支持多种安装方式，满足不同用户的个性化需求，您只需
 ```shell
 # 一键默认安装
 curl -fsSL https://jpom.top/docs/install.sh | bash -s Server jdk+default
+# 一键默认安装 + 自动配置开机自启服务
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Server jdk+default+service
 
 # 安装服务端和 jdk 环境
 yum install -y wget && \
@@ -175,6 +177,8 @@ bash install.sh Server jdk
 ```shell
 # 一键默认安装
 curl -fsSL https://jpom.top/docs/install.sh | bash -s Agent jdk+default
+# 一键默认安装 + 自动配置开机自启服务
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Agent jdk+default+service
 
 # 安装插件端和 jdk 环境
 yum install -y wget && \
