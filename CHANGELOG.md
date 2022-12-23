@@ -32,7 +32,7 @@ curl -LfsSo Agent.sh https://gitee.com/dromara/Jpom/raw/master/modules/agent/src
 ```
 
 ```shell
-curl -LfsSo Server.sh https://gitee.com/dromara/Jpom/raw/master/modules/server/src/main/bin/Service.sh
+curl -LfsSo Server.sh https://gitee.com/dromara/Jpom/raw/master/modules/agent/src/main/bin/Service.sh
 ```
 
 ------
