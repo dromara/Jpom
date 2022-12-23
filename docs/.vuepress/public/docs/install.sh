@@ -442,16 +442,20 @@ tar -zxf "${fileName}" -C "${jpom_dir}"
 rm -f "${fileName}"
 
 shName=""
-if [ -f "./bin/${JPOM_TYPE}.sh" ]; then
-	shName="./bin/${JPOM_TYPE}.sh"
-elif [ -f "./${JPOM_TYPE}.sh" ]; then
-	shName="./${JPOM_TYPE}.sh"
-else
+sh_array=("./bin/${JPOM_TYPE}.sh" "./${JPOM_TYPE}.sh")
+for element in "${sh_array[@]}"; do
+	if [ -f "$element" ]; then
+		shName=$$element
+		break
+	fi
+done
+if [ -z "$shName" ]; then
 	errorExit "没有找到对应的管理命令"
 fi
+
 # 判断是否需要安装服务
 if [[ $(echo "$module" | grep "service") != "" ]]; then
-	echo "开发安装服务"
+	echo "================开始安装服务================"
 	if [ ! -f "./bin/Service.sh" ]; then
 		cat >&2 <<-EOF
 			ERROR: Service.sh not found .
