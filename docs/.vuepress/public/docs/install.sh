@@ -359,11 +359,20 @@ elif [ -f "./${JPOM_TYPE}.sh" ]; then
 else
 	errorExit "没有找到对应的管理命令"
 fi
+# 判断是否需要安装服务
+if [[ $(echo "$module" | grep "service") == "" ]]; then
+	if [ ! -f "./Service.sh" ]; then
+		cat >&2 <<-EOF
+			ERROR: Service.sh not found .
+		EOF
+	fi
+	# 安装并设置开机自启
+	bash "./Service.sh" install enable
+fi
 if [ "$offline" == "" ]; then
 	# 删除安装命令
 	rm -f "${bin_abs_path}/install.sh"
 fi
-# 添加权限
-chmod 755 "$shName"
+echo "================开始启动================"
 # 启动
 bash "$shName" start "$ARGS"
