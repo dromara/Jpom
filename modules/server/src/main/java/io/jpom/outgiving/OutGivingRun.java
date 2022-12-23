@@ -28,7 +28,7 @@ import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.JpomApplication;
+import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -80,7 +80,7 @@ public class OutGivingRun {
                 boolean cancel = false;
                 for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
                     if (cancel) {
-                        String userId = userModel == null ? JpomApplication.SYSTEM_ID : userModel.getId();
+                        String userId = userModel == null ? Const.SYSTEM_ID : userModel.getId();
                         OutGivingItemRun.updateStatus(null, id, outGivingNodeProject, OutGivingNodeProject.Status.Cancel, "前一个节点分发失败，取消分发", userId);
                     } else {
                         OutGivingItemRun outGivingRun = new OutGivingItemRun(item, outGivingNodeProject, file, userModel, unzip, sleepTime);

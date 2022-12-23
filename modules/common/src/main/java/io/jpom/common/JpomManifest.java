@@ -38,7 +38,6 @@ import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JsonFileUtil;
@@ -242,14 +241,14 @@ public class JpomManifest {
      */
     public int getPort() {
         if (port == 0) {
-            port = ConfigBean.getInstance().getPort();
+            port = JpomApplication.getInstance().getPort();
         }
         return port;
     }
 
     public String getDataPath() {
         if (StrUtil.isEmpty(dataPath)) {
-            dataPath = ConfigBean.getInstance().getDataPath();
+            dataPath = JpomApplication.getInstance().getDataPath();
         }
         return dataPath;
     }

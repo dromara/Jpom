@@ -28,6 +28,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.JpomApplication;
 import io.jpom.model.system.AgentAutoUser;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.JvmUtil;
@@ -69,13 +70,13 @@ public class AgentAuthorize implements InitializingBean {
         throw new UnsupportedOperationException("不能调用此方法");
     }
 
-    private final ConfigBean configBean;
+    private final JpomApplication configBean;
     /**
      * 注入控制加载顺序，必须先加载数据目录才能初始化
      */
     private final AgentConfig agentConfig;
 
-    public AgentAuthorize(ConfigBean configBean,
+    public AgentAuthorize(JpomApplication configBean,
                           AgentConfig agentConfig) {
         this.configBean = configBean;
         this.agentConfig = agentConfig;

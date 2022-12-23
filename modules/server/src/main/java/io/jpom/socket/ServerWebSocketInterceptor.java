@@ -27,7 +27,7 @@ import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import io.jpom.JpomApplication;
+import io.jpom.common.Const;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.NodeModel;
@@ -78,7 +78,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
     private boolean checkNode(HttpServletRequest httpServletRequest, Map<String, Object> attributes, UserModel userModel) {
         // 验证 node 权限
         String nodeId = httpServletRequest.getParameter("nodeId");
-        if (!JpomApplication.SYSTEM_ID.equals(nodeId)) {
+        if (!Const.SYSTEM_ID.equals(nodeId)) {
             NodeModel nodeModel = nodeService.getByKey(nodeId, userModel);
             if (nodeModel == null) {
                 return false;

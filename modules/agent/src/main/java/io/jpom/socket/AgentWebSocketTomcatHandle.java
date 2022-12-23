@@ -25,7 +25,7 @@ package io.jpom.socket;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.JpomApplication;
+import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
 import io.jpom.system.AgentConfig;
 import io.jpom.system.LogbackConfig;
@@ -69,7 +69,7 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
             }
             String tomcatId = super.getParameters(session, "tomcatId");
 
-            if (!JpomApplication.SYSTEM_ID.equalsIgnoreCase(tomcatId)) {
+            if (!Const.SYSTEM_ID.equalsIgnoreCase(tomcatId)) {
                 SocketSessionUtil.send(session, "获取tomcat信息错误");
                 session.close();
                 return;
@@ -95,7 +95,7 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
             return;
         }
         String tomcatId = json.getString("tomcatId");
-        if (JpomApplication.SYSTEM_ID.equalsIgnoreCase(tomcatId)) {
+        if (Const.SYSTEM_ID.equalsIgnoreCase(tomcatId)) {
             runMsg(session, json);
         }
     }

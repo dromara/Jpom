@@ -24,7 +24,7 @@ package io.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.system.ConfigBean;
+import io.jpom.JpomApplication;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -77,7 +77,7 @@ public class NodeScriptModel extends BaseWorkspaceModel {
         if (StrUtil.isEmpty(id)) {
             throw new IllegalArgumentException("id 为空");
         }
-        File path = ConfigBean.getInstance().getScriptPath();
+        File path = JpomApplication.getInstance().getScriptPath();
         return FileUtil.file(path, id);
     }
 
@@ -85,7 +85,7 @@ public class NodeScriptModel extends BaseWorkspaceModel {
         if (StrUtil.isEmpty(getId())) {
             throw new IllegalArgumentException("id 为空");
         }
-        File path = ConfigBean.getInstance().getScriptPath();
+        File path = JpomApplication.getInstance().getScriptPath();
         return FileUtil.file(path, getId(), "log", executeId + ".log");
     }
 }

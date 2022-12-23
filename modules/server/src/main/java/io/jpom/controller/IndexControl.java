@@ -344,7 +344,7 @@ public class IndexControl extends BaseServerController {
     private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel, JSONArray showArray) {
 //        String active = jsonObject.getString("active");
 //        if (StrUtil.isNotEmpty(active)) {
-//            String active1 = ConfigBean.getInstance().getActive();
+//            String active1 = JpomApplication.getInstance().getActive();
 //            if (!StrUtil.equals(active, active1)) {
 //                return false;
 //            }

@@ -34,8 +34,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.data.NodeModel;
@@ -147,7 +147,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                              OutGivingNodeProject outGivingNodeProjectItem,
                              OutGivingNodeProject.Status status,
                              String msg) {
-        String userId = this.userModel == null ? JpomApplication.SYSTEM_ID : this.userModel.getId();
+        String userId = this.userModel == null ? Const.SYSTEM_ID : this.userModel.getId();
         updateStatus(this.logId, outGivingId, outGivingNodeProjectItem, status, msg, userId);
     }
 

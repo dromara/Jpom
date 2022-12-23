@@ -41,7 +41,6 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.BackupInfoService;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -177,7 +176,7 @@ public class SystemUpdateController extends BaseServerController {
         if (nodeModel != null) {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.REMOTE_UPGRADE);
         }
-        RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath(), objects -> backupInfoService.autoBackup());
+        RemoteVersion.upgrade(JpomApplication.getInstance().getTempPath().getAbsolutePath(), objects -> backupInfoService.autoBackup());
         return JsonMessage.success(Const.UPGRADE_MSG);
     }
 }

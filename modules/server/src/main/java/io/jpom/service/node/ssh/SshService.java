@@ -36,12 +36,12 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import io.jpom.JpomApplication;
 import io.jpom.common.ServerConst;
 import io.jpom.model.data.SshModel;
 import io.jpom.plugin.IWorkspaceEnvPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseWorkspaceService;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JschUtils;
 import lombok.Lombok;
@@ -137,7 +137,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                 Assert.notNull(rsaFile, "用户目录没有找到私钥信息");
             } else {
                 //这里的实现，用于把 private key 写入到一个临时文件中，此方式不太采取
-                File tempPath = ConfigBean.getInstance().getTempPath();
+                File tempPath = JpomApplication.getInstance().getTempPath();
                 String sshFile = StrUtil.emptyToDefault(sshModel.getId(), IdUtil.fastSimpleUUID());
                 rsaFile = FileUtil.file(tempPath, "ssh", sshFile);
                 FileUtil.writeString(privateKey, rsaFile, CharsetUtil.UTF_8);
@@ -251,7 +251,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         Sftp sftp = null;
         try {
             String tempId = SecureUtil.sha1(sshModel.getId() + ArrayUtil.join(command, StrUtil.COMMA));
-            File buildSsh = FileUtil.file(ConfigBean.getInstance().getTempPath(), "ssh_temp", tempId + ".sh");
+            File buildSsh = FileUtil.file(JpomApplication.getInstance().getTempPath(), "ssh_temp", tempId + ".sh");
             InputStream sshExecTemplateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template.sh");
             String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
 
@@ -312,7 +312,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 //        try {
 //            channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
 //            // 添加环境变量
-//            channel.setCommand(ServerExtConfigBean.getInstance().getSshInitEnv() + " && " + command);
+//            channel.setCommand(ServerExtJpomApplication.getInstance().getSshInitEnv() + " && " + command);
 //            InputStream inputStream = channel.getInputStream();
 //            InputStream errStream = channel.getErrStream();
 //            channel.connect();
@@ -333,7 +333,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 //			session = getSessionByModel(sshModel);
 //			channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
 //			// 添加环境变量
-//			channel.setCommand(ServerExtConfigBean.getInstance().getSshInitEnv() + " && " + command);
+//			channel.setCommand(ServerExtJpomApplication.getInstance().getSshInitEnv() + " && " + command);
 //			InputStream inputStream = channel.getInputStream();
 //			InputStream errStream = channel.getErrStream();
 //			channel.connect();

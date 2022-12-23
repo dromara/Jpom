@@ -84,4 +84,9 @@ public class Const {
 
     public static final String FILE_NAME = "application.yml";
 
+    /**
+     *
+     */
+    public static final String SYSTEM_ID = "system";
+
 }

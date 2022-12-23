@@ -26,9 +26,9 @@ import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import io.jpom.JpomApplication;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
-import io.jpom.system.ConfigBean;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -136,7 +136,7 @@ public class DockerInfoModel extends BaseWorkspaceModel {
      * @return path
      */
     public String generateCertPath() {
-        String dataPath = ConfigBean.getInstance().getDataPath();
+        String dataPath = JpomApplication.getInstance().getDataPath();
         String host = this.getHost();
         Assert.hasText(host, "host empty");
         host = SecureUtil.sha1(host);

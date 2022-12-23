@@ -1,4 +1,26 @@
 #!/bin/bash
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2019 Code Technology Studio
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
 
 # description: manage jpom server Service
 
@@ -24,10 +46,10 @@ command_exists() {
 }
 
 binAbsPath=$(absPath "$(dirname "$0")")
-serviceName="jpom-server.service"
+serviceName="jpom-agent.service"
 serviceFile="/etc/systemd/system/$serviceName"
-binAbsName=$(absPath "$binAbsPath/Server.sh")
-pidfile="$binAbsPath/server.pid"
+binAbsName=$(absPath "$binAbsPath/Agent.sh")
+pidfile="$binAbsPath/agent.pid"
 
 #
 user="$(id -un 2>/dev/null || true)"
@@ -41,7 +63,7 @@ if [ "$user" != 'root' ]; then
 	elif command_exists su; then
 		sh_c='su -c'
 	else
-		cat >&2 <<-'EOF'
+		cat >&2 <<-EOF
 			Error: this installer needs the ability to run commands as root.
 			We are unable to find either "sudo" or "su" available to make this happen.
 		EOF
@@ -67,7 +89,7 @@ function install() {
 
 	$sh_c "cat >$serviceFile" <<EOF
 [Unit]
-Description=jpom server service
+Description=jpom $serviceName
 After=network.target
 After=network-online.target
 Wants=network-online.target
@@ -89,7 +111,7 @@ PIDFile=$pidfile
 WantedBy=multi-user.target
 EOF
 	if [ ! -f "$serviceFile" ]; then
-		cat >&2 <<-'EOF'
+		cat >&2 <<-EOF
 			ERROR: $serviceName write failed Installing the service requires the ability to run commands as root.
 		EOF
 		exit 1
@@ -98,8 +120,8 @@ EOF
 	echo "$serviceName write success :$serviceFile"
 
 	$sh_c 'systemctl daemon-reload'
-	$sh_c "systemctl start $serviceName"
-	cat >&2 <<-'EOF'
+
+	cat >&2 <<-EOF
 		INFO: You can execute the following commands to manage $serviceName.
 		INFO: systemctl start $serviceName　(Start the service )
 		INFO: systemctl stop $serviceName　(Stop the service)
@@ -116,7 +138,7 @@ function uninstall() {
 		$sh_c "systemctl stop $serviceName"
 		$sh_c "rm -f $serviceFile"
 		if [ -f "$serviceFile" ]; then
-			cat >&2 <<-'EOF'
+			cat >&2 <<-EOF
 				ERROR: $serviceName write uninstall .
 			EOF
 			exit 1
@@ -128,20 +150,44 @@ function uninstall() {
 	fi
 }
 
-case "$1" in
-install)
-	install
-	;;
-uninstall)
-	uninstall
-	;;
-reinstall)
-	uninstall
-	echo "--------------------------------------"
-	install
-	;;
-*)
-	echo "Usage: $0 {install|uninstall|reinstall}" 2>&2
+function enable() {
+	if [ -f "$serviceFile" ]; then
+		$sh_c "systemctl enable $serviceName"
+	else
+		echo "$serviceFile not found" 2>&2
+		echo "Usage: $0 install" 2>&2
+	fi
+}
+
+function action() {
+	case "$1" in
+	install)
+		install
+		;;
+	uninstall)
+		uninstall
+		;;
+	reinstall)
+		uninstall
+		echo "--------------------------------------"
+		install
+		;;
+	enable)
+		enable
+		;;
+	*)
+		echo "Usage: $0 {install|uninstall|reinstall|enable}" 2>&2
+		exit 1
+		;;
+	esac
+
+}
+
+if [ -z "$1" ]; then
+	echo "Usage: $0 {install|uninstall|reinstall|enable}" 2>&2
 	exit 1
-	;;
-esac
+fi
+
+for i in "$@"; do
+	action "$i"
+done

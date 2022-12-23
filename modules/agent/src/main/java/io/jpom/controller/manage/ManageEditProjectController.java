@@ -29,7 +29,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
@@ -79,7 +78,7 @@ public class ManageEditProjectController extends BaseAgentController {
         String id = projectInfo.getId();
         String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
         Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "项目id 长度范围2-20（英文字母 、数字和下划线）");
-        Assert.state(!JpomApplication.SYSTEM_ID.equals(id), "项目id " + JpomApplication.SYSTEM_ID + " 关键词被系统占用");
+        Assert.state(!Const.SYSTEM_ID.equals(id), "项目id " + Const.SYSTEM_ID + " 关键词被系统占用");
         // 运行模式
         String runMode = getParameter("runMode");
         RunMode runMode1 = RunMode.ClassPath;

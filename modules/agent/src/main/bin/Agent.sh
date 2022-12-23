@@ -169,7 +169,7 @@ function start() {
 	# start
 	command="${JAVA} -Djpom.application.tag=${PID_TAG} ${JAVA_OPTS} -jar ${Lib}${RUN_JAR} ${MAIN_ARGS}"
 	echo "$command" >"$Log"
-	eval "$command" >>"$Log" 2>&1 &
+	eval "nohup $command >>$Log 2>&1 &"
 	echo $! >"$pidfile"
 
 	pid=$(cat "$pidfile")

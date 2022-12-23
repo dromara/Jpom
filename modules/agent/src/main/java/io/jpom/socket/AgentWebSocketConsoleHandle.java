@@ -28,7 +28,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.JpomApplication;
+import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.commander.CommandOpResult;
 import io.jpom.model.data.NodeProjectInfoModel;
@@ -82,7 +82,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             String copyId = super.getParameters(session, "copyId");
             copyId = StrUtil.nullToDefault(copyId, StrUtil.EMPTY);
             // 判断项目
-            if (!JpomApplication.SYSTEM_ID.equals(projectId)) {
+            if (!Const.SYSTEM_ID.equals(projectId)) {
                 NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, copyId, session);
                 if (nodeProjectInfoModel == null) {
                     return;

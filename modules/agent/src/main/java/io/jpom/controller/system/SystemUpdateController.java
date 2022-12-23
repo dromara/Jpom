@@ -33,7 +33,6 @@ import io.jpom.JpomApplication;
 import io.jpom.common.*;
 import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.system.AgentConfig;
-import io.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,10 +55,10 @@ import java.util.Objects;
 public class SystemUpdateController extends BaseAgentController {
 
     private final AgentConfig agentConfig;
-    private final ConfigBean configBean;
+    private final JpomApplication configBean;
 
     public SystemUpdateController(AgentConfig agentConfig,
-                                  ConfigBean configBean) {
+                                  JpomApplication configBean) {
         this.agentConfig = agentConfig;
         this.configBean = configBean;
     }

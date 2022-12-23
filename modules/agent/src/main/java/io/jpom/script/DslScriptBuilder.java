@@ -34,6 +34,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.NodeProjectInfoModel;
@@ -41,7 +42,6 @@ import io.jpom.model.data.NodeScriptModel;
 import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.service.script.NodeScriptServer;
 import io.jpom.service.system.AgentWorkspaceEnvVarService;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import lombok.Setter;
@@ -223,7 +223,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
      * @return file
      */
     private static File initScriptFile(NodeScriptModel scriptModel) {
-        String dataPath = ConfigBean.getInstance().getDataPath();
+        String dataPath = JpomApplication.getInstance().getDataPath();
         File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
         // 替换内容
         String context = scriptModel.getContext();
