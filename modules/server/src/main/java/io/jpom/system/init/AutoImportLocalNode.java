@@ -24,7 +24,6 @@ package io.jpom.system.init;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -82,6 +81,7 @@ public class AutoImportLocalNode implements InitializingBean {
         if (count > 0) {
             return;
         }
+        log.info("当前服务端中没有任何节点尝试加载本机节点");
         //
         try {
             Integer mainClassPid = JvmUtil.findMainClassPid(Type.Agent.getApplicationClass());
@@ -124,7 +124,7 @@ public class AutoImportLocalNode implements InitializingBean {
         //
         nodeModel.setOpenStatus(1);
         nodeService.insertNotFill(nodeModel);
-        Console.log("Automatically add native node successfully：" + nodeModel.getId());
+        log.info("Automatically add native node successfully：" + nodeModel.getId());
     }
 
     @Override

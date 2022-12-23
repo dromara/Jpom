@@ -110,8 +110,6 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             this.success();
         } else if (event instanceof ContextClosedEvent) {
             //
-            FileUtil.del(configBean.getPidFile());
-            //
             File appJpomFile = configBean.getApplicationJpomInfo(JpomApplication.getAppType());
             FileUtil.del(appJpomFile);
         }
@@ -150,13 +148,20 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         }
         if (jsonObject != null) {
             String beforeJar = jsonObject.getString("beforeJar");
+            String newJar = jsonObject.getString("newJar");
             if (StrUtil.isNotEmpty(beforeJar)) {
                 File beforeJarFile = FileUtil.file(runFile, beforeJar);
                 if (beforeJarFile.exists()) {
-                    File oldJars = JpomManifest.getOldJarsPath();
-                    FileUtil.mkdir(oldJars);
-                    FileUtil.move(beforeJarFile, oldJars, true);
-                    log.info("备份旧程序包：" + beforeJar);
+                    if (this.canMvOldJar(jsonObject, runFile)) {
+                        File oldJars = JpomManifest.getOldJarsPath();
+                        FileUtil.mkdir(oldJars);
+                        FileUtil.move(beforeJarFile, oldJars, true);
+                        log.info("备份旧程序包：{}", beforeJar);
+                    } else {
+                        log.warn("备份旧程序包失败：{},因为新程序包不存在：{}", beforeJar, newJar);
+                    }
+                } else {
+                    log.warn("备份旧程序包失败：{},因为旧程序包不存在", beforeJar);
                 }
             }
         }
@@ -176,7 +181,16 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         //        }
     }
 
-    private static void clearOldJar() {
+    private boolean canMvOldJar(JSONObject jsonObject, File runFile) {
+        String newJar = jsonObject.getString("newJar");
+        if (StrUtil.isEmpty(newJar)) {
+            return false;
+        }
+        File newJarFile = FileUtil.file(runFile, newJar);
+        return FileUtil.exist(newJarFile);
+    }
+
+    private void clearOldJar() {
         File oldJars = JpomManifest.getOldJarsPath();
         List<File> files = FileUtil.loopFiles(oldJars, 1, file -> StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true));
         if (CollUtil.isEmpty(files)) {
@@ -188,7 +202,10 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         int size = CollUtil.size(files);
         files = CollUtil.sub(files, oldJarsCount, size);
         // 删除文件
-        files.forEach(FileUtil::del);
+        files.forEach(file -> {
+            FileUtil.del(file);
+            log.debug("删除旧程序包：{}", file.getAbsolutePath());
+        });
     }
 
 
@@ -313,7 +330,6 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
      * @see AbstractApplicationContext#refresh()
      * @see AbstractApplicationContext#close()
      */
-
     public static void asyncExit(int code) {
         ThreadUtil.execute(() -> System.exit(code));
     }

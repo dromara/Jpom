@@ -25,7 +25,6 @@ package io.jpom.plugin;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FastByteArrayOutputStream;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.ds.DSFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -111,7 +110,7 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
             FileUtil.move(FileUtil.file(s), recoverBackup, true);
         }
         String absolutePath = FileUtil.getAbsolutePath(recoverBackup);
-        Console.log("h2 db recover backup path,{}", absolutePath);
+        log.info("h2 db recover backup path,{}", absolutePath);
         // 恢复数据
         Recover recover = new Recover();
         recover.runTool("-dir", absolutePath, "-db", dbName);
