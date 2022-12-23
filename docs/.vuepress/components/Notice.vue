@@ -31,6 +31,9 @@ export default {
     },
   },
   mounted() {
+    if (window.innerWidth < 720) {
+      return
+    }
     this.destroying = false;
     this.data
       .filter(item => item.id != null && !this.isIgnoreNotice(item.id))

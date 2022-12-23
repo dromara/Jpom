@@ -41,9 +41,9 @@ features: # 可选的
 # 文章列表显示方式: detailed 默认，显示详细版文章列表（包括作者、分类、标签、摘要、分页等）| simple => 显示简约版文章列表（仅标题和日期）| none 不显示文章列表
 postList: none
 notices: # 可选的
-  - id: jpom-2.10.0
-    title: 📢 Jpom v2.10.0 发布！
-    content: '<div><p>2022-12-19</p><ul><li>服务端管理相关功能独立页面菜单</li><li>优化配置文件加载逻辑</li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
+  - id: jpom-2.10.4
+    title: 📢 Jpom v2.10.4 发布！
+    content: '<div><p>2022-12-23</p><ul><li>支持创建系统服务来管理 Jpom</li><li>优化一键安装脚本</li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
     isHtmlContent: true
 ---
 
