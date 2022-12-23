@@ -360,14 +360,14 @@ else
 	errorExit "没有找到对应的管理命令"
 fi
 # 判断是否需要安装服务
-if [[ $(echo "$module" | grep "service") == "" ]]; then
-	if [ ! -f "./Service.sh" ]; then
+if [[ $(echo "$module" | grep "service") != "" ]]; then
+	if [ ! -f "./bin/Service.sh" ]; then
 		cat >&2 <<-EOF
 			ERROR: Service.sh not found .
 		EOF
 	fi
 	# 安装并设置开机自启
-	bash "./Service.sh" install enable
+	bash "./bin/Service.sh" install enable
 fi
 if [ "$offline" == "" ]; then
 	# 删除安装命令
