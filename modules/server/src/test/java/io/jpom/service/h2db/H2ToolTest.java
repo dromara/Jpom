@@ -23,7 +23,6 @@
 package io.jpom.service.h2db;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.sql.SqlLog;
 import cn.hutool.setting.Setting;
@@ -184,7 +183,7 @@ public class H2ToolTest extends ApplicationStartTest {
         setting.set(SqlLog.KEY_SHOW_SQL, "true");
         setting.set(SqlLog.KEY_SQL_LEVEL, "DEBUG");
         setting.set(SqlLog.KEY_SHOW_PARAMS, "true");
-        Console.log("start load h2 db");
+        log.info("start load h2 db");
         // 创建连接
         DSFactory dsFactory = DSFactory.create(setting);
         return dsFactory.getDataSource();

@@ -135,16 +135,6 @@ public class JpomApplication implements DisposableBean {
     }
 
     /**
-     * 获取pid文件
-     *
-     * @return file
-     */
-    public File getPidFile() {
-        return new File(getDataPath(), StrUtil.format("pid.{}.{}",
-            JpomApplication.getAppType().name(), JpomManifest.getInstance().getPid()));
-    }
-
-    /**
      * 获取当前项目全局 运行信息文件路径
      *
      * @param type 程序类型
