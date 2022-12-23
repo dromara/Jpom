@@ -23,134 +23,213 @@
 # https://github.com/AdoptOpenJDK/openjdk-docker/blob/master/8/jdk/centos/Dockerfile.hotspot.releases.full
 # https://github.com/carlossg/docker-maven/blob/master/openjdk-8/Dockerfile
 
-case "$(uname)" in
-Linux)
-	bin_abs_path=$(readlink -f "$(dirname "$0")")
-	;;
-*)
-	bin_abs_path=$(
-		cd "$(dirname "$0")" || exit
-		pwd
-	)
-	;;
-esac
+function absPath() {
+	dir="$1"
+	case "$(uname)" in
+	Linux)
+		abs_path=$(readlink -f "$dir")
+		;;
+	*)
+		abs_path=$(
+			cd "$dir" || exit
+			pwd
+		)
+		;;
+	esac
+	#
+	echo "$abs_path"
+}
 
 JPOM_TYPE="$1"
 ARGS="$*"
 module="$2"
 offline=$(echo "$module" | grep "offline")
+binAbsPath=$(absPath "$(dirname "$0")")
 
 function errorExit() {
 	msg="$1"
 	echo "$msg" 2>&2
 	if [ "$offline" == "" ]; then
 		# 删除安装命令
-		rm -f "${bin_abs_path}/install.sh"
+		rm -f "${binAbsPath}/install.sh"
 	fi
+	rmfile=("jdk.tar.gz" "maven.tar.gz" "node.tar.gz")
+	for element in "${rmfile[@]}"; do
+		rm -f "$element"
+	done
 	exit 1
+}
+
+function findProfile() {
+	user="$(id -un 2>/dev/null || true)"
+	profileName=""
+	if [ "$user" != 'root' ]; then
+		array=("$HOME/.bash_profile" "$HOME/.bashrc" "$HOME/.bash_login")
+		for element in "${array[@]}"; do
+			if [ -f "$element" ] || [ -f "./${JPOM_TYPE}.sh" ]; then
+				profileName=$element
+				break
+			fi
+		done
+		if [ -z "$profileName" ]; then
+			cat >&2 <<-EOF
+				ERROR: 没有找到可用的环境变量文件
+			EOF
+			exit 1
+		fi
+	else
+		profileName="/etc/profile"
+	fi
+	echo "$profileName"
+}
+
+command_exists() {
+	command -v "$@" >/dev/null 2>&1
+}
+
+function checkCommand() {
+	command=$(which "$1")
+	if [[ ! -x "$command" ]]; then
+		if command_exists "$1"; then
+			echo "$1"
+		else
+			echo "not found"
+		fi
+	else
+		echo "$command"
+	fi
+}
+
+function mustMkdir() {
+	dir="$1"
+	name="$2"
+	mkdir -p "$dir"
+	if [ ! -d "$dir" ]; then
+		cat >&2 <<-EOF
+			ERROR: 目录创建失败: $dir
+		EOF
+		while (true); do
+			cat >&2 <<-EOF
+				INFO: 请手动输入安装 $name 目录
+			EOF
+			read -r userOption
+			useAbsPath=$(absPath "$userOption")
+			mkdir -p "$useAbsPath"
+			if [ -d "$useAbsPath" ]; then
+				dir=$useAbsPath
+				break
+			fi
+			cat >&2 <<-EOF
+				 ERROR: 输入的目录创建失败: $useAbsPath
+				 ERROR: 请重新手动输入安装 $name 目录
+			EOF
+		done
+	fi
+	echo "$dir"
 }
 
 # 安装 jdk
 function installJdkFn() {
-	if [[ ! -x "${JAVA_HOME}/bin/java" ]]; then
-		JAVA=$(which java)
-		if [[ ! -x "$JAVA" ]]; then
+	javaCommand=$(checkCommand java)
+	if [[ "$javaCommand" == "not found" ]]; then
+		download_url=""
+		ARCH_O=$(uname -m)
+		# 判断系统架构
+		case "${ARCH_O}" in
+		aarch64 | arm64)
+			ARCH='aarch64'
+			;;
+		armhf | armv7l)
+			ARCH='arm'
+			;;
+		ppc64el | ppc64le)
+			ARCH='ppc64le'
+			;;
+		s390x)
+			ARCH='s390x'
+			;;
+		amd64 | x86_64)
+			ARCH='x64'
+			;;
+		*)
+			errorExit "Unsupported arch: ${ARCH_O}"
+			;;
+		esac
+		useDir=$(mustMkdir /usr/java/ java)
+		userProfileName=$(findProfile)
 
-			download_url=""
-			ARCH_O=$(uname -m)
-			# 判断系统架构
-			case "${ARCH_O}" in
-			aarch64 | arm64)
-				ARCH='aarch64'
-				;;
-			armhf | armv7l)
-				ARCH='arm'
-				;;
-			ppc64el | ppc64le)
-				ARCH='ppc64le'
-				;;
-			s390x)
-				ARCH='s390x'
-				;;
-			amd64 | x86_64)
-				ARCH='x64'
-				;;
-			*)
-				errorExit "Unsupported arch: ${ARCH_O}"
-				;;
-			esac
-
-			download_url=$(curl -s https://gitee.com/dromara/Jpom/raw/download_link/jdk/8/${ARCH})
-
-			curl -LfSo jdk.tar.gz "${download_url}"
-			mkdir -p /usr/java/
-			#
-			jdk_name=$(tar -tf jdk.tar.gz | grep 'jdk' | head -1)
-
-			#	检查环境变量
-			if grep -q "/usr/java/${jdk_name}" /etc/profile; then
-				errorExit "系统环境变量中已经存在 jdk 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source /etc/profile"
-			else
-				tar -zxf jdk.tar.gz -C /usr/java/
-				echo "安装jdk,路径 /usr/java/${jdk_name}"
-				# 修改环境变量
-				{
-					echo ""
-					echo "export JAVA_HOME=/usr/java/${jdk_name}"
-					echo "export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar"
-					echo "export PATH=\$PATH:\$JAVA_HOME/bin"
-				} >>"/etc/profile"
-			fi
-
-			# 更新环境变量
-			source /etc/profile
-			# 删除jdk压缩包
-			rm -f jdk.tar.gz
-		else
-			echo "已经存在java环境${JAVA}"
+		if grep -q "CLASSPATH" "$userProfileName"; then
+			errorExit "系统环境变量中已经存在 CLASSPATH，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
 		fi
+		if grep -q "JAVA_HOME" "$userProfileName"; then
+			errorExit "系统环境变量中已经存在 JAVA_HOME，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
+		fi
+		download_url=$(curl -s https://gitee.com/dromara/Jpom/raw/download_link/jdk/8/${ARCH})
+
+		curl -LfSo jdk.tar.gz "${download_url}"
+		#
+		jdk_name=$(tar -tf jdk.tar.gz | grep 'jdk' | head -1)
+
+		#	检查环境变量
+		if grep -q "$useDir/${jdk_name}" "$userProfileName"; then
+			errorExit "系统环境变量中已经存在 jdk 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
+		fi
+
+		tar -zxf jdk.tar.gz -C "$useDir"
+		echo "安装jdk,路径 $useDir/${jdk_name}"
+		cat >>"$userProfileName" <<EOF
+
+export JAVA_HOME=$useDir/${jdk_name}
+export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar
+export PATH=\$PATH:\$JAVA_HOME/bin
+EOF
+		echo "use profile $userProfileName"
+		# shellcheck source=.profile
+		source "$userProfileName"
+		# 删除jdk压缩包
+		rm -f jdk.tar.gz
 	else
-		echo "已经存在java环境${JAVA_HOME}/bin/java"
+		echo "已经存在java环境${javaCommand}"
 	fi
+
 }
 
 # 安装 mvn
 function installMvnFn() {
-	if [[ ! -x "${MAVEN_HOME}/bin/mvn" ]]; then
-		MVN=$(which mvn)
-		if [[ ! -x "$MVN" ]]; then
-			if grep -q "/usr/maven/apache-maven-3.6.3/" /etc/profile; then
-				errorExit "系统环境变量中已经存在 mvn 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source /etc/profile"
-			fi
-			curl -LfSo apache-maven-3.6.3-bin.tar.gz https://mirrors.aliyun.com/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
-
-			mkdir -p /usr/maven/
-			#
-			tar -zxf apache-maven-3.6.3-bin.tar.gz -C /usr/maven/
-			#
-			echo '安装maven,路径/usr/maven/apache-maven-3.6.3/'
-			# 修改环境变量
-			{
-				echo ""
-				echo "export MAVEN_HOME=/usr/maven/apache-maven-3.6.3/"
-				echo "export PATH=\$PATH:\$MAVEN_HOME/bin"
-			} >>/etc/profile
-
-			# 更新环境变量
-			source /etc/profile
-			# 删除maven压缩包
-			rm -f apache-maven-3.6.3-bin.tar.gz
-		else
-			echo "已经存在maven环境${MVN}/bin/mvn"
+	mvnCommand=$(checkCommand mvn)
+	if [[ "$mvnCommand" == "not found" ]]; then
+		useDir=$(mustMkdir /usr/maven/ maven)
+		userProfileName=$(findProfile)
+		if grep -q "$useDir/apache-maven-3.6.3/" /etc/profile; then
+			errorExit "系统环境变量中已经存在 mvn 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
 		fi
+		if grep -q "MAVEN_HOME" /etc/profile; then
+			errorExit "系统环境变量中已经存在 MAVEN_HOME，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
+		fi
+		curl -LfSo maven.tar.gz https://mirrors.aliyun.com/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+		#
+		tar -zxf maven.tar.gz -C "$useDir"
+		#
+		echo "安装maven,路径 $useDir/apache-maven-3.6.3/"
+		cat >>"$userProfileName" <<EOF
+
+export MAVEN_HOME=$useDir/apache-maven-3.6.3/
+export PATH=\$PATH:\$MAVEN_HOME/bin
+EOF
+		echo "use profile $userProfileName"
+		# shellcheck source=.profile
+		source "$userProfileName"
+		# 删除maven压缩包
+		rm -f maven.tar.gz
 	else
-		echo "已经存在maven环境${MAVEN_HOME}/bin/mvn"
+		echo "已经存在maven环境${mvnCommand}"
 	fi
+
 }
 
 function installNodeFn() {
-	NODE=$(which node)
-	if [[ ! -x "$NODE" ]]; then
+	nodeCommand=$(checkCommand mvn)
+	if [[ "$nodeCommand" == "not found" ]]; then
 		ARCH_O=$(uname -m)
 		case "${ARCH_O}" in
 		aarch64 | arm64)
@@ -165,32 +244,40 @@ function installNodeFn() {
 		esac
 
 		NODE_VERSION="16.13.1"
+		useDir=$(mustMkdir /usr/node/ node)
+		userProfileName=$(findProfile)
+		if grep -q "NODE_HOME" "$userProfileName"; then
+			errorExit "系统环境变量中已经存在 NODE_HOME，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
+		fi
 
 		curl -LfSo node.tar.gz https://npmmirror.com/mirrors/node/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${BINARY_ARCH}.tar.gz
 		#
 		node_name=$(tar -tf node.tar.gz | grep 'node' | head -1)
-		#	检查环境变量
-		if grep -q "/usr/node/${node_name}" /etc/profile; then
-			errorExit "系统环境变量中已经存在 node 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source /etc/profile"
-		else
-			mkdir -p /usr/node/
-			tar -zxf node.tar.gz -C /usr/node
-			echo "安装node,路径 /usr/node/${node_name}"
-			# 修改环境变量
-			{
-				echo ""
-				echo "export NODE_HOME=/usr/node/${node_name}"
-				echo "export PATH=\$NODE_HOME/bin:\$PATH"
-			} >>"/etc/profile"
 
-			# 更新环境变量
-			source /etc/profile
-			npm config set registry https://registry.npmmirror.com/
-			# 删除 node 压缩包
-			rm -f node.tar.gz
+		#	检查环境变量
+		if grep -q "$useDir/${node_name}" "$userProfileName"; then
+			errorExit "系统环境变量中已经存在 node 路径，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
 		fi
+
+		tar -zxf node.tar.gz -C "$useDir"
+		echo "安装node,路径 $useDir/${node_name}"
+
+		cat >>"$userProfileName" <<EOF
+
+export NODE_HOME=$useDir/${node_name}
+export PATH=\$NODE_HOME/bin:\$PATH
+EOF
+		echo "use profile $userProfileName"
+		# shellcheck source=.profile
+		source "$userProfileName"
+
+		npm config set registry https://registry.npmmirror.com/
+		# 删除 node 压缩包
+		rm -f node.tar.gz
+
 	else
-		echo "已经存在node环境${NODE}"
+
+		echo "已经存在node环境${nodeCommand}"
 	fi
 }
 
@@ -263,17 +350,13 @@ else
 fi
 
 ## check java path
-if [ -z "$JAVA" ]; then
-	JAVA=$(which java)
-fi
-if [ -z "$JAVA" ]; then
-	if command_exists java; then
-		JAVA="java"
-	fi
-fi
-if [ -z "$JAVA" ]; then
+javaCommand=$(checkCommand java)
+if [[ "$javaCommand" == "not found" ]]; then
+	echo "不能正常安装"
 	errorExit "Cannot find a Java JDK. Please set either set JAVA or put java (>=1.8) in your PATH."
 fi
+
+echo "use java : $javaCommand"
 
 jpom_dir=/usr/local/jpom-${url_type}
 # 提示用户安装目录
@@ -333,13 +416,17 @@ if [ "$offline" == "" ]; then
 	fi
 fi
 
+jpom_dir=$(mustMkdir "$jpom_dir" "jpom $JPOM_TYPE")
 echo "开始安装：${JPOM_TYPE} ${versions}, 安装目录 ${jpom_dir}"
 # 创建指定目录
 mkdir -p "${jpom_dir}" && cd "${jpom_dir}" || exit
 
-if [ -f "./bin/${JPOM_TYPE}.sh" ] || [ -f "./${JPOM_TYPE}.sh" ]; then
-	errorExit "${jpom_dir} 目录下已经存在管理命令,请不要重复安装"
-fi
+sh_array=("./bin/Agent.sh" "./Agent.sh" "./bin/Server.sh" "./Server.sh")
+for element in "${sh_array[@]}"; do
+	if [ -f "$element" ] || [ -f "./${JPOM_TYPE}.sh" ]; then
+		errorExit "${jpom_dir} 目录下已经存在管理 $element 命令,请不要重复安装"
+	fi
+done
 
 # 判断是否存在文件
 if [[ ! -f "${fileName}" ]]; then
@@ -361,6 +448,7 @@ else
 fi
 # 判断是否需要安装服务
 if [[ $(echo "$module" | grep "service") != "" ]]; then
+	echo "开发安装服务"
 	if [ ! -f "./bin/Service.sh" ]; then
 		cat >&2 <<-EOF
 			ERROR: Service.sh not found .
@@ -371,7 +459,7 @@ if [[ $(echo "$module" | grep "service") != "" ]]; then
 fi
 if [ "$offline" == "" ]; then
 	# 删除安装命令
-	rm -f "${bin_abs_path}/install.sh"
+	rm -f "${binAbsPath}/install.sh"
 fi
 echo "================开始启动================"
 # 启动
