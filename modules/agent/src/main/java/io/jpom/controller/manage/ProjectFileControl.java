@@ -475,6 +475,7 @@ public class ProjectFileControl extends BaseAgentController {
         String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
         try {
             File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
+            FileUtil.mkdir(file);
             File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
             if (BooleanUtil.toBoolean(unzip)) {
                 // 需要解压文件
