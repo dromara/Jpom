@@ -196,30 +196,31 @@ function installNodeFn() {
 
 function checkModule() {
 	# 判断是否包含jdk
-	temp_result=$(echo "$module" | grep "jdk")
-	if [[ "$temp_result" != "" ]]; then
+	if [[ $(echo "$module" | grep "jdk") != "" ]]; then
 		echo "开始检查 jdk"
 		installJdkFn
 	fi
 
 	# 判断是否包含mvn
-	temp_result=$(echo "$module" | grep "mvn")
-	if [[ "$temp_result" != "" ]]; then
+	if [[ $(echo "$module" | grep "mvn") != "" ]]; then
 		echo "开始检查 mvn"
 		installMvnFn
 	fi
 
 	# 判断是否包含 node
-	temp_result=$(echo "$module" | grep "node")
-	if [[ "$temp_result" != "" ]]; then
+	if [[ $(echo "$module" | grep "node") != "" ]]; then
 		echo "开始检查 node"
 		installNodeFn
 	fi
 
-	temp_result=$(echo "$module" | grep "only-module")
-	if [[ "$temp_result" != "" ]]; then
-		errorExit "检查依赖结束"
+	if [[ $(echo "$module" | grep "only-module") != "" ]]; then
+		echo "检查依赖结束"
+		exit 0
 	fi
+}
+
+command_exists() {
+	command -v "$@" >/dev/null 2>&1
 }
 
 # 判断是否填写了安装类型
@@ -259,6 +260,19 @@ else
 	if [[ ! -f "$fileName" ]]; then
 		errorExit "安装包文件不存在"
 	fi
+fi
+
+## check java path
+if [ -z "$JAVA" ]; then
+	JAVA=$(which java)
+fi
+if [ -z "$JAVA" ]; then
+	if command_exists java; then
+		JAVA="java"
+	fi
+fi
+if [ -z "$JAVA" ]; then
+	errorExit "Cannot find a Java JDK. Please set either set JAVA or put java (>=1.8) in your PATH."
 fi
 
 jpom_dir=/usr/local/jpom-${url_type}
@@ -304,8 +318,7 @@ function askInstallPath() {
 	done
 }
 
-temp_result=$(echo "$module" | grep "default")
-if [[ "$temp_result" == "" ]]; then
+if [[ $(echo "$module" | grep "default") == "" ]]; then
 	askInstallPath
 fi
 

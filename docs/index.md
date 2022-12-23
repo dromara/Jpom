@@ -182,29 +182,6 @@ notices: # 可选的
 
 <br/>
 
-## 🏡代码托管
-
-- [Gitee ![star](https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp)](https://gitee.com/dromara/Jpom/)
-- [Github](https://github.com/dromara/Jpom)
-
-<br/>
-
-## 💪🏻参与贡献
-
-欢迎各路好汉一起来参与完善 <Badge text="Jpom"/>，我们期待你的 PR！
-
-如果想贡献，请先查看[贡献准则](/pages/dc18b8/)。
-
-[贡献成员列表](/pages/praise/friends/)
-
-<br/>
-
-## 🍭架构图
-
-<img :src="$withBase('/images/jpom-func-arch.jpg')" style="zoom: 120%" alt="jpom-func-arch">
-
-<br/>
-
 ## 快速体验
 
 ### 一键安装插件端 [详细的安装说明文档](/pages/install/)
@@ -232,7 +209,7 @@ bash install.sh Agent jdk
 curl -fsSL https://jpom.top/docs/install.sh | bash -s Agent jdk+default
 
 # 自定义安装路径
-apt install -y wget && \
+apt-get install -y wget && \
 wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Agent jdk
 ```
@@ -265,7 +242,7 @@ bash install.sh Server jdk
 curl -fsSL https://jpom.top/docs/install.sh | bash -s Server jdk+default
 
 # 自定义安装路径
-apt install -y wget && \
+apt-get install -y wget && \
 wget -O install.sh https://jpom.top/docs/install.sh && \
 bash install.sh Server jdk
 ```
@@ -287,6 +264,31 @@ docker run -p 2122:2122 --name jpom jpomdocker/jpom
 
 ⚠️注意： Linux 系统中有多种防火墙：Firewall、Iptables、SELinux 等，再检查防火墙配置时候需要都检查一下。
 :::
+
+<br/>
+
+## 🏡代码托管
+
+- [Gitee ![star](https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp)](https://gitee.com/dromara/Jpom/)
+- [Github](https://github.com/dromara/Jpom)
+
+<br/>
+
+## 💪🏻参与贡献
+
+欢迎各路好汉一起来参与完善 <Badge text="Jpom"/>，我们期待你的 PR！
+
+如果想贡献，请先查看[贡献准则](/pages/dc18b8/)。
+
+[贡献成员列表](/pages/praise/friends/)
+
+<br/>
+
+## 🍭架构图
+
+<img :src="$withBase('/images/jpom-func-arch.jpg')" style="zoom: 120%" alt="jpom-func-arch">
+
+<br/>
 
 ## 🌍 精彩分享
 
