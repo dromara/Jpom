@@ -25,7 +25,6 @@ package io.jpom.controller;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
@@ -95,7 +94,7 @@ public class InstallController extends BaseServerController {
         //
         Assert.state(!userService.canUse(), "系统已经初始化过啦，请勿重复初始化");
 
-        boolean systemOccupyUserName = StrUtil.equalsAnyIgnoreCase(userName, UserModel.DEMO_USER, JpomApplication.SYSTEM_ID, UserModel.SYSTEM_ADMIN);
+        boolean systemOccupyUserName = StrUtil.equalsAnyIgnoreCase(userName, UserModel.DEMO_USER, Const.SYSTEM_ID, UserModel.SYSTEM_ADMIN);
         Assert.state(!systemOccupyUserName, "当前登录名已经被系统占用啦");
         // 创建用户
         UserModel userModel = new UserModel();

@@ -26,6 +26,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.JpomApplication;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.RemoteVersion;
@@ -39,7 +40,6 @@ import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
-import io.jpom.system.ConfigBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
@@ -64,7 +64,7 @@ public class CheckMonitor implements InitializingBean {
         // 缓存检测调度
         CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
             BuildUtil.reloadCacheSize();
-            ConfigBean.getInstance().dataSize();
+            JpomApplication.getInstance().dataSize();
             // 定时刷新代理配置
             ProxySelectorConfig selectorConfig = SpringUtil.getBean(ProxySelectorConfig.class);
             selectorConfig.refresh();
@@ -128,7 +128,7 @@ public class CheckMonitor implements InitializingBean {
     private void asyncLoad() {
         ThreadUtil.execute(() -> {
             BuildUtil.reloadCacheSize();
-            ConfigBean.getInstance().dataSize();
+            JpomApplication.getInstance().dataSize();
 
             // 状态恢复的数据
             Map<String, IStatusRecover> statusRecoverMap = SpringUtil.getApplicationContext().getBeansOfType(IStatusRecover.class);

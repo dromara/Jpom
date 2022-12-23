@@ -40,7 +40,7 @@
             <directory>./src/main/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <includes>
-                <include>Agent.sh</include>
+                <include>*.sh</include>
             </includes>
             <lineEnding>unix</lineEnding>
         </fileSet>
@@ -48,7 +48,7 @@
             <directory>./src/main/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <includes>
-                <include>Agent.bat</include>
+                <include>*.bat</include>
             </includes>
             <lineEnding>dos</lineEnding>
         </fileSet>

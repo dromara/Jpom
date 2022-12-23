@@ -23,6 +23,7 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
+import io.jpom.JpomApplication;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
@@ -39,7 +40,6 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.socket.ServiceFileTailWatcher;
-import io.jpom.system.ConfigBean;
 import io.jpom.util.CommandUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -77,7 +77,7 @@ public class CacheManageController extends BaseServerController {
         Map<String, Object> map = new HashMap<>(10);
         String fileSize = FileUtil.readableFileSize(BuildUtil.tempFileCacheSize);
         map.put("cacheFileSize", fileSize);
-        map.put("dataSize", FileUtil.readableFileSize(ConfigBean.getInstance().getDataSizeCache()));
+        map.put("dataSize", FileUtil.readableFileSize(JpomApplication.getInstance().getDataSizeCache()));
         int size = LoginControl.LFU_CACHE.size();
         File oldJarsPath = JpomManifest.getOldJarsPath();
         map.put("oldJarsSize", FileUtil.readableFileSize(FileUtil.size(oldJarsPath)));
@@ -117,7 +117,7 @@ public class CacheManageController extends BaseServerController {
     public JsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
         switch (type) {
             case "serviceCacheFileSize": {
-                File tempPath = ConfigBean.getInstance().getTempPath();
+                File tempPath = JpomApplication.getInstance().getTempPath();
                 boolean clean = CommandUtil.systemFastDel(tempPath);
                 Assert.state(!clean, "清空文件缓存失败");
                 break;

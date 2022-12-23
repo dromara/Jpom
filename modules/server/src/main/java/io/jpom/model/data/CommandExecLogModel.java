@@ -24,10 +24,10 @@ package io.jpom.model.data;
 
 import cn.hutool.core.annotation.PropIgnore;
 import cn.hutool.core.io.FileUtil;
+import io.jpom.JpomApplication;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
-import io.jpom.system.ConfigBean;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -100,7 +100,7 @@ public class CommandExecLogModel extends BaseWorkspaceModel {
      * @return 文件
      */
     public static File logFileDir(String commandId) {
-        return FileUtil.file(ConfigBean.getInstance().getDataPath(), "command_log", commandId);
+        return FileUtil.file(JpomApplication.getInstance().getDataPath(), "command_log", commandId);
     }
 
     @Getter

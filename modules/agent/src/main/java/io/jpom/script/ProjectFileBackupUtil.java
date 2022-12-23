@@ -34,9 +34,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.JpomApplication;
 import io.jpom.model.data.DslYmlDto;
 import io.jpom.system.AgentConfig;
-import io.jpom.system.ConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +62,7 @@ public class ProjectFileBackupUtil {
      * @return file
      */
     public static File path(String pathId) {
-        String dataPath = ConfigBean.getInstance().getDataPath();
+        String dataPath = JpomApplication.getInstance().getDataPath();
         return FileUtil.file(dataPath, "project_file_backup", pathId);
     }
 

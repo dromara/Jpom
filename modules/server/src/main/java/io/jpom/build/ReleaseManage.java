@@ -41,6 +41,7 @@ import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.Session;
+import io.jpom.JpomApplication;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -60,7 +61,6 @@ import io.jpom.service.docker.DockerSwarmInfoService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
@@ -263,7 +263,7 @@ public class ReleaseManage implements Runnable {
 
     private void doDockerImage() {
         // 生成临时目录
-        File tempPath = FileUtil.file(ConfigBean.getInstance().getTempPath(), "build_temp", "docker_image", this.buildExtraModule.getId() + StrUtil.DASHED + this.buildNumberId);
+        File tempPath = FileUtil.file(JpomApplication.getInstance().getTempPath(), "build_temp", "docker_image", this.buildExtraModule.getId() + StrUtil.DASHED + this.buildNumberId);
         try {
             File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
             FileUtil.copyContent(sourceFile, tempPath, true);
@@ -386,7 +386,7 @@ public class ReleaseManage implements Runnable {
 
         InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
         String s1 = IoUtil.readUtf8(templateInputStream);
-        ConfigBean.getInstance()
+        JpomApplication.getInstance()
             .execScript(s1 + releaseCommand, file -> {
                 try {
                     return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));

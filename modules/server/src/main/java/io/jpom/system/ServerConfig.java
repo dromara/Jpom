@@ -24,6 +24,7 @@ package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.user.UserModel;
@@ -48,9 +49,9 @@ import java.util.Optional;
 @Data
 public class ServerConfig extends BaseExtConfig {
 
-    private final ConfigBean configBean;
+    private final JpomApplication configBean;
 
-    public ServerConfig(ConfigBean configBean) {
+    public ServerConfig(JpomApplication configBean) {
         this.configBean = configBean;
     }
 
@@ -108,7 +109,7 @@ public class ServerConfig extends BaseExtConfig {
      * @return file
      */
     public File getUserTempPath() {
-        File file =configBean.getTempPath();
+        File file = configBean.getTempPath();
         UserModel userModel = BaseServerController.getUserModel();
         if (userModel == null) {
             throw new JpomRuntimeException("没有登录");

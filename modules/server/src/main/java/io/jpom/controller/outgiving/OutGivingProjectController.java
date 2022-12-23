@@ -29,6 +29,7 @@ import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
@@ -50,7 +51,6 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.outgiving.OutGivingServer;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfig;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -187,7 +187,7 @@ public class OutGivingProjectController extends BaseServerController {
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         //
         boolean unzip = Convert.toBool(autoUnzip, false);
-        File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConst.OUTGIVING_FILE, id);
+        File file = FileUtil.file(JpomApplication.getInstance().getDataPath(), ServerConst.OUTGIVING_FILE, id);
         MultipartFileBuilder multipartFileBuilder = createMultipart();
         multipartFileBuilder
             .setUseOriginalFilename(true)

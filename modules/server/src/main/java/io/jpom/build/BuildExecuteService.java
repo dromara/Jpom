@@ -38,6 +38,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.BaseEnum;
@@ -59,7 +60,6 @@ import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.service.system.WorkspaceEnvVarService;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.CommandUtil;
@@ -636,7 +636,7 @@ public class BuildExecuteService {
             Map<String, Object> map = dockerInfoModel.toParameter();
             map.put("runsOn", dockerYmlDsl.getRunsOn());
             map.put("workingDir", workingDir);
-            map.put("tempDir", ConfigBean.getInstance().getTempPath());
+            map.put("tempDir", JpomApplication.getInstance().getTempPath());
             String buildInfoModelId = buildInfoModel.getId();
             map.put("dockerName", "jpom-build-" + buildInfoModelId);
             map.put("logFile", FileUtil.getAbsolutePath(logRecorder.getFile()));
@@ -698,7 +698,7 @@ public class BuildExecuteService {
             InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
             String s1 = IoUtil.readUtf8(templateInputStream);
             try {
-                int waitFor = ConfigBean.getInstance()
+                int waitFor = JpomApplication.getInstance()
                     .execScript(s1 + buildInfoModel.getScript(), file -> {
                         try {
                             return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
@@ -897,7 +897,7 @@ public class BuildExecuteService {
             try (LogRecorder scriptLog = LogRecorder.builder().file(logFile).build()) {
                 // 创建执行器
                 scriptFile = scriptModel.scriptFile();
-                int waitFor = ConfigBean.getInstance().execScript(scriptModel.getContext(), file -> {
+                int waitFor = JpomApplication.getInstance().execScript(scriptModel.getContext(), file -> {
                     try {
                         return CommandUtil.execWaitFor(file, null, environment, null, (s, process) -> {
                             logRecorder.info(s);

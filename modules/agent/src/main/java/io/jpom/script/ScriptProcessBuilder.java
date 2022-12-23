@@ -34,13 +34,13 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.service.system.AgentWorkspaceEnvVarService;
 import io.jpom.socket.ConsoleCommandOp;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.SocketSessionUtil;
@@ -74,7 +74,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         super(nodeScriptModel.logFile(executeId));
         this.executeId = executeId;
         //
-        String dataPath = ConfigBean.getInstance().getDataPath();
+        String dataPath = JpomApplication.getInstance().getDataPath();
         scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
         FileUtil.writeString(nodeScriptModel.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
         //

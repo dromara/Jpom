@@ -24,7 +24,7 @@ package io.jpom.socket.handler;
 
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.JpomApplication;
+import io.jpom.common.Const;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -65,7 +65,7 @@ public class TomcatHandler extends BaseProxyHandler {
     protected String handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
         String tomcatId = (String) attributes.get("tomcatId");
         String fileName = json.getString("fileName");
-        if (!JpomApplication.SYSTEM_ID.equals(tomcatId) && consoleCommandOp == ConsoleCommandOp.heart) {
+        if (!Const.SYSTEM_ID.equals(tomcatId) && consoleCommandOp == ConsoleCommandOp.heart) {
             // 服务端心跳
             return null;
         }
@@ -73,7 +73,7 @@ public class TomcatHandler extends BaseProxyHandler {
         super.logOpt(this.getClass(), attributes, json);
 
         //
-        if (consoleCommandOp == ConsoleCommandOp.showlog && JpomApplication.SYSTEM_ID.equals(tomcatId)) {
+        if (consoleCommandOp == ConsoleCommandOp.showlog && Const.SYSTEM_ID.equals(tomcatId)) {
 
             // 进入管理页面后需要实时加载日志
             File file = FileUtil.file(LogbackConfig.getPath(), fileName);

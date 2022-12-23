@@ -35,7 +35,6 @@ import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.model.BaseJsonModel;
-import io.jpom.system.ConfigBean;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -313,6 +312,6 @@ public class RemoteVersion extends BaseJsonModel {
      * @return file
      */
     private static File getFile() {
-        return FileUtil.file(ConfigBean.getInstance().getDataPath(), Const.REMOTE_VERSION);
+        return FileUtil.file(JpomApplication.getInstance().getDataPath(), Const.REMOTE_VERSION);
     }
 }

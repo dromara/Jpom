@@ -29,13 +29,13 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.ServerConst;
 import io.jpom.common.Type;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.system.AgentAutoUser;
 import io.jpom.service.node.NodeService;
-import io.jpom.system.ConfigBean;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.JvmUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -55,10 +55,10 @@ import java.io.File;
 public class AutoImportLocalNode implements InitializingBean {
 
     private final NodeService nodeService;
-    private final ConfigBean configBean;
+    private final JpomApplication configBean;
 
     public AutoImportLocalNode(NodeService nodeService,
-                               ConfigBean configBean) {
+                               JpomApplication configBean) {
         this.nodeService = nodeService;
         this.configBean = configBean;
     }

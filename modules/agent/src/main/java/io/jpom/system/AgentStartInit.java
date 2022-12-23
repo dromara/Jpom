@@ -34,6 +34,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import io.jpom.JpomApplication;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.cron.CronUtils;
@@ -68,14 +69,17 @@ public class AgentStartInit implements InitializingBean {
     private final ProjectInfoService projectInfoService;
     private final AgentConfig agentConfig;
     private final AgentAuthorize agentAuthorize;
+    private final JpomApplication jpomApplication;
 
 
     public AgentStartInit(ProjectInfoService projectInfoService,
                           AgentConfig agentConfig,
-                          AgentAuthorize agentAuthorize) {
+                          AgentAuthorize agentAuthorize,
+                          JpomApplication jpomApplication) {
         this.projectInfoService = projectInfoService;
         this.agentConfig = agentConfig;
         this.agentAuthorize = agentAuthorize;
+        this.jpomApplication = jpomApplication;
     }
 
 
@@ -204,7 +208,7 @@ public class AgentStartInit implements InitializingBean {
         urlBuilder.addQuery("ips", CollUtil.join(ips, StrUtil.COMMA));
         urlBuilder.addQuery("loginName", agentAuthorize.getAgentName());
         urlBuilder.addQuery("loginPwd", agentAuthorize.getAgentPwd());
-        int port = ConfigBean.getInstance().getPort();
+        int port = jpomApplication.getPort();
         urlBuilder.addQuery("port", port + "");
         //
         String build = urlBuilder.build();

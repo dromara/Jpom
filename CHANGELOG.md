@@ -1,5 +1,42 @@
 # 🚀 版本日志
 
+## 2.10.4
+
+### 🐞 解决BUG、优化功能
+
+1. 【all】修复 linux 管理脚本中的 pid 文件内容与真实进程不一致问题
+2. 【all】恢复 linux 管理脚本支持创建服务管理
+
+### ⚠️ 注意
+
+Linux 环境 已经安装 2.10.3 ~ 2.10.0 的需要手动更新一下管理脚本
+
+> 需要`创建服务来管理`的需要更新后才能正常使用在线升级和保存配置并重启
+
+> 建议先更新脚本再升级插件端或者服务端
+
+**服务端**：(需要到安装目录的 bin 下执行)
+
+```shell
+curl -LfsSo Server.sh https://gitee.com/dromara/Jpom/raw/master/modules/server/src/main/bin/Server.sh
+```
+
+```shell
+curl -LfsSo Server.sh https://gitee.com/dromara/Jpom/raw/master/modules/server/src/main/bin/Service.sh
+```
+
+**插件端** ：(需要到安装目录的 bin 下执行)
+
+```shell
+curl -LfsSo Agent.sh https://gitee.com/dromara/Jpom/raw/master/modules/agent/src/main/bin/Agent.sh
+```
+
+```shell
+curl -LfsSo Server.sh https://gitee.com/dromara/Jpom/raw/master/modules/server/src/main/bin/Service.sh
+```
+
+------
+
 ## 2.10.3 (2022-12-22)
 
 ### 🐣 新增功能

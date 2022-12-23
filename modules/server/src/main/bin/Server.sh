@@ -58,9 +58,7 @@ function logStdout() {
 }
 
 bin_abs_path=$(absPath "$(dirname "$0")")
-bin_abs_name=$(absPath "$0")
 base=$(absPath "$bin_abs_path/../")
-serverFile="/etc/systemd/system/jpom-server.service"
 
 conf_path="${base}/conf"
 Lib="${base}/lib/"
@@ -111,7 +109,7 @@ JAVA_OPTS=" $JAVA_OPTS -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true 
 JAVA_OPTS="${JAVA_OPTS} -Dlogging.config=$logback_configurationFile -Dspring.config.location=$application_conf"
 
 MAIN_ARGS="$*"
-action="$1"
+
 # mode -s -9
 mode="$2"
 
@@ -245,160 +243,30 @@ function status() {
 		echo "jpom server is stopped"
 	fi
 }
-command_exists() {
-	command -v "$@" >/dev/null 2>&1
-}
-
-function service() {
-	#
-	user="$(id -un 2>/dev/null || true)"
-	user_group="$(id -gn 2>/dev/null || true)"
-
-	sh_c='sh -c'
-	exec_user=""
-	if [ "$user" != 'root' ]; then
-		if command_exists sudo; then
-			sh_c='sudo -E sh -c'
-		elif command_exists su; then
-			sh_c='su -c'
-		else
-			cat >&2 <<-'EOF'
-				Error: this installer needs the ability to run commands as root.
-				We are unable to find either "sudo" or "su" available to make this happen.
-			EOF
-			exit 1
-		fi
-		exec_user="$user"
-	fi
-
-	case "$mode" in
-	install)
-		install
-		;;
-	uninstall)
-		uninstall
-		;;
-	reinstall)
-		uninstall
-		echo "--------------------------------------"
-		install
-		;;
-	*)
-		echo "Usage: $0 service {install|uninstall|reinstall}" 2>&2
-		exit 1
-		;;
-	esac
-}
-
-function install() {
-
-	if [ -f "$serverFile" ]; then
-		echo "service file already exists" 2>&2
-		exit 2
-	fi
-	if [ -z "$JAVA_HOME" ]; then
-		echo "JAVA_HOME variable not found" 2>&2
-		exit 2
-	fi
-	if [ -z "$CLASSPATH" ]; then
-		echo "CLASSPATH variable not found" 2>&2
-		exit 2
-	fi
-
-	$sh_c "cat >$serverFile" <<EOF
-[Unit]
-Description=jpom server service
-After=network.target
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=forking
-Environment="JAVA_HOME=$JAVA_HOME"
-Environment="PATH=$PATH"
-Environment="CLASSPATH=$CLASSPATH"
-ExecStart=/bin/bash $bin_abs_name start -s
-ExecStop=/bin/bash $bin_abs_name stop
-ExecReload=/bin/bash $bin_abs_name restart
-User=$exec_user
-Group=$user_group
-PIDFile=$pidfile
-
-[Install]
-WantedBy=multi-user.target
-EOF
-	if [ ! -f "$serverFile" ]; then
-		cat >&2 <<-'EOF'
-			ERROR: jpom-server.service write failed Installing the service requires the ability to run commands as root.
-		EOF
-		exit 1
-	fi
-
-	echo "jpom-server.service write success :$serverFile"
-
-	$sh_c 'systemctl daemon-reload'
-	$sh_c 'systemctl start jpom-server'
-	cat >&2 <<-'EOF'
-		INFO: You can execute the following commands to manage jpom-server.service.
-		INFO: systemctl start jpom-server.service　(Start the jpom service )
-		INFO: systemctl stop jpom-server.service　(Stop the jpom service)
-		INFO: systemctl enable jpom-server.service (Set up autostart)
-		INFO: systemctl disable jpom-server.service (stop autostart)
-		INFO: systemctl status jpom-server.service (View the current status of the jpom service)
-		INFO: systemctl restart jpom-server.service　(Restart the jpom service）
-	EOF
-}
-
-function uninstall() {
-	if [ -f "$serverFile" ]; then
-		$sh_c 'systemctl disable jpom-server.service'
-		$sh_c 'systemctl stop jpom-server.service'
-		$sh_c "rm -f $serverFile"
-		if [ -f "$serverFile" ]; then
-			cat >&2 <<-'EOF'
-				ERROR: jpom-server.service write uninstall .
-			EOF
-			exit 1
-		fi
-		echo "jpom-server.service uninstalled successfully"
-		$sh_c 'systemctl daemon-reload'
-	else
-		echo "$serverFile not found"
-	fi
-}
 
 function usage() {
-	echo "Usage: $0 {start|stop|restart|status|service(install|uninstall|reinstall)}" 2>&2
+	echo "Usage: $0 {start|stop|restart|status}" 2>&2
 	RETVAL="2"
 }
 
 # See how we were called.
 RETVAL="0"
-
-function execAction() {
-	case "$1" in
-	start)
-		start
-		;;
-	stop)
-		stop
-		;;
-	restart)
-		stop
-		start
-		;;
-	status)
-		status
-		;;
-	service)
-		service
-		;;
-	*)
-		usage
-		;;
-	esac
-}
-
-execAction "$action"
-
+case "$1" in
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+restart)
+	stop
+	start
+	;;
+status)
+	status
+	;;
+*)
+	usage
+	;;
+esac
 exit $RETVAL

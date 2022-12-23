@@ -25,10 +25,10 @@ package io.jpom.model.script;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import lombok.Data;
@@ -84,7 +84,7 @@ public class ScriptModel extends BaseWorkspaceModel {
         if (StrUtil.isEmpty(id)) {
             throw new IllegalArgumentException("id 为空");
         }
-        File path = ConfigBean.getInstance().getScriptPath();
+        File path = JpomApplication.getInstance().getScriptPath();
         return FileUtil.file(path, id);
     }
 
@@ -100,7 +100,7 @@ public class ScriptModel extends BaseWorkspaceModel {
     }
 
     public File scriptFile() {
-        String dataPath = ConfigBean.getInstance().getDataPath();
+        String dataPath = JpomApplication.getInstance().getDataPath();
 
         File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
         FileUtil.writeString(this.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());

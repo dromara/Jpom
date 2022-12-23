@@ -42,7 +42,6 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.jpom.JpomApplication;
 import io.jpom.cron.IAsyncLoad;
 import io.jpom.cron.ICron;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.JvmUtil;
@@ -74,7 +73,7 @@ import java.util.Map;
 @Configuration
 public class JpomApplicationEvent implements ApplicationListener<ApplicationEvent> {
 
-    private final ConfigBean configBean;
+    private final JpomApplication configBean;
 
     private static int oldJarsCount = 2;
 
@@ -82,7 +81,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         JpomApplicationEvent.oldJarsCount = oldJarsCount;
     }
 
-    public JpomApplicationEvent(ConfigBean configBean) {
+    public JpomApplicationEvent(JpomApplication configBean) {
         this.configBean = configBean;
     }
 

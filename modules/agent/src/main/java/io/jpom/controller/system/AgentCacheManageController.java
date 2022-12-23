@@ -24,6 +24,7 @@ package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
@@ -35,7 +36,6 @@ import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.system.AgentWorkspaceEnvVarService;
 import io.jpom.socket.AgentFileTailWatcher;
-import io.jpom.system.ConfigBean;
 import io.jpom.util.CommandUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -58,10 +58,10 @@ import java.util.Map;
 public class AgentCacheManageController extends BaseAgentController {
 
     private final AgentWorkspaceEnvVarService agentWorkspaceEnvVarService;
-    private final ConfigBean configBean;
+    private final JpomApplication configBean;
 
     public AgentCacheManageController(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService,
-                                      ConfigBean configBean) {
+                                      JpomApplication configBean) {
         this.agentWorkspaceEnvVarService = agentWorkspaceEnvVarService;
         this.configBean = configBean;
     }

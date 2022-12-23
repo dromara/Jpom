@@ -27,6 +27,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
+import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -104,7 +105,7 @@ public class AgentConfig extends BaseExtConfig {
      * @return file
      */
     public File getTempPath() {
-        File file = ConfigBean.getInstance().getTempPath();
+        File file = JpomApplication.getInstance().getTempPath();
         String userName = BaseAgentController.getNowUserName();
         if (StrUtil.isEmpty(userName)) {
             throw new JpomRuntimeException("没有登录");
