@@ -195,6 +195,8 @@ notices: # 可选的
 ```bash
 # 一键安装 使用默认的安装路径
 curl -fsSL https://jpom.top/docs/install.sh | bash -s Agent jdk+default
+# 一键默认安装 + 自动配置开机自启服务
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Agent jdk+default+service
 
 # 自定义安装路径
 yum install -y wget && \
@@ -228,6 +230,8 @@ bash install.sh Agent jdk
 ```bash
 # 一键安装 使用默认的安装路径
 curl -fsSL https://jpom.top/docs/install.sh | bash -s Server jdk+default
+# 一键默认安装 + 自动配置开机自启服务
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Server jdk+default+service
 
 # 自定义安装路径
 yum install -y wget && \
@@ -240,6 +244,8 @@ bash install.sh Server jdk
 ```bash
 # 一键安装 使用默认的安装路径
 curl -fsSL https://jpom.top/docs/install.sh | bash -s Server jdk+default
+# 一键默认安装 + 自动配置开机自启服务
+curl -fsSL https://jpom.top/docs/install.sh | bash -s Server jdk+default+service
 
 # 自定义安装路径
 apt-get install -y wget && \
