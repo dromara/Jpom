@@ -34,6 +34,9 @@ import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.GlobalHeaders;
 import cn.hutool.http.Header;
+import cn.hutool.http.useragent.UserAgentInfo;
+import cn.hutool.system.JavaInfo;
+import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -120,9 +123,22 @@ public class JpomManifest {
                     JPOM_MANIFEST.randomId = IdUtil.fastSimpleUUID();
                 }
                 String jpomTag = StrUtil.format("Jpom {}/{}", JPOM_MANIFEST.getType(), JPOM_MANIFEST.getVersion());
-                GlobalHeaders.INSTANCE.header(Header.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36 " + jpomTag, true);
+                String osInfo = buildOsInfo();
+                GlobalHeaders.INSTANCE.header(Header.USER_AGENT, StrUtil.format("Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 {}", osInfo, jpomTag), true);
             }
         }
+    }
+
+    private static String buildOsInfo() {
+        // Windows NT 10.0; Win64; x64
+        OsInfo osInfo = SystemUtil.getOsInfo();
+        JavaInfo javaInfo = SystemUtil.getJavaInfo();
+        return StrUtil.format("{} {}; {}; {}",
+            Opt.ofBlankAble(osInfo.getName()).orElse(UserAgentInfo.NameUnknown),
+            Opt.ofBlankAble(osInfo.getVersion()).orElse("0"),
+            Opt.ofBlankAble(osInfo.getArch()).orElse(UserAgentInfo.NameUnknown),
+            Opt.ofBlankAble(javaInfo.getVersion()).orElse(UserAgentInfo.NameUnknown)
+        );
     }
 
     /**
