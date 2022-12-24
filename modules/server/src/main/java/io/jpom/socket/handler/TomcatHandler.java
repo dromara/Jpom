@@ -23,7 +23,7 @@
 package io.jpom.socket.handler;
 
 import cn.hutool.core.io.FileUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.Const;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.permission.ClassFeature;

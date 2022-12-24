@@ -44,8 +44,8 @@
 // */
 //package io.jpom.service.node.tomcat;
 //
-//import com.alibaba.fastjson.JSONArray;
-//import com.alibaba.fastjson.JSONObject;
+//import com.alibaba.fastjson2.JSONArray;
+//import com.alibaba.fastjson2.JSONObject;
 //import io.jpom.common.forward.NodeForward;
 //import io.jpom.common.forward.NodeUrl;
 //import io.jpom.model.data.NodeModel;

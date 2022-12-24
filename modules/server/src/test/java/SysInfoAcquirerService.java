@@ -20,8 +20,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-//import com.alibaba.fastjson.JSON;
-//import com.alibaba.fastjson.JSONObject;
+//import com.alibaba.fastjson2.JSON;
+//import com.alibaba.fastjson2.JSONObject;
 //import com.alibaba.fastjson.serializer.SerializerFeature;
 //import com.sun.management.OperatingSystemMXBean;
 //import org.springframework.stereotype.Service;

@@ -20,12 +20,13 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import cn.hutool.core.io.unit.DataSizeUtil;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
@@ -129,7 +130,7 @@ public class TestLocal {
     public void test4() {
         InspectContainerCmd socat = dockerClient.inspectContainerCmd("socat").withSize(true);
         InspectContainerResponse exec = socat.exec();
-        System.out.println(JSONObject.toJSONString(exec.getHostConfig(), SerializerFeature.PrettyFormat));
+        System.out.println(JSONObject.toJSONString(exec.getHostConfig(), JSONWriter.Feature.PrettyFormat));
     }
 
     @Test

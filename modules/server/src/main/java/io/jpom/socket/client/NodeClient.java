@@ -25,7 +25,7 @@ package io.jpom.socket.client;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.system.init.OperateLogController;

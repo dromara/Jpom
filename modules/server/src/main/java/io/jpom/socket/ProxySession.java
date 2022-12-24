@@ -26,7 +26,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.system.init.OperateLogController;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;

@@ -24,8 +24,8 @@ package io.jpom.controller.openapi;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseJpomController;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;

@@ -24,7 +24,7 @@ package io.jpom.socket.handler;
 
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;

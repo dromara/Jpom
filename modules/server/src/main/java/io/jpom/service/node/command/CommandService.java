@@ -35,7 +35,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.system.SystemUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.ChannelExec;
 import io.jpom.common.BaseServerController;
 import io.jpom.cron.CronUtils;

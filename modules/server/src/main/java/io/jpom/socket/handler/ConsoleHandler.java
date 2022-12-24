@@ -22,7 +22,7 @@
  */
 package io.jpom.socket.handler;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -42,32 +42,32 @@ import java.util.Map;
 @Feature(cls = ClassFeature.PROJECT_CONSOLE, method = MethodFeature.EXECUTE)
 public class ConsoleHandler extends BaseProxyHandler {
 
-	public ConsoleHandler() {
-		super(NodeUrl.TopSocket);
-	}
+    public ConsoleHandler() {
+        super(NodeUrl.TopSocket);
+    }
 
-	@Override
-	protected Object[] getParameters(Map<String, Object> attributes) {
-		return new Object[]{"projectId", attributes.get("projectId"), "copyId", attributes.get("copyId")};
-	}
+    @Override
+    protected Object[] getParameters(Map<String, Object> attributes) {
+        return new Object[]{"projectId", attributes.get("projectId"), "copyId", attributes.get("copyId")};
+    }
 
-	@Override
-	protected String handleTextMessage(Map<String, Object> attributes,
-									   ProxySession proxySession,
-									   JSONObject json,
-									   ConsoleCommandOp consoleCommandOp) {
-		//ProjectInfoCacheModel dataItem = (ProjectInfoCacheModel) attributes.get("dataItem");
+    @Override
+    protected String handleTextMessage(Map<String, Object> attributes,
+                                       ProxySession proxySession,
+                                       JSONObject json,
+                                       ConsoleCommandOp consoleCommandOp) {
+        //ProjectInfoCacheModel dataItem = (ProjectInfoCacheModel) attributes.get("dataItem");
 //		UserModel userModel = (UserModel) attributes.get("userInfo");
 //		if (RunMode.Dsl.name().equals(dataItem.getRunMode()) && userModel.isDemoUser()) {
 //			if (consoleCommandOp == ConsoleCommandOp.stop || consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
 //				return PermissionInterceptor.DEMO_TIP;
 //			}
 //		}
-		if (consoleCommandOp != ConsoleCommandOp.heart) {
-			super.logOpt(this.getClass(), attributes, json);
+        if (consoleCommandOp != ConsoleCommandOp.heart) {
+            super.logOpt(this.getClass(), attributes, json);
 
-		}
-		proxySession.send(json.toString());
-		return null;
-	}
+        }
+        proxySession.send(json.toString());
+        return null;
+    }
 }

@@ -26,7 +26,7 @@ import cn.hutool.cache.impl.CacheObj;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.commander.AbstractSystemCommander;
 
 import java.util.Iterator;

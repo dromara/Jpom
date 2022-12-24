@@ -38,8 +38,7 @@ import cn.hutool.http.useragent.UserAgentInfo;
 import cn.hutool.system.JavaInfo;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
@@ -288,7 +287,7 @@ public class JpomManifest {
 
     @Override
     public String toString() {
-        return JSON.toJSONString(this);
+        return JSONObject.toJSONString(this);
     }
 
     /**
@@ -416,7 +415,7 @@ public class JpomManifest {
         String upgrade = FileUtil.file(runPath, Const.UPGRADE).getAbsolutePath();
         JSONObject jsonObject = null;
         try {
-            jsonObject = (JSONObject) JsonFileUtil.readJson(upgrade);
+            jsonObject = JsonFileUtil.readJson(upgrade);
         } catch (FileNotFoundException ignored) {
         }
         if (jsonObject == null) {

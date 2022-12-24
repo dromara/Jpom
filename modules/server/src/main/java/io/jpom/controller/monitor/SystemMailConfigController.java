@@ -23,7 +23,7 @@
 package io.jpom.controller.monitor;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.data.MailAccountModel;
@@ -95,7 +95,7 @@ public class SystemMailConfigController extends BaseServerController {
             Assert.hasText(mailAccountModel.getPass(), "请填写pass");
         }
         IPlugin plugin = PluginFactory.getPlugin("email");
-        Object json = JSONObject.toJSON(mailAccountModel);
+        Object json = JSON.toJSON(mailAccountModel);
         Map<String, Object> map = new HashMap<>(1);
         map.put("data", json);
         boolean checkInfo = plugin.execute("checkInfo", map, Boolean.class);

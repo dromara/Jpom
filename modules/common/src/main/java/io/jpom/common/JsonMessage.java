@@ -22,9 +22,11 @@
  */
 package io.jpom.common;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.ToStringSerializer;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.writer.ObjectWriterImplToString;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -48,12 +50,12 @@ public class JsonMessage<T> implements Serializable {
     public static int DEFAULT_SUCCESS_CODE = 200;
 
     static {
+        ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
         // long 类型自动转String
-        SerializeConfig serializeConfig = SerializeConfig.globalInstance;
-        serializeConfig.put(Long.class, ToStringSerializer.instance);
-        serializeConfig.put(long.class, ToStringSerializer.instance);
-        serializeConfig.put(BigInteger.class, ToStringSerializer.instance);
-        serializeConfig.put(Long.TYPE, ToStringSerializer.instance);
+        writerProvider.register(Long.class, ObjectWriterImplToString.INSTANCE);
+        writerProvider.register(long.class, ObjectWriterImplToString.INSTANCE);
+        writerProvider.register(BigInteger.class, ObjectWriterImplToString.INSTANCE);
+        writerProvider.register(Long.TYPE, ObjectWriterImplToString.INSTANCE);
     }
 
     private int code;
@@ -98,7 +100,7 @@ public class JsonMessage<T> implements Serializable {
     }
 
     public JSONObject toJson() {
-        return (JSONObject) JSONObject.toJSON(this);
+        return (JSONObject) JSON.toJSON(this);
     }
 
     public static JSONObject toJson(int code, String msg) {

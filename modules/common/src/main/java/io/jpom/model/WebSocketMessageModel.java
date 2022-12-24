@@ -22,7 +22,7 @@
  */
 package io.jpom.model;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 
 /**
  * websocket发送和接收消息Model
@@ -31,63 +31,63 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class WebSocketMessageModel extends BaseJsonModel {
 
-	private String command;
-	private String nodeId;
-	private Object params;
-	private Object data;
+    private String command;
+    private String nodeId;
+    private Object params;
+    private Object data;
 
-	public WebSocketMessageModel(String command, String nodeId) {
-		this.command = command;
-		this.nodeId = nodeId;
-		this.data = "";
-	}
+    public WebSocketMessageModel(String command, String nodeId) {
+        this.command = command;
+        this.nodeId = nodeId;
+        this.data = "";
+    }
 
-	public static WebSocketMessageModel getInstance(String message) {
-		JSONObject commandObj = JSONObject.parseObject(message);
-		String command = commandObj.getString("command");
-		String nodeId = commandObj.getString("nodeId");
-		WebSocketMessageModel model = new WebSocketMessageModel(command, nodeId);
-		model.setParams(commandObj.get("params"));
-		model.setData(commandObj.get("data"));
+    public static WebSocketMessageModel getInstance(String message) {
+        JSONObject commandObj = JSONObject.parseObject(message);
+        String command = commandObj.getString("command");
+        String nodeId = commandObj.getString("nodeId");
+        WebSocketMessageModel model = new WebSocketMessageModel(command, nodeId);
+        model.setParams(commandObj.get("params"));
+        model.setData(commandObj.get("data"));
 
-		return model;
-	}
+        return model;
+    }
 
-	public String getCommand() {
-		return command;
-	}
+    public String getCommand() {
+        return command;
+    }
 
-	public void setCommand(String command) {
-		this.command = command;
-	}
+    public void setCommand(String command) {
+        this.command = command;
+    }
 
-	public Object getData() {
-		return data;
-	}
+    public Object getData() {
+        return data;
+    }
 
-	public WebSocketMessageModel setData(Object data) {
-		this.data = data;
-		return this;
-	}
+    public WebSocketMessageModel setData(Object data) {
+        this.data = data;
+        return this;
+    }
 
-	public String getNodeId() {
-		return nodeId;
-	}
+    public String getNodeId() {
+        return nodeId;
+    }
 
-	public void setNodeId(String nodeId) {
-		this.nodeId = nodeId;
-	}
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
 
-	public Object getParams() {
-		return params;
-	}
+    public Object getParams() {
+        return params;
+    }
 
-	public void setParams(Object params) {
-		this.params = params;
-	}
+    public void setParams(Object params) {
+        this.params = params;
+    }
 
-	@Override
-	public String toString() {
-		return super.toString();
-	}
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

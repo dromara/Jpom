@@ -24,7 +24,7 @@ package io.jpom.system.init;
 
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson2.JSONArray;
 import io.jpom.model.data.NodeModel;
 import io.jpom.service.system.SystemParametersServer;
 import lombok.Data;

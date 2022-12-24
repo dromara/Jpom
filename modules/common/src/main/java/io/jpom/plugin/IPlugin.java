@@ -24,7 +24,8 @@ package io.jpom.plugin;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ClassUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -123,7 +124,7 @@ public interface IPlugin extends AutoCloseable {
             return (T) Convert.convert(aClass, execute);
         }
         // json 数据
-        Object o = JSONObject.toJSON(execute);
+        Object o = JSON.toJSON(execute);
         if (o instanceof JSONObject) {
             JSONObject jsonObject = (JSONObject) o;
             return jsonObject.toJavaObject(cls);

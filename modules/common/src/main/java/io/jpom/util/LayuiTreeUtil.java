@@ -23,8 +23,8 @@
 package io.jpom.util;
 
 import cn.hutool.core.io.FileUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 
 import java.io.File;
 

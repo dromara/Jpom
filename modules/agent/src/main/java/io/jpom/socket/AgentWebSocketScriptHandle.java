@@ -23,7 +23,7 @@
 package io.jpom.socket;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.script.ScriptProcessBuilder;

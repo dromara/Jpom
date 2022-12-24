@@ -30,8 +30,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONValidator;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONValidator;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -111,21 +111,21 @@ public class SshHandler extends BaseTerminalHandler {
             return;
         }
         String payload = message.getPayload();
-        try (JSONValidator from = JSONValidator.from(payload)) {
-            if (from.getType() == JSONValidator.Type.Object) {
-                JSONObject jsonObject = JSONObject.parseObject(payload);
-                String data = jsonObject.getString("data");
-                if (StrUtil.equals(data, "jpom-heart")) {
-                    // 心跳消息不转发
-                    return;
-                }
-                if (StrUtil.equals(data, "resize")) {
-                    // 缓存区大小
-                    handlerItem.resize(jsonObject);
-                    return;
-                }
+        JSONValidator from = JSONValidator.from(payload);
+        if (from.getType() == JSONValidator.Type.Object) {
+            JSONObject jsonObject = JSONObject.parseObject(payload);
+            String data = jsonObject.getString("data");
+            if (StrUtil.equals(data, "jpom-heart")) {
+                // 心跳消息不转发
+                return;
+            }
+            if (StrUtil.equals(data, "resize")) {
+                // 缓存区大小
+                handlerItem.resize(jsonObject);
+                return;
             }
         }
+
         init();
         Map<String, Object> attributes = session.getAttributes();
         UserModel userInfo = (UserModel) attributes.get("userInfo");
