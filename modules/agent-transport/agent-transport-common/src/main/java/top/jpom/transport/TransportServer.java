@@ -22,7 +22,10 @@
  */
 package top.jpom.transport;
 
-import java.util.Map;
+import com.alibaba.fastjson2.TypeReference;
+import top.jpom.transform.TransformServerFactory;
+
+import java.util.function.Consumer;
 
 /**
  * 插件端消息传输服务
@@ -32,6 +35,60 @@ import java.util.Map;
  */
 public interface TransportServer {
 
-    String execute(INodeInfo nodeInfo, IUrlItem urlItem, Map<String, String> map);
+    /**
+     * 请求 header
+     */
+    String WORKSPACE_ID_REQ_HEADER = "workspaceId";
 
+    String JPOM_AGENT_AUTHORIZE = "Jpom-Agent-Authorize";
+
+    /**
+     * 执行请求
+     *
+     * @param nodeInfo 节点信息
+     * @param urlItem  请求 item
+     * @param data     参数
+     * @return 响应的字符串
+     */
+    String execute(INodeInfo nodeInfo, IUrlItem urlItem, Object data);
+
+    /**
+     * 执行请求，返回响应的所有数据
+     *
+     * @param nodeInfo       节点信息
+     * @param urlItem        请求 item
+     * @param data           参数
+     * @param tTypeReference 返回的泛型
+     * @param <T>            泛型
+     * @return 响应的字符串
+     */
+    default <T> T executeToType(INodeInfo nodeInfo, IUrlItem urlItem, Object data, TypeReference<T> tTypeReference) {
+        String body = this.execute(nodeInfo, urlItem, data);
+        return TransformServerFactory.get().transform(body, tTypeReference);
+    }
+
+    /**
+     * 执行请求,仅返回成功的数据
+     *
+     * @param nodeInfo 节点信息
+     * @param urlItem  请求 item
+     * @param data     参数
+     * @param tClass   返回的泛型
+     * @param <T>      泛型
+     * @return 响应的字符串
+     */
+    default <T> T executeToTypeOnlyData(INodeInfo nodeInfo, IUrlItem urlItem, Object data, Class<T> tClass) {
+        String body = this.execute(nodeInfo, urlItem, data);
+        return TransformServerFactory.get().transformOnlyData(body, tClass);
+    }
+
+    /**
+     * 下载文件
+     *
+     * @param nodeInfo 节点信息
+     * @param urlItem  请求 item
+     * @param data     参数
+     * @param consumer 回调
+     */
+    void download(INodeInfo nodeInfo, IUrlItem urlItem, Object data, Consumer<DownloadCallback> consumer);
 }

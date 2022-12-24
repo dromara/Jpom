@@ -94,7 +94,7 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
             JSONObject reqData = new JSONObject();
             reqData.put("id", item.getScriptId());
             reqData.put("params", JSONObject.toJSONString(ServletUtil.getParamMap(getRequest())));
-            JsonMessage<String> jsonMessage = NodeForward.request(nodeModel, NodeUrl.SCRIPT_EXEC, userModel, reqData);
+            JsonMessage<String> jsonMessage = NodeForward.request(nodeModel, NodeUrl.SCRIPT_EXEC, reqData);
             //
             JSONObject jsonObject = new JSONObject();
             if (jsonMessage.getCode() == 200) {
@@ -158,7 +158,7 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
                 NodeModel nodeModel = nodeService.getByKey(item.getNodeId());
                 JSONObject reqData = new JSONObject();
                 reqData.put("id", item.getScriptId());
-                JsonMessage<String> jsonMessage = NodeForward.request(nodeModel, NodeUrl.SCRIPT_EXEC, userModel, reqData);
+                JsonMessage<String> jsonMessage = NodeForward.request(nodeModel, NodeUrl.SCRIPT_EXEC, reqData);
                 //
                 if (jsonMessage.getCode() == 200) {
                     jsonObject.put("logId", jsonMessage.getData());

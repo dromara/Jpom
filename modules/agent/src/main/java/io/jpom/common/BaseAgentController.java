@@ -45,9 +45,6 @@ public abstract class BaseAgentController extends BaseJpomController {
     @Resource
     protected ProjectInfoService projectInfoService;
 
-    protected String getUserName() {
-        return getUserName(getRequest());
-    }
 
     /**
      * 获取server 端操作人

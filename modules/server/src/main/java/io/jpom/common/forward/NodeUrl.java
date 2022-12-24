@@ -101,7 +101,7 @@ public enum NodeUrl {
     Manage_File_GetFileList("/manage/file/getFileList"),
     MANAGE_FILE_BACKUP_LIST_BACKUP("/manage/file/list-backup"),
     MANAGE_FILE_BACKUP_LIST_ITEM_FILES("/manage/file/backup-item-files"),
-    MANAGE_FILE_BACKUP_DOWNLOAD("/manage/file/backup-download"),
+    MANAGE_FILE_BACKUP_DOWNLOAD("/manage/file/backup-download", true),
     MANAGE_FILE_BACKUP_DELETE("/manage/file/backup-delete"),
     MANAGE_FILE_BACKUP_RECOVER("/manage/file/backup-recover"),
     /**
@@ -127,7 +127,7 @@ public enum NodeUrl {
     MANAGE_FILE_NEW_FILE_FOLDER("/manage/file/new_file_folder.json"),
     MANAGE_FILE_RENAME_FILE_FOLDER("/manage/file/rename.json"),
 
-    Manage_File_Download("/manage/file/download"),
+    Manage_File_Download("/manage/file/download", true),
 
 
     Manage_Log_LogSize("/manage/log/logSize"),
@@ -136,16 +136,16 @@ public enum NodeUrl {
 
     Manage_Log_logBack_delete("/manage/log/logBack_delete"),
 
-    Manage_Log_logBack_download("/manage/log/logBack_download"),
+    Manage_Log_logBack_download("/manage/log/logBack_download", true),
 
     Manage_Log_logBack("/manage/log/logBack"),
 
-    Manage_Log_export("/manage/log/export.html"),
+    Manage_Log_export("/manage/log/export.html", true),
 
-    Manage_internal_data("/manage/internal_data"),
-    Manage_internal_stack("/manage/internal_stack"),
-    Manage_internal_ram("/manage/internal_ram"),
-    Manage_internal_threadInfos("/manage/threadInfos"),
+//    Manage_internal_data("/manage/internal_data"),
+//    Manage_internal_stack("/manage/internal_stack"),
+//    Manage_internal_ram("/manage/internal_ram"),
+//    Manage_internal_threadInfos("/manage/threadInfos"),
 
 //    /**
 //     * jdk
@@ -173,7 +173,7 @@ public enum NodeUrl {
     System_Certificate_saveCertificate("/system/certificate/saveCertificate"),
     System_Certificate_getCertList("/system/certificate/getCertList"),
     System_Certificate_delete("/system/certificate/delete"),
-    System_Certificate_export("/system/certificate/export"),
+    System_Certificate_export("/system/certificate/export", true),
 
     Script_List("/script/list.json"),
     SCRIPT_PULL_EXEC_LOG("/script/pull_exec_log"),
@@ -225,11 +225,11 @@ public enum NodeUrl {
 
     DelSystemLog("/system/log_del.json"),
 
-    DownloadSystemLog("/system/log_download"),
+    DownloadSystemLog("/system/log_download", true),
     /**
      * 更新系统jar包
      */
-    SystemUploadJar("/system/uploadJar.json"),
+    SystemUploadJar("/system/uploadJar.json", true),
     /**
      * 更新系统jar包
      */
@@ -237,7 +237,7 @@ public enum NodeUrl {
     /**
      * 远程升级
      */
-    REMOTE_UPGRADE("/system/remote_upgrade.json"),
+    REMOTE_UPGRADE("/system/remote_upgrade.json", true),
     CHANGE_LOG("/system/change_log"),
 
     /**

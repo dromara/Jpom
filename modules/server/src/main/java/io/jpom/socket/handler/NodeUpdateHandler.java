@@ -24,6 +24,7 @@ package io.jpom.socket.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.resource.FileResource;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
@@ -213,7 +214,9 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
     private void updateNodeItemHttp(NodeModel nodeModel, WebSocketSession session, AgentFileModel agentFileModel) {
         File file = FileUtil.file(agentFileModel.getSavePath());
-        JsonMessage<String> message = NodeForward.requestMultipart(nodeModel, "file", file, NodeUrl.SystemUploadJar);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("file", new FileResource(file));
+        JsonMessage<String> message = NodeForward.request(nodeModel, NodeUrl.SystemUploadJar, jsonObject);
         String id = nodeModel.getId();
         WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", id);
         callbackRestartMessage.setData(message.getMsg());
@@ -226,8 +229,8 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 ++retryCount;
                 try {
                     ThreadUtil.sleep(1000L);
-                    JsonMessage<Object> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Info, "nodeId", id);
-                    if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
+                    JsonMessage<Object> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Info, "nodeId", id);
+                    if (jsonMessage.success()) {
                         this.sendMsg(callbackRestartMessage.setData("重启完成"), session);
                         return;
                     }

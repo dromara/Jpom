@@ -33,6 +33,7 @@ import io.jpom.service.h2db.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import top.jpom.transport.INodeInfo;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -48,7 +49,7 @@ import java.util.List;
 @TableName(value = "NODE_INFO", name = "节点信息")
 @Data
 @NoArgsConstructor
-public class NodeModel extends BaseGroupModel {
+public class NodeModel extends BaseGroupModel implements INodeInfo {
 
     private String url;
     private String loginName;
@@ -115,11 +116,32 @@ public class NodeModel extends BaseGroupModel {
         return StrUtil.format("{}://{}{}", getProtocol().toLowerCase(), getUrl(), nodeUrl.getUrl());
     }
 
+    @Override
+    public String name() {
+        return this.getName();
+    }
+
+    @Override
+    public String url() {
+        return this.getUrl();
+    }
+
+    @Override
+    public String scheme() {
+        return getProtocol();
+    }
+
+    @Override
+    public String authorize() {
+        return this.toAuthorize();
+    }
+
     /**
      * 获取节点的代理
      *
      * @return proxy
      */
+    @Override
     public Proxy proxy() {
         String httpProxy = this.getHttpProxy();
         if (StrUtil.isNotEmpty(httpProxy)) {

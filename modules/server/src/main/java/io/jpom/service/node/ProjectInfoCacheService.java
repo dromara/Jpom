@@ -25,6 +25,7 @@ package io.jpom.service.node;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
@@ -58,7 +59,8 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheMod
      */
     @Override
     public JSONObject getItem(NodeModel nodeModel, String id) {
-        return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectItem, JSONObject.class, "id", id);
+        JsonMessage<JSONObject> request = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectItem, "id", id);
+        return request.getData();
     }
 
     public boolean exists(String workspaceId, String nodeId, String id) {
@@ -77,14 +79,16 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheMod
         return this.exists(nodeModel.getWorkspaceId(), nodeId, id);
     }
 
-    public JSONObject getLogSize(NodeModel nodeModel, String id, String copyId) {
-        return NodeForward.requestData(nodeModel, NodeUrl.Manage_Log_LogSize, JSONObject.class, "id", id, "copyId", copyId);
-    }
+//    public JSONObject getLogSize(NodeModel nodeModel, String id, String copyId) {
+//
+////        return requestData;
+//    }
 
 
     @Override
     public JSONArray getLitDataArray(NodeModel nodeModel) {
-        return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectInfo, JSONArray.class, "notStatus", "true");
+        JsonMessage<JSONArray> tJsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectInfo, "notStatus", "true");
+        return tJsonMessage.getData();
     }
 
     @Override

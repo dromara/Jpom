@@ -20,39 +20,35 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package top.jpom.transport;
+package io.jpom.common.forward;
+
+import com.alibaba.fastjson2.TypeReference;
+import io.jpom.common.JsonMessage;
+import top.jpom.transform.TransformServer;
+import top.jpom.transport.INodeInfo;
 
 /**
+ * json 消息转换
+ *
  * @author bwcx_jzy
- * @since 2022/12/23
+ * @since 2022/12/24
  */
-public interface IUrlItem {
+public class JsonMessageTransformServer implements TransformServer {
 
-    /**
-     * 请求路径
-     *
-     * @return path
-     */
-    String path();
+    @Override
+    public <T> T transform(String data, TypeReference<T> tTypeReference) {
+        return NodeForward.toJsonMessage(data, tTypeReference);
+    }
 
-    /**
-     * 请求超时时间
-     *
-     * @return 超时时间
-     */
-    Integer timeout();
+    @Override
+    public <T> T transformOnlyData(String data, Class<T> tClass) {
+        JsonMessage<T> transform = this.transform(data, new TypeReference<JsonMessage<T>>() {
+        });
+        return transform.getData(tClass);
+    }
 
-    /**
-     * 当前工作空间id
-     *
-     * @return 工作空间
-     */
-    String workspaceId();
-
-    /**
-     * 请求类型
-     *
-     * @return contentType
-     */
-    DataContentType contentType();
+    @Override
+    public Exception transformException(Exception e, INodeInfo nodeInfo) {
+        return NodeForward.responseException(e, nodeInfo);
+    }
 }

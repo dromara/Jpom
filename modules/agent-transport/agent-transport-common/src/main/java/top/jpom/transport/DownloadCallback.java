@@ -22,37 +22,22 @@
  */
 package top.jpom.transport;
 
+import lombok.Builder;
+import lombok.Data;
+
+import java.io.InputStream;
+
 /**
  * @author bwcx_jzy
- * @since 2022/12/23
+ * @since 2022/12/24
  */
-public interface IUrlItem {
+@Builder
+@Data
+public class DownloadCallback {
 
-    /**
-     * 请求路径
-     *
-     * @return path
-     */
-    String path();
+    private String contentDisposition;
 
-    /**
-     * 请求超时时间
-     *
-     * @return 超时时间
-     */
-    Integer timeout();
+    private String contentType;
 
-    /**
-     * 当前工作空间id
-     *
-     * @return 工作空间
-     */
-    String workspaceId();
-
-    /**
-     * 请求类型
-     *
-     * @return contentType
-     */
-    DataContentType contentType();
+    private InputStream inputStream;
 }

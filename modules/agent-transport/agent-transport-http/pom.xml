@@ -34,7 +34,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>agent-transport-common</artifactId>
+    <artifactId>agent-transport-http</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -44,8 +44,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.jpom.agent-transport</groupId>
+            <artifactId>agent-transport-common</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>cn.hutool</groupId>
-            <artifactId>hutool-core</artifactId>
+            <artifactId>hutool-http</artifactId>
         </dependency>
 
         <dependency>
@@ -53,6 +59,7 @@
             <artifactId>slf4j-api</artifactId>
             <optional>true</optional>
         </dependency>
+
 
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>

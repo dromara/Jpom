@@ -45,7 +45,6 @@ import io.jpom.model.data.ServerWhitelist;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
-import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -132,13 +131,12 @@ public class OutGivingProjectEditController extends BaseServerController {
         //
         Assert.state(outGivingModel.outGivingProject(), "该项目不是节点分发项目,不能在此次删除");
 
-        UserModel userModel = getUser();
         List<OutGivingNodeProject> deleteNodeProject = outGivingModel.outGivingNodeProjectList();
         if (deleteNodeProject != null) {
             // 删除实际的项目
             for (OutGivingNodeProject outGivingNodeProject1 : deleteNodeProject) {
                 NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject1.getNodeId());
-                JsonMessage<String> jsonMessage = this.deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId(), thorough);
+                JsonMessage<String> jsonMessage = this.deleteNodeProject(nodeModel, outGivingNodeProject1.getProjectId(), thorough);
                 if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                     return new JsonMessage<>(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
                 }
@@ -190,7 +188,6 @@ public class OutGivingProjectEditController extends BaseServerController {
 //			}
 //			return JsonMessage.getString(405, "数据异常,请重新操作");
 //		}
-        UserModel userModel = getUser();
         List<Tuple> success = new ArrayList<>();
         boolean fail = false;
         try {
@@ -198,7 +195,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                 NodeModel nodeModel = tuple.get(0);
                 JSONObject data = tuple.get(1);
                 //
-                JsonMessage<String> jsonMessage = this.sendData(nodeModel, userModel, data, true);
+                JsonMessage<String> jsonMessage = this.sendData(nodeModel, data, true);
                 if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                     if (!edit) {
                         fail = true;
@@ -221,7 +218,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             if (fail) {
                 try {
                     for (Tuple entry : success) {
-                        deleteNodeProject(entry.get(0), userModel, outGivingModel.getId(), null);
+                        deleteNodeProject(entry.get(0), outGivingModel.getId(), null);
                     }
                 } catch (Exception e) {
                     log.error("还原项目失败", e);
@@ -235,15 +232,15 @@ public class OutGivingProjectEditController extends BaseServerController {
      * 删除项目
      *
      * @param nodeModel 节点
-     * @param userModel 用户
      * @param project   判断id
+     * @param thorough  是否彻底删除
      * @return json
      */
-    private JsonMessage<String> deleteNodeProject(NodeModel nodeModel, UserModel userModel, String project, String thorough) {
+    private JsonMessage<String> deleteNodeProject(NodeModel nodeModel, String project, String thorough) {
         JSONObject data = new JSONObject();
         data.put("id", project);
         data.put("thorough", thorough);
-        JsonMessage<String> request = NodeForward.request(nodeModel, NodeUrl.Manage_DeleteProject, userModel, data);
+        JsonMessage<String> request = NodeForward.request(nodeModel, NodeUrl.Manage_DeleteProject, data);
         if (request.getCode() == HttpStatus.HTTP_OK) {
             // 同步项目信息
             projectInfoCacheService.syncNode(nodeModel, project);
@@ -339,7 +336,6 @@ public class OutGivingProjectEditController extends BaseServerController {
         outGivingModel.setAfterOpt(afterOpt1.getCode());
         JSONObject defData = getDefData(outGivingModel, edit);
 
-        UserModel userModel = getUser();
         //
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         List<OutGivingNodeProject> outGivingNodeProjects = new ArrayList<>();
@@ -399,12 +395,12 @@ public class OutGivingProjectEditController extends BaseServerController {
                     allData.put("name_" + copyId, nameArgs);
                 }
             }
-            JsonMessage<String> jsonMessage = this.sendData(nodeModel, userModel, allData, false);
+            JsonMessage<String> jsonMessage = this.sendData(nodeModel, allData, false);
             Assert.state(jsonMessage.getCode() == HttpStatus.HTTP_OK, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
             tuples.add(new Tuple(nodeModel, allData));
         }
         // 删除已经删除的项目
-        deleteProject(outGivingModel, outGivingNodeProjects, userModel);
+        deleteProject(outGivingModel, outGivingNodeProjects);
 
         outGivingModel.outGivingNodeProjectList(outGivingNodeProjects);
         //
@@ -422,9 +418,8 @@ public class OutGivingProjectEditController extends BaseServerController {
      *
      * @param outGivingModel        分发项目
      * @param outGivingNodeProjects 新的节点项目
-     * @param userModel             用户
      */
-    private void deleteProject(OutGivingModel outGivingModel, List<OutGivingNodeProject> outGivingNodeProjects, UserModel userModel) {
+    private void deleteProject(OutGivingModel outGivingModel, List<OutGivingNodeProject> outGivingNodeProjects) {
         Assert.state(CollUtil.size(outGivingNodeProjects) >= 1, "至少选择一个节点及以上");
         // 删除
         List<OutGivingNodeProject> deleteNodeProject = outGivingModel.getDelete(outGivingNodeProjects);
@@ -435,18 +430,18 @@ public class OutGivingProjectEditController extends BaseServerController {
                 NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject1.getNodeId());
                 //outGivingNodeProject1.getNodeData(true);
                 // 调用彻底删除
-                jsonMessage = this.deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId(), "thorough");
+                jsonMessage = this.deleteNodeProject(nodeModel, outGivingNodeProject1.getProjectId(), "thorough");
                 Assert.state(jsonMessage.getCode() == HttpStatus.HTTP_OK, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
             }
         }
     }
 
-    private JsonMessage<String> sendData(NodeModel nodeModel, UserModel userModel, JSONObject data, boolean save) {
+    private JsonMessage<String> sendData(NodeModel nodeModel, JSONObject data, boolean save) {
         if (save) {
             data.remove("previewData");
         }
         data.put("outGivingProject", true);
         // 发起预检查数据
-        return NodeForward.request(nodeModel, NodeUrl.Manage_SaveProject, userModel, data);
+        return NodeForward.request(nodeModel, NodeUrl.Manage_SaveProject, data);
     }
 }
