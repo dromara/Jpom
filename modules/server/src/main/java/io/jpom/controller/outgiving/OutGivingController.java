@@ -43,7 +43,6 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
-import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -234,7 +233,6 @@ public class OutGivingController extends BaseServerController {
 
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
 
-        UserModel userModel = getUser();
         // 解除项目分发独立分发属性
         List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
         if (outGivingNodeProjectList != null) {
@@ -242,7 +240,8 @@ public class OutGivingController extends BaseServerController {
                 NodeModel item = nodeService.getByKey(outGivingNodeProject.getNodeId());
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("id", outGivingNodeProject.getProjectId());
-                NodeForward.request(item, NodeUrl.Manage_ReleaseOutGiving, userModel, jsonObject);
+                JsonMessage<String> message = NodeForward.request(item, NodeUrl.Manage_ReleaseOutGiving, jsonObject);
+                Assert.state(message.success(), "释放节点项目失败：" + message.getMsg());
             });
         }
 

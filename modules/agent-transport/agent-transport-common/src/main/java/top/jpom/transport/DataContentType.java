@@ -23,36 +23,18 @@
 package top.jpom.transport;
 
 /**
+ * 请求数据传输类型
+ *
  * @author bwcx_jzy
- * @since 2022/12/23
+ * @since 2022/12/24
  */
-public interface IUrlItem {
-
+public enum DataContentType {
     /**
-     * 请求路径
-     *
-     * @return path
+     * URL
      */
-    String path();
-
+    FORM_URLENCODED,
     /**
-     * 请求超时时间
-     *
-     * @return 超时时间
+     * JSON
      */
-    Integer timeout();
-
-    /**
-     * 当前工作空间id
-     *
-     * @return 工作空间
-     */
-    String workspaceId();
-
-    /**
-     * 请求类型
-     *
-     * @return contentType
-     */
-    DataContentType contentType();
+    JSON
 }

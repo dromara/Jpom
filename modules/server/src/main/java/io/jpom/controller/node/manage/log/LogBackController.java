@@ -95,8 +95,10 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public JsonMessage<JSONObject> logSize(String id, String copyId) {
-        JSONObject info = projectInfoCacheService.getLogSize(getNode(), id, copyId);
-        return JsonMessage.success("", info);
+//        JSONObject info = projectInfoCacheService.getLogSize(getNode(), id, copyId);
+        return NodeForward.request(getNode(), NodeUrl.Manage_Log_LogSize, "id", id, "copyId", copyId);
+//        return requestData.getData();
+//        return JsonMessage.success("", info);
     }
 
     /**

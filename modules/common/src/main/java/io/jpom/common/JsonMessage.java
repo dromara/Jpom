@@ -73,6 +73,10 @@ public class JsonMessage<T> implements Serializable {
         this(code, msg, null);
     }
 
+    public boolean success() {
+        return this.code == DEFAULT_SUCCESS_CODE;
+    }
+
     /**
      * 将data 转换为对应实体
      *
@@ -81,13 +85,7 @@ public class JsonMessage<T> implements Serializable {
      * @return Object
      */
     public <E> E getData(Class<E> tClass) {
-        if (data == null) {
-            return null;
-        }
-        if (tClass.isAssignableFrom(data.getClass())) {
-            return (E) data;
-        }
-        return JSONObject.parseObject(data.toString(), tClass);
+        return JSON.to(tClass, this.data);
     }
 
     /**

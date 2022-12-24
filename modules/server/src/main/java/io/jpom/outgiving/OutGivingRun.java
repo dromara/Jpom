@@ -114,7 +114,6 @@ public class OutGivingRun {
      * @param unzip      是否需要解压
      * @param afterOpt   是否需要重启
      * @param nodeModel  节点
-     * @param userModel  操作用户
      * @param clearOld   清空发布
      * @param levelName  文件夹层级
      * @param closeFirst 保存项目文件前先关闭项目
@@ -124,9 +123,9 @@ public class OutGivingRun {
                                                  boolean unzip,
                                                  AfterOpt afterOpt,
                                                  NodeModel nodeModel,
-                                                 UserModel userModel,
+
                                                  boolean clearOld, Boolean closeFirst) {
-        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, userModel, clearOld, null, closeFirst);
+        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, clearOld, null, closeFirst);
     }
 
     /**
@@ -137,7 +136,6 @@ public class OutGivingRun {
      * @param unzip      是否需要解压
      * @param afterOpt   是否需要重启
      * @param nodeModel  节点
-     * @param userModel  操作用户
      * @param clearOld   清空发布
      * @param levelName  文件夹层级
      * @param sleepTime  休眠时间
@@ -148,7 +146,6 @@ public class OutGivingRun {
                                                  boolean unzip,
                                                  AfterOpt afterOpt,
                                                  NodeModel nodeModel,
-                                                 UserModel userModel,
                                                  boolean clearOld,
                                                  Integer sleepTime,
                                                  Boolean closeFirst) {
@@ -171,6 +168,6 @@ public class OutGivingRun {
             data.put("after", afterOpt.getCode());
         }
         data.put("closeFirst", closeFirst);
-        return NodeForward.request(nodeModel, NodeUrl.Manage_File_Upload, userModel, data);
+        return NodeForward.request(nodeModel, NodeUrl.Manage_File_Upload, data);
     }
 }

@@ -139,12 +139,12 @@ public class ScriptController extends BaseServerController {
         return JsonMessage.success("修改成功");
     }
 
-    private void syncDelNodeScript(ScriptModel scriptModel, UserModel user, Collection<String> delNode) {
+    private void syncDelNodeScript(ScriptModel scriptModel, Collection<String> delNode) {
         for (String s : delNode) {
             NodeModel byKey = nodeService.getByKey(s, getRequest());
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", scriptModel.getId());
-            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Del, user, jsonObject);
+            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Del, jsonObject);
             Assert.state(request.getCode() == 200, "处理 " + byKey.getName() + " 节点删除脚本失败" + request.getMsg());
             nodeScriptServer.syncNode(byKey);
         }
@@ -154,9 +154,8 @@ public class ScriptController extends BaseServerController {
         List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
         List<String> newNodeIds = StrUtil.splitTrim(scriptModel.getNodeIds(), StrUtil.COMMA);
         Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
-        UserModel user = getUser();
         // 删除
-        this.syncDelNodeScript(scriptModel, user, delNode);
+        this.syncDelNodeScript(scriptModel, delNode);
         // 更新
         for (String newNodeId : newNodeIds) {
             NodeModel byKey = nodeService.getByKey(newNodeId, getRequest());
@@ -169,8 +168,8 @@ public class ScriptController extends BaseServerController {
             jsonObject.put("description", scriptModel.getDescription());
             jsonObject.put("name", scriptModel.getName());
             jsonObject.put("workspaceId", scriptModel.getWorkspaceId());
-            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Save, user, jsonObject);
-            Assert.state(request.getCode() == 200, "处理 " + byKey.getName() + " 节点同步脚本失败" + request.getMsg());
+            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Save, jsonObject);
+            Assert.state(request.success(), "处理 " + byKey.getName() + " 节点同步脚本失败" + request.getMsg());
             nodeScriptServer.syncNode(byKey);
         }
     }
@@ -187,7 +186,7 @@ public class ScriptController extends BaseServerController {
             // 删除节点中的脚本
             String nodeIds = server.getNodeIds();
             List<String> delNode = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
-            this.syncDelNodeScript(server, getUser(), delNode);
+            this.syncDelNodeScript(server, delNode);
             scriptServer.delByKey(id, request);
             //
             scriptExecuteLogServer.delByWorkspace(request, entity -> entity.set("scriptId", id));

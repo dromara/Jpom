@@ -150,10 +150,10 @@ public class NodeStatService extends BaseWorkspaceService<NodeStatModel> impleme
                     JSONObject nodeTopInfo = this.getNodeTopInfo(nodeModel);
                     //
                     long timeMillis = SystemClock.now();
-                    JsonMessage<Object> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Status, "nodeId", nodeModel.getId());
+                    JsonMessage<Object> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Status, "nodeId", nodeModel.getId());
                     int networkTime = (int) (System.currentTimeMillis() - timeMillis);
                     JSONObject jsonObject;
-                    if (jsonMessage.getCode() == 200) {
+                    if (jsonMessage.success()) {
                         jsonObject = jsonMessage.getData(JSONObject.class);
                     } else {
                         // 状态码错

@@ -22,6 +22,9 @@
  */
 package top.jpom.transform;
 
+import com.alibaba.fastjson2.TypeReference;
+import top.jpom.transport.INodeInfo;
+
 /**
  * 消息转换服务
  *
@@ -30,5 +33,34 @@ package top.jpom.transform;
  */
 public interface TransformServer {
 
-    <T> T transform(String data);
+    /**
+     * 数据类型转换
+     *
+     * @param data           数据
+     * @param tTypeReference 类型
+     * @param <T>            范型
+     * @return data
+     */
+    <T> T transform(String data, TypeReference<T> tTypeReference);
+
+    /**
+     * 数据类型转换,只返回成功的数据
+     *
+     * @param data   数据
+     * @param tClass 类型
+     * @param <T>    范型
+     * @return data
+     */
+    <T> T transformOnlyData(String data, Class<T> tClass);
+
+    /**
+     * 转换异常
+     *
+     * @param e        请求的异常
+     * @param nodeInfo 节点信息
+     * @return 转换后的异常
+     */
+    default Exception transformException(Exception e, INodeInfo nodeInfo) {
+        return e;
+    }
 }

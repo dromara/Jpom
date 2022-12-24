@@ -90,7 +90,7 @@ public class ProjectTriggerApiController extends BaseJpomController {
         NodeUrl resolveAction = this.resolveAction(action);
         //
         NodeModel nodeModel = nodeService.getByKey(item.getNodeId());
-        return NodeForward.requestBySys(nodeModel, resolveAction,
+        return NodeForward.request(nodeModel, resolveAction,
             "id", item.getProjectId(), "getCopy", "true");
     }
 

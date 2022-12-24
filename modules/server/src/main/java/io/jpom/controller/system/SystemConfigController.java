@@ -45,7 +45,6 @@ import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.model.node.NodeAgentWhitelist;
-import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -302,11 +301,10 @@ public class SystemConfigController extends BaseServerController {
         systemParametersServer.upsert(format, agentWhitelist, format);
         //
         List<String> nodeIdsStr = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
-        UserModel user = getUser();
         for (String s : nodeIdsStr) {
             NodeModel byKey = nodeService.getByKey(s, httpServletRequest);
             JSONObject jsonObject = (JSONObject) JSON.toJSON(agentWhitelist);
-            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.WhitelistDirectory_Submit, user, jsonObject);
+            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.WhitelistDirectory_Submit, jsonObject);
             Assert.state(request.getCode() == 200, "分发 " + byKey.getName() + " 节点配置失败" + request.getMsg());
         }
         return JsonMessage.success("保存成功");
@@ -339,13 +337,12 @@ public class SystemConfigController extends BaseServerController {
         systemParametersServer.upsert(id, jsonObject, id);
         //
         List<String> nodeIdsStr = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
-        UserModel user = getUser();
         for (String s : nodeIdsStr) {
             NodeModel byKey = nodeService.getByKey(s, httpServletRequest);
             JSONObject reqData = new JSONObject();
             reqData.put("content", content);
             reqData.put("restart", restart);
-            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.SystemSaveConfig, user, reqData);
+            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.SystemSaveConfig, reqData);
             Assert.state(request.getCode() == 200, "分发 " + byKey.getName() + " 节点配置失败" + request.getMsg());
         }
         return JsonMessage.success("修改成功");

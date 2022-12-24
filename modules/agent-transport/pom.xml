@@ -35,6 +35,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>agent-transport-common</module>
+        <module>agent-transport-http</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
     <version>2.10.4</version>

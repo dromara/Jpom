@@ -31,7 +31,6 @@ import cn.hutool.cron.task.Task;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.JsonMessage;
@@ -119,8 +118,8 @@ public class MonitorItem implements Task {
             String context;
             try {
                 //查询项目运行状态
-                JsonMessage<JSONObject> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id, "getCopy", true);
-                if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
+                JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id, "getCopy", true);
+                if (jsonMessage.success()) {
                     JSONObject jsonObject = jsonMessage.getData();
                     int pid = jsonObject.getIntValue("pId");
                     boolean runStatus = this.checkNotify(monitorModel, nodeModel, id, null, pid > 0);
@@ -198,8 +197,8 @@ public class MonitorItem implements Task {
             if (monitorModel.autoRestart()) {
                 // 执行重启
                 try {
-                    JsonMessage<String> reJson = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_Restart, "id", id, "copyId", copyId);
-                    if (reJson.getCode() == HttpStatus.HTTP_OK) {
+                    JsonMessage<String> reJson = NodeForward.request(nodeModel, NodeUrl.Manage_Restart, "id", id, "copyId", copyId);
+                    if (reJson.success()) {
                         // 重启成功
                         runStatus = true;
                         title = StrUtil.format("【{}】节点的【{}】项目{}已经停止，已经执行重启操作,结果成功", nodeModel.getName(), id, copyMsg);

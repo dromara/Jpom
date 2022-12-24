@@ -487,7 +487,7 @@ public class ReleaseManage implements Runnable {
         String directory = this.buildExtraModule.getProjectSecondaryDirectory();
         directory = Opt.ofBlankAble(directory).orElse(StrUtil.SLASH);
         jsonObject.put("dir", directory);
-        JsonMessage<JSONObject> requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_DIFF_FILE, this.userModel, jsonObject);
+        JsonMessage<JSONObject> requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_DIFF_FILE, jsonObject);
         if (requestBody.getCode() != HttpStatus.HTTP_OK) {
             throw new JpomRuntimeException("对比项目文件失败：" + requestBody);
         }
@@ -504,7 +504,7 @@ public class ReleaseManage implements Runnable {
         // 清空发布才先执行删除
         if (delSize > 0 && clearOld) {
             jsonObject.put("data", del);
-            requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_BATCH_DELETE, this.userModel, jsonObject);
+            requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_BATCH_DELETE, jsonObject);
             if (requestBody.getCode() != HttpStatus.HTTP_OK) {
                 throw new JpomRuntimeException("删除项目文件失败：" + requestBody);
             }
@@ -519,7 +519,7 @@ public class ReleaseManage implements Runnable {
             startPath = FileUtil.normalize(startPath + StrUtil.SLASH + directory);
             //
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
-                projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, this.userModel, false,
+                projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, false,
                 this.buildExtraModule.getProjectUploadCloseFirst());
             if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                 throw new JpomRuntimeException("同步项目文件失败：" + jsonMessage);
@@ -563,7 +563,7 @@ public class ReleaseManage implements Runnable {
             projectId,
             unZip,
             afterOpt,
-            nodeModel, this.userModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst());
+            nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst());
         if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
             logRecorder.info("发布项目包成功：" + jsonMessage);
         } else {

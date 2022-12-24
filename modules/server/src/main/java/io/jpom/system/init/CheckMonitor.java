@@ -113,7 +113,7 @@ public class CheckMonitor implements InitializingBean {
             }
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("ids", strings);
-            JsonMessage<Object> jsonMessage = NodeForward.requestBody(nodeModel, NodeUrl.SCRIPT_DEL_EXEC_LOG, null, jsonObject);
+            JsonMessage<Object> jsonMessage = NodeForward.requestBody(nodeModel, NodeUrl.SCRIPT_DEL_EXEC_LOG, jsonObject);
             if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                 log.error("删除脚本模版执行数据错误:{}", jsonMessage);
             }

@@ -75,8 +75,8 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLog
 
     @Override
     public JSONArray getLitDataArray(NodeModel nodeModel) {
-        JsonMessage<?> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.SCRIPT_PULL_EXEC_LOG, "pullCount", 100);
-        if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+        JsonMessage<?> jsonMessage = NodeForward.request(nodeModel, NodeUrl.SCRIPT_PULL_EXEC_LOG, "pullCount", 100);
+        if (!jsonMessage.success()) {
             throw new AgentException(jsonMessage.toString());
         }
         Object data = jsonMessage.getData();
@@ -153,7 +153,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLog
             executeLogModel -> {
                 try {
                     NodeModel nodeModel = nodeService.getByKey(executeLogModel.getNodeId());
-                    JsonMessage<Object> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.SCRIPT_DEL_LOG,
+                    JsonMessage<Object> jsonMessage = NodeForward.request(nodeModel, NodeUrl.SCRIPT_DEL_LOG,
                         "id", executeLogModel.getScriptId(), "executeId", executeLogModel.getId());
                     if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                         log.warn("{} {} {}", executeLogModel.getNodeId(), executeLogModel.getScriptName(), jsonMessage);

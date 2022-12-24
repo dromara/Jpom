@@ -22,6 +22,8 @@
  */
 package top.jpom.transport;
 
+import java.net.Proxy;
+
 /**
  * 节点通讯的 接口
  *
@@ -29,6 +31,13 @@ package top.jpom.transport;
  * @since 2022/12/23
  */
 public interface INodeInfo {
+
+    /**
+     * 节点名称
+     *
+     * @return 名称
+     */
+    String name();
 
     /**
      * 节点 url
@@ -47,16 +56,17 @@ public interface INodeInfo {
     String scheme();
 
     /**
-     * 节点用户
+     * 节点 授权信息
+     * sha1(user@pwd)
      *
      * @return 用户
      */
-    String user();
+    String authorize();
 
     /**
-     * 节点密码
+     * 节点通讯代理
      *
-     * @return 密码
+     * @return proxy
      */
-    String password();
+    Proxy proxy();
 }

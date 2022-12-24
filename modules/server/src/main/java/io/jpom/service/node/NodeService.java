@@ -30,7 +30,6 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
@@ -93,7 +92,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
         // 检查是否可用默认为5秒，避免太长时间无法连接一直等待
         nodeModel.setTimeOut(5);
         //
-        JsonMessage<JpomManifest> objectJsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Info, "nodeId", nodeModel.getId());
+        JsonMessage<JpomManifest> objectJsonMessage = NodeForward.request(nodeModel, NodeUrl.Info, "nodeId", nodeModel.getId());
         try {
             JpomManifest jpomManifest = objectJsonMessage.getData(JpomManifest.class);
             Assert.notNull(jpomManifest, "节点连接失败，请检查节点是否在线");

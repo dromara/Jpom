@@ -113,7 +113,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                 this.outGivingNodeProject.getProjectId(),
                 unzip,
                 afterOpt,
-                this.nodeModel, this.userModel, this.clearOld,
+                this.nodeModel, this.clearOld,
                 this.sleepTime, this.closeFirst);
             if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                 result = OutGivingNodeProject.Status.Ok;

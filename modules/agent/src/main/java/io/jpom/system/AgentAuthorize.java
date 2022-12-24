@@ -67,7 +67,7 @@ public class AgentAuthorize implements InitializingBean {
     }
 
     public String getAuthorize() {
-        throw new UnsupportedOperationException("不能调用此方法");
+        return null;
     }
 
     private final JpomApplication configBean;

@@ -38,7 +38,6 @@ import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.WorkspaceEnvVarModel;
-import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -149,14 +148,14 @@ public class WorkspaceEnvVarController extends BaseServerController {
         return JsonMessage.success("操作成功");
     }
 
-    private void syncDelNodeEnvVar(String name, UserModel user, Collection<String> delNode, String workspaceId) {
+    private void syncDelNodeEnvVar(String name, Collection<String> delNode, String workspaceId) {
         for (String s : delNode) {
             NodeModel byKey = nodeService.getByKey(s);
             Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择节点错误");
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("name", name);
-            JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Delete, user, jsonObject);
-            Assert.state(jsonMessage.getCode() == 200, "处理 " + byKey.getName() + " 节点删除脚本失败" + jsonMessage.getMsg());
+            JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Delete, jsonObject);
+            Assert.state(jsonMessage.success(), "处理 " + byKey.getName() + " 节点删除脚本失败" + jsonMessage.getMsg());
         }
     }
 
@@ -165,9 +164,8 @@ public class WorkspaceEnvVarController extends BaseServerController {
         List<String> newNodeIds = StrUtil.splitTrim(workspaceEnvVarModel.getNodeIds(), StrUtil.COMMA);
         List<String> oldNodeIds = StrUtil.splitTrim(oldNode, StrUtil.COMMA);
         Collection<String> delNode = CollUtil.subtract(oldNodeIds, newNodeIds);
-        UserModel user = getUser();
         // 删除
-        this.syncDelNodeEnvVar(workspaceEnvVarModel.getName(), user, delNode, workspaceId);
+        this.syncDelNodeEnvVar(workspaceEnvVarModel.getName(), delNode, workspaceId);
         // 更新
         for (String newNodeId : newNodeIds) {
             NodeModel byKey = nodeService.getByKey(newNodeId);
@@ -182,7 +180,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
                 WorkspaceEnvVarModel byKeyExits = workspaceEnvVarService.getByKey(workspaceEnvVarModel.getId());
                 jsonObject.put("value", byKeyExits.getValue());
             }
-            JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Update, user, jsonObject);
+            JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Update, jsonObject);
             Assert.state(jsonMessage.getCode() == 200, "处理 " + byKey.getName() + " 节点同步脚本失败" + jsonMessage.getMsg());
         }
     }
@@ -219,7 +217,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
         Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择工作空间错误");
         String oldNodeIds = byKey.getNodeIds();
         List<String> delNode = StrUtil.splitTrim(oldNodeIds, StrUtil.COMMA);
-        this.syncDelNodeEnvVar(byKey.getName(), getUser(), delNode, workspaceId);
+        this.syncDelNodeEnvVar(byKey.getName(), delNode, workspaceId);
         // 删除信息
         workspaceEnvVarService.delByKey(id);
         return JsonMessage.success("删除成功");

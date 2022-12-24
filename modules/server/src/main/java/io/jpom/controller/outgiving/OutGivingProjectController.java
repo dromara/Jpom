@@ -125,7 +125,7 @@ public class OutGivingProjectController extends BaseServerController {
                 JSONObject projectInfo = null;
                 try {
                     projectInfo = projectInfoCacheService.getItem(nodeModel, outGivingNodeProject.getProjectId());
-                    projectStatus = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId()).toJson();
+                    projectStatus = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId()).toJson();
                 } catch (Exception e) {
                     jsonObject.put("errorMsg", "error " + e.getMessage());
                 }
