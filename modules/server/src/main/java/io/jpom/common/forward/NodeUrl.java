@@ -22,12 +22,15 @@
  */
 package io.jpom.common.forward;
 
+import lombok.Getter;
+
 /**
  * agent 端的请求地址枚举
  *
  * @author jiangzeyin
  * @since 2019/4/16
  */
+@Getter
 public enum NodeUrl {
     /**
      * Jpom agent 信息
@@ -104,7 +107,7 @@ public enum NodeUrl {
     /**
      * jzy add  timeout
      */
-    Manage_File_Upload("/manage/file/upload"),
+    Manage_File_Upload("/manage/file/upload", true),
 
     Manage_File_DeleteFile("/manage/file/deleteFile"),
     /**
@@ -120,7 +123,7 @@ public enum NodeUrl {
 
     Manage_File_ReadFile("/manage/file/read_file"),
 
-    Manage_File_Remote_Download("/manage/file/remote_download"),
+    Manage_File_Remote_Download("/manage/file/remote_download", true),
     MANAGE_FILE_NEW_FILE_FOLDER("/manage/file/new_file_folder.json"),
     MANAGE_FILE_RENAME_FILE_FOLDER("/manage/file/rename.json"),
 
@@ -180,7 +183,7 @@ public enum NodeUrl {
     SCRIPT_LOG("/script/log"),
     SCRIPT_EXEC("/script/exec"),
     SCRIPT_DEL_LOG("/script/del_log"),
-//    Script_Upload("/script/upload.json"),
+    //    Script_Upload("/script/upload.json"),
     Script_Del("/script/del.json"),
 
 //    Tomcat_List("/tomcat/list"),
@@ -247,19 +250,17 @@ public enum NodeUrl {
      * 相对请求地址
      */
     private final String url;
-    private int timeOut;
+    private int timeout;
+    private boolean fileTimeout = false;
 
-    public String getUrl() {
-        return url;
-    }
-
-    public int getTimeOut() {
-        return timeOut;
-    }
-
-    NodeUrl(String url, int timeOut) {
+    NodeUrl(String url, int timeout) {
         this.url = url;
-        this.timeOut = timeOut;
+        this.timeout = timeout;
+    }
+
+    NodeUrl(String url, boolean fileTimeout) {
+        this.url = url;
+        this.fileTimeout = fileTimeout;
     }
 
     NodeUrl(String url) {

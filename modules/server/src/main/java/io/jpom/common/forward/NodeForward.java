@@ -401,24 +401,30 @@ public class NodeForward {
         }
         httpRequest.header(Const.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
         httpRequest.header(Const.WORKSPACEID_REQ_HEADER, nodeModel.getWorkspaceId());
-        // 取最大的超时时间
-        Optional.of(nodeUrl.getTimeOut())
-            .flatMap(timeOut -> {
-                if (timeOut == 0) {
-                    // 读取节点配置的超时时间
-                    return Optional.ofNullable(nodeModel.getTimeOut());
-                }
-                // 值 < 0  url 指定不超时
-                return timeOut > 0 ? Optional.of(timeOut) : Optional.empty();
-            })
-            .map(timeOut -> {
-                if (timeOut <= 0) {
-                    return null;
-                }
-                // 超时时间不能小于 2 秒
-                return Math.max(timeOut, 2);
-            })
-            .ifPresent(timeOut -> httpRequest.timeout(timeOut * 1000));
+        // 配置超时时间
+        if (nodeUrl.isFileTimeout()) {
+            ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+            ServerConfig.NodeConfig configNode = serverConfig.getNode();
+            httpRequest.timeout(configNode.getUploadFileTimeoutMilliseconds());
+        } else {
+            Optional.of(nodeUrl.getTimeout())
+                .flatMap(timeOut -> {
+                    if (timeOut == 0) {
+                        // 读取节点配置的超时时间
+                        return Optional.ofNullable(nodeModel.getTimeOut());
+                    }
+                    // 值 < 0  url 指定不超时
+                    return timeOut > 0 ? Optional.of(timeOut) : Optional.empty();
+                })
+                .map(timeOut -> {
+                    if (timeOut <= 0) {
+                        return null;
+                    }
+                    // 超时时间不能小于 2 秒
+                    return Math.max(timeOut, 2);
+                })
+                .ifPresent(timeOut -> httpRequest.timeout(timeOut * 1000));
+        }
         // 添加 http proxy
         Proxy proxy = nodeModel.proxy();
         httpRequest.setProxy(proxy);
