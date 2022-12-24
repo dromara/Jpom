@@ -26,7 +26,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.Const;

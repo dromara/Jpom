@@ -33,7 +33,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpStatus;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;

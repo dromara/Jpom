@@ -24,7 +24,7 @@ package io.jpom.socket.handler;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;

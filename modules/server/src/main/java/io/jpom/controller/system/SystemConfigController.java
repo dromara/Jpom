@@ -32,8 +32,9 @@ import cn.hutool.core.net.MaskBit;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -304,7 +305,7 @@ public class SystemConfigController extends BaseServerController {
         UserModel user = getUser();
         for (String s : nodeIdsStr) {
             NodeModel byKey = nodeService.getByKey(s, httpServletRequest);
-            JSONObject jsonObject = (JSONObject) JSONObject.toJSON(agentWhitelist);
+            JSONObject jsonObject = (JSONObject) JSON.toJSON(agentWhitelist);
             JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.WhitelistDirectory_Submit, user, jsonObject);
             Assert.state(request.getCode() == 200, "分发 " + byKey.getName() + " 节点配置失败" + request.getMsg());
         }

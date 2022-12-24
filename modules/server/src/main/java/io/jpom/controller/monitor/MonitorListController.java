@@ -26,7 +26,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson2.JSONArray;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.validator.ValidatorItem;

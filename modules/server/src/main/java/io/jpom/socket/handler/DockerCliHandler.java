@@ -26,8 +26,8 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONValidator;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONValidator;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -90,19 +90,18 @@ public class DockerCliHandler extends BaseTerminalHandler {
             return;
         }
         String payload = message.getPayload();
-        try (JSONValidator from = JSONValidator.from(payload)) {
-            if (from.getType() == JSONValidator.Type.Object) {
-                JSONObject jsonObject = JSONObject.parseObject(payload);
-                String data = jsonObject.getString("data");
-                if (StrUtil.equals(data, "jpom-heart")) {
-                    // 心跳消息不转发
-                    return;
-                }
-                if (StrUtil.equals(data, "resize")) {
-                    // 缓存区大小
-                    //handlerItem.resize(jsonObject);
-                    return;
-                }
+        JSONValidator from = JSONValidator.from(payload);
+        if (from.getType() == JSONValidator.Type.Object) {
+            JSONObject jsonObject = JSONObject.parseObject(payload);
+            String data = jsonObject.getString("data");
+            if (StrUtil.equals(data, "jpom-heart")) {
+                // 心跳消息不转发
+                return;
+            }
+            if (StrUtil.equals(data, "resize")) {
+                // 缓存区大小
+                //handlerItem.resize(jsonObject);
+                return;
             }
         }
         try {

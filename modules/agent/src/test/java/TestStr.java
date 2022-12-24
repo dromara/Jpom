@@ -28,7 +28,7 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.commander.impl.LinuxSystemCommander;
 import org.junit.Test;
 
@@ -83,7 +83,7 @@ public class TestStr {
     }
 
     @Test
-    public void testNum(){
+    public void testNum() {
         System.out.println(Convert.toInt("122+"));
         System.out.println(NumberUtil.parseInt("1122+"));
     }

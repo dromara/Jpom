@@ -31,7 +31,8 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.util.*;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
@@ -121,7 +122,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
                     super.close();
                 }
             }).awaitResult();
-            return new Tuple(s, JSONObject.toJSON(statistics));
+            return new Tuple(s, JSON.toJSON(statistics));
         }).collect(Collectors.toMap(tuple -> tuple.get(0), tuple -> tuple.get(1)));
     }
 
@@ -187,14 +188,14 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
             .ifPresent(updateContainerCmd::withMemorySwap);
 
         UpdateContainerResponse updateContainerResponse = updateContainerCmd.exec();
-        return (JSONObject) JSONObject.toJSON(updateContainerResponse);
+        return (JSONObject) JSON.toJSON(updateContainerResponse);
     }
 
     private JSONObject inspectContainerCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         String containerId = (String) parameter.get("containerId");
         InspectContainerResponse containerResponse = dockerClient.inspectContainerCmd(containerId).withSize(true).exec();
-        return (JSONObject) JSONObject.toJSON(containerResponse);
+        return (JSONObject) JSON.toJSON(containerResponse);
     }
 
     private List<JSONObject> listNetworksCmd(Map<String, Object> parameter) {
@@ -212,7 +213,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         }
         List<Network> networks = listNetworksCmd.exec();
         networks = ObjectUtil.defaultIfNull(networks, new ArrayList<>());
-        return networks.stream().map(container -> (JSONObject) JSONObject.toJSON(container)).collect(Collectors.toList());
+        return networks.stream().map(container -> (JSONObject) JSON.toJSON(container)).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -312,7 +313,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         String imageId = (String) parameter.get("imageId");
         InspectImageCmd inspectImageCmd = dockerClient.inspectImageCmd(imageId);
         InspectImageResponse inspectImageResponse = inspectImageCmd.exec();
-        return (JSONObject) JSONObject.toJSON(inspectImageResponse);
+        return (JSONObject) JSON.toJSON(inspectImageResponse);
     }
 
     @SuppressWarnings("unchecked")
@@ -451,7 +452,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         return volumes.stream().map((Function<InspectVolumeResponse, Object>) inspectVolumeResponse -> {
             InspectVolumeCmd inspectVolumeCmd = dockerClient.inspectVolumeCmd(inspectVolumeResponse.getName());
             return inspectVolumeCmd.exec();
-        }).map(container -> (JSONObject) JSONObject.toJSON(container)).collect(Collectors.toList());
+        }).map(container -> (JSONObject) JSON.toJSON(container)).collect(Collectors.toList());
 
     }
 
@@ -477,7 +478,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
         }
         List<Image> exec = listImagesCmd.exec();
         exec = ObjectUtil.defaultIfNull(exec, new ArrayList<>());
-        return exec.stream().map(container -> (JSONObject) JSONObject.toJSON(container)).collect(Collectors.toList());
+        return exec.stream().map(container -> (JSONObject) JSON.toJSON(container)).collect(Collectors.toList());
     }
 
     private void removeImageCmd(Map<String, Object> parameter) {
@@ -507,7 +508,7 @@ public class DefaultDockerPluginImpl implements IDefaultPlugin {
 //		}
         List<Container> exec = listContainersCmd.exec();
         exec = ObjectUtil.defaultIfNull(exec, new ArrayList<>());
-        return exec.stream().map(container -> (JSONObject) JSONObject.toJSON(container)).collect(Collectors.toList());
+        return exec.stream().map(container -> (JSONObject) JSON.toJSON(container)).collect(Collectors.toList());
 
     }
 

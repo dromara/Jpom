@@ -26,7 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson2.JSONArray;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;

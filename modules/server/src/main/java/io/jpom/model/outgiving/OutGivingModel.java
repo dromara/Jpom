@@ -23,7 +23,7 @@
 package io.jpom.model.outgiving;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;

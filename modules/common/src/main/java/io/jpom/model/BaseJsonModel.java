@@ -22,8 +22,8 @@
  */
 package io.jpom.model;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 
 import java.io.Serializable;
 
@@ -35,12 +35,12 @@ import java.io.Serializable;
  */
 public abstract class BaseJsonModel implements Serializable {
 
-	@Override
-	public String toString() {
-		return JSON.toJSONString(this);
-	}
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
 
-	public JSONObject toJson() {
-		return (JSONObject) JSONObject.toJSON(this);
-	}
+    public JSONObject toJson() {
+        return (JSONObject) JSON.toJSON(this);
+    }
 }

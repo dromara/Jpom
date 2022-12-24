@@ -31,7 +31,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.system.ProcessModel;
 import io.jpom.util.CommandUtil;

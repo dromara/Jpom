@@ -30,7 +30,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Condition;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.IAsyncLoad;
 import io.jpom.model.docker.DockerInfoModel;

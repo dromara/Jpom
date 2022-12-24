@@ -28,7 +28,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;

@@ -23,7 +23,7 @@
 package io.jpom.monitor;
 
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.plugin.IPlugin;
@@ -85,6 +85,6 @@ public class EmailUtil implements INotify {
         mailMap.put("context", context);
         //
         IPlugin plugin = PluginFactory.getPlugin("email");
-        plugin.execute(JSONObject.toJSON(config), mailMap);
+        plugin.execute(JSON.toJSON(config), mailMap);
     }
 }

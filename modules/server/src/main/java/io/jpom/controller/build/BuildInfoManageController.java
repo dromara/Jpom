@@ -26,7 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.build.BuildExecuteService;
 import io.jpom.build.BuildExtraModule;
 import io.jpom.build.BuildUtil;

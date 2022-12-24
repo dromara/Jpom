@@ -27,7 +27,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;

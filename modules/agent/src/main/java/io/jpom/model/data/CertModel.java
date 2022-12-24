@@ -31,7 +31,7 @@ import cn.hutool.crypto.PemUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.model.BaseModel;
 import io.jpom.service.system.CertService;
 import io.jpom.system.JpomRuntimeException;

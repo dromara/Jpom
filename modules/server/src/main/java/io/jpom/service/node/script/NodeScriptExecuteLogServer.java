@@ -25,8 +25,9 @@ package io.jpom.service.node.script;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
@@ -80,7 +81,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLog
         }
         Object data = jsonMessage.getData();
         //
-        JSONArray jsonArray = (JSONArray) JSONArray.toJSON(data);
+        JSONArray jsonArray = (JSONArray) JSON.toJSON(data);
         for (Object o : jsonArray) {
             JSONObject jsonObject = (JSONObject) o;
             jsonObject.put("nodeId", nodeModel.getId());

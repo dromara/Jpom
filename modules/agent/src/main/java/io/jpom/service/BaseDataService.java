@@ -24,7 +24,7 @@ package io.jpom.service;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.model.BaseModel;
 import io.jpom.system.JpomRuntimeException;

@@ -5,6 +5,8 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【agent】修复 项目文件夹不存在时不能下载远程文件
+2. 【all】升级 fastjson 升级为 fastjson2
+3. 【all】升级 SpringBoot 2.7.7
 
 ------
 

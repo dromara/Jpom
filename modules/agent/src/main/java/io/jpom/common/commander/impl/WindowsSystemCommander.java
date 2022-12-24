@@ -25,7 +25,7 @@ package io.jpom.common.commander.impl;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.sun.management.OperatingSystemMXBean;
 import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.system.ProcessModel;

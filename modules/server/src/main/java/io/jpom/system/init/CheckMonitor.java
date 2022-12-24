@@ -25,7 +25,7 @@ package io.jpom.system.init;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpStatus;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.JsonMessage;

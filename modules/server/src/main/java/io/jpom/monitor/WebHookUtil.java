@@ -24,7 +24,7 @@ package io.jpom.monitor;
 
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.model.data.MonitorModel;
 import org.springframework.http.MediaType;
 
@@ -51,9 +51,9 @@ public class WebHookUtil implements INotify {
         param.put("msgtype", "text");
         param.put("text", text);
         HttpRequest request = HttpUtil.
-                createPost(notify.getValue()).
-                contentType(MediaType.APPLICATION_JSON_VALUE).
-                body(param.toJSONString());
+            createPost(notify.getValue()).
+            contentType(MediaType.APPLICATION_JSON_VALUE).
+            body(param.toJSONString());
         request.execute();
     }
 }
