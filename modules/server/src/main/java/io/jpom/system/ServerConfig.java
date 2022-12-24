@@ -291,10 +291,6 @@ public class ServerConfig extends BaseExtConfig {
         public int getUploadFileTimeout() {
             return Math.max(this.uploadFileTimeout, 5);
         }
-
-        public int getUploadFileTimeoutMilliseconds() {
-            return this.getUploadFileTimeout() * 1000;
-        }
     }
 
     @EqualsAndHashCode(callSuper = true)

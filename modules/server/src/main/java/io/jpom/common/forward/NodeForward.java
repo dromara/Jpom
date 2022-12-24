@@ -97,7 +97,7 @@ public class NodeForward {
                 if (nodeUrl.isFileTimeout()) {
                     ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
                     ServerConfig.NodeConfig configNode = serverConfig.getNode();
-                    return configNode.getUploadFileTimeoutMilliseconds();
+                    return configNode.getUploadFileTimeout();
                 } else {
                     return Optional.of(nodeUrl.getTimeout())
                         .flatMap(timeOut -> {
