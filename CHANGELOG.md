@@ -6,11 +6,13 @@
 
 1. 【agent】修复 项目文件夹不存在时不能下载远程文件
 2. 【all】升级 fastjson 升级为 fastjson2
-3. 【all】升级 SpringBoot 2.7.7
+3. 【all】升级 SpringBoot 2.7.7 、commons-compress
+4. 【server】移除 空闲依赖 jaxb-api
 
 ### ❌ 不兼容功能
 
 1. 【server】取消 兼容低版本插件端的 websocket 授权信息传输方式（低版本插件端请同步升级到最新）
+2. 【server】取消 服务端取消向插件端传递操作人的用户名
 
 ------
 

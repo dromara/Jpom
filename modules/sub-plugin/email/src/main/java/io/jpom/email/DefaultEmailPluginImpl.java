@@ -25,6 +25,7 @@ package io.jpom.email;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.mail.MailAccount;
+import cn.hutool.extra.mail.MailException;
 import cn.hutool.extra.mail.MailUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.plugin.IDefaultPlugin;
@@ -55,7 +56,7 @@ public class DefaultEmailPluginImpl implements IDefaultPlugin {
             List<String> list = StrUtil.split(toEmail, StrUtil.COMMA, true, true);
             try {
                 return MailUtil.send(mailAccount, list, title, context, false);
-            } catch (cn.hutool.extra.mail.MailException mailException) {
+            } catch (MailException mailException) {
                 Exception cause = (Exception) mailException.getCause();
                 if (cause != null) {
                     throw cause;
@@ -67,9 +68,9 @@ public class DefaultEmailPluginImpl implements IDefaultPlugin {
                 Object data = parameter.get("data");
                 MailAccount account = this.getAccount(data);
                 Session session = MailUtil.getSession(account, false);
-                Transport transport = session.getTransport("smtp");
-                transport.connect();
-                transport.close();
+                try (Transport transport = session.getTransport("smtp")) {
+                    transport.connect();
+                }
                 return true;
             } catch (Exception e) {
                 log.warn("检查邮箱信息错误：{}", e.getMessage());
