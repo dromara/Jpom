@@ -22,9 +22,16 @@
  */
 package top.jpom.transport;
 
+import java.util.Map;
+
 /**
+ * 插件端消息传输服务
+ *
  * @author bwcx_jzy
  * @since 2022/12/18
  */
 public interface TransportServer {
+
+    String execute(INodeInfo nodeInfo, IUrlItem urlItem, Map<String, String> map);
+
 }
