@@ -29,6 +29,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
+import io.jpom.common.ILoadEvent;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.ServerConst;
 import io.jpom.common.Type;
@@ -38,7 +39,7 @@ import io.jpom.service.node.NodeService;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.JvmUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
@@ -51,7 +52,7 @@ import java.io.File;
  */
 @Configuration
 @Slf4j
-public class AutoImportLocalNode implements InitializingBean {
+public class AutoImportLocalNode implements ILoadEvent {
 
     private final NodeService nodeService;
     private final JpomApplication configBean;
@@ -128,7 +129,7 @@ public class AutoImportLocalNode implements InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         this.install();
         this.loadAgent();
     }

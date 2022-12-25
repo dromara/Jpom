@@ -25,11 +25,12 @@ package io.jpom.system.init;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
+import io.jpom.common.ILoadEvent;
 import io.jpom.model.data.NodeModel;
 import io.jpom.service.system.SystemParametersServer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
@@ -51,7 +52,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Configuration
-public class ProxySelectorConfig extends ProxySelector implements InitializingBean {
+public class ProxySelectorConfig extends ProxySelector implements ILoadEvent {
 
     public static final String KEY = "global_proxy";
 
@@ -108,7 +109,7 @@ public class ProxySelectorConfig extends ProxySelector implements InitializingBe
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         if (ProxySelector.getDefault() != this) {
             defaultProxySelector = ProxySelector.getDefault();
             //

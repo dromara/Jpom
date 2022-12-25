@@ -36,6 +36,7 @@ import cn.hutool.db.ds.GlobalDSFactory;
 import cn.hutool.db.sql.SqlLog;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.setting.Setting;
+import io.jpom.common.ILoadEvent;
 import io.jpom.common.JpomApplicationEvent;
 import io.jpom.common.JpomManifest;
 import io.jpom.model.data.BackupInfoModel;
@@ -47,11 +48,9 @@ import io.jpom.system.db.DbConfig;
 import io.jpom.system.extconf.DbExtConfig;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
@@ -75,7 +74,7 @@ import java.util.stream.Collectors;
  */
 @Configuration
 @Slf4j
-public class InitDb implements DisposableBean, ApplicationContextAware {
+public class InitDb implements DisposableBean, ILoadEvent {
 
     private final List<Runnable> BEFORE_CALLBACK = new LinkedList<>();
     private final List<Supplier<Boolean>> AFTER_CALLBACK = new LinkedList<>();
@@ -364,11 +363,15 @@ public class InitDb implements DisposableBean, ApplicationContextAware {
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         this.prepareCallback(applicationContext.getEnvironment());
         this.init();
     }
 
+    @Override
+    public int getOrder() {
+        return HIGHEST_PRECEDENCE;
+    }
 //    @Override
 //    public void handle(Signal signal) {
 //        log.warn("signal event {} {}", signal.getName(), signal.getNumber());
