@@ -121,7 +121,7 @@ public class NodeForward {
 
             @Override
             public String workspaceId() {
-                return nodeModel.getWorkspaceId();
+                return Optional.ofNullable(nodeModel.getWorkspaceId()).orElse(Const.WORKSPACE_DEFAULT_ID);
             }
 
             @Override
