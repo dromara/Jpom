@@ -8,6 +8,9 @@
 2. 【all】升级 fastjson 升级为 fastjson2
 3. 【all】升级 SpringBoot 2.7.7 、commons-compress
 4. 【server】移除 空闲依赖 jaxb-api
+5. 【all】优化 启动加载流程，保存顺序加载
+6. 【all】修复 启动成功写入全局信息由于没有权限造成的异常
+   （感谢 [@LeonChen21](https://gitee.com/leonchen21) [Gitee issues I67C3C](https://gitee.com/dromara/Jpom/issues/I67C3C) ）
 
 ### ❌ 不兼容功能
 

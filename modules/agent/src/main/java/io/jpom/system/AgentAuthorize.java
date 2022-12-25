@@ -29,13 +29,14 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
+import io.jpom.common.ILoadEvent;
 import io.jpom.model.system.AgentAutoUser;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.JvmUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -48,7 +49,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties("jpom.authorize")
-public class AgentAuthorize implements InitializingBean {
+public class AgentAuthorize implements ILoadEvent {
     /**
      * 账号
      */
@@ -127,7 +128,7 @@ public class AgentAuthorize implements InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         // 登录名不能为空
         if (StrUtil.isEmpty(this.agentName)) {
             throw new JpomRuntimeException("The agent login name cannot be empty");
@@ -141,5 +142,10 @@ public class AgentAuthorize implements InitializingBean {
         }
         //
         JvmUtil.checkJpsNormal();
+    }
+
+    @Override
+    public int getOrder() {
+        return HIGHEST_PRECEDENCE;
     }
 }

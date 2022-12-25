@@ -23,6 +23,7 @@
 package io.jpom.common;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
@@ -45,8 +46,12 @@ import io.jpom.cron.ICron;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.JvmUtil;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -71,7 +76,7 @@ import java.util.Map;
  */
 @Slf4j
 @Configuration
-public class JpomApplicationEvent implements ApplicationListener<ApplicationEvent> {
+public class JpomApplicationEvent implements ApplicationListener<ApplicationEvent>, ApplicationContextAware {
 
     private final JpomApplication configBean;
 
@@ -89,25 +94,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
     public void onApplicationEvent(ApplicationEvent event) {
         // 启动最后的预加载
         if (event instanceof ApplicationReadyEvent) {
-            this.clearTemp();
-            this.checkDuplicateRun();
-            //
-            this.checkPath();
-            JpomManifest jpomManifest = JpomManifest.getInstance();
 
-            // 清理旧进程新文件
-            File dataDir = FileUtil.file(configBean.getDataPath());
-            List<File> files = FileUtil.loopFiles(dataDir, 1, pathname -> pathname.getName().startsWith("pid."));
-            files.forEach(FileUtil::del);
-
-            // 写入Jpom 信息 、 写入全局信息
-            File appJpomFile = configBean.getApplicationJpomInfo(JpomApplication.getAppType());
-            FileUtil.writeString(jpomManifest.toString(), appJpomFile, CharsetUtil.CHARSET_UTF_8);
-            // 检查更新文件
-            this.checkUpdate();
-            //
-            this.statLoad();
-            this.success();
         } else if (event instanceof ContextClosedEvent) {
             //
             File appJpomFile = configBean.getApplicationJpomInfo(JpomApplication.getAppType());
@@ -115,12 +102,24 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         }
     }
 
+    private void writeRunTempInfo() {
+        try {
+            // 写入Jpom 信息 、 写入全局信息
+            JpomManifest jpomManifest = JpomManifest.getInstance();
+            File appJpomFile = configBean.getApplicationJpomInfo(JpomApplication.getAppType());
+            FileUtil.writeString(jpomManifest.toString(), appJpomFile, CharsetUtil.CHARSET_UTF_8);
+        } catch (Exception e) {
+            log.warn("写入全局运行信息失败：{}", e.getMessage());
+        }
+    }
+
     private void checkPath() {
         String path = ExtConfigBean.getPath();
-        String extConfigPath = null;
+        String extConfigPath;
         try {
             extConfigPath = ExtConfigBean.getResource().getURL().toString();
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            throw Lombok.sneakyThrow(e);
         }
         File file = FileUtil.file(path);
         try {
@@ -143,7 +142,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         String upgrade = FileUtil.file(runFile, Const.UPGRADE).getAbsolutePath();
         JSONObject jsonObject = null;
         try {
-            jsonObject = (JSONObject) JsonFileUtil.readJson(upgrade);
+            jsonObject = JsonFileUtil.readJson(upgrade);
         } catch (FileNotFoundException ignored) {
         }
         if (jsonObject != null) {
@@ -261,6 +260,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
 
 
     private void clearTemp() {
+        log.debug("Automatically clean up temporary directories");
         File file = configBean.getTempPath();
         /**
          * @author Hotstrip
@@ -332,5 +332,35 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
      */
     public static void asyncExit(int code) {
         ThreadUtil.execute(() -> System.exit(code));
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        // 检查目录权限
+        this.checkPath();
+        // 清空临时目录
+        this.clearTemp();
+        // 开始加载子模块
+        Map<String, ILoadEvent> loadEventMap = applicationContext.getBeansOfType(ILoadEvent.class);
+        loadEventMap.values()
+            .stream()
+            .sorted((o1, o2) -> CompareUtil.compare(o1.getOrder(), o2.getOrder()))
+            .forEach(iLoadEvent -> {
+                try {
+                    iLoadEvent.afterPropertiesSet(applicationContext);
+                } catch (Exception e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            });
+        // 检查更新文件
+        this.checkUpdate();
+        // 提示重复运行
+        this.checkDuplicateRun();
+        // 开始异常加载
+        this.statLoad();
+        // 写入全局运行信息
+        this.writeRunTempInfo();
+        // 提示成功消息
+        this.success();
     }
 }

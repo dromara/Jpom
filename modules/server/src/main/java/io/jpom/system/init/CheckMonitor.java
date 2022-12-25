@@ -28,6 +28,7 @@ import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.build.BuildUtil;
+import io.jpom.common.ILoadEvent;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.forward.NodeForward;
@@ -41,7 +42,7 @@ import io.jpom.service.node.NodeService;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Collection;
@@ -54,12 +55,10 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2019/7/14
  */
-//@PreLoadClass(value = Integer.MAX_VALUE)
 @Configuration
 @Slf4j
-public class CheckMonitor implements InitializingBean {
+public class CheckMonitor implements ILoadEvent {
 
-    //    @PreLoadMethod
     private void init() {
         // 缓存检测调度
         CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
@@ -146,7 +145,7 @@ public class CheckMonitor implements InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         this.init();
     }
 }

@@ -35,6 +35,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import io.jpom.JpomApplication;
+import io.jpom.common.ILoadEvent;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.cron.CronUtils;
@@ -42,7 +43,7 @@ import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.script.BaseRunScript;
 import io.jpom.service.manage.ProjectInfoService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
 
@@ -63,7 +64,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Configuration
-public class AgentStartInit implements InitializingBean {
+public class AgentStartInit implements ILoadEvent {
 
     private static final String ID = "auto_back_log";
     private final ProjectInfoService projectInfoService;
@@ -219,7 +220,7 @@ public class AgentStartInit implements InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         this.startAutoBackLog();
         this.systemMonitor();
         this.autoStartProject();

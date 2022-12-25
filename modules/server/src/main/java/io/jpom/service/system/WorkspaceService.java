@@ -31,7 +31,6 @@ import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.h2db.TableName;
 import io.jpom.service.node.NodeService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -43,14 +42,9 @@ import java.util.Set;
  */
 @Service
 @Slf4j
-public class WorkspaceService extends BaseDbService<WorkspaceModel> implements InitializingBean, IStatusRecover {
+public class WorkspaceService extends BaseDbService<WorkspaceModel> implements IStatusRecover {
     @Resource
     private NodeService nodeService;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-    }
 
     @Override
     public int statusRecover() {
