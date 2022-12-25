@@ -24,6 +24,7 @@ package io.jpom.service.docker;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -43,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -129,7 +131,11 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
             this.updateSwarmStatus(dockerInfoModel.getId(), update.getStatus(), update.getFailureMsg());
             return true;
         } catch (Exception e) {
-            log.error("监控 docker 异常", e);
+            if (ExceptionUtil.isCausedBy(e, NoSuchFileException.class)) {
+                log.error("监控 docker 异常 {}", e.getMessage());
+            } else {
+                log.error("监控 docker 异常", e);
+            }
             this.updateStatus(dockerInfoModel.getId(), 0, e.getMessage());
             return false;
         }
