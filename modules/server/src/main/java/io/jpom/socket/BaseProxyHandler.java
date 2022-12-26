@@ -27,9 +27,14 @@ import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.user.UserModel;
+import io.jpom.util.SocketSessionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import top.jpom.transport.DataContentType;
+import top.jpom.transport.IProxyWebSocket;
+import top.jpom.transport.IUrlItem;
+import top.jpom.transport.TransportServerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -41,6 +46,7 @@ import java.util.Map;
  * @author jiangzeyin
  * @since 2019/4/25
  */
+@Slf4j
 public abstract class BaseProxyHandler extends BaseHandler {
 
     private final NodeUrl nodeUrl;
@@ -78,13 +84,16 @@ public abstract class BaseProxyHandler extends BaseHandler {
             return;
         }
         NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
-        UserModel userInfo = (UserModel) attributes.get("userInfo");
+//        UserModel userInfo = (UserModel) attributes.get("userInfo");
 
         if (nodeModel != null) {
             Object[] parameters = this.getParameters(attributes);
-            String url = NodeForward.getSocketUrl(nodeModel, nodeUrl, userInfo, parameters);
             // 连接节点
-            ProxySession proxySession = new ProxySession(url, nodeModel.getTimeOut(), session);
+            IUrlItem urlItem = NodeForward.createUrlItem(nodeModel, this.nodeUrl, DataContentType.FORM_URLENCODED);
+
+            IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeModel, urlItem, parameters);
+            proxySession.onMessage(s -> sendMsg(session, s));
+            proxySession.open();
             session.getAttributes().put("proxySession", proxySession);
         }
 
@@ -96,7 +105,7 @@ public abstract class BaseProxyHandler extends BaseHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String msg = message.getPayload();
         Map<String, Object> attributes = session.getAttributes();
-        ProxySession proxySession = (ProxySession) attributes.get("proxySession");
+        IProxyWebSocket proxySession = (IProxyWebSocket) attributes.get("proxySession");
         JSONObject json = JSONObject.parseObject(msg);
         String op = json.getString("op");
         ConsoleCommandOp consoleCommandOp = StrUtil.isNotEmpty(op) ? ConsoleCommandOp.valueOf(op) : null;
@@ -135,9 +144,9 @@ public abstract class BaseProxyHandler extends BaseHandler {
      * @param consoleCommandOp 操作类型
      */
     protected String handleTextMessage(Map<String, Object> attributes,
-                                       ProxySession proxySession,
+                                       IProxyWebSocket proxySession,
                                        JSONObject json,
-                                       ConsoleCommandOp consoleCommandOp) {
+                                       ConsoleCommandOp consoleCommandOp) throws IOException {
         return null;
     }
 
@@ -151,9 +160,14 @@ public abstract class BaseProxyHandler extends BaseHandler {
         } catch (IOException ignored) {
         }
         Map<String, Object> attributes = session.getAttributes();
-        ProxySession proxySession = (ProxySession) attributes.get("proxySession");
+        IProxyWebSocket proxySession = (IProxyWebSocket) attributes.get("proxySession");
         if (proxySession != null) {
-            proxySession.close();
+            try {
+                proxySession.close();
+            } catch (Exception e) {
+                log.error("关闭异常", e);
+            }
         }
+        SocketSessionUtil.close(session);
     }
 }

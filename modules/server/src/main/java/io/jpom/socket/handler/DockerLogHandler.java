@@ -113,5 +113,6 @@ public class DockerLogHandler extends BaseProxyHandler {
         //
         super.destroy(session);
 //		ScriptProcessBuilder.stopWatcher(session);
+        SocketSessionUtil.close(session);
     }
 }

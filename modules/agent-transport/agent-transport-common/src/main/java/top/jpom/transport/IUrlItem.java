@@ -37,6 +37,7 @@ public interface IUrlItem {
 
     /**
      * 请求超时时间
+     * 单位秒
      *
      * @return 超时时间
      */

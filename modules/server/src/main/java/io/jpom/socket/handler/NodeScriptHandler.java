@@ -37,8 +37,9 @@ import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
-import io.jpom.socket.ProxySession;
+import top.jpom.transport.IProxyWebSocket;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -60,7 +61,7 @@ public class NodeScriptHandler extends BaseProxyHandler {
     }
 
     @Override
-    protected String handleTextMessage(Map<String, Object> attributes, ProxySession proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) {
+    protected String handleTextMessage(Map<String, Object> attributes, IProxyWebSocket proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
         if (consoleCommandOp != ConsoleCommandOp.heart) {
             super.logOpt(this.getClass(), attributes, json);
         }

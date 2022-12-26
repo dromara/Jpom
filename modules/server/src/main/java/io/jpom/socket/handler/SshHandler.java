@@ -43,6 +43,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.user.UserBindWorkspaceService;
+import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
@@ -291,5 +292,6 @@ public class SshHandler extends BaseTerminalHandler {
         }
         IoUtil.close(session);
         HANDLER_ITEM_CONCURRENT_HASH_MAP.remove(session.getId());
+        SocketSessionUtil.close(session);
     }
 }

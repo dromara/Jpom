@@ -30,8 +30,9 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
-import io.jpom.socket.ProxySession;
+import top.jpom.transport.IProxyWebSocket;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -54,9 +55,9 @@ public class ConsoleHandler extends BaseProxyHandler {
 
     @Override
     protected String handleTextMessage(Map<String, Object> attributes,
-                                       ProxySession proxySession,
+                                       IProxyWebSocket proxySession,
                                        JSONObject json,
-                                       ConsoleCommandOp consoleCommandOp) {
+                                       ConsoleCommandOp consoleCommandOp) throws IOException {
         //ProjectInfoCacheModel dataItem = (ProjectInfoCacheModel) attributes.get("dataItem");
 //		UserModel userModel = (UserModel) attributes.get("userInfo");
 //		if (RunMode.Dsl.name().equals(dataItem.getRunMode()) && userModel.isDemoUser()) {
