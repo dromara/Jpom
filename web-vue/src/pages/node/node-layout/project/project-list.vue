@@ -68,9 +68,9 @@
           <!-- <span>{{ parseTime(record.createTimeMillis) }}</span> -->
         </a-tooltip>
       </template>
-      <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
+      <!-- <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
-      </a-tooltip>
+      </a-tooltip> -->
       <template slot="status" slot-scope="text, record">
         <template v-if="record.error">
           <a-tooltip :title="record.error">
@@ -460,14 +460,14 @@ export default {
         { title: "运行方式", dataIndex: "runMode", sorter: true, width: 90, ellipsis: true, align: "center", scopedSlots: { customRender: "runMode" } },
         { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: 170, ellipsis: true, scopedSlots: { customRender: "time" } },
 
-        {
-          title: "最后操作人",
-          dataIndex: "modifyUser",
-          width: 100,
-          ellipsis: true,
-          sorter: true,
-          scopedSlots: { customRender: "modifyUser" },
-        },
+        // {
+        //   title: "最后操作人",
+        //   dataIndex: "modifyUser",
+        //   width: 100,
+        //   ellipsis: true,
+        //   sorter: true,
+        //   scopedSlots: { customRender: "modifyUser" },
+        // },
         { title: "运行状态", dataIndex: "status", width: 80, ellipsis: true, align: "center", scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 180 },
