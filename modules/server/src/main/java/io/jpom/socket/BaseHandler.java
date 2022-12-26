@@ -22,9 +22,11 @@
  */
 package io.jpom.socket;
 
+import cn.hutool.core.bean.BeanPath;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
+import io.jpom.model.BaseNodeModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.permission.Feature;
@@ -38,6 +40,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author bwcx_jzy
@@ -74,7 +77,9 @@ public abstract class BaseHandler extends TextWebSocketHandler {
      * @throws Exception 异常
      */
     protected void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
-
+        Map<String, Object> attributes = session.getAttributes();
+        // 连接成功后记录
+        this.logOpt(this.getClass(), attributes, attributes);
     }
 
     @Override
@@ -126,7 +131,17 @@ public abstract class BaseHandler extends TextWebSocketHandler {
         cacheInfo.setMethodFeature(method);
 
         cacheInfo.setNodeModel(nodeModel);
-        cacheInfo.setDataId(null);
+        //
+        Object dataItem = attributes.get("dataItem");
+        Optional.ofNullable(dataItem).map(o -> {
+            if (o instanceof BaseNodeModel) {
+                BaseNodeModel baseNodeModel = (BaseNodeModel) o;
+                return baseNodeModel.dataId();
+            }
+            Object id = BeanPath.create("id").get(o);
+            return StrUtil.toStringOrNull(id);
+
+        }).ifPresent(cacheInfo::setDataId);
         String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
         cacheInfo.setUserAgent(userAgent);
         cacheInfo.setReqData(JSONObject.toJSONString(reqData));

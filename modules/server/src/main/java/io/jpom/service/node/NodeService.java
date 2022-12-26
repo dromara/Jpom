@@ -24,6 +24,7 @@ package io.jpom.service.node;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -370,5 +371,15 @@ public class NodeService extends BaseGroupService<NodeModel> {
         NodeModel nodeModel = new NodeModel();
         nodeModel.setSshId(sshId);
         return super.listByBean(nodeModel);
+    }
+
+    @Override
+    public NodeModel getData(String nodeId, String dataId) {
+        return Opt.ofBlankAble(nodeId)
+            .map(super::getByKey)
+            .orElseGet(() -> Opt.ofBlankAble(dataId)
+                .map(NodeService.super::getByKey)
+                .orElse(null)
+            );
     }
 }

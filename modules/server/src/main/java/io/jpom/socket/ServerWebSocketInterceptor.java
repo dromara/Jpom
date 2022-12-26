@@ -205,6 +205,13 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
      * @return 错误消息
      */
     private String checkPermission(UserModel userInfo, Map<String, Object> attributes, HandlerType handlerType) {
+        Object dataItem = attributes.get("dataItem");
+        Object nodeInfo = attributes.get("nodeInfo");
+        String workspaceId = BeanUtil.getProperty(dataItem == null ? nodeInfo : dataItem, "workspaceId");
+        //?  : BeanUtil.getProperty(dataItem, "workspaceId");
+        //
+        attributes.put("workspaceId", workspaceId);
+
         if (userInfo.isSuperSystemUser()) {
             return StrUtil.EMPTY;
         }
@@ -214,12 +221,6 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         if (handlerType == HandlerType.nodeUpdate) {
             return "您没有对应功能【" + ClassFeature.NODE_UPGRADE.getName() + "】管理权限";
         }
-        Object dataItem = attributes.get("dataItem");
-        Object nodeInfo = attributes.get("nodeInfo");
-        String workspaceId = BeanUtil.getProperty(dataItem == null ? nodeInfo : dataItem, "workspaceId");
-        //?  : BeanUtil.getProperty(dataItem, "workspaceId");
-        //
-        attributes.put("workspaceId", workspaceId);
         Class<?> handlerClass = handlerType.getHandlerClass();
         SystemPermission systemPermission = handlerClass.getAnnotation(SystemPermission.class);
         if (systemPermission != null) {

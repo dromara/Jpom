@@ -51,6 +51,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -164,13 +165,14 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
      *
      * @param userOperateLogV1 操作信息
      * @param cacheInfo        操作缓存相关
+     * @return 解析后的相关数据
      */
-    private void checkMonitor(UserOperateLogV1 userOperateLogV1, OperateLogController.CacheInfo cacheInfo) {
+    private Map<String, Object> checkMonitor(UserOperateLogV1 userOperateLogV1, OperateLogController.CacheInfo cacheInfo) {
         ClassFeature classFeature = EnumUtil.fromString(ClassFeature.class, userOperateLogV1.getClassFeature(), null);
         MethodFeature methodFeature = EnumUtil.fromString(MethodFeature.class, userOperateLogV1.getMethodFeature(), null);
         UserModel optUserItem = userService.getByKey(userOperateLogV1.getUserId());
         if (classFeature == null || methodFeature == null || optUserItem == null) {
-            return;
+            return null;
         }
         Map<String, Object> dataMap = this.buildDataMsg(classFeature, cacheInfo, userOperateLogV1);
         WorkspaceModel workspaceModel = workspaceService.getByKey(userOperateLogV1.getWorkspaceId());
@@ -181,7 +183,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
             methodFeature,
             userOperateLogV1.getUserId());
         if (CollUtil.isEmpty(monitorUserOptModels)) {
-            return;
+            return dataMap;
         }
         String context = this.buildContent(optUserItem, dataMap, workspaceModel, optTypeMsg, userOperateLogV1);
         for (MonitorUserOptModel monitorUserOptModel : monitorUserOptModels) {
@@ -233,6 +235,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                 }
             }
         }
+        return dataMap;
     }
 
     /**
@@ -245,7 +248,14 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
         super.insert(userOperateLogV1);
         ThreadUtil.execute(() -> {
             try {
-                this.checkMonitor(userOperateLogV1, cacheInfo);
+                Map<String, Object> monitor = this.checkMonitor(userOperateLogV1, cacheInfo);
+                if (monitor != null) {
+                    String dataName = Optional.ofNullable(monitor.get("数据名称")).map(StrUtil::toStringOrNull).orElse(StrUtil.DASHED);
+                    UserOperateLogV1 userOperateLogV11 = new UserOperateLogV1();
+                    userOperateLogV11.setDataName(dataName);
+                    userOperateLogV11.setId(userOperateLogV1.getId());
+                    super.updateById(userOperateLogV11);
+                }
             } catch (Exception e) {
                 log.error("执行操作监控错误", e);
             }

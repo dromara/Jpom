@@ -56,7 +56,9 @@ public abstract class BaseAgentWebSocketHandle {
     protected String getParameters(Session session, String name) {
         Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
         Map<String, String> parameters = session.getPathParameters();
-        log.debug("web socket parameters: {} {}", JSONObject.toJSONString(requestParameterMap), parameters);
+        if (log.isDebugEnabled()) {
+            log.debug("web socket parameters: {} {}", JSONObject.toJSONString(requestParameterMap), parameters);
+        }
         List<String> strings = requestParameterMap.get(name);
         String value = CollUtil.join(strings, StrUtil.COMMA);
         if (StrUtil.isEmpty(value)) {

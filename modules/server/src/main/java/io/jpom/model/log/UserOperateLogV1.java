@@ -76,6 +76,10 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
      */
     private String dataId;
     /**
+     * 数据名称
+     */
+    private String dataName;
+    /**
      * 浏览器标识
      */
     private String userAgent;

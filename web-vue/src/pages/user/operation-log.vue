@@ -88,6 +88,7 @@ export default {
         { title: "操作者", dataIndex: "userId" },
         { title: "IP", dataIndex: "ip" /*width: 130*/ },
         { title: "节点", dataIndex: "nodeId", width: 120, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "数据名称", dataIndex: "dataName", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "操作功能", dataIndex: "classFeature", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "classFeature" } },
         { title: "操作方法", dataIndex: "methodFeature", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "methodFeature" } },

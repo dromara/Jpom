@@ -22,6 +22,7 @@
  */
 package io.jpom.socket.handler;
 
+import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.permission.ClassFeature;
@@ -63,9 +64,9 @@ public class ConsoleHandler extends BaseProxyHandler {
 //				return PermissionInterceptor.DEMO_TIP;
 //			}
 //		}
-        if (consoleCommandOp != ConsoleCommandOp.heart) {
+        ConsoleCommandOp[] commandOps = new ConsoleCommandOp[]{ConsoleCommandOp.heart, ConsoleCommandOp.showlog};
+        if (!ArrayUtil.contains(commandOps, consoleCommandOp)) {
             super.logOpt(this.getClass(), attributes, json);
-
         }
         proxySession.send(json.toString());
         return null;

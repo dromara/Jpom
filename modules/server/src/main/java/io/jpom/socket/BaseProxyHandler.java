@@ -59,6 +59,7 @@ public abstract class BaseProxyHandler extends BaseHandler {
 
     @Override
     public void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
+        super.afterConnectionEstablishedImpl(session);
         Map<String, Object> attributes = session.getAttributes();
         this.init(session, attributes);
     }

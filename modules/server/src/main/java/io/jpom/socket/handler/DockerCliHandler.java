@@ -60,10 +60,10 @@ public class DockerCliHandler extends BaseTerminalHandler {
 
     @Override
     public void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
+        super.afterConnectionEstablishedImpl(session);
         Map<String, Object> attributes = session.getAttributes();
         DockerInfoModel dockerInfoModel = (DockerInfoModel) attributes.get("dataItem");
         String containerId = (String) attributes.get("containerId");
-        super.logOpt(this.getClass(), attributes, attributes);
         //
         HandlerItem handlerItem;
         try {
