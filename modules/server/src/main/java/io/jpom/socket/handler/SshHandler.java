@@ -81,10 +81,9 @@ public class SshHandler extends BaseTerminalHandler {
 
     @Override
     public void afterConnectionEstablishedImpl(WebSocketSession session) throws Exception {
+        super.afterConnectionEstablishedImpl(session);
         Map<String, Object> attributes = session.getAttributes();
         SshModel sshItem = (SshModel) attributes.get("dataItem");
-
-        super.logOpt(this.getClass(), attributes, attributes);
         //
         HandlerItem handlerItem;
         try {

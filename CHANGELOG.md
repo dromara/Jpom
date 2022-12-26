@@ -2,6 +2,10 @@
 
 ## 2.10.5
 
+### 🐣 新增功能
+
+1. 【server】新增 操作日志新增数据名称字段
+
 ### 🐞 解决BUG、优化功能
 
 1. 【agent】修复 项目文件夹不存在时不能下载远程文件
@@ -11,6 +15,8 @@
 5. 【all】优化 启动加载流程，保存顺序加载
 6. 【all】修复 启动成功写入全局信息由于没有权限造成的异常
    （感谢 [@LeonChen21](https://gitee.com/leonchen21) [Gitee issues I67C3C](https://gitee.com/dromara/Jpom/issues/I67C3C) ）
+7. 【server】优化 websocket 控制台操作日志记录
+8. 【server】修复 超级管理的 websocket 操作日志记录工作空间不正确
 
 ### ❌ 不兼容功能
 

@@ -27,6 +27,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * 构建相关配置
+ *
  * @author bwcx_jzy
  * @since 2022/7/7
  */

@@ -186,11 +186,10 @@ public class OperateLogController implements AopLogInterface {
                 return;
             }
             if (cacheInfo.classFeature == null || cacheInfo.methodFeature == null) {
-                new RuntimeException("权限功能没有配置正确").printStackTrace();
+                log.warn("权限功能没有配置正确 {}", cacheInfo);
                 return;
             }
             UserModel userModel = BaseServerController.getUserByThreadLocal();
-            userModel = userModel == null ? BaseServerController.getUserModel() : userModel;
             // 没有对应的用户
             if (userModel == null) {
                 return;
@@ -271,8 +270,6 @@ public class OperateLogController implements AopLogInterface {
      * @param val   结果
      */
     public void updateLog(String reqId, String val) {
-
-
         Entity entity = new Entity();
         entity.set("resultMsg", val);
         try {

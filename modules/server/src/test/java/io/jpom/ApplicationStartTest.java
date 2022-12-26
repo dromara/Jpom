@@ -23,8 +23,8 @@
 package io.jpom;
 
 import io.jpom.plugin.PluginFactory;
+import io.jpom.system.db.InitDb;
 import io.jpom.system.extconf.DbExtConfig;
-import io.jpom.system.init.InitDb;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

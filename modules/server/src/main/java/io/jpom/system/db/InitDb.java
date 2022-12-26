@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.system.init;
+package io.jpom.system.db;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.CheckedUtil;
@@ -44,7 +44,6 @@ import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.system.JpomRuntimeException;
-import io.jpom.system.db.DbConfig;
 import io.jpom.system.extconf.DbExtConfig;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
