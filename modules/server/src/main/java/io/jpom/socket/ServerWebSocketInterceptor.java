@@ -171,15 +171,18 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             String userId = httpServletRequest.getParameter("userId");
             UserModel userModel = userService.checkUser(userId);
             if (userModel == null) {
-                return false;
+                attributes.put("permissionMsg", "用户不存在");
+                return true;
             }
             boolean checkNode = this.checkNode(httpServletRequest, attributes, userModel);
             HandlerType handlerType = this.fromType(httpServletRequest);
             if (!checkNode || handlerType == null) {
-                return false;
+                attributes.put("permissionMsg", "未匹配到合适的处理类型");
+                return true;
             }
             if (!this.checkHandlerType(handlerType, userModel, httpServletRequest, attributes)) {
-                return false;
+                attributes.put("permissionMsg", "未找到匹配的数据");
+                return true;
             }
             // 判断权限
             String permissionMsg = this.checkPermission(userModel, attributes, handlerType);

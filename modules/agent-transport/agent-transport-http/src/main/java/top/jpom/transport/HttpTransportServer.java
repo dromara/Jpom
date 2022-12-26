@@ -22,6 +22,7 @@
  */
 package top.jpom.transport;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.*;
@@ -125,5 +126,32 @@ public class HttpTransportServer implements TransportServer {
         } catch (Exception e) {
             throw Lombok.sneakyThrow(TransformServerFactory.get().transformException(e, nodeInfo));
         }
+    }
+
+    @Override
+    public IProxyWebSocket websocket(INodeInfo nodeInfo, IUrlItem urlItem, Object... parameters) {
+        String ws = "https".equalsIgnoreCase(nodeInfo.scheme()) ? "wss" : "ws";
+        String url = StrUtil.format("{}://{}/", nodeInfo.scheme(), nodeInfo.url());
+        UrlBuilder urlBuilder = UrlBuilder.of(url).addPath(urlItem.path());
+        //
+        urlBuilder.addQuery(TransportServer.JPOM_AGENT_AUTHORIZE, nodeInfo.authorize());
+        //
+        urlBuilder.addQuery(TransportServer.WORKSPACE_ID_REQ_HEADER, urlItem.workspaceId());
+        for (int i = 0; i < parameters.length; i += 2) {
+            Object parameter = parameters[i + 1];
+            String value = Convert.toStr(parameter, StrUtil.EMPTY);
+            urlBuilder.addQuery(parameters[i].toString(), value);
+        }
+        urlBuilder.setWithEndTag(false);
+        String uriTemplate = urlBuilder.build();
+        uriTemplate = StrUtil.removePrefixIgnoreCase(uriTemplate, "http");
+        uriTemplate = StrUtil.removePrefixIgnoreCase(uriTemplate, "https");
+        uriTemplate = StrUtil.format("{}{}", ws, uriTemplate);
+        //
+        if (log.isDebugEnabled()) {
+            log.debug("{}[{}] -> {}", nodeInfo.name(), uriTemplate, urlItem.workspaceId());
+        }
+        Integer timeout = urlItem.timeout();
+        return new ServletWebSocketClientHandler(uriTemplate, timeout);
     }
 }

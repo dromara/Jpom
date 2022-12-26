@@ -53,13 +53,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!--websocket作为客户端-->
-        <dependency>
-            <groupId>org.java-websocket</groupId>
-            <artifactId>Java-WebSocket</artifactId>
-            <version>1.5.3</version>
-        </dependency>
-
         <!--   数据库-->
         <dependency>
             <groupId>io.jpom.plugins</groupId>

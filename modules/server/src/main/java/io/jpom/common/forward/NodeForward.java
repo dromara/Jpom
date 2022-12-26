@@ -77,7 +77,7 @@ public class NodeForward {
      * @param dataContentType 传输的数据类型
      * @return item
      */
-    private static IUrlItem createUrlItem(NodeModel nodeModel, NodeUrl nodeUrl, DataContentType dataContentType) {
+    public static IUrlItem createUrlItem(NodeModel nodeModel, NodeUrl nodeUrl, DataContentType dataContentType) {
         // 修正节点密码
         if (StrUtil.isEmpty(nodeModel.getLoginPwd())) {
             NodeService nodeService = SpringUtil.getBean(NodeService.class);

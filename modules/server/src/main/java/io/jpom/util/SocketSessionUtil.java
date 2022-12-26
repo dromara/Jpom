@@ -22,13 +22,16 @@
  */
 package io.jpom.util;
 
-import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * socket 会话对象
@@ -38,46 +41,24 @@ import java.io.IOException;
  */
 @Slf4j
 public class SocketSessionUtil {
-    /**
-     * 锁
-     */
-    private static final KeyLock<String> LOCK = new KeyLock<>();
-    /**
-     * 错误尝试次数
-     */
-    private static final int ERROR_TRY_COUNT = 10;
+
+    private static final Map<String, WebSocketSession> SOCKET_MAP = new ConcurrentHashMap<>();
 
     public static void send(WebSocketSession session, String msg) throws IOException {
-        if (StrUtil.isEmpty(msg)) {
+        send(session, new TextMessage(msg));
+    }
+
+    public static void send(WebSocketSession session, WebSocketMessage<?> message) throws IOException {
+        if (!session.isOpen()) {
+            // 会话关闭不能发送消息 @author jzy 21-08-04
+            log.warn("回话已经关闭啦，不能发送消息：{}", message.getPayload());
             return;
         }
-        if (!session.isOpen()) {
-            throw new RuntimeException("session close ");
-        }
-        try {
-            LOCK.lock(session.getId());
-            IOException exception = null;
-            int tryCount = 0;
-            do {
-                tryCount++;
-                if (exception != null) {
-                    // 上一次有异常、休眠 500
-                    ThreadUtil.sleep(500);
-                }
-                try {
-                    session.sendMessage(new TextMessage(msg));
-                    exception = null;
-                    break;
-                } catch (IOException e) {
-                    log.error("发送消息失败:" + tryCount, e);
-                    exception = e;
-                }
-            } while (tryCount <= ERROR_TRY_COUNT);
-            if (exception != null) {
-                throw exception;
-            }
-        } finally {
-            LOCK.unlock(session.getId());
-        }
+        WebSocketSession webSocketSession = SOCKET_MAP.computeIfAbsent(session.getId(), s -> new ConcurrentWebSocketSessionDecorator(session, 60 * 1000, (int) DataSize.ofMegabytes(5).toBytes()));
+        webSocketSession.sendMessage(message);
+    }
+
+    public static void close(WebSocketSession session) {
+        SOCKET_MAP.remove(session.getId());
     }
 }

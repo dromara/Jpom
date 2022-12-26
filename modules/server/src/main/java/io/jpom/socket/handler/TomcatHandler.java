@@ -31,12 +31,12 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
-import io.jpom.socket.ProxySession;
 import io.jpom.socket.ServiceFileTailWatcher;
 import io.jpom.system.LogbackConfig;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
+import top.jpom.transport.IProxyWebSocket;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +95,7 @@ public class TomcatHandler extends BaseProxyHandler {
     }
 
     @Override
-    protected String handleTextMessage(Map<String, Object> attributes, ProxySession proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) {
+    protected String handleTextMessage(Map<String, Object> attributes, IProxyWebSocket proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
         proxySession.send(json.toString());
         return null;
     }

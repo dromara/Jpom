@@ -91,4 +91,14 @@ public interface TransportServer {
      * @param consumer 回调
      */
     void download(INodeInfo nodeInfo, IUrlItem urlItem, Object data, Consumer<DownloadCallback> consumer);
+
+    /**
+     * 创建 websocket 连接
+     *
+     * @param nodeInfo   节点信息
+     * @param urlItem    请求 item
+     * @param parameters 参数
+     * @return websocket
+     */
+    IProxyWebSocket websocket(INodeInfo nodeInfo, IUrlItem urlItem, Object... parameters);
 }

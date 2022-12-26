@@ -35,6 +35,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
+import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -170,5 +171,6 @@ public class DockerCliHandler extends BaseTerminalHandler {
         }
         IoUtil.close(session);
         HANDLER_ITEM_CONCURRENT_HASH_MAP.remove(session.getId());
+        SocketSessionUtil.close(session);
     }
 }

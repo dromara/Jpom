@@ -28,7 +28,6 @@ import cn.hutool.core.io.resource.FileResource;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -41,7 +40,6 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.user.UserModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -50,9 +48,12 @@ import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
-import io.jpom.socket.client.NodeClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
+import top.jpom.transport.DataContentType;
+import top.jpom.transport.IProxyWebSocket;
+import top.jpom.transport.IUrlItem;
+import top.jpom.transport.TransportServerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -73,22 +74,25 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class NodeUpdateHandler extends BaseProxyHandler {
 
-    private final ConcurrentMap<String, NodeClient> clientMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, IProxyWebSocket> clientMap = new ConcurrentHashMap<>();
 
     private static final int CHECK_COUNT = 60;
 
-    private SystemParametersServer systemParametersServer;
-    private NodeService nodeService;
+    private final SystemParametersServer systemParametersServer;
+    private final NodeService nodeService;
 
-    public NodeUpdateHandler() {
+    public NodeUpdateHandler(NodeService nodeService, SystemParametersServer systemParametersServer) {
         super(null);
+        this.nodeService = nodeService;
+        this.systemParametersServer = systemParametersServer;
+        //systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
+//        nodeService = SpringUtil.getBean(NodeService.class);
     }
 
     @Override
     protected void init(WebSocketSession session, Map<String, Object> attributes) throws Exception {
         super.init(session, attributes);
-        systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
-        nodeService = SpringUtil.getBean(NodeService.class);
+
     }
 
     @Override
@@ -109,18 +113,29 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             return;
         }
         for (NodeModel model : nodeModelList) {
-            NodeClient nodeClient = clientMap.get(model.getId());
+            IProxyWebSocket nodeClient = clientMap.get(model.getId());
             if (nodeClient != null) {
                 //
-                nodeClient.close();
+                try {
+                    nodeClient.close();
+                } catch (Exception e) {
+                    log.error("关闭连接异常", e);
+                }
             }
-            Map<String, Object> attributes = session.getAttributes();
-            String url = NodeForward.getSocketUrl(model, NodeUrl.NodeUpdate, (UserModel) attributes.get("userInfo"));
+//            Map<String, Object> attributes = session.getAttributes();
+//            String url = NodeForward.getSocketUrl(model,, (UserModel) attributes.get("userInfo"));
             // 连接节点
             ThreadUtil.execute(() -> {
                 try {
-                    NodeClient client = new NodeClient(url, model, session);
-                    clientMap.put(model.getId(), client);
+                    IUrlItem urlItem = NodeForward.createUrlItem(model, NodeUrl.NodeUpdate, DataContentType.FORM_URLENCODED);
+
+                    IProxyWebSocket proxySession = TransportServerFactory.get().websocket(model, urlItem);
+                    proxySession.onMessage(s -> sendMsg(session, s));
+                    proxySession.open();
+                    WebSocketMessageModel command = new WebSocketMessageModel("getVersion", model.getId());
+                    proxySession.send(command.toString());
+//                    NodeClient client = new NodeClient(url, model, session);
+                    clientMap.put(model.getId(), proxySession);
                 } catch (Exception e) {
                     log.error("创建插件端连接失败", e);
                 }
@@ -131,9 +146,13 @@ public class NodeUpdateHandler extends BaseProxyHandler {
     @Override
     public void destroy(WebSocketSession session) {
         for (String key : clientMap.keySet()) {
-            NodeClient client = clientMap.get(key);
-            if (client.isOpen()) {
-                client.close();
+            IProxyWebSocket client = clientMap.get(key);
+            if (client.isConnected()) {
+                try {
+                    client.close();
+                } catch (Exception e) {
+                    log.error("关闭连接异常", e);
+                }
             }
         }
         clientMap.clear();
@@ -244,7 +263,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         }
     }
 
-    private void updateNodeItemWebSocket(NodeClient client, String id, WebSocketSession session, AgentFileModel agentFileModel) throws IOException {
+    private void updateNodeItemWebSocket(IProxyWebSocket client, String id, WebSocketSession session, AgentFileModel agentFileModel) throws IOException {
         // 发送文件信息
         WebSocketMessageModel webSocketMessageModel = new WebSocketMessageModel("upload", id);
         webSocketMessageModel.setNodeId(id);
@@ -271,7 +290,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 ++retryCount;
                 try {
                     ThreadUtil.sleep(1000L);
-                    if (client.reconnectBlocking()) {
+                    if (client.reopen()) {
                         this.sendMsg(restartMessage.setData("重启完成"), session);
                         return;
                     }
@@ -292,12 +311,12 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 this.onError(session, "没有对应的节点：" + id);
                 return;
             }
-            NodeClient client = clientMap.get(node.getId());
+            IProxyWebSocket client = clientMap.get(node.getId());
             if (client == null) {
                 this.onError(session, "对应的插件端还没有被初始化：" + id);
                 return;
             }
-            if (client.isOpen()) {
+            if (client.isConnected()) {
                 if (http) {
                     this.updateNodeItemHttp(node, session, agentFileModel);
                 } else {
