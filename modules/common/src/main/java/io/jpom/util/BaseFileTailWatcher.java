@@ -26,14 +26,10 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.io.file.Tailer;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
-import org.springframework.web.socket.WebSocketSession;
 
-import javax.websocket.Session;
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.HashSet;
@@ -73,18 +69,19 @@ public abstract class BaseFileTailWatcher<T> {
         this.charset = charset;
     }
 
-    protected void send(T session, String msg) {
-        try {
-            if (session instanceof Session) {
-                SocketSessionUtil.send((Session) session, msg);
-            } else if (session instanceof WebSocketSession) {
-                SocketSessionUtil.send((WebSocketSession) session, msg);
-            } else {
-                throw new JpomRuntimeException("没有对应类型");
-            }
-        } catch (IOException ignored) {
-        }
-    }
+    protected abstract void send(T session, String msg);
+    //{
+//        try {
+//            if (session instanceof Session) {
+//                SocketSessionUtil.send((Session) session, msg);
+//            } else if (session instanceof WebSocketSession) {
+//                SocketSessionUtil.send((WebSocketSession) session, msg);
+//            } else {
+//                throw new JpomRuntimeException("没有对应类型");
+//            }
+//        } catch (IOException ignored) {
+//        }
+    //}
 
     /**
      * 有新的日志

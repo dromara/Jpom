@@ -24,6 +24,7 @@ package io.jpom.socket;
 
 import cn.hutool.core.io.FileUtil;
 import io.jpom.util.BaseFileTailWatcher;
+import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.websocket.Session;
@@ -151,6 +152,14 @@ public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
 
     }
 
+    @Override
+    protected void send(T session, String msg) {
+        try {
+            SocketSessionUtil.send((Session) session, msg);
+        } catch (Exception e) {
+            log.error("发送消息异常", e);
+        }
+    }
 
     /**
      * 关闭

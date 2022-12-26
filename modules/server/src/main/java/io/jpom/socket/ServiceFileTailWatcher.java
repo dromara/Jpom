@@ -24,6 +24,7 @@ package io.jpom.socket;
 
 import cn.hutool.core.io.FileUtil;
 import io.jpom.util.BaseFileTailWatcher;
+import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -137,6 +138,15 @@ public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
         }
         if (serviceFileTailWatcher.socketSessions.isEmpty()) {
             serviceFileTailWatcher.close();
+        }
+    }
+
+    @Override
+    protected void send(T session, String msg) {
+        try {
+            SocketSessionUtil.send((WebSocketSession) session, msg);
+        } catch (Exception e) {
+            log.error("发送消息异常", e);
         }
     }
 
