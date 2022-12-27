@@ -19,6 +19,7 @@
 8. 【server】修复 超级管理的 websocket 操作日志记录工作空间不正确
 9. 【agent】优化 插件端删除 spring-boot-starter-websocket 依赖
 10. 【server】优化 服务端删除 Java-WebSocket 依赖（采用统一模块管理）
+11. 【server】修复 更新构建状态互斥，避免状态被异步更新冲突
 
 ### ❌ 不兼容功能
 

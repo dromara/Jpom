@@ -66,6 +66,26 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
         this.update(buildInfoModel);
     }
 
+    /**
+     * 更新状态
+     *
+     * @param id            ID
+     * @param buildNumberId 构建编号id
+     * @param buildStatus   to Status
+     */
+    public void updateStatus(String id, int buildNumberId, BuildStatus buildStatus) {
+
+        BuildInfoModel buildInfoModel = new BuildInfoModel();
+        buildInfoModel.setId(id);
+        buildInfoModel.setBuildId(buildNumberId);
+        Entity where = this.dataBeanToEntity(buildInfoModel);
+        //
+        BuildInfoModel dataModel = new BuildInfoModel();
+        dataModel.setStatus(buildStatus.getCode());
+        Entity data = this.dataBeanToEntity(dataModel);
+        this.update(data, where);
+    }
+
     @Override
     public void insert(BuildInfoModel buildInfoModel) {
         super.insert(buildInfoModel);

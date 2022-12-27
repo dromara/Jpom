@@ -89,6 +89,12 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
+    <logger name="cn.hutool.db" additivity="false">
+        <level value="debug"/>
+        <appender-ref ref="LOG-ROOT"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
     <logger name="top.jpom" additivity="false">
         <level value="debug"/>
         <appender-ref ref="LOG-ROOT"/>

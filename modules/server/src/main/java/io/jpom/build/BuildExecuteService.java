@@ -310,7 +310,7 @@ public class BuildExecuteService {
      * @param logId       记录ID
      * @param buildStatus to status
      */
-    public void updateStatus(String buildId, String logId, BuildStatus buildStatus) {
+    public void updateStatus(String buildId, String logId, int buildNumberId, BuildStatus buildStatus) {
         BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
         buildHistoryLog.setId(logId);
         buildHistoryLog.setStatus(buildStatus.getCode());
@@ -319,7 +319,7 @@ public class BuildExecuteService {
             buildHistoryLog.setEndTime(SystemClock.now());
         }
         dbBuildHistoryLogService.update(buildHistoryLog);
-        buildService.updateStatus(buildId, buildStatus);
+        buildService.updateStatus(buildId, buildNumberId, buildStatus);
     }
 
     /**
@@ -420,7 +420,7 @@ public class BuildExecuteService {
             Optional.ofNullable(currentThread).ifPresent(Thread::interrupt);
 
             String buildId = taskData.buildInfoModel.getId();
-            buildExecuteService.updateStatus(buildId, logId, BuildStatus.Cancel);
+            buildExecuteService.updateStatus(buildId, logId, taskData.buildInfoModel.getBuildId(), BuildStatus.Cancel);
             BUILD_MANAGE_MAP.remove(buildId);
         }
 
@@ -560,7 +560,7 @@ public class BuildExecuteService {
                         String newBranchTagName = BuildExecuteService.fuzzyMatch(tuple.get(1), branchTagName);
                         if (StrUtil.isEmpty(newBranchTagName)) {
                             logRecorder.info(branchTagName + " Did not match the corresponding tag");
-                            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
+                            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
                             return false;
                         }
                         // author bwcx_jzy 2022.11.28 map.put("branchName", newBranchName);
@@ -576,7 +576,7 @@ public class BuildExecuteService {
                         String newBranchName = BuildExecuteService.fuzzyMatch(tuple.get(0), branchName);
                         if (StrUtil.isEmpty(newBranchName)) {
                             logRecorder.info(branchName + " Did not match the corresponding branch");
-                            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
+                            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
                             return false;
                         }
                         // 分支模式
@@ -685,7 +685,7 @@ public class BuildExecuteService {
             }
             if (StrUtil.isEmpty(buildInfoModel.getScript())) {
                 logRecorder.info("没有需要执行的命令");
-                this.buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, BuildStatus.Error);
+                this.buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
                 return false;
             }
             Map<String, String> environment = new HashMap<>(10);
@@ -749,7 +749,7 @@ public class BuildExecuteService {
             buildExecuteService.updateLastCommitId(buildInfoModel1.getId(), taskData.repositoryLastCommitId);
             //
             BuildStatus buildStatus = buildInfoModel1.getReleaseMethod() != BuildReleaseMethod.No.getCode() ? BuildStatus.PubSuccess : BuildStatus.Success;
-            buildExecuteService.updateStatus(buildInfoModel1.getId(), this.logId, buildStatus);
+            buildExecuteService.updateStatus(buildInfoModel1.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), buildStatus);
             return true;
         }
 
@@ -774,6 +774,7 @@ public class BuildExecuteService {
             } else {
                 BaseServerController.resetInfo(taskData.userModel);
             }
+            BuildInfoModel buildInfoModel = this.taskData.buildInfoModel;
             try {
                 for (Map.Entry<String, Supplier<Boolean>> stringSupplierEntry : suppliers.entrySet()) {
                     processName = stringSupplierEntry.getKey();
@@ -784,7 +785,7 @@ public class BuildExecuteService {
                     if (!aBoolean) {
                         // 有条件结束构建流程
                         this.asyncWebHooks("stop", "process", processName);
-                        buildExecuteService.updateStatus(taskData.buildInfoModel.getId(), this.logId, BuildStatus.Error);
+                        buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error);
                         break;
                     }
                 }
@@ -792,24 +793,24 @@ public class BuildExecuteService {
                 Boolean saveBuildFile = this.buildExtraModule.getSaveBuildFile();
                 if (saveBuildFile != null && !saveBuildFile) {
                     //
-                    File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), taskData.buildInfoModel.getBuildId(), StrUtil.SLASH);
+                    File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), buildInfoModel.getBuildId(), StrUtil.SLASH);
                     CommandUtil.systemFastDel(historyPackageFile);
                 }
                 this.asyncWebHooks("success");
             } catch (RuntimeException runtimeException) {
-                buildExecuteService.updateStatus(taskData.buildInfoModel.getId(), this.logId, BuildStatus.Error);
+                buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error);
                 Throwable cause = runtimeException.getCause();
                 logRecorder.error("构建失败:" + processName, cause == null ? runtimeException : cause);
                 this.asyncWebHooks(processName, "error", runtimeException.getMessage());
             } catch (Exception e) {
-                buildExecuteService.updateStatus(taskData.buildInfoModel.getId(), this.logId, BuildStatus.Error);
+                buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error);
                 logRecorder.error("构建失败:" + processName, e);
                 this.asyncWebHooks(processName, "error", e.getMessage());
             } finally {
                 this.asyncWebHooks("done");
                 long allTime = SystemClock.now() - startTime;
                 logRecorder.info("构建结束 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
-                BUILD_MANAGE_MAP.remove(taskData.buildInfoModel.getId());
+                BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
                 BaseServerController.removeAll();
             }
 //            return false;
