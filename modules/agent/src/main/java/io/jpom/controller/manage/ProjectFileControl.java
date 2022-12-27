@@ -471,12 +471,16 @@ public class ProjectFileControl extends BaseAgentController {
         List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
         Assert.state(CollUtil.isNotEmpty(collect), "不允许下载当前地址的文件");
         NodeProjectInfoModel pim = projectInfoService.getItem(id);
-        // 备份文件
-        String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
+        String tempPathName = agentConfig.getTempPathName();
+        //
+        String backupId = null;
         try {
+            File downloadFile = HttpUtil.downloadFileFromUrl(url, tempPathName);
+            String fileSize = FileUtil.readableFileSize(downloadFile);
+            // 备份文件
+            backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
             File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
             FileUtil.mkdir(file);
-            File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
             if (BooleanUtil.toBoolean(unzip)) {
                 // 需要解压文件
                 try {
@@ -486,8 +490,11 @@ public class ProjectFileControl extends BaseAgentController {
                         log.error("删除文件失败：" + file.getPath());
                     }
                 }
+            } else {
+                // 移动文件到对应目录
+                FileUtil.move(downloadFile, file, true);
             }
-            return JsonMessage.success("下载成功文件大小：" + FileUtil.readableFileSize(downloadFile));
+            return JsonMessage.success("下载成功文件大小：" + fileSize);
         } catch (Exception e) {
             log.error("下载远程文件异常", e);
             return new JsonMessage<>(500, "下载远程文件失败:" + e.getMessage());

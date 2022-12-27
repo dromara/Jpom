@@ -191,6 +191,7 @@ export function remoteDownload(formData) {
   return axios({
     url: "/node/manage/file/remote_download",
     method: "get",
+    timeout: 0,
     params: formData,
   });
 }
