@@ -50,7 +50,7 @@ curl -LfsSo Server.sh https://gitee.com/dromara/Jpom/raw/master/modules/server/s
 ```
 
 ```shell
-curl -LfsSo Server.sh https://gitee.com/dromara/Jpom/raw/master/modules/server/src/main/bin/Service.sh
+curl -LfsSo Service.sh https://gitee.com/dromara/Jpom/raw/master/modules/server/src/main/bin/Service.sh
 ```
 
 **插件端** ：(需要到安装目录的 bin 下执行)
