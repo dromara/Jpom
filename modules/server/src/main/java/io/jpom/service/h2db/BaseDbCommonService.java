@@ -80,22 +80,19 @@ public abstract class BaseDbCommonService<T> {
     private DbConfig dbConfig;
 
     @SuppressWarnings("unchecked")
-    public BaseDbCommonService(String tableName, String key) {
+    public BaseDbCommonService(String key) {
         this.tClass = (Class<T>) TypeUtil.getTypeArgument(this.getClass());
-        this.tableName = this.covetTableName(tableName, this.tClass);
+        this.tableName = this.covetTableName(this.tClass);
         this.key = key;
     }
 
     /**
-     * 转换表面
+     * 转换表名
      *
-     * @param tableName 表面
-     * @param tClass    类
+     * @param tClass 类
      * @return 转换后的表名
      */
-    protected String covetTableName(String tableName, Class<T> tClass) {
-        return tableName;
-    }
+    protected abstract String covetTableName(Class<T> tClass);
 
     public String getTableName() {
         return tableName;

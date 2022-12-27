@@ -79,11 +79,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     };
 
     public BaseDbService() {
-        super(null, ServerConst.ID_STR);
+        super(ServerConst.ID_STR);
     }
 
     @Override
-    protected String covetTableName(String tableName, Class<T> tClass) {
+    protected String covetTableName(Class<T> tClass) {
         TableName annotation = tClass.getAnnotation(TableName.class);
         Assert.notNull(annotation, "请配置 table Name");
         return annotation.value();
