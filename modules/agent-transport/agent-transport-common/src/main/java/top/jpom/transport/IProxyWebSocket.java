@@ -40,11 +40,11 @@ public interface IProxyWebSocket {
     void close() throws IOException;
 
     /**
-     * 打开连接
+     * 打开连接,默认停留一秒
      *
      * @return 打开状态
      */
-    boolean open();
+    boolean connect();
 
     /**
      * 重新打开连接
@@ -52,10 +52,36 @@ public interface IProxyWebSocket {
      * @return 打开状态
      * @throws IOException 关闭异常
      */
-    default boolean reopen() throws IOException {
+    default boolean reconnect() throws IOException {
         this.close();
-        return this.open();
+        return this.connect();
     }
+
+    /**
+     * 重新打开连接
+     *
+     * @return 打开状态
+     * @throws IOException 关闭异常
+     */
+    default boolean reconnectBlocking() throws IOException {
+        this.close();
+        return this.connectBlocking();
+    }
+
+    /**
+     * 打开连接，使用节点配置的超时时间
+     *
+     * @return 打开状态
+     */
+    boolean connectBlocking();
+
+    /**
+     * 打开连接，阻塞指定时间
+     *
+     * @param seconds 阻塞时间
+     * @return 打开状态
+     */
+    boolean connectBlocking(int seconds);
 
     /**
      * 发送消息
