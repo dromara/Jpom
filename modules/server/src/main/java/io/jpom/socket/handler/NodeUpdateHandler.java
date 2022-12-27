@@ -76,7 +76,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
     private final ConcurrentMap<String, IProxyWebSocket> clientMap = new ConcurrentHashMap<>();
 
-    private static final int CHECK_COUNT = 60;
+    private static final int CHECK_COUNT = 120;
 
     private final SystemParametersServer systemParametersServer;
     private final NodeService nodeService;
@@ -113,31 +113,24 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             return;
         }
         for (NodeModel model : nodeModelList) {
-            IProxyWebSocket nodeClient = clientMap.get(model.getId());
-            if (nodeClient != null) {
-                //
-                try {
-                    nodeClient.close();
-                } catch (Exception e) {
-                    log.error("关闭连接异常", e);
-                }
-            }
-//            Map<String, Object> attributes = session.getAttributes();
-//            String url = NodeForward.getSocketUrl(model,, (UserModel) attributes.get("userInfo"));
+            IProxyWebSocket nodeClient = clientMap.computeIfAbsent(model.getId(), s -> {
+                IUrlItem urlItem = NodeForward.createUrlItem(model, NodeUrl.NodeUpdate, DataContentType.FORM_URLENCODED);
+
+                IProxyWebSocket proxySession = TransportServerFactory.get().websocket(model, urlItem);
+                proxySession.onMessage(msg -> sendMsg(session, msg));
+                return proxySession;
+            });
             // 连接节点
             ThreadUtil.execute(() -> {
                 try {
-                    IUrlItem urlItem = NodeForward.createUrlItem(model, NodeUrl.NodeUpdate, DataContentType.FORM_URLENCODED);
-
-                    IProxyWebSocket proxySession = TransportServerFactory.get().websocket(model, urlItem);
-                    proxySession.onMessage(s -> sendMsg(session, s));
-                    proxySession.open();
+                    if (!nodeClient.isConnected()) {
+                        nodeClient.reopen();
+                    }
                     WebSocketMessageModel command = new WebSocketMessageModel("getVersion", model.getId());
-                    proxySession.send(command.toString());
-//                    NodeClient client = new NodeClient(url, model, session);
-                    clientMap.put(model.getId(), proxySession);
+                    nodeClient.send(command.toString());
                 } catch (Exception e) {
                     log.error("创建插件端连接失败", e);
+                    this.onError(session, "连接插件端失败：" + model.getName() + "  " + e.getMessage());
                 }
             });
         }
@@ -145,16 +138,15 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
     @Override
     public void destroy(WebSocketSession session) {
-        for (String key : clientMap.keySet()) {
-            IProxyWebSocket client = clientMap.get(key);
-            if (client.isConnected()) {
+        clientMap.values().forEach(iProxyWebSocket -> {
+            if (iProxyWebSocket.isConnected()) {
                 try {
-                    client.close();
+                    iProxyWebSocket.close();
                 } catch (Exception e) {
                     log.error("关闭连接异常", e);
                 }
             }
-        }
+        });
         clientMap.clear();
         //
         super.destroy(session);
@@ -163,7 +155,6 @@ public class NodeUpdateHandler extends BaseProxyHandler {
     @Override
     protected String handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
         WebSocketMessageModel model = WebSocketMessageModel.getInstance(json.toString());
-        String ids = null;
         String command = model.getCommand();
         switch (command) {
             case "getAgentVersion":
@@ -174,16 +165,25 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 updateNode(model, session);
                 break;
             case "heart":
+                for (Map.Entry<String, IProxyWebSocket> entry : clientMap.entrySet()) {
+                    String key = entry.getKey();
+                    IProxyWebSocket iProxyWebSocket = entry.getValue();
+                    try {
+                        iProxyWebSocket.send(model.toString());
+                    } catch (Exception e) {
+                        log.error("心跳消息转发失败 {} {}", key, e.getMessage());
+                    }
+                }
                 break;
             default: {
                 if (StrUtil.startWith(command, "getNodeList:")) {
-                    ids = StrUtil.removePrefix(command, "getNodeList:");
+                    String ids = StrUtil.removePrefix(command, "getNodeList:");
+                    if (StrUtil.isNotEmpty(ids)) {
+                        pullNodeList(session, ids);
+                    }
                 }
             }
             break;
-        }
-        if (StrUtil.isNotEmpty(ids)) {
-            pullNodeList(session, ids);
         }
         if (model.getData() != null) {
             return model.toString();
@@ -231,7 +231,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         }
     }
 
-    private void updateNodeItemHttp(NodeModel nodeModel, WebSocketSession session, AgentFileModel agentFileModel) {
+    private boolean updateNodeItemHttp(NodeModel nodeModel, WebSocketSession session, AgentFileModel agentFileModel) {
         File file = FileUtil.file(agentFileModel.getSavePath());
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("file", new FileResource(file));
@@ -251,7 +251,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     JsonMessage<Object> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Info, "nodeId", id);
                     if (jsonMessage.success()) {
                         this.sendMsg(callbackRestartMessage.setData("重启完成"), session);
-                        return;
+                        return true;
                     }
                 } catch (Exception ignored) {
                 }
@@ -261,9 +261,10 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             log.error("升级后重连插件端失败:" + id, e);
             this.sendMsg(callbackRestartMessage.setData("重连插件端失败"), session);
         }
+        return false;
     }
 
-    private void updateNodeItemWebSocket(IProxyWebSocket client, String id, WebSocketSession session, AgentFileModel agentFileModel) throws IOException {
+    private boolean updateNodeItemWebSocket(IProxyWebSocket client, String id, WebSocketSession session, AgentFileModel agentFileModel) throws IOException {
         // 发送文件信息
         WebSocketMessageModel webSocketMessageModel = new WebSocketMessageModel("upload", id);
         webSocketMessageModel.setNodeId(id);
@@ -292,7 +293,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     ThreadUtil.sleep(1000L);
                     if (client.reopen()) {
                         this.sendMsg(restartMessage.setData("重启完成"), session);
-                        return;
+                        return true;
                     }
                 } catch (Exception ignored) {
                 }
@@ -302,6 +303,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             log.error("升级后重连插件端失败:" + id, e);
             this.sendMsg(restartMessage.setData("重连插件端失败"), session);
         }
+        return false;
     }
 
     private void updateNodeItem(String id, WebSocketSession session, AgentFileModel agentFileModel, boolean http) {
@@ -317,13 +319,14 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 return;
             }
             if (client.isConnected()) {
-                if (http) {
-                    this.updateNodeItemHttp(node, session, agentFileModel);
-                } else {
-                    this.updateNodeItemWebSocket(client, id, session, agentFileModel);
+                boolean result = http ? this.updateNodeItemHttp(node, session, agentFileModel) : this.updateNodeItemWebSocket(client, id, session, agentFileModel);
+                if (result) {
+                    //
+                    WebSocketMessageModel command = new WebSocketMessageModel("getVersion", node.getId());
+                    client.send(command.toString());
                 }
             } else {
-                this.onError(session, "节点连接丢失");
+                this.onError(session, node.getName() + " 节点连接丢失");
             }
         } catch (Exception e) {
             log.error("升级失败:" + id, e);

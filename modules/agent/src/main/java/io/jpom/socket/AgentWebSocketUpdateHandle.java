@@ -95,7 +95,10 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
             case "restart":
                 model.setData(restart(session));
                 break;
+            case "heart":
+                break;
             default:
+                log.warn("忽略的操作：{}", message);
                 break;
         }
         SocketSessionUtil.send(session, model.toString());
