@@ -30,7 +30,10 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.AuthResponse;
@@ -57,6 +60,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class DockerUtil {
+
+    static {
+        // 禁用 jackson
+        JSONFactory.setUseJacksonAnnotation(false);
+        // 枚举对象使用 枚举名称
+        JSON.config(JSONWriter.Feature.WriteEnumsUsingName);
+    }
 
     private static final Map<String, DockerClient> DOCKER_CLIENT_MAP = new ConcurrentHashMap<>();
 
@@ -231,5 +241,16 @@ public class DockerUtil {
             return StrUtil.format("{} {} {}", status, id, progress);
         }
         return stream;
+    }
+
+    /**
+     * 深度转换为 json object
+     *
+     * @param object 对象
+     * @return 转换后的
+     */
+    public static JSONObject toJSON(Object object) {
+        String jsonString = JSONObject.toJSONString(object);
+        return (JSONObject) JSON.parse(jsonString);
     }
 }

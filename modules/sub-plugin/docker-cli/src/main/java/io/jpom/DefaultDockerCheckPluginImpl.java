@@ -26,7 +26,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.PingCmd;
@@ -151,7 +150,7 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
         DockerClient dockerClient = DockerUtil.get(parameter);
         AuthConfig authConfig = dockerClient.authConfig();
         AuthResponse exec = dockerClient.authCmd().withAuthConfig(authConfig).exec();
-        return (JSONObject) JSON.toJSON(exec);
+        return DockerUtil.toJSON(exec);
     }
 
     private String testLocal() throws IOException {
@@ -176,7 +175,7 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
     private JSONObject infoCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
         Info exec = dockerClient.infoCmd().exec();
-        return (JSONObject) JSON.toJSON(exec);
+        return DockerUtil.toJSON(exec);
     }
 
     /**

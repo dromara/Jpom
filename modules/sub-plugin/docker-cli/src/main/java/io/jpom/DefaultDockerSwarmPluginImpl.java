@@ -30,7 +30,6 @@ import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
@@ -445,7 +444,7 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
             listTasksCmd.withStateFilter(taskState);
         }
         List<Task> exec = listTasksCmd.exec();
-        return exec.stream().map(swarmNode -> (JSONObject) JSON.toJSON(swarmNode)).collect(Collectors.toList());
+        return exec.stream().map(DockerUtil::toJSON).collect(Collectors.toList());
     }
 
     public List<JSONObject> listServicesCmd(Map<String, Object> parameter) {
@@ -461,7 +460,7 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
             listServicesCmd.withNameFilter(CollUtil.newArrayList(name));
         }
         List<Service> exec = listServicesCmd.exec();
-        return exec.stream().map(swarmNode -> (JSONObject) JSON.toJSON(swarmNode)).collect(Collectors.toList());
+        return exec.stream().map(DockerUtil::toJSON).collect(Collectors.toList());
     }
 
     private void removeSwarmNodeCmd(Map<String, Object> parameter) {
@@ -544,7 +543,7 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
         }
         List<SwarmNode> exec = listSwarmNodesCmd.exec();
         return exec.stream().map(swarmNode -> {
-            JSONObject jsonObject = (JSONObject) JSON.toJSON(swarmNode);
+            JSONObject jsonObject = DockerUtil.toJSON(swarmNode);
             jsonObject.remove("rawValues");
             return jsonObject;
         }).collect(Collectors.toList());
@@ -568,7 +567,7 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
         // 先尝试获取
         try {
             Swarm exec = dockerClient.inspectSwarmCmd().exec();
-            JSONObject jsonObject = (JSONObject) JSON.toJSON(exec);
+            JSONObject jsonObject = DockerUtil.toJSON(exec);
             if (jsonObject != null) {
                 return jsonObject;
             }
@@ -581,13 +580,13 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
         dockerClient.initializeSwarmCmd(swarmSpec).exec();
         // 获取信息
         Swarm exec = dockerClient.inspectSwarmCmd().exec();
-        return (JSONObject) JSON.toJSON(exec);
+        return DockerUtil.toJSON(exec);
     }
 
     private JSONObject inSpectSwarmCmd(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);
 
         Swarm exec = dockerClient.inspectSwarmCmd().exec();
-        return (JSONObject) JSON.toJSON(exec);
+        return DockerUtil.toJSON(exec);
     }
 }
