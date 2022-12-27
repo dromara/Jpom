@@ -132,9 +132,9 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
             return true;
         } catch (Exception e) {
             if (ExceptionUtil.isCausedBy(e, NoSuchFileException.class)) {
-                log.error("监控 docker 异常 {}", e.getMessage());
+                log.error("监控 docker[{}] 异常 {}", dockerInfoModel.getName(), e.getMessage());
             } else {
-                log.error("监控 docker 异常", e);
+                log.error("监控 docker[{}] 异常", dockerInfoModel.getName(), e);
             }
             this.updateStatus(dockerInfoModel.getId(), 0, e.getMessage());
             return false;
