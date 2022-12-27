@@ -101,7 +101,7 @@ public class LogBackController extends BaseAgentController {
     }
 
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
-    public String download(String key, String copyId) {
+    public void download(String key, String copyId, HttpServletResponse response) {
         Assert.hasText(key, "请选择对应到文件");
         try {
             NodeProjectInfoModel pim = getProjectInfoModel();
@@ -109,14 +109,14 @@ public class LogBackController extends BaseAgentController {
             File logBack = copyItem == null ? pim.getLogBack() : pim.getLogBack(copyItem);
             if (logBack.exists() && logBack.isDirectory()) {
                 logBack = FileUtil.file(logBack, key);
-                ServletUtil.write(getResponse(), logBack);
+                ServletUtil.write(response, logBack);
             } else {
-                return "没有对应文件";
+                ServletUtil.write(response, JsonMessage.getString(400, "没有对应文件:" + logBack.getPath()), MediaType.APPLICATION_JSON_VALUE);
             }
         } catch (Exception e) {
             log.error("下载文件异常", e);
+            ServletUtil.write(response, JsonMessage.getString(400, "下载失败。请刷新页面后重试", e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
         }
-        return "下载失败。请刷新页面后重试";
     }
 
     @RequestMapping(value = "logBack", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -142,15 +142,14 @@ public class LogBackController extends BaseAgentController {
 
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
     @ResponseBody
-    public JsonMessage<String> export(String copyId) {
+    public void export(String copyId, HttpServletResponse response) {
         NodeProjectInfoModel pim = getProjectInfoModel();
         NodeProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
         File file = copyItem == null ? new File(pim.getLog()) : pim.getLog(copyItem);
         if (!file.exists()) {
-            return new JsonMessage<>(400, "没有日志文件:" + file.getPath());
+            ServletUtil.write(response, JsonMessage.getString(400, "没有日志文件:" + file.getPath()), MediaType.APPLICATION_JSON_VALUE);
+            return;
         }
-        HttpServletResponse response = getResponse();
         ServletUtil.write(response, file);
-        return JsonMessage.success("");
     }
 }

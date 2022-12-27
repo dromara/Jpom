@@ -61,6 +61,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -431,10 +432,9 @@ public class ProjectFileControl extends BaseAgentController {
      * @param id        项目id
      * @param filename  文件名
      * @param levelName 文件夹名
-     * @return 正常情况返回文件流，非正在返回 text plan
      */
     @GetMapping(value = "download", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String download(String id, String filename, String levelName) {
+    public void download(String id, String filename, String levelName, HttpServletResponse response) {
         Assert.hasText(filename, "请选择文件");
 //		String safeFileName = pathSafe(filename);
 //		if (StrUtil.isEmpty(safeFileName)) {
@@ -444,13 +444,14 @@ public class ProjectFileControl extends BaseAgentController {
             NodeProjectInfoModel pim = projectInfoService.getItem(id);
             File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
             if (file.isDirectory()) {
-                return "暂不支持下载文件夹";
+                ServletUtil.write(response, JsonMessage.getString(400, "暂不支持下载文件夹"), MediaType.APPLICATION_JSON_VALUE);
+                return;
             }
-            ServletUtil.write(getResponse(), file);
+            ServletUtil.write(response, file);
         } catch (Exception e) {
             log.error("下载文件异常", e);
+            ServletUtil.write(response, JsonMessage.getString(400, "下载失败。请刷新页面后重试", e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
         }
-        return "下载失败。请刷新页面后重试";
     }
 
     /**

@@ -93,7 +93,11 @@ public abstract class BaseProxyHandler extends BaseHandler {
 
             IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeModel, urlItem, parameters);
             proxySession.onMessage(s -> sendMsg(session, s));
-            proxySession.open();
+            if (!proxySession.connectBlocking()) {
+                this.sendMsg(session, "插件端连接失败");
+                this.destroy(session);
+                return;
+            }
             session.getAttributes().put("proxySession", proxySession);
         }
 

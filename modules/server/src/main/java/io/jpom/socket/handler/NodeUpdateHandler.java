@@ -124,7 +124,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             ThreadUtil.execute(() -> {
                 try {
                     if (!nodeClient.isConnected()) {
-                        nodeClient.reopen();
+                        nodeClient.reconnectBlocking();
                     }
                     WebSocketMessageModel command = new WebSocketMessageModel("getVersion", model.getId());
                     nodeClient.send(command.toString());
@@ -288,15 +288,15 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         int retryCount = 0;
         try {
             while (retryCount <= CHECK_COUNT) {
-                ++retryCount;
                 try {
-                    ThreadUtil.sleep(1000L);
-                    if (client.reopen()) {
+                    if (client.reconnect()) {
                         this.sendMsg(restartMessage.setData("重启完成"), session);
                         return true;
                     }
                 } catch (Exception ignored) {
                 }
+                ThreadUtil.sleep(1000L);
+                ++retryCount;
             }
             this.sendMsg(restartMessage.setData("重连失败"), session);
         } catch (Exception e) {

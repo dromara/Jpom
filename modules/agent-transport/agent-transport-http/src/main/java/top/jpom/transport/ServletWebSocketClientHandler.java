@@ -88,10 +88,28 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
     }
 
     @Override
-    public boolean open() {
+    public boolean connect() {
+        Assert.isNull(this.manager, "The connection has been established, do not repeat the connection");
         this.manager = new WebSocketConnectionManager(CLIENT, this, this.uriTemplate);
         this.manager.start();
+        return this.blocking(1);
+    }
+
+    @Override
+    public boolean connectBlocking() {
         int maxTimeout = Optional.ofNullable(this.timeout).orElse(5 * 60);
+        return this.connectBlocking(maxTimeout);
+    }
+
+    @Override
+    public boolean connectBlocking(int seconds) {
+        if (this.connect()) {
+            return true;
+        }
+        return this.blocking(seconds);
+    }
+
+    private boolean blocking(int seconds) {
         int waitTime = 0;
         do {
             if (this.isConnected()) {
@@ -99,8 +117,7 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
             }
             waitTime++;
             ThreadUtil.sleep(500, TimeUnit.MILLISECONDS);
-        } while (waitTime * 2 <= maxTimeout);
-        //
+        } while (waitTime * 2 <= seconds);
         return false;
     }
 
