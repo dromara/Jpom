@@ -39,7 +39,10 @@
         <a-tag color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
       </a-tooltip>
       <template slot="status" slot-scope="text" placement="topleft" :title="text">
-        <span>{{ statusMap[text] }}</span>
+        <a-tag v-if="text === 2 || text === 5" color="green">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 1 || text === 4" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 3 || text === 6" color="red">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else>{{ statusMap[text] || "未知" }}</a-tag>
       </template>
       <template slot="releaseMethod" slot-scope="text" placement="topleft" :title="text">
         <span>{{ releaseMethodMap[text] }}</span>

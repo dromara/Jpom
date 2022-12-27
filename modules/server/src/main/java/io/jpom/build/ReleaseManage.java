@@ -157,7 +157,7 @@ public class ReleaseManage implements Runnable {
 
 
     public void updateStatus(BuildStatus status) {
-        buildExecuteService.updateStatus(this.buildExtraModule.getId(), this.logId, status);
+        buildExecuteService.updateStatus(this.buildExtraModule.getId(), this.logId, this.buildNumberId, status);
     }
 
     /**
