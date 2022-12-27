@@ -1,4 +1,6 @@
 import axios from "./config";
+import { loadRouterBase } from "./config";
+
 /**
  * 项目列表
  * @param {JSON} params {
@@ -35,13 +37,7 @@ export function backupFileList(params) {
  * } params
  */
 export function backupDownloadProjectFile(params) {
-  return axios({
-    url: "/node/manage/file/backup-download",
-    method: "get",
-    responseType: "blob",
-    timeout: 0,
-    params,
-  });
+  return loadRouterBase("/node/manage/file/backup-download", params);
 }
 
 /**

@@ -104,7 +104,7 @@
   </div>
 </template>
 <script>
-import {backupDeleteProjectFile, backupDownloadProjectFile, backupFileList, backupRecoverProjectFile, listBackup} from "@/api/node-project-backup";
+import { backupDeleteProjectFile, backupDownloadProjectFile, backupFileList, backupRecoverProjectFile, listBackup } from "@/api/node-project-backup";
 
 export default {
   components: {},
@@ -309,15 +309,7 @@ export default {
         backupId: this.temp.filename,
       };
       // 请求接口拿到 blob
-      backupDownloadProjectFile(params).then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.style.display = "none";
-        link.href = url;
-        link.setAttribute("download", record.filename);
-        document.body.appendChild(link);
-        link.click();
-      });
+      window.open(backupDownloadProjectFile(params), "_self");
     },
     // 删除
     handleDelete(record) {

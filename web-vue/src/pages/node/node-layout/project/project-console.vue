@@ -34,10 +34,10 @@
             </a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a-button type="primary" :disabled="!project.logSize" @click="handleDownload">导出日志</a-button>
+                <a-button type="primary" size="small" :disabled="!project.logSize" @click="handleDownload">导出日志</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" @click="handleLogBack">备份列表</a-button>
+                <a-button type="primary" size="small" @click="handleLogBack">备份列表</a-button>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -295,19 +295,7 @@ export default {
         copyId: this.copyId,
       };
       // 请求接口拿到 blob
-      downloadProjectLogFile(params).then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.style.display = "none";
-        link.href = url;
-        if (this.copyId) {
-          link.setAttribute("download", `${this.projectId}-${this.copyId}.log`);
-        } else {
-          link.setAttribute("download", `${this.projectId}.log`);
-        }
-        document.body.appendChild(link);
-        link.click();
-      });
+      window.open(downloadProjectLogFile(params), "_self");
     },
     // 日志备份列表
     handleLogBack() {
@@ -340,15 +328,7 @@ export default {
         key: record.filename,
       };
       // 请求接口拿到 blob
-      downloadProjectLogBackFile(params).then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.style.display = "none";
-        link.href = url;
-        link.setAttribute("download", record.filename);
-        document.body.appendChild(link);
-        link.click();
-      });
+      window.open(downloadProjectLogBackFile(params), "_self");
     },
     // 删除日志备份文件
     handleDelete(record) {

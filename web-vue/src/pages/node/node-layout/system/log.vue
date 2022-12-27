@@ -59,7 +59,7 @@ export default {
         title: "title",
         key: "path",
       },
-      visible: false,
+      // visible: false,
       temp: {},
     };
   },
@@ -185,17 +185,7 @@ export default {
         path: this.temp.path,
       };
       // 请求接口拿到 blob
-      downloadFile(params).then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.style.display = "none";
-        link.href = url;
-        link.setAttribute("download", this.temp.title);
-        document.body.appendChild(link);
-        link.click();
-        // 关闭弹窗
-        this.visible = false;
-      });
+      window.open(downloadFile(params), "_self");
     },
     // 删除文件
     deleteLog() {

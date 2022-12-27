@@ -245,15 +245,7 @@ export default {
         id: record.id,
       };
       // 请求接口拿到 blob
-      downloadCert(params).then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.style.display = "none";
-        link.href = url;
-        link.setAttribute("download", record.domain + ".zip");
-        document.body.appendChild(link);
-        link.click();
-      });
+      window.open(downloadCert(params), "_self");
     },
     // 显示模板
     handleTemplate(record) {
