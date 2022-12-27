@@ -22,13 +22,12 @@
  */
 package io.jpom.system;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
 import io.jpom.JpomApplication;
-import io.jpom.common.BaseAgentController;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -50,6 +49,12 @@ import java.util.Optional;
 @ConfigurationProperties("jpom")
 @Data
 public class AgentConfig extends BaseExtConfig {
+
+    private final JpomApplication jpomApplication;
+
+    public AgentConfig(JpomApplication jpomApplication) {
+        this.jpomApplication = jpomApplication;
+    }
 
     /**
      * 白名单配置
@@ -105,12 +110,8 @@ public class AgentConfig extends BaseExtConfig {
      * @return file
      */
     public File getTempPath() {
-        File file = JpomApplication.getInstance().getTempPath();
-        String userName = BaseAgentController.getNowUserName();
-        if (StrUtil.isEmpty(userName)) {
-            throw new JpomRuntimeException("没有登录");
-        }
-        file = FileUtil.file(file, userName);
+        File file = jpomApplication.getTempPath();
+        file = FileUtil.file(file, DateTime.now().toDateStr());
         FileUtil.mkdir(file);
         return file;
     }

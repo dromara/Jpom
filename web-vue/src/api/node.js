@@ -208,6 +208,7 @@ export function getProcessList(data) {
     url: "/node/processList",
     method: "post",
     data: data,
+    timeout: 0,
     headers: {
       loading: "no",
       tip: "no",

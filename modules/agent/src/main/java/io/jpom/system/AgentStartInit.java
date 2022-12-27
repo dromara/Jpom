@@ -23,7 +23,9 @@
 package io.jpom.system;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateException;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
@@ -42,6 +44,7 @@ import io.jpom.cron.CronUtils;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.script.BaseRunScript;
 import io.jpom.service.manage.ProjectInfoService;
+import io.jpom.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -153,6 +156,25 @@ public class AgentStartInit implements ILoadEvent {
         RemoteVersion.loadRemoteInfo();
         // 清空脚本缓存
         BaseRunScript.clearRunScript();
+        // 清理临时文件
+        File tempPath = agentConfig.getTempPath();
+        if (FileUtil.exist(tempPath)) {
+            File[] files = tempPath.listFiles((dir, name) -> {
+                try {
+                    DateTime dateTime = DateUtil.parse(name);
+                    long between = DateUtil.between(dateTime, DateTime.now(), DateUnit.DAY);
+                    // 保留一天以内的
+                    return between > 1;
+                } catch (DateException dateException) {
+                    return false;
+                }
+            });
+            Optional.ofNullable(files).ifPresent(files1 -> {
+                for (File file : files1) {
+                    CommandUtil.systemFastDel(file);
+                }
+            });
+        }
     }
 
     private void autoStartProject() {
