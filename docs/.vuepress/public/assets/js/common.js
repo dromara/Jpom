@@ -111,26 +111,3 @@ function loopExecute(fn, loopCount = 20) {
 }
 
 
-!(function (c, b, d, a) {
-  c[a] || (c[a] = {});
-  c[a].config =
-    {
-      pid: "c4zj1mcvdr@bc1312d09abf8a6",
-      appType: "web",
-      imgUrl: "https://arms-retcode.aliyuncs.com/r.png?",
-      sendResource: true,
-      enableLinkTrace: true,
-      behavior: true,
-      useFmp: true,
-      enableSPA: true
-    };
-  var bp = document.createElement('script');
-  bp.type = 'text/javascript';
-  bp.async = true;
-  bp.src = d;
-  bp.crossorigin = '';
-  var s = document.getElementsByTagName("script")[0];
-  s.parentNode.insertBefore(bp, s);
-  // with (b) with (body) with (insertBefore(createElement("script"), firstChild)) setAttribute("crossorigin", "", src = d)
-})(window, document, "https://retcode.alicdn.com/retcode/bl.js", "__bl");
-
