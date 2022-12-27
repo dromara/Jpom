@@ -33,6 +33,12 @@
               <!-- 打包时间：{{ agentTimeStamp | version }}</div> -->
             </a-space>
           </template>
+          <template slot="name" slot-scope="text, record">
+            <a-button type="link" style="padding: 0px" size="small" @click="toNode(record.id)">
+              <span>{{ text }}</span>
+              <a-icon type="fullscreen" />
+            </a-button>
+          </template>
           <template slot="version" slot-scope="text">
             {{ text | version }}
           </template>
@@ -389,6 +395,19 @@ export default {
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.getNodeList();
+    },
+    toNode(nodeId) {
+      const newpage = this.$router.resolve({
+        name: "node_" + nodeId,
+        path: "/node/list",
+        query: {
+          ...this.$route.query,
+          nodeId: nodeId,
+          pId: "manage",
+          id: "manageList",
+        },
+      });
+      window.open(newpage.href, "_blank");
     },
   },
 };
