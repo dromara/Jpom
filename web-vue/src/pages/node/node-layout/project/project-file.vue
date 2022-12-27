@@ -225,8 +225,8 @@
   </div>
 </template>
 <script>
-import {deleteProjectFile, downloadProjectFile, getFileList, newFileFolder, noFileModes, readFile, remoteDownload, renameFileFolder, updateFile, uploadProjectFile} from "@/api/node-project";
-import {ZIP_ACCEPT} from "@/utils/const";
+import { deleteProjectFile, downloadProjectFile, getFileList, newFileFolder, noFileModes, readFile, remoteDownload, renameFileFolder, updateFile, uploadProjectFile } from "@/api/node-project";
+import { ZIP_ACCEPT } from "@/utils/const";
 import codeEditor from "@/components/codeEditor";
 import projectFileBackup from "./project-file-backup.vue";
 
@@ -694,16 +694,7 @@ export default {
         levelName: record.levelName,
         filename: record.filename,
       };
-      // 请求接口拿到 blob
-      downloadProjectFile(params).then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.style.display = "none";
-        link.href = url;
-        link.setAttribute("download", record.filename);
-        document.body.appendChild(link);
-        link.click();
-      });
+      window.open(downloadProjectFile(params), "_self");
     },
     // 删除
     handleDelete(record) {

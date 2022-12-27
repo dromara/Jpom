@@ -1,4 +1,5 @@
 import axios from "./config";
+import { loadRouterBase } from "./config";
 
 /**
  * 日志列表
@@ -18,12 +19,7 @@ export function getLogList(params) {
  * @param {nodeId, path} params
  */
 export function downloadFile(params) {
-  return axios({
-    url: "/system/log_download",
-    method: "get",
-    responseType: "blob",
-    params,
-  });
+  return loadRouterBase("/system/log_download", params);
 }
 
 /**

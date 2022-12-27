@@ -1,4 +1,5 @@
 import axios from "./config";
+import { loadRouterBase } from "./config";
 
 // ssh 列表
 export function getSshList(params) {
@@ -140,13 +141,7 @@ export function getFileList(params) {
  * @param {id, path, name} params
  */
 export function downloadFile(params) {
-  return axios({
-    url: "/node/ssh/download.html",
-    method: "get",
-    responseType: "blob",
-    timeout: 0,
-    params,
-  });
+  return loadRouterBase("/node/ssh/download.html", params);
 }
 
 /**

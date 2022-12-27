@@ -123,10 +123,10 @@
   </a-layout>
 </template>
 <script>
-import {deleteFile, downloadFile, getFileList, getRootFileList, newFileFolder, readFile, renameFileFolder, updateFileData, uploadFile} from "@/api/ssh";
+import { deleteFile, downloadFile, getFileList, getRootFileList, newFileFolder, readFile, renameFileFolder, updateFileData, uploadFile } from "@/api/ssh";
 import Terminal from "./terminal";
 import codeEditor from "@/components/codeEditor";
-import {ZIP_ACCEPT} from "@/utils/const";
+import { ZIP_ACCEPT } from "@/utils/const";
 
 export default {
   props: {
@@ -417,15 +417,7 @@ export default {
         name: record.parentDir,
       };
       // 请求接口拿到 blob
-      downloadFile(params).then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.style.display = "none";
-        link.href = url;
-        link.setAttribute("download", record.name);
-        document.body.appendChild(link);
-        link.click();
-      });
+      window.open(downloadFile(params), "_self");
     },
     // 删除文件夹
     handleDeletePath() {

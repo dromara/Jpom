@@ -2,6 +2,7 @@
  * 节点管理 api
  */
 import axios from "./config";
+import { loadRouterBase } from "./config";
 
 /**
  * 项目列表
@@ -170,13 +171,14 @@ export function getFileList(params) {
  * } params
  */
 export function downloadProjectFile(params) {
-  return axios({
-    url: "/node/manage/file/download",
-    method: "get",
-    responseType: "blob",
-    timeout: 0,
-    params,
-  });
+  return loadRouterBase("/node/manage/file/download", params);
+  // return axios({
+  //   url: "/node/manage/file/download",
+  //   method: "get",
+  //   responseType: "blob",
+  //   timeout: 0,
+  //   params,
+  // });
 }
 
 export function readFile(formData) {
@@ -301,13 +303,7 @@ export function getProjectLogSize(params) {
  * } params
  */
 export function downloadProjectLogFile(params) {
-  return axios({
-    url: "/node/manage/log/export.html",
-    method: "get",
-    responseType: "blob",
-    timeout: 0,
-    params,
-  });
+  return loadRouterBase("/node/manage/log/export.html", params);
 }
 
 /**
@@ -335,13 +331,7 @@ export function getLogBackList(params) {
  * } params
  */
 export function downloadProjectLogBackFile(params) {
-  return axios({
-    url: "/node/manage/log/logBack_download",
-    method: "get",
-    responseType: "blob",
-    timeout: 0,
-    params,
-  });
+  return loadRouterBase("/node/manage/log/logBack_download", params);
 }
 
 /**
