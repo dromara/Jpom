@@ -25,6 +25,7 @@ package io.jpom.common;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterImplToString;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import lombok.Data;
@@ -56,6 +57,10 @@ public class JsonMessage<T> implements Serializable {
         writerProvider.register(long.class, ObjectWriterImplToString.INSTANCE);
         writerProvider.register(BigInteger.class, ObjectWriterImplToString.INSTANCE);
         writerProvider.register(Long.TYPE, ObjectWriterImplToString.INSTANCE);
+        //
+        JSONFactory.setUseJacksonAnnotation(false);
+        // 枚举对象使用 枚举名称
+        JSON.config(JSONWriter.Feature.WriteEnumsUsingName);
     }
 
     private int code;
