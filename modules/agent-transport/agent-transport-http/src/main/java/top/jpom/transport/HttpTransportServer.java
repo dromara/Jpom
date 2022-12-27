@@ -130,7 +130,6 @@ public class HttpTransportServer implements TransportServer {
 
     @Override
     public IProxyWebSocket websocket(INodeInfo nodeInfo, IUrlItem urlItem, Object... parameters) {
-        String ws = "https".equalsIgnoreCase(nodeInfo.scheme()) ? "wss" : "ws";
         String url = StrUtil.format("{}://{}/", nodeInfo.scheme(), nodeInfo.url());
         UrlBuilder urlBuilder = UrlBuilder.of(url).addPath(urlItem.path());
         //
@@ -144,8 +143,8 @@ public class HttpTransportServer implements TransportServer {
         }
         urlBuilder.setWithEndTag(false);
         String uriTemplate = urlBuilder.build();
-        uriTemplate = StrUtil.removePrefixIgnoreCase(uriTemplate, "http");
-        uriTemplate = StrUtil.removePrefixIgnoreCase(uriTemplate, "https");
+        uriTemplate = StrUtil.removePrefixIgnoreCase(uriTemplate, nodeInfo.scheme());
+        String ws = "https".equalsIgnoreCase(nodeInfo.scheme()) ? "wss" : "ws";
         uriTemplate = StrUtil.format("{}{}", ws, uriTemplate);
         //
         if (log.isDebugEnabled()) {
