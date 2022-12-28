@@ -177,7 +177,7 @@ public class SshHandler extends BaseTerminalHandler {
         sshTerminalExecuteLogService.batch(userInfo, sshItem, ip, userAgent, refuse, split);
     }
 
-    private class HandlerItem implements Runnable {
+    private class HandlerItem implements Runnable, AutoCloseable {
         private final WebSocketSession session;
         private final InputStream inputStream;
         private final OutputStream outputStream;
@@ -273,23 +273,27 @@ public class SshHandler extends BaseTerminalHandler {
                 }
             } catch (Exception e) {
                 if (!this.openSession.isConnected()) {
+                    log.error("ssh 错误：{}", e.getMessage());
                     return;
                 }
                 log.error("读取错误", e);
                 SshHandler.this.destroy(this.session);
             }
         }
+
+        @Override
+        public void close() throws Exception {
+            IoUtil.close(this.inputStream);
+            IoUtil.close(this.outputStream);
+            JschUtil.close(this.channel);
+            JschUtil.close(this.openSession);
+        }
     }
 
     @Override
     public void destroy(WebSocketSession session) {
         HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
-        if (handlerItem != null) {
-            IoUtil.close(handlerItem.inputStream);
-            IoUtil.close(handlerItem.outputStream);
-            JschUtil.close(handlerItem.channel);
-            JschUtil.close(handlerItem.openSession);
-        }
+        IoUtil.close(handlerItem);
         IoUtil.close(session);
         HANDLER_ITEM_CONCURRENT_HASH_MAP.remove(session.getId());
         SocketSessionUtil.close(session);

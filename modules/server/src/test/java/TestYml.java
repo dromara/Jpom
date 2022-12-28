@@ -20,6 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Dict;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -43,6 +45,12 @@ import java.util.List;
  * @since 2021/8/1
  */
 public class TestYml {
+
+    @Test
+    public void testCharest() {
+        System.out.println(Charset.forName("UTF8"));
+        System.out.println(Charset.forName("UTF-8"));
+    }
 
     @Test
     public void test2() {
