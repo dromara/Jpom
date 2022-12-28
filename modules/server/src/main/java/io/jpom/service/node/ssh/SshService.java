@@ -32,10 +32,7 @@ import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.*;
 import io.jpom.JpomApplication;
 import io.jpom.common.ServerConst;
 import io.jpom.model.data.SshModel;
@@ -45,6 +42,7 @@ import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JschUtils;
 import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -53,7 +51,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
 /**
@@ -61,7 +58,12 @@ import java.util.function.BiFunction;
  * @since 2021/12/4
  */
 @Service
-public class SshService extends BaseWorkspaceService<SshModel> {
+@Slf4j
+public class SshService extends BaseWorkspaceService<SshModel> implements Logger {
+
+    public SshService() {
+        JSch.setLogger(this);
+    }
 
     @Override
     protected void fillSelectResult(SshModel data) {
@@ -150,6 +152,12 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                     sshModel.getPort(), user, FileUtil.getAbsolutePath(rsaFile), passwordByte);
             }
             try {
+                session.setServerAliveInterval(timeout);
+                session.setServerAliveCountMax(5);
+            } catch (JSchException e) {
+                log.warn("配置 ssh serverAliveInterval 错误", e);
+            }
+            try {
                 session.connect(timeout);
             } catch (JSchException e) {
                 throw new JschRuntimeException(e);
@@ -157,11 +165,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         } else {
             throw new IllegalArgumentException("不支持的模式");
         }
-        try {
-            session.setServerAliveInterval((int) TimeUnit.SECONDS.toMillis(5));
-            session.setServerAliveCountMax(5);
-        } catch (JSchException ignored) {
-        }
+
         return session;
     }
 
@@ -439,5 +443,44 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                     super.updateById(update);
                 }
             });
+    }
+
+    @Override
+    public boolean isEnabled(int level) {
+        switch (level) {
+            case DEBUG:
+                return log.isDebugEnabled();
+            case INFO:
+                return log.isInfoEnabled();
+            case WARN:
+                return log.isWarnEnabled();
+            case ERROR:
+            case FATAL:
+                return log.isErrorEnabled();
+            default:
+                log.warn("未知的 jsch 日志级别：{}", level);
+                return false;
+        }
+    }
+
+    @Override
+    public void log(int level, String message) {
+        switch (level) {
+            case DEBUG:
+                log.debug(message);
+                break;
+            case INFO:
+                log.info(message);
+                break;
+            case WARN:
+                log.warn(message);
+                break;
+            case ERROR:
+            case FATAL:
+                log.error(message);
+                break;
+            default:
+                log.warn("未知的 jsch 日志级别：{} {}", level, message);
+        }
     }
 }

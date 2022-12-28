@@ -97,7 +97,7 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
 
     @Override
     public boolean connectBlocking() {
-        int maxTimeout = Optional.ofNullable(this.timeout).orElse(5 * 60);
+        int maxTimeout = Optional.ofNullable(this.timeout).orElse(60);
         return this.connectBlocking(maxTimeout);
     }
 
