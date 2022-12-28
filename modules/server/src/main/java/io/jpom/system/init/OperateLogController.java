@@ -30,6 +30,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
 import io.jpom.common.BaseServerController;
@@ -162,16 +163,21 @@ public class OperateLogController implements AopLogInterface {
         Map<String, Object> allData = new HashMap<>(30);
         String body = ServletFileUpload.isMultipartContent(request) ? null : ServletUtil.getBody(request);
         if (StrUtil.isNotEmpty(body)) {
-            JSONValidator jsonValidator = JSONValidator.from(body);
-            JSONValidator.Type type = jsonValidator.getType();
-            if (type == null || type == JSONValidator.Type.Value) {
+            try {
+                JSONValidator jsonValidator = JSONValidator.from(body);
+                JSONValidator.Type type = jsonValidator.getType();
+                if (type == null || type == JSONValidator.Type.Value) {
+                    allData.put("bodyData", body);
+                } else if (type == JSONValidator.Type.Object) {
+                    JSONObject jsonObject = JSONObject.parseObject(body);
+                    allData.putAll(jsonObject);
+                    //
+                } else if (type == JSONValidator.Type.Array) {
+                    allData.put("bodyData", JSON.toJSON(body));
+                }
+            } catch (JSONException jsonException) {
+                log.warn("消息转换异常 {}", jsonException.getMessage());
                 allData.put("bodyData", body);
-            } else if (type == JSONValidator.Type.Object) {
-                JSONObject jsonObject = JSONObject.parseObject(body);
-                allData.putAll(jsonObject);
-                //
-            } else if (type == JSONValidator.Type.Array) {
-                allData.put("bodyData", JSON.toJSON(body));
             }
         }
         allData.putAll(map);

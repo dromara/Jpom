@@ -26,6 +26,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
 import io.jpom.model.docker.DockerInfoModel;
@@ -91,8 +92,13 @@ public class DockerCliHandler extends BaseTerminalHandler {
             return;
         }
         String payload = message.getPayload();
-        JSONValidator from = JSONValidator.from(payload);
-        if (from.getType() == JSONValidator.Type.Object) {
+        JSONValidator from = null;
+        try {
+            from = JSONValidator.from(payload);
+        } catch (JSONException jsonException) {
+            log.warn("消息转换异常 {}", jsonException.getMessage());
+        }
+        if (from != null && from.getType() == JSONValidator.Type.Object) {
             JSONObject jsonObject = JSONObject.parseObject(payload);
             String data = jsonObject.getString("data");
             if (StrUtil.equals(data, "jpom-heart")) {
