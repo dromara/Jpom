@@ -445,7 +445,7 @@
         </a-form-model-item>
         <!-- 节点 -->
         <a-form-model-item label="分发节点" prop="nodeId">
-          <a-select v-model="temp.nodeIdList" mode="multiple" placeholder="请选择分发节点">
+          <a-select show-search option-filter-prop="children" v-model="temp.nodeIdList" mode="multiple" placeholder="请选择分发节点">
             <a-select-option v-for="node in nodeList" :key="node.id">{{ `${node.name}` }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -536,7 +536,7 @@
       </a-form-model>
     </a-modal>
     <!-- 分发项目 -->
-    <a-modal v-model="dispatchVisible" width="600px" :title="'分发项目----' + temp.name" @ok="handleDispatchOk" :maskClosable="false">
+    <a-modal v-model="dispatchVisible" width="600px" :title="'分发项目-' + temp.name" @ok="handleDispatchOk" :maskClosable="false">
       <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="方式" prop="type">
           <a-radio-group v-model="temp.type" name="type">
@@ -576,6 +576,10 @@
           </template>
           <a-switch v-model="temp.autoUnzip" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
+        <a-form-model-item label="剔除文件夹" v-if="temp.autoUnzip">
+          <a-input-number style="width: 100%" v-model="temp.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
+        </a-form-model-item>
+
         <a-form-model-item label="分发后操作" prop="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
@@ -1143,6 +1147,7 @@ export default {
           formData.append("clearOld", this.temp.clearOld);
           formData.append("autoUnzip", this.temp.autoUnzip);
           formData.append("secondaryDirectory", this.temp.secondaryDirectory || "");
+          formData.append("stripComponents", this.temp.stripComponents || 0);
           uploadDispatchFile(formData).then((res) => {
             if (res.code === 200) {
               this.$notification.success({

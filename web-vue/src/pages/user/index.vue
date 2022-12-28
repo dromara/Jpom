@@ -113,7 +113,7 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item label="权限组" prop="permissionGroup">
-          <a-select placeholder="请选择用户的权限组" v-model="temp.permissionGroup" mode="multiple">
+          <a-select show-search option-filter-prop="children" placeholder="请选择用户的权限组" v-model="temp.permissionGroup" mode="multiple">
             <a-select-option v-for="item in permissionGroup" :key="item.id">
               {{ item.name }}
             </a-select-option>

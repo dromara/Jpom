@@ -25,6 +25,7 @@ package io.jpom.system;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
 import io.jpom.JpomApplication;
@@ -101,7 +102,8 @@ public class AgentConfig extends BaseExtConfig {
      */
     public String getTempPathName() {
         File file = getTempPath();
-        return FileUtil.normalize(file.getPath());
+        // 生成随机的一个文件夹、避免同一个节点分发同一个文件，mv 失败
+        return FileUtil.getAbsolutePath(FileUtil.file(file, IdUtil.fastSimpleUUID()));
     }
 
     /**

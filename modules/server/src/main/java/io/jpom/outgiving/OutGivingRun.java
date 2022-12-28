@@ -55,15 +55,16 @@ public class OutGivingRun {
     /**
      * 开始异步执行分发任务
      *
-     * @param id        分发id
-     * @param file      文件
-     * @param userModel 操作的用户
-     * @param unzip     解压
+     * @param id              分发id
+     * @param file            文件
+     * @param userModel       操作的用户
+     * @param stripComponents 剔除文件夹
+     * @param unzip           解压
      */
     public static void startRun(String id,
                                 File file,
                                 UserModel userModel,
-                                boolean unzip) {
+                                boolean unzip, int stripComponents) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getByKey(id);
         Objects.requireNonNull(item, "不存在分发");
@@ -84,6 +85,7 @@ public class OutGivingRun {
                         OutGivingItemRun.updateStatus(null, id, outGivingNodeProject, OutGivingNodeProject.Status.Cancel, "前一个节点分发失败，取消分发", userId);
                     } else {
                         OutGivingItemRun outGivingRun = new OutGivingItemRun(item, outGivingNodeProject, file, userModel, unzip, sleepTime);
+                        outGivingRun.setStripComponents(stripComponents);
                         OutGivingNodeProject.Status status = outGivingRun.call();
                         if (status != OutGivingNodeProject.Status.Ok) {
                             if (afterOpt == AfterOpt.Order_Must_Restart) {
@@ -97,9 +99,11 @@ public class OutGivingRun {
                 }
             });
         } else if (afterOpt == AfterOpt.Restart || afterOpt == AfterOpt.No) {
-            outGivingNodeProjects.forEach(outGivingNodeProject ->
-                ThreadUtil.execAsync(new OutGivingItemRun(item, outGivingNodeProject, file, userModel, unzip, null))
-            );
+            outGivingNodeProjects.forEach(outGivingNodeProject -> {
+                OutGivingItemRun outGivingItemRun = new OutGivingItemRun(item, outGivingNodeProject, file, userModel, unzip, null);
+                outGivingItemRun.setStripComponents(stripComponents);
+                ThreadUtil.execAsync(outGivingItemRun);
+            });
         } else {
             //
             throw new IllegalArgumentException("Not implemented " + afterOpt.getDesc());
@@ -149,6 +153,30 @@ public class OutGivingRun {
                                                  boolean clearOld,
                                                  Integer sleepTime,
                                                  Boolean closeFirst) {
+        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, clearOld, sleepTime, closeFirst, 0);
+    }
+
+    /**
+     * 上传项目文件
+     *
+     * @param file       需要上传的文件
+     * @param projectId  项目id
+     * @param unzip      是否需要解压
+     * @param afterOpt   是否需要重启
+     * @param nodeModel  节点
+     * @param clearOld   清空发布
+     * @param levelName  文件夹层级
+     * @param sleepTime  休眠时间
+     * @param closeFirst 保存项目文件前先关闭项目
+     * @return json
+     */
+    public static JsonMessage<String> fileUpload(File file, String levelName, String projectId,
+                                                 boolean unzip,
+                                                 AfterOpt afterOpt,
+                                                 NodeModel nodeModel,
+                                                 boolean clearOld,
+                                                 Integer sleepTime,
+                                                 Boolean closeFirst, int stripComponents) {
         JSONObject data = new JSONObject();
         data.put("file", file);
         data.put("id", projectId);
@@ -158,6 +186,7 @@ public class OutGivingRun {
         if (unzip) {
             // 解压
             data.put("type", "unzip");
+            data.put("stripComponents", stripComponents);
         }
         if (clearOld) {
             // 清空

@@ -241,7 +241,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         data.put("id", project);
         data.put("thorough", thorough);
         JsonMessage<String> request = NodeForward.request(nodeModel, NodeUrl.Manage_DeleteProject, data);
-        if (request.getCode() == HttpStatus.HTTP_OK) {
+        if (request.success()) {
             // 同步项目信息
             projectInfoCacheService.syncNode(nodeModel, project);
         }
@@ -396,7 +396,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                 }
             }
             JsonMessage<String> jsonMessage = this.sendData(nodeModel, allData, false);
-            Assert.state(jsonMessage.getCode() == HttpStatus.HTTP_OK, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
+            Assert.state(jsonMessage.success(), nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
             tuples.add(new Tuple(nodeModel, allData));
         }
         // 删除已经删除的项目
@@ -431,7 +431,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                 //outGivingNodeProject1.getNodeData(true);
                 // 调用彻底删除
                 jsonMessage = this.deleteNodeProject(nodeModel, outGivingNodeProject1.getProjectId(), "thorough");
-                Assert.state(jsonMessage.getCode() == HttpStatus.HTTP_OK, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
+                Assert.state(jsonMessage.success(), nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
             }
         }
     }

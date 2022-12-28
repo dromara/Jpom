@@ -22,6 +22,10 @@
  */
 package io.jpom.plugin;
 
+import io.jpom.system.ExtConfigBean;
+
+import java.io.InputStream;
+
 /**
  * 插件模块接口
  *
@@ -29,4 +33,14 @@ package io.jpom.plugin;
  * @since 2021/12/22
  */
 public interface IDefaultPlugin extends IPlugin, AutoCloseable {
+
+    /**
+     * 获取配置文件流
+     *
+     * @param name 配置文件名称
+     * @return InputStream
+     */
+    default InputStream getConfigResourceInputStream(String name) {
+        return ExtConfigBean.getConfigResourceInputStream(name);
+    }
 }
