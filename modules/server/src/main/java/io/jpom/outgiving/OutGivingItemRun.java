@@ -32,7 +32,6 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -46,6 +45,7 @@ import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
  * @since 2021/12/10
  */
 @Slf4j
+@Setter
 public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
 
     private final String outGivingId;
@@ -72,6 +73,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
     private final Integer sleepTime;
     private final String secondaryDirectory;
     private final Boolean closeFirst;
+    private int stripComponents;
     /**
      * 数据库记录id
      */
@@ -114,12 +116,9 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                 unzip,
                 afterOpt,
                 this.nodeModel, this.clearOld,
-                this.sleepTime, this.closeFirst);
-            if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
-                result = OutGivingNodeProject.Status.Ok;
-            } else {
-                result = OutGivingNodeProject.Status.Fail;
-            }
+                this.sleepTime, this.closeFirst, this.stripComponents);
+            result = jsonMessage.success() ? OutGivingNodeProject.Status.Ok : OutGivingNodeProject.Status.Fail;
+
             JSONObject jsonObject = jsonMessage.toJson();
             jsonObject.put("upload_duration", new BetweenFormatter(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND, 2).format());
             jsonObject.put("upload_file_size", fileSize);

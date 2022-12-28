@@ -181,7 +181,8 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip, String secondaryDirectory) throws IOException {
+    public JsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip,
+                                      String secondaryDirectory, String stripComponents) throws IOException {
         OutGivingModel outGivingModel = this.check(id);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
@@ -204,8 +205,9 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingModel.setSecondaryDirectory(secondaryDirectory);
 
         outGivingServer.update(outGivingModel);
+        int stripComponentsValue = Convert.toInt(stripComponents, 0);
         // 开启
-        OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip);
+        OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip, stripComponentsValue);
         return JsonMessage.success("分发成功");
     }
 
@@ -229,7 +231,8 @@ public class OutGivingProjectController extends BaseServerController {
      */
     @RequestMapping(value = "remote_download", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-    public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip, String secondaryDirectory) {
+    public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip,
+                                              String secondaryDirectory, String stripComponents) {
         OutGivingModel outGivingModel = this.check(id);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
@@ -252,8 +255,9 @@ public class OutGivingProjectController extends BaseServerController {
             boolean unzip = BooleanUtil.toBoolean(autoUnzip);
             //
             this.checkZip(downloadFile, unzip);
+            int stripComponentsValue = Convert.toInt(stripComponents, 0);
             // 开启
-            OutGivingRun.startRun(outGivingModel.getId(), downloadFile, getUser(), unzip);
+            OutGivingRun.startRun(outGivingModel.getId(), downloadFile, getUser(), unzip, stripComponentsValue);
             return JsonMessage.success("分发成功");
         } catch (Exception e) {
             log.error("下载远程文件异常", e);

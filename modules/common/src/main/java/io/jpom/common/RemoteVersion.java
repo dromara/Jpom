@@ -30,7 +30,6 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
@@ -257,7 +256,7 @@ public class RemoteVersion extends BaseJsonModel {
         File file = JpomManifest.zipFileFind(FileUtil.getAbsolutePath(downloadFileFromUrl), type, savePath);
         // 检查
         JsonMessage<Tuple> error = JpomManifest.checkJpomJar(FileUtil.getAbsolutePath(file), type, checkRepeat);
-        Assert.state(error.getCode() == HttpStatus.HTTP_OK, error.getMsg());
+        Assert.state(error.success(), error.getMsg());
         return error.getData();
     }
 

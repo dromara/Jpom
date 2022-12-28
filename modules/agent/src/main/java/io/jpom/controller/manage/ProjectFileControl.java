@@ -213,15 +213,14 @@ public class ProjectFileControl extends BaseAgentController {
     }
 
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<CommandOpResult> upload() throws Exception {
+    public JsonMessage<CommandOpResult> upload(String type, String levelName, Integer stripComponents, String after) throws Exception {
         NodeProjectInfoModel pim = getProjectInfoModel();
         MultipartFileBuilder multipartFileBuilder = createMultipart()
             .addFieldName("file")
             .setUseOriginalFilename(true);
         // 压缩文件
-        String type = getParameter("type");
-
-        String levelName = getParameter("levelName");
+//        String type = getParameter("type");
+//        String levelName = getParameter("levelName");
         File lib = StrUtil.isEmpty(levelName) ? new File(pim.allLib()) : FileUtil.file(pim.allLib(), levelName);
         // 备份文件
         String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
@@ -236,7 +235,8 @@ public class ProjectFileControl extends BaseAgentController {
                 // 解压
                 File file = new File(path);
                 try {
-                    CompressionFileUtil.unCompress(file, lib);
+                    int stripComponentsValue = Convert.toInt(stripComponents, 0);
+                    CompressionFileUtil.unCompress(file, lib, stripComponentsValue);
                 } finally {
                     if (!FileUtil.del(file)) {
                         log.error("删除文件失败：" + file.getPath());
@@ -254,7 +254,7 @@ public class ProjectFileControl extends BaseAgentController {
                 FileUtil.move(FileUtil.file(path), lib, true);
             }
             //
-            String after = getParameter("after");
+            //String after = getParameter("after");
             if (StrUtil.isNotEmpty(after)) {
                 //
                 List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = pim.getJavaCopyItemList();
@@ -457,14 +457,15 @@ public class ProjectFileControl extends BaseAgentController {
     /**
      * 下载远程文件
      *
-     * @param id        项目id
-     * @param url       远程 url 地址
-     * @param levelName 保存的文件夹
-     * @param unzip     是否为压缩包、true 将自动解压
+     * @param id              项目id
+     * @param url             远程 url 地址
+     * @param levelName       保存的文件夹
+     * @param unzip           是否为压缩包、true 将自动解压
+     * @param stripComponents 剔除层级
      * @return json
      */
     @PostMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> remoteDownload(String id, String url, String levelName, String unzip) {
+    public JsonMessage<String> remoteDownload(String id, String url, String levelName, String unzip, Integer stripComponents) {
         Assert.hasText(url, "请输入正确的远程地址");
         AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
         Set<String> allowRemoteDownloadHost = whitelist.getAllowRemoteDownloadHost();
@@ -485,7 +486,8 @@ public class ProjectFileControl extends BaseAgentController {
             if (BooleanUtil.toBoolean(unzip)) {
                 // 需要解压文件
                 try {
-                    CompressionFileUtil.unCompress(downloadFile, file);
+                    int stripComponentsValue = Convert.toInt(stripComponents, 0);
+                    CompressionFileUtil.unCompress(downloadFile, file, stripComponentsValue);
                 } finally {
                     if (!FileUtil.del(downloadFile)) {
                         log.error("删除文件失败：" + file.getPath());

@@ -384,7 +384,7 @@
                       <a-icon type="question-circle" theme="filled" />
                     </a-tooltip>
                   </template>
-                  <a-select mode="multiple" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
+                  <a-select show-search option-filter-prop="children" mode="multiple" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
                     <a-select-option v-for="ssh in sshList" :disabled="!ssh.fileDirs" :key="ssh.id">{{ ssh.name }}</a-select-option>
                   </a-select>
                 </a-form-model-item>

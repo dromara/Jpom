@@ -564,7 +564,7 @@ public class ReleaseManage implements Runnable {
             unZip,
             afterOpt,
             nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst());
-        if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
+        if (jsonMessage.success()) {
             logRecorder.info("发布项目包成功：" + jsonMessage);
         } else {
             throw new JpomRuntimeException("发布项目包失败：" + jsonMessage);
@@ -582,7 +582,7 @@ public class ReleaseManage implements Runnable {
             zipFile = this.resultFile;
             unZip = false;
         }
-        OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip);
+        OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);
         logRecorder.info("开始执行分发包啦,请到分发中查看当前状态");
     }
 

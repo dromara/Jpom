@@ -467,10 +467,9 @@ public class SshService extends BaseWorkspaceService<SshModel> implements Logger
     public void log(int level, String message) {
         switch (level) {
             case DEBUG:
-                log.debug(message);
-                break;
+                // info 日志太多 记录维 debug
             case INFO:
-                log.info(message);
+                log.debug(message);
                 break;
             case WARN:
                 log.warn(message);

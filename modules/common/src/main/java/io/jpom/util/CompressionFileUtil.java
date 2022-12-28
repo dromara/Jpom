@@ -53,11 +53,22 @@ public class CompressionFileUtil {
      * @param destDir      解压到的文件夹
      */
     public static void unCompress(File compressFile, File destDir) {
+        unCompress(compressFile, destDir, 0);
+    }
+
+    /**
+     * 解压文件
+     *
+     * @param compressFile    压缩文件
+     * @param destDir         解压到的文件夹
+     * @param stripComponents 剔除文件夹
+     */
+    public static void unCompress(File compressFile, File destDir, int stripComponents) {
         Charset charset = CharsetUtil.CHARSET_GBK;
         charset = ObjectUtil.defaultIfNull(charset, CharsetUtil.defaultCharset());
 
         try (Extractor extractor = CompressUtil.createExtractor(charset, compressFile)) {
-            extractor.extract(destDir);
+            extractor.extract(destDir, stripComponents);
         } catch (Exception e) {
             try (FileInputStream fileInputStream = new FileInputStream(compressFile);
                  CompressorInputStream compressUtilIn = CompressUtil.getIn(null, fileInputStream);) {
@@ -68,7 +79,7 @@ public class CompressionFileUtil {
                     }
                 } else {
                     try (Extractor extractor = CompressUtil.createExtractor(charset, compressUtilIn)) {
-                        extractor.extract(destDir);
+                        extractor.extract(destDir, stripComponents);
                     }
                 }
             } catch (Exception e2) {

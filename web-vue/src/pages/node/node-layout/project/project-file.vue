@@ -124,27 +124,30 @@
           </a-space>
         </a-modal>
         <!-- 上传压缩文件 -->
-        <a-modal v-model="uploadZipFileVisible" width="300px" title="上传压缩文件" :footer="null" :maskClosable="false">
-          <a-upload
-            :file-list="uploadFileList"
-            :remove="
-              () => {
-                this.uploadFileList = [];
-              }
-            "
-            :before-upload="beforeZipUpload"
-            :accept="ZIP_ACCEPT"
-          >
-            <a-button><a-icon type="upload" />选择压缩文件</a-button>
-          </a-upload>
-          <br />
-          <a-switch v-model="checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px" />
-          <br />
-          <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
-          <br />
-          <a-space>
-            <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
-            <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
+        <a-modal v-model="uploadZipFileVisible" width="400px" title="上传压缩文件" :footer="null" :maskClosable="false">
+          <a-space direction="vertical" style="display: block" size="large">
+            <a-upload
+              :file-list="uploadFileList"
+              :remove="
+                () => {
+                  this.uploadFileList = [];
+                }
+              "
+              :before-upload="beforeZipUpload"
+              :accept="ZIP_ACCEPT"
+            >
+              <a-button><a-icon type="upload" />选择压缩文件</a-button>
+            </a-upload>
+
+            <a-switch v-model="uploadData.checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px" />
+
+            <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
+
+            <a-input-number style="width: 100%" v-model="uploadData.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
+            <a-space>
+              <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
+              <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
+            </a-space>
           </a-space>
         </a-modal>
 
@@ -172,12 +175,15 @@
         </a-modal>
         <!--远程下载  -->
         <a-modal v-model="uploadRemoteFileVisible" title="远程下载文件" @ok="handleRemoteUpload" @cancel="openRemoteUpload" :maskClosable="false">
-          <a-form-model :model="remoteDownloadData" :label-col="{ span: 5 }" :wrapper-col="{ span: 24 }" :rules="rules" ref="ruleForm">
+          <a-form-model :model="remoteDownloadData" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules" ref="ruleForm">
             <a-form-model-item label="远程下载URL" prop="url">
               <a-input v-model="remoteDownloadData.url" placeholder="远程下载地址" />
             </a-form-model-item>
             <a-form-model-item label="是否为压缩包">
               <a-switch v-model="remoteDownloadData.unzip" checked-children="是" un-checked-children="否" v-decorator="['unzip', { valuePropName: 'checked' }]" />
+            </a-form-model-item>
+            <a-form-model-item label="剔除文件夹" v-if="remoteDownloadData.unzip">
+              <a-input-number style="width: 100%" v-model="remoteDownloadData.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
             </a-form-model-item>
           </a-form-model>
         </a-modal>
@@ -281,7 +287,10 @@ export default {
       // 是否是上传状态
       uploading: false,
       percentage: 0,
-      checkBox: false,
+      uploadData: {
+        checkBox: false,
+      },
+
       // tableHeight: "80vh",
       defaultProps: {
         children: "children",
@@ -532,7 +541,7 @@ export default {
         });
         return;
       }
-      this.checkBox = false;
+      this.uploadData = {};
       this.successSize = 0;
       this.uploadFileList = [];
       this.uploading = false;
@@ -565,7 +574,8 @@ export default {
       // 计算属性 uploadPath
       formData.append("levelName", this.uploadPath);
       formData.append("type", "unzip");
-      formData.append("clearType", this.checkBox ? "clear" : "noClear");
+      formData.append("stripComponents", this.uploadData.stripComponents || 0);
+      formData.append("clearType", this.uploadData.checkBox ? "clear" : "noClear");
       // 上传文件
       uploadProjectFile(formData).then((res) => {
         if (res.code === 200) {
@@ -578,7 +588,7 @@ export default {
             this.percentage = 0;
             this.uploading = false;
             clearInterval(this.timer);
-            this.checkBox = false;
+            this.uploadData = false;
             this.uploadFileList = [];
             this.loadFileList();
           }, 1000);
@@ -606,6 +616,7 @@ export default {
             url: this.remoteDownloadData.url,
             levelName: this.uploadPath,
             unzip: this.remoteDownloadData.unzip,
+            stripComponents: this.remoteDownloadData.stripComponents || 0,
           };
           remoteDownload(params).then((res) => {
             if (res.code == 200) {
