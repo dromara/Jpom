@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Setter
-public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
+public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status>, Runnable {
 
     private final String outGivingId;
     private final OutGivingNodeProject outGivingNodeProject;
@@ -108,8 +108,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
         long time = SystemClock.now();
         String fileSize = FileUtil.readableFileSize(file);
         try {
-            this.updateStatus(this.outGivingId, this.outGivingNodeProject,
-                OutGivingNodeProject.Status.Ing, "开始分发");
+            this.updateStatus(this.outGivingId, this.outGivingNodeProject, OutGivingNodeProject.Status.Ing, "开始分发");
             //
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, this.secondaryDirectory,
                 this.outGivingNodeProject.getProjectId(),
@@ -148,6 +147,58 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                              String msg) {
         String userId = this.userModel == null ? Const.SYSTEM_ID : this.userModel.getId();
         updateStatus(this.logId, outGivingId, outGivingNodeProjectItem, status, msg, userId);
+    }
+
+    /**
+     * 将所有数据更新维准备中
+     *
+     * @param outGivingId 分发id
+     */
+    public static void allPrepare(String outGivingId) {
+        OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
+        synchronized (outGivingId.intern()) {
+            OutGivingModel outGivingModel = outGivingServer.getByKey(outGivingId);
+
+            List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
+            Assert.notEmpty(outGivingNodeProjects, "没有分发项目");
+            outGivingNodeProjects = outGivingNodeProjects.stream()
+                .peek(outGivingNodeProject -> outGivingNodeProject.setStatus(OutGivingNodeProject.Status.Prepare.getCode()))
+                .collect(Collectors.toList());
+            // 更新分发数据
+            OutGivingModel outGivingModel1 = new OutGivingModel();
+            outGivingModel1.setId(outGivingId);
+            outGivingModel1.setStatus(OutGivingModel.Status.ING.getCode());
+            outGivingModel1.outGivingNodeProjectList(outGivingNodeProjects);
+            outGivingServer.update(outGivingModel1);
+        }
+    }
+
+    /**
+     * 取消分发
+     *
+     * @param outGivingId 分发id
+     */
+    public static void cancel(String outGivingId) {
+        OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
+        synchronized (outGivingId.intern()) {
+            OutGivingModel outGivingModel = outGivingServer.getByKey(outGivingId);
+
+            List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
+            Assert.notEmpty(outGivingNodeProjects, "没有分发项目");
+            outGivingNodeProjects = outGivingNodeProjects.stream()
+                .peek(outGivingNodeProject -> {
+                    if (outGivingNodeProject.getStatus() == OutGivingNodeProject.Status.Prepare.getCode()) {
+                        outGivingNodeProject.setStatus(OutGivingNodeProject.Status.ArtificialCancel.getCode());
+                    }
+                })
+                .collect(Collectors.toList());
+            // 更新分发数据
+            OutGivingModel outGivingModel1 = new OutGivingModel();
+            outGivingModel1.setId(outGivingId);
+            outGivingModel1.setStatus(OutGivingModel.Status.CANCEL.getCode());
+            outGivingModel1.outGivingNodeProjectList(outGivingNodeProjects);
+            outGivingServer.update(outGivingModel1);
+        }
     }
 
     /**
@@ -190,7 +241,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                     .stream()
                     .map(outGivingNodeProject -> EnumUtil.likeValueOf(OutGivingNodeProject.Status.class, outGivingNodeProject.getStatus()))
                     .collect(Collectors.toList());
-                OutGivingModel.Status outGivingStatus = CollUtil.contains(collect, OutGivingNodeProject.Status.Ing)
+                OutGivingModel.Status outGivingStatus = CollUtil.containsAny(collect, CollUtil.newArrayList(OutGivingNodeProject.Status.Ing, OutGivingNodeProject.Status.Prepare))
                     ? OutGivingModel.Status.ING : OutGivingModel.Status.DONE;
                 // 更新分发数据
                 OutGivingModel outGivingModel1 = new OutGivingModel();
@@ -226,5 +277,11 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
         } finally {
             BaseServerController.removeEmpty();
         }
+    }
+
+    @Override
+    public void run() {
+        OutGivingNodeProject.Status call = this.call();
+        log.debug("分发结果 {} {} {}", this.outGivingId, this.outGivingNodeProject.getProjectId(), call);
     }
 }

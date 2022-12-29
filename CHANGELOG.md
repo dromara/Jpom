@@ -5,6 +5,8 @@
 ### 🐣 新增功能
 
 1. 【agent】新增 上传项目文件，下载远程文件 压缩包支持自动剔除文件夹
+2. 【server】新增 节点分发新增手动取消分发任务功能
+   （感谢 [@gxw](https://gitee.com/yinxianer) [Gitee issues I61SBB](https://gitee.com/dromara/Jpom/issues/I61SBB) ）
 
 ### 🐞 解决BUG、优化功能
 
@@ -14,6 +16,8 @@
 4. 【server】修复 在线终端输入部分字符后自动端口连接问题（感谢 @Again.... ）
 5. 【server】修复 部分下拉框无法正常搜索文件（感谢 @Again.... ）
 6. 【agent】优化 同时上传相同的文件名时可能异常
+7. 【server】优化 节点分发状态新增（等待分发、手动取消状态）
+8. 【server】修复 状态为未分发时分发失败引起的状态错误
 
 ------
 

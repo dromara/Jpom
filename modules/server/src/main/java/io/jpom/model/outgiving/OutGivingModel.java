@@ -179,6 +179,7 @@ public class OutGivingModel extends BaseWorkspaceModel {
         NO(0, "未分发"),
         ING(1, "分发中"),
         DONE(2, "分发结束"),
+        CANCEL(3, "已取消"),
         ;
         private final int code;
         private final String desc;

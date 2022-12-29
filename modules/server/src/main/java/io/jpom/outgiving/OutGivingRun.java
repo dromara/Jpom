@@ -22,10 +22,13 @@
  */
 package io.jpom.outgiving;
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.thread.SyncFinisher;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.Const;
@@ -38,10 +41,14 @@ import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.outgiving.OutGivingServer;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,7 +57,20 @@ import java.util.concurrent.TimeUnit;
  * @author bwcx_jzy
  * @since 2019/7/18
  **/
+@Slf4j
 public class OutGivingRun {
+
+    private static final Map<String, SyncFinisher> SYNC_FINISHER_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 取消分发
+     *
+     * @param id 分发id
+     */
+    public static void cancel(String id) {
+        SyncFinisher syncFinisher = SYNC_FINISHER_MAP.remove(id);
+        Optional.ofNullable(syncFinisher).ifPresent(SyncFinisher::stopNow);
+    }
 
     /**
      * 开始异步执行分发任务
@@ -61,52 +81,71 @@ public class OutGivingRun {
      * @param stripComponents 剔除文件夹
      * @param unzip           解压
      */
-    public static void startRun(String id,
-                                File file,
-                                UserModel userModel,
-                                boolean unzip, int stripComponents) {
+    public synchronized static void startRun(String id,
+                                             File file,
+                                             UserModel userModel,
+                                             boolean unzip, int stripComponents) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getByKey(id);
         Objects.requireNonNull(item, "不存在分发");
         AfterOpt afterOpt = ObjectUtil.defaultIfNull(EnumUtil.likeValueOf(AfterOpt.class, item.getAfterOpt()), AfterOpt.No);
-
-        //
-        List<OutGivingNodeProject> outGivingNodeProjects = item.outGivingNodeProjectList();
-        // 开启线程
-        if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
-            ThreadUtil.execute(() -> {
-                // 截取睡眠时间
-                int sleepTime = ObjectUtil.defaultIfNull(item.getIntervalTime(), 10);
-                //
-                boolean cancel = false;
-                for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
-                    if (cancel) {
-                        String userId = userModel == null ? Const.SYSTEM_ID : userModel.getId();
-                        OutGivingItemRun.updateStatus(null, id, outGivingNodeProject, OutGivingNodeProject.Status.Cancel, "前一个节点分发失败，取消分发", userId);
-                    } else {
-                        OutGivingItemRun outGivingRun = new OutGivingItemRun(item, outGivingNodeProject, file, userModel, unzip, sleepTime);
-                        outGivingRun.setStripComponents(stripComponents);
-                        OutGivingNodeProject.Status status = outGivingRun.call();
-                        if (status != OutGivingNodeProject.Status.Ok) {
-                            if (afterOpt == AfterOpt.Order_Must_Restart) {
-                                // 完整重启，不再继续剩余的节点项目
-                                cancel = true;
+        SyncFinisher syncFinisher = null;
+        try {
+            //
+            List<OutGivingNodeProject> outGivingNodeProjects = item.outGivingNodeProjectList();
+            // 开启线程
+            if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
+                syncFinisher = new SyncFinisher(1);
+                syncFinisher.addWorker(() -> {
+                    try {
+                        // 截取睡眠时间
+                        int sleepTime = ObjectUtil.defaultIfNull(item.getIntervalTime(), 10);
+                        //
+                        boolean cancel = false;
+                        for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
+                            if (cancel) {
+                                String userId = userModel == null ? Const.SYSTEM_ID : userModel.getId();
+                                OutGivingItemRun.updateStatus(null, id, outGivingNodeProject, OutGivingNodeProject.Status.Cancel, "前一个节点分发失败，取消分发", userId);
+                            } else {
+                                OutGivingItemRun outGivingRun = new OutGivingItemRun(item, outGivingNodeProject, file, userModel, unzip, sleepTime);
+                                outGivingRun.setStripComponents(stripComponents);
+                                OutGivingNodeProject.Status status = outGivingRun.call();
+                                if (status != OutGivingNodeProject.Status.Ok) {
+                                    if (afterOpt == AfterOpt.Order_Must_Restart) {
+                                        // 完整重启，不再继续剩余的节点项目
+                                        cancel = true;
+                                    }
+                                }
+                                // 休眠x秒 等待之前项目正常启动
+                                ThreadUtil.sleep(sleepTime, TimeUnit.SECONDS);
                             }
                         }
-                        // 休眠x秒 等待之前项目正常启动
-                        ThreadUtil.sleep(sleepTime, TimeUnit.SECONDS);
+                    } catch (Exception e) {
+                        log.error("分发异常 {}", id, e);
                     }
+                });
+            } else if (afterOpt == AfterOpt.Restart || afterOpt == AfterOpt.No) {
+                // 判断最大值
+                int threadSize = outGivingNodeProjects.size();
+                threadSize = Math.min(threadSize, RuntimeUtil.getProcessorCount());
+                //
+                syncFinisher = new SyncFinisher(threadSize);
+                for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
+                    OutGivingItemRun outGivingItemRun = new OutGivingItemRun(item, outGivingNodeProject, file, userModel, unzip, null);
+                    outGivingItemRun.setStripComponents(stripComponents);
+                    syncFinisher.addWorker(outGivingItemRun);
                 }
-            });
-        } else if (afterOpt == AfterOpt.Restart || afterOpt == AfterOpt.No) {
-            outGivingNodeProjects.forEach(outGivingNodeProject -> {
-                OutGivingItemRun outGivingItemRun = new OutGivingItemRun(item, outGivingNodeProject, file, userModel, unzip, null);
-                outGivingItemRun.setStripComponents(stripComponents);
-                ThreadUtil.execAsync(outGivingItemRun);
-            });
-        } else {
-            //
-            throw new IllegalArgumentException("Not implemented " + afterOpt.getDesc());
+            } else {
+                //
+                throw new IllegalArgumentException("Not implemented " + afterOpt.getDesc());
+            }
+            // 更新维准备中
+            OutGivingItemRun.allPrepare(id);
+            // 开启线程
+            SYNC_FINISHER_MAP.put(id, syncFinisher);
+            syncFinisher.start(false);
+        } finally {
+            IoUtil.close(syncFinisher);
         }
     }
 
