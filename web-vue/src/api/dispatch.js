@@ -26,6 +26,7 @@ export function getDispatchProject(id, loading) {
     url: "/outgiving/getItemData.json",
     method: "post",
     data: { id },
+    timeout: 0,
     headers: {
       loading: loading === false ? "no" : "",
     },

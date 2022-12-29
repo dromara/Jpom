@@ -119,7 +119,7 @@
       <a-table
         slot="expandedRowRender"
         slot-scope="record"
-        :loading="childLoading"
+        :loading="childLoading[record.id]"
         :columns="childColumns"
         size="middle"
         :bordered="false"
@@ -658,7 +658,7 @@ export default {
   data() {
     return {
       loading: false,
-      childLoading: false,
+      childLoading: {},
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       statusMap: statusMap,
       javaModes: javaModes,
@@ -774,7 +774,8 @@ export default {
       return new Promise((resolve) => {
         this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
         this.loading = true;
-        this.childLoading = false;
+        this.childLoading = {};
+        // = false;
         getDishPatchList(this.listQuery).then((res) => {
           if (res.code === 200) {
             this.list = res.data.result;
@@ -816,7 +817,7 @@ export default {
           //
           for (let item in this.list_expanded) {
             if (this.list_expanded[item]) {
-              this.handleReloadById(item, false);
+              this.handleReloadById(item, true);
             }
             // console.log(item);
           }
@@ -1104,24 +1105,32 @@ export default {
     },
     // 刷新
     handleReload(record) {
-      this.childLoading = true;
-      this.handleReloadById(record.id).then(() => {
-        this.childLoading = false;
-      });
+      this.handleReloadById(record.id, false);
     },
-    handleReloadById(recordId, loading) {
+    handleReloadById(recordId, silence) {
+      if (silence && this.childLoading[recordId]) {
+        // 不重复加载
+        return;
+      }
+      this.childLoading = { ...this.childLoading, [recordId]: true };
       return new Promise((resolve) => {
-        getDispatchProject(recordId, loading).then((res) => {
-          if (res.code === 200 && res.data) {
-            this.dispatchChildren = {
-              ...this.dispatchChildren,
-              [recordId]: res.data.map((item) => {
-                return { ...item, id_no: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}` };
-              }),
-            };
-          }
-          resolve();
-        });
+        getDispatchProject(recordId, false)
+          .then((res) => {
+            if (res.code === 200 && res.data) {
+              this.dispatchChildren = {
+                ...this.dispatchChildren,
+                [recordId]: res.data.map((item) => {
+                  return { ...item, id_no: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}` };
+                }),
+              };
+            }
+            this.childLoading = { ...this.childLoading, [recordId]: false };
+            resolve();
+          })
+          .catch(() => {
+            // 取消加载中
+            this.childLoading = { ...this.childLoading, [recordId]: false };
+          });
       });
     },
     // 处理分发

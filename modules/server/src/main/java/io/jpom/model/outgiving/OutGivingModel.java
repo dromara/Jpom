@@ -22,6 +22,8 @@
  */
 package io.jpom.model.outgiving;
 
+import cn.hutool.core.comparator.CompareUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import io.jpom.model.BaseEnum;
@@ -94,7 +96,18 @@ public class OutGivingModel extends BaseWorkspaceModel {
 
 
     public List<OutGivingNodeProject> outGivingNodeProjectList() {
-        return StringUtil.jsonConvertArray(outGivingNodeProjectList, OutGivingNodeProject.class);
+        List<OutGivingNodeProject> outGivingNodeProjects = StringUtil.jsonConvertArray(outGivingNodeProjectList, OutGivingNodeProject.class);
+        if (outGivingNodeProjects != null) {
+            // 排序
+            for (int i = 0; i < outGivingNodeProjects.size(); i++) {
+                OutGivingNodeProject outGivingNodeProject = outGivingNodeProjects.get(i);
+                if (outGivingNodeProject.getSortValue() != null) {
+                    outGivingNodeProject.setSortValue(ObjectUtil.defaultIfNull(outGivingNodeProject.getSortValue(), i));
+                }
+            }
+            outGivingNodeProjects.sort((o1, o2) -> CompareUtil.compare(o1.getSortValue(), o2.getSortValue()));
+        }
+        return outGivingNodeProjects;
     }
 
     public void outGivingNodeProjectList(List<OutGivingNodeProject> outGivingNodeProjectList) {
