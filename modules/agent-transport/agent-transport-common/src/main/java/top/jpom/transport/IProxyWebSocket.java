@@ -78,7 +78,7 @@ public interface IProxyWebSocket {
     /**
      * 打开连接，阻塞指定时间
      *
-     * @param seconds 阻塞时间
+     * @param seconds 阻塞时间  建议大于 1秒
      * @return 打开状态
      */
     boolean connectBlocking(int seconds);
