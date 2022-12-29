@@ -218,10 +218,8 @@ export default {
         },
         styleSelectedText: true,
         enableAutoFormatJson: true,
-        // defaultJsonIndentation: 2,
+        defaultJsonIndentation: 2,
       },
-      enableAutoFormatJson: true,
-      defaultJsonIndentation: 2,
     };
   },
 
@@ -263,39 +261,38 @@ export default {
       immediate: true,
     },
     code(n) {
-      if (n !== this.editorValue) {
-        setTimeout(() => {
-          // 延迟赋值,避免行号错乱
-          try {
-            this.editorValue = this.formatStrInJson(n);
-          } catch (error) {
-            this.editorValue = n;
-            // 啥也不做
-          }
-        }, 100);
+      // 延迟赋值,避免行号错乱
+      if (this.cmOptions.mode == "json") {
+        try {
+          this.editorValue = this.formatStrInJson(n);
+        } catch (error) {
+          this.editorValue = n;
+          // 啥也不做
+        }
+      } else {
+        this.editorValue = n;
       }
+      setTimeout(() => {
+        this.$refs.myCm.codemirror.refresh();
+      }, 100);
     },
   },
   mounted() {
     this.codeMirrorHeight = this.showTool ? `calc( 100% - ${this.$refs.toolBar.offsetHeight + 10}px )` : "100%";
-  },
-  created() {
     try {
-      if (!this.editorValue) {
-        this.cmOptions.lint = false;
-        return;
-      }
-      if (this.cmOptions.mode == "json") {
-        if (!this.enableAutoFormatJson) {
-          return;
-        }
+      // if (!this.editorValue) {
+      //   this.cmOptions.lint = false;
+      //   return;
+      // }
+      if (this.cmOptions.mode == "json" && this.cmOptions.enableAutoFormatJson) {
         this.editorValue = this.formatStrInJson(this.editorValue);
       }
     } catch (e) {
-      // console.log("初始化codemirror出错：" + e);
+      console.log("初始化codemirror出错：" + e);
       // this.$message.error("初始化codemirror出错：" + e);
     }
   },
+  created() {},
   methods: {
     // 选择语言
     handleSelectMode(v) {
@@ -346,8 +343,8 @@ export default {
 
     // 格式化字符串为json格式字符串
     formatStrInJson(strValue) {
-      this.$emit("checkJson", strValue);
-      return JSON.stringify(JSON.parse(strValue), null, this.defaultJsonIndentation);
+      //this.$emit("checkJson", strValue);
+      return JSON.stringify(JSON.parse(strValue), null, this.cmOptions.defaultJsonIndentation);
     },
 
     // 过滤选项

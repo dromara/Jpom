@@ -18,7 +18,7 @@ export default {
   data() {
     return {
       logTimer: null,
-      logText: "loading...",
+      // logText: "loading...",
       line: 1,
     };
   },
