@@ -53,7 +53,9 @@ public class OutGivingNodeProject extends BaseNodeProject {
         Ing(1, "分发中"),
         Ok(2, "分发成功"),
         Fail(3, "分发失败"),
-        Cancel(4, "取消分发"),
+        Cancel(4, "系统取消分发"),
+        Prepare(5, "准备分发"),
+        ArtificialCancel(6, "手动取消分发"),
         ;
         private final int code;
         private final String desc;

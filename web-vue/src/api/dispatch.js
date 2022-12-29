@@ -200,6 +200,18 @@ export function editDispatchWhiteList(params) {
   });
 }
 
+/**
+ * 取消分发
+ * @param {*} id 分发 ID
+ */
+export function cancelOutgiving(data) {
+  return axios({
+    url: "/outgiving/cancel",
+    method: "post",
+    data,
+  });
+}
+
 export const afterOptList = [
   { title: "不做任何操作", value: 0 },
   { title: "并发执行", value: 1 },
@@ -217,11 +229,14 @@ export const dispatchStatusMap = {
   1: "分发中",
   2: "分发成功",
   3: "分发失败",
-  4: "取消分发",
+  4: "系统取消分发",
+  5: "准备分发",
+  6: "手动取消分发",
 };
 
 export const statusMap = {
   0: "未分发",
   1: "分发中",
   2: "分发结束",
+  3: "取消分发",
 };

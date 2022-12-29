@@ -45,7 +45,10 @@
       </template>
 
       <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="statusMap[text]">
-        <span>{{ statusMap[text] }}</span>
+        <a-tag v-if="text === 2" color="green">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 1 || text === 0" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 3" color="red">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else>{{ statusMap[text] || "未知" }}</a-tag>
       </a-tooltip>
 
       <a-tooltip slot="clearOld" slot-scope="text"> <a-switch size="small" checked-children="是" un-checked-children="否" disabled :checked="text" /></a-tooltip>
@@ -79,7 +82,9 @@
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleDispatch(record)">分发文件</a-button>
-          <a-button size="small" type="primary" v-if="list_expanded[record.id]" @click="handleReload(record)">刷新</a-button>
+          <template v-if="list_expanded[record.id]">
+            <a-button size="small" type="primary" @click="handleReload(record)">刷新</a-button>
+          </template>
           <template v-else>
             <a-button size="small" type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
             <a-button size="small" type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
@@ -90,6 +95,13 @@
               <a-icon type="down" />
             </a>
             <a-menu slot="overlay">
+              <a-menu-item v-if="list_expanded[record.id]">
+                <a-button size="small" type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
+                <a-button size="small" type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
+              </a-menu-item>
+              <a-menu-item>
+                <a-button type="danger" size="small" :disabled="record.status != 1" @click="handleCancel(record)">取消分发</a-button>
+              </a-menu-item>
               <a-menu-item>
                 <a-button type="danger" size="small" :disabled="list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
               </a-menu-item>
@@ -124,6 +136,12 @@
         <a-tooltip slot="projectName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
+        <template slot="outGivingStatus" slot-scope="text">
+          <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || "未知" }}</a-tag>
+          <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{ dispatchStatusMap[text] || "未知" }}</a-tag>
+          <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{ dispatchStatusMap[text] || "未知" }}</a-tag>
+          <a-tag v-else>{{ dispatchStatusMap[text] || "未知" }}</a-tag>
+        </template>
         <a-tooltip slot="outGivingResultMsg" slot-scope="text, item" placement="topLeft" :title="readJsonStrField(item.outGivingResult, 'msg')">
           <span>{{ readJsonStrField(item.outGivingResult, "code") }}-{{ readJsonStrField(item.outGivingResult, "msg") || item.outGivingResult }}</span>
         </a-tooltip>
@@ -141,7 +159,7 @@
           <a-tooltip v-if="item.errorMsg" :title="item.errorMsg">
             <span>{{ item.errorMsg }}</span>
           </a-tooltip>
-          <a-switch v-else :checked="text" size="small" checked-children="运行中" un-checked-children="未运行" />
+          <a-switch v-else :checked="text" :disabled="true" size="small" checked-children="运行中" un-checked-children="未运行" />
         </template>
 
         <template slot="child-operation" slot-scope="text, record">
@@ -228,7 +246,7 @@
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item prop="intervalTime">
+        <a-form-model-item prop="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
           <template slot="label">
             间隔时间
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -403,7 +421,7 @@
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item prop="intervalTime">
+        <a-form-model-item prop="intervalTime" v-if="temp.afterOpt === 2 || temp.afterOpt === 3">
           <template slot="label">
             间隔时间
             <a-tooltip v-show="temp.type !== 'edit'">
@@ -621,6 +639,8 @@ import {
   statusMap,
   unbindOutgiving,
   uploadDispatchFile,
+  dispatchStatusMap,
+  cancelOutgiving,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeList } from "@/api/node-project";
@@ -643,6 +663,7 @@ export default {
       statusMap: statusMap,
       javaModes: javaModes,
       noFileModes: noFileModes,
+      dispatchStatusMap,
       PROJECT_DSL_DEFATUL,
       list: [],
       accessList: [],
@@ -693,7 +714,7 @@ export default {
         { title: "项目名称", dataIndex: "projectName", ellipsis: true, scopedSlots: { customRender: "projectName" } },
         { title: "项目状态", dataIndex: "projectStatus", width: 120, ellipsis: true, scopedSlots: { customRender: "projectStatus" } },
         { title: "项目进程", dataIndex: "projectPid", width: "120px", ellipsis: true, scopedSlots: { customRender: "projectPid" } },
-        { title: "分发状态", dataIndex: "outGivingStatus", width: "120px" },
+        { title: "分发状态", dataIndex: "outGivingStatus", width: "120px", scopedSlots: { customRender: "outGivingStatus" } },
         { title: "分发结果", dataIndex: "outGivingResultMsg", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsg" } },
         { title: "分发状态消息", dataIndex: "outGivingResultMsgData", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsgData" } },
         { title: "分发耗时", dataIndex: "outGivingResultTime", width: "120px", scopedSlots: { customRender: "outGivingResultTime" } },
@@ -1380,6 +1401,27 @@ export default {
         },
       });
       window.open(newpage.href, "_blank");
+    },
+    // 取消
+    handleCancel(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的取消当前分发吗？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          cancelOutgiving({ id: record.id }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.loadData();
+              this.silenceLoadData();
+            }
+          });
+        },
+      });
     },
   },
 };

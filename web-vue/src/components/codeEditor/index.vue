@@ -225,7 +225,7 @@ export default {
 
   computed: {
     myCodemirror() {
-      return this.$refs.mirror.codemirror;
+      return this.$refs.myCm.codemirror;
     },
     inCode: {
       get() {
@@ -262,7 +262,7 @@ export default {
     },
     code(n) {
       // 延迟赋值,避免行号错乱
-      if (this.cmOptions.mode == "json") {
+      if (this.cmOptions.mode === "json") {
         try {
           this.editorValue = this.formatStrInJson(n);
         } catch (error) {
@@ -273,7 +273,7 @@ export default {
         this.editorValue = n;
       }
       setTimeout(() => {
-        this.$refs.myCm.codemirror.refresh();
+        this.myCodemirror.refresh();
       }, 100);
     },
   },
@@ -284,7 +284,7 @@ export default {
       //   this.cmOptions.lint = false;
       //   return;
       // }
-      if (this.cmOptions.mode == "json" && this.cmOptions.enableAutoFormatJson) {
+      if (this.cmOptions.mode === "json" && this.cmOptions.enableAutoFormatJson) {
         this.editorValue = this.formatStrInJson(this.editorValue);
       }
     } catch (e) {
@@ -307,7 +307,7 @@ export default {
 
     // 黏贴事件处理函数
     OnPaste() {
-      if (this.cmOptions.mode == "json") {
+      if (this.cmOptions.mode === "json") {
         try {
           this.editorValue = this.formatStrInJson(this.editorValue);
         } catch (e) {
@@ -327,14 +327,14 @@ export default {
       const keyCombination = event.ctrlKey || event.altKey || event.metaKey;
       //满足条件触发代码提示
       if (!keyCombination && keyCode > 64 && keyCode < 123) {
-        this.$refs.myCm.codemirror.showHint({ completeSingle: false });
+        this.myCodemirror.showHint({ completeSingle: false });
       }
     },
 
     // 按下鼠标时事件处理函数
     onMouseDown() {
       //取消代码提示
-      this.$refs.myCm.codemirror.closeHint();
+      this.myCodemirror.closeHint();
     },
 
     onCmCodeChanges(cm) {
@@ -353,7 +353,7 @@ export default {
     },
     scrollToBottom() {
       this.$nextTick(() => {
-        this.$refs.myCm.codemirror.execCommand("goDocEnd");
+        this.myCodemirror.execCommand("goDocEnd");
       });
     },
   },

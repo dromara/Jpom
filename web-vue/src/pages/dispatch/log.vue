@@ -37,7 +37,11 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="status" slot-scope="text">
-        {{ dispatchStatusMap[text] || "未知" }}
+        <!-- {{ dispatchStatusMap[text] || "未知" }} -->
+        <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{ dispatchStatusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{ dispatchStatusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else>{{ dispatchStatusMap[text] || "未知" }}</a-tag>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" size="small" @click="handleDetail(record)">详情</a-button>
