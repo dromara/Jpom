@@ -111,45 +111,49 @@ public class OutGivingProjectController extends BaseServerController {
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
         Objects.requireNonNull(outGivingServerItem, "没有数据");
         List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
-        List<JSONObject> collect = outGivingNodeProjectList.stream().map(outGivingNodeProject -> {
-            NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject.getNodeId());
-            JSONObject jsonObject = new JSONObject();
+        List<JSONObject> collect = outGivingNodeProjectList
+            .stream()
+            .map(outGivingNodeProject -> {
+                NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject.getNodeId());
+                JSONObject jsonObject = new JSONObject();
 
-            jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
-            jsonObject.put("projectId", outGivingNodeProject.getProjectId());
-            jsonObject.put("nodeName", nodeModel.getName());
-            jsonObject.put("id", BaseNodeModel.fullId(workspaceId, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId()));
-            // set projectStatus property
-            //NodeModel node = nodeService.getItem(outGivingNodeProject.getNodeId());
-            // Project Status: data.pid > 0 means running
-            JSONObject projectStatus = JsonMessage.toJson(200, "success");
-            if (nodeModel.isOpenStatus()) {
-                JSONObject projectInfo = null;
-                try {
-                    projectInfo = projectInfoCacheService.getItem(nodeModel, outGivingNodeProject.getProjectId());
-                    projectStatus = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId()).toJson();
-                } catch (Exception e) {
-                    jsonObject.put("errorMsg", "error " + e.getMessage());
+                jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
+                jsonObject.put("projectId", outGivingNodeProject.getProjectId());
+                jsonObject.put("nodeName", nodeModel.getName());
+                jsonObject.put("id", BaseNodeModel.fullId(workspaceId, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId()));
+                // set projectStatus property
+                //NodeModel node = nodeService.getItem(outGivingNodeProject.getNodeId());
+                // Project Status: data.pid > 0 means running
+                JSONObject projectStatus = null;
+                if (nodeModel.isOpenStatus()) {
+                    JSONObject projectInfo = null;
+                    try {
+                        projectInfo = projectInfoCacheService.getItem(nodeModel, outGivingNodeProject.getProjectId());
+                        JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId());
+                        projectStatus = jsonMessage.getData(JSONObject.class);
+                    } catch (Exception e) {
+                        log.warn("获取节点项目状态异常", e);
+                        jsonObject.put("errorMsg", "error " + e.getMessage());
+                    }
+                    if (projectInfo != null) {
+                        jsonObject.put("projectName", projectInfo.getString("name"));
+                    }
+                } else {
+                    jsonObject.put("errorMsg", "节点未启用");
                 }
-                if (projectInfo != null) {
-                    jsonObject.put("projectName", projectInfo.getString("name"));
-                }
-            } else {
-                jsonObject.put("errorMsg", "节点未启用");
-            }
-            JSONObject data = projectStatus.getJSONObject("data");
-            Integer pId = Optional.ofNullable(data).map(jsonObject1 -> jsonObject1.getInteger("pId")).orElse(null);
+                Integer pId = Optional.ofNullable(projectStatus).map(jsonObject1 -> jsonObject1.getInteger("pId")).orElse(null);
 
-            jsonObject.put("projectStatus", pId != null && pId > 0);
-            jsonObject.put("projectPid", pId);
+                jsonObject.put("projectStatus", pId != null && pId > 0);
+                jsonObject.put("projectPid", pId);
 
-            // BaseEnum.getDescByCode(Status.class, getStatus())
+                // BaseEnum.getDescByCode(Status.class, getStatus())
 //            jsonObject.put("outGivingStatus", BaseEnum.getDescByCode(OutGivingNodeProject.Status.class, outGivingNodeProject.getStatus()));
-            jsonObject.put("outGivingStatus", outGivingNodeProject.getStatus());
-            jsonObject.put("outGivingResult", outGivingNodeProject.getResult());
-            jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());
-            return jsonObject;
-        }).collect(Collectors.toList());
+                jsonObject.put("outGivingStatus", outGivingNodeProject.getStatus());
+                jsonObject.put("outGivingResult", outGivingNodeProject.getResult());
+                jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
         return JsonMessage.success("", collect);
     }
 
