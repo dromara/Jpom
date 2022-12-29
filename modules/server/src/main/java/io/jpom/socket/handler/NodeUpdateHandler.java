@@ -78,6 +78,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
     private static final int CHECK_COUNT = 120;
 
+    /**
+     * 初始等待时间
+     */
+    private static final int INIT_WAIT = 10 * 1000;
+
     private final SystemParametersServer systemParametersServer;
     private final NodeService nodeService;
 
@@ -241,7 +246,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         callbackRestartMessage.setData(message.getMsg());
         this.sendMsg(callbackRestartMessage, session);
         // 先等待一会，太快可能还没重启
-        ThreadUtil.sleep(5000L);
+        ThreadUtil.sleep(INIT_WAIT);
         int retryCount = 0;
         try {
             while (retryCount <= CHECK_COUNT) {
@@ -253,7 +258,8 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                         this.sendMsg(callbackRestartMessage.setData("重启完成"), session);
                         return true;
                     }
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    log.debug("{} 节点连接失败 {}", id, e.getMessage());
                 }
             }
             this.sendMsg(callbackRestartMessage.setData("重连失败"), session);
@@ -282,7 +288,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         WebSocketMessageModel restartMessage = new WebSocketMessageModel("restart", id);
         client.send(restartMessage.toString());
         // 先等待一会，太快可能还没重启
-        ThreadUtil.sleep(10000L);
+        ThreadUtil.sleep(INIT_WAIT);
         // 重启后尝试访问插件端，能够连接说明重启完毕
         //WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", id);
         int retryCount = 0;
@@ -293,7 +299,8 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                         this.sendMsg(restartMessage.setData("重启完成"), session);
                         return true;
                     }
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    log.debug("{} 节点连接失败 {}", id, e.getMessage());
                 }
                 ThreadUtil.sleep(1000L);
                 ++retryCount;

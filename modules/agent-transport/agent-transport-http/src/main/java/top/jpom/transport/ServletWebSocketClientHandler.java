@@ -92,7 +92,8 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
         Assert.isNull(this.manager, "The connection has been established, do not repeat the connection");
         this.manager = new WebSocketConnectionManager(CLIENT, this, this.uriTemplate);
         this.manager.start();
-        return this.blocking(1);
+        // 时间不能太短，需要大于 1 秒
+        return this.blocking(5);
     }
 
     @Override
