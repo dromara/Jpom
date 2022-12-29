@@ -45,6 +45,7 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ServerWhitelist;
 import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
+import io.jpom.outgiving.OutGivingItemRun;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -67,6 +68,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -96,10 +98,10 @@ public class OutGivingProjectController extends BaseServerController {
         this.serverConfig = serverConfig;
     }
 
-    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getProjectStatus() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectStatus).toString();
-    }
+//    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public JsonMessage<Object> getProjectStatus() {
+//        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectStatus);
+//    }
 
 
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -142,7 +144,8 @@ public class OutGivingProjectController extends BaseServerController {
             jsonObject.put("projectPid", pId);
 
             // BaseEnum.getDescByCode(Status.class, getStatus())
-            jsonObject.put("outGivingStatus", BaseEnum.getDescByCode(OutGivingNodeProject.Status.class, outGivingNodeProject.getStatus()));
+//            jsonObject.put("outGivingStatus", BaseEnum.getDescByCode(OutGivingNodeProject.Status.class, outGivingNodeProject.getStatus()));
+            jsonObject.put("outGivingStatus", outGivingNodeProject.getStatus());
             jsonObject.put("outGivingResult", outGivingNodeProject.getResult());
             jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());
             return jsonObject;
@@ -183,7 +186,7 @@ public class OutGivingProjectController extends BaseServerController {
     @Feature(method = MethodFeature.UPLOAD)
     public JsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip,
                                       String secondaryDirectory, String stripComponents) throws IOException {
-        OutGivingModel outGivingModel = this.check(id);
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         //
@@ -211,13 +214,13 @@ public class OutGivingProjectController extends BaseServerController {
         return JsonMessage.success("分发成功");
     }
 
-    private OutGivingModel check(String id) {
+    private OutGivingModel check(String id, BiConsumer<OutGivingModel.Status, OutGivingModel> consumer) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, getRequest());
         Assert.notNull(outGivingModel, "上传失败,没有找到对应的分发项目");
         // 检查状态
         Integer statusCode = outGivingModel.getStatus();
         OutGivingModel.Status status = BaseEnum.getEnum(OutGivingModel.Status.class, statusCode, OutGivingModel.Status.NO);
-        Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束");
+        consumer.accept(status, outGivingModel);
         return outGivingModel;
     }
 
@@ -233,7 +236,7 @@ public class OutGivingProjectController extends BaseServerController {
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
     public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip,
                                               String secondaryDirectory, String stripComponents) {
-        OutGivingModel outGivingModel = this.check(id);
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         // 验证远程 地址
@@ -264,4 +267,14 @@ public class OutGivingProjectController extends BaseServerController {
             return new JsonMessage<>(500, "下载远程文件失败:" + e.getMessage());
         }
     }
+
+    @RequestMapping(value = "cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> cancel(String id) {
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"));
+        OutGivingRun.cancel(outGivingModel.getId());
+        //
+        OutGivingItemRun.cancel(outGivingModel.getId());
+        return JsonMessage.success("取消成功");
+    }
+
 }
