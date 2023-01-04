@@ -61,7 +61,10 @@ import java.util.function.BiFunction;
 @Slf4j
 public class SshService extends BaseWorkspaceService<SshModel> implements Logger {
 
-    public SshService() {
+    private final JpomApplication jpomApplication;
+
+    public SshService(JpomApplication jpomApplication) {
+        this.jpomApplication = jpomApplication;
         JSch.setLogger(this);
     }
 
@@ -226,14 +229,14 @@ public class SshService extends BaseWorkspaceService<SshModel> implements Logger
         return this.exec(sshModel, (s, session) -> {
             // 执行命令
             String exec, error;
-            try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
-                exec = JschUtil.exec(session, s, charset, stream);
-                error = new String(stream.toByteArray(), charset);
+            try (ByteArrayOutputStream errStream = new ByteArrayOutputStream()) {
+                exec = JschUtil.exec(session, s, charset, errStream);
+                error = new String(errStream.toByteArray(), charset);
                 if (StrUtil.isNotEmpty(error)) {
                     error = " 错误：" + error;
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
+                throw Lombok.sneakyThrow(e);
             }
             return exec + error;
         }, command);
@@ -255,7 +258,7 @@ public class SshService extends BaseWorkspaceService<SshModel> implements Logger
         Sftp sftp = null;
         try {
             String tempId = SecureUtil.sha1(sshModel.getId() + ArrayUtil.join(command, StrUtil.COMMA));
-            File buildSsh = FileUtil.file(JpomApplication.getInstance().getTempPath(), "ssh_temp", tempId + ".sh");
+            File buildSsh = FileUtil.file(jpomApplication.getTempPath(), "ssh_temp", tempId + ".sh");
             InputStream sshExecTemplateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template.sh");
             String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
 

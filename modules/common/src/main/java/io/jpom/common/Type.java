@@ -22,6 +22,8 @@
  */
 package io.jpom.common;
 
+import lombok.Getter;
+
 import java.util.function.Function;
 
 /**
@@ -30,36 +32,29 @@ import java.util.function.Function;
  * @author jiangzeyin
  * @since 2019/4/17
  */
+@Getter
 public enum Type {
-	/**
-	 * 插件端
-	 */
-	Agent("io.jpom.JpomAgentApplication", RemoteVersion::getAgentUrl, "KeepBx-Agent-System-JpomAgentApplication"),
-	/**
-	 * 中心服务端
-	 */
-	Server("io.jpom.JpomServerApplication", RemoteVersion::getServerUrl, "KeepBx-System-JpomServerApplication"),
-	;
+    /**
+     * 插件端
+     */
+    Agent("io.jpom.JpomAgentApplication", RemoteVersion::getAgentUrl, "JPOM_AGENT_APPLICATION"),
+    /**
+     * 中心服务端
+     */
+    Server("io.jpom.JpomServerApplication", RemoteVersion::getServerUrl, "JPOM_SERVER_APPLICATION"),
+    ;
 
-	private final Function<RemoteVersion, String> remoteUrl;
-	private final String applicationClass;
-	private final String tag;
+    private final Function<RemoteVersion, String> remoteUrl;
+    private final String applicationClass;
+    private final String tag;
 
-	Type(String applicationClass, Function<RemoteVersion, String> remoteUrl, String tag) {
-		this.applicationClass = applicationClass;
-		this.remoteUrl = remoteUrl;
-		this.tag = tag;
-	}
+    Type(String applicationClass, Function<RemoteVersion, String> remoteUrl, String tag) {
+        this.applicationClass = applicationClass;
+        this.remoteUrl = remoteUrl;
+        this.tag = tag;
+    }
 
-	public String getRemoteUrl(RemoteVersion remoteVersion) {
-		return remoteUrl.apply(remoteVersion);
-	}
-
-	public String getApplicationClass() {
-		return applicationClass;
-	}
-
-	public String getTag() {
-		return tag;
-	}
+    public String getRemoteUrl(RemoteVersion remoteVersion) {
+        return remoteUrl.apply(remoteVersion);
+    }
 }
