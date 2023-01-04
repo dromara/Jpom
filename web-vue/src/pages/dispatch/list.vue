@@ -171,7 +171,15 @@
       </a-table>
     </a-table>
     <!-- 添加/编辑关联项目 -->
-    <a-modal v-model="linkDispatchVisible" width="800px" :title="temp.type === 'edit' ? '编辑关联项目' : '添加关联项目'" @ok="handleLinkDispatchOk" :maskClosable="false" @cancel="clearDispatchList">
+    <a-modal
+      destroyOnClose
+      v-model="linkDispatchVisible"
+      width="800px"
+      :title="temp.type === 'edit' ? '编辑关联项目' : '添加关联项目'"
+      @ok="handleLinkDispatchOk"
+      :maskClosable="false"
+      @cancel="clearDispatchList"
+    >
       <a-form-model ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item prop="id">
           <template slot="label">
@@ -290,7 +298,7 @@
       </a-form-model>
     </a-modal>
     <!-- 创建/编辑分发项目 -->
-    <a-modal v-model="editDispatchVisible" width="60vw" :title="temp.type === 'edit' ? '编辑分发项目' : '创建分发项目'" @ok="handleEditDispatchOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editDispatchVisible" width="60vw" :title="temp.type === 'edit' ? '编辑分发项目' : '创建分发项目'" @ok="handleEditDispatchOk" :maskClosable="false">
       <a-form-model ref="editDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item prop="id">
           <template slot="label">
@@ -554,7 +562,7 @@
       </a-form-model>
     </a-modal>
     <!-- 分发项目 -->
-    <a-modal v-model="dispatchVisible" width="600px" :title="'分发项目-' + temp.name" @ok="handleDispatchOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="dispatchVisible" width="600px" :title="'分发项目-' + temp.name" @ok="handleDispatchOk" :maskClosable="false">
       <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="方式" prop="type">
           <a-radio-group v-model="temp.type" name="type">

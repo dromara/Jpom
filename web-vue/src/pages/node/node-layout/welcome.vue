@@ -60,7 +60,7 @@
       </template>
     </a-table>
     <!-- 历史监控 -->
-    <a-modal v-model="monitorVisible" width="75%" title="历史监控图表" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="monitorVisible" width="75%" title="历史监控图表" :footer="null" :maskClosable="false">
       <node-top v-if="monitorVisible" :nodeId="this.node.id"></node-top>
     </a-modal>
   </div>

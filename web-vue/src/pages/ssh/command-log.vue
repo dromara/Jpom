@@ -38,7 +38,7 @@
       </template>
     </a-table>
     <!-- 构建日志 -->
-    <a-modal :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
       <command-log v-if="logVisible" :temp="temp" />
     </a-modal>
   </div>

@@ -65,7 +65,7 @@
       </template>
     </a-table>
     <!-- 创建备份信息区 -->
-    <a-modal v-model="createBackupVisible" title="创建备份信息" @ok="handleCreateBackupOk" width="600px" :maskClosable="false">
+    <a-modal destroyOnClose v-model="createBackupVisible" title="创建备份信息" @ok="handleCreateBackupOk" width="600px" :maskClosable="false">
       <a-form-model ref="editBackupForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="备份类型" prop="backupType">
           <a-radio-group v-model="temp.backupType" name="backupType">
@@ -79,7 +79,7 @@
       </a-form-model>
     </a-modal>
     <!-- 上传 SQL 备份文件 -->
-    <a-modal v-model="uploadSqlFileVisible" width="300px" title="上传 SQL 文件" :footer="null" :maskClosable="true">
+    <a-modal destroyOnClose v-model="uploadSqlFileVisible" width="300px" title="上传 SQL 文件" :footer="null" :maskClosable="true">
       <a-upload :file-list="uploadFileList" :remove="handleSqlRemove" :before-upload="beforeSqlUpload" accept=".sql">
         <a-button><a-icon type="upload" />选择 SQL 文件</a-button>
       </a-upload>

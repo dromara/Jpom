@@ -64,7 +64,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="仓库名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="仓库名称" />
@@ -170,7 +170,7 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <a-modal v-model="giteeImportVisible" title="通过私人令牌导入仓库" width="80%" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="giteeImportVisible" title="通过私人令牌导入仓库" width="80%" :footer="null" :maskClosable="false">
       <a-form-model :label-col="{ span: 4 }" :rules="giteeImportFormRules" :model="giteeImportForm" ref="giteeImportForm" :wrapper-col="{ span: 20 }">
         <a-form-model-item prop="token">
           <template slot="label">

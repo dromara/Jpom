@@ -57,7 +57,7 @@
         </a-space>
       </template>
     </a-table>
-    <a-modal v-model="buildVisible" width="60vw" title="构建容器" @ok="handleBuildOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="buildVisible" width="60vw" title="构建容器" @ok="handleBuildOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="基础镜像" prop="image">
           <a-input v-model="temp.image" disabled placeholder="" />
@@ -297,7 +297,7 @@
       </a-form-model>
     </a-modal>
     <!-- 日志 -->
-    <a-modal :width="'80vw'" v-model="logVisible" title="pull日志" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="pull日志" :footer="null" :maskClosable="false">
       <pull-image-Log v-if="logVisible" :id="temp.id" />
     </a-modal>
   </div>

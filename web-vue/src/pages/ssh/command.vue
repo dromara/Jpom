@@ -52,7 +52,7 @@
       </template>
     </a-table>
     <!-- 编辑命令 -->
-    <a-modal v-model="editCommandVisible" width="80vw" title="编辑 命令" @ok="handleEditCommandOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editCommandVisible" width="80vw" title="编辑 命令" @ok="handleEditCommandOk" :maskClosable="false">
       <a-form-model ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="命令名称" prop="name">
           <a-input v-model="temp.name" :maxLength="100" placeholder="命令名称" />
@@ -113,7 +113,7 @@
       </a-form-model>
     </a-modal>
 
-    <a-modal v-model="executeCommandVisible" width="600px" title="执行 命令" @ok="handleExecuteCommandOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="executeCommandVisible" width="600px" title="执行 命令" @ok="handleExecuteCommandOk" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="命令名称" prop="name">
           <a-input v-model="temp.name" :disabled="true" placeholder="命令名称" />
@@ -142,11 +142,11 @@
       </a-form-model>
     </a-modal>
     <!-- 执行日志 -->
-    <a-modal :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
       <command-log v-if="logVisible" :temp="temp" />
     </a-modal>
     <!-- 同步到其他工作空间 -->
-    <a-modal v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+    <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
       <a-alert message="温馨提示" type="warning">
         <template slot="description">
           <ul>
@@ -167,7 +167,7 @@
     </a-modal>
 
     <!-- 触发器 -->
-    <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
       <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template slot="tabBarExtraContent">

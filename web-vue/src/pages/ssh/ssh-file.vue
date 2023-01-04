@@ -76,7 +76,7 @@
         </template>
       </a-table>
       <!-- 上传文件 -->
-      <a-modal @cancel="closeUploadFile" v-model="uploadFileVisible" width="300px" title="上传文件" :footer="null" :maskClosable="true">
+      <a-modal destroyOnClose @cancel="closeUploadFile" v-model="uploadFileVisible" width="300px" title="上传文件" :footer="null" :maskClosable="true">
         <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="`${uploadFileZip ? ZIP_ACCEPT : ''}`" :multiple="!uploadFileZip">
           <a-button>
             <a-icon type="upload" />
@@ -101,16 +101,16 @@
         </a-space>
       </a-modal>
       <!-- Terminal -->
-      <a-modal v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
+      <a-modal destroyOnClose v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
         <terminal v-if="terminalVisible" :sshId="ssh.id" :nodeId="ssh.nodeModel.id" :tail="temp.path + temp.parentDir" />
       </a-modal>
-      <a-modal v-model="editFileVisible" width="80vw" title="编辑文件" cancelText="关闭" :maskClosable="true" @ok="updateFileData">
+      <a-modal destroyOnClose v-model="editFileVisible" width="80vw" title="编辑文件" cancelText="关闭" :maskClosable="true" @ok="updateFileData">
         <div style="height: 60vh">
           <code-editor showTool v-model="temp.fileContent" :fileSuffix="temp.name"></code-editor>
         </div>
       </a-modal>
       <!-- 从命名文件/文件夹 -->
-      <a-modal v-model="renameFileFolderVisible" width="300px" :title="`重命名`" :footer="null" :maskClosable="true">
+      <a-modal destroyOnClose v-model="renameFileFolderVisible" width="300px" :title="`重命名`" :footer="null" :maskClosable="true">
         <a-space direction="vertical" style="width: 100%">
           <a-input v-model="temp.fileFolderName" placeholder="输入新名称" />
 

@@ -210,7 +210,7 @@
       </a-table>
     </a-table>
     <!-- 日志 -->
-    <a-modal :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose :width="'80vw'" v-model="logVisible" title="执行日志" :footer="null" :maskClosable="false">
       <log-view v-if="logVisible" :id="this.id" :containerId="temp.id" />
     </a-modal>
     <!-- Terminal -->
@@ -230,7 +230,7 @@
       <terminal v-if="terminalVisible" :id="this.id" :containerId="temp.id" />
     </a-modal>
     <!-- 编辑容器配置 -->
-    <a-modal v-model="editVisible" title="配置容器" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editVisible" title="配置容器" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :model="temp" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }">
         <a-form-model-item prop="blkioWeight">
           <template slot="label">

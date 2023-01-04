@@ -45,7 +45,7 @@
       </template>
     </log-view>
     <!-- 日志备份 -->
-    <a-modal v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
       <div ref="model-filter" class="filter">
         <a-space direction="vertical">
           <a-tag>控制台日志只是启动项目输出的日志信息,并非项目日志。可以关闭控制台日志备份功能：<b>log.autoBackConsoleCron: none</b></a-tag>

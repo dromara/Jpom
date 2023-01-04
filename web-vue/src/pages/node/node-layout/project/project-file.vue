@@ -102,7 +102,7 @@
           </template>
         </a-table>
         <!-- 批量上传文件 -->
-        <a-modal v-model="uploadFileVisible" width="300px" title="上传项目文件" :footer="null" :maskClosable="false">
+        <a-modal destroyOnClose v-model="uploadFileVisible" width="300px" title="上传项目文件" :footer="null" :maskClosable="false">
           <a-upload
             :file-list="uploadFileList"
             :remove="
@@ -124,7 +124,7 @@
           </a-space>
         </a-modal>
         <!-- 上传压缩文件 -->
-        <a-modal v-model="uploadZipFileVisible" width="400px" title="上传压缩文件" :footer="null" :maskClosable="false">
+        <a-modal destroyOnClose v-model="uploadZipFileVisible" width="400px" title="上传压缩文件" :footer="null" :maskClosable="false">
           <a-space direction="vertical" style="display: block" size="large">
             <a-upload
               :file-list="uploadFileList"
@@ -151,7 +151,7 @@
           </a-space>
         </a-modal>
 
-        <a-modal v-model="editFileVisible" width="80vw" :title="`编辑文件 ${filename}`" :maskClosable="true">
+        <a-modal destroyOnClose v-model="editFileVisible" width="80vw" :title="`编辑文件 ${filename}`" :maskClosable="true">
           <div style="height: 60vh">
             <code-editor showTool v-model="fileContent" :fileSuffix="filename"></code-editor>
           </div>
@@ -174,7 +174,7 @@
           </template>
         </a-modal>
         <!--远程下载  -->
-        <a-modal v-model="uploadRemoteFileVisible" title="远程下载文件" @ok="handleRemoteUpload" @cancel="openRemoteUpload" :maskClosable="false">
+        <a-modal destroyOnClose v-model="uploadRemoteFileVisible" title="远程下载文件" @ok="handleRemoteUpload" @cancel="openRemoteUpload" :maskClosable="false">
           <a-form-model :model="remoteDownloadData" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules" ref="ruleForm">
             <a-form-model-item label="远程下载URL" prop="url">
               <a-input v-model="remoteDownloadData.url" placeholder="远程下载地址" />
@@ -188,7 +188,7 @@
           </a-form-model>
         </a-modal>
         <!-- 创建文件/文件夹 -->
-        <a-modal v-model="addFileFolderVisible" width="300px" :title="addFileOrFolderType === 1 ? '新增目录' : '新建文件'" :footer="null" :maskClosable="true">
+        <a-modal destroyOnClose v-model="addFileFolderVisible" width="300px" :title="addFileOrFolderType === 1 ? '新增目录' : '新建文件'" :footer="null" :maskClosable="true">
           <a-space direction="vertical" style="width: 100%">
             <span v-if="uploadPath">当前目录:{{ uploadPath }}</span>
             <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
@@ -201,7 +201,7 @@
           </a-space>
         </a-modal>
         <!-- 从命名文件/文件夹 -->
-        <a-modal v-model="renameFileFolderVisible" width="300px" :title="`重命名`" :footer="null" :maskClosable="true">
+        <a-modal destroyOnClose v-model="renameFileFolderVisible" width="300px" :title="`重命名`" :footer="null" :maskClosable="true">
           <a-space direction="vertical" style="width: 100%">
             <a-input v-model="fileFolderName" placeholder="输入新名称" />
 
@@ -214,6 +214,7 @@
     </a-layout>
     <!-- 查看备份列表 -->
     <a-modal
+      destroyOnClose
       v-model="backupListVisible"
       width="80vw"
       height="80vh"

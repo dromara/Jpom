@@ -55,7 +55,7 @@
       </a-tooltip>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editUserVisible" width="60vw" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editUserVisible" width="60vw" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
       <a-form-model ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="登录名称" prop="id">
           <a-input @change="checkTipUserName" :maxLength="50" v-model="temp.id" placeholder="登录名称,账号,创建之后不能修改" :disabled="createOption == false" />

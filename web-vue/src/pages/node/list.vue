@@ -165,7 +165,7 @@
     </a-table>
 
     <!-- 编辑区 -->
-    <a-modal v-model="editNodeVisible" width="50%" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editNodeVisible" width="50%" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
       <a-form-model ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
         <!-- <a-form-model-item label="节点 ID" prop="id">
           <a-input v-model="temp.id" placeholder="创建之后不能修改" />
@@ -290,7 +290,7 @@
       <terminal v-if="terminalVisible" :sshId="temp.sshId" :nodeId="temp.id" />
     </a-modal>
     <!-- 解锁节点 -->
-    <a-modal v-model="unlockNode" title="解锁节点" @ok="handleUnLockNodeOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="unlockNode" title="解锁节点" @ok="handleUnLockNodeOk" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="绑定工作空间" prop="workspaceId">
           <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
@@ -301,6 +301,7 @@
     </a-modal>
     <!-- 快速安装插件端 -->
     <a-modal
+      destroyOnClose
       v-model="fastInstallNode"
       width="80%"
       title="快速安装插件端"
@@ -316,7 +317,7 @@
       <fastInstall v-if="fastInstallNode"></fastInstall>
     </a-modal>
     <!-- 同步到其他工作空间 -->
-    <a-modal v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+    <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
       <a-alert message="温馨提示" type="warning">
         <template slot="description">
           <ul>

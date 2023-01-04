@@ -31,7 +31,7 @@
       </template>
     </a-table>
     <!-- 详情区 -->
-    <a-modal v-model="detailVisible" width="600px" title="详情信息" :footer="null">
+    <a-modal destroyOnClose v-model="detailVisible" width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <a-list-item slot="renderItem" slot-scope="item">
           <a-list-item-meta :description="item.description">

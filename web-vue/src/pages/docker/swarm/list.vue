@@ -40,7 +40,7 @@
       </template>
     </a-table>
     <!-- 创建集群区 -->
-    <a-modal v-model="editVisible" title="编辑 Docker 集群" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editVisible" title="编辑 Docker 集群" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="集群名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />
@@ -68,10 +68,10 @@
 </template>
 
 <script>
-import {CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY} from "@/utils/const";
-import {dockerSwarmList, editDockerSwarm, unbindSwarm} from "@/api/docker-swarm";
-import {parseTime} from "@/utils/time";
-import {mapGetters} from "vuex";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { dockerSwarmList, editDockerSwarm, unbindSwarm } from "@/api/docker-swarm";
+import { parseTime } from "@/utils/time";
+import { mapGetters } from "vuex";
 import Console from "./console";
 
 export default {

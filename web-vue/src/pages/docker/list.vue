@@ -82,7 +82,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editVisible" title="编辑  Docker" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editVisible" title="编辑  Docker" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <!-- <a-form-model-item v-if="temp.id" label="容器ID" prop="id">
           <a-input v-model="temp.id" disabled readOnly />
@@ -190,7 +190,7 @@
       </a-form-model>
     </a-modal>
     <!-- 创建集群 -->
-    <a-modal v-model="initSwarmVisible" title="创建 Docker 集群" @ok="handleSwarm" :maskClosable="false">
+    <a-modal destroyOnClose v-model="initSwarmVisible" title="创建 Docker 集群" @ok="handleSwarm" :maskClosable="false">
       <a-form-model ref="initForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="集群名称" prop="name">
           <a-input v-model="temp.name" placeholder="容器名称" />
@@ -200,7 +200,7 @@
       </a-form-model>
     </a-modal>
     <!-- 加入集群 -->
-    <a-modal v-model="joinSwarmVisible" title="加入 Docker 集群" @ok="handleSwarmJoin" :maskClosable="false">
+    <a-modal destroyOnClose v-model="joinSwarmVisible" title="加入 Docker 集群" @ok="handleSwarmJoin" :maskClosable="false">
       <a-form-model ref="joinForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="选择集群" prop="swarmId">
           <a-select

@@ -56,7 +56,7 @@
     </a-button-group>
 
     <!-- 修改密码区 -->
-    <a-modal v-model="updateNameVisible" :width="'60vw'" title="安全管理" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="updateNameVisible" :width="'60vw'" title="安全管理" :footer="null" :maskClosable="false">
       <a-tabs v-model="temp.tabActiveKey" @change="tabChange">
         <a-tab-pane :key="1" tab="修改密码">
           <a-form-model ref="pwdForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
@@ -164,7 +164,7 @@
       </a-tabs>
     </a-modal>
     <!-- 修改用户资料区 -->
-    <a-modal v-model="updateUserVisible" title="修改用户资料" @ok="handleUpdateUserOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="updateUserVisible" title="修改用户资料" @ok="handleUpdateUserOk" :maskClosable="false">
       <a-form-model ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
         <a-form-model-item label="临时token" prop="token">
           <a-input disabled v-model="temp.token" placeholder="Token">
@@ -233,7 +233,7 @@
       </a-form-model>
     </a-modal>
     <!-- 个性配置区 -->
-    <a-modal v-model="customizeVisible" title="个性配置区" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="customizeVisible" title="个性配置区" :footer="null" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-alert banner>
           <template slot="message"> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
@@ -269,7 +269,7 @@
       </a-form-model>
     </a-modal>
     <!-- mfa 提示 -->
-    <a-modal v-model="bindMfaTip" title="安全提醒" :footer="null" :maskClosable="false" :closable="false" :keyboard="false">
+    <a-modal destroyOnClose v-model="bindMfaTip" title="安全提醒" :footer="null" :maskClosable="false" :closable="false" :keyboard="false">
       <a-space direction="vertical">
         <a-alert message="安全提醒" description="为了您的账号安全系统要求必须开启两步验证来确保账号的安全性" type="error" :closable="false" />
         <a-row align="middle" type="flex" justify="center">

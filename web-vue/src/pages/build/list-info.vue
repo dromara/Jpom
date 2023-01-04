@@ -139,7 +139,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editBuildVisible" title="编辑构建" @ok="handleEditBuildOk" width="60vw" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editBuildVisible" title="编辑构建" @ok="handleEditBuildOk" width="60vw" :maskClosable="false">
       <a-form-model ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="名称" prop="name">
           <a-row>
@@ -698,7 +698,7 @@
       </a-form-model>
     </a-modal>
     <!-- 触发器 -->
-    <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
       <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template slot="tabBarExtraContent">
@@ -825,11 +825,11 @@
       </a-form-model>
     </a-modal>
     <!-- 构建日志 -->
-    <a-modal width="80vw" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
+    <a-modal destroyOnClose width="80vw" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
       <build-log v-if="buildLogVisible" :temp="temp" />
     </a-modal>
     <!-- 构建确认 -->
-    <a-modal width="40vw" v-model="buildConfirmVisible" title="构建确认弹窗" @ok="handleStartBuild" :maskClosable="false">
+    <a-modal destroyOnClose width="40vw" v-model="buildConfirmVisible" title="构建确认弹窗" @ok="handleStartBuild" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="名称" prop="name">
           <a-input readOnly disabled v-model="temp.name" />
@@ -897,7 +897,7 @@
       </a-form-model>
     </a-modal>
     <!-- 查看命令示例 -->
-    <a-modal width="50vw" v-model="viewScriptTemplVisible" title="构建命令示例" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose width="50vw" v-model="viewScriptTemplVisible" title="构建命令示例" :footer="null" :maskClosable="false">
       <a-collapse
         :activeKey="
           buildScipts.map((item, index) => {

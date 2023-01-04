@@ -106,7 +106,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditSshOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditSshOk" :maskClosable="false">
       <a-form-model ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="SSH 名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="SSH 名称" />
@@ -207,6 +207,7 @@
     </a-modal>
     <!-- 安装节点 -->
     <a-modal
+      destroyOnClose
       v-model="nodeVisible"
       width="80%"
       title="安装插件端"
@@ -227,6 +228,7 @@
     </a-drawer>
     <!-- Terminal -->
     <a-modal
+      destroyOnClose
       :dialogStyle="{
         maxWidth: '100vw',
         top: this.terminalFullscreen ? 0 : false,
@@ -243,12 +245,11 @@
       :title="temp.name"
       :footer="null"
       :maskClosable="false"
-      :destroyOnClose="true"
     >
       <terminal v-if="terminalVisible" :sshId="temp.id" />
     </a-modal>
     <!-- 操作日志 -->
-    <a-modal v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
       <!-- <div ref="filter" class="filter"></div> -->
       <!-- 数据表格 -->
       <a-table
@@ -303,7 +304,7 @@
       </a-table>
     </a-modal>
     <!-- 同步到其他工作空间 -->
-    <a-modal v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+    <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
       <a-alert message="温馨提示" type="warning">
         <template slot="description">
           <ul>

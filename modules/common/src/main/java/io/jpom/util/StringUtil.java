@@ -88,7 +88,7 @@ public class StringUtil {
         } else {
             newWhitePath = FileUtil.getAbsolutePath(file.getParentFile());
         }
-        String itemAbsPath = FileUtil.getAbsolutePath(startPath);
+        String itemAbsPath = FileUtil.getAbsolutePath(FileUtil.file(startPath));
         itemAbsPath = FileUtil.normalize(itemAbsPath);
         newWhitePath = FileUtil.normalize(newWhitePath);
         String path = StrUtil.removePrefix(newWhitePath, itemAbsPath);

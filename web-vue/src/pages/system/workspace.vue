@@ -36,7 +36,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editVisible" title="编辑工作空间" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editVisible" title="编辑工作空间" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="工作空间名称" />
@@ -48,7 +48,7 @@
       </a-form-model>
     </a-modal>
     <!-- 环境变量 -->
-    <a-modal v-model="envVarListVisible" :title="`${temp.name} 工作空间环境变量`" width="80vw" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="envVarListVisible" :title="`${temp.name} 工作空间环境变量`" width="80vw" :footer="null" :maskClosable="false">
       <workspaceEnv ref="workspaceEnv" :workspaceId="temp.id" />
     </a-modal>
   </div>
