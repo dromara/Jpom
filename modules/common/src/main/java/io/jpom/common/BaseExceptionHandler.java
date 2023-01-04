@@ -80,7 +80,11 @@ public abstract class BaseExceptionHandler {
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ValidateException.class})
     @ResponseBody
     public JsonMessage<String> paramExceptionHandler(HttpServletRequest request, Exception e) {
-        log.warn("controller {} {}", request.getRequestURI(), e.getMessage());
+        if (log.isDebugEnabled()) {
+            log.debug("controller  {}", request.getRequestURI(), e);
+        } else {
+            log.warn("controller {} {}", request.getRequestURI(), e.getMessage());
+        }
         return new JsonMessage<>(405, e.getMessage());
     }
 

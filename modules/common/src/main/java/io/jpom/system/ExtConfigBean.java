@@ -118,11 +118,19 @@ public class ExtConfigBean {
      */
     public static File getConfigResourceFile(String name) {
         FileUtils.checkSlip(name);
+        File resourceDir = getConfigResourceDir();
+        return Opt.ofBlankAble(resourceDir).map(file -> FileUtil.file(file, name)).orElse(null);
+    }
+
+    /**
+     * 获取对应的配置资源目录 对象
+     */
+    public static File getConfigResourceDir() {
         String property = SpringUtil.getApplicationContext().getEnvironment().getProperty(ConfigFileApplicationListener.CONFIG_LOCATION_PROPERTY);
         return Opt.ofBlankAble(property).map(s -> {
             File file = FileUtil.file(s);
             return FileUtil.getParent(file, 1);
-        }).map(file -> FileUtil.file(file, name)).orElse(null);
+        }).orElse(null);
     }
 
     /**
