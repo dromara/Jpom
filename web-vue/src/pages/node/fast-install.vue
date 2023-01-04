@@ -152,12 +152,12 @@ export default {
           this.fastInstallNode = true;
           this.fastInstallInfo = res.data;
           this.tempVue = Vue;
-          this.fastInstallInfo.host = `${location.protocol}//${location.host}${res.data.url}?token=${res.data.token}&workspaceId=${this.getWorkspaceId}`;
+          this.fastInstallInfo.host = `${location.protocol}//${location.host}${res.data.url}?token=${res.data.token}\\&workspaceId=${this.getWorkspaceId}`;
           this.fastInstallInfo.shUrls = res.data.shUrls.map((item) => {
-            item.allText = `${item.url} ${this.fastInstallInfo.key} '${this.fastInstallInfo.host}'`;
+            item.allText = `${item.url} ${this.fastInstallInfo.key} \\'${this.fastInstallInfo.host}\\'`;
             return item;
           });
-          this.fastInstallInfo.bindCommand = `sh ./bin/Agent.sh restart -s ${this.fastInstallInfo.key} '${this.fastInstallInfo.host}' && tail -f ./logs/agent.log`;
+          this.fastInstallInfo.bindCommand = `sh ./bin/Agent.sh restart -s ${this.fastInstallInfo.key} \\'${this.fastInstallInfo.host}\\' && tail -f ./logs/agent.log`;
           // 轮询 结果
           this.pullFastInstallResultTime = setInterval(() => {
             pullFastInstallResult().then((res) => {

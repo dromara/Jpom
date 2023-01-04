@@ -29,12 +29,12 @@ import com.alibaba.fastjson2.JSONObject;
 import java.io.File;
 
 /**
- * layui
+ * 目录树
  *
  * @author bwcx_jzy
  * @since 2019/7/21
  */
-public class LayuiTreeUtil {
+public class DirTreeUtil {
 
     /**
      * 获取树的json
@@ -61,8 +61,6 @@ public class LayuiTreeUtil {
             if (file1.isDirectory()) {
                 JSONArray children = readTree(file1, logFile);
                 jsonObject.put("children", children);
-                //
-                jsonObject.put("spread", true);
             }
             jsonArray.add(jsonObject);
         }

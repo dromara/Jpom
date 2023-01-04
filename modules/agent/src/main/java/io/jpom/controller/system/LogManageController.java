@@ -31,7 +31,7 @@ import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.socket.AgentFileTailWatcher;
 import io.jpom.system.LogbackConfig;
-import io.jpom.util.LayuiTreeUtil;
+import io.jpom.util.DirTreeUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,7 +55,7 @@ public class LogManageController extends BaseAgentController {
 
     @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<JSONArray> logData() {
-        JSONArray data = LayuiTreeUtil.getTreeData(LogbackConfig.getPath());
+        JSONArray data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
         return JsonMessage.success("", data);
     }
 
