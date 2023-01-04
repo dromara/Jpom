@@ -168,7 +168,13 @@ public class SystemExtConfigController extends BaseServerController {
         allList.addAll(collect);
         allList.addAll(listDir.values());
         // 过滤主配置文件
-        allList = allList.stream().filter(node -> !StrUtil.equals(node.getId(), Const.FILE_NAME)).collect(Collectors.toList());
+        allList = allList.stream().peek(node -> {
+            Map<String, Object> extra = node.getExtra();
+            if (extra == null) {
+                return;
+            }
+            extra.put("disabled", StrUtil.equals(node.getId(), Const.FILE_NAME));
+        }).collect(Collectors.toList());
         Tree<String> stringTree = TreeUtil.buildSingle(allList, StrUtil.SLASH);
         stringTree.setName(StrUtil.SLASH);
 
