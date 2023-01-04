@@ -25,7 +25,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editVisible" width="60%" title="编辑日志阅读" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editVisible" width="60%" title="编辑日志阅读" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="日志名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="日志项目名称" />

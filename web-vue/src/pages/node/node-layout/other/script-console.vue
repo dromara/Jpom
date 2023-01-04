@@ -16,7 +16,7 @@
     </div>
 
     <!--远程下载  -->
-    <a-modal v-model="editArgs" title="添加运行参数" @ok="startExecution" @cancel="this.editArgs = false" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editArgs" title="添加运行参数" @ok="startExecution" @cancel="this.editArgs = false" :maskClosable="false">
       <a-form-model :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 24 }" ref="ruleForm">
         <a-form-model-item label="执行参数" prop="args">
           <a-input v-model="temp.args" placeholder="执行参数,没有参数可以不填写" />

@@ -72,7 +72,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
+    <a-modal destroyOnClose v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
       <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-alert v-if="this.temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
         <a-form-model-item label="Script 名称" prop="name">
@@ -118,11 +118,11 @@
       <script-console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :defArgs="temp.defArgs" :id="temp.id" :scriptId="temp.scriptId" />
     </a-drawer>
     <!-- 脚本日志 -->
-    <a-modal :title="drawerTitle" width="85vw" v-model="drawerLogVisible" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose :title="drawerTitle" width="85vw" v-model="drawerLogVisible" :footer="null" :maskClosable="false">
       <script-log v-if="drawerLogVisible" :scriptId="temp.scriptId" :nodeId="temp.nodeId" />
     </a-modal>
     <!-- 触发器 -->
-    <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
       <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template slot="tabBarExtraContent">

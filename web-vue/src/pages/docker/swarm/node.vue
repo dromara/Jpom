@@ -103,7 +103,7 @@
       </template>
     </a-table>
     <!-- 编辑节点 -->
-    <a-modal v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="角色" prop="role">
           <a-radio-group name="role" v-model="temp.role" :disabled="temp.leader">

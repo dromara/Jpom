@@ -27,7 +27,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editCertVisible" title="编辑 Cert" @ok="handleEditCertOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editCertVisible" title="编辑 Cert" @ok="handleEditCertOk" :maskClosable="false">
       <a-form-model ref="editCertForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="证书 ID" prop="id">
           <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="证书 ID" />
@@ -48,7 +48,7 @@
       </a-form-model>
     </a-modal>
     <!-- 模板 -->
-    <a-modal v-model="templateVisible" title="Cert 配置模板" :footer="null" :maskClosable="true">
+    <a-modal destroyOnClose v-model="templateVisible" title="Cert 配置模板" :footer="null" :maskClosable="true">
       <pre class="config">
       ssl	on;
       listen	443 ssl;

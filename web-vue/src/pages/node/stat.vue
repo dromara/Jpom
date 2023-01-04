@@ -215,7 +215,7 @@
       </a-card>
     </div>
     <!-- 历史监控 -->
-    <a-modal v-model="monitorVisible" width="75%" :title="`${this.temp.name}历史监控图表`" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="monitorVisible" width="75%" :title="`${this.temp.name}历史监控图表`" :footer="null" :maskClosable="false">
       <node-top v-if="monitorVisible" :type="this.temp.type" :nodeId="this.temp.id"></node-top>
     </a-modal>
   </div>

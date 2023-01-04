@@ -147,7 +147,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editProjectVisible" width="60vw" title="编辑项目" @ok="handleEditProjectOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editProjectVisible" width="60vw" title="编辑项目" @ok="handleEditProjectOk" :maskClosable="false">
       <a-form-model ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="项目 ID" prop="id">
           <a-input :maxLength="50" v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
@@ -374,7 +374,7 @@
       <replica v-if="drawerReplicaVisible" :node="node" :project="temp" />
     </a-drawer> -->
     <!-- 批量操作状态 -->
-    <a-modal v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
+    <a-modal destroyOnClose v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="selectedRows">
         <a-list-item slot="renderItem" slot-scope="item">
           <a-list-item-meta :description="item.email">

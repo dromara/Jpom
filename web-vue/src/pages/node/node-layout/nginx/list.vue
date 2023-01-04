@@ -94,7 +94,7 @@
         </template>
       </a-table>
       <!-- 编辑区 -->
-      <a-modal v-model="editNginxVisible" title="编辑 Nginx 配置文件" @ok="handleEditNginxOk" :maskClosable="false" width="70vw">
+      <a-modal destroyOnClose v-model="editNginxVisible" title="编辑 Nginx 配置文件" @ok="handleEditNginxOk" :maskClosable="false" width="70vw">
         <a-form-model ref="editNginxForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
           <a-form-model-item label="白名单路径" prop="whitePath">
             <a-select v-model="temp.whitePath" placeholder="请选择白名单路径">
@@ -111,7 +111,7 @@
         </a-form-model>
       </a-modal>
       <!-- 编辑 Nginx 服务名 -->
-      <a-modal v-model="editNginxNameVisible" title="编辑 Nginx 服务名称" @ok="handleEditNginxNameOk" :maskClosable="false" width="500px">
+      <a-modal destroyOnClose v-model="editNginxNameVisible" title="编辑 Nginx 服务名称" @ok="handleEditNginxNameOk" :maskClosable="false" width="500px">
         <a-form-model ref="editNginxNameForm" :rules="rules" :model="nginxData" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-form-model-item label="服务名称" prop="name">
             <a-input v-model="nginxData.name" placeholder="请输入 Nginx 服务名称" />

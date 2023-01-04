@@ -101,7 +101,7 @@
       </template>
     </a-table>
     <!-- 构建日志 -->
-    <a-modal :width="'80vw'" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
+    <a-modal destroyOnClose :width="'80vw'" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
       <build-log v-if="buildLogVisible" :temp="temp" />
     </a-modal>
   </div>

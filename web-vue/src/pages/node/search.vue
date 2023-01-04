@@ -125,7 +125,7 @@
       <file-read v-if="drawerReadFileVisible" :nodeId="temp.nodeId" :readFilePath="temp.readFilePath" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
     <!-- 批量操作状态 -->
-    <a-modal v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
+    <a-modal destroyOnClose v-model="batchVisible" :title="batchTitle" :footer="null" @cancel="batchClose">
       <a-list bordered :data-source="selectedRowKeys">
         <a-list-item slot="renderItem" slot-scope="item">
           <a-list-item-meta :description="item.email">
@@ -138,7 +138,7 @@
       </a-list>
     </a-modal>
     <!-- 触发器 -->
-    <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
       <a-form-model ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template slot="tabBarExtraContent">

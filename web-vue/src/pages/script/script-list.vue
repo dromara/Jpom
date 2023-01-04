@@ -77,7 +77,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
+    <a-modal destroyOnClose v-model="editScriptVisible" title="编辑 Script" @ok="handleEditScriptOk" :maskClosable="false" width="80vw">
       <a-form-model ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
         <a-form-model-item v-if="temp.id" label="ScriptId" prop="id">
           <a-input v-model="temp.id" disabled readOnly />
@@ -129,7 +129,7 @@
       <script-console v-if="drawerConsoleVisible" :defArgs="temp.defArgs" :id="temp.id" />
     </a-drawer>
     <!-- 同步到其他工作空间 -->
-    <a-modal v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+    <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
       <a-alert message="温馨提示" type="warning">
         <template slot="description">
           <ul>
@@ -149,7 +149,7 @@
       </a-form-model>
     </a-modal>
     <!-- 触发器 -->
-    <a-modal v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="triggerVisible" title="触发器" width="50%" :footer="null" :maskClosable="false">
       <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template slot="tabBarExtraContent">

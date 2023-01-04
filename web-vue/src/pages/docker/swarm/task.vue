@@ -68,7 +68,7 @@
       </template>
     </a-table>
     <!-- 编辑节点 -->
-    <a-modal v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
+    <a-modal destroyOnClose v-model="editVisible" title="编辑节点" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="角色" prop="role">
           <a-radio-group name="role" v-model="temp.role">
@@ -86,7 +86,7 @@
       </a-form-model>
     </a-modal>
     <!-- 查看日志 -->
-    <a-modal v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
+    <a-modal destroyOnClose v-model="logVisible" title="查看日志" width="80vw" :footer="null" :maskClosable="false">
       <pull-log v-if="logVisible" :id="this.id" :dataId="this.temp.id" type="taks" />
     </a-modal>
   </div>
