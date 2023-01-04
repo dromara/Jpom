@@ -38,7 +38,7 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.socket.ServiceFileTailWatcher;
 import io.jpom.system.LogbackConfig;
-import io.jpom.util.LayuiTreeUtil;
+import io.jpom.util.DirTreeUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,7 +67,7 @@ public class LogManageController extends BaseServerController {
         if (StrUtil.isNotEmpty(nodeId)) {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemLog);
         }
-        JSONArray data = LayuiTreeUtil.getTreeData(LogbackConfig.getPath());
+        JSONArray data = DirTreeUtil.getTreeData(LogbackConfig.getPath());
         return JsonMessage.success("", data);
     }
 
