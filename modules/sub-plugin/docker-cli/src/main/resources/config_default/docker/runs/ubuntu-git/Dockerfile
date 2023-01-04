@@ -29,6 +29,6 @@ RUN sed -i.bak 's/archive.ubuntu.com/mirror.nju.edu.cn/' /etc/apt/sources.list \
     && apt-get update \
     && apt-get install -y curl wget
 
-RUN apt-get install git
+RUN apt-get install -y git
 
 ENTRYPOINT ["/bin/bash", "/tmp/build.sh"]
