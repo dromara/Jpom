@@ -24,7 +24,7 @@
 
 
 # 版本
-jpom_version=2.10.6
+jpom_version=2.10.7
 
 #Mirror_Host=download.fastgit.org
 #Mirror_Host=hub.fastgit.xyz
