@@ -39,6 +39,7 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.util.StringUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -69,9 +70,56 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SystemExtConfigController extends BaseServerController {
 
+    /**
+     * 获取外部配置文件的 数据
+     *
+     * @param parentMap 父级 map
+     * @return map
+     */
+    private Map<String, TreeNode<String>> listDir(Map<String, TreeNode<String>> parentMap) {
+        File configResourceDir = ExtConfigBean.getConfigResourceDir();
+        if (configResourceDir == null) {
+            return MapUtil.newHashMap();
+        }
+        List<File> files = FileUtil.loopFiles(configResourceDir);
+        return files.stream()
+            .filter(FileUtil::isFile)
+            .map(file -> {
+                String path = StringUtil.delStartPath(file, configResourceDir.getAbsolutePath(), true);
+                return this.buildItemTreeNode(path);
+            })
+            .peek(node -> {
+                String id = node.getId();
+                this.buildParent(parentMap, id);
+                //
+                Map<String, Object> extra = node.getExtra();
+                extra.put("defaultConfig", false);
+            }).collect(Collectors.toMap(TreeNode::getId, node -> node));
+    }
+
+    /**
+     * 插件单个 node 对象
+     *
+     * @param path 路径
+     * @return tree node
+     */
+    private TreeNode<String> buildItemTreeNode(String path) {
+
+        List<String> list = StrUtil.splitTrim(path, StrUtil.SLASH);
+        int size = list.size();
+        String parentId = size > 1 ? CollUtil.join(CollUtil.sub(list, 0, size - 1), StrUtil.SLASH) : StrUtil.SLASH;
+
+        return new TreeNode<>(path, parentId, CollUtil.getLast(list), 0).setExtra(MapUtil.of("isLeaf", true));
+    }
+
     @GetMapping(value = "list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public JsonMessage<Tree<String>> list() throws Exception {
+        Map<String, TreeNode<String>> parentMap = new LinkedHashMap<>(10);
+        // root 节点
+        parentMap.put(StrUtil.SLASH, new TreeNode<>(StrUtil.SLASH, null, "根路径", 0));
+        Map<String, TreeNode<String>> listDir = this.listDir(parentMap);
+        //
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath*:/config_default/**");
         List<TreeNode<String>> collect = Arrays.stream(resources)
@@ -91,38 +139,36 @@ public class SystemExtConfigController extends BaseServerController {
             .map(resource -> {
                 try {
                     String path = resource.getURL().getPath();
-                    path = StrUtil.subAfter(path, "/config_default/", false);
-                    List<String> list = StrUtil.splitTrim(path, StrUtil.SLASH);
-                    int size = list.size();
-                    String parentId = size > 1 ? CollUtil.join(CollUtil.sub(list, 0, size - 1), StrUtil.SLASH) : StrUtil.SLASH;
-
-                    return new TreeNode<>(path, parentId, CollUtil.getLast(list), 0).setExtra(MapUtil.of("isLeaf", true));
+                    if (StrUtil.endWith(path, StrUtil.SLASH)) {
+                        // 目录
+                        return null;
+                    }
+                    String itemPath = StrUtil.subAfter(path, "/config_default/", false);
+                    //log.debug("测试：{} {}", path, itemPath);
+                    return this.buildItemTreeNode(itemPath);
                 } catch (IOException e) {
                     throw Lombok.sneakyThrow(e);
                 }
             })
-            // 过滤主配置文件
-            .filter(node -> !StrUtil.equals(node.getId(), Const.FILE_NAME))
+            .filter(Objects::nonNull)
             .peek(node -> {
-                boolean configResource = ExtConfigBean.existConfigResource(node.getId());
-                if (!configResource) {
-                    node.setName(StrUtil.format("{} [默认]", node.getName()));
-                }
+                String id = node.getId();
+                this.buildParent(parentMap, id);
+                //
+                node.setName(StrUtil.format("{} [默认]", node.getName()));
                 Map<String, Object> extra = node.getExtra();
-                extra.put("defaultConfig", !configResource);
+                extra.put("defaultConfig", true);
             })
+            // 过滤 dir 已经存在的
+            .filter(node -> !listDir.containsKey(node.getId()))
             .collect(Collectors.toList());
 
-        Map<String, TreeNode<String>> parentMap = new LinkedHashMap<>(10);
-        // root 节点
-        parentMap.put(StrUtil.SLASH, new TreeNode<>(StrUtil.SLASH, null, "根路径", 0));
-        for (TreeNode<String> treeNode : collect) {
-            String id = treeNode.getId();
-            this.buildParent(parentMap, id);
-        }
         List<TreeNode<String>> allList = new ArrayList<>();
         allList.addAll(parentMap.values());
         allList.addAll(collect);
+        allList.addAll(listDir.values());
+        // 过滤主配置文件
+        allList = allList.stream().filter(node -> !StrUtil.equals(node.getId(), Const.FILE_NAME)).collect(Collectors.toList());
         Tree<String> stringTree = TreeUtil.buildSingle(allList, StrUtil.SLASH);
         stringTree.setName(StrUtil.SLASH);
 
