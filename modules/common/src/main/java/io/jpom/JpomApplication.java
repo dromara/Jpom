@@ -25,6 +25,7 @@ package io.jpom;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -246,6 +247,9 @@ public class JpomApplication implements DisposableBean {
 
     @Override
     public void destroy() throws Exception {
-        log.info("Jpom {} disposable", getAppType());
+        Type appType = getAppType();
+        log.debug(" Jpom {} shutdown Global ThreadPool", appType);
+        GlobalThreadPool.shutdown(true);
+        log.info("Jpom {} disposable", appType);
     }
 }
