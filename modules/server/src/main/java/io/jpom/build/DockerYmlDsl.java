@@ -24,10 +24,12 @@ package io.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.*;
 import cn.hutool.setting.yaml.YamlUtil;
 import io.jpom.model.BaseJsonModel;
+import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.util.Assert;
@@ -42,7 +44,7 @@ import java.util.Set;
 /**
  * docker 构建 配置
  * <p>
- * https://www.jianshu.com/p/54cfa5721d5f
+ * <a href="https://www.jianshu.com/p/54cfa5721d5f">https://www.jianshu.com/p/54cfa5721d5f</a>
  *
  * @author bwcx_jzy
  * @since 2022/1/25
@@ -88,7 +90,8 @@ public class DockerYmlDsl extends BaseJsonModel {
     private Map<String, String> env;
 
     public void check() {
-        Assert.hasText(runsOn, "请填写runsOn。目前仅支持 ubuntu-latest.更多支持敬请期待!");
+        Assert.hasText(runsOn, "请填写runsOn。");
+        Validator.validateMatchRegex(StringUtil.GENERAL_STR, runsOn, "runsOn 镜像名称不合法");
         Assert.state(CollUtil.isNotEmpty(steps), "请填写 steps");
         stepsCheck();
     }

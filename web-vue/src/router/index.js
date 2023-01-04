@@ -179,9 +179,9 @@ const management = [
     component: () => import("../pages/system/config"),
   },
   {
-    path: "/system/build-config",
-    name: "build-config",
-    component: () => import("../pages/system/build-config"),
+    path: "/system/ext-config",
+    name: "ext-config",
+    component: () => import("../pages/system/ext-config"),
   },
   // 数据库备份
   {

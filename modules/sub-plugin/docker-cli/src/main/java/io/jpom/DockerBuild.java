@@ -26,7 +26,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.text.StrFormatter;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -58,11 +57,13 @@ public class DockerBuild implements AutoCloseable {
     private final Map<String, Object> parameter;
     private final DockerClient dockerClient;
     private final Map<String, String> env;
+    private final IDockerConfigPlugin plugin;
 
-    public DockerBuild(Map<String, Object> parameter) {
+    public DockerBuild(Map<String, Object> parameter, IDockerConfigPlugin plugin) {
         this.parameter = parameter;
         this.dockerClient = DockerUtil.get(parameter);
         this.env = (Map<String, String>) parameter.get("env");
+        this.plugin = plugin;
     }
 
     public void build() {
@@ -339,7 +340,7 @@ public class DockerBuild implements AutoCloseable {
             HashSet<String> tags = new HashSet<>();
             tags.add(image);
             try {
-                File file = DockerUtil.getResourceToFile(String.format(DockerUtil.RUNS_FOLDER + "/%s/" + DockerUtil.DOCKER_FILE, runsOn), tempDir);
+                File file = plugin.getResourceToFile(String.format("runs/%s/" + DockerUtil.DOCKER_FILE, runsOn), tempDir);
                 if (file == null) {
                     throw new IllegalArgumentException("当前还不支持：" + runsOn);
                 }
@@ -445,12 +446,12 @@ public class DockerBuild implements AutoCloseable {
                 .withEntrypoint("/bin/bash", "/tmp/install.sh").exec();
             String containerId = createContainerResponse.getId();
             // 将脚本 复制到容器
-            String pluginInstallResource = DockerUtil.getResourceToFilePath("uses/" + pluginName + "/install.sh", tempDir);
+            File pluginInstallResource = plugin.getResourceToFile("uses/" + pluginName + "/install.sh", tempDir);
             if (pluginInstallResource == null) {
-                throw new IllegalArgumentException("当前还不支持：" + pluginName);
+                throw new IllegalArgumentException("当前不支持：" + pluginName);
             }
             dockerClient.copyArchiveToContainerCmd(containerId)
-                .withHostResource(pluginInstallResource)
+                .withHostResource(pluginInstallResource.getAbsolutePath())
                 .withRemotePath("/tmp/")
                 .exec();
             //

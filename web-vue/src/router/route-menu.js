@@ -36,7 +36,7 @@ const routeMenuMap = {
   logManage: "/system/log",
   update: "/system/upgrade",
   sysConfig: "/system/config",
-  buildConfig: "/system/build-config",
+  systemExtConfig: "/system/ext-config",
   projectSearch: "/node/search",
   // 数据库备份
   backup: "/system/backup",

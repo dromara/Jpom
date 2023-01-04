@@ -2,7 +2,8 @@
   <div class="code-mirror-div">
     <div class="tool-bar" ref="toolBar" v-if="showTool">
       <slot name="tool_before" />
-      <a-space>
+
+      <a-space class="tool-bar-end">
         <div>
           皮肤：
           <a-select v-model="cmOptions.theme" @select="handleSelectTheme" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
@@ -31,8 +32,6 @@
           <a-icon type="question-circle" theme="filled" />
         </a-tooltip>
       </a-space>
-
-      <slot name="tool_after" />
     </div>
     <div :style="{ height: codeMirrorHeight }">
       <codemirror
@@ -129,6 +128,7 @@ const fileSuffixToModeMap = {
   py: "python",
   php: "php",
   md: "markdown",
+  dockerfile: "dockerfile",
 };
 
 export default {
@@ -240,11 +240,24 @@ export default {
         if (!v) {
           return;
         }
-        const textArr = v.split(".");
-        const suffix = textArr.length ? textArr[textArr.length - 1] : v;
-        const newMode = fileSuffixToModeMap[suffix];
-        if (newMode) {
-          this.cmOptions = { ...this.cmOptions, mode: newMode };
+        if (v.indexOf(".") > -1) {
+          const textArr = v.split(".");
+          const suffix = textArr.length ? textArr[textArr.length - 1] : v;
+          const newMode = fileSuffixToModeMap[suffix];
+          if (newMode) {
+            this.cmOptions = { ...this.cmOptions, mode: newMode };
+          }
+        } else {
+          const v2 = v.toLowerCase();
+          for (let key in fileSuffixToModeMap) {
+            if (v2.endsWith(key)) {
+              const newMode = fileSuffixToModeMap[key];
+              if (newMode) {
+                this.cmOptions = { ...this.cmOptions, mode: newMode };
+              }
+              break;
+            }
+          }
         }
       },
       deep: false,
@@ -377,12 +390,19 @@ export default {
 .tool-bar {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
   margin: 5px 5px;
   padding-bottom: 5px;
   border-bottom: 1px solid #d9d9d9;
   /* 20px 0 0; */
 }
+
+/* .tool-bar-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+} */
 .CodeMirror {
   height: 100%;
   border: 1px solid #ccc;
