@@ -30,7 +30,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
 import com.jcraft.jsch.ChannelShell;
@@ -45,6 +44,7 @@ import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.util.SocketSessionUtil;
+import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
@@ -112,13 +112,9 @@ public class SshHandler extends BaseTerminalHandler {
             return;
         }
         String payload = message.getPayload();
-        JSONValidator from = null;
-        try {
-            from = JSONValidator.from(payload);
-        } catch (JSONException jsonException) {
-            log.warn("消息转换异常 {}", jsonException.getMessage());
-        }
-        if (from != null && from.getType() == JSONValidator.Type.Object) {
+
+        JSONValidator.Type type = StringUtil.validatorJson(payload);
+        if (type == JSONValidator.Type.Object) {
             JSONObject jsonObject = JSONObject.parseObject(payload);
             String data = jsonObject.getString("data");
             if (StrUtil.equals(data, "jpom-heart")) {
