@@ -67,7 +67,7 @@ public class RemoteVersion extends BaseJsonModel {
     /**
      * 主 url 用于拉取远程版本信息
      * <p>
-     * 1. https://jpom.top/docs/release-versions.json
+     * 1. <a href="https://jpom.top/docs/release-versions.json">https://jpom.top/docs/release-versions.json</a>
      */
     private static final String DEFAULT_URL = "https://jpom.top/docs/release-versions.json";
     private static String remoteVersionUrl;
