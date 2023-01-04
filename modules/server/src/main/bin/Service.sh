@@ -100,6 +100,7 @@ Environment="JAVA_HOME=$JAVA_HOME"
 Environment="PATH=$PATH"
 Environment="CLASSPATH=$CLASSPATH"
 Environment="JPOM_SERVICE=$serviceName"
+Environment="HOME=$HOME"
 ExecStart=/bin/bash $binAbsName start -s
 ExecStop=/bin/bash $binAbsName stop
 ExecReload=/bin/kill -s HUP \$MAINPID
