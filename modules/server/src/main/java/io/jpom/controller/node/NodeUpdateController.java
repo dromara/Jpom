@@ -24,7 +24,6 @@ package io.jpom.controller.node;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -42,6 +41,7 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.SystemParametersServer;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -174,7 +174,7 @@ public class NodeUpdateController extends BaseServerController {
 
     @GetMapping(value = "fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<JSONObject> fastInstall() {
-        InputStream inputStream = ResourceUtil.getStream("classpath:/config_default/fast-install-info.json");
+        InputStream inputStream = ExtConfigBean.getConfigResourceInputStream("/fast-install-info.json");
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         JSONObject jsonObject = new JSONObject();
         JpomManifest instance = JpomManifest.getInstance();

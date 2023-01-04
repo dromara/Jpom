@@ -24,11 +24,11 @@
 
 case "$(uname)" in
 Linux)
-	bin_abs_path=$(readlink -f $(dirname $0))
+	bin_abs_path=$(readlink -f "$(dirname "$0")")
 	;;
 *)
 	bin_abs_path=$(
-		cd $(dirname $0)
+		cd "$(dirname "$0")" || exit
 		pwd
 	)
 	;;
