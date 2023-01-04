@@ -78,6 +78,10 @@ function install() {
 		echo "service file already exists" 2>&2
 		exit 2
 	fi
+	if [ -f "$binAbsName" ]; then
+		echo "$binAbsName not found" 2>&2
+		exit 2
+	fi
 	if [ -z "$JAVA_HOME" ]; then
 		echo "JAVA_HOME variable not found" 2>&2
 		exit 2
