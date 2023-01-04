@@ -97,6 +97,35 @@ public class ExtConfigBean {
     }
 
     /**
+     * 判断是否存在对应的配置资源
+     *
+     * @param name 名称
+     * @return true 存在
+     */
+    public static boolean existConfigResource(String name) {
+        File configResourceFile = getConfigResourceFile(name);
+        if (configResourceFile == null) {
+            return false;
+        }
+        return FileUtil.exist(configResourceFile) && FileUtil.isFile(configResourceFile);
+    }
+
+    /**
+     * 获取对应的配置资源 file 对象
+     *
+     * @param name 名称
+     * @return true 存在
+     */
+    public static File getConfigResourceFile(String name) {
+        FileUtils.checkSlip(name);
+        String property = SpringUtil.getApplicationContext().getEnvironment().getProperty(ConfigFileApplicationListener.CONFIG_LOCATION_PROPERTY);
+        return Opt.ofBlankAble(property).map(s -> {
+            File file = FileUtil.file(s);
+            return FileUtil.getParent(file, 1);
+        }).map(file -> FileUtil.file(file, name)).orElse(null);
+    }
+
+    /**
      * 动态获取外部配置文件的 resource
      *
      * @return File
@@ -115,18 +144,27 @@ public class ExtConfigBean {
                 return null;
             })
             .orElseGet(() -> {
-                String normalize = FileUtil.normalize("/config_default/" + name);
-                ClassPathResource classPathResource = new ClassPathResource(normalize);
-                Assert.state(classPathResource.exists(), "配置文件不存在");
                 log.debug("外置配置不存在或者未配置：{},使用默认配置", name);
-                try {
-                    return classPathResource.getInputStream();
-                } catch (IOException e) {
-                    throw Lombok.sneakyThrow(e);
-                }
+                return getDefaultConfigResourceInputStream(name);
             });
         Assert.notNull(inputStream, "均未找到配置文件");
         return inputStream;
+    }
+
+    /**
+     * 动态获取外部配置文件的 resource
+     *
+     * @return File
+     */
+    public static InputStream getDefaultConfigResourceInputStream(String name) {
+        String normalize = FileUtil.normalize("/config_default/" + name);
+        ClassPathResource classPathResource = new ClassPathResource(normalize);
+        Assert.state(classPathResource.exists(), "配置文件不存在");
+        try {
+            return classPathResource.getInputStream();
+        } catch (IOException e) {
+            throw Lombok.sneakyThrow(e);
+        }
     }
 
 

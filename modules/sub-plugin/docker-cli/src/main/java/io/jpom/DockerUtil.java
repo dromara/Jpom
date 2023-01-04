@@ -25,8 +25,6 @@ package io.jpom;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.resource.Resource;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
@@ -42,14 +40,9 @@ import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
-import io.jpom.plugin.IPlugin;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.ResourceUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,10 +63,6 @@ public class DockerUtil {
 
     private static final Map<String, DockerClient> DOCKER_CLIENT_MAP = new ConcurrentHashMap<>();
 
-    /**
-     * 资源路径参考 {@link org.springframework.boot.context.config.ConfigDataEnvironment}
-     */
-    public static final String[] FILE_PATHS = new String[]{System.getProperty(IPlugin.DATE_PATH_KEY) + File.separator, "file:./config/", "file:./"};
 
     /**
      * 容器构建存放 dockerfile 目录
@@ -168,57 +157,57 @@ public class DockerUtil {
         return FileUtil.file(tempDir, name);
     }
 
-    /**
-     * 转化文件
-     *
-     * @param name    资源名称
-     * @param tempDir 临时路径
-     * @return file 无法读取或者写入返回 null
-     */
-    public static File getResourceToFile(String name, File tempDir) {
-        try {
-            for (String filePath : FILE_PATHS) {
-                File file;
-                try {
-                    file = ResourceUtils.getFile(filePath + name);
-                    if (!file.exists()) {
-                        log.debug("{} not found", filePath + name);
-                        continue;
-                    }
-                } catch (FileNotFoundException e) {
-                    log.debug("{} not found", filePath + name);
-                    continue;
-                }
-                log.debug("found file:{}", file.getAbsolutePath());
-                File tempFile = DockerUtil.createTemp(name, tempDir);
-                Files.copy(file.toPath(), tempFile.toPath());
-                return tempFile;
-            }
-            Resource resourceObj = ResourceUtil.getResourceObj(name);
-            InputStream stream = resourceObj.getStream();
-            File tempFile = DockerUtil.createTemp(name, tempDir);
-            FileUtil.writeFromStream(stream, tempFile);
-            return tempFile;
-        } catch (Exception e) {
-            log.error("获取 dockerfile 相关问题异常 {}", name, e);
-        }
-        return null;
-    }
+//    /**
+//     * 转化文件
+//     *
+//     * @param name    资源名称
+//     * @param tempDir 临时路径
+//     * @return file 无法读取或者写入返回 null
+//     */
+//    public static File getResourceToFile(String name, File tempDir) {
+//        try {
+//            for (String filePath : FILE_PATHS) {
+//                File file;
+//                try {
+//                    file = ResourceUtils.getFile(filePath + name);
+//                    if (!file.exists()) {
+//                        log.debug("{} not found", filePath + name);
+//                        continue;
+//                    }
+//                } catch (FileNotFoundException e) {
+//                    log.debug("{} not found", filePath + name);
+//                    continue;
+//                }
+//                log.debug("found file:{}", file.getAbsolutePath());
+//                File tempFile = DockerUtil.createTemp(name, tempDir);
+//                Files.copy(file.toPath(), tempFile.toPath());
+//                return tempFile;
+//            }
+//            Resource resourceObj = ResourceUtil.getResourceObj(name);
+//            InputStream stream = resourceObj.getStream();
+//            File tempFile = DockerUtil.createTemp(name, tempDir);
+//            FileUtil.writeFromStream(stream, tempFile);
+//            return tempFile;
+//        } catch (Exception e) {
+//            log.error("获取 dockerfile 相关问题异常 {}", name, e);
+//        }
+//        return null;
+//    }
 
-    /**
-     * 转化文件
-     *
-     * @param name    资源名称
-     * @param tempDir 临时路径
-     * @return path 无法读取或者写入返回 null
-     */
-    public static String getResourceToFilePath(String name, File tempDir) {
-        File resourceToFile = getResourceToFile(name, tempDir);
-        if (resourceToFile == null) {
-            return null;
-        }
-        return resourceToFile.getAbsolutePath();
-    }
+//    /**
+//     * 转化文件
+//     *
+//     * @param name    资源名称
+//     * @param tempDir 临时路径
+//     * @return path 无法读取或者写入返回 null
+//     */
+//    public static String getResourceToFilePath(String name, File tempDir) {
+//        File resourceToFile = getResourceToFile(name, tempDir);
+//        if (resourceToFile == null) {
+//            return null;
+//        }
+//        return resourceToFile.getAbsolutePath();
+//    }
 
     /**
      * 获取进度信息

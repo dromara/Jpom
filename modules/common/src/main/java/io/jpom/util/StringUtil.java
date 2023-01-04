@@ -28,7 +28,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
-import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONValidator;
@@ -39,45 +38,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * main 方法运行参数工具
  *
  * @author jiangzeyin
+ * @see SimpleCommandLinePropertySource
  * @since 2019/4/7
  */
 public class StringUtil {
 
     public static final String GENERAL_STR = "^[a-zA-Z0-9_\\-]+$";
-    public static final Pattern GENERAL = Pattern.compile(GENERAL_STR);
 
     /**
      * 支持的压缩包格式
      */
     public static final String[] PACKAGE_EXT = new String[]{"tar.bz2", "tar.gz", "tar", "bz2", "zip", "gz"};
-
-    /**
-     * 获取启动参数
-     *
-     * @param args 所有参数
-     * @param name 参数名
-     * @return 值
-     */
-    public static String getArgsValue(String[] args, String name) {
-        SimpleCommandLinePropertySource simpleCommandLinePropertySource = new SimpleCommandLinePropertySource(args);
-        return simpleCommandLinePropertySource.getProperty(name);
-//        if (args == null) {
-//            return null;
-//        }
-//        for (String item : args) {
-//            item = StrUtil.trim(item);
-//            if (item.startsWith("--" + name + "=")) {
-//                return item.substring(name.length() + 3);
-//            }
-//        }
-//        return null;
-    }
 
     /**
      * 转换 文件内容
@@ -125,16 +101,6 @@ public class StringUtil {
     }
 
     /**
-     * 获取jdk 中的tools jar文件路径
-     *
-     * @return file
-     */
-    public static File getToolsJar() {
-        File file = new File(SystemUtil.getJavaRuntimeInfo().getHomeDir());
-        return new File(file.getParentFile(), "lib/tools.jar");
-    }
-
-    /**
      * 指定时间的下一个刻度
      *
      * @return String
@@ -147,24 +113,6 @@ public class StringUtil {
         DateTime newTime = dateTime.offsetNew(DateField.SECOND, (int) (millis / 1000));
         return DateUtil.formatTime(newTime);
     }
-
-//	/**
-//	 * 删除 yml 文件内容注释
-//	 *
-//	 * @param content 配置内容
-//	 * @return 移除后的内容
-//	 */
-//	public static String deleteComment(String content) {
-//		List<String> split = StrUtil.split(content, StrUtil.LF);
-//		split = split.stream().filter(s -> {
-//			if (StrUtil.isEmpty(s)) {
-//				return false;
-//			}
-//			s = StrUtil.trim(s);
-//			return !StrUtil.startWith(s, "#");
-//		}).collect(Collectors.toList());
-//		return CollUtil.join(split, StrUtil.LF);
-//	}
 
     /**
      * json 字符串转 bean，兼容普通json和字符串包裹情况

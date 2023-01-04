@@ -88,9 +88,10 @@ public class InitDb implements DisposableBean, ILoadEvent {
     private boolean h2ConsoleEnabled;
 
     public InitDb(DbConfig dbConfig,
-                  DbExtConfig dbExtConfig) {
+                  DbExtConfig dbExtConfig, BackupInfoService backupInfoService) {
         this.dbConfig = dbConfig;
         this.dbExtConfig = dbExtConfig;
+        this.backupInfoService = backupInfoService;
     }
 
     public void addBeforeCallback(Runnable consumer) {
@@ -108,6 +109,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
 
     private final DbConfig dbConfig;
     private final DbExtConfig dbExtConfig;
+    private final BackupInfoService backupInfoService;
 
     private void init() {
         //
@@ -309,7 +311,6 @@ public class InitDb implements DisposableBean, ILoadEvent {
             // 备份数据库
             this.addCallback(() -> {
                 log.info("Start backing up the database");
-                BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
                 Future<BackupInfoModel> backupInfoModelFuture = backupInfoService.autoBackup();
                 try {
                     BackupInfoModel backupInfoModel = backupInfoModelFuture.get();
@@ -351,7 +352,6 @@ public class InitDb implements DisposableBean, ILoadEvent {
             Opt.ofNullable(environment.getProperty("transform-sql")).ifPresent(s -> dbConfig.transformSql(file));
             //
             log.info("Start importing data:{}", sqlPath);
-            BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
             boolean flag = backupInfoService.restoreWithSql(sqlPath);
             if (!flag) {
                 throw new JpomRuntimeException(StrUtil.format("Failed to import according to sql,{}", sqlPath));

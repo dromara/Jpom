@@ -23,7 +23,6 @@
 package io.jpom;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -49,11 +48,10 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -85,66 +83,58 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
                 return this.testLocal();
             case "testAuth":
                 return this.auth(parameter);
-            case "listRuns":
-                return listRuns();
-            case "updateRuns":
-                this.updateRuns(parameter);
-                return null;
-            case "deleteRuns":
-                this.deleteRuns(parameter);
-                return null;
             default:
                 break;
         }
         return null;
     }
 
-    private void deleteRuns(Map<String, Object> parameter) {
-        String dataPath = DockerUtil.FILE_PATHS[0];
-        String name = (String) parameter.get("name");
-        File dockerfile = FileUtil.file(dataPath, DockerUtil.RUNS_FOLDER, name);
-        if (!FileUtil.exist(dockerfile)) {
-//            return JsonMessage.getString(400, "文件不存在");
-            return;
-        }
-        FileUtil.del(dockerfile);
-    }
-
-    private void updateRuns(Map<String, Object> parameter) {
-        String name = (String) parameter.get("name");
-        String content = (String) parameter.get("content");
-        String dataPath = DockerUtil.FILE_PATHS[0];
-        File dockerfile = FileUtil.file(dataPath, DockerUtil.RUNS_FOLDER, name, DockerUtil.DOCKER_FILE);
-        FileUtil.writeString(content, dockerfile, StandardCharsets.UTF_8);
-    }
-
-    private Map<String, URI> listRuns() throws URISyntaxException {
-        // // runs/%s/Dockerfile
-        Map<String, URI> runs = new HashMap<>(5);
-        for (String filePath : DockerUtil.FILE_PATHS) {
-            //
-            File dockerFileDir = FileUtil.file(filePath, DockerUtil.RUNS_FOLDER);
-            if (!FileUtil.exist(dockerFileDir) || FileUtil.isFile(dockerFileDir)) {
-                continue;
-            }
-            File[] files = dockerFileDir.listFiles();
-            if (files == null) {
-                continue;
-            }
-            for (File file : files) {
-                File dockerFile = FileUtil.file(file, DockerUtil.DOCKER_FILE);
-                if (FileUtil.isFile(dockerFile)) {
-                    // 不存在才添加
-                    runs.putIfAbsent(file.getName(), dockerFile.toURI());
-                }
-            }
-        }
-        if (Objects.isNull(runs.get(DockerUtil.DEFAULT_RUNS))) {
-            URL resourceObj = ResourceUtil.getResource(DockerUtil.RUNS_FOLDER + "/" + DockerUtil.DEFAULT_RUNS + "/" + DockerUtil.DOCKER_FILE);
-            runs.put(DockerUtil.DEFAULT_RUNS, resourceObj.toURI());
-        }
-        return runs;
-    }
+//    private void deleteRuns(Map<String, Object> parameter) {
+//        String dataPath = DockerUtil.FILE_PATHS[0];
+//        String name = (String) parameter.get("name");
+//        File dockerfile = FileUtil.file(dataPath, DockerUtil.RUNS_FOLDER, name);
+//        if (!FileUtil.exist(dockerfile)) {
+////            return JsonMessage.getString(400, "文件不存在");
+//            return;
+//        }
+//        FileUtil.del(dockerfile);
+//    }
+//
+//    private void updateRuns(Map<String, Object> parameter) {
+//        String name = (String) parameter.get("name");
+//        String content = (String) parameter.get("content");
+//        String dataPath = DockerUtil.FILE_PATHS[0];
+//        File dockerfile = FileUtil.file(dataPath, DockerUtil.RUNS_FOLDER, name, DockerUtil.DOCKER_FILE);
+//        FileUtil.writeString(content, dockerfile, StandardCharsets.UTF_8);
+//    }
+//
+//    private Map<String, URI> listRuns() throws URISyntaxException {
+//        // // runs/%s/Dockerfile
+//        Map<String, URI> runs = new HashMap<>(5);
+//        for (String filePath : DockerUtil.FILE_PATHS) {
+//            //
+//            File dockerFileDir = FileUtil.file(filePath, DockerUtil.RUNS_FOLDER);
+//            if (!FileUtil.exist(dockerFileDir) || FileUtil.isFile(dockerFileDir)) {
+//                continue;
+//            }
+//            File[] files = dockerFileDir.listFiles();
+//            if (files == null) {
+//                continue;
+//            }
+//            for (File file : files) {
+//                File dockerFile = FileUtil.file(file, DockerUtil.DOCKER_FILE);
+//                if (FileUtil.isFile(dockerFile)) {
+//                    // 不存在才添加
+//                    runs.putIfAbsent(file.getName(), dockerFile.toURI());
+//                }
+//            }
+//        }
+//        if (Objects.isNull(runs.get(DockerUtil.DEFAULT_RUNS))) {
+//            URL resourceObj = ResourceUtil.getResource(DockerUtil.RUNS_FOLDER + "/" + DockerUtil.DEFAULT_RUNS + "/" + DockerUtil.DOCKER_FILE);
+//            runs.put(DockerUtil.DEFAULT_RUNS, resourceObj.toURI());
+//        }
+//        return runs;
+//    }
 
     private JSONObject auth(Map<String, Object> parameter) {
         DockerClient dockerClient = DockerUtil.get(parameter);

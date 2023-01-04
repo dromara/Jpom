@@ -36,7 +36,6 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.InvocationBuilder;
-import io.jpom.plugin.IDefaultPlugin;
 import io.jpom.plugin.PluginConfig;
 import lombok.Lombok;
 import lombok.SneakyThrows;
@@ -59,13 +58,14 @@ import java.util.stream.Collectors;
  * @since 2022/1/26
  */
 @PluginConfig(name = "docker-cli")
-public class DefaultDockerPluginImpl implements IDefaultPlugin {
+public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
+
 
     @Override
     public Object execute(Object main, Map<String, Object> parameter) throws Exception {
         String type = main.toString();
         if ("build".equals(type)) {
-            try (DockerBuild dockerBuild = new DockerBuild(parameter)) {
+            try (DockerBuild dockerBuild = new DockerBuild(parameter, this)) {
                 dockerBuild.build();
             }
             return null;

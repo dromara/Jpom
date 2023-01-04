@@ -15,8 +15,8 @@
         "role": "system"
       },
       {
-        "id": "buildConfig",
-        "title": "构建配置",
+        "id": "systemExtConfig",
+        "title": "系统配置目录",
         "role": "system"
       }
     ]
