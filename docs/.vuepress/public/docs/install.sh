@@ -66,7 +66,7 @@ function findProfile() {
 	if [ "$user" != 'root' ]; then
 		array=("$HOME/.bash_profile" "$HOME/.bashrc" "$HOME/.bash_login")
 		for element in "${array[@]}"; do
-			if [ -f "$element" ] || [ -f "./${JPOM_TYPE}.sh" ]; then
+			if [ -f "$element" ]; then
 				profileName=$element
 				break
 			fi
