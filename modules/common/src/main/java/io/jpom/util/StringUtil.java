@@ -30,11 +30,14 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONValidator;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -217,5 +220,24 @@ public class StringUtil {
             replace = StrUtil.replace(replace, StrUtil.format("${{}}", entry.getKey()), entry.getValue());
         }
         return replace;
+    }
+
+    /**
+     * 验证 json 类型
+     *
+     * @param json json 字符串
+     * @return type
+     */
+    public static JSONValidator.Type validatorJson(String json) {
+        JSONValidator from;
+        try {
+            from = JSONValidator.from(json);
+        } catch (JSONException jsonException) {
+            return null;
+        } catch (Exception e) {
+            // ArrayIndexOutOfBoundsException
+            return null;
+        }
+        return Optional.ofNullable(from).map(JSONValidator::getType).orElse(null);
     }
 }
