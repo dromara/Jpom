@@ -71,7 +71,7 @@ export default {
   },
   filters: {
     version(value) {
-      return (value && value) || "未知";
+      return (value && value) || "---";
     },
     status(value) {
       return (value && value) || "未知";
@@ -93,7 +93,7 @@ export default {
         { title: "节点地址", dataIndex: "url", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
         { title: "版本号", dataIndex: "version", width: 100, ellipsis: true, scopedSlots: { customRender: "version" } },
         { title: "打包时间", dataIndex: "timeStamp", width: 180, ellipsis: true, scopedSlots: { customRender: "timeStamp" } },
-        { title: "状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "更新状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
         // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true, scopedSlots: {customRender: 'autoUpdate'}},
         { title: "操作", dataIndex: "operation", width: 80, scopedSlots: { customRender: "operation" }, align: "center" },
       ],
@@ -298,11 +298,14 @@ export default {
     updateNode() {
       const len = this.tableSelections.length;
       const html =
-        "确认要将选中的 " +
+        "确认要将选中的  <b style='color:red;font-size: 20px;'>" +
         len +
-        " 个节点升级到最新版本吗？<ul style='color:red;'>" +
+        "</b> 个节点升级到 <b style='color:red;font-size: 20px;'>" +
+        this.agentVersion +
+        "</b> 吗？<ul style='color:red;'>" +
         "<li>升级前请阅读更新日志里面的说明和注意事项并且<b>请注意备份数据防止数据丢失！！</b></li>" +
         "<li>如果升级失败需要手动恢复奥</li>" +
+        "<li>一般情况下不建议降级操作</li>" +
         " </ul>";
       const h = this.$createElement;
       this.$confirm({
