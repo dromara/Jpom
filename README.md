@@ -200,7 +200,7 @@ bash install.sh Agent jdk
 #### 一条命令安装
 
 ```shell
-docker run -p 2122:2122 --name jpom jpomdocker/jpom
+docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 ```
 
 #### 使用挂载方式存储相关数据（在部分环境可能出现兼容性问题）
