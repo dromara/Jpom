@@ -144,10 +144,10 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
                         FileUtil.move(beforeJarFile, oldJars, true);
                         log.info("备份旧程序包：{}", beforeJar);
                     } else {
-                        log.warn("备份旧程序包失败：{},因为新程序包不存在：{}", beforeJar, newJar);
+                        log.debug("备份旧程序包失败：{},因为新程序包不存在：{}", beforeJar, newJar);
                     }
                 } else {
-                    log.warn("备份旧程序包失败：{},因为旧程序包不存在", beforeJar);
+                    log.debug("备份旧程序包失败：{},因为旧程序包不存在", beforeJar);
                 }
             }
         }

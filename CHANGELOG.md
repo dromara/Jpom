@@ -11,6 +11,27 @@
 
 1. 【all】取消 程序启动写入全局临时信息
 
+
+### ⚠️ 注意
+
+Linux、Windows 环境 已经安装 2.10.0 ~ 2.10.7 的需要手动更新一下管理脚本
+
+> 建议先更新脚本再升级插件端或者服务端
+> 
+> Windows 用户需要自行下载脚本替换
+
+**服务端**：(需要到安装目录的 bin 下执行)
+
+```shell
+curl -LfsSo Server.sh https://gitee.com/dromara/Jpom/raw/master/modules/server/src/main/bin/Server.sh
+```
+
+**插件端** ：(需要到安装目录的 bin 下执行)
+
+```shell
+curl -LfsSo Agent.sh https://gitee.com/dromara/Jpom/raw/master/modules/agent/src/main/bin/Agent.sh
+```
+
 ------
 
 ## 2.10.7 (2023-01-04)
