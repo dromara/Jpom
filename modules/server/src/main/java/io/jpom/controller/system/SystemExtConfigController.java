@@ -122,7 +122,7 @@ public class SystemExtConfigController extends BaseServerController {
         //
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath*:/config_default/**");
-        List<TreeNode<String>> collect = Arrays.stream(resources)
+        List<TreeNode<String>> classPathList = Arrays.stream(resources)
             .filter(resource -> {
                 if (resource.isFile()) {
                     // 本地运行可能出现文件夹的 item
@@ -158,14 +158,23 @@ public class SystemExtConfigController extends BaseServerController {
                 node.setName(StrUtil.format("{} [默认]", node.getName()));
                 Map<String, Object> extra = node.getExtra();
                 extra.put("defaultConfig", true);
+                extra.put("hasDefault", true);
             })
             // 过滤 dir 已经存在的
-            .filter(node -> !listDir.containsKey(node.getId()))
+            .filter(node -> {
+                TreeNode<String> treeNode = listDir.get(node.getId());
+                if (treeNode != null) {
+                    Map<String, Object> extra = treeNode.getExtra();
+                    extra.put("hasDefault", true);
+                    return false;
+                }
+                return true;
+            })
             .collect(Collectors.toList());
 
         List<TreeNode<String>> allList = new ArrayList<>();
         allList.addAll(parentMap.values());
-        allList.addAll(collect);
+        allList.addAll(classPathList);
         allList.addAll(listDir.values());
         // 过滤主配置文件
         allList = allList.stream().peek(node -> {

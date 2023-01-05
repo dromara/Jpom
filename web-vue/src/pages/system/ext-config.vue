@@ -25,7 +25,7 @@
           <a-row type="flex" justify="center">
             <a-space>
               <a-button type="danger" :disabled="!temp || !temp.name" @click="saveData">保存</a-button>
-              <a-button type="primary" :disabled="!temp || !temp.name" @click="readeDefault">读取默认</a-button>
+              <a-button type="primary" v-if="temp.hasDefault" :disabled="!temp || !temp.name" @click="readeDefault">读取默认</a-button>
             </a-space>
           </a-row>
         </a-space>
@@ -89,6 +89,7 @@ export default {
           this.temp = {
             name: node.dataRef?.id,
             content: res.data,
+            hasDefault: node.dataRef?.hasDefault,
           };
         }
       });
