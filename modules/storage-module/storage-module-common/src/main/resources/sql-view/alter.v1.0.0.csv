@@ -1,0 +1,6 @@
+type,table,name,type,len,comment,is-null
+ALTER-COLUMN,SYSTEMMONITORLOG,id,VARCHAR,50,id,1
+ALTER-ADD,SYSTEMMONITORLOG,createTimeMillis,BIGINT,,数据创建时间
+ALTER-ADD,SYSTEMMONITORLOG,modifyTimeMillis,BIGINT,,数据修改时间
+ALTER-COLUMN,SYSTEMMONITORLOG,monitorTime,BIGINT,,
+ALTER-ADD,SYSTEMMONITORLOG,occupyMemoryUsed,DOUBLE,,'占用内存 (使用)'
