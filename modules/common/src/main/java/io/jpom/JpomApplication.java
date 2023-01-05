@@ -134,27 +134,7 @@ public class JpomApplication implements DisposableBean {
             FileUtil.del(scriptFile);
         }
     }
-
-    /**
-     * 获取当前项目全局 运行信息文件路径
-     *
-     * @param type 程序类型
-     * @return file
-     */
-    public File getApplicationJpomInfo(Type type) {
-        return FileUtil.file(SystemUtil.getUserInfo().getTempDir(), "jpom", type.name());
-    }
-
-    /**
-     * 获取 agent 端自动生成的授权文件路径
-     *
-     * @param dataPath 指定数据路径
-     * @return file
-     */
-    public String getAgentAutoAuthorizeFile(String dataPath) {
-        return FileUtil.normalize(dataPath + StrUtil.SLASH + Const.AUTHORIZE);
-    }
-
+    
     /**
      * 获取临时文件存储路径
      *

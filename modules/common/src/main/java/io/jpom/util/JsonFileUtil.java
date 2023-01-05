@@ -92,6 +92,16 @@ public class JsonFileUtil {
         }
     }
 
+    /**
+     * 保存json 文件,同步
+     *
+     * @param path 路径
+     * @param json 新的json内容
+     */
+    public static void saveJson(File path, Object json) {
+        saveJson(path.getAbsolutePath(), json);
+    }
+
     public static <T> JSONObject arrayToObjById(JSONArray array) {
         JSONObject jsonObject = new JSONObject();
         array.forEach(o -> {

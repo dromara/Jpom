@@ -29,7 +29,6 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -97,21 +96,9 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
 
         } else if (event instanceof ContextClosedEvent) {
             //
-            File appJpomFile = configBean.getApplicationJpomInfo(JpomApplication.getAppType());
-            FileUtil.del(appJpomFile);
         }
     }
 
-    private void writeRunTempInfo() {
-        try {
-            // 写入Jpom 信息 、 写入全局信息
-            JpomManifest jpomManifest = JpomManifest.getInstance();
-            File appJpomFile = configBean.getApplicationJpomInfo(JpomApplication.getAppType());
-            FileUtil.writeString(jpomManifest.toString(), appJpomFile, CharsetUtil.CHARSET_UTF_8);
-        } catch (Exception e) {
-            log.warn("写入全局运行信息失败：{}", e.getMessage());
-        }
-    }
 
     private void checkPath() {
         String path = ExtConfigBean.getPath();
@@ -358,8 +345,6 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         this.checkDuplicateRun();
         // 开始异常加载
         this.statLoad();
-        // 写入全局运行信息
-        this.writeRunTempInfo();
         // 提示成功消息
         this.success();
     }

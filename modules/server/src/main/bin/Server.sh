@@ -67,6 +67,7 @@ base=$(absPath "$bin_abs_path/../")
 conf_path="${base}/conf"
 Lib="${base}/lib/"
 LogPath="${base}/logs/"
+tmpdir="${base}/tmp/"
 Log="${LogPath}/stdout.log"
 logback_configurationFile="${conf_path}/logback.xml"
 application_conf="${conf_path}/application.yml"
@@ -114,8 +115,9 @@ if [ -n "$Java64Str" ]; then
 else
 	JAVA_OPTS="-server ${USR_JVM_SIZE} -XX:NewSize=256m -XX:MaxNewSize=256m -XX:MaxPermSize=128m $JAVA_OPTS"
 fi
-JAVA_OPTS=" $JAVA_OPTS -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Dfile.encoding=UTF-8"
-JAVA_OPTS="${JAVA_OPTS} -Dlogging.config=$logback_configurationFile -Dspring.config.location=$application_conf"
+JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Dfile.encoding=UTF-8"
+JAVA_OPTS="$JAVA_OPTS -Dlogging.config=$logback_configurationFile -Dspring.config.location=$application_conf"
+JAVA_OPTS="$JAVA_OPTS -Djava.io.tmpdir=$tmpdir"
 
 MAIN_ARGS="$*"
 
