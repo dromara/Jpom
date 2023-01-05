@@ -1,0 +1,2 @@
+type,table,name,field
+ADD,SYSTEMMONITORLOG,SYSTEMMONITORLOG_INDEX1,nodeId+monitorTime
