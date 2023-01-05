@@ -151,6 +151,8 @@ function checkConfig() {
 		fi
 	fi
 
+	mkdir -p "$tmpdir"
+
 	export JPOM_LOG=${LogPath}
 }
 

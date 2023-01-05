@@ -134,6 +134,7 @@ function checkConfig() {
 			echo "automatic running：${RUN_JAR}"
 		fi
 	fi
+	mkdir -p "$tmpdir"
 }
 
 function getPid() {
