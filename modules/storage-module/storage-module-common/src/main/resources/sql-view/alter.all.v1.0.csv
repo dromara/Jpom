@@ -1,0 +1,15 @@
+type,table,name,type,len,default,comment,not-null
+DROP,NODE_INFO,cycle
+ADD,PROJECT_INFO,triggerToken,String,100,,触发器token
+ADD,OUT_GIVING,secondaryDirectory,String,200,,二级目录
+ADD,OUT_GIVING,uploadCloseFirst,TINYINT,,0,是否清空旧包发布
+ADD,USEROPERATELOGV1,dataName,String,200,,数据名称
+DROP,SSHTERMINALEXECUTELOG,optTime
+DROP,USEROPERATELOGV1,optType;
+DROP,USEROPERATELOGV1,reqTime;
+DROP,BUILDHISTORYLOG,releaseMethodDataId;
+DROP,BUILDHISTORYLOG,afterOpt;
+DROP,BUILDHISTORYLOG,clearOld;
+DROP,BUILDHISTORYLOG,releaseCommand;
+DROP,BUILDHISTORYLOG,releasePath;
+DROP,BUILDHISTORYLOG,diffSync;

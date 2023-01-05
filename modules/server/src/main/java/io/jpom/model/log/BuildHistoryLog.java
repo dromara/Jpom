@@ -37,116 +37,90 @@ import lombok.EqualsAndHashCode;
  * 构建历史记录
  *
  * @author bwcx_jzy
- * @since 2019/7/17
  * @see BuildExtraModule
+ * @since 2019/7/17
  **/
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "BUILDHISTORYLOG", name = "构建历史")
 @Data
 public class BuildHistoryLog extends BaseWorkspaceModel {
-	/**
-	 * 发布方式
-	 *
-	 * @see BuildReleaseMethod
-	 * @see BuildInfoModel#getReleaseMethod()
-	 */
-	private Integer releaseMethod;
-	/**
-	 * 发布方法的数据id
-	 *
-	 * @see BuildInfoModel#getReleaseMethodDataId()
-	 */
-	@Deprecated
-	private String releaseMethodDataId;
-	/**
-	 * 分发后的操作
-	 * 仅在项目发布类型生效
-	 *
-	 * @see io.jpom.model.AfterOpt
-	 * @see BuildInfoModel#getExtraData()
-	 */
-	@Deprecated
-	private Integer afterOpt;
-	/**
-	 * 是否清空旧包发布
-	 */
-	@Deprecated
-	private Boolean clearOld;
-	/**
-	 * 构建产物目录
-	 */
-	private String resultDirFile;
-	/**
-	 * 发布命令  ssh 才能用上
-	 */
-	@Deprecated
-	private String releaseCommand;
-	/**
-	 * 发布到ssh中的目录
-	 */
-	@Deprecated
-	private String releasePath;
-	/**
-	 * 触发构建类型 触发类型{0，手动，1 触发器,2 自动触发}
-	 */
-	private Integer triggerBuildType;
-	/**
-	 * 增量同步
-	 */
-	@Deprecated
-	private Boolean diffSync;
-	/**
-	 * 关联的构建id
-	 *
-	 * @see BuildInfoModel#getId()
-	 */
-	private String buildDataId;
-	/**
-	 * 构建名称
-	 */
-	private String buildName;
-	/**
-	 * 构建编号
-	 *
-	 * @see BuildInfoModel#getBuildId()
-	 */
-	private Integer buildNumberId;
-	/**
-	 * 状态
-	 *
-	 * @see BuildStatus
-	 */
-	private Integer status;
-	/**
-	 * 开始时间
-	 */
-	private Long startTime;
-	/**
-	 * 结束时间
-	 */
-	private Long endTime;
-	/**
-	 * 构建备注
-	 */
-	private String buildRemark;
-	/**
-	 * 构建其他信息
-	 */
-	private String extraData;
-	/**
-	 * 是否存在构建产物
-	 */
-	@PropIgnore
-	private Boolean hasFile;
-	/**
-	 * 是否存在日志
-	 */
-	@PropIgnore
-	private Boolean hasLog;
+    /**
+     * 发布方式
+     *
+     * @see BuildReleaseMethod
+     * @see BuildInfoModel#getReleaseMethod()
+     */
+    private Integer releaseMethod;
 
-	public void setBuildRemark(String buildRemark) {
-		this.buildRemark = StrUtil.maxLength(buildRemark, 240);
-	}
+    /**
+     * 构建产物目录
+     */
+    private String resultDirFile;
+
+    /**
+     * 触发构建类型 触发类型{0，手动，1 触发器,2 自动触发}
+     */
+    private Integer triggerBuildType;
+
+    /**
+     * 关联的构建id
+     *
+     * @see BuildInfoModel#getId()
+     */
+    private String buildDataId;
+    /**
+     * 构建名称
+     */
+    private String buildName;
+    /**
+     * 构建名称-未用
+     *
+     * @see this#buildName
+     */
+    @Deprecated
+    private String name;
+    /**
+     * 构建编号
+     *
+     * @see BuildInfoModel#getBuildId()
+     */
+    private Integer buildNumberId;
+    /**
+     * 状态
+     *
+     * @see BuildStatus
+     */
+    private Integer status;
+    /**
+     * 开始时间
+     */
+    private Long startTime;
+    /**
+     * 结束时间
+     */
+    private Long endTime;
+    /**
+     * 构建备注
+     */
+    private String buildRemark;
+    /**
+     * 构建其他信息
+     */
+    private String extraData;
+    /**
+     * 是否存在构建产物
+     */
+    @PropIgnore
+    private Boolean hasFile;
+    /**
+     * 是否存在日志
+     */
+    @PropIgnore
+    private Boolean hasLog;
+
+    public void setBuildRemark(String buildRemark) {
+        this.buildRemark = StrUtil.maxLength(buildRemark, 240);
+    }
 
 //	public void fillLogValue(BuildExtraModule buildExtraModule) {
 //		//

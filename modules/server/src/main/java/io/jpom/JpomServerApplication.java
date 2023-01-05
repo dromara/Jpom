@@ -44,8 +44,8 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  * @author jiangzeyin
  * @since 2017/9/14
  */
-@SpringBootApplication
-@ServletComponentScan
+@SpringBootApplication(scanBasePackages = {"io.jpom", "top.jpom"})
+@ServletComponentScan(basePackages = {"io.jpom", "top.jpom"})
 @Slf4j
 @JpomAppType(Type.Server)
 public class JpomServerApplication {

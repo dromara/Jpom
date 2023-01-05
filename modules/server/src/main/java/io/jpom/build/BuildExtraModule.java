@@ -23,8 +23,6 @@
 package io.jpom.build;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ObjectUtil;
-import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseModel;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
@@ -32,6 +30,7 @@ import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.util.Assert;
 
 /**
  * 构建物基类
@@ -183,17 +182,7 @@ public class BuildExtraModule extends BaseModel {
 
     public static BuildExtraModule build(BuildHistoryLog buildHistoryLog) {
         BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildHistoryLog.getExtraData(), BuildExtraModule.class);
-        if (buildExtraModule == null) {
-            buildExtraModule = new BuildExtraModule();
-            buildExtraModule.setAfterOpt(ObjectUtil.defaultIfNull(buildHistoryLog.getAfterOpt(), AfterOpt.No.getCode()));
-
-            buildExtraModule.setReleaseCommand(buildHistoryLog.getReleaseCommand());
-            buildExtraModule.setReleasePath(buildHistoryLog.getReleasePath());
-            buildExtraModule.setReleaseMethodDataId(buildHistoryLog.getReleaseMethodDataId());
-            buildExtraModule.setClearOld(ObjectUtil.defaultIfNull(buildHistoryLog.getClearOld(), false));
-            //
-            buildExtraModule.setDiffSync(ObjectUtil.defaultIfNull(buildHistoryLog.getDiffSync(), false));
-        }
+        Assert.notNull(buildExtraModule, "数据不完整，暂不支持操作");
         buildExtraModule.setId(buildHistoryLog.getBuildDataId());
         buildExtraModule.setName(buildHistoryLog.getBuildName());
         buildExtraModule.setReleaseMethod(buildHistoryLog.getReleaseMethod());
