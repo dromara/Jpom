@@ -1,0 +1,5 @@
+type,table,name,type,len,comment,not-null,default
+ADD,BACKUP_INFO,`status`,int,,状态{0: 默认; 1: 成功; 2: 失败},,0
+ADD,BACKUP_INFO,baleTimeStamp,BIGINT,,打包时间
+ADD,BACKUP_INFO,version,varchar,255,服务版本
+ADD,BACKUP_INFO,modifyUser,VARCHAR,50,操作人
