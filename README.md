@@ -240,7 +240,7 @@ docker run -d -p 2122:2122 \
 >
 > 在低版本 docker 中运行可能出现 `ls: cannot access'/usr/local/jpom-server/lib/': Operation not permitted`
 > 错误，此时需要添加 `--privileged` 参数
-> 如：`docker run -p 2122:2122 --name jpom jpomdocker/jpom --privileged`
+> 如：`docker run -p 2122:2122 --name jpom-server jpomdocker/jpom --privileged`
 
 ### 方式三：💾 下载安装
 
