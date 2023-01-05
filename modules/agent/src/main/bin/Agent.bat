@@ -39,11 +39,14 @@ if "%JAVA_HOME%"=="" (
 set PID_TAG="JPOM_AGENT_APPLICATION"
 set conf_dir="%ENV_PATH%/../conf/"
 set tmpdir="%ENV_PATH%/../tmp/"
+if not exist %tmpdir% md %tmpdir%
 
 @REM see org.springframework.util.StringUtils.cleanPath
 @REM set org.springframework.boot.context.config.StandardConfigDataLocationResolver.getResourceLocation
 cd %conf_dir%
 set conf_dir=%cd%
+cd %tmpdir%
+set tmpdir=%cd%
 cd %ENV_PATH%
 
 set log_dir=%ENV_PATH%\..\logs
