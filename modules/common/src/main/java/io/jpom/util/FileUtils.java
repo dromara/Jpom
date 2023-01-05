@@ -271,8 +271,8 @@ public class FileUtils {
      */
     public static void checkSlip(String dir, Function<Exception, Exception> function) {
         try {
-            File userHomeDir = FileUtil.getUserHomeDir();
-            FileUtil.checkSlip(userHomeDir, FileUtil.file(userHomeDir, dir));
+            File tmpDir = FileUtil.getTmpDir();
+            FileUtil.checkSlip(tmpDir, FileUtil.file(tmpDir, dir));
         } catch (IllegalArgumentException e) {
             throw Lombok.sneakyThrow(function.apply(e));
         }
