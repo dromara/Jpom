@@ -172,8 +172,8 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
         // 数据源参数
         final String url = dbConfig.getDbUrl();
 
-        final String user = dbExtConfig.getUserName();
-        final String pass = dbExtConfig.getUserPwd();
+        final String user = dbExtConfig.userName();
+        final String pass = dbExtConfig.userPwd();
 
         JpomManifest instance = JpomManifest.getInstance();
         // 先构造备份信息插入数据库

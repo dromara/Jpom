@@ -65,8 +65,8 @@ public class H2ToolTest extends ApplicationStartTest {
         // 数据源参数
         String url = dbConfig.getDbUrl();
 
-        String user = dbExtConfig.getUserName();
-        String pass = dbExtConfig.getUserPwd();
+        String user = dbExtConfig.userName();
+        String pass = dbExtConfig.userPwd();
 
         // 备份 SQL 的目录
         File file = FileUtil.file(ExtConfigBean.getPath(), "db", JpomApplication.getAppType().name());
@@ -143,8 +143,8 @@ public class H2ToolTest extends ApplicationStartTest {
         // 数据源参数
         String url = dbConfig.getDbUrl();
 
-        String user = dbExtConfig.getUserName();
-        String pass = dbExtConfig.getUserPwd();
+        String user = dbExtConfig.userName();
+        String pass = dbExtConfig.userPwd();
 
         // 加载数据源
         DataSource dataSource = DSFactory.get();
