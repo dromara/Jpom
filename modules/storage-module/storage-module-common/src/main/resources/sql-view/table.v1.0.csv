@@ -1,4 +1,4 @@
-name,type,len,default,is-null,primary-key,comment,table-comment
+name,type,len,default,not-null,primary-key,comment,table-comment
 USEROPERATELOGV1.id,VARCHAR,50,,1,1,id,操作日志
 USEROPERATELOGV1.reqId,VARCHAR,50,,,,请求ID,
 USEROPERATELOGV1.ip,VARCHAR,30,,,,客户端IP地址,

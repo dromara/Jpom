@@ -1,4 +1,4 @@
-type,table,name,type,len,comment,is-null
+type,table,name,type,len,comment,not-null
 ALTER,SYSTEMMONITORLOG,id,VARCHAR,50,id,1
 ADD,SYSTEMMONITORLOG,createTimeMillis,BIGINT,,数据创建时间
 ADD,SYSTEMMONITORLOG,modifyTimeMillis,BIGINT,,数据修改时间
