@@ -445,7 +445,7 @@ shName=""
 sh_array=("./bin/${JPOM_TYPE}.sh" "./${JPOM_TYPE}.sh")
 for element in "${sh_array[@]}"; do
 	if [ -f "$element" ]; then
-		shName=$$element
+		shName=$element
 		break
 	fi
 done
