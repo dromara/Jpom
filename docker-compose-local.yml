@@ -11,7 +11,8 @@ services:
       "JPOM_SERVER_TEMP_TOKEN": ${SERVER_TOKEN}
     volumes:
       - jpom-server-data:/usr/local/jpom-server/data
-      - jpom-server-log:/usr/local/jpom-server/log
+      - jpom-server-logs:/usr/local/jpom-server/logs
+      - jpom-server-conf:/usr/local/jpom-server/conf
     ports:
       - "2122:2122"
     hostname: server
@@ -51,4 +52,5 @@ volumes:
   jpom-agent01:
   jpom-agent02:
   jpom-server-data:
-  jpom-server-log:
+  jpom-server-logs:
+  jpom-server-conf:

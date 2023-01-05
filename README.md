@@ -207,12 +207,14 @@ docker run -p 2122:2122 --name jpom jpomdocker/jpom
 
 ```shell
 docker pull jpomdocker/jpom
-mkdir -p /home/jpom-server/log
+mkdir -p /home/jpom-server/logs
 mkdir -p /home/jpom-server/data
+mkdir -p /home/jpom-server/conf
 docker run -d -p 2122:2122 \
 	--name jpom-server \
-	-v /home/jpom-server/log:/usr/local/jpom-server/log \
+	-v /home/jpom-server/logs:/usr/local/jpom-server/logs \
 	-v /home/jpom-server/data:/usr/local/jpom-server/data \
+	-v /home/jpom-server/conf:/usr/local/jpom-server/conf \
 	jpomdocker/jpom
 ```
 
@@ -221,11 +223,13 @@ docker run -d -p 2122:2122 \
 ```shell
 docker pull jpomdocker/jpom
 docker volume create jpom-server-data
-docker volume create jpom-server-log
+docker volume create jpom-server-logs
+docker volume create jpom-server-conf
 docker run -d -p 2122:2122 \
 	--name jpom-server \
 	-v jpom-server-data:/usr/local/jpom-server/data \
-	-v jpom-server-log:/usr/local/jpom-server/log \
+	-v jpom-server-logs:/usr/local/jpom-server/logs \
+	-v jpom-server-conf:/usr/local/jpom-server/conf \
 	jpomdocker/jpom
 ```
 
