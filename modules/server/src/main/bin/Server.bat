@@ -38,6 +38,7 @@ if "%JAVA_HOME%"=="" (
 
 set PID_TAG="JPOM_SERVER_APPLICATION"
 set conf_dir="%ENV_PATH%/../conf/"
+set tmpdir="%ENV_PATH%/../tmp/"
 
 @REM see org.springframework.util.StringUtils.cleanPath
 @REM set org.springframework.boot.context.config.StandardConfigDataLocationResolver.getResourceLocation
@@ -56,7 +57,7 @@ set server_log="%log_dir%\server.log"
 set stdout_log="%log_dir%\stdout.log"
 
 set JAVA_MEM_OPTS= -Xms1024m -Xmx2048m -XX:PermSize=128m -XX:+UseG1GC
-set JAVA_OPTS_EXT= -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Dapplication.codeset=UTF-8 -Dfile.encoding=UTF-8
+set JAVA_OPTS_EXT= -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Dapplication.codeset=UTF-8 -Dfile.encoding=UTF-8 -Djava.io.tmpdir="%tmpdir%"
 set APP_OPTS= -Djpom.application.tag="%PID_TAG%" -Dlogging.config="%logback_configurationFile%" -Dspring.config.location="%application_conf%"
 set JAVA_OPTS= %JAVA_MEM_OPTS% %JAVA_OPTS_EXT% %APP_OPTS%
 

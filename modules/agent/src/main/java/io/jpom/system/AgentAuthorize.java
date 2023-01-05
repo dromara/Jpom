@@ -29,6 +29,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
+import io.jpom.common.Const;
 import io.jpom.common.ILoadEvent;
 import io.jpom.model.system.AgentAutoUser;
 import io.jpom.util.JsonFileUtil;
@@ -38,6 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.File;
 
 /**
  * agent 端授权账号信息
@@ -92,12 +95,12 @@ public class AgentAuthorize implements ILoadEvent {
     public boolean checkAuthorize(String authorize) {
         return StrUtil.equals(authorize, this.authorize);
     }
-
+    
     /**
      * 检查是否配置密码
      */
     private void checkPwd() {
-        String path = configBean.getAgentAutoAuthorizeFile(configBean.getDataPath());
+        File path = FileUtil.file(configBean.getDataPath(), Const.AUTHORIZE);
         if (StrUtil.isNotEmpty(agentPwd)) {
             // 有指定密码 清除旧密码信息
             FileUtil.del(path);
