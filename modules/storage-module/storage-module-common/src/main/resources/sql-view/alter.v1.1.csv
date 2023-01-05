@@ -1,4 +1,4 @@
-type,table,name,type,len,comment,is-null,default
+type,table,name,type,len,comment,not-null,default
 ADD,USEROPERATELOGV1,workspaceId,VARCHAR,50,所属工作空间
 ADD,USEROPERATELOGV1,id,VARCHAR,50,id,1,''
 ADD,USEROPERATELOGV1,createTimeMillis,BIGINT,,数据创建时间
