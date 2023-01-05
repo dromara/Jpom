@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.WORKSPACE
     description      varchar(255) comment '描述',
     CONSTRAINT WORKSPACE_PK PRIMARY KEY (id)
 );
-comment on table WORKSPACE is '用户信息表';
+comment on table WORKSPACE is '工作空间表';
 
 -- 用户绑定工作空间表
 CREATE TABLE IF NOT EXISTS PUBLIC.USER_BIND_WORKSPACE

@@ -1,0 +1,13 @@
+name,type,len,default,not-null,primary-key,comment,table-comment
+BACKUP_INFO.id,String,50,,true,true,id,备份数据库信息
+BACKUP_INFO.createTimeMillis,Long,,,false,false,数据创建时间,
+BACKUP_INFO.modifyTimeMillis,Long,,,false,false,数据修改时间,
+BACKUP_INFO.name,String,50,,false,false,备份名称,
+BACKUP_INFO.filePath,String,200,,false,false,文件地址,
+BACKUP_INFO.backupType,Integer,,,false,false,"备份类型{0: 全量, 1: 部分}",
+BACKUP_INFO.fileSize,Long,,,false,false,文件大小,
+BACKUP_INFO.sha1Sum,String,50,,false,false,SHA1 信息,
+BACKUP_INFO.status,Integer,,'0',false,false,状态{0: 默认; 1: 成功; 2: 失败},
+BACKUP_INFO.baleTimeStamp,Long,,,false,false,打包时间,
+BACKUP_INFO.version,String,255,,false,false,服务版本,
+BACKUP_INFO.modifyUser,String,50,,false,false,操作人,

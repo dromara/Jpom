@@ -124,6 +124,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>io.jpom.storage-module</groupId>
+            <artifactId>storage-module-h2</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>
