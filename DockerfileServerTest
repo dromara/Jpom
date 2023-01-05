@@ -34,7 +34,7 @@ ENV JPOM_PKG	server-${JPOM_PKG_VERSION}-release.tar.gz
 
 
 ENV JPOM_DATA_PATH ${JPOM_HOME}/data
-ENV JPOM_LOG_PATH ${JPOM_HOME}/log
+ENV JPOM_LOG_PATH ${JPOM_HOME}/logs
 # 数据目录
 ENV jpom.path ${JPOM_DATA_PATH}
 
