@@ -38,7 +38,6 @@
         <module>email</module>
         <module>svn-clone</module>
         <module>maven-plugin</module>
-        <module>db-h2</module>
         <module>docker-cli</module>
         <module>git-clone</module>
     </modules>

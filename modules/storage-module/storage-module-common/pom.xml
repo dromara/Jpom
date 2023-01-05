@@ -43,6 +43,14 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>io.jpom</groupId>
+            <artifactId>common</artifactId>
+            <scope>provided</scope>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-db</artifactId>

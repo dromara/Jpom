@@ -48,6 +48,19 @@
             <artifactId>storage-module-common</artifactId>
             <version>${pom.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jpom</groupId>
+            <artifactId>common</artifactId>
+            <scope>provided</scope>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
