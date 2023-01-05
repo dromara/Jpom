@@ -25,13 +25,16 @@
 #
 # -------------------------------------------------------------
 # 自动创建 Docker TLS 证书
-# wget https://jpom.top/script/docker-tls.sh
+# wget https://gitee.com/dromara/Jpom/raw/master/script/docker-tls.sh
 # curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
 # systemctl daemon-reload && systemctl restart docker
 # -------------------------------------------------------------
 # 以下是配置信息
 # --[BEGIN]------------------------------
-NOW_PATH=$(cd `dirname $0`; pwd)"/"
+NOW_PATH=$(
+	cd "$(dirname "$0")" || exit
+	pwd
+)"/"
 echo "当前目录：${NOW_PATH} 证书文件将保存在此文件夹下"
 read -p "请输入证书使用的 IP 地址或者 HOST: " HOST
 #
@@ -55,14 +58,14 @@ openssl genrsa -out "server-key.pem" 4096
 # Generate Server Certs.
 openssl req -subj "/CN=$COMMON_NAME" -sha256 -new -key "server-key.pem" -out server.csr
 rm -f extfile.cnf
-echo "subjectAltName = DNS.1:$HOST,IP.1:127.0.0.1" >> extfile.cnf
-echo "extendedKeyUsage = serverAuth" >> extfile.cnf
+echo "subjectAltName = DNS.1:$HOST,IP.1:127.0.0.1,IP.2:$HOST" >>extfile.cnf
+echo "extendedKeyUsage = serverAuth" >>extfile.cnf
 openssl x509 -req -days 365 -sha256 -in server.csr -passin "pass:$PASSWORD" -CA "ca.pem" -CAkey "ca-key.pem" -CAcreateserial -out "server-cert.pem" -extfile extfile.cnf
 # Generate Client Certs.
 rm -f extfile.cnf
 openssl genrsa -out "key.pem" 4096
 openssl req -subj '/CN=client' -new -key "key.pem" -out client.csr
-echo "extendedKeyUsage = clientAuth" >> extfile.cnf
+echo "extendedKeyUsage = clientAuth" >>extfile.cnf
 openssl x509 -req -days 365 -sha256 -in client.csr -passin "pass:$PASSWORD" -CA "ca.pem" -CAkey "ca-key.pem" -CAcreateserial -out "cert.pem" -extfile extfile.cnf
 rm -f client.csr server.csr ca.srl extfile.cnf
 
