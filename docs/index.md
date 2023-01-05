@@ -257,7 +257,7 @@ bash install.sh Server jdk
 <code-block title="docker">
 ```bash
 # 此方式未挂载数据目录（不推荐）
-docker run -p 2122:2122 --name jpom jpomdocker/jpom
+docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 ```
   </code-block>
 </code-group>
