@@ -87,11 +87,11 @@ public class DbExtConfig {
      */
     private Boolean showSql = false;
 
-    public String getUserName() {
+    public String userName() {
         return StrUtil.emptyToDefault(this.userName, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
     }
 
-    public String getUserPwd() {
+    public String userPwd() {
         return StrUtil.emptyToDefault(this.userPwd, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
     }
 }

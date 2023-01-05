@@ -22,6 +22,8 @@
  */
 package io.jpom.controller.system;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -29,6 +31,7 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.core.net.MaskBit;
+import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -56,10 +59,9 @@ import io.jpom.system.db.InitDb;
 import io.jpom.system.extconf.DbExtConfig;
 import io.jpom.system.init.ProxySelectorConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.YamlMapFactoryBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.env.YamlPropertySourceLoader;
-import org.springframework.core.env.MutablePropertySources;
-import org.springframework.core.env.PropertySource;
-import org.springframework.core.env.PropertySourcesPropertyResolver;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -73,7 +75,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 /**
  * 系统配置
@@ -140,33 +142,40 @@ public class SystemConfigController extends BaseServerController {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemSaveConfig);
         }
         Assert.hasText(content, "内容不能为空");
-        List<PropertySource<?>> propertySources;
+
+        ByteArrayResource byteArrayResource;
         try {
             YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
             // @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格
-            ByteArrayResource resource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
-            propertySources = yamlPropertySourceLoader.load("test", resource);
+            byteArrayResource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
+            yamlPropertySourceLoader.load("test", byteArrayResource);
         } catch (Exception e) {
             log.warn("内容格式错误，请检查修正", e);
             return new JsonMessage<>(500, "内容格式错误，请检查修正:" + e.getMessage());
         }
         boolean restartBool = Convert.toBool(restart, false);
         // 修改数据库密码
-        MutablePropertySources mutablePropertySources = new MutablePropertySources();
-        propertySources.forEach(mutablePropertySources::addLast);
-        PropertySourcesPropertyResolver propertySourcesPropertyResolver = new PropertySourcesPropertyResolver(mutablePropertySources);
+        YamlMapFactoryBean yamlMapFactoryBean = new YamlMapFactoryBean();
+        yamlMapFactoryBean.setResources(byteArrayResource);
 
-        DbExtConfig dbExtConfig2 = Optional.of(propertySourcesPropertyResolver).map(propertyResolver -> {
-            DbExtConfig dbExtConfig1 = new DbExtConfig();
-            dbExtConfig1.setUserName(propertyResolver.getProperty("db.userName", String.class));
-            dbExtConfig1.setUserPwd(propertyResolver.getProperty("db.userPwd", String.class));
-            return dbExtConfig1;
-        }).orElseThrow(() -> new IllegalArgumentException("db 参数解析异常"));
+        Map<String, Object> yamlMap = yamlMapFactoryBean.getObject();
+        ConfigurationProperties configurationProperties = DbExtConfig.class.getAnnotation(ConfigurationProperties.class);
+        Assert.notNull(configurationProperties, "没有找到数据库配置标识头");
+        Map<String, Object> dbYamlMap = BeanUtil.getProperty(yamlMap, configurationProperties.prefix());
+        Assert.notNull(dbYamlMap, "未解析出配置文件中的数据库配置信息");
+        // 解析字段密码
+        DbExtConfig dbExtConfig2 = BeanUtil.toBean(dbYamlMap, DbExtConfig.class, CopyOptions.create()
+            .setIgnoreError(true)
+            .setFieldNameEditor(s -> {
+                String camelCase = StrUtil.toCamelCase(s);
+                return StrUtil.toCamelCase(camelCase, CharPool.DASHED);
+            }));
+        Assert.hasText(dbExtConfig2.getUserName(), "未配置(未解析到)数据库用户名");
 
-        String newDbExtConfigUserName = dbExtConfig2.getUserName();
-        String newDbExtConfigUserPwd = dbExtConfig2.getUserPwd();
-        String oldDbExtConfigUserName = dbExtConfig.getUserName();
-        String oldDbExtConfigUserPwd = dbExtConfig.getUserPwd();
+        String newDbExtConfigUserName = dbExtConfig2.userName();
+        String newDbExtConfigUserPwd = dbExtConfig2.userPwd();
+        String oldDbExtConfigUserName = dbExtConfig.userName();
+        String oldDbExtConfigUserPwd = dbExtConfig.userPwd();
         if (!StrUtil.equals(oldDbExtConfigUserName, newDbExtConfigUserName) || !StrUtil.equals(oldDbExtConfigUserPwd, newDbExtConfigUserPwd)) {
             // 执行修改数据库账号密码
             Assert.state(restartBool, "修改数据库密码必须重启");

@@ -118,8 +118,8 @@ public class InitDb implements DisposableBean, ILoadEvent {
         Setting setting = new Setting();
         String dbUrl = dbConfig.getDbUrl();
         setting.set("url", dbUrl);
-        setting.set("user", dbExtConfig.getUserName());
-        setting.set("pass", dbExtConfig.getUserPwd());
+        setting.set("user", dbExtConfig.userName());
+        setting.set("pass", dbExtConfig.userPwd());
         // 配置连接池大小
         setting.set("maxActive", dbExtConfig.getMaxActive() + "");
         setting.set("initialSize", dbExtConfig.getInitialSize() + "");
@@ -220,8 +220,8 @@ public class InitDb implements DisposableBean, ILoadEvent {
      */
     private void dbSecurityCheck(DbExtConfig dbExtConfig) {
         if (!JpomManifest.getInstance().isDebug() && h2ConsoleEnabled
-            && StrUtil.equals(dbExtConfig.getUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
-            && StrUtil.equals(dbExtConfig.getUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
+            && StrUtil.equals(dbExtConfig.userName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
+            && StrUtil.equals(dbExtConfig.userPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
             throw new JpomRuntimeException("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
         }
     }
