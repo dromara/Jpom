@@ -40,19 +40,12 @@ public class ServerConst extends Const {
      */
     public static final String WORKSPACE_GLOBAL = "GLOBAL";
 
-    /**
-     * SQL backup default directory name
-     * 数据库备份默认目录名称
-     */
-    public static final String BACKUP_DIRECTORY_NAME = "backup";
+
     /**
      * h2 数据库表名字段
      */
     public static final String TABLE_NAME = "TABLE_NAME";
-    /**
-     * 备份 SQL 文件 后缀
-     */
-    public static final String SQL_FILE_SUFFIX = ".sql";
+
 
     /**
      * String get

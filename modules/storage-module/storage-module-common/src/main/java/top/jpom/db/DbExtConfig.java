@@ -48,6 +48,16 @@ public class DbExtConfig implements InitializingBean {
     public static final String DEFAULT_USER_OR_AUTHORIZATION = "jpom";
 
     /**
+     * SQL backup default directory name
+     * 数据库备份默认目录名称
+     */
+    public static final String BACKUP_DIRECTORY_NAME = "backup";
+    /**
+     * 备份 SQL 文件 后缀
+     */
+    public static final String SQL_FILE_SUFFIX = ".sql";
+
+    /**
      * 日志记录最大条数
      */
     private Integer logStorageCount = 10000;

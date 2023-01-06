@@ -57,6 +57,12 @@ public class H2StorageServiceImpl implements IStorageService {
 
     @Override
     public DSFactory create(DbExtConfig dbExtConfig, String url, String user, String pass) {
+        Setting setting = this.createSetting(dbExtConfig, url, user, pass);
+        return DSFactory.create(setting);
+    }
+
+    @Override
+    public Setting createSetting(DbExtConfig dbExtConfig, String url, String user, String pass) {
         String url2 = Opt.ofBlankAble(url).orElseGet(() -> this.getDefaultDbUrl(dbExtConfig));
         String user2 = Opt.ofBlankAble(user).orElse(DbExtConfig.DEFAULT_USER_OR_AUTHORIZATION);
         String pass2 = Opt.ofBlankAble(pass).orElse(DbExtConfig.DEFAULT_USER_OR_AUTHORIZATION);
@@ -64,7 +70,7 @@ public class H2StorageServiceImpl implements IStorageService {
         setting.set("user", user2);
         setting.set("pass", pass2);
         setting.set("url", url2);
-        return DSFactory.create(setting);
+        return setting;
     }
 
     @Override
@@ -261,6 +267,18 @@ public class H2StorageServiceImpl implements IStorageService {
             sql = String.format("create user %s password '%s';DROP USER %s", newUse, newPwd, oldUes);
         }
         Db.use(this.dsFactory.getDataSource()).execute(sql);
+    }
+
+    @Override
+    public void backupSql(String url, String user, String pass, String backupSqlPath, List<String> tableNameList) throws Exception {
+        Map<String, Object> map = new HashMap<>(10);
+        map.put("url", url);
+        map.put("user", user);
+        map.put("pass", pass);
+        map.put("backupSqlPath", backupSqlPath);
+        map.put("tableNameList", tableNameList);
+        IPlugin plugin = PluginFactory.getPlugin("db-h2");
+        plugin.execute("backupSql", map);
     }
 
     @Override

@@ -22,7 +22,6 @@
  */
 package io.jpom.service.dblog;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.*;
 import cn.hutool.core.io.FileUtil;
@@ -169,7 +168,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
         final String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
 
         // 设置默认备份 SQL 的文件地址
-        File file = FileUtil.file(StorageServiceFactory.dbLocalPath(), ServerConst.BACKUP_DIRECTORY_NAME, fileName + ServerConst.SQL_FILE_SUFFIX);
+        File file = FileUtil.file(StorageServiceFactory.dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME, fileName + DbExtConfig.SQL_FILE_SUFFIX);
         final String backupSqlPath = FileUtil.getAbsolutePath(file);
 
         // 数据源参数
@@ -192,22 +191,14 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
         backupInfoModel.setBackupType(backupType.getCode());
         backupInfoModel.setFilePath(backupSqlPath);
         this.insert(backupInfoModel);
-        IPlugin plugin = PluginFactory.getPlugin("db-h2");
         // 开启一个子线程去执行任务，任务完成之后修改对应的数据库备份信息
         return ThreadUtil.execAsync(() -> {
             // 修改用的实体类
             BackupInfoModel backupInfo = new BackupInfoModel();
-            BeanUtil.copyProperties(backupInfoModel, backupInfo);
+            backupInfo.setId(backupInfoModel.getId());
             try {
                 log.debug("start a new Thread to execute H2 Database backup...start");
-                Map<String, Object> map = new HashMap<>(10);
-                map.put("url", url);
-                map.put("user", user);
-                map.put("pass", pass);
-                map.put("backupSqlPath", backupSqlPath);
-                map.put("tableNameList", tableNameList);
-                plugin.execute("backupSql", map);
-                //h2BackupService.backupSql(url, user, pass, backupSqlPath, tableNameList);
+                StorageServiceFactory.get().backupSql(url, user, pass, backupSqlPath, tableNameList);
                 // 修改备份任务执行完成
                 backupInfo.setFileSize(FileUtil.size(file));
                 backupInfo.setSha1Sum(SecureUtil.sha1(file));

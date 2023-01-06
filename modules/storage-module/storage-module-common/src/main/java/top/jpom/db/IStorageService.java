@@ -1,10 +1,12 @@
 package top.jpom.db;
 
 import cn.hutool.db.ds.DSFactory;
+import cn.hutool.setting.Setting;
 import io.jpom.system.JpomRuntimeException;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * 数据库实现
@@ -34,6 +36,17 @@ public interface IStorageService extends AutoCloseable, IMode {
     DSFactory create(DbExtConfig dbExtConfig, String url, String user, String pass);
 
     /**
+     * 创建数据库配置参数
+     *
+     * @param dbExtConfig 数据库配置
+     * @param url         url
+     * @param user        用户名
+     * @param pass        密码
+     * @return 配置
+     */
+    Setting createSetting(DbExtConfig dbExtConfig, String url, String user, String pass);
+
+    /**
      * 获取数据库连接工厂
      *
      * @return DSFactory
@@ -44,6 +57,7 @@ public interface IStorageService extends AutoCloseable, IMode {
      * 是否存在数据库文件
      *
      * @return true 存在
+     * @throws Exception 异常
      */
     default boolean hasDbData() throws Exception {
         throw new IllegalArgumentException("没有实现改功能");
@@ -98,8 +112,23 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @param oldUes 旧的账号
      * @param newUse 新的账号
      * @param newPwd 新密码
+     * @throws SQLException sql 异常
      */
     default void alterUser(String oldUes, String newUse, String newPwd) throws SQLException {
+        throw new IllegalArgumentException("没有实现改功能");
+    }
+
+    /**
+     * 备份数据库
+     *
+     * @param url           url
+     * @param user          账号
+     * @param pass          密码
+     * @param backupSqlPath sql 存放路径
+     * @param tableName     备份的表名
+     * @throws Exception 异常
+     */
+    default void backupSql(String url, String user, String pass, String backupSqlPath, List<String> tableName) throws Exception {
         throw new IllegalArgumentException("没有实现改功能");
     }
 
@@ -109,7 +138,6 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @return url
      */
     String dbUrl();
-
 
     /**
      * 异常转换
