@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 Code Technology Studio
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package top.jpom.db;
 
 import cn.hutool.core.date.DatePattern;
@@ -106,6 +128,8 @@ public class StorageServiceFactory {
             }
             long endTime = SystemClock.now();
             log.info("迁移完成,累计迁移 {} 条数据,耗时：{}", total, DateUtil.formatBetween(endTime - time));
+            h2DsFactory.destroy();
+            nowDsFactory.destroy();
             String dbFiles = h2StorageService.deleteDbFiles();
             log.info("自动备份 h2 数据库文件,备份文件位于：{}", dbFiles);
         } catch (Exception e) {
