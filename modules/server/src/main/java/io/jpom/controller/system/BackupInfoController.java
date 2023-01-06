@@ -181,7 +181,9 @@ public class BackupInfoController extends BaseServerController {
         // 存储目录
         File directory = FileUtil.file(StorageServiceFactory.dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME);
         // 生成唯一id
-        File backupSqlFile = FileUtil.file(directory, String.format("%s_%s", IdUtil.objectId(), saveFileName));
+        String format = String.format("%s_%s", IdUtil.fastSimpleUUID(), saveFileName);
+        format = StrUtil.maxLength(format, 40);
+        File backupSqlFile = FileUtil.file(directory, format);
         file.transferTo(backupSqlFile);
         // 记录到数据库
         String sha1Sum = SecureUtil.sha1(backupSqlFile);

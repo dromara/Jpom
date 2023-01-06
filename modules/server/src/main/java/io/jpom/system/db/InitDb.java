@@ -111,8 +111,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
         try {
             // 先执行恢复数据
             storageService.executeRecoverDbSql(dsFactory, this.recoverSqlFile);
-            // 加载 sql 变更记录，避免重复执行
-            Set<String> executeSqlLog = StorageServiceFactory.loadExecuteSqlLog();
+            //
             PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
             Resource[] csvResources = pathMatchingResourcePatternResolver.getResources("classpath*:/sql-view/*.csv");
             Predicate<Resource> filter = resource -> {
@@ -142,6 +141,8 @@ public class InitDb implements DisposableBean, ILoadEvent {
             // 遍历
             DataSource dataSource = dsFactory.getDataSource();
             // 第一次初始化数据库
+            // 加载 sql 变更记录，避免重复执行
+            Set<String> executeSqlLog = StorageServiceFactory.loadExecuteSqlLog();
             tryInitSql(dbExtConfig.getMode(), listMap, executeSqlLog, dataSource, s -> sqlFileNow[0] = s);
             //
             StorageServiceFactory.saveExecuteSqlLog(executeSqlLog);
@@ -215,7 +216,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
         try {
             IStorageSqlBuilderService sqlBuilderService = StorageTableFactory.get();
             Db.use(dataSource).tx((CheckedUtil.VoidFunc1Rt<Db>) parameter -> {
-
+                // 分隔后执行，mysql 不能执行多条 sql 语句
                 List<String> list = StrUtil.isEmpty(sqlBuilderService.delimiter()) ?
                     CollUtil.newArrayList(sql) : StrUtil.splitTrim(sql, sqlBuilderService.delimiter());
                 int rows = list.stream().mapToInt(value -> {
