@@ -22,6 +22,7 @@
  */
 package io.jpom.model.data;
 
+import io.jpom.common.ServerConst;
 import io.jpom.model.BaseStrikeDbModel;
 import top.jpom.h2db.TableName;
 
@@ -31,7 +32,7 @@ import top.jpom.h2db.TableName;
  * @author bwcx_jzy
  * @since 2021/12/3
  */
-@TableName(value = "WORKSPACE", name = "工作空间")
+@TableName(value = "WORKSPACE", name = "工作空间", migrateIgnoreId = ServerConst.WORKSPACE_DEFAULT_ID)
 public class WorkspaceModel extends BaseStrikeDbModel {
 
     /**

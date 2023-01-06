@@ -368,6 +368,7 @@ export default {
             clearInterval(timer);
             this.uploadFileList = [];
             this.loadData();
+            this.uploadSqlFileVisible = false;
           }, 1000);
         }
       });

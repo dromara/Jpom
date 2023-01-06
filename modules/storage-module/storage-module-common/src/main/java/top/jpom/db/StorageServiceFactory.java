@@ -105,7 +105,7 @@ public class StorageServiceFactory {
             String url = setting.get("url");
             String user = setting.get("user");
             String pass = setting.get("pass");
-            StorageServiceFactory.get().backupSql(url, user, pass, backupSqlPath, null);
+            h2StorageService.backupSql(url, user, pass, backupSqlPath, null);
             log.info("H2 数据库备份成功：{}", backupSqlPath);
             //
             IStorageService nowStorageService = doCreateStorageService(dbExtConfig.getMode());
@@ -154,12 +154,34 @@ public class StorageServiceFactory {
             if (pageResult.isEmpty()) {
                 break;
             }
-            total += pageResult.size();
+            // 过滤需要忽略迁移的数据
+            List<Entity> newResult = pageResult.stream().filter(entity -> {
+                String[] migrateIgnoreId = tableName.migrateIgnoreId();
+                if (ArrayUtil.isEmpty(migrateIgnoreId)) {
+                    return true;
+                }
+                String id = entity.getStr("id");
+                if (ArrayUtil.contains(migrateIgnoreId, id)) {
+                    log.info("{} 表中的 {} 数据自动忽略", tableName.name(), id);
+                    return false;
+                }
+                return true;
+            }).collect(Collectors.toList());
+            if (newResult.isEmpty()) {
+                if (pageResult.isLast()) {
+                    // 最后一页
+                    break;
+                }
+                // 继续
+                continue;
+            }
+            total += newResult.size();
+            // 插入信息数据
             Db db2 = Db.use(mysqlDsFactory.getDataSource());
-            db2.insert(pageResult);
+            db2.insert(newResult);
             // 删除数据
             Entity deleteWhere = Entity.create(tableName.value());
-            deleteWhere.set("id", pageResult.stream().map(entity -> entity.getStr("id")).collect(Collectors.toList()));
+            deleteWhere.set("id", newResult.stream().map(entity -> entity.getStr("id")).collect(Collectors.toList()));
             db.del(deleteWhere);
         }
         log.info("{} 迁移成功 {} 条数据", tableName.name(), total);
