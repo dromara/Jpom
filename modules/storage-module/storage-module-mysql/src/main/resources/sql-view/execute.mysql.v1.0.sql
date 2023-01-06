@@ -85,7 +85,7 @@ create procedure drop_index_if_exists(
     p_idxname VARCHAR(200)
 )
 begin
-    select count(*) into @cnt from information_schema.statistics where table_name = p_tablename and index_name = p_idxname;
+    select count(*) into @cnt from information_schema.statistics where `TABLE_SCHEMA` = SCHEMA() and table_name = p_tablename and index_name = p_idxname;
     if @cnt > 0 then
         set @str = concat('drop index ', p_idxname, ' on ', p_tablename);
         PREPARE execute_query FROM @str;

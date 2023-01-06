@@ -193,8 +193,7 @@ public class BackupInfoController extends BaseServerController {
             return new JsonMessage<>(400, "导入的数据已经存在啦");
         }
 
-//		backupInfoModel.setId(IdUtil.fastSimpleUUID());
-        backupInfoModel.setName(file.getName());
+        backupInfoModel.setName(backupSqlFile.getName());
         backupInfoModel.setBackupType(BackupTypeEnum.IMPORT.getCode());
         backupInfoModel.setStatus(BackupStatusEnum.SUCCESS.getCode());
         backupInfoModel.setFileSize(FileUtil.size(backupSqlFile));
