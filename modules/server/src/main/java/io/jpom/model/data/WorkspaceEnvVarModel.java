@@ -23,9 +23,9 @@
 package io.jpom.model.data;
 
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.service.h2db.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import top.jpom.h2db.TableName;
 
 /**
  * 工作空间环境变量

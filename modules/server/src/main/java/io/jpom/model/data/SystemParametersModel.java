@@ -23,8 +23,8 @@
 package io.jpom.model.data;
 
 import io.jpom.model.BaseStrikeDbModel;
-import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;
+import top.jpom.h2db.TableName;
 
 /**
  * 系统参数
@@ -35,32 +35,32 @@ import io.jpom.util.StringUtil;
 @TableName(value = "SYSTEM_PARAMETERS", name = "系统参数")
 public class SystemParametersModel extends BaseStrikeDbModel {
 
-	/**
-	 * 参数值
-	 */
-	private String value;
-	/**
-	 * 参数描述
-	 */
-	private String description;
+    /**
+     * 参数值
+     */
+    private String value;
+    /**
+     * 参数描述
+     */
+    private String description;
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public void setValue(String value) {
-		this.value = value;
-	}
+    public void setValue(String value) {
+        this.value = value;
+    }
 
-	public <T> T jsonToBean(Class<T> cls) {
-		return StringUtil.jsonConvert(this.getValue(), cls);
-	}
+    public <T> T jsonToBean(Class<T> cls) {
+        return StringUtil.jsonConvert(this.getValue(), cls);
+    }
 }

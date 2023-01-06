@@ -23,9 +23,9 @@
 package io.jpom.model.node;
 
 import io.jpom.model.BaseNodeModel;
-import io.jpom.service.h2db.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import top.jpom.h2db.TableName;
 
 /**
  * @author bwcx_jzy

@@ -26,7 +26,7 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.user.UserModel;
-import io.jpom.service.h2db.TableName;
+import top.jpom.h2db.TableName;
 
 /**
  * ssh 终端执行日志

@@ -23,7 +23,7 @@
 package io.jpom.model.data;
 
 import io.jpom.model.BaseStrikeDbModel;
-import io.jpom.service.h2db.TableName;
+import top.jpom.h2db.TableName;
 
 /**
  * 工作空间
@@ -34,36 +34,36 @@ import io.jpom.service.h2db.TableName;
 @TableName(value = "WORKSPACE", name = "工作空间")
 public class WorkspaceModel extends BaseStrikeDbModel {
 
-	/**
-	 * 名称
-	 */
-	private String name;
+    /**
+     * 名称
+     */
+    private String name;
 
-	/**
-	 * 描述
-	 */
-	private String description;
+    /**
+     * 描述
+     */
+    private String description;
 
-	public WorkspaceModel() {
-	}
+    public WorkspaceModel() {
+    }
 
-	public WorkspaceModel(String id) {
-		this.setId(id);
-	}
+    public WorkspaceModel(String id) {
+        this.setId(id);
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

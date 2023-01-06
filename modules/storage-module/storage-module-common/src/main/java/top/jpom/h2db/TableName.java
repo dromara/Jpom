@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.service.h2db;
+package top.jpom.h2db;
 
 import java.lang.annotation.*;
 
@@ -36,17 +36,17 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TableName {
 
-	/**
-	 * 表名
-	 *
-	 * @return tableName
-	 */
-	String value();
+    /**
+     * 表名
+     *
+     * @return tableName
+     */
+    String value();
 
-	/**
-	 * 表描述
-	 *
-	 * @return 描述
-	 */
-	String name();
+    /**
+     * 表描述
+     *
+     * @return 描述
+     */
+    String name();
 }

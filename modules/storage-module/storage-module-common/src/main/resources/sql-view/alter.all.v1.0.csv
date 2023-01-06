@@ -1,4 +1,4 @@
-type,table,name,type,len,default,comment,not-null
+alterType,tableName,name,type,len,defaultValue,comment,notNull
 DROP,NODE_INFO,cycle
 ADD,PROJECT_INFO,triggerToken,String,100,,触发器token
 ADD,OUT_GIVING,secondaryDirectory,String,200,,二级目录

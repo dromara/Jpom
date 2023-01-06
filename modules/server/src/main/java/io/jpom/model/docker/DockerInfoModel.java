@@ -28,12 +28,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import io.jpom.JpomApplication;
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.service.h2db.TableName;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Tolerate;
 import org.springframework.util.Assert;
+import top.jpom.h2db.TableName;
 
 import java.io.File;
 import java.util.HashMap;

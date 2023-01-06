@@ -28,11 +28,11 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import top.jpom.h2db.TableName;
 
 import java.util.ArrayList;
 import java.util.List;

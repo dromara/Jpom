@@ -29,10 +29,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.BaseGroupModel;
-import io.jpom.service.h2db.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import top.jpom.h2db.TableName;
 import top.jpom.transport.INodeInfo;
 
 import java.net.InetSocketAddress;

@@ -26,10 +26,10 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseStrikeDbModel;
-import io.jpom.service.h2db.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import top.jpom.h2db.TableName;
 
 import java.util.concurrent.TimeUnit;
 

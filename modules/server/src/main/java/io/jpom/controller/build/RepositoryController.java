@@ -43,7 +43,6 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
 import io.jpom.common.validator.ValidatorItem;
-import io.jpom.model.PageResultDto;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.permission.ClassFeature;
@@ -62,6 +61,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;

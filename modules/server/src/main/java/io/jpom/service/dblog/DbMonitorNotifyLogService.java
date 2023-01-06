@@ -42,41 +42,41 @@ import org.springframework.stereotype.Service;
 public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotifyLog> {
 
 
-	@Override
-	public void insert(MonitorNotifyLog monitorNotifyLog) {
-		try {
-			BaseServerController.resetInfo(UserModel.EMPTY);
-			if (MonitorNotifyLog.HAS_LOG_ID) {
-				// 兼容历史字段
-				monitorNotifyLog.setLogId(StrUtil.emptyToDefault(monitorNotifyLog.getId(), IdUtil.fastSimpleUUID()));
-			}
-			//
-			monitorNotifyLog.setCreateTime(ObjectUtil.defaultIfNull(monitorNotifyLog.getCreateTime(), SystemClock.now()));
-			super.insert(monitorNotifyLog);
-			//
-		} finally {
-			BaseServerController.removeEmpty();
-		}
-	}
+    @Override
+    public void insert(MonitorNotifyLog monitorNotifyLog) {
+        try {
+            BaseServerController.resetInfo(UserModel.EMPTY);
+            if (MonitorNotifyLog.HAS_LOG_ID) {
+                // 兼容历史字段
+                monitorNotifyLog.setLogId(StrUtil.emptyToDefault(monitorNotifyLog.getId(), IdUtil.fastSimpleUUID()));
+            }
+            //
+            monitorNotifyLog.setCreateTime(ObjectUtil.defaultIfNull(monitorNotifyLog.getCreateTime(), SystemClock.now()));
+            super.insert(monitorNotifyLog);
+            //
+        } finally {
+            BaseServerController.removeEmpty();
+        }
+    }
 
-	@Override
-	protected String[] clearTimeColumns() {
-		return new String[]{"createTime", "createTimeMillis"};
-	}
+    @Override
+    protected String[] clearTimeColumns() {
+        return new String[]{"createTime", "createTimeMillis"};
+    }
 
-	/**
-	 * 修改执行结果
-	 *
-	 * @param logId    通知id
-	 * @param status   状态
-	 * @param errorMsg 错误消息
-	 */
-	public void updateStatus(String logId, boolean status, String errorMsg) {
-		MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
-		monitorNotifyLog.setId(logId);
-		monitorNotifyLog.setNotifyStatus(status);
-		monitorNotifyLog.setNotifyError(errorMsg);
-		super.update(monitorNotifyLog);
+    /**
+     * 修改执行结果
+     *
+     * @param logId    通知id
+     * @param status   状态
+     * @param errorMsg 错误消息
+     */
+    public void updateStatus(String logId, boolean status, String errorMsg) {
+        MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
+        monitorNotifyLog.setId(logId);
+        monitorNotifyLog.setNotifyStatus(status);
+        monitorNotifyLog.setNotifyError(errorMsg);
+        super.update(monitorNotifyLog);
 //		Entity entity = new Entity();
 //		entity.set("notifyStatus", status);
 //		if (errorMsg != null) {
@@ -86,5 +86,5 @@ public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotif
 //		Entity where = new Entity();
 //		where.set("logId", logId);
 //		super.update(entity, where);
-	}
+    }
 }

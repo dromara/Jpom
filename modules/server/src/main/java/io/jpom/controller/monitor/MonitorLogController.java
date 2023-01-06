@@ -24,7 +24,6 @@ package io.jpom.controller.monitor;
 
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
-import io.jpom.model.PageResultDto;
 import io.jpom.model.log.MonitorNotifyLog;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -34,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import top.jpom.model.PageResultDto;
 
 /**
  * 监控列表

@@ -23,7 +23,7 @@
 package io.jpom.model.script;
 
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.service.h2db.TableName;
+import top.jpom.h2db.TableName;
 
 /**
  * @author bwcx_jzy
@@ -32,40 +32,40 @@ import io.jpom.service.h2db.TableName;
 @TableName(value = "SERVER_SCRIPT_EXECUTE_LOG", name = "脚本模版执行记录")
 public class ScriptExecuteLogModel extends BaseWorkspaceModel {
 
-	/**
-	 * 脚本ID
-	 */
-	private String scriptId;
-	/**
-	 * 脚本名称
-	 */
-	private String scriptName;
-	/**
-	 * 触发类型 {0，手动，1 自动触发}
-	 */
-	private Integer triggerExecType;
+    /**
+     * 脚本ID
+     */
+    private String scriptId;
+    /**
+     * 脚本名称
+     */
+    private String scriptName;
+    /**
+     * 触发类型 {0，手动，1 自动触发}
+     */
+    private Integer triggerExecType;
 
-	public String getScriptId() {
-		return scriptId;
-	}
+    public String getScriptId() {
+        return scriptId;
+    }
 
-	public void setScriptId(String scriptId) {
-		this.scriptId = scriptId;
-	}
+    public void setScriptId(String scriptId) {
+        this.scriptId = scriptId;
+    }
 
-	public String getScriptName() {
-		return scriptName;
-	}
+    public String getScriptName() {
+        return scriptName;
+    }
 
-	public void setScriptName(String scriptName) {
-		this.scriptName = scriptName;
-	}
+    public void setScriptName(String scriptName) {
+        this.scriptName = scriptName;
+    }
 
-	public Integer getTriggerExecType() {
-		return triggerExecType;
-	}
+    public Integer getTriggerExecType() {
+        return triggerExecType;
+    }
 
-	public void setTriggerExecType(Integer triggerExecType) {
-		this.triggerExecType = triggerExecType;
-	}
+    public void setTriggerExecType(Integer triggerExecType) {
+        this.triggerExecType = triggerExecType;
+    }
 }

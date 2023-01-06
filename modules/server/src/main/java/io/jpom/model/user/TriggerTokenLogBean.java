@@ -24,9 +24,9 @@ package io.jpom.model.user;
 
 import io.jpom.model.BaseDbModel;
 import io.jpom.service.ITriggerToken;
-import io.jpom.service.h2db.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import top.jpom.h2db.TableName;
 
 /**
  * id 为 triggerToken

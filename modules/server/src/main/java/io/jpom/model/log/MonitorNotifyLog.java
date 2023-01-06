@@ -25,7 +25,7 @@ package io.jpom.model.log;
 import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.MonitorModel;
-import io.jpom.service.h2db.TableName;
+import top.jpom.h2db.TableName;
 
 /**
  * 监控日志
@@ -36,160 +36,160 @@ import io.jpom.service.h2db.TableName;
 @TableName(value = "MONITORNOTIFYLOG", name = "监控通知")
 public class MonitorNotifyLog extends BaseWorkspaceModel {
 
-	/**
-	 * 是否包含旧字段
-	 */
-	public static boolean HAS_LOG_ID = false;
+    /**
+     * 是否包含旧字段
+     */
+    public static boolean HAS_LOG_ID = false;
 
-	/**
-	 *
-	 */
-	@Deprecated
-	private String logId;
-	private String nodeId;
-	private String projectId;
-	/**
-	 * 异常发生时间
-	 */
-	private Long createTime;
-	private String title;
-	private String content;
-	/**
-	 * 项目状态状态
-	 */
-	private Boolean status;
-	/**
-	 * 通知方式
-	 *
-	 * @see MonitorModel.NotifyType
-	 */
-	private Integer notifyStyle;
-	/**
-	 * 通知发送状态
-	 */
-	private Boolean notifyStatus;
-	/**
-	 * 监控id
-	 */
-	private String monitorId;
-	/**
-	 * 通知对象
-	 */
-	private String notifyObject;
-	/**
-	 * 通知异常消息
-	 */
-	private String notifyError;
+    /**
+     *
+     */
+    @Deprecated
+    private String logId;
+    private String nodeId;
+    private String projectId;
+    /**
+     * 异常发生时间
+     */
+    private Long createTime;
+    private String title;
+    private String content;
+    /**
+     * 项目状态状态
+     */
+    private Boolean status;
+    /**
+     * 通知方式
+     *
+     * @see MonitorModel.NotifyType
+     */
+    private Integer notifyStyle;
+    /**
+     * 通知发送状态
+     */
+    private Boolean notifyStatus;
+    /**
+     * 监控id
+     */
+    private String monitorId;
+    /**
+     * 通知对象
+     */
+    private String notifyObject;
+    /**
+     * 通知异常消息
+     */
+    private String notifyError;
 
-	@Deprecated
-	public String getLogId() {
-		return logId;
-	}
+    @Deprecated
+    public String getLogId() {
+        return logId;
+    }
 
-	@Deprecated
-	public void setLogId(String logId) {
-		this.logId = logId;
-	}
+    @Deprecated
+    public void setLogId(String logId) {
+        this.logId = logId;
+    }
 
-	public String getNotifyObject() {
-		return notifyObject;
-	}
+    public String getNotifyObject() {
+        return notifyObject;
+    }
 
-	public void setNotifyObject(String notifyObject) {
-		this.notifyObject = notifyObject;
-	}
+    public void setNotifyObject(String notifyObject) {
+        this.notifyObject = notifyObject;
+    }
 
-	public String getNotifyError() {
-		return notifyError;
-	}
+    public String getNotifyError() {
+        return notifyError;
+    }
 
-	public void setNotifyError(String notifyError) {
-		this.notifyError = notifyError;
-	}
+    public void setNotifyError(String notifyError) {
+        this.notifyError = notifyError;
+    }
 
-	public Boolean getStatus() {
-		return status;
-	}
+    public Boolean getStatus() {
+        return status;
+    }
 
-	public boolean status() {
-		return ObjectUtil.defaultIfNull(status, false);
-	}
+    public boolean status() {
+        return ObjectUtil.defaultIfNull(status, false);
+    }
 
-	public void setStatus(Boolean status) {
-		this.status = status;
-	}
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
 
-	public Boolean getNotifyStatus() {
-		return notifyStatus;
-	}
+    public Boolean getNotifyStatus() {
+        return notifyStatus;
+    }
 
-	public void setNotifyStatus(Boolean notifyStatus) {
-		this.notifyStatus = notifyStatus;
-	}
+    public void setNotifyStatus(Boolean notifyStatus) {
+        this.notifyStatus = notifyStatus;
+    }
 
-	public void setNotifyStatus(boolean notifyStatus) {
-		this.notifyStatus = notifyStatus;
-	}
+    public void setNotifyStatus(boolean notifyStatus) {
+        this.notifyStatus = notifyStatus;
+    }
 
-	public String getMonitorId() {
-		return monitorId;
-	}
+    public String getMonitorId() {
+        return monitorId;
+    }
 
-	public void setMonitorId(String monitorId) {
-		this.monitorId = monitorId;
-	}
+    public void setMonitorId(String monitorId) {
+        this.monitorId = monitorId;
+    }
 
-	public Integer getNotifyStyle() {
-		return notifyStyle;
-	}
+    public Integer getNotifyStyle() {
+        return notifyStyle;
+    }
 
-	public void setNotifyStyle(Integer notifyStyle) {
-		this.notifyStyle = notifyStyle;
-	}
+    public void setNotifyStyle(Integer notifyStyle) {
+        this.notifyStyle = notifyStyle;
+    }
 
 
-	public String getNodeId() {
-		return nodeId;
-	}
+    public String getNodeId() {
+        return nodeId;
+    }
 
-	public void setNodeId(String nodeId) {
-		this.nodeId = nodeId;
-	}
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
 
-	public String getProjectId() {
-		return projectId;
-	}
+    public String getProjectId() {
+        return projectId;
+    }
 
-	public void setProjectId(String projectId) {
-		this.projectId = projectId;
-	}
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
 
-	public Long getCreateTime() {
-		return createTime;
-	}
+    public Long getCreateTime() {
+        return createTime;
+    }
 
-	public void setCreateTime(Long createTime) {
-		this.createTime = createTime;
-	}
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public String getContent() {
+        return content;
+    }
 
-	public void setContent(String content) {
-		this.content = content;
-	}
+    public void setContent(String content) {
+        this.content = content;
+    }
 
-	@Override
-	public void setModifyUser(String modifyUser) {
+    @Override
+    public void setModifyUser(String modifyUser) {
 
-	}
+    }
 }

@@ -37,12 +37,12 @@ import org.springframework.stereotype.Service;
 public class DbOutGivingLogService extends BaseWorkspaceService<OutGivingLog> {
 
 
-	@Override
-	public void insert(OutGivingLog outGivingLog) {
-		outGivingLog.setStartTime(System.currentTimeMillis());
-		if (outGivingLog.getStatus() == OutGivingNodeProject.Status.Cancel.getCode()) {
-			outGivingLog.setEndTime(System.currentTimeMillis());
-		}
-		super.insert(outGivingLog);
-	}
+    @Override
+    public void insert(OutGivingLog outGivingLog) {
+        outGivingLog.setStartTime(System.currentTimeMillis());
+        if (outGivingLog.getStatus() == OutGivingNodeProject.Status.Cancel.getCode()) {
+            outGivingLog.setEndTime(System.currentTimeMillis());
+        }
+        super.insert(outGivingLog);
+    }
 }

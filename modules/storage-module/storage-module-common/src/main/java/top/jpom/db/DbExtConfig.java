@@ -20,11 +20,13 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.system.extconf;
+package top.jpom.db;
 
 import cn.hutool.core.util.StrUtil;
-import io.jpom.system.db.DbConfig;
+import cn.hutool.db.sql.SqlLog;
+import cn.hutool.setting.Setting;
 import lombok.Data;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
@@ -38,12 +40,21 @@ import org.springframework.util.unit.DataSize;
 @Configuration
 @ConfigurationProperties(prefix = "jpom.db")
 @Data
-public class DbExtConfig {
+public class DbExtConfig implements InitializingBean {
+
+    /**
+     * 默认的账号或者密码
+     */
+    public static final String DEFAULT_USER_OR_AUTHORIZATION = "jpom";
 
     /**
      * 日志记录最大条数
      */
     private Integer logStorageCount = 10000;
+    /**
+     * 数据库默认
+     */
+    private Mode mode = Mode.H2;
     /**
      * 数据库 url
      */
@@ -88,10 +99,52 @@ public class DbExtConfig {
     private Boolean showSql = false;
 
     public String userName() {
-        return StrUtil.emptyToDefault(this.userName, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
+        return StrUtil.emptyToDefault(this.userName, DbExtConfig.DEFAULT_USER_OR_AUTHORIZATION);
     }
 
     public String userPwd() {
-        return StrUtil.emptyToDefault(this.userPwd, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
+        return StrUtil.emptyToDefault(this.userPwd, DbExtConfig.DEFAULT_USER_OR_AUTHORIZATION);
+    }
+
+    public Setting toSetting() {
+        //
+        Setting setting = new Setting();
+        setting.set("user", this.userName());
+        setting.set("pass", this.userPwd());
+        // 配置连接池大小
+        setting.set("maxActive", this.getMaxActive() + "");
+        setting.set("initialSize", this.getInitialSize() + "");
+        setting.set("maxWait", this.getMaxWait() + "");
+        setting.set("minIdle", this.getMinIdle() + "");
+        // 调试模式显示sql 信息
+        if (this.getShowSql()) {
+
+            setting.set(SqlLog.KEY_SHOW_SQL, "true");
+			/*
+			  @author Hotstrip
+			  sql log only show when it's needed,
+			  if you want to check init sql,
+			  set the [sqlLevel] from [DEBUG] to [INFO]
+			 */
+            setting.set(SqlLog.KEY_SQL_LEVEL, "DEBUG");
+            setting.set(SqlLog.KEY_SHOW_PARAMS, "true");
+        }
+        return setting;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        StorageServiceFactory.setMode(this.getMode());
+    }
+
+    public enum Mode {
+        /**
+         * h2
+         */
+        H2,
+        /**
+         * mysql
+         */
+        MYSQL
     }
 }
