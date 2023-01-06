@@ -146,11 +146,7 @@ public class StorageServiceFactory {
             PageResult<Entity> pageResult;
             Db db = Db.use(h2DsFactory.getDataSource());
             Page page = new Page(1, 200);
-            try {
-                pageResult = db.page(where, page);
-            } catch (Exception e) {
-                throw Lombok.sneakyThrow(e);
-            }
+            pageResult = db.page(where, page);
             if (pageResult.isEmpty()) {
                 break;
             }
