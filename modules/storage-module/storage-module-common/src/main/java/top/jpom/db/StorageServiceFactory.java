@@ -1,5 +1,9 @@
 package top.jpom.db;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.exceptions.CheckedUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Singleton;
@@ -12,6 +16,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
 import cn.hutool.db.ds.DSFactory;
+import cn.hutool.setting.Setting;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import lombok.Lombok;
@@ -65,9 +70,22 @@ public class StorageServiceFactory {
             if (!hasDbData) {
                 throw new JpomRuntimeException("没有 h2 数据信息不用迁移");
             }
+            long time = SystemClock.now();
             DSFactory h2DsFactory = h2StorageService.create(dbExtConfig, h2Url, h2User, h2Pass);
             h2DsFactory.getDataSource();
-            log.info("成功连接 H2 ");
+            log.info("成功连接 H2 ,开始尝试自动备份");
+            // 设置默认备份 SQL 的文件地址
+            String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
+            File file = FileUtil.file(StorageServiceFactory.dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME, fileName + DbExtConfig.SQL_FILE_SUFFIX);
+            String backupSqlPath = FileUtil.getAbsolutePath(file);
+            Setting setting = h2StorageService.createSetting(dbExtConfig, h2Url, h2User, h2Pass);
+            // 数据源参数
+            String url = setting.get("url");
+            String user = setting.get("user");
+            String pass = setting.get("pass");
+            StorageServiceFactory.get().backupSql(url, user, pass, backupSqlPath, null);
+            log.info("H2 数据库备份成功：{}", backupSqlPath);
+            //
             IStorageService nowStorageService = doCreateStorageService(dbExtConfig.getMode());
             DSFactory nowDsFactory = nowStorageService.create(dbExtConfig, null, null, null);
             nowDsFactory.getDataSource();
@@ -86,7 +104,8 @@ public class StorageServiceFactory {
             for (Class<?> aClass : classes) {
                 total += migrateH2ToNowItem(aClass, h2DsFactory, nowDsFactory);
             }
-            log.info("迁移完成,累计迁移 {} 条数据", total);
+            long endTime = SystemClock.now();
+            log.info("迁移完成,累计迁移 {} 条数据,耗时：{}", total, DateUtil.formatBetween(endTime - time));
             String dbFiles = h2StorageService.deleteDbFiles();
             log.info("自动备份 h2 数据库文件,备份文件位于：{}", dbFiles);
         } catch (Exception e) {

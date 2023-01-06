@@ -35,7 +35,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
-import io.jpom.common.ServerConst;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.data.BackupInfoModel;
@@ -53,6 +52,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import top.jpom.db.DbExtConfig;
 import top.jpom.db.StorageServiceFactory;
 import top.jpom.h2db.TableName;
 import top.jpom.model.PageResultDto;
@@ -179,7 +179,7 @@ public class BackupInfoController extends BaseServerController {
         String saveFileName = UnicodeUtil.toUnicode(originalFilename);
         saveFileName = saveFileName.replace(StrUtil.BACKSLASH, "_");
         // 存储目录
-        File directory = FileUtil.file(StorageServiceFactory.dbLocalPath(), ServerConst.BACKUP_DIRECTORY_NAME);
+        File directory = FileUtil.file(StorageServiceFactory.dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME);
         // 生成唯一id
         File backupSqlFile = FileUtil.file(directory, String.format("%s_%s", IdUtil.objectId(), saveFileName));
         file.transferTo(backupSqlFile);

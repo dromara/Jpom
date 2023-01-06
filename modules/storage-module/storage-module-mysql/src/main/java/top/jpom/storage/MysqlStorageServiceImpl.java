@@ -42,6 +42,12 @@ public class MysqlStorageServiceImpl implements IStorageService {
 
     @Override
     public DSFactory create(DbExtConfig dbExtConfig, String url, String user, String pass) {
+        Setting setting = this.createSetting(dbExtConfig, url, user, pass);
+        return DSFactory.create(setting);
+    }
+
+    @Override
+    public Setting createSetting(DbExtConfig dbExtConfig, String url, String user, String pass) {
         String url2 = Opt.ofBlankAble(url).orElse(dbExtConfig.getUrl());
         String user2 = Opt.ofBlankAble(user).orElse(dbExtConfig.getUserName());
         String pass2 = Opt.ofBlankAble(pass).orElse(dbExtConfig.getUserPwd());
@@ -49,7 +55,7 @@ public class MysqlStorageServiceImpl implements IStorageService {
         setting.set("user", user2);
         setting.set("pass", pass2);
         setting.set("url", url2);
-        return DSFactory.create(setting);
+        return setting;
     }
 
     public DSFactory getDsFactory() {
