@@ -180,6 +180,7 @@ public class DockerInfoController extends BaseServerController {
         boolean ok = (boolean) plugin.execute("host", "host", host);
         Assert.state(ok, "请填写正确的 host");
         //
+        Assert.state(!StrUtil.contains(tagsStr, StrUtil.COLON), "标签不能包含 ：");
         List<String> tagList = StrUtil.splitTrim(tagsStr, StrUtil.COMMA);
         String newTags = CollUtil.join(tagList, StrUtil.COLON, StrUtil.COLON, StrUtil.COLON);
         // 验证重复

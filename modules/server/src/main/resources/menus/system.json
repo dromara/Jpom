@@ -81,7 +81,8 @@
       {
         "id": "backup",
         "title": "数据库备份",
-        "role": "system"
+        "role": "system",
+        "storageMode": "H2"
       }
     ]
   }

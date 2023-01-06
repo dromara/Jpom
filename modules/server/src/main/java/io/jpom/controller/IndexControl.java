@@ -56,6 +56,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import top.jpom.db.DbExtConfig;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -79,15 +80,18 @@ public class IndexControl extends BaseServerController {
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final SystemParametersServer systemParametersServer;
     private final ServerConfig.WebConfig webConfig;
+    private final DbExtConfig dbExtConfig;
 
     public IndexControl(UserService userService,
                         UserBindWorkspaceService userBindWorkspaceService,
                         SystemParametersServer systemParametersServer,
-                        ServerConfig serverConfig) {
+                        ServerConfig serverConfig,
+                        DbExtConfig dbExtConfig) {
         this.userService = userService;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.systemParametersServer = systemParametersServer;
         this.webConfig = serverConfig.getWeb();
+        this.dbExtConfig = dbExtConfig;
     }
 
 
@@ -342,13 +346,12 @@ public class IndexControl extends BaseServerController {
     }
 
     private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel, JSONArray showArray) {
-//        String active = jsonObject.getString("active");
-//        if (StrUtil.isNotEmpty(active)) {
-//            String active1 = JpomApplication.getInstance().getActive();
-//            if (!StrUtil.equals(active, active1)) {
-//                return false;
-//            }
-//        }
+        String storageMode = jsonObject.getString("storageMode");
+        if (StrUtil.isNotEmpty(storageMode)) {
+            if (!StrUtil.equals(dbExtConfig.getMode().name(), storageMode)) {
+                return false;
+            }
+        }
         String role = jsonObject.getString("role");
         if (StrUtil.equals(role, UserModel.SYSTEM_ADMIN) && !userModel.isSuperSystemUser()) {
             // 超级理员权限
