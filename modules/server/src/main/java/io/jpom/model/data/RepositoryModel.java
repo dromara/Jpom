@@ -30,9 +30,9 @@ import io.jpom.common.Const;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.enums.GitProtocolEnum;
-import io.jpom.service.h2db.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import top.jpom.h2db.TableName;
 
 import java.util.HashMap;
 import java.util.Map;

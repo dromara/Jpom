@@ -28,11 +28,11 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.service.h2db.TableName;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import top.jpom.h2db.TableName;
 
 import java.io.File;
 

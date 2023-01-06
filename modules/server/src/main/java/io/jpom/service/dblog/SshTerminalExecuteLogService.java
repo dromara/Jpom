@@ -44,45 +44,45 @@ import java.util.stream.Collectors;
 @Service
 public class SshTerminalExecuteLogService extends BaseWorkspaceService<SshTerminalExecuteLog> {
 
-	@Override
-	protected String[] clearTimeColumns() {
-		return new String[]{"createTimeMillis"};
-	}
+    @Override
+    protected String[] clearTimeColumns() {
+        return new String[]{"createTimeMillis"};
+    }
 
-	/**
-	 * 批量记录日志
-	 *
-	 * @param userInfo  操作的用户
-	 * @param sshItem   ssh 对象
-	 * @param ip        操作人的ip
-	 * @param userAgent 浏览器标识
-	 * @param commands  命令行
-	 * @param refuse    是否拒绝执行
-	 */
-	public void batch(UserModel userInfo, SshModel sshItem, String ip, String userAgent, boolean refuse, List<String> commands) {
-		if (sshItem == null) {
-			return;
-		}
-		long optTime = SystemClock.now();
-		try {
-			BaseServerController.resetInfo(userInfo);
-			List<SshTerminalExecuteLog> executeLogs = commands.stream().filter(StrUtil::isNotEmpty).map(s -> {
-				SshTerminalExecuteLog sshTerminalExecuteLog = new SshTerminalExecuteLog();
-				//sshTerminalExecuteLog.setId(IdUtil.fastSimpleUUID());
-				sshTerminalExecuteLog.setSshId(sshItem.getId());
-				sshTerminalExecuteLog.setSshName(sshItem.getName());
-				sshTerminalExecuteLog.setWorkspaceId(sshItem.getWorkspaceId());
-				sshTerminalExecuteLog.setCommands(s);
-				sshTerminalExecuteLog.setRefuse(refuse);
-				sshTerminalExecuteLog.setCreateTimeMillis(optTime);
-				sshTerminalExecuteLog.setIp(ip);
-				sshTerminalExecuteLog.setUserAgent(userAgent);
-				//sshTerminalExecuteLog.setUserId(UserModel.getOptUserName(userInfo));
-				return sshTerminalExecuteLog;
-			}).collect(Collectors.toList());
-			super.insert(executeLogs);
-		} finally {
-			BaseServerController.removeAll();
-		}
-	}
+    /**
+     * 批量记录日志
+     *
+     * @param userInfo  操作的用户
+     * @param sshItem   ssh 对象
+     * @param ip        操作人的ip
+     * @param userAgent 浏览器标识
+     * @param commands  命令行
+     * @param refuse    是否拒绝执行
+     */
+    public void batch(UserModel userInfo, SshModel sshItem, String ip, String userAgent, boolean refuse, List<String> commands) {
+        if (sshItem == null) {
+            return;
+        }
+        long optTime = SystemClock.now();
+        try {
+            BaseServerController.resetInfo(userInfo);
+            List<SshTerminalExecuteLog> executeLogs = commands.stream().filter(StrUtil::isNotEmpty).map(s -> {
+                SshTerminalExecuteLog sshTerminalExecuteLog = new SshTerminalExecuteLog();
+                //sshTerminalExecuteLog.setId(IdUtil.fastSimpleUUID());
+                sshTerminalExecuteLog.setSshId(sshItem.getId());
+                sshTerminalExecuteLog.setSshName(sshItem.getName());
+                sshTerminalExecuteLog.setWorkspaceId(sshItem.getWorkspaceId());
+                sshTerminalExecuteLog.setCommands(s);
+                sshTerminalExecuteLog.setRefuse(refuse);
+                sshTerminalExecuteLog.setCreateTimeMillis(optTime);
+                sshTerminalExecuteLog.setIp(ip);
+                sshTerminalExecuteLog.setUserAgent(userAgent);
+                //sshTerminalExecuteLog.setUserId(UserModel.getOptUserName(userInfo));
+                return sshTerminalExecuteLog;
+            }).collect(Collectors.toList());
+            super.insert(executeLogs);
+        } finally {
+            BaseServerController.removeAll();
+        }
+    }
 }

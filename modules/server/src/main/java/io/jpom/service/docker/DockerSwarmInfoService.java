@@ -35,5 +35,5 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class DockerSwarmInfoService extends BaseWorkspaceService<DockerSwarmInfoMode> {
 
-	public static final String DOCKER_PLUGIN_NAME = "docker-cli:swarm";
+    public static final String DOCKER_PLUGIN_NAME = "docker-cli:swarm";
 }

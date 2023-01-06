@@ -56,7 +56,6 @@ import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.db.InitDb;
-import io.jpom.system.extconf.DbExtConfig;
 import io.jpom.system.init.ProxySelectorConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.YamlMapFactoryBean;
@@ -67,6 +66,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+import top.jpom.db.DbExtConfig;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;

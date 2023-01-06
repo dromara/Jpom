@@ -24,7 +24,6 @@ package io.jpom.controller.user;
 
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
-import io.jpom.model.PageResultDto;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -35,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import top.jpom.model.PageResultDto;
 
 /**
  * 用户操作日志

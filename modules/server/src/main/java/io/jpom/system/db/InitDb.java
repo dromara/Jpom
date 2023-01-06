@@ -22,42 +22,37 @@
  */
 package io.jpom.system.db;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.CheckedUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.ds.GlobalDSFactory;
-import cn.hutool.db.sql.SqlLog;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.setting.Setting;
 import io.jpom.common.ILoadEvent;
 import io.jpom.common.JpomApplicationEvent;
-import io.jpom.common.JpomManifest;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.h2db.BaseGroupService;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.system.JpomRuntimeException;
-import io.jpom.system.extconf.DbExtConfig;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import top.jpom.db.*;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Future;
@@ -78,14 +73,6 @@ public class InitDb implements DisposableBean, ILoadEvent {
     private final List<Runnable> BEFORE_CALLBACK = new LinkedList<>();
     private final List<Supplier<Boolean>> AFTER_CALLBACK = new LinkedList<>();
 
-    /**
-     * author Hotstrip
-     * 是否开启 web 访问数据库
-     *
-     * @see <a href=http://${ip}:${port}/h2-console>http://${ip}:${port}/h2-console</a>
-     */
-    @Value("${spring.h2.console.enabled:false}")
-    private boolean h2ConsoleEnabled;
 
     public InitDb(DbConfig dbConfig,
                   DbExtConfig dbExtConfig, BackupInfoService backupInfoService) {
@@ -111,69 +98,55 @@ public class InitDb implements DisposableBean, ILoadEvent {
     private final DbExtConfig dbExtConfig;
     private final BackupInfoService backupInfoService;
 
+    /**
+     * 恢复 sql 文件
+     */
+    private File recoverSqlFile;
+
     private void init() {
         //
         BEFORE_CALLBACK.forEach(Runnable::run);
-        //
-        Setting setting = new Setting();
-        String dbUrl = dbConfig.getDbUrl();
-        setting.set("url", dbUrl);
-        setting.set("user", dbExtConfig.userName());
-        setting.set("pass", dbExtConfig.userPwd());
-        // 配置连接池大小
-        setting.set("maxActive", dbExtConfig.getMaxActive() + "");
-        setting.set("initialSize", dbExtConfig.getInitialSize() + "");
-        setting.set("maxWait", dbExtConfig.getMaxWait() + "");
-        setting.set("minIdle", dbExtConfig.getMinIdle() + "");
-        // 调试模式显示sql 信息
-        if (dbExtConfig.getShowSql()) {
-
-            setting.set(SqlLog.KEY_SHOW_SQL, "true");
-			/*
-			  @author Hotstrip
-			  sql log only show when it's needed,
-			  if you want to check init sql,
-			  set the [sqlLevel] from [DEBUG] to [INFO]
-			 */
-            setting.set(SqlLog.KEY_SQL_LEVEL, "DEBUG");
-            setting.set(SqlLog.KEY_SHOW_PARAMS, "true");
-        }
-        log.info("start load h2 db");
+        IStorageService storageService = StorageServiceFactory.get();
+        log.info("start load {} db", dbExtConfig.getMode());
+        DSFactory dsFactory = storageService.init(dbExtConfig);
         final String[] sqlFileNow = {StrUtil.EMPTY};
         try {
-            // 安全检查
-            dbSecurityCheck(dbExtConfig);
-            // 创建连接
-            DSFactory dsFactory = DSFactory.create(setting);
             // 先执行恢复数据
-            dbConfig.executeRecoverDbSql(dsFactory);
-			/*
-			  @author Hotstrip
-			  add another sql init file, if there are more sql file,
-			  please add it with same way
-			 */
-            PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath:/sql/*.sql");
+            StorageServiceFactory.get().executeRecoverDbSql(dsFactory, this.recoverSqlFile);
             // 加载 sql 变更记录，避免重复执行
-            Set<String> executeSqlLog = dbConfig.loadExecuteSqlLog();
-            // 过滤 temp sql
-            List<Resource> resourcesList = Arrays.stream(resources)
-                .sorted((o1, o2) -> StrUtil.compare(o1.getFilename(), o2.getFilename(), true))
-                .filter(resource -> !StrUtil.containsIgnoreCase(resource.getFilename(), "temp"))
-                .collect(Collectors.toList());
+            Set<String> executeSqlLog = StorageServiceFactory.loadExecuteSqlLog();
+            PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
+            Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath*:/sql-view/*.csv");
+            List<Resource> resourceList = Arrays.stream(resources).filter(resource -> {
+                String filename = resource.getFilename();
+                List<String> list = StrUtil.splitTrim(filename, StrUtil.DOT);
+                String modeType = CollUtil.get(list, 1);
+                return StrUtil.equalsAnyIgnoreCase(modeType, "all", StorageServiceFactory.getMode().name());
+            }).collect(Collectors.toList());
+            //
+            Map<String, List<Resource>> listMap = CollStreamUtil.groupByKey(resourceList, resource -> {
+                String filename = resource.getFilename();
+                List<String> list = StrUtil.splitTrim(filename, StrUtil.DOT);
+                return CollUtil.getFirst(list);
+            });
+            for (Map.Entry<String, List<Resource>> entry : listMap.entrySet()) {
+                List<Resource> value = entry.getValue();
+                value.sort((o1, o2) -> StrUtil.compare(o1.getFilename(), o2.getFilename(), true));
+                entry.setValue(value);
+            }
             // 遍历
             DataSource dataSource = dsFactory.getDataSource();
             // 第一次初始化数据库
-            tryInitSql(resourcesList, executeSqlLog, dataSource, s -> sqlFileNow[0] = s);
+            tryInitSql(listMap, executeSqlLog, dataSource, s -> sqlFileNow[0] = s);
             //
-            dbConfig.saveExecuteSqlLog(executeSqlLog);
+            StorageServiceFactory.saveExecuteSqlLog(executeSqlLog);
             GlobalDSFactory.set(dsFactory);
             // 执行回调方法
             long count = AFTER_CALLBACK.stream().mapToInt(value -> value.get() ? 1 : 0).count();
             if (count > 0) {
                 // 因为导入数据后数据结构可能发生变动
                 // 第二次初始化数据库
-                tryInitSql(resourcesList, CollUtil.newHashSet(), dataSource, s -> sqlFileNow[0] = s);
+                tryInitSql(listMap, CollUtil.newHashSet(), dataSource, s -> sqlFileNow[0] = s);
             }
             //
         } catch (Exception e) {
@@ -182,49 +155,57 @@ public class InitDb implements DisposableBean, ILoadEvent {
             throw Lombok.sneakyThrow(e);
         }
         dbConfig.initOk();
-        log.info("h2 db Successfully loaded, url is 【{}】", dbUrl);
+        log.info("{} db Successfully loaded, url is 【{}】", storageService.mode(), storageService.dbUrl());
         this.loadJsonToDb();
         this.syncAllNode();
     }
 
-    private void tryInitSql(List<Resource> resourcesList, Set<String> executeSqlLog, DataSource dataSource, Consumer<String> eachSql) {
-        for (Resource resource : resourcesList) {
-            try (InputStream inputStream = resource.getInputStream()) {
-                String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
-                String sha1 = SecureUtil.sha1(sql);
-                if (executeSqlLog.contains(sha1)) {
-                    // 已经执行过啦，不再执行
-                    continue;
-                }
-                String sqlFileNow = resource.getFilename();
-                eachSql.accept(sqlFileNow);
-                Db.use(dataSource).tx((CheckedUtil.VoidFunc1Rt<Db>) parameter -> {
-                    try {
-                        int rows = parameter.execute(sql);
-                        log.info("exec init SQL file: {} complete, and affected rows is: {}", sqlFileNow, rows);
-                    } catch (SQLException e) {
-                        throw Lombok.sneakyThrow(e);
-                    }
-                });
-                executeSqlLog.add(sha1);
-            } catch (Exception e) {
-                throw Lombok.sneakyThrow(e);
+
+    private void tryInitSql(Map<String, List<Resource>> listMap, Set<String> executeSqlLog, DataSource dataSource, Consumer<String> eachSql) {
+        //
+        Optional.ofNullable(listMap.get("table")).ifPresent(resources -> {
+            for (Resource resource : resources) {
+                String sql = StorageTableFactory.initTable(resource);
+                this.executeSql(sql, resource.getFilename(), executeSqlLog, dataSource, eachSql);
             }
-        }
+        });
+        //
+        Optional.ofNullable(listMap.get("alter")).ifPresent(resources -> {
+            for (Resource resource : resources) {
+                String sql = StorageTableFactory.initAlter(resource);
+                this.executeSql(sql, resource.getFilename(), executeSqlLog, dataSource, eachSql);
+            }
+        });
+        Optional.ofNullable(listMap.get("index")).ifPresent(resources -> {
+            for (Resource resource : resources) {
+                String sql = StorageTableFactory.initIndex(resource);
+                this.executeSql(sql, resource.getFilename(), executeSqlLog, dataSource, eachSql);
+            }
+        });
     }
 
-    /**
-     * 数据库是否开启 web 配置检查
-     *
-     * @param dbExtConfig 外部配置
-     */
-    private void dbSecurityCheck(DbExtConfig dbExtConfig) {
-        if (!JpomManifest.getInstance().isDebug() && h2ConsoleEnabled
-            && StrUtil.equals(dbExtConfig.userName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
-            && StrUtil.equals(dbExtConfig.userPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
-            throw new JpomRuntimeException("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
+    private void executeSql(String sql, String name, Set<String> executeSqlLog, DataSource dataSource, Consumer<String> eachSql) {
+        String sha1 = SecureUtil.sha1(sql);
+        if (executeSqlLog.contains(sha1)) {
+            // 已经执行过啦，不再执行
+            return;
         }
+        eachSql.accept(name);
+        try {
+            Db.use(dataSource).tx((CheckedUtil.VoidFunc1Rt<Db>) parameter -> {
+                try {
+                    int rows = parameter.execute(sql);
+                    log.info("exec init SQL file: {} complete, and affected rows is: {}", name, rows);
+                } catch (SQLException e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            });
+        } catch (SQLException e) {
+            throw Lombok.sneakyThrow(e);
+        }
+        executeSqlLog.add(sha1);
     }
+
 
     /**
      * 修改账号 密码
@@ -270,39 +251,18 @@ public class InitDb implements DisposableBean, ILoadEvent {
 
     @Override
     public void destroy() throws Exception {
-        this.silenceDestroy();
-    }
-
-//    private void silenceSignalHandle(String name) {
-//        try {
-//            Signal.handle(new Signal(name), this);
-//            log.debug("{} signal handle success", name);
-//        } catch (Exception e) {
-//            log.debug("{} signal handle fail:{}", name, e.getMessage());
-//        }
-//    }
-
-    private void silenceDestroy() {
-        dbConfig.close();
-        try {
-            DSFactory dsFactory = GlobalDSFactory.get();
-            GlobalDSFactory.set(null);
-            dsFactory.destroy();
-            log.info("h2 db destroy");
-        } catch (Throwable throwable) {
-            //System.err.println(throwable.getMessage());
-        }
+        IoUtil.close(StorageServiceFactory.get());
     }
 
     private void prepareCallback(Environment environment) {
         Opt.ofNullable(environment.getProperty("rest:load_init_db")).ifPresent(s -> {
             // 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
-            dbConfig.clearExecuteSqlLog();
+            StorageServiceFactory.clearExecuteSqlLog();
         });
         Opt.ofNullable(environment.getProperty("recover:h2db")).ifPresent(s -> {
             // 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
             try {
-                dbConfig.recoverDb();
+                this.recoverSqlFile = StorageServiceFactory.get().recoverDb();
             } catch (Exception e) {
                 throw new JpomRuntimeException("Failed to restore database", e);
             }
@@ -327,7 +287,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
             // 删除掉旧数据
             this.addBeforeCallback(() -> {
                 try {
-                    String dbFiles = dbConfig.deleteDbFiles();
+                    String dbFiles = StorageServiceFactory.get().deleteDbFiles();
                     if (dbFiles != null) {
                         log.info("Automatically backup data files to {} path", dbFiles);
                     }
@@ -349,7 +309,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
                 throw new JpomRuntimeException(StrUtil.format("sql file does not exist :{}", sqlPath));
             }
             //
-            Opt.ofNullable(environment.getProperty("transform-sql")).ifPresent(s -> dbConfig.transformSql(file));
+            Opt.ofNullable(environment.getProperty("transform-sql")).ifPresent(s -> StorageServiceFactory.get().transformSql(file));
             //
             log.info("Start importing data:{}", sqlPath);
             boolean flag = backupInfoService.restoreWithSql(sqlPath);

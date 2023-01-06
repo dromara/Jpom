@@ -24,10 +24,10 @@ package io.jpom.model.outgiving;
 
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import top.jpom.h2db.TableName;
 
 import java.util.List;
 

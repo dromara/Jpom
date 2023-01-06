@@ -28,10 +28,10 @@ import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.h2db.BaseDbService;
-import io.jpom.service.h2db.TableName;
 import io.jpom.service.node.NodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import top.jpom.h2db.TableName;
 
 import javax.annotation.Resource;
 import java.util.Set;

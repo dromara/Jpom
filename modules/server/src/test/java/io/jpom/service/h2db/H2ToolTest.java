@@ -29,11 +29,12 @@ import cn.hutool.setting.Setting;
 import io.jpom.ApplicationStartTest;
 import io.jpom.JpomApplication;
 import io.jpom.system.ExtConfigBean;
-import io.jpom.system.db.DbConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.h2.tools.RunScript;
 import org.h2.tools.Shell;
 import org.junit.jupiter.api.Test;
+import top.jpom.db.DbConfig;
+import top.jpom.db.StorageServiceFactory;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -63,7 +64,7 @@ public class H2ToolTest extends ApplicationStartTest {
     @Test
     public void testH2ShellForBackupSQL() throws SQLException {
         // 数据源参数
-        String url = dbConfig.getDbUrl();
+        String url = StorageServiceFactory.get().dbUrl();
 
         String user = dbExtConfig.userName();
         String pass = dbExtConfig.userPwd();
@@ -141,7 +142,7 @@ public class H2ToolTest extends ApplicationStartTest {
     @Test
     public void testH2DropAllObjects() throws SQLException {
         // 数据源参数
-        String url = dbConfig.getDbUrl();
+        String url = StorageServiceFactory.get().dbUrl();
 
         String user = dbExtConfig.userName();
         String pass = dbExtConfig.userPwd();

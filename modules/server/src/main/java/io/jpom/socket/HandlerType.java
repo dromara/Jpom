@@ -35,53 +35,53 @@ import io.jpom.socket.handler.*;
  * @since 2019/8/9
  */
 public enum HandlerType {
-	/**
-	 * 脚本模板
-	 */
-	nodeScript(NodeScriptHandler.class, NodeScriptServer.class),
-	/**
-	 * tomcat
-	 */
-	tomcat(TomcatHandler.class, null),
-	/**
-	 * 项目控制台和首页监控
-	 */
-	console(ConsoleHandler.class, ProjectInfoCacheService.class),
-	/**
-	 * ssh
-	 */
-	ssh(SshHandler.class, SshService.class),
-	/**
-	 * 节点升级
-	 */
-	nodeUpdate(NodeUpdateHandler.class, null),
-	/**
-	 * 服务端 脚本模版
-	 */
-	script(ServerScriptHandler.class, ScriptServer.class),
-	/**
-	 * 容器 log
-	 */
-	dockerLog(DockerLogHandler.class, DockerInfoService.class),
-	/**
-	 * 容器 终端
-	 */
-	docker(DockerCliHandler.class, DockerInfoService.class),
-	;
-	final Class<?> handlerClass;
+    /**
+     * 脚本模板
+     */
+    nodeScript(NodeScriptHandler.class, NodeScriptServer.class),
+    /**
+     * tomcat
+     */
+    tomcat(TomcatHandler.class, null),
+    /**
+     * 项目控制台和首页监控
+     */
+    console(ConsoleHandler.class, ProjectInfoCacheService.class),
+    /**
+     * ssh
+     */
+    ssh(SshHandler.class, SshService.class),
+    /**
+     * 节点升级
+     */
+    nodeUpdate(NodeUpdateHandler.class, null),
+    /**
+     * 服务端 脚本模版
+     */
+    script(ServerScriptHandler.class, ScriptServer.class),
+    /**
+     * 容器 log
+     */
+    dockerLog(DockerLogHandler.class, DockerInfoService.class),
+    /**
+     * 容器 终端
+     */
+    docker(DockerCliHandler.class, DockerInfoService.class),
+    ;
+    final Class<?> handlerClass;
 
-	final Class<? extends BaseWorkspaceService<?>> serviceClass;
+    final Class<? extends BaseWorkspaceService<?>> serviceClass;
 
-	HandlerType(Class<?> handlerClass, Class<? extends BaseWorkspaceService<?>> serviceClass) {
-		this.handlerClass = handlerClass;
-		this.serviceClass = serviceClass;
-	}
+    HandlerType(Class<?> handlerClass, Class<? extends BaseWorkspaceService<?>> serviceClass) {
+        this.handlerClass = handlerClass;
+        this.serviceClass = serviceClass;
+    }
 
-	public Class<?> getHandlerClass() {
-		return handlerClass;
-	}
+    public Class<?> getHandlerClass() {
+        return handlerClass;
+    }
 
-	public Class<? extends BaseWorkspaceService<?>> getServiceClass() {
-		return serviceClass;
-	}
+    public Class<? extends BaseWorkspaceService<?>> getServiceClass() {
+        return serviceClass;
+    }
 }

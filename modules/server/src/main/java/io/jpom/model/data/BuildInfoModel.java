@@ -25,11 +25,11 @@ package io.jpom.model.data;
 import cn.hutool.core.annotation.PropIgnore;
 import io.jpom.model.BaseGroupModel;
 import io.jpom.model.log.BuildHistoryLog;
-import io.jpom.service.h2db.TableName;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Tolerate;
+import top.jpom.h2db.TableName;
 
 /**
  * new BuildModel class, for replace old BuildModel

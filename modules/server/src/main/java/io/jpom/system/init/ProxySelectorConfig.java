@@ -115,6 +115,8 @@ public class ProxySelectorConfig extends ProxySelector implements ILoadEvent {
             //
             ProxySelector.setDefault(this);
         }
+        // 立马配置 全局代理
+        this.refresh();
     }
 
 

@@ -24,7 +24,9 @@ package io.jpom.controller.system;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.UnicodeUtil;
 import cn.hutool.core.util.ClassUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -34,10 +36,8 @@ import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
-import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
-import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.enums.BackupStatusEnum;
 import io.jpom.model.enums.BackupTypeEnum;
@@ -46,13 +46,19 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.BackupInfoService;
-import io.jpom.service.h2db.TableName;
-import io.jpom.system.db.DbConfig;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import top.jpom.db.StorageServiceFactory;
+import top.jpom.h2db.TableName;
+import top.jpom.model.PageResultDto;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -67,6 +73,7 @@ import java.util.stream.Collectors;
 @RestController
 @Feature(cls = ClassFeature.SYSTEM_BACKUP)
 @SystemPermission
+@ConditionalOnProperty(prefix = "jpom.db", name = "mode", havingValue = "H2")
 public class BackupInfoController extends BaseServerController {
 
     /**
@@ -75,12 +82,9 @@ public class BackupInfoController extends BaseServerController {
     private static Map<String, String> TABLE_NAME_MAP = new HashMap<>();
 
     private final BackupInfoService backupInfoService;
-    private final DbConfig dbConfig;
 
-    public BackupInfoController(BackupInfoService backupInfoService,
-                                DbConfig dbConfig) {
+    public BackupInfoController(BackupInfoService backupInfoService) {
         this.backupInfoService = backupInfoService;
-        this.dbConfig = dbConfig;
     }
 
     /**
@@ -90,9 +94,9 @@ public class BackupInfoController extends BaseServerController {
      */
     @PostMapping(value = "/system/backup/list")
     @Feature(method = MethodFeature.LIST)
-    public Object loadBackupList() {
+    public Object loadBackupList(HttpServletRequest request) {
         // 查询数据库
-        PageResultDto<BackupInfoModel> pageResult = backupInfoService.listPage(getRequest());
+        PageResultDto<BackupInfoModel> pageResult = backupInfoService.listPage(request);
 
         return JsonMessage.success("获取成功", pageResult);
     }
@@ -132,7 +136,7 @@ public class BackupInfoController extends BaseServerController {
             return new JsonMessage<>(400, "备份文件不存在");
         }
         // 清空 sql 加载记录
-        dbConfig.clearExecuteSqlLog();
+        StorageServiceFactory.clearExecuteSqlLog();
         // 还原备份文件
         boolean flag = backupInfoService.restoreWithSql(backupInfoModel.getFilePath());
         if (flag) {
@@ -168,26 +172,24 @@ public class BackupInfoController extends BaseServerController {
     @PostMapping(value = "/system/backup/upload")
     @Feature(method = MethodFeature.UPLOAD)
     @SystemPermission(superUser = true)
-    public JsonMessage<String> uploadBackupFile() throws IOException {
-        MultipartFileBuilder multipartFileBuilder = createMultipart()
-            .addFieldName("file");
-        // 备份类型
-        //int backupType = Integer.parseInt(getParameter("backupType"));
+    public JsonMessage<String> uploadBackupFile(MultipartFile file) throws IOException {
+        String originalFilename = file.getOriginalFilename();
+        String extName = FileUtil.extName(originalFilename);
+        Assert.state(StrUtil.containsAnyIgnoreCase(extName, "sql"), "不支持的文件类型：" + extName);
+        String saveFileName = UnicodeUtil.toUnicode(originalFilename);
+        saveFileName = saveFileName.replace(StrUtil.BACKSLASH, "_");
         // 存储目录
-        File directory = FileUtil.file(dbConfig.dbLocalPath(), ServerConst.BACKUP_DIRECTORY_NAME);
-
-        // 保存文件
-        multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(directory))
-            .setUseOriginalFilename(false);
-        String backupSqlPath = multipartFileBuilder.save();
+        File directory = FileUtil.file(StorageServiceFactory.dbLocalPath(), ServerConst.BACKUP_DIRECTORY_NAME);
+        // 生成唯一id
+        File backupSqlFile = FileUtil.file(directory, String.format("%s_%s", IdUtil.objectId(), saveFileName));
+        file.transferTo(backupSqlFile);
         // 记录到数据库
-        final File file = new File(backupSqlPath);
-        String sha1Sum = SecureUtil.sha1(file);
+        String sha1Sum = SecureUtil.sha1(backupSqlFile);
         BackupInfoModel backupInfoModel = new BackupInfoModel();
         backupInfoModel.setSha1Sum(sha1Sum);
         boolean exists = backupInfoService.exists(backupInfoModel);
         if (exists) {
-            FileUtil.del(file);
+            FileUtil.del(backupSqlFile);
             return new JsonMessage<>(400, "导入的数据已经存在啦");
         }
 
@@ -195,10 +197,10 @@ public class BackupInfoController extends BaseServerController {
         backupInfoModel.setName(file.getName());
         backupInfoModel.setBackupType(BackupTypeEnum.IMPORT.getCode());
         backupInfoModel.setStatus(BackupStatusEnum.SUCCESS.getCode());
-        backupInfoModel.setFileSize(FileUtil.size(file));
+        backupInfoModel.setFileSize(FileUtil.size(backupSqlFile));
 
         backupInfoModel.setSha1Sum(sha1Sum);
-        backupInfoModel.setFilePath(backupSqlPath);
+        backupInfoModel.setFilePath(FileUtil.getAbsolutePath(backupSqlFile));
         backupInfoService.insert(backupInfoModel);
 
         return new JsonMessage<>(200, "导入成功");
@@ -211,7 +213,7 @@ public class BackupInfoController extends BaseServerController {
      */
     @GetMapping(value = "/system/backup/download")
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public void downloadBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id, HttpServletResponse response) {
         // 根据 id 查询备份信息
         BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
         Objects.requireNonNull(backupInfoModel, "备份数据不存在");
@@ -220,12 +222,12 @@ public class BackupInfoController extends BaseServerController {
         File file = new File(backupInfoModel.getFilePath());
         if (!FileUtil.exist(file)) {
             //log.error("文件不存在，无法下载...backupId: {}", id);
-            ServletUtil.write(getResponse(), JsonMessage.getString(404, "文件不存在，无法下载"), ContentType.JSON.toString());
+            ServletUtil.write(response, JsonMessage.getString(404, "文件不存在，无法下载"), ContentType.JSON.toString());
             return;
         }
 
         // 下载文件
-        ServletUtil.write(getResponse(), file);
+        ServletUtil.write(response, file);
     }
 
     /**

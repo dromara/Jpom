@@ -36,17 +36,17 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NodeDataPermission {
 
-	/**
-	 * 参数名
-	 *
-	 * @return 默认ID
-	 */
-	String parameterName() default "id";
+    /**
+     * 参数名
+     *
+     * @return 默认ID
+     */
+    String parameterName() default "id";
 
-	/**
-	 * 数据 class
-	 *
-	 * @return cls
-	 */
-	Class<? extends BaseNodeService<?>> cls();
+    /**
+     * 数据 class
+     *
+     * @return cls
+     */
+    Class<? extends BaseNodeService<?>> cls();
 }

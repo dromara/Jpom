@@ -31,10 +31,10 @@ import cn.hutool.core.util.*;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson2.JSONObject;
-import io.jpom.service.h2db.TableName;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.Assert;
+import top.jpom.h2db.TableName;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -104,7 +104,8 @@ public class H2TableToCsv2Test extends ApplicationStartTest {
             return jsonObject;
         }).collect(Collectors.groupingBy(o -> o.getString("tableName"), Collectors.toList()));
         CsvWriter writer = CsvUtil.getWriter(new File("table.all.v1.0.csv"), CharsetUtil.CHARSET_UTF_8);
-        writer.writeLine("name", "type", "len", "default", "not-null", "primary-key", "comment", "table-comment");
+        // tableName,name,type,len,defaultValue,notNull,primaryKey,comment,tableComment
+        writer.writeLine("tableName", "name", "type", "len", "defaultValue", "notNull", "primaryKey", "comment", "tableComment");
         for (List<JSONObject> list : listMap.values()) {
             list.sort(Comparator.comparing(o -> o.getInteger("ordinalPosition")));
             for (JSONObject jsonObject : list) {
@@ -118,7 +119,7 @@ public class H2TableToCsv2Test extends ApplicationStartTest {
                 String tableRemarks = jsonObject.getString("tableRemarks");
                 Boolean nullable = jsonObject.getBoolean("isNullable");
 
-                writer.writeLine(StrUtil.format("{}.{}", tableName, columnName), dataType, lenStr, defaultValue, String.valueOf(!nullable),
+                writer.writeLine(tableName, columnName, dataType, lenStr, defaultValue, String.valueOf(!nullable),
                     StrUtil.equals("id", columnName) ? Boolean.TRUE.toString() : Boolean.FALSE.toString(), remarks,
                     StrUtil.equals("id", columnName) ? tableRemarks : StrUtil.EMPTY);
             }
@@ -139,8 +140,9 @@ public class H2TableToCsv2Test extends ApplicationStartTest {
             case "BIGINT":
                 return Long.class.getSimpleName();
             case "CHARACTER VARYING":
-            case "CHARACTER LARGE OBJECT":
                 return String.class.getSimpleName();
+            case "CHARACTER LARGE OBJECT":
+                return "TEXT";
             case "INTEGER":
                 return Integer.class.getSimpleName();
             case "TINYINT":

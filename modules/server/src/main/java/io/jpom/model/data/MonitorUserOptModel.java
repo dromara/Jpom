@@ -26,8 +26,8 @@ import com.alibaba.fastjson2.JSON;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;
+import top.jpom.h2db.TableName;
 
 import java.util.List;
 import java.util.stream.Collectors;

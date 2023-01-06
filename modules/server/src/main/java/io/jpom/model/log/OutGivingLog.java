@@ -24,7 +24,7 @@ package io.jpom.model.log;
 
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
-import io.jpom.service.h2db.TableName;
+import top.jpom.h2db.TableName;
 
 /**
  * 项目分发日志
@@ -34,91 +34,91 @@ import io.jpom.service.h2db.TableName;
  **/
 @TableName(value = "OUTGIVINGLOG", name = "分发日志")
 public class OutGivingLog extends BaseWorkspaceModel {
-	/**
-	 * 分发id
-	 */
-	private String outGivingId;
-	/**
-	 * 状态
-	 *
-	 * @see OutGivingNodeProject.Status
-	 */
-	private Integer status;
-	/**
-	 * 开始时间
-	 */
-	private Long startTime;
-	/**
-	 * 结束时间
-	 */
-	private Long endTime;
-	/**
-	 * 处理消息
-	 */
-	private String result;
-	/**
-	 * 节点id
-	 */
-	private String nodeId;
-	/**
-	 * 项目id
-	 */
-	private String projectId;
+    /**
+     * 分发id
+     */
+    private String outGivingId;
+    /**
+     * 状态
+     *
+     * @see OutGivingNodeProject.Status
+     */
+    private Integer status;
+    /**
+     * 开始时间
+     */
+    private Long startTime;
+    /**
+     * 结束时间
+     */
+    private Long endTime;
+    /**
+     * 处理消息
+     */
+    private String result;
+    /**
+     * 节点id
+     */
+    private String nodeId;
+    /**
+     * 项目id
+     */
+    private String projectId;
 
 
-	public String getOutGivingId() {
-		return outGivingId;
-	}
+    public String getOutGivingId() {
+        return outGivingId;
+    }
 
-	public void setOutGivingId(String outGivingId) {
-		this.outGivingId = outGivingId;
-	}
+    public void setOutGivingId(String outGivingId) {
+        this.outGivingId = outGivingId;
+    }
 
-	public Integer getStatus() {
-		return status;
-	}
+    public Integer getStatus() {
+        return status;
+    }
 
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
 
-	public Long getStartTime() {
-		return startTime;
-	}
+    public Long getStartTime() {
+        return startTime;
+    }
 
-	public void setStartTime(Long startTime) {
-		this.startTime = startTime;
-	}
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
 
-	public Long getEndTime() {
-		return endTime;
-	}
+    public Long getEndTime() {
+        return endTime;
+    }
 
-	public void setEndTime(Long endTime) {
-		this.endTime = endTime;
-	}
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
+    }
 
-	public String getResult() {
-		return result;
-	}
+    public String getResult() {
+        return result;
+    }
 
-	public void setResult(String result) {
-		this.result = result;
-	}
+    public void setResult(String result) {
+        this.result = result;
+    }
 
-	public String getNodeId() {
-		return nodeId;
-	}
+    public String getNodeId() {
+        return nodeId;
+    }
 
-	public void setNodeId(String nodeId) {
-		this.nodeId = nodeId;
-	}
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
 
-	public String getProjectId() {
-		return projectId;
-	}
+    public String getProjectId() {
+        return projectId;
+    }
 
-	public void setProjectId(String projectId) {
-		this.projectId = projectId;
-	}
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
 }

@@ -41,13 +41,13 @@ import io.jpom.model.user.UserModel;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.h2db.BaseDbService;
-import io.jpom.system.db.DbConfig;
-import io.jpom.system.extconf.DbExtConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import top.jpom.db.DbExtConfig;
+import top.jpom.db.StorageServiceFactory;
 
 import java.io.File;
 import java.util.HashMap;
@@ -70,12 +70,9 @@ import java.util.stream.Stream;
 public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 
     private final DbExtConfig dbExtConfig;
-    private final DbConfig dbConfig;
 
-    public BackupInfoService(DbExtConfig dbExtConfig,
-                             DbConfig dbConfig) {
+    public BackupInfoService(DbExtConfig dbExtConfig) {
         this.dbExtConfig = dbExtConfig;
-        this.dbConfig = dbConfig;
     }
 
     /**
@@ -166,11 +163,11 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
         final String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
 
         // 设置默认备份 SQL 的文件地址
-        File file = FileUtil.file(dbConfig.dbLocalPath(), ServerConst.BACKUP_DIRECTORY_NAME, fileName + ServerConst.SQL_FILE_SUFFIX);
+        File file = FileUtil.file(StorageServiceFactory.dbLocalPath(), ServerConst.BACKUP_DIRECTORY_NAME, fileName + ServerConst.SQL_FILE_SUFFIX);
         final String backupSqlPath = FileUtil.getAbsolutePath(file);
 
         // 数据源参数
-        final String url = dbConfig.getDbUrl();
+        final String url = StorageServiceFactory.get().dbUrl();
 
         final String user = dbExtConfig.userName();
         final String pass = dbExtConfig.userPwd();

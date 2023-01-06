@@ -25,7 +25,7 @@ package io.jpom.model.stat;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseGroupModel;
 import io.jpom.model.log.SystemMonitorLog;
-import io.jpom.service.h2db.TableName;
+import top.jpom.h2db.TableName;
 
 /**
  * @author bwcx_jzy

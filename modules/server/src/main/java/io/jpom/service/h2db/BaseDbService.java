@@ -40,13 +40,15 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerConst;
 import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseUserModifyDbModel;
-import io.jpom.model.PageResultDto;
 import io.jpom.model.user.UserModel;
-import io.jpom.system.extconf.DbExtConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.util.Assert;
+import top.jpom.db.DbExtConfig;
+import top.jpom.h2db.BaseDbCommonService;
+import top.jpom.h2db.TableName;
+import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;

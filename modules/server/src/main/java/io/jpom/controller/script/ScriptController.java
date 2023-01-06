@@ -30,7 +30,7 @@ import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
-import io.jpom.model.PageResultDto;
+import top.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.model.user.UserModel;

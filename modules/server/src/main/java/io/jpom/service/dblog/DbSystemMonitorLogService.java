@@ -33,13 +33,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class DbSystemMonitorLogService extends BaseDbService<SystemMonitorLog> {
 
-	@Override
-	protected String[] clearTimeColumns() {
-		return new String[]{"monitorTime"};
-	}
+    @Override
+    protected String[] clearTimeColumns() {
+        return new String[]{"monitorTime"};
+    }
 
 
-	//
+    //
 //	public PageResultDto<SystemMonitorLog> getMonitorData(long startTime, long endTime) {
 //		Entity entity = new Entity(SystemMonitorLog.TABLE_NAME);
 //		entity.set(" MONITORTIME", ">= " + startTime);

@@ -33,11 +33,11 @@ import io.jpom.common.ServerOpenApi;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfig;
-import io.jpom.system.db.DbConfig;
 import io.jpom.util.JwtUtil;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
+import top.jpom.db.DbConfig;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
