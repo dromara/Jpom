@@ -38,6 +38,7 @@ import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -125,7 +126,8 @@ public class ManageEditProjectController extends BaseAgentController {
         String lib = projectInfo.getLib();
         Assert.state(StrUtil.isNotEmpty(lib) && !StrUtil.SLASH.equals(lib) && !Validator.isChinese(lib), "项目Jar路径不能为空,不能为顶级目录,不能包含中文");
 
-        Assert.state(checkPathSafe(lib), "项目Jar路径存在提升目录问题");
+        FileUtils.checkSlip(lib, e -> new IllegalArgumentException("项目Jar路径存在提升目录问题"));
+
 
         // java 程序副本
         if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.Jar || runMode1 == RunMode.JarWar || runMode1 == RunMode.JavaExtDirsCp) {

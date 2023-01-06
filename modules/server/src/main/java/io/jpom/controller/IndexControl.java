@@ -22,6 +22,7 @@
  */
 package io.jpom.controller;
 
+import cn.hutool.cache.Cache;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
@@ -30,6 +31,7 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -80,6 +82,7 @@ public class IndexControl extends BaseServerController {
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final SystemParametersServer systemParametersServer;
     private final ServerConfig.WebConfig webConfig;
+    private final ServerConfig.NodeConfig nodeConfig;
     private final DbExtConfig dbExtConfig;
 
     public IndexControl(UserService userService,
@@ -91,6 +94,7 @@ public class IndexControl extends BaseServerController {
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.systemParametersServer = systemParametersServer;
         this.webConfig = serverConfig.getWeb();
+        this.nodeConfig = serverConfig.getNode();
         this.dbExtConfig = dbExtConfig;
     }
 
@@ -126,7 +130,9 @@ public class IndexControl extends BaseServerController {
         html = StrUtil.replace(html, "<link rel=\"icon\" href=\"favicon.ico\">", "<link rel=\"icon\" href=\"" + proxyPath + "favicon.ico\">");
         // <apiTimeOut>
         int webApiTimeout = webConfig.getApiTimeout();
+        int uploadFileSliceSize = nodeConfig.getUploadFileSliceSize();
         html = StrUtil.replace(html, "<apiTimeout>", TimeUnit.SECONDS.toMillis(webApiTimeout) + "");
+        html = StrUtil.replace(html, "<uploadFileSliceSize>", uploadFileSliceSize + "");
         // 修改网页标题
         String title = ReUtil.get("<title>.*?</title>", html, 0);
         if (StrUtil.isNotEmpty(title)) {
@@ -384,5 +390,20 @@ public class IndexControl extends BaseServerController {
             }
         }
         return true;
+    }
+
+    /**
+     * 生成分片id
+     *
+     * @return json
+     */
+    @GetMapping(value = "generate-sharding-id", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> generateShardingId() {
+        Cache<String, String> shardingIds = BaseServerController.SHARDING_IDS;
+        int size = shardingIds.size();
+        Assert.state(size <= 100, "分片id最大同时使用 100 个");
+        String uuid = IdUtil.fastSimpleUUID();
+        shardingIds.put(uuid, uuid);
+        return JsonMessage.success(uuid, uuid);
     }
 }

@@ -60,6 +60,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -212,28 +213,53 @@ public class ProjectFileControl extends BaseAgentController {
         }
     }
 
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<CommandOpResult> upload(String type, String levelName, Integer stripComponents, String after) throws Exception {
+    @RequestMapping(value = "upload-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<CommandOpResult> uploadSharding(MultipartFile file,
+                                                       String sliceId,
+                                                       Integer totalSlice,
+                                                       Integer nowSlice,
+                                                       String fileSumSha1) throws Exception {
+        String tempPathName = agentConfig.getFixedTempPathName();
+        this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumSha1);
+
+        return JsonMessage.success("上传成功");
+    }
+
+    @RequestMapping(value = "sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<CommandOpResult> shardingMerge(String type,
+                                                      String levelName,
+                                                      Integer stripComponents,
+                                                      String sliceId,
+                                                      Integer totalSlice,
+                                                      String fileSumSha1,
+                                                      String after) throws Exception {
+        String tempPathName = agentConfig.getFixedTempPathName();
+        File successFile = this.shardingTryMerge(tempPathName, sliceId, totalSlice, fileSumSha1);
+        // 处理上传文件
+        return this.upload(successFile, type, levelName, stripComponents, after);
+    }
+
+    /**
+     * 处理上传文件
+     *
+     * @param file            上传的文件
+     * @param type            上传类型
+     * @param levelName       文件夹
+     * @param stripComponents 剔除文件夹
+     * @param after           上传之后
+     * @return 结果
+     * @throws Exception 异常
+     */
+    public JsonMessage<CommandOpResult> upload(File file, String type, String levelName, Integer stripComponents, String after) throws Exception {
         NodeProjectInfoModel pim = getProjectInfoModel();
-        MultipartFileBuilder multipartFileBuilder = createMultipart()
-            .addFieldName("file")
-            .setUseOriginalFilename(true);
-        // 压缩文件
-//        String type = getParameter("type");
-//        String levelName = getParameter("levelName");
         File lib = StrUtil.isEmpty(levelName) ? new File(pim.allLib()) : FileUtil.file(pim.allLib(), levelName);
         // 备份文件
         String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
         try {
-            String tempPathName = agentConfig.getTempPathName();
+            //
+            this.saveProjectFileBefore(lib, pim);
             if ("unzip".equals(type)) {
-                multipartFileBuilder.setFileExt(StringUtil.PACKAGE_EXT);
-                multipartFileBuilder.setSavePath(tempPathName);
-                String path = multipartFileBuilder.save();
-                //
-                this.saveProjectFileBefore(lib, pim);
                 // 解压
-                File file = new File(path);
                 try {
                     int stripComponentsValue = Convert.toInt(stripComponents, 0);
                     CompressionFileUtil.unCompress(file, lib, stripComponentsValue);
@@ -243,61 +269,84 @@ public class ProjectFileControl extends BaseAgentController {
                     }
                 }
             } else {
-                // 先存储至临时文件夹
-                multipartFileBuilder.setSavePath(tempPathName);
-                // 保存
-                String path = multipartFileBuilder.save();
-                //
-                this.saveProjectFileBefore(lib, pim);
                 // 移动文件到对应目录
                 FileUtil.mkdir(lib);
-                FileUtil.move(FileUtil.file(path), lib, true);
+                FileUtil.move(file, lib, true);
             }
             //
-            //String after = getParameter("after");
-            if (StrUtil.isNotEmpty(after)) {
-                //
-                List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = pim.getJavaCopyItemList();
-                //
-                AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(after, AfterOpt.No.getCode()));
-                if ("restart".equalsIgnoreCase(after) || afterOpt == AfterOpt.Restart) {
-                    CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
-                    // 自动处理副本集
-                    if (javaCopyItemList != null) {
-                        ThreadUtil.execute(() -> javaCopyItemList.forEach(javaCopyItem -> {
-                            try {
-                                consoleService.execCommand(ConsoleCommandOp.restart, pim, javaCopyItem);
-                            } catch (Exception e) {
-                                log.error("重启副本集失败", e);
-                            }
-                        }));
-                    }
-                    return new JsonMessage<>(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
-                } else if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
-                    CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
-                    if (javaCopyItemList != null) {
-                        int sleepTime = getParameterInt("sleepTime", 30);
-                        ThreadUtil.execute(() -> {
-                            // 副本
-                            for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
-                                if (!this.restart(pim, javaCopyItem, afterOpt)) {
-                                    return;
-                                }
-                                // 休眠x秒 等待之前项目正常启动
-                                try {
-                                    TimeUnit.SECONDS.sleep(sleepTime);
-                                } catch (InterruptedException ignored) {
-                                }
-                            }
-                        });
-                    }
-                    return new JsonMessage<>(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
-                }
+            JsonMessage<CommandOpResult> resultJsonMessage = this.saveProjectFileAfter(after, pim);
+            if (resultJsonMessage != null) {
+                return resultJsonMessage;
             }
         } finally {
             ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
         }
         return JsonMessage.success("上传成功");
+    }
+
+    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<CommandOpResult> upload(String type, String levelName, Integer stripComponents, String after) throws Exception {
+        MultipartFileBuilder multipartFileBuilder = createMultipart()
+            .addFieldName("file")
+            .setUseOriginalFilename(true);
+
+        String tempPathName = agentConfig.getTempPathName();
+        String successPath;
+        if ("unzip".equals(type)) {
+            multipartFileBuilder.setFileExt(StringUtil.PACKAGE_EXT);
+            multipartFileBuilder.setSavePath(tempPathName);
+            successPath = multipartFileBuilder.save();
+        } else {
+            // 先存储至临时文件夹
+            multipartFileBuilder.setSavePath(tempPathName);
+            // 保存
+            successPath = multipartFileBuilder.save();
+        }
+        return this.upload(FileUtil.file(successPath), type, levelName, stripComponents, after);
+    }
+
+    private JsonMessage<CommandOpResult> saveProjectFileAfter(String after, NodeProjectInfoModel pim) throws Exception {
+        if (StrUtil.isEmpty(after)) {
+            return null;
+        }
+        //
+        List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = pim.getJavaCopyItemList();
+        //
+        AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(after, AfterOpt.No.getCode()));
+        if ("restart".equalsIgnoreCase(after) || afterOpt == AfterOpt.Restart) {
+            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
+            // 自动处理副本集
+            if (javaCopyItemList != null) {
+                ThreadUtil.execute(() -> javaCopyItemList.forEach(javaCopyItem -> {
+                    try {
+                        consoleService.execCommand(ConsoleCommandOp.restart, pim, javaCopyItem);
+                    } catch (Exception e) {
+                        log.error("重启副本集失败", e);
+                    }
+                }));
+            }
+            return new JsonMessage<>(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
+        } else if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
+            CommandOpResult result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
+            if (javaCopyItemList != null) {
+                int sleepTime = getParameterInt("sleepTime", 30);
+                ThreadUtil.execute(() -> {
+                    // 副本
+                    for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+                        if (!this.restart(pim, javaCopyItem, afterOpt)) {
+                            return;
+                        }
+                        // 休眠x秒 等待之前项目正常启动
+                        try {
+                            TimeUnit.SECONDS.sleep(sleepTime);
+                        } catch (InterruptedException ignored) {
+                        }
+                    }
+                });
+            }
+            return new JsonMessage<>(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
+        }
+        return null;
     }
 
 

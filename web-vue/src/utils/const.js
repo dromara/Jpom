@@ -250,3 +250,36 @@ export function getWebSocketUrl(url, parameter) {
   const fullUrl = (domain + url).replace(new RegExp("//", "gm"), "/");
   return `${protocol}${location.host}${fullUrl}?${parameter}`;
 }
+
+/**
+ * 并发执行
+ * @params list {Array} - 要迭代的数组
+ * @params limit {Number} - 并发数量控制数,最好小于3
+ * @params asyncHandle {Function} - 对`list`的每一个项的处理函数，参数为当前处理项，必须 return 一个Promise来确定是否继续进行迭代
+ * @return {Promise} - 返回一个 Promise 值来确认所有数据是否迭代完成
+ */
+export function concurrentExecution(list, limit, asyncHandle) {
+  // 递归执行
+  const recursion = (arr) => {
+    // 执行方法 arr.shift() 取出并移除第一个数据
+    return asyncHandle(arr.shift()).then((res) => {
+      // 数组还未迭代完，递归继续进行迭代
+      if (arr.length !== 0) {
+        return recursion(arr);
+      } else {
+        return res;
+      }
+    });
+  };
+  // 创建新的并发数组
+  let listCopy = [].concat(list);
+  // 正在进行的所有并发异步操作
+  let asyncList = [];
+  limit = limit > listCopy.length ? listCopy.length : limit;
+
+  while (limit--) {
+    asyncList.push(recursion(listCopy));
+  }
+  // 所有并发异步操作都完成后，本次并发控制迭代完成
+  return Promise.all(asyncList);
+}

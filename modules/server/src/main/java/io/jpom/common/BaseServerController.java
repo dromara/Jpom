@@ -22,6 +22,8 @@
  */
 package io.jpom.common;
 
+import cn.hutool.cache.Cache;
+import cn.hutool.cache.CacheUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.pattern.CronPattern;
@@ -36,6 +38,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Jpom server 端
@@ -45,7 +48,7 @@ import java.util.Optional;
  */
 public abstract class BaseServerController extends BaseJpomController {
     private static final ThreadLocal<UserModel> USER_MODEL_THREAD_LOCAL = new ThreadLocal<>();
-
+    public static final Cache<String, String> SHARDING_IDS = CacheUtil.newLRUCache(10, TimeUnit.DAYS.toMillis(1));
     public static final String NODE_ID = "nodeId";
 
     @Resource

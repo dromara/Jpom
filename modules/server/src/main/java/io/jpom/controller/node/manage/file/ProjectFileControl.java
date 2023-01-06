@@ -23,6 +23,7 @@
 package io.jpom.controller.node.manage.file;
 
 import io.jpom.common.BaseServerController;
+import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.permission.ClassFeature;
@@ -31,7 +32,10 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.NodeDataPermission;
 import io.jpom.service.node.ProjectInfoCacheService;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 文件管理
@@ -63,8 +67,38 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.UPLOAD)
-    public String upload() {
-        return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload).toString();
+    public JsonMessage<String> upload() {
+        return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload);
+    }
+
+
+    /**
+     * 上传文件
+     *
+     * @return json
+     */
+    @RequestMapping(value = "upload-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.UPLOAD)
+    public JsonMessage<String> uploadSharding(String sliceId) {
+        Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
+        return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload_Sharding);
+    }
+
+    /**
+     * 合并分片
+     *
+     * @return json
+     */
+    @RequestMapping(value = "sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.UPLOAD)
+    public JsonMessage<String> shardingMerge(String sliceId, HttpServletRequest request) {
+        Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
+        JsonMessage<String> message = NodeForward.request(getNode(), request, NodeUrl.Manage_File_Sharding_Merge);
+        if (message.success()) {
+            // 判断-删除分片id
+            BaseServerController.SHARDING_IDS.remove(sliceId);
+        }
+        return message;
     }
 
     /**

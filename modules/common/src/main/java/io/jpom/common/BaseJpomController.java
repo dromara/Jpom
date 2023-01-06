@@ -24,13 +24,15 @@ package io.jpom.common;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.HttpUtil;
 import io.jpom.common.multipart.MultipartFileBuilder;
+import io.jpom.util.FileUtils;
+import lombok.Lombok;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
-import org.springframework.http.HttpHeaders;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -39,14 +41,14 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.util.*;
 
 /**
  * controller
@@ -71,16 +73,6 @@ public abstract class BaseJpomController {
         return FileUtil.normalize(newPath);
     }
 
-    protected boolean checkPathSafe(String path) {
-        if (path == null) {
-            return false;
-        }
-        String newPath = path.replace("../", StrUtil.EMPTY);
-        newPath = newPath.replace("..\\", StrUtil.EMPTY);
-        newPath = newPath.replace("+", StrUtil.EMPTY);
-        return newPath.equals(path);
-    }
-
     /**
      * 获取请求的ip 地址
      *
@@ -91,27 +83,92 @@ public abstract class BaseJpomController {
     }
 
     /**
-     * 获取指定header
+     * 上传保存分片信息
      *
-     * @param name name
-     * @return value
+     * @param file        上传的文件信息
+     * @param tempPath    临时保存目录
+     * @param sliceId     分片id
+     * @param totalSlice  累积分片
+     * @param nowSlice    当前分片
+     * @param fileSumSha1 文件签名信息
+     * @throws IOException 异常
      */
-    protected String getHeader(String name) {
-        return getRequest().getHeader(name);
+    public void uploadSharding(MultipartFile file,
+                               String tempPath,
+                               String sliceId,
+                               Integer totalSlice,
+                               Integer nowSlice,
+                               String fileSumSha1) throws IOException {
+        Assert.hasText(fileSumSha1, "没有文件签名信息");
+        Assert.hasText(sliceId, "没有分片 id 信息");
+
+        Assert.notNull(totalSlice, "上传信息不完成：totalSlice");
+        Assert.notNull(nowSlice, "上传信息不完成：nowSlice");
+        Assert.state(totalSlice > 0 && nowSlice > -1 && totalSlice >= nowSlice, "当前上传的分片信息错误");
+        // 保存路径
+        File slicePath = FileUtil.file(tempPath, "slice", sliceId);
+        File sliceItemPath = FileUtil.file(slicePath, "items");
+
+        String originalFilename = file.getOriginalFilename();
+        File slice = FileUtil.file(sliceItemPath, originalFilename + "." + nowSlice);
+        FileUtil.mkParentDirs(slice);
+        Assert.notNull(file, "没有上传文件");
+        // 保存
+        file.transferTo(slice);
     }
 
     /**
-     * 获取cookie 值
+     * 合并分片
      *
-     * @param name name
-     * @return value
+     * @param tempPath    临时保存目录
+     * @param sliceId     上传id
+     * @param totalSlice  累积分片
+     * @param fileSumSha1 文件签名
+     * @return 合并后的文件
+     * @throws IOException io
      */
-    protected String getCookieValue(String name) {
-        Cookie cookie = ServletUtil.getCookie(getRequest(), name);
-        if (cookie == null) {
-            return "";
+    public File shardingTryMerge(String tempPath,
+                                 String sliceId,
+                                 Integer totalSlice,
+                                 String fileSumSha1) throws IOException {
+        Assert.hasText(fileSumSha1, "没有文件签名信息");
+        Assert.hasText(sliceId, "没有分片 id 信息");
+
+        Assert.notNull(totalSlice, "上传信息不完成：totalSlice");
+
+        // 保存路径
+        File slicePath = FileUtil.file(tempPath, "slice", sliceId);
+        File sliceItemPath = FileUtil.file(slicePath, "items");
+
+        // 准备合并
+        File[] files = sliceItemPath.listFiles();
+        int length = ArrayUtil.length(files);
+        Assert.state(files != null && length == totalSlice, "文件上传失败,存在分片丢失的情况, " + length + " != " + totalSlice);
+        String name = files[0].getName();
+        name = StrUtil.subBefore(name, StrUtil.DOT, true);
+        File successFile = FileUtil.file(slicePath, name);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(successFile)) {
+            try (FileChannel channel = fileOutputStream.getChannel()) {
+                Arrays.stream(files).sorted((o1, o2) -> {
+                    // 排序
+                    Integer o1Int = Convert.toInt(FileUtil.extName(o1));
+                    Integer o2Int = Convert.toInt(FileUtil.extName(o2));
+                    return o1Int.compareTo(o2Int);
+                }).forEach(file12 -> {
+                    try {
+                        FileUtils.appendChannel(file12, channel);
+                    } catch (Exception e) {
+                        throw Lombok.sneakyThrow(e);
+                    }
+                });
+            }
         }
-        return cookie.getValue();
+        // 删除分片信息
+        FileUtil.del(sliceItemPath);
+        // 对比文件信息
+        String newSha1 = SecureUtil.sha1(successFile);
+        Assert.state(StrUtil.equals(newSha1, fileSumSha1), "文件合并后异常,文件不完成可能被损坏");
+        return successFile;
     }
 
     protected String getParameter(String name) {
@@ -138,57 +195,11 @@ public abstract class BaseJpomController {
         return Convert.toInt(getParameter(name), def);
     }
 
-    protected int getParameterInt(String name) {
-        return getParameterInt(name, 0);
-    }
-
     protected long getParameterLong(String name, long def) {
         String value = getParameter(name);
         return Convert.toLong(value, def);
     }
 
-    protected long getParameterLong(String name) {
-        return getParameterLong(name, 0L);
-    }
-
-    /**
-     * 获取来源的url 参数
-     *
-     * @return map
-     */
-    protected Map<String, String> getRefererParameter() {
-        String referer = getHeader(HttpHeaders.REFERER);
-        return HttpUtil.decodeParamMap(referer, CharsetUtil.CHARSET_UTF_8);
-    }
-
-    /**
-     * 获取表单数据到实体中
-     *
-     * @param tClass class
-     * @param <T>    t
-     * @return t
-     */
-    protected <T> T getObject(Class<T> tClass) {
-        return ServletUtil.toBean(getRequest(), tClass, true);
-    }
-
-    /**
-     * 获取所有请求头
-     *
-     * @return map
-     */
-    protected Map<String, String> getHeaders() {
-        return getHeaderMapValues(getRequest());
-    }
-
-    /**
-     * 所有参数
-     *
-     * @return map 值为数组类型
-     */
-    protected Map<String, String[]> getParametersMap() {
-        return getRequest().getParameterMap();
-    }
 
     // ----------------文件上传
     /**
