@@ -180,7 +180,7 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
         if (StrUtil.isEmpty(tag)) {
             return super.findByCondition(workspaceIdCondition, statusCondition);
         } else {
-            Condition tagCondition = new Condition(" instr(tags,'" + tag + "')", "");
+            Condition tagCondition = new Condition(" instr(tags,'" + StrUtil.wrap(tag, StrUtil.COLON) + "')", "");
             tagCondition.setPlaceHolder(false);
             tagCondition.setOperator("");
             return super.findByCondition(workspaceIdCondition, statusCondition, tagCondition);
@@ -196,7 +196,7 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
      */
     public int countByTag(String workspaceId, String tag) {
         String sql = StrUtil.format("SELECT * FROM {} where workspaceId=? and instr(tags,?)", super.getTableName());
-        return (int) super.count(sql, workspaceId, tag);
+        return (int) super.count(sql, workspaceId, StrUtil.wrap(tag, StrUtil.COLON));
     }
 
     /**

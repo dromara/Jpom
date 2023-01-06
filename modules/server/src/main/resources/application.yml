@@ -55,18 +55,15 @@ jpom:
   init-read-line: 10
   db:
     # 数据库默认 支持 ：H2、MYSQL
-    mode: MYSQL
+    mode: H2
     # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
     log-storage-count: 10000
     # H2 模式无需配置 mysql 配置 jdbc 地址
-    #    url:
-    url: jdbc:mysql://127.0.0.1:3306/jpom?useUnicode=true&characterEncoding=UTF-8&useSSL=false&useAffectedRows=true&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&allowMultiQueries=true
+    url:
     # 数据库账号 默认 jpom
-    #user-name: jpom
-    user-name: root
+    user-name: jpom
     # 数据库密码 默认 jpom 如果自行配置请保证密码强度
-    # user-pwd: jpom
-    user-pwd: k@4Qoi6qdV#OYjQd
+    user-pwd: jpom
     # h2 数据库缓存大小  kilobyte 1KB 1,024 megabyte 1MB 1,048,576
     cache-size: 50MB
     # 自动备份间隔天数 小于等于 0 不自动备份
@@ -114,6 +111,8 @@ server:
   tomcat:
     uri-encoding: UTF-8
 spring:
+  profiles:
+    active: mysql-1
   web:
     resources:
       static-locations: classpath:/dist/

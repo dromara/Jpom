@@ -79,6 +79,9 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
      * 检查数据库备份
      */
     public void checkAutoBackup() {
+        if (dbExtConfig.getMode() != DbExtConfig.Mode.H2) {
+            return;
+        }
         try {
             BaseServerController.resetInfo(UserModel.EMPTY);
             // 创建备份
@@ -136,6 +139,9 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
      * 自动备份
      */
     public Future<BackupInfoModel> autoBackup() {
+        if (dbExtConfig.getMode() != DbExtConfig.Mode.H2) {
+            return null;
+        }
         // 执行数据库备份
         return this.backupToSql(null, BackupTypeEnum.AUTO);
     }
