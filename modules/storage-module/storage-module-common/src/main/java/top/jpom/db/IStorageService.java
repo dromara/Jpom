@@ -4,6 +4,7 @@ import cn.hutool.db.ds.DSFactory;
 import io.jpom.system.JpomRuntimeException;
 
 import java.io.File;
+import java.sql.SQLException;
 
 /**
  * 数据库实现
@@ -28,6 +29,13 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @return 数据库连接工厂
      */
     DSFactory create(DbExtConfig dbExtConfig);
+
+    /**
+     * 获取数据库连接工厂
+     *
+     * @return DSFactory
+     */
+    DSFactory getDsFactory();
 
     /**
      * 恢复数据库
@@ -66,6 +74,20 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @throws Exception 异常
      */
     default void executeRecoverDbSql(DSFactory dsFactory, File recoverSqlFile) throws Exception {
+        if (recoverSqlFile == null) {
+            return;
+        }
+        throw new IllegalArgumentException("没有实现改功能");
+    }
+
+    /**
+     * 修改账号 密码
+     *
+     * @param oldUes 旧的账号
+     * @param newUse 新的账号
+     * @param newPwd 新密码
+     */
+    default void alterUser(String oldUes, String newUse, String newPwd) throws SQLException {
         throw new IllegalArgumentException("没有实现改功能");
     }
 

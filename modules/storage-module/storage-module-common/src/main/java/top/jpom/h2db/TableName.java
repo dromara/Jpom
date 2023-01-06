@@ -22,6 +22,8 @@
  */
 package top.jpom.h2db;
 
+import top.jpom.db.DbExtConfig;
+
 import java.lang.annotation.*;
 
 /**
@@ -49,4 +51,11 @@ public @interface TableName {
      * @return 描述
      */
     String name();
+
+    /**
+     * 数据库默认
+     *
+     * @return 默认所有模式
+     */
+    DbExtConfig.Mode[] modes() default {};
 }

@@ -5,6 +5,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 在线编辑配置文件报错并修改数据库密码问题
+2. 【server】二次修复 在线终端输入部分字符后自动断开连接问题
 
 ### ❌ 不兼容功能
 
@@ -55,7 +56,7 @@ curl -LfsSo Agent.sh https://gitee.com/dromara/Jpom/raw/master/modules/agent/src
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复 在线终端输入部分字符后自动端口连接问题（感谢 @Again.... ）
+1. 【server】修复 在线终端输入部分字符后自动断开连接问题（感谢 @Again.... ）
 2. 【server】修复 执行 SSH 脚本未正常加载环境变量问题
 3. 【server】修复 快速安装(绑定)插件端的命令特殊字符转义问题 （感谢@张飞鸿）
 4. 【server】优化 节点在线升级确认操作提醒要升级的目标版本号（感谢@木迷榖）
@@ -81,7 +82,7 @@ curl -LfsSo Agent.sh https://gitee.com/dromara/Jpom/raw/master/modules/agent/src
 1. 【server】优化 SSH 终端 JSCH 新增日志实现，方便排查问题
 2. 【agent】优化 部分下载接口取消返回值，避免控制台出现错误日志
 3. 【server】优化 服务端代理插件端的 websocket 超时问题
-4. 【server】修复 在线终端输入部分字符后自动端口连接问题（感谢 @Again.... ）
+4. 【server】修复 在线终端输入部分字符后自动断开连接问题（感谢 @Again.... ）
 5. 【server】修复 部分下拉框无法正常搜索文件（感谢 @Again.... ）
 6. 【agent】优化 同时上传相同的文件名时可能异常
 7. 【server】优化 节点分发状态新增（等待分发、手动取消状态）

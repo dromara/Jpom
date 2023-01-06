@@ -1,5 +1,7 @@
 package top.jpom.db;
 
+import cn.hutool.core.util.StrUtil;
+
 import java.util.List;
 
 /**
@@ -41,4 +43,13 @@ public interface IStorageSqlBuilderService extends IMode {
      * @return sql
      */
     String generateColumnSql(TableViewRowData tableViewRowData);
+
+    /**
+     * sql 分隔执行标记
+     *
+     * @return 分隔标记
+     */
+    default String delimiter() {
+        return StrUtil.EMPTY;
+    }
 }

@@ -23,6 +23,7 @@
 package io.jpom.model.data;
 
 import io.jpom.model.BaseUserModifyDbModel;
+import top.jpom.db.DbExtConfig;
 import top.jpom.h2db.TableName;
 
 /**
@@ -30,7 +31,7 @@ import top.jpom.h2db.TableName;
  * @since 2021-11-18
  * Backup info with H2 database
  */
-@TableName(value = "BACKUP_INFO", name = "数据备份")
+@TableName(value = "BACKUP_INFO", name = "数据备份", modes = DbExtConfig.Mode.H2)
 public class BackupInfoModel extends BaseUserModifyDbModel {
 
     /**

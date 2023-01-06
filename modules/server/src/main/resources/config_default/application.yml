@@ -54,8 +54,12 @@ jpom:
   # 查看日志时初始读取最后多少行（默认10，0不读取）
   init-read-line: 10
   db:
+    # 数据库默认 支持 ：H2、MYSQL
+    mode: H2
     # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
     log-storage-count: 10000
+    # H2 模式无需配置 mysql 配置 jdbc 地址
+    url:
     # 数据库账号 默认 jpom
     user-name: jpom
     # 数据库密码 默认 jpom 如果自行配置请保证密码强度

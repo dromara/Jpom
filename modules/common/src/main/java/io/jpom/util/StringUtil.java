@@ -177,15 +177,14 @@ public class StringUtil {
      * @return type
      */
     public static JSONValidator.Type validatorJson(String json) {
-        JSONValidator from;
         try {
-            from = JSONValidator.from(json);
+            JSONValidator from = JSONValidator.from(json);
+            return Optional.of(from).map(JSONValidator::getType).orElse(null);
         } catch (JSONException jsonException) {
             return null;
         } catch (Exception e) {
             // ArrayIndexOutOfBoundsException
             return null;
         }
-        return Optional.ofNullable(from).map(JSONValidator::getType).orElse(null);
     }
 }

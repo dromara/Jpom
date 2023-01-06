@@ -34,6 +34,8 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.Assert;
+import top.jpom.db.IStorageService;
+import top.jpom.db.StorageServiceFactory;
 import top.jpom.h2db.TableName;
 
 import java.io.File;
@@ -66,7 +68,8 @@ public class H2TableToCsv2Test extends ApplicationStartTest {
             Map<String, Field> fieldMap = ReflectUtil.getFieldMap(aClass);
             return new CaseInsensitiveMap<>(fieldMap);
         });
-        List<Entity> query = Db.use().query("SELECT * FROM INFORMATION_SCHEMA.COLUMNS  where TABLE_SCHEMA='PUBLIC'");
+        IStorageService iStorageService = StorageServiceFactory.get();
+        List<Entity> query = Db.use(iStorageService.getDsFactory().getDataSource()).query("SELECT * FROM INFORMATION_SCHEMA.COLUMNS  where TABLE_SCHEMA='PUBLIC'");
 
         Map<String, List<JSONObject>> listMap = query.stream().map(entity -> {
             JSONObject jsonObject = new JSONObject();
@@ -130,7 +133,8 @@ public class H2TableToCsv2Test extends ApplicationStartTest {
 
     private String tableRemarks(String tableName) throws SQLException {
         String sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA='PUBLIC' and  TABLE_NAME=?";
-        List<Entity> query = Db.use().query(sql, tableName);
+        IStorageService iStorageService = StorageServiceFactory.get();
+        List<Entity> query = Db.use(iStorageService.getDsFactory().getDataSource()).query(sql, tableName);
         Entity entity = CollUtil.getFirst(query);
         return entity.getStr("REMARKS");
     }
