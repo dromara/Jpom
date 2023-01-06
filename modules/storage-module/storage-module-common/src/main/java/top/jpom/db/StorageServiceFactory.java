@@ -102,7 +102,6 @@ public class StorageServiceFactory {
             Entity where = Entity.create(tableName.value());
             PageResult<Entity> pageResult;
             Db db = Db.use(h2DsFactory.getDataSource());
-            db.setWrapper((Character) null);
             Page page = new Page(1, 200);
             try {
                 pageResult = db.page(where, page);
