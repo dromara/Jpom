@@ -1,6 +1,7 @@
 package top.jpom.db;
 
 import cn.hutool.core.collection.CollStreamUtil;
+import cn.hutool.core.exceptions.CheckedUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Singleton;
 import cn.hutool.core.text.csv.CsvReadConfig;
@@ -9,6 +10,7 @@ import cn.hutool.core.text.csv.CsvUtil;
 import cn.hutool.core.util.ServiceLoaderUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -21,6 +23,7 @@ import java.util.Map;
  * @author bwcx_jzy
  * @since 2023/1/5
  */
+@Slf4j
 public class StorageTableFactory {
 
     /**
@@ -96,7 +99,7 @@ public class StorageTableFactory {
      */
     public static IStorageSqlBuilderService get() {
         Assert.notNull(StorageServiceFactory.getMode(), "当前数据库模式未知");
-        return Singleton.get(IStorageSqlBuilderService.class.getName(), StorageTableFactory::doCreateStorageService);
+        return Singleton.get(IStorageSqlBuilderService.class.getName(), (CheckedUtil.Func0Rt<IStorageSqlBuilderService>) () -> doCreateStorageService(StorageServiceFactory.getMode()));
     }
 
 
@@ -106,15 +109,15 @@ public class StorageTableFactory {
      *
      * @return {@code EngineFactory}
      */
-    private static IStorageSqlBuilderService doCreateStorageService() {
+    private static IStorageSqlBuilderService doCreateStorageService(DbExtConfig.Mode mode) {
         final List<IStorageSqlBuilderService> storageServiceList = ServiceLoaderUtil.loadList(IStorageSqlBuilderService.class);
         if (storageServiceList != null) {
             for (IStorageSqlBuilderService storageService : storageServiceList) {
-                if (storageService.mode() == StorageServiceFactory.getMode()) {
+                if (storageService.mode() == mode) {
                     return storageService;
                 }
             }
         }
-        throw new RuntimeException("No Jpom Storage " + StorageServiceFactory.getMode() + " jar found ! Please add one of it to your project !");
+        throw new RuntimeException("No Jpom Storage " + mode + " jar found ! Please add one of it to your project !");
     }
 }

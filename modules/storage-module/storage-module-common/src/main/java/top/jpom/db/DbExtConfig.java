@@ -111,6 +111,7 @@ public class DbExtConfig implements InitializingBean {
         Setting setting = new Setting();
         setting.set("user", this.userName());
         setting.set("pass", this.userPwd());
+        setting.set("url", this.getUrl());
         // 配置连接池大小
         setting.set("maxActive", this.getMaxActive() + "");
         setting.set("initialSize", this.getInitialSize() + "");

@@ -83,6 +83,10 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
             String dbName = (String) parameter.get("dbName");
             File backupPath = (File) parameter.get("backupPath");
             this.deleteDbFiles(dbPath, dbName, backupPath);
+        } else if (StrUtil.equals("hasDbFiles", method)) {
+            File dbPath = (File) parameter.get("dbPath");
+            String dbName = (String) parameter.get("dbName");
+            return this.hasDbFiles(dbPath, dbName);
         } else {
             throw new IllegalArgumentException("不支持的类型");
         }
@@ -115,6 +119,18 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
         Recover recover = new Recover();
         recover.runTool("-dir", absolutePath, "-db", dbName);
         return FileUtil.file(recoverBackup, dbName + ".h2.sql");
+    }
+
+    /**
+     * 是否存在数据库文件
+     *
+     * @param dbPath 数据库路径
+     * @param dbName 数据库名
+     */
+    private boolean hasDbFiles(File dbPath, String dbName) {
+        String dbLocalPath = FileUtil.getAbsolutePath(dbPath);
+        ArrayList<String> list = FileLister.getDatabaseFiles(dbLocalPath, dbName, true);
+        return CollUtil.isNotEmpty(list);
     }
 
     /**

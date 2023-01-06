@@ -67,7 +67,7 @@
               <div>{{ text }}</div>
               <a-menu slot="overlay">
                 <a-menu-item key="1">
-                  <a-button icon="bars" @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link"> 阅读文件 </a-button>
+                  <a-button icon="bars" @click="goReadFile(record)" :disabled="!record.textFileEdit" type="link"> 跟踪文件 </a-button>
                 </a-menu-item>
                 <a-menu-item key="2">
                   <a-button icon="highlight" @click="handleRenameFile(record)" type="link"> 重命名 </a-button>
