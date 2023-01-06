@@ -25,11 +25,11 @@ package io.jpom.model.user;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import io.jpom.model.BaseDbModel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
+import top.jpom.model.BaseDbModel;
 
 /**
  * @author bwcx_jzy

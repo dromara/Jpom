@@ -79,6 +79,7 @@ public class H2StorageServiceImpl implements IStorageService {
 
     /**
      * 数据库是否开启 web 配置检查
+     * <p>
      * <a href=http://${ip}:${port}/h2-console>http://${ip}:${port}/h2-console</a>
      *
      * @param dbExtConfig 外部配置

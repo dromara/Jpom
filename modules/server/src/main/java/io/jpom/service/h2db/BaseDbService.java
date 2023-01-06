@@ -38,7 +38,7 @@ import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerConst;
-import io.jpom.model.BaseDbModel;
+import top.jpom.model.BaseDbModel;
 import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.model.user.UserModel;
 import lombok.extern.slf4j.Slf4j;

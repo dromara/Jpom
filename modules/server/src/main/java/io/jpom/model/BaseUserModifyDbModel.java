@@ -24,6 +24,7 @@ package io.jpom.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import top.jpom.model.BaseDbModel;
 
 /**
  * 带最后修改人字段 数据表实体
@@ -34,13 +35,13 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public abstract class BaseUserModifyDbModel extends BaseDbModel {
-	/**
-	 * 修改人
-	 */
-	private String modifyUser;
+    /**
+     * 修改人
+     */
+    private String modifyUser;
 
-	@Override
-	public String toString() {
-		return super.toString();
-	}
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }
