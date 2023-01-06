@@ -1,6 +1,6 @@
 # 🚀 版本日志
 
-## 2.10.9
+## 2.10.9 (2023-01-06)
 
 ### 🐣 新增功能
 
@@ -9,10 +9,10 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 在线编辑配置文件报错并修改数据库密码问题
-2. 【server】三次修复 在线终端输入部分字符后自动断开连接问题
+2. 【server】~~三次修复~~ 在线终端输入部分字符后自动断开连接问题
 3. 【server】升级 svnkit 依赖版本
 4. 【server】优化 docker 标签查询精准查询
-5. 【server】更名 阅读文件更名未跟踪文件
+5. 【server】更名 阅读文件更名为跟踪文件
 
 ### ❌ 不兼容功能
 
@@ -24,7 +24,7 @@
 
 1. 修改 `jpom.db.mode` 为 `MYSQL`
 2. 修改 `jpom.db.url` 为你 mysql 的 jdbc 地址( jdbc:mysql://127.0.0.1:
-   3306/jpom2?useUnicode=true&characterEncoding=UTF-8&useSSL=false)
+   3306/jpom?useUnicode=true&characterEncoding=UTF-8&useSSL=false)
 3. 修改 `jpom.db.user-name` 为对应 mysql 账户
 4. 修改 `jpom.db.user-pwd` 为对应 mysql 密码
 
