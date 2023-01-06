@@ -219,10 +219,32 @@ export function updateFile(formData) {
  */
 export function uploadProjectFile(formData) {
   return axios({
-    url: "/node/manage/file/upload",
+    url: "/node/manage/file/upload-sharding",
     headers: {
       "Content-Type": "multipart/form-data;charset=UTF-8",
     },
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData,
+  });
+}
+
+/**
+ * 合并分片项目文件
+ * @param {
+ *  file: 文件 multipart/form-data
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ *  levelName: 目录地址
+ *  type: unzip 表示压缩文件 *上传压缩文件时需要
+ *  clearType: {clear: 清空文件夹, noClear: 不清空} *上传压缩文件时需要
+ * } formData
+ */
+export function shardingMerge(formData) {
+  return axios({
+    url: "/node/manage/file/sharding-merge",
+    headers: {},
     method: "post",
     // 0 表示无超时时间
     timeout: 0,

@@ -102,7 +102,7 @@
           </template>
         </a-table>
         <!-- 批量上传文件 -->
-        <a-modal destroyOnClose v-model="uploadFileVisible" width="300px" title="上传项目文件" :footer="null" :maskClosable="false">
+        <a-modal destroyOnClose v-model="uploadFileVisible" width="400px" title="上传项目文件" :footer="null" :maskClosable="false">
           <a-upload
             :file-list="uploadFileList"
             :remove="
@@ -120,7 +120,8 @@
           <br />
           <a-space>
             <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">开始上传</a-button>
-            <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
+            <a-tag color="green" v-if="this.uploadFileList.length" class="successTag"> {{ successSize }}/{{ this.uploadFileList.length }} </a-tag>
+            <!-- <a-tag :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag> -->
           </a-space>
         </a-modal>
         <!-- 上传压缩文件 -->
@@ -146,7 +147,8 @@
             <a-input-number style="width: 100%" v-model="uploadData.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
             <a-space>
               <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
-              <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
+              <a-tag color="green" v-if="this.uploadFileList.length" class="successTag"> {{ successSize }}/{{ this.uploadFileList.length }} </a-tag>
+              <!-- <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag> -->
             </a-space>
           </a-space>
         </a-modal>
@@ -232,10 +234,24 @@
   </div>
 </template>
 <script>
-import { deleteProjectFile, downloadProjectFile, getFileList, newFileFolder, noFileModes, readFile, remoteDownload, renameFileFolder, updateFile, uploadProjectFile } from "@/api/node-project";
+import {
+  deleteProjectFile,
+  downloadProjectFile,
+  getFileList,
+  newFileFolder,
+  noFileModes,
+  readFile,
+  remoteDownload,
+  renameFileFolder,
+  updateFile,
+  uploadProjectFile,
+  shardingMerge,
+} from "@/api/node-project";
 import { ZIP_ACCEPT } from "@/utils/const";
 import codeEditor from "@/components/codeEditor";
 import projectFileBackup from "./project-file-backup.vue";
+import { uploadPieces } from "@/utils/upload-pieces";
+import { concurrentExecution } from "@/utils/const";
 
 export default {
   components: {
@@ -339,6 +355,7 @@ export default {
     this.loadData();
   },
   methods: {
+    uploadPieces,
     handleEditFile(record) {
       this.editFileVisible = true;
       this.loadFileData(record.filename);
@@ -499,39 +516,77 @@ export default {
       });
       // 设置上传状态
       this.uploading = true;
-      this.timer = setInterval(() => {
-        this.percentage = this.percentage > 99 ? 99 : this.percentage + 1;
-      }, 1000);
-
+      this.successSize = 0;
       // 遍历上传文件
-      this.uploadFileList.forEach((file, index) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("nodeId", this.nodeId);
-        formData.append("id", this.projectId);
-        // 计算属性 uploadPath
-        formData.append("levelName", this.uploadPath);
+      concurrentExecution(
+        this.uploadFileList.map((item, index) => {
+          return index;
+        }),
+        1,
+        (curItem) => {
+          const file = this.uploadFileList[curItem];
+          this.percentage = 0;
+          return new Promise((resolve, reject) => {
+            uploadPieces({
+              file,
+              process: (process) => {
+                this.percentage = Math.max(this.percentage, process);
+              },
+              success: (uploadData, name) => {
+                // 准备合并
+                shardingMerge({ ...uploadData[0], nodeId: this.nodeId, id: this.projectId, levelName: this.uploadPath }).then((res) => {
+                  if (res.code === 200) {
+                    this.successSize++;
+                    this.$notification.success({
+                      message: name + " " + res.msg,
+                    });
+                    resolve();
+                  } else {
+                    reject();
+                  }
+                });
+              },
+              error: (msg) => {
+                this.$notification.error({
+                  message: msg,
+                });
+                reject();
+              },
+              uploadCallback: (formData) => {
+                return new Promise((resolve, reject) => {
+                  formData.append("nodeId", this.nodeId);
+                  formData.append("id", this.projectId);
+                  // 计算属性 uploadPath
+                  formData.append("levelName", this.uploadPath);
 
-        // 上传文件
-        uploadProjectFile(formData).then((res) => {
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg,
+                  // 上传文件
+                  uploadProjectFile(formData)
+                    .then((res) => {
+                      if (res.code === 200) {
+                        resolve();
+                      } else {
+                        reject();
+                      }
+                    })
+                    .catch(() => {
+                      reject();
+                    });
+                });
+              },
             });
-            this.successSize++;
-          }
-          // 判断是否全部上传完成
-          if (index === this.uploadFileList.length - 1) {
-            this.percentage = 100;
-            setTimeout(() => {
-              this.percentage = 0;
-              this.uploading = false;
-              clearInterval(this.timer);
-              this.loadFileList();
-              this.uploadFileList = [];
-            }, 1000);
-          }
-        });
+          });
+        }
+      ).then(() => {
+        this.uploading = this.successSize != this.uploadFileList.length;
+        // // 判断是否全部上传完成
+        if (!this.uploading) {
+          setTimeout(() => {
+            this.percentage = 0;
+            this.loadFileList();
+            this.uploadFileList = [];
+            this.uploadFileVisible = false;
+          }, 1000);
+        }
       });
     },
     // 上传压缩文件
@@ -562,40 +617,99 @@ export default {
       });
       // 设置上传状态
       this.uploading = true;
-      this.timer = setInterval(() => {
-        this.percentage = this.percentage > 99 ? 99 : this.percentage + 1;
-      }, 1000);
-
-      // 上传文件
+      this.percentage = 0;
       const file = this.uploadFileList[0];
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("nodeId", this.nodeId);
-      formData.append("id", this.projectId);
-      // 计算属性 uploadPath
-      formData.append("levelName", this.uploadPath);
-      formData.append("type", "unzip");
-      formData.append("stripComponents", this.uploadData.stripComponents || 0);
-      formData.append("clearType", this.uploadData.checkBox ? "clear" : "noClear");
-      // 上传文件
-      uploadProjectFile(formData).then((res) => {
-        if (res.code === 200) {
-          this.$notification.success({
-            message: res.msg,
+      uploadPieces({
+        file,
+        process: (process) => {
+          this.percentage = Math.max(this.percentage, process);
+        },
+        success: (uploadData, name) => {
+          // 准备合并
+          // formData.append("type", "unzip");
+          // formData.append("stripComponents", this.uploadData.stripComponents || 0);
+          // formData.append("clearType", this.uploadData.checkBox ? "clear" : "noClear");
+          shardingMerge({
+            ...uploadData[0],
+            nodeId: this.nodeId,
+            id: this.projectId,
+            levelName: this.uploadPath,
+            type: "unzip",
+            stripComponents: this.uploadData.stripComponents || 0,
+            clearType: this.uploadData.checkBox ? "clear" : "noClear",
+          }).then((res) => {
+            if (res.code === 200) {
+              this.successSize++;
+              this.$notification.success({
+                message: name + " " + res.msg,
+              });
+              this.uploading = this.successSize != this.uploadFileList.length;
+              // // 判断是否全部上传完成
+              if (!this.uploading) {
+                setTimeout(() => {
+                  this.percentage = 0;
+                  this.loadFileList();
+                  this.uploadFileList = [];
+                  this.uploadZipFileVisible = false;
+                }, 1000);
+              }
+            }
           });
-          this.successSize++;
-          this.percentage = 100;
-          setTimeout(() => {
-            this.percentage = 0;
-            this.uploading = false;
-            clearInterval(this.timer);
-            this.uploadData = false;
-            this.uploadFileList = [];
-            this.loadFileList();
-          }, 1000);
-        }
-        this.percentage = 0;
+        },
+        error: (msg) => {
+          this.$notification.error({
+            message: msg,
+          });
+        },
+        uploadCallback: (formData) => {
+          return new Promise((resolve, reject) => {
+            formData.append("nodeId", this.nodeId);
+            formData.append("id", this.projectId);
+            // 计算属性 uploadPath
+            formData.append("levelName", this.uploadPath);
+            formData.append("type", "unzip");
+            formData.append("stripComponents", this.uploadData.stripComponents || 0);
+            formData.append("clearType", this.uploadData.checkBox ? "clear" : "noClear");
+
+            // 上传文件
+            uploadProjectFile(formData)
+              .then((res) => {
+                if (res.code === 200) {
+                  resolve();
+                } else {
+                  reject();
+                }
+              })
+              .catch(() => {
+                reject();
+              });
+          });
+        },
       });
+
+      // // 上传文件
+      // const file = this.uploadFileList[0];
+      // const formData = new FormData();
+
+      // // 上传文件
+      // uploadProjectFile(formData).then((res) => {
+      //   if (res.code === 200) {
+      //     this.$notification.success({
+      //       message: res.msg,
+      //     });
+      //     this.successSize++;
+      //     this.percentage = 100;
+      //     setTimeout(() => {
+      //       this.percentage = 0;
+      //       this.uploading = false;
+      //       clearInterval(this.timer);
+      //       this.uploadData = false;
+      //       this.uploadFileList = [];
+      //       this.loadFileList();
+      //     }, 1000);
+      //   }
+      //   this.percentage = 0;
+      // });
     },
     //打开远程上传
     openRemoteUpload() {
@@ -620,7 +734,7 @@ export default {
             stripComponents: this.remoteDownloadData.stripComponents || 0,
           };
           remoteDownload(params).then((res) => {
-            if (res.code == 200) {
+            if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
               });

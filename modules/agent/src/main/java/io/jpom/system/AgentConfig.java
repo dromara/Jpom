@@ -109,6 +109,17 @@ public class AgentConfig extends BaseExtConfig {
     /**
      * 获取当前登录用户的临时文件存储路径，如果没有登录则抛出异常
      *
+     * @return 文件夹
+     */
+    public String getFixedTempPathName() {
+        File file = getTempPath();
+        return FileUtil.getAbsolutePath(file);
+    }
+
+
+    /**
+     * 获取当前登录用户的临时文件存储路径，如果没有登录则抛出异常
+     *
      * @return file
      */
     public File getTempPath() {

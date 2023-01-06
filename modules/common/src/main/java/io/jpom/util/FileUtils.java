@@ -36,7 +36,10 @@ import lombok.Lombok;
 import org.springframework.util.AntPathMatcher;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
@@ -285,5 +288,25 @@ public class FileUtils {
      */
     public static void checkSlip(String dir) {
         checkSlip(dir, e -> new IllegalArgumentException("目录不能越级：" + e.getMessage()));
+    }
+
+    /**
+     * 文件追加
+     *
+     * @param file
+     * @param channel
+     * @throws Exception
+     */
+    public static void appendChannel(File file, FileChannel channel) throws Exception {
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            try (FileChannel inChannel = fileInputStream.getChannel()) {
+                ByteBuffer bb = ByteBuffer.allocate(1024 * 1024);
+                while (inChannel.read(bb) != -1) {
+                    bb.flip();
+                    channel.write(bb);
+                    bb.clear();
+                }
+            }
+        }
     }
 }

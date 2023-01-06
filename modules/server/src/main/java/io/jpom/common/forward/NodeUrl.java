@@ -108,6 +108,8 @@ public enum NodeUrl {
      * jzy add  timeout
      */
     Manage_File_Upload("/manage/file/upload", true),
+    Manage_File_Upload_Sharding("/manage/file/upload-sharding", true),
+    Manage_File_Sharding_Merge("/manage/file/sharding-merge", true),
 
     Manage_File_DeleteFile("/manage/file/deleteFile"),
     /**

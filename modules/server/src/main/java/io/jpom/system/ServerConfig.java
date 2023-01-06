@@ -288,8 +288,17 @@ public class ServerConfig extends BaseExtConfig {
          */
         private int uploadFileTimeout = 300;
 
+        /**
+         * 节点文件分片上传大小，单位 M
+         */
+        private int uploadFileSliceSize = 1;
+
         public int getUploadFileTimeout() {
             return Math.max(this.uploadFileTimeout, 5);
+        }
+
+        public int getUploadFileSliceSize() {
+            return Math.max(this.uploadFileSliceSize, 1);
         }
     }
 
