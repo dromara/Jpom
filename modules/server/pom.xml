@@ -182,7 +182,7 @@
                             </archive>
                             <excludes>
                                 <exclude>logback.xml</exclude>
-                                <exclude>application.yml</exclude>
+                                <exclude>application*.yml</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
