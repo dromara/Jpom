@@ -22,8 +22,10 @@
  */
 package io.jpom.model.log;
 
-import io.jpom.model.BaseDbModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
+import top.jpom.model.BaseDbModel;
 
 /**
  * 系统监控记录
@@ -31,7 +33,9 @@ import top.jpom.h2db.TableName;
  * @author Arno
  * @since 2019/9/16
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "SYSTEMMONITORLOG", name = "节点监控记录")
+@Data
 public class SystemMonitorLog extends BaseDbModel {
 
     /**
@@ -63,60 +67,4 @@ public class SystemMonitorLog extends BaseDbModel {
      * 网络时间
      */
     private Integer networkTime;
-
-    public Integer getNetworkTime() {
-        return networkTime;
-    }
-
-    public void setNetworkTime(Integer networkTime) {
-        this.networkTime = networkTime;
-    }
-
-    public String getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public Long getMonitorTime() {
-        return monitorTime;
-    }
-
-    public void setMonitorTime(Long monitorTime) {
-        this.monitorTime = monitorTime;
-    }
-
-    public Double getOccupyCpu() {
-        return occupyCpu;
-    }
-
-    public void setOccupyCpu(Double occupyCpu) {
-        this.occupyCpu = occupyCpu;
-    }
-
-    public Double getOccupyMemory() {
-        return occupyMemory;
-    }
-
-    public void setOccupyMemory(Double occupyMemory) {
-        this.occupyMemory = occupyMemory;
-    }
-
-    public Double getOccupyMemoryUsed() {
-        return occupyMemoryUsed;
-    }
-
-    public void setOccupyMemoryUsed(Double occupyMemoryUsed) {
-        this.occupyMemoryUsed = occupyMemoryUsed;
-    }
-
-    public Double getOccupyDisk() {
-        return occupyDisk;
-    }
-
-    public void setOccupyDisk(Double occupyDisk) {
-        this.occupyDisk = occupyDisk;
-    }
 }
