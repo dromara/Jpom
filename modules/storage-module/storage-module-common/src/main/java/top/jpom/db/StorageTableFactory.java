@@ -51,6 +51,7 @@ public class StorageTableFactory {
                     .orElse(null);
                 Assert.hasText(tableComment, key + " 没有描述");
                 stringBuffer.append(sqlBuilderService.generateTableSql(key, tableComment, value)).append(StrUtil.LF);
+                stringBuffer.append(sqlBuilderService.delimiter()).append(StrUtil.LF);
             }
             return stringBuffer.toString();
         } catch (Exception e) {

@@ -33,10 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.h2.tools.RunScript;
 import org.h2.tools.Shell;
 import org.junit.jupiter.api.Test;
-import top.jpom.db.DbConfig;
 import top.jpom.db.StorageServiceFactory;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -52,8 +50,6 @@ import java.sql.SQLException;
 @Slf4j
 public class H2ToolTest extends ApplicationStartTest {
 
-    @Resource
-    private DbConfig dbConfig;
 
     /**
      * 备份 SQL 文件

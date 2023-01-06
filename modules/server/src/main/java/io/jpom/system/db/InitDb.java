@@ -53,10 +53,12 @@ import top.jpom.db.*;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -74,9 +76,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
     private final List<Supplier<Boolean>> AFTER_CALLBACK = new LinkedList<>();
 
 
-    public InitDb(DbConfig dbConfig,
-                  DbExtConfig dbExtConfig, BackupInfoService backupInfoService) {
-        this.dbConfig = dbConfig;
+    public InitDb(DbExtConfig dbExtConfig, BackupInfoService backupInfoService) {
         this.dbExtConfig = dbExtConfig;
         this.backupInfoService = backupInfoService;
     }
@@ -94,7 +94,6 @@ public class InitDb implements DisposableBean, ILoadEvent {
         AFTER_CALLBACK.add(supplier);
     }
 
-    private final DbConfig dbConfig;
     private final DbExtConfig dbExtConfig;
     private final BackupInfoService backupInfoService;
 
@@ -112,32 +111,39 @@ public class InitDb implements DisposableBean, ILoadEvent {
         final String[] sqlFileNow = {StrUtil.EMPTY};
         try {
             // 先执行恢复数据
-            StorageServiceFactory.get().executeRecoverDbSql(dsFactory, this.recoverSqlFile);
+            storageService.executeRecoverDbSql(dsFactory, this.recoverSqlFile);
             // 加载 sql 变更记录，避免重复执行
             Set<String> executeSqlLog = StorageServiceFactory.loadExecuteSqlLog();
             PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath*:/sql-view/*.csv");
-            List<Resource> resourceList = Arrays.stream(resources).filter(resource -> {
+            Resource[] csvResources = pathMatchingResourcePatternResolver.getResources("classpath*:/sql-view/*.csv");
+            Predicate<Resource> filter = resource -> {
                 String filename = resource.getFilename();
                 List<String> list = StrUtil.splitTrim(filename, StrUtil.DOT);
                 String modeType = CollUtil.get(list, 1);
                 return StrUtil.equalsAnyIgnoreCase(modeType, "all", StorageServiceFactory.getMode().name());
-            }).collect(Collectors.toList());
+            };
+            List<Resource> resourceList = Arrays.stream(csvResources).filter(filter).collect(Collectors.toList());
             //
             Map<String, List<Resource>> listMap = CollStreamUtil.groupByKey(resourceList, resource -> {
                 String filename = resource.getFilename();
                 List<String> list = StrUtil.splitTrim(filename, StrUtil.DOT);
                 return CollUtil.getFirst(list);
             });
+            //
+            Resource[] sqlResources = pathMatchingResourcePatternResolver.getResources("classpath*:/sql-view/*.sql");
+            List<Resource> sqlResourceList = Arrays.stream(sqlResources).filter(filter).collect(Collectors.toList());
+            listMap.put("execute", sqlResourceList);
+            //
             for (Map.Entry<String, List<Resource>> entry : listMap.entrySet()) {
                 List<Resource> value = entry.getValue();
+                // 排序,先后顺序执行
                 value.sort((o1, o2) -> StrUtil.compare(o1.getFilename(), o2.getFilename(), true));
                 entry.setValue(value);
             }
             // 遍历
             DataSource dataSource = dsFactory.getDataSource();
             // 第一次初始化数据库
-            tryInitSql(listMap, executeSqlLog, dataSource, s -> sqlFileNow[0] = s);
+            tryInitSql(dbExtConfig.getMode(), listMap, executeSqlLog, dataSource, s -> sqlFileNow[0] = s);
             //
             StorageServiceFactory.saveExecuteSqlLog(executeSqlLog);
             GlobalDSFactory.set(dsFactory);
@@ -146,7 +152,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
             if (count > 0) {
                 // 因为导入数据后数据结构可能发生变动
                 // 第二次初始化数据库
-                tryInitSql(listMap, CollUtil.newHashSet(), dataSource, s -> sqlFileNow[0] = s);
+                tryInitSql(dbExtConfig.getMode(), listMap, CollUtil.newHashSet(), dataSource, s -> sqlFileNow[0] = s);
             }
             //
         } catch (Exception e) {
@@ -154,85 +160,12 @@ public class InitDb implements DisposableBean, ILoadEvent {
             JpomApplicationEvent.asyncExit(2);
             throw Lombok.sneakyThrow(e);
         }
-        dbConfig.initOk();
         log.info("{} db Successfully loaded, url is 【{}】", storageService.mode(), storageService.dbUrl());
-        this.loadJsonToDb();
-        this.syncAllNode();
-    }
-
-
-    private void tryInitSql(Map<String, List<Resource>> listMap, Set<String> executeSqlLog, DataSource dataSource, Consumer<String> eachSql) {
-        //
-        Optional.ofNullable(listMap.get("table")).ifPresent(resources -> {
-            for (Resource resource : resources) {
-                String sql = StorageTableFactory.initTable(resource);
-                this.executeSql(sql, resource.getFilename(), executeSqlLog, dataSource, eachSql);
-            }
-        });
-        //
-        Optional.ofNullable(listMap.get("alter")).ifPresent(resources -> {
-            for (Resource resource : resources) {
-                String sql = StorageTableFactory.initAlter(resource);
-                this.executeSql(sql, resource.getFilename(), executeSqlLog, dataSource, eachSql);
-            }
-        });
-        Optional.ofNullable(listMap.get("index")).ifPresent(resources -> {
-            for (Resource resource : resources) {
-                String sql = StorageTableFactory.initIndex(resource);
-                this.executeSql(sql, resource.getFilename(), executeSqlLog, dataSource, eachSql);
-            }
-        });
-    }
-
-    private void executeSql(String sql, String name, Set<String> executeSqlLog, DataSource dataSource, Consumer<String> eachSql) {
-        String sha1 = SecureUtil.sha1(sql);
-        if (executeSqlLog.contains(sha1)) {
-            // 已经执行过啦，不再执行
-            return;
-        }
-        eachSql.accept(name);
-        try {
-            Db.use(dataSource).tx((CheckedUtil.VoidFunc1Rt<Db>) parameter -> {
-                try {
-                    int rows = parameter.execute(sql);
-                    log.info("exec init SQL file: {} complete, and affected rows is: {}", name, rows);
-                } catch (SQLException e) {
-                    throw Lombok.sneakyThrow(e);
-                }
-            });
-        } catch (SQLException e) {
-            throw Lombok.sneakyThrow(e);
-        }
-        executeSqlLog.add(sha1);
-    }
-
-
-    /**
-     * 修改账号 密码
-     *
-     * @param oldUes 旧的账号
-     * @param newUse 新的账号
-     * @param newPwd 新密码
-     */
-    public void alterUser(String oldUes, String newUse, String newPwd) throws SQLException {
-        String sql;
-        if (StrUtil.equals(oldUes, newUse)) {
-            sql = String.format("ALTER USER %s SET PASSWORD '%s' ", newUse, newPwd);
-        } else {
-            sql = String.format("create user %s password '%s';DROP USER %s", newUse, newPwd, oldUes);
-        }
-        Db.use().execute(sql);
-    }
-
-    private void loadJsonToDb() {
         //
         Map<String, BaseGroupService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseGroupService.class);
         for (BaseGroupService<?> value : groupServiceMap.values()) {
             value.repairGroupFiled();
         }
-    }
-
-    private void syncAllNode() {
         //  同步项目
         Map<String, BaseNodeService> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeService.class);
         for (BaseNodeService<?> value : beansOfType.values()) {
@@ -240,14 +173,67 @@ public class InitDb implements DisposableBean, ILoadEvent {
         }
     }
 
-//    @Override
-//    public void afterPropertiesSet() throws Exception {
-////        String[] signalArray = new String[]{"TERM"};
-////        for (String s : signalArray) {
-////            this.silenceSignalHandle(s);
-////        }
-//
-//    }
+
+    private void tryInitSql(DbExtConfig.Mode mode, Map<String, List<Resource>> listMap, Set<String> executeSqlLog, DataSource dataSource, Consumer<String> eachSql) {
+        //
+        Optional.ofNullable(listMap.get("table")).ifPresent(resources -> {
+            for (Resource resource : resources) {
+                String sql = StorageTableFactory.initTable(resource);
+                this.executeSql(sql, resource.getFilename(), mode, executeSqlLog, dataSource, eachSql);
+            }
+        });
+        Optional.ofNullable(listMap.get("execute")).ifPresent(resources -> {
+            for (Resource resource : resources) {
+                try (InputStream inputStream = resource.getInputStream()) {
+                    String sql = IoUtil.readUtf8(inputStream);
+                    this.executeSql(sql, resource.getFilename(), mode, executeSqlLog, dataSource, eachSql);
+                } catch (Exception e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            }
+        });
+        //
+        Optional.ofNullable(listMap.get("alter")).ifPresent(resources -> {
+            for (Resource resource : resources) {
+                String sql = StorageTableFactory.initAlter(resource);
+                this.executeSql(sql, resource.getFilename(), mode, executeSqlLog, dataSource, eachSql);
+            }
+        });
+        Optional.ofNullable(listMap.get("index")).ifPresent(resources -> {
+            for (Resource resource : resources) {
+                String sql = StorageTableFactory.initIndex(resource);
+                this.executeSql(sql, resource.getFilename(), mode, executeSqlLog, dataSource, eachSql);
+            }
+        });
+    }
+
+    private void executeSql(String sql, String name, DbExtConfig.Mode mode, Set<String> executeSqlLog, DataSource dataSource, Consumer<String> eachSql) {
+        String sha1 = SecureUtil.sha1(sql + mode);
+        if (executeSqlLog.contains(sha1)) {
+            // 已经执行过啦，不再执行
+            return;
+        }
+        eachSql.accept(name);
+        try {
+            IStorageSqlBuilderService sqlBuilderService = StorageTableFactory.get();
+            Db.use(dataSource).tx((CheckedUtil.VoidFunc1Rt<Db>) parameter -> {
+
+                List<String> list = StrUtil.isEmpty(sqlBuilderService.delimiter()) ?
+                    CollUtil.newArrayList(sql) : StrUtil.splitTrim(sql, sqlBuilderService.delimiter());
+                int rows = list.stream().mapToInt(value -> {
+                    try {
+                        return parameter.execute(value);
+                    } catch (SQLException e) {
+                        throw Lombok.sneakyThrow(e);
+                    }
+                }).sum();
+                log.info("exec init SQL file: {} complete, and affected rows is: {}", name, rows);
+            });
+        } catch (SQLException e) {
+            throw Lombok.sneakyThrow(e);
+        }
+        executeSqlLog.add(sha1);
+    }
 
     @Override
     public void destroy() throws Exception {

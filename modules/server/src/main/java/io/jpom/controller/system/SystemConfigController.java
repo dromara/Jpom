@@ -67,6 +67,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import top.jpom.db.DbExtConfig;
+import top.jpom.db.StorageServiceFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -171,15 +172,16 @@ public class SystemConfigController extends BaseServerController {
                 return StrUtil.toCamelCase(camelCase, CharPool.DASHED);
             }));
         Assert.hasText(dbExtConfig2.getUserName(), "未配置(未解析到)数据库用户名");
-
-        String newDbExtConfigUserName = dbExtConfig2.userName();
-        String newDbExtConfigUserPwd = dbExtConfig2.userPwd();
-        String oldDbExtConfigUserName = dbExtConfig.userName();
-        String oldDbExtConfigUserPwd = dbExtConfig.userPwd();
-        if (!StrUtil.equals(oldDbExtConfigUserName, newDbExtConfigUserName) || !StrUtil.equals(oldDbExtConfigUserPwd, newDbExtConfigUserPwd)) {
-            // 执行修改数据库账号密码
-            Assert.state(restartBool, "修改数据库密码必须重启");
-            initDb.alterUser(oldDbExtConfigUserName, newDbExtConfigUserName, newDbExtConfigUserPwd);
+        if (dbExtConfig2.getMode() == DbExtConfig.Mode.H2) {
+            String newDbExtConfigUserName = dbExtConfig2.userName();
+            String newDbExtConfigUserPwd = dbExtConfig2.userPwd();
+            String oldDbExtConfigUserName = dbExtConfig.userName();
+            String oldDbExtConfigUserPwd = dbExtConfig.userPwd();
+            if (!StrUtil.equals(oldDbExtConfigUserName, newDbExtConfigUserName) || !StrUtil.equals(oldDbExtConfigUserPwd, newDbExtConfigUserPwd)) {
+                // 执行修改数据库账号密码
+                Assert.state(restartBool, "修改数据库密码必须重启");
+                StorageServiceFactory.get().alterUser(oldDbExtConfigUserName, newDbExtConfigUserName, newDbExtConfigUserPwd);
+            }
         }
         Resource resource = ExtConfigBean.getResource();
         Assert.state(resource.isFile(), "当前环境下不支持在线修改配置文件");

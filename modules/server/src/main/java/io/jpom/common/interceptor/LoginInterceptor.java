@@ -37,7 +37,6 @@ import io.jpom.util.JwtUtil;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
-import top.jpom.db.DbConfig;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -61,8 +60,7 @@ public class LoginInterceptor implements HandlerMethodInterceptor {
     public static final String SESSION_NAME = "user";
 
     private static final Map<Integer, String> MSG_CACHE = new HashMap<>(3);
-
-    private final DbConfig dbConfig;
+    
     private final ServerConfig.UserConfig userConfig;
 
     static {
@@ -71,20 +69,13 @@ public class LoginInterceptor implements HandlerMethodInterceptor {
         MSG_CACHE.put(ServerConst.ACCOUNT_LOCKED, ServerConst.ACCOUNT_LOCKED_TIP);
     }
 
-    public LoginInterceptor(DbConfig dbConfig,
-                            ServerConfig serverConfig) {
-        this.dbConfig = dbConfig;
+    public LoginInterceptor(ServerConfig serverConfig) {
         this.userConfig = serverConfig.getUser();
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
         HttpSession session = request.getSession();
-        boolean init = dbConfig.isInit();
-        if (!init) {
-            ServletUtil.write(response, JsonMessage.getString(100, "数据库还没有初始化成功,请耐心等待"), MediaType.APPLICATION_JSON_VALUE);
-            return false;
-        }
         //
         NotLogin notLogin = handlerMethod.getMethodAnnotation(NotLogin.class);
         if (notLogin == null) {

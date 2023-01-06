@@ -6,6 +6,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.setting.Setting;
@@ -26,6 +27,7 @@ import top.jpom.db.StorageServiceFactory;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +70,11 @@ public class H2StorageServiceImpl implements IStorageService {
         this.dsFactory = this.create(dbExtConfig);
         this.dbUrl = this.getDbUrl(dbExtConfig);
         return this.dsFactory;
+    }
+
+    public DSFactory getDsFactory() {
+        Assert.notNull(this.dsFactory, "还没有初始化数据库");
+        return dsFactory;
     }
 
     /**
@@ -213,6 +220,17 @@ public class H2StorageServiceImpl implements IStorageService {
         plugin.execute("restoreBackupSql", map);
     }
 
+
+    @Override
+    public void alterUser(String oldUes, String newUse, String newPwd) throws SQLException {
+        String sql;
+        if (StrUtil.equals(oldUes, newUse)) {
+            sql = String.format("ALTER USER %s SET PASSWORD '%s' ", newUse, newPwd);
+        } else {
+            sql = String.format("create user %s password '%s';DROP USER %s", newUse, newPwd, oldUes);
+        }
+        Db.use(this.dsFactory.getDataSource()).execute(sql);
+    }
 
     @Override
     public void close() throws Exception {

@@ -32,16 +32,16 @@ import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
+import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.sql.Condition;
 import cn.hutool.db.sql.Order;
 import io.jpom.system.JpomRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
-import top.jpom.db.DbConfig;
 import top.jpom.db.StorageServiceFactory;
 import top.jpom.model.PageResultDto;
 
-import javax.annotation.Resource;
+import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -73,8 +73,6 @@ public abstract class BaseDbCommonService<T> {
      */
     protected final String key;
 
-    @Resource
-    private DbConfig dbConfig;
 
     @SuppressWarnings("unchecked")
     public BaseDbCommonService(String key) {
@@ -99,18 +97,18 @@ public abstract class BaseDbCommonService<T> {
         return key;
     }
 
+    private DataSource getDataSource() {
+        DSFactory dsFactory = StorageServiceFactory.get().getDsFactory();
+        return dsFactory.getDataSource();
+    }
+
     /**
      * 插入数据
      *
      * @param t 数据
      */
     public void insert(T t) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return;
-        }
-        Db db = Db.use();
+        Db db = Db.use(this.getDataSource());
         db.setWrapper((Character) null);
         try {
             Entity entity = this.dataBeanToEntity(t);
@@ -129,12 +127,7 @@ public abstract class BaseDbCommonService<T> {
         if (CollUtil.isEmpty(t)) {
             return;
         }
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return;
-        }
-        Db db = Db.use();
+        Db db = Db.use(this.getDataSource());
         db.setWrapper((Character) null);
         try {
             List<Entity> entities = t.stream().map(this::dataBeanToEntity).collect(Collectors.toList());
@@ -165,12 +158,7 @@ public abstract class BaseDbCommonService<T> {
      * @return 影响行数
      */
     public int insert(Entity entity) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return 0;
-        }
-        Db db = Db.use();
+        Db db = Db.use(this.getDataSource());
         db.setWrapper((Character) null);
         entity.setTableName(tableName);
         try {
@@ -198,12 +186,7 @@ public abstract class BaseDbCommonService<T> {
      * @return 影响行数
      */
     public int update(Entity entity, Entity where) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return 0;
-        }
-        Db db = Db.use();
+        Db db = Db.use(this.getDataSource());
         db.setWrapper((Character) null);
         if (where.isEmpty()) {
             throw new JpomRuntimeException("没有更新条件");
@@ -249,16 +232,11 @@ public abstract class BaseDbCommonService<T> {
         if (StrUtil.isEmpty(keyValue)) {
             return null;
         }
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return null;
-        }
         Entity where = new Entity(tableName);
         where.set(key, keyValue);
         Entity entity;
         try {
-            Db db = Db.use();
+            Db db = Db.use(this.getDataSource());
             db.setWrapper((Character) null);
             if (consumer != null) {
                 consumer.accept(where);
@@ -331,11 +309,6 @@ public abstract class BaseDbCommonService<T> {
         //		if (ObjectUtil.isEmpty(keyValue)) {
         //			return 0;
         //		}
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return 0;
-        }
         Entity where = new Entity(tableName);
         if (keyValue != null) {
             where.set(key, keyValue);
@@ -354,17 +327,12 @@ public abstract class BaseDbCommonService<T> {
      * @return 影响行数
      */
     public int del(Entity where) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return 0;
-        }
         where.setTableName(tableName);
         if (where.isEmpty()) {
             throw new JpomRuntimeException("没有删除条件");
         }
         try {
-            Db db = Db.use();
+            Db db = Db.use(this.getDataSource());
             db.setWrapper((Character) null);
             return db.del(where);
         } catch (Exception e) {
@@ -401,13 +369,8 @@ public abstract class BaseDbCommonService<T> {
      * @return count
      */
     public long count(Entity where) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return 0;
-        }
         where.setTableName(getTableName());
-        Db db = Db.use();
+        Db db = Db.use(this.getDataSource());
         db.setWrapper((Character) null);
         try {
             return db.count(where);
@@ -423,13 +386,8 @@ public abstract class BaseDbCommonService<T> {
      * @return count
      */
     public long count(String sql, Object... params) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return 0;
-        }
         try {
-            return Db.use().count(sql, params);
+            return Db.use(this.getDataSource()).count(sql, params);
         } catch (Exception e) {
             throw warpException(e);
         }
@@ -464,13 +422,8 @@ public abstract class BaseDbCommonService<T> {
      * @return List
      */
     public List<Entity> queryList(Entity where) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return null;
-        }
         where.setTableName(getTableName());
-        Db db = Db.use();
+        Db db = Db.use(this.getDataSource());
         db.setWrapper((Character) null);
         try {
             return db.find(where);
@@ -486,12 +439,7 @@ public abstract class BaseDbCommonService<T> {
      * @return List
      */
     public List<T> findByCondition(Condition... wheres) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return null;
-        }
-        Db db = Db.use();
+        Db db = Db.use(this.getDataSource());
         db.setWrapper((Character) null);
         try {
             List<Entity> entities = db.findBy(getTableName(), wheres);
@@ -526,14 +474,9 @@ public abstract class BaseDbCommonService<T> {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public PageResultDto<T> listPage(Entity where, Page page) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return PageResultDto.EMPTY;
-        }
         where.setTableName(getTableName());
         PageResult<Entity> pageResult;
-        Db db = Db.use();
+        Db db = Db.use(this.getDataSource());
         db.setWrapper((Character) null);
         try {
             pageResult = db.page(where, page);
@@ -574,13 +517,8 @@ public abstract class BaseDbCommonService<T> {
      * @return list
      */
     public List<Entity> query(String sql, Object... params) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return null;
-        }
         try {
-            return Db.use().query(sql, params);
+            return Db.use(this.getDataSource()).query(sql, params);
         } catch (Exception e) {
             throw warpException(e);
         }
@@ -594,13 +532,8 @@ public abstract class BaseDbCommonService<T> {
      * @return list
      */
     public int execute(String sql, Object... params) {
-        if (!dbConfig.isInit()) {
-            // ignore
-            log.error("The database is not initialized, this execution will be ignored:{},{}", this.tClass, this.getClass());
-            return 0;
-        }
         try {
-            return Db.use().execute(sql, params);
+            return Db.use(this.getDataSource()).execute(sql, params);
         } catch (Exception e) {
             throw warpException(e);
         }

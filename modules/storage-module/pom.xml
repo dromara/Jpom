@@ -36,6 +36,7 @@
     <modules>
         <module>storage-module-common</module>
         <module>storage-module-h2</module>
+        <module>storage-module-mysql</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
     <version>2.10.8</version>
