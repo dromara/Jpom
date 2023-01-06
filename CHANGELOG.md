@@ -18,6 +18,23 @@
 
 1. 【server】删除 数据库中多个数据表中弃用字段
 
+### ⚠️ 注意
+
+如果需要使用 mysql 存储，则需要修改配置：
+
+1. 修改 `jpom.db.mode` 为 `MYSQL`
+2. 修改 `jpom.db.url` 为你 mysql 的 jdbc 地址( jdbc:mysql://127.0.0.1:
+   3306/jpom2?useUnicode=true&characterEncoding=UTF-8&useSSL=false)
+3. 修改 `jpom.db.user-name` 为对应 mysql 账户
+4. 修改 `jpom.db.user-pwd` 为对应 mysql 密码
+
+如果您需要迁移之前 h2 数据库中的数据到 mysql（需要先将 mysql 的连接信息配置好后才能迁移）
+
+```shell
+bash ./bin/Server.sh restart -15 --h2-migrate-mysql --h2-user=jpom --h2-pass=jpom
+
+```
+
 ------
 
 ## 2.10.8 (2023-01-05)

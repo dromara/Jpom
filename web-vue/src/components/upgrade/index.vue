@@ -94,6 +94,9 @@ export default {
   mounted() {
     this.loadData();
   },
+  beforeDestroy() {
+    this.timer && clearTimeout(this.timer);
+  },
   methods: {
     // 加载数据
     loadData() {

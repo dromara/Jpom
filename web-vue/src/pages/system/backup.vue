@@ -189,6 +189,7 @@ export default {
         releasePath: [{ required: true, message: "Please input release path", trigger: "blur" }],
       },
       tempVue: Vue,
+      timer: null,
     };
   },
   computed: {
@@ -204,6 +205,9 @@ export default {
   created() {
     // console.log(backupTypeMap);
     this.loadData();
+  },
+  beforeDestroy() {
+    this.timer && clearTimeout(this.timer);
   },
   methods: {
     // 格式化文件大小
@@ -330,9 +334,13 @@ export default {
     handleSqlUpload() {
       this.successSize = 0;
       this.uploadSqlFileVisible = true;
+      clearInterval(this.timer);
+      this.percentage = 0;
+      this.uploadFileList = [];
+      this.uploading = false;
     },
     handleSqlRemove() {
-      this.uploadFileList = [];
+      this.handleSqlUpload();
     },
     beforeSqlUpload(file) {
       this.uploadFileList = [file];
@@ -345,7 +353,7 @@ export default {
       });
       // 设置上传状态
       this.uploading = true;
-      const timer = setInterval(() => {
+      this.timer = setInterval(() => {
         this.percentage = this.percentage > 99 ? 99 : this.percentage + 1;
       }, 1000);
 
@@ -363,10 +371,7 @@ export default {
           this.successSize++;
           this.percentage = 100;
           setTimeout(() => {
-            this.percentage = 0;
-            this.uploading = false;
-            clearInterval(timer);
-            this.uploadFileList = [];
+            this.handleSqlRemove();
             this.loadData();
             this.uploadSqlFileVisible = false;
           }, 1000);
