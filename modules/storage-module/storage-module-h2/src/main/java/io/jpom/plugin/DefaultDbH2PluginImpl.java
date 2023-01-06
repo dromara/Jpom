@@ -26,7 +26,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FastByteArrayOutputStream;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.ds.DSFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.h2.store.FileLister;
 import org.h2.tools.DeleteDbFiles;
@@ -35,6 +34,7 @@ import org.h2.tools.RunScript;
 import org.h2.tools.Shell;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import top.jpom.db.StorageServiceFactory;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -70,7 +70,7 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
             DataSource dataSource = (DataSource) parameter.get("dataSource");
             if (dataSource == null) {
                 // 加载数据源
-                dataSource = DSFactory.get();
+                dataSource = StorageServiceFactory.get().getDsFactory().getDataSource();
             }
             this.restoreBackupSql(backupSqlPath, dataSource);
         } else if (StrUtil.equals("recoverToSql", method)) {

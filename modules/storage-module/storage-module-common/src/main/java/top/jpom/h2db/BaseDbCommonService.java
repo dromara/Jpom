@@ -109,7 +109,6 @@ public abstract class BaseDbCommonService<T> {
      */
     public void insert(T t) {
         Db db = Db.use(this.getDataSource());
-        db.setWrapper((Character) null);
         try {
             Entity entity = this.dataBeanToEntity(t);
             db.insert(entity);
@@ -128,7 +127,6 @@ public abstract class BaseDbCommonService<T> {
             return;
         }
         Db db = Db.use(this.getDataSource());
-        db.setWrapper((Character) null);
         try {
             List<Entity> entities = t.stream().map(this::dataBeanToEntity).collect(Collectors.toList());
             db.insert(entities);
@@ -159,7 +157,6 @@ public abstract class BaseDbCommonService<T> {
      */
     public int insert(Entity entity) {
         Db db = Db.use(this.getDataSource());
-        db.setWrapper((Character) null);
         entity.setTableName(tableName);
         try {
             return db.insert(entity);
@@ -187,7 +184,6 @@ public abstract class BaseDbCommonService<T> {
      */
     public int update(Entity entity, Entity where) {
         Db db = Db.use(this.getDataSource());
-        db.setWrapper((Character) null);
         if (where.isEmpty()) {
             throw new JpomRuntimeException("没有更新条件");
         }
@@ -237,7 +233,6 @@ public abstract class BaseDbCommonService<T> {
         Entity entity;
         try {
             Db db = Db.use(this.getDataSource());
-            db.setWrapper((Character) null);
             if (consumer != null) {
                 consumer.accept(where);
             }
@@ -333,7 +328,6 @@ public abstract class BaseDbCommonService<T> {
         }
         try {
             Db db = Db.use(this.getDataSource());
-            db.setWrapper((Character) null);
             return db.del(where);
         } catch (Exception e) {
             throw warpException(e);
@@ -371,7 +365,6 @@ public abstract class BaseDbCommonService<T> {
     public long count(Entity where) {
         where.setTableName(getTableName());
         Db db = Db.use(this.getDataSource());
-        db.setWrapper((Character) null);
         try {
             return db.count(where);
         } catch (Exception e) {
@@ -424,7 +417,6 @@ public abstract class BaseDbCommonService<T> {
     public List<Entity> queryList(Entity where) {
         where.setTableName(getTableName());
         Db db = Db.use(this.getDataSource());
-        db.setWrapper((Character) null);
         try {
             return db.find(where);
         } catch (Exception e) {
@@ -440,7 +432,6 @@ public abstract class BaseDbCommonService<T> {
      */
     public List<T> findByCondition(Condition... wheres) {
         Db db = Db.use(this.getDataSource());
-        db.setWrapper((Character) null);
         try {
             List<Entity> entities = db.findBy(getTableName(), wheres);
             return this.entityToBeanList(entities);
@@ -477,7 +468,6 @@ public abstract class BaseDbCommonService<T> {
         where.setTableName(getTableName());
         PageResult<Entity> pageResult;
         Db db = Db.use(this.getDataSource());
-        db.setWrapper((Character) null);
         try {
             pageResult = db.page(where, page);
         } catch (Exception e) {
