@@ -32,7 +32,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
-import cn.hutool.db.ds.GlobalDSFactory;
 import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.ILoadEvent;
 import io.jpom.common.JpomApplicationEvent;
@@ -146,7 +145,6 @@ public class InitDb implements DisposableBean, ILoadEvent {
             tryInitSql(dbExtConfig.getMode(), listMap, executeSqlLog, dataSource, s -> sqlFileNow[0] = s);
             //
             StorageServiceFactory.saveExecuteSqlLog(executeSqlLog);
-            GlobalDSFactory.set(dsFactory);
             // 执行回调方法
             long count = AFTER_CALLBACK.stream().mapToInt(value -> value.get() ? 1 : 0).count();
             if (count > 0) {
@@ -268,7 +266,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
             });
         });
         // 导入数据
-        Opt.ofBlankAble(environment.getProperty("import-h2-sql")).ifPresent(this::importH2Sql);
+        Opt.ofBlankAble(environment.getProperty("import-h2-sql")).ifPresent(s -> importH2Sql(environment, s));
         Opt.ofBlankAble(environment.getProperty("replace-import-h2-sql")).ifPresent(s -> {
             // 删除掉旧数据
             this.addBeforeCallback(() -> {
@@ -282,12 +280,26 @@ public class InitDb implements DisposableBean, ILoadEvent {
                 }
             });
             // 导入数据
-            importH2Sql(s);
+            importH2Sql(environment, s);
+        });
+        // 迁移数据
+        Opt.ofNullable(environment.getProperty("h2-migrate-mysql")).ifPresent(s -> {
+            DbExtConfig.Mode mode = dbExtConfig.getMode();
+            if (mode != DbExtConfig.Mode.MYSQL) {
+                throw new JpomRuntimeException(StrUtil.format("当前模式不正确，不能直接迁移到 {}", mode));
+            }
+            String user = environment.getProperty("h2-user");
+            String url = environment.getProperty("h2-url");
+            String pass = environment.getProperty("h2-pass");
+            this.addCallback(() -> {
+                //
+                StorageServiceFactory.migrateH2ToNow(dbExtConfig, url, user, pass);
+                return false;
+            });
         });
     }
 
-    private void importH2Sql(String importH2Sql) {
-        Environment environment = SpringUtil.getApplicationContext().getEnvironment();
+    private void importH2Sql(Environment environment, String importH2Sql) {
         this.addCallback(() -> {
             File file = FileUtil.file(importH2Sql);
             String sqlPath = FileUtil.getAbsolutePath(file);

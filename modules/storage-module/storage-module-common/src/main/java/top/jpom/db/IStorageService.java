@@ -25,10 +25,13 @@ public interface IStorageService extends AutoCloseable, IMode {
     /**
      * 创建数据库连接工厂
      *
-     * @param dbExtConfig 配置参数信息
+     * @param dbExtConfig 数据库配置
+     * @param url         url
+     * @param user        用户名
+     * @param pass        密码
      * @return 数据库连接工厂
      */
-    DSFactory create(DbExtConfig dbExtConfig);
+    DSFactory create(DbExtConfig dbExtConfig, String url, String user, String pass);
 
     /**
      * 获取数据库连接工厂
@@ -36,6 +39,15 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @return DSFactory
      */
     DSFactory getDsFactory();
+
+    /**
+     * 是否存在数据库文件
+     *
+     * @return true 存在
+     */
+    default boolean hasDbData() throws Exception {
+        throw new IllegalArgumentException("没有实现改功能");
+    }
 
     /**
      * 恢复数据库

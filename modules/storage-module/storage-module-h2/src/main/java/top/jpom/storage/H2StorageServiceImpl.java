@@ -4,6 +4,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
@@ -55,20 +56,28 @@ public class H2StorageServiceImpl implements IStorageService {
     }
 
     @Override
-    public DSFactory create(DbExtConfig dbExtConfig) {
+    public DSFactory create(DbExtConfig dbExtConfig, String url, String user, String pass) {
+        String url2 = Opt.ofBlankAble(url).orElseGet(() -> this.getDefaultDbUrl(dbExtConfig));
+        String user2 = Opt.ofBlankAble(user).orElse(DbExtConfig.DEFAULT_USER_OR_AUTHORIZATION);
+        String pass2 = Opt.ofBlankAble(pass).orElse(DbExtConfig.DEFAULT_USER_OR_AUTHORIZATION);
         Setting setting = dbExtConfig.toSetting();
-        String dbUrl = this.getDbUrl(dbExtConfig);
-        setting.set("url", dbUrl);
-        // 安全检查
-        dbSecurityCheck(dbExtConfig);
+        setting.set("user", user2);
+        setting.set("pass", pass2);
+        setting.set("url", url2);
         return DSFactory.create(setting);
     }
 
     @Override
     public DSFactory init(DbExtConfig dbExtConfig) {
         Assert.isNull(this.dsFactory, "不要重复初始化数据库");
-        this.dsFactory = this.create(dbExtConfig);
-        this.dbUrl = this.getDbUrl(dbExtConfig);
+        Setting setting = dbExtConfig.toSetting();
+        //
+        String dbUrl = this.getDbUrl(dbExtConfig);
+        setting.set("url", dbUrl);
+        // 安全检查
+        dbSecurityCheck(dbExtConfig);
+        this.dsFactory = DSFactory.create(setting);
+        this.dbUrl = dbUrl;
         return this.dsFactory;
     }
 
@@ -107,16 +116,23 @@ public class H2StorageServiceImpl implements IStorageService {
         if (StrUtil.isNotEmpty(dbUrl)) {
             return dbUrl;
         }
+        return this.getDefaultDbUrl(dbExtConfig);
+    }
+
+    /**
+     * 获取数据库的jdbc 连接
+     *
+     * @return jdbc
+     */
+    public String getDefaultDbUrl(DbExtConfig dbExtConfig) {
         File file = FileUtil.file(StorageServiceFactory.dbLocalPath(), this.getDbName());
         String path = FileUtil.getAbsolutePath(file);
         return StrUtil.format("jdbc:h2:{};CACHE_SIZE={};MODE=MYSQL;LOCK_TIMEOUT=10000", path, dbExtConfig.getCacheSize().toKilobytes());
     }
 
-
     private String getDbName() {
         return JpomApplication.getAppType().name();
     }
-
 
     @Override
     public JpomRuntimeException warpException(Exception e) {
@@ -161,6 +177,20 @@ public class H2StorageServiceImpl implements IStorageService {
         StorageServiceFactory.clearExecuteSqlLog();
         // 记录恢复的 sql
         return backupSql;
+    }
+
+    @Override
+    public boolean hasDbData() throws Exception {
+        File dbLocalPathFile = StorageServiceFactory.dbLocalPath();
+        if (!FileUtil.exist(dbLocalPathFile)) {
+            return false;
+        }
+        IPlugin plugin = PluginFactory.getPlugin("db-h2");
+        Map<String, Object> map = new HashMap<>(10);
+        map.put("dbName", this.getDbName());
+        map.put("dbPath", dbLocalPathFile);
+        Object hasDbFiles = plugin.execute("hasDbFiles", map);
+        return BooleanUtil.toBoolean(StrUtil.toStringOrNull(hasDbFiles));
     }
 
     /**

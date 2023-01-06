@@ -1,17 +1,30 @@
 package top.jpom.db;
 
+import cn.hutool.core.exceptions.CheckedUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Singleton;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.ServiceLoaderUtil;
+import cn.hutool.db.Db;
+import cn.hutool.db.Entity;
+import cn.hutool.db.Page;
+import cn.hutool.db.PageResult;
+import cn.hutool.db.ds.DSFactory;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.system.JpomRuntimeException;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
+import top.jpom.h2db.TableName;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 数据存储服务
@@ -39,6 +52,76 @@ public class StorageServiceFactory {
 
     public static DbExtConfig.Mode getMode() {
         return mode;
+    }
+
+    /**
+     * 将数据迁移到当前环境
+     */
+    public static void migrateH2ToNow(DbExtConfig dbExtConfig, String h2Url, String h2User, String h2Pass) {
+        log.info("开始迁移 h2 数据到 {}", dbExtConfig.getMode());
+        try {
+            IStorageService h2StorageService = doCreateStorageService(DbExtConfig.Mode.H2);
+            boolean hasDbData = h2StorageService.hasDbData();
+            if (!hasDbData) {
+                throw new JpomRuntimeException("没有 h2 数据信息不用迁移");
+            }
+            DSFactory h2DsFactory = h2StorageService.create(dbExtConfig, h2Url, h2User, h2Pass);
+            h2DsFactory.getDataSource();
+            log.info("成功连接 H2 ");
+            IStorageService nowStorageService = doCreateStorageService(dbExtConfig.getMode());
+            DSFactory nowDsFactory = nowStorageService.create(dbExtConfig, null, null, null);
+            nowDsFactory.getDataSource();
+            log.info("成功连接 {} {}", dbExtConfig.getMode(), dbExtConfig.getUrl());
+            Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("io.jpom", TableName.class);
+            classes = classes.stream().filter(aClass -> {
+                TableName tableName = aClass.getAnnotation(TableName.class);
+                DbExtConfig.Mode[] modes = tableName.modes();
+                if (ArrayUtil.isEmpty(modes)) {
+                    return true;
+                }
+                return ArrayUtil.contains(modes, dbExtConfig.getMode());
+            }).collect(Collectors.toSet());
+            log.info("准备迁移数据");
+            int total = 0;
+            for (Class<?> aClass : classes) {
+                total += migrateH2ToNowItem(aClass, h2DsFactory, nowDsFactory);
+            }
+            log.info("迁移完成,累计迁移 {} 条数据", total);
+            String dbFiles = h2StorageService.deleteDbFiles();
+            log.info("自动备份 h2 数据库文件,备份文件位于：{}", dbFiles);
+        } catch (Exception e) {
+            throw Lombok.sneakyThrow(e);
+        }
+    }
+
+    private static int migrateH2ToNowItem(Class<?> aClass, DSFactory h2DsFactory, DSFactory mysqlDsFactory) throws SQLException {
+        TableName tableName = aClass.getAnnotation(TableName.class);
+        log.info("开始迁移 {} {}", tableName.name(), tableName.value());
+        int total = 0;
+        while (true) {
+            Entity where = Entity.create(tableName.value());
+            PageResult<Entity> pageResult;
+            Db db = Db.use(h2DsFactory.getDataSource());
+            db.setWrapper((Character) null);
+            Page page = new Page(1, 200);
+            try {
+                pageResult = db.page(where, page);
+            } catch (Exception e) {
+                throw Lombok.sneakyThrow(e);
+            }
+            if (pageResult.isEmpty()) {
+                break;
+            }
+            total += pageResult.size();
+            Db db2 = Db.use(mysqlDsFactory.getDataSource());
+            db2.insert(pageResult);
+            // 删除数据
+            Entity deleteWhere = Entity.create(tableName.value());
+            deleteWhere.set("id", pageResult.stream().map(entity -> entity.getStr("id")).collect(Collectors.toList()));
+            db.del(deleteWhere);
+        }
+        log.info("{} 迁移成功 {} 条数据", tableName.name(), total);
+        return total;
     }
 
     /**
@@ -96,7 +179,7 @@ public class StorageServiceFactory {
      */
     public static IStorageService get() {
         Assert.notNull(mode, "当前数据库模式未知");
-        return Singleton.get(IStorageService.class.getName(), StorageServiceFactory::doCreateStorageService);
+        return Singleton.get(IStorageService.class.getName(), (CheckedUtil.Func0Rt<IStorageService>) () -> doCreateStorageService(mode));
     }
 
 
@@ -106,7 +189,7 @@ public class StorageServiceFactory {
      *
      * @return {@code EngineFactory}
      */
-    private static IStorageService doCreateStorageService() {
+    private static IStorageService doCreateStorageService(DbExtConfig.Mode mode) {
         final List<IStorageService> storageServiceList = ServiceLoaderUtil.loadList(IStorageService.class);
         if (storageServiceList != null) {
             for (IStorageService storageService : storageServiceList) {

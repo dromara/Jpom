@@ -120,7 +120,7 @@
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
       <console v-if="drawerConsoleVisible" :id="temp.id" :nodeId="temp.nodeId" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
-    <!-- 项目阅读文件组件 -->
+    <!-- 项目跟踪文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerReadFileVisible" @close="onReadFileClose">
       <file-read v-if="drawerReadFileVisible" :nodeId="temp.nodeId" :readFilePath="temp.readFilePath" :id="temp.id" :projectId="temp.projectId" @goFile="goFile" />
     </a-drawer>
@@ -391,12 +391,12 @@ export default {
       this.onFileClose();
       this.handleConsole(this.temp);
     },
-    // 阅读文件
+    // 跟踪文件
     goReadFile(path, filename) {
       this.onFileClose();
       this.drawerReadFileVisible = true;
       this.temp.readFilePath = (path + "/" + filename).replace(new RegExp("//", "gm"), "/");
-      this.drawerTitle = `阅读文件(${filename})`;
+      this.drawerTitle = `跟踪文件(${filename})`;
     },
     onReadFileClose() {
       this.drawerReadFileVisible = false;
