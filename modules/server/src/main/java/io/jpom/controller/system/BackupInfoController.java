@@ -184,6 +184,7 @@ public class BackupInfoController extends BaseServerController {
         String format = String.format("%s_%s", IdUtil.fastSimpleUUID(), saveFileName);
         format = StrUtil.maxLength(format, 40);
         File backupSqlFile = FileUtil.file(directory, format + "." + extName);
+        FileUtil.mkParentDirs(backupSqlFile);
         file.transferTo(backupSqlFile);
         // 记录到数据库
         String sha1Sum = SecureUtil.sha1(backupSqlFile);
