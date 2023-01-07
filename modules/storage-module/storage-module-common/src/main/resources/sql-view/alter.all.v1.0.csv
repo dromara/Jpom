@@ -18,3 +18,4 @@ ADD,SSHTERMINALEXECUTELOG,strike,Integer,,0,逻辑删除{1，删除，0 未删�
 ADD,BUILD_INFO,strike,Integer,,0,逻辑删除{1，删除，0 未删除(默认)}
 ADD,OUTGIVINGLOG,strike,Integer,,0,逻辑删除{1，删除，0 未删除(默认)}
 ADD,BUILDHISTORYLOG,strike,Integer,,0,逻辑删除{1，删除，0 未删除(默认)}
+ADD,OUT_GIVING,statusMsg,String,255,,分发状态信息

@@ -37,7 +37,6 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.Session;
@@ -70,6 +69,7 @@ import io.jpom.util.StringUtil;
 import lombok.Builder;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -488,9 +488,8 @@ public class ReleaseManage implements Runnable {
         directory = Opt.ofBlankAble(directory).orElse(StrUtil.SLASH);
         jsonObject.put("dir", directory);
         JsonMessage<JSONObject> requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_DIFF_FILE, jsonObject);
-        if (requestBody.getCode() != HttpStatus.HTTP_OK) {
-            throw new JpomRuntimeException("对比项目文件失败：" + requestBody);
-        }
+        Assert.state(requestBody.success(), "对比项目文件失败：" + requestBody);
+
         JSONObject data = requestBody.getData();
         JSONArray diff = data.getJSONArray("diff");
         JSONArray del = data.getJSONArray("del");
@@ -505,9 +504,7 @@ public class ReleaseManage implements Runnable {
         if (delSize > 0 && clearOld) {
             jsonObject.put("data", del);
             requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_BATCH_DELETE, jsonObject);
-            if (requestBody.getCode() != HttpStatus.HTTP_OK) {
-                throw new JpomRuntimeException("删除项目文件失败：" + requestBody);
-            }
+            Assert.state(requestBody.success(), "删除项目文件失败：" + requestBody);
         }
         for (int i = 0; i < diffSize; i++) {
             boolean last = (i == diffSize - 1);
@@ -521,9 +518,7 @@ public class ReleaseManage implements Runnable {
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
                 projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, false,
                 this.buildExtraModule.getProjectUploadCloseFirst());
-            if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-                throw new JpomRuntimeException("同步项目文件失败：" + jsonMessage);
-            }
+            Assert.state(jsonMessage.success(), "同步项目文件失败：" + jsonMessage);
             if (last) {
                 // 最后一个
                 logRecorder.info("发布项目包成功：" + jsonMessage);

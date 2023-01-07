@@ -24,6 +24,8 @@ package io.jpom.model.log;
 
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
 
 /**
@@ -32,7 +34,9 @@ import top.jpom.h2db.TableName;
  * @author bwcx_jzy
  * @since 2019/7/19
  **/
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "OUTGIVINGLOG", name = "分发日志")
+@Data
 public class OutGivingLog extends BaseWorkspaceModel {
     /**
      * 分发id
@@ -64,61 +68,4 @@ public class OutGivingLog extends BaseWorkspaceModel {
      * 项目id
      */
     private String projectId;
-
-
-    public String getOutGivingId() {
-        return outGivingId;
-    }
-
-    public void setOutGivingId(String outGivingId) {
-        this.outGivingId = outGivingId;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Long startTime) {
-        this.startTime = startTime;
-    }
-
-    public Long getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Long endTime) {
-        this.endTime = endTime;
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
-    }
-
-    public String getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
 }

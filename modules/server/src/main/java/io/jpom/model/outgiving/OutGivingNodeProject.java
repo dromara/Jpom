@@ -37,9 +37,6 @@ import lombok.Getter;
 @EqualsAndHashCode(callSuper = true)
 public class OutGivingNodeProject extends BaseNodeProject {
 
-    private String lastOutGivingTime;
-    private Integer status;
-    private String result;
     /**
      * 排序值
      */

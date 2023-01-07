@@ -42,14 +42,15 @@ import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ServerWhitelist;
+import io.jpom.model.log.OutGivingLog;
 import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
-import io.jpom.outgiving.OutGivingItemRun;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.node.ProjectInfoCacheService;
+import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.system.ServerConfig;
 import io.jpom.util.StringUtil;
@@ -87,15 +88,18 @@ public class OutGivingProjectController extends BaseServerController {
     private final ProjectInfoCacheService projectInfoCacheService;
     private final OutGivingWhitelistService outGivingWhitelistService;
     private final ServerConfig serverConfig;
+    private final DbOutGivingLogService dbOutGivingLogService;
 
     public OutGivingProjectController(OutGivingServer outGivingServer,
                                       ProjectInfoCacheService projectInfoCacheService,
                                       OutGivingWhitelistService outGivingWhitelistService,
-                                      ServerConfig serverConfig) {
+                                      ServerConfig serverConfig,
+                                      DbOutGivingLogService dbOutGivingLogService) {
         this.outGivingServer = outGivingServer;
         this.projectInfoCacheService = projectInfoCacheService;
         this.outGivingWhitelistService = outGivingWhitelistService;
         this.serverConfig = serverConfig;
+        this.dbOutGivingLogService = dbOutGivingLogService;
     }
 
 //    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -146,11 +150,12 @@ public class OutGivingProjectController extends BaseServerController {
                 jsonObject.put("projectStatus", pId != null && pId > 0);
                 jsonObject.put("projectPid", pId);
 
-                // BaseEnum.getDescByCode(Status.class, getStatus())
-//            jsonObject.put("outGivingStatus", BaseEnum.getDescByCode(OutGivingNodeProject.Status.class, outGivingNodeProject.getStatus()));
-                jsonObject.put("outGivingStatus", outGivingNodeProject.getStatus());
-                jsonObject.put("outGivingResult", outGivingNodeProject.getResult());
-                jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());
+                OutGivingLog outGivingLog = dbOutGivingLogService.getByProject(id, outGivingNodeProject);
+                if (outGivingLog != null) {
+                    jsonObject.put("outGivingStatus", outGivingLog.getStatus());
+                    jsonObject.put("outGivingResult", outGivingLog.getResult());
+                    jsonObject.put("lastTime", outGivingLog.getCreateTimeMillis());
+                }
                 return jsonObject;
             })
             .collect(Collectors.toList());
@@ -297,7 +302,6 @@ public class OutGivingProjectController extends BaseServerController {
         OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"));
         OutGivingRun.cancel(outGivingModel.getId());
         //
-        OutGivingItemRun.cancel(outGivingModel.getId());
         return JsonMessage.success("取消成功");
     }
 
