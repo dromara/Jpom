@@ -42,7 +42,8 @@ jpom:
     log-charset: UTF-8
     # 控制台编码格式
     console-charset:
-
+    # 在线升级允许降级-操作
+    allowed-downgrade: false
 server:
   #运行端口号
   port: 2123

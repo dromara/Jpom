@@ -20,20 +20,20 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.codec.Base64;
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.convert.impl.DurationConverter;
-import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
-import cn.hutool.core.util.*;
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.crypto.digest.Digester;
 import org.junit.Test;
 import org.springframework.boot.convert.DurationStyle;
-import org.springframework.core.convert.support.DefaultConversionService;
 
 import java.nio.charset.Charset;
 import java.time.Duration;
@@ -164,5 +164,10 @@ public class TestString {
 
 //        System.out.println(Duration.parse("18000"));
 //        DateUnit dateUnit = DateUnit.valueOf("18000");
+    }
+
+    @Test
+    public void testVersion() {
+        System.out.println(StrUtil.compareVersion("2.10.10", "2.10.9"));
     }
 }
