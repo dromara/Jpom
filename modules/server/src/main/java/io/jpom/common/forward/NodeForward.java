@@ -25,12 +25,16 @@ package io.jpom.common.forward;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.resource.BytesResource;
+import cn.hutool.core.io.unit.DataSize;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
+import cn.hutool.core.thread.SyncFinisher;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
@@ -47,18 +51,23 @@ import io.jpom.system.ServerConfig;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import top.jpom.transport.DataContentType;
-import top.jpom.transport.INodeInfo;
-import top.jpom.transport.IUrlItem;
-import top.jpom.transport.TransportServerFactory;
+import top.jpom.transport.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * 节点请求转发
@@ -163,6 +172,112 @@ public class NodeForward {
         IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl);
         return TransportServerFactory.get().executeToType(nodeModel, urlItem, jsonObject, new TypeReference<JsonMessage<T>>() {
         });
+    }
+
+    /**
+     * 普通消息转发
+     *
+     * @param nodeModel  节点
+     * @param nodeUrl    节点的url
+     * @param jsonObject 数据
+     * @return JSON
+     */
+    public static <T> JsonMessage<T> requestSharding(NodeModel nodeModel, NodeUrl nodeUrl, JSONObject jsonObject, File file, Function<JSONObject, JsonMessage<T>> doneCallback, BiConsumer<Long, Long> streamProgress) throws IOException {
+        IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl);
+        ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
+        ServerConfig.NodeConfig nodeConfig = serverConfig.getNode();
+        long length = file.length();
+        String fileName = file.getName();
+        Assert.state(length > 0, "空文件不能上传");
+        String sha1 = SecureUtil.sha1(file);
+        int fileSliceSize = nodeConfig.getUploadFileSliceSize();
+        //如果小数点大于1，整数加一 例如4.1 =》5
+        long chunkSize = DataSize.ofMegabytes(fileSliceSize).toBytes();
+        int total = (int) Math.ceil((double) length / chunkSize);
+        Queue<Integer> queueList = new ConcurrentLinkedDeque<>();
+        for (int i = 1; i <= total; i++) {
+            queueList.offer(i);
+        }
+        List<Integer> success = Collections.synchronizedList(new ArrayList<>(total));
+
+        // 并发数
+        int concurrent = 2;
+        AtomicReference<JsonMessage<T>> failureMessage = new AtomicReference<>();
+        AtomicReference<JsonMessage<T>> succeedMessage = new AtomicReference<>();
+        String sliceId = IdUtil.fastSimpleUUID();
+
+        JSONObject sliceData = new JSONObject();
+        sliceData.put("sliceId", sliceId);
+        sliceData.put("totalSlice", total);
+        sliceData.put("fileSumSha1", sha1);
+        TransportServer transportServer = TransportServerFactory.get();
+
+        TypeReference<JsonMessage<T>> typeReference = new TypeReference<JsonMessage<T>>() {
+        };
+
+        try (SyncFinisher syncFinisher = new SyncFinisher(concurrent)) {
+            Runnable runnable = () -> {
+                // 取出任务
+                Integer currentChunk = queueList.poll();
+                if (currentChunk == null) {
+                    return;
+                }
+                JSONObject uploadData = jsonObject.clone();
+                long start = currentChunk * chunkSize;
+
+                try {
+                    try (FileInputStream inputStream = new FileInputStream(file)) {
+                        try (FileChannel inputChannel = inputStream.getChannel()) {
+                            //分配缓冲区，设定每次读的字节数
+                            ByteBuffer byteBuffer = ByteBuffer.allocate((int) chunkSize);
+                            inputChannel.position(start);
+                            inputChannel.read(byteBuffer);
+                            //上面把数据写入到了buffer，所以可知上面的buffer是写模式，调用flip把buffer切换到读模式，读取数据
+                            byteBuffer.flip();
+                            byte[] array = new byte[byteBuffer.remaining()];
+                            byteBuffer.get(array, 0, array.length);
+                            byteBuffer.clear();
+                            uploadData.put("file", new BytesResource(array, fileName));
+                            uploadData.put("nowSlice", currentChunk);
+                            uploadData.putAll(sliceData);
+                        }
+                    }
+                    // 上传
+                    JsonMessage<T> message = transportServer.executeToType(nodeModel, urlItem, uploadData, typeReference);
+                    if (message.success()) {
+                        // 使用成功的个数计算
+                        success.add(currentChunk);
+                        long end = Math.min(length, ((success.size() - 1) * chunkSize) + chunkSize);
+                        streamProgress.accept(length, end);
+                        succeedMessage.set(message);
+                    } else {
+                        log.warn("分片上传异常：{} {}", nodeUrl, message);
+                        // 终止上传
+                        queueList.clear();
+                        failureMessage.set(message);
+                    }
+                } catch (Exception e) {
+                    log.error("分片上传文件异常", e);
+                    // 终止上传
+                    queueList.clear();
+                    failureMessage.set(new JsonMessage<>(500, "上传异常：" + e.getMessage()));
+                }
+            };
+            for (int i = 0; i < total; i++) {
+                syncFinisher.addWorker(runnable);
+            }
+            syncFinisher.start();
+        }
+        JsonMessage<T> message = failureMessage.get();
+        if (message != null) {
+            return message;
+        }
+        // 判断是否都成功
+        Assert.state(success.size() == total, "上传异常,完成数量不匹配");
+        //
+        return Optional.ofNullable(doneCallback)
+            .map(function -> function.apply(sliceData))
+            .orElseGet(succeedMessage::get);
     }
 
     /**

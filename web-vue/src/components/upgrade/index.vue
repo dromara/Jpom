@@ -46,6 +46,11 @@
     <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".jar,.zip">
       <a-button><a-icon type="upload" />选择升级文件</a-button>
     </a-upload>
+    <a-row>
+      <a-col span="20">
+        <a-progress v-if="percentage" :percent="percentage"></a-progress>
+      </a-col>
+    </a-row>
     <a-button type="primary" class="upload-btn" :disabled="fileList.length === 0" @click="startUpload">上传升级文件</a-button>
 
     <a-divider dashed />
@@ -53,12 +58,14 @@
   </div>
 </template>
 <script>
-import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade } from "@/api/system";
+import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade, uploadUpgradeFileMerge } from "@/api/system";
 import Vue from "vue";
 import { parseTime } from "@/utils/time";
 import MarkdownItVue from "markdown-it-vue";
 import "markdown-it-vue/dist/markdown-it-vue.css";
 import { RESTART_UPGRADE_WAIT_TIME_COUNT } from "@/utils/const";
+import { uploadPieces } from "@/utils/upload-pieces";
+
 export default {
   name: "Upgrade",
   components: {
@@ -76,7 +83,7 @@ export default {
 
       checkCount: 0,
       fileList: [],
-      timer: null,
+      percentage: 0,
       changelog: "",
       markdownOptions: {
         markdownIt: {
@@ -94,10 +101,9 @@ export default {
   mounted() {
     this.loadData();
   },
-  beforeDestroy() {
-    this.timer && clearTimeout(this.timer);
-  },
+  beforeDestroy() {},
   methods: {
+    uploadPieces,
     // 加载数据
     loadData() {
       systemInfo(this.nodeId).then((res) => {
@@ -155,20 +161,65 @@ export default {
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
-          const formData = new FormData();
-          formData.append("file", this.fileList[0]);
-          formData.append("nodeId", this.nodeId);
-          // 上传文件
-          uploadUpgradeFile(formData).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
+          const file = this.fileList[0];
+          this.percentage = 0;
+          uploadPieces({
+            file,
+            process: (process) => {
+              this.percentage = Math.max(this.percentage, process);
+            },
+            success: (uploadData) => {
+              // 准备合并
+              uploadUpgradeFileMerge({
+                ...uploadData[0],
+                nodeId: this.nodeId,
+              }).then((res) => {
+                if (res.code === 200) {
+                  this.fileList = [];
+                  this.startCheckUpgradeStatus(res.msg);
+                }
+                setTimeout(() => {
+                  this.percentage = 0;
+                }, 2000);
               });
-
-              this.startCheckUpgradeStatus(res.msg);
-            }
+            },
+            error: (msg) => {
+              this.$notification.error({
+                message: msg,
+              });
+            },
+            uploadCallback: (formData) => {
+              return new Promise((resolve, reject) => {
+                formData.append("nodeId", this.nodeId);
+                // 上传文件
+                uploadUpgradeFile(formData)
+                  .then((res) => {
+                    if (res.code === 200) {
+                      resolve();
+                    } else {
+                      reject();
+                    }
+                  })
+                  .catch(() => {
+                    reject();
+                  });
+              });
+            },
           });
-          this.fileList = [];
+          // const formData = new FormData();
+          // formData.append("file", this.fileList[0]);
+
+          // // 上传文件
+          // uploadUpgradeFile(formData).then((res) => {
+          //   if (res.code === 200) {
+          //     this.$notification.success({
+          //       message: res.msg,
+          //     });
+
+          //     this.startCheckUpgradeStatus(res.msg);
+          //   }
+          // });
+          // this.fileList = [];
         },
       });
     },

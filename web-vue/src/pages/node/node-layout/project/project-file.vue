@@ -102,7 +102,7 @@
           </template>
         </a-table>
         <!-- 批量上传文件 -->
-        <a-modal destroyOnClose v-model="uploadFileVisible" width="400px" title="上传项目文件" :footer="null" :maskClosable="false">
+        <a-modal destroyOnClose v-model="uploadFileVisible" :closable="!uploading" :keyboard="false" width="400px" title="上传项目文件" :footer="null" :maskClosable="false">
           <a-upload
             :file-list="uploadFileList"
             :remove="
@@ -125,7 +125,7 @@
           </a-space>
         </a-modal>
         <!-- 上传压缩文件 -->
-        <a-modal destroyOnClose v-model="uploadZipFileVisible" width="400px" title="上传压缩文件" :footer="null" :maskClosable="false">
+        <a-modal destroyOnClose v-model="uploadZipFileVisible" :closable="!uploading" :keyboard="false" width="400px" title="上传压缩文件" :footer="null" :maskClosable="false">
           <a-space direction="vertical" style="display: block" size="large">
             <a-upload
               :file-list="uploadFileList"
@@ -496,7 +496,6 @@ export default {
       this.uploading = false;
       this.percentage = 0;
       this.uploadFileVisible = true;
-      this.timer && clearInterval(this.timer);
     },
     handleRemove(file) {
       const index = this.uploadFileList.indexOf(file);
@@ -603,7 +602,6 @@ export default {
       this.uploading = false;
       this.percentage = 0;
       this.uploadZipFileVisible = true;
-      this.timer && clearInterval(this.timer);
     },
 
     beforeZipUpload(file) {

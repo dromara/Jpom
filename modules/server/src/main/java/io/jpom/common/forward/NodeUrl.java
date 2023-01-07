@@ -231,7 +231,11 @@ public enum NodeUrl {
     /**
      * 更新系统jar包
      */
-    SystemUploadJar("/system/uploadJar.json", true),
+    SystemUploadJar("/system/upload-jar-sharding", true),
+    /**
+     * 更新系统jar包
+     */
+    SystemUploadJarMerge("/system/upload-jar-sharding-merge", true),
     /**
      * 更新系统jar包
      */

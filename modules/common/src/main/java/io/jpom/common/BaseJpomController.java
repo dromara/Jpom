@@ -98,7 +98,8 @@ public abstract class BaseJpomController {
                                String sliceId,
                                Integer totalSlice,
                                Integer nowSlice,
-                               String fileSumSha1) throws IOException {
+                               String fileSumSha1,
+                               String... extNames) throws IOException {
         Assert.hasText(fileSumSha1, "没有文件签名信息");
         Assert.hasText(sliceId, "没有分片 id 信息");
 
@@ -110,6 +111,11 @@ public abstract class BaseJpomController {
         File sliceItemPath = FileUtil.file(slicePath, "items");
 
         String originalFilename = file.getOriginalFilename();
+        if (ArrayUtil.isNotEmpty(extNames)) {
+            String extName = FileUtil.extName(originalFilename);
+            Assert.state(StrUtil.containsAnyIgnoreCase(extName, extNames), "不支持的文件类型：" + extName);
+        }
+
         File slice = FileUtil.file(sliceItemPath, originalFilename + "." + nowSlice);
         FileUtil.mkParentDirs(slice);
         Assert.notNull(file, "没有上传文件");

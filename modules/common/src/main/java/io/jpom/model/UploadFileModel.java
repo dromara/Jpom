@@ -20,11 +20,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.model.data;
+package io.jpom.model;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.model.BaseModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -34,62 +35,32 @@ import java.io.IOException;
 /**
  * @author lf
  */
+@EqualsAndHashCode(callSuper = true)
 @Slf4j
+@Data
 public class UploadFileModel extends BaseModel {
-	private long size = 0;
-	private long completeSize = 0;
-	private String savePath;
-	private String version;
+    private long size = 0;
+    private long completeSize = 0;
+    private String savePath;
+    private String version;
 
-	public long getSize() {
-		return size;
-	}
+    public void save(byte[] data) {
+        this.completeSize += data.length;
+        File file = new File(this.getFilePath());
+        FileUtil.mkParentDirs(file);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file, true)) {
+            fileOutputStream.write(data);
+            fileOutputStream.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
-	public void setSize(long size) {
-		this.size = size;
-	}
+    public String getFilePath() {
+        return savePath + StrUtil.SLASH + getName();
+    }
 
-	public long getCompleteSize() {
-		return completeSize;
-	}
-
-	public void setCompleteSize(long completeSize) {
-		this.completeSize = completeSize;
-	}
-
-	public String getSavePath() {
-		return savePath;
-	}
-
-	public void setSavePath(String savePath) {
-		this.savePath = savePath;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
-
-	public void save(byte[] data) {
-		this.completeSize += data.length;
-		File file = new File(this.getFilePath());
-		FileUtil.mkParentDirs(file);
-		try (FileOutputStream fileOutputStream = new FileOutputStream(file, true)) {
-			fileOutputStream.write(data);
-			fileOutputStream.flush();
-		} catch (IOException e) {
-			log.error(e.getMessage(), e);
-		}
-	}
-
-	public String getFilePath() {
-		return savePath + StrUtil.SLASH + getName();
-	}
-
-	public void remove() {
-		FileUtil.del(this.getFilePath());
-	}
+    public void remove() {
+        FileUtil.del(this.getFilePath());
+    }
 }
