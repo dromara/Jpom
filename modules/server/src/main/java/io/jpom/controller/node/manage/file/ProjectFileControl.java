@@ -78,7 +78,7 @@ public class ProjectFileControl extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "upload-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.UPLOAD)
+    @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.UPLOAD, log = false)
     public JsonMessage<String> uploadSharding(String sliceId) {
         Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload_Sharding);

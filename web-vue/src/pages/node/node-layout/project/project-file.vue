@@ -116,7 +116,7 @@
             <a-button><a-icon type="upload" />选择文件</a-button>
           </a-upload>
           <br />
-          <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
+          <a-progress v-if="percentage" :percent="percentage"></a-progress>
           <br />
           <a-space>
             <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">开始上传</a-button>
@@ -142,7 +142,7 @@
 
             <a-switch v-model="uploadData.checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px" />
 
-            <a-progress v-if="percentage" :percent="percentage" status="success"></a-progress>
+            <a-progress v-if="percentage" :percent="percentage"></a-progress>
 
             <a-input-number style="width: 100%" v-model="uploadData.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
             <a-space>
