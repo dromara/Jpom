@@ -283,3 +283,15 @@ export function concurrentExecution(list, limit, asyncHandle) {
   // 所有并发异步操作都完成后，本次并发控制迭代完成
   return Promise.all(asyncList);
 }
+
+export function readJsonStrField(json, key) {
+  try {
+    const data = JSON.parse(json)[key];
+    if (Object.prototype.toString.call(data) === "[object Object]") {
+      return JSON.stringify(data);
+    }
+    return data;
+  } catch (e) {
+    //
+  }
+}
