@@ -41,8 +41,9 @@ END
 
 -- mysql delimiter
 
-
 DROP PROCEDURE IF EXISTS drop_column_if_exists;
+
+-- mysql delimiter
 
 CREATE PROCEDURE drop_column_if_exists(
     tname VARCHAR(64),
@@ -60,6 +61,8 @@ END
 -- mysql delimiter
 
 DROP PROCEDURE IF EXISTS add_column_if_not_exists;
+
+-- mysql delimiter
 
 CREATE PROCEDURE add_column_if_not_exists(
     tname VARCHAR(64),
@@ -80,6 +83,9 @@ END
 -- mysql delimiter
 
 DROP PROCEDURE IF EXISTS drop_index_if_exists;
+
+-- mysql delimiter
+
 create procedure drop_index_if_exists(
     p_tablename varchar(200),
     p_idxname VARCHAR(200)
