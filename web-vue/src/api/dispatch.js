@@ -99,14 +99,23 @@ export function editDispatchProject(params) {
  */
 export function uploadDispatchFile(formData) {
   return axios({
-    url: "/outgiving/upload",
+    url: "/outgiving/upload-sharding",
     headers: {
       "Content-Type": "multipart/form-data;charset=UTF-8",
+      loading: "no",
     },
     method: "post",
     // 0 表示无超时时间
     timeout: 0,
     data: formData,
+  });
+}
+
+export function uploadDispatchFileMerge(params) {
+  return axios({
+    url: "/outgiving/upload-sharding-merge",
+    method: "post",
+    data: params,
   });
 }
 

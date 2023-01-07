@@ -562,7 +562,16 @@
       </a-form-model>
     </a-modal>
     <!-- 分发项目 -->
-    <a-modal destroyOnClose v-model="dispatchVisible" width="600px" :title="'分发项目-' + temp.name" @ok="handleDispatchOk" :maskClosable="false">
+    <a-modal
+      destroyOnClose
+      v-model="dispatchVisible"
+      :closable="!uploading"
+      :footer="uploading ? null : undefined"
+      width="600px"
+      :title="'分发项目-' + temp.name"
+      @ok="handleDispatchOk"
+      :maskClosable="false"
+    >
       <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="方式" prop="type">
           <a-radio-group v-model="temp.type" name="type">
@@ -570,6 +579,9 @@
             <a-radio :value="'download'">远程下载</a-radio>
           </a-radio-group>
         </a-form-model-item>
+        <a-form-model v-if="percentage">
+          <a-progress :percent="percentage" />
+        </a-form-model>
         <a-form-model-item label="选择分发文件" prop="clearOld" v-if="temp.type == 'upload'">
           <!-- accept=".zip,.tar,.gz,.bz2" -->
           <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload">
@@ -649,12 +661,14 @@ import {
   uploadDispatchFile,
   dispatchStatusMap,
   cancelOutgiving,
+  uploadDispatchFileMerge,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeList } from "@/api/node-project";
 import { itemGroupBy, parseTime } from "@/utils/time";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
+import { uploadPieces } from "@/utils/upload-pieces";
 
 export default {
   components: {
@@ -743,6 +757,8 @@ export default {
       countdownTime: Date.now(),
       refreshInterval: 5,
       drawerReadFileVisible: false,
+      percentage: 0,
+      uploading: false,
     };
   },
   computed: {
@@ -1176,28 +1192,92 @@ export default {
             });
             return false;
           }
-          // 上传文件
-          const formData = new FormData();
-          //this.$message.loading({ content: "正在上传文件...", key, duration: 0 });
-          formData.append("file", this.fileList[0]);
-          formData.append("id", this.temp.id);
-          formData.append("afterOpt", this.temp.afterOpt);
-          formData.append("clearOld", this.temp.clearOld);
-          formData.append("autoUnzip", this.temp.autoUnzip);
-          formData.append("secondaryDirectory", this.temp.secondaryDirectory || "");
-          formData.append("stripComponents", this.temp.stripComponents || 0);
-          uploadDispatchFile(formData).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
+          this.percentage = 0;
+          let file = this.fileList[0];
+          this.uploading = true;
+          uploadPieces({
+            file,
+            process: (process) => {
+              this.percentage = Math.max(this.percentage, process);
+            },
+            success: (uploadData) => {
+              // 准备合并
+              uploadDispatchFileMerge({
+                ...uploadData[0],
+                id: this.temp.id,
+                afterOpt: this.temp.afterOpt,
+                clearOld: this.temp.clearOld,
+                autoUnzip: this.temp.autoUnzip,
+                secondaryDirectory: this.temp.secondaryDirectory || "",
+                stripComponents: this.temp.stripComponents || 0,
+              })
+                .then((res) => {
+                  if (res.code === 200) {
+                    this.fileList = [];
+                    this.loadData();
+                    this.dispatchVisible = false;
+                    this.$refs["dispatchForm"].resetFields();
+                  }
+                  setTimeout(() => {
+                    this.percentage = 0;
+                  }, 2000);
+                  this.uploading = false;
+                })
+                .catch(() => {
+                  this.uploading = false;
+                });
+            },
+            error: (msg) => {
+              this.$notification.error({
+                message: msg,
               });
-              // this.$message.success({ content: "上传成功,开始分发!", key });
-              this.fileList = [];
-              this.loadData();
-              this.dispatchVisible = false;
-              this.$refs["dispatchForm"].resetFields();
-            }
+              this.uploading = false;
+            },
+            uploadCallback: (formData) => {
+              return new Promise((resolve, reject) => {
+                formData.append("id", this.temp.id);
+                //formData.append("afterOpt", this.temp.afterOpt);
+                //formData.append("clearOld", this.temp.clearOld);
+                //formData.append("autoUnzip", this.temp.autoUnzip);
+                //formData.append("secondaryDirectory", this.temp.secondaryDirectory || "");
+                //formData.append("stripComponents", this.temp.stripComponents || 0);
+                // 上传文件
+                uploadDispatchFile(formData)
+                  .then((res) => {
+                    if (res.code === 200) {
+                      resolve();
+                    } else {
+                      reject();
+                    }
+                  })
+                  .catch(() => {
+                    reject();
+                  });
+              });
+            },
           });
+          // // 上传文件
+          // const formData = new FormData();
+          // //this.$message.loading({ content: "正在上传文件...", key, duration: 0 });
+          // formData.append("file", this.fileList[0]);
+          // formData.append("id", this.temp.id);
+          // formData.append("afterOpt", this.temp.afterOpt);
+          // formData.append("clearOld", this.temp.clearOld);
+          // formData.append("autoUnzip", this.temp.autoUnzip);
+          // formData.append("secondaryDirectory", this.temp.secondaryDirectory || "");
+          // formData.append("stripComponents", this.temp.stripComponents || 0);
+          // uploadDispatchFile(formData).then((res) => {
+          //   if (res.code === 200) {
+          //     this.$notification.success({
+          //       message: res.msg,
+          //     });
+          //     // this.$message.success({ content: "上传成功,开始分发!", key });
+          //     this.fileList = [];
+          //     this.loadData();
+          //     this.dispatchVisible = false;
+          //     this.$refs["dispatchForm"].resetFields();
+          //   }
+          // });
           return true;
         }
         if (this.temp.type == "download") {
