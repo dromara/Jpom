@@ -34,7 +34,6 @@ import io.jpom.JpomApplication;
 import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.model.data.NodeModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -47,7 +46,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,23 +113,37 @@ public class SystemUpdateController extends BaseServerController {
         return JsonMessage.success("", log);
     }
 
-    @PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<String> uploadJar() throws IOException {
+    @PostMapping(value = "upload-jar-sharding", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE, log = false)
+    public JsonMessage<String> uploadJarSharding(MultipartFile file, String sliceId,
+                                                 Integer totalSlice,
+                                                 Integer nowSlice,
+                                                 String fileSumSha1) throws IOException {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
             return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar);
         }
+        String absolutePath = serverConfig.getUserTempPath().getAbsolutePath();
+        this.uploadSharding(file, absolutePath, sliceId, totalSlice, nowSlice, fileSumSha1, "jar", "zip");
+        return JsonMessage.success("上传成功");
+    }
+
+    @PostMapping(value = "upload-jar-sharding-merge", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public JsonMessage<String> uploadJar(String sliceId,
+                                         Integer totalSlice,
+                                         String fileSumSha1,
+                                         HttpServletRequest request) throws IOException {
+        NodeModel nodeModel = tryGetNode();
+        if (nodeModel != null) {
+            return NodeForward.request(getNode(), request, NodeUrl.SystemUploadJarMerge);
+        }
         //
         Objects.requireNonNull(JpomManifest.getScriptFile());
-        MultipartFileBuilder multipartFileBuilder = createMultipart();
         String absolutePath = serverConfig.getUserTempPath().getAbsolutePath();
-        multipartFileBuilder
-            .setFileExt("jar", "zip")
-            .addFieldName("file")
-            .setUseOriginalFilename(true)
-            .setSavePath(absolutePath);
-        String path = multipartFileBuilder.save();
+        File successFile = this.shardingTryMerge(absolutePath, sliceId, totalSlice, fileSumSha1);
+
+        String path = FileUtil.getAbsolutePath(successFile);
         // 解析压缩包
         File file = JpomManifest.zipFileFind(path, Type.Server, absolutePath);
         path = FileUtil.getAbsolutePath(file);

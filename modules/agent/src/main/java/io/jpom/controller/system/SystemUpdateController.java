@@ -28,15 +28,14 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
-import cn.hutool.http.HttpStatus;
 import io.jpom.JpomApplication;
 import io.jpom.common.*;
-import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.system.AgentConfig;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,24 +62,33 @@ public class SystemUpdateController extends BaseAgentController {
         this.configBean = configBean;
     }
 
-    @PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> uploadJar() throws IOException {
+    @PostMapping(value = "upload-jar-sharding", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> uploadJarSharding(MultipartFile file, String sliceId,
+                                                 Integer totalSlice,
+                                                 Integer nowSlice,
+                                                 String fileSumSha1) throws IOException {
+        //
+        String tempPathName = agentConfig.getFixedTempPathName();
+        this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumSha1, "jar", "zip");
+        return JsonMessage.success("上传成功");
+    }
+
+    @PostMapping(value = "upload-jar-sharding-merge", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> uploadJarShardingMerge(String sliceId,
+                                                      Integer totalSlice,
+                                                      String fileSumSha1) throws IOException {
         //
         Objects.requireNonNull(JpomManifest.getScriptFile());
-        MultipartFileBuilder multipartFileBuilder = createMultipart();
+        String tempPathName = agentConfig.getFixedTempPathName();
+        File successFile = this.shardingTryMerge(tempPathName, sliceId, totalSlice, fileSumSha1);
         String absolutePath = agentConfig.getTempPath().getAbsolutePath();
-        multipartFileBuilder
-            .setFileExt("jar", "zip")
-            .addFieldName("file")
-            .setUseOriginalFilename(true)
-            .setSavePath(absolutePath);
-        String path = multipartFileBuilder.save();
+        String path = FileUtil.getAbsolutePath(successFile);
         // 解析压缩包
         File file = JpomManifest.zipFileFind(path, Type.Agent, absolutePath);
         path = FileUtil.getAbsolutePath(file);
         // 基础检查
         JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Agent);
-        if (error.getCode() != HttpStatus.HTTP_OK) {
+        if (!error.success()) {
             return new JsonMessage<>(error.getCode(), error.getMsg());
         }
         Tuple data = error.getData();

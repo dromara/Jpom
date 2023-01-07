@@ -73,7 +73,7 @@ export const uploadPieces = ({ file, concurrent = 2, uploadCallback, success, pr
         uploadCallback(uploadData)
           .then(() => {
             uploaded.push(chunkInfo.currentChunk + 1);
-            const sd = parseInt(((chunkInfo.currentChunk + 1) / chunkInfo.chunkCount) * 100);
+            const sd = parseInt((uploaded.length / chunkInfo.chunkCount) * 100);
             process(sd);
             //
             /***

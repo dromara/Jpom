@@ -222,6 +222,7 @@ export function uploadProjectFile(formData) {
     url: "/node/manage/file/upload-sharding",
     headers: {
       "Content-Type": "multipart/form-data;charset=UTF-8",
+      loading: "no",
     },
     method: "post",
     // 0 表示无超时时间

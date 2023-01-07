@@ -24,7 +24,6 @@ package io.jpom.socket.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.resource.FileResource;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
@@ -38,6 +37,7 @@ import io.jpom.common.Type;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AgentFileModel;
+import io.jpom.model.UploadFileModel;
 import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.permission.ClassFeature;
@@ -236,11 +236,30 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         }
     }
 
-    private boolean updateNodeItemHttp(NodeModel nodeModel, WebSocketSession session, AgentFileModel agentFileModel) {
+    private boolean updateNodeItemHttp(NodeModel nodeModel, WebSocketSession session, AgentFileModel agentFileModel) throws IOException {
         File file = FileUtil.file(agentFileModel.getSavePath());
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("file", new FileResource(file));
-        JsonMessage<String> message = NodeForward.request(nodeModel, NodeUrl.SystemUploadJar, jsonObject);
+
+        JsonMessage<String> message = NodeForward.requestSharding(nodeModel, NodeUrl.SystemUploadJar, new JSONObject(),
+            file,
+            jsonObject -> NodeForward.request(nodeModel, NodeUrl.SystemUploadJarMerge, jsonObject),
+            (total, progressSize) -> {
+                UploadFileModel uploadFileModel = new UploadFileModel();
+                uploadFileModel.setSize(total);
+                uploadFileModel.setCompleteSize(progressSize);
+                uploadFileModel.setId(nodeModel.getId());
+                uploadFileModel.setVersion(agentFileModel.getVersion());
+                // 更新进度
+                WebSocketMessageModel model = new WebSocketMessageModel("updateNode", nodeModel.getId());
+                model.setData(uploadFileModel);
+                NodeUpdateHandler.this.sendMsg(model, session);
+            });
+        if (!message.success()) {
+            // 通知异常消息
+            WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", nodeModel.getId());
+            callbackRestartMessage.setData(message.getMsg());
+            this.sendMsg(callbackRestartMessage, session);
+            return false;
+        }
         String id = nodeModel.getId();
         WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", id);
         callbackRestartMessage.setData(message.getMsg());

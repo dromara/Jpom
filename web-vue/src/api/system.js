@@ -180,14 +180,28 @@ export function systemInfo(nodeId) {
  */
 export function uploadUpgradeFile(formData) {
   return axios({
-    url: "/system/uploadJar.json",
+    url: "/system/upload-jar-sharding",
     headers: {
       "Content-Type": "multipart/form-data;charset=UTF-8",
+      loading: "no",
     },
     method: "post",
     // 0 表示无超时时间
     timeout: 0,
     data: formData,
+  });
+}
+
+/**
+ * 上传文件合并
+ *@param {String} nodeId 节点 ID
+ */
+export function uploadUpgradeFileMerge(data) {
+  return axios({
+    url: "/system/upload-jar-sharding-merge",
+    method: "post",
+    headers: {},
+    data: data,
   });
 }
 
