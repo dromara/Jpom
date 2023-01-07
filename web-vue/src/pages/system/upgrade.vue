@@ -400,16 +400,6 @@ export default {
               });
             },
           });
-          // const formData = new FormData();
-          // formData.append("file", file);
-          // uploadAgentFile(formData).then(({ code, msg }) => {
-          //   if (code === 200) {
-          //     this.$notification.success({ message: msg });
-          //     this.refresh();
-          //   } else {
-          //     //this.$notification.error({ message: msg });
-          //   }
-          // });
         },
       });
       return false;

@@ -249,7 +249,7 @@ public abstract class BaseJpomController {
      */
     protected boolean hasFile() {
         Map<String, MultipartFile> fileMap = getMultiRequest().getFileMap();
-        return fileMap != null && fileMap.size() > 0;
+        return fileMap.size() > 0;
     }
 
     /**

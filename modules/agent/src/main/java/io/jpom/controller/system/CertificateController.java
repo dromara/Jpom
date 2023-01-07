@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,7 +81,7 @@ public class CertificateController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> saveCertificate() {
+    public JsonMessage<String> saveCertificate(HttpServletRequest request) {
         String data = getParameter("data");
         JSONObject jsonObject = JSONObject.parseObject(data);
         String type = jsonObject.getString("type");
@@ -112,7 +113,7 @@ public class CertificateController extends BaseAgentController {
                 Assert.hasText(name, "请填写证书名称");
 
                 certModel.setName(name);
-                if (ServletFileUpload.isMultipartContent(getRequest()) && hasFile()) {
+                if (ServletFileUpload.isMultipartContent(request) && hasFile()) {
                     JsonMessage<String> error = getCertFile(certModel, false);
                     if (error != null) {
                         return error;

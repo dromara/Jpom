@@ -35,7 +35,6 @@ import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.AfterOpt;
@@ -60,6 +59,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -157,11 +157,6 @@ public class OutGivingProjectController extends BaseServerController {
         return JsonMessage.success("", collect);
     }
 
-    private File checkZip(String path, boolean unzip) {
-        File file = FileUtil.file(path);
-        return this.checkZip(file, unzip);
-    }
-
     private File checkZip(File path, boolean unzip) {
         if (unzip) {
             boolean zip = false;
@@ -179,6 +174,29 @@ public class OutGivingProjectController extends BaseServerController {
     /**
      * 节点分发文件
      *
+     * @param id 分发id
+     * @return json
+     * @throws IOException IO
+     */
+    @RequestMapping(value = "upload-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.UPLOAD, log = false)
+    public JsonMessage<Object> uploadSharding(String id,
+                                              MultipartFile file,
+                                              String sliceId,
+                                              Integer totalSlice,
+                                              Integer nowSlice,
+                                              String fileSumSha1) throws IOException {
+        // 状态判断
+        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+        File userTempPath = serverConfig.getUserTempPath();
+        // 保存文件
+        this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumSha1);
+        return JsonMessage.success("上传成功");
+    }
+
+    /**
+     * 节点分发文件
+     *
      * @param id        分发id
      * @param afterOpt  之后的操作
      * @param autoUnzip 是否自动解压
@@ -186,27 +204,29 @@ public class OutGivingProjectController extends BaseServerController {
      * @return json
      * @throws IOException IO
      */
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "upload-sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
     public JsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip,
-                                      String secondaryDirectory, String stripComponents) throws IOException {
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
+                                      String secondaryDirectory, String stripComponents,
+                                      String sliceId,
+                                      Integer totalSlice,
+                                      String fileSumSha1) throws IOException {
+        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
         //
         boolean unzip = Convert.toBool(autoUnzip, false);
         File file = FileUtil.file(JpomApplication.getInstance().getDataPath(), ServerConst.OUTGIVING_FILE, id);
-        MultipartFileBuilder multipartFileBuilder = createMultipart();
-        multipartFileBuilder
-            .setUseOriginalFilename(true)
-            //				.setFileExt(StringUtil.PACKAGE_EXT)
-            .addFieldName("file")
-            .setSavePath(FileUtil.getAbsolutePath(file));
-        String path = multipartFileBuilder.save();
         //
-        File dest = this.checkZip(path, unzip);
+        File userTempPath = serverConfig.getUserTempPath();
+        File successFile = this.shardingTryMerge(userTempPath.getAbsolutePath(), sliceId, totalSlice, fileSumSha1);
+        FileUtil.move(successFile, file, true);
         //
-        //outGivingModel = outGivingServer.getItem(id);
+        File dest = FileUtil.file(file, successFile.getName());
+        dest = this.checkZip(dest, unzip);
+        //
+        OutGivingModel outGivingModel = new OutGivingModel();
+        outGivingModel.setId(id);
         outGivingModel.setClearOld(Convert.toBool(clearOld, false));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
         outGivingModel.setSecondaryDirectory(secondaryDirectory);
@@ -215,7 +235,7 @@ public class OutGivingProjectController extends BaseServerController {
         int stripComponentsValue = Convert.toInt(stripComponents, 0);
         // 开启
         OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip, stripComponentsValue);
-        return JsonMessage.success("分发成功");
+        return JsonMessage.success("上传成功,开始分发!");
     }
 
     private OutGivingModel check(String id, BiConsumer<OutGivingModel.Status, OutGivingModel> consumer) {

@@ -75,7 +75,7 @@ jpom:
     # 自动备份保留天数 小于等于 0，不自动删除自动备份数据
     auto-backup-reserve-day: 5
     # 数据库连接池相关配置
-    max-active: 100
+    max-active: 500
     initial-size: 10
     max-wait: 10
     min-idle: 1
