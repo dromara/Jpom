@@ -2,7 +2,7 @@ jpom:
   db:
     # 数据库默认 支持 ：H2、MYSQL
     mode: MYSQL
-    url: jdbc:mysql://127.0.0.1:3306/jpom3?useUnicode=true&characterEncoding=UTF-8&useSSL=false&useAffectedRows=true&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&allowMultiQueries=true
+    url: jdbc:mysql://127.0.0.1:3306/jpom3?useUnicode=true&characterEncoding=UTF-8&useSSL=false&useAffectedRows=true&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
     # 数据库账号 默认 jpom
     #user-name: jpom
     user-name: root
