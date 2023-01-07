@@ -33,8 +33,6 @@ import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
-import io.jpom.common.forward.NodeForward;
-import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.AfterOpt;
@@ -67,7 +65,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -128,27 +125,27 @@ public class OutGivingProjectController extends BaseServerController {
                 // set projectStatus property
                 //NodeModel node = nodeService.getItem(outGivingNodeProject.getNodeId());
                 // Project Status: data.pid > 0 means running
-                JSONObject projectStatus = null;
-                if (nodeModel.isOpenStatus()) {
-                    JSONObject projectInfo = null;
-                    try {
-                        projectInfo = projectInfoCacheService.getItem(nodeModel, outGivingNodeProject.getProjectId());
-                        JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId());
-                        projectStatus = jsonMessage.getData(JSONObject.class);
-                    } catch (Exception e) {
-                        log.warn("获取节点项目状态异常", e);
-                        jsonObject.put("errorMsg", "error " + e.getMessage());
-                    }
-                    if (projectInfo != null) {
-                        jsonObject.put("projectName", projectInfo.getString("name"));
-                    }
-                } else {
-                    jsonObject.put("errorMsg", "节点未启用");
-                }
-                Integer pId = Optional.ofNullable(projectStatus).map(jsonObject1 -> jsonObject1.getInteger("pId")).orElse(null);
-
-                jsonObject.put("projectStatus", pId != null && pId > 0);
-                jsonObject.put("projectPid", pId);
+//                JSONObject projectStatus = null;
+//                if (nodeModel.isOpenStatus()) {
+//                    JSONObject projectInfo = null;
+//                    try {
+//                        projectInfo = projectInfoCacheService.getItem(nodeModel, outGivingNodeProject.getProjectId());
+//                        JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId());
+//                        projectStatus = jsonMessage.getData(JSONObject.class);
+//                    } catch (Exception e) {
+//                        log.warn("获取节点项目状态异常", e);
+//                        jsonObject.put("errorMsg", "error " + e.getMessage());
+//                    }
+//                    if (projectInfo != null) {
+//                        jsonObject.put("projectName", projectInfo.getString("name"));
+//                    }
+//                } else {
+//                    jsonObject.put("errorMsg", "节点未启用");
+//                }
+//                Integer pId = Optional.ofNullable(projectStatus).map(jsonObject1 -> jsonObject1.getInteger("pId")).orElse(null);
+//
+//                jsonObject.put("projectStatus", pId != null && pId > 0);
+//                jsonObject.put("projectPid", pId);
 
                 OutGivingLog outGivingLog = dbOutGivingLogService.getByProject(id, outGivingNodeProject);
                 if (outGivingLog != null) {

@@ -25,9 +25,7 @@
       <a-tooltip slot="outGivingId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
+
       <a-tooltip slot="nodeName" slot-scope="text, record" placement="topLeft" :title="text">
         <span>{{
           nodeList.filter((item) => item.id === record.nodeId) && nodeList.filter((item) => item.id === record.nodeId)[0] && nodeList.filter((item) => item.id === record.nodeId)[0].name
@@ -35,6 +33,18 @@
       </a-tooltip>
       <a-tooltip slot="projectId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
+      </a-tooltip>
+      <a-tooltip slot="outGivingResultMsg" slot-scope="text, item" placement="topLeft" :title="readJsonStrField(item.result, 'msg')">
+        <span>{{ readJsonStrField(item.result, "code") }}-{{ readJsonStrField(item.result, "msg") || item.result }}</span>
+      </a-tooltip>
+      <a-tooltip slot="outGivingResultTime" slot-scope="text, item" placement="topLeft" :title="readJsonStrField(item.result, 'upload_duration')">
+        <span>{{ readJsonStrField(item.result, "upload_duration") }}</span>
+      </a-tooltip>
+      <a-tooltip slot="outGivingResultSize" slot-scope="text, item" placement="topLeft" :title="readJsonStrField(item.result, 'upload_file_size')">
+        {{ readJsonStrField(item.result, "upload_file_size") }}
+      </a-tooltip>
+      <a-tooltip slot="outGivingResultMsgData" slot-scope="text, item" placement="topLeft" :title="`${readJsonStrField(item.result, 'data')}`">
+        {{ readJsonStrField(item.result, "data") }}
       </a-tooltip>
       <a-tooltip slot="status" slot-scope="text">
         <!-- {{ dispatchStatusMap[text] || "未知" }} -->
@@ -64,7 +74,7 @@ import { getNodeListAll } from "@/api/node";
 import { dispatchStatusMap, getDishPatchListAll, getDishPatchLogList } from "@/api/dispatch";
 import { parseTime } from "@/utils/time";
 
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, readJsonStrField } from "@/utils/const";
 
 export default {
   data() {
@@ -81,9 +91,13 @@ export default {
       detailData: [],
       columns: [
         { title: "分发项目 ID", dataIndex: "outGivingId", ellipsis: true, scopedSlots: { customRender: "outGivingId" } },
-        { title: "节点 ID", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+
         { title: "节点名称", dataIndex: "nodeName", ellipsis: true, scopedSlots: { customRender: "nodeName" } },
         { title: "项目 ID", dataIndex: "projectId", ellipsis: true, scopedSlots: { customRender: "projectId" } },
+        { title: "分发结果", dataIndex: "outGivingResultMsg", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsg" } },
+        { title: "分发状态消息", dataIndex: "outGivingResultMsgData", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsgData" } },
+        { title: "分发耗时", dataIndex: "outGivingResultTime", width: "120px", scopedSlots: { customRender: "outGivingResultTime" } },
+        { title: "文件大小", dataIndex: "outGivingResultSize", width: "100px", scopedSlots: { customRender: "outGivingResultSize" } },
         {
           title: "开始时间",
           dataIndex: "startTime",
@@ -104,7 +118,7 @@ export default {
         },
         { title: "操作人", dataIndex: "modifyUser", ellipsis: true, scopedSlots: { customRender: "modifyUser" }, width: 120 },
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "100px" },
+        // { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "100px" },
       ],
     };
   },
@@ -117,6 +131,7 @@ export default {
     this.handleFilter();
   },
   methods: {
+    readJsonStrField,
     // 搜索
     handleFilter() {
       this.loadNodeList();

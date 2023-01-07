@@ -23,6 +23,7 @@
 package io.jpom.service.outgiving;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import io.jpom.model.log.OutGivingLog;
 import io.jpom.model.outgiving.OutGivingNodeProject;
@@ -53,7 +54,7 @@ public class DbOutGivingLogService extends BaseWorkspaceService<OutGivingLog> {
         outGivingLog.setOutGivingId(outId);
         outGivingLog.setNodeId(nodeProject.getNodeId());
         outGivingLog.setProjectId(nodeProject.getProjectId());
-        List<OutGivingLog> givingLogs = this.queryList(outGivingLog, 1, new Order("createTimeMillis"));
+        List<OutGivingLog> givingLogs = this.queryList(outGivingLog, 1, new Order("createTimeMillis", Direction.DESC));
         return CollUtil.getFirst(givingLogs);
     }
 }

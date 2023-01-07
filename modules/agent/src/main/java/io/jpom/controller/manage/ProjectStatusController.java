@@ -121,6 +121,7 @@ public class ProjectStatusController extends BaseAgentController {
                 JSONObject itemObj = new JSONObject();
                 try {
                     NodeProjectInfoModel projectInfoServiceItem = projectInfoService.getItem(item);
+                    itemObj.put("name", projectInfoServiceItem.getName());
                     pid = AbstractProjectCommander.getInstance().getPid(projectInfoServiceItem, null);
                 } catch (Exception e) {
                     log.error("获取端口错误", e);

@@ -44,10 +44,10 @@
         </a-tooltip>
       </template>
 
-      <a-tooltip slot="status" slot-scope="text, record" placement="topLeft" :title="statusMap[text] + ' ' + record.statusMsg">
+      <a-tooltip slot="status" slot-scope="text, record" placement="topLeft" :title="`${statusMap[text]}   ${record.statusMsg}`">
         <a-tag v-if="text === 2" color="green">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else-if="text === 1 || text === 0" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
-        <a-tag v-else-if="text === 3" color="red">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 3 || text === 4" color="red">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else>{{ statusMap[text] || "未知" }}</a-tag>
       </a-tooltip>
 
@@ -157,7 +157,7 @@
 
         <template slot="projectStatus" slot-scope="text, item">
           <a-tooltip v-if="item.errorMsg" :title="item.errorMsg">
-            <span>{{ item.errorMsg }}</span>
+            <a-icon type="warning" />
           </a-tooltip>
           <a-switch v-else :checked="text" :disabled="true" size="small" checked-children="运行中" un-checked-children="未运行" />
         </template>
@@ -664,9 +664,9 @@ import {
   uploadDispatchFileMerge,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { getProjectData, javaModes, noFileModes, runModeList } from "@/api/node-project";
+import { getProjectData, javaModes, noFileModes, runModeList, getRuningProjectInfo } from "@/api/node-project";
 import { itemGroupBy, parseTime } from "@/utils/time";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, readJsonStrField, concurrentExecution } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
 import { uploadPieces } from "@/utils/upload-pieces";
 
@@ -784,6 +784,7 @@ export default {
     this.loadNodeList();
   },
   methods: {
+    readJsonStrField,
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {
@@ -1149,12 +1150,22 @@ export default {
         getDispatchProject(recordId, false)
           .then((res) => {
             if (res.code === 200 && res.data) {
+              let projectList = res.data.map((item) => {
+                return { ...item, id_no: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}` };
+              });
+
+              let oldProjectList = this.dispatchChildren[recordId] || [];
+              let oldProjectMap = oldProjectList.groupBy((item) => item.id);
+              projectList = projectList.map((item) => {
+                return Object.assign({}, oldProjectMap[item.id], item);
+              });
               this.dispatchChildren = {
                 ...this.dispatchChildren,
-                [recordId]: res.data.map((item) => {
-                  return { ...item, id_no: `${item.id}-${item.nodeId}-${item.projectId}-${new Date().getTime()}` };
-                }),
+                [recordId]: projectList,
               };
+              // 查询项目状态
+              const nodeProjects = itemGroupBy(projectList, "nodeId");
+              this.getRuningProjectInfo(nodeProjects, recordId);
             }
             this.childLoading = { ...this.childLoading, [recordId]: false };
             resolve();
@@ -1164,6 +1175,81 @@ export default {
             this.childLoading = { ...this.childLoading, [recordId]: false };
           });
       });
+    },
+    getRuningProjectInfo(nodeProjects, recordId) {
+      if (nodeProjects.length <= 0) {
+        return;
+      }
+      concurrentExecution(
+        nodeProjects.map((item, index) => {
+          return index;
+        }),
+        3,
+        (curItem) => {
+          const data = nodeProjects[curItem];
+
+          return new Promise((resolve, reject) => {
+            const ids = data.data.map((item) => {
+              return item.projectId;
+            });
+            if (ids.length <= 0) {
+              resolve();
+              return;
+            }
+            const tempParams = {
+              nodeId: data.type,
+              ids: JSON.stringify(ids),
+            };
+            getRuningProjectInfo(tempParams)
+              .then((res2) => {
+                let projectList = this.dispatchChildren[recordId];
+                if (res2.code === 200) {
+                  projectList = projectList.map((element) => {
+                    if (res2.data[element.projectId] && element.nodeId === data.type) {
+                      return {
+                        ...element,
+                        projectStatus: res2.data[element.projectId].pid > 0,
+                        projectPid: res2.data[element.projectId].pid || "-",
+                        errorMsg: res2.data[element.projectId].error,
+                        projectName: res2.data[element.projectId].name,
+                      };
+                    }
+                    return element;
+                  });
+                  resolve();
+                } else {
+                  projectList = projectList.map((element) => {
+                    if (element.nodeId === data.type) {
+                      return { ...element, projectStatus: false, projectPid: "-", errorMsg: res2.msg };
+                    }
+                    return element;
+                  });
+
+                  reject();
+                }
+                this.dispatchChildren = {
+                  ...this.dispatchChildren,
+                  [recordId]: projectList,
+                };
+              })
+              .catch(() => {
+                let projectList = this.dispatchChildren[recordId];
+                projectList = projectList.map((element) => {
+                  if (element.nodeId === data.type) {
+                    return { ...element, projectStatus: false, projectPid: "-", errorMsg: "网络异常" };
+                  }
+                  return element;
+                });
+                this.dispatchChildren = {
+                  ...this.dispatchChildren,
+                  [recordId]: projectList,
+                };
+                reject();
+              });
+          });
+        }
+      );
+      // console.log(i);
     },
     // 处理分发
     handleDispatch(record) {
@@ -1483,17 +1569,7 @@ export default {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.loadData();
     },
-    readJsonStrField(json, key) {
-      try {
-        const data = JSON.parse(json)[key];
-        if (Object.prototype.toString.call(data) === "[object Object]") {
-          return JSON.stringify(data);
-        }
-        return data;
-      } catch (e) {
-        //
-      }
-    },
+
     toNode(nodeId) {
       const newpage = this.$router.resolve({
         name: "node_" + nodeId,
