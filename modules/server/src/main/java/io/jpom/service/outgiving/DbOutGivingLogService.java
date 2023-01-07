@@ -22,10 +22,14 @@
  */
 package io.jpom.service.outgiving;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.db.sql.Order;
 import io.jpom.model.log.OutGivingLog;
 import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 分发日志
@@ -37,12 +41,19 @@ import org.springframework.stereotype.Service;
 public class DbOutGivingLogService extends BaseWorkspaceService<OutGivingLog> {
 
 
-    @Override
-    public void insert(OutGivingLog outGivingLog) {
-        outGivingLog.setStartTime(System.currentTimeMillis());
-        if (outGivingLog.getStatus() == OutGivingNodeProject.Status.Cancel.getCode()) {
-            outGivingLog.setEndTime(System.currentTimeMillis());
-        }
-        super.insert(outGivingLog);
+    /**
+     * 查询最新的分发日志
+     *
+     * @param outId       分发id
+     * @param nodeProject 项目信息
+     * @return log
+     */
+    public OutGivingLog getByProject(String outId, OutGivingNodeProject nodeProject) {
+        OutGivingLog outGivingLog = new OutGivingLog();
+        outGivingLog.setOutGivingId(outId);
+        outGivingLog.setNodeId(nodeProject.getNodeId());
+        outGivingLog.setProjectId(nodeProject.getProjectId());
+        List<OutGivingLog> givingLogs = this.queryList(outGivingLog, 1, new Order("createTimeMillis"));
+        return CollUtil.getFirst(givingLogs);
     }
 }

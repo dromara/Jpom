@@ -22,6 +22,7 @@
  */
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
@@ -37,6 +38,7 @@ import org.springframework.boot.convert.DurationStyle;
 
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.SortedMap;
@@ -169,5 +171,11 @@ public class TestString {
     @Test
     public void testVersion() {
         System.out.println(StrUtil.compareVersion("2.10.10", "2.10.9"));
+    }
+
+    @Test
+    public void testArrayList() {
+        ArrayList<Integer> integers = CollUtil.newArrayList(1, 2);
+        System.out.println(CollUtil.sub(integers, 0 + 1, integers.size()));
     }
 }

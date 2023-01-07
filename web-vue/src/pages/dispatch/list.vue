@@ -44,7 +44,7 @@
         </a-tooltip>
       </template>
 
-      <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="statusMap[text]">
+      <a-tooltip slot="status" slot-scope="text, record" placement="topLeft" :title="statusMap[text] + ' ' + record.statusMsg">
         <a-tag v-if="text === 2" color="green">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else-if="text === 1 || text === 0" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else-if="text === 3" color="red">{{ statusMap[text] || "未知" }}</a-tag>
@@ -727,7 +727,7 @@ export default {
           customRender: (text) => {
             return parseTime(text);
           },
-          width: 170,
+          width: "170px",
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 210, align: "center" },
       ],
@@ -741,7 +741,15 @@ export default {
         { title: "分发状态消息", dataIndex: "outGivingResultMsgData", ellipsis: true, scopedSlots: { customRender: "outGivingResultMsgData" } },
         { title: "分发耗时", dataIndex: "outGivingResultTime", width: "120px", scopedSlots: { customRender: "outGivingResultTime" } },
         { title: "文件大小", dataIndex: "outGivingResultSize", width: "100px", scopedSlots: { customRender: "outGivingResultSize" } },
-        { title: "最后分发时间", dataIndex: "lastTime", width: 180, ellipsis: true, scopedSlots: { customRender: "lastTime" } },
+        {
+          title: "最后分发时间",
+          dataIndex: "lastTime",
+          width: "170px",
+          ellipsis: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+        },
         { title: "操作", dataIndex: "child-operation", scopedSlots: { customRender: "child-operation" }, width: 120, align: "center" },
       ],
       rules: {

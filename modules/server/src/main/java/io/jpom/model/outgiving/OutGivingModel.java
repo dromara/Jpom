@@ -85,6 +85,10 @@ public class OutGivingModel extends BaseWorkspaceModel {
      * 保存项目文件前先关闭
      */
     private Boolean uploadCloseFirst;
+    /**
+     * 状态消息
+     */
+    private String statusMsg;
 
     public boolean clearOld() {
         return clearOld != null && clearOld;
@@ -193,6 +197,7 @@ public class OutGivingModel extends BaseWorkspaceModel {
         ING(1, "分发中"),
         DONE(2, "分发结束"),
         CANCEL(3, "已取消"),
+        FAIL(4, "分发失败"),
         ;
         private final int code;
         private final String desc;
