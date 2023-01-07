@@ -29,10 +29,7 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.exceptions.CheckedUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Singleton;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.ClassUtil;
-import cn.hutool.core.util.ServiceLoaderUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
@@ -113,14 +110,17 @@ public class StorageServiceFactory {
             nowDsFactory.getDataSource();
             log.info("成功连接 {} {}", dbExtConfig.getMode(), dbExtConfig.getUrl());
             Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("io.jpom", TableName.class);
-            classes = classes.stream().filter(aClass -> {
-                TableName tableName = aClass.getAnnotation(TableName.class);
-                DbExtConfig.Mode[] modes = tableName.modes();
-                if (ArrayUtil.isEmpty(modes)) {
-                    return true;
-                }
-                return ArrayUtil.contains(modes, dbExtConfig.getMode());
-            }).collect(Collectors.toSet());
+            classes = classes.stream()
+                .filter(aClass -> {
+                    TableName tableName = aClass.getAnnotation(TableName.class);
+                    DbExtConfig.Mode[] modes = tableName.modes();
+                    if (ArrayUtil.isEmpty(modes)) {
+                        return true;
+                    }
+                    return ArrayUtil.contains(modes, dbExtConfig.getMode());
+                })
+                .sorted((o1, o2) -> StrUtil.compare(o1.getSimpleName(), o2.getSimpleName(), false))
+                .collect(Collectors.toSet());
             log.info("准备迁移数据");
             int total = 0;
             for (Class<?> aClass : classes) {
@@ -151,18 +151,25 @@ public class StorageServiceFactory {
                 break;
             }
             // 过滤需要忽略迁移的数据
-            List<Entity> newResult = pageResult.stream().filter(entity -> {
-                String[] migrateIgnoreId = tableName.migrateIgnoreId();
-                if (ArrayUtil.isEmpty(migrateIgnoreId)) {
+            List<Entity> newResult = pageResult.stream()
+                .filter(entity -> {
+                    String[] migrateIgnoreId = tableName.migrateIgnoreId();
+                    if (ArrayUtil.isEmpty(migrateIgnoreId)) {
+                        return true;
+                    }
+                    String id = entity.getStr("id");
+                    if (ArrayUtil.contains(migrateIgnoreId, id)) {
+                        log.info("{} 表中的 {} 数据自动忽略", tableName.name(), id);
+                        return false;
+                    }
                     return true;
-                }
-                String id = entity.getStr("id");
-                if (ArrayUtil.contains(migrateIgnoreId, id)) {
-                    log.info("{} 表中的 {} 数据自动忽略", tableName.name(), id);
-                    return false;
-                }
-                return true;
-            }).collect(Collectors.toList());
+                })
+                .map(entity -> entity.toBeanIgnoreCase(aClass))
+                .map(o -> {
+                    // 兼容大小写
+                    Entity entity = Entity.create(tableName.value());
+                    return entity.parseBean(o);
+                }).collect(Collectors.toList());
             if (newResult.isEmpty()) {
                 if (pageResult.isLast()) {
                     // 最后一页
