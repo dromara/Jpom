@@ -103,25 +103,30 @@
         </a-table>
         <!-- 批量上传文件 -->
         <a-modal destroyOnClose v-model="uploadFileVisible" :closable="!uploading" :keyboard="false" width="400px" title="上传项目文件" :footer="null" :maskClosable="false">
-          <a-upload
-            :file-list="uploadFileList"
-            :remove="
-              () => {
-                this.uploadFileList = [];
-              }
-            "
-            :before-upload="beforeUpload"
-            multiple
-          >
-            <a-button><a-icon type="upload" />选择文件</a-button>
-          </a-upload>
-          <br />
-          <a-progress v-if="percentage" :percent="percentage"></a-progress>
-          <br />
-          <a-space>
+          <a-space direction="vertical" style="display: block" size="large">
+            <a-upload
+              :file-list="uploadFileList"
+              :remove="
+                () => {
+                  this.uploadFileList = [];
+                }
+              "
+              :before-upload="beforeUpload"
+              multiple
+            >
+              <a-button><a-icon type="upload" />选择文件</a-button>
+            </a-upload>
+
+            <a-row>
+              <a-col span="4">
+                <a-tag v-if="this.uploadFileList.length"> {{ successSize }}/{{ this.uploadFileList.length }} </a-tag>
+              </a-col>
+              <a-col span="20">
+                <a-progress v-if="percentage" :percent="percentage"></a-progress>
+              </a-col>
+            </a-row>
+
             <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">开始上传</a-button>
-            <a-tag color="green" v-if="this.uploadFileList.length" class="successTag"> {{ successSize }}/{{ this.uploadFileList.length }} </a-tag>
-            <!-- <a-tag :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag> -->
           </a-space>
         </a-modal>
         <!-- 上传压缩文件 -->
@@ -142,14 +147,16 @@
 
             <a-switch v-model="uploadData.checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px" />
 
-            <a-progress v-if="percentage" :percent="percentage"></a-progress>
-
             <a-input-number style="width: 100%" v-model="uploadData.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
-            <a-space>
-              <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
-              <a-tag color="green" v-if="this.uploadFileList.length" class="successTag"> {{ successSize }}/{{ this.uploadFileList.length }} </a-tag>
-              <!-- <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag> -->
-            </a-space>
+            <a-row>
+              <a-col span="4">
+                <a-tag v-if="this.uploadFileList.length"> {{ successSize }}/{{ this.uploadFileList.length }} </a-tag>
+              </a-col>
+              <a-col span="20">
+                <a-progress v-if="percentage" :percent="percentage"></a-progress>
+              </a-col>
+            </a-row>
+            <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
           </a-space>
         </a-modal>
 
@@ -510,9 +517,6 @@ export default {
     },
     // 开始上传文件
     startUpload() {
-      this.$notification.info({
-        message: "正在上传文件，请稍后...",
-      });
       // 设置上传状态
       this.uploading = true;
       this.successSize = 0;
@@ -576,7 +580,7 @@ export default {
           });
         }
       ).then(() => {
-        this.uploading = this.successSize != this.uploadFileList.length;
+        this.uploading = this.successSize !== this.uploadFileList.length;
         // // 判断是否全部上传完成
         if (!this.uploading) {
           setTimeout(() => {
@@ -610,9 +614,6 @@ export default {
     },
     // 开始上传压缩文件
     startZipUpload() {
-      this.$notification.info({
-        message: "正在上传文件，请稍后...",
-      });
       // 设置上传状态
       this.uploading = true;
       this.percentage = 0;
@@ -641,7 +642,7 @@ export default {
               this.$notification.success({
                 message: name + " " + res.msg,
               });
-              this.uploading = this.successSize != this.uploadFileList.length;
+              this.uploading = this.successSize !== this.uploadFileList.length;
               // // 判断是否全部上传完成
               if (!this.uploading) {
                 setTimeout(() => {
@@ -932,9 +933,5 @@ export default {
   margin: 10px 10px 0;
   padding: 10px;
   background-color: #fff;
-}
-.successTag {
-  height: 32px;
-  line-height: 30px;
 }
 </style>

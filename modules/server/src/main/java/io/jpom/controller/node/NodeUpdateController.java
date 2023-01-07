@@ -27,11 +27,9 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.*;
-import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.controller.openapi.NodeInfoController;
 import io.jpom.model.AgentFileModel;
@@ -50,6 +48,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -127,27 +126,40 @@ public class NodeUpdateController extends BaseServerController {
         return JsonMessage.success("", jsonObject);
     }
 
-    @RequestMapping(value = "upload_agent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "upload-agent-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @SystemPermission
+    @Feature(method = MethodFeature.UPLOAD, log = false)
+    public JsonMessage<String> uploadAgentSharding(MultipartFile file,
+                                                   String sliceId,
+                                                   Integer totalSlice,
+                                                   Integer nowSlice,
+                                                   String fileSumSha1) throws IOException {
+        File userTempPath = serverConfig.getUserTempPath();
+        this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumSha1, "jar", "zip");
+        return JsonMessage.success("上传成功");
+    }
+
+    @RequestMapping(value = "upload-agent-sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> uploadAgent() throws IOException {
-        String saveDir = serverConfig.getAgentPath().getAbsolutePath();
-        MultipartFileBuilder multipartFileBuilder = createMultipart();
-        multipartFileBuilder
-            .setFileExt("jar", "zip")
-            .addFieldName("file")
-            .setUseOriginalFilename(true)
-            .setSavePath(saveDir);
-        String path = multipartFileBuilder.save();
+    public JsonMessage<String> uploadAgent(String sliceId,
+                                           Integer totalSlice,
+                                           String fileSumSha1) throws IOException {
+        File agentPath = serverConfig.getAgentPath();
+
+        File userTempPath = serverConfig.getUserTempPath();
+        File successFile = this.shardingTryMerge(userTempPath.getAbsolutePath(), sliceId, totalSlice, fileSumSha1);
+        FileUtil.move(successFile, agentPath, true);
+        //
+        String path = FileUtil.file(agentPath, successFile.getName()).getAbsolutePath();
         // 解析压缩包
-        File file = JpomManifest.zipFileFind(path, Type.Agent, saveDir);
+        File file = JpomManifest.zipFileFind(path, Type.Agent, agentPath.getAbsolutePath());
         path = FileUtil.getAbsolutePath(file);
         // 基础检查
         JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Agent, false);
-        if (error.getCode() != HttpStatus.HTTP_OK) {
+        if (!error.success()) {
             FileUtil.del(path);
             return new JsonMessage<>(error.getCode(), error.getMsg());
-            //error.toString();
         }
         // 保存文件
         this.saveAgentFile(error.getData());

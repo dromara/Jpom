@@ -115,7 +115,8 @@ public class SystemUpdateController extends BaseServerController {
 
     @PostMapping(value = "upload-jar-sharding", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE, log = false)
-    public JsonMessage<String> uploadJarSharding(MultipartFile file, String sliceId,
+    public JsonMessage<String> uploadJarSharding(MultipartFile file,
+                                                 String sliceId,
                                                  Integer totalSlice,
                                                  Integer nowSlice,
                                                  String fileSumSha1) throws IOException {

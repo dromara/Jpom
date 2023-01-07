@@ -255,14 +255,27 @@ export function nodeMonitorData(params, loading) {
  */
 export function uploadAgentFile(formData) {
   return axios({
-    url: "/node/upload_agent",
+    url: "/node/upload-agent-sharding",
     headers: {
       "Content-Type": "multipart/form-data;charset=UTF-8",
+      loading: "no",
     },
     method: "post",
     // 0 表示无超时时间
     timeout: 0,
     data: formData,
+  });
+}
+
+/**
+ *  上传文件合并
+ * @returns json
+ */
+export function uploadAgentFileMerge(data) {
+  return axios({
+    url: "/node/upload-agent-sharding-merge",
+    method: "post",
+    data: data,
   });
 }
 
