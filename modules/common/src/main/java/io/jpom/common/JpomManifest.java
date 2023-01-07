@@ -70,6 +70,10 @@ public class JpomManifest {
 
     private volatile static JpomManifest JPOM_MANIFEST;
     /**
+     * 允许降级
+     */
+    private volatile static boolean allowedDowngrade;
+    /**
      * 当前版本
      */
     private String version = "dev";
@@ -343,6 +347,10 @@ public class JpomManifest {
         return checkJpomJar(path, type, true);
     }
 
+    public static void setAllowedDowngrade(boolean allowedDowngrade) {
+        JpomManifest.allowedDowngrade = allowedDowngrade;
+    }
+
     /**
      * 检查是否为jpom包
      *
@@ -391,6 +399,10 @@ public class JpomManifest {
                 }
                 if (StrUtil.compareVersion(jpomManifest.getVersion(), minVersion) < 0) {
                     return new JsonMessage<>(405, StrUtil.format("当前程序版本 {} 新版程序最低兼容 {} 不能直接升级", jpomManifest.getVersion(), minVersion));
+                }
+                // 判断降级
+                if (!allowedDowngrade && StrUtil.compareVersion(version, jpomManifest.getVersion()) < 0) {
+                    return new JsonMessage<>(405, "在线升级不能降级操作");
                 }
             }
         } catch (Exception e) {

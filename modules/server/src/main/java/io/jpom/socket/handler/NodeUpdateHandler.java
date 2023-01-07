@@ -253,17 +253,13 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 model.setData(uploadFileModel);
                 NodeUpdateHandler.this.sendMsg(model, session);
             });
-        if (!message.success()) {
-            // 通知异常消息
-            WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", nodeModel.getId());
-            callbackRestartMessage.setData(message.getMsg());
-            this.sendMsg(callbackRestartMessage, session);
-            return false;
-        }
         String id = nodeModel.getId();
         WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", id);
         callbackRestartMessage.setData(message.getMsg());
         this.sendMsg(callbackRestartMessage, session);
+        if (!message.success()) {
+            return false;
+        }
         // 先等待一会，太快可能还没重启
         ThreadUtil.sleep(INIT_WAIT);
         int retryCount = 0;
