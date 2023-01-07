@@ -1,6 +1,7 @@
 import sha1 from "sha1-file-web";
 import { concurrentExecution } from "@/utils/const";
 import { generateShardingId } from "@/api/common";
+import Vue from "vue";
 
 const uploadFileSliceSize = window.uploadFileSliceSize === "<uploadFileSliceSize>" ? 1 : window.uploadFileSliceSize;
 /**
@@ -28,11 +29,17 @@ export const uploadPieces = ({ file, concurrent = 2, uploadCallback, success, pr
    * 获取md5
    **/
   const readFileSh1 = () => {
+    //
+    Vue.prototype.$setLoading({
+      spinning: true,
+      tip: "解析文件,准备上传中",
+    });
     sha1(file).then((sha1) => {
       fileSh1 = sha1;
       for (let i = 0; i < chunkCount; i++) {
         chunkList.push(Number(i));
       }
+      Vue.prototype.$setLoading(false);
       generateShardingId().then((res) => {
         if (res.code == 200) {
           sliceId = res.data;

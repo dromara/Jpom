@@ -5,6 +5,9 @@
       <a-tab-pane key="2" tab="所有节点(插件端)" force-render>
         <a-table :columns="columns" :data-source="listComputed" bordered size="middle" rowKey="id" class="table" :pagination="pagination" @change="changePage" :row-selection="rowSelection">
           <template slot="title">
+            <a-row v-if="percentage">
+              <a-col span="24"><a-progress v-if="percentage" :percent="percentage" /> </a-col>
+            </a-row>
             <a-space>
               <a-input class="search-input-item" @pressEnter="refresh" v-model="listQuery['%name%']" placeholder="节点名称" />
               <a-input class="search-input-item" @pressEnter="refresh" v-model="listQuery['%url%']" placeholder="节点地址" />
@@ -30,6 +33,7 @@
                 <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} </a-tag>
                 <!-- </div> -->
               </a-tooltip>
+
               <!-- 打包时间：{{ agentTimeStamp | version }}</div> -->
             </a-space>
           </template>
@@ -61,9 +65,10 @@
 </template>
 <script>
 import upgrade from "@/components/upgrade";
-import { checkVersion, downloadRemote, getNodeGroupAll, getNodeList, uploadAgentFile } from "@/api/node";
+import { checkVersion, downloadRemote, getNodeGroupAll, getNodeList, uploadAgentFile, uploadAgentFileMerge } from "@/api/node";
 import { mapGetters } from "vuex";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, getWebSocketUrl, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { uploadPieces } from "@/utils/upload-pieces";
 
 export default {
   components: {
@@ -101,6 +106,7 @@ export default {
       nodeStatus: {},
       tableSelections: [],
       temp: {},
+      percentage: 0,
     };
   },
   computed: {
@@ -353,16 +359,57 @@ export default {
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
-          const formData = new FormData();
-          formData.append("file", file);
-          uploadAgentFile(formData).then(({ code, msg }) => {
-            if (code === 200) {
-              this.$notification.success({ message: msg });
-              this.refresh();
-            } else {
-              //this.$notification.error({ message: msg });
-            }
+          this.percentage = 0;
+          uploadPieces({
+            file,
+            process: (process) => {
+              this.percentage = Math.max(this.percentage, process);
+            },
+            success: (uploadData) => {
+              // 准备合并
+              uploadAgentFileMerge({
+                ...uploadData[0],
+              }).then((res) => {
+                if (res.code === 200) {
+                  this.refresh();
+                }
+                setTimeout(() => {
+                  this.percentage = 0;
+                }, 2000);
+              });
+            },
+            error: (msg) => {
+              this.$notification.error({
+                message: msg,
+              });
+            },
+            uploadCallback: (formData) => {
+              return new Promise((resolve, reject) => {
+                // 上传文件
+                uploadAgentFile(formData)
+                  .then((res) => {
+                    if (res.code === 200) {
+                      resolve();
+                    } else {
+                      reject();
+                    }
+                  })
+                  .catch(() => {
+                    reject();
+                  });
+              });
+            },
           });
+          // const formData = new FormData();
+          // formData.append("file", file);
+          // uploadAgentFile(formData).then(({ code, msg }) => {
+          //   if (code === 200) {
+          //     this.$notification.success({ message: msg });
+          //     this.refresh();
+          //   } else {
+          //     //this.$notification.error({ message: msg });
+          //   }
+          // });
         },
       });
       return false;
