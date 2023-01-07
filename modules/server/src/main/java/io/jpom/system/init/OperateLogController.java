@@ -81,9 +81,13 @@ public class OperateLogController implements AopLogInterface {
         this.dbUserOperateLogService = dbUserOperateLogService;
     }
 
-    private CacheInfo createCacheInfo(Method method) {
+    private CacheInfo createCacheInfo(Method method, HttpServletRequest request) {
         Feature feature = method.getAnnotation(Feature.class);
         if (feature == null) {
+            return null;
+        }
+        if (!feature.log()) {
+            log.debug("忽略记录日志 {}", request.getRequestURI());
             return null;
         }
         Class<?> declaringClass = method.getDeclaringClass();
@@ -118,13 +122,13 @@ public class OperateLogController implements AopLogInterface {
         if (signature instanceof MethodSignature) {
             MethodSignature methodSignature = (MethodSignature) signature;
             Method method = methodSignature.getMethod();
-            CacheInfo cacheInfo = this.createCacheInfo(method);
-            if (cacheInfo == null) {
-                return;
-            }
             //
             ServletRequestAttributes servletRequestAttributes = BaseServerController.getRequestAttributes();
             HttpServletRequest request = servletRequestAttributes.getRequest();
+            CacheInfo cacheInfo = this.createCacheInfo(method, request);
+            if (cacheInfo == null) {
+                return;
+            }
             // 获取ip地址
             cacheInfo.ip = ServletUtil.getClientIP(request);
             // 获取节点
