@@ -127,7 +127,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
         outGivingLog.setId(logId);
         outGivingLog.setStatus(status.getCode());
         outGivingLog.setResult(msg);
-        if (status == OutGivingNodeProject.Status.Ok) {
+        if (status == OutGivingNodeProject.Status.Ok || status == OutGivingNodeProject.Status.Fail) {
             outGivingLog.setEndTime(SystemClock.now());
         }
         DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);

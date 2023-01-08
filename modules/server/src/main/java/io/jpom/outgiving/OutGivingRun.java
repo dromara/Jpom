@@ -78,7 +78,7 @@ public class OutGivingRun {
         SyncFinisher syncFinisher = SYNC_FINISHER_MAP.remove(id);
         Optional.ofNullable(syncFinisher).ifPresent(SyncFinisher::stopNow);
         //
-        Map<String, String> map = LOG_CACHE_MAP.get(id);
+        Map<String, String> map = LOG_CACHE_MAP.remove(id);
         DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
         for (String logId : map.values()) {
             OutGivingLog outGivingLog = new OutGivingLog();
@@ -87,14 +87,15 @@ public class OutGivingRun {
             outGivingLog.setResult("手动取消分发");
             dbOutGivingLogService.update(outGivingLog);
         }
-        //
-        OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
-        // 更新分发数据
-        OutGivingModel outGivingModel1 = new OutGivingModel();
-        outGivingModel1.setId(id);
-        outGivingModel1.setStatus(OutGivingModel.Status.CANCEL.getCode());
-
-        outGivingServer.update(outGivingModel1);
+        if (!map.isEmpty()) {
+            //
+            OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
+            // 更新分发数据
+            OutGivingModel outGivingModel1 = new OutGivingModel();
+            outGivingModel1.setId(id);
+            outGivingModel1.setStatus(OutGivingModel.Status.CANCEL.getCode());
+            outGivingServer.update(outGivingModel1);
+        }
     }
 
 

@@ -24,7 +24,6 @@ package io.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
@@ -80,7 +79,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -722,7 +720,6 @@ public class BuildExecuteService {
         private boolean release() {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             UserModel userModel = taskData.userModel;
-
             // 发布文件
             ReleaseManage releaseManage = ReleaseManage.builder()
                 .buildNumberId(buildInfoModel.getBuildId())
@@ -753,18 +750,83 @@ public class BuildExecuteService {
             return true;
         }
 
+        private Map<String, IProcessItem> createProcess() {
+            // 初始化构建流程 准备构建->拉取仓库代码->执行构建命令->打包产物->发布产物->构建结束
+            Map<String, IProcessItem> suppliers = new LinkedHashMap<>(10);
+            suppliers.put("startReady", new IProcessItem() {
+                @Override
+                public String name() {
+                    return "准备构建";
+                }
+
+                @Override
+                public boolean execute() {
+                    return BuildInfoManage.this.startReady();
+                }
+            });
+            suppliers.put("pull", new IProcessItem() {
+                @Override
+                public String name() {
+                    return "拉取仓库代码";
+                }
+
+                @Override
+                public boolean execute() {
+                    return BuildInfoManage.this.pull();
+                }
+            });
+            suppliers.put("executeCommand", new IProcessItem() {
+                @Override
+                public String name() {
+                    return "执行构建命令";
+                }
+
+                @Override
+                public boolean execute() {
+                    return BuildInfoManage.this.executeCommand();
+                }
+            });
+            suppliers.put("packageFile", new IProcessItem() {
+                @Override
+                public String name() {
+                    return "打包产物";
+                }
+
+                @Override
+                public boolean execute() {
+                    return BuildInfoManage.this.packageFile();
+                }
+            });
+            suppliers.put("release", new IProcessItem() {
+                @Override
+                public String name() {
+                    return "发布产物";
+                }
+
+                @Override
+                public boolean execute() {
+                    return BuildInfoManage.this.release();
+                }
+            });
+            suppliers.put("finish", new IProcessItem() {
+                @Override
+                public String name() {
+                    return "构建结束";
+                }
+
+                @Override
+                public boolean execute() {
+                    return BuildInfoManage.this.finish();
+                }
+            });
+            return suppliers;
+        }
+
         @Override
         public void run() {
             currentThread = Thread.currentThread();
             logRecorder.info("开始执行构建任务,任务等待时间：{}", DateUtil.formatBetween(SystemClock.now() - submitTaskTime));
-            // 初始化构建流程 准备->拉取代码->执行构建命令->打包发布
-            Map<String, Supplier<Boolean>> suppliers = new LinkedHashMap<>(10);
-            suppliers.put("startReady", BuildInfoManage.this::startReady);
-            suppliers.put("pull", BuildInfoManage.this::pull);
-            suppliers.put("executeCommand", BuildInfoManage.this::executeCommand);
-            suppliers.put("packageFile", BuildInfoManage.this::packageFile);
-            suppliers.put("release", BuildInfoManage.this::release);
-            suppliers.put("finish", BuildInfoManage.this::finish);
+            Map<String, IProcessItem> processItemMap = this.createProcess();
             // 依次执行流程，发生异常结束整个流程
             String processName = StrUtil.EMPTY;
             long startTime = SystemClock.now();
@@ -776,18 +838,22 @@ public class BuildExecuteService {
             }
             BuildInfoModel buildInfoModel = this.taskData.buildInfoModel;
             try {
-                for (Map.Entry<String, Supplier<Boolean>> stringSupplierEntry : suppliers.entrySet()) {
+                for (Map.Entry<String, IProcessItem> stringSupplierEntry : processItemMap.entrySet()) {
                     processName = stringSupplierEntry.getKey();
-                    Supplier<Boolean> value = stringSupplierEntry.getValue();
+                    IProcessItem processItem = stringSupplierEntry.getValue();
                     //
+                    long processItemStartTime = SystemClock.now();
+                    logRecorder.info("[SYSTEM-INFO] 开始执行 {}流程", processItem.name());
                     this.asyncWebHooks(processName);
-                    Boolean aBoolean = value.get();
+                    boolean aBoolean = processItem.execute();
                     if (!aBoolean) {
                         // 有条件结束构建流程
+                        logRecorder.info("[SYSTEM-INFO] 执行异常 {}流程", processItem.name());
                         this.asyncWebHooks("stop", "process", processName);
                         buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error);
                         break;
                     }
+                    logRecorder.info("[SYSTEM-INFO] 执行结束 {}流程,耗时：{}", processItem.name(), DateUtil.formatBetween(SystemClock.now() - processItemStartTime));
                 }
                 // 判断是否保留产物
                 Boolean saveBuildFile = this.buildExtraModule.getSaveBuildFile();
@@ -807,9 +873,8 @@ public class BuildExecuteService {
                 logRecorder.error("构建失败:" + processName, e);
                 this.asyncWebHooks(processName, "error", e.getMessage());
             } finally {
+                logRecorder.info("[SYSTEM-INFO] 构建结束 累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
                 this.asyncWebHooks("done");
-                long allTime = SystemClock.now() - startTime;
-                logRecorder.info("构建结束 耗时:" + DateUtil.formatBetween(allTime, BetweenFormatter.Level.SECOND));
                 BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
                 BaseServerController.removeAll();
             }
