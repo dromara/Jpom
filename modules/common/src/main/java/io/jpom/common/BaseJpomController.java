@@ -323,32 +323,6 @@ public abstract class BaseJpomController {
         return request;
     }
 
-    public HttpServletResponse getResponse() {
-        HttpServletResponse response = getRequestAttributes().getResponse();
-        Objects.requireNonNull(response, "response null");
-        return response;
-    }
-
-    /**
-     * 获取session
-     *
-     * @return session
-     */
-    public HttpSession getSession() {
-        HttpSession session = getRequestAttributes().getRequest().getSession();
-        Objects.requireNonNull(session, "session null");
-        return session;
-    }
-
-    /**
-     * 获取Application
-     *
-     * @return Application
-     */
-    public ServletContext getApplication() {
-        return getRequest().getServletContext();
-    }
-
     /**
      * 获取session 字符串
      *

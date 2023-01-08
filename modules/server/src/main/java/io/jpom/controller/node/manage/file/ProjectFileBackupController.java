@@ -37,6 +37,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * @author bwcx_jzy
  * @since 2022/5/11
@@ -80,8 +83,10 @@ public class ProjectFileBackupController extends BaseServerController {
      * @param backupId  备份id
      */
     @GetMapping(value = "backup-download", produces = MediaType.APPLICATION_JSON_VALUE)
-    public void download(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
-        NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.MANAGE_FILE_BACKUP_DOWNLOAD);
+    public void download(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName,
+                         HttpServletResponse response,
+                         HttpServletRequest request) {
+        NodeForward.requestDownload(getNode(), request, response, NodeUrl.MANAGE_FILE_BACKUP_DOWNLOAD);
     }
 
     /**
@@ -94,8 +99,8 @@ public class ProjectFileBackupController extends BaseServerController {
      * @return msg
      */
     @RequestMapping(value = "backup-delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.MANAGE_FILE_BACKUP_DELETE).toString();
+    public String deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName, HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_DELETE).toString();
     }
 
     /**
@@ -109,7 +114,7 @@ public class ProjectFileBackupController extends BaseServerController {
      * @return msg
      */
     @RequestMapping(value = "backup-recover", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName) {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.MANAGE_FILE_BACKUP_RECOVER).toString();
+    public String recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName, HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_RECOVER).toString();
     }
 }

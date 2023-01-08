@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -288,12 +289,12 @@ public class CertificateController extends BaseAgentController {
      * @param id 项目id
      */
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public void export(String id) {
+    public void export(String id, HttpServletResponse response) {
         CertModel item = certService.getItem(id);
         Assert.notNull(item, "导出失败");
         String parent = FileUtil.file(item.getCert()).getParent();
         File zip = ZipUtil.zip(parent);
-        ServletUtil.write(getResponse(), zip);
+        ServletUtil.write(response, zip);
         FileUtil.del(zip);
     }
 }

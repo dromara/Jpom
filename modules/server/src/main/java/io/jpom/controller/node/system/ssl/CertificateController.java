@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -116,7 +117,7 @@ public class CertificateController extends BaseServerController {
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void export() {
-        NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.System_Certificate_export);
+    public void export(HttpServletResponse response) {
+        NodeForward.requestDownload(getNode(), getRequest(), response, NodeUrl.System_Certificate_export);
     }
 }

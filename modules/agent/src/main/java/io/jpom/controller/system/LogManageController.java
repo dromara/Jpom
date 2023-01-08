@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
@@ -77,10 +78,10 @@ public class LogManageController extends BaseAgentController {
 
     @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void logDownload(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
+    public void logDownload(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path, HttpServletResponse response) {
         File file = FileUtil.file(LogbackConfig.getPath(), path);
         if (file.isFile()) {
-            ServletUtil.write(getResponse(), file);
+            ServletUtil.write(response, file);
         }
     }
 }

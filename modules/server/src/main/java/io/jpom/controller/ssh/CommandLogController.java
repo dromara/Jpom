@@ -41,6 +41,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import top.jpom.model.PageResultDto;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.List;
 
@@ -176,7 +177,7 @@ public class CommandLogController extends BaseServerController {
     @RequestMapping(value = "download_log", method = RequestMethod.GET)
     @ResponseBody
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId) {
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId, HttpServletResponse response) {
         CommandExecLogModel item = commandExecLogService.getByKey(logId);
         Assert.notNull(item, "没有对应数据");
         File logFile = item.logFile();
@@ -184,7 +185,7 @@ public class CommandLogController extends BaseServerController {
             return;
         }
         if (logFile.isFile()) {
-            ServletUtil.write(getResponse(), logFile);
+            ServletUtil.write(response, logFile);
         }
     }
 }

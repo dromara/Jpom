@@ -121,8 +121,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @param backupId  备份id
      */
     @GetMapping(value = "backup-download", produces = MediaType.APPLICATION_JSON_VALUE)
-    public void download(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
-        HttpServletResponse response = getResponse();
+    public void download(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName, HttpServletResponse response) {
         try {
             super.getProjectInfoModel();
             File lib = ProjectFileBackupUtil.path(id, backupId);
