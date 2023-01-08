@@ -289,8 +289,7 @@ public abstract class BaseJpomController {
         RequestAttributes attributes = null;
         try {
             attributes = RequestContextHolder.currentRequestAttributes();
-        } catch (IllegalStateException e) {
-            // TODO: handle exception
+        } catch (IllegalStateException ignored) {
         }
         if (attributes == null) {
             return null;
