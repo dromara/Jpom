@@ -38,6 +38,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 控制台日志备份管理
  *
@@ -59,8 +62,8 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
     @ResponseBody
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void export() {
-        NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_export);
+    public void export(HttpServletRequest request, HttpServletResponse response) {
+        NodeForward.requestDownload(getNode(), request, response, NodeUrl.Manage_Log_export);
     }
 
     /**
@@ -81,8 +84,8 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     @ResponseBody
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void download() {
-        NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_logBack_download);
+    public void download(HttpServletResponse response) {
+        NodeForward.requestDownload(getNode(), getRequest(), response, NodeUrl.Manage_Log_logBack_download);
     }
 
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

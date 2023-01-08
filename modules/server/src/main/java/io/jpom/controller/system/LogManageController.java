@@ -45,6 +45,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
@@ -102,14 +104,16 @@ public class LogManageController extends BaseServerController {
     @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void logDownload(String nodeId,
-                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
+                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path,
+                            HttpServletResponse response,
+                            HttpServletRequest request) {
         if (StrUtil.isNotEmpty(nodeId)) {
-            NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.DownloadSystemLog);
+            NodeForward.requestDownload(getNode(), request, response, NodeUrl.DownloadSystemLog);
             return;
         }
         File file = FileUtil.file(LogbackConfig.getPath(), path);
         if (file.isFile()) {
-            ServletUtil.write(getResponse(), file);
+            ServletUtil.write(response, file);
         }
     }
 }

@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -71,7 +72,8 @@ public class UserInfoController extends BaseServerController {
      */
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<String> updatePwd(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String oldPwd,
-                                         @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String newPwd) {
+                                         @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String newPwd,
+                                         HttpSession session) {
         Assert.state(!StrUtil.equals(oldPwd, newPwd), "新旧密码一致");
         UserModel userName = getUser();
         Assert.state(!userName.isDemoUser(), "当前账户为演示账号，不支持修改密码");
@@ -82,7 +84,7 @@ public class UserInfoController extends BaseServerController {
 
             userService.updatePwd(userName.getId(), newPwd);
             // 如果修改成功，则销毁会话
-            getSession().invalidate();
+            session.invalidate();
             return JsonMessage.success("修改密码成功！");
         } catch (Exception e) {
             log.error(e.getMessage(), e);

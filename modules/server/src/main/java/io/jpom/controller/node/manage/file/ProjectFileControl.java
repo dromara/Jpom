@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 文件管理
@@ -106,8 +107,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.DOWNLOAD)
-    public void download() {
-        NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_File_Download);
+    public void download(HttpServletRequest request, HttpServletResponse response) {
+        NodeForward.requestDownload(getNode(), request, response, NodeUrl.Manage_File_Download);
     }
 
     /**
@@ -117,8 +118,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.DEL)
-    public String deleteFile() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_DeleteFile).toString();
+    public String deleteFile(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_DeleteFile).toString();
     }
 
 
@@ -129,8 +130,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @PostMapping(value = "update_config_file", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.EDIT)
-    public String updateConfigFile() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_UpdateConfigFile).toString();
+    public String updateConfigFile(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_UpdateConfigFile).toString();
     }
 
     /**
@@ -140,8 +141,8 @@ public class ProjectFileControl extends BaseServerController {
      */
     @GetMapping(value = "read_file", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.LIST)
-    public String readFile() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_ReadFile).toString();
+    public String readFile(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_ReadFile).toString();
     }
 
     /**

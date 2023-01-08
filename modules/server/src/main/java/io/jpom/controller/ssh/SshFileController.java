@@ -91,8 +91,7 @@ public class SshFileController extends BaseServerController {
 
     @RequestMapping(value = "download.html", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void download(String id, String path, String name) throws IOException {
-        HttpServletResponse response = getResponse();
+    public void download(String id, String path, String name, HttpServletResponse response) throws IOException {
         SshModel sshModel = sshService.getByKey(id, false);
         if (sshModel == null) {
             ServletUtil.write(response, "ssh error", MediaType.TEXT_HTML_VALUE);

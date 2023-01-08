@@ -76,9 +76,9 @@ public class BuildInfoHistoryController extends BaseServerController {
      */
     @RequestMapping(value = "/build/history/download_file.html", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId) {
+    public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId, HttpServletResponse response) {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
-        this.downloadFile(buildHistoryLog);
+        this.downloadFile(buildHistoryLog, response);
     }
 
     /**
@@ -89,7 +89,9 @@ public class BuildInfoHistoryController extends BaseServerController {
      */
     @RequestMapping(value = "/build/history/download_file_by_build", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String buildId, @ValidatorItem(ValidatorRule.NUMBERS) int buildNumberId) {
+    public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String buildId,
+                             @ValidatorItem(ValidatorRule.NUMBERS) int buildNumberId,
+                             HttpServletResponse response) {
         String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(getRequest());
         //
         BuildHistoryLog historyLog = new BuildHistoryLog();
@@ -98,11 +100,10 @@ public class BuildInfoHistoryController extends BaseServerController {
         historyLog.setBuildNumberId(buildNumberId);
         List<BuildHistoryLog> buildHistoryLogs = dbBuildHistoryLogService.listByBean(historyLog);
         BuildHistoryLog first = CollUtil.getFirst(buildHistoryLogs);
-        this.downloadFile(first);
+        this.downloadFile(first, response);
     }
 
-    private void downloadFile(BuildHistoryLog buildHistoryLog) {
-        HttpServletResponse response = getResponse();
+    private void downloadFile(BuildHistoryLog buildHistoryLog, HttpServletResponse response) {
         if (buildHistoryLog == null) {
             ServletUtil.write(response, JsonMessage.getString(404, "构建记录不存在"), MediaType.APPLICATION_JSON_VALUE);
             return;
@@ -124,7 +125,7 @@ public class BuildInfoHistoryController extends BaseServerController {
 
     @RequestMapping(value = "/build/history/download_log.html", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId) {
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId, HttpServletResponse response) {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
         Objects.requireNonNull(buildHistoryLog);
         BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
@@ -134,7 +135,7 @@ public class BuildInfoHistoryController extends BaseServerController {
             return;
         }
         if (logFile.isFile()) {
-            ServletUtil.write(getResponse(), logFile);
+            ServletUtil.write(response, logFile);
         }
     }
 

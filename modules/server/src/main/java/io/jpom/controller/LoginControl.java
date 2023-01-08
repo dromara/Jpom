@@ -60,6 +60,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
@@ -105,9 +106,9 @@ public class LoginControl extends BaseServerController {
      */
     @RequestMapping(value = "randCode.png", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
     @NotLogin
-    public void randCode() throws IOException {
+    public void randCode(HttpServletResponse response) throws IOException {
         if (webConfig.isDisabledCaptcha()) {
-            ServletUtil.write(getResponse(), JsonMessage.success("验证码已禁用").toString(), MediaType.APPLICATION_JSON_VALUE);
+            ServletUtil.write(response, JsonMessage.success("验证码已禁用").toString(), MediaType.APPLICATION_JSON_VALUE);
             return;
         }
         int height = 50;
@@ -115,7 +116,6 @@ public class LoginControl extends BaseServerController {
         // 设置为默认字体
         circleCaptcha.setFont(new Font(null, Font.PLAIN, (int) (height * 0.75)));
         circleCaptcha.createCode();
-        HttpServletResponse response = getResponse();
         circleCaptcha.write(response.getOutputStream());
         String code = circleCaptcha.getCode();
         setSessionAttribute(LOGIN_CODE, code);
@@ -261,8 +261,8 @@ public class LoginControl extends BaseServerController {
      */
     @RequestMapping(value = "logout2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<Object> logout() {
-        getSession().invalidate();
+    public JsonMessage<Object> logout(HttpSession session) {
+        session.invalidate();
         return JsonMessage.success("退出成功");
     }
 
