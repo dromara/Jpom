@@ -75,9 +75,9 @@
               </a-menu>
             </a-dropdown>
           </a-tooltip>
-          <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
+          <template slot="isDirectory" slot-scope="text">
             <span>{{ text ? "目录" : "文件" }}</span>
-          </a-tooltip>
+          </template>
           <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>
