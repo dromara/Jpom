@@ -108,7 +108,7 @@ public class IndexControl extends BaseServerController {
      */
     @GetMapping(value = {"index", "", "/", "index.html"}, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
-    public void index(HttpServletResponse response) {
+    public void index(HttpServletResponse response, HttpServletRequest request) {
         InputStream inputStream = ResourceUtil.getStream("classpath:/dist/index.html");
         String html = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         //<div id="jpomCommonJs"></div>
@@ -124,7 +124,7 @@ public class IndexControl extends BaseServerController {
         }
 
         // <routerBase>
-        String proxyPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), ServerConst.PROXY_PATH);
+        String proxyPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         html = StrUtil.replace(html, "<routerBase>", proxyPath);
         //
         html = StrUtil.replace(html, "<link rel=\"icon\" href=\"favicon.ico\">", "<link rel=\"icon\" href=\"" + proxyPath + "favicon.ico\">");
@@ -245,8 +245,7 @@ public class IndexControl extends BaseServerController {
      */
     @NotLogin
     @RequestMapping(value = "check-system", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> checkSystem() {
-        HttpServletRequest request = getRequest();
+    public JsonMessage<JSONObject> checkSystem(HttpServletRequest request) {
         JSONObject data = new JSONObject();
         data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH));
         //
@@ -274,10 +273,10 @@ public class IndexControl extends BaseServerController {
      * @apiSuccess {JSON}  data 菜单相关字段
      */
     @RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<Object>> menusData() {
+    public JsonMessage<List<Object>> menusData(HttpServletRequest request) {
         NodeModel nodeModel = tryGetNode();
         UserModel userModel = getUserModel();
-        String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
+        String workspaceId = nodeService.getCheckUserWorkspace(request);
         JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
         // 菜单
         InputStream inputStream;
@@ -294,14 +293,14 @@ public class IndexControl extends BaseServerController {
         JSONArray jsonArray = JSONArray.parseArray(json);
         List<Object> collect1 = jsonArray.stream().filter(o -> {
             JSONObject jsonObject = (JSONObject) o;
-            if (!testMenus(jsonObject, userModel, nodeModel, showArray)) {
+            if (!testMenus(jsonObject, userModel, nodeModel, showArray, request)) {
                 return false;
             }
             JSONArray childs = jsonObject.getJSONArray("childs");
             if (childs != null) {
                 List<Object> collect = childs.stream().filter(o1 -> {
                     JSONObject jsonObject1 = (JSONObject) o1;
-                    return testMenus(jsonObject1, userModel, nodeModel, showArray);
+                    return testMenus(jsonObject1, userModel, nodeModel, showArray, request);
                 }).collect(Collectors.toList());
                 if (collect.isEmpty()) {
                     return false;
@@ -323,7 +322,7 @@ public class IndexControl extends BaseServerController {
      * @apiSuccess {JSON}  data 菜单相关字段
      */
     @RequestMapping(value = "system_menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<Object>> systemMenusData() {
+    public JsonMessage<List<Object>> systemMenusData(HttpServletRequest request) {
         UserModel userModel = getUserModel();
         // 菜单
         InputStream inputStream = ResourceUtil.getStream("classpath:/menus/system.json");
@@ -331,14 +330,14 @@ public class IndexControl extends BaseServerController {
         JSONArray jsonArray = JSONArray.parseArray(json);
         List<Object> collect1 = jsonArray.stream().filter(o -> {
             JSONObject jsonObject = (JSONObject) o;
-            if (!testMenus(jsonObject, userModel, null, null)) {
+            if (!testMenus(jsonObject, userModel, null, null, request)) {
                 return false;
             }
             JSONArray childs = jsonObject.getJSONArray("childs");
             if (childs != null) {
                 List<Object> collect = childs.stream().filter(o1 -> {
                     JSONObject jsonObject1 = (JSONObject) o1;
-                    return testMenus(jsonObject1, userModel, null, null);
+                    return testMenus(jsonObject1, userModel, null, null, request);
                 }).collect(Collectors.toList());
                 if (collect.isEmpty()) {
                     return false;
@@ -351,7 +350,7 @@ public class IndexControl extends BaseServerController {
         return JsonMessage.success("", collect1);
     }
 
-    private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel, JSONArray showArray) {
+    private boolean testMenus(JSONObject jsonObject, UserModel userModel, NodeModel nodeModel, JSONArray showArray, HttpServletRequest request) {
         String storageMode = jsonObject.getString("storageMode");
         if (StrUtil.isNotEmpty(storageMode)) {
             if (!StrUtil.equals(dbExtConfig.getMode().name(), storageMode)) {
@@ -385,7 +384,7 @@ public class IndexControl extends BaseServerController {
                 if (userModel.isSuperSystemUser()) {
                     return true;
                 }
-                String workspaceId = BaseWorkspaceService.getWorkspaceId(getRequest());
+                String workspaceId = BaseWorkspaceService.getWorkspaceId(request);
                 return userBindWorkspaceService.exists(userModel, workspaceId + UserBindWorkspaceService.SYSTEM_USER);
             }
         }

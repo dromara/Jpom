@@ -174,7 +174,7 @@
     <a-modal
       destroyOnClose
       v-model="linkDispatchVisible"
-      width="800px"
+      width="900px"
       :title="temp.type === 'edit' ? '编辑关联项目' : '添加关联项目'"
       @ok="handleLinkDispatchOk"
       :maskClosable="false"
@@ -205,7 +205,13 @@
               }
             "
           >
-            <a-list-item slot="renderItem" slot-scope="item, index">
+            <a-list-item
+              :locale="{
+                emptyText: '暂无数据,请先添加节点项目数据',
+              }"
+              slot="renderItem"
+              slot-scope="item, index"
+            >
               <a-space>
                 <span>节点: </span>
                 <a-select

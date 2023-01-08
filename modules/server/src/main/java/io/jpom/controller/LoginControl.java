@@ -58,6 +58,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
@@ -272,8 +273,8 @@ public class LoginControl extends BaseServerController {
      */
     @RequestMapping(value = "renewal", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public JsonMessage<UserLoginDto> renewalToken() {
-        String token = getRequest().getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
+    public JsonMessage<UserLoginDto> renewalToken(HttpServletRequest request) {
+        String token = request.getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
         if (StrUtil.isEmpty(token)) {
             return new JsonMessage<>(ServerConst.AUTHORIZE_TIME_OUT_CODE, "刷新token失败");
         }

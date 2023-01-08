@@ -96,8 +96,8 @@ public class OutGivingController extends BaseServerController {
      */
     @PostMapping(value = "dispatch-list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<OutGivingModel>> dispatchList() {
-        PageResultDto<OutGivingModel> pageResultDto = outGivingServer.listPage(getRequest());
+    public JsonMessage<PageResultDto<OutGivingModel>> dispatchList(HttpServletRequest request) {
+        PageResultDto<OutGivingModel> pageResultDto = outGivingServer.listPage(request);
         return JsonMessage.success("success", pageResultDto);
     }
 
@@ -110,52 +110,51 @@ public class OutGivingController extends BaseServerController {
      */
     @GetMapping(value = "dispatch-list-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<OutGivingModel>> dispatchListAll() {
-        List<OutGivingModel> outGivingModels = outGivingServer.listByWorkspace(getRequest());
+    public JsonMessage<List<OutGivingModel>> dispatchListAll(HttpServletRequest request) {
+        List<OutGivingModel> outGivingModels = outGivingServer.listByWorkspace(request);
         return JsonMessage.success("", outGivingModels);
     }
 
 
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> save(String type, @ValidatorItem String id) throws IOException {
+    public JsonMessage<Object> save(String type, @ValidatorItem String id, HttpServletRequest request) throws IOException {
         if ("add".equalsIgnoreCase(type)) {
             //
             String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
             Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
             //boolean general = StringUtil.isGeneral(id, 2, 20);
             //Assert.state(general, );
-            return addOutGiving(id);
+            return addOutGiving(id, request);
         } else {
-            return updateGiving(id);
+            return updateGiving(id, request);
         }
     }
 
-    private JsonMessage<Object> addOutGiving(String id) {
+    private JsonMessage<Object> addOutGiving(String id, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id);
-        Assert.isNull(outGivingModel, "分发id已经存在啦");
+        Assert.isNull(outGivingModel, "分发id已经存在啦,分发id需要全局唯一");
         //
         outGivingModel = new OutGivingModel();
         outGivingModel.setId(id);
-        this.doData(outGivingModel);
+        this.doData(outGivingModel, request);
         //
         outGivingServer.insert(outGivingModel);
         return JsonMessage.success("添加成功");
     }
 
-    private JsonMessage<Object> updateGiving(String id) {
-        OutGivingModel outGivingModel = outGivingServer.getByKey(id);
+    private JsonMessage<Object> updateGiving(String id, HttpServletRequest request) {
+        OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingModel, "没有找到对应的分发id");
-        doData(outGivingModel);
+        doData(outGivingModel, request);
 
         outGivingServer.update(outGivingModel);
         return JsonMessage.success("修改成功");
     }
 
-    private void doData(OutGivingModel outGivingModel) {
+    private void doData(OutGivingModel outGivingModel, HttpServletRequest request) {
         outGivingModel.setName(getParameter("name"));
         Assert.hasText(outGivingModel.getName(), "分发名称不能为空");
-        HttpServletRequest request = getRequest();
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         //
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
@@ -225,8 +224,7 @@ public class OutGivingController extends BaseServerController {
      */
     @RequestMapping(value = "release_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> releaseDel(String id) {
-        HttpServletRequest request = getRequest();
+    public JsonMessage<Object> releaseDel(String id, HttpServletRequest request) {
         // 判断构建
         boolean releaseMethod = buildService.checkReleaseMethod(id, request, BuildReleaseMethod.Outgiving);
         Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
@@ -263,8 +261,7 @@ public class OutGivingController extends BaseServerController {
      */
     @GetMapping(value = "unbind.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> unbind(String id) {
-        HttpServletRequest request = getRequest();
+    public JsonMessage<Object> unbind(String id, HttpServletRequest request) {
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingServerItem, "对应的分发不存在");
         // 判断构建
