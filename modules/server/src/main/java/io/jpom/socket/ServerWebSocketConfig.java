@@ -25,6 +25,7 @@ package io.jpom.socket;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.socket.handler.*;
+import io.jpom.system.ServerConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -41,13 +42,16 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
     private final ServerWebSocketInterceptor serverWebSocketInterceptor;
     private final SystemParametersServer systemParametersServer;
     private final NodeService nodeService;
+    private final ServerConfig.NodeConfig nodeConfig;
 
     public ServerWebSocketConfig(ServerWebSocketInterceptor serverWebSocketInterceptor,
                                  SystemParametersServer systemParametersServer,
-                                 NodeService nodeService) {
+                                 NodeService nodeService,
+                                 ServerConfig serverConfig) {
         this.serverWebSocketInterceptor = serverWebSocketInterceptor;
         this.systemParametersServer = systemParametersServer;
         this.nodeService = nodeService;
+        this.nodeConfig = serverConfig.getNode();
     }
 
     @Override
@@ -65,7 +69,7 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
         registry.addHandler(new SshHandler(), "/socket/ssh")
             .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
         // 节点升级
-        registry.addHandler(new NodeUpdateHandler(nodeService, systemParametersServer), "/socket/node_update")
+        registry.addHandler(new NodeUpdateHandler(nodeService, systemParametersServer, nodeConfig), "/socket/node_update")
             .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
         // 脚本模板
         registry.addHandler(new ServerScriptHandler(), "/socket/script_run")

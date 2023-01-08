@@ -31,6 +31,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.util.FileUtils;
 import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
@@ -48,7 +49,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * controller
@@ -56,6 +59,7 @@ import java.util.*;
  * @author jiangzeyin
  * @since 2019/4/16
  */
+@Slf4j
 public abstract class BaseJpomController {
     /**
      * 路径安全格式化
@@ -173,7 +177,10 @@ public abstract class BaseJpomController {
         FileUtil.del(sliceItemPath);
         // 对比文件信息
         String newSha1 = SecureUtil.sha1(successFile);
-        Assert.state(StrUtil.equals(newSha1, fileSumSha1), "文件合并后异常,文件不完成可能被损坏");
+        Assert.state(StrUtil.equals(newSha1, fileSumSha1), () -> {
+            log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumSha1);
+            return "文件合并后异常,文件不完成可能被损坏";
+        });
         return successFile;
     }
 
@@ -311,25 +318,6 @@ public abstract class BaseJpomController {
         return ServletUtil.getClientIP(request);
     }
 
-    /**
-     * 获取header
-     *
-     * @param request req
-     * @return map
-     * @author jiangzeyin
-     */
-    public static Map<String, String> getHeaderMapValues(HttpServletRequest request) {
-        Enumeration<String> enumeration = request.getHeaderNames();
-        Map<String, String> headerMapValues = new HashMap<>(20);
-        if (enumeration != null) {
-            for (; enumeration.hasMoreElements(); ) {
-                String name = enumeration.nextElement();
-                headerMapValues.put(name, request.getHeader(name));
-            }
-        }
-        return headerMapValues;
-    }
-
     public HttpServletRequest getRequest() {
         HttpServletRequest request = getRequestAttributes().getRequest();
         Objects.requireNonNull(request, "request null");
@@ -360,14 +348,6 @@ public abstract class BaseJpomController {
      */
     public ServletContext getApplication() {
         return getRequest().getServletContext();
-    }
-
-    public Object getAttribute(String name) {
-        return getRequestAttributes().getAttribute(name, RequestAttributes.SCOPE_REQUEST);
-    }
-
-    public void setAttribute(String name, Object object) {
-        getRequestAttributes().setAttribute(name, object, RequestAttributes.SCOPE_REQUEST);
     }
 
     /**

@@ -35,17 +35,17 @@ import lombok.EqualsAndHashCode;
 @Data
 public abstract class BaseWorkspaceModel extends BaseStrikeDbModel {
 
-	/**
-	 * 工作空间ID
-	 *
-	 * @see io.jpom.model.data.WorkspaceModel
-	 * @see io.jpom.common.Const#WORKSPACEID_REQ_HEADER
-	 */
-	private String workspaceId;
+    /**
+     * 工作空间ID
+     *
+     * @see io.jpom.model.data.WorkspaceModel
+     * @see io.jpom.common.Const#WORKSPACE_ID_REQ_HEADER
+     */
+    private String workspaceId;
 
-	@Override
-	public String toString() {
-		return super.toString();
-	}
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 
 }

@@ -48,13 +48,16 @@ import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -317,9 +320,10 @@ public class OutGivingRun {
                                                  boolean unzip,
                                                  AfterOpt afterOpt,
                                                  NodeModel nodeModel,
-
-                                                 boolean clearOld, Boolean closeFirst) {
-        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, clearOld, null, closeFirst);
+                                                 boolean clearOld,
+                                                 Boolean closeFirst,
+                                                 BiConsumer<Long, Long> streamProgress) {
+        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, clearOld, null, closeFirst, streamProgress);
     }
 
     /**
@@ -342,8 +346,9 @@ public class OutGivingRun {
                                                  NodeModel nodeModel,
                                                  boolean clearOld,
                                                  Integer sleepTime,
-                                                 Boolean closeFirst) {
-        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, clearOld, sleepTime, closeFirst, 0);
+                                                 Boolean closeFirst,
+                                                 BiConsumer<Long, Long> streamProgress) {
+        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, clearOld, sleepTime, closeFirst, 0, streamProgress);
     }
 
     /**
@@ -366,9 +371,10 @@ public class OutGivingRun {
                                                  NodeModel nodeModel,
                                                  boolean clearOld,
                                                  Integer sleepTime,
-                                                 Boolean closeFirst, int stripComponents) {
+                                                 Boolean closeFirst, int stripComponents,
+                                                 BiConsumer<Long, Long> streamProgress) {
         JSONObject data = new JSONObject();
-        data.put("file", file);
+        //  data.put("file", file);
         data.put("id", projectId);
         Opt.ofBlankAble(levelName).ifPresent(s -> data.put("levelName", s));
         Opt.ofNullable(sleepTime).ifPresent(integer -> data.put("sleepTime", integer));
@@ -387,6 +393,17 @@ public class OutGivingRun {
             data.put("after", afterOpt.getCode());
         }
         data.put("closeFirst", closeFirst);
-        return NodeForward.request(nodeModel, NodeUrl.Manage_File_Upload, data);
+        try {
+            return NodeForward.requestSharding(nodeModel, NodeUrl.Manage_File_Upload_Sharding, data, file,
+                sliceData -> {
+                    sliceData.putAll(data);
+                    return NodeForward.request(nodeModel, NodeUrl.Manage_File_Sharding_Merge, sliceData);
+                },
+                streamProgress);
+        } catch (IOException e) {
+            throw Lombok.sneakyThrow(e);
+        }
+
+        //return NodeForward.request(nodeModel, NodeUrl.Manage_File_Upload, data);
     }
 }

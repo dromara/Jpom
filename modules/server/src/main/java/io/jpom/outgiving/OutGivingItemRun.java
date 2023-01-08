@@ -96,7 +96,9 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                 unzip,
                 afterOpt,
                 this.nodeModel, this.clearOld,
-                this.sleepTime, this.closeFirst, this.stripComponents);
+                this.sleepTime, this.closeFirst, this.stripComponents, (total, progressSize) -> {
+                    double floor = Math.floor(((float) progressSize / total) * 100);
+                });
             result = jsonMessage.success() ? OutGivingNodeProject.Status.Ok : OutGivingNodeProject.Status.Fail;
 
             JSONObject jsonObject = jsonMessage.toJson();

@@ -219,6 +219,7 @@ public class OutGivingProjectController extends BaseServerController {
         //
         boolean unzip = Convert.toBool(autoUnzip, false);
         File file = FileUtil.file(JpomApplication.getInstance().getDataPath(), ServerConst.OUTGIVING_FILE, id);
+        FileUtil.mkdir(file);
         //
         File userTempPath = serverConfig.getUserTempPath();
         File successFile = this.shardingTryMerge(userTempPath.getAbsolutePath(), sliceId, totalSlice, fileSumSha1);

@@ -65,6 +65,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -195,7 +196,7 @@ public class NodeForward {
         long chunkSize = DataSize.ofMegabytes(fileSliceSize).toBytes();
         int total = (int) Math.ceil((double) length / chunkSize);
         Queue<Integer> queueList = new ConcurrentLinkedDeque<>();
-        for (int i = 1; i <= total; i++) {
+        for (int i = 0; i < total; i++) {
             queueList.offer(i);
         }
         List<Integer> success = Collections.synchronizedList(new ArrayList<>(total));
@@ -204,18 +205,16 @@ public class NodeForward {
         int concurrent = 2;
         AtomicReference<JsonMessage<T>> failureMessage = new AtomicReference<>();
         AtomicReference<JsonMessage<T>> succeedMessage = new AtomicReference<>();
-        String sliceId = IdUtil.fastSimpleUUID();
-
+        AtomicLong atomicProgressSize = new AtomicLong(0);
         JSONObject sliceData = new JSONObject();
-        sliceData.put("sliceId", sliceId);
+        sliceData.put("sliceId", IdUtil.fastSimpleUUID());
         sliceData.put("totalSlice", total);
         sliceData.put("fileSumSha1", sha1);
         TransportServer transportServer = TransportServerFactory.get();
-
         TypeReference<JsonMessage<T>> typeReference = new TypeReference<JsonMessage<T>>() {
         };
-
-        try (SyncFinisher syncFinisher = new SyncFinisher(concurrent)) {
+        // 需要计算 并发数和最大任务数，如果任务数小于并发数则使用任务数
+        try (SyncFinisher syncFinisher = new SyncFinisher(Math.min(concurrent, total))) {
             Runnable runnable = () -> {
                 // 取出任务
                 Integer currentChunk = queueList.poll();
@@ -223,14 +222,13 @@ public class NodeForward {
                     return;
                 }
                 JSONObject uploadData = jsonObject.clone();
-                long start = currentChunk * chunkSize;
-
                 try {
                     try (FileInputStream inputStream = new FileInputStream(file)) {
                         try (FileChannel inputChannel = inputStream.getChannel()) {
                             //分配缓冲区，设定每次读的字节数
                             ByteBuffer byteBuffer = ByteBuffer.allocate((int) chunkSize);
-                            inputChannel.position(start);
+                            // 移动到指定位置开始读取
+                            inputChannel.position(currentChunk * chunkSize);
                             inputChannel.read(byteBuffer);
                             //上面把数据写入到了buffer，所以可知上面的buffer是写模式，调用flip把buffer切换到读模式，读取数据
                             byteBuffer.flip();
@@ -248,7 +246,9 @@ public class NodeForward {
                         // 使用成功的个数计算
                         success.add(currentChunk);
                         long end = Math.min(length, ((success.size() - 1) * chunkSize) + chunkSize);
-                        streamProgress.accept(length, end);
+                        // 保存线程安全顺序回调进度信息
+                        atomicProgressSize.set(Math.max(end, atomicProgressSize.get()));
+                        streamProgress.accept(length, atomicProgressSize.get());
                         succeedMessage.set(message);
                     } else {
                         log.warn("分片上传异常：{} {}", nodeUrl, message);

@@ -44,7 +44,7 @@
         </a-tooltip>
       </template>
 
-      <a-tooltip slot="status" slot-scope="text, record" placement="topLeft" :title="`${statusMap[text]}   ${record.statusMsg}`">
+      <a-tooltip slot="status" slot-scope="text, record" placement="topLeft" :title="`${record.statusMsg}`">
         <a-tag v-if="text === 2" color="green">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else-if="text === 1 || text === 0" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else-if="text === 3 || text === 4" color="red">{{ statusMap[text] || "未知" }}</a-tag>
@@ -1255,6 +1255,8 @@ export default {
     handleDispatch(record) {
       this.temp = Object.assign({ type: "upload" }, record);
       this.dispatchVisible = true;
+      this.percentage = 0;
+      this.fileList = [];
       this.$refs["dispatchForm"] && this.$refs["dispatchForm"].resetFields();
     },
     // 处理文件移除

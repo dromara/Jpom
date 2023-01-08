@@ -124,7 +124,7 @@ public class RepositoryModel extends BaseWorkspaceModel {
         }
         map.put("username", this.getUserName());
         map.put("password", this.getPassword());
-        map.put(Const.WORKSPACEID_REQ_HEADER, this.getWorkspaceId());
+        map.put(Const.WORKSPACE_ID_REQ_HEADER, this.getWorkspaceId());
         map.put("rsaFile", BuildUtil.getRepositoryRsaFile(this));
         return map;
     }
