@@ -64,8 +64,8 @@ spring:
         name: JPOMID-AGENT
     multipart:
       # 上传文件大小限制 12KB -- parses as 12 kilobytes 5MB  -- parses as 5 megabytes 20  -- parses as 20 kilobytes
-      max-request-size: 2GB
-      max-file-size: 1GB
+      max-request-size: 50MB
+      max-file-size: 10MB
   mvc:
     throw-exception-if-no-handler-found: true
     log-request-details: true

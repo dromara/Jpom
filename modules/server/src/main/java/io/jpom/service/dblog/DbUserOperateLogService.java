@@ -275,7 +275,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
     public String getCheckUserWorkspace(HttpServletRequest request) {
         // 忽略检查
         return BaseWorkspaceService.getWorkspaceId(request);
-        // String header = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+        // String header = ServletUtil.getHeader(request, Const.WORKSPACE_ID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
         // return ObjectUtil.defaultIfNull(header, StrUtil.EMPTY);
     }
 

@@ -24,13 +24,12 @@ package io.jpom.socket.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.unit.DataSize;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import io.jpom.common.Const;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.Type;
@@ -48,6 +47,7 @@ import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
+import io.jpom.system.ServerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
 import top.jpom.transport.DataContentType;
@@ -85,11 +85,15 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
     private final SystemParametersServer systemParametersServer;
     private final NodeService nodeService;
+    private final ServerConfig.NodeConfig nodeConfig;
 
-    public NodeUpdateHandler(NodeService nodeService, SystemParametersServer systemParametersServer) {
+    public NodeUpdateHandler(NodeService nodeService,
+                             SystemParametersServer systemParametersServer,
+                             ServerConfig.NodeConfig nodeConfig) {
         super(null);
         this.nodeService = nodeService;
         this.systemParametersServer = systemParametersServer;
+        this.nodeConfig = nodeConfig;
         //systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
 //        nodeService = SpringUtil.getBean(NodeService.class);
     }
@@ -223,7 +227,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 return;
             }
             JsonMessage<Tuple> error = JpomManifest.checkJpomJar(agentFileModel.getSavePath(), Type.Agent, false);
-            if (error.getCode() != HttpStatus.HTTP_OK) {
+            if (!error.success()) {
                 this.onError(session, "Agent JAR 损坏请重新上传," + error.getMsg());
                 return;
             }
@@ -295,7 +299,8 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         try (FileInputStream fis = new FileInputStream(agentFileModel.getSavePath())) {
             // 发送文件内容
             int len;
-            byte[] buffer = new byte[Const.DEFAULT_BUFFER_SIZE];
+            int fileSliceSize = nodeConfig.getUploadFileSliceSize();
+            byte[] buffer = new byte[(int) DataSize.ofMegabytes(fileSliceSize).toBytes()];
             while ((len = fis.read(buffer)) > 0) {
                 client.send(ByteBuffer.wrap(buffer, 0, len));
             }

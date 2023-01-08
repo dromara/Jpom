@@ -74,7 +74,7 @@ public abstract class BaseAgentController extends BaseJpomController {
     }
 
     protected String getWorkspaceId() {
-        return ServletUtil.getHeader(getRequest(), Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+        return ServletUtil.getHeader(getRequest(), Const.WORKSPACE_ID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
     }
 
     /**

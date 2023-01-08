@@ -37,7 +37,9 @@ import io.jpom.system.AgentConfig;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.servlet.MultipartProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.util.unit.DataSize;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -58,10 +60,12 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
     private static final Map<String, UploadFileModel> UPLOAD_FILE_INFO = new HashMap<>();
 
     private static AgentConfig agentConfig;
+    private static MultipartProperties multipartProperties;
 
     @Autowired
-    public void init(AgentConfig agentConfig) {
+    public void init(AgentConfig agentConfig, MultipartProperties multipartProperties) {
         AgentWebSocketUpdateHandle.agentConfig = agentConfig;
+        AgentWebSocketUpdateHandle.multipartProperties = multipartProperties;
     }
 
     @OnOpen
@@ -69,7 +73,8 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
         if (super.checkAuthorize(session)) {
             return;
         }
-        session.setMaxBinaryMessageBufferSize(Const.DEFAULT_BUFFER_SIZE);
+        DataSize maxRequestSize = multipartProperties.getMaxRequestSize();
+        session.setMaxBinaryMessageBufferSize((int) maxRequestSize.toBytes());
         //
     }
 

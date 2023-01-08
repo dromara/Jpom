@@ -45,7 +45,7 @@ public interface IWorkspaceEnvPlugin extends IDefaultPlugin {
      * @throws Exception 异常
      */
     default String convertRefEnvValue(Map<String, Object> parameter, String key) throws Exception {
-        String workspaceId = (String) parameter.get(Const.WORKSPACEID_REQ_HEADER);
+        String workspaceId = (String) parameter.get(Const.WORKSPACE_ID_REQ_HEADER);
         return this.convertRefEnvValue(workspaceId, (String) parameter.get(key));
     }
 

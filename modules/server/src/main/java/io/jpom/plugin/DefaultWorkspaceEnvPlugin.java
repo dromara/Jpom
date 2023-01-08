@@ -38,7 +38,7 @@ public class DefaultWorkspaceEnvPlugin implements IWorkspaceEnvPlugin {
     @Override
     public Object execute(Object main, Map<String, Object> parameter) throws Exception {
         WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
-        String workspaceId = (String) parameter.get(Const.WORKSPACEID_REQ_HEADER);
+        String workspaceId = (String) parameter.get(Const.WORKSPACE_ID_REQ_HEADER);
         String value = (String) parameter.get("value");
         return workspaceEnvVarService.convertRefEnvValue(workspaceId, value);
     }

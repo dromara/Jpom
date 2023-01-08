@@ -24,14 +24,13 @@ package io.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -171,7 +170,6 @@ public class ReleaseManage implements Runnable {
             logRecorder.info("不存在构建产物");
             return false;
         }
-        long time = SystemClock.now();
         int releaseMethod = this.buildExtraModule.getReleaseMethod();
         logRecorder.info("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
 
@@ -192,8 +190,7 @@ public class ReleaseManage implements Runnable {
             logRecorder.info(" 没有实现的发布分发:" + releaseMethod);
             return false;
         }
-        logRecorder.info("release complete : " + DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
-
+        //logRecorder.info("release complete : " + DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
         return true;
     }
 
@@ -517,7 +514,12 @@ public class ReleaseManage implements Runnable {
             //
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
                 projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, false,
-                this.buildExtraModule.getProjectUploadCloseFirst());
+                this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
+                    //  total, progressSize
+                    logRecorder.info("[SYSTEM-INFO] 上传文件进度:{} {}/{} {}", file.getName(),
+                        FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                        NumberUtil.formatPercent(((float) progressSize / total), 0));
+                });
             Assert.state(jsonMessage.success(), "同步项目文件失败：" + jsonMessage);
             if (last) {
                 // 最后一个
@@ -553,12 +555,17 @@ public class ReleaseManage implements Runnable {
             zipFile = this.resultFile;
             unZip = false;
         }
+        String name = zipFile.getName();
         JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile,
             this.buildExtraModule.getProjectSecondaryDirectory(),
             projectId,
             unZip,
             afterOpt,
-            nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst());
+            nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
+                logRecorder.info("[SYSTEM-INFO] 上传文件进度:{} {}/{} {}", name,
+                    FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                    NumberUtil.formatPercent(((float) progressSize / total), 0));
+            });
         if (jsonMessage.success()) {
             logRecorder.info("发布项目包成功：" + jsonMessage);
         } else {

@@ -136,7 +136,7 @@ public class OperateLogController implements AopLogInterface {
             //
             cacheInfo.userAgent = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.USER_AGENT);
             cacheInfo.workspaceId = BaseWorkspaceService.getWorkspaceId(request);
-            //ServletUtil.getHeaderIgnoreCase(request, Const.WORKSPACEID_REQ_HEADER);
+            //ServletUtil.getHeaderIgnoreCase(request, Const.WORKSPACE_ID_REQ_HEADER);
             //
             Map<String, Object> allData = this.buildRequestParam(request);
             //

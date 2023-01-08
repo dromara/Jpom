@@ -196,9 +196,9 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
     }
 
     public static String getWorkspaceId(HttpServletRequest request) {
-        String workspaceId = request.getParameter(Const.WORKSPACEID_REQ_HEADER);
+        String workspaceId = request.getParameter(Const.WORKSPACE_ID_REQ_HEADER);
         if (StrUtil.isEmpty(workspaceId)) {
-            workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+            workspaceId = ServletUtil.getHeader(request, Const.WORKSPACE_ID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
         }
         return StrUtil.emptyToDefault(workspaceId, Const.WORKSPACE_DEFAULT_ID);
     }
