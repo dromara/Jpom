@@ -118,9 +118,9 @@ public class BuildInfoController extends BaseServerController {
      */
     @RequestMapping(value = "/build/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<BuildInfoModel>> getBuildList() {
+    public JsonMessage<PageResultDto<BuildInfoModel>> getBuildList(HttpServletRequest request) {
         // load list with page
-        PageResultDto<BuildInfoModel> page = buildInfoService.listPage(getRequest());
+        PageResultDto<BuildInfoModel> page = buildInfoService.listPage(request);
         page.each(buildInfoModel -> {
             // 获取源码目录是否存在
             File source = BuildUtil.getSourceById(buildInfoModel.getId());
@@ -139,9 +139,9 @@ public class BuildInfoController extends BaseServerController {
      */
     @GetMapping(value = "/build/list_all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<BuildInfoModel>> getBuildListAll() {
+    public JsonMessage<List<BuildInfoModel>> getBuildListAll(HttpServletRequest request) {
         // load list with page
-        List<BuildInfoModel> modelList = buildInfoService.listByWorkspace(getRequest());
+        List<BuildInfoModel> modelList = buildInfoService.listByWorkspace(request);
         return JsonMessage.success("", modelList);
     }
 
@@ -152,9 +152,9 @@ public class BuildInfoController extends BaseServerController {
      */
     @GetMapping(value = "/build/list_group_all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<List<String>> getBuildGroupAll() {
+    public JsonMessage<List<String>> getBuildGroupAll(HttpServletRequest request) {
         // load list with page
-        List<String> group = buildInfoService.listGroup(getRequest());
+        List<String> group = buildInfoService.listGroup(request);
         return JsonMessage.success("", group);
     }
 
@@ -184,9 +184,10 @@ public class BuildInfoController extends BaseServerController {
                                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
                                            String branchName, String branchTagName, String webhook, String autoBuildCron,
                                            String extraData, String group,
-                                           @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "构建方式不正确") int buildMode) {
+                                           @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "构建方式不正确") int buildMode,
+                                           HttpServletRequest request) {
         // 根据 repositoryId 查询仓库信息
-        RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, getRequest());
+        RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, request);
         Assert.notNull(repositoryModel, "无效的仓库信息");
         // 如果是 GIT 需要检测分支是否存在
         if (RepositoryModel.RepoType.Git.getCode() == repositoryModel.getRepoType()) {
@@ -199,14 +200,14 @@ public class BuildInfoController extends BaseServerController {
         Assert.state(buildMode == 0 || buildMode == 1, "请选择正确的构建方式");
         if (buildMode == 1) {
             // 验证 dsl 内容
-            this.checkDocker(script);
+            this.checkDocker(script, request);
         }
         if (buildExtConfig.isCheckDeleteCommand()) {
             // 判断删除命令
             Assert.state(!CommandUtil.checkContainsDel(script), "不能包含删除命令");
         }
         // 查询构建信息
-        BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
+        BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         buildInfoModel = ObjectUtil.defaultIfNull(buildInfoModel, new BuildInfoModel());
         // 设置参数
         if (StrUtil.isNotEmpty(webhook)) {
@@ -234,7 +235,7 @@ public class BuildInfoController extends BaseServerController {
         if (releaseMethod1 == BuildReleaseMethod.Project) {
             this.formatProject(jsonObject);
         } else if (releaseMethod1 == BuildReleaseMethod.Ssh) {
-            this.formatSsh(jsonObject);
+            this.formatSsh(jsonObject, request);
         } else if (releaseMethod1 == BuildReleaseMethod.Outgiving) {
             String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_1");
             Assert.hasText(releaseMethodDataId, "请选择分发项目");
@@ -244,7 +245,7 @@ public class BuildInfoController extends BaseServerController {
             jsonObject.put("releaseMethodDataId", "LocalCommand");
         } else if (releaseMethod1 == BuildReleaseMethod.DockerImage) {
             // dockerSwarmId default
-            String dockerSwarmId = this.formatDocker(jsonObject);
+            String dockerSwarmId = this.formatDocker(jsonObject, request);
             jsonObject.put("releaseMethodDataId", dockerSwarmId);
         }
         // 检查关联数据ID
@@ -255,7 +256,7 @@ public class BuildInfoController extends BaseServerController {
         // 验证服务端脚本
         String noticeScriptId = jsonObject.getString("noticeScriptId");
         if (StrUtil.isNotEmpty(noticeScriptId)) {
-            ScriptModel scriptModel = scriptServer.getByKey(noticeScriptId, getRequest());
+            ScriptModel scriptModel = scriptServer.getByKey(noticeScriptId, request);
             Assert.notNull(scriptModel, "不存在对应的服务端脚本,请重新选择");
         }
         buildInfoModel.setExtraData(jsonObject.toJSONString());
@@ -268,18 +269,18 @@ public class BuildInfoController extends BaseServerController {
             return JsonMessage.success("添加成功");
         }
 
-        buildInfoService.updateById(buildInfoModel, getRequest());
+        buildInfoService.updateById(buildInfoModel, request);
         return JsonMessage.success("修改成功");
     }
 
-    private void checkDocker(String script) {
+    private void checkDocker(String script, HttpServletRequest request) {
         DockerYmlDsl build = DockerYmlDsl.build(script);
         build.check();
         //
         String fromTag = build.getFromTag();
         if (StrUtil.isNotEmpty(fromTag)) {
             //
-            String workspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
+            String workspaceId = dockerInfoService.getCheckUserWorkspace(request);
             int count = dockerInfoService.countByTag(workspaceId, fromTag);
             Assert.state(count > 0, "docker tag 填写不正确,没有找到任何docker");
         }
@@ -291,7 +292,7 @@ public class BuildInfoController extends BaseServerController {
      *
      * @param jsonObject 配置信息
      */
-    private void formatSsh(JSONObject jsonObject) {
+    private void formatSsh(JSONObject jsonObject, HttpServletRequest request) {
         // 发布方式
         String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_3");
         Assert.hasText(releaseMethodDataId, "请选择分发SSH项");
@@ -302,7 +303,7 @@ public class BuildInfoController extends BaseServerController {
         String releaseCommand = jsonObject.getString("releaseCommand");
         List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
         for (String releaseMethodDataIdItem : strings) {
-            SshModel sshServiceItem = sshService.getByKey(releaseMethodDataIdItem, getRequest());
+            SshModel sshServiceItem = sshService.getByKey(releaseMethodDataIdItem, request);
             Assert.notNull(sshServiceItem, "没有对应的ssh项");
             //
             if (releasePath.startsWith(StrUtil.SLASH)) {
@@ -334,14 +335,14 @@ public class BuildInfoController extends BaseServerController {
         jsonObject.put("releaseMethodDataId", releaseMethodDataId);
     }
 
-    private String formatDocker(JSONObject jsonObject) {
+    private String formatDocker(JSONObject jsonObject, HttpServletRequest request) {
         // 发布命令
         String dockerfile = jsonObject.getString("dockerfile");
         Assert.hasText(dockerfile, "请填写要执行的 Dockerfile 路径");
         String fromTag = jsonObject.getString("fromTag");
         if (StrUtil.isNotEmpty(fromTag)) {
             Assert.hasText(fromTag, "请填要执行 docker 标签");
-            String workspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
+            String workspaceId = dockerInfoService.getCheckUserWorkspace(request);
             int count = dockerInfoService.countByTag(workspaceId, fromTag);
             Assert.state(count > 0, "docker tag 填写不正确,没有找到任何docker");
         }
@@ -426,9 +427,8 @@ public class BuildInfoController extends BaseServerController {
      */
     @PostMapping(value = "/build/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public JsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
+    public JsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id, HttpServletRequest request) {
         // 查询构建信息
-        HttpServletRequest request = getRequest();
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         Objects.requireNonNull(buildInfoModel, "没有对应数据");
         //
@@ -456,9 +456,9 @@ public class BuildInfoController extends BaseServerController {
      */
     @PostMapping(value = "/build/clean-source", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public JsonMessage<Object> cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
+    public JsonMessage<Object> cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id, HttpServletRequest request) {
         // 查询构建信息
-        BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
+        BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         Objects.requireNonNull(buildInfoModel, "没有对应数据");
         File source = BuildUtil.getSourceById(buildInfoModel.getId());
         // 快速删除
@@ -478,8 +478,7 @@ public class BuildInfoController extends BaseServerController {
      */
     @GetMapping(value = "/build/sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId) {
-        HttpServletRequest request = getRequest();
+    public JsonMessage<String> sortItem(@ValidatorItem String id, @ValidatorItem String method, String compareId, HttpServletRequest request) {
         if (StrUtil.equalsIgnoreCase(method, "top")) {
             buildInfoService.sortToTop(id, request);
         } else if (StrUtil.equalsIgnoreCase(method, "up")) {

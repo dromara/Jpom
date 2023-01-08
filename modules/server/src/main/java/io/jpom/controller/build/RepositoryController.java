@@ -94,7 +94,7 @@ public class RepositoryController extends BaseServerController {
      * load repository list
      *
      * <pre>
-     *     此请求会分页列出数据，如需要不分页列出所有数据使用{@link #loadRepositoryListAll()}
+     *     此请求会分页列出数据，如需要不分页列出所有数据使用{@link #loadRepositoryListAll(HttpServletRequest request)}
      * </pre>
      *
      * @return json
@@ -117,8 +117,8 @@ public class RepositoryController extends BaseServerController {
      */
     @GetMapping(value = "/build/repository/list_all")
     @Feature(method = MethodFeature.LIST)
-    public Object loadRepositoryListAll() {
-        List<RepositoryModel> repositoryModels = repositoryService.listByWorkspace(getRequest());
+    public Object loadRepositoryListAll(HttpServletRequest request) {
+        List<RepositoryModel> repositoryModels = repositoryService.listByWorkspace(request);
         return JsonMessage.success("", repositoryModels);
     }
 
@@ -175,22 +175,21 @@ public class RepositoryController extends BaseServerController {
      */
     @PostMapping(value = "/build/repository/rest_hide_field")
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> restHideField(@ValidatorItem String id) {
+    public JsonMessage<String> restHideField(@ValidatorItem String id, HttpServletRequest request) {
         RepositoryModel repositoryModel = new RepositoryModel();
         repositoryModel.setId(id);
         repositoryModel.setPassword(StrUtil.EMPTY);
         repositoryModel.setRsaPrv(StrUtil.EMPTY);
         repositoryModel.setRsaPub(StrUtil.EMPTY);
-        repositoryModel.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
+        repositoryModel.setWorkspaceId(repositoryService.getCheckUserWorkspace(request));
         repositoryService.updateById(repositoryModel);
         return new JsonMessage<>(200, "操作成功");
     }
 
     @GetMapping(value = "/build/repository/authorize_repos")
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<JSONObject>> authorizeRepos() {
+    public JsonMessage<PageResultDto<JSONObject>> authorizeRepos(HttpServletRequest request) {
         // 获取分页信息
-        HttpServletRequest request = getRequest();
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         Page page = repositoryService.parsePage(paramMap);
         String token = paramMap.get("token");
@@ -203,14 +202,14 @@ public class RepositoryController extends BaseServerController {
         PageResultDto<JSONObject> pageResultDto;
         switch (type) {
             case "gitee":
-                pageResultDto = this.giteeRepos(token, page, condition);
+                pageResultDto = this.giteeRepos(token, page, condition, request);
                 break;
             case "github":
                 // GitHub 不支持条件搜索
-                pageResultDto = this.githubRepos(token, page);
+                pageResultDto = this.githubRepos(token, page, request);
                 break;
             case "gitlab":
-                pageResultDto = this.gitlabRepos(token, page, condition, gitlabAddress);
+                pageResultDto = this.gitlabRepos(token, page, condition, gitlabAddress, request);
                 break;
             default:
                 throw new IllegalArgumentException("不支持的类型");
@@ -228,7 +227,7 @@ public class RepositoryController extends BaseServerController {
      * @param gitlabAddress gitLab 地址
      * @return page
      */
-    private PageResultDto<JSONObject> gitlabRepos(String token, Page page, String condition, String gitlabAddress) {
+    private PageResultDto<JSONObject> gitlabRepos(String token, Page page, String condition, String gitlabAddress, HttpServletRequest request) {
         // 删除最后的 /
         if (gitlabAddress.endsWith("/")) {
             gitlabAddress = gitlabAddress.substring(0, gitlabAddress.length() - 1);
@@ -270,7 +269,7 @@ public class RepositoryController extends BaseServerController {
             jsonObject.put("private", !StrUtil.equalsIgnoreCase("public", repo.getString("visibility")));
             jsonObject.put("description", repo.getString("description"));
             jsonObject.put("username", username);
-            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(htmlUrl));
+            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(htmlUrl, request));
             return jsonObject;
         }).collect(Collectors.toList());
 
@@ -286,7 +285,7 @@ public class RepositoryController extends BaseServerController {
      * @param page  分页
      * @return page
      */
-    private PageResultDto<JSONObject> githubRepos(String token, Page page) {
+    private PageResultDto<JSONObject> githubRepos(String token, Page page, HttpServletRequest request) {
         GitHubUtil.GitHubUserInfo gitHubUserInfo = GitHubUtil.getGitHubUserInfo(token);
         JSONArray gitHubUserReposArray = GitHubUtil.getGitHubUserRepos(token, page);
 
@@ -301,7 +300,7 @@ public class RepositoryController extends BaseServerController {
             jsonObject.put("private", repo.getBooleanValue("private"));
             //
             jsonObject.put("username", gitHubUserInfo.getLogin());
-            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(cloneUrl));
+            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(cloneUrl, request));
             return jsonObject;
         }).collect(Collectors.toList());
         //
@@ -317,7 +316,7 @@ public class RepositoryController extends BaseServerController {
      * @param page  分页
      * @return page
      */
-    private PageResultDto<JSONObject> giteeRepos(String token, Page page, String condition) {
+    private PageResultDto<JSONObject> giteeRepos(String token, Page page, String condition, HttpServletRequest request) {
         String giteeUsername = GiteeUtil.getGiteeUsername(token);
 
         Map<String, Object> giteeReposMap = GiteeUtil.getGiteeRepos(token, page, condition);
@@ -344,7 +343,7 @@ public class RepositoryController extends BaseServerController {
             jsonObject.put("description", repo.getString("description"));
 
             jsonObject.put("username", giteeUsername);
-            jsonObject.put("exists", this.checkRepositoryUrl(htmlUrl));
+            jsonObject.put("exists", this.checkRepositoryUrl(htmlUrl, request));
             return jsonObject;
         }).collect(Collectors.toList());
 
@@ -410,8 +409,8 @@ public class RepositoryController extends BaseServerController {
      * @param url 仓库 url
      * @return true 在当前工作空间已经存在拉
      */
-    private boolean checkRepositoryUrl(String url) {
-        String workspaceId = repositoryService.getCheckUserWorkspace(getRequest());
+    private boolean checkRepositoryUrl(String url, HttpServletRequest request) {
+        String workspaceId = repositoryService.getCheckUserWorkspace(request);
         return this.checkRepositoryUrl(workspaceId, null, url);
     }
 

@@ -25,6 +25,7 @@ package io.jpom.outgiving;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.SyncFinisher;
@@ -248,6 +249,9 @@ public class OutGivingRun {
                 log.error("分发线程异常", e);
                 updateStatus(id, OutGivingModel.Status.FAIL, e.getMessage());
             } finally {
+                // 删除分发的文件
+                FileUtil.del(file);
+                //
                 IoUtil.close(SYNC_FINISHER_MAP.remove(id));
                 LOG_CACHE_MAP.remove(id);
             }
