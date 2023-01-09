@@ -45,6 +45,7 @@ import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 在线升级
@@ -74,7 +75,17 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
             return;
         }
         DataSize maxRequestSize = multipartProperties.getMaxRequestSize();
-        session.setMaxBinaryMessageBufferSize((int) maxRequestSize.toBytes());
+        int max = Optional.ofNullable(maxRequestSize)
+            .map(dataSize -> {
+                // 最大 10MB
+                long value = Math.min(dataSize.toBytes(), DataSize.ofMegabytes(10).toBytes());
+                // 最后转换，不然可能出现 0
+                int valueInt = (int) value;
+                return valueInt > 0 ? valueInt : null;
+            })
+            .orElseGet(() -> (int) DataSize.ofMegabytes(10).toBytes());
+
+        session.setMaxBinaryMessageBufferSize(max);
         //
     }
 
