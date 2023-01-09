@@ -30,7 +30,7 @@ import java.util.function.Consumer;
  * @author bwcx_jzy
  * @since 2022/12/26
  */
-public interface IProxyWebSocket {
+public interface IProxyWebSocket extends AutoCloseable {
 
     /**
      * 关闭连接
@@ -112,4 +112,11 @@ public interface IProxyWebSocket {
      * @return true
      */
     boolean isConnected();
+
+    /**
+     * 获取关闭状态描述
+     *
+     * @return 状态描述
+     */
+    String getCloseStatusMsg();
 }
