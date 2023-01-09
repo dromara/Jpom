@@ -83,23 +83,26 @@ public class OutGivingRun {
         Optional.ofNullable(syncFinisher).ifPresent(SyncFinisher::stopNow);
         //
         Map<String, String> map = LOG_CACHE_MAP.remove(id);
-        DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
-        for (String logId : map.values()) {
-            OutGivingLog outGivingLog = new OutGivingLog();
-            outGivingLog.setId(logId);
-            outGivingLog.setStatus(OutGivingNodeProject.Status.ArtificialCancel.getCode());
-            outGivingLog.setResult("手动取消分发");
-            dbOutGivingLogService.update(outGivingLog);
-        }
-        if (!map.isEmpty()) {
-            //
-            OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
-            // 更新分发数据
-            OutGivingModel outGivingModel1 = new OutGivingModel();
-            outGivingModel1.setId(id);
-            outGivingModel1.setStatus(OutGivingModel.Status.CANCEL.getCode());
-            outGivingServer.update(outGivingModel1);
-        }
+        Optional.ofNullable(map).ifPresent(map1 -> {
+            DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
+            for (String logId : map1.values()) {
+                OutGivingLog outGivingLog = new OutGivingLog();
+                outGivingLog.setId(logId);
+                outGivingLog.setStatus(OutGivingNodeProject.Status.ArtificialCancel.getCode());
+                outGivingLog.setResult("手动取消分发");
+                dbOutGivingLogService.update(outGivingLog);
+            }
+            if (!map1.isEmpty()) {
+                //
+                OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
+                // 更新分发数据
+                OutGivingModel outGivingModel1 = new OutGivingModel();
+                outGivingModel1.setId(id);
+                outGivingModel1.setStatus(OutGivingModel.Status.CANCEL.getCode());
+                outGivingServer.update(outGivingModel1);
+            }
+        });
+
     }
 
 
