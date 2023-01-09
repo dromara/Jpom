@@ -68,4 +68,14 @@ public class OutGivingLog extends BaseWorkspaceModel {
      * 项目id
      */
     private String projectId;
+
+    /**
+     * 文件大小
+     */
+    private Long fileSize;
+
+    /**
+     * 进度信息
+     */
+    private Long progressSize;
 }

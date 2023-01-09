@@ -40,7 +40,6 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
-import io.jpom.common.multipart.MultipartFileBuilder;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.SshModel;
@@ -58,6 +57,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -463,7 +463,7 @@ public class SshFileController extends BaseServerController {
 
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public JsonMessage<String> upload(String id, String path, String name, String unzip) {
+    public JsonMessage<String> upload(String id, String path, String name, String unzip, MultipartFile file) {
         SshModel sshModel = sshService.getByKey(id, false);
         Assert.notNull(sshModel, "ssh error");
         List<String> fileDirs = sshModel.fileDirs();
@@ -475,35 +475,34 @@ public class SshFileController extends BaseServerController {
         try {
             session = SshService.getSessionByModel(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            MultipartFileBuilder multipart = createMultipart();
             // 保存路径
             File tempPath = serverConfig.getUserTempPath();
             File savePath = FileUtil.file(tempPath, "ssh", sshModel.getId());
-            multipart.setSavePath(FileUtil.getAbsolutePath(savePath));
-            multipart.addFieldName("file")
-                .setUseOriginalFilename(true);
+            FileUtil.mkdir(savePath);
+            String originalFilename = file.getOriginalFilename();
+            File filePath = FileUtil.file(savePath, originalFilename);
             //
             if (Convert.toBool(unzip, false)) {
-                multipart.setFileExt(StringUtil.PACKAGE_EXT);
-                localPath = multipart.save();
+                String extName = FileUtil.extName(originalFilename);
+                Assert.state(StrUtil.containsAnyIgnoreCase(extName, StringUtil.PACKAGE_EXT), "不支持的文件类型：" + extName);
+                file.transferTo(filePath);
                 // 解压
-                File file = new File(localPath);
                 File tempUnzipPath = FileUtil.file(savePath, IdUtil.fastSimpleUUID());
                 try {
-                    CompressionFileUtil.unCompress(file, tempUnzipPath);
+                    FileUtil.mkdir(tempUnzipPath);
+                    CompressionFileUtil.unCompress(filePath, tempUnzipPath);
                     // 同步上传文件
                     sshService.uploadDir(sshModel, remotePath, tempUnzipPath);
                 } finally {
                     // 删除临时文件
-                    CommandUtil.systemFastDel(file);
+                    CommandUtil.systemFastDel(filePath);
                     CommandUtil.systemFastDel(tempUnzipPath);
                 }
             } else {
-                localPath = multipart.save();
-                File file = FileUtil.file(localPath);
+                file.transferTo(filePath);
                 channel.cd(remotePath);
-                try (FileInputStream src = IoUtil.toStream(file)) {
-                    channel.put(src, file.getName());
+                try (FileInputStream src = IoUtil.toStream(filePath)) {
+                    channel.put(src, filePath.getName());
                 }
             }
 

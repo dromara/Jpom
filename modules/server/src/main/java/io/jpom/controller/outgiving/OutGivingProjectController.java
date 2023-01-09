@@ -152,6 +152,8 @@ public class OutGivingProjectController extends BaseServerController {
                     jsonObject.put("outGivingStatus", outGivingLog.getStatus());
                     jsonObject.put("outGivingResult", outGivingLog.getResult());
                     jsonObject.put("lastTime", outGivingLog.getCreateTimeMillis());
+                    jsonObject.put("fileSize", outGivingLog.getFileSize());
+                    jsonObject.put("progressSize", outGivingLog.getProgressSize());
                 }
                 return jsonObject;
             })

@@ -97,7 +97,16 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                 afterOpt,
                 this.nodeModel, this.clearOld,
                 this.sleepTime, this.closeFirst, this.stripComponents, (total, progressSize) -> {
-                    double floor = Math.floor(((float) progressSize / total) * 100);
+
+                    String logId = OutGivingRun.getLogId(outGivingId, outGivingNodeProject);
+                    //
+                    OutGivingLog outGivingLog = new OutGivingLog();
+                    outGivingLog.setId(logId);
+                    outGivingLog.setFileSize(total);
+                    outGivingLog.setProgressSize(progressSize);
+                    //
+                    DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
+                    dbOutGivingLogService.update(outGivingLog);
                 });
             result = jsonMessage.success() ? OutGivingNodeProject.Status.Ok : OutGivingNodeProject.Status.Fail;
 

@@ -24,11 +24,27 @@
 12. 【server】优化 构建发布项目文件采用分片上传、并且支持进度显示
 13. 【agent】优化 配置文件中上传文件大小限制由 1G 改为 10MB 节省插件端占用内存大小（采用分片代替）
 14. 【server】优化 手动上传的节点分发文件将自动删除，节省存储空间
+15. 【server】优化 节点分发日志支持显示进度信息
 
 ### ⚠️ 注意
 
 1. 插件端需要同步升级，否则节点分发项目无法显示项目名称
 2. 插件端需要同步升级，否则会出现部分接口 404 或者参数不正确的情况
+
+**如果需要使用 mysql 存储，则需要修改配置**
+
+1. 修改 `jpom.db.mode` 为 `MYSQL`
+2. 修改 `jpom.db.url` 为你 mysql 的 jdbc 地址( jdbc:mysql://127.0.0.1:
+   3306/jpom?useUnicode=true&characterEncoding=UTF-8&useSSL=false)
+3. 修改 `jpom.db.user-name` 为对应 mysql 账户
+4. 修改 `jpom.db.user-pwd` 为对应 mysql 密码
+
+如果您需要迁移之前 h2 数据库中的数据到 mysql（需要先将 mysql 的连接信息配置好后才能迁移）
+
+```shell
+bash ./bin/Server.sh restart -15 --h2-migrate-mysql --h2-user=jpom --h2-pass=jpom
+
+```
 
 ------
 
