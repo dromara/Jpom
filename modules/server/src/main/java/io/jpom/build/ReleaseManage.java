@@ -61,6 +61,7 @@ import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
+import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
@@ -73,10 +74,8 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -99,6 +98,7 @@ public class ReleaseManage implements Runnable {
 
     private LogRecorder logRecorder;
     private File resultFile;
+    private BuildExtConfig buildExtConfig;
 
     private void init() {
         if (this.logRecorder == null) {
@@ -118,6 +118,7 @@ public class ReleaseManage implements Runnable {
 //        envFileMap.put("BUILD_NAME", this.buildExtraModule.getName());
         buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
 //        envFileMap.put("BUILD_NUMBER_ID", this.buildNumberId + StrUtil.EMPTY);
+        this.buildExtConfig = SpringUtil.getBean(BuildExtConfig.class);
     }
 
 //	/**
@@ -512,13 +513,21 @@ public class ReleaseManage implements Runnable {
             String startPath = StringUtil.delStartPath(file, resultFileParent, false);
             startPath = FileUtil.normalize(startPath + StrUtil.SLASH + directory);
             //
+            Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
+            int finalI = i;
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
                 projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, false,
                 this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
-                    //  total, progressSize
-                    logRecorder.info("[SYSTEM-INFO] 上传文件进度:{} {}/{} {}", file.getName(),
-                        FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
-                        NumberUtil.formatPercent(((float) progressSize / total), 0));
+                    double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                    int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                    if (progressRangeList.add(progressRange)) {
+                        //  total, progressSize
+                        logRecorder.info("[SYSTEM-INFO] 上传文件进度:{}[{}/{}] {}/{} {} ", file.getName(),
+                            (finalI + 1), diffSize,
+                            FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                            NumberUtil.formatPercent(((float) progressSize / total), 0)
+                        );
+                    }
                 });
             Assert.state(jsonMessage.success(), "同步项目文件失败：" + jsonMessage);
             if (last) {
@@ -556,15 +565,20 @@ public class ReleaseManage implements Runnable {
             unZip = false;
         }
         String name = zipFile.getName();
+        Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
         JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile,
             this.buildExtraModule.getProjectSecondaryDirectory(),
             projectId,
             unZip,
             afterOpt,
             nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
-                logRecorder.info("[SYSTEM-INFO] 上传文件进度:{} {}/{} {}", name,
-                    FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
-                    NumberUtil.formatPercent(((float) progressSize / total), 0));
+                double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                if (progressRangeList.add(progressRange)) {
+                    logRecorder.info("[SYSTEM-INFO] 上传文件进度:{} {}/{} {}", name,
+                        FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                        NumberUtil.formatPercent(((float) progressSize / total), 0));
+                }
             });
         if (jsonMessage.success()) {
             logRecorder.info("发布项目包成功：" + jsonMessage);

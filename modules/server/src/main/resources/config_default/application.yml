@@ -93,7 +93,8 @@ jpom:
     pool-size: 5
     # 构建任务等待数量，超过此数量将取消构建任务，值最小为 1
     pool-wait-queue: 10
-
+    # 日志显示 压缩折叠显示进度比例 范围 1-100
+    log-reduce-progress-ratio: 5
 server:
   #运行端口号
   port: 2122

@@ -58,5 +58,13 @@ public class BuildExtConfig {
      * 构建任务等待数量，超过此数量将取消构建任务，值最小为 1
      */
     private int poolWaitQueue = 10;
+    /**
+     * 压缩折叠显示进度比例 范围 1-100
+     */
+    private int logReduceProgressRatio = 5;
 
+    public void setLogReduceProgressRatio(int logReduceProgressRatio) {
+        // 修正值
+        this.logReduceProgressRatio = Math.min(Math.max(logReduceProgressRatio, 1), 100);
+    }
 }

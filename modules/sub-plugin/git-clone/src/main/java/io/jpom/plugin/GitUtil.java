@@ -41,7 +41,10 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.internal.JGitText;
-import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.*;
@@ -137,7 +140,8 @@ public class GitUtil {
         }
         CloneCommand cloneCommand = Git.cloneRepository();
         if (printWriter != null) {
-            cloneCommand.setProgressMonitor(new SmallTextProgressMonitor(printWriter));
+            Integer progressRatio = (Integer) parameter.get("reduceProgressRatio");
+            cloneCommand.setProgressMonitor(new SmallTextProgressMonitor(printWriter, progressRatio));
         }
         if (branchName != null) {
             cloneCommand.setBranch(Constants.R_HEADS + branchName);
@@ -375,7 +379,8 @@ public class GitUtil {
      * @throws Exception 异常
      */
     private static PullResult pull(Git git, Map<String, Object> parameter, String branchName, PrintWriter printWriter) throws Exception {
-        SmallTextProgressMonitor progressMonitor = new SmallTextProgressMonitor(printWriter);
+        Integer progressRatio = (Integer) parameter.get("reduceProgressRatio");
+        SmallTextProgressMonitor progressMonitor = new SmallTextProgressMonitor(printWriter, progressRatio);
         // 放弃本地修改
         git.checkout().setName(branchName).setForced(true).setProgressMonitor(progressMonitor).call();
 
