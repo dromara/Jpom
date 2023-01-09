@@ -131,7 +131,7 @@ export default {
     },
 
     viewEnvVar(record) {
-      this.temp = record;
+      this.temp = Object.assign({}, record);
       // this.envTemp = {
       //   workspaceId: this.temp.id,
       // };
@@ -147,7 +147,7 @@ export default {
       this.$refs["editForm"] && this.$refs["editForm"].resetFields();
     },
     handleEdit(record) {
-      this.temp = record;
+      this.temp = Object.assign({}, record);
       this.editVisible = true;
     },
     handleEditOk() {

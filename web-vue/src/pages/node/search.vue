@@ -58,8 +58,8 @@
       </a-tooltip>
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
         <a-button type="link" style="padding: 0px" size="small" @click="toNode(text)">
-          <span>{{ nodeMap[text] }}</span
-          ><a-icon type="fullscreen" />
+          <span>{{ nodeMap[text] }}</span>
+          <a-icon type="fullscreen" />
         </a-button>
       </a-tooltip>
       <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
@@ -213,7 +213,7 @@ import { getRuningProjectInfo, noFileModes, restartProject, runModeList, startPr
 import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { itemGroupBy, parseTime } from "@/utils/time";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, concurrentExecution } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
 import Vue from "vue";
 
@@ -300,7 +300,7 @@ export default {
     getNodeListAll().then((res) => {
       if (res.code === 200) {
         res.data.forEach((item) => {
-          this.nodeMap[item.id] = item.name;
+          this.nodeMap = { ...this.nodeMap, [item.id]: item.name };
         });
       }
     });
@@ -320,41 +320,76 @@ export default {
           this.listQuery.total = res.data.total;
 
           let nodeProjects = itemGroupBy(this.projList, "nodeId");
-          this.getRuningProjectInfo(nodeProjects, 0);
+          this.getRuningProjectInfo(nodeProjects);
         }
         this.loading = false;
       });
     },
-    getRuningProjectInfo(nodeProjects, i) {
-      if (nodeProjects.length <= i) {
+    getRuningProjectInfo(nodeProjects) {
+      if (nodeProjects.length <= 0) {
         return;
       }
-      // console.log(i);
-      let data = nodeProjects[i];
-      let ids = data.data.map((item) => {
-        return item.projectId;
-      });
-      if (ids.length <= 0) {
-        return;
-      }
-      const tempParams = {
-        nodeId: data.type,
-        ids: JSON.stringify(ids),
-      };
-      getRuningProjectInfo(tempParams).then((res2) => {
-        if (res2.code === 200) {
-          this.projList = this.projList.map((element) => {
-            if (res2.data[element.projectId] && element.nodeId === data.type) {
-              element.port = res2.data[element.projectId].port;
-              element.pid = res2.data[element.projectId].pid;
-              element.status = element.pid > 0;
-              element.error = res2.data[element.projectId].error;
+      concurrentExecution(
+        nodeProjects.map((item, index) => {
+          return index;
+        }),
+        3,
+        (citem) => {
+          // console.log(i);
+          const data = nodeProjects[citem];
+          return new Promise((resolve, reject) => {
+            const ids = data.data.map((item) => {
+              return item.projectId;
+            });
+            if (ids.length <= 0) {
+              return;
             }
-            return element;
+            const tempParams = {
+              nodeId: data.type,
+              ids: JSON.stringify(ids),
+            };
+            getRuningProjectInfo(tempParams, "noTip")
+              .then((res2) => {
+                if (res2.code === 200) {
+                  this.projList = this.projList.map((element) => {
+                    if (res2.data[element.projectId] && element.nodeId === data.type) {
+                      element.port = res2.data[element.projectId].port;
+                      element.pid = res2.data[element.projectId].pid;
+                      element.status = element.pid > 0;
+                      element.error = res2.data[element.projectId].error;
+                    }
+                    return element;
+                  });
+                  resolve();
+                } else {
+                  this.projList = this.projList.map((element) => {
+                    if (element.nodeId === data.type) {
+                      element.port = 0;
+                      element.pid = 0;
+                      element.status = false;
+                      element.error = res2.msg;
+                    }
+                    return element;
+                  });
+                  reject();
+                }
+                // this.getRuningProjectInfo(nodeProjects, i + 1);
+              })
+              .catch(() => {
+                this.projList = this.projList.map((element) => {
+                  if (element.nodeId === data.type) {
+                    element.port = 0;
+                    element.pid = 0;
+                    element.status = false;
+                    element.error = "网络异常";
+                  }
+                  return element;
+                });
+                reject();
+              });
           });
         }
-        this.getRuningProjectInfo(nodeProjects, i + 1);
-      });
+      );
     },
     // 文件管理
     handleFile(record) {

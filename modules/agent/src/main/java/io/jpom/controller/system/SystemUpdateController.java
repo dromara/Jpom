@@ -78,9 +78,9 @@ public class SystemUpdateController extends BaseAgentController {
                                                       Integer totalSlice,
                                                       String fileSumSha1) throws IOException {
         //
-        Objects.requireNonNull(JpomManifest.getScriptFile());
         String tempPathName = agentConfig.getFixedTempPathName();
         File successFile = this.shardingTryMerge(tempPathName, sliceId, totalSlice, fileSumSha1);
+        Objects.requireNonNull(JpomManifest.getScriptFile());
         String absolutePath = agentConfig.getTempPath().getAbsolutePath();
         String path = FileUtil.getAbsolutePath(successFile);
         // 解析压缩包

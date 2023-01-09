@@ -26,7 +26,7 @@ export function getProjectList(params) {
  *  ids: 项目 ID 数组字符串格式 ["id1", "id2"]
  * }
  */
-export function getRuningProjectInfo(params) {
+export function getRuningProjectInfo(params, noTip) {
   return axios({
     url: "/node/manage/getProjectPort",
     method: "post",
@@ -34,6 +34,7 @@ export function getRuningProjectInfo(params) {
     timeout: 0,
     headers: {
       loading: "no",
+      tip: noTip ? "no" : "",
     },
   });
 }

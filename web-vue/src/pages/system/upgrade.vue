@@ -22,11 +22,9 @@
               </a-select>
               <a-button type="primary" @click="batchUpdate">批量更新</a-button>
               |
-              <a-upload name="file" accept=".jar,.zip" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
-                <a-button type="primary">
-                  <a-icon type="upload" />
-                  新版本
-                </a-button>
+              <a-upload name="file" accept=".jar,.zip" action="" :disabled="percentage ? true : false" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+                <a-icon type="loading" v-if="percentage" />
+                <a-button type="primary" v-else icon="upload"> 选择升级包 </a-button>
               </a-upload>
               <a-tooltip :title="`打包时间：${agentTimeStamp || '未知'}`">
                 Agent版本：{{ agentVersion | version }}
