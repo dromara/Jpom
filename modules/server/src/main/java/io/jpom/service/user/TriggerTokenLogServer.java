@@ -57,6 +57,7 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
      * 填充的长度
      */
     private static final int BUILD_INFO_TRIGGER_TOKEN_FILL_LEN = 3;
+    public static final String NAME = "sync_trigger_token";
 
     private final SystemParametersServer parametersServer;
     private final UserService userService;
@@ -145,15 +146,14 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
 
     @Override
     public int statusRecover() {
-        String name = "sync_trigger_token";
-        String triggerToken = parametersServer.getConfig(name, String.class);
+        String triggerToken = parametersServer.getConfig(NAME, String.class);
         if (StrUtil.isNotEmpty(triggerToken)) {
             // 已经同步过啦
             return 0;
         }
         List<UserModel> list = userService.list();
         if (CollUtil.isEmpty(list)) {
-            log.warn("TriggerToken status recover,user list empty");
+            log.debug("TriggerToken status recover,user list empty");
             return -1;
         }
         List<String> userIds = list.stream().map(BaseIdModel::getId).collect(Collectors.toList());
@@ -179,7 +179,7 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
             //
             return CollUtil.size(triggerTokenLogBeans);
         }).sum();
-        parametersServer.upsert(name, count, name);
+        parametersServer.upsert(NAME, count, NAME);
         log.info("trigger token sync count:{}", count);
         return count;
     }
