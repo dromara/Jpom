@@ -309,7 +309,6 @@ public class ServerConfig extends BaseExtConfig {
 
         public void setUploadFileConcurrent(int uploadFileConcurrent) {
             this.uploadFileConcurrent = Math.min(Math.max(uploadFileConcurrent, 1), RuntimeUtil.getProcessorCount());
-            ;
         }
     }
 

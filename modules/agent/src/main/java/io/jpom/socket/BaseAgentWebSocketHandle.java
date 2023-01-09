@@ -78,6 +78,7 @@ public abstract class BaseAgentWebSocketHandle {
         AgentAuthorize agentAuthorize = SpringUtil.getBean(AgentAuthorize.class);
         boolean ok = agentAuthorize.checkAuthorize(authorize);
         if (!ok) {
+            log.warn("socket 会话建立失败,授权信息错误");
             try {
                 session.close(new CloseReason(CANNOT_ACCEPT, "授权信息错误"));
             } catch (Exception e) {

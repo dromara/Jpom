@@ -23,10 +23,12 @@
 package top.jpom.transport;
 
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.socket.BinaryMessage;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketConnectionManager;
@@ -54,6 +56,7 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
     private final String uriTemplate;
     private Consumer<String> consumerText;
     private WebSocketConnectionManager manager;
+    private CloseStatus closeStatus;
 
     public ServletWebSocketClientHandler(String uriTemplate, Integer timeout) {
         this.uriTemplate = uriTemplate;
@@ -145,5 +148,18 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         log.error("websocket 出现错误：{}", session.getId(), exception);
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        this.closeStatus = status;
+        log.warn("连接关闭 {} {}", status.getCode(), status.getReason());
+    }
+
+    @Override
+    public String getCloseStatusMsg() {
+        return Optional.ofNullable(this.closeStatus)
+            .map(closeStatus -> StrUtil.format("{}:{}", closeStatus.getCode(), closeStatus.getReason()))
+            .orElse(StrUtil.EMPTY);
     }
 }

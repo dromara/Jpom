@@ -24,6 +24,7 @@ package io.jpom.socket.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.unit.DataSize;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.thread.ThreadUtil;
@@ -138,8 +139,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     WebSocketMessageModel command = new WebSocketMessageModel("getVersion", model.getId());
                     nodeClient.send(command.toString());
                 } catch (Exception e) {
-                    log.error("创建插件端连接失败", e);
-                    this.onError(session, "连接插件端失败：" + e.getMessage(), model.getId());
+                    String closeStatusMsg = nodeClient.getCloseStatusMsg();
+                    log.error("创建插件端连接失败 {}", closeStatusMsg, e);
+                    IProxyWebSocket webSocket = clientMap.remove(model.getId());
+                    IoUtil.close(webSocket);
+                    this.onError(session, "连接插件端失败：" + closeStatusMsg + " " + e.getMessage(), model.getId());
                 }
             });
         }
