@@ -21,3 +21,5 @@ ADD,BUILDHISTORYLOG,strike,Integer,,0,逻辑删除{1，删除，0 未删除(默�
 ADD,OUT_GIVING,statusMsg,String,255,,分发状态信息
 ADD,OUTGIVINGLOG,fileSize,Long,,,文件大小
 ADD,OUTGIVINGLOG,progressSize,Long,,,当前进度
+ADD,MONITORNOTIFYLOG,modifyUser,String,50,,操作人,
+ADD,MONITORNOTIFYLOG,strike,Integer,,0,逻辑删除{1，删除，0 未删除(默认)}

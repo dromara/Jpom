@@ -161,7 +161,7 @@ import { initInstall } from "@/api/install";
 import { bindMfa } from "@/api/user/user";
 import { MFA_APP_TIP_ARRAY } from "@/utils/const";
 import QRCode from "qrcodejs2";
-import sha1 from "sha1";
+import sha1 from "js-sha1";
 import Vue from "vue";
 import { checkSystem } from "@/api/install";
 

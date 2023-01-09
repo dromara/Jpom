@@ -35,8 +35,11 @@ import io.jpom.service.node.NodeService;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -137,5 +140,22 @@ public abstract class BaseServerController extends BaseJpomController {
             return null;
         }
         return (UserModel) servletRequestAttributes.getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
+    }
+
+    @Override
+    public void uploadSharding(MultipartFile file, String tempPath, String sliceId, Integer totalSlice, Integer nowSlice, String fileSumSha1, String... extNames) throws IOException {
+        Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
+        super.uploadSharding(file, tempPath, sliceId, totalSlice, nowSlice, fileSumSha1, extNames);
+    }
+
+    @Override
+    public File shardingTryMerge(String tempPath, String sliceId, Integer totalSlice, String fileSumSha1) throws IOException {
+        Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
+        try {
+            return super.shardingTryMerge(tempPath, sliceId, totalSlice, fileSumSha1);
+        } finally {
+            // 判断-删除分片id
+            BaseServerController.SHARDING_IDS.remove(sliceId);
+        }
     }
 }

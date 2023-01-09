@@ -91,7 +91,8 @@ public class CacheManageController extends BaseServerController {
 
         map.put("taskList", CronUtils.list());
         map.put("pluginSize", PluginFactory.size());
-
+        map.put("shardingSize", BaseServerController.SHARDING_IDS.size());
+        //
         return JsonMessage.success("ok", map);
     }
 

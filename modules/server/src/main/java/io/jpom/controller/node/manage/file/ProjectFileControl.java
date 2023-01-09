@@ -95,10 +95,8 @@ public class ProjectFileControl extends BaseServerController {
     public JsonMessage<String> shardingMerge(String sliceId, HttpServletRequest request) {
         Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
         JsonMessage<String> message = NodeForward.request(getNode(), request, NodeUrl.Manage_File_Sharding_Merge);
-        if (message.success()) {
-            // 判断-删除分片id
-            BaseServerController.SHARDING_IDS.remove(sliceId);
-        }
+        // 判断-删除分片id
+        BaseServerController.SHARDING_IDS.remove(sliceId);
         return message;
     }
 

@@ -25,6 +25,8 @@ package io.jpom.model.log;
 import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.MonitorModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
 
 /**
@@ -33,19 +35,12 @@ import top.jpom.h2db.TableName;
  * @author bwcx_jzy
  * @since 2019/7/13
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "MONITORNOTIFYLOG", name = "监控通知")
+@Data
 public class MonitorNotifyLog extends BaseWorkspaceModel {
 
-    /**
-     * 是否包含旧字段
-     */
-    public static boolean HAS_LOG_ID = false;
 
-    /**
-     *
-     */
-    @Deprecated
-    private String logId;
     private String nodeId;
     private String projectId;
     /**
@@ -81,115 +76,7 @@ public class MonitorNotifyLog extends BaseWorkspaceModel {
      */
     private String notifyError;
 
-    @Deprecated
-    public String getLogId() {
-        return logId;
-    }
-
-    @Deprecated
-    public void setLogId(String logId) {
-        this.logId = logId;
-    }
-
-    public String getNotifyObject() {
-        return notifyObject;
-    }
-
-    public void setNotifyObject(String notifyObject) {
-        this.notifyObject = notifyObject;
-    }
-
-    public String getNotifyError() {
-        return notifyError;
-    }
-
-    public void setNotifyError(String notifyError) {
-        this.notifyError = notifyError;
-    }
-
-    public Boolean getStatus() {
-        return status;
-    }
-
     public boolean status() {
         return ObjectUtil.defaultIfNull(status, false);
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
-
-    public Boolean getNotifyStatus() {
-        return notifyStatus;
-    }
-
-    public void setNotifyStatus(Boolean notifyStatus) {
-        this.notifyStatus = notifyStatus;
-    }
-
-    public void setNotifyStatus(boolean notifyStatus) {
-        this.notifyStatus = notifyStatus;
-    }
-
-    public String getMonitorId() {
-        return monitorId;
-    }
-
-    public void setMonitorId(String monitorId) {
-        this.monitorId = monitorId;
-    }
-
-    public Integer getNotifyStyle() {
-        return notifyStyle;
-    }
-
-    public void setNotifyStyle(Integer notifyStyle) {
-        this.notifyStyle = notifyStyle;
-    }
-
-
-    public String getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
-
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    @Override
-    public void setModifyUser(String modifyUser) {
-
     }
 }
