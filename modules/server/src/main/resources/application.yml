@@ -8,6 +8,8 @@ jpom:
     upload-file-timeout: 300
     # 节点文件分片上传大小，单位 M，建议小于 5MB（需要考虑插件端上传文件大小限制）
     upload-file-slice-size: 1
+    # 节点文件分片上传并发数,最小1 最大 服务端 CPU 核心数
+    upload-file-concurrent: 2
   system:
     # cron 定时器是否开启匹配秒
     timer-match-second: false

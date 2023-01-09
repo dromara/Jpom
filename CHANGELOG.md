@@ -2,7 +2,8 @@
 
 ## 2.10.11
 
-1. 【server】新增 分片操作数查看
+1. 【server】新增 系统缓存新增分片操作数查看
+2. 【server】新增 节点分片上传支持配置并发数：`jpom.node.upload-file-concurrent`
 
 ### 🐞 解决BUG、优化功能
 

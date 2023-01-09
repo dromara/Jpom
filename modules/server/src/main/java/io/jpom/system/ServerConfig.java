@@ -23,6 +23,7 @@
 package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
@@ -293,12 +294,22 @@ public class ServerConfig extends BaseExtConfig {
          */
         private int uploadFileSliceSize = 1;
 
+        /**
+         * 节点文件分片上传并发数,最小1 最大 服务端 CPU 核心数
+         */
+        private int uploadFileConcurrent = 2;
+
         public int getUploadFileTimeout() {
             return Math.max(this.uploadFileTimeout, 5);
         }
 
         public int getUploadFileSliceSize() {
             return Math.max(this.uploadFileSliceSize, 1);
+        }
+
+        public void setUploadFileConcurrent(int uploadFileConcurrent) {
+            this.uploadFileConcurrent = Math.min(Math.max(uploadFileConcurrent, 1), RuntimeUtil.getProcessorCount());
+            ;
         }
     }
 
