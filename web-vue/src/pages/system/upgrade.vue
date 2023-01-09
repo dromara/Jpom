@@ -22,7 +22,7 @@
               </a-select>
               <a-button type="primary" @click="batchUpdate">批量更新</a-button>
               |
-              <a-upload name="file" accept=".jar,.zip" action="" :disabled="percentage ? true : false" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
+              <a-upload name="file" accept=".jar,.zip" action="" :disabled="!!percentage" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
                 <a-icon type="loading" v-if="percentage" />
                 <a-button type="primary" v-else icon="upload"> 选择升级包 </a-button>
               </a-upload>

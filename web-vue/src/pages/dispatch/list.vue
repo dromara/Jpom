@@ -586,17 +586,24 @@
             <a-radio :value="'download'">远程下载</a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-form-model v-if="percentage">
-          <a-progress :percent="percentage" />
-        </a-form-model>
-        <a-form-model-item label="选择分发文件" prop="clearOld" v-if="temp.type == 'upload'">
+
+        <a-form-model-item label="选择分发文件" prop="clearOld" v-if="temp.type === 'upload'">
           <!-- accept=".zip,.tar,.gz,.bz2" -->
-          <a-upload :file-list="fileList" :disabled="percentage ? true : false" :remove="handleRemove" :before-upload="beforeUpload">
+
+          <a-progress v-if="percentage" :percent="percentage">
+            <template #format="percent">
+              {{ percent }}%
+              <template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
+              <template v-if="percentageInfo.duration"> 用时:{{ formatDuration(percentageInfo.duration) }}) </template>
+            </template>
+          </a-progress>
+
+          <a-upload :file-list="fileList" :disabled="!!percentage" :remove="handleRemove" :before-upload="beforeUpload">
             <a-icon type="loading" v-if="percentage" />
             <a-button v-else type="primary" icon="upload">选择文件上传</a-button>
           </a-upload>
         </a-form-model-item>
-        <a-form-model-item label="远程下载URL" prop="url" v-if="temp.type == 'download'">
+        <a-form-model-item label="远程下载URL" prop="url" v-if="temp.type === 'download'">
           <a-input v-model="temp.url" placeholder="远程下载地址" />
         </a-form-model-item>
         <!-- <a-form-model-item label="是否为压缩包" v-if="temp.type == 'download'">
@@ -673,7 +680,7 @@ import {
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeList, getRuningProjectInfo } from "@/api/node-project";
-import { itemGroupBy, parseTime } from "@/utils/time";
+import { itemGroupBy, parseTime, renderSize, formatDuration } from "@/utils/time";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, readJsonStrField, concurrentExecution } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
 import { uploadPieces } from "@/utils/upload-pieces";
@@ -774,6 +781,7 @@ export default {
       refreshInterval: 5,
       drawerReadFileVisible: false,
       percentage: 0,
+      percentageInfo: {},
       uploading: false,
     };
   },
@@ -793,6 +801,8 @@ export default {
   },
   methods: {
     readJsonStrField,
+    renderSize,
+    formatDuration,
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {
@@ -1264,6 +1274,7 @@ export default {
       this.temp = Object.assign({ type: "upload" }, record);
       this.dispatchVisible = true;
       this.percentage = 0;
+      this.percentageInfo = {};
       this.fileList = [];
       this.$refs["dispatchForm"] && this.$refs["dispatchForm"].resetFields();
     },
@@ -1297,12 +1308,14 @@ export default {
             return false;
           }
           this.percentage = 0;
+          this.percentageInfo = {};
           let file = this.fileList[0];
           this.uploading = true;
           uploadPieces({
             file,
-            process: (process) => {
+            process: (process, end, total, duration) => {
               this.percentage = Math.max(this.percentage, process);
+              this.percentageInfo = { end, total, duration };
             },
             success: (uploadData) => {
               // 准备合并
@@ -1324,6 +1337,7 @@ export default {
                   }
                   setTimeout(() => {
                     this.percentage = 0;
+                    this.percentageInfo = {};
                   }, 2000);
                   this.uploading = false;
                 })
@@ -1620,6 +1634,9 @@ export default {
 <style scoped>
 .replica-area {
   width: 80%;
+}
+/deep/ .ant-progress-text {
+  width: auto;
 }
 /* .replica-btn-del {
   position: absolute;

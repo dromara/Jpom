@@ -4,6 +4,7 @@ import { generateShardingId } from "@/api/common";
 import Vue from "vue";
 
 const uploadFileSliceSize = window.uploadFileSliceSize === "<uploadFileSliceSize>" ? 1 : window.uploadFileSliceSize;
+const uploadFileConcurrent = window.uploadFileConcurrent === "<uploadFileConcurrent>" ? 1 : window.uploadFileConcurrent;
 /**
  * 文件分片上传
  * @params file {File} 文件
@@ -13,7 +14,7 @@ const uploadFileSliceSize = window.uploadFileSliceSize === "<uploadFileSliceSize
  * @params success {Function} 成功回调函数
  * @params error {Function} 失败回调函数
  */
-export const uploadPieces = ({ file, concurrent = 2, uploadCallback, success, process, error }) => {
+export const uploadPieces = ({ file, uploadCallback, success, process, error }) => {
   // 如果文件传入为空直接 return 返回
   if (!file || file.length < 1) {
     return error("文件不能为空");
@@ -21,12 +22,13 @@ export const uploadPieces = ({ file, concurrent = 2, uploadCallback, success, pr
   if (!window.FileReader) {
     return error("您的浏览器版本太低，不支持该功能");
   }
-  let fileSh1 = ""; // 总文件列表
+  let fileSh1 = ""; //
   let sliceId = "";
   const chunkSize = uploadFileSliceSize * 1024 * 1024; // 1MB一片
   const chunkCount = Math.ceil(file.size / chunkSize); // 总片数
   const chunkList = []; // 分片列表
   const uploaded = []; // 已经上传的
+  let total = 0;
 
   /***
    * 获取md5
@@ -40,7 +42,7 @@ export const uploadPieces = ({ file, concurrent = 2, uploadCallback, success, pr
     const reader = new FileReader();
     const sha1Hash = sha1.create();
     let start = 0;
-    let total = file.size;
+    total = file.size;
     // 默认 2M 解析缓存
     const batch = 1024 * 1024 * 2;
     const asyncUpdate = function () {
@@ -61,7 +63,7 @@ export const uploadPieces = ({ file, concurrent = 2, uploadCallback, success, pr
         Vue.prototype.$setLoading("closeAll");
         //生成分片 id
         generateShardingId().then((res) => {
-          if (res.code == 200) {
+          if (res.code === 200) {
             sliceId = res.data;
             concurrentUpload();
           }
@@ -99,9 +101,10 @@ export const uploadPieces = ({ file, concurrent = 2, uploadCallback, success, pr
    * 并发上传
    **/
   const concurrentUpload = () => {
-    concurrentExecution(chunkList, concurrent, (curItem) => {
+    const startTime = new Date().getTime();
+    concurrentExecution(chunkList, uploadFileConcurrent, (curItem) => {
       return new Promise((resolve, reject) => {
-        const { chunk } = getChunkInfo(file, curItem, chunkSize);
+        const { chunk, end } = getChunkInfo(file, curItem, chunkSize);
         const chunkInfo = {
           chunk,
           currentChunk: curItem,
@@ -115,7 +118,8 @@ export const uploadPieces = ({ file, concurrent = 2, uploadCallback, success, pr
           .then(() => {
             uploaded.push(chunkInfo.currentChunk + 1);
             const sd = parseInt((uploaded.length / chunkInfo.chunkCount) * 100);
-            process(sd);
+            // console.log(chunk);
+            process(sd, end, total, new Date().getTime() - startTime);
             //
             /***
              * 创建文件上传参数

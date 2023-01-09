@@ -200,9 +200,8 @@ public class NodeForward {
             queueList.offer(i);
         }
         List<Integer> success = Collections.synchronizedList(new ArrayList<>(total));
-
         // 并发数
-        int concurrent = 2;
+        int concurrent = nodeConfig.getUploadFileConcurrent();
         AtomicReference<JsonMessage<T>> failureMessage = new AtomicReference<>();
         AtomicReference<JsonMessage<T>> succeedMessage = new AtomicReference<>();
         AtomicLong atomicProgressSize = new AtomicLong(0);

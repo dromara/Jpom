@@ -130,9 +130,9 @@ public class IndexControl extends BaseServerController {
         html = StrUtil.replace(html, "<link rel=\"icon\" href=\"favicon.ico\">", "<link rel=\"icon\" href=\"" + proxyPath + "favicon.ico\">");
         // <apiTimeOut>
         int webApiTimeout = webConfig.getApiTimeout();
-        int uploadFileSliceSize = nodeConfig.getUploadFileSliceSize();
         html = StrUtil.replace(html, "<apiTimeout>", TimeUnit.SECONDS.toMillis(webApiTimeout) + "");
-        html = StrUtil.replace(html, "<uploadFileSliceSize>", uploadFileSliceSize + "");
+        html = StrUtil.replace(html, "<uploadFileSliceSize>", nodeConfig.getUploadFileSliceSize() + "");
+        html = StrUtil.replace(html, "<uploadFileConcurrent>", nodeConfig.getUploadFileConcurrent() + "");
         // 修改网页标题
         String title = ReUtil.get("<title>.*?</title>", html, 0);
         if (StrUtil.isNotEmpty(title)) {

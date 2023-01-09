@@ -102,7 +102,7 @@
           </template>
         </a-table>
         <!-- 批量上传文件 -->
-        <a-modal destroyOnClose v-model="uploadFileVisible" :closable="!uploading" :keyboard="false" width="400px" title="上传项目文件" :footer="null" :maskClosable="false">
+        <a-modal destroyOnClose v-model="uploadFileVisible" :closable="!uploading" :keyboard="false" width="35vw" title="上传项目文件" :footer="null" :maskClosable="false">
           <a-space direction="vertical" style="display: block" size="large">
             <a-upload
               :file-list="uploadFileList"
@@ -113,18 +113,21 @@
               "
               :before-upload="beforeUpload"
               multiple
-              :disabled="percentage ? true : false"
+              :disabled="!!percentage"
             >
               <a-icon type="loading" v-if="percentage" />
               <a-button v-else icon="upload">选择文件</a-button>
             </a-upload>
 
-            <a-row>
-              <a-col span="4">
-                <a-tag v-if="this.uploadFileList.length"> {{ successSize }}/{{ this.uploadFileList.length }} </a-tag>
-              </a-col>
-              <a-col span="20">
-                <a-progress v-if="percentage" :percent="percentage"></a-progress>
+            <a-row v-if="percentage">
+              <a-col span="24">
+                <a-progress :percent="percentage" class="max-progress">
+                  <template #format="percent">
+                    {{ percent }}%<template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
+                    <template v-if="percentageInfo.duration"> 当前文件用时:{{ formatDuration(percentageInfo.duration) }} </template>
+                    <template v-if="uploadFileList.length"> 完成 {{ successSize }} 个 / 共{{ uploadFileList.length }}个 </template>
+                  </template>
+                </a-progress>
               </a-col>
             </a-row>
 
@@ -132,7 +135,7 @@
           </a-space>
         </a-modal>
         <!-- 上传压缩文件 -->
-        <a-modal destroyOnClose v-model="uploadZipFileVisible" :closable="!uploading" :keyboard="false" width="400px" title="上传压缩文件" :footer="null" :maskClosable="false">
+        <a-modal destroyOnClose v-model="uploadZipFileVisible" :closable="!uploading" :keyboard="false" width="35vw" title="上传压缩文件" :footer="null" :maskClosable="false">
           <a-space direction="vertical" style="display: block" size="large">
             <a-upload
               :file-list="uploadFileList"
@@ -141,7 +144,7 @@
                   this.uploadFileList = [];
                 }
               "
-              :disabled="percentage ? true : false"
+              :disabled="!!percentage"
               :before-upload="beforeZipUpload"
               :accept="ZIP_ACCEPT"
             >
@@ -152,12 +155,15 @@
             <a-switch v-model="uploadData.checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px" />
 
             <a-input-number style="width: 100%" v-model="uploadData.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
-            <a-row>
-              <a-col span="4">
-                <a-tag v-if="this.uploadFileList.length"> {{ successSize }}/{{ this.uploadFileList.length }} </a-tag>
-              </a-col>
-              <a-col span="20">
-                <a-progress v-if="percentage" :percent="percentage"></a-progress>
+            <a-row v-if="percentage">
+              <a-col span="24">
+                <a-progress :percent="percentage" class="max-progress">
+                  <template #format="percent">
+                    {{ percent }}%<template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
+                    <template v-if="percentageInfo.duration"> 当前文件用时:{{ formatDuration(percentageInfo.duration) }} </template>
+                    <template v-if="uploadFileList.length"> 完成 {{ successSize }} 个 / 共{{ uploadFileList.length }}个 </template>
+                  </template>
+                </a-progress>
               </a-col>
             </a-row>
             <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
@@ -259,6 +265,8 @@ import {
   shardingMerge,
 } from "@/api/node-project";
 import { ZIP_ACCEPT } from "@/utils/const";
+import { renderSize, formatDuration } from "@/utils/time";
+
 import codeEditor from "@/components/codeEditor";
 import projectFileBackup from "./project-file-backup.vue";
 import { uploadPieces } from "@/utils/upload-pieces";
@@ -315,6 +323,7 @@ export default {
       // 是否是上传状态
       uploading: false,
       percentage: 0,
+      percentageInfo: {},
       uploadData: {
         checkBox: false,
       },
@@ -366,7 +375,9 @@ export default {
     this.loadData();
   },
   methods: {
+    renderSize,
     uploadPieces,
+    formatDuration,
     handleEditFile(record) {
       this.editFileVisible = true;
       this.loadFileData(record.filename);
@@ -506,6 +517,7 @@ export default {
       this.uploadFileList = [];
       this.uploading = false;
       this.percentage = 0;
+      this.percentageInfo = {};
       this.uploadFileVisible = true;
     },
     handleRemove(file) {
@@ -533,11 +545,13 @@ export default {
         (curItem) => {
           const file = this.uploadFileList[curItem];
           this.percentage = 0;
+          this.percentageInfo = {};
           return new Promise((resolve, reject) => {
             uploadPieces({
               file,
-              process: (process) => {
+              process: (process, end, total, duration) => {
                 this.percentage = Math.max(this.percentage, process);
+                this.percentageInfo = { end, total, duration };
               },
               success: (uploadData, name) => {
                 // 准备合并
@@ -589,6 +603,7 @@ export default {
         if (!this.uploading) {
           setTimeout(() => {
             this.percentage = 0;
+            this.percentageInfo = {};
             this.loadFileList();
             this.uploadFileList = [];
             this.uploadFileVisible = false;
@@ -609,6 +624,7 @@ export default {
       this.uploadFileList = [];
       this.uploading = false;
       this.percentage = 0;
+      this.percentageInfo = {};
       this.uploadZipFileVisible = true;
     },
 
@@ -621,11 +637,13 @@ export default {
       // 设置上传状态
       this.uploading = true;
       this.percentage = 0;
+      this.percentageInfo = {};
       const file = this.uploadFileList[0];
       uploadPieces({
         file,
-        process: (process) => {
+        process: (process, end, total, duration) => {
           this.percentage = Math.max(this.percentage, process);
+          this.percentageInfo = { end, total, duration };
         },
         success: (uploadData, name) => {
           // 准备合并
@@ -651,6 +669,7 @@ export default {
               if (!this.uploading) {
                 setTimeout(() => {
                   this.percentage = 0;
+                  this.percentageInfo = {};
                   this.loadFileList();
                   this.uploadFileList = [];
                   this.uploadZipFileVisible = false;
@@ -919,9 +938,10 @@ export default {
 </script>
 
 <style scoped>
-.file-layout {
-  padding: 0;
+/deep/ .ant-progress-text {
+  width: auto;
 }
+
 .sider {
   border: 1px solid #e2e2e2;
   height: calc(100vh - 80px);

@@ -46,7 +46,7 @@
     <a-row>
       <a-col span="22">
         <a-space direction="vertical" style="display: block">
-          <a-upload :file-list="fileList" :remove="handleRemove" :disabled="percentage ? true : false" :before-upload="beforeUpload" accept=".jar,.zip">
+          <a-upload :file-list="fileList" :remove="handleRemove" :disabled="!!percentage" :before-upload="beforeUpload" accept=".jar,.zip">
             <a-icon type="loading" v-if="percentage" />
             <a-button icon="upload" v-else>选择升级文件</a-button>
           </a-upload>
@@ -55,7 +55,7 @@
               <a-progress :percent="percentage"></a-progress>
             </a-col>
           </a-row>
-          <a-button type="primary" :disabled="fileList.length === 0 || percentage ? true : false" @click="startUpload">上传升级包</a-button>
+          <a-button type="primary" :disabled="fileList.length === 0 || !!percentage" @click="startUpload">上传升级包</a-button>
         </a-space>
       </a-col>
     </a-row>
