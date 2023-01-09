@@ -23,7 +23,6 @@
 package io.jpom.model.data;
 
 import io.jpom.model.BaseStrikeDbModel;
-import io.jpom.service.user.TriggerTokenLogServer;
 import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,7 +35,7 @@ import top.jpom.h2db.TableName;
  * @since 2021/12/2
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "SYSTEM_PARAMETERS", name = "系统参数", migrateIgnoreId = TriggerTokenLogServer.NAME)
+@TableName(value = "SYSTEM_PARAMETERS", name = "系统参数")
 @Data
 public class SystemParametersModel extends BaseStrikeDbModel {
 

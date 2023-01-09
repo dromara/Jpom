@@ -58,11 +58,4 @@ public @interface TableName {
      * @return 默认所有模式
      */
     DbExtConfig.Mode[] modes() default {};
-
-    /**
-     * 迁移数据是忽略的数据id
-     *
-     * @return 迁移数据需要忽略的数据id
-     */
-    String[] migrateIgnoreId() default {};
 }

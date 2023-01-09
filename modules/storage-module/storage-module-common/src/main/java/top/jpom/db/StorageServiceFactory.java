@@ -153,18 +153,6 @@ public class StorageServiceFactory {
             }
             // 过滤需要忽略迁移的数据
             List<Entity> newResult = pageResult.stream()
-                .filter(entity -> {
-                    String[] migrateIgnoreId = tableName.migrateIgnoreId();
-                    if (ArrayUtil.isEmpty(migrateIgnoreId)) {
-                        return true;
-                    }
-                    String id = entity.getStr("id");
-                    if (ArrayUtil.contains(migrateIgnoreId, id)) {
-                        log.info("{} 表中的 {} 数据自动忽略", tableName.name(), id);
-                        return false;
-                    }
-                    return true;
-                })
                 .map(entity -> entity.toBeanIgnoreCase(aClass))
                 .map(o -> {
                     // 兼容大小写
