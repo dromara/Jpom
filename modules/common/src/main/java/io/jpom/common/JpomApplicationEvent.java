@@ -29,7 +29,6 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -44,7 +43,6 @@ import io.jpom.cron.IAsyncLoad;
 import io.jpom.cron.ICron;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.JsonFileUtil;
-import io.jpom.util.JvmUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -227,24 +225,6 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         }
     }
 
-    /**
-     * 判断是否重复运行
-     */
-
-    private void checkDuplicateRun() {
-        try {
-            Class<?> appClass = JpomApplication.getAppClass();
-            String pid = String.valueOf(JpomManifest.getInstance().getPid());
-            Integer mainClassPid = JvmUtil.findMainClassPid(appClass.getName());
-            if (mainClassPid == null || pid.equals(ObjectUtil.toString(mainClassPid))) {
-                return;
-            }
-            log.warn("The Jpom program recommends that only one corresponding program be run on a machine：" + JpomApplication.getAppType() + "  pid:" + mainClassPid);
-        } catch (Exception e) {
-            log.error("检查异常", e);
-        }
-    }
-
 
     private void clearTemp() {
         log.debug("Automatically clean up temporary directories");
@@ -341,8 +321,6 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             });
         // 检查更新文件
         this.checkUpdate();
-        // 提示重复运行
-        this.checkDuplicateRun();
         // 开始异常加载
         this.statLoad();
         // 提示成功消息
