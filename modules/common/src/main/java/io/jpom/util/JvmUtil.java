@@ -24,20 +24,14 @@ package io.jpom.util;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.JpomManifest;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 /**
@@ -190,42 +184,5 @@ public class JvmUtil {
             }
         }
         return null;
-    }
-
-    /**
-     * 工具指定的 mainClass 获取对应所有的的  MonitoredVm对象
-     *
-     * @param mainClass 程序运行主类
-     * @return pid
-     */
-    public static Integer findMainClassPid(String mainClass) {
-        String execSystemCommand = CommandUtil.execSystemCommand("jps -l");
-        List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
-        Optional<Tuple> any = list.stream().map(s -> {
-            List<String> split = StrUtil.split(s, StrUtil.SPACE);
-            return new Tuple(CollUtil.getFirst(split), CollUtil.getLast(split));
-        }).filter(tuple -> {
-            String fileName = tuple.get(1);
-            return StrUtil.equals(mainClass, fileName) || checkFile(fileName, mainClass);
-        }).findAny();
-        return any.map(tuple -> Convert.toInt(tuple.get(0))).orElse(null);
-    }
-
-    private static boolean checkFile(String fileName, String mainClass) {
-        try {
-            File file = FileUtil.file(fileName);
-            if (!file.exists() || file.isDirectory()) {
-                return false;
-            }
-            try (JarFile jarFile1 = new JarFile(file)) {
-                Manifest manifest = jarFile1.getManifest();
-                Attributes attributes = manifest.getMainAttributes();
-                String jarMainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
-                String jarStartClass = attributes.getValue("Start-Class");
-                return StrUtil.equals(mainClass, jarMainClass) || StrUtil.equals(mainClass, jarStartClass);
-            }
-        } catch (Exception e) {
-            return false;
-        }
     }
 }
