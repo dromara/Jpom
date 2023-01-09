@@ -42,6 +42,7 @@ import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -122,6 +123,7 @@ public class SystemUpdateController extends BaseServerController {
                                                  String fileSumSha1) throws IOException {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
+            Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
             return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar);
         }
         String absolutePath = serverConfig.getUserTempPath().getAbsolutePath();
@@ -137,7 +139,10 @@ public class SystemUpdateController extends BaseServerController {
                                          HttpServletRequest request) throws IOException {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
-            return NodeForward.request(getNode(), request, NodeUrl.SystemUploadJarMerge);
+            JsonMessage<String> message = NodeForward.request(getNode(), request, NodeUrl.SystemUploadJarMerge);
+            // 判断-删除分片id
+            BaseServerController.SHARDING_IDS.remove(sliceId);
+            return message;
         }
         //
         Objects.requireNonNull(JpomManifest.getScriptFile());

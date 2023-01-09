@@ -52,9 +52,11 @@
           <a-timeline-item>
             <span class="layui-elem-quote">在读取的日志文件数：{{ temp.readFileOnLineCount }}</span>
           </a-timeline-item>
-
           <a-timeline-item>
             <span class="layui-elem-quote">插件数：{{ temp.pluginSize || 0 }}</span>
+          </a-timeline-item>
+          <a-timeline-item>
+            <span class="layui-elem-quote">分片操作数：{{ temp.shardingSize }}</span>
           </a-timeline-item>
         </a-timeline>
       </a-tab-pane>
