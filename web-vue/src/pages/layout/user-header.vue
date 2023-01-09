@@ -16,7 +16,7 @@
       <a-dropdown>
         <a-button type="primary" class="jpom-user-operation btn-group-item" icon="down"> </a-button>
         <a-menu slot="overlay">
-          <a-sub-menu v-if="this.mode === 'normal'">
+          <a-sub-menu>
             <template #title>
               <a-button type="link" icon="swap">切换工作空间</a-button>
             </template>
