@@ -286,7 +286,7 @@ export function concurrentExecution(list, limit, asyncHandle) {
 
 export function readJsonStrField(json, key) {
   try {
-    const data = JSON.parse(json)[key];
+    const data = JSON.parse(json)[key] || "";
     if (Object.prototype.toString.call(data) === "[object Object]") {
       return JSON.stringify(data);
     }
@@ -294,4 +294,5 @@ export function readJsonStrField(json, key) {
   } catch (e) {
     //
   }
+  return "";
 }

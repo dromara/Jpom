@@ -44,6 +44,7 @@
         {{ readJsonStrField(item.result, "upload_file_size") }}
       </a-tooltip>
       <a-tooltip slot="outGivingResultMsgData" slot-scope="text, item" placement="topLeft" :title="`${readJsonStrField(item.result, 'data')}`">
+        <template v-if="item.fileSize"> {{ Math.floor((item.progressSize / item.fileSize) * 100) }}% </template>
         {{ readJsonStrField(item.result, "data") }}
       </a-tooltip>
       <a-tooltip slot="status" slot-scope="text">
