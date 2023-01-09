@@ -1,4 +1,4 @@
-import sha1 from "sha1-file-web";
+import sha1 from "js-sha1";
 import { concurrentExecution } from "@/utils/const";
 import { generateShardingId } from "@/api/common";
 import Vue from "vue";
@@ -18,6 +18,9 @@ export const uploadPieces = ({ file, concurrent = 2, uploadCallback, success, pr
   if (!file || file.length < 1) {
     return error("文件不能为空");
   }
+  if (!window.FileReader) {
+    return error("您的浏览器版本太低，不支持该功能");
+  }
   let fileSh1 = ""; // 总文件列表
   let sliceId = "";
   const chunkSize = uploadFileSliceSize * 1024 * 1024; // 1MB一片
@@ -34,19 +37,50 @@ export const uploadPieces = ({ file, concurrent = 2, uploadCallback, success, pr
       spinning: true,
       tip: "解析文件,准备上传中",
     });
-    sha1(file).then((sha1) => {
-      fileSh1 = sha1;
-      for (let i = 0; i < chunkCount; i++) {
-        chunkList.push(Number(i));
-      }
-      Vue.prototype.$setLoading(false);
-      generateShardingId().then((res) => {
-        if (res.code == 200) {
-          sliceId = res.data;
-          concurrentUpload();
+    const reader = new FileReader();
+    const sha1Hash = sha1.create();
+    let start = 0;
+    let total = file.size;
+    // 默认 2M 解析缓存
+    const batch = 1024 * 1024 * 2;
+    const asyncUpdate = function () {
+      if (start < total) {
+        Vue.prototype.$setLoading({
+          spinning: true,
+          tip: "解析文件,准备上传中 " + ((start / total) * 100).toFixed(2) + "%",
+        });
+        let end = Math.min(start + batch, total);
+        reader.readAsArrayBuffer(file.slice(start, end));
+        start = end;
+      } else {
+        // 解析结束
+        fileSh1 = sha1Hash.hex();
+        for (let i = 0; i < chunkCount; i++) {
+          chunkList.push(Number(i));
         }
-      });
-    });
+        Vue.prototype.$setLoading("closeAll");
+        //生成分片 id
+        generateShardingId().then((res) => {
+          if (res.code == 200) {
+            sliceId = res.data;
+            concurrentUpload();
+          }
+        });
+      }
+    };
+    reader.onload = function (event) {
+      try {
+        sha1Hash.update(event.target.result);
+        asyncUpdate();
+      } catch (e) {
+        Vue.prototype.$setLoading("closeAll");
+        this.$notification.error({
+          message: "解析文件失败：" + e,
+        });
+        error("解析文件失败：" + e);
+      }
+    };
+    asyncUpdate();
   };
   /***
    * 获取每一个分片的详情

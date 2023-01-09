@@ -66,7 +66,7 @@
 <script>
 import { login, demoInfo, mfaVerify } from "@/api/user/user";
 import { checkSystem } from "@/api/install";
-import sha1 from "sha1";
+import sha1 from "js-sha1";
 
 import { mapGetters } from "vuex";
 export default {
