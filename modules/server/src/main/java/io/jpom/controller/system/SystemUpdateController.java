@@ -145,10 +145,9 @@ public class SystemUpdateController extends BaseServerController {
             return message;
         }
         //
-        Objects.requireNonNull(JpomManifest.getScriptFile());
         String absolutePath = serverConfig.getUserTempPath().getAbsolutePath();
         File successFile = this.shardingTryMerge(absolutePath, sliceId, totalSlice, fileSumSha1);
-
+        Objects.requireNonNull(JpomManifest.getScriptFile());
         String path = FileUtil.getAbsolutePath(successFile);
         // 解析压缩包
         File file = JpomManifest.zipFileFind(path, Type.Server, absolutePath);

@@ -168,7 +168,7 @@ export default {
       this.getAllNodeList(this.envTemp.workspaceId);
     },
     handleEnvEdit(record) {
-      this.envTemp = record;
+      this.envTemp = Object.assign({}, record);
       this.envTemp.workspaceId = this.workspaceId;
       this.envTemp = { ...this.envTemp, chooseNode: record.nodeIds ? record.nodeIds.split(",") : [] };
       this.editEnvVisible = true;

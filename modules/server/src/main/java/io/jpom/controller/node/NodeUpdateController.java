@@ -121,6 +121,7 @@ public class NodeUpdateController extends BaseServerController {
             } else {
                 String version = StrUtil.removePrefixIgnoreCase(agentFileModel.getVersion(), "v");
                 jsonObject.put("upgrade", StrUtil.compareVersion(version, tagName) < 0);
+                jsonObject.put("path", agentFileModel.getSavePath());
             }
         }
         return JsonMessage.success("", jsonObject);

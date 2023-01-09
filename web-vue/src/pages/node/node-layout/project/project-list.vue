@@ -583,7 +583,7 @@ export default {
               nodeId: this.node.id,
               ids: JSON.stringify(ids),
             };
-            getRuningProjectInfo(tempParams).then((res2) => {
+            getRuningProjectInfo(tempParams, "noTip").then((res2) => {
               if (res2.code === 200) {
                 this.list = this.list.map((element) => {
                   if (res2.data[element.projectId]) {
@@ -595,6 +595,15 @@ export default {
                   return element;
                 });
                 // this.list.forEach((element) => {});
+              } else {
+                // error
+                this.list = this.list.map((element) => {
+                  element.port = 0;
+                  element.pid = 0;
+                  element.status = false;
+                  element.error = res2.msg;
+                  return element;
+                });
               }
             });
             //

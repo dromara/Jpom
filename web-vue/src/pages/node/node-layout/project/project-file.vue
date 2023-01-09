@@ -113,8 +113,10 @@
               "
               :before-upload="beforeUpload"
               multiple
+              :disabled="percentage ? true : false"
             >
-              <a-button><a-icon type="upload" />选择文件</a-button>
+              <a-icon type="loading" v-if="percentage" />
+              <a-button v-else icon="upload">选择文件</a-button>
             </a-upload>
 
             <a-row>
@@ -139,10 +141,12 @@
                   this.uploadFileList = [];
                 }
               "
+              :disabled="percentage ? true : false"
               :before-upload="beforeZipUpload"
               :accept="ZIP_ACCEPT"
             >
-              <a-button><a-icon type="upload" />选择压缩文件</a-button>
+              <a-icon type="loading" v-if="percentage" />
+              <a-button v-else icon="upload">选择压缩文件</a-button>
             </a-upload>
 
             <a-switch v-model="uploadData.checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px" />

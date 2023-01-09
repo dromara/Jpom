@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div>
     <a-timeline>
       <a-timeline-item>
         <span class="layui-elem-quote">当前程序打包时间：{{ temp.timeStamp }}</span>
@@ -43,15 +43,22 @@
       </a-timeline-item>
     </a-timeline>
 
-    <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".jar,.zip">
-      <a-button><a-icon type="upload" />选择升级文件</a-button>
-    </a-upload>
     <a-row>
-      <a-col span="20">
-        <a-progress v-if="percentage" :percent="percentage"></a-progress>
+      <a-col span="22">
+        <a-space direction="vertical" style="display: block">
+          <a-upload :file-list="fileList" :remove="handleRemove" :disabled="percentage ? true : false" :before-upload="beforeUpload" accept=".jar,.zip">
+            <a-icon type="loading" v-if="percentage" />
+            <a-button icon="upload" v-else>选择升级文件</a-button>
+          </a-upload>
+          <a-row v-if="percentage">
+            <a-col span="20">
+              <a-progress :percent="percentage"></a-progress>
+            </a-col>
+          </a-row>
+          <a-button type="primary" :disabled="fileList.length === 0 || percentage ? true : false" @click="startUpload">上传升级包</a-button>
+        </a-space>
       </a-col>
     </a-row>
-    <a-button type="primary" class="upload-btn" :disabled="fileList.length === 0" @click="startUpload">上传升级文件</a-button>
 
     <a-divider dashed />
     <markdown-it-vue class="md-body" :content="changelog" :options="markdownOptions" />
@@ -333,14 +340,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-.main {
-  background-color: #fff;
-  margin: -15px -30px 0 -15px;
-  padding: 15px;
-}
-
-.upload-btn {
-  margin-top: 20px;
-}
-</style>
+<style scoped></style>

@@ -591,8 +591,9 @@
         </a-form-model>
         <a-form-model-item label="选择分发文件" prop="clearOld" v-if="temp.type == 'upload'">
           <!-- accept=".zip,.tar,.gz,.bz2" -->
-          <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload">
-            <a-button type="primary"><a-icon type="upload" />选择文件上传</a-button>
+          <a-upload :file-list="fileList" :disabled="percentage ? true : false" :remove="handleRemove" :before-upload="beforeUpload">
+            <a-icon type="loading" v-if="percentage" />
+            <a-button v-else type="primary" icon="upload">选择文件上传</a-button>
           </a-upload>
         </a-form-model-item>
         <a-form-model-item label="远程下载URL" prop="url" v-if="temp.type == 'download'">
@@ -1207,7 +1208,7 @@ export default {
               nodeId: data.type,
               ids: JSON.stringify(ids),
             };
-            getRuningProjectInfo(tempParams)
+            getRuningProjectInfo(tempParams, "noTip")
               .then((res2) => {
                 let projectList = this.dispatchChildren[recordId];
                 if (res2.code === 200) {
