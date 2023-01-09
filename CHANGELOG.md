@@ -8,6 +8,7 @@
 2. 【server】优化 解析文件数据采用分片形式，避免大文件造成浏览器奔溃
 3. 【server】优化 插件端在线升级管理页面错误信息提示由弹窗改到对应节点
 4. 【server】修复 迁移数据出现监控报警记录表字段不全问题 （感谢@loyal）
+5. 【server】修复 迁移系统参数表中的 sync_trigger_token 数据重复问题
 
 ### ❌ 不兼容功能
 
@@ -46,8 +47,8 @@
 1. 插件端需要同步升级，否则节点分发项目无法显示项目名称
 2. 插件端需要同步升级，否则会出现部分接口 404 或者参数不正确的情况
 3. 建议升级验证上传项目文件无问题后，将插件端上传文件大小限制配置属性大改小
-   1. spring.servlet.multipart.max-file-size=5MB
-   2. spring.servlet.multipart.max-request-size=20MB
+	1. spring.servlet.multipart.max-file-size=5MB
+	2. spring.servlet.multipart.max-request-size=20MB
 
 **如果需要使用 mysql 存储，则需要修改配置**
 
