@@ -139,7 +139,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     nodeClient.send(command.toString());
                 } catch (Exception e) {
                     log.error("创建插件端连接失败", e);
-                    this.onError(session, "连接插件端失败：" + model.getName() + "  " + e.getMessage());
+                    this.onError(session, "连接插件端失败：" + e.getMessage(), model.getId());
                 }
             });
         }
@@ -201,7 +201,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
     }
 
     private void onError(WebSocketSession session, String msg) {
-        WebSocketMessageModel error = new WebSocketMessageModel("onError", "");
+        this.onError(session, msg, StrUtil.EMPTY);
+    }
+
+    private void onError(WebSocketSession session, String msg, String nodeId) {
+        WebSocketMessageModel error = new WebSocketMessageModel("onError", nodeId);
         error.setData(msg);
         this.sendMsg(error, session);
     }
@@ -232,8 +236,13 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 return;
             }
             for (int i = 0; i < ids.size(); i++) {
-                int finalI = i;
-                ThreadUtil.execute(() -> this.updateNodeItem(ids.getString(finalI), session, agentFileModel, http));
+                String id = ids.getString(i);
+                NodeModel node = nodeService.getByKey(id);
+                if (node == null) {
+                    this.onError(session, "没有对应的节点：" + id);
+                    continue;
+                }
+                ThreadUtil.execute(() -> this.updateNodeItem(id, node, session, agentFileModel, http));
             }
         } catch (Exception e) {
             log.error("升级失败", e);
@@ -333,16 +342,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         return false;
     }
 
-    private void updateNodeItem(String id, WebSocketSession session, AgentFileModel agentFileModel, boolean http) {
+    private void updateNodeItem(String id, NodeModel node, WebSocketSession session, AgentFileModel agentFileModel, boolean http) {
         try {
-            NodeModel node = nodeService.getByKey(id);
-            if (node == null) {
-                this.onError(session, "没有对应的节点：" + id);
-                return;
-            }
             IProxyWebSocket client = clientMap.get(node.getId());
             if (client == null) {
-                this.onError(session, "对应的插件端还没有被初始化：" + id);
+                this.onError(session, "对应的插件端还没有被初始化", id);
                 return;
             }
             if (client.isConnected()) {
@@ -353,11 +357,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     client.send(command.toString());
                 }
             } else {
-                this.onError(session, node.getName() + " 节点连接丢失");
+                this.onError(session, "节点连接丢失或者还没有连接上", id);
             }
         } catch (Exception e) {
             log.error("升级失败:" + id, e);
-            this.onError(session, "节点升级失败：" + e.getMessage());
+            this.onError(session, "节点升级失败：" + e.getMessage(), id);
         }
     }
 
