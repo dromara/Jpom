@@ -1,6 +1,6 @@
 {
   "name": "jpom-vue",
-  "version": "2.10.10",
+  "version": "2.10.11",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service --max-old-space-size=900 serve  --mode dev",
