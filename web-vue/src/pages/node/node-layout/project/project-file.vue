@@ -151,10 +151,6 @@
               <a-icon type="loading" v-if="percentage" />
               <a-button v-else icon="upload">选择压缩文件</a-button>
             </a-upload>
-
-            <a-switch v-model="uploadData.checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px" />
-
-            <a-input-number style="width: 100%" v-model="uploadData.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
             <a-row v-if="percentage">
               <a-col span="24">
                 <a-progress :percent="percentage" class="max-progress">
@@ -166,6 +162,11 @@
                 </a-progress>
               </a-col>
             </a-row>
+
+            <a-switch v-model="uploadData.checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px" />
+
+            <a-input-number style="width: 100%" v-model="uploadData.stripComponents" :min="0" placeholder="解压时候自动剔除压缩包里面多余的文件夹名" />
+
             <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
           </a-space>
         </a-modal>
