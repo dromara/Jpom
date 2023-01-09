@@ -548,7 +548,7 @@ public class BuildExecuteService {
                     Tuple tuple = (Tuple) plugin.execute("branchAndTagList", map);
                     //GitUtil.getBranchAndTagList(repositoryModel);
                     Assert.notNull(tuple, "获取仓库分支失败");
-
+                    map.put("reduceProgressRatio", this.buildExecuteService.buildExtConfig.getLogReduceProgressRatio());
                     map.put("logWriter", logRecorder.getPrintWriter());
                     map.put("savePath", gitFile);
                     // 模糊匹配 标签
@@ -566,7 +566,7 @@ public class BuildExecuteService {
                         //author bwcx_jzy 2022.11.28 buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
                         buildEnv.put("BUILD_TAG_NAME", newBranchTagName);
                         // 标签拉取模式
-                        logRecorder.info("repository tag [" + branchTagName + "] clone pull from " + newBranchTagName);
+                        logRecorder.info("repository tag [{}] clone pull from {}", branchTagName, newBranchTagName);
                         result = (String[]) plugin.execute("pullByTag", map);
                     } else {
                         String branchName = buildInfoModel.getBranchName();
@@ -704,7 +704,7 @@ public class BuildExecuteService {
                             throw Lombok.sneakyThrow(e);
                         }
                     });
-                logRecorder.info("[INFO] --- PROCESS RESULT " + waitFor);
+                logRecorder.info("[SYSTEM-INFO] --- PROCESS RESULT " + waitFor);
             } catch (Exception e) {
                 logRecorder.error("执行异常", e);
                 return false;
@@ -939,7 +939,7 @@ public class BuildExecuteService {
             }
             ScriptModel scriptModel = buildExecuteService.scriptServer.getByKey(noticeScriptId);
             if (scriptModel == null) {
-                logRecorder.info("[WARNING] noticeScript does not exist:{}", type);
+                logRecorder.info("[SYSTEM-WARNING] noticeScript does not exist:{}", type);
                 return;
             }
             // 判断是否包含需要执行的事件
@@ -947,7 +947,7 @@ public class BuildExecuteService {
                 log.warn("忽略执行事件脚本 {} {} {}", type, scriptModel.getName(), noticeScriptId);
                 return;
             }
-            logRecorder.info("[INFO] --- EXEC NOTICESCRIPT {}", type);
+            logRecorder.info("[SYSTEM-INFO] --- EXEC NOTICESCRIPT {}", type);
             // 环境变量
             Map<String, String> environment = new HashMap<>(map.size());
             for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -973,7 +973,7 @@ public class BuildExecuteService {
                         throw Lombok.sneakyThrow(e);
                     }
                 });
-                logRecorder.info("[INFO] {} --- NOTICESCRIPT PROCESS RESULT {}", type, waitFor);
+                logRecorder.info("[SYSTEM-INFO] {} --- NOTICESCRIPT PROCESS RESULT {}", type, waitFor);
             } finally {
                 if (scriptFile != null) {
                     try {

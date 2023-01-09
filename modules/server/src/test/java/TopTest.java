@@ -20,9 +20,11 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.CharsetUtil;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,8 +42,13 @@ public class TopTest {
             System.out.println(s);
             System.out.println("结束");
         });
+    }
 
-
+    @Test
+    public void testFlor() {
+        double floor = Math.floor(((float) 103 / 103) * 100);
+        int floor1 = (int) Math.floor(floor / 600);
+        System.out.println(floor + "  " + floor1);
     }
 
     private static String execCommand(String[] command) {
