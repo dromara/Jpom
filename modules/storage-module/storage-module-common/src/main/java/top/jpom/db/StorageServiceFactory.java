@@ -120,7 +120,7 @@ public class StorageServiceFactory {
                     return ArrayUtil.contains(modes, dbExtConfig.getMode());
                 })
                 .sorted((o1, o2) -> StrUtil.compare(o1.getSimpleName(), o2.getSimpleName(), false))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
             log.info("准备迁移数据");
             int total = 0;
             for (Class<?> aClass : classes) {
@@ -130,6 +130,7 @@ public class StorageServiceFactory {
             log.info("迁移完成,累计迁移 {} 条数据,耗时：{}", total, DateUtil.formatBetween(endTime - time));
             h2DsFactory.destroy();
             nowDsFactory.destroy();
+            log.info("准备删除当前数据库文件");
             String dbFiles = h2StorageService.deleteDbFiles();
             log.info("自动备份 h2 数据库文件,备份文件位于：{}", dbFiles);
         } catch (Exception e) {

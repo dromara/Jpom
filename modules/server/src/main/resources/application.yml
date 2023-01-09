@@ -79,7 +79,7 @@ jpom:
     initial-size: 10
     max-wait: 10
     min-idle: 1
-    show-sql: true
+    show-sql: false
   # 构建相关配置
   build:
     # 最多保存多少份历史记录

@@ -72,8 +72,13 @@ import java.util.stream.Collectors;
 public class InitDb implements DisposableBean, ILoadEvent {
 
     private final List<Runnable> BEFORE_CALLBACK = new LinkedList<>();
-    private final List<Supplier<Boolean>> AFTER_CALLBACK = new LinkedList<>();
-
+    private final Map<String, Supplier<Boolean>> AFTER_CALLBACK = new LinkedHashMap<>();
+    private final DbExtConfig dbExtConfig;
+    private final BackupInfoService backupInfoService;
+    /**
+     * 恢复 sql 文件
+     */
+    private File recoverSqlFile;
 
     public InitDb(DbExtConfig dbExtConfig, BackupInfoService backupInfoService) {
         this.dbExtConfig = dbExtConfig;
@@ -87,22 +92,18 @@ public class InitDb implements DisposableBean, ILoadEvent {
     /**
      * 添加监听回调
      *
+     * @param name     事件名称
      * @param supplier 回调，返回 true 需要重新初始化数据库
      */
-    public void addCallback(Supplier<Boolean> supplier) {
-        AFTER_CALLBACK.add(supplier);
+    public void addCallback(String name, Supplier<Boolean> supplier) {
+        AFTER_CALLBACK.put(name, supplier);
     }
 
-    private final DbExtConfig dbExtConfig;
-    private final BackupInfoService backupInfoService;
-
-    /**
-     * 恢复 sql 文件
-     */
-    private File recoverSqlFile;
-
-    private void init() {
+    @SuppressWarnings("rawtypes")
+    public void afterPropertiesSet(ApplicationContext applicationContext) {
+        this.prepareCallback(applicationContext.getEnvironment());
         //
+        log.debug("需要执行 {} 个前置事件", BEFORE_CALLBACK.size());
         BEFORE_CALLBACK.forEach(Runnable::run);
         IStorageService storageService = StorageServiceFactory.get();
         log.info("start load {} db", dbExtConfig.getMode());
@@ -147,7 +148,16 @@ public class InitDb implements DisposableBean, ILoadEvent {
             //
             StorageServiceFactory.saveExecuteSqlLog(executeSqlLog);
             // 执行回调方法
-            long count = AFTER_CALLBACK.stream().mapToInt(value -> value.get() ? 1 : 0).count();
+            log.debug("需要执行 {} 个回调", AFTER_CALLBACK.size());
+            long count = AFTER_CALLBACK.entrySet()
+                .stream()
+                .mapToInt(value -> {
+                    log.info("开始执行数据库事件：{}", value.getKey());
+                    Supplier<Boolean> supplier = value.getValue();
+                    boolean arg2 = supplier.get();
+                    log.info("数据库 {} 事件执行结束,结果：{}", value.getKey(), arg2);
+                    return arg2 ? 1 : 0;
+                }).sum();
             if (count > 0) {
                 // 因为导入数据后数据结构可能发生变动
                 // 第二次初始化数据库
@@ -254,7 +264,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
         });
         Opt.ofNullable(environment.getProperty("backup-h2")).ifPresent(s -> {
             // 备份数据库
-            this.addCallback(() -> {
+            this.addCallback("备份数据库", () -> {
                 log.info("Start backing up the database");
                 Future<BackupInfoModel> backupInfoModelFuture = backupInfoService.autoBackup();
                 try {
@@ -292,16 +302,17 @@ public class InitDb implements DisposableBean, ILoadEvent {
             String user = environment.getProperty("h2-user");
             String url = environment.getProperty("h2-url");
             String pass = environment.getProperty("h2-pass");
-            this.addCallback(() -> {
+            this.addCallback("迁移数据", () -> {
                 //
                 StorageServiceFactory.migrateH2ToNow(dbExtConfig, url, user, pass);
                 return false;
             });
+            log.info("开始等待数据迁移");
         });
     }
 
     private void importH2Sql(Environment environment, String importH2Sql) {
-        this.addCallback(() -> {
+        this.addCallback("导入数据", () -> {
             File file = FileUtil.file(importH2Sql);
             String sqlPath = FileUtil.getAbsolutePath(file);
             if (!FileUtil.isFile(file)) {
@@ -318,12 +329,6 @@ public class InitDb implements DisposableBean, ILoadEvent {
             log.info("Import successfully according to sql,{}", sqlPath);
             return true;
         });
-    }
-
-    @Override
-    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
-        this.prepareCallback(applicationContext.getEnvironment());
-        this.init();
     }
 
     @Override
