@@ -28,7 +28,6 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
-import cn.hutool.core.thread.SyncFinisher;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -49,6 +48,7 @@ import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
+import io.jpom.util.StrictSyncFinisher;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OutGivingRun {
 
-    private static final Map<String, SyncFinisher> SYNC_FINISHER_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, StrictSyncFinisher> SYNC_FINISHER_MAP = new ConcurrentHashMap<>();
     private static final Map<String, Map<String, String>> LOG_CACHE_MAP = new ConcurrentHashMap<>();
 
     /**
@@ -79,8 +79,8 @@ public class OutGivingRun {
      * @param id 分发id
      */
     public static void cancel(String id) {
-        SyncFinisher syncFinisher = SYNC_FINISHER_MAP.remove(id);
-        Optional.ofNullable(syncFinisher).ifPresent(SyncFinisher::stopNow);
+        StrictSyncFinisher syncFinisher = SYNC_FINISHER_MAP.remove(id);
+        Optional.ofNullable(syncFinisher).ifPresent(StrictSyncFinisher::stopNow);
         //
         Map<String, String> map = LOG_CACHE_MAP.remove(id);
         Optional.ofNullable(map).ifPresent(map1 -> {
@@ -160,14 +160,14 @@ public class OutGivingRun {
         OutGivingModel item = outGivingServer.getByKey(id);
         Objects.requireNonNull(item, "不存在分发");
         AfterOpt afterOpt = ObjectUtil.defaultIfNull(EnumUtil.likeValueOf(AfterOpt.class, item.getAfterOpt()), AfterOpt.No);
-        SyncFinisher syncFinisher;
+        StrictSyncFinisher syncFinisher;
         //
         List<OutGivingNodeProject> outGivingNodeProjects = item.outGivingNodeProjectList();
         int projectSize = outGivingNodeProjects.size();
         final List<OutGivingNodeProject.Status> statusList = new ArrayList<>(projectSize);
         // 开启线程
         if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
-            syncFinisher = new SyncFinisher(1);
+            syncFinisher = new StrictSyncFinisher(1, 1);
             syncFinisher.addWorker(() -> {
                 try {
                     // 截取睡眠时间
@@ -201,7 +201,7 @@ public class OutGivingRun {
         } else if (afterOpt == AfterOpt.Restart || afterOpt == AfterOpt.No) {
             // 判断最大值
             int threadSize = Math.min(projectSize, RuntimeUtil.getProcessorCount());
-            syncFinisher = new SyncFinisher(threadSize);
+            syncFinisher = new StrictSyncFinisher(threadSize, projectSize);
 
             for (final OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
                 final OutGivingItemRun outGivingItemRun = new OutGivingItemRun(item, outGivingNodeProject, file, unzip, null);
