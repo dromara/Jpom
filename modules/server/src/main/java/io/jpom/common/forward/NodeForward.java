@@ -29,7 +29,6 @@ import cn.hutool.core.io.unit.DataSize;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
-import cn.hutool.core.thread.SyncFinisher;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -48,6 +47,7 @@ import io.jpom.service.node.NodeService;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.ServerConfig;
+import io.jpom.util.StrictSyncFinisher;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -213,7 +213,7 @@ public class NodeForward {
         TypeReference<JsonMessage<T>> typeReference = new TypeReference<JsonMessage<T>>() {
         };
         // 需要计算 并发数和最大任务数，如果任务数小于并发数则使用任务数
-        try (SyncFinisher syncFinisher = new SyncFinisher(Math.min(concurrent, total))) {
+        try (StrictSyncFinisher syncFinisher = new StrictSyncFinisher(Math.min(concurrent, total), total)) {
             Runnable runnable = () -> {
                 // 取出任务
                 Integer currentChunk = queueList.poll();
