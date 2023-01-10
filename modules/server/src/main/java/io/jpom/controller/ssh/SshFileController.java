@@ -29,6 +29,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.*;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
@@ -276,9 +277,9 @@ public class SshFileController extends BaseServerController {
             session = SshService.getSessionByModel(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
             Vector<ChannelSftp.LsEntry> vector;
+            String allPath = StrUtil.format("{}/{}", path, children);
+            allPath = FileUtil.normalize(allPath);
             if (StrUtil.isNotEmpty(children)) {
-                String allPath = StrUtil.format("{}/{}", path, children);
-                allPath = FileUtil.normalize(allPath);
                 vector = channel.ls(allPath);
             } else {
                 vector = channel.ls(path);
@@ -291,7 +292,7 @@ public class SshFileController extends BaseServerController {
                 }
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("name", filename);
-                jsonObject.put("id", IdUtil.fastSimpleUUID());
+                jsonObject.put("id", SecureUtil.sha1(allPath + StrUtil.SLASH + filename));
                 int mTime = lsEntry.getAttrs().getMTime();
                 String format = DateUtil.format(DateUtil.date(mTime * 1000L), DatePattern.NORM_DATETIME_MINUTE_PATTERN);
                 jsonObject.put("modifyTime", format);
