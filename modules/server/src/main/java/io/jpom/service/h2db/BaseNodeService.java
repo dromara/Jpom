@@ -151,7 +151,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseWorks
             where.setWorkspaceId(nodeModel.getWorkspaceId());
             where.setNodeId(nodeModel.getId());
             List<T> cacheAll = super.listByBean(where);
-            cacheAll = ObjectUtil.defaultIfNull(cacheAll, Collections.EMPTY_LIST);
+            cacheAll = ObjectUtil.defaultIfNull(cacheAll, Collections.emptyList());
             Set<String> cacheIds = cacheAll.stream()
                 .map(BaseNodeModel::dataId)
                 .collect(Collectors.toSet());

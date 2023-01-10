@@ -233,7 +233,6 @@ public class NodeForward {
                             byteBuffer.flip();
                             byte[] array = new byte[byteBuffer.remaining()];
                             byteBuffer.get(array, 0, array.length);
-                            byteBuffer.clear();
                             uploadData.put("file", new BytesResource(array, fileName));
                             uploadData.put("nowSlice", currentChunk);
                             uploadData.putAll(sliceData);

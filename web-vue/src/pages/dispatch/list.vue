@@ -581,7 +581,7 @@
     >
       <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="方式" prop="type">
-          <a-radio-group v-model="temp.type" name="type">
+          <a-radio-group v-model="temp.type" name="type" :disabled="!!percentage">
             <a-radio :value="'upload'">上传文件</a-radio>
             <a-radio :value="'download'">远程下载</a-radio>
           </a-radio-group>
@@ -594,7 +594,7 @@
             <template #format="percent">
               {{ percent }}%
               <template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
-              <template v-if="percentageInfo.duration"> 用时:{{ formatDuration(percentageInfo.duration) }}) </template>
+              <template v-if="percentageInfo.duration"> 用时:{{ formatDuration(percentageInfo.duration) }} </template>
             </template>
           </a-progress>
 
