@@ -107,11 +107,19 @@
             <a-upload
               :file-list="uploadFileList"
               :remove="
-                () => {
-                  this.uploadFileList = [];
+                (file) => {
+                  const index = this.uploadFileList.indexOf(file);
+                  //const newFileList = this.uploadFileList.slice();
+
+                  this.uploadFileList.splice(index, 1);
                 }
               "
-              :before-upload="beforeUpload"
+              :before-upload="
+                (file) => {
+                  this.uploadFileList = [...this.uploadFileList, file];
+                  return false;
+                }
+              "
               multiple
               :disabled="!!percentage"
             >
@@ -145,7 +153,12 @@
                 }
               "
               :disabled="!!percentage"
-              :before-upload="beforeZipUpload"
+              :before-upload="
+                (file) => {
+                  this.uploadFileList = [file];
+                  return false;
+                }
+              "
               :accept="ZIP_ACCEPT"
             >
               <a-icon type="loading" v-if="percentage" />
@@ -521,17 +534,8 @@ export default {
       this.percentageInfo = {};
       this.uploadFileVisible = true;
     },
-    handleRemove(file) {
-      const index = this.uploadFileList.indexOf(file);
-      const newFileList = this.uploadFileList.slice();
-      newFileList.splice(index, 1);
-      this.uploadFileList = newFileList;
-    },
-    beforeUpload(file) {
-      this.successSize = 0;
-      this.uploadFileList = [...this.uploadFileList, file];
-      return false;
-    },
+    // handleRemove(file) {},
+
     // 开始上传文件
     startUpload() {
       // 设置上传状态
@@ -540,11 +544,18 @@ export default {
       // 遍历上传文件
       concurrentExecution(
         this.uploadFileList.map((item, index) => {
+          // console.log(item);
           return index;
         }),
         1,
         (curItem) => {
           const file = this.uploadFileList[curItem];
+          this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
+            if (fileIndex === curItem) {
+              fileItem.status = "uploading";
+            }
+            return fileItem;
+          });
           this.percentage = 0;
           this.percentageInfo = {};
           return new Promise((resolve, reject) => {
@@ -562,13 +573,32 @@ export default {
                     this.$notification.success({
                       message: name + " " + res.msg,
                     });
+                    this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
+                      if (fileIndex === curItem) {
+                        fileItem.status = "done";
+                      }
+                      return fileItem;
+                    });
+
                     resolve();
                   } else {
+                    this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
+                      if (fileIndex === curItem) {
+                        fileItem.status = "error";
+                      }
+                      return fileItem;
+                    });
                     reject();
                   }
                 });
               },
               error: (msg) => {
+                this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
+                  if (fileIndex === curItem) {
+                    fileItem.status = "error";
+                  }
+                  return fileItem;
+                });
                 this.$notification.error({
                   message: msg,
                 });
@@ -602,13 +632,13 @@ export default {
         this.uploading = this.successSize !== this.uploadFileList.length;
         // // 判断是否全部上传完成
         if (!this.uploading) {
+          this.uploadFileList = [];
           setTimeout(() => {
             this.percentage = 0;
             this.percentageInfo = {};
             this.loadFileList();
-            this.uploadFileList = [];
             this.uploadFileVisible = false;
-          }, 1000);
+          }, 2000);
         }
       });
     },
@@ -629,10 +659,6 @@ export default {
       this.uploadZipFileVisible = true;
     },
 
-    beforeZipUpload(file) {
-      this.uploadFileList = [file];
-      return false;
-    },
     // 开始上传压缩文件
     startZipUpload() {
       // 设置上传状态
@@ -668,13 +694,13 @@ export default {
               this.uploading = this.successSize !== this.uploadFileList.length;
               // // 判断是否全部上传完成
               if (!this.uploading) {
+                this.uploadFileList = [];
                 setTimeout(() => {
                   this.percentage = 0;
                   this.percentageInfo = {};
                   this.loadFileList();
-                  this.uploadFileList = [];
                   this.uploadZipFileVisible = false;
-                }, 1000);
+                }, 2000);
               }
             }
           });

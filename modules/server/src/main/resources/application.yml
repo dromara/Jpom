@@ -119,7 +119,7 @@ server:
     uri-encoding: UTF-8
 spring:
   profiles:
-    active: mysql
+    active: mysql-1
   web:
     resources:
       static-locations: classpath:/dist/
