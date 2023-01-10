@@ -20,7 +20,7 @@
         <a slot="extra" href="#"></a>
         <terminal v-if="sshData" :sshId="sshData.id" />
         <template v-else>
-          <a-result status="404" title="404" sub-title="没有对应的SSH">
+          <a-result status="404" title="不能操作" sub-title="没有对应的SSH">
             <template #extra>
               <router-link :to="{ path: '/ssh', query: {} }">
                 <a-button type="primary">返回首页</a-button>
@@ -38,7 +38,7 @@
 </template>
 <script>
 import terminal from "./terminal";
-import {getItem} from "@/api/ssh";
+import { getItem } from "@/api/ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 
 export default {

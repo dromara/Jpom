@@ -3,6 +3,9 @@
   <a-layout class="ssh-file-layout">
     <!-- 目录树 -->
     <a-layout-sider theme="light" class="sider" width="25%">
+      <a-row class="dir-container">
+        <a-button size="small" type="primary" @click="loadData()">刷新</a-button>
+      </a-row>
       <a-empty v-if="treeList.length === 0" />
       <a-directory-tree :treeData="treeList" :replaceFields="replaceFields" @select="onSelect"></a-directory-tree>
     </a-layout-sider>
@@ -188,18 +191,16 @@ export default {
       this.loading = true;
       getRootFileList(this.ssh.id).then((res) => {
         if (res.code === 200) {
-          let tempList = [];
-          res.data.forEach((element) => {
-            tempList.push({
-              key: element.path,
+          this.treeList = res.data.map((element) => {
+            return {
+              key: element.id,
               title: element.path,
               path: element.path,
               parentDir: "/",
               isLeaf: false,
-              disabled: element.error ? true : false,
-            });
+              disabled: !!element.error,
+            };
           });
-          this.treeList = tempList;
         }
         this.loading = false;
       });
@@ -239,7 +240,7 @@ export default {
         id: this.ssh.id,
         path: this.nowPath,
         name: this.fileFolderName,
-        unFolder: this.addFileOrFolderType === 1 ? false : true,
+        unFolder: this.addFileOrFolderType !== 1,
       };
       newFileFolder(params).then((res) => {
         if (res.code === 200) {
@@ -350,7 +351,7 @@ export default {
         path: this.tempNode.path,
         children: this.tempNode.parentDir,
       };
-      this.fileList = [];
+      // this.fileList = [];
       this.loading = true;
       // 加载文件
       getFileList(params).then((res) => {
@@ -380,7 +381,7 @@ export default {
         children: record.parentDir,
       };
       readFile(params).then((res) => {
-        if (res.code == 200) {
+        if (res.code === 200) {
           this.temp.fileContent = res.data;
           this.editFileVisible = true;
         }
@@ -398,7 +399,7 @@ export default {
         this.$notification.success({
           message: res.msg,
         });
-        if (res.code == 200) {
+        if (res.code === 200) {
           this.editFileVisible = false;
         }
       });
@@ -441,6 +442,8 @@ export default {
               });
               // 刷新树
               this.loadData();
+              this.fileList = [];
+              //this.loadFileList();
             }
           });
         },
@@ -505,6 +508,11 @@ export default {
 .ssh-file-layout {
   padding: 0;
   min-height calc(100vh - 75px);
+}
+
+.dir-container {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
 }
 
 .sider {
