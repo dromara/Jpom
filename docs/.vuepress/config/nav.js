@@ -10,6 +10,7 @@ module.exports = [
       {text: '离线安装教程', link: '/pages/af288b/'},
       {text: 'v2.9.X迁移到v2.10.X指南', link: '/pages/upgrade/2.9.x-to-2.10.x/'},
       {text: 'v2.8.X迁移到v2.9.X指南', link: '/pages/upgrade/2.8.x-to-2.9.x/'},
+      {text: '数据库迁移到 mysql', link: '/pages/4cfb46/'},
     ]
   },
   {
