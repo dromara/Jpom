@@ -41,9 +41,9 @@ features: # 可选的
 # 文章列表显示方式: detailed 默认，显示详细版文章列表（包括作者、分类、标签、摘要、分页等）| simple => 显示简约版文章列表（仅标题和日期）| none 不显示文章列表
 postList: none
 notices: # 可选的
-  - id: jpom-2.10.9
-    title: 📢 Jpom v2.10.9 发布！
-    content: '<div><p>2023-01-06</p><ul><li>服务端数据存储支持 mysql</li><li>修复在线编辑配置文件保存并修改数据库密码问题</li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
+  - id: jpom-2.10.11
+    title: 📢 Jpom v2.10.11 发布！
+    content: '<div><p>2023-01-06</p><ul><li>服务端数据存储支持 mysql</li><li>节点上传文件使用分片</li></ul></div><p style="text-align: right;"><a href="/pages/changelog/new/">查看详情</a>&nbsp;&nbsp;<a href="/pages/all-downloads/">下载安装包</a></p>'
     isHtmlContent: true
 ---
 
