@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.HashSet;
@@ -69,7 +70,14 @@ public abstract class BaseFileTailWatcher<T> {
         this.charset = charset;
     }
 
-    protected abstract void send(T session, String msg);
+    /**
+     * 发生消息
+     *
+     * @param session 会话
+     * @param msg     消息内容
+     * @throws IOException io
+     */
+    protected abstract void send(T session, String msg) throws IOException;
     //{
 //        try {
 //            if (session instanceof Session) {
@@ -110,7 +118,7 @@ public abstract class BaseFileTailWatcher<T> {
      * @param name    文件名
      * @param session 会话
      */
-    protected boolean add(T session, String name) {
+    protected boolean add(T session, String name) throws IOException {
         Method byName = ReflectUtil.getMethodByName(session.getClass(), "getId");
         Assert.notNull(byName, "没有  getId 方法");
         String id = ReflectUtil.invoke(session, byName);

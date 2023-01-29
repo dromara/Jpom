@@ -142,12 +142,8 @@ public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
     }
 
     @Override
-    protected void send(T session, String msg) {
-        try {
-            SocketSessionUtil.send((WebSocketSession) session, msg);
-        } catch (Exception e) {
-            log.error("发送消息异常", e);
-        }
+    protected void send(T session, String msg) throws IOException {
+        SocketSessionUtil.send((WebSocketSession) session, msg);
     }
 
     /**
