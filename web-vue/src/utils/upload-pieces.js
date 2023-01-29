@@ -5,6 +5,7 @@ import Vue from "vue";
 
 const uploadFileSliceSize = window.uploadFileSliceSize === "<uploadFileSliceSize>" ? 1 : window.uploadFileSliceSize;
 const uploadFileConcurrent = window.uploadFileConcurrent === "<uploadFileConcurrent>" ? 1 : window.uploadFileConcurrent;
+
 /**
  * 文件分片上传
  * @params file {File} 文件
@@ -29,7 +30,7 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
   const chunkList = []; // 分片列表
   const uploaded = []; // 已经上传的
   let total = 0;
-
+  const blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
   /***
    * 获取md5
    **/
@@ -52,7 +53,7 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
           tip: "解析文件,准备上传中 " + ((start / total) * 100).toFixed(2) + "%",
         });
         let end = Math.min(start + batch, total);
-        reader.readAsArrayBuffer(file.slice(start, end));
+        reader.readAsArrayBuffer(blobSlice.call(file, start, end));
         start = end;
       } else {
         // 解析结束
@@ -90,7 +91,7 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
   const getChunkInfo = (file, currentChunk, chunkSize) => {
     let start = currentChunk * chunkSize;
     let end = Math.min(file.size, start + chunkSize);
-    let chunk = file.slice(start, end);
+    let chunk = blobSlice.call(file, start, end);
     return {
       start,
       end,
