@@ -12,18 +12,23 @@
 8. 基于 commit 新增 tag: v2.x.x 并且将代码推送到远程
 9. 将包上传到 oss : ` sh deploy-release-oss.sh`
 10. 更新文档版本号：`cd ./docs/script && sh replaceVersion.sh 2.x.x`
-11. 发布文档：`sh deploy-docs-pages.sh`
-12. 测试远程更新是否正常
-13. 发布服务端 docker 镜像包 `docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.x.x -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .`
-14. 添加 gitee、github 发行版
+11. 手动 copy 更新文档 changelog
+12. 发布文档：`sh deploy-docs-pages.sh`
+13. 测试远程更新是否正常
+14. 发布服务端 docker 镜像包 `docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.x.x -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .`
+15. 添加 gitee、github 发行版
+16. 可选填写发版公告
 
 ## 流水线版
 
 1. 将 dev 分支合并到 master
-2. changelog 版本增加发版日期
-3. 发布代码
-4. 基于 commit 新增 tag: v2.x.x 并且将代码推送到远程
-5. 发布文档
-6. 测试远程更新是否正常
-7. 发布镜像
-8. 添加 gitee、github 发行版
+2. 人工打包并测试相关功能
+3. changelog 版本增加发版日期
+4. 执行-发布代码任务 (注意修改构建命令版本号)
+5. 基于 commit 新增 tag: v2.x.x 并且将代码推送到远程
+6. 手动 copy 更新文档 changelog
+7. 执行-发布文档 (注意修改构建命令版本号)
+8. 测试远程更新是否正常
+9. 执行-发布镜像
+10. 添加 gitee、github 发行版
+11. 可选填写发版公告
