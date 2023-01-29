@@ -215,6 +215,16 @@ export default {
     this.activeTagKey = this.temp.cacheData.useNodeId + "," + this.temp.cacheData.useProjectId;
     // console.log(cacheData);
   },
+  beforeDestroy() {
+    Object.keys(this.socketCache).forEach((item) => {
+      clearInterval(this.socketCache[item].heart);
+    });
+  },
+  destroyed() {
+    Object.keys(this.socketCache).forEach((item) => {
+      clearInterval(this.socketCache[item].heart);
+    });
+  },
   methods: {
     initWebSocket(id, url) {
       let socket;
@@ -228,7 +238,7 @@ export default {
           key: "log-read-error",
           message: "web socket 错误,请检查是否开启 ws 代理",
         });
-        clearInterval(this.socketCache[id]);
+        clearInterval(this.socketCache[id].heart);
       };
       socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
@@ -237,10 +247,10 @@ export default {
           key: "log-read-close",
           message: "会话已经关闭",
         });
-        clearInterval(this.socketCache[id]);
+        clearInterval(this.socketCache[id].heart);
       };
       socket.onmessage = (msg) => {
-        // console.log(msg);
+        //console.log(msg);
         this.$refs[id][0].appendLine(msg.data);
 
         clearInterval(this.socketCache[id].heart);
@@ -325,7 +335,7 @@ export default {
           this.sendSearchLog();
         } else {
           //
-          this.$message.error("当前文件不可读");
+          this.$message.error("当前文件不可读,需要配置可读文件白名单");
         }
       }
     },
@@ -355,9 +365,8 @@ export default {
 
       // 设置默认展开第一个
       setTimeout(() => {
-        const node = this.treeList[0];
-        this.tempNode = node;
-        this.expandKeys = [key];
+        this.tempNode = this.treeList[0];
+        //this.expandKeys = [key];
         //this.loadFileList();
       }, 1000);
     },
@@ -379,14 +388,13 @@ export default {
           // 加载文件
           getFileList(params).then((res) => {
             if (res.code === 200) {
-              const treeData = res.data.map((ele) => {
+              data.children = res.data.map((ele) => {
                 ele.isLeaf = !ele.isDirectory;
                 ele.key = ele.filename + "-" + new Date().getTime();
                 //ele.disabled = ele.textFileEdit;
 
                 return ele;
               });
-              data.children = treeData;
 
               this.treeList = [...this.treeList];
               resolve();
@@ -401,12 +409,13 @@ export default {
     },
     sendSearchLog() {
       if (this.temp?.cacheData?.logFile) {
-        Object.keys(this.socketCache).forEach((item) => {
-          this.$refs[item][0].clearLogCache();
-          this.sendMsg(item, "showlog", this.temp.cacheData);
+        // 先更新缓存再请求搜索，避免长loading
+        updateCache(Object.assign({}, this.temp.cacheData, { id: this.temp.id })).then(() => {
+          Object.keys(this.socketCache).forEach((item) => {
+            this.$refs[item][0].clearLogCache();
+            this.sendMsg(item, "showlog", this.temp.cacheData);
+          });
         });
-        //
-        updateCache(Object.assign({}, this.temp.cacheData, { id: this.temp.id })).then();
       }
       //
     },
@@ -434,9 +443,7 @@ export default {
 .log-filter {
   /* margin-top: -22px; */
   /* margin-bottom: 10px; */
-  padding: 0 10px;
-  padding-top: 0;
-  padding-bottom: 10px;
+  padding: 0 10px 10px;
   line-height: 0;
   border-bottom: 1px solid #eee;
 }

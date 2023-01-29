@@ -30,15 +30,15 @@ export function editLogRead(params) {
 }
 
 export function updateCache(params) {
-    return axios({
-      url: "/log-read/update-cache.json",
-      method: "post",
-      data: params,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  }
+  return axios({
+    url: "/log-read/update-cache.json",
+    method: "post",
+    data: params,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
 
 /**
  * 删除日志阅读
