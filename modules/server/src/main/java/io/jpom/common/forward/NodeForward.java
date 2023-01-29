@@ -208,7 +208,7 @@ public class NodeForward {
         JSONObject sliceData = new JSONObject();
         sliceData.put("sliceId", IdUtil.fastSimpleUUID());
         sliceData.put("totalSlice", total);
-        sliceData.put("fileSumSha1", sha1);
+        sliceData.put("fileSumMd5", sha1);
         TransportServer transportServer = TransportServerFactory.get();
         TypeReference<JsonMessage<T>> typeReference = new TypeReference<JsonMessage<T>>() {
         };

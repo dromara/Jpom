@@ -188,12 +188,12 @@ public class OutGivingProjectController extends BaseServerController {
                                               String sliceId,
                                               Integer totalSlice,
                                               Integer nowSlice,
-                                              String fileSumSha1) throws IOException {
+                                              String fileSumMd5) throws IOException {
         // 状态判断
         this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
         File userTempPath = serverConfig.getUserTempPath();
         // 保存文件
-        this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumSha1);
+        this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5);
         return JsonMessage.success("上传成功");
     }
 
@@ -213,7 +213,7 @@ public class OutGivingProjectController extends BaseServerController {
                                       String secondaryDirectory, String stripComponents,
                                       String sliceId,
                                       Integer totalSlice,
-                                      String fileSumSha1) throws IOException {
+                                      String fileSumMd5) throws IOException {
         this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
@@ -223,7 +223,7 @@ public class OutGivingProjectController extends BaseServerController {
         FileUtil.mkdir(file);
         //
         File userTempPath = serverConfig.getUserTempPath();
-        File successFile = this.shardingTryMerge(userTempPath.getAbsolutePath(), sliceId, totalSlice, fileSumSha1);
+        File successFile = this.shardingTryMerge(userTempPath.getAbsolutePath(), sliceId, totalSlice, fileSumMd5);
         FileUtil.move(successFile, file, true);
         //
         File dest = FileUtil.file(file, successFile.getName());

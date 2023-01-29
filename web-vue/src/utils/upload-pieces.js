@@ -1,4 +1,4 @@
-import sha1 from "js-sha1";
+import SparkMD5 from "spark-md5";
 import { concurrentExecution } from "@/utils/const";
 import { generateShardingId } from "@/api/common";
 import Vue from "vue";
@@ -23,7 +23,7 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
   if (!window.FileReader) {
     return error("您的浏览器版本太低，不支持该功能");
   }
-  let fileSh1 = ""; //
+  let fileMd5 = ""; //
   let sliceId = "";
   const chunkSize = uploadFileSliceSize * 1024 * 1024; // 1MB一片
   const chunkCount = Math.ceil(file.size / chunkSize); // 总片数
@@ -31,17 +31,18 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
   const uploaded = []; // 已经上传的
   let total = 0;
   const blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+
   /***
    * 获取md5
    **/
-  const readFileSh1 = () => {
+  const readFileMd5 = () => {
     //
     Vue.prototype.$setLoading({
       spinning: true,
       tip: "解析文件,准备上传中",
     });
     const reader = new FileReader();
-    const sha1Hash = sha1.create();
+    const spark = new SparkMD5.ArrayBuffer();
     let start = 0;
     total = file.size;
     // 默认 2M 解析缓存
@@ -57,7 +58,9 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
         start = end;
       } else {
         // 解析结束
-        fileSh1 = sha1Hash.hex();
+        fileMd5 = spark.end();
+        // 释放缓存
+        spark.destroy();
         for (let i = 0; i < chunkCount; i++) {
           chunkList.push(Number(i));
         }
@@ -67,13 +70,15 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
           if (res.code === 200) {
             sliceId = res.data;
             concurrentUpload();
+          } else {
+            error("文件上传id生成失败：" + res.msg);
           }
         });
       }
     };
     reader.onload = function (event) {
       try {
-        sha1Hash.update(event.target.result);
+        spark.append(event.target.result);
         asyncUpdate();
       } catch (e) {
         Vue.prototype.$setLoading("closeAll");
@@ -129,7 +134,7 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
               nowSlice: chunkInfo.currentChunk + 1,
               totalSlice: chunkCount,
               sliceId: sliceId,
-              fileSumSha1: fileSh1,
+              fileSumMd5: fileMd5,
             };
             resolve(createUploadData2);
           })
@@ -147,17 +152,17 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
    * 创建文件上传参数
    **/
   const createUploadData = (chunkInfo) => {
-    let fetchForm = new FormData();
-
-    fetchForm.append("nowSlice", chunkInfo.currentChunk + 1);
+    const fetchForm = new FormData();
+    const nowSlice = chunkInfo.currentChunk + 1;
+    fetchForm.append("nowSlice", nowSlice);
     fetchForm.append("totalSlice", chunkCount);
     fetchForm.append("sliceId", sliceId);
-    const chunkfile = new File([chunkInfo.chunk], file.name);
+    const chunkfile = new File([chunkInfo.chunk], file.name + "." + nowSlice);
     fetchForm.append("file", chunkfile); // fetchForm.append('file', chunkInfo.chunk)
-    fetchForm.append("fileSumSha1", fileSh1);
+    fetchForm.append("fileSumMd5", fileMd5);
 
     return fetchForm;
   };
 
-  readFileSh1(); // 开始执行代码
+  readFileMd5(); // 开始执行代码
 };

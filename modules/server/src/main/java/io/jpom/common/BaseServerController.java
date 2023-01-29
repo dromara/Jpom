@@ -143,16 +143,16 @@ public abstract class BaseServerController extends BaseJpomController {
     }
 
     @Override
-    public void uploadSharding(MultipartFile file, String tempPath, String sliceId, Integer totalSlice, Integer nowSlice, String fileSumSha1, String... extNames) throws IOException {
+    public void uploadSharding(MultipartFile file, String tempPath, String sliceId, Integer totalSlice, Integer nowSlice, String fileSumMd5, String... extNames) throws IOException {
         Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
-        super.uploadSharding(file, tempPath, sliceId, totalSlice, nowSlice, fileSumSha1, extNames);
+        super.uploadSharding(file, tempPath, sliceId, totalSlice, nowSlice, fileSumMd5, extNames);
     }
 
     @Override
-    public File shardingTryMerge(String tempPath, String sliceId, Integer totalSlice, String fileSumSha1) throws IOException {
+    public File shardingTryMerge(String tempPath, String sliceId, Integer totalSlice, String fileSumMd5) throws IOException {
         Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
         try {
-            return super.shardingTryMerge(tempPath, sliceId, totalSlice, fileSumSha1);
+            return super.shardingTryMerge(tempPath, sliceId, totalSlice, fileSumMd5);
         } finally {
             // 判断-删除分片id
             BaseServerController.SHARDING_IDS.remove(sliceId);
