@@ -12,6 +12,8 @@
 5. 【all】优化 分片上传文件签名由 sha1 改为 md5 提升效率
 6. 【server】优化 构建历史页面鼠标移到名称下拉项显示文字
    （感谢 [@伤感的风铃草](https://gitee.com/bwy-flc) [Gitee pr 167](https://gitee.com/dromara/Jpom/pulls/167) ）
+7. 【all】修复 日志监听器 catch 异常日志造成会话未自动删除问题
+   （感谢 [@金技](https://gitee.com/jinjiG) [Gitee issues I6A5QW](https://gitee.com/dromara/Jpom/issues/I6A5QW) ）
 
 ------
 
