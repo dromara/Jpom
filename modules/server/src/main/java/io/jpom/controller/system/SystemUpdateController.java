@@ -120,14 +120,14 @@ public class SystemUpdateController extends BaseServerController {
                                                  String sliceId,
                                                  Integer totalSlice,
                                                  Integer nowSlice,
-                                                 String fileSumSha1) throws IOException {
+                                                 String fileSumMd5) throws IOException {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
             Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
             return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar);
         }
         String absolutePath = serverConfig.getUserTempPath().getAbsolutePath();
-        this.uploadSharding(file, absolutePath, sliceId, totalSlice, nowSlice, fileSumSha1, "jar", "zip");
+        this.uploadSharding(file, absolutePath, sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
         return JsonMessage.success("上传成功");
     }
 
@@ -135,7 +135,7 @@ public class SystemUpdateController extends BaseServerController {
     @Feature(method = MethodFeature.EXECUTE)
     public JsonMessage<String> uploadJar(String sliceId,
                                          Integer totalSlice,
-                                         String fileSumSha1,
+                                         String fileSumMd5,
                                          HttpServletRequest request) throws IOException {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
@@ -146,7 +146,7 @@ public class SystemUpdateController extends BaseServerController {
         }
         //
         String absolutePath = serverConfig.getUserTempPath().getAbsolutePath();
-        File successFile = this.shardingTryMerge(absolutePath, sliceId, totalSlice, fileSumSha1);
+        File successFile = this.shardingTryMerge(absolutePath, sliceId, totalSlice, fileSumMd5);
         Objects.requireNonNull(JpomManifest.getScriptFile());
         String path = FileUtil.getAbsolutePath(successFile);
         // 解析压缩包

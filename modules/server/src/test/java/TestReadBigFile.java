@@ -144,7 +144,7 @@ public class TestReadBigFile {
         File[] files = partDir.listFiles();
 
         long start2 = SystemClock.now();
-        String fileSumSha1 = SecureUtil.sha1(file);
+        String fileSumMd5 = SecureUtil.sha1(file);
         log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
         assert files != null;
         String name = files[0].getName();
@@ -172,8 +172,8 @@ public class TestReadBigFile {
         start2 = SystemClock.now();
         String newSha1 = SecureUtil.sha1(successFile);
         log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
-        Assert.state(StrUtil.equals(newSha1, fileSumSha1), () -> {
-            log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumSha1);
+        Assert.state(StrUtil.equals(newSha1, fileSumMd5), () -> {
+            log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumMd5);
             return "文件合并后异常,文件不完成可能被损坏";
         });
         log.info("合并文件花费：" + DateUtil.formatBetween(SystemClock.now() - start));
@@ -184,7 +184,7 @@ public class TestReadBigFile {
         long start = SystemClock.now();
         File[] files = partDir.listFiles();
         long start2 = SystemClock.now();
-        String fileSumSha1 = null;// SecureUtil.sha1(file);
+        String fileSumMd5 = null;// SecureUtil.sha1(file);
         log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
         assert files != null;
         String name = files[0].getName();
@@ -215,8 +215,8 @@ public class TestReadBigFile {
         String newSha1 = HexUtil.encodeHexStr(digester.getDigest().digest());
         //SecureUtil.sha1(successFile);
         log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
-        Assert.state(StrUtil.equals(newSha1, fileSumSha1), () -> {
-            log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumSha1);
+        Assert.state(StrUtil.equals(newSha1, fileSumMd5), () -> {
+            log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumMd5);
             return "文件合并后异常,文件不完成可能被损坏";
         });
         log.info("合并文件花费：" + DateUtil.formatBetween(SystemClock.now() - start));

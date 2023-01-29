@@ -218,9 +218,9 @@ public class ProjectFileControl extends BaseAgentController {
                                                        String sliceId,
                                                        Integer totalSlice,
                                                        Integer nowSlice,
-                                                       String fileSumSha1) throws Exception {
+                                                       String fileSumMd5) throws Exception {
         String tempPathName = agentConfig.getFixedTempPathName();
-        this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumSha1);
+        this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumMd5);
 
         return JsonMessage.success("上传成功");
     }
@@ -231,10 +231,10 @@ public class ProjectFileControl extends BaseAgentController {
                                                       Integer stripComponents,
                                                       String sliceId,
                                                       Integer totalSlice,
-                                                      String fileSumSha1,
+                                                      String fileSumMd5,
                                                       String after) throws Exception {
         String tempPathName = agentConfig.getFixedTempPathName();
-        File successFile = this.shardingTryMerge(tempPathName, sliceId, totalSlice, fileSumSha1);
+        File successFile = this.shardingTryMerge(tempPathName, sliceId, totalSlice, fileSumMd5);
         // 处理上传文件
         return this.upload(successFile, type, levelName, stripComponents, after);
     }

@@ -8,6 +8,10 @@
 2. 【server】修复 线程同步器，避免任务过多造成线程数不可控（节点分发相关功能）
 3. 【server】优化 前端打包取消 .map 文件，缩少发布包大小
    （感谢 [@金技](https://gitee.com/jinjiG) [Gitee issues I6AK0N](https://gitee.com/dromara/Jpom/issues/I6AK0N) ）
+4. 【all】优化 分片上传文件名采用分片序号（伪装文件后缀）（感谢@冷月）
+5. 【all】优化 分片上传文件签名由 sha1 改为 md5 提升效率
+6. 【server】优化 构建历史页面鼠标移到名称下拉项显示文字
+   （感谢 [@伤感的风铃草](https://gitee.com/bwy-flc) [Gitee pr 167](https://gitee.com/dromara/Jpom/pulls/167) ）
 
 ------
 

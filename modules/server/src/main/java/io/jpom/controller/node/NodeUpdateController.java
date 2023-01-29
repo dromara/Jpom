@@ -134,9 +134,9 @@ public class NodeUpdateController extends BaseServerController {
                                                    String sliceId,
                                                    Integer totalSlice,
                                                    Integer nowSlice,
-                                                   String fileSumSha1) throws IOException {
+                                                   String fileSumMd5) throws IOException {
         File userTempPath = serverConfig.getUserTempPath();
-        this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumSha1, "jar", "zip");
+        this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
         return JsonMessage.success("上传成功");
     }
 
@@ -145,11 +145,11 @@ public class NodeUpdateController extends BaseServerController {
     @Feature(method = MethodFeature.UPLOAD)
     public JsonMessage<String> uploadAgent(String sliceId,
                                            Integer totalSlice,
-                                           String fileSumSha1) throws IOException {
+                                           String fileSumMd5) throws IOException {
         File agentPath = serverConfig.getAgentPath();
 
         File userTempPath = serverConfig.getUserTempPath();
-        File successFile = this.shardingTryMerge(userTempPath.getAbsolutePath(), sliceId, totalSlice, fileSumSha1);
+        File successFile = this.shardingTryMerge(userTempPath.getAbsolutePath(), sliceId, totalSlice, fileSumMd5);
         FileUtil.move(successFile, agentPath, true);
         //
         String path = FileUtil.file(agentPath, successFile.getName()).getAbsolutePath();

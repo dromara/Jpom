@@ -41,10 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -89,12 +86,12 @@ public abstract class BaseJpomController {
     /**
      * 上传保存分片信息
      *
-     * @param file        上传的文件信息
-     * @param tempPath    临时保存目录
-     * @param sliceId     分片id
-     * @param totalSlice  累积分片
-     * @param nowSlice    当前分片
-     * @param fileSumSha1 文件签名信息
+     * @param file       上传的文件信息
+     * @param tempPath   临时保存目录
+     * @param sliceId    分片id
+     * @param totalSlice 累积分片
+     * @param nowSlice   当前分片
+     * @param fileSumMd5 文件签名信息
      * @throws IOException 异常
      */
     public void uploadSharding(MultipartFile file,
@@ -102,9 +99,9 @@ public abstract class BaseJpomController {
                                String sliceId,
                                Integer totalSlice,
                                Integer nowSlice,
-                               String fileSumSha1,
+                               String fileSumMd5,
                                String... extNames) throws IOException {
-        Assert.hasText(fileSumSha1, "没有文件签名信息");
+        Assert.hasText(fileSumMd5, "没有文件签名信息");
         Assert.hasText(sliceId, "没有分片 id 信息");
 
         Assert.notNull(totalSlice, "上传信息不完成：totalSlice");
@@ -113,16 +110,17 @@ public abstract class BaseJpomController {
         // 保存路径
         File slicePath = FileUtil.file(tempPath, "slice", sliceId);
         File sliceItemPath = FileUtil.file(slicePath, "items");
-
+        Assert.notNull(file, "没有上传文件");
         String originalFilename = file.getOriginalFilename();
+        // 截断序号 xxxxx.avi.1
+        String realName = StrUtil.subBefore(originalFilename, StrUtil.DOT, true);
         if (ArrayUtil.isNotEmpty(extNames)) {
-            String extName = FileUtil.extName(originalFilename);
+            String extName = FileUtil.extName(realName);
             Assert.state(StrUtil.containsAnyIgnoreCase(extName, extNames), "不支持的文件类型：" + extName);
         }
-
-        File slice = FileUtil.file(sliceItemPath, originalFilename + "." + nowSlice);
+        assert originalFilename != null;
+        File slice = FileUtil.file(sliceItemPath, originalFilename);
         FileUtil.mkParentDirs(slice);
-        Assert.notNull(file, "没有上传文件");
         // 保存
         file.transferTo(slice);
     }
@@ -130,18 +128,18 @@ public abstract class BaseJpomController {
     /**
      * 合并分片
      *
-     * @param tempPath    临时保存目录
-     * @param sliceId     上传id
-     * @param totalSlice  累积分片
-     * @param fileSumSha1 文件签名
+     * @param tempPath   临时保存目录
+     * @param sliceId    上传id
+     * @param totalSlice 累积分片
+     * @param fileSumMd5 文件签名
      * @return 合并后的文件
      * @throws IOException io
      */
     public File shardingTryMerge(String tempPath,
                                  String sliceId,
                                  Integer totalSlice,
-                                 String fileSumSha1) throws IOException {
-        Assert.hasText(fileSumSha1, "没有文件签名信息");
+                                 String fileSumMd5) throws IOException {
+        Assert.hasText(fileSumMd5, "没有文件签名信息");
         Assert.hasText(sliceId, "没有分片 id 信息");
 
         Assert.notNull(totalSlice, "上传信息不完成：totalSlice");
@@ -176,9 +174,9 @@ public abstract class BaseJpomController {
         // 删除分片信息
         FileUtil.del(sliceItemPath);
         // 对比文件信息
-        String newSha1 = SecureUtil.sha1(successFile);
-        Assert.state(StrUtil.equals(newSha1, fileSumSha1), () -> {
-            log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumSha1);
+        String newMd5 = SecureUtil.md5(successFile);
+        Assert.state(StrUtil.equals(newMd5, fileSumMd5), () -> {
+            log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newMd5, fileSumMd5);
             return "文件合并后异常,文件不完成可能被损坏";
         });
         return successFile;
@@ -206,11 +204,6 @@ public abstract class BaseJpomController {
 
     protected int getParameterInt(String name, int def) {
         return Convert.toInt(getParameter(name), def);
-    }
-
-    protected long getParameterLong(String name, long def) {
-        String value = getParameter(name);
-        return Convert.toLong(value, def);
     }
 
 

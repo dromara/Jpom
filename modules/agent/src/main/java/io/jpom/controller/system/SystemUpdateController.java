@@ -66,20 +66,20 @@ public class SystemUpdateController extends BaseAgentController {
     public JsonMessage<String> uploadJarSharding(MultipartFile file, String sliceId,
                                                  Integer totalSlice,
                                                  Integer nowSlice,
-                                                 String fileSumSha1) throws IOException {
+                                                 String fileSumMd5) throws IOException {
         //
         String tempPathName = agentConfig.getFixedTempPathName();
-        this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumSha1, "jar", "zip");
+        this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
         return JsonMessage.success("上传成功");
     }
 
     @PostMapping(value = "upload-jar-sharding-merge", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<String> uploadJarShardingMerge(String sliceId,
                                                       Integer totalSlice,
-                                                      String fileSumSha1) throws IOException {
+                                                      String fileSumMd5) throws IOException {
         //
         String tempPathName = agentConfig.getFixedTempPathName();
-        File successFile = this.shardingTryMerge(tempPathName, sliceId, totalSlice, fileSumSha1);
+        File successFile = this.shardingTryMerge(tempPathName, sliceId, totalSlice, fileSumMd5);
         Objects.requireNonNull(JpomManifest.getScriptFile());
         String absolutePath = agentConfig.getTempPath().getAbsolutePath();
         String path = FileUtil.getAbsolutePath(successFile);

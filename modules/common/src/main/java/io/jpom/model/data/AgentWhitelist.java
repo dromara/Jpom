@@ -28,7 +28,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseJpomController;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.system.ExtConfigBean;
@@ -143,25 +142,6 @@ public class AgentWhitelist extends BaseJsonModel {
             }
         }
         return false;
-    }
-
-    /**
-     * 解析出json 中的白名单字段
-     *
-     * @param projectInfo 项目的json对象
-     * @param path        要比较的白名单
-     * @return null 不是该白名单
-     */
-    public static String getItemWhitelistDirectory(JSONObject projectInfo, String path) {
-        String lib = projectInfo.getString("lib");
-        if (lib.startsWith(path)) {
-            String itemWhitelistDirectory = lib.substring(0, path.length());
-            lib = lib.substring(path.length());
-
-            projectInfo.put("lib", lib);
-            return itemWhitelistDirectory;
-        }
-        return null;
     }
 
     /**
