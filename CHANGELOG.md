@@ -15,6 +15,10 @@
 7. 【all】修复 日志监听器 catch 异常日志造成会话未自动删除问题
    （感谢 [@金技](https://gitee.com/jinjiG) [Gitee issues I6A5QW](https://gitee.com/dromara/Jpom/issues/I6A5QW) ）
 
+### ⚠️ 注意
+
+1. 插件端需要同步升级，否则不能正常使用节点上传文件
+
 ------
 
 ## 2.10.11 (2023-01-10)

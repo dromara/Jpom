@@ -305,7 +305,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             if (!watcher) {
                 SocketSessionUtil.send(session, "监听文件失败,可能文件不存在");
             }
-        } catch (IOException io) {
+        } catch (Exception io) {
             log.error("监听日志变化", io);
             SocketSessionUtil.send(session, io.getMessage());
         }

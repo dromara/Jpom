@@ -78,18 +78,6 @@ public abstract class BaseFileTailWatcher<T> {
      * @throws IOException io
      */
     protected abstract void send(T session, String msg) throws IOException;
-    //{
-//        try {
-//            if (session instanceof Session) {
-//                SocketSessionUtil.send((Session) session, msg);
-//            } else if (session instanceof WebSocketSession) {
-//                SocketSessionUtil.send((WebSocketSession) session, msg);
-//            } else {
-//                throw new JpomRuntimeException("没有对应类型");
-//            }
-//        } catch (IOException ignored) {
-//        }
-    //}
 
     /**
      * 有新的日志
@@ -137,9 +125,6 @@ public abstract class BaseFileTailWatcher<T> {
             }
         }
         return true;
-        //        else {
-        //            this.send(session, "添加日志监听失败");
-        //        }
     }
 
     public void start() {
