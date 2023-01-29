@@ -190,7 +190,7 @@ public class NodeForward {
         long length = file.length();
         String fileName = file.getName();
         Assert.state(length > 0, "空文件不能上传");
-        String sha1 = SecureUtil.sha1(file);
+        String md5 = SecureUtil.md5(file);
         int fileSliceSize = nodeConfig.getUploadFileSliceSize();
         //如果小数点大于1，整数加一 例如4.1 =》5
         long chunkSize = DataSize.ofMegabytes(fileSliceSize).toBytes();
@@ -208,7 +208,7 @@ public class NodeForward {
         JSONObject sliceData = new JSONObject();
         sliceData.put("sliceId", IdUtil.fastSimpleUUID());
         sliceData.put("totalSlice", total);
-        sliceData.put("fileSumMd5", sha1);
+        sliceData.put("fileSumMd5", md5);
         TransportServer transportServer = TransportServerFactory.get();
         TypeReference<JsonMessage<T>> typeReference = new TypeReference<JsonMessage<T>>() {
         };
@@ -233,7 +233,7 @@ public class NodeForward {
                             byteBuffer.flip();
                             byte[] array = new byte[byteBuffer.remaining()];
                             byteBuffer.get(array, 0, array.length);
-                            uploadData.put("file", new BytesResource(array, fileName));
+                            uploadData.put("file", new BytesResource(array, fileName + StrUtil.DOT + currentChunk));
                             uploadData.put("nowSlice", currentChunk);
                             uploadData.putAll(sliceData);
                         }

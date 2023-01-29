@@ -113,7 +113,7 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
             try {
                 AgentFileTailWatcher.addWatcher(file, systemConfig.getLogCharset(), session);
                 CACHE_FILE.put(session.getId(), file);
-            } catch (IOException io) {
+            } catch (Exception io) {
                 log.error("监听日志变化", io);
                 SocketSessionUtil.send(session, io.getMessage());
             }

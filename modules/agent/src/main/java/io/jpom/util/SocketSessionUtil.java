@@ -25,6 +25,7 @@ package io.jpom.util;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
 import javax.websocket.Session;
 import java.io.IOException;
@@ -57,9 +58,7 @@ public class SocketSessionUtil {
         if (StrUtil.isEmpty(msg)) {
             return;
         }
-        if (!session.isOpen()) {
-            throw new RuntimeException("session close ");
-        }
+        Assert.state(session.isOpen(), "session close ");
         try {
             LOCK.lock(session.getId());
             IOException exception = null;
