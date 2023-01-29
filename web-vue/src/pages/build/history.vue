@@ -9,7 +9,7 @@
       <template slot="title">
         <a-space>
           <a-select show-search option-filter-prop="children" v-model="listQuery.buildDataId" allowClear placeholder="请选择构建名称" class="search-input-item">
-            <a-select-option v-for="build in buildList" :key="build.id">{{ build.name }}</a-select-option>
+            <a-select-option v-for="build in buildList" :key="build.id" :title="build.name">{{ build.name }}</a-select-option>
           </a-select>
           <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
