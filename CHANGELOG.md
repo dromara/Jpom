@@ -14,6 +14,8 @@
    （感谢 [@伤感的风铃草](https://gitee.com/bwy-flc) [Gitee pr 167](https://gitee.com/dromara/Jpom/pulls/167) ）
 7. 【all】修复 日志监听器 catch 异常日志造成会话未自动删除问题
    （感谢 [@金技](https://gitee.com/jinjiG) [Gitee issues I6A5QW](https://gitee.com/dromara/Jpom/issues/I6A5QW) ）
+8. 【server】修复 仓库地址 https 证书验证问题（自动忽略验证）
+   （感谢 [@arstercz](https://github.com/arstercz) [Github issues 32](https://github.com/dromara/Jpom/issues/32) ）
 
 ### ⚠️ 注意
 
@@ -22,6 +24,8 @@
 ------
 
 ## 2.10.11 (2023-01-10)
+
+### 🐣 新增功能
 
 1. 【server】新增 系统缓存新增分片操作数查看
 2. 【server】新增 节点分片上传支持配置并发数：`jpom.node.upload-file-concurrent`
