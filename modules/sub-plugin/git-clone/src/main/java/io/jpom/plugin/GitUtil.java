@@ -170,7 +170,7 @@ public class GitUtil {
         String password = StrUtil.emptyToDefault((String) parameter.get("password"), StrUtil.EMPTY);
         if (protocol == 0) {
             // http
-            UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
+            CredentialsProvider credentialsProvider = new SslVerifyUsernamePasswordCredentialsProvider(username, password);
             transportCommand.setCredentialsProvider(credentialsProvider);
         } else if (protocol == 1) {
             // ssh
