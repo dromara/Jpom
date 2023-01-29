@@ -43,6 +43,8 @@ module.exports = {
       },
     },
   },
+  //打包后是否让每个js文件都生成一个.map文件？true代表生成，false代表不生成。
+  productionSourceMap: false,
   configureWebpack: {
     // name: name,
     // 修改打包后的js文件名称

@@ -6,6 +6,8 @@
 
 1. 【server】优化 在线终端断开连接时提醒并支持重连
 2. 【server】修复 线程同步器，避免任务过多造成线程数不可控（节点分发相关功能）
+3. 【server】优化 前端打包取消 .map 文件，缩少发布包大小
+   （感谢 [@金技](https://gitee.com/jinjiG) [Gitee issues I6AK0N](https://gitee.com/dromara/Jpom/issues/I6AK0N) ）
 
 ------
 
