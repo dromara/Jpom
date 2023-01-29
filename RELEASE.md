@@ -1,5 +1,6 @@
 # 发布流程
 
+## 手动版
 
 1. 将 dev 分支合并到 master
 2. changelog 版本增加发版日期
@@ -15,3 +16,14 @@
 12. 测试远程更新是否正常
 13. 发布服务端 docker 镜像包 `docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.x.x -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .`
 14. 添加 gitee、github 发行版
+
+## 流水线版
+
+1. 将 dev 分支合并到 master
+2. changelog 版本增加发版日期
+3. 发布代码
+4. 基于 commit 新增 tag: v2.x.x 并且将代码推送到远程
+5. 发布文档
+6. 测试远程更新是否正常
+7. 发布镜像
+8. 添加 gitee、github 发行版
