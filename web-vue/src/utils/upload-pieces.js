@@ -153,7 +153,7 @@ export const uploadPieces = ({ file, uploadCallback, success, process, error }) 
    **/
   const createUploadData = (chunkInfo) => {
     const fetchForm = new FormData();
-    const nowSlice = chunkInfo.currentChunk + 1;
+    const nowSlice = chunkInfo.currentChunk;
     fetchForm.append("nowSlice", nowSlice);
     fetchForm.append("totalSlice", chunkCount);
     fetchForm.append("sliceId", sliceId);

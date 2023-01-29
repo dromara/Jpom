@@ -116,6 +116,8 @@ export function uploadDispatchFileMerge(params) {
     url: "/outgiving/upload-sharding-merge",
     method: "post",
     data: params,
+    // 0 表示无超时时间
+    timeout: 0,
   });
 }
 

@@ -152,6 +152,7 @@ public abstract class BaseJpomController {
         File[] files = sliceItemPath.listFiles();
         int length = ArrayUtil.length(files);
         Assert.state(files != null && length == totalSlice, "文件上传失败,存在分片丢失的情况, " + length + " != " + totalSlice);
+        // 文件真实名称
         String name = files[0].getName();
         name = StrUtil.subBefore(name, StrUtil.DOT, true);
         File successFile = FileUtil.file(slicePath, name);
@@ -159,8 +160,8 @@ public abstract class BaseJpomController {
             try (FileChannel channel = fileOutputStream.getChannel()) {
                 Arrays.stream(files).sorted((o1, o2) -> {
                     // 排序
-                    Integer o1Int = Convert.toInt(FileUtil.extName(o1));
-                    Integer o2Int = Convert.toInt(FileUtil.extName(o2));
+                    Integer o1Int = Convert.toInt(FileUtil.extName(o1), 0);
+                    Integer o2Int = Convert.toInt(FileUtil.extName(o2), 0);
                     return o1Int.compareTo(o2Int);
                 }).forEach(file12 -> {
                     try {
