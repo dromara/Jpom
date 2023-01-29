@@ -144,13 +144,14 @@ public class TestReadBigFile {
         File[] files = partDir.listFiles();
 
         long start2 = SystemClock.now();
-        String fileSumMd5 = SecureUtil.sha1(file);
+        String fileSumMd5 = SecureUtil.md5(file);
         log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
         assert files != null;
         String name = files[0].getName();
         name = StrUtil.subBefore(name, StrUtil.DOT, true);
         File successFile = FileUtil.file(saveDir, name);
         FileUtil.del(successFile);
+        start2 = SystemClock.now();
         try (FileOutputStream fileOutputStream = new FileOutputStream(successFile)) {
             try (FileChannel channel = fileOutputStream.getChannel()) {
                 Arrays.stream(files).sorted((o1, o2) -> {
@@ -160,14 +161,69 @@ public class TestReadBigFile {
                     return o1Int.compareTo(o2Int);
                 }).forEach(file12 -> {
                     try {
+                        //channel.write(ByteBuffer.wrap(FileUtil.readBytes(file12)));
                         FileUtils.appendChannel(file12, channel);
-                        log.info("合并 {} 文件花费：{}", file12.getName(), DateUtil.formatBetween(SystemClock.now() - start));
+                        //log.info("合并 {} 文件花费：{}", file12.getName(), DateUtil.formatBetween(SystemClock.now() - start));
                     } catch (Exception e) {
                         throw Lombok.sneakyThrow(e);
                     }
                 });
             }
         }
+        log.info("合并文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
+        // 对比文件信息
+        start2 = SystemClock.now();
+        String newSha1 = SecureUtil.md5(successFile);
+        log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
+        Assert.state(StrUtil.equals(newSha1, fileSumMd5), () -> {
+            log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumMd5);
+            return "文件合并后异常,文件不完成可能被损坏";
+        });
+        log.info("合并+解析文件花费：" + DateUtil.formatBetween(SystemClock.now() - start));
+    }
+
+    @Test
+    public void testMerge2() throws IOException {
+        long start = SystemClock.now();
+        File[] files = partDir.listFiles();
+        long start2 = SystemClock.now();
+        String fileSumMd5 = SecureUtil.sha1(file);
+        log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
+        assert files != null;
+        String name = files[0].getName();
+        name = StrUtil.subBefore(name, StrUtil.DOT, true);
+        File successFile = FileUtil.file(saveDir, name);
+        FileUtil.del(successFile);
+        start2 = SystemClock.now();
+        //
+        // 预分配文件所占的磁盘空间，磁盘中会创建一个指定大小的文件
+        try (RandomAccessFile raf = new RandomAccessFile(successFile, "rw")) {
+            // 预分配文件空间
+            raf.setLength(file.length());
+        }
+
+        try (StrictSyncFinisher syncFinisher = new StrictSyncFinisher(20, files.length)) {
+            Arrays.stream(files).sorted((o1, o2) -> {
+                // 排序
+                Integer o1Int = Convert.toInt(FileUtil.extName(o1));
+                Integer o2Int = Convert.toInt(FileUtil.extName(o2));
+                return o1Int.compareTo(o2Int);
+            }).forEach(file12 -> {
+                long chunkSize = DataSize.ofMegabytes(1).toBytes();
+                syncFinisher.addWorker(() -> {
+                    try (RandomAccessFile raf = new RandomAccessFile(successFile, "rw")) {
+                        Integer o1Int = Convert.toInt(FileUtil.extName(file12));
+                        raf.seek(o1Int * chunkSize);
+                        raf.write(FileUtil.readBytes(file12));
+                    } catch (Exception e) {
+                        throw Lombok.sneakyThrow(e);
+                    }
+                });
+            });
+            syncFinisher.start();
+        }
+
+        log.info("合并文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
         // 对比文件信息
         start2 = SystemClock.now();
         String newSha1 = SecureUtil.sha1(successFile);
@@ -176,50 +232,7 @@ public class TestReadBigFile {
             log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumMd5);
             return "文件合并后异常,文件不完成可能被损坏";
         });
-        log.info("合并文件花费：" + DateUtil.formatBetween(SystemClock.now() - start));
-    }
-
-    @Test
-    public void testMerge2() throws IOException {
-        long start = SystemClock.now();
-        File[] files = partDir.listFiles();
-        long start2 = SystemClock.now();
-        String fileSumMd5 = null;// SecureUtil.sha1(file);
-        log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
-        assert files != null;
-        String name = files[0].getName();
-        name = StrUtil.subBefore(name, StrUtil.DOT, true);
-        File successFile = FileUtil.file(saveDir, name);
-        FileUtil.del(successFile);
-        Digester digester = SecureUtil.sha1();
-        try (OutputStream fileOutputStream = Files.newOutputStream(successFile.toPath())) {
-
-            try (DigestOutputStream digestOutputStream = new DigestOutputStream(fileOutputStream, digester.getDigest());) {
-                Arrays.stream(files).sorted((o1, o2) -> {
-                    // 排序
-                    Integer o1Int = Convert.toInt(FileUtil.extName(o1));
-                    Integer o2Int = Convert.toInt(FileUtil.extName(o2));
-                    return o1Int.compareTo(o2Int);
-                }).forEach(file12 -> {
-                    try {
-                        digestOutputStream.write(FileUtil.readBytes(file12));
-                        log.info("合并 {} 文件花费：{}", file12.getName(), DateUtil.formatBetween(SystemClock.now() - start));
-                    } catch (Exception e) {
-                        throw Lombok.sneakyThrow(e);
-                    }
-                });
-            }
-        }
-        // 对比文件信息
-        start2 = SystemClock.now();
-        String newSha1 = HexUtil.encodeHexStr(digester.getDigest().digest());
-        //SecureUtil.sha1(successFile);
-        log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
-        Assert.state(StrUtil.equals(newSha1, fileSumMd5), () -> {
-            log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumMd5);
-            return "文件合并后异常,文件不完成可能被损坏";
-        });
-        log.info("合并文件花费：" + DateUtil.formatBetween(SystemClock.now() - start));
+        log.info("合并+解析文件花费：" + DateUtil.formatBetween(SystemClock.now() - start));
     }
 
     /**

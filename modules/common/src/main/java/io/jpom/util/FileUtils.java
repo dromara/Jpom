@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
@@ -293,14 +294,14 @@ public class FileUtils {
     /**
      * 文件追加
      *
-     * @param file
-     * @param channel
-     * @throws Exception
+     * @param file    被添加的文件
+     * @param channel 需要添加的文件通道
+     * @throws IOException io
      */
-    public static void appendChannel(File file, FileChannel channel) throws Exception {
+    public static void appendChannel(File file, FileChannel channel) throws IOException {
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             try (FileChannel inChannel = fileInputStream.getChannel()) {
-                ByteBuffer bb = ByteBuffer.allocate(1024 * 1024);
+                ByteBuffer bb = ByteBuffer.allocate(IoUtil.DEFAULT_MIDDLE_BUFFER_SIZE);
                 while (inChannel.read(bb) != -1) {
                     bb.flip();
                     channel.write(bb);

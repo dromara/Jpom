@@ -276,6 +276,8 @@ export function uploadAgentFileMerge(data) {
     url: "/node/upload-agent-sharding-merge",
     method: "post",
     data: data,
+    // 0 表示无超时时间
+    timeout: 0,
   });
 }
 
