@@ -28,6 +28,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -302,7 +303,7 @@ public class FileUtils {
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             try (FileChannel inChannel = fileInputStream.getChannel()) {
                 ByteBuffer bb = ByteBuffer.allocate(IoUtil.DEFAULT_MIDDLE_BUFFER_SIZE);
-                while (inChannel.read(bb) != -1) {
+                while (inChannel.read(bb) != NioUtil.EOF) {
                     bb.flip();
                     channel.write(bb);
                     bb.clear();
