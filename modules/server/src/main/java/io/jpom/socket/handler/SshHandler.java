@@ -25,6 +25,7 @@ package io.jpom.socket.handler;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -270,7 +271,7 @@ public class SshHandler extends BaseTerminalHandler {
                 byte[] buffer = new byte[1024];
                 int i;
                 //如果没有数据来，线程会一直阻塞在这个地方等待数据。
-                while ((i = inputStream.read(buffer)) != -1) {
+                while ((i = inputStream.read(buffer)) != NioUtil.EOF) {
                     sendBinary(session, new String(Arrays.copyOfRange(buffer, 0, i), sshItem.charset()));
                 }
             } catch (Exception e) {

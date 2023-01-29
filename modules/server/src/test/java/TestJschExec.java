@@ -21,6 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.thread.SyncFinisher;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -98,7 +99,7 @@ public class TestJschExec {
 					byte[] buffer = new byte[1024];
 					int i;
 					//如果没有数据来，线程会一直阻塞在这个地方等待数据。
-					while ((i = finalInputStream.read(buffer)) != -1) {
+					while ((i = finalInputStream.read(buffer)) != NioUtil.EOF) {
 						//System.out.println(i);
 						stringBuilder.append(new String(Arrays.copyOfRange(buffer, 0, i), CharsetUtil.CHARSET_UTF_8));
 					}
