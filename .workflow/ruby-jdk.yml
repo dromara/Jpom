@@ -1,6 +1,6 @@
 version: '1.0'
-name: pipeline-20230131
-displayName: pipeline-20230131
+name: tsinghua-jdk
+displayName: 自动更新 tsinghua jdk 地址
 triggers:
   trigger: auto
   push:
@@ -8,7 +8,7 @@ triggers:
       precise:
         - download_link
   schedule:
-    - cron: '* * 0 ? * * *'
+    - cron: '0 0 8 * * ?'
 stages:
   - name: stage-95187e4b
     displayName: 未命名
