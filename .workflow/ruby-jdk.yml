@@ -1,6 +1,6 @@
 version: '1.0'
 name: tsinghua-jdk
-displayName: 自动更新 tsinghua jdk 地址
+displayName: tsinghua-jdk
 triggers:
   trigger: auto
   push:
