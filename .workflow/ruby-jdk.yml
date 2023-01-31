@@ -11,7 +11,7 @@ triggers:
     - cron: '0 0 8 * * ?'
 stages:
   - name: stage-95187e4b
-    displayName: 未命名
+    displayName: tsinghua-jdk
     strategy: naturally
     trigger: auto
     executor: []
