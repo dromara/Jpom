@@ -1,0 +1,34 @@
+version: '1.0'
+name: pipeline-20230131
+displayName: pipeline-20230131
+triggers:
+  trigger: auto
+  push:
+    branches:
+      precise:
+        - download_link
+  schedule:
+    - cron: '* * 0 ? * * *'
+stages:
+  - name: stage-95187e4b
+    displayName: 未命名
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: build@ruby
+        name: build_ruby
+        displayName: Ruby 构建
+        rubyVersion: 3.0.2
+        commands:
+          - bundle install
+          - ruby jdk.rb
+          - ls -lR Jpom/jdk/
+        artifacts:
+          - name: BUILD_ARTIFACT
+            path:
+              - ./
+        caches: []
+        notify: []
+        strategy:
+          retry: '0'
