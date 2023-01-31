@@ -1,5 +1,29 @@
 # 🚀 版本日志
 
+## 2.10.13
+
+### 🐞 解决BUG、优化功能
+
+1. 【all】修复 linux 无法正常安装 service （感谢@山上雪）
+
+### ⚠️ 注意
+
+Linux 环境 已经安装的需要手动更新一下服务管理脚本
+
+**服务端**：(需要到安装目录的 bin 下执行)
+
+```shell
+curl -LfsSo Service.sh https://gitee.com/dromara/Jpom/raw/master/modules/server/src/main/bin/Service.sh
+```
+
+**插件端** ：(需要到安装目录的 bin 下执行)
+
+```shell
+curl -LfsSo Service.sh https://gitee.com/dromara/Jpom/raw/master/modules/agent/src/main/bin/Service.sh
+```
+
+------
+
 ## 2.10.12 (2023-01-29)
 
 ### 🐞 解决BUG、优化功能

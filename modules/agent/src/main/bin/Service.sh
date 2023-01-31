@@ -78,7 +78,7 @@ function install() {
 		echo "service file already exists" 2>&2
 		exit 2
 	fi
-	if [ -f "$binAbsName" ]; then
+	if [ ! -f "$binAbsName" ]; then
 		echo "$binAbsName not found" 2>&2
 		exit 2
 	fi
