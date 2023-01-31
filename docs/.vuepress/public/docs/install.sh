@@ -168,6 +168,12 @@ function installJdkFn() {
 		download_url=$(curl -s https://gitee.com/dromara/Jpom/raw/download_link/jdk/8/${ARCH})
 
 		curl -LfSo jdk.tar.gz "${download_url}"
+
+	#	检查是否下载成功
+		if [[ ! -f jdk.tar.gz ]]; then
+			errorExit "JDK下载失败，请检查下载地址 : $download_url"
+		fi
+
 		#
 		jdk_name=$(tar -tf jdk.tar.gz | grep 'jdk' | head -1)
 
