@@ -28,15 +28,10 @@ get_versions.each do |version|
     results << { version: version, arch: arch, path: path } if path
   end
 end
-#`git clone https://${gitee_user}:${gitee_token}@gitee.com/dromara/Jpom.git --branch download_link`
-#`cd Jpom && rm -rf jdk/*`
 `rm -rf jdk/*`
 results.each do |result|
-  #FileUtils.mkdir_p "Jpom/jdk/#{result[:version]}"
   FileUtils.mkdir_p "jdk/#{result[:version]}"
-  #`cd Jpom && echo "#{result[:path]}" > jdk/#{result[:version]}/#{result[:arch]}`
   `echo "#{result[:path]}" > jdk/#{result[:version]}/#{result[:arch]}`
 end
 `git config --global user.email "#{ENV['gitee_email']}" && git config --global user.name "jpom jdk"`
-#`cd Jpom && git add . && git commit -m "update jdk" && git push origin download_link`
 `git add . && git commit -m "update jdk" && git push origin download_link`
