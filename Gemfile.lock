@@ -1,0 +1,21 @@
+GEM
+  remote: https://gems.ruby-china.com/
+  specs:
+    httparty (0.21.0)
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
+    mini_mime (1.1.2)
+    multi_xml (0.6.0)
+    nokogiri (1.14.1-x86_64-linux)
+      racc (~> 1.4)
+    racc (1.6.2)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  httparty
+  nokogiri
+
+BUNDLED WITH
+   2.2.22
