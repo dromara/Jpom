@@ -28,7 +28,7 @@ get_versions.each do |version|
     results << { version: version, arch: arch, path: path } if path
   end
 end
-`git clone https://${gitee_user}:${gitee_token}@gitee.com/dromara/Jpom.git --branch download_link`
+#`git clone https://${gitee_user}:${gitee_token}@gitee.com/dromara/Jpom.git --branch download_link`
 `cd Jpom && rm -rf jdk/*`
 results.each do |result|
   FileUtils.mkdir_p "Jpom/jdk/#{result[:version]}"
