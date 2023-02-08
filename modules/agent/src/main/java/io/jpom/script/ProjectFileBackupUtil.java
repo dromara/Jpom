@@ -91,24 +91,7 @@ public class ProjectFileBackupUtil {
      * @return file
      */
     public static File pathProjectBackup(NodeProjectInfoModel projectInfoModel, String backupId) {
-        DslYmlDto dslYmlDto = projectInfoModel.dslConfig();
-        String backupPath = resolveBackupPath(dslYmlDto);
-        String pathId = projectInfoModel.getId();
-        return pathProjectBackup(backupPath, pathId, backupId);
-//        File fileBackup = pathProject(backupPath, pathId);
-//        return FileUtil.file(fileBackup, backupId);
-    }
-
-    /**
-     * 获取项目的单次备份目录，备份ID
-     *
-     * @param pathId     项目ID
-     * @param backupId   备份ID
-     * @param backupPath 备份路径
-     * @return file
-     */
-    private static File pathProjectBackup(String backupPath, String pathId, String backupId) {
-        File fileBackup = pathProject(backupPath, pathId);
+        File fileBackup = pathProject(projectInfoModel);
         return FileUtil.file(fileBackup, backupId);
     }
 
@@ -118,7 +101,6 @@ public class ProjectFileBackupUtil {
      * @param projectInfoModel 项目
      */
     public static String backup(NodeProjectInfoModel projectInfoModel) {
-        String pathId = projectInfoModel.getId();
         String projectPath = projectInfoModel.allLib();
         AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
         AgentConfig.ProjectConfig project = agentConfig.getProject();
@@ -132,9 +114,8 @@ public class ProjectFileBackupUtil {
         if (!FileUtil.exist(file)) {
             return null;
         }
-        String backupPath = resolveBackupPath(projectInfoModel.dslConfig());
         String backupId = DateTime.now().toString(DatePattern.PURE_DATETIME_MS_FORMAT);
-        File projectFileBackup = ProjectFileBackupUtil.pathProjectBackup(backupPath, pathId, backupId);
+        File projectFileBackup = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
         Assert.state(!FileUtil.exist(projectFileBackup), "备份目录冲突：" + projectFileBackup.getName());
         FileUtil.copyContent(file, projectFileBackup, true);
         //
@@ -180,11 +161,8 @@ public class ProjectFileBackupUtil {
         return Optional.ofNullable(dslYmlDto)
             .map(DslYmlDto::getFile)
             .map(DslYmlDto.FileConfig::getBackupPath)
-            .map(s -> StrUtil.isEmpty(s) ? null : s)
-            .orElseGet(() -> {
-                String dataPath = JpomApplication.getInstance().getDataPath();
-                return FileUtil.file(dataPath, "project_file_backup").getAbsolutePath();
-            });
+            .filter(s -> !StrUtil.isEmpty(s))
+            .orElse(null);
     }
 
     /**
