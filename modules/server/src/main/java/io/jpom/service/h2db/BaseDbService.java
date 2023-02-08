@@ -38,7 +38,6 @@ import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerConst;
-import top.jpom.model.BaseDbModel;
 import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.model.user.UserModel;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +47,7 @@ import org.springframework.util.Assert;
 import top.jpom.db.DbExtConfig;
 import top.jpom.h2db.BaseDbCommonService;
 import top.jpom.h2db.TableName;
+import top.jpom.model.BaseDbModel;
 import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
@@ -322,7 +322,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         // 排序
         if (StrUtil.isNotEmpty(orderField)) {
             orderField = StrUtil.removeAll(orderField, "%");
-            pageReq.addOrder(new Order(orderField, StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
+            pageReq.addOrder(new Order(StrUtil.format("`{}`", orderField), StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
         }
         return this.listPage(where, pageReq);
     }

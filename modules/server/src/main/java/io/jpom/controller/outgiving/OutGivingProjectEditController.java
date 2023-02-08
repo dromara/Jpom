@@ -270,6 +270,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         JSONObject defData = new JSONObject();
         defData.put("id", outGivingModel.getId());
         defData.put("name", outGivingModel.getName());
+        defData.put("group", outGivingModel.getGroup());
         //
         // 运行模式
         String runMode = getParameter("runMode");
@@ -318,6 +319,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      */
     private List<Tuple> doData(OutGivingModel outGivingModel, boolean edit) {
         outGivingModel.setName(getParameter("name"));
+        outGivingModel.setGroup(getParameter("group"));
         Assert.hasText(outGivingModel.getName(), "分发名称不能为空");
         //
         int intervalTime = getParameterInt("intervalTime", 10);
@@ -340,9 +342,6 @@ public class OutGivingProjectEditController extends BaseServerController {
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         List<OutGivingNodeProject> outGivingNodeProjects = new ArrayList<>();
         OutGivingNodeProject outGivingNodeProject;
-        //
-        //Iterator<NodeModel> iterator = nodeModelList.iterator();
-
 
         List<Tuple> tuples = new ArrayList<>();
 

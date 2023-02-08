@@ -4,8 +4,11 @@
     <a-table :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="pagination" @change="changePage">
       <template slot="title">
         <a-space>
-          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%id%']" placeholder="id" />
+          <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%id%']" placeholder="分发id" />
           <a-input class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="名称" />
+          <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="search-input-item" @change="loadData">
+            <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+          </a-select>
           <a-select v-model="listQuery.outGivingProject" allowClear placeholder="分发类型" class="search-input-item">
             <a-select-option :value="1">独立</a-select-option>
             <a-select-option :value="0">关联</a-select-option>
@@ -38,7 +41,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="name" slot-scope="text, record">
-        <a-tooltip placement="topLeft" @click="handleEdit(record)" :title="text">
+        <a-tooltip placement="topLeft" :title="text">
           <a-button size="small" style="padding: 0px" type="link" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">{{ text }}</a-button>
           <a-button size="small" style="padding: 0px" type="link" v-else @click="handleEditDispatch(record)">{{ text }}</a-button>
         </a-tooltip>
@@ -192,8 +195,17 @@
           </template>
           <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
+
         <a-form-model-item label="分发名称" prop="name">
-          <a-input v-model="temp.name" :maxLength="50" placeholder="分发名称" />
+          <a-row>
+            <a-col :span="10">
+              <a-input v-model="temp.name" :maxLength="50" placeholder="分发名称" />
+            </a-col>
+            <a-col :span="4" style="text-align: right">分组名称：</a-col>
+            <a-col :span="10">
+              <custom-select suffixIcon="" :maxLength="50" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder="选择分组"> </custom-select>
+            </a-col>
+          </a-row>
         </a-form-model-item>
 
         <a-form-model-item label="分发节点" required>
@@ -315,10 +327,18 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
+          <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改,分发 ID 等同于项目 ID" />
         </a-form-model-item>
-        <a-form-model-item label="项目名称" prop="name">
-          <a-input v-model="temp.name" :maxLength="50" placeholder="项目名称" />
+        <a-form-model-item label="分发名称" prop="name">
+          <a-row>
+            <a-col :span="10">
+              <a-input v-model="temp.name" :maxLength="50" placeholder="分发名称（项目名称）" />
+            </a-col>
+            <a-col :span="4" style="text-align: right">分组名称：</a-col>
+            <a-col :span="10">
+              <custom-select suffixIcon="" :maxLength="50" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder="选择分组"> </custom-select>
+            </a-col>
+          </a-row>
         </a-form-model-item>
 
         <a-form-model-item prop="runMode">
@@ -679,11 +699,12 @@ import {
   uploadDispatchFileMerge,
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { getProjectData, javaModes, noFileModes, runModeList, getRuningProjectInfo } from "@/api/node-project";
+import { getProjectData, javaModes, noFileModes, runModeList, getRuningProjectInfo, getProjectGroupAll } from "@/api/node-project";
 import { itemGroupBy, parseTime, renderSize, formatDuration } from "@/utils/time";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, readJsonStrField, concurrentExecution } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
 import { uploadPieces } from "@/utils/upload-pieces";
+import CustomSelect from "@/components/customSelect";
 
 export default {
   components: {
@@ -691,6 +712,7 @@ export default {
     Console,
     codeEditor,
     FileRead,
+    CustomSelect,
   },
   data() {
     return {
@@ -706,6 +728,7 @@ export default {
       accessList: [],
       nodeList: [],
       projectList: [],
+      groupList: [],
       afterOptList,
       targetKeys: [],
       // reqId: "",
@@ -728,7 +751,8 @@ export default {
       columns: [
         { title: "分发 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "分发名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "类型", dataIndex: "outGivingProject", width: "90px", ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
+        { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
+        { title: "分发类型", dataIndex: "outGivingProject", width: "90px", ellipsis: true, scopedSlots: { customRender: "outGivingProject" } },
         { title: "分发后", dataIndex: "afterOpt", ellipsis: true, width: "150px", scopedSlots: { customRender: "afterOpt" } },
         { title: "清空发布", dataIndex: "clearOld", align: "center", ellipsis: true, width: "100px", scopedSlots: { customRender: "clearOld" } },
         { title: "间隔时间", dataIndex: "intervalTime", width: 90, ellipsis: true, scopedSlots: { customRender: "intervalTime" } },
@@ -744,7 +768,7 @@ export default {
           },
           width: "170px",
         },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 210, align: "center" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "200px", align: "center" },
       ],
       childColumns: [
         { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
@@ -798,6 +822,7 @@ export default {
   created() {
     this.loadData();
     this.loadNodeList();
+    this.loadGroupList();
   },
   methods: {
     readJsonStrField,
@@ -844,6 +869,13 @@ export default {
       getDispatchWhiteList().then((res) => {
         if (res.code === 200) {
           this.accessList = res.data.outGivingArray || [];
+        }
+      });
+    },
+    loadGroupList() {
+      getProjectGroupAll().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
         }
       });
     },
@@ -923,6 +955,7 @@ export default {
             clearOld: record.clearOld,
             secondaryDirectory: record.secondaryDirectory || "",
             uploadCloseFirst: record.uploadCloseFirst,
+            group: record.group,
           };
           // console.log(this.temp);
           this.linkDispatchVisible = true;
@@ -1007,6 +1040,7 @@ export default {
           this.temp[`${node.id}_javaCopyItemList`] = [];
         });
         this.loadAccesList();
+        this.loadGroupList();
 
         this.editDispatchVisible = true;
         this.$nextTick(() => {
@@ -1052,6 +1086,7 @@ export default {
                 clearOld: record.clearOld,
                 secondaryDirectory: record.secondaryDirectory,
                 uploadCloseFirst: record.uploadCloseFirst,
+                group: record.group,
               };
             }
             // 添加 nodeIdList
@@ -1070,6 +1105,7 @@ export default {
 
         // 加载其他数据
         this.loadAccesList();
+        this.loadGroupList();
 
         this.editDispatchVisible = true;
       });

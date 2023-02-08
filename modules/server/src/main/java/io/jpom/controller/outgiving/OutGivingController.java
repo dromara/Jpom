@@ -154,6 +154,7 @@ public class OutGivingController extends BaseServerController {
 
     private void doData(OutGivingModel outGivingModel, HttpServletRequest request) {
         outGivingModel.setName(getParameter("name"));
+        outGivingModel.setGroup(getParameter("group"));
         Assert.hasText(outGivingModel.getName(), "分发名称不能为空");
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         //

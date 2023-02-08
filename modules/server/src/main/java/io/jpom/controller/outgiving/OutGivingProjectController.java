@@ -47,7 +47,6 @@ import io.jpom.outgiving.OutGivingRun;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
-import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.system.ServerConfig;
@@ -82,18 +81,15 @@ import java.util.stream.Collectors;
 public class OutGivingProjectController extends BaseServerController {
 
     private final OutGivingServer outGivingServer;
-    private final ProjectInfoCacheService projectInfoCacheService;
     private final OutGivingWhitelistService outGivingWhitelistService;
     private final ServerConfig serverConfig;
     private final DbOutGivingLogService dbOutGivingLogService;
 
     public OutGivingProjectController(OutGivingServer outGivingServer,
-                                      ProjectInfoCacheService projectInfoCacheService,
                                       OutGivingWhitelistService outGivingWhitelistService,
                                       ServerConfig serverConfig,
                                       DbOutGivingLogService dbOutGivingLogService) {
         this.outGivingServer = outGivingServer;
-        this.projectInfoCacheService = projectInfoCacheService;
         this.outGivingWhitelistService = outGivingWhitelistService;
         this.serverConfig = serverConfig;
         this.dbOutGivingLogService = dbOutGivingLogService;

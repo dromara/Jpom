@@ -1,0 +1,3 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,PROJECT_INFO,group,String,50,,项目分组
+ADD,OUT_GIVING,group,String,50,,项目分组
