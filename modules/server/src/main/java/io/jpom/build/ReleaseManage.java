@@ -269,6 +269,7 @@ public class ReleaseManage implements Runnable {
         try {
             File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
             FileUtil.copyContent(sourceFile, tempPath, true);
+            // 将产物文件 copy 到本地仓库目录
             File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, StrUtil.SLASH);
             FileUtil.copyContent(historyPackageFile, tempPath, true);
             // env file
@@ -562,28 +563,24 @@ public class ReleaseManage implements Runnable {
             this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
             return;
         }
-        File zipFile = BuildUtil.isDirPackage(this.resultFile);
-        boolean unZip = true;
-        if (zipFile == null) {
-            zipFile = this.resultFile;
-            unZip = false;
-        }
-        String name = zipFile.getName();
-        Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
-        JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile,
-            this.buildExtraModule.getProjectSecondaryDirectory(),
-            projectId,
-            unZip,
-            afterOpt,
-            nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
-                double progressPercentage = Math.floor(((float) progressSize / total) * 100);
-                int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
-                if (progressRangeList.add(progressRange)) {
-                    logRecorder.info("[SYSTEM-INFO] 上传文件进度:{} {}/{} {}", name,
-                        FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
-                        NumberUtil.formatPercent(((float) progressSize / total), 0));
-                }
-            });
+        JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, zipFile) -> {
+            String name = zipFile.getName();
+            Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
+            return OutGivingRun.fileUpload(zipFile,
+                this.buildExtraModule.getProjectSecondaryDirectory(),
+                projectId,
+                unZip,
+                afterOpt,
+                nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
+                    double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                    int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                    if (progressRangeList.add(progressRange)) {
+                        logRecorder.info("[SYSTEM-INFO] 上传文件进度:{} {}/{} {}", name,
+                            FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                            NumberUtil.formatPercent(((float) progressSize / total), 0));
+                    }
+                });
+        });
         if (jsonMessage.success()) {
             logRecorder.info("发布项目包成功：" + jsonMessage);
         } else {
@@ -597,22 +594,18 @@ public class ReleaseManage implements Runnable {
     private void doOutGiving() throws ExecutionException, InterruptedException {
         String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
         String projectSecondaryDirectory = this.buildExtraModule.getProjectSecondaryDirectory();
-        File zipFile = BuildUtil.isDirPackage(this.resultFile);
-        boolean unZip = true;
-        if (zipFile == null) {
-            zipFile = this.resultFile;
-            unZip = false;
-        }
-        OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
-            .id(releaseMethodDataId)
-            .file(zipFile)
-            .userModel(userModel)
-            .unzip(unZip)
-            // 由构建配置决定是否删除
-            .doneDeleteFile(false)
-            .projectSecondaryDirectory(projectSecondaryDirectory)
-            .stripComponents(0);
-        Future<OutGivingModel.Status> statusFuture = outGivingRunBuilder.build().startRun();
+        Future<OutGivingModel.Status> statusFuture = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, zipFile) -> {
+            OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
+                .id(releaseMethodDataId)
+                .file(zipFile)
+                .userModel(userModel)
+                .unzip(unZip)
+                // 由构建配置决定是否删除
+                .doneDeleteFile(false)
+                .projectSecondaryDirectory(projectSecondaryDirectory)
+                .stripComponents(0);
+            return outGivingRunBuilder.build().startRun();
+        });
         //OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);
         logRecorder.info("开始执行分发包啦,请到分发中查看详情状态");
         OutGivingModel.Status status = statusFuture.get();

@@ -108,18 +108,9 @@ public class BuildInfoHistoryController extends BaseServerController {
             ServletUtil.write(response, JsonMessage.getString(404, "构建记录不存在"), MediaType.APPLICATION_JSON_VALUE);
             return;
         }
-        File logFile = BuildUtil.getHistoryPackageFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
-        if (!FileUtil.exist(logFile)) {
-            ServletUtil.write(response, JsonMessage.getString(404, "产物文件不存在"), MediaType.APPLICATION_JSON_VALUE);
-            return;
-        }
-        if (logFile.isFile()) {
-            ServletUtil.write(response, logFile);
-        } else {
-            File zipFile = BuildUtil.isDirPackage(logFile);
-            assert zipFile != null;
-            ServletUtil.write(response, zipFile);
-        }
+        File resultDirFile = BuildUtil.getHistoryPackageFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
+        File dirPackage = BuildUtil.loadDirPackage(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), resultDirFile, (aBoolean, file) -> file);
+        ServletUtil.write(response, dirPackage);
     }
 
 
