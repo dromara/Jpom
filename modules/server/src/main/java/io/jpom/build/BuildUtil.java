@@ -23,6 +23,7 @@
 package io.jpom.build;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.core.util.ZipUtil;
@@ -34,6 +35,7 @@ import io.jpom.model.data.RepositoryModel;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.util.function.BiFunction;
 
 /**
  * 构建工具类
@@ -112,22 +114,39 @@ public class BuildUtil {
      * @param file file
      * @return 压缩包文件
      */
-    public static File isDirPackage(File file) {
+    private static File isDirPackage(String id, int buildNumberId, File file) {
+        Assert.state(file != null && file.exists(), "产物文件不存在");
         if (file.isFile()) {
             return null;
         }
         String name = FileUtil.getName(file);
-        if (StrUtil.isEmpty(name)) {
-            name = "result";
-        }
+        name = ObjectUtil.defaultIfNull(name, "result");
         // 保存目录存放值 history 路径
-        File zipFile = FileUtil.file(file.getParentFile().getParentFile(), name + ".zip");
+        File packageFile = BuildUtil.getHistoryPackageFile(id, buildNumberId, StrUtil.SLASH);
+        File zipFile = FileUtil.file(packageFile, name + ".zip");
         if (!zipFile.exists()) {
             // 不存在则打包
             ZipUtil.zip(file.getAbsolutePath(), zipFile.getAbsolutePath());
         }
         return zipFile;
     }
+
+    /**
+     * 如果为文件夹自动打包为zip ,反之返回null
+     *
+     * @param file     file
+     * @param consumer 文件回调
+     * @return 执行结果
+     */
+    public static <T> T loadDirPackage(String id, int buildNumberId, File file, BiFunction<Boolean, File, T> consumer) {
+        File dirPackage = isDirPackage(id, buildNumberId, file);
+        if (dirPackage == null) {
+            return consumer.apply(false, file);
+        } else {
+            return consumer.apply(true, dirPackage);
+        }
+    }
+
 
     /**
      * 获取日志记录文件
