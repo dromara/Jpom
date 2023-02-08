@@ -7,6 +7,8 @@
 1. 【server】新增 项目支持配置分组属性，方便项目列表筛选
    （感谢 @[hjk2008](https://gitee.com/hjk2008) [Gitee issues I63PEN](https://gitee.com/dromara/Jpom/issues/I63PEN) ）
 2. 【server】新增 节点分发支持配置分组属性，方便列表筛选
+3. 【agent】新增 DSL 项目支持配置自定义备份路径
+   （感谢 @[陈旭](https://gitee.com/chenxu8989) [Gitee issues I57ZKJ](https://gitee.com/dromara/Jpom/issues/I57ZKJ) ）
 
 ### 🐞 解决BUG、优化功能
 
