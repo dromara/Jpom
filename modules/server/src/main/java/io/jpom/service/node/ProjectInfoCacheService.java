@@ -31,7 +31,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.service.ITriggerToken;
-import io.jpom.service.h2db.BaseNodeService;
+import io.jpom.service.h2db.BaseNodeGroupService;
 import io.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +42,7 @@ import java.util.List;
  * @since 2021/12/5
  */
 @Service
-public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheModel> implements ITriggerToken {
+public class ProjectInfoCacheService extends BaseNodeGroupService<ProjectInfoCacheModel> implements ITriggerToken {
 
 
     public ProjectInfoCacheService(NodeService nodeService,

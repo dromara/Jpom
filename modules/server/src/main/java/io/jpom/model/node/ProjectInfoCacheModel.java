@@ -22,7 +22,7 @@
  */
 package io.jpom.model.node;
 
-import io.jpom.model.BaseNodeModel;
+import io.jpom.model.BaseNodeGroupModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
@@ -34,7 +34,7 @@ import top.jpom.h2db.TableName;
 @TableName(value = "PROJECT_INFO", name = "项目信息")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ProjectInfoCacheModel extends BaseNodeModel {
+public class ProjectInfoCacheModel extends BaseNodeGroupModel {
 
     private String projectId;
 
