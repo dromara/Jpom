@@ -23,6 +23,7 @@
    （感谢 [@Smith](https://gitee.com/mrsmith) [Gitee issues I6DNSM](https://gitee.com/dromara/Jpom/issues/I6DNSM) ）
 7. 【server】优化 定时构建支持配置禁用表达式，方便临时关闭定时执行
    （感谢 [@阿超](https://gitee.com/VampireAchao) [Gitee issues I6DNBW](https://gitee.com/dromara/Jpom/issues/I6DNBW) ）
+8. 【server】修复 DSL 项目配置文件备份数量不生效问题
 
 ### ⚠️ 注意
 
