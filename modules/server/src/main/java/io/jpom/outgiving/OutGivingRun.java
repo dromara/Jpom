@@ -49,6 +49,7 @@ import io.jpom.model.user.UserModel;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.util.StrictSyncFinisher;
+import lombok.Builder;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
@@ -59,6 +60,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -68,10 +70,31 @@ import java.util.stream.Collectors;
  * @since 2019/7/18
  **/
 @Slf4j
+@Builder
 public class OutGivingRun {
 
     private static final Map<String, StrictSyncFinisher> SYNC_FINISHER_MAP = new ConcurrentHashMap<>();
     private static final Map<String, Map<String, String>> LOG_CACHE_MAP = new ConcurrentHashMap<>();
+
+//      * @param id              分发id
+//     * @param file            文件
+//     * @param userModel       操作的用户
+//     * @param stripComponents 剔除文件夹
+//     * @param unzip           解压
+//     * @param clearFile       是否清空文件
+
+    private String id;
+    private File file;
+    private UserModel userModel;
+    private boolean unzip;
+    private int stripComponents;
+    /**
+     * 是否清空文件
+     */
+    @Builder.Default
+    private boolean clearFile = true;
+    private Consumer<OutGivingModel.Status> finish;
+    private String projectSecondaryDirectory;
 
     /**
      * 取消分发
@@ -145,20 +168,14 @@ public class OutGivingRun {
 
     /**
      * 开始异步执行分发任务
-     *
-     * @param id              分发id
-     * @param file            文件
-     * @param userModel       操作的用户
-     * @param stripComponents 剔除文件夹
-     * @param unzip           解压
      */
-    public synchronized static void startRun(final String id,
-                                             File file,
-                                             UserModel userModel,
-                                             boolean unzip, int stripComponents) {
+    public synchronized void startRun() {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getByKey(id);
         Objects.requireNonNull(item, "不存在分发");
+        // 更新二级目录
+        Opt.ofBlankAble(this.projectSecondaryDirectory).ifPresent(item::setSecondaryDirectory);
+        //
         AfterOpt afterOpt = ObjectUtil.defaultIfNull(EnumUtil.likeValueOf(AfterOpt.class, item.getAfterOpt()), AfterOpt.No);
         StrictSyncFinisher syncFinisher;
         //
@@ -226,12 +243,17 @@ public class OutGivingRun {
         // 开启线程
         SYNC_FINISHER_MAP.put(id, syncFinisher);
         // 异步执行
-        ThreadUtil.execute(() -> {
+        ThreadUtil.execute(createRunnable(syncFinisher, statusList, projectSize));
+    }
+
+    private Runnable createRunnable(StrictSyncFinisher syncFinisher,
+                                    List<OutGivingNodeProject.Status> statusList, int projectSize) {
+        return () -> {
+            OutGivingModel.Status status = null;
             try {
+                // 阻塞执行
                 syncFinisher.start();
-                syncFinisher.close();
                 // 更新分发状态
-                OutGivingModel.Status status;
                 String msg;
                 if (statusList.size() != projectSize) {
                     //
@@ -252,13 +274,17 @@ public class OutGivingRun {
                 log.error("分发线程异常", e);
                 updateStatus(id, OutGivingModel.Status.FAIL, e.getMessage());
             } finally {
-                // 删除分发的文件
-                FileUtil.del(file);
+                if (clearFile) {
+                    // 删除分发的文件
+                    FileUtil.del(file);
+                }
+                OutGivingModel.Status finalStatus = status;
+                Optional.ofNullable(finish).ifPresent(statusConsumer -> statusConsumer.accept(finalStatus));
                 //
                 IoUtil.close(SYNC_FINISHER_MAP.remove(id));
                 LOG_CACHE_MAP.remove(id);
             }
-        });
+        };
     }
 
     /**
