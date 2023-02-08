@@ -15,12 +15,15 @@
       rowKey="id"
     >
       <template slot="title">
-        <!-- <a-select    v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="loadData">
-        <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-      </a-select> -->
         <a-space>
+          <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="search-input-item" @change="loadData">
+            <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+          </a-select>
           <a-input class="search-input-item" v-model="listQuery['%projectId%']" placeholder="项目ID" />
           <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="项目名称" />
+          <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
+            <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
+          </a-select>
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
@@ -59,7 +62,7 @@
         </template>
       </template>
       <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}`" @click="handleEdit(record)">
-        <a-button type="link" style="padding: 0px" size="small">{{ text }}</a-button>
+        <a-button type="link" style="padding: 0px" size="small"><a-icon v-if="record.outGivingProject === 1" type="apartment" />{{ text }} </a-button>
       </a-tooltip>
       <template slot="time" slot-scope="text, record" placement="topLeft">
         <a-tooltip :title="`创建时间：${parseTime(record.createTimeMillis)}，${record.modifyTimeMillis ? '修改时间：' + parseTime(record.modifyTimeMillis) : ''}`">
@@ -68,6 +71,9 @@
           <!-- <span>{{ parseTime(record.createTimeMillis) }}</span> -->
         </a-tooltip>
       </template>
+      <a-tooltip slot="path" slot-scope="text, item" placement="topLeft" :title="item.whitelistDirectory + item.lib">
+        <span>{{ item.whitelistDirectory + item.lib }}</span>
+      </a-tooltip>
       <!-- <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip> -->
@@ -152,8 +158,19 @@
         <a-form-model-item label="项目 ID" prop="id">
           <a-input :maxLength="50" v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
-        <a-form-model-item label="项目名称" prop="name">
+        <!-- <a-form-model-item label="项目名称" prop="name">
           <a-input v-model="temp.name" :maxLength="50" placeholder="项目名称" />
+        </a-form-model-item> -->
+        <a-form-model-item label="项目名称" prop="name">
+          <a-row>
+            <a-col :span="10">
+              <a-input v-model="temp.name" :maxLength="50" placeholder="项目名称" />
+            </a-col>
+            <a-col :span="4" style="text-align: right">分组名称：</a-col>
+            <a-col :span="10">
+              <custom-select suffixIcon="" :maxLength="50" v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder="选择分组"> </custom-select>
+            </a-col>
+          </a-row>
         </a-form-model-item>
         <a-form-model-item prop="runMode">
           <template slot="label">
@@ -390,7 +407,7 @@
 import File from "./project-file";
 import Console from "./project-console";
 import FileRead from "./project-file-read";
-
+import CustomSelect from "@/components/customSelect";
 // import Replica from "./project-replica";
 import { parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
@@ -411,6 +428,7 @@ import {
   runModeList,
   startProject,
   stopProject,
+  getProjectGroupAll,
 } from "@/api/node-project";
 
 export default {
@@ -422,7 +440,7 @@ export default {
   components: {
     File,
     Console,
-
+    CustomSelect,
     // Replica,
     codeEditor,
     FileRead,
@@ -432,7 +450,7 @@ export default {
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       accessList: [],
-
+      groupList: [],
       runModeList: runModeList,
       javaModes: javaModes,
       noFileModes: noFileModes,
@@ -457,8 +475,15 @@ export default {
       columns: [
         { title: "", dataIndex: "javaCopyItemList", align: "center", width: "40px", scopedSlots: { customRender: "copyIcon" } },
         { title: "项目名称", dataIndex: "name", sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "运行方式", dataIndex: "runMode", sorter: true, width: 90, ellipsis: true, align: "center", scopedSlots: { customRender: "runMode" } },
-        { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: 170, ellipsis: true, scopedSlots: { customRender: "time" } },
+        { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
+        {
+          title: "项目路径",
+          dataIndex: "path",
+          ellipsis: true,
+          scopedSlots: { customRender: "path" },
+        },
+        { title: "运行方式", dataIndex: "runMode", sorter: true, width: "90px", ellipsis: true, align: "center", scopedSlots: { customRender: "runMode" } },
+        { title: "修改时间", sorter: true, dataIndex: "modifyTimeMillis", width: "170px", ellipsis: true, scopedSlots: { customRender: "time" } },
 
         // {
         //   title: "最后操作人",
@@ -538,7 +563,13 @@ export default {
         }
       });
     },
-
+    loadGroupList() {
+      getProjectGroupAll().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
+      });
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true;
@@ -609,6 +640,7 @@ export default {
             //
             this.expandedRowKeys = [];
           }
+          this.loadGroupList();
         }
         this.loading = false;
       });

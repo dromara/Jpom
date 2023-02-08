@@ -38,6 +38,7 @@ import io.jpom.common.JpomApplicationEvent;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.h2db.BaseGroupService;
+import io.jpom.service.h2db.BaseNodeGroupService;
 import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.system.JpomRuntimeException;
 import lombok.Lombok;
@@ -173,6 +174,11 @@ public class InitDb implements DisposableBean, ILoadEvent {
         //
         Map<String, BaseGroupService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseGroupService.class);
         for (BaseGroupService<?> value : groupServiceMap.values()) {
+            value.repairGroupFiled();
+        }
+        //
+        Map<String, BaseNodeGroupService> nodeGroupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeGroupService.class);
+        for (BaseNodeGroupService<?> value : nodeGroupServiceMap.values()) {
             value.repairGroupFiled();
         }
         //  同步项目

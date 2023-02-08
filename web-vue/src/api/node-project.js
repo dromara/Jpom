@@ -575,6 +575,16 @@ export function renameFileFolder(params) {
 }
 
 /**
+ * 构建分组
+ */
+export function getProjectGroupAll() {
+  return axios({
+    url: "/node/list-project-group-all",
+    method: "get",
+  });
+}
+
+/**
  * 所有的运行模式
  */
 export const runModeList = ["Dsl", "ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"];

@@ -7,6 +7,9 @@
           <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="search-input-item">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
+          <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="search-input-item" @change="getNodeProjectData">
+            <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+          </a-select>
           <a-input v-model="listQuery['%name%']" @pressEnter="getNodeProjectData" placeholder="搜索项目" class="search-input-item" />
 
           <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="search-input-item">
@@ -53,7 +56,8 @@
           </a-tooltip>
         </a-space>
       </template>
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="text">
+        <a-icon v-if="record.outGivingProject === 1" type="apartment" />
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
@@ -209,7 +213,7 @@
 </template>
 <script>
 import { delAllProjectCache, getNodeListAll, getProjectList, sortItemProject } from "@/api/node";
-import { getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject, getProjectTriggerUrl } from "@/api/node-project";
+import { getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject, getProjectTriggerUrl, getProjectGroupAll } from "@/api/node-project";
 import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { itemGroupBy, parseTime } from "@/utils/time";
@@ -226,6 +230,7 @@ export default {
   data() {
     return {
       projList: [],
+      groupList: [],
       runModeList: runModeList,
       selectedRowKeys: [],
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
@@ -241,6 +246,7 @@ export default {
       batchTitle: "",
       columns: [
         { title: "项目名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "项目分组", dataIndex: "group", sorter: true, width: "100px", ellipsis: true, scopedSlots: { customRender: "group" } },
         { title: "节点名称", dataIndex: "nodeId", ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         {
           title: "项目路径",
@@ -321,8 +327,17 @@ export default {
 
           let nodeProjects = itemGroupBy(this.projList, "nodeId");
           this.getRuningProjectInfo(nodeProjects);
+          //
+          this.loadGroupList();
         }
         this.loading = false;
+      });
+    },
+    loadGroupList() {
+      getProjectGroupAll().then((res) => {
+        if (res.data) {
+          this.groupList = res.data;
+        }
       });
     },
     getRuningProjectInfo(nodeProjects) {

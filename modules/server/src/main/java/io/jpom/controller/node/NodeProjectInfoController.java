@@ -106,6 +106,18 @@ public class NodeProjectInfoController extends BaseServerController {
     }
 
     /**
+     * 查询所有的分组
+     *
+     * @return list
+     */
+    @GetMapping(value = "list-project-group-all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<String>> listGroupAll() {
+        List<String> listGroup = projectInfoCacheService.listGroup(getRequest());
+        return JsonMessage.success("", listGroup);
+    }
+
+    /**
      * 同步节点项目
      *
      * @return json
