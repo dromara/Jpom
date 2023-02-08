@@ -37,6 +37,7 @@ import io.jpom.model.user.UserModel;
 import io.jpom.service.IStatusRecover;
 import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseGroupService;
+import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -137,6 +138,7 @@ public class BuildInfoService extends BaseGroupService<BuildInfoModel> implement
         String id = buildInfoModel.getId();
         String taskId = "build:" + id;
         String autoBuildCron = buildInfoModel.getAutoBuildCron();
+        autoBuildCron = StringUtil.parseCron(autoBuildCron);
         if (StrUtil.isEmpty(autoBuildCron)) {
             CronUtils.remove(taskId);
             return false;

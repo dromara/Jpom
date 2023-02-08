@@ -35,6 +35,7 @@ import io.jpom.model.data.NodeScriptExecLogModel;
 import io.jpom.model.data.NodeScriptModel;
 import io.jpom.script.ScriptProcessBuilder;
 import io.jpom.service.BaseWorkspaceOptService;
+import io.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -87,11 +88,13 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
     @Override
     public boolean checkCron(NodeScriptModel nodeScriptModel) {
         String id = "script:" + nodeScriptModel.getId();
-        if (StrUtil.isEmpty(nodeScriptModel.getAutoExecCron())) {
+        String autoExecCron = nodeScriptModel.getAutoExecCron();
+        autoExecCron = StringUtil.parseCron(autoExecCron);
+        if (StrUtil.isEmpty(autoExecCron)) {
             CronUtils.remove(id);
             return false;
         } else {
-            CronUtils.upsert(id, nodeScriptModel.getAutoExecCron(), new CronTask(nodeScriptModel.getId()));
+            CronUtils.upsert(id, autoExecCron, new CronTask(nodeScriptModel.getId()));
             return true;
         }
     }

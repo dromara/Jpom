@@ -24,14 +24,13 @@ package io.jpom.common;
 
 import cn.hutool.cache.Cache;
 import cn.hutool.cache.CacheUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.cron.pattern.CronPattern;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
+import io.jpom.util.StringUtil;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -78,16 +77,11 @@ public abstract class BaseServerController extends BaseJpomController {
      * @return 原样返回
      */
     protected String checkCron(String cron) {
-        if (StrUtil.isNotEmpty(cron)) {
+        return StringUtil.checkCron(cron, s -> {
             UserModel user = getUser();
             Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
-            try {
-                new CronPattern(cron);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("cron 表达式格式不正确");
-            }
-        }
-        return ObjectUtil.defaultIfNull(cron, StrUtil.EMPTY);
+            return s;
+        });
     }
 
     /**

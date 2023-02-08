@@ -115,7 +115,7 @@ export const RESTART_UPGRADE_WAIT_TIME_COUNT = 80;
  */
 export const CRON_DATA_SOURCE = [
   {
-    title: "取消定时,不再定时执行",
+    title: "取消定时,不再定时执行（支持 ! 前缀禁用定时执行，如：!0 0/1 * * * ?）",
     children: [
       {
         title: "",

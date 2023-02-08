@@ -48,6 +48,7 @@ import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.WorkspaceEnvVarService;
+import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -120,6 +121,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
         String id = buildInfoModel.getId();
         String taskId = "ssh_command:" + id;
         String autoExecCron = buildInfoModel.getAutoExecCron();
+        autoExecCron = StringUtil.parseCron(autoExecCron);
         if (StrUtil.isEmpty(autoExecCron)) {
             CronUtils.remove(taskId);
             return false;
