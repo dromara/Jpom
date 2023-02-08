@@ -7,6 +7,12 @@
 1. 【all】修复 linux 无法正常安装 service （感谢@山上雪）
 2. 【server】优化 构建的节点分发模式增加二级目录
    （感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I6DNMX](https://gitee.com/dromara/Jpom/issues/I6DNMX) ）
+3. 【server】优化 构建不保留产物时自动删除产物为目录时的压缩包文件
+4. 【server】优化 构建状态等待`节点分发`完成（阻塞执行节点分发）
+5. 【server】修复 构建选择`节点分发`并关闭`保留产物`，会导致分发失败。
+   （感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I6DII6](https://gitee.com/dromara/Jpom/issues/I6DII6) ）
+6. 【server】修复 构建分发为`节点分发`，产物为文件时导致的不能回滚
+   （感谢 [@Smith](https://gitee.com/mrsmith) [Gitee issues I6DNSM](https://gitee.com/dromara/Jpom/issues/I6DNSM) ）
 
 ### ⚠️ 注意
 
