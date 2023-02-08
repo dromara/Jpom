@@ -101,15 +101,12 @@ public class ProjectFileBackupUtil {
      * @param projectInfoModel 项目
      */
     public static String backup(NodeProjectInfoModel projectInfoModel) {
-        String projectPath = projectInfoModel.allLib();
-        AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
-        AgentConfig.ProjectConfig project = agentConfig.getProject();
-        int backupCount = project.getFileBackupCount();
+        int backupCount = resolveBackupCount(projectInfoModel.dslConfig());
         if (backupCount <= 0) {
             // 未开启备份
             return null;
         }
-        File file = FileUtil.file(projectPath);
+        File file = FileUtil.file(projectInfoModel.allLib());
         //
         if (!FileUtil.exist(file)) {
             return null;
@@ -128,14 +125,7 @@ public class ProjectFileBackupUtil {
      * @param backupPath 目录
      */
     private static void clearOldBackup(File backupPath, DslYmlDto dslYmlDto) {
-        int backupCount = Optional.ofNullable(dslYmlDto)
-            .map(DslYmlDto::getFile)
-            .map(DslYmlDto.FileConfig::getBackupCount)
-            .orElseGet(() -> {
-                AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
-                AgentConfig.ProjectConfig project = agentConfig.getProject();
-                return project.getFileBackupCount();
-            });
+        int backupCount = resolveBackupCount(dslYmlDto);
         //
         if (!FileUtil.isDirectory(backupPath)) {
             return;
@@ -163,6 +153,17 @@ public class ProjectFileBackupUtil {
             .map(DslYmlDto.FileConfig::getBackupPath)
             .filter(s -> !StrUtil.isEmpty(s))
             .orElse(null);
+    }
+
+    public static int resolveBackupCount(DslYmlDto dslYmlDto) {
+        return Optional.ofNullable(dslYmlDto)
+            .map(DslYmlDto::getFile)
+            .map(DslYmlDto.FileConfig::getBackupCount)
+            .orElseGet(() -> {
+                AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
+                AgentConfig.ProjectConfig project = agentConfig.getProject();
+                return project.getFileBackupCount();
+            });
     }
 
     /**
