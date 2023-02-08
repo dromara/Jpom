@@ -158,9 +158,7 @@
         <a-form-model-item label="项目 ID" prop="id">
           <a-input :maxLength="50" v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
         </a-form-model-item>
-        <!-- <a-form-model-item label="项目名称" prop="name">
-          <a-input v-model="temp.name" :maxLength="50" placeholder="项目名称" />
-        </a-form-model-item> -->
+
         <a-form-model-item label="项目名称" prop="name">
           <a-row>
             <a-col :span="10">

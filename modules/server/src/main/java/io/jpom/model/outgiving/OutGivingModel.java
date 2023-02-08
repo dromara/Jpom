@@ -27,7 +27,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.model.BaseGroupModel;
 import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -46,7 +46,17 @@ import java.util.List;
 @TableName(value = "OUT_GIVING", name = "节点分发")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class OutGivingModel extends BaseWorkspaceModel {
+public class OutGivingModel extends BaseGroupModel {
+
+    /**
+     * @param group 分组
+     * @see io.jpom.model.node.ProjectInfoCacheModel#setGroup(String)
+     */
+    @Override
+    public void setGroup(String group) {
+        super.setGroup(group);
+    }
+
     /**
      * 名称
      */
