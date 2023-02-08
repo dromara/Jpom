@@ -858,7 +858,11 @@ public class BuildExecuteService {
                 // 判断是否保留产物
                 Boolean saveBuildFile = this.buildExtraModule.getSaveBuildFile();
                 if (saveBuildFile != null && !saveBuildFile) {
-                    //
+                    // 删除 压缩包文件
+                    File resultDirFile = this.buildExtraModule.resultDirFile(this.taskData.buildInfoModel.getBuildId());
+                    File zipFile = BuildUtil.isDirPackage(resultDirFile);
+                    Optional.ofNullable(zipFile).ifPresent(CommandUtil::systemFastDel);
+                    // 删除 产物文件夹
                     File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), buildInfoModel.getBuildId(), StrUtil.SLASH);
                     CommandUtil.systemFastDel(historyPackageFile);
                 }

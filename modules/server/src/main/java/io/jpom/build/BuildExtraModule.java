@@ -32,6 +32,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.util.Assert;
 
+import java.io.File;
+
 /**
  * 构建物基类
  *
@@ -165,6 +167,10 @@ public class BuildExtraModule extends BaseModel {
             return null;
         }
         return FileUtil.normalize(this.resultDirFile.trim());
+    }
+
+    public File resultDirFile(int buildNumberId) {
+        return BuildUtil.getHistoryPackageFile(this.getId(), buildNumberId, this.getResultDirFile());
     }
 
     /**

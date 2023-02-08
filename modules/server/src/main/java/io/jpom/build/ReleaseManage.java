@@ -50,6 +50,7 @@ import io.jpom.model.data.SshModel;
 import io.jpom.model.docker.DockerInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
+import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.plugin.IPlugin;
@@ -76,6 +77,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -105,7 +108,8 @@ public class ReleaseManage implements Runnable {
             File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), buildNumberId);
             this.logRecorder = LogRecorder.builder().file(logFile).build();
         }
-        this.resultFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, buildExtraModule.getResultDirFile());
+        this.resultFile = buildExtraModule.resultDirFile(this.buildNumberId);
+        //BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, buildExtraModule.getResultDirFile());
         //
         if (buildEnv == null) {
             this.buildEnv = new HashMap<>();
@@ -163,7 +167,7 @@ public class ReleaseManage implements Runnable {
     /**
      * 不修改为发布中状态
      */
-    public boolean start() throws IOException {
+    public boolean start() throws Exception {
         init();
         this.updateStatus(BuildStatus.PubIng);
         logRecorder.info("start release：" + FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
@@ -590,7 +594,7 @@ public class ReleaseManage implements Runnable {
     /**
      * 分发包
      */
-    private void doOutGiving() {
+    private void doOutGiving() throws ExecutionException, InterruptedException {
         String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
         String projectSecondaryDirectory = this.buildExtraModule.getProjectSecondaryDirectory();
         File zipFile = BuildUtil.isDirPackage(this.resultFile);
@@ -604,12 +608,15 @@ public class ReleaseManage implements Runnable {
             .file(zipFile)
             .userModel(userModel)
             .unzip(unZip)
-            .clearFile(false)
+            // 由构建配置决定是否删除
+            .doneDeleteFile(false)
             .projectSecondaryDirectory(projectSecondaryDirectory)
             .stripComponents(0);
-        outGivingRunBuilder.build().startRun();
+        Future<OutGivingModel.Status> statusFuture = outGivingRunBuilder.build().startRun();
         //OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);
-        logRecorder.info("开始执行分发包啦,请到分发中查看当前状态");
+        logRecorder.info("开始执行分发包啦,请到分发中查看详情状态");
+        OutGivingModel.Status status = statusFuture.get();
+        logRecorder.info("分发结果：{}", status.getDesc());
     }
 
     @Override

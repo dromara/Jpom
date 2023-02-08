@@ -120,6 +120,7 @@ public class BuildUtil {
         if (StrUtil.isEmpty(name)) {
             name = "result";
         }
+        // 保存目录存放值 history 路径
         File zipFile = FileUtil.file(file.getParentFile().getParentFile(), name + ".zip");
         if (!zipFile.exists()) {
             // 不存在则打包

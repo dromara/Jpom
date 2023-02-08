@@ -57,10 +57,11 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -89,11 +90,10 @@ public class OutGivingRun {
     private boolean unzip;
     private int stripComponents;
     /**
-     * 是否清空文件
+     * 是否删除发布文件
      */
     @Builder.Default
-    private boolean clearFile = true;
-    private Consumer<OutGivingModel.Status> finish;
+    private boolean doneDeleteFile = true;
     private String projectSecondaryDirectory;
 
     /**
@@ -138,7 +138,7 @@ public class OutGivingRun {
         return logId;
     }
 
-    public static void removeLogId(String outId, OutGivingNodeProject nodeProject) {
+    private void removeLogId(String outId, OutGivingNodeProject nodeProject) {
         Map<String, String> map = LOG_CACHE_MAP.get(outId);
         Assert.notNull(map, "当前分发数据丢失");
         String dataId = StrUtil.format("{}_{}", nodeProject.getNodeId(), nodeProject.getProjectId());
@@ -169,7 +169,7 @@ public class OutGivingRun {
     /**
      * 开始异步执行分发任务
      */
-    public synchronized void startRun() {
+    public synchronized Future<OutGivingModel.Status> startRun() {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getByKey(id);
         Objects.requireNonNull(item, "不存在分发");
@@ -243,11 +243,12 @@ public class OutGivingRun {
         // 开启线程
         SYNC_FINISHER_MAP.put(id, syncFinisher);
         // 异步执行
-        ThreadUtil.execute(createRunnable(syncFinisher, statusList, projectSize));
+        Callable<OutGivingModel.Status> callable = createRunnable(syncFinisher, statusList, projectSize);
+        return ThreadUtil.execAsync(callable);
     }
 
-    private Runnable createRunnable(StrictSyncFinisher syncFinisher,
-                                    List<OutGivingNodeProject.Status> statusList, int projectSize) {
+    private Callable<OutGivingModel.Status> createRunnable(StrictSyncFinisher syncFinisher,
+                                                           List<OutGivingNodeProject.Status> statusList, int projectSize) {
         return () -> {
             OutGivingModel.Status status = null;
             try {
@@ -274,16 +275,15 @@ public class OutGivingRun {
                 log.error("分发线程异常", e);
                 updateStatus(id, OutGivingModel.Status.FAIL, e.getMessage());
             } finally {
-                if (clearFile) {
+                if (doneDeleteFile) {
                     // 删除分发的文件
                     FileUtil.del(file);
                 }
-                OutGivingModel.Status finalStatus = status;
-                Optional.ofNullable(finish).ifPresent(statusConsumer -> statusConsumer.accept(finalStatus));
                 //
                 IoUtil.close(SYNC_FINISHER_MAP.remove(id));
                 LOG_CACHE_MAP.remove(id);
             }
+            return status;
         };
     }
 
@@ -293,7 +293,7 @@ public class OutGivingRun {
      * @param outGivingId 分发id
      * @param userId      用户id
      */
-    private static void allPrepare(String outGivingId, String userId) {
+    private void allPrepare(String outGivingId, String userId) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel outGivingModel = outGivingServer.getByKey(outGivingId);
         List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
@@ -327,7 +327,7 @@ public class OutGivingRun {
 
     }
 
-    private static void updateStatus(String outGivingId, OutGivingModel.Status status, String msg) {
+    private void updateStatus(String outGivingId, OutGivingModel.Status status, String msg) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel outGivingModel1 = new OutGivingModel();
         outGivingModel1.setId(outGivingId);
