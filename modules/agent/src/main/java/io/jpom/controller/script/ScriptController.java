@@ -27,7 +27,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.cron.pattern.CronPattern;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseAgentController;
@@ -41,6 +40,7 @@ import io.jpom.service.script.NodeScriptExecLogServer;
 import io.jpom.service.script.NodeScriptServer;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
+import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -89,13 +89,7 @@ public class ScriptController extends BaseAgentController {
         Assert.hasText(nodeScriptModel.getContext(), "内容为空");
         //
         String autoExecCron = nodeScriptModel.getAutoExecCron();
-        if (StrUtil.isNotEmpty(autoExecCron)) {
-            try {
-                new CronPattern(autoExecCron);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("定时执行表达式格式不正确");
-            }
-        }
+        autoExecCron = StringUtil.checkCron(autoExecCron, s -> s);
         nodeScriptModel.setWorkspaceId(getWorkspaceId());
         //
         nodeScriptModel.setContext(nodeScriptModel.getContext());

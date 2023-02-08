@@ -35,6 +35,7 @@ import io.jpom.model.user.UserModel;
 import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.socket.ScriptProcessBuilder;
+import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -91,6 +92,7 @@ public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements I
         String id = scriptModel.getId();
         String taskId = "server_script:" + id;
         String autoExecCron = scriptModel.getAutoExecCron();
+        autoExecCron = StringUtil.parseCron(autoExecCron);
         if (StrUtil.isEmpty(autoExecCron)) {
             CronUtils.remove(taskId);
             return false;

@@ -101,8 +101,8 @@ public class MonitorModel extends BaseWorkspaceModel {
      *
      * @return true 启用
      */
-    public boolean status() {
-        return status != null && status && StrUtil.isNotEmpty(getExecCron());
+    public boolean status(String autoExecCron) {
+        return status != null && status && StrUtil.isNotEmpty(autoExecCron);
     }
 
     public List<NodeProject> projects() {

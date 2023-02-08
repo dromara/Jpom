@@ -27,6 +27,7 @@ import io.jpom.cron.ICron;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.monitor.MonitorItem;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -85,7 +86,8 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> implement
         String id = monitorModel.getId();
         String taskId = "monitor:" + id;
         String autoExecCron = monitorModel.getExecCron();
-        if (!monitorModel.status()) {
+        autoExecCron = StringUtil.parseCron(autoExecCron);
+        if (!monitorModel.status(autoExecCron)) {
             CronUtils.remove(taskId);
             return false;
         }

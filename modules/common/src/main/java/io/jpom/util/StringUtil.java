@@ -26,8 +26,10 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
+import cn.hutool.cron.pattern.CronPattern;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONValidator;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * main 方法运行参数工具
@@ -186,5 +189,42 @@ public class StringUtil {
             // ArrayIndexOutOfBoundsException
             return null;
         }
+    }
+
+    /**
+     * 验证 cron 表达式, demo 账号不能开启 cron
+     *
+     * @param cron cron
+     * @return 原样返回
+     */
+    public static String checkCron(String cron, Function<String, String> function) {
+        String newCron = cron;
+        if (StrUtil.isNotEmpty(newCron)) {
+            if (StrUtil.startWith(newCron, "!")) {
+                // 不用验证
+                return newCron;
+            }
+            newCron = function.apply(newCron);
+            try {
+                new CronPattern(newCron);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("cron 表达式格式不正确");
+            }
+        }
+        return ObjectUtil.defaultIfNull(newCron, StrUtil.EMPTY);
+    }
+
+    /**
+     * 转换 cron 表达式,格式化
+     *
+     * @param cron cron
+     * @return 转化后的
+     */
+    public static String parseCron(String cron) {
+        if (StrUtil.startWith(cron, "!")) {
+            // 存在前缀，直接返回空串
+            return null;
+        }
+        return cron;
     }
 }

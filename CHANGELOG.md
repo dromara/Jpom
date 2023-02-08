@@ -13,6 +13,8 @@
    （感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I6DII6](https://gitee.com/dromara/Jpom/issues/I6DII6) ）
 6. 【server】修复 构建分发为`节点分发`，产物为文件时导致的不能回滚
    （感谢 [@Smith](https://gitee.com/mrsmith) [Gitee issues I6DNSM](https://gitee.com/dromara/Jpom/issues/I6DNSM) ）
+7. 【server】优化 定时构建支持配置禁用表达式，方便临时关闭定时执行
+   （感谢 [@阿超](https://gitee.com/VampireAchao) [Gitee issues I6DNBW](https://gitee.com/dromara/Jpom/issues/I6DNBW) ）
 
 ### ⚠️ 注意
 
