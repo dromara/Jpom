@@ -355,11 +355,17 @@
             <template v-else>
               <template v-if="temp.releaseMethod === 0"> 不发布：只执行构建流程并且保存构建历史,不执行发布流程</template>
               <!-- 节点分发 -->
-              <a-form-model-item v-if="temp.releaseMethod === 1" label="分发项目" prop="releaseMethodDataId">
-                <a-select show-search allowClear v-model="tempExtraData.releaseMethodDataId_1" placeholder="请选择分发项目">
-                  <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }} </a-select-option>
-                </a-select>
-              </a-form-model-item>
+              <template v-if="temp.releaseMethod === 1">
+                <a-form-model-item label="分发项目" prop="releaseMethodDataId">
+                  <a-select show-search allowClear v-model="tempExtraData.releaseMethodDataId_1" placeholder="请选择分发项目">
+                    <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }} </a-select-option>
+                  </a-select>
+                </a-form-model-item>
+                <a-form-model-item prop="projectSecondaryDirectory" label="二级目录">
+                  <a-input v-model="tempExtraData.projectSecondaryDirectory" placeholder="不填写则使用节点分发配置的二级目录" />
+                </a-form-model-item>
+              </template>
+
               <!-- 项目 -->
               <template v-if="temp.releaseMethod === 2">
                 <a-form-model-item label="发布项目" prop="releaseMethodDataIdList">

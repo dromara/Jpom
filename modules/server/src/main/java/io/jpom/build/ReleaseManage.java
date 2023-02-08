@@ -592,13 +592,23 @@ public class ReleaseManage implements Runnable {
      */
     private void doOutGiving() {
         String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
+        String projectSecondaryDirectory = this.buildExtraModule.getProjectSecondaryDirectory();
         File zipFile = BuildUtil.isDirPackage(this.resultFile);
         boolean unZip = true;
         if (zipFile == null) {
             zipFile = this.resultFile;
             unZip = false;
         }
-        OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);
+        OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
+            .id(releaseMethodDataId)
+            .file(zipFile)
+            .userModel(userModel)
+            .unzip(unZip)
+            .clearFile(false)
+            .projectSecondaryDirectory(projectSecondaryDirectory)
+            .stripComponents(0);
+        outGivingRunBuilder.build().startRun();
+        //OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);
         logRecorder.info("开始执行分发包啦,请到分发中查看当前状态");
     }
 

@@ -238,7 +238,14 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingServer.update(outGivingModel);
         int stripComponentsValue = Convert.toInt(stripComponents, 0);
         // 开启
-        OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip, stripComponentsValue);
+        OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
+            .id(outGivingModel.getId())
+            .file(dest)
+            .userModel(getUser())
+            .unzip(unzip)
+            .stripComponents(stripComponentsValue);
+        outGivingRunBuilder.build().startRun();
+        //OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip, stripComponentsValue);
         return JsonMessage.success("上传成功,开始分发!");
     }
 
@@ -288,7 +295,14 @@ public class OutGivingProjectController extends BaseServerController {
             this.checkZip(downloadFile, unzip);
             int stripComponentsValue = Convert.toInt(stripComponents, 0);
             // 开启
-            OutGivingRun.startRun(outGivingModel.getId(), downloadFile, getUser(), unzip, stripComponentsValue);
+            OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
+                .id(outGivingModel.getId())
+                .file(downloadFile)
+                .userModel(getUser())
+                .unzip(unzip)
+                .stripComponents(stripComponentsValue);
+            outGivingRunBuilder.build().startRun();
+            //OutGivingRun.startRun(outGivingModel.getId(), downloadFile, getUser(), unzip, stripComponentsValue);
             return JsonMessage.success("分发成功");
         } catch (Exception e) {
             log.error("下载远程文件异常", e);

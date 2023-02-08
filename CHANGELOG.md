@@ -5,6 +5,8 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【all】修复 linux 无法正常安装 service （感谢@山上雪）
+2. 【server】优化 构建的节点分发模式增加二级目录
+   （感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues I6DNMX](https://gitee.com/dromara/Jpom/issues/I6DNMX) ）
 
 ### ⚠️ 注意
 
