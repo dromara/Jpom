@@ -71,8 +71,11 @@ public class ProjectFileBackupController extends BaseAgentController {
     @RequestMapping(value = "list-backup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<JSONObject> listBackup(String id) {
         //
-        super.getProjectInfoModel(id);
-        File path = ProjectFileBackupUtil.path(id);
+        NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
+        // 合并
+        ProjectFileBackupUtil.margeBackupPath(projectInfoModel);
+        //
+        File path = ProjectFileBackupUtil.pathProject(projectInfoModel);
         //
         List<File> collect = Arrays.stream(Optional.ofNullable(path.listFiles()).orElse(new File[0]))
             .filter(FileUtil::isDirectory)
@@ -99,9 +102,8 @@ public class ProjectFileBackupController extends BaseAgentController {
     @RequestMapping(value = "backup-item-files", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<List<JSONObject>> backupItemFiles(String id, String path, @ValidatorItem String backupId) {
         // 查询项目路径
-        super.getProjectInfoModel();
-
-        File lib = ProjectFileBackupUtil.path(id, backupId);
+        NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
+        File lib = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
         File fileDir = FileUtil.file(lib, StrUtil.emptyToDefault(path, FileUtil.FILE_SEPARATOR));
         //
         File[] filesAll = FileUtil.exist(fileDir) ? fileDir.listFiles() : new File[]{};
@@ -123,8 +125,8 @@ public class ProjectFileBackupController extends BaseAgentController {
     @GetMapping(value = "backup-download", produces = MediaType.APPLICATION_JSON_VALUE)
     public void download(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName, HttpServletResponse response) {
         try {
-            super.getProjectInfoModel();
-            File lib = ProjectFileBackupUtil.path(id, backupId);
+            NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
+            File lib = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
             File file = FileUtil.file(lib, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
             if (file.isDirectory()) {
                 ServletUtil.write(response, "暂不支持下载文件夹", MediaType.TEXT_HTML_VALUE);
@@ -148,8 +150,8 @@ public class ProjectFileBackupController extends BaseAgentController {
      */
     @RequestMapping(value = "backup-delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<Object> deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
-        super.getProjectInfoModel();
-        File lib = ProjectFileBackupUtil.path(id, backupId);
+        NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
+        File lib = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
         File file = FileUtil.file(lib, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
         CommandUtil.systemFastDel(file);
         return JsonMessage.success("删除成功");
@@ -168,7 +170,7 @@ public class ProjectFileBackupController extends BaseAgentController {
     @RequestMapping(value = "backup-recover", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<Object> recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName) {
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
-        File backupPath = ProjectFileBackupUtil.path(id, backupId);
+        File backupPath = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
         String projectPath = projectInfoModel.allLib();
         //
         File backupFile;

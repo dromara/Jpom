@@ -150,6 +150,11 @@ public class DslYmlDto extends BaseJsonModel {
          * 指定备份文件后缀，如果未指定则备份所有类型文件
          */
         private String[] backupSuffix;
+
+        /**
+         * 项目文件备份路径
+         */
+        private String backupPath;
     }
 
     @Data

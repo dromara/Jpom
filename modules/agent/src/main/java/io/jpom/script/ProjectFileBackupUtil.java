@@ -36,6 +36,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.model.data.DslYmlDto;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.system.AgentConfig;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.StringUtil;
@@ -58,33 +59,67 @@ public class ProjectFileBackupUtil {
     /**
      * 整个项目的备份目录
      *
-     * @param pathId 项目ID
+     * @param projectInfoModel 项目
      * @return file
      */
-    public static File path(String pathId) {
-        String dataPath = JpomApplication.getInstance().getDataPath();
-        return FileUtil.file(dataPath, "project_file_backup", pathId);
+    public static File pathProject(NodeProjectInfoModel projectInfoModel) {
+        DslYmlDto dslYmlDto = projectInfoModel.dslConfig();
+        String backupPath = resolveBackupPath(dslYmlDto);
+        return pathProject(backupPath, projectInfoModel.getId());
+    }
+
+    /**
+     * 整个项目的备份目录
+     *
+     * @param pathId     项目ID
+     * @param backupPath 备份路径
+     * @return file
+     */
+    private static File pathProject(String backupPath, String pathId) {
+        if (StrUtil.isEmpty(backupPath)) {
+            String dataPath = JpomApplication.getInstance().getDataPath();
+            return FileUtil.file(dataPath, "project_file_backup", pathId);
+        }
+        return FileUtil.file(backupPath, pathId);
     }
 
     /**
      * 获取项目的单次备份目录，备份ID
      *
-     * @param pathId   项目ID
-     * @param backupId 备份ID
+     * @param projectInfoModel 项目
+     * @param backupId         备份ID
      * @return file
      */
-    public static File path(String pathId, String backupId) {
-        File fileBackup = path(pathId);
+    public static File pathProjectBackup(NodeProjectInfoModel projectInfoModel, String backupId) {
+        DslYmlDto dslYmlDto = projectInfoModel.dslConfig();
+        String backupPath = resolveBackupPath(dslYmlDto);
+        String pathId = projectInfoModel.getId();
+        return pathProjectBackup(backupPath, pathId, backupId);
+//        File fileBackup = pathProject(backupPath, pathId);
+//        return FileUtil.file(fileBackup, backupId);
+    }
+
+    /**
+     * 获取项目的单次备份目录，备份ID
+     *
+     * @param pathId     项目ID
+     * @param backupId   备份ID
+     * @param backupPath 备份路径
+     * @return file
+     */
+    private static File pathProjectBackup(String backupPath, String pathId, String backupId) {
+        File fileBackup = pathProject(backupPath, pathId);
         return FileUtil.file(fileBackup, backupId);
     }
 
     /**
      * 备份项目文件
      *
-     * @param pathId      目录ID（项目ID）
-     * @param projectPath 项目路径
+     * @param projectInfoModel 项目
      */
-    public static String backup(String pathId, String projectPath) {
+    public static String backup(NodeProjectInfoModel projectInfoModel) {
+        String pathId = projectInfoModel.getId();
+        String projectPath = projectInfoModel.allLib();
         AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
         AgentConfig.ProjectConfig project = agentConfig.getProject();
         int backupCount = project.getFileBackupCount();
@@ -97,8 +132,9 @@ public class ProjectFileBackupUtil {
         if (!FileUtil.exist(file)) {
             return null;
         }
+        String backupPath = resolveBackupPath(projectInfoModel.dslConfig());
         String backupId = DateTime.now().toString(DatePattern.PURE_DATETIME_MS_FORMAT);
-        File projectFileBackup = ProjectFileBackupUtil.path(pathId, backupId);
+        File projectFileBackup = ProjectFileBackupUtil.pathProjectBackup(backupPath, pathId, backupId);
         Assert.state(!FileUtil.exist(projectFileBackup), "备份目录冲突：" + projectFileBackup.getName());
         FileUtil.copyContent(file, projectFileBackup, true);
         //
@@ -140,23 +176,36 @@ public class ProjectFileBackupUtil {
         }
     }
 
+    public static String resolveBackupPath(DslYmlDto dslYmlDto) {
+        return Optional.ofNullable(dslYmlDto)
+            .map(DslYmlDto::getFile)
+            .map(DslYmlDto.FileConfig::getBackupPath)
+            .map(s -> StrUtil.isEmpty(s) ? null : s)
+            .orElseGet(() -> {
+                String dataPath = JpomApplication.getInstance().getDataPath();
+                return FileUtil.file(dataPath, "project_file_backup").getAbsolutePath();
+            });
+    }
+
     /**
      * 检查文件变动
      *
-     * @param pathId      项目ID
-     * @param projectPath 项目路径
-     * @param backupId    要对比的备份ID
+     * @param projectInfoModel 项目
+     * @param backupId         要对比的备份ID
      */
-    public static void checkDiff(String pathId, String projectPath, String backupId, DslYmlDto dslYmlDto) {
+    public static void checkDiff(NodeProjectInfoModel projectInfoModel, String backupId) {
         if (StrUtil.isEmpty(backupId)) {
             // 备份ID 不存在
             return;
         }
+        String projectPath = projectInfoModel.allLib();
+        DslYmlDto dslYmlDto = projectInfoModel.dslConfig();
         // 考虑到大文件对比，比较耗时。需要异步对比文件
         ThreadUtil.execute(() -> {
             try {
-                File backupItemPath = ProjectFileBackupUtil.path(pathId, backupId);
-                File backupPath = ProjectFileBackupUtil.path(pathId);
+                //String useBackupPath = resolveBackupPath(dslYmlDto);
+                File backupItemPath = ProjectFileBackupUtil.pathProjectBackup(projectInfoModel, backupId);
+                File backupPath = ProjectFileBackupUtil.pathProject(projectInfoModel);
                 // 获取文件列表
                 Map<String, File> backupFiles = ProjectFileBackupUtil.listFiles(backupItemPath.getAbsolutePath());
                 Map<String, File> nowFiles = ProjectFileBackupUtil.listFiles(projectPath);
@@ -196,10 +245,27 @@ public class ProjectFileBackupUtil {
                 loopClean(backupItemPath);
                 // 检查备份保留个数
                 clearOldBackup(backupPath, dslYmlDto);
+                // 合并之前备份目录
+                margeBackupPath(projectInfoModel);
             } catch (Exception e) {
                 log.warn("对比清空项目文件备份失败", e);
             }
         });
+    }
+
+    /**
+     * 合并备份路径
+     *
+     * @param projectInfoModel 项目
+     */
+    public static void margeBackupPath(NodeProjectInfoModel projectInfoModel) {
+        File backupPath = ProjectFileBackupUtil.pathProject(projectInfoModel);
+        File backupPathBefore = ProjectFileBackupUtil.pathProject(null, projectInfoModel.getId());
+        if (FileUtil.isDirectory(backupPathBefore) && !FileUtil.equals(backupPathBefore, backupPath)) {
+            // 默认的备份路径存在，并且现在的路径和默认的不一致
+            FileUtil.moveContent(backupPathBefore, backupPath, true);
+            FileUtil.del(backupPathBefore);
+        }
     }
 
     private static void loopClean(File backupPath) {

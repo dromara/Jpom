@@ -122,7 +122,9 @@ export default {
       loading: false,
       treeList: [],
       fileList: [],
-      backupListData: {},
+      backupListData: {
+        list: [],
+      },
       backupListLoading: false,
       tempNode: {},
       temp: {},

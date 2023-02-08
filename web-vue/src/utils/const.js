@@ -233,6 +233,8 @@ export const PROJECT_DSL_DEFATUL =
   "#  backupCount: 5\r\n" +
   "# 限制备份指定文件后缀（支持正则）\r\n" +
   "#  backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]\r\n" +
+  "# 项目文件备份路径\r\n" +
+  "#  backupPath: /data/jpom_backup\r\n" +
   "config:\r\n" +
   "# 是否开启日志备份功能\r\n" +
   "#  autoBackToFile: true\r\n" +

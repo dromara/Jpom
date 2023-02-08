@@ -254,7 +254,7 @@ public class ProjectFileControl extends BaseAgentController {
         NodeProjectInfoModel pim = getProjectInfoModel();
         File lib = StrUtil.isEmpty(levelName) ? new File(pim.allLib()) : FileUtil.file(pim.allLib(), levelName);
         // 备份文件
-        String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
+        String backupId = ProjectFileBackupUtil.backup(pim);
         try {
             //
             this.saveProjectFileBefore(lib, pim);
@@ -279,7 +279,7 @@ public class ProjectFileControl extends BaseAgentController {
                 return resultJsonMessage;
             }
         } finally {
-            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
+            ProjectFileBackupUtil.checkDiff(pim, backupId);
         }
         return JsonMessage.success("上传成功");
     }
@@ -373,7 +373,7 @@ public class ProjectFileControl extends BaseAgentController {
 //            file = FileUtil.file(pim.allLib(), levelName);
 //        }
         // 备份文件
-        String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
+        String backupId = ProjectFileBackupUtil.backup(pim);
         try {
             if ("clear".equalsIgnoreCase(type)) {
                 // 清空文件
@@ -398,7 +398,7 @@ public class ProjectFileControl extends BaseAgentController {
                 return new JsonMessage<>(500, "删除失败");
             }
         } finally {
-            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
+            ProjectFileBackupUtil.checkDiff(pim, backupId);
         }
     }
 
@@ -409,7 +409,7 @@ public class ProjectFileControl extends BaseAgentController {
         String dir = diffFileVo.getDir();
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
         // 备份文件
-        String backupId = ProjectFileBackupUtil.backup(projectInfoModel.getId(), projectInfoModel.allLib());
+        String backupId = ProjectFileBackupUtil.backup(projectInfoModel);
         try {
             //
             List<DiffFileVo.DiffItem> data = diffFileVo.getData();
@@ -425,7 +425,7 @@ public class ProjectFileControl extends BaseAgentController {
             }
             return JsonMessage.success("删除成功");
         } finally {
-            ProjectFileBackupUtil.checkDiff(projectInfoModel.getId(), projectInfoModel.allLib(), backupId, projectInfoModel.dslConfig());
+            ProjectFileBackupUtil.checkDiff(projectInfoModel, backupId);
         }
 
     }
@@ -465,12 +465,12 @@ public class ProjectFileControl extends BaseAgentController {
         AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
         Charset charset = AgentWhitelist.checkFileSuffix(whitelist.getAllowEditSuffix(), filename);
         // 备份文件
-        String backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
+        String backupId = ProjectFileBackupUtil.backup(pim);
         try {
             FileUtil.writeString(fileText, FileUtil.file(pim.allLib(), filePath, filename), charset);
             return JsonMessage.success("文件写入成功");
         } finally {
-            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
+            ProjectFileBackupUtil.checkDiff(pim, backupId);
         }
     }
 
@@ -529,7 +529,7 @@ public class ProjectFileControl extends BaseAgentController {
             File downloadFile = HttpUtil.downloadFileFromUrl(url, tempPathName);
             String fileSize = FileUtil.readableFileSize(downloadFile);
             // 备份文件
-            backupId = ProjectFileBackupUtil.backup(pim.getId(), pim.allLib());
+            backupId = ProjectFileBackupUtil.backup(pim);
             File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
             FileUtil.mkdir(file);
             if (BooleanUtil.toBoolean(unzip)) {
@@ -551,7 +551,7 @@ public class ProjectFileControl extends BaseAgentController {
             log.error("下载远程文件异常", e);
             return new JsonMessage<>(500, "下载远程文件失败:" + e.getMessage());
         } finally {
-            ProjectFileBackupUtil.checkDiff(pim.getId(), pim.allLib(), backupId, pim.dslConfig());
+            ProjectFileBackupUtil.checkDiff(pim, backupId);
         }
     }
 
