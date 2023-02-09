@@ -47,7 +47,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -208,7 +207,7 @@ public class ManageEditProjectController extends BaseAgentController {
             String dslContent = projectInfo.getDslContent();
             Assert.hasText(dslContent, "请配置 dsl 内容");
             DslYmlDto build = DslYmlDto.build(dslContent);
-            //System.out.println(build);
+            Assert.state(build.hasRunProcess("status"), "没有配置 run.status");
         }
     }
 
@@ -242,22 +241,17 @@ public class ManageEditProjectController extends BaseAgentController {
                 // 预检查数据
                 return JsonMessage.success("检查通过");
             } else {
-                exits.setLog(projectInfo.getLog());
-                exits.setLogPath(projectInfo.getLogPath());
                 exits.setName(projectInfo.getName());
                 exits.setGroup(projectInfo.getGroup());
                 exits.setAutoStart(projectInfo.getAutoStart());
                 exits.setMainClass(projectInfo.getMainClass());
-                exits.setLib(projectInfo.getLib());
                 exits.setJvm(projectInfo.getJvm());
                 exits.setArgs(projectInfo.getArgs());
                 exits.setWorkspaceId(this.getWorkspaceId());
                 exits.setOutGivingProject(projectInfo.isOutGivingProject());
                 exits.setRunMode(runMode);
-                exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
                 exits.setToken(projectInfo.getToken());
                 exits.setDslContent(projectInfo.getDslContent());
-
                 // 检查是否非法删除副本集
                 List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = exits.getJavaCopyItemList();
                 List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList1 = projectInfo.getJavaCopyItemList();
@@ -267,8 +261,14 @@ public class ManageEditProjectController extends BaseAgentController {
                 }
                 exits.setJavaCopyItemList(javaCopyItemList1);
                 exits.setJavaExtDirsCp(projectInfo.getJavaExtDirsCp());
+                // 移动到新路径
+                this.moveTo(exits, projectInfo);
+                // 最后才设置新的路径
+                exits.setLib(projectInfo.getLib());
+                exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
                 //
-                moveTo(exits, projectInfo);
+                exits.setLog(projectInfo.getLog());
+                exits.setLogPath(projectInfo.getLogPath());
                 projectInfoService.updateItem(exits);
                 return JsonMessage.success("修改成功");
             }
@@ -279,28 +279,37 @@ public class ManageEditProjectController extends BaseAgentController {
     }
 
     private void moveTo(NodeProjectInfoModel old, NodeProjectInfoModel news) {
-        // 移动目录
-        if (!old.allLib().equals(news.allLib())) {
-            File oldLib = new File(old.allLib());
-            if (oldLib.exists()) {
-                File newsLib = new File(news.allLib());
-                FileUtil.move(oldLib, newsLib, true);
+        {
+            // 移动目录
+            File oldLib = FileUtil.file(old.allLib());
+            File newLib = FileUtil.file(news.allLib());
+            if (!FileUtil.equals(oldLib, newLib)) {
+                if (oldLib.exists()) {
+                    FileUtil.mkdir(newLib);
+                    FileUtil.moveContent(oldLib, newLib, true);
+                    // 删除文件夹
+                    FileUtil.del(oldLib);
+                }
             }
         }
-        // log
-        if (!old.getLog().equals(news.getLog())) {
-            File oldLog = new File(old.getLog());
-            if (oldLog.exists()) {
-                File newsLog = new File(news.getLog());
-                FileUtil.move(oldLog, newsLog, true);
-            }
-            // logBack
-            File oldLogBack = old.getLogBack();
-            if (oldLogBack.exists()) {
-                FileUtil.move(oldLogBack, news.getLogBack(), true);
+        {
+            // log
+            File oldLog = FileUtil.file(old.getLog());
+            File newLog = FileUtil.file(news.getLog());
+            if (!FileUtil.equals(oldLog, newLog)) {
+                if (oldLog.exists()) {
+                    FileUtil.mkParentDirs(newLog);
+                    FileUtil.move(oldLog, newLog, true);
+                }
+                // logBack
+                File oldLogBack = old.getLogBack();
+                if (oldLogBack.exists()) {
+                    File logBack = news.getLogBack();
+                    FileUtil.mkdir(logBack);
+                    FileUtil.move(oldLogBack, logBack, true);
+                }
             }
         }
-
     }
 
     /**
@@ -426,21 +435,21 @@ public class ManageEditProjectController extends BaseAgentController {
      */
     @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<String> saveProject(String id, String newLib) {
+        Assert.hasText(newLib, "请填写项目路径");
+        FileUtils.checkSlip(newLib);
+        Assert.state(!Validator.isChinese(newLib), "不建议使用中文目录");
         File file = FileUtil.file(newLib);
-        // new File(newLib);
         //  填写的jar路径是一个存在的文件
         Assert.state(!FileUtil.isFile(file), "填写jar目录当前是一个已经存在的文件,请修改");
 
         NodeProjectInfoModel exits = projectInfoService.getItem(id);
         if (exits == null) {
             // 创建项目 填写的jar路径是已经存在的文件夹
-            Assert.state(!FileUtil.exist(file), "填写jar目录当前已经在,创建成功后会自动同步文件");
+            Assert.state(!FileUtil.exist(file), "填写项目目录当前已经在,创建成功后会自动同步文件");
         } else {
             // 已经存在的项目
             File oldLib = new File(exits.allLib());
-            Path newPath = file.toPath();
-            Path oldPath = oldLib.toPath();
-            if (newPath.equals(oldPath)) {
+            if (FileUtil.equals(oldLib, file)) {
                 // 新 旧没有变更
                 return JsonMessage.success("");
             }
@@ -448,14 +457,16 @@ public class ManageEditProjectController extends BaseAgentController {
                 String msg;
                 if (oldLib.exists()) {
                     // 新旧jar路径都存在，会自动覆盖新的jar路径中的文件
-                    msg = "原jar目录已经存在并且新的jar目录已经存在,保存将覆盖新文件夹并会自动同步原jar目录";
+                    msg = "原项目目录已经存在并且新的jar目录已经存在,保存将覆盖新文件夹并会自动同步原jar目录";
                 } else {
-                    msg = "填写jar目录当前已经在,创建成功后会自动同步文件";
+                    msg = "填写项目目录当前已经存在,创建成功后会自动同步文件";
                 }
                 return new JsonMessage<>(401, msg);
+            } else {
+                return new JsonMessage<>(401, "填写项目目录当前不存在,创建成功后会自动同步文件");
             }
         }
-        Assert.state(!Validator.isChinese(newLib), "不建议使用中文目录");
+
 
         return JsonMessage.success("");
     }
