@@ -38,13 +38,24 @@ const app = {
   },
   actions: {
     // 加载系统菜单 action
-    loadSystemMenus({ commit, state }) {
+    loadSystemMenus({ dispatch, state }) {
       return new Promise((resolve, reject) => {
         if (state.menus.length) {
           // 避免重复加载
           resolve();
           return;
         }
+        dispatch("restLoadSystemMenus")
+          .then(() => {
+            resolve();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+    restLoadSystemMenus({ commit }) {
+      return new Promise((resolve, reject) => {
         // 加载系统菜单
         getMenu()
           .then((res) => {

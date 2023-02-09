@@ -137,21 +137,21 @@ public class DockerSwarmServiceController extends BaseServerController {
         //
         String uuid = IdUtil.fastSimpleUUID();
         File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-swarm-log", uuid + ".log");
-        try (LogRecorder logRecorder = LogRecorder.builder().file(file).build()) {
-            logRecorder.info("start pull {}", dataId);
-            Consumer<String> logConsumer = logRecorder::append;
-            parameter.put("charset", CharsetUtil.CHARSET_UTF_8);
-            parameter.put("consumer", logConsumer);
-            parameter.put("tail", 50);
-            ThreadUtil.execute(() -> {
-                try {
-                    plugin.execute(StrUtil.equalsIgnoreCase(type, "service") ? "logService" : "logTask", parameter);
-                } catch (Exception e) {
-                    logRecorder.error("拉取日志异常", e);
-                }
-                logRecorder.info("pull end");
-            });
-        }
+        LogRecorder logRecorder = LogRecorder.builder().file(file).build();
+
+        logRecorder.system("start pull {}", dataId);
+        Consumer<String> logConsumer = logRecorder::append;
+        parameter.put("charset", CharsetUtil.CHARSET_UTF_8);
+        parameter.put("consumer", logConsumer);
+        parameter.put("tail", 50);
+        ThreadUtil.execute(() -> {
+            try {
+                plugin.execute(StrUtil.equalsIgnoreCase(type, "service") ? "logService" : "logTask", parameter);
+            } catch (Exception e) {
+                logRecorder.error("拉取日志异常", e);
+            }
+            logRecorder.system("pull end");
+        });
         return JsonMessage.success("开始拉取", uuid);
     }
 

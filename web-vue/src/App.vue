@@ -16,6 +16,7 @@
 import zhCN from "ant-design-vue/lib/locale-provider/zh_CN";
 import Vue from "vue";
 import { mapGetters } from "vuex";
+import store from "@/store/index";
 
 export default {
   name: "App",
@@ -54,6 +55,10 @@ export default {
   methods: {
     reload() {
       this.routerActivation = false;
+      // 刷新菜单
+      store.dispatch("restLoadSystemMenus").then(() => {
+        //
+      });
       this.$nextTick(() => {
         this.routerActivation = true;
       });
