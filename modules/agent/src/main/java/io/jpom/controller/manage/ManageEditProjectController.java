@@ -123,9 +123,9 @@ public class ManageEditProjectController extends BaseAgentController {
         }
         //
         String lib = projectInfo.getLib();
-        Assert.state(StrUtil.isNotEmpty(lib) && !StrUtil.SLASH.equals(lib) && !Validator.isChinese(lib), "项目Jar路径不能为空,不能为顶级目录,不能包含中文");
+        Assert.state(StrUtil.isNotEmpty(lib) && !StrUtil.SLASH.equals(lib) && !Validator.isChinese(lib), "项目路径不能为空,不能为顶级目录,不能包含中文");
 
-        FileUtils.checkSlip(lib, e -> new IllegalArgumentException("项目Jar路径存在提升目录问题"));
+        FileUtils.checkSlip(lib, e -> new IllegalArgumentException("项目路径存在提升目录问题"));
 
 
         // java 程序副本
@@ -179,15 +179,14 @@ public class ManageEditProjectController extends BaseAgentController {
                 }
             }
         }
-        File checkFile = new File(allLib);
+        File checkFile = FileUtil.file(allLib);
         Assert.state(!FileUtil.exist(checkFile) || FileUtil.isDirectory(checkFile), "项目路径是一个已经存在的文件");
 
         // 自动生成log文件
         String log = projectInfo.getLog();
         Assert.hasText(log, "项目log解析读取失败");
-        checkFile = new File(log);
+        checkFile = FileUtil.file(log);
         Assert.state(!FileUtil.exist(checkFile) || FileUtil.isFile(checkFile), "项目log是一个已经存在的文件夹");
-
         //
         String token = projectInfo.getToken();
         if (StrUtil.isNotEmpty(token)) {
@@ -306,7 +305,9 @@ public class ManageEditProjectController extends BaseAgentController {
                 if (oldLogBack.exists()) {
                     File logBack = news.getLogBack();
                     FileUtil.mkdir(logBack);
-                    FileUtil.move(oldLogBack, logBack, true);
+                    FileUtil.moveContent(oldLogBack, logBack, true);
+                    // 删除文件夹
+                    FileUtil.del(oldLogBack);
                 }
             }
         }
@@ -339,7 +340,7 @@ public class ManageEditProjectController extends BaseAgentController {
             }
         }
         if (nodeProjectInfoModel1 != null) {
-            throw new IllegalArgumentException("项目Jar路径和【" + nodeProjectInfoModel1.getName() + "】项目冲突:" + nodeProjectInfoModel1.allLib());
+            throw new IllegalArgumentException("项目路径和【" + nodeProjectInfoModel1.getName() + "】项目冲突:" + nodeProjectInfoModel1.allLib());
         }
     }
 
@@ -426,48 +427,46 @@ public class ManageEditProjectController extends BaseAgentController {
         return JsonMessage.success("ok");
     }
 
-    /**
-     * 检查项目lib 情况
-     *
-     * @param id     项目id
-     * @param newLib 新路径
-     * @return 状态码，400是一定不能操作的，401 是提醒
-     */
-    @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> saveProject(String id, String newLib) {
-        Assert.hasText(newLib, "请填写项目路径");
-        FileUtils.checkSlip(newLib);
-        Assert.state(!Validator.isChinese(newLib), "不建议使用中文目录");
-        File file = FileUtil.file(newLib);
-        //  填写的jar路径是一个存在的文件
-        Assert.state(!FileUtil.isFile(file), "填写jar目录当前是一个已经存在的文件,请修改");
-
-        NodeProjectInfoModel exits = projectInfoService.getItem(id);
-        if (exits == null) {
-            // 创建项目 填写的jar路径是已经存在的文件夹
-            Assert.state(!FileUtil.exist(file), "填写项目目录当前已经在,创建成功后会自动同步文件");
-        } else {
-            // 已经存在的项目
-            File oldLib = new File(exits.allLib());
-            if (FileUtil.equals(oldLib, file)) {
-                // 新 旧没有变更
-                return JsonMessage.success("");
-            }
-            if (file.exists()) {
-                String msg;
-                if (oldLib.exists()) {
-                    // 新旧jar路径都存在，会自动覆盖新的jar路径中的文件
-                    msg = "原项目目录已经存在并且新的jar目录已经存在,保存将覆盖新文件夹并会自动同步原jar目录";
-                } else {
-                    msg = "填写项目目录当前已经存在,创建成功后会自动同步文件";
-                }
-                return new JsonMessage<>(401, msg);
-            } else {
-                return new JsonMessage<>(401, "填写项目目录当前不存在,创建成功后会自动同步文件");
-            }
-        }
-
-
-        return JsonMessage.success("");
-    }
+//    /**
+//     * 检查项目lib 情况
+//     *
+//     * @param id     项目id
+//     * @param newLib 新路径
+//     * @return 状态码，400是一定不能操作的，401 是提醒
+//     */
+//    @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public JsonMessage<String> saveProject(String id, String newLib) {
+//        Assert.hasText(newLib, "请填写项目路径");
+//        FileUtils.checkSlip(newLib);
+//        Assert.state(!Validator.isChinese(newLib), "不建议使用中文目录");
+//        File file = FileUtil.file(newLib);
+//        //  填写的jar路径是一个存在的文件
+//        Assert.state(!FileUtil.isFile(file), "填写目录当前是一个已经存在的文件,请修改");
+//
+//        NodeProjectInfoModel exits = projectInfoService.getItem(id);
+//        if (exits == null) {
+//            // 创建项目 填写的jar路径是已经存在的文件夹
+//            Assert.state(!FileUtil.exist(file), "填写项目目录当前已经在,创建成功后会自动同步文件");
+//        } else {
+//            // 已经存在的项目
+//            File oldLib = new File(exits.allLib());
+//            if (FileUtil.equals(oldLib, file)) {
+//                // 新 旧没有变更
+//                return JsonMessage.success("没有变化");
+//            }
+//            if (file.exists()) {
+//                String msg;
+//                if (oldLib.exists()) {
+//                    // 新旧jar路径都存在，会自动覆盖新的jar路径中的文件
+//                    msg = "原项目目录已经存在并且新的项目目录已经存在,保存将覆盖新文件夹并会自动同步原项目目录";
+//                } else {
+//                    msg = "填写项目目录当前已经存在,创建成功后会自动同步文件";
+//                }
+//                return new JsonMessage<>(201, msg);
+//            } else {
+//                return new JsonMessage<>(201, "填写项目目录当前不存在,创建成功后会自动同步文件");
+//            }
+//        }
+//        return JsonMessage.success("");
+//    }
 }

@@ -34,7 +34,6 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -98,7 +97,7 @@ public class NodeScriptLogController extends BaseServerController {
         ScriptExecuteLogCacheModel executeLogModel = nodeScriptExecuteLogServer.queryByBean(scriptExecuteLogCacheModel);
         Assert.notNull(executeLogModel, "没有对应的执行日志");
         JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.SCRIPT_DEL_LOG);
-        if (request.getCode() == HttpStatus.OK.value()) {
+        if (request.success()) {
             nodeScriptExecuteLogServer.delByKey(executeId);
         }
         return request.toString();

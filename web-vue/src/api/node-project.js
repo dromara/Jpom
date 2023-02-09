@@ -458,23 +458,23 @@ export function getProjectReplicaList(params) {
   });
 }
 
-/**
- * 查询节点目录是否存在
- * @param {
- *  nodeId: 节点 ID,
- *  newLib: 新目录地址
- * } params
- */
-export function nodeJudgeLibExist(params) {
-  return axios({
-    url: "/node/manage/judge_lib.json",
-    method: "post",
-    data: params,
-    headers: {
-      tip: "no",
-    },
-  });
-}
+// /**
+//  * 查询节点目录是否存在
+//  * @param {
+//  *  nodeId: 节点 ID,
+//  *  newLib: 新目录地址
+//  * } params
+//  */
+// export function nodeJudgeLibExist(params) {
+//   return axios({
+//     url: "/node/manage/judge_lib.json",
+//     method: "post",
+//     data: params,
+//     headers: {
+//       tip: "no",
+//     },
+//   });
+// }
 
 /**
  * 重启项目
