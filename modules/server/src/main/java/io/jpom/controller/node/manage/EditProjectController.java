@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -92,7 +93,10 @@ public class EditProjectController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> saveProject(String id) {
         NodeModel node = getNode();
-        JsonMessage<String> request = NodeForward.request(node, getRequest(), NodeUrl.Manage_SaveProject);
+
+        HttpServletRequest httpServletRequest = getRequest();
+        //
+        JsonMessage<String> request = NodeForward.request(node, httpServletRequest, NodeUrl.Manage_SaveProject, "outGivingProject");
         if (request.success()) {
             projectInfoCacheService.syncNode(node, id);
         }
