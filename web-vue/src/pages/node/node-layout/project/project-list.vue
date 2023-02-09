@@ -207,13 +207,13 @@
             </a-tooltip>
           </template>
           <a-input-group compact>
-            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径" @change="checkLibIndexExist">
+            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
               <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
             </a-select>
-            <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹" @blur.native="checkLibIndexExist" />
+            <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹" />
           </a-input-group>
           <template #extra>
-            <span class="lib-exist" v-show="temp.libExist">{{ temp.libExistMsg }}</span>
+            <!-- <span class="lib-exist" v-show="temp.libExist">{{ temp.libExistMsg }}</span> -->
           </template>
         </a-form-model-item>
         <!-- <a-form-model-item prop="lib">
@@ -422,7 +422,7 @@ import {
   getRuningProjectCopyInfo,
   getRuningProjectInfo,
   javaModes,
-  nodeJudgeLibExist,
+  // nodeJudgeLibExist,
   noFileModes,
   restartProject,
   runModeList,
@@ -834,31 +834,31 @@ export default {
       });
     },
 
-    //检查节点是否存在
-    checkLibIndexExist() {
-      // 检查是否输入完整
-      if (this.temp.lib && this.temp.lib.length !== 0 && this.temp.whitelistDirectory && this.temp.whitelistDirectory.length !== 0) {
-        const params = {
-          nodeId: this.node.id,
-          id: this.temp.id,
-          newLib: this.temp.whitelistDirectory + this.temp.lib,
-        };
-        nodeJudgeLibExist(params).then((res) => {
-          // if (res.code === 401) {
-          //   this.temp = { ...this.temp, libExist: true, libExistMsg: res.msg };
-          // }
-          if (res.code !== 200) {
-            this.$notification.warning({
-              message: "提示",
-              description: res.msg,
-            });
-            this.temp = { ...this.temp, libExist: true, libExistMsg: res.msg };
-          } else {
-            this.temp = { ...this.temp, libExist: false, libExistMsg: "" };
-          }
-        });
-      }
-    },
+    // //检查节点是否存在
+    // checkLibIndexExist() {
+    //   // 检查是否输入完整
+    //   if (this.temp.lib && this.temp.lib.length !== 0 && this.temp.whitelistDirectory && this.temp.whitelistDirectory.length !== 0) {
+    //     const params = {
+    //       nodeId: this.node.id,
+    //       id: this.temp.id,
+    //       newLib: this.temp.whitelistDirectory + this.temp.lib,
+    //     };
+    //     nodeJudgeLibExist(params).then((res) => {
+    //       // if (res.code === 401) {
+    //       //   this.temp = { ...this.temp, libExist: true, libExistMsg: res.msg };
+    //       // }
+    //       if (res.code !== 200) {
+    //         this.$notification.warning({
+    //           message: "提示",
+    //           description: res.msg,
+    //         });
+    //         this.temp = { ...this.temp, libExist: true, libExistMsg: res.msg };
+    //       } else {
+    //         this.temp = { ...this.temp, libExist: false, libExistMsg: "" };
+    //       }
+    //     });
+    //   }
+    // },
     // handleReadFile() {
 
     // },
@@ -1137,7 +1137,7 @@ export default {
   top: 74px;
 } */
 
-.lib-exist {
+/* .lib-exist {
   color: #faad14;
-}
+} */
 </style>

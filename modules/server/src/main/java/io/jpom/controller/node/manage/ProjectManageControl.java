@@ -43,7 +43,6 @@ import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.outgiving.LogReadServer;
 import io.jpom.service.outgiving.OutGivingServer;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -159,7 +158,7 @@ public class ProjectManageControl extends BaseServerController {
             Assert.state(!releaseMethod, "当前项目存在构建项，不能直接删除");
         }
         JsonMessage<String> request = NodeForward.request(nodeModel, servletRequest, NodeUrl.Manage_DeleteProject);
-        if (request.getCode() == HttpStatus.OK.value()) {
+        if (request.success()) {
             //
             projectInfoCacheService.syncNode(nodeModel);
         }

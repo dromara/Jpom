@@ -36,7 +36,6 @@ import io.jpom.permission.*;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.service.user.TriggerTokenLogServer;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import top.jpom.model.PageResultDto;
@@ -112,7 +111,7 @@ public class NodeScriptController extends BaseServerController {
         NodeModel node = getNode();
         this.checkCron(autoExecCron);
         JsonMessage<Object> request = NodeForward.request(node, getRequest(), NodeUrl.Script_Save);
-        if (request.getCode() == HttpStatus.OK.value()) {
+        if (request.success()) {
             nodeScriptServer.syncNode(node);
         }
         return request.toString();
@@ -124,7 +123,7 @@ public class NodeScriptController extends BaseServerController {
         NodeModel node = getNode();
         HttpServletRequest request = getRequest();
         JsonMessage<Object> requestData = NodeForward.request(node, request, NodeUrl.Script_Del);
-        if (requestData.getCode() == HttpStatus.OK.value()) {
+        if (requestData.success()) {
             nodeScriptServer.syncNode(node);
             // 删除日志
             nodeScriptExecuteLogServer.delCache(id, node.getId(), request);

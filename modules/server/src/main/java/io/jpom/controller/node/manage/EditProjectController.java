@@ -35,7 +35,6 @@ import io.jpom.permission.MethodFeature;
 import io.jpom.permission.NodeDataPermission;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.system.WhitelistDirectoryService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -94,20 +93,20 @@ public class EditProjectController extends BaseServerController {
     public JsonMessage<String> saveProject(String id) {
         NodeModel node = getNode();
         JsonMessage<String> request = NodeForward.request(node, getRequest(), NodeUrl.Manage_SaveProject);
-        if (request.getCode() == HttpStatus.OK.value()) {
+        if (request.success()) {
             projectInfoCacheService.syncNode(node, id);
         }
         return request;
     }
 
 
-    /**
-     * 验证lib 暂时用情况
-     *
-     * @return json
-     */
-    @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String saveProject() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Jude_Lib).toString();
-    }
+//    /**
+//     * 验证lib 暂时用情况
+//     *
+//     * @return json
+//     */
+//    @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public String saveProject() {
+//        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Jude_Lib).toString();
+//    }
 }
