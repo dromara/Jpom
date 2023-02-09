@@ -124,13 +124,13 @@ public class LoginControl extends BaseServerController {
     /**
      * 记录 ip 登录失败
      */
-    private void ipError() {
+    private synchronized void ipError() {
         String ip = getIp();
         int count = ObjectUtil.defaultIfNull(LFU_CACHE.get(ip), 0) + 1;
         LFU_CACHE.put(ip, count, userConfig.getIpErrorLockTime().toMillis());
     }
 
-    private void ipSuccess() {
+    private synchronized void ipSuccess() {
         String ip = getIp();
         LFU_CACHE.remove(ip);
     }

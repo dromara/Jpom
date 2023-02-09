@@ -22,11 +22,13 @@
  */
 package io.jpom.model.data;
 
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.setting.yaml.YamlUtil;
 import io.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.util.Assert;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -60,6 +62,23 @@ public class DslYmlDto extends BaseJsonModel {
      * 配置
      */
     private Config config;
+
+    public DslYmlDto.BaseProcess runProcess(String opt) {
+        DslYmlDto.Run run = this.getRun();
+        Assert.notNull(run, "yml 未配置 运行管理");
+        DslYmlDto.BaseProcess baseProcess = (DslYmlDto.BaseProcess) ReflectUtil.getFieldValue(run, opt);
+        Assert.notNull(baseProcess, "未找到对应的类型或者未配置 " + opt);
+        return baseProcess;
+    }
+
+    public boolean hasRunProcess(String opt) {
+        DslYmlDto.Run run = this.getRun();
+        if (run == null) {
+            return false;
+        }
+        DslYmlDto.BaseProcess baseProcess = (DslYmlDto.BaseProcess) ReflectUtil.getFieldValue(run, opt);
+        return baseProcess != null;
+    }
 
     /**
      * 构建对象

@@ -207,12 +207,14 @@
             </a-tooltip>
           </template>
           <a-input-group compact>
-            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
+            <a-select style="width: 50%" v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径" @change="checkLibIndexExist">
               <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
             </a-select>
             <a-input style="width: 50%" v-model="temp.lib" placeholder="项目存储的文件夹" @blur.native="checkLibIndexExist" />
-            <span class="lib-exist" v-show="temp.libExist">{{ temp.libExistMsg }}</span>
           </a-input-group>
+          <template #extra>
+            <span class="lib-exist" v-show="temp.libExist">{{ temp.libExistMsg }}</span>
+          </template>
         </a-form-model-item>
         <!-- <a-form-model-item prop="lib">
           <template slot="label">
@@ -842,16 +844,17 @@ export default {
           newLib: this.temp.whitelistDirectory + this.temp.lib,
         };
         nodeJudgeLibExist(params).then((res) => {
-          if (res.code === 401) {
-            this.temp.libExist = true;
-            this.temp.libExistMsg = res.msg;
-            this.temp = { ...this.temp };
-          }
+          // if (res.code === 401) {
+          //   this.temp = { ...this.temp, libExist: true, libExistMsg: res.msg };
+          // }
           if (res.code !== 200) {
             this.$notification.warning({
-              message: res.msg,
-              description: "提示",
+              message: "提示",
+              description: res.msg,
             });
+            this.temp = { ...this.temp, libExist: true, libExistMsg: res.msg };
+          } else {
+            this.temp = { ...this.temp, libExist: false, libExistMsg: "" };
           }
         });
       }

@@ -365,12 +365,7 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
     public DslYmlDto.BaseProcess getDslProcess(String opt) {
         DslYmlDto build = dslConfig();
         Assert.notNull(build, "yml 还未配置");
-
-        DslYmlDto.Run run = build.getRun();
-        Assert.notNull(run, "yml 未配置 运行管理");
-        DslYmlDto.BaseProcess baseProcess = (DslYmlDto.BaseProcess) ReflectUtil.getFieldValue(run, opt);
-        Assert.notNull(baseProcess, "未找到对应的类型或者未配置 " + opt);
-        return baseProcess;
+        return build.runProcess(opt);
     }
 
     @Data
