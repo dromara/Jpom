@@ -127,7 +127,6 @@ public class ManageEditProjectController extends BaseAgentController {
 
         FileUtils.checkSlip(lib, e -> new IllegalArgumentException("项目路径存在提升目录问题"));
 
-
         // java 程序副本
         if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.Jar || runMode1 == RunMode.JarWar || runMode1 == RunMode.JavaExtDirsCp) {
             String javaCopyIds = getParameter("javaCopyIds");
@@ -170,18 +169,18 @@ public class ManageEditProjectController extends BaseAgentController {
         String id = projectInfo.getId();
         //
         String allLib = projectInfo.allLib();
+        File checkFile = FileUtil.file(allLib);
+        Assert.state(!FileUtil.exist(checkFile) || FileUtil.isDirectory(checkFile), "项目路径是一个已经存在的文件");
         // 重复lib
         List<NodeProjectInfoModel> list = projectInfoService.list();
         if (list != null) {
             for (NodeProjectInfoModel nodeProjectInfoModel : list) {
-                if (!nodeProjectInfoModel.getId().equals(id) && nodeProjectInfoModel.allLib().equals(allLib)) {
+                File fileLib = FileUtil.file(nodeProjectInfoModel.allLib());
+                if (!nodeProjectInfoModel.getId().equals(id) && FileUtil.equals(fileLib, checkFile)) {
                     return new JsonMessage<>(401, "当前项目路径已经被【" + nodeProjectInfoModel.getName() + "】占用,请检查");
                 }
             }
         }
-        File checkFile = FileUtil.file(allLib);
-        Assert.state(!FileUtil.exist(checkFile) || FileUtil.isDirectory(checkFile), "项目路径是一个已经存在的文件");
-
         // 自动生成log文件
         String log = projectInfo.getLog();
         Assert.hasText(log, "项目log解析读取失败");

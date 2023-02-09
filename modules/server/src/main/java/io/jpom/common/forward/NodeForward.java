@@ -154,8 +154,11 @@ public class NodeForward {
      * @param <T>       泛型
      * @return JSON
      */
-    public static <T> JsonMessage<T> request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl) {
-        Map<String, String> map = Optional.ofNullable(request).map(ServletUtil::getParamMap).orElse(null);
+    public static <T> JsonMessage<T> request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl, String... removeKeys) {
+        Map<String, String> map = Optional.ofNullable(request)
+            .map(ServletUtil::getParamMap)
+            .map(map1 -> MapUtil.removeAny(map1, removeKeys))
+            .orElse(null);
         IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl);
         return TransportServerFactory.get().executeToType(nodeModel, urlItem, map, new TypeReference<JsonMessage<T>>() {
         });
