@@ -446,7 +446,6 @@ public class ReleaseManage implements Runnable {
         } finally {
             JschUtil.close(session);
         }
-        logRecorder.info("");
         // 执行命令
         String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
         if (commands == null || commands.length <= 0) {
@@ -497,9 +496,9 @@ public class ReleaseManage implements Runnable {
         int delSize = CollUtil.size(del);
         int diffSize = CollUtil.size(diff);
         if (clearOld) {
-            logRecorder.system(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize));
+            logRecorder.system("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize);
         } else {
-            logRecorder.system(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff)));
+            logRecorder.system("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff));
         }
         // 清空发布才先执行删除
         if (delSize > 0 && clearOld) {

@@ -428,7 +428,7 @@ public class BuildExecuteService {
                 // 容器构建直接下载到 结果目录
                 File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFileAction.getPath());
                 if (!FileUtil.exist(toFile)) {
-                    logRecorder.systemError(resultDirFileAction.getPath() + "不存在，处理构建产物失败");
+                    logRecorder.systemError("{} 不存在，处理构建产物失败", resultDirFileAction.getPath());
                     return false;
                 }
                 logRecorder.system("备份产物 {} {}", resultDirFileAction.getPath(), buildInfoModel.getBuildId());
@@ -439,10 +439,10 @@ public class BuildExecuteService {
                 List<String> paths = AntPathUtil.antPathMatcher(this.gitFile, resultDirFileAction.getPath());
                 int matcherSize = CollUtil.size(paths);
                 if (matcherSize <= 0) {
-                    logRecorder.systemError(resultDirFileAction.getPath() + " 没有匹配到任何文件");
+                    logRecorder.systemError("{} 没有匹配到任何文件", resultDirFileAction.getPath());
                     return false;
                 }
-                logRecorder.system(StrUtil.format("{} 模糊匹配到 {} 个文件", resultDirFileAction.getPath(), matcherSize));
+                logRecorder.system("{} 模糊匹配到 {} 个文件", resultDirFileAction.getPath(), matcherSize);
                 String antSubMatch = resultDirFileAction.antSubMatch();
                 ResultDirFileAction.AntFileUploadMode antFileUploadMode = resultDirFileAction.getAntFileUploadMode();
                 Assert.notNull(antFileUploadMode, "没有配置文件上传模式");
@@ -656,7 +656,7 @@ public class BuildExecuteService {
                 .queryByTag(buildInfoModel.getWorkspaceId(), 1, fromTag);
             DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
             Assert.notNull(dockerInfoModel, "没有可用的 docker server");
-            logRecorder.info("use docker {}", dockerInfoModel.getName());
+            logRecorder.system("use docker {}", dockerInfoModel.getName());
             String workingDir = "/home/jpom/";
             Map<String, Object> map = dockerInfoModel.toParameter();
             map.put("runsOn", dockerYmlDsl.getRunsOn());
@@ -664,7 +664,7 @@ public class BuildExecuteService {
             map.put("tempDir", JpomApplication.getInstance().getTempPath());
             String buildInfoModelId = buildInfoModel.getId();
             map.put("dockerName", "jpom-build-" + buildInfoModelId);
-            map.put("logFile", FileUtil.getAbsolutePath(logRecorder.getFile()));
+            map.put("logFile", logRecorder.getFile());
             //
             List<String> copy = ObjectUtil.defaultIfNull(dockerYmlDsl.getCopy(), new ArrayList<>());
             // 将仓库文件上传到容器
@@ -709,7 +709,7 @@ public class BuildExecuteService {
                 return this.dockerCommand();
             }
             if (StrUtil.isEmpty(buildInfoModel.getScript())) {
-                logRecorder.info("没有需要执行的命令");
+                logRecorder.systemError("没有需要执行的命令");
                 this.buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
                 return false;
             }
@@ -994,7 +994,8 @@ public class BuildExecuteService {
             ScriptExecuteLogModel logModel = buildExecuteService.scriptExecuteLogServer.create(scriptModel, 1);
             File logFile = scriptModel.logFile(logModel.getId());
             File scriptFile = null;
-            try (LogRecorder scriptLog = LogRecorder.builder().file(logFile).build()) {
+            LogRecorder scriptLog = LogRecorder.builder().file(logFile).build();
+            try {
                 // 创建执行器
                 scriptFile = scriptModel.scriptFile();
                 int waitFor = JpomApplication.getInstance().execScript(scriptModel.getContext(), file -> {

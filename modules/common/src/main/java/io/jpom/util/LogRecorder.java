@@ -29,6 +29,7 @@ import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -43,12 +44,12 @@ import java.nio.charset.Charset;
  */
 @Builder
 @Slf4j
-public class LogRecorder implements AutoCloseable {
+@Getter
+public class LogRecorder {
     /**
      * 文件
      */
     private File file;
-    private String filePath;
     /**
      * 文件编码
      */
@@ -61,16 +62,6 @@ public class LogRecorder implements AutoCloseable {
         return charset;
     }
 
-    public File getFile() {
-        if (file == null) {
-            if (StrUtil.isEmpty(filePath)) {
-                return null;
-            }
-            file = FileUtil.file(filePath);
-        }
-        return file;
-    }
-
     /**
      * 记录错误信息
      *
@@ -79,9 +70,9 @@ public class LogRecorder implements AutoCloseable {
      */
     public void error(String title, Throwable throwable) {
         log.error(title, throwable);
-        FileUtil.appendLines(CollectionUtil.toList(title), this.getFile(), this.getCharset());
+        FileUtil.appendLines(CollectionUtil.toList(title), this.file, this.getCharset());
         String s = ExceptionUtil.stacktraceToString(throwable);
-        FileUtil.appendLines(CollectionUtil.toList(s), this.getFile(), this.getCharset());
+        FileUtil.appendLines(CollectionUtil.toList(s), this.file, this.getCharset());
     }
 
     /**
@@ -91,7 +82,7 @@ public class LogRecorder implements AutoCloseable {
      */
     public void info(String info, Object... vals) {
         String format = StrUtil.format(info, vals);
-        FileUtil.appendLines(CollectionUtil.toList(format), this.getFile(), this.getCharset());
+        FileUtil.appendLines(CollectionUtil.toList(format), this.file, this.getCharset());
     }
 
     /**
@@ -128,7 +119,7 @@ public class LogRecorder implements AutoCloseable {
      */
     public void append(String info, Object... vals) {
         String format = StrUtil.format(info, vals);
-        FileUtil.appendString(format, this.getFile(), this.getCharset());
+        FileUtil.appendString(format, this.file, this.getCharset());
     }
 
     /**
@@ -137,11 +128,6 @@ public class LogRecorder implements AutoCloseable {
      * @return Writer
      */
     public PrintWriter getPrintWriter() {
-        return FileWriter.create(this.getFile(), this.getCharset()).getPrintWriter(true);
-    }
-
-    @Override
-    public void close() throws Exception {
-
+        return FileWriter.create(this.file, this.getCharset()).getPrintWriter(true);
     }
 }

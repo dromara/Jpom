@@ -68,11 +68,11 @@ public class DockerBuild implements AutoCloseable {
 
     public void build() {
 
-        String logFile = (String) parameter.get("logFile");
+        File logFile = (File) parameter.get("logFile");
         File tempDir = (File) parameter.get("tempDir");
         // 生成临时目录
         tempDir = FileUtil.file(tempDir, "docker-temp", IdUtil.fastSimpleUUID());
-        LogRecorder logRecorder = LogRecorder.builder().filePath(logFile).build();
+        LogRecorder logRecorder = LogRecorder.builder().file(logFile).build();
         List<String> copy = (List<String>) parameter.get("copy");
         String resultFile = (String) parameter.get("resultFile");
         String resultFileOut = (String) parameter.get("resultFileOut");
@@ -209,7 +209,7 @@ public class DockerBuild implements AutoCloseable {
         }
         for (String s : copy) {
             List<String> split = StrUtil.split(s, StrUtil.COLON);
-            logRecorder.info("send file to : {}\n", split.get(1));
+            logRecorder.system("send file to : {}\n", split.get(1));
             dockerClient.copyArchiveToContainerCmd(containerId)
                 .withHostResource(split.get(0))
                 .withRemotePath(split.get(1))
@@ -480,7 +480,7 @@ public class DockerBuild implements AutoCloseable {
             dockerClient.waitContainerCmd(containerId).exec(new ResultCallback.Adapter<WaitResponse>() {
                 @Override
                 public void onNext(WaitResponse object) {
-                    logRecorder.info("dockerTask status code is: {}", object.getStatusCode());
+                    logRecorder.system("dockerTask status code is: {}", object.getStatusCode());
                 }
             }).awaitCompletion();
         } catch (InterruptedException e) {

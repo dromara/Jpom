@@ -92,13 +92,13 @@ public class DockerClientUtil {
      * @param resultFileOut 保存目录
      */
     public static void copyArchiveFromContainerCmd(DockerClient dockerClient, String containerId, LogRecorder logRecorder, String resultFile, String resultFileOut) {
-        logRecorder.info("download file from : {}", resultFile);
+        logRecorder.system("download file from : {}", resultFile);
         try (InputStream stream = dockerClient.copyArchiveFromContainerCmd(containerId, resultFile).exec();
              TarArchiveInputStream tarStream = new TarArchiveInputStream(stream)) {
             TarArchiveEntry tarArchiveEntry;
             while ((tarArchiveEntry = tarStream.getNextTarEntry()) != null) {
                 if (!tarStream.canReadEntryData(tarArchiveEntry)) {
-                    logRecorder.info("不能读取tarArchiveEntry");
+                    logRecorder.systemWarning("不能读取tarArchiveEntry {}", tarArchiveEntry.getName());
                 }
                 if (tarArchiveEntry.isDirectory()) {
                     continue;
@@ -114,7 +114,7 @@ public class DockerClientUtil {
                 IoUtil.copy(tarStream, Files.newOutputStream(currentFile.toPath()));
             }
         } catch (NotFoundException notFoundException) {
-            logRecorder.info("容器中没有找到执行结果文件: {}", notFoundException.getMessage());
+            logRecorder.systemWarning("容器中没有找到执行结果文件: {}", notFoundException.getMessage());
         } catch (Exception e) {
             logRecorder.error("无法获取容器执行结果文件", e);
         }

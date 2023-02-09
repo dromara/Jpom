@@ -127,7 +127,7 @@ public class DockerImagesController extends BaseServerController {
         String uuid = IdUtil.fastSimpleUUID();
         File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-log", uuid + ".log");
         LogRecorder logRecorder = LogRecorder.builder().file(file).build();
-        logRecorder.info("start pull {}", repository);
+        logRecorder.system("start pull {}", repository);
         Consumer<String> logConsumer = logRecorder::info;
         parameter.put("logConsumer", logConsumer);
         ThreadUtil.execute(() -> {
@@ -136,7 +136,7 @@ public class DockerImagesController extends BaseServerController {
             } catch (Exception e) {
                 logRecorder.error("拉取异常", e);
             }
-            logRecorder.info("pull end");
+            logRecorder.system("pull end");
         });
         return JsonMessage.success("开始拉取", uuid);
     }

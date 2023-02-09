@@ -121,6 +121,35 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <a-modal destroyOnClose v-model="showUserPwd" title="用户密码提示" :maskClosable="false" :footer="null">
+      <a-result status="success" :title="this.temp.title">
+        <template #subTitle>
+          账号新密码为：
+          <b
+            style="color: red; font-size: 20px"
+            v-clipboard:copy="temp.randomPwd"
+            v-clipboard:success="
+              () => {
+                tempVue.prototype.$notification.success({
+                  message: '复制成功',
+                });
+              }
+            "
+            v-clipboard:error="
+              () => {
+                tempVue.prototype.$notification.error({
+                  message: '复制失败',
+                });
+              }
+            "
+          >
+            {{ temp.randomPwd }}
+            <a-icon type="copy" />
+          </b>
+          请将此密码复制告知该用户
+        </template>
+      </a-result>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -128,13 +157,14 @@ import { closeUserMfa, deleteUser, editUser, getUserList, unlockUser, restUserPw
 import { getUserPermissionListAll } from "@/api/user/user-permission";
 import { parseTime } from "@/utils/time";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-
+import Vue from "vue";
 export default {
   data() {
     return {
       loading: false,
       list: [],
       temp: {},
+      tempVue: null,
       createOption: true,
       editUserVisible: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
@@ -166,6 +196,7 @@ export default {
         name: [{ required: true, message: "请填写用户昵称", trigger: "blur" }],
         permissionGroup: [{ required: true, message: "请选择用户权限组", trigger: "blur" }],
       },
+      showUserPwd: false,
     };
   },
   computed: {
@@ -235,13 +266,12 @@ export default {
         editUser(paramsTemp).then((res) => {
           if (res.code === 200) {
             if (paramsTemp.type === "add") {
-              this.$notification.success({
-                message: "账号添加成功",
-                description: "账号密码为：" + res.data.randomPwd + "  请将此密码复制告知该用户",
-                duration: 500,
-                btn: null,
-                key: "user-pwd-" + paramsTemp.id,
-              });
+              this.temp = {
+                title: "账号添加成功",
+                randomPwd: res.data.randomPwd,
+              };
+              this.tempVue = Vue;
+              this.showUserPwd = true;
             } else {
               this.$notification.success({
                 message: res.msg,
@@ -345,13 +375,12 @@ export default {
           // 解锁用户
           restUserPwd(record.id).then((res) => {
             if (res.code === 200) {
-              this.$notification.success({
-                message: "用户密码重置成功",
-                description: "账号新密码为：" + res.data.randomPwd + "  请将此密码复制告知该用户",
-                duration: 500,
-                btn: null,
-                key: "user-pwd-" + record.id,
-              });
+              this.temp = {
+                title: "用户密码重置成功",
+                randomPwd: res.data.randomPwd,
+              };
+              this.tempVue = Vue;
+              this.showUserPwd = true;
             }
           });
         },
