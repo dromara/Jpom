@@ -79,19 +79,21 @@ public class StringUtil {
     /**
      * 删除文件开始的路径
      *
-     * @param file      要删除的文件
-     * @param startPath 开始的路径
-     * @param inName    是否返回文件名
+     * @param file     要删除的文件
+     * @param baseFile 开始的路径
+     * @param inName   是否返回文件名
      * @return /test/a.txt /test/  a.txt
      */
-    public static String delStartPath(File file, String startPath, boolean inName) {
+    public static String delStartPath(File file, File baseFile, boolean inName) {
+        FileUtil.checkSlip(baseFile, file);
+        //
         String newWhitePath;
         if (inName) {
             newWhitePath = FileUtil.getAbsolutePath(file.getAbsolutePath());
         } else {
             newWhitePath = FileUtil.getAbsolutePath(file.getParentFile());
         }
-        String itemAbsPath = FileUtil.getAbsolutePath(FileUtil.file(startPath));
+        String itemAbsPath = FileUtil.getAbsolutePath(baseFile);
         itemAbsPath = FileUtil.normalize(itemAbsPath);
         newWhitePath = FileUtil.normalize(newWhitePath);
         String path = StrUtil.removePrefix(newWhitePath, itemAbsPath);
@@ -101,6 +103,18 @@ public class StringUtil {
             path = path.substring(1);
         }
         return path;
+    }
+
+    /**
+     * 删除文件开始的路径
+     *
+     * @param file      要删除的文件
+     * @param startPath 开始的路径
+     * @param inName    是否返回文件名
+     * @return /test/a.txt /test/  a.txt
+     */
+    public static String delStartPath(File file, String startPath, boolean inName) {
+        return delStartPath(file, FileUtil.file(startPath), inName);
     }
 
     /**

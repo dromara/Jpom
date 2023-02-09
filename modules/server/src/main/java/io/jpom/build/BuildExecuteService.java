@@ -61,15 +61,11 @@ import io.jpom.service.script.ScriptServer;
 import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.extconf.BuildExtConfig;
-import io.jpom.util.CommandUtil;
-import io.jpom.util.FileUtils;
-import io.jpom.util.LogRecorder;
-import io.jpom.util.StringUtil;
+import io.jpom.util.*;
 import lombok.Builder;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -93,8 +89,6 @@ public class BuildExecuteService {
      * 缓存构建中
      */
     private static final Map<String, BuildInfoManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
-
-    private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
     /**
      * 构建线程池
@@ -396,7 +390,7 @@ public class BuildExecuteService {
             //
             int queueSize = threadPoolExecutor.getQueue().size();
             int size = BUILD_MANAGE_MAP.size();
-            logRecorder.info("当前构建中任务数：{},队列中任务数：{} {}", size, queueSize,
+            logRecorder.system("当前构建中任务数：{},队列中任务数：{} {}", size, queueSize,
                 size > buildExecuteService.buildExtConfig.getPoolSize() ? "构建任务开始进入队列等待...." : StrUtil.EMPTY);
             return this;
         }
@@ -406,7 +400,7 @@ public class BuildExecuteService {
          */
         public void rejectedExecution() {
             int queueSize = threadPoolExecutor.getQueue().size();
-            logRecorder.info("当前构建中任务数：{},队列中任务数：{} 构建任务等待超时或者超出最大等待数量,取消执行当前构建", BUILD_MANAGE_MAP.size(), queueSize);
+            logRecorder.system("当前构建中任务数：{},队列中任务数：{} 构建任务等待超时或者超出最大等待数量,取消执行当前构建", BUILD_MANAGE_MAP.size(), queueSize);
             this.cancelTask();
         }
 
@@ -429,71 +423,104 @@ public class BuildExecuteService {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             Integer buildMode = taskData.buildInfoModel.getBuildMode();
             String resultDirFile = buildInfoModel.getResultDirFile();
+            ResultDirFileAction resultDirFileAction = ResultDirFileAction.parse(resultDirFile);
             if (buildMode != null && buildMode == 1) {
                 // 容器构建直接下载到 结果目录
-                File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
+                File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFileAction.getPath());
                 if (!FileUtil.exist(toFile)) {
-                    logRecorder.info(resultDirFile + "不存在，处理构建产物失败");
+                    logRecorder.systemError(resultDirFileAction.getPath() + "不存在，处理构建产物失败");
                     return false;
                 }
-                logRecorder.info(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
+                logRecorder.system("备份产物 {} {}", resultDirFileAction.getPath(), buildInfoModel.getBuildId());
                 return true;
             }
-            ThreadUtil.sleep(1, TimeUnit.SECONDS);
-            boolean updateDirFile = false;
-            boolean copyFile = true;
-            if (ANT_PATH_MATCHER.isPattern(resultDirFile)) {
+            if (resultDirFileAction.getType() == ResultDirFileAction.Type.ANT_PATH) {
                 // 通配模式
-                List<String> paths = FileUtils.antPathMatcher(this.gitFile, resultDirFile);
-                int size = CollUtil.size(paths);
-                if (size <= 0) {
-                    logRecorder.info(resultDirFile + " 没有匹配到任何文件");
+                List<String> paths = AntPathUtil.antPathMatcher(this.gitFile, resultDirFileAction.getPath());
+                int matcherSize = CollUtil.size(paths);
+                if (matcherSize <= 0) {
+                    logRecorder.systemError(resultDirFileAction.getPath() + " 没有匹配到任何文件");
                     return false;
                 }
-                if (size == 1) {
-                    String first = CollUtil.getFirst(paths);
-                    // 切换到匹配到到文件
-                    logRecorder.info(StrUtil.format("match {} {}", resultDirFile, first));
-                    resultDirFile = first;
-                    updateDirFile = true;
-                } else {
-                    resultDirFile = FileUtil.normalize(resultDirFile);
-                    logRecorder.info(StrUtil.format("match {} count {}", resultDirFile, size));
-                    String subBefore = StrUtil.subBefore(resultDirFile, "*", false);
-                    subBefore = StrUtil.subBefore(subBefore, StrUtil.SLASH, true);
-                    subBefore = StrUtil.emptyToDefault(subBefore, StrUtil.SLASH);
-                    resultDirFile = subBefore;
-                    copyFile = false;
-                    updateDirFile = true;
-                    for (String path : paths) {
-                        File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), subBefore);
-                        FileCopier.create(FileUtil.file(this.gitFile, path), FileUtil.file(toFile, path))
-                            .setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
+                logRecorder.system(StrUtil.format("{} 模糊匹配到 {} 个文件", resultDirFileAction.getPath(), matcherSize));
+                String antSubMatch = resultDirFileAction.antSubMatch();
+                ResultDirFileAction.AntFileUploadMode antFileUploadMode = resultDirFileAction.getAntFileUploadMode();
+                Assert.notNull(antFileUploadMode, "没有配置文件上传模式");
+                File historyPackageFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), StrUtil.SLASH);
+                int subMatchCount = paths.stream()
+                    .filter(s -> {
+                        // 需要能满足二级匹配
+                        return StrUtil.isEmpty(antSubMatch) || AntPathUtil.ANT_PATH_MATCHER.matchStart(antSubMatch + "**", s);
+                    })
+                    .mapToInt(path -> {
+                        File srcFile = FileUtil.file(this.gitFile, path);
+                        File toFile;
+                        if (antFileUploadMode == ResultDirFileAction.AntFileUploadMode.KEEP_DIR) {
+                            // 剔除文件夹层级
+                            List<String> list = StrUtil.splitTrim(path, StrUtil.SLASH);
+                            int notMathIndex;
+                            int pathItemSize = list.size();
+                            if (StrUtil.isEmpty(antSubMatch)) {
+                                notMathIndex = 0;
+                            } else {
+                                notMathIndex = ArrayUtil.INDEX_NOT_FOUND;
+                                for (int i = pathItemSize - 1; i >= 0; i--) {
+                                    String suffix = i == pathItemSize - 1 ? StrUtil.EMPTY : StrUtil.SLASH;
+                                    String itemS = StrUtil.SLASH + CollUtil.join(CollUtil.sub(list, 0, i + 1), StrUtil.SLASH) + suffix;
+                                    if (AntPathUtil.ANT_PATH_MATCHER.match(antSubMatch, itemS)) {
+                                        notMathIndex = i + 1;
+                                        break; // 结束本次循环
+                                    }
+                                }
+                                if (notMathIndex == ArrayUtil.INDEX_NOT_FOUND) {
+                                    return 0;
+                                }
+                            }
+                            // 保留文件夹层级
+                            String itemEnd = CollUtil.join(CollUtil.sub(list, notMathIndex, pathItemSize), StrUtil.SLASH);
+                            toFile = FileUtil.file(historyPackageFile, itemEnd);
+                        } else if (antFileUploadMode == ResultDirFileAction.AntFileUploadMode.SAME_DIR) {
+                            toFile = historyPackageFile;
+                        } else {
+                            throw new IllegalStateException("暂不支持的模式：" + antFileUploadMode);
+                        }
+                        // 创建文件夹，避免出现文件全部为相关文件名（result）
+                        BuildUtil.mkdirHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
+                        //
+                        FileCopier.create(srcFile, toFile)
+                            .setCopyContentIfDir(true)
+                            .setOverride(true)
+                            .setCopyAttributes(true)
                             .setCopyFilter(file1 -> !file1.isHidden())
                             .copy();
-                    }
-                }
-            }
-            if (copyFile) {
-                File file = FileUtil.file(this.gitFile, resultDirFile);
-                if (!file.exists()) {
-                    logRecorder.info(resultDirFile + "不存在，处理构建产物失败");
+                        return 1;
+                    }).sum();
+                if (subMatchCount <= 0) {
+                    logRecorder.systemError("{} 没有匹配到任何文件", antSubMatch);
                     return false;
                 }
+                logRecorder.system("{} 二级目录模糊匹配到 {} 个文件, 当前文件保留方式 {}", antSubMatch, subMatchCount, antFileUploadMode);
+                // 更新产物路径为普通路径
+                buildExecuteService.dbBuildHistoryLogService.updateResultDirFile(this.logId, StrUtil.SLASH);
+                buildInfoModel.setResultDirFile(StrUtil.SLASH);
+                this.buildExtraModule.setResultDirFile(StrUtil.SLASH);
+            } else if (resultDirFileAction.getType() == ResultDirFileAction.Type.ORIGINAL) {
+                File file = FileUtil.file(this.gitFile, resultDirFile);
+                if (!file.exists()) {
+                    logRecorder.systemError("{} 不存在，处理构建产物失败", resultDirFile);
+                    return false;
+                }
+                BuildUtil.mkdirHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
                 File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
+                //
                 FileCopier.create(file, toFile)
-                    .setCopyContentIfDir(true).setOverride(true).setCopyAttributes(true)
+                    .setCopyContentIfDir(true)
+                    .setOverride(true)
+                    .setCopyAttributes(true)
                     .setCopyFilter(file1 -> !file1.isHidden())
                     .copy();
             }
-            logRecorder.info(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
-            // 修改构建产物目录
-            if (updateDirFile) {
-                buildExecuteService.dbBuildHistoryLogService.updateResultDirFile(this.logId, resultDirFile);
-                //
-                buildInfoModel.setResultDirFile(resultDirFile);
-                this.buildExtraModule.setResultDirFile(resultDirFile);
-            }
+            //logRecorder.system("mv #{} {}[{}] ", resultDirFile, resultDirFileAction.getType(), buildInfoModel.getBuildId());
             return true;
         }
 
@@ -507,16 +534,16 @@ public class BuildExecuteService {
             this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
 
             Integer delay = taskData.delay;
-            logRecorder.info("#" + buildInfoModel.getBuildId() + " start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
+            logRecorder.system("开始构建 #{} 构建执行路径 : {}", buildInfoModel.getBuildId(), FileUtil.getAbsolutePath(this.gitFile));
             if (delay != null && delay > 0) {
                 // 延迟执行
-                logRecorder.info("Execution delayed by " + delay + " seconds");
+                logRecorder.system("执行等待 {} 秒", delay);
                 ThreadUtil.sleep(delay, TimeUnit.SECONDS);
             }
             // 删除缓存
             Boolean cacheBuild = this.buildExtraModule.getCacheBuild();
             if (cacheBuild != null && !cacheBuild) {
-                logRecorder.info("clear cache");
+                logRecorder.system("删除构建缓存");
                 CommandUtil.systemFastDel(this.gitFile);
             }
             //
@@ -557,7 +584,7 @@ public class BuildExecuteService {
                     if (StrUtil.isNotEmpty(branchTagName)) {
                         String newBranchTagName = BuildExecuteService.fuzzyMatch(tuple.get(1), branchTagName);
                         if (StrUtil.isEmpty(newBranchTagName)) {
-                            logRecorder.info(branchTagName + " Did not match the corresponding tag");
+                            logRecorder.systemError("{} Did not match the corresponding tag", branchTagName);
                             buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
                             return false;
                         }
@@ -566,21 +593,21 @@ public class BuildExecuteService {
                         //author bwcx_jzy 2022.11.28 buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
                         buildEnv.put("BUILD_TAG_NAME", newBranchTagName);
                         // 标签拉取模式
-                        logRecorder.info("repository tag [{}] clone pull from {}", branchTagName, newBranchTagName);
+                        logRecorder.system("repository tag [{}] clone pull from {}", branchTagName, newBranchTagName);
                         result = (String[]) plugin.execute("pullByTag", map);
                     } else {
                         String branchName = buildInfoModel.getBranchName();
                         // 模糊匹配分支
                         String newBranchName = BuildExecuteService.fuzzyMatch(tuple.get(0), branchName);
                         if (StrUtil.isEmpty(newBranchName)) {
-                            logRecorder.info(branchName + " Did not match the corresponding branch");
+                            logRecorder.systemError("{} Did not match the corresponding branch", branchName);
                             buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
                             return false;
                         }
                         // 分支模式
                         map.put("branchName", newBranchName);
                         buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
-                        logRecorder.info("repository [" + branchName + "] clone pull from " + newBranchName);
+                        logRecorder.system("repository [{}] clone pull from {}", branchName, newBranchName);
                         result = (String[]) plugin.execute("pull", map);
                     }
                     msg = result[1];
@@ -588,7 +615,7 @@ public class BuildExecuteService {
                     if (checkRepositoryDiff != null && checkRepositoryDiff) {
                         if (StrUtil.equals(repositoryLastCommitId, result[0])) {
                             // 如果一致，则不构建
-                            logRecorder.info("仓库代码没有任何变动终止本次构建：{} {}", result[0], msg);
+                            logRecorder.systemError("仓库代码没有任何变动终止本次构建：{} {}", result[0], msg);
                             return false;
                         }
                     }
@@ -605,13 +632,13 @@ public class BuildExecuteService {
                     if (checkRepositoryDiff != null && checkRepositoryDiff) {
                         if (StrUtil.equals(repositoryLastCommitId, result[0])) {
                             // 如果一致，则不构建
-                            logRecorder.info("仓库代码没有任何变动终止本次构建：{}", result[0]);
+                            logRecorder.systemError("仓库代码没有任何变动终止本次构建：{}", result[0]);
                             return false;
                         }
                     }
                     taskData.repositoryLastCommitId = result[0];
                 }
-                logRecorder.info(msg);
+                logRecorder.system(msg);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -704,7 +731,7 @@ public class BuildExecuteService {
                             throw Lombok.sneakyThrow(e);
                         }
                     });
-                logRecorder.info("[SYSTEM-INFO] --- PROCESS RESULT " + waitFor);
+                logRecorder.system("执行脚本的退出码是：{}", waitFor);
             } catch (Exception e) {
                 logRecorder.error("执行异常", e);
                 return false;
@@ -747,6 +774,16 @@ public class BuildExecuteService {
             //
             BuildStatus buildStatus = buildInfoModel1.getReleaseMethod() != BuildReleaseMethod.No.getCode() ? BuildStatus.PubSuccess : BuildStatus.Success;
             buildExecuteService.updateStatus(buildInfoModel1.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), buildStatus);
+            // 判断是否保留产物
+            Boolean saveBuildFile = this.buildExtraModule.getSaveBuildFile();
+            if (saveBuildFile != null && !saveBuildFile) {
+                // 删除 产物文件夹
+                File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), buildInfoModel1.getBuildId(), StrUtil.SLASH);
+                CommandUtil.systemFastDel(historyPackageFile);
+                //
+                File historyPackageZipFile = BuildUtil.getHistoryPackageZipFile(buildExtraModule.getId(), buildInfoModel1.getBuildId());
+                CommandUtil.systemFastDel(historyPackageZipFile);
+            }
             return true;
         }
 
@@ -825,7 +862,7 @@ public class BuildExecuteService {
         @Override
         public void run() {
             currentThread = Thread.currentThread();
-            logRecorder.info("开始执行构建任务,任务等待时间：{}", DateUtil.formatBetween(SystemClock.now() - submitTaskTime));
+            logRecorder.system("开始执行构建任务,任务等待时间：{}", DateUtil.formatBetween(SystemClock.now() - submitTaskTime));
             Map<String, IProcessItem> processItemMap = this.createProcess();
             // 依次执行流程，发生异常结束整个流程
             String processName = StrUtil.EMPTY;
@@ -843,25 +880,19 @@ public class BuildExecuteService {
                     IProcessItem processItem = stringSupplierEntry.getValue();
                     //
                     long processItemStartTime = SystemClock.now();
-                    logRecorder.info("[SYSTEM-INFO] 开始执行 {}流程", processItem.name());
+                    logRecorder.system("开始执行 {}流程", processItem.name());
                     this.asyncWebHooks(processName);
                     boolean aBoolean = processItem.execute();
                     if (!aBoolean) {
                         // 有条件结束构建流程
-                        logRecorder.info("[SYSTEM-INFO] 执行异常 {}流程", processItem.name());
+                        logRecorder.system("执行异常 {}流程", processItem.name());
                         this.asyncWebHooks("stop", "process", processName);
                         buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error);
                         break;
                     }
-                    logRecorder.info("[SYSTEM-INFO] 执行结束 {}流程,耗时：{}", processItem.name(), DateUtil.formatBetween(SystemClock.now() - processItemStartTime));
+                    logRecorder.system("执行结束 {}流程,耗时：{}", processItem.name(), DateUtil.formatBetween(SystemClock.now() - processItemStartTime));
                 }
-                // 判断是否保留产物
-                Boolean saveBuildFile = this.buildExtraModule.getSaveBuildFile();
-                if (saveBuildFile != null && !saveBuildFile) {
-                    // 删除 产物文件夹
-                    File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), buildInfoModel.getBuildId(), StrUtil.SLASH);
-                    CommandUtil.systemFastDel(historyPackageFile);
-                }
+
                 this.asyncWebHooks("success");
             } catch (RuntimeException runtimeException) {
                 buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error);
@@ -873,7 +904,7 @@ public class BuildExecuteService {
                 logRecorder.error("构建失败:" + processName, e);
                 this.asyncWebHooks(processName, "error", e.getMessage());
             } finally {
-                logRecorder.info("[SYSTEM-INFO] 构建结束 累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
+                logRecorder.system("构建结束 累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
                 this.asyncWebHooks("done");
                 BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
                 BaseServerController.removeAll();
@@ -894,29 +925,32 @@ public class BuildExecuteService {
         private void asyncWebHooks(String type, Object... other) {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
 
-            IPlugin plugin = PluginFactory.getPlugin("webhook");
             Map<String, Object> map = new HashMap<>(10);
-            long triggerTime = SystemClock.now();
             map.put("buildId", buildInfoModel.getId());
             map.put("buildNumberId", this.taskData.buildInfoModel.getBuildId());
             map.put("buildName", buildInfoModel.getName());
             map.put("buildSourceFile", FileUtil.getAbsolutePath(this.gitFile));
             map.put("type", type);
             map.put("triggerBuildType", taskData.triggerBuildType);
-            map.put("triggerTime", triggerTime);
-            map.put("buildResultFile", BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), this.taskData.buildInfoModel.getBuildId(), buildExtraModule.getResultDirFile()));
+            map.put("triggerTime", SystemClock.now());
+            String resultDirFile = buildExtraModule.getResultDirFile();
+            map.put("buildResultDirFile", resultDirFile);
+            map.put("buildResultFile", BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), this.taskData.buildInfoModel.getBuildId(), resultDirFile));
             //
             for (int i = 0; i < other.length; i += 2) {
                 map.put(other[i].toString(), other[i + 1]);
             }
-            String webhook = buildInfoModel.getWebhook();
-            Opt.ofBlankAble(webhook).ifPresent(s -> ThreadUtil.execute(() -> {
-                try {
-                    plugin.execute(s, map);
-                } catch (Exception e) {
-                    log.error("WebHooks 调用错误", e);
-                }
-            }));
+            Opt.ofBlankAble(buildInfoModel.getWebhook())
+                .ifPresent(s ->
+                    ThreadUtil.execute(() -> {
+                        try {
+                            IPlugin plugin = PluginFactory.getPlugin("webhook");
+                            plugin.execute(s, map);
+                        } catch (Exception e) {
+                            log.error("WebHooks 调用错误", e);
+                        }
+                    })
+                );
             // 执行对应的事件脚本
             try {
                 this.noticeScript(type, map);
@@ -939,7 +973,7 @@ public class BuildExecuteService {
             }
             ScriptModel scriptModel = buildExecuteService.scriptServer.getByKey(noticeScriptId);
             if (scriptModel == null) {
-                logRecorder.info("[SYSTEM-WARNING] noticeScript does not exist:{}", type);
+                logRecorder.systemWarning("noticeScript does not exist:{}", type);
                 return;
             }
             // 判断是否包含需要执行的事件
@@ -947,7 +981,7 @@ public class BuildExecuteService {
                 log.warn("忽略执行事件脚本 {} {} {}", type, scriptModel.getName(), noticeScriptId);
                 return;
             }
-            logRecorder.info("[SYSTEM-INFO] --- EXEC NOTICESCRIPT {}", type);
+            logRecorder.system("--- EXEC NOTICE SCRIPT {}", type);
             // 环境变量
             Map<String, String> environment = new HashMap<>(map.size());
             for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -973,7 +1007,7 @@ public class BuildExecuteService {
                         throw Lombok.sneakyThrow(e);
                     }
                 });
-                logRecorder.info("[SYSTEM-INFO] {} --- NOTICESCRIPT PROCESS RESULT {}", type, waitFor);
+                logRecorder.system("执行 {} 类型脚本的退出码是：{}", type, waitFor);
             } finally {
                 if (scriptFile != null) {
                     try {
@@ -994,8 +1028,8 @@ public class BuildExecuteService {
      */
     private static String fuzzyMatch(List<String> list, String pattern) {
         Assert.notEmpty(list, "仓库没有任何分支或者标签");
-        if (ANT_PATH_MATCHER.isPattern(pattern)) {
-            List<String> collect = list.stream().filter(s -> ANT_PATH_MATCHER.match(pattern, s)).collect(Collectors.toList());
+        if (AntPathUtil.ANT_PATH_MATCHER.isPattern(pattern)) {
+            List<String> collect = list.stream().filter(s -> AntPathUtil.ANT_PATH_MATCHER.match(pattern, s)).collect(Collectors.toList());
             return CollUtil.getFirst(collect);
         }
         return pattern;

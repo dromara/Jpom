@@ -112,7 +112,7 @@ public class ReleaseManage implements Runnable {
         //BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, buildExtraModule.getResultDirFile());
         //
         if (buildEnv == null) {
-            this.buildEnv = new HashMap<>();
+            this.buildEnv = new HashMap<>(10);
             buildEnv.put("BUILD_ID", this.buildExtraModule.getId());
             buildEnv.put("BUILD_NAME", this.buildExtraModule.getName());
             //buildEnv.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
@@ -170,13 +170,13 @@ public class ReleaseManage implements Runnable {
     public boolean start() throws Exception {
         init();
         this.updateStatus(BuildStatus.PubIng);
-        logRecorder.info("start release：" + FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
-        if (!this.resultFile.exists()) {
-            logRecorder.info("不存在构建产物");
+        logRecorder.system("开始执行发布,需要发布的文件大小：{}", FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
+        if (FileUtil.isEmpty(this.resultFile)) {
+            logRecorder.systemError("发布的文件或者文件夹为空,不能继续发布");
             return false;
         }
         int releaseMethod = this.buildExtraModule.getReleaseMethod();
-        logRecorder.info("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
+        logRecorder.system("发布的方式：{}", BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
 
         if (releaseMethod == BuildReleaseMethod.Outgiving.getCode()) {
             //
@@ -192,10 +192,9 @@ public class ReleaseManage implements Runnable {
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
             return true;
         } else {
-            logRecorder.info(" 没有实现的发布分发:" + releaseMethod);
+            logRecorder.systemError("没有实现的发布分发:{}", releaseMethod);
             return false;
         }
-        //logRecorder.info("release complete : " + DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
         return true;
     }
 
@@ -239,7 +238,7 @@ public class ReleaseManage implements Runnable {
             List<String> versionList = StrUtil.splitTrim(version, StrUtil.DOT);
             int tagSize = CollUtil.size(tag);
             if (tagSize <= 1 || CollUtil.size(versionList) <= 1) {
-                logRecorder.info("Warning version number incrementing error, no match for . or :");
+                logRecorder.systemWarning("version number incrementing error, no match for . or :");
                 return s;
             }
             boolean match = false;
@@ -255,9 +254,9 @@ public class ReleaseManage implements Runnable {
             tag.set(tagSize - 1, CollUtil.join(versionList, StrUtil.DOT));
             String newVersion = CollUtil.join(tag, StrUtil.COLON);
             if (match) {
-                logRecorder.info("dockerTag version number incrementing {} -> {}", s, newVersion);
+                logRecorder.system("dockerTag version number incrementing {} -> {}", s, newVersion);
             } else {
-                logRecorder.info("Warning version number incrementing error,No numeric version number {} ", s);
+                logRecorder.systemWarning("version number incrementing error,No numeric version number {} ", s);
             }
             return newVersion;
         }).collect(Collectors.joining(StrUtil.COMMA));
@@ -284,7 +283,7 @@ public class ReleaseManage implements Runnable {
             String dockerFile = CollUtil.getLast(list);
             File dockerfile = FileUtil.file(tempPath, dockerFile);
             if (!FileUtil.isFile(dockerfile)) {
-                logRecorder.info("仓库目录下没有找到 Dockerfile 文件:", dockerFile);
+                logRecorder.systemError("仓库目录下没有找到 Dockerfile 文件: {}", dockerFile);
                 return;
             }
             File baseDir = FileUtil.file(tempPath, list.size() == 1 ? StrUtil.SLASH : CollUtil.get(list, 0));
@@ -296,7 +295,7 @@ public class ReleaseManage implements Runnable {
                 .queryByTag(this.buildExtraModule.getWorkspaceId(), 1, fromTag);
             DockerInfoModel dockerInfoModel = CollUtil.getFirst(dockerInfoModels);
             if (dockerInfoModel == null) {
-                logRecorder.info("没有可用的 docker server");
+                logRecorder.systemError("没有可用的 docker server");
                 return;
             }
             //String dockerBuildArgs = this.buildExtraModule.getDockerBuildArgs();
@@ -308,7 +307,7 @@ public class ReleaseManage implements Runnable {
             if (pushToRepository != null && pushToRepository) {
                 List<String> repositoryList = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
                 for (String repositoryItem : repositoryList) {
-                    logRecorder.info("start push to repository in({}),{} {}", dockerInfoModel.getName(), StrUtil.emptyToDefault(dockerInfoModel.getRegistryUrl(), StrUtil.EMPTY), repositoryItem);
+                    logRecorder.system("start push to repository in({}),{} {}", dockerInfoModel.getName(), StrUtil.emptyToDefault(dockerInfoModel.getRegistryUrl(), StrUtil.EMPTY), repositoryItem);
                     Map<String, Object> map = dockerInfoModel.toParameter();
                     //
                     map.put("repository", repositoryItem);
@@ -335,7 +334,7 @@ public class ReleaseManage implements Runnable {
         }
         List<String> splitTrim = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
         String first = CollUtil.getFirst(splitTrim);
-        logRecorder.info("start update swarm service: {} use image {}", serviceName, first);
+        logRecorder.system("start update swarm service: {} use image {}", serviceName, first);
         Map<String, Object> pluginMap = buildExecuteService.dockerInfoService.getBySwarmPluginMap(swarmId);
         pluginMap.put("serviceId", serviceName);
         pluginMap.put("image", first);
@@ -349,7 +348,7 @@ public class ReleaseManage implements Runnable {
     }
 
     private void doDockerImage(DockerInfoModel dockerInfoModel, File dockerfile, File baseDir, String dockerTag, BuildExtraModule extraModule) {
-        logRecorder.info("{} start build image {}", dockerInfoModel.getName(), dockerTag);
+        logRecorder.system("{} start build image {}", dockerInfoModel.getName(), dockerTag);
         Map<String, Object> map = dockerInfoModel.toParameter();
         map.put("Dockerfile", dockerfile);
         map.put("baseDirectory", baseDir);
@@ -376,11 +375,10 @@ public class ReleaseManage implements Runnable {
         // 执行命令
         String releaseCommand = this.buildExtraModule.getReleaseCommand();
         if (StrUtil.isEmpty(releaseCommand)) {
-            logRecorder.info("没有需要执行的命令");
+            logRecorder.systemError("没有需要执行的命令");
             return;
         }
-        logRecorder.info(DateUtil.now() + " start exec");
-
+        logRecorder.system("{} start exec", DateUtil.now());
 
         File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
         Map<String, String> envFileMap = FileUtils.readEnvFile(sourceFile, this.buildExtraModule.getAttachEnv());
@@ -409,7 +407,7 @@ public class ReleaseManage implements Runnable {
         for (String releaseMethodDataIdItem : strings) {
             SshModel item = sshService.getByKey(releaseMethodDataIdItem, false);
             if (item == null) {
-                logRecorder.info("没有找到对应的ssh项：" + releaseMethodDataIdItem);
+                logRecorder.systemError("没有找到对应的ssh项：{}", releaseMethodDataIdItem);
                 continue;
             }
             this.doSsh(item, sshService);
@@ -421,9 +419,9 @@ public class ReleaseManage implements Runnable {
         try {
             String releasePath = this.buildExtraModule.getReleasePath();
             if (StrUtil.isEmpty(releasePath)) {
-                logRecorder.info("发布目录为空");
+                logRecorder.systemWarning("发布目录为空");
             } else {
-                logRecorder.info("{} {} start ftp upload", DateUtil.now(), item.getName());
+                logRecorder.system("{} {} start ftp upload", DateUtil.now(), item.getName());
                 try (Sftp sftp = new Sftp(session, item.charset(), item.timeout())) {
                     String prefix = "";
                     if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
@@ -442,7 +440,7 @@ public class ReleaseManage implements Runnable {
                         }
                     }
                     sftp.syncUpload(this.resultFile, normalizePath);
-                    logRecorder.info("{} ftp upload done", item.getName());
+                    logRecorder.system("{} ftp upload done", item.getName());
                 }
             }
         } finally {
@@ -452,13 +450,13 @@ public class ReleaseManage implements Runnable {
         // 执行命令
         String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
         if (commands == null || commands.length <= 0) {
-            logRecorder.info("没有需要执行的ssh命令");
+            logRecorder.systemWarning("没有需要执行的ssh命令");
             return;
         }
         // 替换变量
         this.formatCommand(commands);
         //
-        logRecorder.info("{} {} start exec", DateUtil.now(), item.getName());
+        logRecorder.system("{} {} start exec", DateUtil.now(), item.getName());
         String s = sshService.exec(item, commands);
         logRecorder.info(s);
     }
@@ -499,9 +497,9 @@ public class ReleaseManage implements Runnable {
         int delSize = CollUtil.size(del);
         int diffSize = CollUtil.size(diff);
         if (clearOld) {
-            logRecorder.info(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize));
+            logRecorder.system(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize));
         } else {
-            logRecorder.info(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff)));
+            logRecorder.system(StrUtil.format("对比文件结果,产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff)));
         }
         // 清空发布才先执行删除
         if (delSize > 0 && clearOld) {
@@ -527,7 +525,7 @@ public class ReleaseManage implements Runnable {
                     int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                     if (progressRangeList.add(progressRange)) {
                         //  total, progressSize
-                        logRecorder.info("[SYSTEM-INFO] 上传文件进度:{}[{}/{}] {}/{} {} ", file.getName(),
+                        logRecorder.system("上传文件进度:{}[{}/{}] {}/{} {} ", file.getName(),
                             (finalI + 1), diffSize,
                             FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                             NumberUtil.formatPercent(((float) progressSize / total), 0)
@@ -537,7 +535,7 @@ public class ReleaseManage implements Runnable {
             Assert.state(jsonMessage.success(), "同步项目文件失败：" + jsonMessage);
             if (last) {
                 // 最后一个
-                logRecorder.info("发布项目包成功：" + jsonMessage);
+                logRecorder.system("发布项目包成功：{}", jsonMessage);
             }
         }
     }
@@ -575,14 +573,14 @@ public class ReleaseManage implements Runnable {
                     double progressPercentage = Math.floor(((float) progressSize / total) * 100);
                     int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                     if (progressRangeList.add(progressRange)) {
-                        logRecorder.info("[SYSTEM-INFO] 上传文件进度:{} {}/{} {}", name,
+                        logRecorder.system("上传文件进度:{} {}/{} {}", name,
                             FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                             NumberUtil.formatPercent(((float) progressSize / total), 0));
                     }
                 });
         });
         if (jsonMessage.success()) {
-            logRecorder.info("发布项目包成功：" + jsonMessage);
+            logRecorder.system("发布项目包成功：{}", jsonMessage);
         } else {
             throw new JpomRuntimeException("发布项目包失败：" + jsonMessage);
         }
@@ -607,9 +605,9 @@ public class ReleaseManage implements Runnable {
             return outGivingRunBuilder.build().startRun();
         });
         //OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);
-        logRecorder.info("开始执行分发包啦,请到分发中查看详情状态");
+        logRecorder.system("开始执行分发包啦,请到分发中查看详情状态");
         OutGivingModel.Status status = statusFuture.get();
-        logRecorder.info("分发结果：{}", status.getDesc());
+        logRecorder.system("分发结果：{}", status.getDesc());
     }
 
     @Override
