@@ -67,13 +67,11 @@
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-tooltip title="下载构建日志,如果按钮不可用表示日志文件不存在,一般是构建历史相关文件被删除">
-            <a-button size="small" type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="read" /></a-button>
+            <a-button size="small" icon="download" type="primary" :disabled="!record.hasLog" @click="handleDownload(record)">日志</a-button>
           </a-tooltip>
 
           <a-tooltip title="下载构建产物,如果按钮不可用表示产物文件不存在,一般是构建没有产生对应的文件或者构建历史相关文件被删除">
-            <a-button size="small" type="primary" :disabled="!record.hasFile" @click="handleFile(record)">
-              <a-icon type="file-zip" />
-            </a-button>
+            <a-button size="small" icon="download" type="primary" :disabled="!record.hasFile" @click="handleFile(record)"> 产物 </a-button>
           </a-tooltip>
 
           <a-dropdown>
@@ -153,7 +151,7 @@ export default {
         },
         { title: "发布方式", dataIndex: "releaseMethod", width: 100, ellipsis: true, scopedSlots: { customRender: "releaseMethod" } },
         { title: "构建人", dataIndex: "modifyUser", width: 130, ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 150, align: "center" },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "220px", align: "center" },
       ],
     };
   },

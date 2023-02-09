@@ -23,7 +23,6 @@
 package io.jpom.build;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.core.util.ZipUtil;
@@ -102,10 +101,50 @@ public class BuildUtil {
         if (StrUtil.isEmpty(buildModelId) || StrUtil.isEmpty(resultFile)) {
             return null;
         }
+        File result = FileUtil.file(getBuildDataFile(buildModelId), "history", BuildInfoModel.getBuildIdStr(buildId), "result");
+        return FileUtil.file(result, resultFile);
+    }
+
+    /**
+     * 插件构建产物存放路径
+     *
+     * @param buildModelId 构建实体
+     * @param buildId      id
+     */
+    public static void mkdirHistoryPackageFile(String buildModelId, int buildId) {
+        File result = FileUtil.file(getBuildDataFile(buildModelId), "history", BuildInfoModel.getBuildIdStr(buildId), "result");
+        FileUtil.mkdir(result);
+    }
+
+    /**
+     * 获取构建产物存放路径
+     *
+     * @param buildModelId 构建实体
+     * @param buildId      id
+     * @return file
+     */
+    public static File getHistoryPackageZipFile(String buildModelId, int buildId) {
         return FileUtil.file(getBuildDataFile(buildModelId),
             "history",
             BuildInfoModel.getBuildIdStr(buildId),
-            "result", resultFile);
+            "zip");
+    }
+
+    /**
+     * 获取日志记录文件
+     *
+     * @param buildModelId buildModelId
+     * @param buildId      构建编号
+     * @return file
+     */
+    public static File getLogFile(String buildModelId, int buildId) {
+        if (StrUtil.isEmpty(buildModelId)) {
+            return null;
+        }
+        return FileUtil.file(getBuildDataFile(buildModelId),
+            "history",
+            BuildInfoModel.getBuildIdStr(buildId),
+            "info.log");
     }
 
     /**
@@ -119,10 +158,12 @@ public class BuildUtil {
         if (file.isFile()) {
             return null;
         }
+        Assert.state(!FileUtil.isDirEmpty(file), "文件夹为空,不能打包 #" + buildNumberId);
         String name = FileUtil.getName(file);
-        name = ObjectUtil.defaultIfNull(name, "result");
+        // 如果产物配置 / 时无法获取文件名，采用 result
+        name = StrUtil.emptyToDefault(name, "result");
         // 保存目录存放值 history 路径
-        File packageFile = BuildUtil.getHistoryPackageFile(id, buildNumberId, StrUtil.SLASH);
+        File packageFile = BuildUtil.getHistoryPackageZipFile(id, buildNumberId);
         File zipFile = FileUtil.file(packageFile, name + ".zip");
         if (!zipFile.exists()) {
             // 不存在则打包
@@ -147,23 +188,6 @@ public class BuildUtil {
         }
     }
 
-
-    /**
-     * 获取日志记录文件
-     *
-     * @param buildModelId buildModelId
-     * @param buildId      构建编号
-     * @return file
-     */
-    public static File getLogFile(String buildModelId, int buildId) {
-        if (StrUtil.isEmpty(buildModelId)) {
-            return null;
-        }
-        return FileUtil.file(getBuildDataFile(buildModelId),
-            "history",
-            BuildInfoModel.getBuildIdStr(buildId),
-            "info.log");
-    }
 
     /**
      * get rsa file

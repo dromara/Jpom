@@ -136,7 +136,7 @@ public class BuildInfoHistoryController extends BaseServerController {
         PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(getRequest());
         pageResultTemp.each(buildHistoryLog -> {
             File file = BuildUtil.getHistoryPackageFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
-            buildHistoryLog.setHasFile(FileUtil.exist(file));
+            buildHistoryLog.setHasFile(FileUtil.isNotEmpty(file));
             //
             File logFile = BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId());
             buildHistoryLog.setHasLog(FileUtil.exist(logFile));

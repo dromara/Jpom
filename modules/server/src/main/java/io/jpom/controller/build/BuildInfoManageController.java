@@ -27,10 +27,7 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
-import io.jpom.build.BuildExecuteService;
-import io.jpom.build.BuildExtraModule;
-import io.jpom.build.BuildUtil;
-import io.jpom.build.ReleaseManage;
+import io.jpom.build.*;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.validator.ValidatorConfig;
@@ -99,7 +96,11 @@ public class BuildInfoManageController extends BaseServerController {
         Assert.notNull(item, "没有对应数据");
         // 更新数据
         BuildInfoModel update = new BuildInfoModel();
-        Opt.ofBlankAble(resultDirFile).ifPresent(update::setResultDirFile);
+        Opt.ofBlankAble(resultDirFile).ifPresent(s -> {
+            ResultDirFileAction parse = ResultDirFileAction.parse(s);
+            parse.check();
+            update.setResultDirFile(s);
+        });
         Opt.ofBlankAble(branchName).ifPresent(update::setBranchName);
         Opt.ofBlankAble(branchTagName).ifPresent(update::setBranchTagName);
         Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> {

@@ -1074,6 +1074,7 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "branchName" },
         },
+        { title: "产物", dataIndex: "resultDirFile", ellipsis: true, scopedSlots: { customRender: "resultDirFile" } },
         { title: "方式", dataIndex: "buildMode", align: "center", width: 80, ellipsis: true, scopedSlots: { customRender: "buildMode" } },
         { title: "状态", dataIndex: "status", align: "center", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         {

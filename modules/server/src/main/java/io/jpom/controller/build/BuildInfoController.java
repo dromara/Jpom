@@ -35,6 +35,7 @@ import com.alibaba.fastjson2.JSONObject;
 import io.jpom.build.BuildExecuteService;
 import io.jpom.build.BuildUtil;
 import io.jpom.build.DockerYmlDsl;
+import io.jpom.build.ResultDirFileAction;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.validator.ValidatorConfig;
@@ -196,11 +197,15 @@ public class BuildInfoController extends BaseServerController {
             // 如果是 SVN
             branchName = "trunk";
         }
+        ResultDirFileAction resultDirFileAction = ResultDirFileAction.parse(resultDirFile);
+        resultDirFileAction.check();
         //
         Assert.state(buildMode == 0 || buildMode == 1, "请选择正确的构建方式");
         if (buildMode == 1) {
             // 验证 dsl 内容
             this.checkDocker(script, request);
+            // 容器构建不能使用 ant 模式
+            Assert.state(resultDirFileAction.getType() == ResultDirFileAction.Type.ORIGINAL, "容器构建的产物路径不能使用 ant 模式");
         }
         if (buildExtConfig.isCheckDeleteCommand()) {
             // 判断删除命令
@@ -213,7 +218,7 @@ public class BuildInfoController extends BaseServerController {
         if (StrUtil.isNotEmpty(webhook)) {
             Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
         }
-        FileUtils.checkSlip(resultDirFile, e -> new IllegalArgumentException("产物目录不能越级：" + e.getMessage()));
+        //
         buildInfoModel.setAutoBuildCron(this.checkCron(autoBuildCron));
         buildInfoModel.setWebhook(webhook);
         buildInfoModel.setRepositoryId(repositoryId);

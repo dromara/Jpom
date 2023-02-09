@@ -31,6 +31,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.build.BuildExecuteService;
+import io.jpom.build.ResultDirFileAction;
 import io.jpom.common.BaseJpomController;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
@@ -190,6 +191,8 @@ public class BuildTriggerApiController extends BaseJpomController {
             item.setScript(script);
         }
         if (StrUtil.isNotEmpty(resultDirFile)) {
+            ResultDirFileAction parse = ResultDirFileAction.parse(resultDirFile);
+            parse.check();
             item.setResultDirFile(resultDirFile);
         }
         if (StrUtil.isNotEmpty(webhook)) {
