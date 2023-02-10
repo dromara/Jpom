@@ -65,7 +65,7 @@
           <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
           <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
           <!-- <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button> -->
-          <a-tooltip :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去解绑' : '删除'}`">
+          <a-tooltip :title="`${record.scriptType === 'server-sync' ? '服务端分发同步的脚本不能直接删除,需要到服务端去操作' : '删除'}`">
             <a-button size="small" :disabled="record.scriptType === 'server-sync'" type="danger" @click="handleDelete(record)">删除</a-button>
           </a-tooltip>
         </a-space>

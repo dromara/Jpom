@@ -224,7 +224,7 @@ export default {
         });
       });
     },
-    // 解绑
+    //
     handleLeava(record) {
       this.$confirm({
         title: "系统提示",

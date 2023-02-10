@@ -189,9 +189,19 @@ export default {
     },
     // 解绑
     handleUnbind(record) {
+      const html =
+        "<b style='font-size: 20px;'>真的要解绑该集群么？</b>" +
+        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
+        "<li>解绑只删除在本系统的关联数据,不会删除容器里面数据</b></li>" +
+        " </ul>";
+
+      const h = this.$createElement;
+      //
       this.$confirm({
-        title: "系统提示",
-        content: "真的要解绑该集群么？解绑只删除在本系统的关联数据,不会删除容器里面数据",
+        title: "危险操作！！！",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+        okButtonProps: { props: { type: "danger", size: "small" } },
+        cancelButtonProps: { props: { type: "primary" } },
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
