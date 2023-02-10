@@ -542,7 +542,7 @@ public abstract class AbstractProjectCommander {
                     return DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action);
                 } catch (IllegalArgument2Exception argument2Exception) {
                     log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
-                    return null;
+                    return CollUtil.newArrayList(argument2Exception.getMessage());
                 }
             });
 
