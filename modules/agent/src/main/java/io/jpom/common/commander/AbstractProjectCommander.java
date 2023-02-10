@@ -532,12 +532,21 @@ public abstract class AbstractProjectCommander {
     public CommandOpResult status(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.Dsl) {
-            List<String> status = this.runDsl(nodeProjectInfoModel, "status", (baseProcess, action) -> DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action));
-            String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
-            FileUtil.appendLines(status, FileUtil.file(log), CharsetUtil.CHARSET_UTF_8);
-
+            List<String> status = this.runDsl(nodeProjectInfoModel, "status", (baseProcess, action) -> {
+                // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
+                String scriptId = baseProcess.getScriptId();
+                if (StrUtil.isEmpty(scriptId)) {
+                    return null;
+                }
+                return DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action);
+            });
 
             return Optional.ofNullable(status)
+                .map(strings -> {
+                    String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
+                    FileUtil.appendLines(strings, FileUtil.file(log), CharsetUtil.CHARSET_UTF_8);
+                    return strings;
+                })
                 .map(CollUtil::getLast)
                 // StrUtil.format("{} [{}] - {}", DateUtil.now(), this.action, line);
                 .map(s -> StrUtil.splitTrim(s, StrPool.DASHED))

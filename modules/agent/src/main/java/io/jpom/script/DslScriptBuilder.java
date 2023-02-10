@@ -199,6 +199,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     private static DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log) {
         NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
         String scriptId = scriptProcess.getScriptId();
+        Assert.hasText(scriptId, "请填写脚本模板id");
         NodeScriptModel item = nodeScriptServer.getItem(scriptId);
         Map<String, String> environment = DslScriptBuilder.environment(nodeProjectInfoModel, scriptProcess);
         File scriptFile;

@@ -103,13 +103,13 @@
                 <a-button size="small" type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="danger" size="small" :disabled="record.status != 1" @click="handleCancel(record)">取消分发</a-button>
+                <a-button type="danger" size="small" :disabled="record.status !== 1" @click="handleCancel(record)">取消分发</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="danger" size="small" :disabled="list_expanded[record.id]" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
+                <a-button type="danger" size="small" @click="handleDelete(record)">{{ record.outGivingProject ? "删除" : "释放" }}</a-button>
               </a-menu-item>
               <a-menu-item v-if="record.outGivingProject">
-                <a-button type="danger" size="small" :disabled="list_expanded[record.id]" @click="handleDelete(record, 'thorough')"> 彻底删除</a-button>
+                <a-button type="danger" size="small" @click="handleDelete(record, 'thorough')"> 彻底删除</a-button>
               </a-menu-item>
               <a-menu-item>
                 <a-button type="danger" size="small" @click="handleUnbind(record)">解绑</a-button>
@@ -193,7 +193,24 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
+          <a-input :maxLength="50" v-model="temp.id" v-if="temp.type === 'edit'" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
+          <template v-else>
+            <a-input-search
+              :maxLength="50"
+              v-model="temp.id"
+              placeholder="创建之后不能修改"
+              @search="
+                () => {
+                  this.temp = { ...this.temp, id: randomStr(6) };
+                }
+              "
+            >
+              <template slot="enterButton">
+                <a-button type="primary"> 随机生成 </a-button>
+              </template>
+            </a-input-search>
+          </template>
+          <!-- <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" /> -->
         </a-form-model-item>
 
         <a-form-model-item label="分发名称" prop="name">
@@ -212,19 +229,16 @@
           <a-list
             item-layout="horizontal"
             :data-source="dispatchList"
+            :locale="{
+              emptyText: '暂无数据,请先添加节点项目数据',
+            }"
             :rowKey="
               (item) => {
                 return item.nodeId + item.projectId + item.index;
               }
             "
           >
-            <a-list-item
-              :locale="{
-                emptyText: '暂无数据,请先添加节点项目数据',
-              }"
-              slot="renderItem"
-              slot-scope="item, index"
-            >
+            <a-list-item slot="renderItem" slot-scope="item, index">
               <a-space>
                 <span>节点: </span>
                 <a-select
@@ -327,7 +341,24 @@
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
-          <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改,分发 ID 等同于项目 ID" />
+          <a-input :maxLength="50" v-model="temp.id" v-if="temp.type === 'edit'" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改,分发 ID 等同于项目 ID" />
+          <template v-else>
+            <a-input-search
+              :maxLength="50"
+              v-model="temp.id"
+              placeholder="创建之后不能修改,分发 ID 等同于项目 ID"
+              @search="
+                () => {
+                  this.temp = { ...this.temp, id: randomStr(6) };
+                }
+              "
+            >
+              <template slot="enterButton">
+                <a-button type="primary"> 随机生成 </a-button>
+              </template>
+            </a-input-search>
+          </template>
+          <!-- <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改,分发 ID 等同于项目 ID" /> -->
         </a-form-model-item>
         <a-form-model-item label="分发名称" prop="name">
           <a-row>
@@ -701,7 +732,7 @@ import {
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeList, getRuningProjectInfo, getProjectGroupAll } from "@/api/node-project";
 import { itemGroupBy, parseTime, renderSize, formatDuration } from "@/utils/time";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, readJsonStrField, concurrentExecution } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, readJsonStrField, concurrentExecution, randomStr } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
 import { uploadPieces } from "@/utils/upload-pieces";
 import CustomSelect from "@/components/customSelect";
@@ -828,6 +859,7 @@ export default {
     readJsonStrField,
     renderSize,
     formatDuration,
+    randomStr,
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {
@@ -1112,13 +1144,7 @@ export default {
     },
     // 添加副本
     handleAddReplica(nodeId) {
-      const $chars = "ABCDEFGHJKMNPQRSTWXYZ0123456789";
-      /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
-      const maxPos = $chars.length;
-      let repliccaId = "";
-      for (let i = 0; i < 2; i++) {
-        repliccaId += $chars.charAt(Math.floor(Math.random() * maxPos));
-      }
+      let repliccaId = randomStr();
       this.temp[`${nodeId}_javaCopyItemList`].push({
         id: repliccaId,
         jvm: "",
@@ -1478,6 +1504,7 @@ export default {
                 this.$notification.success({
                   message: res.msg,
                 });
+                delete this.list_expanded[record.id];
                 this.loadData();
               }
             });
@@ -1497,6 +1524,7 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
+              delete this.list_expanded[record.id];
               this.loadData();
             }
           });
@@ -1517,6 +1545,7 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
+              delete this.list_expanded[record.id];
               this.loadData();
             }
           });

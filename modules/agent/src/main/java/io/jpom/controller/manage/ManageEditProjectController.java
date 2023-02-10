@@ -169,6 +169,8 @@ public class ManageEditProjectController extends BaseAgentController {
         String id = projectInfo.getId();
         //
         String allLib = projectInfo.allLib();
+        // 判断空格
+        Assert.state(!id.contains(StrUtil.SPACE) && !allLib.contains(StrUtil.SPACE), "项目Id、项目路径不能包含空格");
         File checkFile = FileUtil.file(allLib);
         Assert.state(!FileUtil.exist(checkFile) || FileUtil.isDirectory(checkFile), "项目路径是一个已经存在的文件");
         // 重复lib
@@ -191,9 +193,6 @@ public class ManageEditProjectController extends BaseAgentController {
         if (StrUtil.isNotEmpty(token)) {
             Validator.validateMatchRegex(RegexPool.URL_HTTP, token, "WebHooks 地址不合法");
         }
-        // 判断空格
-        Assert.state(!id.contains(StrUtil.SPACE) && !allLib.contains(StrUtil.SPACE), "项目Id、项目路径不能包含空格");
-
         // 判断 yml
         this.checkDslYml(projectInfo);
         //
