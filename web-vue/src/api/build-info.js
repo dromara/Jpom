@@ -278,6 +278,7 @@ export const statusMap = {
   5: "发布成功",
   6: "发布失败",
   7: "取消构建",
+  8: "构建中断",
 };
 
 export const releaseMethodMap = {

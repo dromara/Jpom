@@ -30,6 +30,7 @@ import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
@@ -103,7 +104,7 @@ public class ScriptModel extends BaseWorkspaceModel {
         String dataPath = JpomApplication.getInstance().getDataPath();
 
         File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
-        FileUtil.writeString(this.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
+        FileUtils.writeScript(this.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
 //        File path = this.scriptPath();
 //        File file = FileUtil.file(path, StrUtil.format("script.{}", CommandUtil.SUFFIX));
 //        //

@@ -44,6 +44,7 @@ import io.jpom.service.script.NodeScriptServer;
 import io.jpom.service.system.AgentWorkspaceEnvVarService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
@@ -228,7 +229,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
         // 替换内容
         String context = scriptModel.getContext();
-        FileUtil.writeString(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
+        FileUtils.writeScript(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
         return scriptFile;
     }
 

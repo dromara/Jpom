@@ -23,11 +23,13 @@
 package io.jpom.model.enums;
 
 import io.jpom.model.BaseEnum;
+import lombok.Getter;
 
 /**
  * @author bwcx_jzy
  * @since 2021/8/27
  */
+@Getter
 public enum BuildStatus implements BaseEnum {
     /**
      *
@@ -40,6 +42,7 @@ public enum BuildStatus implements BaseEnum {
     PubSuccess(5, "发布成功"),
     PubError(6, "发布失败"),
     Cancel(7, "取消构建"),
+    Interrupt(8, "构建中断"),
     ;
 
     private final int code;
@@ -48,16 +51,6 @@ public enum BuildStatus implements BaseEnum {
     BuildStatus(int code, String desc) {
         this.code = code;
         this.desc = desc;
-    }
-
-    @Override
-    public int getCode() {
-        return code;
-    }
-
-    @Override
-    public String getDesc() {
-        return desc;
     }
 
 }
