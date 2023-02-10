@@ -160,8 +160,7 @@ public class BuildExecuteService {
         }
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, status);
         Objects.requireNonNull(nowStatus);
-        if (BuildStatus.Ing == nowStatus ||
-            BuildStatus.PubIng == nowStatus) {
+        if (BuildStatus.Ing == nowStatus || BuildStatus.PubIng == nowStatus) {
             return "当前还在：" + nowStatus.getDesc();
         }
         return null;
@@ -175,10 +174,11 @@ public class BuildExecuteService {
      * @param delay            延迟的时间
      * @param triggerBuildType 触发构建类型
      * @param buildRemark      构建备注
+     * @param parametersEnv    外部环境变量
      * @return json
      */
-    public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType, String buildRemark) {
-        return this.start(buildInfoId, userModel, delay, triggerBuildType, buildRemark, null);
+    public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType, String buildRemark, Object... parametersEnv) {
+        return this.start(buildInfoId, userModel, delay, triggerBuildType, buildRemark, null, parametersEnv);
     }
 
     /**
@@ -190,13 +190,22 @@ public class BuildExecuteService {
      * @param triggerBuildType    触发构建类型
      * @param buildRemark         构建备注
      * @param checkRepositoryDiff 差异构建
+     * @param parametersEnv       外部环境变量
      * @return json
      */
-    public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay, int triggerBuildType, String buildRemark, String checkRepositoryDiff) {
+    public JsonMessage<Integer> start(String buildInfoId, UserModel userModel, Integer delay,
+                                      int triggerBuildType, String buildRemark, String checkRepositoryDiff,
+                                      Object... parametersEnv) {
         synchronized (buildInfoId.intern()) {
             BuildInfoModel buildInfoModel = buildService.getByKey(buildInfoId);
             String e = this.checkStatus(buildInfoModel.getStatus());
             Assert.isNull(e, () -> e);
+            //
+            boolean containsKey = BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId());
+            Assert.state(!containsKey, "当前构建还在进行中");
+            //
+            BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildInfoModel.getExtraData(), BuildExtraModule.class);
+            Assert.notNull(buildExtraModule, "构建信息缺失");
             // set buildId field
             int buildId = ObjectUtil.defaultIfNull(buildInfoModel.getBuildId(), 0);
             {
@@ -219,7 +228,7 @@ public class BuildExecuteService {
                 .triggerBuildType(triggerBuildType);
             //
             Opt.ofBlankAble(checkRepositoryDiff).map(Convert::toBool).ifPresent(taskBuilder::checkRepositoryDiff);
-            this.runTask(taskBuilder.build());
+            this.runTask(taskBuilder.build(), buildExtraModule, parametersEnv);
             String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
             return new JsonMessage<>(200, msg, buildInfoModel.getBuildId());
         }
@@ -228,15 +237,12 @@ public class BuildExecuteService {
     /**
      * 创建构建
      *
-     * @param taskData 任务
+     * @param taskData         任务
+     * @param buildExtraModule 构建更多配置信息
+     * @param parametersEnv    外部环境变量
      */
-    private void runTask(TaskData taskData) {
+    private void runTask(TaskData taskData, BuildExtraModule buildExtraModule, Object... parametersEnv) {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
-        boolean containsKey = BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId());
-        Assert.state(!containsKey, "当前构建还在进行中");
-        //
-        BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildInfoModel.getExtraData(), BuildExtraModule.class);
-        Assert.notNull(buildExtraModule, "构建信息缺失");
         String logId = this.insertLog(buildExtraModule, taskData);
         // 创建线程池
         initPool();
@@ -250,7 +256,7 @@ public class BuildExecuteService {
         //BuildInfoManage manage = new BuildInfoManage(taskData);
         BUILD_MANAGE_MAP.put(buildInfoModel.getId(), build);
         // 输出提交任务日志, 提交到线程池中
-        threadPoolExecutor.execute(build.submitTask());
+        threadPoolExecutor.execute(build.submitTask(parametersEnv));
     }
 
     /**
@@ -378,12 +384,19 @@ public class BuildExecuteService {
         private Long submitTaskTime;
 
         private final Map<String, String> buildEnv = new HashMap<>(10);
+        private Object[] parametersEnv;
 
         /**
          * 提交任务
          */
-        public BuildInfoManage submitTask() {
+        public BuildInfoManage submitTask(Object... parametersEnv) {
             submitTaskTime = SystemClock.now();
+            // 解析外部变量
+            for (int i = 0; i < parametersEnv.length; i += 2) {
+                buildEnv.put(StrUtil.toString(parametersEnv[i]), StrUtil.toString(parametersEnv[i + 1]));
+            }
+            this.parametersEnv = parametersEnv;
+            //
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             File logFile = BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
             this.logRecorder = LogRecorder.builder().file(logFile).build();
@@ -585,7 +598,7 @@ public class BuildExecuteService {
                         String newBranchTagName = BuildExecuteService.fuzzyMatch(tuple.get(1), branchTagName);
                         if (StrUtil.isEmpty(newBranchTagName)) {
                             logRecorder.systemError("{} Did not match the corresponding tag", branchTagName);
-                            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
+                            //buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
                             return false;
                         }
                         // author bwcx_jzy 2022.11.28 map.put("branchName", newBranchName);
@@ -601,7 +614,7 @@ public class BuildExecuteService {
                         String newBranchName = BuildExecuteService.fuzzyMatch(tuple.get(0), branchName);
                         if (StrUtil.isEmpty(newBranchName)) {
                             logRecorder.systemError("{} Did not match the corresponding branch", branchName);
-                            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
+                            //buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
                             return false;
                         }
                         // 分支模式
@@ -710,7 +723,7 @@ public class BuildExecuteService {
             }
             if (StrUtil.isEmpty(buildInfoModel.getScript())) {
                 logRecorder.systemError("没有需要执行的命令");
-                this.buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
+                //this.buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
                 return false;
             }
             Map<String, String> environment = new HashMap<>(10);
@@ -881,18 +894,24 @@ public class BuildExecuteService {
                     //
                     long processItemStartTime = SystemClock.now();
                     logRecorder.system("开始执行 {}流程", processItem.name());
-                    this.asyncWebHooks(processName);
+                    boolean interruptStatus = this.asyncWebHooks(processName);
+                    if (!interruptStatus) {
+                        // 事件脚本中断构建流程
+                        logRecorder.system("执行中断 {} 流程,原因事件脚本中断", processItem.name());
+                        this.asyncWebHooks("stop", "process", processName);
+                        buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt);
+                        break;
+                    }
                     boolean aBoolean = processItem.execute();
                     if (!aBoolean) {
                         // 有条件结束构建流程
-                        logRecorder.system("执行异常 {}流程", processItem.name());
+                        logRecorder.system("执行异常 {} 流程", processItem.name());
                         this.asyncWebHooks("stop", "process", processName);
                         buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error);
                         break;
                     }
                     logRecorder.system("执行结束 {}流程,耗时：{}", processItem.name(), DateUtil.formatBetween(SystemClock.now() - processItemStartTime));
                 }
-
                 this.asyncWebHooks("success");
             } catch (RuntimeException runtimeException) {
                 buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error);
@@ -921,11 +940,21 @@ public class BuildExecuteService {
          *
          * @param type  类型
          * @param other 其他参数
+         * @return 是否还继续整个构建流程
          */
-        private void asyncWebHooks(String type, Object... other) {
+        private boolean asyncWebHooks(String type, Object... other) {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
-
             Map<String, Object> map = new HashMap<>(10);
+            Optional.ofNullable(this.parametersEnv).ifPresent(objects -> {
+                // 解析外部变量
+                for (int i = 0; i < objects.length; i += 2) {
+                    map.put(StrUtil.toString(objects[i]), objects[i + 1]);
+                }
+            });
+            //
+            for (int i = 0; i < other.length; i += 2) {
+                map.put(other[i].toString(), other[i + 1]);
+            }
             map.put("buildId", buildInfoModel.getId());
             map.put("buildNumberId", this.taskData.buildInfoModel.getBuildId());
             map.put("buildName", buildInfoModel.getName());
@@ -936,10 +965,7 @@ public class BuildExecuteService {
             String resultDirFile = buildExtraModule.getResultDirFile();
             map.put("buildResultDirFile", resultDirFile);
             map.put("buildResultFile", BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), this.taskData.buildInfoModel.getBuildId(), resultDirFile));
-            //
-            for (int i = 0; i < other.length; i += 2) {
-                map.put(other[i].toString(), other[i + 1]);
-            }
+
             Opt.ofBlankAble(buildInfoModel.getWebhook())
                 .ifPresent(s ->
                     ThreadUtil.execute(() -> {
@@ -953,9 +979,12 @@ public class BuildExecuteService {
                 );
             // 执行对应的事件脚本
             try {
-                this.noticeScript(type, map);
+                return this.noticeScript(type, map);
             } catch (Exception e) {
                 log.error("noticeScript 调用错误", e);
+                logRecorder.error("执行事件脚本错误", e);
+                // 执行事件脚本发送异常不终止构建流程
+                return true;
             }
         }
 
@@ -964,24 +993,24 @@ public class BuildExecuteService {
          *
          * @param type 事件类型
          * @param map  相关参数
-         * @throws Exception 异常
+         * @return 是否还继续整个构建流程
          */
-        private void noticeScript(String type, Map<String, Object> map) throws Exception {
+        private boolean noticeScript(String type, Map<String, Object> map) {
             String noticeScriptId = this.buildExtraModule.getNoticeScriptId();
             if (StrUtil.isEmpty(noticeScriptId)) {
-                return;
+                return true;
             }
             ScriptModel scriptModel = buildExecuteService.scriptServer.getByKey(noticeScriptId);
             if (scriptModel == null) {
-                logRecorder.systemWarning("noticeScript does not exist:{}", type);
-                return;
+                logRecorder.systemWarning("事件脚本不存在:{} {}", type, noticeScriptId);
+                return true;
             }
             // 判断是否包含需要执行的事件
-            if (!StrUtil.contains(scriptModel.getDescription(), type)) {
+            if (!StrUtil.containsAnyIgnoreCase(scriptModel.getDescription(), type, "all")) {
                 log.warn("忽略执行事件脚本 {} {} {}", type, scriptModel.getName(), noticeScriptId);
-                return;
+                return true;
             }
-            logRecorder.system("--- EXEC NOTICE SCRIPT {}", type);
+            logRecorder.system("开始执行事件脚本： {}", type);
             // 环境变量
             Map<String, String> environment = new HashMap<>(map.size());
             for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -995,6 +1024,7 @@ public class BuildExecuteService {
             File logFile = scriptModel.logFile(logModel.getId());
             File scriptFile = null;
             LogRecorder scriptLog = LogRecorder.builder().file(logFile).build();
+            final String[] lastMsg = new String[1];
             try {
                 // 创建执行器
                 scriptFile = scriptModel.scriptFile();
@@ -1003,18 +1033,18 @@ public class BuildExecuteService {
                         return CommandUtil.execWaitFor(file, null, environment, null, (s, process) -> {
                             logRecorder.info(s);
                             scriptLog.info(s);
+                            lastMsg[0] = s;
                         });
                     } catch (IOException | InterruptedException e) {
                         throw Lombok.sneakyThrow(e);
                     }
                 });
                 logRecorder.system("执行 {} 类型脚本的退出码是：{}", type, waitFor);
+                return !StrUtil.startWithIgnoreCase(lastMsg[0], "interrupt " + type);
             } finally {
-                if (scriptFile != null) {
-                    try {
-                        FileUtil.del(scriptFile);
-                    } catch (Exception ignored) {
-                    }
+                try {
+                    FileUtil.del(scriptFile);
+                } catch (Exception ignored) {
                 }
             }
         }

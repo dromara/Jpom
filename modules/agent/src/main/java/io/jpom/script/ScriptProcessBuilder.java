@@ -43,6 +43,7 @@ import io.jpom.service.system.AgentWorkspaceEnvVarService;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,7 +77,8 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         //
         String dataPath = JpomApplication.getInstance().getDataPath();
         scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
-        FileUtil.writeString(nodeScriptModel.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
+
+        FileUtils.writeScript(nodeScriptModel.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
         processBuilder = new ProcessBuilder();

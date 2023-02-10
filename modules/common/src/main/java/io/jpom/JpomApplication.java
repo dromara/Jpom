@@ -24,7 +24,6 @@ package io.jpom;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -37,6 +36,7 @@ import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +44,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -103,18 +102,18 @@ public class JpomApplication implements DisposableBean {
         return dataPath;
     }
 
-    /**
-     * 执行脚本
-     *
-     * @param inputStream 脚本内容
-     * @param function    回调分发
-     * @param <T>         值类型
-     * @return 返回值
-     */
-    public <T> T execScript(InputStream inputStream, Function<File, T> function) {
-        String sshExecTemplate = IoUtil.readUtf8(inputStream);
-        return this.execScript(sshExecTemplate, function);
-    }
+//    /**
+//     * 执行脚本
+//     *
+//     * @param inputStream 脚本内容
+//     * @param function    回调分发
+//     * @param <T>         值类型
+//     * @return 返回值
+//     */
+//    public <T> T execScript(InputStream inputStream, Function<File, T> function) {
+//        String sshExecTemplate = IoUtil.readUtf8(inputStream);
+//        return this.execScript(sshExecTemplate, function);
+//    }
 
     /**
      * 执行脚本
@@ -127,14 +126,14 @@ public class JpomApplication implements DisposableBean {
     public <T> T execScript(String context, Function<File, T> function) {
         String dataPath = this.getDataPath();
         File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
-        FileUtil.writeString(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
+        FileUtils.writeScript(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
         try {
             return function.apply(scriptFile);
         } finally {
             FileUtil.del(scriptFile);
         }
     }
-    
+
     /**
      * 获取临时文件存储路径
      *

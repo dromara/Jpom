@@ -41,6 +41,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -274,5 +275,18 @@ public class FileUtils {
                 }
             }
         }
+    }
+
+    /**
+     * 使用当前系统的换行符写文件
+     *
+     * @param context    文件内容
+     * @param scriptFile 文件路径
+     * @param charset    编码格式
+     */
+    public static void writeScript(String context, File scriptFile, Charset charset) {
+        // 替换换行符
+        String replace = StrUtil.replace(context, StrUtil.LF, FileUtil.getLineSeparator());
+        FileUtil.writeString(replace, scriptFile, charset);
     }
 }

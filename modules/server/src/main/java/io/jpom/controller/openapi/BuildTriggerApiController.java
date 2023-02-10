@@ -28,6 +28,7 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.http.ContentType;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.build.BuildExecuteService;
@@ -50,7 +51,9 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -75,6 +78,21 @@ public class BuildTriggerApiController extends BaseJpomController {
     }
 
 
+    private Object[] buildParametersEnv(HttpServletRequest request) {
+        String contentType = request.getContentType();
+        Object[] parametersEnv = new Object[4];
+        parametersEnv[0] = "triggerContentType";
+        parametersEnv[1] = contentType;
+        parametersEnv[2] = "triggerBodyData";
+        if (ContentType.isDefault(contentType)) {
+            Map<String, String> paramMap = ServletUtil.getParamMap(request);
+            parametersEnv[3] = JSONObject.toJSONString(paramMap);
+        } else {
+            parametersEnv[3] = ServletUtil.getBody(request);
+        }
+        return parametersEnv;
+    }
+
     /**
      * 构建触发器
      *
@@ -84,7 +102,9 @@ public class BuildTriggerApiController extends BaseJpomController {
      * @return json
      */
     @RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD2, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String trigger2(@PathVariable String id, @PathVariable String token, String delay, String buildRemark) {
+    public String trigger2(@PathVariable String id, @PathVariable String token,
+                           HttpServletRequest request,
+                           String delay, String buildRemark) {
         BuildInfoModel item = buildInfoService.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         UserModel userModel = this.triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
@@ -93,7 +113,9 @@ public class BuildTriggerApiController extends BaseJpomController {
 
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
         BaseServerController.resetInfo(userModel);
-        JsonMessage<Integer> start = buildExecuteService.start(id, userModel, Convert.toInt(delay, 0), 1, buildRemark);
+        // 构建外部参数
+        Object[] parametersEnv = this.buildParametersEnv(request);
+        JsonMessage<Integer> start = buildExecuteService.start(id, userModel, Convert.toInt(delay, 0), 1, buildRemark, parametersEnv);
         return start.toString();
     }
 
@@ -121,9 +143,11 @@ public class BuildTriggerApiController extends BaseJpomController {
      * @return json
      */
     @PostMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD_BATCH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<Object>> triggerBatch() {
+    public JsonMessage<List<Object>> triggerBatch(HttpServletRequest request) {
         try {
-            String body = ServletUtil.getBody(getRequest());
+            String body = ServletUtil.getBody(request);
+            // 构建外部参数
+            Object[] parametersEnv = this.buildParametersEnv(request);
             JSONArray jsonArray = JSONArray.parseArray(body);
             List<Object> collect = jsonArray.stream().peek(o -> {
                 JSONObject jsonObject = (JSONObject) o;
@@ -154,7 +178,7 @@ public class BuildTriggerApiController extends BaseJpomController {
                 }
                 BaseServerController.resetInfo(userModel);
                 //
-                JsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1, buildRemark);
+                JsonMessage<Integer> start = buildExecuteService.start(id, userModel, delay, 1, buildRemark, parametersEnv);
                 jsonObject.put("msg", start.getMsg());
                 jsonObject.put("buildId", start.getData());
             }).collect(Collectors.toList());

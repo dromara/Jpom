@@ -67,6 +67,7 @@
       <template slot="status" slot-scope="text">
         <a-tag v-if="text === 2 || text === 5" color="green">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else-if="text === 1 || text === 4" color="orange">{{ statusMap[text] || "未知" }}</a-tag>
+        <a-tag v-else-if="text === 8" color="blue"> {{ statusMap[text] || "未知" }} </a-tag>
         <a-tag v-else-if="text === 3 || text === 6" color="red">{{ statusMap[text] || "未知" }}</a-tag>
         <a-tag v-else>{{ statusMap[text] || "未知" }}</a-tag>
       </template>
