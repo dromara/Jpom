@@ -38,6 +38,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
+import io.jpom.common.IllegalArgument2Exception;
 import io.jpom.common.commander.impl.LinuxProjectCommander;
 import io.jpom.common.commander.impl.MacOsProjectCommander;
 import io.jpom.common.commander.impl.WindowsProjectCommander;
@@ -531,14 +532,18 @@ public abstract class AbstractProjectCommander {
      */
     public CommandOpResult status(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
+        if (runMode == RunMode.File) {
+            return CommandOpResult.of(false, "file 类型项目没有运行状态");
+        }
         if (runMode == RunMode.Dsl) {
             List<String> status = this.runDsl(nodeProjectInfoModel, "status", (baseProcess, action) -> {
                 // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
-                String scriptId = baseProcess.getScriptId();
-                if (StrUtil.isEmpty(scriptId)) {
+                try {
+                    return DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action);
+                } catch (IllegalArgument2Exception argument2Exception) {
+                    log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
                     return null;
                 }
-                return DslScriptBuilder.syncRun(baseProcess, nodeProjectInfoModel, action);
             });
 
             return Optional.ofNullable(status)

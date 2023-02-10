@@ -28,6 +28,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.Const;
@@ -49,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 编辑项目
@@ -74,18 +76,15 @@ public class ManageEditProjectController extends BaseAgentController {
      * @param whitelistDirectory 白名单
      * @param previewData        预检查数据
      */
-    private void checkParameter(NodeProjectInfoModel projectInfo, String whitelistDirectory, boolean previewData) {
+    private NodeProjectInfoModel checkParameter(NodeProjectInfoModel projectInfo, String whitelistDirectory, boolean previewData) {
         String id = projectInfo.getId();
+        // 兼容 _
         String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
         Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "项目id 长度范围2-20（英文字母 、数字和下划线）");
         Assert.state(!Const.SYSTEM_ID.equals(id), "项目id " + Const.SYSTEM_ID + " 关键词被系统占用");
         // 运行模式
-        String runMode = getParameter("runMode");
-        RunMode runMode1 = RunMode.ClassPath;
-        try {
-            runMode1 = RunMode.valueOf(runMode);
-        } catch (Exception ignored) {
-        }
+        String runModeStr = getParameter("runMode");
+        RunMode runMode1 = EnumUtil.fromString(RunMode.class, runModeStr, RunMode.ClassPath);
         projectInfo.setRunMode(runMode1);
         // 监测
         if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.JavaExtDirsCp) {
@@ -126,6 +125,7 @@ public class ManageEditProjectController extends BaseAgentController {
         Assert.state(StrUtil.isNotEmpty(lib) && !StrUtil.SLASH.equals(lib) && !Validator.isChinese(lib), "项目路径不能为空,不能为顶级目录,不能包含中文");
 
         FileUtils.checkSlip(lib, e -> new IllegalArgumentException("项目路径存在提升目录问题"));
+        NodeProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
 
         // java 程序副本
         if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.Jar || runMode1 == RunMode.JarWar || runMode1 == RunMode.JavaExtDirsCp) {
@@ -154,6 +154,7 @@ public class ManageEditProjectController extends BaseAgentController {
         } else {
             projectInfo.setJavaCopyItemList(null);
         }
+        return exits;
     }
 
 
@@ -164,8 +165,7 @@ public class ManageEditProjectController extends BaseAgentController {
         boolean previewData = Convert.toBool(strPreviewData, false);
         String whitelistDirectory = projectInfo.getWhitelistDirectory();
         //
-        this.checkParameter(projectInfo, whitelistDirectory, previewData);
-
+        NodeProjectInfoModel exits = this.checkParameter(projectInfo, whitelistDirectory, previewData);
         String id = projectInfo.getId();
         //
         String allLib = projectInfo.allLib();
@@ -196,7 +196,7 @@ public class ManageEditProjectController extends BaseAgentController {
         // 判断 yml
         this.checkDslYml(projectInfo);
         //
-        return save(projectInfo, previewData);
+        return save(projectInfo, exits, previewData);
     }
 
     private void checkDslYml(NodeProjectInfoModel projectInfo) {
@@ -215,63 +215,58 @@ public class ManageEditProjectController extends BaseAgentController {
      * @param previewData 是否是预检查
      * @return 错误信息
      */
-    private JsonMessage<String> save(NodeProjectInfoModel projectInfo, boolean previewData) {
+    private JsonMessage<String> save(NodeProjectInfoModel projectInfo, NodeProjectInfoModel exits, boolean previewData) {
         projectInfo.setWorkspaceId(getWorkspaceId());
-        NodeProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
-        try {
-            this.checkPath(projectInfo);
-            RunMode runMode = projectInfo.getRunMode();
-            if (exits == null) {
-                // 检查运行中的tag 是否被占用
-                if (runMode != RunMode.File && runMode != RunMode.Dsl) {
-                    Assert.state(!AbstractProjectCommander.getInstance().isRun(projectInfo, null), "当前项目id已经被正在运行的程序占用");
-                }
-                if (previewData) {
-                    // 预检查数据
-                    return JsonMessage.success("检查通过");
-                } else {
-                    projectInfoService.addItem(projectInfo);
-                    return JsonMessage.success("新增成功！");
-                }
+
+        this.checkPath(projectInfo);
+        RunMode runMode = projectInfo.getRunMode();
+        if (exits == null) {
+            // 检查运行中的tag 是否被占用
+            if (runMode != RunMode.File && runMode != RunMode.Dsl) {
+                Assert.state(!AbstractProjectCommander.getInstance().isRun(projectInfo, null), "当前项目id已经被正在运行的程序占用");
             }
             if (previewData) {
                 // 预检查数据
                 return JsonMessage.success("检查通过");
             } else {
-                exits.setName(projectInfo.getName());
-                exits.setGroup(projectInfo.getGroup());
-                exits.setAutoStart(projectInfo.getAutoStart());
-                exits.setMainClass(projectInfo.getMainClass());
-                exits.setJvm(projectInfo.getJvm());
-                exits.setArgs(projectInfo.getArgs());
-                exits.setWorkspaceId(this.getWorkspaceId());
-                exits.setOutGivingProject(projectInfo.isOutGivingProject());
-                exits.setRunMode(runMode);
-                exits.setToken(projectInfo.getToken());
-                exits.setDslContent(projectInfo.getDslContent());
-                // 检查是否非法删除副本集
-                List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = exits.getJavaCopyItemList();
-                List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList1 = projectInfo.getJavaCopyItemList();
-                if (CollUtil.isNotEmpty(javaCopyItemList) && !CollUtil.containsAll(javaCopyItemList1, javaCopyItemList)) {
-                    // 重写了 equals
-                    return new JsonMessage<>(405, "修改中不能删除副本集、请到副本集中删除");
-                }
-                exits.setJavaCopyItemList(javaCopyItemList1);
-                exits.setJavaExtDirsCp(projectInfo.getJavaExtDirsCp());
-                // 移动到新路径
-                this.moveTo(exits, projectInfo);
-                // 最后才设置新的路径
-                exits.setLib(projectInfo.getLib());
-                exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
-                //
-                exits.setLog(projectInfo.getLog());
-                exits.setLogPath(projectInfo.getLogPath());
-                projectInfoService.updateItem(exits);
-                return JsonMessage.success("修改成功");
+                projectInfoService.addItem(projectInfo);
+                return JsonMessage.success("新增成功！");
             }
-        } catch (Exception e) {
-            log.error("保存数据异常", e);
-            return new JsonMessage<>(500, "保存数据异常:" + e.getMessage());
+        }
+        if (previewData) {
+            // 预检查数据
+            return JsonMessage.success("检查通过");
+        } else {
+            exits.setName(projectInfo.getName());
+            exits.setGroup(projectInfo.getGroup());
+            exits.setAutoStart(projectInfo.getAutoStart());
+            exits.setMainClass(projectInfo.getMainClass());
+            exits.setJvm(projectInfo.getJvm());
+            exits.setArgs(projectInfo.getArgs());
+            exits.setWorkspaceId(this.getWorkspaceId());
+            exits.setOutGivingProject(projectInfo.isOutGivingProject());
+            exits.setRunMode(runMode);
+            exits.setToken(projectInfo.getToken());
+            exits.setDslContent(projectInfo.getDslContent());
+            // 检查是否非法删除副本集
+            List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = exits.getJavaCopyItemList();
+            List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList1 = projectInfo.getJavaCopyItemList();
+            if (CollUtil.isNotEmpty(javaCopyItemList) && !CollUtil.containsAll(javaCopyItemList1, javaCopyItemList)) {
+                // 重写了 equals
+                return new JsonMessage<>(405, "修改中不能删除副本集、请到副本集中删除");
+            }
+            exits.setJavaCopyItemList(javaCopyItemList1);
+            exits.setJavaExtDirsCp(projectInfo.getJavaExtDirsCp());
+            // 移动到新路径
+            this.moveTo(exits, projectInfo);
+            // 最后才设置新的路径
+            exits.setLib(projectInfo.getLib());
+            exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
+            //
+            exits.setLog(projectInfo.getLog());
+            exits.setLogPath(projectInfo.getLogPath());
+            projectInfoService.updateItem(exits);
+            return JsonMessage.success("修改成功");
         }
     }
 
@@ -281,6 +276,8 @@ public class ManageEditProjectController extends BaseAgentController {
             File oldLib = FileUtil.file(old.allLib());
             File newLib = FileUtil.file(news.allLib());
             if (!FileUtil.equals(oldLib, newLib)) {
+                // 正在运行的项目不能修改路径
+                this.projectMustNotRun(old, "正在运行的项目不能修改路径");
                 if (oldLib.exists()) {
                     FileUtil.mkdir(newLib);
                     FileUtil.moveContent(oldLib, newLib, true);
@@ -294,6 +291,8 @@ public class ManageEditProjectController extends BaseAgentController {
             File oldLog = FileUtil.file(old.getLog());
             File newLog = FileUtil.file(news.getLog());
             if (!FileUtil.equals(oldLog, newLog)) {
+                // 正在运行的项目不能修改路径
+                this.projectMustNotRun(old, "正在运行的项目不能修改路径");
                 if (oldLog.exists()) {
                     FileUtil.mkParentDirs(newLog);
                     FileUtil.move(oldLog, newLog, true);
@@ -309,6 +308,18 @@ public class ManageEditProjectController extends BaseAgentController {
                 }
             }
         }
+    }
+
+    private void projectMustNotRun(NodeProjectInfoModel projectInfoModel, String msg) {
+        boolean run = AbstractProjectCommander.getInstance().isRun(projectInfoModel, null);
+        Assert.state(!run, msg);
+        List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = projectInfoModel.getJavaCopyItemList();
+        Optional.ofNullable(javaCopyItemList).ifPresent(javaCopyItems -> {
+            for (NodeProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItems) {
+                boolean run1 = AbstractProjectCommander.getInstance().isRun(projectInfoModel, javaCopyItem);
+                Assert.state(!run1, msg + " 副本 " + javaCopyItem.getName());
+            }
+        });
     }
 
     /**
@@ -354,33 +365,29 @@ public class ManageEditProjectController extends BaseAgentController {
             // 返回正常 200 状态码，考虑节点分发重复操作
             return JsonMessage.success("项目不存在");
         }
-        try {
-            NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
+        NodeProjectInfoModel.JavaCopyItem copyItem = nodeProjectInfoModel.findCopyItem(copyId);
 
-            if (copyItem == null) {
-                List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
-                Assert.state(CollUtil.isEmpty(javaCopyItemList), "当前项目存在副本不能直接删除");
-                // 运行判断
-                boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, null);
-                Assert.state(!run, "不能删除正在运行的项目");
-                this.thorough(thorough, nodeProjectInfoModel, null);
-                //
-                projectInfoService.deleteItem(nodeProjectInfoModel.getId());
-            } else {
-                boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, copyItem);
-                Assert.state(!run, "不能删除正在运行的项目副本");
-                //
-                this.thorough(thorough, nodeProjectInfoModel, copyItem);
-                //
-                boolean removeCopyItem = nodeProjectInfoModel.removeCopyItem(copyId);
-                Assert.state(removeCopyItem, "删除对应副本集不存在");
-                projectInfoService.updateItem(nodeProjectInfoModel);
-            }
-            return JsonMessage.success("删除成功！");
-        } catch (Exception e) {
-            log.error("删除异常", e);
-            return new JsonMessage<>(500, "删除异常：" + e.getMessage());
+        if (copyItem == null) {
+            List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = nodeProjectInfoModel.getJavaCopyItemList();
+            Assert.state(CollUtil.isEmpty(javaCopyItemList), "当前项目存在副本不能直接删除");
+            // 运行判断
+            boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, null);
+            Assert.state(!run, "不能删除正在运行的项目");
+            this.thorough(thorough, nodeProjectInfoModel, null);
+            //
+            projectInfoService.deleteItem(nodeProjectInfoModel.getId());
+        } else {
+            boolean run = AbstractProjectCommander.getInstance().isRun(nodeProjectInfoModel, copyItem);
+            Assert.state(!run, "不能删除正在运行的项目副本");
+            //
+            this.thorough(thorough, nodeProjectInfoModel, copyItem);
+            //
+            boolean removeCopyItem = nodeProjectInfoModel.removeCopyItem(copyId);
+            Assert.state(removeCopyItem, "删除对应副本集不存在");
+            projectInfoService.updateItem(nodeProjectInfoModel);
         }
+        return JsonMessage.success("删除成功！");
+
     }
 
     /**

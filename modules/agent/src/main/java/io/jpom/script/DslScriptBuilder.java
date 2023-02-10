@@ -36,6 +36,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
+import io.jpom.common.IllegalArgument2Exception;
 import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.data.NodeScriptModel;
@@ -47,7 +48,6 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.Assert;
 
 import java.io.File;
 import java.util.*;
@@ -200,14 +200,15 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     private static DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log) {
         NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
         String scriptId = scriptProcess.getScriptId();
-        Assert.hasText(scriptId, "请填写脚本模板id");
+        cn.hutool.core.lang.Assert.notBlank(scriptId, () -> new IllegalArgument2Exception("请填写脚本模板id"));
+
         NodeScriptModel item = nodeScriptServer.getItem(scriptId);
         Map<String, String> environment = DslScriptBuilder.environment(nodeProjectInfoModel, scriptProcess);
         File scriptFile;
         boolean autoDelete = false;
         if (item == null) {
             scriptFile = FileUtil.file(nodeProjectInfoModel.allLib(), scriptId);
-            Assert.state(FileUtil.isFile(scriptFile), "脚本模版不存在:" + scriptProcess.getScriptId());
+            cn.hutool.core.lang.Assert.isTrue(FileUtil.isFile(scriptFile), () -> new IllegalArgument2Exception("脚本模版不存在:" + scriptProcess.getScriptId()));
         } else {
             scriptFile = DslScriptBuilder.initScriptFile(item);
             autoDelete = true;
