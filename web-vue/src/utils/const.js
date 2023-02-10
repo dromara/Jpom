@@ -210,21 +210,21 @@ export const PROJECT_DSL_DEFATUL =
   "run:\r\n" +
   "  start:\r\n" +
   "#    scriptId: project.sh\r\n" +
-  "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
+  "    scriptId: \r\n" +
   "    scriptArgs: start\r\n" +
   "    scriptEnv:\r\n" +
   '      "boot_active": test\r\n' +
   "  status:\r\n" +
   "#    scriptId: project.sh\r\n" +
-  "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
+  "    scriptId: \r\n" +
   "    scriptArgs: status\r\n" +
   "  stop:\r\n" +
   "#    scriptId: project.sh\r\n" +
-  "    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
+  "    scriptId: \r\n" +
   "    scriptArgs: stop\r\n" +
   "#  restart:\r\n" +
   "##    scriptId: project.sh\r\n" +
-  "#    scriptId: eb16f693147b43a1b06f9eb96aed1bc7\r\n" +
+  "#    scriptId: \r\n" +
   "#    scriptArgs: restart\r\n" +
   "#    scriptEnv:\r\n" +
   '#      "boot_active": test\r\n' +
@@ -297,4 +297,15 @@ export function readJsonStrField(json, key) {
     //
   }
   return "";
+}
+
+export function randomStr(len = 2) {
+  const $chars = "ABCDEFGHJKMNPQRSTWXYZ0123456789";
+  /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+  const maxPos = $chars.length;
+  let repliccaId = "";
+  for (let i = 0; i < len; i++) {
+    repliccaId += $chars.charAt(Math.floor(Math.random() * maxPos));
+  }
+  return repliccaId;
 }

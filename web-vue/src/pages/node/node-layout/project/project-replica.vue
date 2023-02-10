@@ -1,10 +1,11 @@
 <template>
   <div class="node-full-content">
-    <div ref="filter" class="filter">
-      <a-button type="primary" @click="handleFilter">刷新</a-button>
-    </div>
+    <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+      <template #title>
+        <a-button type="primary" @click="handleFilter">刷新</a-button>
+      </template>
       <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
       <template slot="operation" slot-scope="text, record">
         <a-space>
@@ -140,7 +141,7 @@ export default {
 };
 </script>
 <style scoped>
-.filter {
+/* .filter {
   margin: 0 0 10px;
-}
+} */
 </style>

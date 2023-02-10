@@ -156,7 +156,23 @@
     <a-modal destroyOnClose v-model="editProjectVisible" width="60vw" title="编辑项目" @ok="handleEditProjectOk" :maskClosable="false">
       <a-form-model ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="项目 ID" prop="id">
-          <a-input :maxLength="50" v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
+          <a-input :maxLength="50" v-model="temp.id" v-if="temp.type === 'edit'" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
+          <template v-else>
+            <a-input-search
+              :maxLength="50"
+              v-model="temp.id"
+              placeholder="创建之后不能修改"
+              @search="
+                () => {
+                  this.temp = { ...this.temp, id: randomStr(6) };
+                }
+              "
+            >
+              <template slot="enterButton">
+                <a-button type="primary"> 随机生成 </a-button>
+              </template>
+            </a-input-search>
+          </template>
         </a-form-model-item>
 
         <a-form-model-item label="项目名称" prop="name">
@@ -411,7 +427,7 @@ import CustomSelect from "@/components/customSelect";
 // import Replica from "./project-replica";
 import { parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr } from "@/utils/const";
 
 import {
   deleteProject,
@@ -539,6 +555,7 @@ export default {
   },
   methods: {
     parseTime,
+    randomStr,
     // 页面引导
     introGuide() {
       this.$store.dispatch("tryOpenGuide", {
@@ -698,13 +715,7 @@ export default {
     },
     // 添加副本
     handleAddReplica() {
-      const $chars = "ABCDEFGHJKMNPQRSTWXYZ0123456789";
-      /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
-      const maxPos = $chars.length;
-      let repliccaId = "";
-      for (let i = 0; i < 2; i++) {
-        repliccaId += $chars.charAt(Math.floor(Math.random() * maxPos));
-      }
+      let repliccaId = randomStr();
       this.temp.javaCopyItemList.push({
         id: repliccaId,
         jvm: "",
