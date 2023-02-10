@@ -381,9 +381,20 @@ export default {
     },
     // 解绑
     handleUnbind(record) {
+      const html =
+        "<b style='font-size: 20px;'>真的要解绑脚本关联的节点么？</b>" +
+        "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
+        "<li>解绑不会真实请求节点删除脚本信息</b></li>" +
+        "<li>一般用于服务器无法连接且已经确定不再使用</li>" +
+        "<li>如果误操作会产生冗余数据！！！</li>" +
+        " </ul>";
+
+      const h = this.$createElement;
       this.$confirm({
-        title: "系统提示",
-        content: "真的要解绑脚本关联的节点么？解绑不会真实请求节点解绑,一般用于服务器无法连接且已经确定不再使用。如果误操作可能冗余数据",
+        title: "危险操作！！！",
+        content: h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]),
+        okButtonProps: { props: { type: "danger", size: "small" } },
+        cancelButtonProps: { props: { type: "primary" } },
         okText: "确认",
         cancelText: "取消",
         onOk: () => {

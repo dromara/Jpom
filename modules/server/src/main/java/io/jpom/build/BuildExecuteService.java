@@ -344,6 +344,9 @@ public class BuildExecuteService {
         private final Integer delay;
         /**
          * 触发类型
+         * 0: "手动",
+         * 1: "触发器",
+         * 2: "定时",
          */
         private final int triggerBuildType;
         /**
