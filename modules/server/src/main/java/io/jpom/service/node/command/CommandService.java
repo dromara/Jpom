@@ -40,6 +40,7 @@ import com.jcraft.jsch.ChannelExec;
 import io.jpom.common.BaseServerController;
 import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
+import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.CommandExecLogModel;
 import io.jpom.model.data.CommandModel;
 import io.jpom.model.data.SshModel;
@@ -269,7 +270,8 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             String command = commandModel.getCommand();
             String[] commands = StrUtil.splitToArray(command, StrUtil.LF);
             //
-            workspaceEnvVarService.formatCommand(commandModel.getWorkspaceId(), commands);
+            EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.formatCommand(commandModel.getWorkspaceId(), commands);
+            environmentMapBuilder.eachStr(s -> appendLine(outputStream, s));
             //
             Charset charset = sshModel.charset();
 
@@ -328,7 +330,7 @@ public class CommandService extends BaseWorkspaceService<CommandModel> implement
             outputStream.write(LINE_BYTES);
             outputStream.flush();
         } catch (IOException e) {
-            log.warn("command log append line:{}", e.getMessage());
+            log.error("command log append line", e);
         }
     }
 

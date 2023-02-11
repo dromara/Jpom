@@ -26,6 +26,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.model.script.ScriptExecuteLogModel;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.model.user.UserModel;
@@ -36,7 +37,7 @@ import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
-import io.jpom.socket.ScriptProcessBuilder;
+import io.jpom.socket.ServerScriptProcessBuilder;
 import io.jpom.util.SocketSessionUtil;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -84,8 +85,9 @@ public class ServerScriptHandler extends BaseProxyHandler {
 
                     String args = json.getString("args");
                     String executeId = this.createLog(attributes, scriptModel);
+                    json.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
                     json.put("executeId", executeId);
-                    ScriptProcessBuilder.addWatcher(scriptModel, executeId, args, session);
+                    ServerScriptProcessBuilder.addWatcher(scriptModel, executeId, args, session);
                     this.sendMsg(session, json.toString());
                     break;
                 }
@@ -96,7 +98,7 @@ public class ServerScriptHandler extends BaseProxyHandler {
                         session.close();
                         return null;
                     }
-                    ScriptProcessBuilder.stopRun(executeId);
+                    ServerScriptProcessBuilder.stopRun(executeId);
                     break;
                 }
                 default:
@@ -136,6 +138,6 @@ public class ServerScriptHandler extends BaseProxyHandler {
     public void destroy(WebSocketSession session) {
         //
         super.destroy(session);
-        ScriptProcessBuilder.stopWatcher(session);
+        ServerScriptProcessBuilder.stopWatcher(session);
     }
 }

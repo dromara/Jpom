@@ -242,9 +242,7 @@ public class BuildInfoController extends BaseServerController {
         } else if (releaseMethod1 == BuildReleaseMethod.Ssh) {
             this.formatSsh(jsonObject, request);
         } else if (releaseMethod1 == BuildReleaseMethod.Outgiving) {
-            String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_1");
-            Assert.hasText(releaseMethodDataId, "请选择分发项目");
-            jsonObject.put("releaseMethodDataId", releaseMethodDataId);
+            this.formatOutGiving(jsonObject);
         } else if (releaseMethod1 == BuildReleaseMethod.LocalCommand) {
             this.formatLocalCommand(jsonObject);
             jsonObject.put("releaseMethodDataId", "LocalCommand");
@@ -372,6 +370,14 @@ public class BuildInfoController extends BaseServerController {
         }
     }
 
+    private void formatOutGiving(JSONObject jsonObject) {
+        String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_1");
+        Assert.hasText(releaseMethodDataId, "请选择分发项目");
+        jsonObject.put("releaseMethodDataId", releaseMethodDataId);
+        //
+        this.checkProjectSecondaryDirectory(jsonObject);
+    }
+
     /**
      * 验证构建信息
      * 当发布方式为【项目】的时候
@@ -392,6 +398,11 @@ public class BuildInfoController extends BaseServerController {
         String clearOld = jsonObject.getString("clearOld");
         jsonObject.put("afterOpt", afterOpt1.getCode());
         jsonObject.put("clearOld", Convert.toBool(clearOld, false));
+        //
+        this.checkProjectSecondaryDirectory(jsonObject);
+    }
+
+    private void checkProjectSecondaryDirectory(JSONObject jsonObject) {
         //
         String projectSecondaryDirectory = jsonObject.getString("projectSecondaryDirectory");
         Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> {

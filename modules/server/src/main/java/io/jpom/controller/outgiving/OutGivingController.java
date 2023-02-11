@@ -24,7 +24,6 @@ package io.jpom.controller.outgiving;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -49,7 +48,6 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
-import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -210,10 +208,7 @@ public class OutGivingController extends BaseServerController {
         outGivingModel.setClearOld(Convert.toBool(getParameter("clearOld"), false));
         //
         String secondaryDirectory = getParameter("secondaryDirectory");
-        Opt.ofBlankAble(secondaryDirectory).ifPresent(s -> {
-            FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage()));
-            outGivingModel.setSecondaryDirectory(secondaryDirectory);
-        });
+        outGivingModel.setSecondaryDirectory(secondaryDirectory);
         outGivingModel.setUploadCloseFirst(Convert.toBool(getParameter("uploadCloseFirst"), false));
     }
 

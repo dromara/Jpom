@@ -45,6 +45,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.docker.DockerInfoModel;
@@ -59,7 +60,6 @@ import io.jpom.service.docker.DockerInfoService;
 import io.jpom.service.docker.DockerSwarmInfoService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
-import io.jpom.service.system.WorkspaceEnvVarService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.extconf.BuildExtConfig;
@@ -75,7 +75,10 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -97,7 +100,7 @@ public class ReleaseManage implements Runnable {
     private final BuildExtraModule buildExtraModule;
     private final String logId;
     private final BuildExecuteService buildExecuteService;
-    private Map<String, String> buildEnv;
+    private EnvironmentMapBuilder buildEnv;
 
     private LogRecorder logRecorder;
     private File resultFile;
@@ -109,19 +112,7 @@ public class ReleaseManage implements Runnable {
             this.logRecorder = LogRecorder.builder().file(logFile).build();
         }
         this.resultFile = buildExtraModule.resultDirFile(this.buildNumberId);
-        //BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, buildExtraModule.getResultDirFile());
-        //
-        if (buildEnv == null) {
-            this.buildEnv = new HashMap<>(10);
-            buildEnv.put("BUILD_ID", this.buildExtraModule.getId());
-            buildEnv.put("BUILD_NAME", this.buildExtraModule.getName());
-            //buildEnv.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
-            buildEnv.put("BUILD_NUMBER_ID", this.buildNumberId + StrUtil.EMPTY);
-        }
-//        envFileMap.put("BUILD_ID", this.buildExtraModule.getId());
-//        envFileMap.put("BUILD_NAME", this.buildExtraModule.getName());
         buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
-//        envFileMap.put("BUILD_NUMBER_ID", this.buildNumberId + StrUtil.EMPTY);
         this.buildExtConfig = SpringUtil.getBean(BuildExtConfig.class);
     }
 
@@ -198,27 +189,16 @@ public class ReleaseManage implements Runnable {
         return true;
     }
 
-
-    /**
-     * 格式化命令模版
-     *
-     * @param commands 命令
-     */
-    private Map<String, String> formatCommand(String[] commands) {
-        File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
-        //        File envFile = FileUtil.file(sourceFile, ".env");
-        Map<String, String> envFileMap = FileUtils.readEnvFile(sourceFile, this.buildExtraModule.getAttachEnv());
-        //
-        envFileMap.putAll(buildEnv);
-        //
-        for (int i = 0; i < commands.length; i++) {
-            commands[i] = StringUtil.formatStrByMap(commands[i], envFileMap);
-        }
-        //
-        WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
-        workspaceEnvVarService.formatCommand(this.buildExtraModule.getWorkspaceId(), commands);
-        return envFileMap;
-    }
+//
+//    /**
+//     * 格式化命令模版
+//     *
+//     * @param commands 命令
+//     */
+//    private Map<String, String> formatCommand(String[] commands) {
+//
+//        return envFileMap;
+//    }
 
     /**
      * 版本号递增
@@ -381,9 +361,7 @@ public class ReleaseManage implements Runnable {
         logRecorder.system("{} start exec", DateUtil.now());
 
         File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
-        Map<String, String> envFileMap = FileUtils.readEnvFile(sourceFile, this.buildExtraModule.getAttachEnv());
-        //
-        envFileMap.putAll(buildEnv);
+        Map<String, String> envFileMap = buildEnv.environment();
 
         InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
         String s1 = IoUtil.readUtf8(templateInputStream);
@@ -448,14 +426,19 @@ public class ReleaseManage implements Runnable {
         }
         // 执行命令
         String[] commands = StrUtil.splitToArray(this.buildExtraModule.getReleaseCommand(), StrUtil.LF);
-        if (commands == null || commands.length <= 0) {
+        if (ArrayUtil.isEmpty(commands)) {
             logRecorder.systemWarning("没有需要执行的ssh命令");
             return;
         }
         // 替换变量
-        this.formatCommand(commands);
+        //this.formatCommand(commands);
+        Map<String, String> envFileMap = buildEnv.environment();
         //
-        logRecorder.system("{} {} start exec", DateUtil.now(), item.getName());
+        for (int i = 0; i < commands.length; i++) {
+            commands[i] = StringUtil.formatStrByMap(commands[i], envFileMap);
+        }
+        //
+        logRecorder.system("开始执行 {} ssh 命令", item.getName());
         String s = sshService.exec(item, commands);
         logRecorder.info(s);
     }

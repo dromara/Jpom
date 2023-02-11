@@ -89,4 +89,6 @@ public class Const {
      */
     public static final String SYSTEM_ID = "system";
 
+    public static final String SOCKET_MSG_TAG = "JPOM_MSG";
+
 }

@@ -227,7 +227,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         // 返回数据
         if (resultData != null) {
             reqJson.putAll(resultData.toJson());
-            reqJson.put("JPOM_MSG", "JPOM_MSG");
+            reqJson.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
             log.info(reqJson.toString());
             SocketSessionUtil.send(session, reqJson.toString());
         }

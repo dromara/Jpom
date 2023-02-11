@@ -29,6 +29,7 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.JvmUtil;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +42,10 @@ import java.util.Optional;
  */
 public abstract class BaseUnixProjectCommander extends AbstractProjectCommander {
 
+
+    public BaseUnixProjectCommander(Charset fileCharset) {
+        super(fileCharset);
+    }
 
     @Override
     public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {

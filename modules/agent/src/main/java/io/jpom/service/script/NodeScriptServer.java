@@ -33,7 +33,7 @@ import io.jpom.cron.CronUtils;
 import io.jpom.cron.ICron;
 import io.jpom.model.data.NodeScriptExecLogModel;
 import io.jpom.model.data.NodeScriptModel;
-import io.jpom.script.ScriptProcessBuilder;
+import io.jpom.script.NodeScriptProcessBuilder;
 import io.jpom.service.BaseWorkspaceOptService;
 import io.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
@@ -129,7 +129,7 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
             nodeScriptExecLogModel.setTriggerExecType(1);
             execLogServer.addItem(nodeScriptExecLogModel);
             // 执行
-            ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs(), null);
+            NodeScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs(), null);
         }
     }
 
@@ -153,7 +153,7 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
         execLogServer.addItem(nodeScriptExecLogModel);
         String userArgs = StrUtil.emptyToDefault(args, scriptServerItem.getDefArgs());
         // 执行
-        ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), userArgs, null);
+        NodeScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), userArgs, null);
         return nodeScriptExecLogModel.getId();
     }
 
@@ -177,7 +177,7 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
         execLogServer.addItem(nodeScriptExecLogModel);
         String userArgs = StrUtil.emptyToDefault(args, scriptServerItem.getDefArgs());
         // 执行
-        ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), userArgs, paramMap);
+        NodeScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), userArgs, paramMap);
         return nodeScriptExecLogModel.getId();
     }
 }

@@ -29,11 +29,14 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
+import io.jpom.util.ILogRecorder;
 import io.jpom.util.LogRecorder;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * 脚本模版执行父类
@@ -41,7 +44,7 @@ import java.util.Date;
  * @author bwcx_jzy
  * @since 2022/1/15
  */
-public abstract class BaseRunScript implements AutoCloseable {
+public abstract class BaseRunScript implements AutoCloseable, ILogRecorder {
 
     /**
      * 日志文件
@@ -51,19 +54,45 @@ public abstract class BaseRunScript implements AutoCloseable {
     protected Process process;
     protected InputStream inputStream;
 
-    protected BaseRunScript(File logFile) {
+    protected BaseRunScript(File logFile, Charset charset) {
         this.logFile = logFile;
-        this.logRecorder = LogRecorder.builder().file(logFile).build();
+        this.logRecorder = LogRecorder.builder().file(logFile).charset(charset).build();
+    }
+
+    @Override
+    public String info(String info, Object... vals) {
+        String msg = logRecorder.info(info, vals);
+        this.msgCallback(msg);
+        return msg;
+    }
+
+    @Override
+    public String system(String info, Object... vals) {
+        String msg = logRecorder.system(info, vals);
+        this.msgCallback(msg);
+        return msg;
+    }
+
+    @Override
+    public String systemError(String info, Object... vals) {
+        String msg = logRecorder.systemError(info, vals);
+        this.msgCallback(msg);
+        return msg;
+    }
+
+    @Override
+    public String systemWarning(String info, Object... vals) {
+        String msg = logRecorder.systemWarning(info, vals);
+        this.msgCallback(msg);
+        return msg;
     }
 
     /**
-     * 响应
+     * 输出消息后的回调
      *
-     * @param line 信息
+     * @param msg 消息
      */
-    protected void handle(String line) {
-        logRecorder.info(line);
-    }
+    protected abstract void msgCallback(String msg);
 
     /**
      * 结束执行
@@ -74,12 +103,9 @@ public abstract class BaseRunScript implements AutoCloseable {
 
     @Override
     public void close() {
-        if (this.process != null) {
-            // windows 中不能正常关闭
-            IoUtil.close(inputStream);
-            this.process.destroy();
-            this.process = null;
-        }
+        // windows 中不能正常关闭
+        IoUtil.close(inputStream);
+        Optional.ofNullable(process).ifPresent(Process::destroy);
     }
 
     /**
@@ -98,14 +124,13 @@ public abstract class BaseRunScript implements AutoCloseable {
             // 文件大于一个小时才能被删除
             return between > 1;
         });
-        if (files == null) {
-            return;
-        }
-        for (File file : files) {
-            try {
-                FileUtil.del(file);
-            } catch (Exception ignored) {
+        Optional.ofNullable(files).ifPresent(files1 -> {
+            for (File file : files1) {
+                try {
+                    FileUtil.del(file);
+                } catch (Exception ignored) {
+                }
             }
-        }
+        });
     }
 }

@@ -41,6 +41,7 @@ import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.docker.DockerInfoModel;
@@ -218,17 +219,21 @@ public class BuildExecuteService {
             // load repository
             RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
             Assert.notNull(repositoryModel, "仓库信息不存在");
-            Map<String, String> env = workspaceEnvVarService.getEnv(buildInfoModel.getWorkspaceId());
+            EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(buildInfoModel.getWorkspaceId());
+            // 解析外部变量
+            environmentMapBuilder.putObjectArray(parametersEnv);
+            //
             BuildExecuteService.TaskData.TaskDataBuilder taskBuilder = BuildExecuteService.TaskData.builder()
                 .buildInfoModel(buildInfoModel)
                 .repositoryModel(repositoryModel)
                 .userModel(userModel)
                 .buildRemark(buildRemark)
-                .delay(delay).env(env)
+                .delay(delay)
+                .environmentMapBuilder(environmentMapBuilder)
                 .triggerBuildType(triggerBuildType);
             //
             Opt.ofBlankAble(checkRepositoryDiff).map(Convert::toBool).ifPresent(taskBuilder::checkRepositoryDiff);
-            this.runTask(taskBuilder.build(), buildExtraModule, parametersEnv);
+            this.runTask(taskBuilder.build(), buildExtraModule);
             String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
             return new JsonMessage<>(200, msg, buildInfoModel.getBuildId());
         }
@@ -239,9 +244,8 @@ public class BuildExecuteService {
      *
      * @param taskData         任务
      * @param buildExtraModule 构建更多配置信息
-     * @param parametersEnv    外部环境变量
      */
-    private void runTask(TaskData taskData, BuildExtraModule buildExtraModule, Object... parametersEnv) {
+    private void runTask(TaskData taskData, BuildExtraModule buildExtraModule) {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
         String logId = this.insertLog(buildExtraModule, taskData);
         // 创建线程池
@@ -256,7 +260,7 @@ public class BuildExecuteService {
         //BuildInfoManage manage = new BuildInfoManage(taskData);
         BUILD_MANAGE_MAP.put(buildInfoModel.getId(), build);
         // 输出提交任务日志, 提交到线程池中
-        threadPoolExecutor.execute(build.submitTask(parametersEnv));
+        threadPoolExecutor.execute(build.submitTask());
     }
 
     /**
@@ -355,8 +359,9 @@ public class BuildExecuteService {
         private String buildRemark;
         /**
          * 环境变量
+         * 工作空间环境变量
          */
-        private Map<String, String> env;
+        private EnvironmentMapBuilder environmentMapBuilder;
 
         /**
          * 仓库代码最后一次变动信息（ID，git 为 commit hash, svn 最后的版本号）
@@ -386,19 +391,11 @@ public class BuildExecuteService {
          */
         private Long submitTaskTime;
 
-        private final Map<String, String> buildEnv = new HashMap<>(10);
-        private Object[] parametersEnv;
-
         /**
          * 提交任务
          */
-        public BuildInfoManage submitTask(Object... parametersEnv) {
+        public BuildInfoManage submitTask() {
             submitTaskTime = SystemClock.now();
-            // 解析外部变量
-            for (int i = 0; i < parametersEnv.length; i += 2) {
-                buildEnv.put(StrUtil.toString(parametersEnv[i]), StrUtil.toString(parametersEnv[i + 1]));
-            }
-            this.parametersEnv = parametersEnv;
             //
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             File logFile = BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
@@ -562,11 +559,14 @@ public class BuildExecuteService {
                 logRecorder.system("删除构建缓存");
                 CommandUtil.systemFastDel(this.gitFile);
             }
+            // env file
+            Map<String, String> envFileMap = FileUtils.readEnvFile(this.gitFile, this.buildExtraModule.getAttachEnv());
+            taskData.environmentMapBuilder.putStr(envFileMap);
             //
-            buildEnv.put("BUILD_ID", this.buildExtraModule.getId());
-            buildEnv.put("BUILD_NAME", this.buildExtraModule.getName());
-            buildEnv.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
-            buildEnv.put("BUILD_NUMBER_ID", this.taskData.buildInfoModel.getBuildId() + "");
+            taskData.environmentMapBuilder.put("BUILD_ID", this.buildExtraModule.getId());
+            taskData.environmentMapBuilder.put("BUILD_NAME", this.buildExtraModule.getName());
+            taskData.environmentMapBuilder.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
+            taskData.environmentMapBuilder.put("BUILD_NUMBER_ID", this.taskData.buildInfoModel.getBuildId() + "");
             return true;
         }
 
@@ -579,7 +579,7 @@ public class BuildExecuteService {
             RepositoryModel repositoryModel = taskData.repositoryModel;
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             try {
-                String msg = "error";
+                String msg;
                 Integer repoTypeCode = repositoryModel.getRepoType();
                 RepositoryModel.RepoType repoType = EnumUtil.likeValueOf(RepositoryModel.RepoType.class, repoTypeCode);
                 Boolean checkRepositoryDiff = Optional.ofNullable(taskData.checkRepositoryDiff).orElse(buildExtraModule.getCheckRepositoryDiff());
@@ -607,7 +607,7 @@ public class BuildExecuteService {
                         // author bwcx_jzy 2022.11.28 map.put("branchName", newBranchName);
                         map.put("tagName", newBranchTagName);
                         //author bwcx_jzy 2022.11.28 buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
-                        buildEnv.put("BUILD_TAG_NAME", newBranchTagName);
+                        taskData.environmentMapBuilder.put("BUILD_TAG_NAME", newBranchTagName);
                         // 标签拉取模式
                         logRecorder.system("repository tag [{}] clone pull from {}", branchTagName, newBranchTagName);
                         result = (String[]) plugin.execute("pullByTag", map);
@@ -622,7 +622,7 @@ public class BuildExecuteService {
                         }
                         // 分支模式
                         map.put("branchName", newBranchName);
-                        buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
+                        taskData.environmentMapBuilder.put("BUILD_BRANCH_NAME", newBranchName);
                         logRecorder.system("repository [{}] clone pull from {}", branchName, newBranchName);
                         result = (String[]) plugin.execute("pull", map);
                     }
@@ -653,11 +653,17 @@ public class BuildExecuteService {
                         }
                     }
                     taskData.repositoryLastCommitId = result[0];
+                } else {
+                    logRecorder.systemError("不支持的类型：" + repoType);
+                    return false;
                 }
+                taskData.environmentMapBuilder.put("BUILD_COMMIT_ID", taskData.repositoryLastCommitId);
                 logRecorder.system(msg);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            // 输出环境变量
+            taskData.environmentMapBuilder.eachStr(s -> logRecorder.system(s));
             return true;
         }
 
@@ -689,7 +695,7 @@ public class BuildExecuteService {
             map.put("binds", ObjectUtil.defaultIfNull(dockerYmlDsl.getBinds(), new ArrayList<>()));
 
             Map<String, String> dockerEnv = ObjectUtil.defaultIfNull(dockerYmlDsl.getEnv(), new HashMap<>(10));
-            Map<String, String> env = taskData.env;
+            Map<String, String> env = taskData.environmentMapBuilder.environment();
             env.putAll(dockerEnv);
             env.put("JPOM_BUILD_ID", buildInfoModelId);
             env.put("JPOM_WORKING_DIR", workingDir);
@@ -729,12 +735,7 @@ public class BuildExecuteService {
                 //this.buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
                 return false;
             }
-            Map<String, String> environment = new HashMap<>(10);
-            environment.putAll(taskData.env);
-            // env file
-            Map<String, String> envFileMap = FileUtils.readEnvFile(this.gitFile, this.buildExtraModule.getAttachEnv());
-            environment.putAll(envFileMap);
-            environment.putAll(buildEnv);
+            Map<String, String> environment = taskData.environmentMapBuilder.environment();
 
             InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
             String s1 = IoUtil.readUtf8(templateInputStream);
@@ -769,7 +770,7 @@ public class BuildExecuteService {
                 .buildExtraModule(buildExtraModule)
                 .userModel(userModel)
                 .logId(logId)
-                .buildEnv(buildEnv)
+                .buildEnv(taskData.environmentMapBuilder)
                 .buildExecuteService(buildExecuteService)
                 .logRecorder(logRecorder).build();
             try {
@@ -948,12 +949,6 @@ public class BuildExecuteService {
         private boolean asyncWebHooks(String type, Object... other) {
             BuildInfoModel buildInfoModel = taskData.buildInfoModel;
             Map<String, Object> map = new HashMap<>(10);
-            Optional.ofNullable(this.parametersEnv).ifPresent(objects -> {
-                // 解析外部变量
-                for (int i = 0; i < objects.length; i += 2) {
-                    map.put(StrUtil.toString(objects[i]), objects[i + 1]);
-                }
-            });
             //
             for (int i = 0; i < other.length; i += 2) {
                 map.put(other[i].toString(), other[i + 1]);
@@ -1015,14 +1010,7 @@ public class BuildExecuteService {
             }
             logRecorder.system("开始执行事件脚本： {}", type);
             // 环境变量
-            Map<String, String> environment = new HashMap<>(map.size());
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                Object value = entry.getValue();
-                if (value == null) {
-                    continue;
-                }
-                environment.put(entry.getKey(), StrUtil.toStringOrNull(value));
-            }
+            Map<String, String> environment = taskData.environmentMapBuilder.environment(map);
             ScriptExecuteLogModel logModel = buildExecuteService.scriptExecuteLogServer.create(scriptModel, 1);
             File logFile = scriptModel.logFile(logModel.getId());
             File scriptFile = null;
@@ -1033,6 +1021,9 @@ public class BuildExecuteService {
                 scriptFile = scriptModel.scriptFile();
                 int waitFor = JpomApplication.getInstance().execScript(scriptModel.getContext(), file -> {
                     try {
+                        // 输出环境变量
+                        taskData.environmentMapBuilder.eachStr(s -> logRecorder.system(s), map);
+                        //
                         return CommandUtil.execWaitFor(file, null, environment, null, (s, process) -> {
                             logRecorder.info(s);
                             scriptLog.info(s);

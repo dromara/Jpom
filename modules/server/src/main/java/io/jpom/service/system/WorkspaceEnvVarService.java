@@ -27,12 +27,12 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import io.jpom.common.ServerConst;
+import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.WorkspaceEnvVarModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,15 +49,16 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
      * @param workspaceId 工作空间ID
      * @return map
      */
-    public Map<String, String> getEnv(String workspaceId) {
+    public EnvironmentMapBuilder getEnv(String workspaceId) {
         Entity entity = Entity.create();
         entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
         List<WorkspaceEnvVarModel> list = super.listByEntity(entity);
-        Map<String, String> map = CollStreamUtil.toMap(list, WorkspaceEnvVarModel::getName, WorkspaceEnvVarModel::getValue);
+        Map<String, EnvironmentMapBuilder.Item> map = CollStreamUtil.toMap(list, WorkspaceEnvVarModel::getName, workspaceEnvVarModel -> {
+            Integer privacy = workspaceEnvVarModel.getPrivacy();
+            return new EnvironmentMapBuilder.Item(workspaceEnvVarModel.getValue(), privacy != null && privacy == 1);
+        });
         // java.lang.UnsupportedOperationException
-        HashMap<String, String> hashMap = new HashMap<>(CollUtil.size(list) + 10);
-        hashMap.putAll(map);
-        return hashMap;
+        return EnvironmentMapBuilder.builder(map);
     }
 
     /**
@@ -83,12 +84,14 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
         return workspaceEnvVarModel.getValue();
     }
 
-    public void formatCommand(String workspaceId, String[] commands) {
+    public EnvironmentMapBuilder formatCommand(String workspaceId, String[] commands) {
         WorkspaceEnvVarModel workspaceEnvVarModel = new WorkspaceEnvVarModel();
         workspaceEnvVarModel.setWorkspaceId(workspaceId);
-        Map<String, String> evn = this.getEnv(workspaceId);
+        EnvironmentMapBuilder mapBuilder = this.getEnv(workspaceId);
+        Map<String, String> evn = mapBuilder.environment();
         for (int i = 0; i < commands.length; i++) {
             commands[i] = StringUtil.formatStrByMap(commands[i], evn);
         }
+        return mapBuilder;
     }
 }

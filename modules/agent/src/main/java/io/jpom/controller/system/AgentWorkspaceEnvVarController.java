@@ -58,13 +58,15 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
     @PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<Object> updateWorkspaceEnvVar(@ValidatorItem String name,
                                                      @ValidatorItem String value,
-                                                     @ValidatorItem String description) {
+                                                     @ValidatorItem String description,
+                                                     Integer privacy) {
         String workspaceId = getWorkspaceId();
         synchronized (AgentWorkspaceEnvVarController.class) {
             WorkspaceEnvVarModel.WorkspaceEnvVarItemModel workspaceEnvVarModel = new WorkspaceEnvVarModel.WorkspaceEnvVarItemModel();
             workspaceEnvVarModel.setName(name);
             workspaceEnvVarModel.setValue(value);
             workspaceEnvVarModel.setDescription(description);
+            workspaceEnvVarModel.setPrivacy(privacy);
             //
             WorkspaceEnvVarModel item = agentWorkspaceEnvVarService.getItem(workspaceId);
             if (null == item) {

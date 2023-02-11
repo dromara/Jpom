@@ -27,6 +27,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Builder;
 import lombok.Getter;
@@ -45,7 +46,7 @@ import java.nio.charset.Charset;
 @Builder
 @Slf4j
 @Getter
-public class LogRecorder {
+public class LogRecorder implements ILogRecorder {
     /**
      * 文件
      */
@@ -56,10 +57,7 @@ public class LogRecorder {
     private Charset charset;
 
     public Charset getCharset() {
-        if (charset == null) {
-            return CharsetUtil.CHARSET_UTF_8;
-        }
-        return charset;
+        return ObjectUtil.defaultIfNull(this.charset, CharsetUtil.CHARSET_UTF_8);
     }
 
     /**
@@ -80,9 +78,10 @@ public class LogRecorder {
      *
      * @param info 日志
      */
-    public void info(String info, Object... vals) {
+    public String info(String info, Object... vals) {
         String format = StrUtil.format(info, vals);
         FileUtil.appendLines(CollectionUtil.toList(format), this.file, this.getCharset());
+        return format;
     }
 
     /**
@@ -90,8 +89,8 @@ public class LogRecorder {
      *
      * @param info 日志
      */
-    public void system(String info, Object... vals) {
-        this.info("[SYSTEM-INFO] " + info, vals);
+    public String system(String info, Object... vals) {
+        return this.info("[SYSTEM-INFO] " + info, vals);
     }
 
     /**
@@ -99,8 +98,8 @@ public class LogRecorder {
      *
      * @param info 日志
      */
-    public void systemError(String info, Object... vals) {
-        this.info("[SYSTEM-ERROR] " + info, vals);
+    public String systemError(String info, Object... vals) {
+        return this.info("[SYSTEM-ERROR] " + info, vals);
     }
 
     /**
@@ -108,8 +107,8 @@ public class LogRecorder {
      *
      * @param info 日志
      */
-    public void systemWarning(String info, Object... vals) {
-        this.info("[SYSTEM-WARNING] " + info, vals);
+    public String systemWarning(String info, Object... vals) {
+        return this.info("[SYSTEM-WARNING] " + info, vals);
     }
 
     /**

@@ -37,7 +37,7 @@ import io.jpom.model.user.UserModel;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
 import io.jpom.service.user.TriggerTokenLogServer;
-import io.jpom.socket.ScriptProcessBuilder;
+import io.jpom.socket.ServerScriptProcessBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -104,7 +104,7 @@ public class ServerScriptTriggerApiController extends BaseJpomController {
             // 创建记录
             ScriptExecuteLogModel nodeScriptExecLogModel = scriptExecuteLogServer.create(item, 2);
             // 执行
-            ScriptProcessBuilder.create(item, nodeScriptExecLogModel.getId(), item.getDefArgs(), newParamMap);
+            ServerScriptProcessBuilder.create(item, nodeScriptExecLogModel.getId(), item.getDefArgs(), newParamMap);
             //
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("logId", nodeScriptExecLogModel.getId());
@@ -166,7 +166,7 @@ public class ServerScriptTriggerApiController extends BaseJpomController {
                     // 创建记录
                     ScriptExecuteLogModel nodeScriptExecLogModel = scriptExecuteLogServer.create(item, 2);
                     // 执行
-                    ScriptProcessBuilder.create(item, nodeScriptExecLogModel.getId(), item.getDefArgs());
+                    ServerScriptProcessBuilder.create(item, nodeScriptExecLogModel.getId(), item.getDefArgs());
                     jsonObject.put("logId", nodeScriptExecLogModel.getId());
                 } catch (Exception e) {
                     log.error("触发自动执行命令模版异常", e);

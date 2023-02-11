@@ -20,66 +20,47 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.model.system;
-
-import io.jpom.model.BaseModel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-import java.util.HashMap;
-import java.util.Map;
+package io.jpom.util;
 
 /**
- * @author lidaofu
- * @since 2022/3/8
+ * @author bwcx_jzy
+ * @since 2023/2/11
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-public class WorkspaceEnvVarModel extends BaseModel {
-
-    private Map<String, WorkspaceEnvVarItemModel> varData;
+public interface ILogRecorder {
 
     /**
-     * 更新变量
+     * 记录单行日志
      *
-     * @param name                 变量名称
-     * @param workspaceEnvVarModel 变量信息
+     * @param info 日志
+     * @param vals 变量参数
+     * @return 格式化后的字符串
      */
-    public void put(String name, WorkspaceEnvVarItemModel workspaceEnvVarModel) {
-        if (varData == null) {
-            varData = new HashMap<>(2);
-        }
-        varData.put(name, workspaceEnvVarModel);
-    }
+    String info(String info, Object... vals);
 
     /**
-     * 删除 变量
+     * 记录单行日志
      *
-     * @param name 名称
+     * @param info 日志
+     * @param vals 变量参数
+     * @return 格式化后的字符串
      */
-    public void remove(String name) {
-        if (varData == null) {
-            return;
-        }
-        varData.remove(name);
-    }
+    String system(String info, Object... vals);
 
     /**
-     * @author lidaofu
-     * @since 2022/3/8
+     * 记录单行日志
+     *
+     * @param info 日志
+     * @param vals 变量参数
+     * @return 格式化后的字符串
      */
-    @Data
-    public static class WorkspaceEnvVarItemModel {
+    String systemError(String info, Object... vals);
 
-        private String name;
-
-        private String value;
-
-        private String description;
-
-        /**
-         * 隐私变量{1，隐私变量，0 非隐私变量（明文回显）}
-         */
-        private Integer privacy;
-    }
+    /**
+     * 记录单行日志
+     *
+     * @param info 日志
+     * @param vals 变量参数
+     * @return 格式化后的字符串
+     */
+    String systemWarning(String info, Object... vals);
 }

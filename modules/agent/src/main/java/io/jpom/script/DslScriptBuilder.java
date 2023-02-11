@@ -22,14 +22,12 @@
  */
 package io.jpom.script;
 
-import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -37,12 +35,13 @@ import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.common.IllegalArgument2Exception;
+import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.DslYmlDto;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.data.NodeScriptModel;
-import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.service.script.NodeScriptServer;
 import io.jpom.service.system.AgentWorkspaceEnvVarService;
+import io.jpom.system.AgentConfig;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
@@ -50,7 +49,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.util.*;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -68,12 +69,16 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     private String action;
     private File scriptFile;
     private boolean autoDelete;
-    private Map<String, String> environment;
+    private EnvironmentMapBuilder environmentMapBuilder;
 
-    private DslScriptBuilder(String action, Map<String, String> environment, String args, String log) {
-        super(FileUtil.file(log));
+    private DslScriptBuilder(String action,
+                             EnvironmentMapBuilder environmentMapBuilder,
+                             String args,
+                             String log,
+                             Charset charset) {
+        super(FileUtil.file(log), charset);
         this.action = action;
-        this.environment = environment;
+        this.environmentMapBuilder = environmentMapBuilder;
         this.args = args;
     }
 
@@ -88,7 +93,9 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         command.add(0, script);
         CommandUtil.paddingPrefix(command);
         log.debug(CollUtil.join(command, StrUtil.SPACE));
-        Optional.ofNullable(environment).ifPresent(map -> processBuilder.environment().putAll(map));
+        processBuilder
+            .environment()
+            .putAll(environmentMapBuilder.environment());
         processBuilder.directory(FileUtil.getParent(scriptFile, 1));
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
@@ -99,28 +106,27 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
     public void run() {
         try {
             ProcessBuilder processBuilder = this.init();
+            environmentMapBuilder.eachStr(this::info);
             //
+            this.system("开始执行: {}", this.action);
             process = processBuilder.start();
             inputStream = process.getInputStream();
-            IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) DslScriptBuilder.this::handle);
+            IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> {
+                String formatLine = formatLine(line);
+                this.info(formatLine);
+            });
             //
             int waitFor = process.waitFor();
             //
-            if (waitFor != 0) {
-                this.handle(StrUtil.format("execute done: {}", waitFor));
-            }
+            this.system("执行结束: {} {}", this.action, waitFor);
         } catch (Exception e) {
             log.error("执行异常", e);
-            this.handle("执行异常：" + e.getMessage());
+            this.systemError("执行异常：" + e.getMessage());
         } finally {
             this.close();
         }
     }
 
-    @Override
-    protected void handle(String line) {
-        super.handle(this.formatLine(line));
-    }
 
     private String formatLine(String line) {
         return StrUtil.format("{} [{}] - {}", DateTime.now().toString(DatePattern.NORM_DATETIME_MS_FORMAT), this.action, line);
@@ -140,10 +146,8 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> result.add(this.formatLine(line)));
             //
             int waitFor = process.waitFor();
-            if (waitFor != 0) {
-                // 插入第一行
-                result.add(0, this.formatLine(StrUtil.format("execute done: {}", waitFor)));
-            }
+            // 插入第一行
+            result.add(0, this.formatLine(StrUtil.format("执行结束: {}", waitFor)));
             //
             return result;
         } catch (Exception e) {
@@ -157,6 +161,11 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
     @Override
     protected void end(String msg) {
+
+    }
+
+    @Override
+    protected void msgCallback(String msg) {
 
     }
 
@@ -199,11 +208,13 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
 
     private static DslScriptBuilder create(DslYmlDto.BaseProcess scriptProcess, NodeProjectInfoModel nodeProjectInfoModel, String action, String log) {
         NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
+        AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
+        AgentConfig.ProjectConfig.LogConfig logConfig = agentConfig.getProject().getLog();
         String scriptId = scriptProcess.getScriptId();
         cn.hutool.core.lang.Assert.notBlank(scriptId, () -> new IllegalArgument2Exception("请填写脚本模板id"));
 
         NodeScriptModel item = nodeScriptServer.getItem(scriptId);
-        Map<String, String> environment = DslScriptBuilder.environment(nodeProjectInfoModel, scriptProcess);
+        EnvironmentMapBuilder environment = DslScriptBuilder.environment(nodeProjectInfoModel, scriptProcess);
         File scriptFile;
         boolean autoDelete = false;
         if (item == null) {
@@ -211,9 +222,10 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             cn.hutool.core.lang.Assert.isTrue(FileUtil.isFile(scriptFile), () -> new IllegalArgument2Exception("脚本模版不存在:" + scriptProcess.getScriptId()));
         } else {
             scriptFile = DslScriptBuilder.initScriptFile(item);
+            // 系统生成的脚本需要自动删除
             autoDelete = true;
         }
-        DslScriptBuilder builder = new DslScriptBuilder(action, environment, scriptProcess.getScriptArgs(), log);
+        DslScriptBuilder builder = new DslScriptBuilder(action, environment, scriptProcess.getScriptArgs(), log, logConfig.getFileCharset());
         builder.setScriptFile(scriptFile);
         builder.setAutoDelete(autoDelete);
         return builder;
@@ -234,21 +246,16 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
         return scriptFile;
     }
 
-    private static Map<String, String> environment(NodeProjectInfoModel nodeProjectInfoModel, DslYmlDto.BaseProcess scriptProcess) {
-        HashMap<String, String> env = MapUtil.newHashMap();
+    private static EnvironmentMapBuilder environment(NodeProjectInfoModel nodeProjectInfoModel, DslYmlDto.BaseProcess scriptProcess) {
         //
         AgentWorkspaceEnvVarService workspaceService = SpringUtil.getBean(AgentWorkspaceEnvVarService.class);
-        WorkspaceEnvVarModel item = workspaceService.getItem(nodeProjectInfoModel.getWorkspaceId());
-        Optional.ofNullable(item)
-            .map(WorkspaceEnvVarModel::getVarData)
-            .map(map -> CollStreamUtil.toMap(map.values(), WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getName, WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getValue))
-            .ifPresent(env::putAll);
-        //
-        Optional.ofNullable(scriptProcess.getScriptEnv()).ifPresent(env::putAll);
-        //
-        env.put("PROJECT_ID", nodeProjectInfoModel.getId());
-        env.put("PROJECT_NAME", nodeProjectInfoModel.getName());
-        env.put("PROJECT_PATH", nodeProjectInfoModel.allLib());
-        return env;
+        EnvironmentMapBuilder environmentMapBuilder = workspaceService.getEnv(nodeProjectInfoModel.getWorkspaceId());
+
+        environmentMapBuilder
+            .putStr(scriptProcess.getScriptEnv())
+            .put("PROJECT_ID", nodeProjectInfoModel.getId())
+            .put("PROJECT_NAME", nodeProjectInfoModel.getName())
+            .put("PROJECT_PATH", nodeProjectInfoModel.allLib());
+        return environmentMapBuilder;
     }
 }
