@@ -23,11 +23,13 @@
 package io.jpom.model.outgiving;
 
 import cn.hutool.core.comparator.CompareUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseGroupModel;
+import io.jpom.util.FileUtils;
 import io.jpom.util.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -108,6 +110,12 @@ public class OutGivingModel extends BaseGroupModel {
         return outGivingProject != null && outGivingProject;
     }
 
+    public void setSecondaryDirectory(String secondaryDirectory) {
+        this.secondaryDirectory = Opt.ofBlankAble(secondaryDirectory).map(s -> {
+            FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage()));
+            return s;
+        }).orElse(StrUtil.EMPTY);
+    }
 
     public List<OutGivingNodeProject> outGivingNodeProjectList() {
         List<OutGivingNodeProject> outGivingNodeProjects = StringUtil.jsonConvertArray(outGivingNodeProjectList, OutGivingNodeProject.class);

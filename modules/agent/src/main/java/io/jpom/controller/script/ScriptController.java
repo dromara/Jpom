@@ -35,7 +35,7 @@ import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.data.NodeScriptExecLogModel;
 import io.jpom.model.data.NodeScriptModel;
-import io.jpom.script.ScriptProcessBuilder;
+import io.jpom.script.NodeScriptProcessBuilder;
 import io.jpom.service.script.NodeScriptExecLogServer;
 import io.jpom.service.script.NodeScriptServer;
 import io.jpom.util.CommandUtil;
@@ -150,7 +150,7 @@ public class ScriptController extends BaseAgentController {
 
         JSONObject data = FileUtils.readLogFile(logFile, line);
         // 运行中
-        data.put("run", ScriptProcessBuilder.isRun(executeId));
+        data.put("run", NodeScriptProcessBuilder.isRun(executeId));
         return JsonMessage.success("ok", data);
     }
 

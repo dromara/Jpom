@@ -29,6 +29,7 @@ import io.jpom.common.commander.BaseUnixProjectCommander;
 import io.jpom.model.system.NetstatModel;
 import io.jpom.util.CommandUtil;
 
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -40,43 +41,47 @@ import java.util.stream.Collectors;
  */
 public class LinuxProjectCommander extends BaseUnixProjectCommander {
 
-	@Override
-	public List<NetstatModel> listNetstat(int pId, boolean listening) {
-		String cmd;
-		if (listening) {
-			cmd = "netstat -antup | grep " + pId + " |grep \"LISTEN\" | head -20";
-		} else {
-			cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -20";
-		}
-		return this.listNetstat(cmd);
-	}
+    public LinuxProjectCommander(Charset fileCharset) {
+        super(fileCharset);
+    }
 
-	protected List<NetstatModel> listNetstat(String cmd) {
-		String result = CommandUtil.execSystemCommand(cmd);
-		List<String> netList = StrSplitter.splitTrim(result, StrUtil.LF, true);
-		if (CollUtil.isEmpty(netList)) {
-			return null;
-		}
-		return netList.stream().map(str -> {
-			List<String> list = StrSplitter.splitTrim(str, " ", true);
-			if (list.size() < 5) {
-				return null;
-			}
-			NetstatModel netstatModel = new NetstatModel();
-			netstatModel.setProtocol(list.get(0));
-			netstatModel.setReceive(list.get(1));
-			netstatModel.setSend(list.get(2));
-			netstatModel.setLocal(list.get(3));
-			netstatModel.setForeign(list.get(4));
-			if ("tcp".equalsIgnoreCase(netstatModel.getProtocol())) {
-				netstatModel.setStatus(CollUtil.get(list, 5));
-				netstatModel.setName(CollUtil.get(list, 6));
-			} else {
-				netstatModel.setStatus(StrUtil.DASHED);
-				netstatModel.setName(CollUtil.get(list, 5));
-			}
+    @Override
+    public List<NetstatModel> listNetstat(int pId, boolean listening) {
+        String cmd;
+        if (listening) {
+            cmd = "netstat -antup | grep " + pId + " |grep \"LISTEN\" | head -20";
+        } else {
+            cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -20";
+        }
+        return this.listNetstat(cmd);
+    }
 
-			return netstatModel;
-		}).filter(Objects::nonNull).collect(Collectors.toList());
-	}
+    protected List<NetstatModel> listNetstat(String cmd) {
+        String result = CommandUtil.execSystemCommand(cmd);
+        List<String> netList = StrSplitter.splitTrim(result, StrUtil.LF, true);
+        if (CollUtil.isEmpty(netList)) {
+            return null;
+        }
+        return netList.stream().map(str -> {
+            List<String> list = StrSplitter.splitTrim(str, " ", true);
+            if (list.size() < 5) {
+                return null;
+            }
+            NetstatModel netstatModel = new NetstatModel();
+            netstatModel.setProtocol(list.get(0));
+            netstatModel.setReceive(list.get(1));
+            netstatModel.setSend(list.get(2));
+            netstatModel.setLocal(list.get(3));
+            netstatModel.setForeign(list.get(4));
+            if ("tcp".equalsIgnoreCase(netstatModel.getProtocol())) {
+                netstatModel.setStatus(CollUtil.get(list, 5));
+                netstatModel.setName(CollUtil.get(list, 6));
+            } else {
+                netstatModel.setStatus(StrUtil.DASHED);
+                netstatModel.setName(CollUtil.get(list, 5));
+            }
+
+            return netstatModel;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+    }
 }

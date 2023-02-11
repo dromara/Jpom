@@ -40,6 +40,8 @@
         <start-class>io.jpom.JpomAgentApplication</start-class>
         <!--当前程序兼容 jpom 最新版本号-->
         <jpom-min-version>1.0.0</jpom-min-version>
+
+        <oshi.version>6.4.0</oshi.version>
     </properties>
     <dependencies>
         <dependency>
@@ -70,6 +72,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core</artifactId>
+            <version>${oshi.version}</version>
         </dependency>
 
     </dependencies>

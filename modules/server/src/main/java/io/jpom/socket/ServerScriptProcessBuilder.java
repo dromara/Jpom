@@ -23,7 +23,6 @@
 package io.jpom.socket;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
@@ -32,7 +31,9 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
+import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
+import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.script.ScriptModel;
 import io.jpom.script.BaseRunScript;
 import io.jpom.service.system.WorkspaceEnvVarService;
@@ -54,24 +55,26 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 2022/1/19
  */
 @Slf4j
-public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
+public class ServerScriptProcessBuilder extends BaseRunScript implements Runnable {
     /**
      * 执行中的缓存
      */
-    private static final ConcurrentHashMap<String, ScriptProcessBuilder> FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, ServerScriptProcessBuilder> FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
     private final ProcessBuilder processBuilder;
     private final Set<WebSocketSession> sessions = new HashSet<>();
     private final String executeId;
     private final File scriptFile;
 
+    private final EnvironmentMapBuilder environmentMapBuilder;
 
-    private ScriptProcessBuilder(ScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
-        super(nodeScriptModel.logFile(executeId));
+    private ServerScriptProcessBuilder(ScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
+        super(nodeScriptModel.logFile(executeId), CharsetUtil.CHARSET_UTF_8);
         this.executeId = executeId;
         //
         WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
-        Map<String, String> env = workspaceEnvVarService.getEnv(nodeScriptModel.getWorkspaceId());
+        environmentMapBuilder = workspaceEnvVarService.getEnv(nodeScriptModel.getWorkspaceId());
+        environmentMapBuilder.putStr(paramMap);
         scriptFile = nodeScriptModel.scriptFile();
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
@@ -83,10 +86,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
         Map<String, String> environment = processBuilder.environment();
-        environment.putAll(env);
-        if (paramMap != null) {
-            environment.putAll(paramMap);
-        }
+        environment.putAll(environmentMapBuilder.environment());
         processBuilder.directory(scriptFile.getParentFile());
     }
 
@@ -97,7 +97,7 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
      * @param executeId       执行ID
      * @param args            参数
      */
-    public static ScriptProcessBuilder create(ScriptModel nodeScriptModel, String executeId, String args) {
+    public static ServerScriptProcessBuilder create(ScriptModel nodeScriptModel, String executeId, String args) {
         return create(nodeScriptModel, executeId, args, null);
     }
 
@@ -109,11 +109,11 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
      * @param args            参数
      * @param paramMap        环境变量参数
      */
-    public static ScriptProcessBuilder create(ScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
+    public static ServerScriptProcessBuilder create(ScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
         return FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.computeIfAbsent(executeId, file1 -> {
-            ScriptProcessBuilder scriptProcessBuilder1 = new ScriptProcessBuilder(nodeScriptModel, executeId, args, paramMap);
-            ThreadUtil.execute(scriptProcessBuilder1);
-            return scriptProcessBuilder1;
+            ServerScriptProcessBuilder serverScriptProcessBuilder1 = new ServerScriptProcessBuilder(nodeScriptModel, executeId, args, paramMap);
+            ThreadUtil.execute(serverScriptProcessBuilder1);
+            return serverScriptProcessBuilder1;
         });
     }
 
@@ -126,12 +126,12 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
      * @param session         会话
      */
     public static void addWatcher(ScriptModel nodeScriptModel, String executeId, String args, WebSocketSession session) {
-        ScriptProcessBuilder scriptProcessBuilder = create(nodeScriptModel, executeId, args);
+        ServerScriptProcessBuilder serverScriptProcessBuilder = create(nodeScriptModel, executeId, args);
         //
-        if (scriptProcessBuilder.sessions.add(session)) {
-            if (FileUtil.exist(scriptProcessBuilder.logFile)) {
+        if (serverScriptProcessBuilder.sessions.add(session)) {
+            if (FileUtil.exist(serverScriptProcessBuilder.logFile)) {
                 // 读取之前的信息并发送
-                FileUtil.readLines(scriptProcessBuilder.logFile, CharsetUtil.CHARSET_UTF_8, (LineHandler) line -> {
+                FileUtil.readLines(serverScriptProcessBuilder.logFile, CharsetUtil.CHARSET_UTF_8, (LineHandler) line -> {
                     try {
                         SocketSessionUtil.send(session, line);
                     } catch (IOException e) {
@@ -158,9 +158,9 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
      * @param session 会话
      */
     public static void stopWatcher(WebSocketSession session) {
-        Collection<ScriptProcessBuilder> scriptProcessBuilders = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.values();
-        for (ScriptProcessBuilder scriptProcessBuilder : scriptProcessBuilders) {
-            Set<WebSocketSession> sessions = scriptProcessBuilder.sessions;
+        Collection<ServerScriptProcessBuilder> serverScriptProcessBuilders = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.values();
+        for (ServerScriptProcessBuilder serverScriptProcessBuilder : serverScriptProcessBuilders) {
+            Set<WebSocketSession> sessions = serverScriptProcessBuilder.sessions;
             sessions.removeIf(session1 -> session1.getId().equals(session.getId()));
         }
     }
@@ -171,9 +171,9 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
      * @param executeId 执行ID
      */
     public static void stopRun(String executeId) {
-        ScriptProcessBuilder scriptProcessBuilder = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.get(executeId);
-        if (scriptProcessBuilder != null) {
-            scriptProcessBuilder.end("停止运行");
+        ServerScriptProcessBuilder serverScriptProcessBuilder = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.get(executeId);
+        if (serverScriptProcessBuilder != null) {
+            serverScriptProcessBuilder.end("停止运行");
         }
     }
 
@@ -181,20 +181,21 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
     public void run() {
         //初始化ProcessBuilder对象
         try {
-            this.handle("start execute:" + DateUtil.now());
+            this.environmentMapBuilder.eachStr(this::info);
             process = processBuilder.start();
-            {
-                inputStream = process.getInputStream();
-                IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) ScriptProcessBuilder.this::handle);
-            }
+            inputStream = process.getInputStream();
+            IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) ServerScriptProcessBuilder.this::info);
             int waitFor = process.waitFor();
+            this.system("执行结束:{}", waitFor);
+            //
             JsonMessage<String> jsonMessage = new JsonMessage<>(200, "执行完毕:" + waitFor);
             JSONObject jsonObject = jsonMessage.toJson();
+            jsonObject.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
             jsonObject.put("op", ConsoleCommandOp.stop.name());
             this.end(jsonObject.toString());
-            this.handle("execute done:" + waitFor + " time:" + DateUtil.now());
         } catch (Exception e) {
             log.error("执行异常", e);
+            this.system("执行异常", e.getMessage());
             this.end("执行异常：" + e.getMessage());
         } finally {
             this.close();
@@ -218,23 +219,18 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
             }
             iterator.remove();
         }
-        FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.remove(this.executeId);
+        ServerScriptProcessBuilder serverScriptProcessBuilder = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.remove(this.executeId);
+        IoUtil.close(serverScriptProcessBuilder);
     }
 
-    /**
-     * 响应
-     *
-     * @param line 信息
-     */
     @Override
-    protected void handle(String line) {
-        super.handle(line);
+    protected void msgCallback(String info) {
         //
         Iterator<WebSocketSession> iterator = sessions.iterator();
         while (iterator.hasNext()) {
             WebSocketSession session = iterator.next();
             try {
-                SocketSessionUtil.send(session, line);
+                SocketSessionUtil.send(session, info);
             } catch (IOException e) {
                 log.error("发送消息失败", e);
                 iterator.remove();
@@ -245,11 +241,9 @@ public class ScriptProcessBuilder extends BaseRunScript implements Runnable {
     @Override
     public void close() {
         super.close();
-        if (this.scriptFile != null) {
-            try {
-                FileUtil.del(this.scriptFile);
-            } catch (Exception ignored) {
-            }
+        try {
+            FileUtil.del(this.scriptFile);
+        } catch (Exception ignored) {
         }
     }
 }

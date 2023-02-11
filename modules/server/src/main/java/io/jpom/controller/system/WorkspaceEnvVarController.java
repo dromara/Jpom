@@ -173,6 +173,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("description", workspaceEnvVarModel.getDescription());
             jsonObject.put("name", workspaceEnvVarModel.getName());
+            jsonObject.put("privacy", workspaceEnvVarModel.getPrivacy());
             if (StrUtil.isNotEmpty(workspaceEnvVarModel.getValue())) {
                 jsonObject.put("value", workspaceEnvVarModel.getValue());
             } else {

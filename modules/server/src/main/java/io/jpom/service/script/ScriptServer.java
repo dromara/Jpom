@@ -34,7 +34,7 @@ import io.jpom.model.script.ScriptModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.ITriggerToken;
 import io.jpom.service.h2db.BaseWorkspaceService;
-import io.jpom.socket.ScriptProcessBuilder;
+import io.jpom.socket.ServerScriptProcessBuilder;
 import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -174,7 +174,7 @@ public class ScriptServer extends BaseWorkspaceService<ScriptModel> implements I
                 ScriptExecuteLogServer execLogServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
                 ScriptExecuteLogModel nodeScriptExecLogModel = execLogServer.create(scriptServerItem, 1);
                 // 执行
-                ScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs());
+                ServerScriptProcessBuilder.create(scriptServerItem, nodeScriptExecLogModel.getId(), scriptServerItem.getDefArgs());
             } catch (Exception e) {
                 log.error("触发自动执行命令模版异常", e);
             } finally {

@@ -34,7 +34,6 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.StrPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.system.SystemUtil;
@@ -62,6 +61,7 @@ import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -94,6 +94,12 @@ public abstract class AbstractProjectCommander {
      */
     public static final LRUCache<Integer, String> PID_PORT = new LRUCache<>(100, TimeUnit.MINUTES.toMillis(10));
 
+    private final Charset fileCharset;
+
+    public AbstractProjectCommander(Charset fileCharset) {
+        this.fileCharset = fileCharset;
+    }
+
     /**
      * 实例化Commander
      *
@@ -103,14 +109,16 @@ public abstract class AbstractProjectCommander {
         if (abstractProjectCommander != null) {
             return abstractProjectCommander;
         }
+        AgentConfig agentConfig = SpringUtil.getBean(AgentConfig.class);
+        AgentConfig.ProjectConfig.LogConfig logConfig = agentConfig.getProject().getLog();
         if (SystemUtil.getOsInfo().isLinux()) {
             // Linux系统
-            abstractProjectCommander = new LinuxProjectCommander();
+            abstractProjectCommander = new LinuxProjectCommander(logConfig.getFileCharset());
         } else if (SystemUtil.getOsInfo().isWindows()) {
             // Windows系统
-            abstractProjectCommander = new WindowsProjectCommander();
+            abstractProjectCommander = new WindowsProjectCommander(logConfig.getFileCharset());
         } else if (SystemUtil.getOsInfo().isMac()) {
-            abstractProjectCommander = new MacOsProjectCommander();
+            abstractProjectCommander = new MacOsProjectCommander(logConfig.getFileCharset());
         } else {
             throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
         }
@@ -324,7 +332,7 @@ public abstract class AbstractProjectCommander {
             try {
                 this.webHooks(nodeProjectInfoModel, javaCopyItem, type, other);
             } catch (Exception e) {
-                log.error("project webhook {}", e.getMessage());
+                log.error("project webhook", e);
             }
         });
     }
@@ -549,11 +557,11 @@ public abstract class AbstractProjectCommander {
             return Optional.ofNullable(status)
                 .map(strings -> {
                     String log = nodeProjectInfoModel.getAbsoluteLog(javaCopyItem);
-                    FileUtil.appendLines(strings, FileUtil.file(log), CharsetUtil.CHARSET_UTF_8);
+                    FileUtil.appendLines(strings, FileUtil.file(log), fileCharset);
                     return strings;
                 })
                 .map(CollUtil::getLast)
-                // StrUtil.format("{} [{}] - {}", DateUtil.now(), this.action, line);
+                // 此流程特意处理 系统日志标准格式 StrUtil.format("{} [{}] - {}", DateUtil.now(), this.action, line);
                 .map(s -> StrUtil.splitTrim(s, StrPool.DASHED))
                 .map(CollUtil::getLast)
                 .map(s -> {

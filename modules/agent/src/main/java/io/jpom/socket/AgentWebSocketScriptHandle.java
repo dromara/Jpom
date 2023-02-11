@@ -26,7 +26,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.data.NodeScriptModel;
-import io.jpom.script.ScriptProcessBuilder;
+import io.jpom.script.NodeScriptProcessBuilder;
 import io.jpom.service.script.NodeScriptServer;
 import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -104,7 +104,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
                     session.close();
                     return;
                 }
-                ScriptProcessBuilder.addWatcher(nodeScriptModel, executeId, args, session);
+                NodeScriptProcessBuilder.addWatcher(nodeScriptModel, executeId, args, session);
                 break;
             }
             case stop: {
@@ -114,7 +114,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
                     session.close();
                     return;
                 }
-                ScriptProcessBuilder.stopRun(executeId);
+                NodeScriptProcessBuilder.stopRun(executeId);
                 break;
             }
             case heart:
@@ -137,7 +137,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
     @OnClose
     public void onClose(Session session) {
         super.onClose(session);
-        ScriptProcessBuilder.stopWatcher(session);
+        NodeScriptProcessBuilder.stopWatcher(session);
     }
 
     @OnError

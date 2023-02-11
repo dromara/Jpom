@@ -22,10 +22,16 @@
  */
 package io.jpom.service.system;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import io.jpom.common.AgentConst;
+import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.system.WorkspaceEnvVarModel;
 import io.jpom.service.BaseOperService;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author lidaofu
@@ -36,5 +42,17 @@ public class AgentWorkspaceEnvVarService extends BaseOperService<WorkspaceEnvVar
 
     public AgentWorkspaceEnvVarService() {
         super(AgentConst.WORKSPACE_ENV_VAR);
+    }
+
+    public EnvironmentMapBuilder getEnv(String workspaceId) {
+        WorkspaceEnvVarModel item = this.getItem(workspaceId);
+        Map<String, EnvironmentMapBuilder.Item> objectMap = Optional.ofNullable(item)
+            .map(WorkspaceEnvVarModel::getVarData)
+            .map(map -> CollStreamUtil.toMap(map.values(), WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getName, workspaceEnvVarItemModel -> {
+                // 需要考虑兼容之前没有隐私变量字段，默认为隐私字段
+                Integer privacy = workspaceEnvVarItemModel.getPrivacy();
+                return new EnvironmentMapBuilder.Item(workspaceEnvVarItemModel.getName(), privacy == null || privacy == 1);
+            })).orElse(new HashMap<>(1));
+        return EnvironmentMapBuilder.builder(objectMap);
     }
 }

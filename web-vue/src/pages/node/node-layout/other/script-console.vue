@@ -103,7 +103,7 @@ export default {
         this.btnLoading = true;
       };
       this.socket.onmessage = (msg) => {
-        if (msg.data.indexOf("code") > -1 && msg.data.indexOf("msg") > -1) {
+        if (msg.data.indexOf("JPOM_MSG") > -1 && msg.data.indexOf("op") > -1) {
           const res = JSON.parse(msg.data);
           if (res.code === 200) {
             this.$notification.success({

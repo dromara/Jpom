@@ -25,6 +25,7 @@ package io.jpom.socket.handler;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.node.ScriptCacheModel;
@@ -72,6 +73,7 @@ public class NodeScriptHandler extends BaseProxyHandler {
             //			}
             // 开始执行
             String executeId = this.createLog(attributes);
+            json.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
             json.put("executeId", executeId);
         }
         proxySession.send(json.toString());

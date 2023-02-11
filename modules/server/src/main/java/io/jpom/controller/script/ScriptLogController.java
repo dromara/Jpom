@@ -35,7 +35,7 @@ import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.service.script.ScriptExecuteLogServer;
 import io.jpom.service.script.ScriptServer;
-import io.jpom.socket.ScriptProcessBuilder;
+import io.jpom.socket.ServerScriptProcessBuilder;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
@@ -117,7 +117,7 @@ public class ScriptLogController extends BaseServerController {
         Assert.state(FileUtil.isFile(logFile), "日志文件错误");
         JSONObject data = FileUtils.readLogFile(logFile, line);
         // 运行中
-        data.put("run", ScriptProcessBuilder.isRun(executeId));
+        data.put("run", ServerScriptProcessBuilder.isRun(executeId));
         return JsonMessage.success("ok", data);
     }
 }

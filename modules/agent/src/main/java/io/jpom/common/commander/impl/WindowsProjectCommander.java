@@ -33,6 +33,7 @@ import io.jpom.model.system.NetstatModel;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JvmUtil;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +44,11 @@ import java.util.Optional;
  * @author Administrator
  */
 public class WindowsProjectCommander extends AbstractProjectCommander {
+
+
+    public WindowsProjectCommander(Charset fileCharset) {
+        super(fileCharset);
+    }
 
     @Override
     public String buildJavaCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
