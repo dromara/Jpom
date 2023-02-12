@@ -22,14 +22,10 @@
  */
 package io.jpom.common.commander.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.text.CharPool;
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -44,32 +40,32 @@ import java.util.List;
 @Slf4j
 public class LinuxSystemCommander extends AbstractSystemCommander {
 
-    @Override
-    public JSONObject getAllMonitor() {
-        String result = CommandUtil.execSystemCommand("top -i -b -n 1");
-        if (StrUtil.isEmpty(result)) {
-            return null;
-        }
-        String[] split = result.split(StrUtil.LF);
-        int length = split.length;
-        JSONObject jsonObject = new JSONObject();
-        if (length >= 2) {
-            String cpus = split[2];
-            //cpu占比
-            String cpu = getLinuxCpu(cpus);
-            jsonObject.put("cpu", cpu);
-        }
-        if (length >= 3) {
-            String mem = split[3];
-            //内存占比
-            String[] memory = getLinuxMemory(mem);
-            jsonObject.put("memory", ArrayUtil.get(memory, 0));
-            // @author jzy
-            jsonObject.put("memoryUsed", ArrayUtil.get(memory, 1));
-        }
-        jsonObject.put("disk", getHardDisk());
-        return jsonObject;
-    }
+//    @Override
+//    public JSONObject getAllMonitor() {
+//        String result = CommandUtil.execSystemCommand("top -i -b -n 1");
+//        if (StrUtil.isEmpty(result)) {
+//            return null;
+//        }
+//        String[] split = result.split(StrUtil.LF);
+//        int length = split.length;
+//        JSONObject jsonObject = new JSONObject();
+//        if (length >= 2) {
+//            String cpus = split[2];
+//            //cpu占比
+//            String cpu = getLinuxCpu(cpus);
+//            jsonObject.put("cpu", cpu);
+//        }
+//        if (length >= 3) {
+//            String mem = split[3];
+//            //内存占比
+//            String[] memory = getLinuxMemory(mem);
+//            jsonObject.put("memory", ArrayUtil.get(memory, 0));
+//            // @author jzy
+//            jsonObject.put("memoryUsed", ArrayUtil.get(memory, 1));
+//        }
+//        jsonObject.put("disk", getHardDisk());
+//        return jsonObject;
+//    }
 
 //    @Override
 //    public List<ProcessModel> getProcessList(String processName) {
@@ -151,71 +147,71 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 //        return Convert.toLong(val, 0L) / 1024 + " MB";
 //    }
 
-    /**
-     * 获取内存信息
-     *
-     * @param info 内存信息
-     * @return 内存信息
-     */
-    private static String[] getLinuxMemory(String info) {
-        if (StrUtil.isEmpty(info)) {
-            return null;
-        }
-        int index = info.indexOf(CharPool.COLON) + 1;
-        String[] split = info.substring(index).split(StrUtil.COMMA);
-//            509248k total — 物理内存总量（509M）
-//            495964k used — 使用中的内存总量（495M）
-//            13284k free — 空闲内存总量（13M）
-//            25364k buffers — 缓存的内存量 （25M）
-        double total = 0, free = 0, used = 0;
-        for (String str : split) {
-            str = str.trim();
-            if (str.endsWith("free")) {
-                // 减去了 buff
-                String value = str.replace("free", "").replace("k", "").trim();
-                free = Convert.toDouble(value, 0.0);
-            }
-            if (str.endsWith("total")) {
-                String value = str.replace("total", "").replace("k", "").trim();
-                total = Convert.toDouble(value, 0.0);
-            }
-            if (str.endsWith("used")) {
-                // 计算出时间使用
-                String value = str.replace("used", "").replace("k", "").trim();
-                used = Convert.toDouble(value, 0.0);
-            }
-        }
-        return new String[]{String.format("%.2f", (total - free) / total * 100), String.format("%.2f", (used) / total * 100)};
-    }
+//    /**
+//     * 获取内存信息
+//     *
+//     * @param info 内存信息
+//     * @return 内存信息
+//     */
+//    private static String[] getLinuxMemory(String info) {
+//        if (StrUtil.isEmpty(info)) {
+//            return null;
+//        }
+//        int index = info.indexOf(CharPool.COLON) + 1;
+//        String[] split = info.substring(index).split(StrUtil.COMMA);
+////            509248k total — 物理内存总量（509M）
+////            495964k used — 使用中的内存总量（495M）
+////            13284k free — 空闲内存总量（13M）
+////            25364k buffers — 缓存的内存量 （25M）
+//        double total = 0, free = 0, used = 0;
+//        for (String str : split) {
+//            str = str.trim();
+//            if (str.endsWith("free")) {
+//                // 减去了 buff
+//                String value = str.replace("free", "").replace("k", "").trim();
+//                free = Convert.toDouble(value, 0.0);
+//            }
+//            if (str.endsWith("total")) {
+//                String value = str.replace("total", "").replace("k", "").trim();
+//                total = Convert.toDouble(value, 0.0);
+//            }
+//            if (str.endsWith("used")) {
+//                // 计算出时间使用
+//                String value = str.replace("used", "").replace("k", "").trim();
+//                used = Convert.toDouble(value, 0.0);
+//            }
+//        }
+//        return new String[]{String.format("%.2f", (total - free) / total * 100), String.format("%.2f", (used) / total * 100)};
+//    }
 
-    /**
-     * 获取占用cpu信息
-     *
-     * @param info cpu信息
-     * @return cpu信息
-     */
-    public static String getLinuxCpu(String info) {
-        List<String> strings = StrUtil.splitTrim(info, StrUtil.COLON);
-        String last = CollUtil.getLast(strings);
-        List<String> list = StrUtil.splitTrim(last, StrUtil.COMMA);
-        if (CollUtil.isEmpty(list)) {
-            return null;
-        }
-//            1.3% us — 用户空间占用CPU的百分比。
-//            1.0% sy — 内核空间占用CPU的百分比。
-//            0.0% ni — 改变过优先级的进程占用CPU的百分比
-//            97.3% id — 空闲CPU百分比
-//            0.0% wa — IO等待占用CPU的百分比
-//            0.3% hi — 硬中断（Hardware IRQ）占用CPU的百分比
-//            0.0% si — 软中断（Software Interrupts）占用CPU的百分比
-        String value = list.stream().filter(s -> StrUtil.endWithIgnoreCase(s, "us")).map(s -> StrUtil.removeSuffixIgnoreCase(s, "us")).findAny().orElse(null);
-        Double val = Convert.toDouble(value);
-        if (val == null) {
-            return null;
-        }
-        // return String.format("%.2f", 100.00 - val);
-        return String.format("%.2f", val);
-    }
+//    /**
+//     * 获取占用cpu信息
+//     *
+//     * @param info cpu信息
+//     * @return cpu信息
+//     */
+//    public static String getLinuxCpu(String info) {
+//        List<String> strings = StrUtil.splitTrim(info, StrUtil.COLON);
+//        String last = CollUtil.getLast(strings);
+//        List<String> list = StrUtil.splitTrim(last, StrUtil.COMMA);
+//        if (CollUtil.isEmpty(list)) {
+//            return null;
+//        }
+////            1.3% us — 用户空间占用CPU的百分比。
+////            1.0% sy — 内核空间占用CPU的百分比。
+////            0.0% ni — 改变过优先级的进程占用CPU的百分比
+////            97.3% id — 空闲CPU百分比
+////            0.0% wa — IO等待占用CPU的百分比
+////            0.3% hi — 硬中断（Hardware IRQ）占用CPU的百分比
+////            0.0% si — 软中断（Software Interrupts）占用CPU的百分比
+//        String value = list.stream().filter(s -> StrUtil.endWithIgnoreCase(s, "us")).map(s -> StrUtil.removeSuffixIgnoreCase(s, "us")).findAny().orElse(null);
+//        Double val = Convert.toDouble(value);
+//        if (val == null) {
+//            return null;
+//        }
+//        // return String.format("%.2f", 100.00 - val);
+//        return String.format("%.2f", val);
+//    }
 
     @Override
     public boolean getServiceStatus(String serviceName) {

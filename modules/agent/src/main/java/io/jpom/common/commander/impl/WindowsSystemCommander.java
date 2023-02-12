@@ -23,13 +23,10 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSONObject;
-import com.sun.management.OperatingSystemMXBean;
 import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.util.CommandUtil;
 
 import java.io.File;
-import java.lang.management.ManagementFactory;
 
 /**
  * windows 系统查询命令
@@ -39,28 +36,28 @@ import java.lang.management.ManagementFactory;
  */
 public class WindowsSystemCommander extends AbstractSystemCommander {
 
-    /**
-     * 获取windows 监控
-     * https://docs.oracle.com/javase/7/docs/jre/api/management/extension/com/sun/management/OperatingSystemMXBean.html
-     *
-     * @return 返回cpu占比和内存占比
-     */
-    @Override
-    public JSONObject getAllMonitor() {
-        OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-        JSONObject jsonObject = new JSONObject();
-        double total = operatingSystemMXBean.getTotalPhysicalMemorySize();
-        double free = operatingSystemMXBean.getFreePhysicalMemorySize();
-        jsonObject.put("memory", String.format("%.2f", (total - free) / total * 100));
-        //最近系统cpu使用量
-        double systemCpuLoad = operatingSystemMXBean.getSystemCpuLoad();
-        if (systemCpuLoad <= 0) {
-            systemCpuLoad = 0;
-        }
-        jsonObject.put("cpu", String.format("%.2f", systemCpuLoad * 100));
-        jsonObject.put("disk", getHardDisk());
-        return jsonObject;
-    }
+//    /**
+//     * 获取windows 监控
+//     * https://docs.oracle.com/javase/7/docs/jre/api/management/extension/com/sun/management/OperatingSystemMXBean.html
+//     *
+//     * @return 返回cpu占比和内存占比
+//     */
+//    @Override
+//    public JSONObject getAllMonitor() {
+//        OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+//        JSONObject jsonObject = new JSONObject();
+//        double total = operatingSystemMXBean.getTotalPhysicalMemorySize();
+//        double free = operatingSystemMXBean.getFreePhysicalMemorySize();
+//        jsonObject.put("memory", String.format("%.2f", (total - free) / total * 100));
+//        //最近系统cpu使用量
+//        double systemCpuLoad = operatingSystemMXBean.getSystemCpuLoad();
+//        if (systemCpuLoad <= 0) {
+//            systemCpuLoad = 0;
+//        }
+//        jsonObject.put("cpu", String.format("%.2f", systemCpuLoad * 100));
+//        jsonObject.put("disk", getHardDisk());
+//        return jsonObject;
+//    }
 
 //    @Override
 //    public List<ProcessModel> getProcessList(String processName) {

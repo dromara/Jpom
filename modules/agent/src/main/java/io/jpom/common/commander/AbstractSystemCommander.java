@@ -23,7 +23,6 @@
 package io.jpom.common.commander;
 
 import cn.hutool.system.SystemUtil;
-import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.commander.impl.LinuxSystemCommander;
 import io.jpom.common.commander.impl.MacOsSystemCommander;
 import io.jpom.common.commander.impl.WindowsSystemCommander;
@@ -60,12 +59,12 @@ public abstract class AbstractSystemCommander {
         return abstractSystemCommander;
     }
 
-    /**
-     * 获取整个服务器监控信息
-     *
-     * @return data
-     */
-    public abstract JSONObject getAllMonitor();
+//    /**
+//     * 获取整个服务器监控信息
+//     *
+//     * @return data
+//     */
+//    public abstract JSONObject getAllMonitor();
 
 //    /**
 //     * 获取当前服务器的所有进程列表
@@ -83,22 +82,22 @@ public abstract class AbstractSystemCommander {
      */
     public abstract String emptyLogFile(File file);
 
-    /**
-     * 磁盘占用
-     *
-     * @return 磁盘占用
-     */
-    protected static String getHardDisk() {
-        File[] files = File.listRoots();
-        double totalSpace = 0;
-        double useAbleSpace = 0;
-        for (File file : files) {
-            double total = file.getTotalSpace();
-            totalSpace += total;
-            useAbleSpace += total - file.getUsableSpace();
-        }
-        return totalSpace <= 0 ? "0" : String.format("%.2f", useAbleSpace / totalSpace * 100);
-    }
+//    /**
+//     * 磁盘占用
+//     *
+//     * @return 磁盘占用
+//     */
+//    protected static String getHardDisk() {
+//        File[] files = File.listRoots();
+//        double totalSpace = 0;
+//        double useAbleSpace = 0;
+//        for (File file : files) {
+//            double total = file.getTotalSpace();
+//            totalSpace += total;
+//            useAbleSpace += total - file.getUsableSpace();
+//        }
+//        return totalSpace <= 0 ? "0" : String.format("%.2f", useAbleSpace / totalSpace * 100);
+//    }
 
     /**
      * 查询服务状态
