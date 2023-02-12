@@ -27,6 +27,8 @@ import SideMenu from "./side-menu";
 // import UserHeader from "./user-header";
 import ContentTab from "./content-tab";
 import { checkSystem } from "@/api/install";
+import { executionRequest } from "@/api/external";
+import { parseTime } from "@/utils/const";
 
 export default {
   props: {
@@ -146,6 +148,20 @@ export default {
         } else if (res.code === 222) {
           this.$router.push("/install");
         }
+      });
+      // 控制台输出版本号信息
+      executionRequest("https://jpom.top/docs/versions.tag", {}).then((data) => {
+        const htmlVersion = document.head.querySelector("[name~=jpom-version][content]").content;
+        const buildTime = document.head.querySelector("[name~=build-time][content]").content;
+
+        console.log(
+          "\n %c " + parseTime(buildTime) + " %c vs %c " + htmlVersion + " %c vs %c " + data,
+          "color: #ffffff; background: #f1404b; padding:5px 0;",
+          "background: #1890ff; padding:5px 0;",
+          "color: #ffffff; background: #f1404b; padding:5px 0;",
+          "background: #1890ff; padding:5px 0;",
+          "color: #ffffff; background: #f1404b; padding:5px 0;"
+        );
       });
     },
     changeCollapsed() {
