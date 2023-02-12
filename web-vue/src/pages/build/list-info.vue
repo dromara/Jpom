@@ -894,11 +894,13 @@
           </a-space>
         </a-form-model-item>
 
-        <a-form-model-item v-if="temp.releaseMethod === 2" prop="projectSecondaryDirectory" label="二级目录">
+        <a-form-model-item v-if="temp.releaseMethod === 1 || temp.releaseMethod === 2" prop="projectSecondaryDirectory" label="二级目录">
           <a-input v-model="temp.projectSecondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-model-item>
-
-        <a-form-model-item label="构建备注" prop="buildRemark">
+        <a-form-model-item label="环境变量" prop="buildEnvParameter" help="配置后将保存到当前构建">
+          <a-textarea v-model="temp.buildEnvParameter" placeholder="请输入构建环境变量：xx=abc 多个变量回车换行即可" :auto-size="{ minRows: 3, maxRows: 5 }" />
+        </a-form-model-item>
+        <a-form-model-item label="构建备注" prop="buildRemark" help="填写仅本次构建生效">
           <a-textarea v-model="temp.buildRemark" :maxLength="240" placeholder="请输入构建备注,长度小于 240" :auto-size="{ minRows: 3, maxRows: 5 }" />
         </a-form-model-item>
       </a-form-model>
@@ -1599,6 +1601,7 @@ export default {
           branchName: this.temp.branchName,
           checkRepositoryDiff: this.temp.checkRepositoryDiff,
           projectSecondaryDirectory: this.temp.projectSecondaryDirectory,
+          buildEnvParameter: this.temp.buildEnvParameter,
         },
         true
       ).then(() => {

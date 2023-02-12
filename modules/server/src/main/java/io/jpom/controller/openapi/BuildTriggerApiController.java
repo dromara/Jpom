@@ -104,7 +104,8 @@ public class BuildTriggerApiController extends BaseJpomController {
     @RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD2, produces = MediaType.APPLICATION_JSON_VALUE)
     public String trigger2(@PathVariable String id, @PathVariable String token,
                            HttpServletRequest request,
-                           String delay, String buildRemark) {
+                           String delay,
+                           String buildRemark) {
         BuildInfoModel item = buildInfoService.getByKey(id);
         Assert.notNull(item, "没有对应数据");
         UserModel userModel = this.triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());

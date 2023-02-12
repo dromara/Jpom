@@ -84,7 +84,6 @@ import java.util.Objects;
 @Feature(cls = ClassFeature.BUILD)
 public class BuildInfoController extends BaseServerController {
 
-
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final SshService sshService;
     private final BuildInfoService buildInfoService;
