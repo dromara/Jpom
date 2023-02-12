@@ -67,10 +67,9 @@
 <script>
 import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade, uploadUpgradeFileMerge } from "@/api/system";
 import Vue from "vue";
-import { parseTime } from "@/utils/time";
 import MarkdownItVue from "markdown-it-vue";
 import "markdown-it-vue/dist/markdown-it-vue.css";
-import { RESTART_UPGRADE_WAIT_TIME_COUNT } from "@/utils/const";
+import { RESTART_UPGRADE_WAIT_TIME_COUNT, parseTime } from "@/utils/const";
 import { uploadPieces } from "@/utils/upload-pieces";
 
 export default {

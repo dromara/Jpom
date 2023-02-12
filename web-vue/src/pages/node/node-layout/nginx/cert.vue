@@ -65,8 +65,8 @@
   </div>
 </template>
 <script>
-import { deleteCert, downloadCert, editCert, getCertList, getCertWhiteList } from "../../../../api/node-nginx";
-import { parseTime } from "../../../../utils/time";
+import { deleteCert, downloadCert, editCert, getCertList, getCertWhiteList } from "@/api/node-nginx";
+import { parseTime } from "@/utils/const";
 
 export default {
   props: {

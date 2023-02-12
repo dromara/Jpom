@@ -101,8 +101,7 @@
 </template>
 <script>
 import { backupStatusMap, backupTypeArray, backupTypeMap, createBackup, deleteBackup, downloadBackupFile, getBackupList, getTableNameList, restoreBackup, uploadBackupFile } from "@/api/backup-info";
-import { parseTime, renderSize } from "@/utils/time";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize } from "@/utils/const";
 import Vue from "vue";
 
 export default {

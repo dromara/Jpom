@@ -116,9 +116,8 @@
 </template>
 <script>
 import { deleteLogRead, editLogRead, getLogReadList } from "@/api/log-read";
-import { itemGroupBy, parseTime } from "@/utils/time";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, itemGroupBy, parseTime } from "@/utils/const";
 
 import { mapGetters } from "vuex";
 import logReadView from "./logReadView";

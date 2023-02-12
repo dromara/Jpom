@@ -222,8 +222,7 @@
 </template>
 <script>
 import { getStatist, status, statusStat } from "@/api/node-stat";
-import { formatDuration, parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
+import { PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime } from "@/utils/const";
 import NodeTop from "@/pages/node/node-layout/node-top";
 import { getNodeGroupAll } from "@/api/node";
 

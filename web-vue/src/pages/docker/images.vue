@@ -303,7 +303,7 @@
   </div>
 </template>
 <script>
-import { parseTime, renderSize } from "@/utils/time";
+import { parseTime, renderSize } from "@/utils/const";
 import { dockerImageCreateContainer, dockerImageInspect, dockerImagePullImage, dockerImageRemove, dockerImagesList } from "@/api/docker-api";
 import PullImageLog from "@/pages/docker/pull-image-log";
 

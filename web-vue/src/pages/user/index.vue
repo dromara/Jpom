@@ -155,8 +155,7 @@
 <script>
 import { closeUserMfa, deleteUser, editUser, getUserList, unlockUser, restUserPwd } from "@/api/user/user";
 import { getUserPermissionListAll } from "@/api/user/user-permission";
-import { parseTime } from "@/utils/time";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import Vue from "vue";
 export default {
   data() {

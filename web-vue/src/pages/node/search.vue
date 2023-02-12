@@ -216,8 +216,7 @@ import { delAllProjectCache, getNodeListAll, getProjectList, sortItemProject } f
 import { getRuningProjectInfo, noFileModes, restartProject, runModeList, startProject, stopProject, getProjectTriggerUrl, getProjectGroupAll } from "@/api/node-project";
 import File from "@/pages/node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
-import { itemGroupBy, parseTime } from "@/utils/time";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, concurrentExecution } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, concurrentExecution, itemGroupBy, parseTime } from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
 import Vue from "vue";
 

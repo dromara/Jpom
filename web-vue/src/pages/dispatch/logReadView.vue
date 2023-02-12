@@ -121,9 +121,8 @@
 </template>
 <script>
 import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { itemGroupBy } from "@/utils/time";
 import { getFileList } from "@/api/node-project";
-import { getWebSocketUrl } from "@/utils/const";
+import { getWebSocketUrl, itemGroupBy } from "@/utils/const";
 import { mapGetters } from "vuex";
 import viewPre from "@/components/logView/view-pre";
 import { updateCache } from "@/api/log-read";

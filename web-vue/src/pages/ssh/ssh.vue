@@ -329,8 +329,7 @@
 import { deleteSsh, editSsh, getSshCheckAgent, getSshList, getSshOperationLogList, syncToWorkspace } from "@/api/ssh";
 import SshFile from "@/pages/ssh/ssh-file";
 import Terminal from "@/pages/ssh/terminal";
-import { parseTime } from "@/utils/time";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import Vue from "vue";
 import { mapGetters } from "vuex";

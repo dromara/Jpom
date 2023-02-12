@@ -168,9 +168,8 @@ import { workspaceList } from "@/api/user/user";
 import { getList, editPermissionGroup, deletePermissionGroup } from "@/api/user/user-permission";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import { getMonitorOperateTypeList } from "@/api/monitor";
-import { parseTime } from "@/utils/time";
 import moment from "moment";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import Transfer from "@/components/compositionTransfer/composition-transfer.vue";
 
 export default {

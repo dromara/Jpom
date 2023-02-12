@@ -55,8 +55,7 @@
 </template>
 <script>
 import { deleteWorkspace, editWorkSpace, getWorkSpaceList } from "@/api/workspace";
-import { parseTime } from "@/utils/time";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import workspaceEnv from "./workspace-env.vue";
 
 export default {

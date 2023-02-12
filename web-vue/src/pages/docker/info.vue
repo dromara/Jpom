@@ -109,7 +109,7 @@
 </template>
 <script>
 import { dockerInfo, dockerPrune } from "@/api/docker-api";
-import { renderSize } from "@/utils/time";
+import { renderSize } from "@/utils/const";
 export default {
   props: {
     id: {

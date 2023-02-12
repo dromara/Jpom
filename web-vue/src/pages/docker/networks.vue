@@ -61,7 +61,7 @@
   </a-table>
 </template>
 <script>
-import { renderSize, parseTime } from "@/utils/time";
+import { renderSize, parseTime } from "@/utils/const";
 import { dockerNetworksList, dockerVolumesRemove } from "@/api/docker-api";
 export default {
   props: {

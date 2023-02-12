@@ -1,5 +1,5 @@
 import axios from "./config";
-import { parseTime } from "@/utils/time";
+import { parseTime } from "@/utils/const";
 import echarts from "echarts";
 
 // node 列表
