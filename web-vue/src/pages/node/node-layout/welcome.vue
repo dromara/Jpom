@@ -10,7 +10,7 @@
     <a-divider>进程监控表格</a-divider>
     <!-- 进程表格数据 -->
 
-    <a-table size="middle" :locale="tableLocale" :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="pid" class="node-table" :pagination="false">
+    <a-table size="middle" :locale="tableLocale" :loading="loading" :columns="columns" :data-source="processList" bordered rowKey="processId" class="node-table" :pagination="false">
       <template #title>
         <a-row>
           <a-col :span="18">
@@ -46,14 +46,23 @@
           </a-col>
         </a-row>
       </template>
-      <!-- <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
+      <!-- 
+      -->
+      <a-tooltip slot="percentTooltip" slot-scope="text" placement="topLeft" :title="formatPercent(text)">
+        {{ formatPercent(text) }}
       </a-tooltip>
-      <a-tooltip slot="user" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip> -->
+      <a-tooltip slot="timeTooltip" slot-scope="text" placement="topLeft" :title="parseTime(text)">
+        {{ parseTime(text) }}
+      </a-tooltip>
+      <a-tooltip slot="durationTooltip" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
+        {{ formatDuration(text) }}
+      </a-tooltip>
+
+      <a-tooltip slot="sizeTooltip" slot-scope="text" placement="topLeft" :title="renderSizeFormat(text)">
+        {{ renderSizeFormat(text) }}
+      </a-tooltip>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
+        {{ text }}
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" size="small" @click="kill(record)">Kill</a-button>
@@ -67,7 +76,7 @@
 </template>
 <script>
 import { nodeMonitorData, getProcessList, killPid } from "@/api/node";
-
+import { renderSize, formatPercent, parseTime, formatDuration } from "@/utils/time";
 import CustomSelect from "@/components/customSelect";
 import NodeTop from "@/pages/node/node-layout/node-top";
 import { generateNodeTopChart, drawChart } from "@/api/node-stat";
@@ -96,18 +105,22 @@ export default {
       historyData: [],
       processName: "java",
       columns: [
-        { title: "进程 ID", dataIndex: "pid", width: 80, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "进程名称", dataIndex: "command", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "端口", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "所有者", dataIndex: "user", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "项目名称", dataIndex: "jpomName", width: 150, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "物理内存", dataIndex: "res", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "进程状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "占用CPU", dataIndex: "cpu", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "物理内存百分比", dataIndex: "mem", width: 140, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "虚拟内存", dataIndex: "virt", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "共享内存", dataIndex: "shr", width: 100, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: 80, fixed: "right" },
+        { title: "ID", dataIndex: "processId", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "端口", dataIndex: "port", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "所有者", dataIndex: "user", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "项目名称", dataIndex: "jpomName", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "状态", dataIndex: "state", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "虚拟内存", dataIndex: "virtualSize", width: "100px", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
+        { title: "CPU", dataIndex: "processCpuLoadCumulative", width: "100px", ellipsis: true, scopedSlots: { customRender: "percentTooltip" } },
+        { title: "驻留集", dataIndex: "residentSetSize", width: "100px", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
+        { title: "优先级", dataIndex: "priority", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "启动时间", dataIndex: "startTime", width: "180px", ellipsis: true, scopedSlots: { customRender: "timeTooltip" } },
+        { title: "运行时间", dataIndex: "upTime", width: "100px", ellipsis: true, scopedSlots: { customRender: "durationTooltip" } },
+        { title: "用户时间", dataIndex: "userTime", width: "100px", ellipsis: true, scopedSlots: { customRender: "durationTooltip" } },
+        { title: "路径", dataIndex: "path", width: "180px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "启动命令", dataIndex: "commandLine", width: "180px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "80px", fixed: "right" },
       ],
       refreshInterval: 20,
       historyChart: null,
@@ -131,6 +144,13 @@ export default {
     },
   },
   methods: {
+    // 格式化文件大小
+    renderSizeFormat(value) {
+      return renderSize(value);
+    },
+    formatPercent,
+    parseTime,
+    formatDuration,
     addNodeProcess(v) {
       this.processNames = v;
       this.cacheNodeProcess();

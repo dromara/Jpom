@@ -134,3 +134,13 @@ export function formatDuration(ms, seg, levelCount) {
     .splice(0, levelCount)
     .join(seg);
 }
+
+//小数转换为分数(小数先转换成number类型，再乘以100，并且保留2位小数)
+export function formatPercent(point, keep = 2) {
+  if (null == point) {
+    return "--";
+  }
+  var percent = (Number(point) * 100).toFixed(keep);
+  percent += "%";
+  return percent;
+}

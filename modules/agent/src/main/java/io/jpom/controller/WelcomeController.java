@@ -23,6 +23,7 @@
 package io.jpom.controller;
 
 import cn.hutool.cache.impl.CacheObj;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.StrUtil;
@@ -30,10 +31,12 @@ import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
+import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.common.commander.AbstractSystemCommander;
-import io.jpom.model.system.ProcessModel;
 import io.jpom.system.TopManager;
+import io.jpom.util.OshiUtils;
 import io.jpom.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,16 +44,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author jiangzeyin
  * @since 2019/4/16
  */
 @RestController
+@Slf4j
 public class WelcomeController extends BaseAgentController {
 
     @PostMapping(value = "getDirectTop", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -96,14 +101,22 @@ public class WelcomeController extends BaseAgentController {
 
 
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage getProcessList(String processName) {
+    public JsonMessage<List<JSONObject>> getProcessList(String processName, Integer count) {
         processName = StrUtil.emptyToDefault(processName, "java");
-        List<ProcessModel> array = AbstractSystemCommander.getInstance().getProcessList(processName);
-        if (array != null && !array.isEmpty()) {
-            array.sort(Comparator.comparingInt(ProcessModel::getPid));
-            return JsonMessage.success("", array);
-        }
-        return new JsonMessage<>(402, "没有获取到进程信息");
+        List<JSONObject> processes = OshiUtils.getProcesses(processName, Convert.toInt(count, 20));
+        processes = processes.stream().peek(jsonObject -> {
+            int processId = jsonObject.getIntValue("processId");
+            String port = AbstractProjectCommander.getInstance().getMainPort(processId);
+            jsonObject.put("port", port);
+            //
+            try {
+                String jpomName = AbstractProjectCommander.getInstance().getJpomNameByPid(processId);
+                jsonObject.put("jpomName", jpomName);
+            } catch (IOException e) {
+                log.error("解析进程失败", e);
+            }
+        }).collect(Collectors.toList());
+        return JsonMessage.success("ok", processes);
     }
 
 

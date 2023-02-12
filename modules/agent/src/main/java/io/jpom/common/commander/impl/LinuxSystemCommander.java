@@ -26,19 +26,15 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.CharPool;
-import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.commander.AbstractSystemCommander;
-import io.jpom.model.system.ProcessModel;
 import io.jpom.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -75,23 +71,11 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
         return jsonObject;
     }
 
-    @Override
-    public List<ProcessModel> getProcessList(String processName) {
-        String s = CommandUtil.execSystemCommand("top -b -n 1 | grep " + processName);
-        return formatLinuxTop(s, false);
-    }
-
-
-    @Override
-    public ProcessModel getPidInfo(int pid) {
-        String command = "top -b -n 1 -p " + pid;
-        String internal = CommandUtil.execSystemCommand(command);
-        List<ProcessModel> processModels = formatLinuxTop(internal, true);
-        if (processModels == null || processModels.isEmpty()) {
-            return null;
-        }
-        return processModels.get(0);
-    }
+//    @Override
+//    public List<ProcessModel> getProcessList(String processName) {
+//        String s = CommandUtil.execSystemCommand("top -b -n 1 | grep " + processName);
+//        return formatLinuxTop(s, false);
+//    }
 
 
     @Override
@@ -99,73 +83,73 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
         return CommandUtil.execSystemCommand("cp /dev/null " + file.getAbsolutePath());
     }
 
-    /**
-     * 将linux的top信息转为集合
-     *
-     * @param top top
-     */
-    private static List<ProcessModel> formatLinuxTop(String top, boolean header) {
-        List<String> list = StrSplitter.splitTrim(top, StrUtil.LF, true);
-        if (list.size() <= 0) {
-            return null;
-        }
-        List<ProcessModel> list1 = new ArrayList<>();
-        ProcessModel processModel;
-        for (int i = header ? 6 : 0, len = list.size(); i < len; i++) {
-            processModel = new ProcessModel();
-            String item = list.get(i);
-            List<String> values = StrSplitter.splitTrim(item, StrUtil.SPACE, true);
-            processModel.setPid(NumberUtil.parseInt(values.get(0)));
-            processModel.setUser(values.get(1));
-            processModel.setPr(values.get(2));
-            processModel.setNi(values.get(3));
-            //
-            processModel.setVirt(formSize(values.get(4)));
-            processModel.setRes(formSize(values.get(5)));
-            processModel.setShr(formSize(values.get(6)));
-            //
-            processModel.setStatus(formStatus(values.get(7)));
-            //
-            processModel.setCpu(values.get(8) + "%");
-            processModel.setMem(values.get(9) + "%");
-            //
-            processModel.setTime(CollUtil.get(values, 10));
-            processModel.setCommand(CollUtil.get(values, 11));
-            list1.add(processModel);
-        }
-        return list1;
-    }
+//    /**
+//     * 将linux的top信息转为集合
+//     *
+//     * @param top top
+//     */
+//    private static List<ProcessModel> formatLinuxTop(String top, boolean header) {
+//        List<String> list = StrSplitter.splitTrim(top, StrUtil.LF, true);
+//        if (list.size() <= 0) {
+//            return null;
+//        }
+//        List<ProcessModel> list1 = new ArrayList<>();
+//        ProcessModel processModel;
+//        for (int i = header ? 6 : 0, len = list.size(); i < len; i++) {
+//            processModel = new ProcessModel();
+//            String item = list.get(i);
+//            List<String> values = StrSplitter.splitTrim(item, StrUtil.SPACE, true);
+//            processModel.setPid(NumberUtil.parseInt(values.get(0)));
+//            processModel.setUser(values.get(1));
+//            processModel.setPr(values.get(2));
+//            processModel.setNi(values.get(3));
+//            //
+//            processModel.setVirt(formSize(values.get(4)));
+//            processModel.setRes(formSize(values.get(5)));
+//            processModel.setShr(formSize(values.get(6)));
+//            //
+//            processModel.setStatus(formStatus(values.get(7)));
+//            //
+//            processModel.setCpu(values.get(8) + "%");
+//            processModel.setMem(values.get(9) + "%");
+//            //
+//            processModel.setTime(CollUtil.get(values, 10));
+//            processModel.setCommand(CollUtil.get(values, 11));
+//            list1.add(processModel);
+//        }
+//        return list1;
+//    }
 
 
-    private static String formStatus(String val) {
-        String value = "未知";
-        if ("S".equalsIgnoreCase(val)) {
-            value = "睡眠";
-        } else if ("R".equalsIgnoreCase(val)) {
-            value = "运行";
-        } else if ("T".equalsIgnoreCase(val)) {
-            value = "跟踪/停止";
-        } else if ("Z".equalsIgnoreCase(val)) {
-            value = "僵尸进程 ";
-        } else if ("D".equalsIgnoreCase(val)) {
-            value = "不可中断的睡眠状态 ";
-        } else if ("i".equalsIgnoreCase(val)) {
-            value = "多线程 ";
-        }
-        return value;
-    }
-
-    private static String formSize(String val) {
-        if (StrUtil.endWithIgnoreCase(val, "g")) {
-            String newVal = val.substring(0, val.length() - 1);
-            return String.format("%.2f MB", Convert.toDouble(newVal, 0D) * 1024);
-        }
-        if (StrUtil.endWithIgnoreCase(val, "m")) {
-            String newVal = val.substring(0, val.length() - 1);
-            return Convert.toLong(newVal, 0L) / 1024 + " MB";
-        }
-        return Convert.toLong(val, 0L) / 1024 + " MB";
-    }
+//    private static String formStatus(String val) {
+//        String value = "未知";
+//        if ("S".equalsIgnoreCase(val)) {
+//            value = "睡眠";
+//        } else if ("R".equalsIgnoreCase(val)) {
+//            value = "运行";
+//        } else if ("T".equalsIgnoreCase(val)) {
+//            value = "跟踪/停止";
+//        } else if ("Z".equalsIgnoreCase(val)) {
+//            value = "僵尸进程 ";
+//        } else if ("D".equalsIgnoreCase(val)) {
+//            value = "不可中断的睡眠状态 ";
+//        } else if ("i".equalsIgnoreCase(val)) {
+//            value = "多线程 ";
+//        }
+//        return value;
+//    }
+//
+//    private static String formSize(String val) {
+//        if (StrUtil.endWithIgnoreCase(val, "g")) {
+//            String newVal = val.substring(0, val.length() - 1);
+//            return String.format("%.2f MB", Convert.toDouble(newVal, 0D) * 1024);
+//        }
+//        if (StrUtil.endWithIgnoreCase(val, "m")) {
+//            String newVal = val.substring(0, val.length() - 1);
+//            return Convert.toLong(newVal, 0L) / 1024 + " MB";
+//        }
+//        return Convert.toLong(val, 0L) / 1024 + " MB";
+//    }
 
     /**
      * 获取内存信息

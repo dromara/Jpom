@@ -25,17 +25,14 @@ package io.jpom.common.commander.impl;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.CharPool;
-import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.commander.AbstractSystemCommander;
-import io.jpom.model.system.ProcessModel;
 import io.jpom.util.CommandUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -126,79 +123,68 @@ public class MacOsSystemCommander extends AbstractSystemCommander {
         return "0";
     }
 
-    @Override
-    public List<ProcessModel> getProcessList(String processName) {
-        String s = CommandUtil.execSystemCommand("top -l 1 | grep " + processName);
-        return formatLinuxTop(s, false);
-    }
+//    @Override
+//    public List<ProcessModel> getProcessList(String processName) {
+//        String s = CommandUtil.execSystemCommand("top -l 1 | grep " + processName);
+//        return formatLinuxTop(s, false);
+//    }
 
     @Override
     public String emptyLogFile(File file) {
         return CommandUtil.execSystemCommand("cp /dev/null " + file.getAbsolutePath());
     }
-
-    /**
-     * 把 top 返回的数据组装成集合
-     *
-     * @param top
-     * @param header 是否有 header
-     * @return
-     */
-    private List<ProcessModel> formatLinuxTop(final String top, final boolean header) {
-        List<String> list = StrSplitter.splitTrim(top, StrUtil.LF, true);
-        if (list.size() <= 0) {
-            return null;
-        }
-        List<ProcessModel> list1 = new ArrayList<>();
-        ProcessModel processModel;
-        for (String item : list) {
-            processModel = new ProcessModel();
-            log.debug("process item: {}", item);
-            List<String> values = StrSplitter.splitTrim(item, StrUtil.SPACE, true);
-            //log.debug(JSON.toJSONString(values));
-            processModel.setPid(Convert.toInt(values.get(0), 0));
-            //processModel.setPort(values.get(6));
-            processModel.setCommand(values.get(1));
-            processModel.setCpu(values.get(2) + "%");
-            processModel.setMem(values.get(14) + "%");
-            processModel.setStatus(formStatus(values.get(12)));
-            processModel.setTime(values.get(3));
-            processModel.setRes(values.get(7));
-            processModel.setUser(values.get(29));
-            list1.add(processModel);
-        }
-        return list1;
-    }
-
-    private String formStatus(final String val) {
-        String tempVal = val.toUpperCase();
-        String value = "未知";
-        if (tempVal.startsWith("S")) {
-            value = "睡眠";
-        } else if (tempVal.startsWith("R")) {
-            value = "运行";
-        } else if (tempVal.startsWith("T")) {
-            value = "跟踪/停止";
-        } else if (tempVal.startsWith("Z")) {
-            value = "僵尸进程 ";
-        } else if (tempVal.startsWith("D")) {
-            value = "不可中断的睡眠状态 ";
-        } else if (tempVal.startsWith("I")) {
-            value = "多线程 ";
-        }
-        return value;
-    }
-
-    @Override
-    public ProcessModel getPidInfo(int pid) {
-        String command = "top -l 1 | grep " + pid;
-        String internal = CommandUtil.execSystemCommand(command);
-        List<ProcessModel> processModels = formatLinuxTop(internal, true);
-        if (processModels == null || processModels.isEmpty()) {
-            return null;
-        }
-        return processModels.get(0);
-    }
+//
+//    /**
+//     * 把 top 返回的数据组装成集合
+//     *
+//     * @param top
+//     * @param header 是否有 header
+//     * @return
+//     */
+//    private List<ProcessModel> formatLinuxTop(final String top, final boolean header) {
+//        List<String> list = StrSplitter.splitTrim(top, StrUtil.LF, true);
+//        if (list.size() <= 0) {
+//            return null;
+//        }
+//        List<ProcessModel> list1 = new ArrayList<>();
+//        ProcessModel processModel;
+//        for (String item : list) {
+//            processModel = new ProcessModel();
+//            log.debug("process item: {}", item);
+//            List<String> values = StrSplitter.splitTrim(item, StrUtil.SPACE, true);
+//            //log.debug(JSON.toJSONString(values));
+//            processModel.setPid(Convert.toInt(values.get(0), 0));
+//            //processModel.setPort(values.get(6));
+//            processModel.setCommand(values.get(1));
+//            processModel.setCpu(values.get(2) + "%");
+//            processModel.setMem(values.get(14) + "%");
+//            processModel.setStatus(formStatus(values.get(12)));
+//            processModel.setTime(values.get(3));
+//            processModel.setRes(values.get(7));
+//            processModel.setUser(values.get(29));
+//            list1.add(processModel);
+//        }
+//        return list1;
+//    }
+//
+//    private String formStatus(final String val) {
+//        String tempVal = val.toUpperCase();
+//        String value = "未知";
+//        if (tempVal.startsWith("S")) {
+//            value = "睡眠";
+//        } else if (tempVal.startsWith("R")) {
+//            value = "运行";
+//        } else if (tempVal.startsWith("T")) {
+//            value = "跟踪/停止";
+//        } else if (tempVal.startsWith("Z")) {
+//            value = "僵尸进程 ";
+//        } else if (tempVal.startsWith("D")) {
+//            value = "不可中断的睡眠状态 ";
+//        } else if (tempVal.startsWith("I")) {
+//            value = "多线程 ";
+//        }
+//        return value;
+//    }
 
     @Override
     public boolean getServiceStatus(String serviceName) {
