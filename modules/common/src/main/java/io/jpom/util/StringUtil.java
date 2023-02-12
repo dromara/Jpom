@@ -22,10 +22,11 @@
  */
 package io.jpom.util;
 
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.collection.CollStreamUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
@@ -36,11 +37,9 @@ import com.alibaba.fastjson2.JSONValidator;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * main 方法运行参数工具
@@ -117,19 +116,19 @@ public class StringUtil {
         return delStartPath(file, FileUtil.file(startPath), inName);
     }
 
-    /**
-     * 指定时间的下一个刻度
-     *
-     * @return String
-     */
-    public static String getNextScaleTime(String time, Long millis) {
-        DateTime dateTime = DateUtil.parse(time);
-        if (millis == null) {
-            millis = 30 * 1000L;
-        }
-        DateTime newTime = dateTime.offsetNew(DateField.SECOND, (int) (millis / 1000));
-        return DateUtil.formatTime(newTime);
-    }
+//    /**
+//     * 指定时间的下一个刻度
+//     *
+//     * @return String
+//     */
+//    public static String getNextScaleTime(String time, Long millis) {
+//        DateTime dateTime = DateUtil.parse(time);
+//        if (millis == null) {
+//            millis = 30 * 1000L;
+//        }
+//        DateTime newTime = dateTime.offsetNew(DateField.SECOND, (int) (millis / 1000));
+//        return DateUtil.formatTime(newTime);
+//    }
 
     /**
      * json 字符串转 bean，兼容普通json和字符串包裹情况
@@ -240,5 +239,27 @@ public class StringUtil {
             return null;
         }
         return cron;
+    }
+
+    public static Map<String, String> parseEnvStr(String envStr) {
+        List<String> list = StrUtil.splitTrim(envStr, StrUtil.LF);
+        return parseEnvStr(list);
+    }
+
+    public static Map<String, String> parseEnvStr(List<String> envStrList) {
+        if (envStrList == null) {
+            return MapUtil.newHashMap();
+        }
+        List<Tuple> collect = envStrList.stream()
+            .map(StrUtil::trim)
+            .filter(s -> !StrUtil.isEmpty(s) && !StrUtil.startWith(s, "#"))
+            .map(s -> {
+                List<String> list1 = StrUtil.splitTrim(s, "=");
+                if (CollUtil.size(list1) != 2) {
+                    return null;
+                }
+                return new Tuple(list1.get(0), list1.get(1));
+            }).filter(Objects::nonNull).collect(Collectors.toList());
+        return CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
     }
 }

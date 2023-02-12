@@ -223,6 +223,8 @@ public class BuildExecuteService {
             // 解析外部变量
             environmentMapBuilder.putObjectArray(parametersEnv);
             //
+            environmentMapBuilder.putStr(StringUtil.parseEnvStr(buildInfoModel.getBuildEnvParameter()));
+            //
             BuildExecuteService.TaskData.TaskDataBuilder taskBuilder = BuildExecuteService.TaskData.builder()
                 .buildInfoModel(buildInfoModel)
                 .repositoryModel(repositoryModel)

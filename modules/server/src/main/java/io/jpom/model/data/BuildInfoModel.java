@@ -124,6 +124,10 @@ public class BuildInfoModel extends BaseGroupModel {
      * 排序
      */
     private Float sortValue;
+    /**
+     * 构建环境变量
+     */
+    private String buildEnvParameter;
 
     @Tolerate
     public BuildInfoModel() {

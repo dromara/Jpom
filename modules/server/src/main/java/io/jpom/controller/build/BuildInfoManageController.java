@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * new build info manage controller
@@ -63,7 +64,6 @@ import java.util.Objects;
 @RestController
 @Feature(cls = ClassFeature.BUILD)
 public class BuildInfoManageController extends BaseServerController {
-
 
     private final BuildInfoService buildInfoService;
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
@@ -91,7 +91,8 @@ public class BuildInfoManageController extends BaseServerController {
                         String branchName,
                         String branchTagName,
                         String checkRepositoryDiff,
-                        String projectSecondaryDirectory) {
+                        String projectSecondaryDirectory,
+                        String buildEnvParameter) {
         BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
         Assert.notNull(item, "没有对应数据");
         // 更新数据
@@ -111,11 +112,10 @@ public class BuildInfoManageController extends BaseServerController {
             jsonObject.put("projectSecondaryDirectory", s);
             update.setExtraData(jsonObject.toString());
         });
-
-        if (!StrUtil.isAllBlank(resultDirFile, branchName, branchTagName, projectSecondaryDirectory)) {
-            update.setId(id);
-            buildInfoService.update(update);
-        }
+        // 会存在清空的情况
+        update.setBuildEnvParameter(Optional.ofNullable(buildEnvParameter).orElse(StrUtil.EMPTY));
+        update.setId(id);
+        buildInfoService.update(update);
         // userModel
         UserModel userModel = getUser();
         // 执行构建
