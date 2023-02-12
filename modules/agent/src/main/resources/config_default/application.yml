@@ -36,8 +36,6 @@ jpom:
     timer-match-second: false
     # 旧包文件保留个数
     old-jars-count: 2
-    # Check the url for the new version
-    remote-version-url:
     # 系统日志编码格式
     log-charset: UTF-8
     # 控制台编码格式

@@ -15,8 +15,6 @@ jpom:
     timer-match-second: false
     # 旧包文件保留个数
     old-jars-count: 2
-    # Check the url for the new version
-    remote-version-url:
     # 系统日志编码格式
     log-charset: UTF-8
     # 控制台编码格式
@@ -41,16 +39,6 @@ jpom:
   web:
     # 前端接口 超时时间 单位秒(最小 5 秒)
     api-timeout: 20
-    # 系统名称
-    name:
-    # 副标题
-    sub-title:
-    # 登录页名称
-    login-title:
-    # logo 文件路径（绝对路径、http） 文件限制后缀:jpg、png、gif
-    logo-file:
-    # icon 文件路径（绝对路径、http），建议规格 12×12、16×16、24×24、32×32、48×48 , 文件限制后缀 ico、png
-    icon-file:
     # 禁用页面引导导航
     disabled-guide: false
     # 禁用登录图形验证码 （一般用于服务器没有字体或者开启了两部验证后才关闭图形验证码）
