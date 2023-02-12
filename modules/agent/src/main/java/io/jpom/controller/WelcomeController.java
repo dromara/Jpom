@@ -22,10 +22,7 @@
  */
 package io.jpom.controller;
 
-import cn.hutool.cache.impl.CacheObj;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseAgentController;
@@ -33,9 +30,7 @@ import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.common.commander.AbstractSystemCommander;
-import io.jpom.system.TopManager;
 import io.jpom.util.OshiUtils;
-import io.jpom.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -45,8 +40,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,44 +53,42 @@ public class WelcomeController extends BaseAgentController {
 
     @PostMapping(value = "getDirectTop", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<JSONObject> getDirectTop() {
-        JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
-        //
-        topInfo.put("time", SystemClock.now());
+        JSONObject topInfo = OshiUtils.getSimpleInfo();
         return JsonMessage.success("ok", topInfo);
     }
 
-    @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> getTop(Long millis) {
-        Iterator<CacheObj<String, JSONObject>> cacheObjIterator = TopManager.get();
-        List<JSONObject> series = new ArrayList<>();
-        List<String> scale = new ArrayList<>();
-        int count = 60;
-        int minSize = 12;
-        while (cacheObjIterator.hasNext()) {
-            CacheObj<String, JSONObject> cacheObj = cacheObjIterator.next();
-            String key = cacheObj.getKey();
-            scale.add(key);
-            JSONObject value = cacheObj.getValue();
-            series.add(value);
-        }
-        //限定数组最大数量
-        if (series.size() > count) {
-            series = series.subList(series.size() - count, series.size());
-            scale = scale.subList(scale.size() - count, scale.size());
-        }
-        while (scale.size() <= minSize) {
-            if (scale.size() == 0) {
-                scale.add(DateUtil.formatTime(DateUtil.date()));
-            }
-            String time = scale.get(scale.size() - 1);
-            String newTime = StringUtil.getNextScaleTime(time, millis);
-            scale.add(newTime);
-        }
-        JSONObject object = new JSONObject();
-        object.put("scales", scale);
-        object.put("series", series);
-        return JsonMessage.success("", object);
-    }
+//    @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public JsonMessage<JSONObject> getTop(Long millis) {
+//        Iterator<CacheObj<String, JSONObject>> cacheObjIterator = TopManager.get();
+//        List<JSONObject> series = new ArrayList<>();
+//        List<String> scale = new ArrayList<>();
+//        int count = 60;
+//        int minSize = 12;
+//        while (cacheObjIterator.hasNext()) {
+//            CacheObj<String, JSONObject> cacheObj = cacheObjIterator.next();
+//            String key = cacheObj.getKey();
+//            scale.add(key);
+//            JSONObject value = cacheObj.getValue();
+//            series.add(value);
+//        }
+//        //限定数组最大数量
+//        if (series.size() > count) {
+//            series = series.subList(series.size() - count, series.size());
+//            scale = scale.subList(scale.size() - count, scale.size());
+//        }
+//        while (scale.size() <= minSize) {
+//            if (scale.size() == 0) {
+//                scale.add(DateUtil.formatTime(DateUtil.date()));
+//            }
+//            String time = scale.get(scale.size() - 1);
+//            String newTime = StringUtil.getNextScaleTime(time, millis);
+//            scale.add(newTime);
+//        }
+//        JSONObject object = new JSONObject();
+//        object.put("scales", scale);
+//        object.put("series", series);
+//        return JsonMessage.success("", object);
+//    }
 
 
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

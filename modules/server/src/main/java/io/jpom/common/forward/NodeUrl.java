@@ -39,7 +39,7 @@ public enum NodeUrl {
     /**
      *
      */
-    GetTop("/getTop"),
+//    GetTop("/getTop"),
     GetDirectTop("/getDirectTop"),
     Status("/status"),
     exportTop("/exportTop"),
