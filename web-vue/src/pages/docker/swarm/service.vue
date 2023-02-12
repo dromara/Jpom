@@ -398,7 +398,7 @@
 import { dockerSwarmServicesDel, dockerSwarmServicesEdit, dockerSwarmServicesList } from "@/api/docker-swarm";
 import SwarmTask from "./task";
 import PullLog from "./pull-log";
-import { renderSize } from "@/utils/time";
+import { renderSize } from "@/utils/const";
 
 export default {
   components: { SwarmTask, PullLog },

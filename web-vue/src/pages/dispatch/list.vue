@@ -731,8 +731,19 @@ import {
 } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getProjectData, javaModes, noFileModes, runModeList, getRuningProjectInfo, getProjectGroupAll } from "@/api/node-project";
-import { itemGroupBy, parseTime, renderSize, formatDuration } from "@/utils/time";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, readJsonStrField, concurrentExecution, randomStr } from "@/utils/const";
+import {
+  CHANGE_PAGE,
+  COMPUTED_PAGINATION,
+  PAGE_DEFAULT_LIST_QUERY,
+  PROJECT_DSL_DEFATUL,
+  readJsonStrField,
+  concurrentExecution,
+  randomStr,
+  itemGroupBy,
+  parseTime,
+  renderSize,
+  formatDuration,
+} from "@/utils/const";
 import FileRead from "@/pages/node/node-layout/project/project-file-read";
 import { uploadPieces } from "@/utils/upload-pieces";
 import CustomSelect from "@/components/customSelect";

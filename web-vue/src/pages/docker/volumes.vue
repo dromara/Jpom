@@ -49,7 +49,7 @@
   </a-table>
 </template>
 <script>
-import { renderSize, parseTime } from "@/utils/time";
+import { renderSize, parseTime } from "@/utils/const";
 import { dockerVolumesList, dockerVolumesRemove } from "@/api/docker-api";
 export default {
   props: {

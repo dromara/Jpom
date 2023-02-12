@@ -60,7 +60,7 @@
 <script>
 import { getNodeCache, clearCache } from "@/api/system";
 import TaskStat from "@/pages/system/taskStat";
-import { parseTime } from "@/utils/time";
+import { parseTime } from "@/utils/const";
 export default {
   components: {
     TaskStat,

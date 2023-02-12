@@ -76,7 +76,7 @@
 </template>
 <script>
 import { nodeMonitorData, getProcessList, killPid } from "@/api/node";
-import { renderSize, formatPercent, parseTime, formatDuration } from "@/utils/time";
+import { renderSize, formatPercent, parseTime, formatDuration } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import NodeTop from "@/pages/node/node-layout/node-top";
 import { generateNodeTopChart, drawChart } from "@/api/node-stat";

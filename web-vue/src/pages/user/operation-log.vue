@@ -63,9 +63,8 @@ import { getOperationLogList } from "@/api/operation-log";
 import { getMonitorOperateTypeList } from "@/api/monitor";
 import { getNodeListAll } from "@/api/node";
 import { getUserListAll } from "@/api/user/user";
-import { parseTime } from "@/utils/time";
 import JsonViewer from "vue-json-viewer";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 
 export default {
   components: { JsonViewer },

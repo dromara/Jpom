@@ -278,9 +278,7 @@ import {
   uploadProjectFile,
   shardingMerge,
 } from "@/api/node-project";
-import { ZIP_ACCEPT } from "@/utils/const";
-import { renderSize, formatDuration } from "@/utils/time";
-
+import { ZIP_ACCEPT, renderSize, formatDuration } from "@/utils/const";
 import codeEditor from "@/components/codeEditor";
 import projectFileBackup from "./project-file-backup.vue";
 import { uploadPieces } from "@/utils/upload-pieces";

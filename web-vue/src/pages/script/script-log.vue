@@ -51,10 +51,8 @@
 </template>
 <script>
 import { getScriptLogList, scriptDel, triggerExecTypeMap } from "@/api/server-script";
-
 import ScriptLogView from "@/pages/script/script-log-view";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 
 export default {
   components: {

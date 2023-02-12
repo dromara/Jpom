@@ -425,9 +425,8 @@ import Console from "./project-console";
 import FileRead from "./project-file-read";
 import CustomSelect from "@/components/customSelect";
 // import Replica from "./project-replica";
-import { parseTime } from "@/utils/time";
 import codeEditor from "@/components/codeEditor";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PROJECT_DSL_DEFATUL, randomStr, parseTime } from "@/utils/const";
 
 import {
   deleteProject,

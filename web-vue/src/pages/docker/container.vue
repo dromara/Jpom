@@ -328,7 +328,7 @@
   </div>
 </template>
 <script>
-import { parseTime, renderSize } from "@/utils/time";
+import { parseTime, renderSize } from "@/utils/const";
 import {
   dockerContainerList,
   dockerContainerRemove,

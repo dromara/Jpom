@@ -94,7 +94,7 @@
 
 <script>
 import { dockerSwarmNodeLeave, dockerSwarmNodeUpdate, dockerSwarmServicesTaskList, TASK_STATE } from "@/api/docker-swarm";
-import { parseTime } from "@/utils/time";
+import { parseTime } from "@/utils/const";
 import PullLog from "./pull-log";
 
 export default {

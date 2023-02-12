@@ -90,8 +90,7 @@
 <script>
 import { deleteMonitorOperate, editMonitorOperate, getMonitorOperateLogList, getMonitorOperateTypeList } from "@/api/monitor";
 import { getUserListAll } from "@/api/user/user";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 
 export default {
   data() {

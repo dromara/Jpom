@@ -236,8 +236,7 @@
 
 <script>
 import { deleteCommand, editCommand, executeBatch, getCommandList, syncToWorkspace, getTriggerUrl } from "@/api/command";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import { getSshListAll } from "@/api/ssh";
 import codeEditor from "@/components/codeEditor";
 import CommandLog from "./command-view-log";

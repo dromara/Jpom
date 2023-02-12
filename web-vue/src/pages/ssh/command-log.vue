@@ -46,8 +46,7 @@
 
 <script>
 import { deleteCommandLog, downloadLog, getCommandLogList, statusMap, triggerExecTypeMap } from "@/api/command";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import CommandLog from "./command-view-log";
 
 export default {

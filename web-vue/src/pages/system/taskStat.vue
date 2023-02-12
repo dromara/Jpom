@@ -14,7 +14,7 @@
   </div>
 </template>
 <script>
-import { parseTime } from "@/utils/time";
+import { parseTime } from "@/utils/const";
 export default {
   name: "TaskStat",
   props: {

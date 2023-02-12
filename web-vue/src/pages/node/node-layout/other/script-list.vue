@@ -83,8 +83,7 @@
 import { getScriptList, editScript, deleteScript, itemScript, syncScript } from "@/api/node-other";
 import codeEditor from "@/components/codeEditor";
 import ScriptConsole from "./script-console";
-import { CRON_DATA_SOURCE, COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import { CRON_DATA_SOURCE, COMPUTED_PAGINATION, CHANGE_PAGE, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 export default {
   components: {
     ScriptConsole,

@@ -220,8 +220,7 @@ import { deleteScript, editScript, getScriptList, syncToWorkspace, unbindScript,
 import codeEditor from "@/components/codeEditor";
 import { getNodeListAll } from "@/api/node";
 import ScriptConsole from "@/pages/script/script-console";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
-import { parseTime } from "@/utils/time";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import { mapGetters } from "vuex";
 import { getWorkSpaceListAll } from "@/api/workspace";
 import Vue from "vue";
