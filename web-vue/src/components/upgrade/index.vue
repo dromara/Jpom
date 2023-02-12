@@ -69,8 +69,9 @@ import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade, 
 import Vue from "vue";
 import MarkdownItVue from "markdown-it-vue";
 import "markdown-it-vue/dist/markdown-it-vue.css";
-import { RESTART_UPGRADE_WAIT_TIME_COUNT, parseTime } from "@/utils/const";
+import { RESTART_UPGRADE_WAIT_TIME_COUNT, parseTime, compareVersion } from "@/utils/const";
 import { uploadPieces } from "@/utils/upload-pieces";
+import { executionRequest } from "@/api/external";
 
 export default {
   name: "Upgrade",
@@ -123,6 +124,8 @@ export default {
           //
           // res.data.
           this.showVersion(false, res.data?.remoteVersion);
+          // 本地网络检测
+          this.loaclCheckVersion();
         });
       });
     },
@@ -282,30 +285,66 @@ export default {
     checkVersion() {
       checkVersion(this.nodeId).then((res) => {
         if (res.code === 200) {
-          this.showVersion(true, res.data);
+          this.showVersion(true, res.data).then((upgrade) => {
+            // 远程检测失败才本地检测
+            if (!upgrade) {
+              this.loaclCheckVersion();
+            }
+          });
+        }
+      });
+    },
+    // 本地网络检测
+    loaclCheckVersion() {
+      //console.log(compareVersion("1.0.0", "1.0.1"), compareVersion("2.4.3", "2.4.2"));
+      //console.log(compareVersion("1.0.2", "dev"));
+      executionRequest("https://jpom.top/docs/release-versions.json", {
+        type: this.nodeId ? "agent" : "server",
+      }).then((data) => {
+        if (!data || !data.tag_name) {
+          return;
+        }
+
+        const tagName = data.tag_name.replace("v", "");
+        const upgrade = compareVersion(this.temp.version, tagName) < 0;
+
+        if (upgrade) {
+          this.$notification.success({
+            duration: 10,
+            message: function (h) {
+              //
+              const dUrl = data.downloadUrl || "https://jpom.top";
+              const html = "检测到新版本 " + tagName + "。请前往：<a target='_blank' href='" + dUrl + "'>" + dUrl + "</a> 下载安装包";
+              return h("div", null, [h("p", { domProps: { innerHTML: html } }, null)]);
+            },
+          });
         }
       });
     },
     showVersion(tip, data) {
-      if (!data) {
-        this.temp.upgrade = false;
+      return new Promise((resolve) => {
+        if (!data) {
+          this.temp = { ...this.temp, upgrade: false };
+          if (tip) {
+            this.$notification.success({
+              message: "没有检查到最新版",
+            });
+          }
+          resolve(false);
+          return;
+        }
+        this.temp = { ...this.temp, upgrade: data.upgrade, newVersion: data.tagName };
+
+        if (this.temp.upgrade && data.changelog) {
+          this.changelog = data.changelog;
+        }
         if (tip) {
           this.$notification.success({
-            message: "没有检查到最新版",
+            message: this.temp.upgrade ? "检测到新版本 " + data.tagName : "没有检查到最新版",
           });
         }
-        return;
-      }
-      this.temp.upgrade = data.upgrade;
-      this.temp.newVersion = data.tagName;
-      if (this.temp.upgrade && data.changelog) {
-        this.changelog = data.changelog;
-      }
-      if (tip) {
-        this.$notification.success({
-          message: this.temp.upgrade ? "检测到新版本 " + data.tagName : "没有检查到最新版",
-        });
-      }
+        resolve(data.upgrade);
+      });
     },
     // 升级
     upgrageVerion() {

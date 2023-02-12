@@ -456,3 +456,41 @@ export function formatPercent(point, keep = 2) {
   percent += "%";
   return percent;
 }
+
+export function compareVersion(version1, version2) {
+  if (version1 == null && version2 == null) {
+    return 0;
+  } else if (version1 == null) {
+    // null视为最小版本，排在前
+    return -1;
+  } else if (version2 == null) {
+    return 1;
+  }
+
+  if (version1 === version2) {
+    return 0;
+  }
+
+  const v1s = version1.split(".");
+  const v2s = version2.split(".");
+
+  let diff = 0;
+  const minLength = Math.min(v1s.length, v2s.length); // 取最小长度值
+
+  for (let i = 0; i < minLength; i++) {
+    let v1 = v1s[i];
+    let v2 = v2s[i];
+    // 先比较长度
+    diff = v1.length - v2.length;
+    if (0 == diff) {
+      diff = v1.localeCompare(v2);
+    }
+    if (diff != 0) {
+      //已有结果，结束
+      break;
+    }
+  }
+
+  // 如果已经分出大小，则直接返回，如果未分出大小，则再比较位数，有子版本的为大；
+  return diff != 0 ? diff : v1s.length - v2s.length;
+}
