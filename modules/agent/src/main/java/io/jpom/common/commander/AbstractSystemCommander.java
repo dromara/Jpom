@@ -27,12 +27,10 @@ import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.commander.impl.LinuxSystemCommander;
 import io.jpom.common.commander.impl.MacOsSystemCommander;
 import io.jpom.common.commander.impl.WindowsSystemCommander;
-import io.jpom.model.system.ProcessModel;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * 系统监控命令
@@ -69,21 +67,13 @@ public abstract class AbstractSystemCommander {
      */
     public abstract JSONObject getAllMonitor();
 
-    /**
-     * 获取当前服务器的所有进程列表
-     *
-     * @param processName 进程名称
-     * @return array
-     */
-    public abstract List<ProcessModel> getProcessList(String processName);
-
-    /**
-     * 获取指定进程的 内存信息
-     *
-     * @param pid 进程id
-     * @return json
-     */
-    public abstract ProcessModel getPidInfo(int pid);
+//    /**
+//     * 获取当前服务器的所有进程列表
+//     *
+//     * @param processName 进程名称
+//     * @return array
+//     */
+//    public abstract List<ProcessModel> getProcessList(String processName);
 
     /**
      * 清空文件内容
