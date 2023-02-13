@@ -360,13 +360,14 @@ export function parseTime(time, cFormat) {
 /**
  * 格式化文件大小
  * @param {*} value
+ * @param defaultValue
  * @returns
  */
 export function renderSize(value, defaultValue = "-") {
-  if (null == value || value == "") {
+  if (null == value || value === "") {
     return defaultValue;
   }
-  var unitArr = new Array("Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB");
+  var unitArr = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   var index = 0;
   var srcsize = parseFloat(value);
   if (srcsize <= 0) {
@@ -427,7 +428,7 @@ export function itemGroupBy(arr, groupKey, key, dataKey) {
  * @returns
  */
 export function formatDuration(ms, seg, levelCount) {
-  if (isNaN(new Number(ms))) {
+  if (isNaN(Number(ms))) {
     return ms;
   }
   seg = seg || "";
@@ -449,12 +450,25 @@ export function formatDuration(ms, seg, levelCount) {
 
 //小数转换为分数(小数先转换成number类型，再乘以100，并且保留2位小数)
 export function formatPercent(point, keep = 2) {
+  return formatPercent2(Number(point) * 100, keep);
+}
+
+//小数转换为分数(小数先转换成number类型，并且保留2位小数)
+export function formatPercent2(point, keep = 2) {
   if (null == point) {
     return "--";
   }
-  var percent = (Number(point) * 100).toFixed(keep);
+  var percent = Number(point).toFixed(keep);
   percent += "%";
   return percent;
+}
+
+//小数转换为分数(小数先转换成number类型，再乘以100，并且保留2位小数)
+export function formatPercent2Number(point, keep = 2) {
+  if (null == point) {
+    return 0;
+  }
+  return Number(Number(point).toFixed(keep));
 }
 
 export function compareVersion(version1, version2) {
@@ -482,15 +496,15 @@ export function compareVersion(version1, version2) {
     let v2 = v2s[i];
     // 先比较长度
     diff = v1.length - v2.length;
-    if (0 == diff) {
+    if (0 === diff) {
       diff = v1.localeCompare(v2);
     }
-    if (diff != 0) {
+    if (diff !== 0) {
       //已有结果，结束
       break;
     }
   }
 
   // 如果已经分出大小，则直接返回，如果未分出大小，则再比较位数，有子版本的为大；
-  return diff != 0 ? diff : v1s.length - v2s.length;
+  return diff !== 0 ? diff : v1s.length - v2s.length;
 }

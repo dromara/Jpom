@@ -222,7 +222,7 @@
 </template>
 <script>
 import { getStatist, status, statusStat } from "@/api/node-stat";
-import { PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime } from "@/utils/const";
+import { PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime, formatPercent2Number } from "@/utils/const";
 import NodeTop from "@/pages/node/node-layout/node-top";
 import { getNodeGroupAll } from "@/api/node";
 
@@ -269,7 +269,16 @@ export default {
       this.loading = true;
       getStatist(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data.result;
+          this.list =
+            res.data.result &&
+            res.data.result.map((item) => {
+              console.log(item);
+              item.occupyCpu = formatPercent2Number(item.occupyCpu);
+              item.occupyMemoryUsed = formatPercent2Number(item.occupyMemoryUsed);
+              item.occupyDisk = formatPercent2Number(item.occupyDisk);
+              item.occupyMemory = formatPercent2Number(item.occupyMemory);
+              return item;
+            });
           this.listQuery.total = res.data.total;
         }
         this.loading = false;

@@ -32,6 +32,7 @@ import oshi.hardware.GlobalMemory;
 import oshi.software.os.FileSystem;
 import oshi.software.os.OSFileStore;
 import oshi.software.os.OperatingSystem;
+import oshi.util.GlobalConfig;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +42,11 @@ import java.util.stream.Collectors;
  * @since 2023/2/12
  */
 public class OshiUtils {
+
+    static {
+        // 解决Oshi获取CPU使用率与Windows任务管理器显示不匹配的问题
+        GlobalConfig.set(GlobalConfig.OSHI_OS_WINDOWS_CPU_UTILITY, true);
+    }
 
     /**
      * 获取信息简单的基础状态信息
