@@ -1,5 +1,5 @@
 import axios from "./config";
-import { parseTime } from "@/utils/const";
+import { parseTime, formatPercent2 } from "@/utils/const";
 import echarts from "echarts";
 
 // node 列表
@@ -130,6 +130,17 @@ export function generateNodeTopChart(data) {
         formatter: "{value} %",
       },
       max: 100,
+    },
+    tooltip: {
+      trigger: "axis",
+      show: true,
+      formatter: function (params) {
+        var html = params[0].name + "<br>";
+        for (var i = 0; i < params.length; i++) {
+          html += params[i].marker + params[i].seriesName + ":" + formatPercent2(params[i].value) + "<br>";
+        }
+        return html;
+      },
     },
     series: series,
   });

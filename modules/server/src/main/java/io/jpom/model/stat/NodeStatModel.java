@@ -25,6 +25,8 @@ package io.jpom.model.stat;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseGroupModel;
 import io.jpom.model.log.SystemMonitorLog;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import top.jpom.h2db.TableName;
 
 /**
@@ -33,7 +35,9 @@ import top.jpom.h2db.TableName;
  * @see io.jpom.model.data.NodeModel
  * @since 2022/1/22
  */
+@EqualsAndHashCode(callSuper = true)
 @TableName(value = "NODE_STAT", name = "节点统计")
+@Data
 public class NodeStatModel extends BaseGroupModel {
     /**
      * 占用cpu
@@ -87,99 +91,8 @@ public class NodeStatModel extends BaseGroupModel {
      */
     private String name;
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getFailureMsg() {
-        return failureMsg;
-    }
 
     public void setFailureMsg(String failureMsg) {
         this.failureMsg = StrUtil.maxLength(failureMsg, 240);
-    }
-
-    public Double getOccupyCpu() {
-        return occupyCpu;
-    }
-
-    public void setOccupyCpu(Double occupyCpu) {
-        this.occupyCpu = occupyCpu;
-    }
-
-    public Double getOccupyMemory() {
-        return occupyMemory;
-    }
-
-    public void setOccupyMemory(Double occupyMemory) {
-        this.occupyMemory = occupyMemory;
-    }
-
-    public Double getOccupyMemoryUsed() {
-        return occupyMemoryUsed;
-    }
-
-    public void setOccupyMemoryUsed(Double occupyMemoryUsed) {
-        this.occupyMemoryUsed = occupyMemoryUsed;
-    }
-
-    public Double getOccupyDisk() {
-        return occupyDisk;
-    }
-
-    public void setOccupyDisk(Double occupyDisk) {
-        this.occupyDisk = occupyDisk;
-    }
-
-    public Integer getNetworkTime() {
-        return networkTime;
-    }
-
-    public void setNetworkTime(Integer networkTime) {
-        this.networkTime = networkTime;
-    }
-
-    public String getUpTimeStr() {
-        return upTimeStr;
-    }
-
-    public void setUpTimeStr(String upTimeStr) {
-        this.upTimeStr = upTimeStr;
-    }
-
-    public String getOsName() {
-        return osName;
-    }
-
-    public void setOsName(String osName) {
-        this.osName = osName;
-    }
-
-    public String getJpomVersion() {
-        return jpomVersion;
-    }
-
-    public void setJpomVersion(String jpomVersion) {
-        this.jpomVersion = jpomVersion;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
     }
 }
