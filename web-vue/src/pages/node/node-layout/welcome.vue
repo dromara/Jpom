@@ -20,7 +20,7 @@
                 selStyle="width: 200px !important"
                 @change="loadNodeProcess"
                 @addOption="addNodeProcess"
-                v-model="processName"
+                v-model="processSearch.processName"
                 :data="processNames"
                 :popupContainerParent="false"
                 inputPlaceholder="自定义进程类型"
@@ -29,11 +29,13 @@
               >
                 <template slot="suffixIcon"> <a-icon type="down" /></template>
               </custom-select>
-              <div>
-                <a-tooltip title="重置自定义的进程名信息">
-                  <a-icon type="rest" @click="restProcessNames" />
-                </a-tooltip>
-              </div>
+              <a-tooltip title="查看的进程数量">
+                <a-input-number v-model="processSearch.processCount" :min="1" @change="loadNodeProcess" />
+              </a-tooltip>
+              <a-tooltip title="重置自定义的进程名信息">
+                <a-icon type="rest" @click="restProcessNames" />
+              </a-tooltip>
+
               <a-select placeholder="刷新周期" v-model="refreshInterval" style="width: 120px" @change="pullNodeData">
                 <a-select-option v-for="item in [5, 10, 15, 20, 25, 30]" :key="item"> {{ item }}秒 </a-select-option>
               </a-select>
@@ -46,7 +48,7 @@
           </a-col>
         </a-row>
       </template>
-      <!-- 
+      <!--
       -->
       <a-tooltip slot="percentTooltip" slot-scope="text" placement="topLeft" :title="formatPercent(text)">
         {{ formatPercent(text) }}
@@ -103,7 +105,10 @@ export default {
       monitorVisible: false,
       timeRange: "",
       historyData: [],
-      processName: "java",
+      processSearch: {
+        processName: "java",
+        processCount: 20,
+      },
       columns: [
         { title: "ID", dataIndex: "processId", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "名称", dataIndex: "name", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -156,8 +161,11 @@ export default {
       this.cacheNodeProcess();
     },
     restProcessNames() {
-      this.processName = this.defaultProcessNames[0];
       this.processNames = this.defaultProcessNames;
+      this.processSearch = {
+        processName: this.defaultProcessNames[0],
+        processCount: 20,
+      };
       this.cacheNodeProcess();
       this.loadNodeProcess();
     },
@@ -165,7 +173,7 @@ export default {
     initData() {
       const nodeCache = this.getCacheNodeProcess();
 
-      this.processName = nodeCache?.processName || this.processName;
+      this.processSearch = { ...this.processSearch, processName: nodeCache?.processName || this.processSearch.processName, processCount: nodeCache?.processCount || this.processSearch.processCount };
       this.processNames = nodeCache?.processNames || this.processNames;
       // 加载缓存信息
       this.refreshInterval = this.getCacheNode("refreshInterval", this.refreshInterval);
@@ -196,14 +204,15 @@ export default {
       this.loading = true;
       getProcessList({
         nodeId: this.node.id,
-        processName: this.processName,
+        processName: this.processSearch.processName,
+        count: this.processSearch.processCount,
       }).then((res) => {
         if (res.code === 200) {
           this.processList = res.data;
         } else {
           this.processList = [];
         }
-        this.tableLocale.emptyText = res.msg;
+        this.tableLocale.emptyText = "没有找到任何进程";
         this.loading = false;
       });
       if (v) {
@@ -221,7 +230,7 @@ export default {
           // kill
           const params = {
             nodeId: this.node.id,
-            pid: record.pid,
+            pid: record.processId,
           };
           killPid(params).then((res) => {
             if (res.code === 200) {
@@ -241,8 +250,10 @@ export default {
     cacheNodeProcess() {
       const cacheJson = this.getCacheAllNode();
       // console.log(cacheJson);
+      cacheJson[this.node.id] = cacheJson[this.node.id] || {};
       cacheJson[this.node.id].processNames = this.processNames;
-      cacheJson[this.node.id].processName = this.processName;
+      cacheJson[this.node.id].processName = this.processSearch.processName;
+      cacheJson[this.node.id].processCount = this.processSearch.processCount;
       cacheJson["refreshInterval"] = this.refreshInterval;
       localStorage.setItem("node-process-name", JSON.stringify(cacheJson));
     },
