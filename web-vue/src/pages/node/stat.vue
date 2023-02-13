@@ -272,7 +272,7 @@ export default {
           this.list =
             res.data.result &&
             res.data.result.map((item) => {
-              console.log(item);
+              // console.log(item);
               item.occupyCpu = formatPercent2Number(item.occupyCpu);
               item.occupyMemoryUsed = formatPercent2Number(item.occupyMemoryUsed);
               item.occupyDisk = formatPercent2Number(item.occupyDisk);
