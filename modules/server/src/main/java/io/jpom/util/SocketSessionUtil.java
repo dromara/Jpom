@@ -51,7 +51,7 @@ public class SocketSessionUtil {
     public static void send(WebSocketSession session, WebSocketMessage<?> message) throws IOException {
         if (!session.isOpen()) {
             // 会话关闭不能发送消息 @author jzy 21-08-04
-            log.warn("回话已经关闭啦，不能发送消息：{}", message.getPayload());
+            log.warn("会话已经关闭啦，不能发送消息：{}", message.getPayload());
             return;
         }
         WebSocketSession webSocketSession = SOCKET_MAP.computeIfAbsent(session.getId(), s -> new ConcurrentWebSocketSessionDecorator(session, 60 * 1000, (int) DataSize.ofMegabytes(5).toBytes()));
