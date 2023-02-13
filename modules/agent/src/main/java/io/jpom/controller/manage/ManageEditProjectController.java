@@ -130,6 +130,7 @@ public class ManageEditProjectController extends BaseAgentController {
         // java 程序副本
         if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.Jar || runMode1 == RunMode.JarWar || runMode1 == RunMode.JavaExtDirsCp) {
             String javaCopyIds = getParameter("javaCopyIds");
+            // TODO 删除副本验证
             if (StrUtil.isEmpty(javaCopyIds)) {
                 projectInfo.setJavaCopyItemList(null);
             } else {
