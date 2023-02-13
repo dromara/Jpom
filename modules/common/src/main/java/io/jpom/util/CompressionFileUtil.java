@@ -35,7 +35,6 @@ import org.apache.commons.compress.compressors.bzip2.BZip2Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -79,7 +78,7 @@ public class CompressionFileUtil {
                         IoUtil.copy(compressUtilIn, outputStream);
                     }
                 } else {
-                    unCompressTryCharset(compressUtilIn, destDir, stripComponents);
+                    unCompressByInputStreamTryCharset(compressFile, destDir, stripComponents);
                 }
             } catch (Exception e2) {
                 //
@@ -91,12 +90,12 @@ public class CompressionFileUtil {
     }
 
     private static void unCompressTryCharset(File compressFile, File destDir, int stripComponents) {
-        for (int i = CHARSETS.length - 1; i >= 0; i--) {
+        for (int i = 0; i < CHARSETS.length; i++) {
             Charset charset = CHARSETS[i];
             try (Extractor extractor = CompressUtil.createExtractor(charset, compressFile)) {
                 extractor.extract(destDir, stripComponents);
             } catch (Exception e) {
-                log.warn("解压异常 {} {}", charset, e.getMessage());
+                log.warn("{} 解压异常 {} {}", compressFile.getName(), charset, e.getMessage());
                 if (i == CHARSETS.length - 1) {
                     // 最后一个
                     throw Lombok.sneakyThrow(e);
@@ -105,11 +104,14 @@ public class CompressionFileUtil {
         }
     }
 
-    private static void unCompressTryCharset(InputStream compressInputStream, File destDir, int stripComponents) {
-        for (int i = CHARSETS.length - 1; i >= 0; i--) {
+    private static void unCompressByInputStreamTryCharset(File compressFile, File destDir, int stripComponents) {
+        for (int i = 0; i < CHARSETS.length; i++) {
             Charset charset = CHARSETS[i];
-            try (Extractor extractor = CompressUtil.createExtractor(charset, compressInputStream)) {
-                extractor.extract(destDir, stripComponents);
+            try (FileInputStream fileInputStream = new FileInputStream(compressFile);
+                 CompressorInputStream compressUtilIn = CompressUtil.getIn(null, fileInputStream);) {
+                try (Extractor extractor = CompressUtil.createExtractor(charset, compressUtilIn)) {
+                    extractor.extract(destDir, stripComponents);
+                }
             } catch (Exception e) {
                 log.warn("解压异常 {} by InputStream {}", charset, e.getMessage());
                 if (i == CHARSETS.length - 1) {
