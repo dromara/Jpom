@@ -150,7 +150,7 @@ export default {
         }
       });
       // 控制台输出版本号信息
-      executionRequest("https://jpom.top/docs/versions.tag", {}).then((data) => {
+      executionRequest("https://jpom.top/docs/versions.show", {}).then((data) => {
         const htmlVersion = document.head.querySelector("[name~=jpom-version][content]").content;
         const buildTime = document.head.querySelector("[name~=build-time][content]").content;
 
