@@ -2,6 +2,11 @@
 
 ## 2.10.16
 
+### 🐣 新增功能
+
+1. 【server】新增 docker 列表支持跨工作空间同步
+   （感谢 @[清风柳絮II号](https://gitee.com/zhangfeihong_597) [Gitee issues I6EOIR](https://gitee.com/dromara/Jpom/issues/I6EOIR) ）
+
 ### 🐞 解决BUG、优化功能
 
 1. 【all】优化 解压工具支持多种编码格式（GBK、UTF8）（感谢@Again... . ）

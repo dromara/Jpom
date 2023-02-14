@@ -293,4 +293,45 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> imp
         Assert.notNull(managerSwarmDocker, "对应的 docker 不存在");
         return managerSwarmDocker.toParameter();
     }
+
+    /**
+     * 将节点信息同步到其他工作空间
+     *
+     * @param ids            多给节点ID
+     * @param nowWorkspaceId 当前的工作空间ID
+     * @param workspaceId    同步到哪个工作空间
+     */
+    public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
+        StrUtil.splitTrim(ids, StrUtil.COMMA).forEach(id -> {
+            DockerInfoModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
+            Assert.notNull(data, "没有对应到docker信息");
+            //
+            DockerInfoModel where = new DockerInfoModel();
+            where.setWorkspaceId(workspaceId);
+            where.setHost(data.getHost());
+            DockerInfoModel exits = super.queryByBean(where);
+            if (exits == null) {
+                // 不存在则添加节点
+                data.setId(null);
+                data.setWorkspaceId(workspaceId);
+                data.setCreateTimeMillis(null);
+                data.setModifyTimeMillis(null);
+                data.setModifyUser(null);
+                // 集群 不同步
+                data.setSwarmId(null);
+                data.setSwarmNodeId(null);
+                this.insert(data);
+            } else {
+                // 修改信息
+                DockerInfoModel update = DockerInfoModel.builder().build();
+                update.setId(exits.getId());
+                update.setTlsVerify(data.getTlsVerify());
+                update.setRegistryEmail(data.getRegistryEmail());
+                update.setRegistryUrl(data.getRegistryUrl());
+                update.setRegistryUsername(data.getRegistryUsername());
+                update.setRegistryPassword(data.getRegistryPassword());
+                this.updateById(update);
+            }
+        });
+    }
 }

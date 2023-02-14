@@ -39,6 +39,7 @@ import io.jpom.model.docker.DockerSwarmInfoMode;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.docker.DockerInfoService;
@@ -353,5 +354,23 @@ public class DockerInfoController extends BaseServerController {
         Long spaceReclaimed = plugin.execute("prune", parameter, Long.class);
         spaceReclaimed = ObjectUtil.defaultIfNull(spaceReclaimed, 0L);
         return JsonMessage.success("修剪完成,总回收空间：" + FileUtil.readableFileSize(spaceReclaimed));
+    }
+
+    /**
+     * 同步到指定工作空间
+     *
+     * @param ids           节点ID
+     * @param toWorkspaceId 分配到到工作空间ID
+     * @return msg
+     */
+    @GetMapping(value = "sync-to-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    @SystemPermission()
+    public JsonMessage<String> syncToWorkspace(@ValidatorItem String ids, @ValidatorItem String toWorkspaceId) {
+        String nowWorkspaceId = dockerInfoService.getCheckUserWorkspace(getRequest());
+        //
+        dockerInfoService.checkUserWorkspace(toWorkspaceId);
+        dockerInfoService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
+        return JsonMessage.success("操作成功");
     }
 }

@@ -332,3 +332,11 @@ export function tryLocalDocker(params) {
     params,
   });
 }
+
+export function syncToWorkspace(params) {
+  return axios({
+    url: "/docker/sync-to-workspace",
+    method: "get",
+    params: params,
+  });
+}
