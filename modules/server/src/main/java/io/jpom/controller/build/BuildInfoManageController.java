@@ -34,6 +34,7 @@ import io.jpom.common.validator.ValidatorConfig;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.EnvironmentMapBuilder;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
@@ -163,18 +164,21 @@ public class BuildInfoManageController extends BaseServerController {
         Assert.isNull(e, () -> e);
         UserModel userModel = getUser();
         BuildExtraModule buildExtraModule = BuildExtraModule.build(buildHistoryLog);
-        //new BuildExtraModule();
-        //buildExtraModule.updateValue(buildHistoryLog);
+        //
+        String buildEnvCache = buildHistoryLog.getBuildEnvCache();
+        JSONObject jsonObject = Opt.ofBlankAble(buildEnvCache).map(JSONObject::parseObject).orElse(new JSONObject());
+        EnvironmentMapBuilder environmentMapBuilder = new EnvironmentMapBuilder(jsonObject.size());
+        environmentMapBuilder.putObject(jsonObject);
+        //
         ReleaseManage manage = ReleaseManage.builder()
             .buildExtraModule(buildExtraModule)
             .logId(buildHistoryLog.getId())
             .userModel(userModel)
             .buildNumberId(buildHistoryLog.getBuildNumberId())
             .buildExecuteService(buildExecuteService)
+            .buildEnv(environmentMapBuilder)
             .build();
-        //ReleaseManage releaseManage = new ReleaseManage(buildHistoryLog, userModel);
-        // 标记发布中
-        //releaseManage.updateStatus(BuildStatus.PubIng);
+        //
         ThreadUtil.execute(manage);
         return JsonMessage.success("重新发布中");
     }

@@ -40,6 +40,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.Session;
 import io.jpom.JpomApplication;
+import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -596,6 +597,7 @@ public class ReleaseManage implements Runnable {
     @Override
     public void run() {
         try {
+            BaseServerController.resetInfo(userModel);
             boolean start = this.start();
             if (start) {
                 this.updateStatus(BuildStatus.PubSuccess);

@@ -70,6 +70,15 @@ public class EnvironmentMapBuilder {
         return this;
     }
 
+    public EnvironmentMapBuilder putObject(Map<String, Object> map) {
+        Optional.ofNullable(map).ifPresent(stringMap -> {
+            for (Map.Entry<String, Object> entry : stringMap.entrySet()) {
+                put(entry.getKey(), StrUtil.toString(entry.getValue()));
+            }
+        });
+        return this;
+    }
+
     public EnvironmentMapBuilder putObjectArray(Object... parametersEnv) {
         for (int i = 0; i < parametersEnv.length; i += 2) {
             this.put(StrUtil.toString(parametersEnv[i]), StrUtil.toString(parametersEnv[i + 1]));
