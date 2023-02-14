@@ -94,7 +94,7 @@ import java.util.stream.Collectors;
  */
 @Builder
 @Slf4j
-public class ReleaseManage implements Runnable {
+public class ReleaseManage {
 
     private final UserModel userModel;
     private final Integer buildNumberId;
@@ -594,10 +594,15 @@ public class ReleaseManage implements Runnable {
         logRecorder.system("分发结果：{}", status.getDesc());
     }
 
-    @Override
-    public void run() {
+    /**
+     * 回滚
+     */
+    public void rollback() {
         try {
             BaseServerController.resetInfo(userModel);
+            // 重新标记为发布中
+            this.updateStatus(BuildStatus.PubIng);
+            //
             boolean start = this.start();
             if (start) {
                 this.updateStatus(BuildStatus.PubSuccess);

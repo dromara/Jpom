@@ -179,7 +179,7 @@ public class BuildInfoManageController extends BaseServerController {
             .buildEnv(environmentMapBuilder)
             .build();
         //
-        ThreadUtil.execute(manage);
+        ThreadUtil.execute(manage::rollback);
         return JsonMessage.success("重新发布中");
     }
 
