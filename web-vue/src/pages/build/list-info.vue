@@ -360,6 +360,7 @@
                 <a-form-model-item label="分发项目" prop="releaseMethodDataId">
                   <a-select show-search allowClear v-model="tempExtraData.releaseMethodDataId_1" placeholder="请选择分发项目">
                     <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }} </a-select-option>
+                    <a-icon slot="suffixIcon" type="reload" @click="loadDispatchList" />
                   </a-select>
                 </a-form-model-item>
                 <a-form-model-item prop="projectSecondaryDirectory" label="二级目录">
@@ -370,7 +371,9 @@
               <!-- 项目 -->
               <template v-if="temp.releaseMethod === 2">
                 <a-form-model-item label="发布项目" prop="releaseMethodDataIdList">
-                  <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="请选择节点项目" />
+                  <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="请选择节点项目">
+                    <a-icon slot="suffixIcon" type="reload" @click="loadNodeProjectList" />
+                  </a-cascader>
                 </a-form-model-item>
                 <a-form-model-item label="发布后操作" prop="afterOpt">
                   <a-select show-search allowClear v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
@@ -393,6 +396,7 @@
                   </template>
                   <a-select show-search option-filter-prop="children" mode="multiple" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
                     <a-select-option v-for="ssh in sshList" :disabled="!ssh.fileDirs" :key="ssh.id">{{ ssh.name }}</a-select-option>
+                    <a-icon slot="suffixIcon" type="reload" @click="loadSshList" />
                   </a-select>
                 </a-form-model-item>
                 <a-form-model-item label="发布目录" prop="releaseMethodDataId">
@@ -522,6 +526,7 @@
                   <a-select @change="selectSwarm()" show-search allowClear v-model="tempExtraData.dockerSwarmId" placeholder="请选择发布到哪个 docker 集群">
                     <a-select-option value="">不发布到 docker 集群</a-select-option>
                     <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
+                    <a-icon slot="suffixIcon" type="reload" @click="loadDockerSwarmListAll" />
                   </a-select>
                 </a-form-model-item>
                 <a-form-model-item prop="pushToRepository" :label="` `" :colon="false">
@@ -1226,7 +1231,7 @@ export default {
     this.countdownTime = Date.now() + this.refreshInterval * 1000;
   },
   methods: {
-    // 页面引导
+    //
     loadDockerSwarmListAll() {
       dockerSwarmListAll().then((res) => {
         this.dockerSwarmList = res.data;
