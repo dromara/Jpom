@@ -2,3 +2,4 @@ alterType,tableName,name,type,len,defaultValue,comment,notNull
 ADD,PROJECT_INFO,group,String,50,,项目分组
 ADD,OUT_GIVING,group,String,50,,项目分组
 ADD,BUILD_INFO,buildEnvParameter,TEXT,,,构建环境变量
+ADD,BUILDHISTORYLOG,buildEnvCache,TEXT,,,构建环境变量

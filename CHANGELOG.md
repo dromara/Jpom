@@ -6,11 +6,13 @@
 
 1. 【server】新增 docker 列表支持跨工作空间同步
    （感谢 @[清风柳絮II号](https://gitee.com/zhangfeihong_597) [Gitee issues I6EOIR](https://gitee.com/dromara/Jpom/issues/I6EOIR) ）
+2. 【server】新增 构建历史保存构建环境变量（为回滚流程使用）
 
 ### 🐞 解决BUG、优化功能
 
 1. 【all】优化 解压工具支持多种编码格式（GBK、UTF8）（感谢@Again... . ）
 2. 【server】优化 在线构建新增配置文件环境变量测试（`BUILD_CONFIG_BRANCH_NAME`）(感谢@阿克苏市姑墨信息科技有限公司)
+3. 【server】修复 节点方法回滚 NPE （感谢@酱总）
 
 ------
 

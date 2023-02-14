@@ -37,6 +37,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
@@ -339,6 +340,19 @@ public class BuildExecuteService {
         buildService.update(buildInfoModel);
     }
 
+    /**
+     * 更新构建历史的环境变量
+     *
+     * @param buildId 构建ID
+     * @param map     环境变量
+     */
+    private void updateBuildEnv(String buildId, Map<String, String> map) {
+        BuildHistoryLog buildInfoModel = new BuildHistoryLog();
+        buildInfoModel.setId(buildId);
+        buildInfoModel.setBuildEnvCache(JSONObject.toJSONString(map));
+        dbBuildHistoryLogService.update(buildInfoModel);
+    }
+
     @Builder
     public static class TaskData {
         private final BuildInfoModel buildInfoModel;
@@ -572,6 +586,20 @@ public class BuildExecuteService {
             // 配置的分支名称，可能存在模糊匹配的情况
             taskData.environmentMapBuilder.put("BUILD_CONFIG_BRANCH_NAME", this.taskData.buildInfoModel.getBranchName());
             return true;
+        }
+
+        /**
+         * 拉取代码后并缓存环境变量
+         *
+         * @return pull 的结果
+         */
+        private boolean pullAndCacheBuildEnv() {
+            boolean pull = this.pull();
+            if (pull) {
+                BuildInfoModel buildInfoModel1 = taskData.buildInfoModel;
+                buildExecuteService.updateBuildEnv(buildInfoModel1.getId(), taskData.environmentMapBuilder.environment());
+            }
+            return pull;
         }
 
         /**
@@ -831,7 +859,7 @@ public class BuildExecuteService {
 
                 @Override
                 public boolean execute() {
-                    return BuildInfoManage.this.pull();
+                    return BuildInfoManage.this.pullAndCacheBuildEnv();
                 }
             });
             suppliers.put("executeCommand", new IProcessItem() {
