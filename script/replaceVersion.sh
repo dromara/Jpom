@@ -28,65 +28,67 @@
 
 set -o errexit
 
-
 current_path=$(pwd)
 case "$(uname)" in
-    Linux)
-		bin_abs_path=$(readlink -f $(dirname "$0"))
-		;;
-	*)
-		bin_abs_path=`cd $(dirname $0) || exit; pwd`
-		;;
+Linux)
+	bin_abs_path=$(readlink -f "$(dirname "$0")")
+	;;
+*)
+	bin_abs_path=$(
+		cd "$(dirname "$0")" || exit
+		pwd
+	)
+	;;
 esac
 
 pwd=${bin_abs_path}/../
 
 echo "当前路径：${current_path},脚本路径：${bin_abs_path}"
 
-if [ -n "$1" ];then
-    new_version="$1"
-    old_version=`cat ${pwd}/docs/.vuepress/public/docs/versions.tag`
-    echo "$old_version 替换为新版本 $new_version"
+if [ -n "$1" ]; then
+	new_version="$1"
+	old_version=$(cat "${pwd}/docs/.vuepress/public/docs/versions.tag")
+	echo "$old_version 替换为新版本 $new_version"
 else
-    # 参数错误，退出
-    echo "ERROR: 请指定新版本！"
-    exit
+	# 参数错误，退出
+	echo "ERROR: 请指定新版本！"
+	exit
 fi
 
-if [ ! -n "$old_version" ]; then
-    echo "ERROR: 旧版本不存在，请确认 /docs/.vuepress/public/docs/versions.tag 中信息正确"
-    exit
+if [ -z "$old_version" ]; then
+	echo "ERROR: 旧版本不存在，请确认 /docs/.vuepress/public/docs/versions.tag 中信息正确"
+	exit
 fi
-
 
 # 替换远程更新包的版本号
-sed -i.bak "s/${old_version}/${new_version}/g" ${pwd}/docs/.vuepress/public/docs/versions.json
-sed -i.bak "s/${old_version}/${new_version}/g" ${pwd}/docs/.vuepress/public/docs/release-versions.json
-sed -i.bak "s/${old_version}/${new_version}/g" ${pwd}/package.json
+sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/versions.json"
+sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/release-versions.json"
+sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/package.json"
+sed -i.bak "s/${old_version}/${new_version}/g" "${pwd}/docs/.vuepress/public/docs/versions.show"
 
-function updateDocUrlItem(){
+function updateDocUrlItem() {
 
-mdPath="${pwd}/docs/更新日志/02.下载链接/01.下载链接.md"
+	mdPath="${pwd}/docs/更新日志/02.下载链接/01.下载链接.md"
 
-if [[ `cat ${mdPath} |grep "$1"` != ""  ]]; then
-	echo "下载地址已经更新啦"
-else
-	echo "" > ${pwd}/temp-docs.log
-	echo "## $1" >> ${pwd}/temp-docs.log
-	echo "- [jpom-$1.zip](https://download.jpom.top/release/$1/jpom-$1.zip)" >> ${pwd}/temp-docs.log
-	echo "- [server-$1-release.tar.gz](https://download.jpom.top/release/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.tar.gz.sha1)" >> ${pwd}/temp-docs.log
-	echo "- [server-$1-release.zip](https://download.jpom.top/release/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.zip.sha1)" >> ${pwd}/temp-docs.log
-	echo "- [agent-$1-release.tar.gz](https://download.jpom.top/release/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.tar.gz.sha1)" >> ${pwd}/temp-docs.log
-	echo "- [agent-$1-release.zip](https://download.jpom.top/release/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.zip.sha1)" >> ${pwd}/temp-docs.log
-	echo "" >> ${pwd}/temp-docs.log
-	echo "--------" >> ${pwd}/temp-docs.log
-	echo "" >> ${pwd}/temp-docs.log
+	if [[ $(cat "${mdPath}" | grep "$1") != "" ]]; then
+		echo "下载地址已经更新啦"
+	else
+		echo "" >"${pwd}/temp-docs.log"
+		echo "## $1" >>"${pwd}/temp-docs.log"
+		echo "- [jpom-$1.zip](https://download.jpom.top/release/$1/jpom-$1.zip)" >>"${pwd}/temp-docs.log"
+		echo "- [server-$1-release.tar.gz](https://download.jpom.top/release/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.tar.gz.sha1)" >>"${pwd}/temp-docs.log"
+		echo "- [server-$1-release.zip](https://download.jpom.top/release/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.zip.sha1)" >>"${pwd}/temp-docs.log"
+		echo "- [agent-$1-release.tar.gz](https://download.jpom.top/release/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.tar.gz.sha1)" >>"${pwd}/temp-docs.log"
+		echo "- [agent-$1-release.zip](https://download.jpom.top/release/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.zip.sha1)" >>"${pwd}/temp-docs.log"
+		echo "" >>"${pwd}/temp-docs.log"
+		echo "--------" >>"${pwd}/temp-docs.log"
+		echo "" >>"${pwd}/temp-docs.log"
 
-	sed -i.bak "12r ${pwd}/temp-docs.log" ${mdPath}
-fi
+		sed -i.bak "12r ${pwd}/temp-docs.log" ${mdPath}
+	fi
 }
 
-updateDocUrlItem $new_version
+updateDocUrlItem "$new_version"
 
 # 保留新版本号
-echo "$new_version" > ${pwd}/docs/.vuepress/public/docs/versions.tag
+echo "$new_version" >"${pwd}/docs/.vuepress/public/docs/versions.tag"
