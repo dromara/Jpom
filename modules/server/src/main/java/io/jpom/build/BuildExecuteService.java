@@ -569,6 +569,8 @@ public class BuildExecuteService {
             taskData.environmentMapBuilder.put("BUILD_NAME", this.buildExtraModule.getName());
             taskData.environmentMapBuilder.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
             taskData.environmentMapBuilder.put("BUILD_NUMBER_ID", this.taskData.buildInfoModel.getBuildId() + "");
+            // 配置的分支名称，可能存在模糊匹配的情况
+            taskData.environmentMapBuilder.put("BUILD_CONFIG_BRANCH_NAME", this.taskData.buildInfoModel.getBranchName());
             return true;
         }
 
@@ -624,6 +626,7 @@ public class BuildExecuteService {
                         }
                         // 分支模式
                         map.put("branchName", newBranchName);
+                        // 真实使用的分支名
                         taskData.environmentMapBuilder.put("BUILD_BRANCH_NAME", newBranchName);
                         logRecorder.system("repository [{}] clone pull from {}", branchName, newBranchName);
                         result = (String[]) plugin.execute("pull", map);
