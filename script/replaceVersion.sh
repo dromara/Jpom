@@ -70,21 +70,22 @@ function updateDocUrlItem() {
 
 	mdPath="${pwd}/docs/更新日志/02.下载链接/01.下载链接.md"
 
-	if [[ $(cat "${mdPath}" | grep "$1") != "" ]]; then
+	if [[ $(grep "$1" "${mdPath}") != "" ]]; then
 		echo "下载地址已经更新啦"
 	else
-		echo "" >"${pwd}/temp-docs.log"
-		echo "## $1" >>"${pwd}/temp-docs.log"
-		echo "- [jpom-$1.zip](https://download.jpom.top/release/$1/jpom-$1.zip)" >>"${pwd}/temp-docs.log"
-		echo "- [server-$1-release.tar.gz](https://download.jpom.top/release/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.tar.gz.sha1)" >>"${pwd}/temp-docs.log"
-		echo "- [server-$1-release.zip](https://download.jpom.top/release/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.zip.sha1)" >>"${pwd}/temp-docs.log"
-		echo "- [agent-$1-release.tar.gz](https://download.jpom.top/release/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.tar.gz.sha1)" >>"${pwd}/temp-docs.log"
-		echo "- [agent-$1-release.zip](https://download.jpom.top/release/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.zip.sha1)" >>"${pwd}/temp-docs.log"
-		echo "" >>"${pwd}/temp-docs.log"
-		echo "--------" >>"${pwd}/temp-docs.log"
-		echo "" >>"${pwd}/temp-docs.log"
+		cat >"${pwd}/temp-docs.log" <<EOF
+## $1
 
-		sed -i.bak "12r ${pwd}/temp-docs.log" ${mdPath}
+- [jpom-$1.zip](https://download.jpom.top/release/$1/jpom-$1.zip)
+- [server-$1-release.tar.gz](https://download.jpom.top/release/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.tar.gz.sha1)
+- [server-$1-release.zip](https://download.jpom.top/release/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/server-$1-release.zip.sha1)
+- [agent-$1-release.tar.gz](https://download.jpom.top/release/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.tar.gz.sha1)
+- [agent-$1-release.zip](https://download.jpom.top/release/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/release/$1/agent-$1-release.zip.sha1)
+
+--------
+EOF
+		#		插入第 12 行
+		sed -i.bak "12r ${pwd}/temp-docs.log" "${mdPath}"
 	fi
 }
 
