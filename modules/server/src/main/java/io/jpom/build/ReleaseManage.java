@@ -365,7 +365,7 @@ public class ReleaseManage implements Runnable {
 
         InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
         String s1 = IoUtil.readUtf8(templateInputStream);
-        JpomApplication.getInstance()
+        int waitFor = JpomApplication.getInstance()
             .execScript(s1 + releaseCommand, file -> {
                 try {
                     return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> logRecorder.info(s));
@@ -373,6 +373,7 @@ public class ReleaseManage implements Runnable {
                     throw Lombok.sneakyThrow(e);
                 }
             });
+        logRecorder.system("执行发布脚本的退出码是：{}", waitFor);
     }
 
     /**
