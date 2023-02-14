@@ -40,4 +40,11 @@ public class TestCompression {
         File dir = FileUtil.file("D:\\temp\\unc");
         CompressionFileUtil.unCompress(file, dir);
     }
+
+    @Test
+    public void test2(){
+       File file = new File("/Users/user/压缩文件.tbz");
+        File dir = FileUtil.file("/Users/user/unc");
+        CompressionFileUtil.unCompress(file, dir);
+    }
 }

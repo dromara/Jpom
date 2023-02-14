@@ -70,16 +70,8 @@ public class CompressionFileUtil {
         try {
             unCompressTryCharset(compressFile, destDir, stripComponents);
         } catch (Exception e) {
-            try (FileInputStream fileInputStream = new FileInputStream(compressFile);
-                 CompressorInputStream compressUtilIn = CompressUtil.getIn(null, fileInputStream);) {
-                if (compressUtilIn instanceof BZip2CompressorInputStream) {
-                    File file = FileUtil.file(destDir, BZip2Utils.getUncompressedFilename(compressFile.getName()));
-                    try (OutputStream outputStream = Files.newOutputStream(file.toPath())) {
-                        IoUtil.copy(compressUtilIn, outputStream);
-                    }
-                } else {
-                    unCompressByInputStreamTryCharset(compressFile, destDir, stripComponents);
-                }
+            try {
+                unCompressByInputStreamTryCharset(compressFile, destDir, stripComponents);
             } catch (Exception e2) {
                 //
                 e2.addSuppressed(e);
