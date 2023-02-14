@@ -28,7 +28,7 @@ import SideMenu from "./side-menu";
 import ContentTab from "./content-tab";
 import { checkSystem } from "@/api/install";
 import { executionRequest } from "@/api/external";
-import { parseTime } from "@/utils/const";
+import { parseTime, pageBuildInfo } from "@/utils/const";
 
 export default {
   props: {
@@ -150,12 +150,10 @@ export default {
         }
       });
       // 控制台输出版本号信息
-      executionRequest("https://jpom.top/docs/versions.show", {}).then((data) => {
-        const htmlVersion = document.head.querySelector("[name~=jpom-version][content]").content;
-        const buildTime = document.head.querySelector("[name~=build-time][content]").content;
-
+      const buildInfo = pageBuildInfo();
+      executionRequest("https://jpom.top/docs/versions.show", { ...buildInfo }).then((data) => {
         console.log(
-          "\n %c " + parseTime(buildTime) + " %c vs %c " + htmlVersion + " %c vs %c " + data,
+          "\n %c " + parseTime(buildInfo.t) + " %c vs %c " + buildInfo.v + " %c vs %c " + data,
           "color: #ffffff; background: #f1404b; padding:5px 0;",
           "background: #1890ff; padding:5px 0;",
           "color: #ffffff; background: #f1404b; padding:5px 0;",

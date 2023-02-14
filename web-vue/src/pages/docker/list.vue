@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <!-- 数据表格 -->
-    <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="listQuery.total / listQuery.limit > 1 ? pagination : false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :columns="columns" @change="changePage" :pagination="listQuery.total / listQuery.limit > 1 ? pagination : false" bordered rowKey="id" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="名称" class="search-input-item" />
@@ -15,6 +15,14 @@
           <a-tooltip title="自动检测服务端所在服务器中是否存在 docker，如果存在将自动添加到列表中">
             <a-button type="dashed" @click="handleTryLocalDocker"> <a-icon type="question-circle" theme="filled" />自动探测 </a-button>
           </a-tooltip>
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
         </a-space>
       </template>
       <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
@@ -240,14 +248,35 @@
     <a-drawer :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose">
       <console v-if="consoleVisible" :visible="consoleVisible" :id="temp.id"></console>
     </a-drawer>
+    <!-- 同步到其他工作空间 -->
+    <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="同步到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+      <a-alert message="温馨提示" type="warning">
+        <template slot="description">
+          <ul>
+            <li>同步机制采用容器 host 确定是同一个服务器（docker）</li>
+            <li>当目标工作空间不存在对应的节点时候将自动创建一个新的docker（逻辑docker）</li>
+            <li>当目标工作空间已经存在节点时候将自动同步 docker 仓库配置信息</li>
+          </ul>
+        </template>
+      </a-alert>
+      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item> </a-form-model-item>
+        <a-form-model-item label="选择工作空间" prop="workspaceId">
+          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
+            <a-select-option :disabled="getWorkspaceId === item.id" v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import { apiVersions, dcokerSwarmLeaveForce, deleteDcoker, dockerList, editDocker, editDockerByFile, tryLocalDocker } from "@/api/docker-api";
+import { apiVersions, dcokerSwarmLeaveForce, deleteDcoker, dockerList, editDocker, editDockerByFile, tryLocalDocker, syncToWorkspace } from "@/api/docker-api";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import { dockerSwarmListAll, initDockerSwarm, joinDockerSwarm } from "@/api/docker-swarm";
 import Console from "./console";
 import { mapGetters } from "vuex";
+import { getWorkSpaceListAll } from "@/api/workspace";
 
 export default {
   components: {
@@ -310,12 +339,23 @@ export default {
           { pattern: /^\w{1,10}$/, message: "标签限制为字母数字且长度 1-10" },
         ],
       },
+      workspaceList: [],
+      tableSelections: [],
+      syncToWorkspaceVisible: false,
     };
   },
   computed: {
-    ...mapGetters(["getCollapsed"]),
+    ...mapGetters(["getCollapsed", "getWorkspaceId"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+      };
     },
   },
   mounted() {
@@ -598,6 +638,45 @@ export default {
             message: res.msg,
           });
           this.loadData();
+        }
+      });
+    },
+    // 加载工作空间数据
+    loadWorkSpaceListAll() {
+      getWorkSpaceListAll().then((res) => {
+        if (res.code === 200) {
+          this.workspaceList = res.data;
+        }
+      });
+    },
+    // 同步到其他工作情况
+    syncToWorkspaceShow() {
+      this.syncToWorkspaceVisible = true;
+      this.loadWorkSpaceListAll();
+      this.temp = {
+        workspaceId: undefined,
+      };
+    },
+    //
+    handleSyncToWorkspace() {
+      if (!this.temp.workspaceId) {
+        this.$notification.warn({
+          message: "请选择工作空间",
+        });
+        return false;
+      }
+      // 同步
+      syncToWorkspace({
+        ids: this.tableSelections.join(","),
+        toWorkspaceId: this.temp.workspaceId,
+      }).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.tableSelections = [];
+          this.syncToWorkspaceVisible = false;
+          return false;
         }
       });
     },

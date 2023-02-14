@@ -69,7 +69,7 @@ import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade, 
 import Vue from "vue";
 import MarkdownItVue from "markdown-it-vue";
 import "markdown-it-vue/dist/markdown-it-vue.css";
-import { RESTART_UPGRADE_WAIT_TIME_COUNT, parseTime, compareVersion } from "@/utils/const";
+import { RESTART_UPGRADE_WAIT_TIME_COUNT, parseTime, compareVersion, pageBuildInfo } from "@/utils/const";
 import { uploadPieces } from "@/utils/upload-pieces";
 import { executionRequest } from "@/api/external";
 
@@ -123,9 +123,10 @@ export default {
           this.changelog = resLog.data;
           //
           // res.data.
-          this.showVersion(false, res.data?.remoteVersion);
-          // 本地网络检测
-          this.loaclCheckVersion();
+          this.showVersion(false, res.data?.remoteVersion).then((upgrade) => {
+            // 本地网络检测
+            this.loaclCheckVersion(!upgrade);
+          });
         });
       });
     },
@@ -288,19 +289,19 @@ export default {
           this.showVersion(true, res.data).then((upgrade) => {
             // 远程检测失败才本地检测
             if (!upgrade) {
-              this.loaclCheckVersion();
+              this.loaclCheckVersion(true);
             }
           });
         }
       });
     },
     // 本地网络检测
-    loaclCheckVersion() {
+    loaclCheckVersion(tip) {
       //console.log(compareVersion("1.0.0", "1.0.1"), compareVersion("2.4.3", "2.4.2"));
       //console.log(compareVersion("1.0.2", "dev"));
-      executionRequest("https://jpom.top/docs/release-versions.json", {
-        type: this.nodeId ? "agent" : "server",
-      }).then((data) => {
+      const buildInfo = pageBuildInfo();
+
+      executionRequest("https://jpom.top/docs/release-versions.json", { ...buildInfo, type: this.nodeId ? "agent" : "server" }).then((data) => {
         if (!data || !data.tag_name) {
           return;
         }
@@ -308,7 +309,7 @@ export default {
         const tagName = data.tag_name.replace("v", "");
         const upgrade = compareVersion(this.temp.version, tagName) < 0;
 
-        if (upgrade) {
+        if (upgrade && tip) {
           this.$notification.success({
             duration: 10,
             message: function (h) {
