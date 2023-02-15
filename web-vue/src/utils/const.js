@@ -510,6 +510,7 @@ export function compareVersion(version1, version2) {
   return diff !== 0 ? diff : v1s.length - v2s.length;
 }
 
+// 当前页面构建信息
 export function pageBuildInfo() {
   const htmlVersion = document.head.querySelector("[name~=jpom-version][content]").content;
   const buildTime = document.head.querySelector("[name~=build-time][content]").content;
@@ -519,5 +520,6 @@ export function pageBuildInfo() {
     t: buildTime,
     e: buildEnv,
     df: (document.title || "").toLowerCase().includes("jpom"),
+    t2: Date.now(),
   };
 }
