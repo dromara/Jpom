@@ -169,7 +169,7 @@ function installJdkFn() {
 
 		curl -LfSo jdk.tar.gz "${download_url}"
 
-	#	检查是否下载成功
+		#	检查是否下载成功
 		if [[ ! -f jdk.tar.gz ]]; then
 			errorExit "JDK下载失败，请检查下载地址 : $download_url"
 		fi
@@ -343,6 +343,14 @@ else
 fi
 
 fileName="${JPOM_TYPE}.tar.gz"
+
+#判断非 root 用户不能使用默认方式安装
+if [[ $(echo "$module" | grep "default") != "" ]]; then
+	user="$(id -un 2>/dev/null || true)"
+	if [ "$user" != 'root' ]; then
+		errorExit "非 root 用户不能使用 default 形式安装,请使用普通安装方式"
+	fi
+fi
 
 #开始准备安装相关依赖、判断是否未离线安装
 
