@@ -46,6 +46,8 @@ import io.jpom.model.log.OutGivingLog;
 import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.model.user.UserModel;
+import io.jpom.plugin.IPlugin;
+import io.jpom.plugin.PluginFactory;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.util.StrictSyncFinisher;
@@ -116,13 +118,8 @@ public class OutGivingRun {
                 dbOutGivingLogService.update(outGivingLog);
             }
             if (!map1.isEmpty()) {
-                //
-                OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
                 // 更新分发数据
-                OutGivingModel outGivingModel1 = new OutGivingModel();
-                outGivingModel1.setId(id);
-                outGivingModel1.setStatus(OutGivingModel.Status.CANCEL.getCode());
-                outGivingServer.update(outGivingModel1);
+                updateStatus(id, OutGivingModel.Status.CANCEL, null);
             }
         });
 
@@ -320,20 +317,38 @@ public class OutGivingRun {
         OutGivingRun.LOG_CACHE_MAP.put(outGivingId, logIdMap);
 
         // 更新分发数据
-        OutGivingModel outGivingModel1 = new OutGivingModel();
-        outGivingModel1.setId(outGivingId);
-        outGivingModel1.setStatus(OutGivingModel.Status.ING.getCode());
-        outGivingServer.update(outGivingModel1);
-
+        updateStatus(outGivingId, OutGivingModel.Status.ING, null);
     }
 
-    private void updateStatus(String outGivingId, OutGivingModel.Status status, String msg) {
+    private static void updateStatus(String outGivingId, OutGivingModel.Status status, String msg) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel outGivingModel1 = new OutGivingModel();
         outGivingModel1.setId(outGivingId);
         outGivingModel1.setStatus(status.getCode());
         outGivingModel1.setStatusMsg(msg);
         outGivingServer.update(outGivingModel1);
+        //
+        OutGivingModel outGivingModel = outGivingServer.getByKey(outGivingId);
+        Opt.ofNullable(outGivingModel)
+            .map(outGivingModel2 ->
+                Opt.ofBlankAble(outGivingModel2.getWebhook())
+                    .orElse(null))
+            .ifPresent(webhook ->
+                ThreadUtil.execute(() -> {
+                    // outGivingId、outGivingName、status、statusMsg、executeTime
+                    Map<String, Object> map = new HashMap<>(10);
+                    map.put("outGivingId", outGivingId);
+                    map.put("outGivingName", outGivingModel.getName());
+                    map.put("status", status.getCode());
+                    map.put("statusMsg", msg);
+                    map.put("executeTime", SystemClock.now());
+                    try {
+                        IPlugin plugin = PluginFactory.getPlugin("webhook");
+                        plugin.execute(webhook, map);
+                    } catch (Exception e) {
+                        log.error("WebHooks 调用错误", e);
+                    }
+                }));
     }
 
     /**

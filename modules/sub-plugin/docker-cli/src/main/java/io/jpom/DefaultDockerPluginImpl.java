@@ -66,9 +66,8 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         String type = main.toString();
         if ("build".equals(type)) {
             try (DockerBuild dockerBuild = new DockerBuild(parameter, this)) {
-                dockerBuild.build();
+                return dockerBuild.build();
             }
-            return null;
         }
         Method method = ReflectUtil.getMethodByName(this.getClass(), type + "Cmd");
         Assert.notNull(method, "不支持的类型:" + type);

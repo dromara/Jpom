@@ -24,6 +24,7 @@ package io.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -112,9 +113,6 @@ public class ReleaseManage {
             File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), buildNumberId);
             this.logRecorder = LogRecorder.builder().file(logFile).build();
         }
-        this.resultFile = buildExtraModule.resultDirFile(this.buildNumberId);
-        buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
-        this.buildExtConfig = SpringUtil.getBean(BuildExtConfig.class);
     }
 
 //	/**
@@ -160,7 +158,11 @@ public class ReleaseManage {
      * 不修改为发布中状态
      */
     public boolean start() throws Exception {
-        init();
+        this.init();
+        this.resultFile = buildExtraModule.resultDirFile(this.buildNumberId);
+        this.buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
+        this.buildExtConfig = SpringUtil.getBean(BuildExtConfig.class);
+        //
         this.updateStatus(BuildStatus.PubIng);
         logRecorder.system("开始执行发布,需要发布的文件大小：{}", FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
         if (FileUtil.isEmpty(this.resultFile)) {
@@ -178,7 +180,7 @@ public class ReleaseManage {
         } else if (releaseMethod == BuildReleaseMethod.Ssh.getCode()) {
             this.doSsh();
         } else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
-            this.localCommand();
+            return this.localCommand();
         } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
             this.doDockerImage();
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
@@ -352,12 +354,12 @@ public class ReleaseManage {
     /**
      * 本地命令执行
      */
-    private void localCommand() {
+    private boolean localCommand() {
         // 执行命令
         String releaseCommand = this.buildExtraModule.getReleaseCommand();
         if (StrUtil.isEmpty(releaseCommand)) {
             logRecorder.systemError("没有需要执行的命令");
-            return;
+            return true;
         }
         logRecorder.system("{} start exec", DateUtil.now());
 
@@ -375,6 +377,11 @@ public class ReleaseManage {
                 }
             });
         logRecorder.system("执行发布脚本的退出码是：{}", waitFor);
+        // 判断是否为严格执行
+        if (buildExtraModule.strictlyEnforce()) {
+            return waitFor == 0;
+        }
+        return true;
     }
 
     /**
@@ -600,10 +607,11 @@ public class ReleaseManage {
     public void rollback() {
         try {
             BaseServerController.resetInfo(userModel);
-            // 重新标记为发布中
-            this.updateStatus(BuildStatus.PubIng);
+            this.init();
+            logRecorder.system("开始回滚:{}", DateTime.now());
             //
             boolean start = this.start();
+            logRecorder.system("执行回滚结束：{}", start);
             if (start) {
                 this.updateStatus(BuildStatus.PubSuccess);
             } else {

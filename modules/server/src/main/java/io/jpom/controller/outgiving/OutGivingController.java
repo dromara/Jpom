@@ -24,6 +24,8 @@ package io.jpom.controller.outgiving;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.lang.Opt;
+import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -116,7 +118,7 @@ public class OutGivingController extends BaseServerController {
 
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<Object> save(String type, @ValidatorItem String id, HttpServletRequest request) throws IOException {
+    public JsonMessage<String> save(String type, @ValidatorItem String id, HttpServletRequest request) throws IOException {
         if ("add".equalsIgnoreCase(type)) {
             //
             String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
@@ -129,7 +131,7 @@ public class OutGivingController extends BaseServerController {
         }
     }
 
-    private JsonMessage<Object> addOutGiving(String id, HttpServletRequest request) {
+    private JsonMessage<String> addOutGiving(String id, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id);
         Assert.isNull(outGivingModel, "分发id已经存在啦,分发id需要全局唯一");
         //
@@ -141,7 +143,7 @@ public class OutGivingController extends BaseServerController {
         return JsonMessage.success("添加成功");
     }
 
-    private JsonMessage<Object> updateGiving(String id, HttpServletRequest request) {
+    private JsonMessage<String> updateGiving(String id, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
         Assert.notNull(outGivingModel, "没有找到对应的分发id");
         doData(outGivingModel, request);
@@ -210,6 +212,15 @@ public class OutGivingController extends BaseServerController {
         String secondaryDirectory = getParameter("secondaryDirectory");
         outGivingModel.setSecondaryDirectory(secondaryDirectory);
         outGivingModel.setUploadCloseFirst(Convert.toBool(getParameter("uploadCloseFirst"), false));
+        //
+        String webhook = getParameter("webhook");
+        webhook = Opt.ofBlankAble(webhook)
+            .map(s -> {
+                Validator.validateMatchRegex(RegexPool.URL_HTTP, s, "WebHooks 地址不合法");
+                return s;
+            })
+            .orElse(StrUtil.EMPTY);
+        outGivingModel.setWebhook(webhook);
     }
 
     /**

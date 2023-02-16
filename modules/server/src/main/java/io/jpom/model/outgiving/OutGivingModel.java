@@ -102,6 +102,11 @@ public class OutGivingModel extends BaseGroupModel {
      */
     private String statusMsg;
 
+    /**
+     * 构建发布状态通知
+     */
+    private String webhook;
+
     public boolean clearOld() {
         return clearOld != null && clearOld;
     }

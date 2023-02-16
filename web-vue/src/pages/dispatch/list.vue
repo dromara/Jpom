@@ -328,6 +328,23 @@
             </a-col>
           </a-row>
         </a-form-model-item>
+        <a-form-model-item prop="webhook">
+          <template slot="label">
+            WebHooks
+            <a-tooltip v-show="!temp.id">
+              <template slot="title">
+                <ul>
+                  <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
+                  <li>传入参数有：outGivingId、outGivingName、status、statusMsg、executeTime</li>
+                  <li>status 的值有：1:分发中、2：分发结束、3：已取消、4：分发失败</li>
+                  <li>异步请求不能保证有序性</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 创建/编辑分发项目 -->
@@ -617,6 +634,23 @@
             </div>
           </a-collapse-panel>
         </a-collapse>
+        <a-form-model-item prop="webhook">
+          <template slot="label">
+            WebHooks
+            <a-tooltip v-show="!temp.id">
+              <template slot="title">
+                <ul>
+                  <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
+                  <li>传入参数有：outGivingId、outGivingName、status、error、executeTime</li>
+                  <li>status 的值有：1:分发中、2：分发结束、3：已取消、4：分发失败</li>
+                  <li>异步请求不能保证有序性</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
+          <a-input v-model="temp.webhook" placeholder="构建过程请求,非必填，GET请求" />
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 分发项目 -->

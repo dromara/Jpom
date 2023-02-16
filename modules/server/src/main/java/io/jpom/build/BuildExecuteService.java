@@ -743,7 +743,12 @@ public class BuildExecuteService {
             map.put("resultFileOut", FileUtil.getAbsolutePath(toFile));
             IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
             try {
-                plugin.execute("build", map);
+                Object execute = plugin.execute("build", map);
+                int resultCode = Convert.toInt(execute, -100);
+                // 严格模式
+                if (buildExtraModule.strictlyEnforce()) {
+                    return resultCode == 0;
+                }
             } catch (Exception e) {
                 logRecorder.error("构建调用容器异常", e);
                 return false;
@@ -782,6 +787,10 @@ public class BuildExecuteService {
                         }
                     });
                 logRecorder.system("执行脚本的退出码是：{}", waitFor);
+                // 判断是否为严格执行
+                if (buildExtraModule.strictlyEnforce()) {
+                    return waitFor == 0;
+                }
             } catch (Exception e) {
                 logRecorder.error("执行异常", e);
                 return false;
@@ -1067,6 +1076,11 @@ public class BuildExecuteService {
                     }
                 });
                 logRecorder.system("执行 {} 类型脚本的退出码是：{}", type, waitFor);
+                // 判断是否为严格执行
+                if (buildExtraModule.strictlyEnforce() && waitFor != 0) {
+                    logRecorder.systemError("严格执行模式，事件脚本返回状态码异常");
+                    return false;
+                }
                 return !StrUtil.startWithIgnoreCase(lastMsg[0], "interrupt " + type);
             } finally {
                 try {
