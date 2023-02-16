@@ -162,6 +162,15 @@ public class BuildExtraModule extends BaseModel {
      */
     private Boolean projectUploadCloseFirst;
 
+    /**
+     * 是否为严格执行脚本，严格执行脚本执行结果返回状态码必须是 0
+     */
+    private Boolean strictlyEnforce;
+
+    public boolean strictlyEnforce() {
+        return strictlyEnforce != null && strictlyEnforce;
+    }
+
     public String getResultDirFile() {
         if (resultDirFile == null) {
             return null;

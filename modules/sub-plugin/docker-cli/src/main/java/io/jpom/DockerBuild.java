@@ -30,6 +30,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.system.SystemUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -66,7 +67,7 @@ public class DockerBuild implements AutoCloseable {
         this.plugin = plugin;
     }
 
-    public void build() {
+    public int build() {
 
         File logFile = (File) parameter.get("logFile");
         File tempDir = (File) parameter.get("tempDir");
@@ -109,14 +110,15 @@ public class DockerBuild implements AutoCloseable {
                 dockerClient.startContainerCmd(containerId).exec();
             } catch (RuntimeException e) {
                 logRecorder.error("容器启动失败:", e);
-                return;
+                return -101;
             }
             // 获取日志
             this.pullLog(dockerClient, containerId, logRecorder);
             // 等待容器执行结果
-            this.waitContainerCmd(dockerClient, containerId, logRecorder);
+            int statusCode = this.waitContainerCmd(dockerClient, containerId, logRecorder);
             // 获取容器执行结果文件
             DockerClientUtil.copyArchiveFromContainerCmd(dockerClient, containerId, logRecorder, resultFile, resultFileOut);
+            return statusCode;
         } finally {
             DockerClientUtil.removeContainerCmd(dockerClient, containerId);
             // 删除临时目录
@@ -208,12 +210,26 @@ public class DockerBuild implements AutoCloseable {
             return;
         }
         for (String s : copy) {
+            // C:\Users\bwcx_\jpom\server\data\build\5c631117d4834dd4833c04dc1e6e635c\source:/home/jpom/:true
+            String resource;
+            String remotePath;
+            boolean dirChildrenOnly;
             List<String> split = StrUtil.split(s, StrUtil.COLON);
-            logRecorder.system("send file to : {}\n", split.get(1));
+            if (SystemUtil.getOsInfo().isWindows() && StrUtil.length(split.get(0)) == 1) {
+                // 第一位是盘符
+                resource = split.get(0) + StrUtil.COLON + split.get(1);
+                remotePath = split.get(2);
+                dirChildrenOnly = Convert.toBool(CollUtil.get(split, 3), true);
+            } else {
+                resource = split.get(0);
+                remotePath = split.get(1);
+                dirChildrenOnly = Convert.toBool(CollUtil.get(split, 2), true);
+            }
+            logRecorder.system("send file from : {} to : {}", resource, remotePath);
             dockerClient.copyArchiveToContainerCmd(containerId)
-                .withHostResource(split.get(0))
-                .withRemotePath(split.get(1))
-                .withDirChildrenOnly(Convert.toBool(CollUtil.get(split, 2), true))
+                .withHostResource(resource)
+                .withRemotePath(remotePath)
+                .withDirChildrenOnly(dirChildrenOnly)
                 .exec();
         }
     }
@@ -227,7 +243,7 @@ public class DockerBuild implements AutoCloseable {
      */
     private String generateBuildShell(List<Map<String, Object>> steps, String buildId) {
         StringBuilder stepsScript = new StringBuilder("#!/bin/bash\n");
-        stepsScript.append("echo \"<<<<<<< Build Start >>>>>>>\"\n");
+        stepsScript.append("echo \"\n<<<<<<< Build Start >>>>>>>\"\n");
         //
         for (Map<String, Object> step : steps) {
             if (step.containsKey("env")) {
@@ -475,19 +491,23 @@ public class DockerBuild implements AutoCloseable {
     }
 
 
-    private void waitContainerCmd(DockerClient dockerClient, String containerId, LogRecorder logRecorder) {
+    private int waitContainerCmd(DockerClient dockerClient, String containerId, LogRecorder logRecorder) {
+        final Integer[] statusCode = {-100};
         try {
             dockerClient.waitContainerCmd(containerId).exec(new ResultCallback.Adapter<WaitResponse>() {
                 @Override
                 public void onNext(WaitResponse object) {
-                    logRecorder.system("dockerTask status code is: {}", object.getStatusCode());
+                    statusCode[0] = object.getStatusCode();
+                    logRecorder.system("dockerTask status code is: {}", statusCode[0]);
                 }
             }).awaitCompletion();
+
         } catch (InterruptedException e) {
             logRecorder.error("获取容器执行结果操作被中断:", e);
         } catch (RuntimeException e) {
             logRecorder.error("获取容器执行结果失败", e);
         }
+        return statusCode[0];
     }
 
     @Override
