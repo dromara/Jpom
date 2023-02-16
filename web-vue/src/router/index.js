@@ -11,11 +11,11 @@ Router.prototype.push = function push(location) {
 Vue.use(Router);
 
 const children = [
-  {
-    path: "/dashboard",
-    name: "dashboard",
-    component: () => import("../pages/dashboard"),
-  },
+  // {
+  //   path: "/dashboard",
+  //   name: "dashboard",
+  //   component: () => import("../pages/dashboard"),
+  // },
   {
     path: "/node/list",
     name: "node-list",

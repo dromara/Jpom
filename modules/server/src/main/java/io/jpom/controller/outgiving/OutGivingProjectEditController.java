@@ -24,6 +24,8 @@ package io.jpom.controller.outgiving;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.lang.Opt;
+import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
@@ -404,6 +406,15 @@ public class OutGivingProjectEditController extends BaseServerController {
         String secondaryDirectory = getParameter("secondaryDirectory");
         outGivingModel.setSecondaryDirectory(secondaryDirectory);
         outGivingModel.setUploadCloseFirst(Convert.toBool(getParameter("uploadCloseFirst"), false));
+        //
+        String webhook = getParameter("webhook");
+        webhook = Opt.ofBlankAble(webhook)
+            .map(s -> {
+                Validator.validateMatchRegex(RegexPool.URL_HTTP, s, "WebHooks 地址不合法");
+                return s;
+            })
+            .orElse(StrUtil.EMPTY);
+        outGivingModel.setWebhook(webhook);
         return tuples;
     }
 
