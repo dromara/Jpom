@@ -3,6 +3,7 @@
 ## 2.10.17
 
 1. 【server】新增 构建配置新增严格执行命令模式（判断命令执行状态码是否为0） (感谢@阿克苏市姑墨信息科技有限公司) [Gitee pr 169](https://gitee.com/dromara/Jpom/pulls/169) ）
+2. 【server】新增 节点分发新增 webhook 配置属性（感谢@酱总）
 
 ### 🐞 解决BUG、优化功能
 
