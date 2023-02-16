@@ -30,6 +30,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.system.SystemUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -209,12 +210,26 @@ public class DockerBuild implements AutoCloseable {
             return;
         }
         for (String s : copy) {
+            // C:\Users\bwcx_\jpom\server\data\build\5c631117d4834dd4833c04dc1e6e635c\source:/home/jpom/:true
+            String resource;
+            String remotePath;
+            boolean dirChildrenOnly;
             List<String> split = StrUtil.split(s, StrUtil.COLON);
-            logRecorder.system("send file from : {} to : {}", split.get(1), split.get(0));
+            if (SystemUtil.getOsInfo().isWindows() && StrUtil.length(split.get(0)) == 1) {
+                // 第一位是盘符
+                resource = split.get(0) + StrUtil.COLON + split.get(1);
+                remotePath = split.get(2);
+                dirChildrenOnly = Convert.toBool(CollUtil.get(split, 3), true);
+            } else {
+                resource = split.get(0);
+                remotePath = split.get(1);
+                dirChildrenOnly = Convert.toBool(CollUtil.get(split, 2), true);
+            }
+            logRecorder.system("send file from : {} to : {}", resource, remotePath);
             dockerClient.copyArchiveToContainerCmd(containerId)
-                .withHostResource(split.get(0))
-                .withRemotePath(split.get(1))
-                .withDirChildrenOnly(Convert.toBool(CollUtil.get(split, 2), true))
+                .withHostResource(resource)
+                .withRemotePath(remotePath)
+                .withDirChildrenOnly(dirChildrenOnly)
                 .exec();
         }
     }
@@ -228,7 +243,7 @@ public class DockerBuild implements AutoCloseable {
      */
     private String generateBuildShell(List<Map<String, Object>> steps, String buildId) {
         StringBuilder stepsScript = new StringBuilder("#!/bin/bash\n");
-        stepsScript.append("echo \"<<<<<<< Build Start >>>>>>>\"\n");
+        stepsScript.append("echo \"\n<<<<<<< Build Start >>>>>>>\"\n");
         //
         for (Map<String, Object> step : steps) {
             if (step.containsKey("env")) {
