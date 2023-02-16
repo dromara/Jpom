@@ -61,6 +61,10 @@ public class ResultDirFileAction {
     private String antSubMatch;
 
     public String antSubMatch() {
+        if (StrUtil.isEmpty(this.antSubMatch)) {
+            // 兼容默认数据，未配置
+            return StrUtil.EMPTY;
+        }
         String normalize = FileUtil.normalize(this.antSubMatch);
         //需要包裹成目录结构
         return StrUtil.wrapIfMissing(normalize, StrUtil.SLASH, StrUtil.SLASH);
