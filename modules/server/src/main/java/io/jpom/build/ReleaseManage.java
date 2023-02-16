@@ -180,7 +180,7 @@ public class ReleaseManage {
         } else if (releaseMethod == BuildReleaseMethod.Ssh.getCode()) {
             this.doSsh();
         } else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
-            this.localCommand();
+            return this.localCommand();
         } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
             this.doDockerImage();
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
@@ -354,12 +354,12 @@ public class ReleaseManage {
     /**
      * 本地命令执行
      */
-    private void localCommand() {
+    private boolean localCommand() {
         // 执行命令
         String releaseCommand = this.buildExtraModule.getReleaseCommand();
         if (StrUtil.isEmpty(releaseCommand)) {
             logRecorder.systemError("没有需要执行的命令");
-            return;
+            return true;
         }
         logRecorder.system("{} start exec", DateUtil.now());
 
@@ -377,6 +377,11 @@ public class ReleaseManage {
                 }
             });
         logRecorder.system("执行发布脚本的退出码是：{}", waitFor);
+        // 判断是否为严格执行
+        if (buildExtraModule.strictlyEnforce()) {
+            return waitFor == 0;
+        }
+        return true;
     }
 
     /**

@@ -608,32 +608,44 @@
                 </a-tooltip>
               </template>
               <a-row>
-                <a-col :span="4">
+                <a-col :span="2">
                   <a-tooltip title="开启缓存构建目录将保留仓库文件,二次构建将 pull 代码, 不开启缓存目录每次构建都将重新拉取仓库代码(较大的项目不建议关闭缓存)">
                     <a-switch v-model="tempExtraData.cacheBuild" checked-children="是" un-checked-children="否" />
                   </a-tooltip>
                 </a-col>
-                <a-col :span="4" style="text-align: right">
-                  <a-tooltip>
-                    <template slot="title"> 保留产物是指对在构建完成后是否保留构建产物相关文件，用于回滚 </template>
+                <a-col :span="6" style="text-align: right">
+                  <a-space>
+                    <a-tooltip>
+                      <template slot="title"> 保留产物是指对在构建完成后是否保留构建产物相关文件，用于回滚 </template>
 
-                    <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
-                    保留产物：
-                  </a-tooltip>
+                      <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                      保留产物：
+                    </a-tooltip>
+                    <a-switch v-model="tempExtraData.saveBuildFile" checked-children="是" un-checked-children="否" />
+                  </a-space>
                 </a-col>
-                <a-col :span="4">
-                  <a-switch v-model="tempExtraData.saveBuildFile" checked-children="是" un-checked-children="否" />
-                </a-col>
-                <a-col :span="4" style="text-align: right">
-                  <a-tooltip>
-                    <template slot="title"> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
 
-                    <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
-                    差异构建：
-                  </a-tooltip>
+                <a-col :span="6" style="text-align: right">
+                  <a-space>
+                    <a-tooltip>
+                      <template slot="title"> 差异构建是指构建时候是否判断仓库代码有变动，如果没有变动则不执行构建 </template>
+
+                      <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                      差异构建：
+                    </a-tooltip>
+                    <a-switch v-model="tempExtraData.checkRepositoryDiff" checked-children="是" un-checked-children="否" />
+                  </a-space>
                 </a-col>
-                <a-col :span="4">
-                  <a-switch v-model="tempExtraData.checkRepositoryDiff" checked-children="是" un-checked-children="否" />
+                <a-col :span="6" style="text-align: right">
+                  <a-space>
+                    <a-tooltip>
+                      <template slot="title"> 严格执行脚本（构建命令、事件脚本、本地发布脚本、容器构建命令）执行返回状态码必须是 0、否则将构建状态标记为失败 </template>
+
+                      <a-icon v-if="!temp.id" type="question-circle" theme="filled" />
+                      严格执行：
+                    </a-tooltip>
+                    <a-switch v-model="tempExtraData.strictlyEnforce" checked-children="是" un-checked-children="否" />
+                  </a-space>
                 </a-col>
               </a-row>
             </a-form-model-item>
