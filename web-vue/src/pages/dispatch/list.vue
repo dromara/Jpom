@@ -1033,6 +1033,7 @@ export default {
             secondaryDirectory: record.secondaryDirectory || "",
             uploadCloseFirst: record.uploadCloseFirst,
             group: record.group,
+            webhook: record.webhook,
           };
           // console.log(this.temp);
           this.linkDispatchVisible = true;
