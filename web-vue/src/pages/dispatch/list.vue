@@ -641,7 +641,7 @@
               <template slot="title">
                 <ul>
                   <li>分发过程请求对应的地址,开始分发,分发完成,分发失败,取消分发</li>
-                  <li>传入参数有：outGivingId、outGivingName、status、error、executeTime</li>
+                  <li>传入参数有：outGivingId、outGivingName、status、statusMsg、executeTime</li>
                   <li>status 的值有：1:分发中、2：分发结束、3：已取消、4：分发失败</li>
                   <li>异步请求不能保证有序性</li>
                 </ul>
@@ -1165,6 +1165,7 @@ export default {
                 secondaryDirectory: record.secondaryDirectory,
                 uploadCloseFirst: record.uploadCloseFirst,
                 group: record.group,
+                webhook: record.webhook,
               };
             }
             // 添加 nodeIdList
