@@ -40,8 +40,7 @@ public enum NodeUrl {
      *
      */
 //    GetTop("/getTop"),
-    GetDirectTop("/getDirectTop"),
-    Status("/status"),
+    GetStatInfo("/get-stat-info"),
     exportTop("/exportTop"),
     Kill("/kill.json"),
 

@@ -36,25 +36,22 @@ import io.jpom.common.JsonMessage;
 import io.jpom.common.Type;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.func.assets.model.MachineNodeModel;
+import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.UploadFileModel;
 import io.jpom.model.WebSocketMessageModel;
-import io.jpom.model.data.NodeModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
-import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.system.ServerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.WebSocketSession;
-import top.jpom.transport.DataContentType;
-import top.jpom.transport.IProxyWebSocket;
-import top.jpom.transport.IUrlItem;
-import top.jpom.transport.TransportServerFactory;
+import top.jpom.transport.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -85,14 +82,14 @@ public class NodeUpdateHandler extends BaseProxyHandler {
     private static final int INIT_WAIT = 10 * 1000;
 
     private final SystemParametersServer systemParametersServer;
-    private final NodeService nodeService;
+    private final MachineNodeServer machineNodeServer;
     private final ServerConfig.NodeConfig nodeConfig;
 
-    public NodeUpdateHandler(NodeService nodeService,
+    public NodeUpdateHandler(MachineNodeServer machineNodeServer,
                              SystemParametersServer systemParametersServer,
                              ServerConfig.NodeConfig nodeConfig) {
         super(null);
-        this.nodeService = nodeService;
+        this.machineNodeServer = machineNodeServer;
         this.systemParametersServer = systemParametersServer;
         this.nodeConfig = nodeConfig;
         //systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
@@ -117,16 +114,17 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
     private void pullNodeList(WebSocketSession session, String ids) {
         List<String> split = StrUtil.split(ids, StrUtil.COMMA);
-        List<NodeModel> nodeModelList = nodeService.listById(split);
+        List<MachineNodeModel> nodeModelList = machineNodeServer.listById(split);
         if (nodeModelList == null) {
             this.onError(session, "没有查询到节点信息：" + ids);
             return;
         }
-        for (NodeModel model : nodeModelList) {
+        for (MachineNodeModel model : nodeModelList) {
             IProxyWebSocket nodeClient = clientMap.computeIfAbsent(model.getId(), s -> {
-                IUrlItem urlItem = NodeForward.createUrlItem(model, NodeUrl.NodeUpdate, DataContentType.FORM_URLENCODED);
+                INodeInfo nodeInfo = NodeForward.coverNodeInfo(model);
+                IUrlItem urlItem = NodeForward.parseUrlItem(model, StrUtil.EMPTY, NodeUrl.NodeUpdate, DataContentType.FORM_URLENCODED);
 
-                IProxyWebSocket proxySession = TransportServerFactory.get().websocket(model, urlItem);
+                IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem);
                 proxySession.onMessage(msg -> sendMsg(session, msg));
                 return proxySession;
             });
@@ -241,7 +239,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             }
             for (int i = 0; i < ids.size(); i++) {
                 String id = ids.getString(i);
-                NodeModel node = nodeService.getByKey(id);
+                MachineNodeModel node = machineNodeServer.getByKey(id);
                 if (node == null) {
                     this.onError(session, "没有对应的节点：" + id);
                     continue;
@@ -254,24 +252,24 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         }
     }
 
-    private boolean updateNodeItemHttp(NodeModel nodeModel, WebSocketSession session, AgentFileModel agentFileModel) throws IOException {
+    private boolean updateNodeItemHttp(MachineNodeModel machineNodeModel, WebSocketSession session, AgentFileModel agentFileModel) throws IOException {
         File file = FileUtil.file(agentFileModel.getSavePath());
 
-        JsonMessage<String> message = NodeForward.requestSharding(nodeModel, NodeUrl.SystemUploadJar, new JSONObject(),
+        JsonMessage<String> message = NodeForward.requestSharding(machineNodeModel, NodeUrl.SystemUploadJar, new JSONObject(),
             file,
-            jsonObject -> NodeForward.request(nodeModel, NodeUrl.SystemUploadJarMerge, jsonObject),
+            jsonObject -> NodeForward.request(machineNodeModel, NodeUrl.SystemUploadJarMerge, jsonObject),
             (total, progressSize) -> {
                 UploadFileModel uploadFileModel = new UploadFileModel();
                 uploadFileModel.setSize(total);
                 uploadFileModel.setCompleteSize(progressSize);
-                uploadFileModel.setId(nodeModel.getId());
+                uploadFileModel.setId(machineNodeModel.getId());
                 uploadFileModel.setVersion(agentFileModel.getVersion());
                 // 更新进度
-                WebSocketMessageModel model = new WebSocketMessageModel("updateNode", nodeModel.getId());
+                WebSocketMessageModel model = new WebSocketMessageModel("updateNode", machineNodeModel.getId());
                 model.setData(uploadFileModel);
                 NodeUpdateHandler.this.sendMsg(model, session);
             });
-        String id = nodeModel.getId();
+        String id = machineNodeModel.getId();
         WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", id);
         callbackRestartMessage.setData(message.getMsg());
         this.sendMsg(callbackRestartMessage, session);
@@ -286,7 +284,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 ++retryCount;
                 try {
                     ThreadUtil.sleep(1000L);
-                    JsonMessage<Object> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Info, "nodeId", id);
+                    JsonMessage<Object> jsonMessage = NodeForward.request(machineNodeModel, StrUtil.EMPTY, NodeUrl.Info, "nodeId", id);
                     if (jsonMessage.success()) {
                         this.sendMsg(callbackRestartMessage.setData("重启完成"), session);
                         return true;
@@ -347,7 +345,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         return false;
     }
 
-    private void updateNodeItem(String id, NodeModel node, WebSocketSession session, AgentFileModel agentFileModel, boolean http) {
+    private void updateNodeItem(String id, MachineNodeModel node, WebSocketSession session, AgentFileModel agentFileModel, boolean http) {
         try {
             IProxyWebSocket client = clientMap.get(node.getId());
             if (client == null) {

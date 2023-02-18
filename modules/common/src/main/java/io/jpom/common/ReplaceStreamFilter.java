@@ -22,6 +22,7 @@
  */
 package io.jpom.common;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -51,14 +52,15 @@ public class ReplaceStreamFilter implements Filter {
         ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper((HttpServletRequest) request);
         chain.doFilter(wrapper, response);
         long endTime = System.currentTimeMillis();
-        if (endTime - startTime > 1000 * 5) {
+        long l = endTime - startTime;
+        if (l > 1000 * 5) {
             byte[] contentAsByteArray = wrapper.getContentAsByteArray();
             String str = StrUtil.str(contentAsByteArray, CharsetUtil.CHARSET_UTF_8);
             String reqData = Opt.ofBlankAble(str)
                 .map(s -> wrapper.getParameterMap())
                 .map(JSONObject::toJSONString)
                 .orElse(StrUtil.EMPTY);
-            log.warn("[timeout] {} {}", wrapper.getRequestURI(), reqData);
+            log.warn("[timeout] {} {} {}", wrapper.getRequestURI(), reqData, DateUtil.formatBetween(l));
         }
     }
 }

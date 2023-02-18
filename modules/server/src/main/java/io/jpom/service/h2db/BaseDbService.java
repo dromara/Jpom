@@ -110,17 +110,17 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         }
     }
 
-    /**
-     * 不填充 插入
-     *
-     * @param t 数据
-     */
-    public void insertNotFill(T t) {
-        // def create time
-        t.setCreateTimeMillis(ObjectUtil.defaultIfNull(t.getCreateTimeMillis(), SystemClock.now()));
-        t.setId(ObjectUtil.defaultIfNull(t.getId(), IdUtil.fastSimpleUUID()));
-        super.insert(t);
-    }
+//    /**
+//     * 不填充 插入
+//     *
+//     * @param t 数据
+//     */
+//    public void insertNotFill(T t) {
+//        // def create time
+//        t.setCreateTimeMillis(ObjectUtil.defaultIfNull(t.getCreateTimeMillis(), SystemClock.now()));
+//        t.setId(ObjectUtil.defaultIfNull(t.getId(), IdUtil.fastSimpleUUID()));
+//        super.insert(t);
+//    }
 
     @Override
     public void insert(Collection<T> t) {
@@ -208,7 +208,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     }
 
     public List<T> list() {
-        return super.listByBean(ReflectUtil.newInstance(this.tClass));
+        return this.list(true);
+    }
+
+    public List<T> list(boolean fill) {
+        return this.listByBean(ReflectUtil.newInstance(this.tClass), fill);
     }
 
     public long count() {

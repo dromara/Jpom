@@ -22,22 +22,13 @@
  */
 package io.jpom.model.data;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.EnumUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
-import io.jpom.common.forward.NodeUrl;
-import io.jpom.model.BaseGroupModel;
+import cn.hutool.core.annotation.PropIgnore;
+import io.jpom.func.assets.model.MachineNodeModel;
+import io.jpom.model.BaseMachineModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import top.jpom.h2db.TableName;
-import top.jpom.transport.INodeInfo;
-
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.util.List;
 
 /**
  * 节点实体
@@ -49,16 +40,20 @@ import java.util.List;
 @TableName(value = "NODE_INFO", name = "节点信息")
 @Data
 @NoArgsConstructor
-public class NodeModel extends BaseGroupModel implements INodeInfo {
+public class NodeModel extends BaseMachineModel {
 
+    @Deprecated
     private String url;
+    @Deprecated
     private String loginName;
+    @Deprecated
     private String loginPwd;
     private String name;
 
     /**
      * 节点协议
      */
+    @Deprecated
     private String protocol;
     /**
      * 开启状态，如果关闭状态就暂停使用节点 1 启用
@@ -67,28 +62,30 @@ public class NodeModel extends BaseGroupModel implements INodeInfo {
     /**
      * 节点超时时间
      */
+    @Deprecated
     private Integer timeOut;
     /**
      * 绑定的sshId
      */
     private String sshId;
-    /**
-     * 锁定类型
-     */
-    private String unLockType;
 
     /**
      * http 代理
      */
+    @Deprecated
     private String httpProxy;
     /**
      * https 代理 类型
      */
+    @Deprecated
     private String httpProxyType;
     /**
      * 排序
      */
     private Float sortValue;
+
+    @PropIgnore
+    private MachineNodeModel machineNodeData;
 
     public boolean isOpenStatus() {
         return openStatus != null && openStatus == 1;
@@ -103,73 +100,8 @@ public class NodeModel extends BaseGroupModel implements INodeInfo {
         this.setWorkspaceId(workspaceId);
     }
 
-    /**
-     * 获取 授权的信息
-     *
-     * @return sha1
-     */
-    public String toAuthorize() {
-        return SecureUtil.sha1(loginName + "@" + loginPwd);
-    }
+//    public String getRealUrl(NodeUrl nodeUrl) {
+//        return StrUtil.format("{}://{}{}", getProtocol().toLowerCase(), getUrl(), nodeUrl.getUrl());
+//    }
 
-    public String getRealUrl(NodeUrl nodeUrl) {
-        return StrUtil.format("{}://{}{}", getProtocol().toLowerCase(), getUrl(), nodeUrl.getUrl());
-    }
-
-    @Override
-    public String name() {
-        return this.getName();
-    }
-
-    @Override
-    public String url() {
-        return this.getUrl();
-    }
-
-    @Override
-    public String scheme() {
-        return getProtocol();
-    }
-
-    @Override
-    public String authorize() {
-        return this.toAuthorize();
-    }
-
-    /**
-     * 获取节点的代理
-     *
-     * @return proxy
-     */
-    @Override
-    public Proxy proxy() {
-        String httpProxy = this.getHttpProxy();
-        if (StrUtil.isNotEmpty(httpProxy)) {
-            List<String> split = StrUtil.splitTrim(httpProxy, StrUtil.COLON);
-            String host = CollUtil.getFirst(split);
-            int port = Convert.toInt(CollUtil.getLast(split), 0);
-            String type = this.getHttpProxyType();
-            Proxy.Type type1 = EnumUtil.fromString(Proxy.Type.class, type, Proxy.Type.HTTP);
-            return new Proxy(type1, new InetSocketAddress(host, port));
-        }
-        return null;
-    }
-
-    /**
-     * 创建代理
-     *
-     * @param type      代理类型
-     * @param httpProxy 代理地址
-     * @return proxy
-     */
-    public static Proxy crateProxy(String type, String httpProxy) {
-        if (StrUtil.isNotEmpty(httpProxy)) {
-            List<String> split = StrUtil.splitTrim(httpProxy, StrUtil.COLON);
-            String host = CollUtil.getFirst(split);
-            int port = Convert.toInt(CollUtil.getLast(split), 0);
-            Proxy.Type type1 = EnumUtil.fromString(Proxy.Type.class, type, Proxy.Type.HTTP);
-            return new Proxy(type1, new InetSocketAddress(host, port));
-        }
-        return null;
-    }
 }

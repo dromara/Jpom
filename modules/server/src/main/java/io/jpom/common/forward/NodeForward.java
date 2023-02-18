@@ -22,17 +22,16 @@
  */
 package io.jpom.common.forward;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.resource.BytesResource;
 import cn.hutool.core.io.unit.DataSize;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.net.url.UrlQuery;
-import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -41,9 +40,9 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
+import io.jpom.func.assets.model.MachineNodeModel;
+import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.user.UserModel;
-import io.jpom.service.node.NodeService;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.ServerConfig;
@@ -61,6 +60,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.*;
@@ -68,6 +69,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -80,70 +82,118 @@ import java.util.function.Function;
 public class NodeForward {
 
     /**
+     * 创建代理
+     *
+     * @param type      代理类型
+     * @param httpProxy 代理地址
+     * @return proxy
+     */
+    public static Proxy crateProxy(String type, String httpProxy) {
+        if (StrUtil.isNotEmpty(httpProxy)) {
+            List<String> split = StrUtil.splitTrim(httpProxy, StrUtil.COLON);
+            String host = CollUtil.getFirst(split);
+            int port = Convert.toInt(CollUtil.getLast(split), 0);
+            Proxy.Type type1 = EnumUtil.fromString(Proxy.Type.class, type, Proxy.Type.HTTP);
+            return new Proxy(type1, new InetSocketAddress(host, port));
+        }
+        return null;
+    }
+
+    public static INodeInfo parseNodeInfo(NodeModel nodeModel) {
+        Assert.hasText(nodeModel.getMachineId(), "节点信息不完整,缺少机器id");
+        MachineNodeServer machineNodeServer = SpringUtil.getBean(MachineNodeServer.class);
+        MachineNodeModel model = machineNodeServer.getByKey(nodeModel.getMachineId(), false);
+        Assert.notNull(model, "对应的机器信息不存在");
+        return model;
+    }
+
+    public static INodeInfo coverNodeInfo(MachineNodeModel machineNodeModel) {
+        if (StrUtil.isEmpty(machineNodeModel.getId())) {
+            // 新增的情况
+            return machineNodeModel;
+        }
+        MachineNodeServer machineNodeServer = SpringUtil.getBean(MachineNodeServer.class);
+        MachineNodeModel model = machineNodeServer.getByKey(machineNodeModel.getId(), false);
+        Optional.ofNullable(model)
+            .ifPresent(exits -> {
+                String password = Opt.ofBlankAble(machineNodeModel.getJpomPassword()).orElse(exits.getJpomPassword());
+                machineNodeModel.setJpomPassword(password);
+            });
+        return machineNodeModel;
+    }
+
+    /**
+     * 创建节点 url
+     *
+     * @param iNodeInfo       节点信息
+     * @param nodeUrl         节点功能 url
+     * @param dataContentType 传输的数据类型
+     */
+    public static IUrlItem parseUrlItem(INodeInfo iNodeInfo, String workspaceId, NodeUrl nodeUrl, DataContentType dataContentType) {
+        //
+        return new DefaultUrlItem(nodeUrl, iNodeInfo.timeout(), workspaceId, dataContentType);
+    }
+
+    /**
+     * 创建节点 url
+     *
+     * @param iNodeInfo 节点信息
+     * @param nodeUrl   节点功能 url
+     */
+    public static IUrlItem parseUrlItem(INodeInfo iNodeInfo, String workspaceId, NodeUrl nodeUrl) {
+        //
+        return new DefaultUrlItem(nodeUrl, iNodeInfo.timeout(), workspaceId, DataContentType.FORM_URLENCODED);
+    }
+
+    /**
      * 创建节点 url
      *
      * @param nodeModel       节点信息
      * @param nodeUrl         节点功能 url
      * @param dataContentType 传输的数据类型
-     * @return item
      */
-    public static IUrlItem createUrlItem(NodeModel nodeModel, NodeUrl nodeUrl, DataContentType dataContentType) {
-        // 修正节点密码
-        if (StrUtil.isEmpty(nodeModel.getLoginPwd())) {
-            NodeService nodeService = SpringUtil.getBean(NodeService.class);
-            NodeModel model = nodeService.getByKey(nodeModel.getId(), false);
-            nodeModel.setLoginPwd(model.getLoginPwd());
-            nodeModel.setLoginName(model.getLoginName());
-        }
+    public static <T> T createUrlItem(NodeModel nodeModel, NodeUrl nodeUrl, DataContentType dataContentType, BiFunction<INodeInfo, IUrlItem, T> consumer) {
+        INodeInfo parseNodeInfo = parseNodeInfo(nodeModel);
         //
-        return new IUrlItem() {
-            @Override
-            public String path() {
-                return nodeUrl.getUrl();
-            }
-
-            @Override
-            public Integer timeout() {
-                if (nodeUrl.isFileTimeout()) {
-                    ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
-                    ServerConfig.NodeConfig configNode = serverConfig.getNode();
-                    return configNode.getUploadFileTimeout();
-                } else {
-                    return Optional.of(nodeUrl.getTimeout())
-                        .flatMap(timeOut -> {
-                            if (timeOut == 0) {
-                                // 读取节点配置的超时时间
-                                return Optional.ofNullable(nodeModel.getTimeOut());
-                            }
-                            // 值 < 0  url 指定不超时
-                            return timeOut > 0 ? Optional.of(timeOut) : Optional.empty();
-                        })
-                        .map(timeOut -> {
-                            if (timeOut <= 0) {
-                                return null;
-                            }
-                            // 超时时间不能小于 2 秒
-                            return Math.max(timeOut, 2);
-                        })
-                        .orElse(null);
-                }
-            }
-
-            @Override
-            public String workspaceId() {
-                return Optional.ofNullable(nodeModel.getWorkspaceId()).orElse(Const.WORKSPACE_DEFAULT_ID);
-            }
-
-            @Override
-            public DataContentType contentType() {
-                return dataContentType;
-            }
-        };
+        IUrlItem iUrlItem = new DefaultUrlItem(nodeUrl, parseNodeInfo.timeout(), nodeModel.getWorkspaceId(), dataContentType);
+        return consumer.apply(parseNodeInfo, iUrlItem);
     }
 
-    private static IUrlItem createUrlItem(NodeModel nodeModel, NodeUrl nodeUrl) {
-        return createUrlItem(nodeModel, nodeUrl, DataContentType.FORM_URLENCODED);
+    private static <T> T createUrlItem(NodeModel nodeModel, NodeUrl nodeUrl, BiFunction<INodeInfo, IUrlItem, T> consumer) {
+        return createUrlItem(nodeModel, nodeUrl, DataContentType.FORM_URLENCODED, consumer);
     }
+
+    private static <T> T createUrlItem(INodeInfo nodeInfo, String workspaceId, NodeUrl nodeUrl, BiFunction<INodeInfo, IUrlItem, T> consumer) {
+        return createUrlItem(nodeInfo, workspaceId, nodeUrl, DataContentType.FORM_URLENCODED, consumer);
+    }
+
+    private static <T> T createUrlItem(INodeInfo nodeInfo, String workspaceId, NodeUrl nodeUrl, DataContentType dataContentType, BiFunction<INodeInfo, IUrlItem, T> consumer) {
+        //
+        IUrlItem iUrlItem = new DefaultUrlItem(nodeUrl, nodeInfo.timeout(), workspaceId, dataContentType);
+        return consumer.apply(nodeInfo, iUrlItem);
+    }
+
+//    /**
+//     * 普通消息转发
+//     *
+//     * @param nodeInfo 节点信息
+//     * @param request  请求
+//     * @param nodeUrl  节点的url
+//     * @param <T>      泛型
+//     * @return JSON
+//     */
+//    private static <T> JsonMessage<T> request(INodeInfo nodeInfo, HttpServletRequest request, NodeUrl nodeUrl, String... removeKeys) {
+//        Map<String, String> map = Optional.ofNullable(request)
+//            .map(ServletUtil::getParamMap)
+//            .map(map1 -> MapUtil.removeAny(map1, removeKeys))
+//            .orElse(null);
+//        TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
+//        };
+//        return createUrlItem(nodeInfo, StrUtil.EMPTY, nodeUrl,
+//            (nodeInfo1, urlItem) ->
+//                TransportServerFactory.get().executeToType(nodeInfo1, urlItem, map, tTypeReference)
+//        );
+//    }
 
     /**
      * 普通消息转发
@@ -159,9 +209,12 @@ public class NodeForward {
             .map(ServletUtil::getParamMap)
             .map(map1 -> MapUtil.removeAny(map1, removeKeys))
             .orElse(null);
-        IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl);
-        return TransportServerFactory.get().executeToType(nodeModel, urlItem, map, new TypeReference<JsonMessage<T>>() {
-        });
+        TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
+        };
+        return createUrlItem(nodeModel, nodeUrl,
+            (nodeInfo, urlItem) ->
+                TransportServerFactory.get().executeToType(nodeInfo, urlItem, map, tTypeReference)
+        );
     }
 
     /**
@@ -173,10 +226,39 @@ public class NodeForward {
      * @return JSON
      */
     public static <T> JsonMessage<T> request(NodeModel nodeModel, NodeUrl nodeUrl, JSONObject jsonObject) {
-        IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl);
-        return TransportServerFactory.get().executeToType(nodeModel, urlItem, jsonObject, new TypeReference<JsonMessage<T>>() {
-        });
+        TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
+        };
+        return createUrlItem(nodeModel, nodeUrl, (nodeInfo, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo, urlItem, jsonObject, tTypeReference));
     }
+
+    /**
+     * 普通消息转发
+     *
+     * @param machineNodeModel 节点
+     * @param nodeUrl          节点的url
+     * @param jsonObject       数据
+     * @return JSON
+     */
+    public static <T> JsonMessage<T> request(MachineNodeModel machineNodeModel, NodeUrl nodeUrl, JSONObject jsonObject) {
+        TypeReference<JsonMessage<T>> typeReference = new TypeReference<JsonMessage<T>>() {
+        };
+        INodeInfo nodeInfo = coverNodeInfo(machineNodeModel);
+        return createUrlItem(nodeInfo, StrUtil.EMPTY, nodeUrl, (nodeInfo1, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo1, urlItem, jsonObject, typeReference));
+    }
+
+//    /**
+//     * 普通消息转发
+//     *
+//     * @param nodeInfo   节点
+//     * @param nodeUrl    节点的url
+//     * @param jsonObject 数据
+//     * @return JSON
+//     */
+//    private static <T> JsonMessage<T> request(INodeInfo nodeInfo, NodeUrl nodeUrl, JSONObject jsonObject) {
+//        TypeReference<JsonMessage<T>> typeReference = new TypeReference<JsonMessage<T>>() {
+//        };
+//        return createUrlItem(nodeInfo, StrUtil.EMPTY, nodeUrl, (nodeInfo1, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo1, urlItem, jsonObject, typeReference));
+//    }
 
     /**
      * 普通消息转发
@@ -187,7 +269,35 @@ public class NodeForward {
      * @return JSON
      */
     public static <T> JsonMessage<T> requestSharding(NodeModel nodeModel, NodeUrl nodeUrl, JSONObject jsonObject, File file, Function<JSONObject, JsonMessage<T>> doneCallback, BiConsumer<Long, Long> streamProgress) throws IOException {
-        IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl);
+        INodeInfo nodeInfo = parseNodeInfo(nodeModel);
+        return requestSharding(nodeInfo, nodeModel.getWorkspaceId(), nodeUrl, jsonObject, file, doneCallback, streamProgress);
+    }
+
+    /**
+     * 普通消息转发
+     *
+     * @param machineNodeModel 节点
+     * @param nodeUrl          节点的url
+     * @param jsonObject       数据
+     * @return JSON
+     */
+    public static <T> JsonMessage<T> requestSharding(MachineNodeModel machineNodeModel, NodeUrl nodeUrl, JSONObject jsonObject, File file, Function<JSONObject, JsonMessage<T>> doneCallback, BiConsumer<Long, Long> streamProgress) throws IOException {
+        INodeInfo nodeInfo = coverNodeInfo(machineNodeModel);
+        return requestSharding(nodeInfo, StrUtil.EMPTY, nodeUrl, jsonObject, file, doneCallback, streamProgress);
+    }
+
+    /**
+     * 普通消息转发
+     *
+     * @param nodeInfo       节点
+     * @param workspaceId    工作空间id
+     * @param streamProgress 进度回调
+     * @param nodeUrl        节点的url
+     * @param jsonObject     数据
+     * @return JSON
+     */
+    private static <T> JsonMessage<T> requestSharding(INodeInfo nodeInfo, String workspaceId, NodeUrl nodeUrl, JSONObject jsonObject, File file, Function<JSONObject, JsonMessage<T>> doneCallback, BiConsumer<Long, Long> streamProgress) throws IOException {
+        IUrlItem urlItem = parseUrlItem(nodeInfo, workspaceId, nodeUrl, DataContentType.FORM_URLENCODED);
         ServerConfig serverConfig = SpringUtil.getBean(ServerConfig.class);
         ServerConfig.NodeConfig nodeConfig = serverConfig.getNode();
         long length = file.length();
@@ -242,7 +352,7 @@ public class NodeForward {
                         }
                     }
                     // 上传
-                    JsonMessage<T> message = transportServer.executeToType(nodeModel, urlItem, uploadData, typeReference);
+                    JsonMessage<T> message = transportServer.executeToType(nodeInfo, urlItem, uploadData, typeReference);
                     if (message.success()) {
                         // 使用成功的个数计算
                         success.add(currentChunk);
@@ -292,13 +402,49 @@ public class NodeForward {
      * @return JSON
      */
     public static <T> JsonMessage<T> request(NodeModel nodeModel, NodeUrl nodeUrl, String pName, Object pVal, Object... parameters) {
+
+        INodeInfo parseNodeInfo = parseNodeInfo(nodeModel);
+        return request(parseNodeInfo, nodeModel.getWorkspaceId(), nodeUrl, pName, pVal, parameters);
+    }
+
+    /**
+     * 普通消息转发
+     *
+     * @param machineNodeModel 节点
+     * @param workspaceId      工作空间id
+     * @param nodeUrl          节点的url
+     * @param pName            主参数名
+     * @param pVal             主参数值
+     * @param parameters       其他参数
+     * @return JSON
+     */
+    public static <T> JsonMessage<T> request(MachineNodeModel machineNodeModel, String workspaceId, NodeUrl nodeUrl, String pName, Object pVal, Object... parameters) {
         Map<String, Object> parametersMap = MapUtil.of(pName, pVal);
         for (int i = 0; i < parameters.length; i += 2) {
             parametersMap.put(parameters[i].toString(), parameters[i + 1]);
         }
-        IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl);
+        INodeInfo nodeInfo = coverNodeInfo(machineNodeModel);
+        return request(nodeInfo, workspaceId, nodeUrl, pName, pVal, parameters);
+    }
 
-        return TransportServerFactory.get().executeToType(nodeModel, urlItem, parametersMap, new TypeReference<JsonMessage<T>>() {
+    /**
+     * 普通消息转发
+     *
+     * @param nodeInfo    节点
+     * @param workspaceId 工作空间id
+     * @param nodeUrl     节点的url
+     * @param pName       主参数名
+     * @param pVal        主参数值
+     * @param parameters  其他参数
+     * @return JSON
+     */
+    private static <T> JsonMessage<T> request(INodeInfo nodeInfo, String workspaceId, NodeUrl nodeUrl, String pName, Object pVal, Object... parameters) {
+        Map<String, Object> parametersMap = MapUtil.of(pName, pVal);
+        for (int i = 0; i < parameters.length; i += 2) {
+            parametersMap.put(parameters[i].toString(), parameters[i + 1]);
+        }
+        IUrlItem iUrlItem = parseUrlItem(nodeInfo, workspaceId, nodeUrl);
+        return TransportServerFactory.get().executeToType(nodeInfo, iUrlItem, parametersMap, new TypeReference<JsonMessage<T>>() {
         });
     }
 
@@ -312,10 +458,11 @@ public class NodeForward {
      * @return JSON
      */
     public static <T> JsonMessage<T> requestBody(NodeModel nodeModel, NodeUrl nodeUrl, JSONObject jsonData) {
+        TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
+        };
+        return createUrlItem(nodeModel, nodeUrl, DataContentType.JSON,
+            (nodeInfo, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo, urlItem, jsonData, tTypeReference));
 
-        IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl, DataContentType.JSON);
-        return TransportServerFactory.get().executeToType(nodeModel, urlItem, jsonData, new TypeReference<JsonMessage<T>>() {
-        });
     }
 
     /**
@@ -357,10 +504,8 @@ public class NodeForward {
      */
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, HttpServletRequest request, Class<T> tClass) {
         Map<String, String> map = Optional.ofNullable(request).map(ServletUtil::getParamMap).orElse(null);
-        IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl);
-        return TransportServerFactory.get().executeToTypeOnlyData(nodeModel, urlItem, map, tClass);
-//        JsonMessage<T> jsonMessage = request(nodeModel, request, nodeUrl);
-//        return jsonMessage.getData(tClass);
+        return createUrlItem(nodeModel, nodeUrl, (nodeInfo, urlItem) -> TransportServerFactory.get().executeToTypeOnlyData(nodeInfo, urlItem, map, tClass));
+
     }
 
 
@@ -374,7 +519,7 @@ public class NodeForward {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static JsonMessage<String> requestMultipart(NodeModel nodeModel, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
-        IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl);
+
         //
         Map params = ServletUtil.getParamMap(request);
         //
@@ -387,8 +532,11 @@ public class NodeForward {
                 throw Lombok.sneakyThrow(e);
             }
         });
-        return TransportServerFactory.get().executeToType(nodeModel, urlItem, params, new TypeReference<JsonMessage<String>>() {
-        });
+        TypeReference<JsonMessage<String>> tTypeReference = new TypeReference<JsonMessage<String>>() {
+        };
+        return createUrlItem(nodeModel, nodeUrl,
+            (nodeInfo, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo, urlItem, params, tTypeReference));
+
     }
 
     /**
@@ -400,57 +548,55 @@ public class NodeForward {
      * @param nodeUrl   节点的url
      */
     public static void requestDownload(NodeModel nodeModel, HttpServletRequest request, HttpServletResponse response, NodeUrl nodeUrl) {
-        IUrlItem urlItem = createUrlItem(nodeModel, nodeUrl);
         //
         Map<String, String> params = ServletUtil.getParamMap(request);
-        TransportServerFactory.get().download(nodeModel, urlItem, params, downloadCallback -> {
-            Opt.ofBlankAble(downloadCallback.getContentDisposition())
-                .ifPresent(s -> response.setHeader(HttpHeaders.CONTENT_DISPOSITION, s));
-            response.setContentType(downloadCallback.getContentType());
-            ServletUtil.write(response, downloadCallback.getInputStream());
+        createUrlItem(nodeModel, nodeUrl, (nodeInfo, urlItem) -> {
+            TransportServerFactory.get().download(nodeInfo, urlItem, params, downloadCallback -> {
+                Opt.ofBlankAble(downloadCallback.getContentDisposition())
+                    .ifPresent(s -> response.setHeader(HttpHeaders.CONTENT_DISPOSITION, s));
+                response.setContentType(downloadCallback.getContentType());
+                ServletUtil.write(response, downloadCallback.getInputStream());
+            });
+            return null;
         });
+
     }
 
-    /**
-     * 获取节点socket 信息
-     *
-     * @param nodeModel 节点信息
-     * @param nodeUrl   url
-     * @return url
-     */
-    public static String getSocketUrl(NodeModel nodeModel, NodeUrl nodeUrl, UserModel userInfo, Object... parameters) {
-        String ws;
-        if ("https".equalsIgnoreCase(nodeModel.getProtocol())) {
-            ws = "wss";
-        } else {
-            ws = "ws";
-        }
-        if (StrUtil.isEmpty(nodeModel.getLoginPwd())) {
-            NodeService nodeService = SpringUtil.getBean(NodeService.class);
-            NodeModel model = nodeService.getByKey(nodeModel.getId(), false);
-            nodeModel.setLoginPwd(model.getLoginPwd());
-            nodeModel.setLoginName(model.getLoginName());
-        }
-        UrlQuery urlQuery = new UrlQuery();
-        urlQuery.add(Const.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
-        //
-        String optUser = userInfo.getId();
-        optUser = URLUtil.encode(optUser);
-        urlQuery.add("optUser", optUser);
-        if (ArrayUtil.isNotEmpty(parameters)) {
-            for (int i = 0; i < parameters.length; i += 2) {
-                Object parameter = parameters[i + 1];
-                String value = Convert.toStr(parameter, StrUtil.EMPTY);
-                urlQuery.add(parameters[i].toString(), URLUtil.encode(value));
-            }
-        }
-        // 兼容旧版本-节点升级 @author jzy
-        //urlQuery.add("name", URLUtil.encode(nodeModel.getLoginName()));
-        //urlQuery.add("password", URLUtil.encode(nodeModel.getLoginPwd()));
-        String format = StrUtil.format("{}://{}{}?{}", ws, nodeModel.getUrl(), nodeUrl.getUrl(), urlQuery.toString());
-        log.debug("web socket url:{}", format);
-        return format;
-    }
+//    /**
+//     * 获取节点socket 信息
+//     *
+//     * @param nodeModel 节点信息
+//     * @param nodeUrl   url
+//     * @return url
+//     */
+//    public static String getSocketUrl(NodeModel nodeModel, NodeUrl nodeUrl, UserModel userInfo, Object... parameters) {
+//        INodeInfo nodeInfo = parseNodeInfo(nodeModel);
+//        String ws;
+//        if ("https".equalsIgnoreCase(nodeInfo.scheme())) {
+//            ws = "wss";
+//        } else {
+//            ws = "ws";
+//        }
+//        UrlQuery urlQuery = new UrlQuery();
+//        urlQuery.add(Const.JPOM_AGENT_AUTHORIZE, nodeInfo.authorize());
+//        //
+//        String optUser = userInfo.getId();
+//        optUser = URLUtil.encode(optUser);
+//        urlQuery.add("optUser", optUser);
+//        if (ArrayUtil.isNotEmpty(parameters)) {
+//            for (int i = 0; i < parameters.length; i += 2) {
+//                Object parameter = parameters[i + 1];
+//                String value = Convert.toStr(parameter, StrUtil.EMPTY);
+//                urlQuery.add(parameters[i].toString(), URLUtil.encode(value));
+//            }
+//        }
+//        // 兼容旧版本-节点升级 @author jzy
+//        //urlQuery.add("name", URLUtil.encode(nodeModel.getLoginName()));
+//        //urlQuery.add("password", URLUtil.encode(nodeModel.getLoginPwd()));
+//        String format = StrUtil.format("{}://{}{}?{}", ws, nodeInfo.url(), nodeUrl.getUrl(), urlQuery.toString());
+//        log.debug("web socket url:{}", format);
+//        return format;
+//    }
 
     public static <T> T toJsonMessage(String body, TypeReference<T> tTypeReference) {
         if (StrUtil.isEmpty(body)) {

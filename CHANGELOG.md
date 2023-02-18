@@ -1,5 +1,12 @@
 # 🚀 版本日志
 
+1. 删除 node_info unLockType 字段
+2. 取消节点解绑功能
+3. 停止使用 NODE_STAT 表（暂时保留相关数据）
+4. MACHINE_NODE_STAT_LOG 表替代 SYSTEMMONITORLOG 表（并暂时保留 SYSTEMMONITORLOG 数据）
+5. 节点列表更名逻辑节点
+6. 新增机器资产管理
+
 ## 2.10.17 (2023-02-16)
 
 1. 【server】新增 构建配置新增严格执行命令模式（判断命令执行状态码是否为0）

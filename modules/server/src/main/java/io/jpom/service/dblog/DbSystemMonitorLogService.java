@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
  * @since 2019/9/13
  */
 @Service
+@Deprecated
 public class DbSystemMonitorLogService extends BaseDbService<SystemMonitorLog> {
 
     @Override

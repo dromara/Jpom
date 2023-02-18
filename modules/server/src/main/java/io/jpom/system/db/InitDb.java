@@ -32,14 +32,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
-import cn.hutool.extra.spring.SpringUtil;
 import io.jpom.common.ILoadEvent;
 import io.jpom.common.JpomApplicationEvent;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.service.dblog.BackupInfoService;
-import io.jpom.service.h2db.BaseGroupService;
-import io.jpom.service.h2db.BaseNodeGroupService;
-import io.jpom.service.h2db.BaseNodeService;
 import io.jpom.system.JpomRuntimeException;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
@@ -171,21 +167,6 @@ public class InitDb implements DisposableBean, ILoadEvent {
             throw Lombok.sneakyThrow(e);
         }
         log.info("{} db Successfully loaded, url is 【{}】", storageService.mode(), storageService.dbUrl());
-        //
-        Map<String, BaseGroupService> groupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseGroupService.class);
-        for (BaseGroupService<?> value : groupServiceMap.values()) {
-            value.repairGroupFiled();
-        }
-        //
-        Map<String, BaseNodeGroupService> nodeGroupServiceMap = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeGroupService.class);
-        for (BaseNodeGroupService<?> value : nodeGroupServiceMap.values()) {
-            value.repairGroupFiled();
-        }
-        //  同步项目
-        Map<String, BaseNodeService> beansOfType = SpringUtil.getApplicationContext().getBeansOfType(BaseNodeService.class);
-        for (BaseNodeService<?> value : beansOfType.values()) {
-            value.syncAllNode();
-        }
     }
 
 

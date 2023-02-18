@@ -35,8 +35,10 @@ import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
-import io.jpom.model.data.NodeModel;
+import io.jpom.func.assets.model.MachineNodeModel;
+import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.data.WorkspaceModel;
+import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.WorkspaceService;
 import lombok.extern.slf4j.Slf4j;
@@ -63,11 +65,14 @@ public class NodeInfoController extends BaseServerController {
 
     private final NodeService nodeService;
     private final WorkspaceService workspaceService;
+    private final MachineNodeServer machineNodeServer;
 
     public NodeInfoController(NodeService nodeService,
-                              WorkspaceService workspaceService) {
+                              WorkspaceService workspaceService,
+                              MachineNodeServer machineNodeServer) {
         this.nodeService = nodeService;
         this.workspaceService = workspaceService;
+        this.machineNodeServer = machineNodeServer;
     }
 
     /**
@@ -98,18 +103,18 @@ public class NodeInfoController extends BaseServerController {
             ipsList.add(clientIp);
         }
         List<String> canUseIps = ipsList.stream().filter(s -> this.testIpPort(s, ping)).collect(Collectors.toList());
-        List<NodeModel> canUseNode = canUseIps.stream().map(s -> {
-            NodeModel model = NodeInfoController.this.createModel(s, loginName, loginPwd, port, workspaceId);
+        List<MachineNodeModel> canUseNode = canUseIps.stream().map(s -> {
+            MachineNodeModel model = NodeInfoController.this.createMachineNodeModel(s, loginName, loginPwd, port);
             try {
-                nodeService.testNode(model);
+                machineNodeServer.testNode(model);
             } catch (Exception e) {
-                log.warn("测试结果：{} {}", model.getUrl(), e.getMessage());
+                log.warn("测试结果：{} {}", model.getJpomUrl(), e.getMessage());
                 return null;
             }
             return model;
         }).filter(Objects::nonNull).collect(Collectors.toList());
         // 只返回能通的 IP
-        canUseIps = canUseNode.stream().map(NodeModel::getName).collect(Collectors.toList());
+        canUseIps = canUseNode.stream().map(MachineNodeModel::getName).collect(Collectors.toList());
         int size1 = CollUtil.size(canUseNode);
         //
         JSONObject jsonObject = new JSONObject();
@@ -120,8 +125,8 @@ public class NodeInfoController extends BaseServerController {
         jsonObject.put("canUseNode", canUseNode);
         //
         exists = false;
-        for (NodeModel nodeModel : canUseNode) {
-            if (nodeService.existsByUrl(nodeModel.getUrl(), nodeModel.getWorkspaceId(), null)) {
+        for (MachineNodeModel nodeModel : canUseNode) {
+            if (machineNodeServer.existsByUrl(nodeModel.getJpomUrl(), null)) {
                 // 存在
                 jsonObject.put("type", "exists");
                 exists = true;
@@ -130,10 +135,10 @@ public class NodeInfoController extends BaseServerController {
         }
         if (!exists) {
             if (size1 == 1) {
-                // 只有一个 ip 可以使用
-                // 添加插件端
-                NodeModel first = CollUtil.getFirst(canUseNode);
-                nodeService.insertNotFill(first);
+                // 只有一个 ip 可以使用,添加插件端
+                BaseServerController.resetInfo(UserModel.EMPTY);
+                MachineNodeModel first = CollUtil.getFirst(canUseNode);
+                machineNodeServer.insertAndNode(first, workspaceId);
                 jsonObject.put("type", "success");
             } else {
                 jsonObject.put("type", size1 == 0 ? "canUseIpEmpty" : "multiIp");
@@ -174,15 +179,14 @@ public class NodeInfoController extends BaseServerController {
         return NetUtil.ping(ip, pingTime * 1000);
     }
 
-    private NodeModel createModel(String ip, String loginName, String loginPwd, int port, String workspaceId) {
-        NodeModel nodeModel = new NodeModel();
-        nodeModel.setWorkspaceId(workspaceId);
-        nodeModel.setName(ip);
-        nodeModel.setOpenStatus(1);
-        nodeModel.setLoginName(loginName);
-        nodeModel.setLoginPwd(loginPwd);
-        nodeModel.setUrl(ip + StrUtil.COLON + port);
-        nodeModel.setProtocol("http");
-        return nodeModel;
+    private MachineNodeModel createMachineNodeModel(String ip, String loginName, String loginPwd, int port) {
+        MachineNodeModel machineNodeModel = new MachineNodeModel();
+        machineNodeModel.setName(ip);
+        machineNodeModel.setStatus(1);
+        machineNodeModel.setJpomUsername(loginName);
+        machineNodeModel.setJpomPassword(loginPwd);
+        machineNodeModel.setJpomUrl(ip + StrUtil.COLON + port);
+        machineNodeModel.setJpomProtocol("http");
+        return machineNodeModel;
     }
 }

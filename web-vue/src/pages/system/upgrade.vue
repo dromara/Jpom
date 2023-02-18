@@ -10,8 +10,8 @@
             </a-row>
             <a-space>
               <a-input class="search-input-item" @pressEnter="getNodeList" v-model="listQuery['%name%']" placeholder="节点名称" />
-              <a-input class="search-input-item" @pressEnter="getNodeList" v-model="listQuery['%url%']" placeholder="节点地址" />
-              <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
+              <a-input class="search-input-item" @pressEnter="getNodeList" v-model="listQuery['%jpomUrl%']" placeholder="节点地址" />
+              <a-select show-search option-filter-prop="children" v-model="listQuery.groupName" allowClear placeholder="分组" class="search-input-item">
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
               <a-button :loading="loading" type="primary" @click="getNodeList">搜索</a-button>
@@ -66,7 +66,8 @@
 </template>
 <script>
 import upgrade from "@/components/upgrade";
-import { checkVersion, downloadRemote, getNodeGroupAll, getNodeList, uploadAgentFile, uploadAgentFileMerge } from "@/api/node";
+import { checkVersion, downloadRemote, uploadAgentFile, uploadAgentFileMerge } from "@/api/node";
+import { machineListData, machineListGroup, statusMap } from "@/api/system/assets-machine";
 import { mapGetters } from "vuex";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, getWebSocketUrl, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 import { uploadPieces } from "@/utils/upload-pieces";
@@ -96,7 +97,7 @@ export default {
       columns: [
         // { title: "节点 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "节点名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "节点地址", dataIndex: "url", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
+        { title: "节点地址", dataIndex: "jpomUrl", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
         { title: "版本号", dataIndex: "version", width: "100px", ellipsis: true, scopedSlots: { customRender: "version" } },
         { title: "打包时间", dataIndex: "timeStamp", width: "180px", ellipsis: true, scopedSlots: { customRender: "timeStamp" } },
         { title: "运行时间", dataIndex: "upTimeStr", width: "180px", ellipsis: true, scopedSlots: { customRender: "upTimeStr" } },
@@ -110,6 +111,7 @@ export default {
       tableSelections: [],
       temp: {},
       percentage: 0,
+      statusMap,
     };
   },
   computed: {
@@ -159,7 +161,7 @@ export default {
     },
     // 获取所有的分组
     loadGroupList() {
-      getNodeGroupAll().then((res) => {
+      machineListGroup().then((res) => {
         if (res.data) {
           this.groupList = res.data;
         }
@@ -261,7 +263,7 @@ export default {
     },
     getNodeList() {
       this.loading = true;
-      getNodeList(this.listQuery).then((res) => {
+      machineListData(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;

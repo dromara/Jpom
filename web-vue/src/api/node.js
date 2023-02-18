@@ -43,14 +43,14 @@ export function getNodeListWithVersion(params) {
   });
 }
 
-// node 状态
-export function getNodeStatus(nodeId) {
-  return axios({
-    url: "/node/node_status",
-    method: "post",
-    data: { nodeId },
-  });
-}
+// // node 状态
+// export function getNodeStatus(nodeId) {
+//   return axios({
+//     url: "/node/node_status",
+//     method: "post",
+//     data: { nodeId },
+//   });
+// }
 
 // 节点 + 项目列表
 export function getNodeProjectList(params) {
@@ -85,14 +85,6 @@ export function syncProject(nodeId) {
     url: "/node/sync_project",
     method: "get",
     params: { nodeId: nodeId },
-  });
-}
-
-export function unLockWorkspace(params) {
-  return axios({
-    url: "/node/un_lock_workspace",
-    method: "get",
-    params: params,
   });
 }
 

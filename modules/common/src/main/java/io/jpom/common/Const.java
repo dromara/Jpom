@@ -40,6 +40,10 @@ public class Const {
      * 默认的工作空间
      */
     public static final String WORKSPACE_DEFAULT_ID = "DEFAULT";
+    /**
+     * 默认的分组名
+     */
+    public static final String DEFAULT_GROUP_NAME = "默认";
 //    /**
 //     * websocket 传输 agent 包 buffer size
 //     */

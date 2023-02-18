@@ -31,10 +31,7 @@ import io.jpom.util.SocketSessionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import top.jpom.transport.DataContentType;
-import top.jpom.transport.IProxyWebSocket;
-import top.jpom.transport.IUrlItem;
-import top.jpom.transport.TransportServerFactory;
+import top.jpom.transport.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -89,9 +86,10 @@ public abstract class BaseProxyHandler extends BaseHandler {
         if (nodeModel != null) {
             Object[] parameters = this.getParameters(attributes);
             // 连接节点
-            IUrlItem urlItem = NodeForward.createUrlItem(nodeModel, this.nodeUrl, DataContentType.FORM_URLENCODED);
+            INodeInfo nodeInfo = NodeForward.parseNodeInfo(nodeModel);
+            IUrlItem urlItem = NodeForward.parseUrlItem(nodeInfo, nodeModel.getWorkspaceId(), this.nodeUrl, DataContentType.FORM_URLENCODED);
 
-            IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeModel, urlItem, parameters);
+            IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem, parameters);
             proxySession.onMessage(s -> sendMsg(session, s));
             if (!proxySession.connectBlocking()) {
                 this.sendMsg(session, "插件端连接失败");

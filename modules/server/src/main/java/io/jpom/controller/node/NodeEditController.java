@@ -23,14 +23,11 @@
 package io.jpom.controller.node;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
-import io.jpom.common.forward.NodeForward;
-import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
+import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.model.node.ScriptCacheModel;
@@ -45,10 +42,12 @@ import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
 import io.jpom.service.outgiving.LogReadServer;
 import io.jpom.service.outgiving.OutGivingServer;
-import io.jpom.service.stat.NodeStatService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
@@ -71,8 +70,8 @@ public class NodeEditController extends BaseServerController {
     private final LogReadServer logReadServer;
     private final ProjectInfoCacheService projectInfoCacheService;
     private final NodeScriptServer nodeScriptServer;
-    private final NodeStatService nodeStatService;
     private final NodeScriptExecuteLogServer nodeScriptExecuteLogServer;
+    private final MachineNodeServer machineNodeServer;
 
     public NodeEditController(OutGivingServer outGivingServer,
                               MonitorService monitorService,
@@ -80,23 +79,24 @@ public class NodeEditController extends BaseServerController {
                               LogReadServer logReadServer,
                               ProjectInfoCacheService projectInfoCacheService,
                               NodeScriptServer nodeScriptServer,
-                              NodeStatService nodeStatService,
-                              NodeScriptExecuteLogServer nodeScriptExecuteLogServer) {
+                              NodeScriptExecuteLogServer nodeScriptExecuteLogServer,
+                              MachineNodeServer machineNodeServer) {
         this.outGivingServer = outGivingServer;
         this.monitorService = monitorService;
         this.buildService = buildService;
         this.logReadServer = logReadServer;
         this.projectInfoCacheService = projectInfoCacheService;
         this.nodeScriptServer = nodeScriptServer;
-        this.nodeStatService = nodeStatService;
         this.nodeScriptExecuteLogServer = nodeScriptExecuteLogServer;
+        this.machineNodeServer = machineNodeServer;
     }
 
 
     @PostMapping(value = "list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<PageResultDto<NodeModel>> listJson() {
-        PageResultDto<NodeModel> nodeModelPageResultDto = nodeService.listPage(getRequest());
+    public JsonMessage<PageResultDto<NodeModel>> listJson(HttpServletRequest request) {
+        PageResultDto<NodeModel> nodeModelPageResultDto = nodeService.listPage(request);
+        nodeModelPageResultDto.each(nodeModel -> nodeModel.setMachineNodeData(machineNodeServer.getByKey(nodeModel.getMachineId())));
         return JsonMessage.success("", nodeModelPageResultDto);
     }
 
@@ -131,24 +131,10 @@ public class NodeEditController extends BaseServerController {
         return JsonMessage.success("", listGroup);
     }
 
-    @RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONArray> nodeStatus() {
-        long timeMillis = System.currentTimeMillis();
-        NodeModel node = getNode();
-        JSONObject jsonObject = NodeForward.requestData(node, NodeUrl.Status, getRequest(), JSONObject.class);
-        Assert.notNull(jsonObject, "获取信息失败");
-        JSONArray jsonArray = new JSONArray();
-        jsonObject.put("timeOut", System.currentTimeMillis() - timeMillis);
-        jsonObject.put("nodeId", node.getId());
-        jsonArray.add(jsonObject);
-        return JsonMessage.success("", jsonArray);
-    }
-
     @PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> save() {
-        nodeService.update(getRequest());
+    public JsonMessage<String> save(HttpServletRequest request) {
+        nodeService.update(request);
         return JsonMessage.success("操作成功");
     }
 
@@ -202,8 +188,6 @@ public class NodeEditController extends BaseServerController {
         //
         int i = nodeService.delByKey(id, request);
         if (i > 0) {
-            // 删除节点统计数据
-            nodeStatService.delByKey(id);
             //
             nodeScriptExecuteLogServer.delCache(id, request);
         }
@@ -227,21 +211,6 @@ public class NodeEditController extends BaseServerController {
         return JsonMessage.success("操作成功");
     }
 
-    /**
-     * 解锁节点，通过插件端自动注册的节点默认未分配工作空间
-     *
-     * @param id            节点ID
-     * @param toWorkspaceId 分配到到工作空间ID
-     * @return msg
-     */
-    @GetMapping(value = "un_lock_workspace", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    @SystemPermission()
-    public JsonMessage<String> unLockWorkspace(@ValidatorItem String id, @ValidatorItem String toWorkspaceId) {
-        nodeService.checkUserWorkspace(toWorkspaceId);
-        nodeService.unLock(id, toWorkspaceId);
-        return JsonMessage.success("操作成功");
-    }
 
     /**
      * 同步到指定工作空间

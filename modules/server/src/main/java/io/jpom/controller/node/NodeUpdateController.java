@@ -32,8 +32,9 @@ import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.*;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.controller.openapi.NodeInfoController;
+import io.jpom.func.assets.model.MachineNodeModel;
+import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.AgentFileModel;
-import io.jpom.model.data.NodeModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -71,11 +72,14 @@ public class NodeUpdateController extends BaseServerController {
 
     private final SystemParametersServer systemParametersServer;
     private final ServerConfig serverConfig;
+    private final MachineNodeServer machineNodeServer;
 
     public NodeUpdateController(SystemParametersServer systemParametersServer,
-                                ServerConfig serverConfig) {
+                                ServerConfig serverConfig,
+                                MachineNodeServer machineNodeServer) {
         this.systemParametersServer = systemParametersServer;
         this.serverConfig = serverConfig;
+        this.machineNodeServer = machineNodeServer;
     }
 
     /**
@@ -220,25 +224,26 @@ public class NodeUpdateController extends BaseServerController {
         Assert.notNull(receiveCache, "没有对应的缓存信息");
         JSONArray jsonArray = receiveCache.getJSONArray("canUseNode");
         Assert.notEmpty(jsonArray, "没有对应的缓存信息：-1");
-        Optional<NodeModel> any = jsonArray.stream().map(o -> {
-            if (o instanceof NodeModel) {
-                return (NodeModel) o;
+        Optional<MachineNodeModel> any = jsonArray.stream().map(o -> {
+            if (o instanceof MachineNodeModel) {
+                return (MachineNodeModel) o;
             }
             JSONObject jsonObject = (JSONObject) o;
-            return jsonObject.toJavaObject(NodeModel.class);
-        }).filter(nodeModel -> StrUtil.equals(nodeModel.getUrl(), StrUtil.format("{}:{}", ip, port))).findAny();
+            return jsonObject.toJavaObject(MachineNodeModel.class);
+        }).filter(nodeModel -> StrUtil.equals(nodeModel.getJpomUrl(), StrUtil.format("{}:{}", ip, port))).findAny();
         Assert.state(any.isPresent(), "ip 地址信息不正确");
-        NodeModel nodeModel = any.get();
+        MachineNodeModel machineNodeModel = any.get();
         try {
-            nodeService.testNode(nodeModel);
+            machineNodeServer.testNode(machineNodeModel);
         } catch (Exception e) {
-            log.warn("测试结果：{} {}", nodeModel.getUrl(), e.getMessage());
+            log.warn("测试结果：{} {}", machineNodeModel.getJpomUrl(), e.getMessage());
             return new JsonMessage<>(500, "节点连接失败：" + e.getMessage());
         }
         // 插入
-        boolean exists = nodeService.existsByUrl(nodeModel.getUrl(), nodeModel.getWorkspaceId(), null);
-        Assert.state(!exists, "对应的节点已经存在拉：" + nodeModel.getUrl());
-        nodeService.insert(nodeModel);
+        boolean exists = machineNodeServer.existsByUrl(machineNodeModel.getJpomUrl(), null);
+        Assert.state(!exists, "对应的节点已经存在拉：" + machineNodeModel.getJpomUrl());
+        String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
+        machineNodeServer.insertAndNode(machineNodeModel, workspaceId);
         // 更新结果
         receiveCache.put("type", "success");
         return JsonMessage.success("安装成功", NodeInfoController.listReceiveCache(null));

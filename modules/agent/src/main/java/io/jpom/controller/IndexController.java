@@ -23,13 +23,16 @@
 package io.jpom.controller;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.RemoteVersion;
+import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.common.interceptor.NotAuthorize;
 import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.data.NodeScriptModel;
@@ -37,12 +40,18 @@ import io.jpom.plugin.PluginFactory;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.service.script.NodeScriptServer;
 import io.jpom.util.JvmUtil;
+import io.jpom.util.OshiUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 首页
@@ -51,6 +60,7 @@ import java.util.List;
  * @since 2019/4/17
  */
 @RestController
+@Slf4j
 public class IndexController extends BaseAgentController {
 
     private final ProjectInfoService projectInfoService;
@@ -82,32 +92,73 @@ public class IndexController extends BaseAgentController {
     }
 
     /**
-     * 返回节点项目状态信息
+     * 获取节点统计信息
      *
-     * @return array
+     * @return json
      */
-    @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<JSONObject> status() {
+    @PostMapping(value = "get-stat-info", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<JSONObject> getDirectTop() {
+        JSONObject jsonObject = new JSONObject();
+        JSONObject topInfo = OshiUtils.getSimpleInfo();
+        jsonObject.put("simpleStatus", topInfo);
+
+        JSONObject systemInfo = OshiUtils.getSystemInfo();
+        jsonObject.put("systemInfo", systemInfo);
+
+        JSONObject jpomInfo = this.getJpomInfo();
+        jsonObject.put("jpomInfo", jpomInfo);
+        return JsonMessage.success("ok", jsonObject);
+    }
+
+    private JSONObject getJpomInfo() {
         List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
         List<NodeScriptModel> list = nodeScriptServer.list();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
         JpomManifest instance = JpomManifest.getInstance();
-        jsonObject.put("osName", instance.getOsName());
-        jsonObject.put("jpomVersion", instance.getVersion());
+        jsonObject.put("jpomManifest", instance);
         jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
         //  获取JVM中内存总大小
-        long totalMemory = SystemUtil.getTotalMemory();
-        jsonObject.put("totalMemory", FileUtil.readableFileSize(totalMemory));
+        jsonObject.put("totalMemory", SystemUtil.getTotalMemory());
         //
-        long freeMemory = SystemUtil.getFreeMemory();
-        jsonObject.put("freeMemory", FileUtil.readableFileSize(freeMemory));
+        jsonObject.put("freeMemory", SystemUtil.getFreeMemory());
         //
-        jsonObject.put("count", CollUtil.size(nodeProjectInfoModels));
+        jsonObject.put("projectCount", CollUtil.size(nodeProjectInfoModels));
         jsonObject.put("scriptCount", CollUtil.size(list));
-        // 运行时间
-        jsonObject.put("runTime", instance.getUpTimeStr());
-        jsonObject.put("runTimeLong", instance.getUpTime());
-        return JsonMessage.success("", jsonObject);
+        return jsonObject;
+    }
+
+
+    @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<JSONObject>> getProcessList(String processName, Integer count) {
+        processName = StrUtil.emptyToDefault(processName, "java");
+        List<JSONObject> processes = OshiUtils.getProcesses(processName, Convert.toInt(count, 20));
+        processes = processes.stream()
+            .peek(jsonObject -> {
+                int processId = jsonObject.getIntValue("processId");
+                String port = AbstractProjectCommander.getInstance().getMainPort(processId);
+                jsonObject.put("port", port);
+                //
+                try {
+                    String jpomName = AbstractProjectCommander.getInstance().getJpomNameByPid(processId);
+                    jsonObject.put("jpomName", jpomName);
+                } catch (IOException e) {
+                    log.error("解析进程失败", e);
+                }
+            })
+            .collect(Collectors.toList());
+        return JsonMessage.success("ok", processes);
+    }
+
+
+    @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<Object> kill(int pid) {
+        long jpomAgentId = JpomManifest.getInstance().getPid();
+        Assert.state(!StrUtil.equals(StrUtil.toString(jpomAgentId), StrUtil.toString(pid)), "不支持在线关闭 Agent 进程");
+        String result = AbstractSystemCommander.getInstance().kill(null, pid);
+        if (StrUtil.isEmpty(result)) {
+            result = "成功kill";
+        }
+        return JsonMessage.success(result);
     }
 }

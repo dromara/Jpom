@@ -45,6 +45,7 @@ import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
+import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.model.node.NodeAgentWhitelist;
@@ -55,7 +56,6 @@ import io.jpom.permission.SystemPermission;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ExtConfigBean;
-import io.jpom.system.db.InitDb;
 import io.jpom.system.init.ProxySelectorConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.YamlMapFactoryBean;
@@ -92,21 +92,21 @@ import java.util.Map;
 public class SystemConfigController extends BaseServerController {
 
     private final SystemParametersServer systemParametersServer;
-    private final InitDb initDb;
     private final NodeService nodeService;
     private final ProxySelectorConfig proxySelectorConfig;
     private final DbExtConfig dbExtConfig;
+    private final MachineNodeServer machineNodeServer;
 
     public SystemConfigController(SystemParametersServer systemParametersServer,
-                                  InitDb initDb,
                                   NodeService nodeService,
                                   ProxySelectorConfig proxySelectorConfig,
-                                  DbExtConfig dbExtConfig) {
+                                  DbExtConfig dbExtConfig,
+                                  MachineNodeServer machineNodeServer) {
         this.systemParametersServer = systemParametersServer;
-        this.initDb = initDb;
         this.nodeService = nodeService;
         this.proxySelectorConfig = proxySelectorConfig;
         this.dbExtConfig = dbExtConfig;
+        this.machineNodeServer = machineNodeServer;
     }
 
     /**
@@ -420,7 +420,7 @@ public class SystemConfigController extends BaseServerController {
         proxys = ObjectUtil.defaultIfNull(proxys, Collections.emptyList());
         for (ProxySelectorConfig.ProxyConfigItem proxy : proxys) {
             if (StrUtil.isNotEmpty(proxy.getProxyAddress())) {
-                nodeService.testHttpProxy(proxy.getProxyAddress());
+                machineNodeServer.testHttpProxy(proxy.getProxyAddress());
             }
         }
         systemParametersServer.upsert(ProxySelectorConfig.KEY, proxys, ProxySelectorConfig.KEY);
