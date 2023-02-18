@@ -26,7 +26,7 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
 import io.jpom.common.ILoadEvent;
-import io.jpom.model.data.NodeModel;
+import io.jpom.common.forward.NodeForward;
 import io.jpom.service.system.SystemParametersServer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +79,7 @@ public class ProxySelectorConfig extends ProxySelector implements ILoadEvent {
                     }
                     return StrUtil.containsIgnoreCase(url, proxyConfigItem.getPattern());
                 })
-                .map(proxyConfigItem -> NodeModel.crateProxy(proxyConfigItem.getProxyType(), proxyConfigItem.getProxyAddress()))
+                .map(proxyConfigItem -> NodeForward.crateProxy(proxyConfigItem.getProxyType(), proxyConfigItem.getProxyAddress()))
                 .filter(Objects::nonNull)
                 .findFirst()
                 .map(Collections::singletonList)

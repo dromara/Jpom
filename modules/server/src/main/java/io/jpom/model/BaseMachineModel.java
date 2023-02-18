@@ -20,60 +20,21 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package top.jpom.transport;
+package io.jpom.model;
 
-import java.net.Proxy;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * 节点通讯的 接口
- *
  * @author bwcx_jzy
- * @since 2022/12/23
+ * @since 2023/2/18
  */
-public interface INodeInfo {
+@EqualsAndHashCode(callSuper = true)
+@Data
+public abstract class BaseMachineModel extends BaseGroupModel {
 
     /**
-     * 节点名称
-     *
-     * @return 名称
+     * 机器id
      */
-    String name();
-
-    /**
-     * 节点 url
-     * <p>
-     * HOST:PORT
-     *
-     * @return 节点 url
-     */
-    String url();
-
-    /**
-     * 协议
-     *
-     * @return http
-     */
-    String scheme();
-
-    /**
-     * 节点 授权信息
-     * sha1(user@pwd)
-     *
-     * @return 用户
-     */
-    String authorize();
-
-    /**
-     * 节点通讯代理
-     *
-     * @return proxy
-     */
-    Proxy proxy();
-
-    /**
-     * 超时时间
-     *
-     * @return 超时时间 单位秒
-     */
-    Integer timeout();
+    private String machineId;
 }

@@ -61,7 +61,7 @@ export default {
       // 加载数据
       nodeMonitorData(params).then((res) => {
         if (res.code === 200) {
-          if (this.type === "networkTime") {
+          if (this.type === "networkDelay") {
             this.historyChart = drawChart(res.data, "historyChart", generateNodeNetworkTimeChart);
           } else {
             this.historyChart = drawChart(res.data, "historyChart", generateNodeTopChart);

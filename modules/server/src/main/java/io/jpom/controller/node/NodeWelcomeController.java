@@ -33,10 +33,10 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.func.assets.model.MachineNodeStatLogModel;
+import io.jpom.func.assets.server.MachineNodeStatLogServer;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.log.SystemMonitorLog;
 import io.jpom.permission.SystemPermission;
-import io.jpom.service.dblog.DbSystemMonitorLogService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,35 +47,36 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 欢迎页
+ * 节点统计信息
  *
- * @author Administrator
+ * @author bwcx_jzy
  */
 @RestController
 @RequestMapping(value = "/node")
 public class NodeWelcomeController extends BaseServerController {
 
-    private final DbSystemMonitorLogService dbSystemMonitorLogService;
+    private final MachineNodeStatLogServer machineNodeStatLogServer;
 
-    public NodeWelcomeController(DbSystemMonitorLogService dbSystemMonitorLogService) {
-        this.dbSystemMonitorLogService = dbSystemMonitorLogService;
+    public NodeWelcomeController(MachineNodeStatLogServer machineNodeStatLogServer) {
+        this.machineNodeStatLogServer = machineNodeStatLogServer;
     }
 
     @PostMapping(value = "node_monitor_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<SystemMonitorLog>> nodeMonitorJson() {
-        List<SystemMonitorLog> list = this.getList();
+    public JsonMessage<List<MachineNodeStatLogModel>> nodeMonitorJson() {
+        List<MachineNodeStatLogModel> list = this.getList();
         Assert.notEmpty(list, "没有查询到任何数据");
         return JsonMessage.success("ok", list);
     }
 
-    private List<SystemMonitorLog> getList() {
+    private List<MachineNodeStatLogModel> getList() {
         NodeModel node = getNode();
+        String machineId = node.getMachineId();
         String startDateStr = getParameter("time[0]");
         String endDateStr = getParameter("time[1]");
         if (StrUtil.hasEmpty(startDateStr, endDateStr)) {
-            SystemMonitorLog systemMonitorLog = new SystemMonitorLog();
-            systemMonitorLog.setNodeId(node.getId());
-            return dbSystemMonitorLogService.queryList(systemMonitorLog, 500, new Order("monitorTime", Direction.DESC));
+            MachineNodeStatLogModel systemMonitorLog = new MachineNodeStatLogModel();
+            systemMonitorLog.setMachineId(machineId);
+            return machineNodeStatLogServer.queryList(systemMonitorLog, 500, new Order("monitorTime", Direction.DESC));
         }
         //  处理时间
         DateTime startDate = DateUtil.parse(startDateStr);
@@ -86,68 +87,15 @@ public class NodeWelcomeController extends BaseServerController {
             endDate = DateUtil.endOfDay(endDate);
         }
         long endTime = endDate.getTime();
-
         // 开启了节点信息采集
         Page pageObj = new Page(1, 5000);
         pageObj.addOrder(new Order("monitorTime", Direction.DESC));
         Entity entity = Entity.create();
-        entity.set("nodeId", node.getId());
+        entity.set("machineId", machineId);
         entity.set(" MONITORTIME", ">= " + startTime);
         entity.set("MONITORTIME", "<= " + endTime);
-        return dbSystemMonitorLogService.listPageOnlyResult(entity, pageObj);
+        return machineNodeStatLogServer.listPageOnlyResult(entity, pageObj);
     }
-
-//	private JSONObject getData() {
-//		List<SystemMonitorLog> list = getList();
-//		Assert.notEmpty(list, "没有查询到任何数据");
-//		List<JSONObject> series = new ArrayList<>();
-//		List<String> scale = new ArrayList<>();
-//		for (int i = list.size() - 1; i >= 0; i--) {
-//			SystemMonitorLog systemMonitorLog = list.get(i);
-//			scale.add(new DateTime(systemMonitorLog.getMonitorTime()).toString(DatePattern.NORM_DATETIME_PATTERN));
-//			JSONObject jsonObject = new JSONObject();
-//			jsonObject.put("cpu", systemMonitorLog.getOccupyCpu());
-//			jsonObject.put("memory", systemMonitorLog.getOccupyMemory());
-//			jsonObject.put("memoryUsed", systemMonitorLog.getOccupyMemoryUsed());
-//			jsonObject.put("disk", systemMonitorLog.getOccupyDisk());
-//			series.add(jsonObject);
-//		}
-//
-//		JSONObject object = new JSONObject();
-//		object.put("scales", scale);
-//		object.put("series", series);
-//		return object;
-//	}
-//
-//	@PostMapping(value = "getTop", produces = MediaType.APPLICATION_JSON_VALUE)
-//	public String getTop() {
-//		JSONObject object = getData();
-//		return JsonMessage.success( "ok", object);
-//	}
-
-//	@RequestMapping(value = "exportTop")
-//	public void exportTop(String time) throws UnsupportedEncodingException {
-//		List<SystemMonitorLog> result = getList();
-//		if (CollUtil.isEmpty(result)) {
-//			//            NodeForward.requestDownload(node, getRequest(), getResponse(), NodeUrl.exportTop);
-//		} else {
-//			NodeModel node = getNode();
-//			StringBuilder buf = new StringBuilder();
-//			buf.append("监控时间").append(",占用cpu").append(",占用内存").append(",占用磁盘").append("\r\n");
-//			for (SystemMonitorLog log : result) {
-//				long monitorTime = log.getMonitorTime();
-//				buf.append(DateUtil.date(monitorTime)).append(StrUtil.COMMA)
-//						.append(log.getOccupyCpu()).append("%").append(StrUtil.COMMA)
-//						.append(log.getOccupyMemory()).append("%").append(StrUtil.COMMA)
-//						.append(log.getOccupyDisk()).append("%").append("\r\n");
-//			}
-//			String fileName = URLEncoder.encode("Jpom系统监控-" + node.getId(), "UTF-8");
-//			HttpServletResponse response = getResponse();
-//			response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(StandardCharsets.UTF_8), "GBK") + ".csv");
-//			response.setContentType("text/csv;charset=utf-8");
-//			ServletUtil.write(getResponse(), buf.toString(), CharsetUtil.UTF_8);
-//		}
-//	}
 
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getProcessList() {

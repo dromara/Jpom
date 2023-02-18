@@ -20,60 +20,56 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package top.jpom.transport;
+package io.jpom.func.assets.model;
 
-import java.net.Proxy;
+import io.jpom.model.log.SystemMonitorLog;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import top.jpom.h2db.TableName;
+import top.jpom.model.BaseDbModel;
 
 /**
- * 节点通讯的 接口
- *
  * @author bwcx_jzy
- * @since 2022/12/23
+ * @see SystemMonitorLog
+ * @see io.jpom.model.data.NodeModel
+ * @since 2023/02/18
  */
-public interface INodeInfo {
+@EqualsAndHashCode(callSuper = true)
+@TableName(value = "MACHINE_NODE_STAT_LOG", name = "资产机器节点统计")
+@Data
+public class MachineNodeStatLogModel extends BaseDbModel {
+    /**
+     * 机器id
+     */
+    private String machineId;
+    /**
+     * 占用cpu
+     */
+    private Double occupyCpu;
+    /**
+     * 占用内存 （总共）
+     */
+    private Double occupyMemory;
+    /**
+     * 占用磁盘
+     */
+    private Double occupyDisk;
+    /**
+     * 监控时间
+     * 插件端返回的时间
+     */
+    private Long monitorTime;
+    /**
+     * 网络耗时（延迟）
+     */
+    private Integer networkDelay;
+    /**
+     * 每秒发送的KB数,rxkB/s
+     */
+    private Long netTxBytes;
 
     /**
-     * 节点名称
-     *
-     * @return 名称
+     * 每秒接收的KB数,rxkB/s
      */
-    String name();
-
-    /**
-     * 节点 url
-     * <p>
-     * HOST:PORT
-     *
-     * @return 节点 url
-     */
-    String url();
-
-    /**
-     * 协议
-     *
-     * @return http
-     */
-    String scheme();
-
-    /**
-     * 节点 授权信息
-     * sha1(user@pwd)
-     *
-     * @return 用户
-     */
-    String authorize();
-
-    /**
-     * 节点通讯代理
-     *
-     * @return proxy
-     */
-    Proxy proxy();
-
-    /**
-     * 超时时间
-     *
-     * @return 超时时间 单位秒
-     */
-    Integer timeout();
+    private Long netRxBytes;
 }

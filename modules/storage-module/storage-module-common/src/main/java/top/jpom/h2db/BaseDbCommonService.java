@@ -557,18 +557,34 @@ public abstract class BaseDbCommonService<T> {
      * @return data
      */
     public List<T> listByBean(T data) {
+        return this.listByBean(data, true);
+    }
+
+    /**
+     * 查询实体对象
+     *
+     * @param data 实体
+     * @return data
+     */
+    public List<T> listByBean(T data, boolean fill) {
         Entity where = this.dataBeanToEntity(data);
         List<Entity> entitys = this.queryList(where);
-        return this.entityToBeanList(entitys);
+        return this.entityToBeanList(entitys, fill);
     }
 
     public List<T> entityToBeanList(List<Entity> entitys) {
+        return this.entityToBeanList(entitys, true);
+    }
+
+    public List<T> entityToBeanList(List<Entity> entitys, boolean fill) {
         if (entitys == null) {
             return null;
         }
         return entitys.stream().map((entity -> {
             T entityToBean = this.entityToBean(entity, this.tClass);
-            this.fillSelectResult(entityToBean);
+            if (fill) {
+                this.fillSelectResult(entityToBean);
+            }
             return entityToBean;
         })).collect(Collectors.toList());
     }

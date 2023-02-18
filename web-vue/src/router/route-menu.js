@@ -42,6 +42,7 @@ const routeMenuMap = {
   backup: "/system/backup",
   workspace: "/system/workspace",
   globalEnv: "/system/global-env",
+  machine_node_info: "/system/assets/machine-list",
 };
 
 export default routeMenuMap;

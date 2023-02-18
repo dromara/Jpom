@@ -23,6 +23,7 @@
 package io.jpom.service.h2db;
 
 import cn.hutool.db.Entity;
+import io.jpom.common.Const;
 import io.jpom.common.ServerConst;
 import io.jpom.model.BaseNodeGroupModel;
 import io.jpom.service.node.NodeService;
@@ -71,6 +72,6 @@ public abstract class BaseNodeGroupService<T extends BaseNodeGroupModel> extends
      */
     public void repairGroupFiled() {
         String sql = "update " + getTableName() + " set `GROUP`=? where `GROUP` is null or `GROUP`=''";
-        super.execute(sql, "默认");
+        super.execute(sql, Const.DEFAULT_GROUP_NAME);
     }
 }

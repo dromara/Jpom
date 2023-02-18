@@ -52,7 +52,7 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
         if (workspaceModel == null) {
             WorkspaceModel defaultWorkspace = new WorkspaceModel();
             defaultWorkspace.setId(Const.WORKSPACE_DEFAULT_ID);
-            defaultWorkspace.setName("默认");
+            defaultWorkspace.setName(Const.DEFAULT_GROUP_NAME);
             defaultWorkspace.setDescription("系统默认的工作空间,不能删除");
             super.insert(defaultWorkspace);
 

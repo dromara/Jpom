@@ -123,6 +123,11 @@ const children = [
 
 const management = [
   {
+    path: "/system/assets/machine-list",
+    name: "system-machine-list",
+    component: () => import("../pages/system/assets/machine/machine-list"),
+  },
+  {
     path: "/user/permission-group",
     name: "permission-group",
     component: () => import("../pages/user/permission-group"),

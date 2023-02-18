@@ -1,29 +1,29 @@
-import axios from "./config";
+// import axios from "./config";
 import { parseTime, formatPercent2 } from "@/utils/const";
 import echarts from "echarts";
 
-// node 列表
-export function getStatist(params) {
-  return axios({
-    url: "/node/stat/list_data.json",
-    method: "post",
-    params: params,
-    headers: {
-      loading: "no",
-    },
-  });
-}
+// // node 列表
+// export function getStatist(params) {
+//   return axios({
+//     url: "/node/stat/list_data.json",
+//     method: "post",
+//     params: params,
+//     headers: {
+//       loading: "no",
+//     },
+//   });
+// }
 
-// node 列表
-export function statusStat() {
-  return axios({
-    url: "/node/stat/status_stat.json",
-    method: "get",
-    headers: {
-      loading: "no",
-    },
-  });
-}
+// // node 列表
+// export function statusStat() {
+//   return axios({
+//     url: "/node/stat/status_stat.json",
+//     method: "get",
+//     headers: {
+//       loading: "no",
+//     },
+//   });
+// }
 
 const defaultData = {
   title: {
@@ -163,7 +163,7 @@ export function generateNodeNetworkTimeChart(data) {
   const scales = [];
   for (var i = data.length - 1; i >= 0; i--) {
     const item = data[i];
-    dataArray.data.push(parseFloat(item.networkTime));
+    dataArray.data.push(parseFloat(item.networkDelay));
     scales.push(parseTime(item.monitorTime));
   }
 
@@ -209,10 +209,10 @@ export function drawChart(data, domId, parseFn) {
   return historyChart;
 }
 
-export const status = {
-  1: "无法连接",
-  0: "正常",
-  2: "授权信息错误",
-  3: "状态码错误",
-  4: "关闭中",
-};
+// export const status = {
+//   1: "无法连接",
+//   0: "正常",
+//   2: "授权信息错误",
+//   3: "状态码错误",
+//   4: "关闭中",
+// };

@@ -1,41 +1,16 @@
 <template>
   <div class="full-content">
     <div>
-      <a-card :bodyStyle="{ padding: '10px' }">
+      <a-card>
         <template slot="title">
-          <a-row style="text-align: center">
-            <a-col :span="3">
-              <a-statistic title="节点总数" :value="nodeCount"> </a-statistic>
-            </a-col>
-            <a-col :span="3" v-for="(desc, key) in statusMap" :key="key">
-              <a-statistic :title="desc" :value="statusStatMap[key]">
-                <template #suffix>
-                  <!-- <a-icon type="question-circle" /> -->
-                </template>
-              </a-statistic>
-            </a-col>
-
-            <a-col :span="3"> <a-statistic-countdown format="s 秒" title="刷新倒计时" :value="deadline" @finish="onFinish" /> </a-col>
-          </a-row>
-        </template>
-        <a-space direction="vertical">
-          <div ref="filter" class="filter">
+          <a-row>
             <a-space>
               <a-input v-model="listQuery['%name%']" @pressEnter="loadData" placeholder="节点名称" />
-              <a-input v-model="listQuery['%url%']" @pressEnter="loadData" placeholder="节点地址" />
-              <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="search-input-item">
-                <a-select-option v-for="(desc, key) in statusMap" :key="key">{{ desc }}</a-select-option>
-              </a-select>
+
               <a-select show-search option-filter-prop="children" v-model="listQuery.group" allowClear placeholder="分组" class="search-input-item">
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
-              <a-select v-model="listQuery['order_field']" allowClear placeholder="请选择排序字段" class="search-input-item">
-                <a-select-option value="networkTime">网络延迟</a-select-option>
-                <a-select-option value="occupyCpu">cpu</a-select-option>
-                <a-select-option value="occupyDisk">硬盘</a-select-option>
-                <a-select-option value="occupyMemoryUsed">内存Used</a-select-option>
-                <a-select-option value="occupyMemory">内存</a-select-option>
-              </a-select>
+
               <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
                 <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
               </a-tooltip>
@@ -55,9 +30,11 @@
                 </template>
                 <a-icon type="question-circle" theme="filled" />
               </a-tooltip>
+              <a-col :span="3"> <a-statistic-countdown format="s 秒" title="" :value="deadline" @finish="onFinish" /> </a-col>
             </a-space>
-          </div>
-        </a-space>
+          </a-row>
+        </template>
+
         <a-row :gutter="[16, 16]">
           <template v-if="list && list.length">
             <a-col v-for="item in list" :key="item.id" :span="6">
@@ -75,8 +52,14 @@
                         </a-tooltip>
                       </a-col>
                       <a-col :span="7" style="text-align: right">
-                        <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.status === 0 ? '' : '异常描述：' + item.failureMsg} `">
-                          <a-tag :color="item.status === 0 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
+                        <a-tooltip>
+                          <template slot="title">
+                            <div>当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}</div>
+                            <div>状态描述：{{ (item.machineNodeData && item.machineNodeData.statusMsg) || "" }}</div>
+                          </template>
+                          <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+                            {{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
+                          </a-tag>
                         </a-tooltip>
                       </a-col>
                     </a-row>
@@ -84,7 +67,7 @@
 
                   <a-row :gutter="[8, 8]">
                     <a-col :span="8">
-                      <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
+                      <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
                         <a-progress
                           type="circle"
                           :width="80"
@@ -100,7 +83,7 @@
                       </a-tooltip>
                     </a-col>
                     <a-col :span="8">
-                      <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
+                      <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
                         <a-progress
                           type="circle"
                           :width="80"
@@ -116,10 +99,7 @@
                       </a-tooltip>
                     </a-col>
                     <a-col :span="8">
-                      <a-tooltip
-                        @click="item.status === 4 ? null : handleHistory(item, 'nodeTop')"
-                        :title="`内存占用率：${item.occupyMemoryUsed && item.occupyMemoryUsed !== -1 ? item.occupyMemoryUsed : item.occupyMemory}%`"
-                      >
+                      <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`内存占用率：${item.occupyMemory}%`">
                         <a-progress
                           :width="80"
                           type="circle"
@@ -130,7 +110,7 @@
                           }"
                           size="small"
                           status="active"
-                          :percent="item.occupyMemoryUsed && item.occupyMemoryUsed !== -1 ? item.occupyMemoryUsed : item.occupyMemory"
+                          :percent="item.occupyMemory"
                         />
                       </a-tooltip>
                     </a-col>
@@ -138,40 +118,43 @@
 
                   <a-row :gutter="[8, 8]" style="text-align: center">
                     <a-col :span="8">
-                      <a-tooltip @click="item.status === 4 ? null : handleHistory(item, 'networkTime')" :title="`${item.status === 4 ? '-' : '延迟' + item.networkTime + 'ms 点击查看历史趋势'}`">
+                      <a-tooltip
+                        @click="handleHistory(item, 'networkDelay')"
+                        :title="`${'延迟' + (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-') + ' 点击查看历史趋势'}`"
+                      >
                         <a-statistic
                           title="延迟"
-                          :value="item.networkTime"
+                          :value="item.machineNodeData && item.machineNodeData.networkDelay"
                           valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
                           :formatter="
                             (v) => {
-                              return item.networkTime === -1 ? '-' : item.networkTime + 'ms';
+                              return formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-';
                             }
                           "
                         />
                       </a-tooltip>
                     </a-col>
                     <a-col :span="8">
-                      <a-tooltip :title="formatDuration(item.upTimeStr) || '-'">
+                      <a-tooltip :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'">
                         <a-statistic
                           title="运行时间"
                           valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
                           :formatter="
                             (v) => {
-                              return formatDuration(item.upTimeStr, '', 1) || '-';
+                              return formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 2) || '-';
                             }
                           "
                         />
                       </a-tooltip>
                     </a-col>
                     <a-col :span="8">
-                      <a-tooltip :title="`${item.status === 4 ? '-' : parseTime(item.modifyTimeMillis)}`">
+                      <a-tooltip :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`">
                         <a-statistic
                           title="更新时间"
                           valueStyle="font-size: 14px;overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
                           :formatter="
                             (v) => {
-                              return item.status === 4 ? '-' : parseTime(item.modifyTimeMillis, '{h}:{i}:{s}');
+                              return parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis, '{h}:{i}:{s}');
                             }
                           "
                         />
@@ -221,25 +204,25 @@
   </div>
 </template>
 <script>
-import { getStatist, status, statusStat } from "@/api/node-stat";
+// import { getStatist, status, statusStat } from "@/api/node-stat";
+import {} from "@/api/node";
 import { PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime, formatPercent2Number } from "@/utils/const";
 import NodeTop from "@/pages/node/node-layout/node-top";
-import { getNodeGroupAll } from "@/api/node";
+import { getNodeGroupAll, getNodeList } from "@/api/node";
+import { statusMap } from "@/api/system/assets-machine";
 
 export default {
   components: { NodeTop },
   data() {
     return {
       loading: false,
-      statusMap: status,
-      listQuery: Object.assign({ order: "descend", order_field: "networkTime" }, PAGE_DEFAULT_LIST_QUERY, {
+      statusMap,
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, {
         limit: 8,
       }),
       sizeOptions: ["8", "12", "16", "20", "24"],
       list: [],
-      statusStatMap: {},
-      // openStatusMap: {},
-      nodeCount: 0,
+
       monitorVisible: false,
       deadline: 0,
       temp: {},
@@ -253,11 +236,7 @@ export default {
     this.loadData();
     this.loadGroupList();
   },
-  destroyed() {
-    if (this.pullFastInstallResultTime) {
-      clearInterval(this.pullFastInstallResultTime);
-    }
-  },
+  destroyed() {},
   methods: {
     PAGE_DEFAULT_SHOW_TOTAL,
     parseTime,
@@ -267,36 +246,23 @@ export default {
       //this.list = [];
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page;
       this.loading = true;
-      getStatist(this.listQuery).then((res) => {
+      getNodeList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list =
             res.data.result &&
             res.data.result.map((item) => {
               // console.log(item);
-              item.occupyCpu = formatPercent2Number(item.occupyCpu);
-              item.occupyMemoryUsed = formatPercent2Number(item.occupyMemoryUsed);
-              item.occupyDisk = formatPercent2Number(item.occupyDisk);
-              item.occupyMemory = formatPercent2Number(item.occupyMemory);
+              item.occupyCpu = formatPercent2Number(item.machineNodeData?.osOccupyCpu);
+
+              item.occupyDisk = formatPercent2Number(item.machineNodeData?.osOccupyDisk);
+              item.occupyMemory = formatPercent2Number(item.machineNodeData?.osOccupyMemory);
               return item;
             });
           this.listQuery.total = res.data.total;
+          this.refreshInterval = 30;
+          this.deadline = Date.now() + this.refreshInterval * 1000;
         }
         this.loading = false;
-      });
-      statusStat().then((res) => {
-        if (res.data) {
-          this.statusStatMap = res.data.status;
-          let nodeCount2 = 0;
-          // console.log(this.statusStatMap);
-          Object.values(this.statusStatMap).forEach((element) => {
-            nodeCount2 += element;
-          });
-          this.nodeCount = nodeCount2;
-          this.refreshInterval = res.data.heartSecond;
-          this.deadline = Date.now() + this.refreshInterval * 1000;
-          //
-          // this.openStatusMap = res.data.openStatus;
-        }
       });
     },
 
@@ -326,4 +292,13 @@ export default {
   },
 };
 </script>
-<style scoped></style>
+<style scoped>
+/* /deep/ .ant-statistic div {
+  display: inline-block;
+}
+
+/deep/ .ant-statistic-content-value,
+/deep/ .ant-statistic-content {
+  font-size: 16px;
+} */
+</style>

@@ -28,14 +28,20 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.oshi.CpuInfo;
 import cn.hutool.system.oshi.OshiUtil;
 import com.alibaba.fastjson2.JSONObject;
-import oshi.hardware.GlobalMemory;
+import lombok.Data;
+import oshi.hardware.*;
 import oshi.software.os.FileSystem;
+import oshi.software.os.NetworkParams;
 import oshi.software.os.OSFileStore;
 import oshi.software.os.OperatingSystem;
 import oshi.util.GlobalConfig;
+import oshi.util.Util;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author bwcx_jzy
@@ -49,13 +55,57 @@ public class OshiUtils {
     }
 
     /**
+     * 获取系统信息
+     *
+     * @return json
+     */
+    public static JSONObject getSystemInfo() {
+        JSONObject jsonObject = new JSONObject();
+        OperatingSystem os = OshiUtil.getOs();
+        jsonObject.put("systemUptime", os.getSystemUptime());
+        String manufacturer = os.getManufacturer();
+        String family = os.getFamily();
+        OperatingSystem.OSVersionInfo versionInfo = os.getVersionInfo();
+        String versionStr = versionInfo.toString();
+        jsonObject.put("osVersion", StrUtil.format("{} {} {}", manufacturer, family, versionStr));
+        NetworkParams networkParams = os.getNetworkParams();
+        String hostName = networkParams.getHostName();
+        jsonObject.put("hostName", hostName);
+        //
+        HardwareAbstractionLayer hardware = OshiUtil.getHardware();
+        ComputerSystem computerSystem = hardware.getComputerSystem();
+        jsonObject.put("hardwareVersion", StrUtil.format("{} {}", computerSystem.getManufacturer(), computerSystem.getModel()));
+        List<NetworkIF> networks = hardware.getNetworkIFs();
+        List<String> collect = networks.stream()
+            .flatMap((Function<NetworkIF, Stream<String>>) network -> Arrays.stream(network.getIPv4addr()))
+            .collect(Collectors.toList());
+        jsonObject.put("hostIpv4s", collect);
+        //
+        CentralProcessor processor = OshiUtil.getProcessor();
+        CentralProcessor.ProcessorIdentifier identifier = processor.getProcessorIdentifier();
+        jsonObject.put("osCpuIdentifierName", identifier.getName());
+        jsonObject.put("osCpuCores", processor.getLogicalProcessorCount());
+        GlobalMemory globalMemory = OshiUtil.getMemory();
+        jsonObject.put("osMoneyTotal", globalMemory.getTotal());
+        double[] systemLoadAverage = processor.getSystemLoadAverage(3);
+        jsonObject.put("osLoadAverage", systemLoadAverage);
+        FileSystem fileSystem = os.getFileSystem();
+        List<OSFileStore> fileStores = fileSystem.getFileStores();
+        long total = fileStores.stream().mapToLong(OSFileStore::getTotalSpace).sum();
+        jsonObject.put("osFileStoreTotal", total);
+        //
+        return jsonObject;
+    }
+
+    /**
      * 获取信息简单的基础状态信息
      *
      * @return json
      */
     public static JSONObject getSimpleInfo() {
-        CpuInfo cpuInfo = OshiUtil.getCpuInfo();
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("time", SystemClock.now());
+        CpuInfo cpuInfo = OshiUtil.getCpuInfo();
         jsonObject.put("cpu", cpuInfo.getUsed());
         //
         GlobalMemory globalMemory = OshiUtil.getMemory();
@@ -69,8 +119,35 @@ public class OshiUtils {
             used += (fs.getTotalSpace() - fs.getUsableSpace());
         }
         jsonObject.put("disk", NumberUtil.div(used, total, 2) * 100);
-        jsonObject.put("time", SystemClock.now());
+        //
+        NetIoInfo startNetInfo = getNetInfo();
+        //暂停1秒
+        Util.sleep(1000);
+        NetIoInfo endNetInfo = getNetInfo();
+        jsonObject.put("netTxBytes", endNetInfo.getTxbyt() - startNetInfo.getTxbyt());
+        jsonObject.put("netRxBytes", endNetInfo.getRxbyt() - startNetInfo.getRxbyt());
         return jsonObject;
+    }
+
+    private static NetIoInfo getNetInfo() {
+        //
+        long rxBytesBegin = 0;
+        long txBytesBegin = 0;
+        long rxPacketsBegin = 0;
+        long txPacketsBegin = 0;
+        List<NetworkIF> listBegin = OshiUtil.getNetworkIFs();
+        for (NetworkIF net : listBegin) {
+            rxBytesBegin += net.getBytesRecv();
+            txBytesBegin += net.getBytesSent();
+            rxPacketsBegin += net.getPacketsRecv();
+            txPacketsBegin += net.getPacketsSent();
+        }
+        NetIoInfo netIoInfo = new NetIoInfo();
+        netIoInfo.setRxbyt(rxBytesBegin);
+        netIoInfo.setTxbyt(txBytesBegin);
+        netIoInfo.setRxpck(rxPacketsBegin);
+        netIoInfo.setTxpck(txPacketsBegin);
+        return netIoInfo;
     }
 
     /**
@@ -110,5 +187,29 @@ public class OshiUtils {
                 return jsonObject;
             })
             .collect(Collectors.toList());
+    }
+
+    @Data
+    private static class NetIoInfo {
+        /**
+         * 接收的数据包,rxpck/s
+         */
+        private Long rxpck;
+
+        /**
+         * 发送的数据包,txpck/s
+         */
+        private Long txpck;
+
+        /**
+         * 接收的KB数,rxkB/s
+         */
+        private Long rxbyt;
+
+        /**
+         * 发送的KB数,txkB/s
+         */
+        private Long txbyt;
+
     }
 }
