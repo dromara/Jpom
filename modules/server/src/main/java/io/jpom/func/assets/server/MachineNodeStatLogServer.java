@@ -22,8 +22,14 @@
  */
 package io.jpom.func.assets.server;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.db.Entity;
+import io.jpom.common.ISystemTask;
 import io.jpom.func.assets.model.MachineNodeStatLogModel;
 import io.jpom.service.h2db.BaseDbService;
+import io.jpom.system.ServerConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,5 +37,27 @@ import org.springframework.stereotype.Service;
  * @since 2023/2/18
  */
 @Service
-public class MachineNodeStatLogServer extends BaseDbService<MachineNodeStatLogModel> {
+@Slf4j
+public class MachineNodeStatLogServer extends BaseDbService<MachineNodeStatLogModel> implements ISystemTask {
+
+    private final ServerConfig.NodeConfig nodeConfig;
+
+    public MachineNodeStatLogServer(ServerConfig serverConfig) {
+        this.nodeConfig = serverConfig.getNode();
+    }
+
+    @Override
+    public void executeTask() {
+        int statLogKeepDays = nodeConfig.getStatLogKeepDays();
+        log.debug("统计日志保留天数 {}", statLogKeepDays);
+        if (statLogKeepDays <= 0) {
+            return;
+        }
+        Entity entity = Entity.create();
+        DateTime dateTime = DateUtil.beginOfDay(DateTime.now());
+        dateTime = DateUtil.offsetDay(dateTime, -statLogKeepDays);
+        entity.set(" monitorTime", "< " + dateTime.getTime());
+        int del = this.del(entity);
+        log.info("自动清理 {} 条机器节点统计日志", del);
+    }
 }

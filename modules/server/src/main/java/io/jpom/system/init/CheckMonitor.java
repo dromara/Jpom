@@ -24,11 +24,11 @@ package io.jpom.system.init;
 
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.ILoadEvent;
+import io.jpom.common.ISystemTask;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.forward.NodeForward;
@@ -37,7 +37,6 @@ import io.jpom.cron.CronUtils;
 import io.jpom.model.data.NodeModel;
 import io.jpom.script.BaseRunScript;
 import io.jpom.service.IStatusRecover;
-import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.script.NodeScriptExecuteLogServer;
 import io.jpom.service.node.script.NodeScriptServer;
@@ -57,7 +56,7 @@ import java.util.Map;
  */
 @Configuration
 @Slf4j
-public class CheckMonitor implements ILoadEvent {
+public class CheckMonitor implements ILoadEvent, ISystemTask {
 
     private void init() {
         // 缓存检测调度
@@ -67,16 +66,6 @@ public class CheckMonitor implements ILoadEvent {
             // 定时刷新代理配置
             ProxySelectorConfig selectorConfig = SpringUtil.getBean(ProxySelectorConfig.class);
             selectorConfig.refresh();
-        });
-        // 开启系统检测调度（自动备份数据）
-        CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", () -> {
-
-            BackupInfoService backupInfoService = SpringUtil.getBean(BackupInfoService.class);
-            backupInfoService.checkAutoBackup();
-            //
-            RemoteVersion.loadRemoteInfo();
-            // 清空脚本缓存
-            BaseRunScript.clearRunScript();
         });
         // 拉取 脚本模版日志
         CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
@@ -113,7 +102,7 @@ public class CheckMonitor implements ILoadEvent {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("ids", strings);
             JsonMessage<Object> jsonMessage = NodeForward.requestBody(nodeModel, NodeUrl.SCRIPT_DEL_EXEC_LOG, jsonObject);
-            if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+            if (!jsonMessage.success()) {
                 log.error("删除脚本模版执行数据错误:{}", jsonMessage);
             }
         } catch (Exception e) {
@@ -128,7 +117,6 @@ public class CheckMonitor implements ILoadEvent {
         ThreadUtil.execute(() -> {
             BuildUtil.reloadCacheSize();
             JpomApplication.getInstance().dataSize();
-
             // 状态恢复的数据
             Map<String, IStatusRecover> statusRecoverMap = SpringUtil.getApplicationContext().getBeansOfType(IStatusRecover.class);
             statusRecoverMap.forEach((name, iCron) -> {
@@ -137,15 +125,19 @@ public class CheckMonitor implements ILoadEvent {
                     log.debug("{} Recover bad data {}", name, count);
                 }
             });
-            // 尝试获取版本更新信息
-            RemoteVersion.loadRemoteInfo();
-            // 清空脚本缓存
-            BaseRunScript.clearRunScript();
         });
     }
 
     @Override
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         this.init();
+    }
+
+    @Override
+    public void executeTask() {
+        // 尝试获取版本更新信息
+        RemoteVersion.loadRemoteInfo();
+        // 清空脚本缓存
+        BaseRunScript.clearRunScript();
     }
 }

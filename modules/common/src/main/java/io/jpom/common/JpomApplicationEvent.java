@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.jpom.JpomApplication;
+import io.jpom.cron.CronUtils;
 import io.jpom.cron.IAsyncLoad;
 import io.jpom.cron.ICron;
 import io.jpom.system.ExtConfigBean;
@@ -64,6 +65,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 启动 、关闭监听
@@ -73,7 +75,7 @@ import java.util.Map;
  */
 @Slf4j
 @Configuration
-public class JpomApplicationEvent implements ApplicationListener<ApplicationEvent>, ApplicationContextAware {
+public class JpomApplicationEvent implements ApplicationListener<ApplicationEvent>, ApplicationContextAware, ILoadEvent {
 
     private final JpomApplication configBean;
 
@@ -325,5 +327,23 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         this.statLoad();
         // 提示成功消息
         this.success();
+    }
+
+    @Override
+    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
+        CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", this::executeTask);
+        // 启动执行一次
+        ThreadUtil.execute(() -> {
+            try {
+                this.executeTask();
+            } catch (Exception e) {
+                log.error("执行系统任务异常", e);
+            }
+        });
+    }
+
+    private void executeTask() {
+        Map<String, ISystemTask> taskMap = SpringUtil.getBeansOfType(ISystemTask.class);
+        Optional.ofNullable(taskMap).ifPresent(map -> map.values().forEach(ISystemTask::executeTask));
     }
 }

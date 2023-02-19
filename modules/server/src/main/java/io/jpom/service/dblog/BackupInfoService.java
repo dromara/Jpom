@@ -31,6 +31,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.ISystemTask;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.ServerConst;
 import io.jpom.model.data.BackupInfoModel;
@@ -66,7 +67,7 @@ import java.util.stream.Stream;
  **/
 @Service
 @Slf4j
-public class BackupInfoService extends BaseDbService<BackupInfoModel> {
+public class BackupInfoService extends BaseDbService<BackupInfoModel> implements ISystemTask {
 
     private final DbExtConfig dbExtConfig;
 
@@ -77,7 +78,8 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
     /**
      * 检查数据库备份
      */
-    public void checkAutoBackup() {
+    @Override
+    public void executeTask() {
         if (dbExtConfig.getMode() != DbExtConfig.Mode.H2) {
             return;
         }

@@ -38,6 +38,7 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.ILoadEvent;
+import io.jpom.common.ISystemTask;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.cron.CronUtils;
@@ -67,7 +68,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Configuration
-public class AgentStartInit implements ILoadEvent {
+public class AgentStartInit implements ILoadEvent, ISystemTask {
 
     private static final String ID = "auto_back_log";
     private final ProjectInfoService projectInfoService;
@@ -141,17 +142,8 @@ public class AgentStartInit implements ILoadEvent {
         files.forEach(FileUtil::del);
     }
 
-
-    private void systemMonitor() {
-        // 开启检测调度
-        ThreadUtil.execute(() -> {
-            // 定时任务
-            CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", this::systemTask);
-            this.systemTask();
-        });
-    }
-
-    private void systemTask() {
+    @Override
+    public void executeTask() {
         // 启动加载
         RemoteVersion.loadRemoteInfo();
         // 清空脚本缓存
@@ -244,7 +236,6 @@ public class AgentStartInit implements ILoadEvent {
     @Override
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         this.startAutoBackLog();
-        this.systemMonitor();
         this.autoStartProject();
     }
 }
