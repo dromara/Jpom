@@ -56,36 +56,7 @@ import java.util.Map;
  */
 @Configuration
 @Slf4j
-public class CheckMonitor implements ILoadEvent, ISystemTask {
-
-    private void init() {
-        // 缓存检测调度
-        CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
-            BuildUtil.reloadCacheSize();
-            JpomApplication.getInstance().dataSize();
-            // 定时刷新代理配置
-            ProxySelectorConfig selectorConfig = SpringUtil.getBean(ProxySelectorConfig.class);
-            selectorConfig.refresh();
-        });
-        // 拉取 脚本模版日志
-        CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
-            NodeService nodeService = SpringUtil.getBean(NodeService.class);
-            NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
-            List<String> nodeIds = nodeScriptServer.hasScriptNode();
-            if (nodeIds == null) {
-                return;
-            }
-            for (String nodeId : nodeIds) {
-                NodeModel nodeModel = nodeService.getByKey(nodeId);
-                if (nodeModel == null) {
-                    continue;
-                }
-                ThreadUtil.execute(() -> this.pullScriptLogItem(nodeModel));
-            }
-        });
-        // 异步加载
-        this.asyncLoad();
-    }
+public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
 
     /**
      * 同步 节点的脚本模版日志
@@ -122,7 +93,7 @@ public class CheckMonitor implements ILoadEvent, ISystemTask {
             statusRecoverMap.forEach((name, iCron) -> {
                 int count = iCron.statusRecover();
                 if (count > 0) {
-                    log.debug("{} Recover bad data {}", name, count);
+                    log.info("{} 恢复 {} 条异常数据", name, count);
                 }
             });
         });
@@ -130,7 +101,32 @@ public class CheckMonitor implements ILoadEvent, ISystemTask {
 
     @Override
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
-        this.init();
+        // 缓存检测调度
+        CronUtils.upsert("cache_manger_schedule", "0 0/10 * * * ?", () -> {
+            BuildUtil.reloadCacheSize();
+            JpomApplication.getInstance().dataSize();
+            // 定时刷新代理配置
+            ProxySelectorConfig selectorConfig = SpringUtil.getBean(ProxySelectorConfig.class);
+            selectorConfig.refresh();
+        });
+        // 拉取 脚本模版日志
+        CronUtils.upsert("pull_script_log", "0 0/1 * * * ?", () -> {
+            NodeService nodeService = SpringUtil.getBean(NodeService.class);
+            NodeScriptServer nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
+            List<String> nodeIds = nodeScriptServer.hasScriptNode();
+            if (nodeIds == null) {
+                return;
+            }
+            for (String nodeId : nodeIds) {
+                NodeModel nodeModel = nodeService.getByKey(nodeId);
+                if (nodeModel == null) {
+                    continue;
+                }
+                ThreadUtil.execute(() -> this.pullScriptLogItem(nodeModel));
+            }
+        });
+        // 异步加载
+        this.asyncLoad();
     }
 
     @Override
