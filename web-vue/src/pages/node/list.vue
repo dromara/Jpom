@@ -75,11 +75,12 @@
         </template>
       </template>
       <a-tooltip slot="status" slot-scope="text, item" placement="topLeft" :title="statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'">
-        <!-- <span>{{ statusMap[item.machineNodeData && item.machineNodeData.status] || "未知" }}</span> -->
-
-        <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
-          {{ statusMap[item.machineNodeData && item.machineNodeData.status] || "未知" }}
-        </a-tag>
+        <template v-if="item.openStatus === 1">
+          <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+            {{ statusMap[item.machineNodeData && item.machineNodeData.status] || "未知" }}
+          </a-tag>
+        </template>
+        <a-tag v-else>未启用</a-tag>
       </a-tooltip>
       <a-tooltip slot="osName" slot-scope="text, item" placement="topLeft" :title="text">
         <span>{{ item.machineNodeData && item.machineNodeData.osName }}</span>

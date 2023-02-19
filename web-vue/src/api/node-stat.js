@@ -1,29 +1,30 @@
-// import axios from "./config";
-import { parseTime, formatPercent2 } from "@/utils/const";
+import axios from "./config";
+import { parseTime, formatPercent2, renderSize } from "@/utils/const";
 import echarts from "echarts";
 
-// // node 列表
-// export function getStatist(params) {
-//   return axios({
-//     url: "/node/stat/list_data.json",
-//     method: "post",
-//     params: params,
-//     headers: {
-//       loading: "no",
-//     },
-//   });
-// }
+// 获取机器信息
+export function machineInfo(params) {
+  return axios({
+    url: "/node/machine-info",
+    method: "get",
+    params: params,
+    headers: {
+      loading: "no",
+    },
+  });
+}
 
-// // node 列表
-// export function statusStat() {
-//   return axios({
-//     url: "/node/stat/status_stat.json",
-//     method: "get",
-//     headers: {
-//       loading: "no",
-//     },
-//   });
-// }
+// 机器硬盘
+export function machineDiskInfo(params) {
+  return axios({
+    url: "/node/disk-info",
+    method: "get",
+    params,
+    headers: {
+      loading: "no",
+    },
+  });
+}
 
 const defaultData = {
   title: {
@@ -82,13 +83,6 @@ export function generateNodeTopChart(data) {
     smooth: true,
   };
   const memoryItem = {
-    name: "内存占用(累计)",
-    type: "line",
-    data: [],
-    showSymbol: false,
-    smooth: true,
-  };
-  const memoryUsedItem = {
     name: "内存占用",
     type: "line",
     data: [],
@@ -101,16 +95,12 @@ export function generateNodeTopChart(data) {
     cpuItem.data.push(parseFloat(item.occupyCpu));
     diskItem.data.push(parseFloat(item.occupyDisk));
     memoryItem.data.push(parseFloat(item.occupyMemory));
-    if (item.occupyMemoryUsed) {
-      memoryUsedItem.data.push(parseFloat(item.occupyMemoryUsed));
-    }
+
     scales.push(parseTime(item.monitorTime));
   }
 
   const series = [cpuItem, memoryItem, diskItem];
-  if (memoryUsedItem.data.length > 0) {
-    series.push(memoryUsedItem);
-  }
+
   const legends = series.map((data) => {
     return data.name;
   });
@@ -138,6 +128,72 @@ export function generateNodeTopChart(data) {
         var html = params[0].name + "<br>";
         for (var i = 0; i < params.length; i++) {
           html += params[i].marker + params[i].seriesName + ":" + formatPercent2(params[i].value) + "<br>";
+        }
+        return html;
+      },
+    },
+    series: series,
+  });
+}
+
+/**
+ * 节点网络统计
+ * @param { JSON } data
+ * @returns
+ */
+export function generateNodeNetChart(data) {
+  const rxItem = {
+    name: "接收",
+    type: "line",
+    data: [],
+    showSymbol: false,
+    // 设置折线为曲线
+    smooth: true,
+  };
+  const txItem = {
+    name: "发送",
+    type: "line",
+    data: [],
+    showSymbol: false,
+    smooth: true,
+  };
+  const scales = [];
+  for (var i = data.length - 1; i >= 0; i--) {
+    const item = data[i];
+    txItem.data.push(item.netTxBytes);
+    rxItem.data.push(item.netRxBytes);
+
+    scales.push(parseTime(item.monitorTime));
+  }
+
+  const series = [rxItem, txItem];
+
+  const legends = series.map((data) => {
+    return data.name;
+  });
+
+  // 指定图表的配置项和数据
+  return Object.assign({}, defaultData, {
+    legend: {
+      data: legends,
+    },
+    xAxis: {
+      data: scales,
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: {
+        // 设置y轴数值为 kb/s
+        formatter: "{value} kb/s",
+      },
+    },
+    tooltip: {
+      trigger: "axis",
+      show: true,
+      formatter: function (params) {
+        var html = params[0].name + "<br>";
+        for (var i = 0; i < params.length; i++) {
+          html += params[i].marker + params[i].seriesName + ":" + renderSize(params[i].value * 1024) + "/s <br>";
         }
         return html;
       },

@@ -220,6 +220,29 @@ public class NodeForward {
     /**
      * 普通消息转发
      *
+     * @param machineNodeModel 机器
+     * @param request          请求
+     * @param nodeUrl          节点的url
+     * @param <T>              泛型
+     * @return JSON
+     */
+    public static <T> JsonMessage<T> request(MachineNodeModel machineNodeModel, HttpServletRequest request, NodeUrl nodeUrl, String... removeKeys) {
+        Map<String, String> map = Optional.ofNullable(request)
+            .map(ServletUtil::getParamMap)
+            .map(map1 -> MapUtil.removeAny(map1, removeKeys))
+            .orElse(null);
+        TypeReference<JsonMessage<T>> tTypeReference = new TypeReference<JsonMessage<T>>() {
+        };
+        INodeInfo nodeInfo1 = coverNodeInfo(machineNodeModel);
+        return createUrlItem(nodeInfo1, StrUtil.EMPTY, nodeUrl,
+            (nodeInfo, urlItem) ->
+                TransportServerFactory.get().executeToType(nodeInfo, urlItem, map, tTypeReference)
+        );
+    }
+
+    /**
+     * 普通消息转发
+     *
      * @param nodeModel  节点
      * @param nodeUrl    节点的url
      * @param jsonObject 数据

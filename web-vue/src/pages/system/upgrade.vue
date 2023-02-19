@@ -11,6 +11,7 @@
             <a-space>
               <a-input class="search-input-item" @pressEnter="getNodeList" v-model="listQuery['%name%']" placeholder="节点名称" />
               <a-input class="search-input-item" @pressEnter="getNodeList" v-model="listQuery['%jpomUrl%']" placeholder="节点地址" />
+              <a-input class="search-input-item" @pressEnter="getNodeList" v-model="listQuery['%jpomVersion%']" placeholder="插件版本" />
               <a-select show-search option-filter-prop="children" v-model="listQuery.groupName" allowClear placeholder="分组" class="search-input-item">
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
@@ -24,7 +25,7 @@
               |
               <a-upload name="file" accept=".jar,.zip" action="" :disabled="!!percentage" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
                 <a-icon type="loading" v-if="percentage" />
-                <a-button type="primary" v-else icon="upload"> 选择升级包 </a-button>
+                <a-button type="primary" v-else icon="upload"> 上传包 </a-button>
               </a-upload>
               <a-tooltip :title="`打包时间：${agentTimeStamp || '未知'}`">
                 Agent版本：{{ agentVersion | version }}
@@ -45,6 +46,11 @@
             {{ text | version }}
           </template>
           <template slot="status" slot-scope="text">
+            <a-tag :color="text === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+              {{ statusMap[text] || "未知" }}
+            </a-tag>
+          </template>
+          <template slot="updateStatus" slot-scope="text">
             <div v-if="text && text.type === 'restarting'">
               <a-tooltip :title="text.data"> {{ text.data }} </a-tooltip>
             </div>
@@ -98,11 +104,13 @@ export default {
         // { title: "节点 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "节点名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "节点地址", dataIndex: "jpomUrl", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
-        { title: "版本号", dataIndex: "version", width: "100px", ellipsis: true, scopedSlots: { customRender: "version" } },
+        { title: "机器状态(缓存)", dataIndex: "status", width: "130px", ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "缓存版本号", dataIndex: "jpomVersion", width: "100px", ellipsis: true, scopedSlots: { customRender: "version" } },
+        { title: "实时版本号", dataIndex: "version", width: "100px", ellipsis: true, scopedSlots: { customRender: "version" } },
         { title: "打包时间", dataIndex: "timeStamp", width: "180px", ellipsis: true, scopedSlots: { customRender: "timeStamp" } },
         { title: "运行时间", dataIndex: "upTimeStr", width: "180px", ellipsis: true, scopedSlots: { customRender: "upTimeStr" } },
 
-        { title: "更新状态", dataIndex: "status", ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "更新状态", dataIndex: "updateStatus", ellipsis: true, scopedSlots: { customRender: "updateStatus" } },
         // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true, scopedSlots: {customRender: 'autoUpdate'}},
         { title: "操作", dataIndex: "operation", width: 80, scopedSlots: { customRender: "operation" }, align: "center" },
       ],
@@ -154,7 +162,7 @@ export default {
           }
         }
         // item.nextTIme = Date.now();
-        item.status = this.nodeStatus[item.id];
+        item.updateStatus = this.nodeStatus[item.id];
         // data.push(item);
         return item;
       });

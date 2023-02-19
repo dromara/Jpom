@@ -5,6 +5,7 @@
         <a-space>
           <a-input class="search-input-item" @pressEnter="getMachineList" v-model="listQuery['%name%']" placeholder="机器名称" />
           <a-input class="search-input-item" @pressEnter="getMachineList" v-model="listQuery['%jpomUrl%']" placeholder="节点地址" />
+          <a-input class="search-input-item" @pressEnter="getMachineList" v-model="listQuery['%jpomVersion%']" placeholder="插件版本" />
           <a-select show-search option-filter-prop="children" v-model="listQuery.groupName" allowClear placeholder="分组" class="search-input-item">
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
@@ -32,17 +33,15 @@
                           <div>节点名称：{{ item.name }}</div>
                           <div>节点地址：{{ item.jpomUrl }}</div>
                         </template>
-
-                        <a-button type="link" size="small" icon="edit" @click="handleEdit(item)">
-                          {{ item.name }}
-                        </a-button>
+                        {{ item.name }}
                       </a-tooltip>
                     </a-col>
-                    <a-col :span="7" style="text-align: right">
+                    <a-col :span="7" style="text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                       <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
                         <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
                       </a-tooltip>
-                      <a-button type="link" icon="fullscreen" size="small"> </a-button>
+
+                      <!-- <a-button type="link" icon="fullscreen" size="small"> </a-button> -->
                       <!-- <a-icon type="fullscreen" /> -->
                     </a-col>
                   </a-row>
@@ -81,6 +80,12 @@
                     </div>
                   </div>
                 </a-tooltip>
+                <a-row type="flex" align="middle" justify="center">
+                  <a-button-group>
+                    <a-button @click="handleEdit(item)" size="small"> 编辑 </a-button>
+                    <a-button @click="showMachineInfo(item)" size="small">详情</a-button>
+                  </a-button-group>
+                </a-row>
                 <!-- <a-button type="link" :size="size"> 详情 </a-button> -->
               </a-card>
             </template>
@@ -181,6 +186,21 @@
         </a-collapse>
       </a-form-model>
     </a-modal>
+
+    <a-drawer
+      title="机器详情"
+      placement="right"
+      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
+      :visible="drawerVisible"
+      @close="
+        () => {
+          this.drawerVisible = false;
+        }
+      "
+    >
+      <!-- 机器信息组件 -->
+      <machine-info v-if="drawerVisible" :machineId="temp.id" />
+    </a-drawer>
   </div>
 </template>
 
@@ -188,9 +208,13 @@
 import { machineListData, machineListGroup, statusMap, machineEdit } from "@/api/system/assets-machine";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
+import { mapGetters } from "vuex";
+import machineInfo from "./machine-info.vue";
+
 export default {
   components: {
     CustomSelect,
+    machineInfo,
   },
   data() {
     return {
@@ -205,9 +229,11 @@ export default {
       rules: {
         name: [{ required: true, message: "请输入机器的名称", trigger: "blur" }],
       },
+      drawerVisible: false,
     };
   },
   computed: {
+    ...mapGetters(["getCollapsed"]),
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery);
     },
@@ -271,6 +297,10 @@ export default {
           }
         });
       });
+    },
+    showMachineInfo(item) {
+      this.temp = { ...item };
+      this.drawerVisible = true;
     },
   },
 };

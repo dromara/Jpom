@@ -43,6 +43,7 @@ public enum NodeUrl {
     GetStatInfo("/get-stat-info"),
     exportTop("/exportTop"),
     Kill("/kill.json"),
+    DiskInfo("/disk-info"),
 
     ProcessList("/processList", -1),
     /**

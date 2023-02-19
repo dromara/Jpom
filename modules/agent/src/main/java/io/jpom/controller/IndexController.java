@@ -151,8 +151,8 @@ public class IndexController extends BaseAgentController {
     }
 
 
-    @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Object> kill(int pid) {
+    @PostMapping(value = "kill.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<String> kill(int pid) {
         long jpomAgentId = JpomManifest.getInstance().getPid();
         Assert.state(!StrUtil.equals(StrUtil.toString(jpomAgentId), StrUtil.toString(pid)), "不支持在线关闭 Agent 进程");
         String result = AbstractSystemCommander.getInstance().kill(null, pid);
@@ -160,5 +160,11 @@ public class IndexController extends BaseAgentController {
             result = "成功kill";
         }
         return JsonMessage.success(result);
+    }
+
+    @PostMapping(value = "disk-info", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<JSONObject>> diskInfo() {
+        List<JSONObject> list = OshiUtils.diskInfo();
+        return JsonMessage.success("", list);
     }
 }
