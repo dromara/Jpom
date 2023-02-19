@@ -6,6 +6,7 @@
 4. MACHINE_NODE_STAT_LOG 表替代 SYSTEMMONITORLOG 表（并暂时保留 SYSTEMMONITORLOG 数据）
 5. 节点列表更名逻辑节点
 6. 新增机器资产管理
+7. 新增配置属性：jpom.node.stat-log-keep-days
 
 ## 2.10.17 (2023-02-16)
 

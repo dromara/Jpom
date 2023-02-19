@@ -20,30 +20,18 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.service.h2db;
-
-import io.jpom.ApplicationStartTest;
-import io.jpom.service.dblog.BackupInfoService;
-import org.junit.jupiter.api.Test;
-
-import javax.annotation.Resource;
+package io.jpom.common;
 
 /**
+ * 系统定时任务
+ *
  * @author bwcx_jzy
- * @since 2022/2/9
+ * @since 2023/2/19
  */
-public class H2BackupTest extends ApplicationStartTest {
+public interface ISystemTask {
 
-    @Resource
-    protected BackupInfoService backupInfoService;
-
-    @Test
-    public void testBackup() {
-        backupInfoService.executeTask();
-    }
-
-    @Test
-    public void testAuto() {
-        backupInfoService.autoBackup();
-    }
+    /**
+     * 执行
+     */
+    void executeTask();
 }

@@ -25,13 +25,16 @@ package io.jpom.func.assets.controller;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import io.jpom.common.JsonMessage;
+import io.jpom.common.validator.ValidatorItem;
 import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
+import io.jpom.service.node.NodeService;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,9 +57,12 @@ import java.util.stream.Collectors;
 public class MachineNodeController {
 
     private final MachineNodeServer machineNodeServer;
+    private final NodeService nodeService;
 
-    public MachineNodeController(MachineNodeServer machineNodeServer) {
+    public MachineNodeController(MachineNodeServer machineNodeServer,
+                                 NodeService nodeService) {
         this.machineNodeServer = machineNodeServer;
+        this.nodeService = nodeService;
     }
 
     @PostMapping(value = "list-data", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -87,6 +93,15 @@ public class MachineNodeController {
     @Feature(method = MethodFeature.EDIT)
     public JsonMessage<String> save(HttpServletRequest request) {
         machineNodeServer.update(request);
+        return JsonMessage.success("操作成功");
+    }
+
+    @PostMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public JsonMessage<String> delete(@ValidatorItem String id) {
+        long count = nodeService.countByMachine(id);
+        Assert.state(count <= 0, "当前机器还关联" + count + "个节点不能删除");
+        machineNodeServer.delByKey(id);
         return JsonMessage.success("操作成功");
     }
 }

@@ -206,4 +206,10 @@ public class NodeService extends BaseGroupService<NodeModel> {
                 .orElse(null)
             );
     }
+
+    public long countByMachine(String machineId) {
+        NodeModel nodeModel = new NodeModel();
+        nodeModel.setMachineId(machineId);
+        return this.count(nodeModel);
+    }
 }

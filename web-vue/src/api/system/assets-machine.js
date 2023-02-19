@@ -26,6 +26,15 @@ export function machineEdit(params) {
   });
 }
 
+// 删除机器
+export function machineDelete(params) {
+  return axios({
+    url: "/system/assets/machine/delete",
+    method: "post",
+    params: params,
+  });
+}
+
 export const statusMap = {
   0: "无法连接",
   1: "正常",

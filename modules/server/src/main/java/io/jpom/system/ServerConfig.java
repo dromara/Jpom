@@ -310,6 +310,11 @@ public class ServerConfig extends BaseExtConfig {
         public void setUploadFileConcurrent(int uploadFileConcurrent) {
             this.uploadFileConcurrent = Math.min(Math.max(uploadFileConcurrent, 1), RuntimeUtil.getProcessorCount());
         }
+
+        /**
+         * 节点统计日志保留天数，如果小于等于 0 不自动删除
+         */
+        private int statLogKeepDays = 3;
     }
 
     @EqualsAndHashCode(callSuper = true)

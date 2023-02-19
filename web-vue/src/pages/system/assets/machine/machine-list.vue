@@ -84,6 +84,7 @@
                   <a-button-group>
                     <a-button @click="handleEdit(item)" size="small"> 编辑 </a-button>
                     <a-button @click="showMachineInfo(item)" size="small">详情</a-button>
+                    <a-button @click="deleteMachineInfo(item)" type="danger" size="small">删除</a-button>
                   </a-button-group>
                 </a-row>
                 <!-- <a-button type="link" :size="size"> 详情 </a-button> -->
@@ -205,7 +206,7 @@
 </template>
 
 <script>
-import { machineListData, machineListGroup, statusMap, machineEdit } from "@/api/system/assets-machine";
+import { machineListData, machineListGroup, statusMap, machineEdit, machineDelete } from "@/api/system/assets-machine";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import { mapGetters } from "vuex";
@@ -301,6 +302,27 @@ export default {
     showMachineInfo(item) {
       this.temp = { ...item };
       this.drawerVisible = true;
+    },
+    deleteMachineInfo(item) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要删除机器么？删除会检查数据关联性",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          machineDelete({
+            id: item.id,
+          }).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+              });
+              this.getMachineList();
+            }
+          });
+        },
+      });
     },
   },
 };
