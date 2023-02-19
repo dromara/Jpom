@@ -3,90 +3,86 @@
     <a-tabs @change="changeTabs">
       <template slot="tabBarExtraContent">
         <a-space>
-          <a-select placeholder="刷新周期" v-model="refreshInterval" style="width: 160px" @change="pullNodeData">
-            <a-select-option v-for="item in [5, 10, 15, 20, 25, 30]" :key="item">刷新周期 {{ item }}秒 </a-select-option>
-          </a-select>
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="pullNodeData" />
         </a-space>
       </template>
       <a-tab-pane key="info" tab="信息">
-        <a-row>
-          <a-col span="24">
-            <a-descriptions :column="4" :bordered="true">
-              <template slot="title">
-                {{ machineInfo && machineInfo.name }}
-                {{ machineInfo && machineInfo.name }}
-
-                <a-tag v-if="machineInfo" :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
-                  {{ statusMap[machineInfo && machineInfo.status] || "未知" }}
-                </a-tag>
-              </template>
-              <a-descriptions-item v-if="machineInfo && machineInfo.status !== 1" label="状态描述" :span="4">{{ (machineInfo && machineInfo.statusMsg) || "" }}</a-descriptions-item>
-              <a-descriptions-item label="系统名" :span="2">{{ machineInfo && machineInfo.osName }}</a-descriptions-item>
-              <a-descriptions-item label="系统版本" :span="2">{{ machineInfo && machineInfo.osVersion }}</a-descriptions-item>
-              <a-descriptions-item label="硬件信息" :span="2"> {{ machineInfo && machineInfo.osHardwareVersion }} </a-descriptions-item>
-              <a-descriptions-item label="CPU型号" :span="2"> {{ machineInfo && machineInfo.osCpuIdentifierName }} </a-descriptions-item>
-              <a-descriptions-item label="主机名" :span="2"> {{ machineInfo && machineInfo.hostName }} </a-descriptions-item>
-              <a-descriptions-item label="IPV4" :span="2">
-                <template v-if="machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length">
-                  {{ machineInfo && machineInfo.ipv4List[0] }}
-                  <a-popover title="所有的IPV4列表">
-                    <template slot="content">
-                      <p v-for="item in machineInfo && machineInfo.ipv4List" :key="item">{{ item }}</p>
-                    </template>
-                    <a-tag>
-                      <!-- :count=""
+        <a-card size="small">
+          <template slot="title">
+            {{ machineInfo && machineInfo.name }}
+          </template>
+          <template slot="extra">
+            <a-tag v-if="machineInfo" :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
+              {{ statusMap[machineInfo && machineInfo.status] || "未知" }}
+            </a-tag>
+          </template>
+          <a-descriptions :column="4" :bordered="true">
+            <template slot="title"> </template>
+            <a-descriptions-item v-if="machineInfo && machineInfo.status !== 1" label="状态描述" :span="4">{{ (machineInfo && machineInfo.statusMsg) || "" }}</a-descriptions-item>
+            <a-descriptions-item label="系统名" :span="2">{{ machineInfo && machineInfo.osName }}</a-descriptions-item>
+            <a-descriptions-item label="系统版本" :span="2">{{ machineInfo && machineInfo.osVersion }}</a-descriptions-item>
+            <a-descriptions-item label="硬件信息" :span="2"> {{ machineInfo && machineInfo.osHardwareVersion }} </a-descriptions-item>
+            <a-descriptions-item label="CPU型号" :span="2"> {{ machineInfo && machineInfo.osCpuIdentifierName }} </a-descriptions-item>
+            <a-descriptions-item label="主机名" :span="2"> {{ machineInfo && machineInfo.hostName }} </a-descriptions-item>
+            <a-descriptions-item label="IPV4" :span="2">
+              <template v-if="machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length">
+                {{ machineInfo && machineInfo.ipv4List[0] }}
+                <a-popover title="所有的IPV4列表">
+                  <template slot="content">
+                    <p v-for="item in machineInfo && machineInfo.ipv4List" :key="item">{{ item }}</p>
+                  </template>
+                  <a-tag>
+                    <!-- :count=""
                       :number-style="{
                         backgroundColor: '#fff',
                         color: '#999',
                         boxShadow: '0 0 0 1px #d9d9d9 inset',
                       }" -->
-                      {{ machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length }}
-                      <!-- <a-icon type="more" /> -->
-                      <a-icon type="ellipsis" />
-                    </a-tag>
-                  </a-popover>
-                </template>
-              </a-descriptions-item>
-              <a-descriptions-item label="CPU数">{{ machineInfo && machineInfo.osCpuCores }} </a-descriptions-item>
-              <a-descriptions-item label="内存">{{ renderSize(machineInfo && machineInfo.osMoneyTotal) }} </a-descriptions-item>
-              <a-descriptions-item label="硬盘">{{ renderSize(machineInfo && machineInfo.osFileStoreTotal) }} </a-descriptions-item>
+                    {{ machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length }}
+                    <!-- <a-icon type="more" /> -->
+                    <a-icon type="ellipsis" />
+                  </a-tag>
+                </a-popover>
+              </template>
+            </a-descriptions-item>
+            <a-descriptions-item label="CPU数">{{ machineInfo && machineInfo.osCpuCores }} </a-descriptions-item>
+            <a-descriptions-item label="内存">{{ renderSize(machineInfo && machineInfo.osMoneyTotal) }} </a-descriptions-item>
+            <a-descriptions-item label="硬盘">{{ renderSize(machineInfo && machineInfo.osFileStoreTotal) }} </a-descriptions-item>
 
-              <a-descriptions-item label="负载">{{ machineInfo && machineInfo.osLoadAverage }} </a-descriptions-item>
-              <a-descriptions-item label="系统运行时间">{{ formatDuration(((machineInfo && machineInfo.osSystemUptime) || 0) * 1000) }} </a-descriptions-item>
-              <a-descriptions-item label="插件版本">{{ machineInfo && machineInfo.jpomVersion }} </a-descriptions-item>
-              <a-descriptions-item label="插件运行时间">{{ formatDuration(machineInfo && machineInfo.jpomUptime) }} </a-descriptions-item>
-              <a-descriptions-item label="插件构建时间">{{ machineInfo && machineInfo.jpomBuildTime }} </a-descriptions-item>
-              <a-descriptions-item label="硬盘占用" :span="4">
-                <a-progress
-                  :stroke-color="{
-                    '0%': '#87d068',
-                    '100%': 'red',
-                  }"
-                  :percent="(machineInfo && machineInfo.osOccupyDisk) || 0"
-                />
-              </a-descriptions-item>
-              <a-descriptions-item label="内存占用" :span="4">
-                <a-progress
-                  :stroke-color="{
-                    '0%': '#87d068',
-                    '100%': 'red',
-                  }"
-                  :percent="(machineInfo && machineInfo.osOccupyMemory) || 0"
-                />
-              </a-descriptions-item>
-              <a-descriptions-item label="CPU占用" :span="4">
-                <a-progress
-                  :stroke-color="{
-                    '0%': '#87d068',
-                    '100%': 'red',
-                  }"
-                  :percent="(machineInfo && machineInfo.osOccupyCpu) || 0"
-                />
-              </a-descriptions-item>
-            </a-descriptions>
-          </a-col>
-        </a-row>
+            <a-descriptions-item label="负载">{{ machineInfo && machineInfo.osLoadAverage }} </a-descriptions-item>
+            <a-descriptions-item label="系统运行时间">{{ formatDuration(((machineInfo && machineInfo.osSystemUptime) || 0) * 1000) }} </a-descriptions-item>
+            <a-descriptions-item label="插件版本">{{ machineInfo && machineInfo.jpomVersion }} </a-descriptions-item>
+            <a-descriptions-item label="插件运行时间">{{ formatDuration(machineInfo && machineInfo.jpomUptime, "", 3) }} </a-descriptions-item>
+            <a-descriptions-item label="插件构建时间">{{ machineInfo && machineInfo.jpomBuildTime }} </a-descriptions-item>
+            <a-descriptions-item label="硬盘占用" :span="4">
+              <a-progress
+                :stroke-color="{
+                  '0%': '#87d068',
+                  '100%': 'red',
+                }"
+                :percent="(machineInfo && machineInfo.osOccupyDisk) || 0"
+              />
+            </a-descriptions-item>
+            <a-descriptions-item label="内存占用" :span="4">
+              <a-progress
+                :stroke-color="{
+                  '0%': '#87d068',
+                  '100%': 'red',
+                }"
+                :percent="(machineInfo && machineInfo.osOccupyMemory) || 0"
+              />
+            </a-descriptions-item>
+            <a-descriptions-item label="CPU占用" :span="4">
+              <a-progress
+                :stroke-color="{
+                  '0%': '#87d068',
+                  '100%': 'red',
+                }"
+                :percent="(machineInfo && machineInfo.osOccupyCpu) || 0"
+              />
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card>
       </a-tab-pane>
       <a-tab-pane key="stat" tab="统计趋势">
         <a-space direction="vertical" style="display: block">
