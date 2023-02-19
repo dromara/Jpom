@@ -29,22 +29,25 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.func.assets.model.MachineNodeStatLogModel;
+import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.func.assets.server.MachineNodeStatLogServer;
+import io.jpom.model.BaseMachineModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.permission.SystemPermission;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 节点统计信息
@@ -56,26 +59,29 @@ import java.util.List;
 public class NodeWelcomeController extends BaseServerController {
 
     private final MachineNodeStatLogServer machineNodeStatLogServer;
+    private final MachineNodeServer machineNodeServer;
 
-    public NodeWelcomeController(MachineNodeStatLogServer machineNodeStatLogServer) {
+    public NodeWelcomeController(MachineNodeStatLogServer machineNodeStatLogServer,
+                                 MachineNodeServer machineNodeServer) {
         this.machineNodeStatLogServer = machineNodeStatLogServer;
+        this.machineNodeServer = machineNodeServer;
     }
 
     @PostMapping(value = "node_monitor_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<MachineNodeStatLogModel>> nodeMonitorJson() {
-        List<MachineNodeStatLogModel> list = this.getList();
+    public JsonMessage<List<MachineNodeStatLogModel>> nodeMonitorJson(String machineId) {
+        NodeModel node = tryGetNode();
+        List<MachineNodeStatLogModel> list = this.getList(node, machineId);
         Assert.notEmpty(list, "没有查询到任何数据");
         return JsonMessage.success("ok", list);
     }
 
-    private List<MachineNodeStatLogModel> getList() {
-        NodeModel node = getNode();
-        String machineId = node.getMachineId();
+    private List<MachineNodeStatLogModel> getList(NodeModel node, String machineId) {
+        String useMachineId = Optional.ofNullable(node).map(BaseMachineModel::getMachineId).orElse(machineId);
         String startDateStr = getParameter("time[0]");
         String endDateStr = getParameter("time[1]");
         if (StrUtil.hasEmpty(startDateStr, endDateStr)) {
             MachineNodeStatLogModel systemMonitorLog = new MachineNodeStatLogModel();
-            systemMonitorLog.setMachineId(machineId);
+            systemMonitorLog.setMachineId(useMachineId);
             return machineNodeStatLogServer.queryList(systemMonitorLog, 500, new Order("monitorTime", Direction.DESC));
         }
         //  处理时间
@@ -91,20 +97,52 @@ public class NodeWelcomeController extends BaseServerController {
         Page pageObj = new Page(1, 5000);
         pageObj.addOrder(new Order("monitorTime", Direction.DESC));
         Entity entity = Entity.create();
-        entity.set("machineId", machineId);
+        entity.set("machineId", useMachineId);
         entity.set(" MONITORTIME", ">= " + startTime);
         entity.set("MONITORTIME", "<= " + endTime);
         return machineNodeStatLogServer.listPageOnlyResult(entity, pageObj);
     }
 
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getProcessList() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.ProcessList).toString();
+    public JsonMessage<List<JSONObject>> getProcessList(HttpServletRequest request, String machineId) {
+        NodeModel node = tryGetNode();
+        if (node != null) {
+            return NodeForward.request(node, request, NodeUrl.ProcessList);
+        }
+        MachineNodeModel model = machineNodeServer.getByKey(machineId);
+        Assert.notNull(model, "没有找到对应的机器");
+        return NodeForward.request(model, request, NodeUrl.ProcessList);
     }
 
     @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
-    public String kill() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Kill).toString();
+    public JsonMessage<String> kill(HttpServletRequest request, String machineId) {
+        NodeModel node = tryGetNode();
+        if (node != null) {
+            return NodeForward.request(node, request, NodeUrl.Kill);
+        }
+        MachineNodeModel model = machineNodeServer.getByKey(machineId);
+        Assert.notNull(model, "没有找到对应的机器");
+        return NodeForward.request(model, request, NodeUrl.Kill);
+    }
+
+    @GetMapping(value = "machine-info", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<MachineNodeModel> machineInfo(String machineId) {
+        NodeModel nodeModel = tryGetNode();
+        String useMachineId = Optional.ofNullable(nodeModel).map(BaseMachineModel::getMachineId).orElse(machineId);
+        MachineNodeModel model = machineNodeServer.getByKey(useMachineId);
+        Assert.notNull(model, "没有找到对应的机器");
+        return JsonMessage.success("", model);
+    }
+
+    @GetMapping(value = "disk-info", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<MachineNodeModel> diskInfo(HttpServletRequest request, String machineId) {
+        NodeModel node = tryGetNode();
+        if (node != null) {
+            return NodeForward.request(node, request, NodeUrl.DiskInfo);
+        }
+        MachineNodeModel model = machineNodeServer.getByKey(machineId);
+        Assert.notNull(model, "没有找到对应的机器");
+        return NodeForward.request(model, request, NodeUrl.DiskInfo);
     }
 }

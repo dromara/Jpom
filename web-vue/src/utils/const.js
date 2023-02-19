@@ -422,7 +422,7 @@ export function itemGroupBy(arr, groupKey, key, dataKey) {
 }
 
 /**
- * 格式化时长
+ * 格式化时长(毫秒)
  * @param {String} ms
  * @param {String} seg 分割符
  * @param {String} levelCount 格式化个数

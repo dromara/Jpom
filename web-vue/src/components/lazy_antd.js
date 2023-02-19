@@ -63,7 +63,7 @@ import {
   ConfigProvider,
   Empty,
   Result,
-  //   Descriptions,
+  Descriptions,
   PageHeader,
   Space,
   message,
@@ -132,7 +132,7 @@ const components = [
   ConfigProvider,
   Empty,
   Result,
-  //   Descriptions,
+  Descriptions,
   PageHeader,
   Space,
 ];

@@ -189,6 +189,34 @@ public class OshiUtils {
             .collect(Collectors.toList());
     }
 
+    /**
+     * 获取硬盘信息
+     *
+     * @return list
+     */
+    public static List<JSONObject> diskInfo() {
+        FileSystem fileSystem = OshiUtil.getOs().getFileSystem();
+        List<OSFileStore> fileStores = fileSystem.getFileStores();
+        return fileStores.stream().map(osFileStore -> {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("name", osFileStore.getName());
+            jsonObject.put("volume", osFileStore.getVolume());
+            jsonObject.put("logicalVolume", osFileStore.getLogicalVolume());
+            jsonObject.put("mount", osFileStore.getMount());
+            jsonObject.put("label", osFileStore.getLabel());
+            jsonObject.put("description", osFileStore.getDescription());
+            jsonObject.put("type", osFileStore.getType());
+            jsonObject.put("options", osFileStore.getOptions());
+            jsonObject.put("uuid", osFileStore.getUUID());
+            jsonObject.put("freeInodes", osFileStore.getFreeInodes());
+            jsonObject.put("totalInodes", osFileStore.getTotalInodes());
+            jsonObject.put("freeSpace", osFileStore.getFreeSpace());
+            jsonObject.put("totalSpace", osFileStore.getTotalSpace());
+            jsonObject.put("usableSpace", osFileStore.getUsableSpace());
+            return jsonObject;
+        }).collect(Collectors.toList());
+    }
+
     @Data
     private static class NetIoInfo {
         /**
@@ -210,6 +238,5 @@ public class OshiUtils {
          * 发送的KB数,txkB/s
          */
         private Long txbyt;
-
     }
 }

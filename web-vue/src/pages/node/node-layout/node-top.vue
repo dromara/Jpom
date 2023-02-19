@@ -23,12 +23,15 @@
 </template>
 <script>
 import { nodeMonitorData } from "@/api/node";
-import { drawChart, generateNodeTopChart, generateNodeNetworkTimeChart } from "@/api/node-stat";
+import { drawChart, generateNodeTopChart, generateNodeNetworkTimeChart, generateNodeNetChart } from "@/api/node-stat";
 import moment from "moment";
 export default {
   components: {},
   props: {
     nodeId: {
+      type: String,
+    },
+    machineId: {
       type: String,
     },
     type: {
@@ -56,6 +59,7 @@ export default {
     handleFilter() {
       const params = {
         nodeId: this.nodeId,
+        machineId: this.machineId,
         time: this.timeRange,
       };
       // 加载数据
@@ -63,6 +67,8 @@ export default {
         if (res.code === 200) {
           if (this.type === "networkDelay") {
             this.historyChart = drawChart(res.data, "historyChart", generateNodeNetworkTimeChart);
+          } else if (this.type === "network-stat") {
+            this.historyChart = drawChart(res.data, "historyChart", generateNodeNetChart);
           } else {
             this.historyChart = drawChart(res.data, "historyChart", generateNodeTopChart);
           }
