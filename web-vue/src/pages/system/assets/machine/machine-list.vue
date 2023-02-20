@@ -34,10 +34,12 @@
                           <div>节点名称：{{ item.name }}</div>
                           <div>节点地址：{{ item.jpomUrl }}</div>
                         </template>
-                        {{ item.name }}
+                        <span @click="showMachineInfo(item)" style="cursor: pointer">
+                          {{ item.name }}
+                        </span>
                       </a-tooltip>
                     </a-col>
-                    <a-col :span="7" style="text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+                    <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
                       <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
                         <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
                       </a-tooltip>
@@ -49,7 +51,9 @@
                   <a-row class="item-info">
                     <a-col :span="6" class="title text-overflow-hidden">系统名称:</a-col>
                     <a-col :span="18" class="content text-overflow-hidden">
-                      {{ item.osName }}
+                      <span style="color: #40a9ff; cursor: pointer" @click="showMachineInfo(item)">
+                        {{ item.osName }}
+                      </span>
                     </a-col>
                   </a-row>
                 </a-tooltip>
@@ -73,7 +77,7 @@
                   <a-row class="item-info">
                     <a-col :span="6" class="title text-overflow-hidden">插件版本:</a-col>
                     <a-col :span="18" class="content text-overflow-hidden">
-                      <span v-if="item.jpomVersion" type="link" size="small" @click="showMachineUpgrade(item)" style="color: #40a9ff">
+                      <span v-if="item.jpomVersion" type="link" size="small" @click="showMachineUpgrade(item)" style="color: #40a9ff; cursor: pointer">
                         {{ item.jpomVersion || "-" }}
                       </span>
                     </a-col>
