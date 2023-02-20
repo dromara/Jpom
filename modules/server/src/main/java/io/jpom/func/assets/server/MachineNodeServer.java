@@ -329,6 +329,13 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         return this.exists(entity);
     }
 
+    public MachineNodeModel getByUrl(String jpomUrl) {
+        MachineNodeModel machineNodeModel = new MachineNodeModel();
+        machineNodeModel.setJpomUrl(jpomUrl);
+        List<MachineNodeModel> machineNodeModels = this.listByBean(machineNodeModel);
+        return CollUtil.getFirst(machineNodeModels);
+    }
+
     public void update(HttpServletRequest request) {
         MachineNodeModel machineNodeModel = this.resolveMachineData(request);
         boolean exists = this.existsByUrl(machineNodeModel.getJpomUrl(), machineNodeModel.getId());
