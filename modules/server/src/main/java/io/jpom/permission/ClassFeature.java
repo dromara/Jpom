@@ -93,7 +93,7 @@ public enum ClassFeature {
     SYSTEM_CONFIG("服务端系统配置"),
     SYSTEM_EXT_CONFIG("系统配置目录"),
     SYSTEM_CONFIG_IP("系统配置IP白名单"),
-    SYSTEM_CONFIG_MENUS("系统菜单配置"),
+    //    SYSTEM_CONFIG_MENUS("系统菜单配置"),
     SYSTEM_NODE_WHITELIST("节点白名单分发"),
     SYSTEM_BACKUP("数据库备份", BackupInfoService.class),
     SYSTEM_WORKSPACE("工作空间", WorkspaceService.class),

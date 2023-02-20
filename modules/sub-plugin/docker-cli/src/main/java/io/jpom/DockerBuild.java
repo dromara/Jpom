@@ -383,10 +383,14 @@ public class DockerBuild implements AutoCloseable {
         // 可能存在变量，替换为完整的值
         cachePath = this.replaceEnv(cachePath);
         if (StrUtil.equalsIgnoreCase(mode, "copy")) {
+            // npm WARN reify Removing non-directory
+            // https://github.com/npm/cli/issues/3669
+            beforeScript += String.format("echo \"upload cache %s\"\n", cachePath);
             beforeScript += String.format("mkdir -p %s\n", cachePath);
             beforeScript += String.format("cp -rf %s/* %s \n", path, cachePath);
             // 执行构建完成后的命令，将缓存目录 copy 到卷中
             afterScript += "# cacheScript after\n";
+            afterScript += String.format("echo \"download cache %s\"\n", cachePath);
             afterScript += String.format("cp -rf %s/* %s \n", cachePath, path);
         } else {
             beforeScript += String.format("ln -s %s %s \n", path, cachePath);

@@ -190,45 +190,7 @@
         </a-row>
       </a-form-model>
     </a-tab-pane>
-    <!-- 菜单配置 -->
-    <a-tab-pane key="5">
-      <span slot="tab">
-        <a-icon type="menu" />
-        菜单配置
-      </span>
-      <a-alert :message="`菜单配置只对非超级管理员生效,当前配置对当前工作空间生效,其他工作空间请切换后配置`" style="margin-top: 10px; margin-bottom: 20px" banner />
-      <a-form-model ref="editWhiteForm" :model="menusConfigData">
-        <a-row type="flex" justify="center">
-          <a-col :span="12">
-            <a-card title="服务端菜单" :bordered="false">
-              <a-tree show-icon v-if="menusConfigData.serverMenus" checkable :tree-data="menusConfigData.serverMenus" :replaceFields="replaceFields" v-model="menusConfigData.serverMenuKeys">
-                <a-icon slot="switcherIcon" type="down" />
 
-                <template slot="custom" slot-scope="{ dataRef }">
-                  <a-icon :type="dataRef.icon_v3" />
-                </template>
-              </a-tree>
-            </a-card>
-          </a-col>
-          <a-col :span="12">
-            <a-card title="节点菜单" :bordered="false">
-              <a-tree show-icon v-if="menusConfigData.nodeMenus" checkable :tree-data="menusConfigData.nodeMenus" :replaceFields="replaceFields" v-model="menusConfigData.nodeMenuKeys">
-                <a-icon slot="switcherIcon" type="down" />
-
-                <template slot="custom" slot-scope="{ dataRef }">
-                  <a-icon :type="dataRef.icon_v3" />
-                </template>
-              </a-tree>
-            </a-card>
-          </a-col>
-        </a-row>
-        <a-form-model-item>
-          <a-row type="flex" justify="center">
-            <a-button type="primary" @click="onSubmitMenus">保存</a-button>
-          </a-row>
-        </a-form-model-item>
-      </a-form-model>
-    </a-tab-pane>
     <!-- 全局代理 -->
     <a-tab-pane key="6">
       <span slot="tab">
@@ -296,21 +258,7 @@
   </a-tabs>
 </template>
 <script>
-import {
-  editConfig,
-  editIpConfig,
-  getConfigData,
-  getIpConfigData,
-  getMenusConfig,
-  getNodeConfig,
-  getProxyConfig,
-  getWhitelist,
-  saveMenusConfig,
-  saveNodeConfig,
-  saveProxyConfig,
-  saveWhitelist,
-  systemInfo,
-} from "@/api/system";
+import { editConfig, editIpConfig, getConfigData, getIpConfigData, getNodeConfig, getProxyConfig, getWhitelist, saveNodeConfig, saveProxyConfig, saveWhitelist, systemInfo } from "@/api/system";
 import codeEditor from "@/components/codeEditor";
 import { RESTART_UPGRADE_WAIT_TIME_COUNT } from "@/utils/const";
 import Vue from "vue";
@@ -333,8 +281,7 @@ export default {
       tempNodeConfig: {},
       nodeList: [],
       checkCount: 0,
-      menusConfigData: {},
-      replaceFields: { children: "childs", title: "title", key: "id" },
+
       proxyConfigData: {
         globalProxy: [
           {
@@ -385,59 +332,7 @@ export default {
         }
       });
     },
-    // 加载菜单配置信息
-    loadMenusConfig() {
-      getMenusConfig().then((res) => {
-        if (res.code !== 200) {
-          return;
-        }
-        this.menusConfigData = res.data;
 
-        this.menusConfigData.serverMenus = this.menusConfigData?.serverMenus.map((item) => {
-          item.scopedSlots = { icon: "custom" };
-          item.childs?.map((item2) => {
-            item2.id = item.id + ":" + item2.id;
-            return item2;
-          });
-          return item;
-        });
-        this.menusConfigData.nodeMenus = this.menusConfigData?.nodeMenus.map((item) => {
-          item.scopedSlots = { icon: "custom" };
-          item.childs?.map((item2) => {
-            item2.id = item.id + ":" + item2.id;
-            return item2;
-          });
-          return item;
-        });
-        if (!this.menusConfigData?.serverMenuKeys) {
-          //
-          const serverMenuKeys = [];
-          this.menusConfigData.serverMenus.forEach((item) => {
-            serverMenuKeys.push(item.id);
-            if (item.childs) {
-              item.childs.forEach((item2) => {
-                serverMenuKeys.push(item2.id);
-              });
-            }
-          });
-          this.menusConfigData = { ...this.menusConfigData, serverMenuKeys: serverMenuKeys };
-        }
-
-        if (!this.menusConfigData?.nodeMenuKeys) {
-          //
-          const nodeMenuKeys = [];
-          this.menusConfigData.nodeMenus.forEach((item) => {
-            nodeMenuKeys.push(item.id);
-            if (item.childs) {
-              item.childs.forEach((item2) => {
-                nodeMenuKeys.push(item2.id);
-              });
-            }
-          });
-          this.menusConfigData = { ...this.menusConfigData, nodeMenuKeys: nodeMenuKeys };
-        }
-      });
-    },
     // submit
     onSubmit(restart) {
       this.$confirm({
@@ -574,19 +469,7 @@ export default {
         },
       });
     },
-    onSubmitMenus() {
-      saveMenusConfig({
-        serverMenuKeys: this.menusConfigData.serverMenuKeys.join(","),
-        nodeMenuKeys: this.menusConfigData.nodeMenuKeys.join(","),
-      }).then((res) => {
-        if (res.code === 200) {
-          // 成功
-          this.$notification.success({
-            message: res.msg,
-          });
-        }
-      });
-    },
+
     // 加载
     loadProxyConfig() {
       getProxyConfig().then((res) => {
@@ -618,8 +501,6 @@ export default {
       } else if (activeKey === "4") {
         this.loadNodeConfig();
         this.getAllNodeList();
-      } else if (activeKey === "5") {
-        this.loadMenusConfig();
       } else if (activeKey === "6") {
         //
         this.loadProxyConfig();

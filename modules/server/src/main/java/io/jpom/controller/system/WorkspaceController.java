@@ -23,9 +23,14 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
@@ -38,17 +43,16 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
+import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.UserBindWorkspaceService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import top.jpom.h2db.TableName;
 import top.jpom.model.PageResultDto;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -64,11 +68,14 @@ public class WorkspaceController extends BaseServerController {
 
     private final WorkspaceService workspaceService;
     private final UserBindWorkspaceService userBindWorkspaceService;
+    private final SystemParametersServer systemParametersServer;
 
     public WorkspaceController(WorkspaceService workspaceService,
-                               UserBindWorkspaceService userBindWorkspaceService) {
+                               UserBindWorkspaceService userBindWorkspaceService,
+                               SystemParametersServer systemParametersServer) {
         this.workspaceService = workspaceService;
         this.userBindWorkspaceService = userBindWorkspaceService;
+        this.systemParametersServer = systemParametersServer;
     }
 
     /**
@@ -171,8 +178,51 @@ public class WorkspaceController extends BaseServerController {
         // 判断用户绑定关系
         boolean workspace = userBindWorkspaceService.existsWorkspace(id);
         Assert.state(!workspace, "当前工作空间下还绑定着用户信息");
+        // 删除缓存
+        String menusConfigKey = StrUtil.format("menus_config_{}", id);
+        systemParametersServer.delByKey(menusConfigKey);
         // 删除信息
         workspaceService.delByKey(id);
         return new JsonMessage<>(200, "删除成功 " + autoDelete);
+    }
+
+    /**
+     * 加载菜单配置
+     *
+     * @return json
+     */
+    @RequestMapping(value = "get_menus_config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<JSONObject> getMenusConfig(String workspaceId) {
+        WorkspaceModel workspaceModel = workspaceService.getByKey(workspaceId);
+        Assert.notNull(workspaceModel, "不存在对应的工作空间");
+        JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
+        //"classpath:/menus/index.json"
+        //"classpath:/menus/node-index.json"
+        config.put("serverMenus", this.readMenusJson("classpath:/menus/index.json"));
+        config.put("nodeMenus", this.readMenusJson("classpath:/menus/node-index.json"));
+        return JsonMessage.success("", config);
+    }
+
+    @PostMapping(value = "save_menus_config.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public JsonMessage<Object> saveMenusConfig(String serverMenuKeys, String nodeMenuKeys, String workspaceId) {
+        WorkspaceModel workspaceModel = workspaceService.getByKey(workspaceId);
+        Assert.notNull(workspaceModel, "不存在对应的工作空间");
+        //
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("nodeMenuKeys", StrUtil.splitTrim(nodeMenuKeys, StrUtil.COMMA));
+        jsonObject.put("serverMenuKeys", StrUtil.splitTrim(serverMenuKeys, StrUtil.COMMA));
+        String format = StrUtil.format("menus_config_{}", workspaceId);
+        systemParametersServer.upsert(format, jsonObject, format);
+        //
+        return JsonMessage.success("修改成功");
+    }
+
+    private JSONArray readMenusJson(String path) {
+        // 菜单
+        InputStream inputStream = ResourceUtil.getStream(path);
+        String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
+        return JSONArray.parseArray(json);
     }
 }

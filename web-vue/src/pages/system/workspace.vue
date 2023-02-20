@@ -30,6 +30,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-space>
           <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+          <a-button size="small" type="primary" @click="configMeun(record)">菜单</a-button>
           <a-button size="small" type="primary" @click="viewEnvVar(record)">变量</a-button>
           <a-button size="small" type="danger" @click="handleDelete(record)">删除</a-button>
         </a-space>
@@ -51,10 +52,39 @@
     <a-modal destroyOnClose v-model="envVarListVisible" :title="`${temp.name} 工作空间环境变量`" width="80vw" :footer="null" :maskClosable="false">
       <workspaceEnv ref="workspaceEnv" :workspaceId="temp.id" />
     </a-modal>
+    <!-- 工作空间菜单 -->
+    <a-modal destroyOnClose v-model="configMenuVisible" :title="`${temp.name} 工作空间菜单`" @ok="onSubmitMenus" :maskClosable="false">
+      <a-form-model ref="editWhiteForm" :model="menusConfigData">
+        <a-row type="flex" justify="center">
+          <a-col :span="12">
+            <a-card title="服务端菜单" :bordered="false">
+              <a-tree show-icon v-if="menusConfigData.serverMenus" checkable :tree-data="menusConfigData.serverMenus" :replaceFields="replaceFields" v-model="menusConfigData.serverMenuKeys">
+                <a-icon slot="switcherIcon" type="down" />
+
+                <template slot="custom" slot-scope="{ dataRef }">
+                  <a-icon :type="dataRef.icon_v3" />
+                </template>
+              </a-tree>
+            </a-card>
+          </a-col>
+          <a-col :span="12">
+            <a-card title="节点菜单" :bordered="false">
+              <a-tree show-icon v-if="menusConfigData.nodeMenus" checkable :tree-data="menusConfigData.nodeMenus" :replaceFields="replaceFields" v-model="menusConfigData.nodeMenuKeys">
+                <a-icon slot="switcherIcon" type="down" />
+
+                <template slot="custom" slot-scope="{ dataRef }">
+                  <a-icon :type="dataRef.icon_v3" />
+                </template>
+              </a-tree>
+            </a-card>
+          </a-col>
+        </a-row>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import { deleteWorkspace, editWorkSpace, getWorkSpaceList } from "@/api/workspace";
+import { deleteWorkspace, editWorkSpace, getWorkSpaceList, getMenusConfig, saveMenusConfig } from "@/api/workspace";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from "@/utils/const";
 import workspaceEnv from "./workspace-env.vue";
 
@@ -97,7 +127,7 @@ export default {
           sorter: true,
           width: 180,
         },
-        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: 180 },
+        { title: "操作", dataIndex: "operation", align: "center", scopedSlots: { customRender: "operation" }, width: "220px" },
       ],
 
       // 表单校验规则
@@ -105,6 +135,9 @@ export default {
         name: [{ required: true, message: "请输入工作空间名称", trigger: "blur" }],
         description: [{ required: true, message: "请输入工作空间描述", trigger: "blur" }],
       },
+      configMenuVisible: false,
+      replaceFields: { children: "childs", title: "title", key: "id" },
+      menusConfigData: {},
     };
   },
   computed: {
@@ -190,6 +223,80 @@ export default {
             }
           });
         },
+      });
+    },
+    configMeun(record) {
+      this.temp = Object.assign({}, record);
+
+      // 加载菜单配置信息
+      // loadMenusConfig(id) {},
+      getMenusConfig({
+        workspaceId: record.id,
+      }).then((res) => {
+        if (res.code !== 200) {
+          return;
+        }
+        this.menusConfigData = res.data;
+
+        this.menusConfigData.serverMenus = this.menusConfigData?.serverMenus.map((item) => {
+          item.scopedSlots = { icon: "custom" };
+          item.childs?.map((item2) => {
+            item2.id = item.id + ":" + item2.id;
+            return item2;
+          });
+          return item;
+        });
+        this.menusConfigData.nodeMenus = this.menusConfigData?.nodeMenus.map((item) => {
+          item.scopedSlots = { icon: "custom" };
+          item.childs?.map((item2) => {
+            item2.id = item.id + ":" + item2.id;
+            return item2;
+          });
+          return item;
+        });
+        if (!this.menusConfigData?.serverMenuKeys) {
+          //
+          const serverMenuKeys = [];
+          this.menusConfigData.serverMenus.forEach((item) => {
+            serverMenuKeys.push(item.id);
+            if (item.childs) {
+              item.childs.forEach((item2) => {
+                serverMenuKeys.push(item2.id);
+              });
+            }
+          });
+          this.menusConfigData = { ...this.menusConfigData, serverMenuKeys: serverMenuKeys };
+        }
+
+        if (!this.menusConfigData?.nodeMenuKeys) {
+          //
+          const nodeMenuKeys = [];
+          this.menusConfigData.nodeMenus.forEach((item) => {
+            nodeMenuKeys.push(item.id);
+            if (item.childs) {
+              item.childs.forEach((item2) => {
+                nodeMenuKeys.push(item2.id);
+              });
+            }
+          });
+          this.menusConfigData = { ...this.menusConfigData, nodeMenuKeys: nodeMenuKeys };
+        }
+        this.configMenuVisible = true;
+      });
+    },
+    onSubmitMenus() {
+      saveMenusConfig({
+        serverMenuKeys: this.menusConfigData.serverMenuKeys.join(","),
+        nodeMenuKeys: this.menusConfigData.nodeMenuKeys.join(","),
+        workspaceId: this.temp.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          // 成功
+          this.$notification.success({
+            message: res.msg,
+          });
+          this.configMenuVisible = false;
+        }
       });
     },
   },
