@@ -99,22 +99,22 @@
         <span>{{ formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, "", 2) }}</span>
       </a-tooltip>
       <template slot="projectCount" slot-scope="text, item">
-        <div v-if="item.machineNodeData" @click="syncNode(item)">
+        <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNode(item)">
           <a-tooltip placement="topLeft" title="节点中的所有项目数量,点击重新同步节点项目信息">
             <a-tag>{{ item.machineNodeData.jpomProjectCount }} </a-tag>
             <a-icon type="sync" />
           </a-tooltip>
         </div>
-        <span v-else>0</span>
+        <span v-else>-</span>
       </template>
       <template slot="scriptCount" slot-scope="text, item">
-        <div v-if="item.machineNodeData" @click="syncNodeScript(item)">
+        <div v-if="item.machineNodeData && item.machineNodeData.status === 1" @click="syncNodeScript(item)">
           <a-tooltip placement="topLeft" title="节点中的所有脚本模版数量,点击重新同步脚本模版信息">
             <a-tag>{{ item.machineNodeData.jpomScriptCount }} </a-tag>
             <a-icon type="sync" />
           </a-tooltip>
         </div>
-        <span v-else>0</span>
+        <span v-else>-</span>
       </template>
 
       <template slot="operation" slot-scope="text, record, index">
@@ -537,7 +537,7 @@ export default {
       }
     },
     syncNode(node) {
-      syncProject(node.nodeId).then((res) => {
+      syncProject(node.id).then((res) => {
         if (res.code == 200) {
           this.$notification.success({
             message: res.msg,
@@ -548,7 +548,7 @@ export default {
     },
     syncNodeScript(node) {
       syncScript({
-        nodeId: node.nodeId,
+        nodeId: node.id,
       }).then((res) => {
         if (res.code == 200) {
           this.$notification.success({
