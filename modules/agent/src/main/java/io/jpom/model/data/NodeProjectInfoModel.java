@@ -152,7 +152,9 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
 
 
     public String allLib() {
-        return FileUtil.file(this.getWhitelistDirectory(), this.getLib()).getAbsolutePath();
+        String directory = this.getWhitelistDirectory();
+        directory = AgentWhitelist.convertRealPath(directory);
+        return FileUtil.file(directory, this.getLib()).getAbsolutePath();
     }
 
     /**

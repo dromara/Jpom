@@ -28,9 +28,9 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.common.BaseJpomController;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.util.FileUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,11 @@ import org.springframework.util.Assert;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 白名单
@@ -76,6 +80,30 @@ public class AgentWhitelist extends BaseJsonModel {
      */
     private Set<String> allowRemoteDownloadHost;
 
+    public static String convertRealPath(String path) {
+        String val = String.format("/%s/", path);
+        return FileUtil.normalize(val);
+    }
+
+    public static List<String> useConvert(List<String> list) {
+        if (list == null) {
+            return null;
+        }
+        return list.stream().map(AgentWhitelist::convertRealPath).collect(Collectors.toList());
+    }
+
+    public List<String> nginx() {
+        return useConvert(nginx);
+    }
+
+    public List<String> project() {
+        return useConvert(nginx);
+    }
+
+    public List<String> certificate() {
+        return useConvert(certificate);
+    }
+
     /**
      * 格式化，判断是否与jpom 数据路径冲突
      *
@@ -86,23 +114,16 @@ public class AgentWhitelist extends BaseJsonModel {
         if (list == null) {
             return null;
         }
-        List<String> array = new ArrayList<>();
-        for (String s : list) {
-            String val = String.format("/%s/", s);
-            val = BaseJpomController.pathSafe(val);
-            if (StrUtil.SLASH.equals(val)) {
-                continue;
-            }
-            if (array.contains(val)) {
-                continue;
-            }
-            // 判断是否保护jpom 路径
-            if (val == null || val.startsWith(ExtConfigBean.getPath())) {
-                throw new IllegalArgumentException(errorMsg);
-            }
-            array.add(val);
-        }
-        return array;
+        return list.stream()
+            .peek(s -> {
+                String val = String.format("/%s/", s);
+                val = FileUtil.normalize(val);
+                FileUtils.checkSlip(val);
+                // 判断是否保护jpom 路径
+                Assert.state(!StrUtil.startWith(ExtConfigBean.getPath(), val), errorMsg);
+            })
+            .distinct()
+            .collect(Collectors.toList());
     }
 
     /**
@@ -112,12 +133,7 @@ public class AgentWhitelist extends BaseJsonModel {
      * @return str
      */
     public static String convertToLine(Collection<String> jsonArray) {
-        try {
-            return CollUtil.join(jsonArray, StrUtil.CRLF);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return "";
+        return CollUtil.join(jsonArray, StrUtil.CRLF);
     }
 
     /**
@@ -134,7 +150,7 @@ public class AgentWhitelist extends BaseJsonModel {
         if (StrUtil.isEmpty(path)) {
             return false;
         }
-        File file1, file2 = FileUtil.file(path);
+        File file1, file2 = FileUtil.file(convertRealPath(path));
         for (String item : list) {
             file1 = FileUtil.file(item);
             if (FileUtil.pathEquals(file1, file2)) {

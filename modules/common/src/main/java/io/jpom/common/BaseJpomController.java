@@ -58,21 +58,6 @@ import java.util.Objects;
  */
 @Slf4j
 public abstract class BaseJpomController {
-    /**
-     * 路径安全格式化
-     *
-     * @param path 路径
-     * @return 去掉 提权字符串
-     */
-    public static String pathSafe(String path) {
-        if (path == null) {
-            return null;
-        }
-        String newPath = path.replace("../", StrUtil.EMPTY);
-        newPath = newPath.replace("..\\", StrUtil.EMPTY);
-        newPath = newPath.replace("+", StrUtil.EMPTY);
-        return FileUtil.normalize(newPath);
-    }
 
     /**
      * 获取请求的ip 地址

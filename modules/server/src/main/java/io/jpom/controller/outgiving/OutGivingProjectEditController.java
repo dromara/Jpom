@@ -291,7 +291,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         }
         String whitelistDirectory = getParameter("whitelistDirectory");
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(getRequest());
-        List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
+        List<String> whitelistServerOutGiving = configDeNewInstance.outGiving();
         Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, whitelistDirectory), "请选择正确的项目路径,或者还没有配置白名单");
 
         defData.put("whitelistDirectory", whitelistDirectory);
