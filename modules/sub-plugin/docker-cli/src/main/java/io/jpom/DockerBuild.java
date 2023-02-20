@@ -245,6 +245,7 @@ public class DockerBuild implements AutoCloseable {
         StringBuilder stepsScript = new StringBuilder("#!/bin/bash\n");
         stepsScript.append("echo \"\n<<<<<<< Build Start >>>>>>>\"\n");
         //
+        List<String> afterScriptList = new ArrayList<>();
         for (Map<String, Object> step : steps) {
             if (step.containsKey("env")) {
                 stepsScript.append("# env\n");
@@ -263,7 +264,10 @@ public class DockerBuild implements AutoCloseable {
                 } else if ("maven".equals(uses)) {
                     stepsScript.append(mavenScript(step));
                 } else if ("cache".equals(uses)) {
-                    stepsScript.append(cacheScript(step, buildId));
+                    String[] cacheScript = cacheScript(step, buildId);
+                    stepsScript.append(cacheScript[0]);
+                    //
+                    afterScriptList.add(cacheScript[1]);
                 } else if ("go".equals(uses)) {
                     stepsScript.append(goScript(step));
                 } else if ("python3".equals(uses)) {
@@ -276,17 +280,12 @@ public class DockerBuild implements AutoCloseable {
                 stepsScript.append(run).append(" \n");
             }
         }
+        // copy
+        afterScriptList.forEach(stepsScript::append);
         stepsScript.append("echo \"<<<<<<< Build End >>>>>>>\"\n");
         return stepsScript.toString();
     }
 
-    private String cacheScript(Map<String, Object> step, String buildId) {
-        String cachePath = String.valueOf(step.get("path"));
-        String path = String.format("/opt/jpom_cache_%s_%s", buildId, SecureUtil.md5(cachePath));
-        String script = "# cacheScript\n";
-        script += String.format("ln -s %s %s \n", path, cachePath);
-        return script;
-    }
 
     private String mavenScript(Map<String, Object> step) {
         String version = String.valueOf(step.get("version"));
@@ -375,26 +374,64 @@ public class DockerBuild implements AutoCloseable {
         }
     }
 
+    private String[] cacheScript(Map<String, Object> step, String buildId) {
+        String mode = String.valueOf(step.get("mode"));
+        String path = String.format("/opt/%s", this.buildCacheName(step, buildId));
+        String beforeScript = "# cacheScript\n";
+        String afterScript = "";
+        String cachePath = String.valueOf(step.get("path"));
+        // 可能存在变量，替换为完整的值
+        cachePath = this.replaceEnv(cachePath);
+        if (StrUtil.equalsIgnoreCase(mode, "copy")) {
+            beforeScript += String.format("mkdir -p %s\n", cachePath);
+            beforeScript += String.format("cp -rf %s/* %s \n", path, cachePath);
+            // 执行构建完成后的命令，将缓存目录 copy 到卷中
+            afterScript += "# cacheScript after\n";
+            afterScript += String.format("cp -rf %s/* %s \n", cachePath, path);
+        } else {
+            beforeScript += String.format("ln -s %s %s \n", path, cachePath);
+        }
+        return new String[]{beforeScript, afterScript};
+    }
+
+    /**
+     * 构建缓存插件名称
+     *
+     * @param step    缓存配置信息
+     * @param buildId 构建id
+     * @return 名称
+     */
+    private String buildCacheName(Map<String, Object> step, String buildId) {
+        String path = (String) step.get("path");
+        String type = StrUtil.toString(step.get("type"));
+        // 全局模式
+        boolean global = StrUtil.equalsIgnoreCase(type, "global");
+        String md5 = SecureUtil.md5(path);
+        return global ? String.format("jpom_cache_%s", md5) : String.format("jpom_cache_%s_%s", buildId, md5);
+    }
+
     private List<Mount> cachePluginCheck(DockerClient dockerClient, List<Map<String, Object>> steps, String buildId) {
         return steps.stream()
             .filter(map -> {
                 String uses = (String) map.get("uses");
                 return StrUtil.equals("cache", uses);
             })
-            .map(stringObjectMap -> {
-                String path = (String) stringObjectMap.get("path");
-                path = this.replaceEnv(path);
-                String name = String.format("jpom_cache_%s_%s", buildId, SecureUtil.md5(path));
+            .map(objMap -> {
+                String name = this.buildCacheName(objMap, buildId);
                 try {
                     dockerClient.inspectVolumeCmd(name).exec();
                 } catch (NotFoundException e) {
                     HashMap<String, String> labels = MapUtil.of("jpom_build_" + buildId, buildId);
+                    String path = (String) objMap.get("path");
+                    String type = StrUtil.toString(objMap.get("type"));
                     labels.put("jpom_build_path", path);
+                    labels.put("jpom_build_cache_type", type);
                     dockerClient.createVolumeCmd()
                         .withName(name)
                         .withLabels(labels)
                         .exec();
                 }
+                // 最终使用 ls 来绑定
                 Mount mount = new Mount();
                 mount.withType(MountType.VOLUME).withSource(name).withTarget("/opt/" + name);
                 return mount;

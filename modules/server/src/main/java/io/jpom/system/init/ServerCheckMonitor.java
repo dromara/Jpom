@@ -86,8 +86,6 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
      */
     private void asyncLoad() {
         ThreadUtil.execute(() -> {
-            BuildUtil.reloadCacheSize();
-            JpomApplication.getInstance().dataSize();
             // 状态恢复的数据
             Map<String, IStatusRecover> statusRecoverMap = SpringUtil.getApplicationContext().getBeansOfType(IStatusRecover.class);
             statusRecoverMap.forEach((name, iCron) -> {
@@ -96,6 +94,9 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
                     log.info("{} 恢复 {} 条异常数据", name, count);
                 }
             });
+            //
+            BuildUtil.reloadCacheSize();
+            JpomApplication.getInstance().dataSize();
         });
     }
 
