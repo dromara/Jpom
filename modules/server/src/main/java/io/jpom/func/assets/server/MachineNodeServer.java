@@ -24,6 +24,7 @@ package io.jpom.func.assets.server;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.net.NetUtil;
@@ -111,6 +112,8 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         List<MachineNodeModel> machineNodeModels = new ArrayList<>(nodeUrlMap.size());
         for (Map.Entry<String, List<NodeModel>> entry : nodeUrlMap.entrySet()) {
             List<NodeModel> value = entry.getValue();
+            // 排序，最近更新过优先
+            value.sort((o1, o2) -> CompareUtil.compare(o2.getModifyTimeMillis(), o1.getModifyTimeMillis()));
             NodeModel first = CollUtil.getFirst(value);
             if (value.size() > 1) {
                 log.warn("节点地址 {} 存在多个数据，将自动合并使用 {} 节点的配置信息", entry.getKey(), first.getName());

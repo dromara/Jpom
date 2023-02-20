@@ -1,14 +1,39 @@
 # 🚀 版本日志
 
-1. 删除 node_info unLockType 字段
-2. 取消节点解绑功能
-3. 停止使用 NODE_STAT 表（暂时保留相关数据）
-4. MACHINE_NODE_STAT_LOG 表替代 SYSTEMMONITORLOG 表（并暂时保留 SYSTEMMONITORLOG 数据）
-5. 节点列表更名逻辑节点
-6. 新增机器资产管理
-7. 新增配置属性：jpom.node.stat-log-keep-days
+## 2.10.18 
+
+### 🐣 新增功能
+
+1. 【server】新增 资产管理->机器管理
+2. 【server】新增 配置属性：jpom.node.stat-log-keep-days（节点统计日志保留天数）
+3. 【all】新增 机器节点硬盘信息统计
+4. 【all】新增 机器节点网络流量信息统计
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】更名 节点列表更名逻辑节点
+2. 【server】修复 节点分发编辑 webhook 字段回显（感谢@酱总）
+
+### ❌ 不兼容功能
+
+1. 【server】删除 node_info unLockType 字段
+2. 【server】取消 节点解绑功能
+3. 【server】停止 使用 NODE_STAT 表（暂时保留相关数据）
+4. 【server】替代 MACHINE_NODE_STAT_LOG 表替代 SYSTEMMONITORLOG 表（并暂时保留 SYSTEMMONITORLOG 数据）
+
+### ⚠️ 注意
+
+由于新增机器管理，程序将自动同步节点表中的所有数据`以节点地址去重`后保存到机器表中，如果同一个节点地址出现多条数据（节点存在不同的工作空间）将跟进节点更新时间最新的为准
+
+插件端需要同步更新，否则节点状态、机器状态为：`状态码错误`
+
+如果更新当前版本后出现节点授权码错误：可能原因是之前同一个机器添加多个节点到不同的工作空间并且最后更新的节点中保存的授权信息是错误，导致数据自动同步后仍然是错误的授权信息
+
+------
 
 ## 2.10.17 (2023-02-16)
+
+### 🐣 新增功能
 
 1. 【server】新增 构建配置新增严格执行命令模式（判断命令执行状态码是否为0）
    （感谢@阿克苏市姑墨信息科技有限公司） [Gitee pr 169](https://gitee.com/dromara/Jpom/pulls/169) ）
