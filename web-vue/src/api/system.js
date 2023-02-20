@@ -159,7 +159,7 @@ export function editMailConfig(params) {
  * 系统程序信息
  * @param {String} nodeId 节点 ID
  */
-export function systemInfo(nodeId) {
+export function systemInfo(data) {
   return axios({
     url: "/system/info",
     method: "post",
@@ -167,7 +167,7 @@ export function systemInfo(nodeId) {
       tip: "no",
       loading: "no",
     },
-    data: { nodeId },
+    data,
   });
 }
 
@@ -211,12 +211,12 @@ export function uploadUpgradeFileMerge(data) {
  * 获取更新日志
  *@param {String} nodeId 节点 ID
  */
-export function changelog(nodeId) {
+export function changelog(data) {
   return axios({
     url: "/system/change_log",
     method: "post",
     headers: {},
-    data: { nodeId },
+    data,
   });
 }
 
@@ -224,12 +224,12 @@ export function changelog(nodeId) {
  * 检查新版本
  *@param {String} nodeId 节点 ID
  */
-export function checkVersion(nodeId) {
+export function checkVersion(data) {
   return axios({
     url: "/system/check_version.json",
     method: "post",
     headers: {},
-    data: { nodeId },
+    data,
   });
 }
 
@@ -237,13 +237,13 @@ export function checkVersion(nodeId) {
  * 远程升级
  *@param {String} nodeId 节点 ID
  */
-export function remoteUpgrade(nodeId) {
+export function remoteUpgrade(params) {
   return axios({
     url: "/system/remote_upgrade.json",
     method: "get",
     timeout: 0,
     headers: {},
-    params: { nodeId },
+    params,
   });
 }
 
