@@ -222,7 +222,8 @@ public class NodeUpdateController extends BaseServerController {
     @GetMapping(value = "confirm_fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<Collection<JSONObject>> confirmFastInstall(HttpServletRequest request,
                                                                   @ValidatorItem String id,
-                                                                  @ValidatorItem String ip, int port) {
+                                                                  @ValidatorItem String ip,
+                                                                  int port) {
         JSONObject receiveCache = NodeInfoController.getReceiveCache(id);
         Assert.notNull(receiveCache, "没有对应的缓存信息");
         JSONArray jsonArray = receiveCache.getJSONArray("canUseNode");
@@ -242,11 +243,17 @@ public class NodeUpdateController extends BaseServerController {
             log.warn("测试结果：{} {}", machineNodeModel.getJpomUrl(), e.getMessage());
             return new JsonMessage<>(500, "节点连接失败：" + e.getMessage());
         }
-        // 插入
-        boolean exists = machineNodeServer.existsByUrl(machineNodeModel.getJpomUrl(), null);
-        Assert.state(!exists, "对应的节点已经存在拉：" + machineNodeModel.getJpomUrl());
         String workspaceId = nodeService.getCheckUserWorkspace(request);
-        machineNodeServer.insertAndNode(machineNodeModel, workspaceId);
+
+        MachineNodeModel existsMachine = machineNodeServer.getByUrl(machineNodeModel.getJpomUrl());
+        if (existsMachine == null) {
+            // 插入
+            machineNodeServer.insertAndNode(machineNodeModel, workspaceId);
+        } else {
+            boolean exists = nodeService.existsNode2(workspaceId, existsMachine.getId());
+            Assert.state(!exists, "对应的节点已经存在拉");
+            machineNodeServer.insertNode(machineNodeModel, workspaceId);
+        }
         // 更新结果
         receiveCache.put("type", "success");
         return JsonMessage.success("安装成功", NodeInfoController.listReceiveCache(null));
