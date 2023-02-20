@@ -75,7 +75,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Configuration
-public class JpomApplicationEvent implements ApplicationListener<ApplicationEvent>, ApplicationContextAware, ILoadEvent {
+public class JpomApplicationEvent implements ApplicationListener<ApplicationEvent>, ApplicationContextAware {
 
     private final JpomApplication configBean;
 
@@ -329,21 +329,25 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         this.success();
     }
 
-    @Override
-    public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
-        CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", this::executeTask);
-        // 启动执行一次
-        ThreadUtil.execute(() -> {
-            try {
-                this.executeTask();
-            } catch (Exception e) {
-                log.error("执行系统任务异常", e);
-            }
-        });
-    }
+    @Configuration
+    public static class SystemEvent implements ILoadEvent {
 
-    private void executeTask() {
-        Map<String, ISystemTask> taskMap = SpringUtil.getBeansOfType(ISystemTask.class);
-        Optional.ofNullable(taskMap).ifPresent(map -> map.values().forEach(ISystemTask::executeTask));
+        @Override
+        public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
+            CronUtils.upsert("system_monitor", "0 0 0,12 * * ?", this::executeTask);
+            // 启动执行一次
+            ThreadUtil.execute(() -> {
+                try {
+                    this.executeTask();
+                } catch (Exception e) {
+                    log.error("执行系统任务异常", e);
+                }
+            });
+        }
+
+        private void executeTask() {
+            Map<String, ISystemTask> taskMap = SpringUtil.getBeansOfType(ISystemTask.class);
+            Optional.ofNullable(taskMap).ifPresent(map -> map.values().forEach(ISystemTask::executeTask));
+        }
     }
 }
