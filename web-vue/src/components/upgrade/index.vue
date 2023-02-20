@@ -83,6 +83,10 @@ export default {
       type: String,
       default: "",
     },
+    machineId: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     return {
@@ -113,13 +117,19 @@ export default {
     uploadPieces,
     // 加载数据
     loadData() {
-      systemInfo(this.nodeId).then((res) => {
+      systemInfo({
+        nodeId: this.nodeId,
+        machineId: this.machineId,
+      }).then((res) => {
         this.temp = res.data?.manifest;
         //
         // vueTimeStamp
         this.temp = { ...this.temp, vueTimeStamp: parseTime(this.getMeta("build-time")) };
         //
-        changelog(this.nodeId).then((resLog) => {
+        changelog({
+          nodeId: this.nodeId,
+          machineId: this.machineId,
+        }).then((resLog) => {
           this.changelog = resLog.data;
           //
           // res.data.
@@ -183,6 +193,7 @@ export default {
               uploadUpgradeFileMerge({
                 ...uploadData[0],
                 nodeId: this.nodeId,
+                machineId: this.machineId,
               }).then((res) => {
                 if (res.code === 200) {
                   this.fileList = [];
@@ -201,6 +212,7 @@ export default {
             uploadCallback: (formData) => {
               return new Promise((resolve, reject) => {
                 formData.append("nodeId", this.nodeId);
+                formData.append("machineId", this.machineId);
                 // 上传文件
                 uploadUpgradeFile(formData)
                   .then((res) => {
@@ -241,7 +253,10 @@ export default {
       });
       //
       this.timer = setInterval(() => {
-        systemInfo(this.nodeId)
+        systemInfo({
+          nodeId: this.nodeId,
+          machineId: this.machineId,
+        })
           .then((res) => {
             let manifest = res.data?.manifest;
             if (res.code === 200 && manifest?.timeStamp !== this.temp.timeStamp) {
@@ -284,7 +299,10 @@ export default {
     },
     // 检查新版本
     checkVersion() {
-      checkVersion(this.nodeId).then((res) => {
+      checkVersion({
+        nodeId: this.nodeId,
+        machineId: this.machineId,
+      }).then((res) => {
         if (res.code === 200) {
           this.showVersion(true, res.data).then((upgrade) => {
             // 远程检测失败才本地检测
@@ -301,7 +319,7 @@ export default {
       //console.log(compareVersion("1.0.2", "dev"));
       const buildInfo = pageBuildInfo();
 
-      executionRequest("https://jpom.top/docs/release-versions.json", { ...buildInfo, type: this.nodeId ? "agent" : "server" }).then((data) => {
+      executionRequest("https://jpom.top/docs/release-versions.json", { ...buildInfo, type: this.nodeId || this.machineId ? "agent" : "server" }).then((data) => {
         if (!data || !data.tag_name) {
           return;
         }
@@ -364,7 +382,10 @@ export default {
         cancelText: "取消",
         onOk: () => {
           //
-          remoteUpgrade(this.nodeId).then((res) => {
+          remoteUpgrade({
+            nodeId: this.nodeId,
+            machineId: this.machineId,
+          }).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
