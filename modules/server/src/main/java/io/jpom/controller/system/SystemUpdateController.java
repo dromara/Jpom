@@ -28,7 +28,6 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.*;
@@ -163,7 +162,7 @@ public class SystemUpdateController extends BaseServerController {
         path = FileUtil.getAbsolutePath(file);
         // 基础检查
         JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Server);
-        if (error.getCode() != HttpStatus.HTTP_OK) {
+        if (!error.success()) {
             return new JsonMessage<>(error.getCode(), error.getMsg());
         }
         Tuple data = error.getData();

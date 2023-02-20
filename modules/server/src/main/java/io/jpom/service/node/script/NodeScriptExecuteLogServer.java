@@ -24,7 +24,6 @@ package io.jpom.service.node.script;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -155,7 +154,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<ScriptExecuteLog
                     NodeModel nodeModel = nodeService.getByKey(executeLogModel.getNodeId());
                     JsonMessage<Object> jsonMessage = NodeForward.request(nodeModel, NodeUrl.SCRIPT_DEL_LOG,
                         "id", executeLogModel.getScriptId(), "executeId", executeLogModel.getId());
-                    if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+                    if (!jsonMessage.success()) {
                         log.warn("{} {} {}", executeLogModel.getNodeId(), executeLogModel.getScriptName(), jsonMessage);
                         return false;
                     }

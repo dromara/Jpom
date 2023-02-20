@@ -24,7 +24,6 @@ package io.jpom.service.dblog;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpStatus;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.JsonMessage;
 import io.jpom.model.data.BuildInfoModel;
@@ -139,7 +138,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
             entity -> entity.set("buildDataId", buildHistoryLog.getBuildDataId()),
             buildHistoryLog1 -> {
                 JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
-                if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+                if (!jsonMessage.success()) {
                     log.warn("{} {} {}", buildHistoryLog1.getBuildName(), buildHistoryLog1.getBuildNumberId(), jsonMessage);
                     return false;
                 }
@@ -160,7 +159,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
             null,
             buildHistoryLog1 -> {
                 JsonMessage<String> jsonMessage = this.deleteLogAndFile(buildHistoryLog1);
-                if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+                if (!jsonMessage.success()) {
                     log.warn("{} {} {}", buildHistoryLog1.getBuildName(), buildHistoryLog1.getBuildNumberId(), jsonMessage);
                     return false;
                 }

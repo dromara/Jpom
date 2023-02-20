@@ -23,7 +23,6 @@
 package io.jpom.socket;
 
 import cn.hutool.core.lang.Tuple;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
@@ -144,7 +143,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
             UploadFileModel uploadFile = UPLOAD_FILE_INFO.get(session.getId());
             String filePath = uploadFile.getFilePath();
             JsonMessage<Tuple> error = JpomManifest.checkJpomJar(filePath, Type.Agent);
-            if (error.getCode() != HttpStatus.HTTP_OK) {
+            if (!error.success()) {
                 return error.getMsg();
             }
             JpomManifest.releaseJar(filePath, uploadFile.getVersion());
