@@ -27,7 +27,6 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerConst;
 import io.jpom.common.validator.ValidatorItem;
-import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.node.ProjectInfoCacheModel;
 import io.jpom.model.node.ScriptCacheModel;
@@ -71,7 +70,6 @@ public class NodeEditController extends BaseServerController {
     private final ProjectInfoCacheService projectInfoCacheService;
     private final NodeScriptServer nodeScriptServer;
     private final NodeScriptExecuteLogServer nodeScriptExecuteLogServer;
-    private final MachineNodeServer machineNodeServer;
 
     public NodeEditController(OutGivingServer outGivingServer,
                               MonitorService monitorService,
@@ -79,8 +77,7 @@ public class NodeEditController extends BaseServerController {
                               LogReadServer logReadServer,
                               ProjectInfoCacheService projectInfoCacheService,
                               NodeScriptServer nodeScriptServer,
-                              NodeScriptExecuteLogServer nodeScriptExecuteLogServer,
-                              MachineNodeServer machineNodeServer) {
+                              NodeScriptExecuteLogServer nodeScriptExecuteLogServer) {
         this.outGivingServer = outGivingServer;
         this.monitorService = monitorService;
         this.buildService = buildService;
@@ -88,7 +85,6 @@ public class NodeEditController extends BaseServerController {
         this.projectInfoCacheService = projectInfoCacheService;
         this.nodeScriptServer = nodeScriptServer;
         this.nodeScriptExecuteLogServer = nodeScriptExecuteLogServer;
-        this.machineNodeServer = machineNodeServer;
     }
 
 

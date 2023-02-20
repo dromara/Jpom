@@ -25,8 +25,12 @@ package io.jpom.common;
 import cn.hutool.cache.Cache;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.core.util.StrUtil;
+import io.jpom.common.forward.NodeForward;
+import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.PermissionInterceptor;
+import io.jpom.func.assets.model.MachineNodeModel;
+import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
@@ -37,6 +41,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -55,6 +60,8 @@ public abstract class BaseServerController extends BaseJpomController {
 
     @Resource
     protected NodeService nodeService;
+    @Resource
+    protected MachineNodeServer machineNodeServer;
 
     protected NodeModel getNode() {
         NodeModel nodeModel = tryGetNode();
@@ -68,6 +75,19 @@ public abstract class BaseServerController extends BaseJpomController {
             return null;
         }
         return nodeService.getByKey(nodeId);
+    }
+
+    protected <T> JsonMessage<T> tryRequestNode(String machineId, HttpServletRequest request, NodeUrl nodeUrl) {
+        NodeModel nodeModel = tryGetNode();
+        if (nodeModel != null) {
+            return NodeForward.request(nodeModel, request, nodeUrl);
+        }
+        if (StrUtil.isNotEmpty(machineId)) {
+            MachineNodeModel model = machineNodeServer.getByKey(machineId);
+            Assert.notNull(model, "没有找到对应的机器");
+            return NodeForward.request(model, request, nodeUrl);
+        }
+        return null;
     }
 
     /**

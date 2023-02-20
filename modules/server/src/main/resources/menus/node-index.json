@@ -69,11 +69,6 @@
         "role": "system"
       },
       {
-        "id": "update",
-        "title": "在线升级",
-        "role": "sys"
-      },
-      {
         "id": "sysConfig",
         "title": "系统配置",
         "role": "system"

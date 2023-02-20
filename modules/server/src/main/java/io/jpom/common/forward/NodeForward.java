@@ -540,9 +540,35 @@ public class NodeForward {
      * @param nodeUrl   节点的url
      * @return json
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public static JsonMessage<String> requestMultipart(NodeModel nodeModel, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
+        INodeInfo parseNodeInfo = parseNodeInfo(nodeModel);
+        return requestMultipart(parseNodeInfo, nodeModel.getWorkspaceId(), request, nodeUrl);
+    }
 
+    /**
+     * 上传文件消息转发
+     *
+     * @param machineNodeModel 节点
+     * @param request          请求
+     * @param nodeUrl          节点的url
+     * @return json
+     */
+    public static JsonMessage<String> requestMultipart(MachineNodeModel machineNodeModel, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
+        INodeInfo nodeInfo = coverNodeInfo(machineNodeModel);
+        return requestMultipart(nodeInfo, StrUtil.EMPTY, request, nodeUrl);
+    }
+
+    /**
+     * 上传文件消息转发
+     *
+     * @param nodeInfo 节点
+     * @param request  请求
+     * @param nodeUrl  节点的url
+     * @return json
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static JsonMessage<String> requestMultipart(INodeInfo nodeInfo, String workspaceId, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
+        IUrlItem iUrlItem = parseUrlItem(nodeInfo, workspaceId, nodeUrl);
         //
         Map params = ServletUtil.getParamMap(request);
         //
@@ -557,8 +583,7 @@ public class NodeForward {
         });
         TypeReference<JsonMessage<String>> tTypeReference = new TypeReference<JsonMessage<String>>() {
         };
-        return createUrlItem(nodeModel, nodeUrl,
-            (nodeInfo, urlItem) -> TransportServerFactory.get().executeToType(nodeInfo, urlItem, params, tTypeReference));
+        return TransportServerFactory.get().executeToType(nodeInfo, iUrlItem, params, tTypeReference);
 
     }
 

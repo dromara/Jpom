@@ -35,7 +35,7 @@
       <white-list v-if="currentId === 'whitelistDirectory'" :node="node" />
       <cache v-if="currentId === 'cacheManage'" :node="node" />
       <log v-if="currentId === 'logManage'" :node="node" />
-      <upgrade v-if="currentId === 'update'" :node="node" />
+
       <config-file v-if="currentId === 'sysConfig'" :node="node" />
     </a-layout-content>
   </a-layout>
@@ -54,7 +54,7 @@ import Cert from "@/pages/node/node-layout/nginx/cert";
 import WhiteList from "@/pages/node/node-layout/system/white-list.vue";
 import Cache from "@/pages/node/node-layout/system/cache";
 import Log from "@/pages/node/node-layout/system/log.vue";
-import Upgrade from "@/pages/node/node-layout/system/upgrade.vue";
+
 import ConfigFile from "@/pages/node/node-layout/system/config-file.vue";
 import { mapGetters } from "vuex";
 
@@ -70,7 +70,7 @@ export default {
     WhiteList,
     Cache,
     Log,
-    Upgrade,
+
     ConfigFile,
     ScriptLog,
   },
