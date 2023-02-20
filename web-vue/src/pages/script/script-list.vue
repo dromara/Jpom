@@ -125,7 +125,7 @@
       </a-form-model>
     </a-modal>
     <!-- 脚本控制台组件 -->
-    <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
+    <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
       <script-console v-if="drawerConsoleVisible" :defArgs="temp.defArgs" :id="temp.id" />
     </a-drawer>
     <!-- 同步到其他工作空间 -->

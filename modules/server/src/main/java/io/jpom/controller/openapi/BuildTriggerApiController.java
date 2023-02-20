@@ -23,6 +23,7 @@
 package io.jpom.controller.openapi;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
@@ -32,6 +33,7 @@ import cn.hutool.http.ContentType;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.build.BuildExecuteService;
+import io.jpom.build.BuildUtil;
 import io.jpom.build.ResultDirFileAction;
 import io.jpom.common.BaseJpomController;
 import io.jpom.common.BaseServerController;
@@ -39,6 +41,7 @@ import io.jpom.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.common.validator.ValidatorItem;
+import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.enums.BuildStatus;
@@ -52,6 +55,10 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -243,6 +250,39 @@ public class BuildTriggerApiController extends BaseJpomController {
     public JsonMessage<JSONObject> buildStatusGet(@ValidatorItem String id, @ValidatorItem String token) {
         JSONObject statusData = this.getStatusData(id, token);
         return JsonMessage.success("", statusData);
+    }
+
+    /**
+     * 批量获取构建状态
+     */
+    @GetMapping(value = ServerOpenApi.BUILD_TRIGGER_LOG, produces = MediaType.APPLICATION_JSON_VALUE)
+    public void buildLogGet(@ValidatorItem String id,
+                            @ValidatorItem String token,
+                            @ValidatorItem(ValidatorRule.NUMBERS) Integer buildNumId,
+                            HttpServletResponse response) throws IOException {
+        BuildInfoModel item = buildInfoService.getByKey(id);
+        if (item == null) {
+            ServletUtil.write(response, "没有对应数据", ContentType.TEXT_PLAIN.getValue());
+            return;
+        }
+        UserModel userModel = triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
+        if (userModel == null) {
+            ServletUtil.write(response, "对应的用户不存在,触发器已失效", ContentType.TEXT_PLAIN.getValue());
+            return;
+        }
+        //
+        if (!StrUtil.equals(token, item.getTriggerToken())) {
+            ServletUtil.write(response, "触发token错误,或者已经失效", ContentType.TEXT_PLAIN.getValue());
+            return;
+        }
+        File file = BuildUtil.getLogFile(item.getId(), buildNumId);
+        if (!FileUtil.isFile(file)) {
+            ServletUtil.write(response, "日志文件错误", ContentType.TEXT_PLAIN.getValue());
+            return;
+        }
+        try (BufferedInputStream inputStream = FileUtil.getInputStream(file)) {
+            ServletUtil.write(response, inputStream, ContentType.TEXT_PLAIN.getValue());
+        }
     }
 
     /**

@@ -31,7 +31,7 @@
       </a-card>
     </a-spin>
     <!-- 文件管理 -->
-    <a-drawer v-if="sshData" :title="`${sshData.name} (${sshData.host}) 文件管理`" placement="right" width="90vw" :visible="drawerVisible" @close="onClose">
+    <a-drawer destroyOnClose v-if="sshData" :title="`${sshData.name} (${sshData.host}) 文件管理`" placement="right" width="90vw" :visible="drawerVisible" @close="onClose">
       <ssh-file v-if="drawerVisible" :ssh="sshData" />
     </a-drawer>
   </div>

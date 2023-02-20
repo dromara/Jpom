@@ -87,6 +87,7 @@
     </a-modal>
     <!-- 实时阅读 -->
     <a-drawer
+      destroyOnClose
       placement="right"
       :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
       :visible="logReadVisible"

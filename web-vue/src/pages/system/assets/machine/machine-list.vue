@@ -186,6 +186,7 @@
     </a-modal>
 
     <a-drawer
+      destroyOnClose
       title="机器详情"
       placement="right"
       :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"

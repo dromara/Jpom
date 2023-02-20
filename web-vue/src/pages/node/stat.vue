@@ -1,7 +1,7 @@
 <template>
   <div class="full-content">
     <div>
-      <a-card>
+      <a-card :headStyle="{ padding: '0 6px' }" :bodyStyle="{ padding: '10px' }">
         <template slot="title">
           <a-row>
             <a-space>
@@ -29,7 +29,7 @@
                 </template>
                 <a-icon type="question-circle" theme="filled" />
               </a-tooltip>
-              <a-col :span="3"> <a-statistic-countdown format="s 秒" title="" :value="deadline" @finish="onFinish" /> </a-col>
+              <a-col :span="3" class="header-statistic"> <a-statistic-countdown format="s 秒" title="刷新倒计时 " :value="deadline" @finish="onFinish" /> </a-col>
             </a-space>
           </a-row>
         </template>
@@ -65,7 +65,7 @@
                   </template>
 
                   <a-row :gutter="[8, 8]">
-                    <a-col :span="8">
+                    <a-col :span="8" style="text-align: center">
                       <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`CPU 占用率：${item.occupyCpu}%`">
                         <a-progress
                           type="circle"
@@ -81,7 +81,7 @@
                         />
                       </a-tooltip>
                     </a-col>
-                    <a-col :span="8">
+                    <a-col :span="8" style="text-align: center">
                       <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`硬盘占用率：${item.occupyDisk}%`">
                         <a-progress
                           type="circle"
@@ -97,7 +97,7 @@
                         />
                       </a-tooltip>
                     </a-col>
-                    <a-col :span="8">
+                    <a-col :span="8" style="text-align: center">
                       <a-tooltip @click="handleHistory(item, 'nodeTop')" :title="`内存占用率：${item.occupyMemory}%`">
                         <a-progress
                           :width="80"
@@ -292,12 +292,12 @@ export default {
 };
 </script>
 <style scoped>
-/* /deep/ .ant-statistic div {
+.header-statistic /deep/ .ant-statistic div {
   display: inline-block;
 }
 
-/deep/ .ant-statistic-content-value,
-/deep/ .ant-statistic-content {
+.header-statistic /deep/ .ant-statistic-content-value,
+.header-statistic /deep/ .ant-statistic-content {
   font-size: 16px;
-} */
+}
 </style>

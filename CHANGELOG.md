@@ -8,6 +8,8 @@
 2. 【server】新增 配置属性：jpom.node.stat-log-keep-days（节点统计日志保留天数）
 3. 【all】新增 机器节点硬盘信息统计
 4. 【all】新增 机器节点网络流量信息统计
+5. 【server】新增 构建触发器新增获取构建日志接口
+   （感谢 [@黑黑](https://gitee.com/c180) [Gitee issues I6G0AT](https://gitee.com/dromara/Jpom/issues/I6G0AT) ）
 
 ### 🐞 解决BUG、优化功能
 

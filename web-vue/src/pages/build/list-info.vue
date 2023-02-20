@@ -845,6 +845,38 @@
               </a-alert>
             </a-space>
           </a-tab-pane>
+          <a-tab-pane key="3" tab="查看构建日志">
+            <a-space style="display: block" direction="vertical" align="baseline">
+              <a-alert message="温馨提示" type="warning">
+                <template slot="description">
+                  <ul>
+                    <li>参数中的 id 、token 和触发构建一致、buildNumId 构建序号id</li>
+                    <li>构建序号id需要跟进实际情况替换</li>
+                  </ul>
+                </template>
+              </a-alert>
+              <a-alert
+                v-clipboard:copy="temp.buildLogUrl"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`获取单个构建日志地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>GET</a-tag> <span>{{ temp.buildLogUrl }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+            </a-space>
+          </a-tab-pane>
         </a-tabs>
       </a-form-model>
     </a-modal>
@@ -1570,9 +1602,11 @@ export default {
       this.temp.triggerBuildUrl = `${location.protocol}//${location.host}${res.data.triggerBuildUrl}`;
       this.temp.batchTriggerBuildUrl = `${location.protocol}//${location.host}${res.data.batchTriggerBuildUrl}`;
       this.temp.batchBuildStatusUrl = `${location.protocol}//${location.host}${res.data.batchBuildStatusUrl}`;
+      this.temp.buildLogUrl = `${location.protocol}//${location.host}${res.data.buildLogUrl}`;
       // this.temp.id = res.data.id;
       // this.temp.token = res.data.token;
       this.temp.batchBuildStatusUrl2 = `${this.temp.batchBuildStatusUrl}?id=${res.data.id}&token=${res.data.token}`;
+      this.temp.buildLogUrl = `${this.temp.buildLogUrl}?id=${res.data.id}&token=${res.data.token}&buildNumId=0`;
       this.temp = { ...this.temp };
     },
     // 清除构建

@@ -57,9 +57,14 @@ public class ServerOpenApi {
      */
     public static final String BUILD_TRIGGER_BUILD_BATCH = API + "build_batch";
     /**
-     * 获取当前构建状态和日志
+     * 获取当前构建状态
      */
     public static final String BUILD_TRIGGER_STATUS = API + "build_status";
+
+    /**
+     * 获取当前构建日志
+     */
+    public static final String BUILD_TRIGGER_LOG = API + "build_log";
 
     /**
      * SSH 脚本执行, 第一级脚本id,第二级token

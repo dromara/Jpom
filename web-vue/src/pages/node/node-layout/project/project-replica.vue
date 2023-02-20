@@ -16,7 +16,7 @@
       </template>
     </a-table>
     <!-- 项目控制台组件 -->
-    <a-drawer :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
+    <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="85vw" :visible="drawerConsoleVisible" @close="onConsoleClose">
       <console v-if="drawerConsoleVisible" :nodeId="node.id" :id="project.id" :projectId="project.projectId" :replica="temp" :copyId="temp.id" />
     </a-drawer>
   </div>
