@@ -14,8 +14,8 @@
             <a-select-option value="osOccupyCpu">cpu</a-select-option>
             <a-select-option value="osOccupyDisk">硬盘</a-select-option>
             <a-select-option value="osOccupyMemory">内存</a-select-option>
-            <a-select-option value="osOccupyMemory">更新时间</a-select-option>
-            <a-select-option value="osOccupyMemory">创建时间</a-select-option>
+            <a-select-option value="modifyTimeMillis">更新时间</a-select-option>
+            <a-select-option value="createTimeMillis">创建时间</a-select-option>
           </a-select>
           <a-button :loading="loading" type="primary" @click="getMachineList">搜索</a-button>
           <a-button type="primary" @click="addMachine">添加机器</a-button>

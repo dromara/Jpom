@@ -29,7 +29,6 @@ import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -137,7 +136,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             for (OutGivingNodeProject outGivingNodeProject1 : deleteNodeProject) {
                 NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject1.getNodeId());
                 JsonMessage<String> jsonMessage = this.deleteNodeProject(nodeModel, outGivingNodeProject1.getProjectId(), thorough);
-                if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+                if (!jsonMessage.success()) {
                     return new JsonMessage<>(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
                 }
             }
@@ -196,7 +195,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                 JSONObject data = tuple.get(1);
                 //
                 JsonMessage<String> jsonMessage = this.sendData(nodeModel, data, true);
-                if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+                if (!jsonMessage.success()) {
                     if (!edit) {
                         fail = true;
                         outGivingServer.delByKey(outGivingModel.getId());
