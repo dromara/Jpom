@@ -79,12 +79,12 @@
                     </a-col>
                   </a-row>
                 </a-tooltip>
-                <a-row type="flex" align="middle" justify="center">
+                <a-row type="flex" align="middle" justify="center" style="margin-top: 10px">
                   <a-button-group>
                     <a-button @click="handleEdit(item)" type="primary" size="small"> 编辑 </a-button>
                     <a-button @click="showMachineInfo(item)" type="primary" size="small">详情</a-button>
                     <a-button @click="syncToWorkspaceShow(item)" type="primary" size="small">分配</a-button>
-                    <a-button @click="deleteMachineInfo(item)" type="danger" size="small">删除</a-button>
+                    <a-button @click="deleteMachineInfo(item)" size="small">删除</a-button>
                   </a-button-group>
                 </a-row>
               </a-card>
