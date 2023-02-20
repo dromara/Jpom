@@ -223,7 +223,7 @@
       <fastInstall v-if="nodeVisible"></fastInstall>
     </a-modal>
     <!-- 文件管理 -->
-    <a-drawer :title="drawerTitle" placement="right" width="90vw" :visible="drawerVisible" @close="onClose">
+    <a-drawer destroyOnClose :title="drawerTitle" placement="right" width="90vw" :visible="drawerVisible" @close="onClose">
       <ssh-file v-if="drawerVisible" :ssh="temp" />
     </a-drawer>
     <!-- Terminal -->

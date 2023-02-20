@@ -52,6 +52,7 @@
 
     <!-- 控制台 -->
     <a-drawer
+      destroyOnClose
       :title="`${temp.name} 控制台`"
       placement="right"
       :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"

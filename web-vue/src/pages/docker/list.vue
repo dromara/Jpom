@@ -245,7 +245,7 @@
       </a-form-model>
     </a-modal>
     <!-- 控制台 -->
-    <a-drawer :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose">
+    <a-drawer destroyOnClose :title="`${temp.name} 控制台`" placement="right" :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="consoleVisible" @close="onClose">
       <console v-if="consoleVisible" :visible="consoleVisible" :id="temp.id"></console>
     </a-drawer>
     <!-- 同步到其他工作空间 -->

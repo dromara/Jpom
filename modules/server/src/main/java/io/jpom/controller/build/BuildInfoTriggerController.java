@@ -97,6 +97,8 @@ public class BuildInfoTriggerController extends BaseServerController {
         //
         String batchBuildStatusUrl = String.format("/%s/%s", contextPath, ServerOpenApi.BUILD_TRIGGER_STATUS);
         map.put("batchBuildStatusUrl", FileUtil.normalize(batchBuildStatusUrl));
+        String buildLogUrl = String.format("/%s/%s", contextPath, ServerOpenApi.BUILD_TRIGGER_LOG);
+        map.put("buildLogUrl", FileUtil.normalize(buildLogUrl));
         map.put("id", item.getId());
         map.put("token", item.getTriggerToken());
         return map;
