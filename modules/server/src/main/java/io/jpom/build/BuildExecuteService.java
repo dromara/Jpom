@@ -575,9 +575,6 @@ public class BuildExecuteService {
                 logRecorder.system("删除构建缓存");
                 CommandUtil.systemFastDel(this.gitFile);
             }
-            // env file
-            Map<String, String> envFileMap = FileUtils.readEnvFile(this.gitFile, this.buildExtraModule.getAttachEnv());
-            taskData.environmentMapBuilder.putStr(envFileMap);
             //
             taskData.environmentMapBuilder.put("BUILD_ID", this.buildExtraModule.getId());
             taskData.environmentMapBuilder.put("BUILD_NAME", this.buildExtraModule.getName());
@@ -695,6 +692,13 @@ public class BuildExecuteService {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            // env file
+            String attachEnv = this.buildExtraModule.getAttachEnv();
+            Opt.ofBlankAble(attachEnv).ifPresent(s -> {
+                logRecorder.system("读取附件变量：{}", attachEnv);
+                Map<String, String> envFileMap = FileUtils.readEnvFile(this.gitFile, s);
+                taskData.environmentMapBuilder.putStr(envFileMap);
+            });
             // 输出环境变量
             taskData.environmentMapBuilder.eachStr(s -> logRecorder.system(s));
             return true;

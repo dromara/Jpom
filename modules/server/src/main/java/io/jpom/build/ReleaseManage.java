@@ -66,7 +66,6 @@ import io.jpom.system.ExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.extconf.BuildExtConfig;
 import io.jpom.util.CommandUtil;
-import io.jpom.util.FileUtils;
 import io.jpom.util.LogRecorder;
 import io.jpom.util.StringUtil;
 import lombok.Builder;
@@ -255,7 +254,7 @@ public class ReleaseManage {
             File historyPackageFile = BuildUtil.getHistoryPackageFile(buildExtraModule.getId(), this.buildNumberId, StrUtil.SLASH);
             FileUtil.copyContent(historyPackageFile, tempPath, true);
             // env file
-            Map<String, String> envMap = FileUtils.readEnvFile(sourceFile, this.buildExtraModule.getAttachEnv());
+            Map<String, String> envMap = buildEnv.environment();
             //File envFile = FileUtil.file(tempPath, ".env");
             String dockerTag = StringUtil.formatStrByMap(this.buildExtraModule.getDockerTag(), envMap);
             //
