@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -219,7 +220,9 @@ public class NodeUpdateController extends BaseServerController {
     }
 
     @GetMapping(value = "confirm_fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<Collection<JSONObject>> confirmFastInstall(@ValidatorItem String id, @ValidatorItem String ip, int port) {
+    public JsonMessage<Collection<JSONObject>> confirmFastInstall(HttpServletRequest request,
+                                                                  @ValidatorItem String id,
+                                                                  @ValidatorItem String ip, int port) {
         JSONObject receiveCache = NodeInfoController.getReceiveCache(id);
         Assert.notNull(receiveCache, "没有对应的缓存信息");
         JSONArray jsonArray = receiveCache.getJSONArray("canUseNode");
@@ -242,7 +245,7 @@ public class NodeUpdateController extends BaseServerController {
         // 插入
         boolean exists = machineNodeServer.existsByUrl(machineNodeModel.getJpomUrl(), null);
         Assert.state(!exists, "对应的节点已经存在拉：" + machineNodeModel.getJpomUrl());
-        String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
+        String workspaceId = nodeService.getCheckUserWorkspace(request);
         machineNodeServer.insertAndNode(machineNodeModel, workspaceId);
         // 更新结果
         receiveCache.put("type", "success");

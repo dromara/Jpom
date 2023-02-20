@@ -89,6 +89,8 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     protected void fillInsert(MachineNodeModel machineNodeModel) {
         super.fillInsert(machineNodeModel);
         machineNodeModel.setGroupName(StrUtil.emptyToDefault(machineNodeModel.getGroupName(), Const.DEFAULT_GROUP_NAME));
+        //
+        machineNodeModel.setTransportMode(0);
     }
 
     @Override
@@ -162,7 +164,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         // 启动心跳检测
         int heartSecond = nodeConfig.getHeartSecond();
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread(runnable, "Jpom Node Monitor"));
-        scheduler.scheduleAtFixedRate(this, 10, heartSecond, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this, 0, heartSecond, TimeUnit.SECONDS);
     }
 
     @Override
@@ -223,7 +225,10 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         machineNodeModel.setId(machineNode.getId());
         machineNodeModel.setStatus(1);
         machineNodeModel.setStatusMsg("ok");
-        Integer networkDelay = data.getInteger("networkDelay");
+        int networkDelay = data.getIntValue("networkDelay");
+        int systemSleep = data.getIntValue("systemSleep");
+        // 减去系统固定休眠时间
+        networkDelay = networkDelay - systemSleep;
         machineNodeModel.setNetworkDelay(networkDelay);
         // jpom 相关信息
         Optional.ofNullable(data.getJSONObject("jpomInfo")).ifPresent(jsonObject -> {
@@ -334,8 +339,6 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         if (StrUtil.isNotEmpty(machineNodeModel.getId())) {
             this.updateById(machineNodeModel);
         } else {
-            // 目前默认为此
-            machineNodeModel.setTransportMode(0);
             this.insert(machineNodeModel);
         }
     }
@@ -387,16 +390,28 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
 
     public void insertAndNode(MachineNodeModel machineNodeModel, String workspaceId) {
         this.insert(machineNodeModel);
+        //
+        this.insertNode(machineNodeModel, workspaceId);
+    }
+
+    /**
+     * 根据机器添加 节点
+     *
+     * @param machineNodeModel 机器信息
+     * @param workspaceId      工作空间
+     */
+    public void insertNode(MachineNodeModel machineNodeModel, String workspaceId) {
         NodeModel nodeModel = this.createModel(machineNodeModel, workspaceId);
         nodeService.insert(nodeModel);
     }
 
     private NodeModel createModel(MachineNodeModel machineNodeModel, String workspaceId) {
         NodeModel nodeModel = new NodeModel();
+        nodeModel.setMachineId(machineNodeModel.getId());
         nodeModel.setWorkspaceId(workspaceId);
         nodeModel.setName(machineNodeModel.getName());
         nodeModel.setOpenStatus(1);
-        nodeModel.setGroup(Const.DEFAULT_GROUP_NAME);
+        nodeModel.setGroup(machineNodeModel.getGroupName());
         return nodeModel;
     }
 }

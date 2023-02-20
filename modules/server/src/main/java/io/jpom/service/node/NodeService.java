@@ -128,6 +128,15 @@ public class NodeService extends BaseGroupService<NodeModel> {
     }
 
 
+    public void existsNode(String workspaceId, String machineId) {
+        //
+        NodeModel where = new NodeModel();
+        where.setWorkspaceId(workspaceId);
+        where.setMachineId(machineId);
+        NodeModel nodeModel = this.queryByBean(where);
+        Assert.isNull(nodeModel, () -> "对应工作空间已经存在改节点啦:" + nodeModel.getName());
+    }
+
     /**
      * 将节点信息同步到其他工作空间
      *
@@ -139,12 +148,7 @@ public class NodeService extends BaseGroupService<NodeModel> {
         StrUtil.splitTrim(ids, StrUtil.COMMA).forEach(id -> {
             NodeModel data = this.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
             Assert.notNull(data, "没有对应到节点信息");
-            //
-            NodeModel where = new NodeModel();
-            where.setWorkspaceId(workspaceId);
-            where.setMachineId(data.getMachineId());
-            NodeModel nodeModel = this.queryByBean(where);
-            Assert.isNull(nodeModel, () -> "对应工作空间已经存在改节点啦:" + nodeModel.getName());
+            this.existsNode(workspaceId, data.getMachineId());
             // 不存在则添加节点
             data.setId(null);
             data.setWorkspaceId(workspaceId);

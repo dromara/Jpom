@@ -1,5 +1,5 @@
 import axios from "./config";
-import { parseTime, formatPercent2, renderSize } from "@/utils/const";
+import { parseTime, formatPercent2, renderSize, formatDuration } from "@/utils/const";
 import echarts from "echarts";
 
 // 获取机器信息
@@ -183,8 +183,11 @@ export function generateNodeNetChart(data) {
     yAxis: {
       type: "value",
       axisLabel: {
-        // 设置y轴数值为 kb/s
-        formatter: "{value} kb/s",
+        // 设置y轴数值为 bit/s
+        // formatter: "{value} bit/s",
+        formatter: (value) => {
+          return renderSize(value);
+        },
       },
     },
     tooltip: {
@@ -193,7 +196,7 @@ export function generateNodeNetChart(data) {
       formatter: function (params) {
         var html = params[0].name + "<br>";
         for (var i = 0; i < params.length; i++) {
-          html += params[i].marker + params[i].seriesName + ":" + renderSize(params[i].value * 1024) + "/s <br>";
+          html += params[i].marker + params[i].seriesName + ":" + renderSize(params[i].value) + "/s <br>";
         }
         return html;
       },
@@ -209,7 +212,7 @@ export function generateNodeNetChart(data) {
  */
 export function generateNodeNetworkTimeChart(data) {
   const dataArray = {
-    name: "网络延迟ms",
+    name: "网络延迟",
     type: "line",
     data: [],
     showSymbol: false,
@@ -239,7 +242,21 @@ export function generateNodeNetworkTimeChart(data) {
     yAxis: {
       type: "value",
       axisLabel: {
-        formatter: "{value} ms",
+        // formatter: "{value} ms",
+        formatter: (value) => {
+          return formatDuration(value);
+        },
+      },
+    },
+    tooltip: {
+      trigger: "axis",
+      show: true,
+      formatter: function (params) {
+        var html = params[0].name + "<br>";
+        for (var i = 0; i < params.length; i++) {
+          html += params[i].marker + params[i].seriesName + ":" + formatDuration(params[i].value) + " <br>";
+        }
+        return html;
       },
     },
     series: series,

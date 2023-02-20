@@ -101,6 +101,8 @@ public class IndexController extends BaseAgentController {
         JSONObject jsonObject = new JSONObject();
         JSONObject topInfo = OshiUtils.getSimpleInfo();
         jsonObject.put("simpleStatus", topInfo);
+        // 系统固定休眠时间
+        jsonObject.put("systemSleep", OshiUtils.NET_STAT_SLEEP + OshiUtils.CPU_STAT_SLEEP);
 
         JSONObject systemInfo = OshiUtils.getSystemInfo();
         jsonObject.put("systemInfo", systemInfo);

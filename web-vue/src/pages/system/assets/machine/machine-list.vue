@@ -18,6 +18,7 @@
             <a-select-option value="osOccupyMemory">创建时间</a-select-option>
           </a-select>
           <a-button :loading="loading" type="primary" @click="getMachineList">搜索</a-button>
+          <a-button type="primary" @click="addMachine">添加机器</a-button>
         </a-space>
       </template>
       <a-row :gutter="[16, 16]">
@@ -40,54 +41,50 @@
                       <a-tooltip :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : ''} `">
                         <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
                       </a-tooltip>
-
-                      <!-- <a-button type="link" icon="fullscreen" size="small"> </a-button> -->
-                      <!-- <a-icon type="fullscreen" /> -->
                     </a-col>
                   </a-row>
                 </template>
 
-                <!-- <a-row :gutter="[8, 8]"> -->
                 <a-tooltip :title="item.osName">
-                  <div class="item-info">
-                    <div class="title">系统名称:</div>
-                    <div class="content">
+                  <a-row class="item-info">
+                    <a-col :span="6" class="title text-overflow-hidden">系统名称:</a-col>
+                    <a-col :span="18" class="content text-overflow-hidden">
                       {{ item.osName }}
-                    </div>
-                  </div>
+                    </a-col>
+                  </a-row>
                 </a-tooltip>
                 <a-tooltip :title="item.osVersion">
-                  <div class="item-info">
-                    <div class="title">系统版本:</div>
-                    <div class="content">
+                  <a-row class="item-info">
+                    <a-col :span="6" class="title text-overflow-hidden">系统版本:</a-col>
+                    <a-col :span="18" class="content text-overflow-hidden">
                       {{ item.osVersion }}
-                    </div>
-                  </div>
+                    </a-col>
+                  </a-row>
                 </a-tooltip>
                 <a-tooltip :title="item.osLoadAverage">
-                  <div class="item-info">
-                    <div class="title">系统负载:</div>
-                    <div class="content">
+                  <a-row class="item-info">
+                    <a-col :span="6" class="title text-overflow-hidden">系统负载:</a-col>
+                    <a-col :span="18" class="content text-overflow-hidden">
                       {{ item.osLoadAverage }}
-                    </div>
-                  </div>
+                    </a-col>
+                  </a-row>
                 </a-tooltip>
                 <a-tooltip :title="item.jpomVersion">
-                  <div class="item-info">
-                    <div class="title">插件版本:</div>
-                    <div class="content">
+                  <a-row class="item-info">
+                    <a-col :span="6" class="title text-overflow-hidden">插件版本:</a-col>
+                    <a-col :span="18" class="content text-overflow-hidden">
                       {{ item.jpomVersion }}
-                    </div>
-                  </div>
+                    </a-col>
+                  </a-row>
                 </a-tooltip>
                 <a-row type="flex" align="middle" justify="center">
                   <a-button-group>
-                    <a-button @click="handleEdit(item)" size="small"> 编辑 </a-button>
-                    <a-button @click="showMachineInfo(item)" size="small">详情</a-button>
+                    <a-button @click="handleEdit(item)" type="primary" size="small"> 编辑 </a-button>
+                    <a-button @click="showMachineInfo(item)" type="primary" size="small">详情</a-button>
+                    <a-button @click="syncToWorkspaceShow(item)" type="primary" size="small">分配</a-button>
                     <a-button @click="deleteMachineInfo(item)" type="danger" size="small">删除</a-button>
                   </a-button-group>
                 </a-row>
-                <!-- <a-button type="link" :size="size"> 详情 </a-button> -->
               </a-card>
             </template>
           </a-col>
@@ -147,7 +144,7 @@
             </a-tooltip>
           </template>
           <a-input v-model="temp.jpomUrl" placeholder="节点地址 (127.0.0.1:2123)">
-            <a-select placeholder="选择协议类型" slot="addonBefore" v-model="temp.jpomProtocol" default-value="Http://" style="width: 80px">
+            <a-select placeholder="协议类型" slot="addonBefore" v-model="temp.jpomProtocol" default-value="Http://" style="width: 160px">
               <a-select-option value="Http"> Http:// </a-select-option>
               <a-select-option value="Https"> Https:// </a-select-option>
             </a-select>
@@ -202,15 +199,30 @@
       <!-- 机器信息组件 -->
       <machine-info v-if="drawerVisible" :machineId="temp.id" />
     </a-drawer>
+    <!-- 分配到其他工作空间 -->
+    <a-modal destroyOnClose v-model="syncToWorkspaceVisible" title="分配到其他工作空间" @ok="handleSyncToWorkspace" :maskClosable="false">
+      <!-- <a-alert message="温馨提示" type="warning">
+        <template slot="description"> </template>
+      </a-alert> -->
+      <a-form-model :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item> </a-form-model-item>
+        <a-form-model-item label="选择工作空间" prop="workspaceId">
+          <a-select show-search option-filter-prop="children" v-model="temp.workspaceId" placeholder="请选择工作空间">
+            <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 
 <script>
-import { machineListData, machineListGroup, statusMap, machineEdit, machineDelete } from "@/api/system/assets-machine";
+import { machineListData, machineListGroup, statusMap, machineEdit, machineDelete, machineDistribute } from "@/api/system/assets-machine";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import { mapGetters } from "vuex";
 import machineInfo from "./machine-info.vue";
+import { getWorkSpaceListAll } from "@/api/workspace";
 
 export default {
   components: {
@@ -226,11 +238,13 @@ export default {
       groupList: [],
       loading: true,
       editVisible: false,
+      syncToWorkspaceVisible: false,
       temp: {},
       rules: {
         name: [{ required: true, message: "请输入机器的名称", trigger: "blur" }],
       },
       drawerVisible: false,
+      workspaceList: [],
     };
   },
   computed: {
@@ -270,6 +284,10 @@ export default {
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter });
       this.getMachineList();
+    },
+    addMachine() {
+      this.temp = {};
+      this.editVisible = true;
     },
     // 修改
     handleEdit(record) {
@@ -324,6 +342,41 @@ export default {
         },
       });
     },
+    // 加载工作空间数据
+    loadWorkSpaceListAll() {
+      getWorkSpaceListAll().then((res) => {
+        if (res.code === 200) {
+          this.workspaceList = res.data;
+        }
+      });
+    },
+    // 同步到其他工作情况
+    syncToWorkspaceShow(item) {
+      this.syncToWorkspaceVisible = true;
+      this.loadWorkSpaceListAll();
+      this.temp = {
+        id: item.id,
+      };
+    },
+    handleSyncToWorkspace() {
+      if (!this.temp.workspaceId) {
+        this.$notification.warn({
+          message: "请选择工作空间",
+        });
+        return false;
+      }
+      // 同步
+      machineDistribute(this.temp).then((res) => {
+        if (res.code == 200) {
+          this.$notification.success({
+            message: res.msg,
+          });
+
+          this.syncToWorkspaceVisible = false;
+          return false;
+        }
+      });
+    },
   },
 };
 </script>
@@ -332,14 +385,18 @@ export default {
 .item-info {
   padding: 5px 0;
 }
+
+.text-overflow-hidden {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .item-info .title {
   display: inline;
   font-weight: bold;
 }
 .item-info .content {
   display: inline;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 </style>
