@@ -2,6 +2,10 @@
 
 ## 2.10.19
 
+### 🐣 新增功能
+
+1. 【server】新增 容器构建缓存插件支持全局缓存 `type: global`
+2. 【server】新增 容器构建缓存插件支持缓存 node_modules `mode: copy` (避免出现：[https://github.com/npm/cli/issues/3669](https://github.com/npm/cli/issues/3669))
 
 ### 🐞 解决BUG、优化功能
 
