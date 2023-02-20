@@ -292,28 +292,6 @@ export function saveNodeConfig(data) {
 }
 
 /**
- * 加载 菜单配置信息
- */
-export function getMenusConfig() {
-  return axios({
-    url: "/system/get_menus_config",
-    method: "post",
-    data: {},
-  });
-}
-
-/**
- * 保存菜单配置信息
- */
-export function saveMenusConfig(data) {
-  return axios({
-    url: "/system/save_menus_config.json",
-    method: "post",
-    data: data,
-  });
-}
-
-/**
  * 加载 代理配置
  */
 export function getProxyConfig() {

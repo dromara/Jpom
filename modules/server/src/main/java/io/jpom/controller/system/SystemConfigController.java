@@ -27,7 +27,6 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.core.net.MaskBit;
@@ -69,7 +68,6 @@ import top.jpom.db.StorageServiceFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -351,43 +349,6 @@ public class SystemConfigController extends BaseServerController {
         return JsonMessage.success("修改成功");
     }
 
-    /**
-     * 加载菜单配置
-     *
-     * @return json
-     */
-    @RequestMapping(value = "get_menus_config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> getMenusConfig() {
-        String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
-        JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
-        //"classpath:/menus/index.json"
-        //"classpath:/menus/node-index.json"
-        config.put("serverMenus", this.readMenusJson("classpath:/menus/index.json"));
-        config.put("nodeMenus", this.readMenusJson("classpath:/menus/node-index.json"));
-        return JsonMessage.success("", config);
-    }
-
-    @PostMapping(value = "save_menus_config.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(cls = ClassFeature.SYSTEM_CONFIG_MENUS, method = MethodFeature.EDIT)
-    public JsonMessage<Object> saveMenusConfig(String serverMenuKeys, String nodeMenuKeys) {
-        String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
-        //
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("nodeMenuKeys", StrUtil.splitTrim(nodeMenuKeys, StrUtil.COMMA));
-        jsonObject.put("serverMenuKeys", StrUtil.splitTrim(serverMenuKeys, StrUtil.COMMA));
-        String format = StrUtil.format("menus_config_{}", workspaceId);
-        systemParametersServer.upsert(format, jsonObject, format);
-        //
-        return JsonMessage.success("修改成功");
-    }
-
-    private JSONArray readMenusJson(String path) {
-        // 菜单
-        InputStream inputStream = ResourceUtil.getStream(path);
-        String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
-        return JSONArray.parseArray(json);
-    }
 
     /**
      * 加载代理配置
