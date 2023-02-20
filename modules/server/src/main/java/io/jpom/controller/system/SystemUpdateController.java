@@ -34,6 +34,7 @@ import io.jpom.JpomApplication;
 import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -48,6 +49,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -55,6 +57,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 在线升级
@@ -79,18 +82,17 @@ public class SystemUpdateController extends BaseServerController {
 
     @PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> info() {
-        NodeModel nodeModel = tryGetNode();
-        if (nodeModel != null) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.Info);
-        }
-        JpomManifest instance = JpomManifest.getInstance();
-        RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
-        //
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("manifest", instance);
-        jsonObject.put("remoteVersion", remoteVersion);
-        return JsonMessage.success("", jsonObject);
+    public JsonMessage<JSONObject> info(HttpServletRequest request, String machineId) {
+        JsonMessage<JSONObject> message = this.tryRequestNode(machineId, request, NodeUrl.Info);
+        return Optional.ofNullable(message).orElseGet(() -> {
+            JpomManifest instance = JpomManifest.getInstance();
+            RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+            //
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("manifest", instance);
+            jsonObject.put("remoteVersion", remoteVersion);
+            return JsonMessage.success("", jsonObject);
+        });
     }
 
     /**
@@ -99,10 +101,10 @@ public class SystemUpdateController extends BaseServerController {
      * @return changelog md
      */
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<String> changeLog() {
-        NodeModel nodeModel = tryGetNode();
-        if (nodeModel != null) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.CHANGE_LOG);
+    public JsonMessage<String> changeLog(HttpServletRequest request, String machineId) {
+        JsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.CHANGE_LOG);
+        if (message != null) {
+            return message;
         }
         //
         URL resource = ResourceUtil.getResource("CHANGELOG.md");
@@ -117,14 +119,21 @@ public class SystemUpdateController extends BaseServerController {
     @PostMapping(value = "upload-jar-sharding", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE, log = false)
     public JsonMessage<String> uploadJarSharding(MultipartFile file,
+                                                 String machineId,
                                                  String sliceId,
                                                  Integer totalSlice,
                                                  Integer nowSlice,
                                                  String fileSumMd5) throws IOException {
+        MultipartHttpServletRequest multiRequest = getMultiRequest();
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
             Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
-            return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar);
+            return NodeForward.requestMultipart(nodeModel, multiRequest, NodeUrl.SystemUploadJar);
+        }
+        if (StrUtil.isNotEmpty(machineId)) {
+            MachineNodeModel model = machineNodeServer.getByKey(machineId);
+            Assert.notNull(model, "没有找到对应的机器");
+            return NodeForward.requestMultipart(model, multiRequest, NodeUrl.SystemUploadJar);
         }
         String absolutePath = serverConfig.getUserTempPath().getAbsolutePath();
         this.uploadSharding(file, absolutePath, sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
@@ -136,10 +145,10 @@ public class SystemUpdateController extends BaseServerController {
     public JsonMessage<String> uploadJar(String sliceId,
                                          Integer totalSlice,
                                          String fileSumMd5,
-                                         HttpServletRequest request) throws IOException {
-        NodeModel nodeModel = tryGetNode();
-        if (nodeModel != null) {
-            JsonMessage<String> message = NodeForward.request(getNode(), request, NodeUrl.SystemUploadJarMerge);
+                                         HttpServletRequest request,
+                                         String machineId) throws IOException {
+        JsonMessage<String> message = this.tryRequestNode(machineId, request, NodeUrl.SystemUploadJarMerge);
+        if (message != null) {
             // 判断-删除分片id
             BaseServerController.SHARDING_IDS.remove(sliceId);
             return message;

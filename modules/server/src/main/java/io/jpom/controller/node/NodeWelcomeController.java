@@ -36,7 +36,6 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.func.assets.model.MachineNodeStatLogModel;
-import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.func.assets.server.MachineNodeStatLogServer;
 import io.jpom.model.BaseMachineModel;
 import io.jpom.model.data.NodeModel;
@@ -60,14 +59,11 @@ import java.util.Optional;
 public class NodeWelcomeController extends BaseServerController {
 
     private final MachineNodeStatLogServer machineNodeStatLogServer;
-    private final MachineNodeServer machineNodeServer;
     private final ServerConfig.NodeConfig nodeConfig;
 
     public NodeWelcomeController(MachineNodeStatLogServer machineNodeStatLogServer,
-                                 MachineNodeServer machineNodeServer,
                                  ServerConfig serverConfig) {
         this.machineNodeStatLogServer = machineNodeStatLogServer;
-        this.machineNodeServer = machineNodeServer;
         this.nodeConfig = serverConfig.getNode();
     }
 

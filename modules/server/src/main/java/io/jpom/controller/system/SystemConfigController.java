@@ -45,7 +45,6 @@ import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
-import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.model.node.NodeAgentWhitelist;
@@ -53,7 +52,6 @@ import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
-import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.init.ProxySelectorConfig;
@@ -92,21 +90,15 @@ import java.util.Map;
 public class SystemConfigController extends BaseServerController {
 
     private final SystemParametersServer systemParametersServer;
-    private final NodeService nodeService;
     private final ProxySelectorConfig proxySelectorConfig;
     private final DbExtConfig dbExtConfig;
-    private final MachineNodeServer machineNodeServer;
 
     public SystemConfigController(SystemParametersServer systemParametersServer,
-                                  NodeService nodeService,
                                   ProxySelectorConfig proxySelectorConfig,
-                                  DbExtConfig dbExtConfig,
-                                  MachineNodeServer machineNodeServer) {
+                                  DbExtConfig dbExtConfig) {
         this.systemParametersServer = systemParametersServer;
-        this.nodeService = nodeService;
         this.proxySelectorConfig = proxySelectorConfig;
         this.dbExtConfig = dbExtConfig;
-        this.machineNodeServer = machineNodeServer;
     }
 
     /**

@@ -73,7 +73,9 @@
                   <a-row class="item-info">
                     <a-col :span="6" class="title text-overflow-hidden">插件版本:</a-col>
                     <a-col :span="18" class="content text-overflow-hidden">
-                      {{ item.jpomVersion }}
+                      <span v-if="item.jpomVersion" type="link" size="small" @click="showMachineUpgrade(item)" style="color: #40a9ff">
+                        {{ item.jpomVersion || "-" }}
+                      </span>
                     </a-col>
                   </a-row>
                 </a-tooltip>
@@ -214,6 +216,21 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <a-drawer
+      destroyOnClose
+      :title="`${temp.name} 插件版本信息`"
+      placement="right"
+      :width="`${this.getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
+      :visible="drawerUpgradeVisible"
+      @close="
+        () => {
+          this.drawerUpgradeVisible = false;
+        }
+      "
+    >
+      <!-- 在线升级 -->
+      <upgrade v-if="drawerUpgradeVisible" :machineId="temp.id" />
+    </a-drawer>
   </div>
 </template>
 
@@ -224,11 +241,14 @@ import CustomSelect from "@/components/customSelect";
 import { mapGetters } from "vuex";
 import machineInfo from "./machine-info.vue";
 import { getWorkSpaceListAll } from "@/api/workspace";
+// import Upgrade from "@/pages/node/node-layout/system/upgrade.vue";
+import upgrade from "@/components/upgrade";
 
 export default {
   components: {
     CustomSelect,
     machineInfo,
+    upgrade,
   },
   data() {
     return {
@@ -245,6 +265,7 @@ export default {
         name: [{ required: true, message: "请输入机器的名称", trigger: "blur" }],
       },
       drawerVisible: false,
+      drawerUpgradeVisible: false,
       workspaceList: [],
     };
   },
@@ -378,13 +399,17 @@ export default {
         }
       });
     },
+    showMachineUpgrade(item) {
+      this.temp = { ...item };
+      this.drawerUpgradeVisible = true;
+    },
   },
 };
 </script>
 
 <style scoped>
 .item-info {
-  padding: 5px 0;
+  padding: 2px 0;
 }
 
 .text-overflow-hidden {
@@ -394,10 +419,10 @@ export default {
 }
 
 .item-info .title {
-  display: inline;
-  font-weight: bold;
+  /* display: inline; */
+  /* font-weight: bold; */
 }
 .item-info .content {
-  display: inline;
+  /* display: inline; */
 }
 </style>

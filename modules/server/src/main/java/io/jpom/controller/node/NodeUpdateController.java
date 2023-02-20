@@ -33,7 +33,6 @@ import io.jpom.common.*;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.controller.openapi.NodeInfoController;
 import io.jpom.func.assets.model.MachineNodeModel;
-import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.AgentFileModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -73,14 +72,11 @@ public class NodeUpdateController extends BaseServerController {
 
     private final SystemParametersServer systemParametersServer;
     private final ServerConfig serverConfig;
-    private final MachineNodeServer machineNodeServer;
 
     public NodeUpdateController(SystemParametersServer systemParametersServer,
-                                ServerConfig serverConfig,
-                                MachineNodeServer machineNodeServer) {
+                                ServerConfig serverConfig) {
         this.systemParametersServer = systemParametersServer;
         this.serverConfig = serverConfig;
-        this.machineNodeServer = machineNodeServer;
     }
 
     /**

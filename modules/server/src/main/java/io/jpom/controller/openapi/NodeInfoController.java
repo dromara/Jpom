@@ -36,7 +36,6 @@ import io.jpom.common.interceptor.NotLogin;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.func.assets.model.MachineNodeModel;
-import io.jpom.func.assets.server.MachineNodeServer;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.user.UserModel;
 import io.jpom.service.node.NodeService;
@@ -65,14 +64,11 @@ public class NodeInfoController extends BaseServerController {
 
     private final NodeService nodeService;
     private final WorkspaceService workspaceService;
-    private final MachineNodeServer machineNodeServer;
 
     public NodeInfoController(NodeService nodeService,
-                              WorkspaceService workspaceService,
-                              MachineNodeServer machineNodeServer) {
+                              WorkspaceService workspaceService) {
         this.nodeService = nodeService;
         this.workspaceService = workspaceService;
-        this.machineNodeServer = machineNodeServer;
     }
 
     /**
