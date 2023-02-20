@@ -28,11 +28,13 @@ import io.jpom.common.JsonMessage;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.func.assets.server.MachineNodeServer;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.node.NodeService;
+import io.jpom.service.system.WorkspaceService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,11 +60,14 @@ public class MachineNodeController {
 
     private final MachineNodeServer machineNodeServer;
     private final NodeService nodeService;
+    private final WorkspaceService workspaceService;
 
     public MachineNodeController(MachineNodeServer machineNodeServer,
-                                 NodeService nodeService) {
+                                 NodeService nodeService,
+                                 WorkspaceService workspaceService) {
         this.machineNodeServer = machineNodeServer;
         this.nodeService = nodeService;
+        this.workspaceService = workspaceService;
     }
 
     @PostMapping(value = "list-data", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -102,6 +107,21 @@ public class MachineNodeController {
         long count = nodeService.countByMachine(id);
         Assert.state(count <= 0, "当前机器还关联" + count + "个节点不能删除");
         machineNodeServer.delByKey(id);
+        return JsonMessage.success("操作成功");
+    }
+
+    @PostMapping(value = "distribute", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public JsonMessage<String> distribute(@ValidatorItem String id, @ValidatorItem String workspaceId) {
+        MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
+        Assert.notNull(machineNodeModel, "没有对应的机器");
+        WorkspaceModel workspaceModel = new WorkspaceModel(workspaceId);
+        boolean exists = workspaceService.exists(workspaceModel);
+        Assert.state(exists, "不存在对应的工作空间");
+        //
+        nodeService.existsNode(workspaceId, id);
+        //
+        machineNodeServer.insertNode(machineNodeModel, workspaceId);
         return JsonMessage.success("操作成功");
     }
 }

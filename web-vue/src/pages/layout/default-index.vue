@@ -111,11 +111,6 @@ export default {
               element: document.querySelector(".layout-content"),
               intro: "这里是主要的内容展示区域",
             },
-            {
-              title: "导航助手",
-              element: document.querySelector(".jpom-node-manage-add"),
-              intro: "如果节点列表中还没有节点 可以点击【新增】按钮新增节点",
-            },
           ],
         },
       });

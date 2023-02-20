@@ -49,6 +49,9 @@ import java.util.stream.Stream;
  */
 public class OshiUtils {
 
+    public static final int NET_STAT_SLEEP = 1000;
+    public static final int CPU_STAT_SLEEP = 1000;
+
     static {
         // 解决Oshi获取CPU使用率与Windows任务管理器显示不匹配的问题
         GlobalConfig.set(GlobalConfig.OSHI_OS_WINDOWS_CPU_UTILITY, true);
@@ -105,7 +108,7 @@ public class OshiUtils {
     public static JSONObject getSimpleInfo() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("time", SystemClock.now());
-        CpuInfo cpuInfo = OshiUtil.getCpuInfo();
+        CpuInfo cpuInfo = OshiUtil.getCpuInfo(CPU_STAT_SLEEP);
         jsonObject.put("cpu", cpuInfo.getUsed());
         //
         GlobalMemory globalMemory = OshiUtil.getMemory();
@@ -122,7 +125,7 @@ public class OshiUtils {
         //
         NetIoInfo startNetInfo = getNetInfo();
         //暂停1秒
-        Util.sleep(1000);
+        Util.sleep(NET_STAT_SLEEP);
         NetIoInfo endNetInfo = getNetInfo();
         jsonObject.put("netTxBytes", endNetInfo.getTxbyt() - startNetInfo.getTxbyt());
         jsonObject.put("netRxBytes", endNetInfo.getRxbyt() - startNetInfo.getRxbyt());
@@ -230,12 +233,12 @@ public class OshiUtils {
         private Long txpck;
 
         /**
-         * 接收的KB数,rxkB/s
+         * 接收的KB数,rxbit/s
          */
         private Long rxbyt;
 
         /**
-         * 发送的KB数,txkB/s
+         * 发送的KB数,txbit/s
          */
         private Long txbyt;
     }

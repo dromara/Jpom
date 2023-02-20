@@ -430,9 +430,11 @@ export default {
                 this.handleNode(item);
               }
             });
-            this.$nextTick(() => {
-              this.introGuideList();
-            });
+            if (res.data.total > 0) {
+              this.$nextTick(() => {
+                this.introGuideList();
+              });
+            }
             resolve();
           }
           this.loading = false;

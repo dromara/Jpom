@@ -41,6 +41,7 @@ import io.jpom.func.assets.server.MachineNodeStatLogServer;
 import io.jpom.model.BaseMachineModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.permission.SystemPermission;
+import io.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -60,11 +61,14 @@ public class NodeWelcomeController extends BaseServerController {
 
     private final MachineNodeStatLogServer machineNodeStatLogServer;
     private final MachineNodeServer machineNodeServer;
+    private final ServerConfig.NodeConfig nodeConfig;
 
     public NodeWelcomeController(MachineNodeStatLogServer machineNodeStatLogServer,
-                                 MachineNodeServer machineNodeServer) {
+                                 MachineNodeServer machineNodeServer,
+                                 ServerConfig serverConfig) {
         this.machineNodeStatLogServer = machineNodeStatLogServer;
         this.machineNodeServer = machineNodeServer;
+        this.nodeConfig = serverConfig.getNode();
     }
 
     @PostMapping(value = "node_monitor_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -127,16 +131,19 @@ public class NodeWelcomeController extends BaseServerController {
     }
 
     @GetMapping(value = "machine-info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<MachineNodeModel> machineInfo(String machineId) {
+    public JsonMessage<JSONObject> machineInfo(String machineId) {
         NodeModel nodeModel = tryGetNode();
         String useMachineId = Optional.ofNullable(nodeModel).map(BaseMachineModel::getMachineId).orElse(machineId);
         MachineNodeModel model = machineNodeServer.getByKey(useMachineId);
         Assert.notNull(model, "没有找到对应的机器");
-        return JsonMessage.success("", model);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data", model);
+        jsonObject.put("heartSecond", nodeConfig.getHeartSecond());
+        return JsonMessage.success("", jsonObject);
     }
 
     @GetMapping(value = "disk-info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<MachineNodeModel> diskInfo(HttpServletRequest request, String machineId) {
+    public JsonMessage<List<JSONObject>> diskInfo(HttpServletRequest request, String machineId) {
         NodeModel node = tryGetNode();
         if (node != null) {
             return NodeForward.request(node, request, NodeUrl.DiskInfo);

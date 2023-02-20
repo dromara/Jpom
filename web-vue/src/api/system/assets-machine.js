@@ -35,6 +35,15 @@ export function machineDelete(params) {
   });
 }
 
+// 分配机器
+export function machineDistribute(params) {
+  return axios({
+    url: "/system/assets/machine/distribute",
+    method: "post",
+    params: params,
+  });
+}
+
 export const statusMap = {
   0: "无法连接",
   1: "正常",

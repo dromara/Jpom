@@ -52,10 +52,19 @@
               <a-descriptions-item label="硬盘">{{ renderSize(machineInfo && machineInfo.osFileStoreTotal) }} </a-descriptions-item>
 
               <a-descriptions-item label="负载">{{ machineInfo && machineInfo.osLoadAverage }} </a-descriptions-item>
-              <a-descriptions-item label="系统运行时间">{{ formatDuration(((machineInfo && machineInfo.osSystemUptime) || 0) * 1000) }} </a-descriptions-item>
+              <a-descriptions-item label="系统运行时间">{{ formatDuration(((machineInfo && machineInfo.osSystemUptime) || 0) * 1000, "", 3) }} </a-descriptions-item>
               <a-descriptions-item label="插件版本">{{ machineInfo && machineInfo.jpomVersion }} </a-descriptions-item>
               <a-descriptions-item label="插件运行时间">{{ formatDuration(machineInfo && machineInfo.jpomUptime, "", 3) }} </a-descriptions-item>
               <a-descriptions-item label="插件构建时间">{{ machineInfo && machineInfo.jpomBuildTime }} </a-descriptions-item>
+              <a-descriptions-item label="JDK版本">{{ machineInfo && machineInfo.javaVersion }} </a-descriptions-item>
+              <a-descriptions-item label="JVM总内存">{{ renderSize(machineInfo && machineInfo.jvmTotalMemory) }} </a-descriptions-item>
+              <a-descriptions-item label="JVM剩余内存">{{ renderSize(machineInfo && machineInfo.jvmFreeMemory) }} </a-descriptions-item>
+
+              <a-descriptions-item label="项目数">{{ machineInfo && machineInfo.jpomProjectCount }} </a-descriptions-item>
+              <a-descriptions-item label="脚本数">{{ machineInfo && machineInfo.jpomScriptCount }} </a-descriptions-item>
+              <a-descriptions-item label="网络延迟">{{ formatDuration(machineInfo && machineInfo.networkDelay) }} </a-descriptions-item>
+              <a-descriptions-item></a-descriptions-item>
+              <a-descriptions-item></a-descriptions-item>
               <a-descriptions-item label="硬盘占用" :span="4">
                 <a-progress
                   :stroke-color="{
@@ -91,17 +100,24 @@
         <a-space direction="vertical" style="display: block">
           <a-card size="small" title="基础信息">
             <template slot="extra">
-              <a-button size="small" type="primary" @click="handleHistory"><a-icon type="area-chart" />历史监控图表</a-button>
+              <a-button size="small" v-if="historyChart" type="primary" @click="handleHistory"><a-icon type="area-chart" />历史监控图表</a-button>
             </template>
             <!-- top 图表 -->
             <div id="top-chart" class="chart">loading...</div>
           </a-card>
-          <a-card size="small" title="网络信息">
+          <a-card size="small" title="网络流量信息">
             <template slot="extra">
-              <a-button size="small" type="primary" @click="handleHistory('network-stat')"><a-icon type="area-chart" />历史监控图表</a-button>
+              <a-button size="small" v-if="netHistoryChart" type="primary" @click="handleHistory('network-stat')"><a-icon type="area-chart" />历史监控图表</a-button>
             </template>
-            <!-- 网络 图表 -->
+            <!-- 网络流量图表 -->
             <div id="net-chart" class="chart">loading...</div>
+          </a-card>
+          <a-card size="small" title="机器延迟">
+            <template slot="extra">
+              <a-button size="small" v-if="networkDelayChart" type="primary" @click="handleHistory('networkDelay')"><a-icon type="area-chart" />历史监控图表</a-button>
+            </template>
+            <!-- 机器延迟 图表 -->
+            <div id="network-delay-chart" class="chart">loading...</div>
           </a-card>
         </a-space>
       </a-tab-pane>
@@ -160,7 +176,7 @@
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="disk" tab="硬盘">
-        <a-table size="middle" :locale="tableLocale" :loading="loading" :columns="diskColumns" :data-source="diskList" bordered rowKey="uuid" :pagination="false">
+        <a-table size="middle" :locale="tableLocale" :loading="diskLoading" :columns="diskColumns" :data-source="diskList" bordered rowKey="uuid" :pagination="false">
           <a-tooltip slot="percentTooltip" slot-scope="text" placement="topLeft" :title="formatPercent(text)">
             {{ formatPercent(text) }}
           </a-tooltip>
@@ -189,7 +205,7 @@ import { nodeMonitorData, getProcessList, killPid } from "@/api/node";
 import { renderSize, formatPercent, parseTime, formatDuration, formatPercent2Number } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import NodeTop from "@/pages/node/node-layout/node-top";
-import { generateNodeTopChart, drawChart, machineInfo, generateNodeNetChart, machineDiskInfo } from "@/api/node-stat";
+import { generateNodeTopChart, drawChart, machineInfo, generateNodeNetChart, machineDiskInfo, generateNodeNetworkTimeChart } from "@/api/node-stat";
 import { statusMap } from "@/api/system/assets-machine";
 
 export default {
@@ -216,6 +232,7 @@ export default {
   data() {
     return {
       loading: false,
+      diskLoading: false,
       tableLocale: {
         emptyText: "",
       },
@@ -265,9 +282,10 @@ export default {
         { title: "总 inode 数", dataIndex: "totalInodes", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "选项", dataIndex: "options", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
       ],
-      refreshInterval: 20,
+      refreshInterval: 5,
       historyChart: null,
       netHistoryChart: null,
+      networkDelayChart: null,
       countdownTime: Date.now(),
       machineInfo: null,
     };
@@ -297,10 +315,13 @@ export default {
     getMachineInfo() {
       machineInfo({ ...this.idInfo }).then((res) => {
         //
-        this.machineInfo = res.data;
-        if (this.machineInfo) {
-          let ipListStr = (this.machineInfo && this.machineInfo.hostIpv4s) || "";
-          this.machineInfo = { ...this.machineInfo, ipv4List: ipListStr.length ? ipListStr.split(",") : "" };
+        if (res.data) {
+          this.machineInfo = res.data.data;
+          if (this.machineInfo) {
+            let ipListStr = (this.machineInfo && this.machineInfo.hostIpv4s) || "";
+            this.machineInfo = { ...this.machineInfo, ipv4List: ipListStr.length ? ipListStr.split(",") : "" };
+          }
+          this.refreshInterval = res.data.heartSecond;
         }
       });
     },
@@ -324,7 +345,7 @@ export default {
       this.processSearch = { ...this.processSearch, processName: nodeCache?.processName || this.processSearch.processName, processCount: nodeCache?.processCount || this.processSearch.processCount };
       this.processNames = nodeCache?.processNames || this.processNames;
       // 加载缓存信息
-      this.refreshInterval = this.getCacheNode("refreshInterval", this.refreshInterval);
+      //this.refreshInterval = this.getCacheNode("refreshInterval", this.refreshInterval);
       //
       this.pullNodeData();
     },
@@ -351,6 +372,7 @@ export default {
         if (res.code === 200) {
           this.historyChart = drawChart(res.data, "top-chart", generateNodeTopChart);
           this.netHistoryChart = drawChart(res.data, "net-chart", generateNodeNetChart);
+          this.networkDelayChart = drawChart(res.data, "network-delay-chart", generateNodeNetworkTimeChart);
         }
       });
     },
@@ -413,7 +435,7 @@ export default {
       cacheJson[cacheId].processNames = this.processNames;
       cacheJson[cacheId].processName = this.processSearch.processName;
       cacheJson[cacheId].processCount = this.processSearch.processCount;
-      cacheJson["refreshInterval"] = this.refreshInterval;
+      //cacheJson["refreshInterval"] = this.refreshInterval;
       localStorage.setItem("node-process-name", JSON.stringify(cacheJson));
     },
     getCacheNodeProcess() {
@@ -438,8 +460,12 @@ export default {
       return cacheJson[key] || defaultValue;
     },
     getMachineDiskInfo() {
+      this.diskLoading = !this.diskList || this.diskList.length <= 0;
       machineDiskInfo({ ...this.idInfo }).then((res) => {
         this.diskList = res.data;
+        if (this.diskList) {
+          this.diskLoading = false;
+        }
       });
     },
   },
