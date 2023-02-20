@@ -529,7 +529,7 @@ export default {
     // 管理节点
     handleNode(record) {
       this.temp = Object.assign({}, record);
-      this.drawerTitle = `${record.name} (${this.temp.url})`;
+      this.drawerTitle = `${record.name}`;
       this.drawerVisible = true;
       let nodeId = this.$route.query.nodeId;
       if (nodeId !== record.id) {
