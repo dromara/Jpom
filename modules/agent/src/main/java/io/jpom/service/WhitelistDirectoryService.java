@@ -75,37 +75,24 @@ public class WhitelistDirectoryService extends BaseDataService {
         saveWhitelistDirectory(agentWhitelist);
     }
 
-    public boolean isInstalled() {
-        AgentWhitelist agentWhitelist = getWhitelist();
-        List<String> project = agentWhitelist.getProject();
-        return project != null && !project.isEmpty();
-    }
-
-    private List<String> getNgxDirectory() {
-        AgentWhitelist agentWhitelist = getWhitelist();
-        return agentWhitelist.getNginx();
-    }
-
     public boolean checkProjectDirectory(String path) {
         AgentWhitelist agentWhitelist = getWhitelist();
-
-        List<String> list = agentWhitelist.getProject();
+        List<String> list = agentWhitelist.project();
         return AgentWhitelist.checkPath(list, path);
     }
 
     public boolean checkNgxDirectory(String path) {
-        List<String> list = getNgxDirectory();
+
+        AgentWhitelist agentWhitelist = getWhitelist();
+        List<String> list = agentWhitelist.nginx();
         return AgentWhitelist.checkPath(list, path);
     }
 
-    private List<String> getCertificateDirectory() {
-        AgentWhitelist agentWhitelist = getWhitelist();
-
-        return agentWhitelist.getCertificate();
-    }
 
     public boolean checkCertificateDirectory(String path) {
-        List<String> list = getCertificateDirectory();
+        AgentWhitelist agentWhitelist = getWhitelist();
+
+        List<String> list = agentWhitelist.certificate();
         if (list == null) {
             return false;
         }

@@ -51,7 +51,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -70,10 +69,14 @@ import java.util.Optional;
 @Slf4j
 public class NginxController extends BaseAgentController {
 
-    @Resource
-    private NginxService nginxService;
-    @Resource
-    private WhitelistDirectoryService whitelistDirectoryService;
+    private final NginxService nginxService;
+    private final WhitelistDirectoryService whitelistDirectoryService;
+
+    public NginxController(NginxService nginxService,
+                           WhitelistDirectoryService whitelistDirectoryService) {
+        this.nginxService = nginxService;
+        this.whitelistDirectoryService = whitelistDirectoryService;
+    }
 
     /**
      * 配置列表
@@ -111,13 +114,13 @@ public class NginxController extends BaseAgentController {
     public JsonMessage<JSONObject> itemData(String path, String name) {
         boolean ngxDirectory = whitelistDirectoryService.checkNgxDirectory(path);
         Assert.state(ngxDirectory, "文件路径错误,非白名单路径");
-
-        File file = FileUtil.file(path, name);
+        String realPath = AgentWhitelist.convertRealPath(path);
+        File file = FileUtil.file(realPath, name);
         Assert.state(FileUtil.isFile(file), "对应对配置文件不存在");
         JSONObject jsonObject = new JSONObject();
         String string = FileUtil.readUtf8String(file);
         jsonObject.put("context", string);
-        String rName = StringUtil.delStartPath(file, path, true);
+        String rName = StringUtil.delStartPath(file, realPath, true);
         // nginxService.paresName(path, file.getAbsolutePath())
         jsonObject.put("name", rName);
         jsonObject.put("whitePath", path);
@@ -144,6 +147,7 @@ public class NginxController extends BaseAgentController {
         //
         boolean ngxDirectory = whitelistDirectoryService.checkNgxDirectory(whitePath);
         Assert.state(ngxDirectory, "请选择正确的白名单");
+        whitePath = AgentWhitelist.convertRealPath(whitePath);
         //nginx文件
         File file = FileUtil.file(whitePath, name);
         if ("add".equals(genre) && file.exists()) {
@@ -249,6 +253,7 @@ public class NginxController extends BaseAgentController {
         } else {
             Assert.state(name.endsWith(".conf"), "文件后缀必须为\".conf\"");
         }
+        path = AgentWhitelist.convertRealPath(path);
         File file = FileUtil.file(path, name);
         if (StrUtil.equals(type, "real")) {
             // 真删除

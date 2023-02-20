@@ -24,6 +24,8 @@ package io.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseJsonModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 import java.util.Set;
@@ -34,43 +36,33 @@ import java.util.Set;
  * @author jiangzeyin
  * @since 2019/4/22
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class ServerWhitelist extends BaseJsonModel {
 
-	public static final String ID = "OUTGIVING_WHITELIST";
+    public static final String ID = "OUTGIVING_WHITELIST";
 
-	/**
-	 * 不同工作空间的 ID
-	 *
-	 * @param workspaceId 工作空间ID
-	 * @return id
-	 */
-	public static String workspaceId(String workspaceId) {
-		return ServerWhitelist.ID + StrUtil.DASHED + workspaceId;
-	}
+    /**
+     * 不同工作空间的 ID
+     *
+     * @param workspaceId 工作空间ID
+     * @return id
+     */
+    public static String workspaceId(String workspaceId) {
+        return ServerWhitelist.ID + StrUtil.DASHED + workspaceId;
+    }
 
-	/**
-	 * 项目的白名单
-	 */
-	private List<String> outGiving;
+    /**
+     * 项目的白名单
+     */
+    private List<String> outGiving;
 
-	/**
-	 * 允许远程下载的 host
-	 */
-	private Set<String> allowRemoteDownloadHost;
+    /**
+     * 允许远程下载的 host
+     */
+    private Set<String> allowRemoteDownloadHost;
 
-	public List<String> getOutGiving() {
-		return outGiving;
-	}
-
-	public void setOutGiving(List<String> outGiving) {
-		this.outGiving = outGiving;
-	}
-
-	public Set<String> getAllowRemoteDownloadHost() {
-		return allowRemoteDownloadHost;
-	}
-
-	public void setAllowRemoteDownloadHost(Set<String> allowRemoteDownloadHost) {
-		this.allowRemoteDownloadHost = allowRemoteDownloadHost;
-	}
+    public List<String> outGiving() {
+        return AgentWhitelist.useConvert(outGiving);
+    }
 }

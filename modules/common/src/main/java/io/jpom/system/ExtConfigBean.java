@@ -192,6 +192,6 @@ public class ExtConfigBean {
                 path = FileUtil.getAbsolutePath(parentFile);
             }
         }
-        return path;
+        return FileUtil.normalize(path);
     }
 }

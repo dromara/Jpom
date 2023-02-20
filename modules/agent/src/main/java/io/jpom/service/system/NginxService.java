@@ -64,15 +64,9 @@ public class NginxService extends BaseDataService {
     }
 
     public List<JSONObject> list(String whitePath, String fileName, String showAll) {
-        AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
-        if (agentWhitelist == null) {
-            return null;
-        }
-        List<String> ngxDirectory = agentWhitelist.getNginx();
-        if (ngxDirectory == null) {
-            return null;
-        }
-        File normalize = FileUtil.file(whitePath, fileName);
+        String realPath = AgentWhitelist.convertRealPath(whitePath);
+        //
+        File normalize = FileUtil.file(realPath, fileName);
         File[] files = FileUtil.ls(normalize.getAbsolutePath());
         if (files == null || files.length <= 0) {
             return null;
@@ -147,7 +141,8 @@ public class NginxService extends BaseDataService {
      * @param fileName  文件路径
      */
     private JSONObject addChild(String whitePath, String fileName) {
-        File parentFile = StrUtil.isNotEmpty(fileName) ? FileUtil.file(whitePath, fileName) : FileUtil.file(whitePath);
+        String realPath = AgentWhitelist.convertRealPath(whitePath);
+        File parentFile = StrUtil.isNotEmpty(fileName) ? FileUtil.file(realPath, fileName) : FileUtil.file(realPath);
         if (!FileUtil.isDirectory(parentFile)) {
             return null;
         }
@@ -163,7 +158,7 @@ public class NginxService extends BaseDataService {
         object.put("path", fileName);
         JSONArray array = new JSONArray();
         for (File file : files) {
-            String name = StringUtil.delStartPath(file, whitePath, true);
+            String name = StringUtil.delStartPath(file, realPath, true);
             if (file.isDirectory()) {
                 if (FileUtil.isEmpty(file)) {
                     continue;
