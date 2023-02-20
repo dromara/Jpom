@@ -137,6 +137,14 @@ public class NodeService extends BaseGroupService<NodeModel> {
         Assert.isNull(nodeModel, () -> "对应工作空间已经存在改节点啦:" + nodeModel.getName());
     }
 
+    public boolean existsNode2(String workspaceId, String machineId) {
+        //
+        NodeModel where = new NodeModel();
+        where.setWorkspaceId(workspaceId);
+        where.setMachineId(machineId);
+        return this.exists(where);
+    }
+
     /**
      * 将节点信息同步到其他工作空间
      *

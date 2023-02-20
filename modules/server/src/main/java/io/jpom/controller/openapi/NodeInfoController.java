@@ -115,7 +115,8 @@ public class NodeInfoController extends BaseServerController {
         }).filter(Objects::nonNull).collect(Collectors.toList());
         // 只返回能通的 IP
         canUseIps = canUseNode.stream().map(MachineNodeModel::getName).collect(Collectors.toList());
-        int size1 = CollUtil.size(canUseNode);
+        // 标记为系统操作
+        BaseServerController.resetInfo(UserModel.EMPTY);
         //
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("allIp", ipsList);
@@ -124,16 +125,22 @@ public class NodeInfoController extends BaseServerController {
         jsonObject.put("id", sha1Id);
         jsonObject.put("canUseNode", canUseNode);
         //
-        exists = false;
         for (MachineNodeModel nodeModel : canUseNode) {
-            if (machineNodeServer.existsByUrl(nodeModel.getJpomUrl(), null)) {
-                // 存在
-                jsonObject.put("type", "exists");
-                exists = true;
+            MachineNodeModel existsMachine = machineNodeServer.getByUrl(nodeModel.getJpomUrl());
+            if (existsMachine != null) {
+                if (nodeService.existsNode2(workspaceId, existsMachine.getId())) {
+                    // 存在
+                    jsonObject.put("type", "exists");
+                } else {
+                    // 自动同步
+                    jsonObject.put("type", "success");
+                    machineNodeServer.insertNode(existsMachine, workspaceId);
+                }
                 break;
             }
         }
-        if (!exists) {
+        if (!jsonObject.containsKey("type")) {
+            int size1 = CollUtil.size(canUseNode);
             if (size1 == 1) {
                 // 只有一个 ip 可以使用,添加插件端
                 BaseServerController.resetInfo(UserModel.EMPTY);
