@@ -307,6 +307,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         //
         MachineNodeModel update = new MachineNodeModel();
         update.setId(machineNodeModel.getId());
+        update.setGroupName(machineNodeModel.getGroupName());
         update.setName(machineNodeModel.getName());
         update.setJpomHttpProxy(machineNodeModel.getJpomHttpProxy());
         update.setJpomHttpProxyType(machineNodeModel.getJpomHttpProxyType());

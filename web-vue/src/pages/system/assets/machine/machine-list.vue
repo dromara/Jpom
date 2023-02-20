@@ -131,7 +131,7 @@
         <a-form-model-item label="机器名称" prop="name">
           <a-input :maxLength="50" v-model="temp.name" placeholder="机器名称" />
         </a-form-model-item>
-        <a-form-model-item label="机器分组" prop="group">
+        <a-form-model-item label="机器分组" prop="groupName">
           <custom-select v-model="temp.groupName" :data="groupList" suffixIcon="" inputPlaceholder="添加分组" selectPlaceholder="选择分组名"> </custom-select>
         </a-form-model-item>
 
