@@ -98,6 +98,7 @@
                     <a-button @click="handleEdit(item)" type="primary" size="small"> 编辑 </a-button>
                     <a-button @click="showMachineInfo(item)" type="primary" size="small">详情</a-button>
                     <a-button @click="syncToWorkspaceShow(item)" type="primary" size="small">分配</a-button>
+                    <a-button @click="viewMachineNode(item)" type="primary" size="small">节点</a-button>
                     <a-button @click="deleteMachineInfo(item)" size="small">删除</a-button>
                   </a-button-group>
                 </a-row>
@@ -230,6 +231,7 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 机器在线升级相关信息 -->
     <a-drawer
       destroyOnClose
       :title="`${temp.name} 插件版本信息`"
@@ -245,11 +247,23 @@
       <!-- 在线升级 -->
       <upgrade v-if="drawerUpgradeVisible" :machineId="temp.id" />
     </a-drawer>
+    <!-- 查看机器关联节点 -->
+    <a-modal destroyOnClose v-model="viewLinkNode" width="50%" title="关联节点" :footer="null" :maskClosable="false">
+      <a-list bordered :data-source="nodeList">
+        <a-list-item slot="renderItem" slot-scope="item" style="display: block">
+          <a-row>
+            <a-col :span="10">节点名称：{{ item.name }}</a-col>
+            <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+            <a-col :span="4"> <a-button type="link" icon="login" @click="toNode(item.id, item.workspace && item.workspace.id)"> </a-button></a-col>
+          </a-row>
+        </a-list-item>
+      </a-list>
+    </a-modal>
   </div>
 </template>
 
 <script>
-import { machineListData, machineListGroup, statusMap, machineEdit, machineDelete, machineDistribute } from "@/api/system/assets-machine";
+import { machineListData, machineListGroup, statusMap, machineEdit, machineDelete, machineDistribute, machineListNode } from "@/api/system/assets-machine";
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import { mapGetters } from "vuex";
@@ -281,6 +295,8 @@ export default {
       drawerVisible: false,
       drawerUpgradeVisible: false,
       workspaceList: [],
+      viewLinkNode: false,
+      nodeList: [],
     };
   },
   computed: {
@@ -413,9 +429,35 @@ export default {
         }
       });
     },
+    // 显示节点版本信息
     showMachineUpgrade(item) {
       this.temp = { ...item };
       this.drawerUpgradeVisible = true;
+    },
+    // 查看机器关联的节点
+    viewMachineNode(item) {
+      machineListNode({
+        id: item.id,
+      }).then((res) => {
+        if (res.code === 200) {
+          this.viewLinkNode = true;
+          this.nodeList = res.data;
+        }
+      });
+    },
+    toNode(nodeId, wid) {
+      const newpage = this.$router.resolve({
+        name: "node_" + nodeId,
+        path: "/node/list",
+        query: {
+          ...this.$route.query,
+          nodeId: nodeId,
+          pId: "manage",
+          id: "manageList",
+          wid: wid,
+        },
+      });
+      window.open(newpage.href, "_blank");
     },
   },
 };

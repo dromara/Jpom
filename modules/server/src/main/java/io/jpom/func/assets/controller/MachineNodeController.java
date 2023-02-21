@@ -28,6 +28,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.func.assets.model.MachineNodeModel;
+import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
@@ -43,11 +44,15 @@ import org.springframework.web.bind.annotation.RestController;
 import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * 机器节点
+ *
  * @author bwcx_jzy
  * @since 2023/2/18
  */
@@ -103,6 +108,13 @@ public class MachineNodeController extends BaseServerController {
         return JsonMessage.success("操作成功");
     }
 
+    /**
+     * 将机器分配到指定工作空间
+     *
+     * @param id          机器id
+     * @param workspaceId 工作空间id
+     * @return json
+     */
     @PostMapping(value = "distribute", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public JsonMessage<String> distribute(@ValidatorItem String id, @ValidatorItem String workspaceId) {
@@ -116,5 +128,20 @@ public class MachineNodeController extends BaseServerController {
         //
         machineNodeServer.insertNode(machineNodeModel, workspaceId);
         return JsonMessage.success("操作成功");
+    }
+
+    @GetMapping(value = "list-node", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<NodeModel>> listData(@ValidatorItem String id) {
+        MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
+        Assert.notNull(machineNodeModel, "没有对应的机器");
+        NodeModel nodeModel = new NodeModel();
+        nodeModel.setMachineId(id);
+        List<NodeModel> modelList = nodeService.listByBean(nodeModel);
+        modelList = Optional.ofNullable(modelList).orElseGet(ArrayList::new);
+        for (NodeModel model : modelList) {
+            model.setWorkspace(workspaceService.getByKey(model.getWorkspaceId()));
+        }
+        return JsonMessage.success("", modelList);
     }
 }

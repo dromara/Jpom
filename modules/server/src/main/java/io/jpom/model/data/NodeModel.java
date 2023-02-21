@@ -87,6 +87,9 @@ public class NodeModel extends BaseMachineModel {
     @PropIgnore
     private MachineNodeModel machineNodeData;
 
+    @PropIgnore
+    private WorkspaceModel workspace;
+
     public boolean isOpenStatus() {
         return openStatus != null && openStatus == 1;
     }
@@ -99,9 +102,4 @@ public class NodeModel extends BaseMachineModel {
         this.setId(id);
         this.setWorkspaceId(workspaceId);
     }
-
-//    public String getRealUrl(NodeUrl nodeUrl) {
-//        return StrUtil.format("{}://{}{}", getProtocol().toLowerCase(), getUrl(), nodeUrl.getUrl());
-//    }
-
 }
