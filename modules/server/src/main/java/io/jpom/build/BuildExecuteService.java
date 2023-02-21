@@ -153,17 +153,18 @@ public class BuildExecuteService {
     /**
      * check status
      *
-     * @param status 状态码
+     * @param buildInfoModel 构建信息
      * @return 错误消息
      */
-    public String checkStatus(Integer status) {
+    public String checkStatus(BuildInfoModel buildInfoModel) {
+        Integer status = buildInfoModel.getStatus();
         if (status == null) {
             return null;
         }
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, status);
         Objects.requireNonNull(nowStatus);
         if (BuildStatus.Ing == nowStatus || BuildStatus.PubIng == nowStatus) {
-            return "当前还在：" + nowStatus.getDesc();
+            return buildInfoModel.getName() + " 当前还在：" + nowStatus.getDesc();
         }
         return null;
     }
@@ -200,7 +201,7 @@ public class BuildExecuteService {
                                       Object... parametersEnv) {
         synchronized (buildInfoId.intern()) {
             BuildInfoModel buildInfoModel = buildService.getByKey(buildInfoId);
-            String e = this.checkStatus(buildInfoModel.getStatus());
+            String e = this.checkStatus(buildInfoModel);
             Assert.isNull(e, () -> e);
             //
             boolean containsKey = BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId());

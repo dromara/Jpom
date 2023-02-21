@@ -2,7 +2,7 @@
   <div class="full-content">
     <!-- <div ref="filter" class="filter"></div> -->
     <!-- 表格 -->
-    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
+    <a-table size="middle" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage" :row-selection="rowSelection">
       <template slot="title">
         <a-space>
           <a-input allowClear class="search-input-item" @pressEnter="loadData" v-model="listQuery['%name%']" placeholder="构建名称" />
@@ -20,6 +20,7 @@
             <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="batchBuild" :disabled="!tableSelections || tableSelections.length <= 0">批量构建</a-button>
           <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" />
         </a-space>
       </template>
@@ -1229,6 +1230,7 @@ export default {
         "  NODE_OPTIONS: --max-old-space-size=900",
       countdownTime: Date.now(),
       refreshInterval: 5,
+      tableSelections: [],
     };
   },
   computed: {
@@ -1265,6 +1267,14 @@ export default {
           name: this.buildModeMap[item],
         };
       });
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys;
+        },
+        selectedRowKeys: this.tableSelections,
+      };
     },
   },
   watch: {},
@@ -1772,6 +1782,26 @@ export default {
     // 下载构建产物
     handleDownloadFile(record) {
       window.open(downloadBuildFileByBuild(record.id, record.buildId), "_self");
+    },
+    // 批量构建
+    batchBuild() {
+      if (!this.tableSelections || this.tableSelections.length <= 0) {
+        this.$notification.warning({
+          message: "没有选择任何数据",
+        });
+        return;
+      }
+
+      this.tableSelections.forEach((item) => {
+        startBuild({
+          id: item,
+        }).then((res) => {
+          if (res.code === 200) {
+            //
+          }
+        });
+      });
+      this.handleFilter();
     },
   },
 };

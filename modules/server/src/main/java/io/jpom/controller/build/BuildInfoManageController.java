@@ -160,7 +160,7 @@ public class BuildInfoManageController extends BaseServerController {
         Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
         BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
         Objects.requireNonNull(item, "没有对应数据");
-        String e = buildExecuteService.checkStatus(item.getStatus());
+        String e = buildExecuteService.checkStatus(item);
         Assert.isNull(e, () -> e);
         UserModel userModel = getUser();
         BuildExtraModule buildExtraModule = BuildExtraModule.build(buildHistoryLog);

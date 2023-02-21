@@ -31,18 +31,6 @@
               </a-menu-item>
             </a-menu>
           </a-dropdown>
-
-          <a-tooltip>
-            <template slot="title">
-              <ul>
-                <li>点击节点管理进入节点管理页面</li>
-                <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
-                <li>节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件）</li>
-                <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
-              </ul>
-            </template>
-            <a-icon type="question-circle" theme="filled" />
-          </a-tooltip>
         </a-space>
       </template>
       <a-tooltip slot="url" slot-scope="text, record" placement="topLeft" :title="text">

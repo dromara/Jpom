@@ -175,7 +175,7 @@
           </a-table>
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="disk" tab="硬盘">
+      <a-tab-pane key="disk" tab="文件系统">
         <a-table size="middle" :locale="tableLocale" :loading="diskLoading" :columns="diskColumns" :data-source="diskList" bordered rowKey="uuid" :pagination="false">
           <a-tooltip slot="percentTooltip" slot-scope="text" placement="topLeft" :title="formatPercent(text)">
             {{ formatPercent(text) }}
