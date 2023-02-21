@@ -192,6 +192,76 @@
           </template>
         </a-table>
       </a-tab-pane>
+      <a-tab-pane key="networkInterfaces" tab="网络">
+        <a-collapse v-if="networkInterfaces && networkInterfaces.length">
+          <a-collapse-panel :key="index" v-for="(item, index) in networkInterfaces">
+            <template #header>
+              {{ item.name }}
+              <a-tag>
+                {{ item.displayName }}
+              </a-tag>
+              <a-tag>
+                {{ item.ifAlias }}
+              </a-tag>
+              <!-- /**
+         * Up and operational. Ready to pass packets.
+         */
+        UP(1),
+        /**
+         * Down and not operational. Not ready to pass packets.
+         */
+        DOWN(2),
+        /**
+         * In some test mode.
+         */
+        TESTING(3),
+        /**
+         * The interface status is unknown.
+         */
+        UNKNOWN(4),
+        /**
+         * The interface is not up, but is in a pending state, waiting for some external event.
+         */
+        DORMANT(5),
+        /**
+         * Some component is missing
+         */
+        NOT_PRESENT(6),
+        /**
+         * Down due to state of lower-layer interface(s).
+         */
+        LOWER_LAYER_DOWN(7); -->
+
+              <a-tag v-if="item.ifOperStatus === 'UP'" color="green">{{ item.ifOperStatus }}</a-tag>
+              <a-tag v-else-if="item.ifOperStatus === 'DOWN' || item.ifOperStatus === 'TESTING' || item.ifOperStatus === 'DORMANT'" color="orange">{{ item.ifOperStatus }}</a-tag>
+              <a-tag v-else-if="item.ifOperStatus === 'UNKNOWN' || item.ifOperStatus === 'NOT_PRESENT' || item.ifOperStatus === 'LOWER_LAYER_DOWN'" color="red">{{ item.ifOperStatus }}</a-tag>
+              <a-tag v-else>{{ item.ifOperStatus }}</a-tag>
+            </template>
+            <a-descriptions title="" bordered :column="4">
+              <a-descriptions-item label="MAC"> {{ item.macaddr }} </a-descriptions-item>
+              <a-descriptions-item label="MTU"> {{ item.mtu }} </a-descriptions-item>
+              <a-descriptions-item label="速度">{{ renderBpsSize(item.speed) }} </a-descriptions-item>
+              <a-descriptions-item label="虚拟MAC">{{ item.knownVmMacAddr ? "是" : "否" }} </a-descriptions-item>
+
+              <a-descriptions-item label="IPV4" :span="4">
+                <a-tag :key="ipItem" v-for="ipItem in item.ipv4addr || []">{{ ipItem }}</a-tag>
+              </a-descriptions-item>
+              <a-descriptions-item label="IPV6" :span="4">
+                <a-tag :key="ipItem" v-for="ipItem in item.ipv6addr || []">{{ ipItem }}</a-tag>
+              </a-descriptions-item>
+              <a-descriptions-item label="接收包">{{ item.packetsRecv }} </a-descriptions-item>
+              <a-descriptions-item label="接收大小">{{ renderSize(item.bytesRecv) }} </a-descriptions-item>
+              <a-descriptions-item label="接收错误">{{ item.inErrors }} </a-descriptions-item>
+              <a-descriptions-item label="丢弃包">{{ item.tnDrops }} </a-descriptions-item>
+              <a-descriptions-item label="发送包">{{ item.packetsSent }} </a-descriptions-item>
+              <a-descriptions-item label="发送大小">{{ renderSize(item.bytesSent) }} </a-descriptions-item>
+              <a-descriptions-item label="发送错误">{{ item.outErrors }} </a-descriptions-item>
+              <a-descriptions-item label="冲突数">{{ item.collisions }} </a-descriptions-item>
+            </a-descriptions>
+          </a-collapse-panel>
+        </a-collapse>
+        <a-empty v-else description="没有任何网络接口信息" />
+      </a-tab-pane>
     </a-tabs>
 
     <!-- 历史监控 -->
@@ -202,10 +272,10 @@
 </template>
 <script>
 import { nodeMonitorData, getProcessList, killPid } from "@/api/node";
-import { renderSize, formatPercent, parseTime, formatDuration, formatPercent2Number } from "@/utils/const";
+import { renderSize, formatPercent, parseTime, formatDuration, formatPercent2Number, renderBpsSize } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import NodeTop from "@/pages/node/node-layout/node-top";
-import { generateNodeTopChart, drawChart, machineInfo, generateNodeNetChart, machineDiskInfo, generateNodeNetworkTimeChart } from "@/api/node-stat";
+import { generateNodeTopChart, drawChart, machineInfo, generateNodeNetChart, machineDiskInfo, generateNodeNetworkTimeChart, machineNetworkInterfaces } from "@/api/node-stat";
 import { statusMap } from "@/api/system/assets-machine";
 
 export default {
@@ -288,6 +358,7 @@ export default {
       networkDelayChart: null,
       countdownTime: Date.now(),
       machineInfo: null,
+      networkInterfaces: [],
     };
   },
   mounted() {
@@ -312,6 +383,7 @@ export default {
     formatDuration,
     renderSize,
     formatPercent2Number,
+    renderBpsSize,
     getMachineInfo() {
       machineInfo({ ...this.idInfo }).then((res) => {
         //
@@ -354,6 +426,7 @@ export default {
       this.loadNodeProcess();
       this.getMachineInfo();
       this.getMachineDiskInfo();
+      this.getMachineNetworkInterfaces();
       // 重新计算倒计时
       this.countdownTime = Date.now() + this.refreshInterval * 1000;
     },
@@ -466,6 +539,11 @@ export default {
         if (this.diskList) {
           this.diskLoading = false;
         }
+      });
+    },
+    getMachineNetworkInterfaces() {
+      machineNetworkInterfaces({ ...this.idInfo }).then((res) => {
+        this.networkInterfaces = res.data || [];
       });
     },
   },

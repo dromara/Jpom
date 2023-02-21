@@ -39,4 +39,10 @@ public class TestInfo {
         //System.out.println(processor);
         System.out.println(systemInfo);
     }
+
+    @Test
+    public void test2() {
+        System.out.println(1L << 10);
+        System.out.println(1_000L);
+    }
 }

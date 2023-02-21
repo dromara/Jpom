@@ -365,18 +365,38 @@ export function parseTime(time, cFormat) {
  * @returns
  */
 export function renderSize(value, defaultValue = "-") {
+  return formatUnits(value, 1024, ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"], defaultValue);
+}
+
+/**
+ * 格式化网络大小
+ * @param {*} value
+ * @param defaultValue
+ * @returns
+ */
+export function renderBpsSize(value, defaultValue = "-") {
+  return formatUnits(value, 1024, ["bps", "Kbps", "Mbps", "Gbps", "Tbps", "Pbps", "Ebps", "Zbps", "Ybps"], defaultValue);
+}
+
+/**
+ * 格式化文件大小
+ * @param {*} value
+ * @param defaultValue
+ * @returns
+ */
+export function formatUnits(value, base, unitArr, defaultValue = "-") {
   if (null == value || value === "") {
     return defaultValue;
   }
-  var unitArr = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
   var index = 0;
   var srcsize = parseFloat(value);
   if (srcsize <= 0) {
     return defaultValue;
   }
   // console.log(value, srcsize);
-  index = Math.floor(Math.log(srcsize) / Math.log(1024));
-  var size = srcsize / Math.pow(1024, index);
+  index = Math.floor(Math.log(srcsize) / Math.log(base));
+  var size = srcsize / Math.pow(base, index);
   size = size.toFixed(2); //保留的小数位数
   return size + unitArr[index];
 }

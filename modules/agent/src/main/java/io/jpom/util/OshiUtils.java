@@ -37,8 +37,10 @@ import oshi.software.os.OperatingSystem;
 import oshi.util.GlobalConfig;
 import oshi.util.Util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -193,11 +195,11 @@ public class OshiUtils {
     }
 
     /**
-     * 获取硬盘信息
+     * 获取文件系统信息
      *
      * @return list
      */
-    public static List<JSONObject> diskInfo() {
+    public static List<JSONObject> fileStores() {
         FileSystem fileSystem = OshiUtil.getOs().getFileSystem();
         List<OSFileStore> fileStores = fileSystem.getFileStores();
         return fileStores.stream().map(osFileStore -> {
@@ -218,6 +220,87 @@ public class OshiUtils {
             jsonObject.put("usableSpace", osFileStore.getUsableSpace());
             return jsonObject;
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * 硬盘存储
+     *
+     * @return list
+     */
+    public static List<JSONObject> diskStores() {
+        HardwareAbstractionLayer hardware = OshiUtil.getHardware();
+        List<HWDiskStore> diskStores = hardware.getDiskStores();
+
+        return diskStores.stream()
+            .map(disk -> {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name", disk.getName());
+                jsonObject.put("model", disk.getModel());
+                jsonObject.put("serial", disk.getSerial());
+                jsonObject.put("size", disk.getSize());
+                jsonObject.put("readBytes", disk.getReadBytes());
+                jsonObject.put("reads", disk.getReads());
+                jsonObject.put("writeBytes", disk.getWriteBytes());
+                jsonObject.put("writes", disk.getWrites());
+                jsonObject.put("currentQueueLength", disk.getCurrentQueueLength());
+                jsonObject.put("transferTime", disk.getTransferTime());
+                jsonObject.put("timeStamp", disk.getTimeStamp());
+
+                List<HWPartition> partitions = disk.getPartitions();
+                List<JSONObject> partition = Optional.ofNullable(partitions)
+                    .map(hwPartitions -> hwPartitions.stream()
+                        .map(hwPartition -> {
+                            JSONObject object = new JSONObject();
+                            object.put("identification", hwPartition.getIdentification());
+                            object.put("name", hwPartition.getName());
+                            object.put("type", hwPartition.getType());
+                            object.put("major", hwPartition.getMajor());
+                            object.put("minor", hwPartition.getMinor());
+                            object.put("size", hwPartition.getSize());
+                            object.put("mountPoint", hwPartition.getMountPoint());
+                            object.put("uuid", hwPartition.getUuid());
+                            return object;
+                        }).collect(Collectors.toList()))
+                    .orElse(new ArrayList<>());
+                jsonObject.put("partition", partition);
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
+    }
+
+    public static List<JSONObject> networkInterfaces() {
+        HardwareAbstractionLayer hardware = OshiUtil.getHardware();
+        List<NetworkIF> networkIfs = hardware.getNetworkIFs(true);
+        return Optional.ofNullable(networkIfs)
+            .map(networkIfs2 -> networkIfs2.stream()
+                .map(networkIf -> {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("name", networkIf.getName());
+                    jsonObject.put("displayName", networkIf.getDisplayName());
+                    jsonObject.put("index", networkIf.getIndex());
+                    jsonObject.put("macaddr", networkIf.getMacaddr());
+                    jsonObject.put("timeStamp", networkIf.getTimeStamp());
+                    jsonObject.put("tnDrops", networkIf.getInDrops());
+                    jsonObject.put("inErrors", networkIf.getInErrors());
+                    jsonObject.put("bytesRecv", networkIf.getBytesRecv());
+                    jsonObject.put("bytesSent", networkIf.getBytesSent());
+                    jsonObject.put("packetsRecv", networkIf.getPacketsRecv());
+                    jsonObject.put("packetsSent", networkIf.getPacketsSent());
+                    jsonObject.put("collisions", networkIf.getCollisions());
+                    jsonObject.put("ifAlias", networkIf.getIfAlias());
+                    jsonObject.put("ifType", networkIf.getIfType());
+                    jsonObject.put("ifOperStatus", networkIf.getIfOperStatus());
+                    jsonObject.put("ipv4addr", networkIf.getIPv4addr());
+                    jsonObject.put("ipv6addr", networkIf.getIPv6addr());
+                    jsonObject.put("mtu", networkIf.getMTU());
+                    jsonObject.put("outErrors", networkIf.getOutErrors());
+                    jsonObject.put("speed", networkIf.getSpeed());
+                    jsonObject.put("subnetMasks", networkIf.getSubnetMasks());
+                    jsonObject.put("prefixLengths", networkIf.getPrefixLengths());
+                    jsonObject.put("knownVmMacAddr", networkIf.isKnownVmMacAddr());
+                    return jsonObject;
+                }).collect(Collectors.toList()))
+            .orElse(new ArrayList<>());
     }
 
     @Data
