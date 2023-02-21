@@ -148,4 +148,26 @@ public class NodeWelcomeController extends BaseServerController {
         Assert.notNull(model, "没有找到对应的机器");
         return NodeForward.request(model, request, NodeUrl.DiskInfo);
     }
+
+    @GetMapping(value = "hw-disk-info", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<JSONObject>> hwDiskInfo(HttpServletRequest request, String machineId) {
+        NodeModel node = tryGetNode();
+        if (node != null) {
+            return NodeForward.request(node, request, NodeUrl.HwDiskInfo);
+        }
+        MachineNodeModel model = machineNodeServer.getByKey(machineId);
+        Assert.notNull(model, "没有找到对应的机器");
+        return NodeForward.request(model, request, NodeUrl.HwDiskInfo);
+    }
+
+    @GetMapping(value = "network-interfaces", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<JSONObject>> networkInterfaces(HttpServletRequest request, String machineId) {
+        NodeModel node = tryGetNode();
+        if (node != null) {
+            return NodeForward.request(node, request, NodeUrl.NetworkInterfaces);
+        }
+        MachineNodeModel model = machineNodeServer.getByKey(machineId);
+        Assert.notNull(model, "没有找到对应的机器");
+        return NodeForward.request(model, request, NodeUrl.NetworkInterfaces);
+    }
 }

@@ -289,3 +289,15 @@ export function drawChart(data, domId, parseFn) {
 //   3: "状态码错误",
 //   4: "关闭中",
 // };
+
+// 机器网络
+export function machineNetworkInterfaces(params) {
+  return axios({
+    url: "/node/network-interfaces",
+    method: "get",
+    params,
+    headers: {
+      loading: "no",
+    },
+  });
+}

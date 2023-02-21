@@ -44,6 +44,9 @@ public enum NodeUrl {
     exportTop("/exportTop"),
     Kill("/kill.json"),
     DiskInfo("/disk-info"),
+    HwDiskInfo("/hw-disk--info"),
+
+    NetworkInterfaces("/network-interfaces"),
 
     ProcessList("/processList", -1),
     /**

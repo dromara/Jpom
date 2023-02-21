@@ -166,7 +166,19 @@ public class IndexController extends BaseAgentController {
 
     @PostMapping(value = "disk-info", produces = MediaType.APPLICATION_JSON_VALUE)
     public JsonMessage<List<JSONObject>> diskInfo() {
-        List<JSONObject> list = OshiUtils.diskInfo();
+        List<JSONObject> list = OshiUtils.fileStores();
+        return JsonMessage.success("", list);
+    }
+
+    @PostMapping(value = "hw-disk--info", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<JSONObject>> hwDiskInfo() {
+        List<JSONObject> list = OshiUtils.diskStores();
+        return JsonMessage.success("", list);
+    }
+
+    @PostMapping(value = "network-interfaces", produces = MediaType.APPLICATION_JSON_VALUE)
+    public JsonMessage<List<JSONObject>> networkInterfaces() {
+        List<JSONObject> list = OshiUtils.networkInterfaces();
         return JsonMessage.success("", list);
     }
 }
