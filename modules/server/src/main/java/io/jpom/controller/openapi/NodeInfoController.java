@@ -98,9 +98,11 @@ public class NodeInfoController extends BaseServerController {
         if (!ipsList.contains(clientIp)) {
             ipsList.add(clientIp);
         }
-        List<String> canUseIps = ipsList.stream().filter(s -> this.testIpPort(s, ping)).collect(Collectors.toList());
+        List<String> canUseIps = ipsList.stream()
+            .filter(s -> this.testIpPort(s, ping))
+            .collect(Collectors.toList());
         List<MachineNodeModel> canUseNode = canUseIps.stream().map(s -> {
-            MachineNodeModel model = NodeInfoController.this.createMachineNodeModel(s, loginName, loginPwd, port);
+            MachineNodeModel model = this.createMachineNodeModel(s, loginName, loginPwd, port);
             try {
                 machineNodeServer.testNode(model);
             } catch (Exception e) {

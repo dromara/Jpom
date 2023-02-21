@@ -19,6 +19,16 @@
           </a-select>
           <a-button :loading="loading" type="primary" @click="getMachineList">搜索</a-button>
           <a-button type="primary" @click="addMachine">添加机器</a-button>
+          <a-tooltip>
+            <template slot="title">
+              <ul>
+                <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
+                <li>节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json 文件查看（如果自定义配置了账号密码将没有此文件）</li>
+                <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
+              </ul>
+            </template>
+            <a-icon type="question-circle" theme="filled" />
+          </a-tooltip>
         </a-space>
       </template>
       <a-row :gutter="[16, 16]">

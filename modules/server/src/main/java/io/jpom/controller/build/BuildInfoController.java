@@ -447,7 +447,7 @@ public class BuildInfoController extends BaseServerController {
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         Objects.requireNonNull(buildInfoModel, "没有对应数据");
         //
-        String e = buildExecuteService.checkStatus(buildInfoModel.getStatus());
+        String e = buildExecuteService.checkStatus(buildInfoModel);
         Assert.isNull(e, () -> e);
         // 删除构建历史
         dbBuildHistoryLogService.delByWorkspace(request, entity -> entity.set("buildDataId", buildInfoModel.getId()));
