@@ -1394,11 +1394,11 @@ export default {
         });
       });
     },
-    // 筛选
-    handleFilter() {
-      this.loadData();
-      // this.loadRepositoryList();
-    },
+    // // 筛选
+    // handleFilter() {
+    //   this.loadData();
+    //   // this.loadRepositoryList();
+    // },
     // 选择仓库
     changeRepositpry(value) {
       this.repositoryList.forEach((element) => {
@@ -1555,7 +1555,7 @@ export default {
             });
             //this.$refs["editBuildForm"].resetFields();
             this.editBuildVisible = false;
-            this.handleFilter();
+            this.loadData();
             this.loadGroupList();
           }
         });
@@ -1676,7 +1676,7 @@ export default {
             this.$notification.success({
               message: res.msg,
             });
-            this.handleFilter();
+            this.loadData();
             if (openLog) {
               // 自动打开构建日志
               this.handleBuildLog({
@@ -1703,7 +1703,7 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              this.handleFilter();
+              this.loadData();
             }
           });
         },
@@ -1719,7 +1719,7 @@ export default {
     },
     // 关闭日志对话框
     closeBuildLogModel() {
-      this.handleFilter();
+      this.loadData();
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
@@ -1767,7 +1767,7 @@ export default {
             method: method,
             compareId: compareId,
           }).then((res) => {
-            if (res.code == 200) {
+            if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
               });
@@ -1801,7 +1801,8 @@ export default {
           }
         });
       });
-      this.handleFilter();
+      this.tableSelections = [];
+      this.loadData();
     },
   },
 };

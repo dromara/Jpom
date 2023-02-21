@@ -50,3 +50,12 @@ export const statusMap = {
   2: "授权信息错误",
   3: "状态码错误",
 };
+
+// 查看机器关联节点
+export function machineListNode(params) {
+  return axios({
+    url: "/system/assets/machine/list-node",
+    method: "get",
+    params: params,
+  });
+}
