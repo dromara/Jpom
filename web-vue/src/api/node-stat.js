@@ -14,10 +14,22 @@ export function machineInfo(params) {
   });
 }
 
-// 机器硬盘
+// 机器文件系统
 export function machineDiskInfo(params) {
   return axios({
     url: "/node/disk-info",
+    method: "get",
+    params,
+    headers: {
+      loading: "no",
+    },
+  });
+}
+
+// 机器硬件硬盘
+export function machineHwDiskInfo(params) {
+  return axios({
+    url: "/node/hw-disk-info",
     method: "get",
     params,
     headers: {
