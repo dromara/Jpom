@@ -152,7 +152,7 @@
             </a-row>
           </template>
 
-          <a-table size="middle" :locale="tableLocale" :loading="loading" :columns="processColumns" :data-source="processList" bordered rowKey="processId" :pagination="false">
+          <a-table size="middle" :loading="loading" :columns="processColumns" :data-source="processList" bordered rowKey="processId" :pagination="false">
             <a-tooltip slot="percentTooltip" slot-scope="text" placement="topLeft" :title="formatPercent(text)">
               {{ formatPercent(text) }}
             </a-tooltip>
@@ -176,7 +176,7 @@
         </a-card>
       </a-tab-pane>
       <a-tab-pane key="disk" tab="文件系统">
-        <a-table size="middle" :locale="tableLocale" :loading="diskLoading" :columns="diskColumns" :data-source="diskList" bordered rowKey="uuid" :pagination="false">
+        <a-table size="middle" :loading="diskLoading" :columns="diskColumns" :data-source="diskList" bordered rowKey="uuid" :pagination="false">
           <a-tooltip slot="percentTooltip" slot-scope="text" placement="topLeft" :title="formatPercent(text)">
             {{ formatPercent(text) }}
           </a-tooltip>
@@ -190,6 +190,27 @@
           <template slot="operation" slot-scope="text, record">
             <a-button type="primary" size="small" @click="kill(record)">Kill</a-button>
           </template>
+        </a-table>
+      </a-tab-pane>
+      <a-tab-pane key="hw-disk" tab="硬件硬盘">
+        <a-table size="middle" :columns="hwDiskColumns" :data-source="hwDiskList" bordered :rowKey="(record, index) => index" :pagination="false">
+          <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+            {{ text }}
+          </a-tooltip>
+          <a-tooltip slot="sizeTooltip" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+            {{ renderSize(text) }}
+          </a-tooltip>
+          <a-tooltip slot="durationTooltip" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
+            {{ formatDuration(text) }}
+          </a-tooltip>
+          <a-table size="middle" slot="expandedRowRender" slot-scope="item" :columns="hwDiskPartitionColumns" :rowKey="(record, index) => index" :data-source="item.partition" :pagination="false">
+            <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
+              {{ text }}
+            </a-tooltip>
+            <a-tooltip slot="sizeTooltip" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+              {{ renderSize(text) }}
+            </a-tooltip>
+          </a-table>
         </a-table>
       </a-tab-pane>
       <a-tab-pane key="networkInterfaces" tab="网络">
@@ -275,7 +296,7 @@ import { nodeMonitorData, getProcessList, killPid } from "@/api/node";
 import { renderSize, formatPercent, parseTime, formatDuration, formatPercent2Number, renderBpsSize } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import NodeTop from "@/pages/node/node-layout/node-top";
-import { generateNodeTopChart, drawChart, machineInfo, generateNodeNetChart, machineDiskInfo, generateNodeNetworkTimeChart, machineNetworkInterfaces } from "@/api/node-stat";
+import { generateNodeTopChart, drawChart, machineInfo, generateNodeNetChart, machineDiskInfo, machineHwDiskInfo, generateNodeNetworkTimeChart, machineNetworkInterfaces } from "@/api/node-stat";
 import { statusMap } from "@/api/system/assets-machine";
 
 export default {
@@ -303,12 +324,10 @@ export default {
     return {
       loading: false,
       diskLoading: false,
-      tableLocale: {
-        emptyText: "",
-      },
       statusMap,
       processList: [],
       diskList: [],
+      hwDiskList: [],
       defaultProcessNames: ["java", "python", "mysql", "php", "docker"],
       processNames: [],
       monitorVisible: {
@@ -340,7 +359,7 @@ export default {
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, align: "center", width: "80px", fixed: "right" },
       ],
       diskColumns: [
-        // { title: "ID", dataIndex: "processId", width: "80px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "uuid", dataIndex: "uuid", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "卷", dataIndex: "mount", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "文件系统类型", dataIndex: "type", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
@@ -351,6 +370,28 @@ export default {
         { title: "剩余 inode 数", dataIndex: "freeInodes", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "总 inode 数", dataIndex: "totalInodes", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "选项", dataIndex: "options", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+      ],
+      hwDiskColumns: [
+        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "型号", dataIndex: "model", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "序号", dataIndex: "serial", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "大小", dataIndex: "size", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
+        { title: "写入大小", dataIndex: "writeBytes", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
+        { title: "读取大小", dataIndex: "readBytes", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
+        { title: "写入次数", dataIndex: "writes", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
+        { title: "读取次数", dataIndex: "reads", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
+        { title: "运行时间", dataIndex: "transferTime", ellipsis: true, scopedSlots: { customRender: "durationTooltip" } },
+        { title: "队列数", dataIndex: "currentQueueLength", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+      ],
+      hwDiskPartitionColumns: [
+        { title: "分区ID", dataIndex: "identification", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "挂载分区", dataIndex: "mountPoint", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "类型", dataIndex: "type", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "大小", dataIndex: "size", ellipsis: true, scopedSlots: { customRender: "sizeTooltip" } },
+        { title: "主要ID", dataIndex: "major", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "次要ID", dataIndex: "minor", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "uuid", dataIndex: "uuid", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
       ],
       refreshInterval: 5,
       historyChart: null,
@@ -427,6 +468,7 @@ export default {
       this.getMachineInfo();
       this.getMachineDiskInfo();
       this.getMachineNetworkInterfaces();
+      this.getMachineHwDiskInfo();
       // 重新计算倒计时
       this.countdownTime = Date.now() + this.refreshInterval * 1000;
     },
@@ -462,7 +504,7 @@ export default {
         } else {
           this.processList = [];
         }
-        this.tableLocale.emptyText = "没有找到任何进程";
+
         this.loading = false;
       });
       if (v) {
@@ -543,7 +585,16 @@ export default {
     },
     getMachineNetworkInterfaces() {
       machineNetworkInterfaces({ ...this.idInfo }).then((res) => {
-        this.networkInterfaces = res.data || [];
+        this.networkInterfaces = (res.data || []).sort((item1, item2) => {
+          const item1All = item1.bytesRecv || 0 + item1.bytesSecv || 0;
+          const item2All = item2.bytesRecv || 0 + item2.bytesSecv || 0;
+          return item2All - item1All;
+        });
+      });
+    },
+    getMachineHwDiskInfo() {
+      machineHwDiskInfo({ ...this.idInfo }).then((res) => {
+        this.hwDiskList = res.data || [];
       });
     },
   },
