@@ -11,26 +11,24 @@
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                this.fastInstallNode = true;
+              }
+            "
+            >快速安装
+          </a-button>
+          <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
 
-          <a-dropdown>
+          <!-- <a-dropdown>
             <a class="ant-dropdown-link" @click="(e) => e.preventDefault()"> 更多 <a-icon type="down" /> </a>
             <a-menu slot="overlay">
-              <a-menu-item>
-                <a-button
-                  type="primary"
-                  @click="
-                    () => {
-                      this.fastInstallNode = true;
-                    }
-                  "
-                  >快速安装</a-button
-                >
-              </a-menu-item>
-              <a-menu-item>
-                <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow">工作空间同步</a-button>
-              </a-menu-item>
+              <a-menu-item> </a-menu-item>
+              <a-menu-item> </a-menu-item>
             </a-menu>
-          </a-dropdown>
+          </a-dropdown> -->
         </a-space>
       </template>
       <a-tooltip slot="url" slot-scope="text, record" placement="topLeft" :title="text">
