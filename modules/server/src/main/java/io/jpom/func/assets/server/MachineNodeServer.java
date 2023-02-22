@@ -316,6 +316,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         update.setJpomUsername(machineNodeModel.getJpomUsername());
         update.setJpomPassword(machineNodeModel.getJpomPassword());
         update.setJpomTimeout(machineNodeModel.getJpomTimeout());
+        update.setTemplateNode(machineNodeModel.getTemplateNode());
         return update;
     }
 

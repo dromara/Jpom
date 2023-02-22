@@ -75,11 +75,11 @@ export function clearCache(params) {
  * 加载配置数据
  * @param {String} nodeId 节点 ID，若为空表示加载 Server 端配置
  */
-export function getConfigData(nodeId) {
+export function getConfigData(data) {
   return axios({
     url: "/system/config-data",
     method: "post",
-    data: { nodeId },
+    data: data,
   });
 }
 
@@ -244,50 +244,6 @@ export function remoteUpgrade(params) {
     timeout: 0,
     headers: {},
     params,
-  });
-}
-
-/**
- * 加载 白名单配置
- */
-export function getWhitelist() {
-  return axios({
-    url: "/system/get_whitelist",
-    method: "post",
-    data: {},
-  });
-}
-
-/**
- * 保存 白名单配置
- */
-export function saveWhitelist(data) {
-  return axios({
-    url: "/system/save_whitelist",
-    method: "post",
-    data: data,
-  });
-}
-
-/**
- * 加载 节点系统配置缓存信息
- */
-export function getNodeConfig() {
-  return axios({
-    url: "/system/get_node_config",
-    method: "post",
-    data: {},
-  });
-}
-
-/**
- * 保存 节点系统配置
- */
-export function saveNodeConfig(data) {
-  return axios({
-    url: "/system/save_node_config.json",
-    method: "post",
-    data: data,
   });
 }
 

@@ -189,7 +189,10 @@ public class MachineNodeModel extends BaseUserModifyDbModel implements INodeInfo
      * jvm 剩余内存
      */
     private Long jvmFreeMemory;
-
+    /**
+     * 模板节点 ，1 模板节点 0 非模板节点
+     */
+    private Boolean templateNode;
 
     @Override
     public String name() {

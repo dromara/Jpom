@@ -24,8 +24,11 @@ package io.jpom.func.assets.controller;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import com.alibaba.fastjson2.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
+import io.jpom.common.forward.NodeForward;
+import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.validator.ValidatorItem;
 import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.model.data.NodeModel;
@@ -37,10 +40,7 @@ import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.WorkspaceService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import top.jpom.model.PageResultDto;
 
 import javax.servlet.http.HttpServletRequest;
@@ -143,5 +143,60 @@ public class MachineNodeController extends BaseServerController {
             model.setWorkspace(workspaceService.getByKey(model.getWorkspaceId()));
         }
         return JsonMessage.success("", modelList);
+    }
+
+    /**
+     * 查询模板节点
+     *
+     * @return list
+     */
+    @GetMapping(value = "list-template-node", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public JsonMessage<List<MachineNodeModel>> listTemplate() {
+        MachineNodeModel machineNodeModel = new MachineNodeModel();
+        machineNodeModel.setTemplateNode(true);
+        List<MachineNodeModel> modelList = machineNodeServer.listByBean(machineNodeModel);
+        return JsonMessage.success("", modelList);
+    }
+
+
+    /**
+     * 保存白名单配置
+     *
+     * @return json
+     */
+    @RequestMapping(value = "save-whitelist", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(cls = ClassFeature.SYSTEM_NODE_WHITELIST, method = MethodFeature.EDIT)
+    public JsonMessage<Object> saveWhitelist(@ValidatorItem(msg = "请选择分发的机器") String ids,
+                                             HttpServletRequest request) {
+        //
+        List<String> idList = StrUtil.splitTrim(ids, StrUtil.COMMA);
+        for (String s : idList) {
+            MachineNodeModel machineNodeModel = machineNodeServer.getByKey(s);
+            Assert.notNull(machineNodeModel, "没有对应的机器");
+            JsonMessage<String> jsonMessage = NodeForward.request(machineNodeModel, request, NodeUrl.WhitelistDirectory_Submit);
+            Assert.state(jsonMessage.success(), "分发 " + machineNodeModel.getName() + " 节点白名单失败" + jsonMessage.getMsg());
+        }
+        return JsonMessage.success("保存成功");
+    }
+
+
+    @PostMapping(value = "save-node-config", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(cls = ClassFeature.SYSTEM_CONFIG, method = MethodFeature.EDIT)
+    @SystemPermission(superUser = true)
+    public JsonMessage<Object> saveNodeConfig(@ValidatorItem(msg = "请选择分发的机器") String ids,
+                                              String content,
+                                              String restart) {
+        List<String> idList = StrUtil.splitTrim(ids, StrUtil.COMMA);
+        for (String s : idList) {
+            MachineNodeModel machineNodeModel = machineNodeServer.getByKey(s);
+            Assert.notNull(machineNodeModel, "没有对应的机器");
+            JSONObject reqData = new JSONObject();
+            reqData.put("content", content);
+            reqData.put("restart", restart);
+            JsonMessage<String> jsonMessage = NodeForward.request(machineNodeModel, NodeUrl.SystemSaveConfig, reqData);
+            Assert.state(jsonMessage.success(), "分发 " + machineNodeModel.getName() + " 节点配置失败" + jsonMessage.getMsg());
+        }
+        return JsonMessage.success("修改成功");
     }
 }

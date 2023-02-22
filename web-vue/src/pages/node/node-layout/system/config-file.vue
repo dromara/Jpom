@@ -44,7 +44,7 @@ export default {
   methods: {
     // load data
     loadData() {
-      getConfigData(this.node.id).then((res) => {
+      getConfigData({ nodeId: this.node.id }).then((res) => {
         if (res.code === 200) {
           this.temp.content = res.data;
           this.temp.content = res.data.content;
