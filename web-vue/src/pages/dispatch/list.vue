@@ -726,7 +726,7 @@
         <a-form-model-item prop="secondaryDirectory" label="二级目录">
           <a-input v-model="temp.secondaryDirectory" placeholder="不填写则发布至项目的根目录" />
         </a-form-model-item>
-        <a-form-model-item prop="selectProject" label="筛选项目" help="筛选之后本次发布操作只发布筛选项,并且只对本地操作生效">
+        <a-form-model-item prop="selectProject" label="筛选项目" help="筛选之后本次发布操作只发布筛选项,并且只对本次操作生效">
           <a-select mode="multiple" v-model="temp.selectProjectArray" placeholder="请选择指定发布的项目">
             <a-select-option v-for="item in itemProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
               {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
