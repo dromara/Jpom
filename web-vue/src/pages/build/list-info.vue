@@ -1211,16 +1211,23 @@ export default {
         "  - uses: java\n" +
         "    version: 8\n" +
         "  - uses: maven\n" +
-        "    version: 3.8.5\n" +
+        "    version: 3.8.7\n" +
         "  - uses: node\n" +
         "    version: 16.3.0\n" +
         "#  - uses: go\n" +
         "#    version: 1.17.6\n" +
         "#  - uses: python3\n" +
         "#    version: 3.6.6\n" +
-        "# 将容器中的文件缓存到 docker 卷中\n" +
+        "# 将容器中的 maven 仓库文件缓存到 docker 卷中\n" +
         "  - uses: cache\n" +
         "    path: /root/.m2\n" +
+        "# 将此目录缓存到全局（多个构建可以共享此缓存目录）\n" +
+        "    type: global\n" +
+        "# 将容器中的 node_modules 文件缓存到 docker 卷中\n" +
+        "  - uses: cache\n" +
+        "    path: ${JPOM_WORKING_DIR}/web-vue/node_modules\n" +
+        "# 使用 copy 文件的方式缓存，反之使用软链的形式。copy 文件方式缓存 node_modules 可以避免 npm WARN reify Removing non-directory\n" +
+        "    mode: copy\n" +
         "  - run: npm config set registry https://registry.npmmirror.com\n" +
         "# 内置变量 ${JPOM_WORKING_DIR} ${JPOM_BUILD_ID}\n" +
         "  - run: cd  ${JPOM_WORKING_DIR}/web-vue && npm i && npm run build\n" +
