@@ -526,9 +526,39 @@ public class NodeForward {
      * @return T
      */
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, HttpServletRequest request, Class<T> tClass) {
-        Map<String, String> map = Optional.ofNullable(request).map(ServletUtil::getParamMap).orElse(null);
-        return createUrlItem(nodeModel, nodeUrl, (nodeInfo, urlItem) -> TransportServerFactory.get().executeToTypeOnlyData(nodeInfo, urlItem, map, tClass));
+        INodeInfo parseNodeInfo = parseNodeInfo(nodeModel);
+        return requestData(parseNodeInfo, nodeModel.getWorkspaceId(), nodeUrl, request, tClass);
+    }
 
+    /**
+     * 普通消息转发,并解析数据
+     *
+     * @param machineNodeModel 节点
+     * @param request          请求
+     * @param nodeUrl          节点的url
+     * @param tClass           要解析的类
+     * @param <T>              泛型
+     * @return T
+     */
+    public static <T> T requestData(MachineNodeModel machineNodeModel, NodeUrl nodeUrl, HttpServletRequest request, Class<T> tClass) {
+        INodeInfo nodeInfo = coverNodeInfo(machineNodeModel);
+        return requestData(nodeInfo, StrUtil.EMPTY, nodeUrl, request, tClass);
+    }
+
+    /**
+     * 普通消息转发,并解析数据
+     *
+     * @param nodeInfo1 节点
+     * @param request   请求
+     * @param nodeUrl   节点的url
+     * @param tClass    要解析的类
+     * @param <T>       泛型
+     * @return T
+     */
+    private static <T> T requestData(INodeInfo nodeInfo1, String workspaceId, NodeUrl nodeUrl, HttpServletRequest request, Class<T> tClass) {
+        Map<String, String> map = Optional.ofNullable(request).map(ServletUtil::getParamMap).orElse(null);
+        IUrlItem iUrlItem = parseUrlItem(nodeInfo1, workspaceId, nodeUrl);
+        return TransportServerFactory.get().executeToTypeOnlyData(nodeInfo1, iUrlItem, map, tClass);
     }
 
 

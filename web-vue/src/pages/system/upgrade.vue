@@ -36,9 +36,9 @@
               <!-- 打包时间：{{ agentTimeStamp | version }}</div> -->
             </a-space>
           </template>
-          <template slot="name" slot-scope="text">
+          <a-tooltip slot="tooltip" slot-scope="text" :title="text">
             <span>{{ text }}</span>
-          </template>
+          </a-tooltip>
           <template slot="version" slot-scope="text">
             {{ text | version }}
           </template>
@@ -98,18 +98,18 @@ export default {
       list: [],
       groupList: [],
       columns: [
-        // { title: "节点 ID", dataIndex: "id", ellipsis: true, scopedSlots: { customRender: "id" } },
-        { title: "节点名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "节点地址", dataIndex: "jpomUrl", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
+        { title: "机器名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "节点地址", dataIndex: "jpomUrl", sorter: true, width: "150px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "分组名", dataIndex: "groupName", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         { title: "机器状态(缓存)", dataIndex: "status", width: "130px", ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "缓存版本号", dataIndex: "jpomVersion", width: "100px", ellipsis: true, scopedSlots: { customRender: "version" } },
         { title: "实时版本号", dataIndex: "version", width: "100px", ellipsis: true, scopedSlots: { customRender: "version" } },
-        { title: "打包时间", dataIndex: "timeStamp", width: "180px", ellipsis: true, scopedSlots: { customRender: "timeStamp" } },
-        { title: "运行时间", dataIndex: "upTimeStr", width: "180px", ellipsis: true, scopedSlots: { customRender: "upTimeStr" } },
+        { title: "打包时间", dataIndex: "timeStamp", width: "170px", ellipsis: true, scopedSlots: { customRender: "timeStamp" } },
+        { title: "运行时间", dataIndex: "upTimeStr", width: "120px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
 
         { title: "更新状态", dataIndex: "updateStatus", ellipsis: true, scopedSlots: { customRender: "updateStatus" } },
         // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true, scopedSlots: {customRender: 'autoUpdate'}},
-        { title: "操作", dataIndex: "operation", width: 80, scopedSlots: { customRender: "operation" }, align: "center" },
+        { title: "操作", dataIndex: "operation", width: "80px", scopedSlots: { customRender: "operation" }, align: "center" },
       ],
       nodeVersion: {},
       nodeStatus: {},
@@ -349,7 +349,7 @@ export default {
         "确认要将选中的  <b style='color:red;font-size: 20px;'>" +
         len +
         "</b> 个节点升级到 <b style='color:red;font-size: 20px;'>" +
-        this.agentVersion +
+        (this.agentVersion || "--") +
         "</b> 吗？<ul style='color:red;'>" +
         "<li>升级前请阅读更新日志里面的说明和注意事项并且<b>请注意备份数据防止数据丢失！！</b></li>" +
         "<li>如果升级失败需要手动恢复奥</li>" +

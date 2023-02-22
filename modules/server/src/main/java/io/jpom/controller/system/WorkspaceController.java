@@ -181,6 +181,9 @@ public class WorkspaceController extends BaseServerController {
         // 删除缓存
         String menusConfigKey = StrUtil.format("menus_config_{}", id);
         systemParametersServer.delByKey(menusConfigKey);
+        String whitelistConfigKey = StrUtil.format("node_whitelist_{}", id);
+        systemParametersServer.delByKey(whitelistConfigKey);
+        systemParametersServer.delByKey(StrUtil.format("node_config_{}", id));
         // 删除信息
         workspaceService.delByKey(id);
         return new JsonMessage<>(200, "删除成功 " + autoDelete);

@@ -59,3 +59,33 @@ export function machineListNode(params) {
     params: params,
   });
 }
+
+export function machineListTemplateNode(params) {
+  return axios({
+    url: "/system/assets/machine/list-template-node",
+    method: "get",
+    params: params,
+  });
+}
+
+/**
+ * 保存 白名单配置
+ */
+export function saveWhitelist(data) {
+  return axios({
+    url: "/system/assets/machine/save-whitelist",
+    method: "post",
+    data: data,
+  });
+}
+
+/**
+ * 保存 节点系统配置
+ */
+export function saveNodeConfig(data) {
+  return axios({
+    url: "/system/assets/machine/save-node-config",
+    method: "post",
+    data: data,
+  });
+}

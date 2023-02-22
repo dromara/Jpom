@@ -35,7 +35,7 @@
   </div>
 </template>
 <script>
-import {editWhiteList, getWhiteList} from "@/api/node-system";
+import { editWhiteList, getWhiteList } from "@/api/node-system";
 
 export default {
   props: {
@@ -55,7 +55,9 @@ export default {
   methods: {
     // load data
     loadData() {
-      getWhiteList(this.node.id).then((res) => {
+      getWhiteList({
+        nodeId: this.node.id,
+      }).then((res) => {
         if (res.code === 200) {
           this.temp = res.data;
         }

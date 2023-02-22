@@ -24,6 +24,7 @@ package io.jpom.service.system;
 
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.NodeModel;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,10 @@ public class WhitelistDirectoryService {
 
     public AgentWhitelist getData(NodeModel model) {
         return NodeForward.requestData(model, NodeUrl.WhitelistDirectory_data, null, AgentWhitelist.class);
+    }
+
+    public AgentWhitelist getData(MachineNodeModel machineNodeModel) {
+        return NodeForward.requestData(machineNodeModel, NodeUrl.WhitelistDirectory_data, null, AgentWhitelist.class);
     }
 
     /**

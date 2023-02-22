@@ -25,18 +25,21 @@ package io.jpom.controller.node.system;
 import cn.hutool.core.util.ReflectUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JsonMessage;
-import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.func.assets.model.MachineNodeModel;
 import io.jpom.model.data.AgentWhitelist;
+import io.jpom.model.data.NodeModel;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,8 +73,15 @@ public class WhitelistDirectoryController extends BaseServerController {
      */
     @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
-    public JsonMessage<Map<String, String>> whiteList() {
-        AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
+    public JsonMessage<Map<String, String>> whiteList(String machineId) {
+        NodeModel nodeModel = tryGetNode();
+        AgentWhitelist agentWhitelist;
+        if (nodeModel != null) {
+            agentWhitelist = whitelistDirectoryService.getData(nodeModel);
+        } else {
+            MachineNodeModel machineNodeModel = machineNodeServer.getByKey(machineId);
+            agentWhitelist = whitelistDirectoryService.getData(machineNodeModel);
+        }
         Map<String, String> map = new HashMap<>(8);
         if (agentWhitelist != null) {
             /**
@@ -100,7 +110,9 @@ public class WhitelistDirectoryController extends BaseServerController {
      */
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
-    public String whitelistDirectorySubmit() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.WhitelistDirectory_Submit).toString();
+    public JsonMessage<String> whitelistDirectorySubmit(HttpServletRequest request, String machineId) {
+        JsonMessage<String> objectJsonMessage = this.tryRequestNode(machineId, request, NodeUrl.WhitelistDirectory_Submit);
+        Assert.notNull(objectJsonMessage, "请选择节点");
+        return objectJsonMessage;
     }
 }

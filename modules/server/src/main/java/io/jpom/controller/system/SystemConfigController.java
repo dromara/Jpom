@@ -34,7 +34,6 @@ import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import io.jpom.JpomApplication;
@@ -43,10 +42,7 @@ import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.validator.ValidatorItem;
-import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SystemIpConfigModel;
-import io.jpom.model.node.NodeAgentWhitelist;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
@@ -128,9 +124,10 @@ public class SystemConfigController extends BaseServerController {
     @PostMapping(value = "save_config.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     @SystemPermission(superUser = true)
-    public JsonMessage<String> saveConfig(String nodeId, String content, String restart) throws SQLException, IOException {
-        if (StrUtil.isNotEmpty(nodeId)) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemSaveConfig);
+    public JsonMessage<String> saveConfig(String machineId, String content, String restart, HttpServletRequest request) throws SQLException, IOException {
+        JsonMessage<String> jsonMessage = this.tryRequestNode(machineId, request, NodeUrl.SystemSaveConfig);
+        if (jsonMessage != null) {
+            return jsonMessage;
         }
         Assert.hasText(content, "内容不能为空");
 
@@ -261,92 +258,6 @@ public class SystemConfigController extends BaseServerController {
             boolean ipv4 = Validator.isIpv4(itemIp);
             Assert.state(ipv4, "请填写 ipv4 地址：" + itemIp);
         }
-    }
-
-    /**
-     * 加载白名单配置
-     *
-     * @return json
-     */
-    @RequestMapping(value = "get_whitelist", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(cls = ClassFeature.SYSTEM_NODE_WHITELIST, method = MethodFeature.LIST)
-    public JsonMessage<NodeAgentWhitelist> getWhitelist() {
-        String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
-        NodeAgentWhitelist config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("node_whitelist_{}", workspaceId), NodeAgentWhitelist.class);
-        return JsonMessage.success("加载成功", config);
-    }
-
-    /**
-     * 保存白名单配置
-     *
-     * @return json
-     */
-    @RequestMapping(value = "save_whitelist", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(cls = ClassFeature.SYSTEM_NODE_WHITELIST, method = MethodFeature.EDIT)
-    public JsonMessage<Object> saveWhitelist(@ValidatorItem(msg = "请选择分发的节点") String nodeIds,
-                                             String project,
-                                             String certificate,
-                                             String nginx,
-                                             String allowEditSuffix,
-                                             String allowRemoteDownloadHost) {
-        HttpServletRequest httpServletRequest = getRequest();
-        String workspaceId = nodeService.getCheckUserWorkspace(httpServletRequest);
-        NodeAgentWhitelist agentWhitelist = new NodeAgentWhitelist();
-        agentWhitelist.setNodeIds(nodeIds);
-        agentWhitelist.setProject(project);
-        agentWhitelist.setCertificate(certificate);
-        agentWhitelist.setNginx(nginx);
-        agentWhitelist.setAllowEditSuffix(allowEditSuffix);
-        agentWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHost);
-        String format = StrUtil.format("node_whitelist_{}", workspaceId);
-        systemParametersServer.upsert(format, agentWhitelist, format);
-        //
-        List<String> nodeIdsStr = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
-        for (String s : nodeIdsStr) {
-            NodeModel byKey = nodeService.getByKey(s, httpServletRequest);
-            JSONObject jsonObject = (JSONObject) JSON.toJSON(agentWhitelist);
-            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.WhitelistDirectory_Submit, jsonObject);
-            Assert.state(request.getCode() == 200, "分发 " + byKey.getName() + " 节点配置失败" + request.getMsg());
-        }
-        return JsonMessage.success("保存成功");
-    }
-
-    /**
-     * 加载节点配置
-     *
-     * @return json
-     */
-    @RequestMapping(value = "get_node_config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> getNodeConfig() {
-        String workspaceId = nodeService.getCheckUserWorkspace(getRequest());
-        JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("node_config_{}", workspaceId), JSONObject.class);
-        return JsonMessage.success("", config);
-    }
-
-    @PostMapping(value = "save_node_config.json", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    @SystemPermission(superUser = true)
-    public JsonMessage<Object> saveNodeConfig(@ValidatorItem(msg = "请选择分发的节点") String nodeIds, String templateNodeId, String content, String restart) {
-        Assert.hasText(content, "内容不能为空");
-        HttpServletRequest httpServletRequest = getRequest();
-        String workspaceId = nodeService.getCheckUserWorkspace(httpServletRequest);
-        String id = StrUtil.format("node_config_{}", workspaceId);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("templateNodeId", templateNodeId);
-        jsonObject.put("nodeIds", nodeIds);
-        systemParametersServer.upsert(id, jsonObject, id);
-        //
-        List<String> nodeIdsStr = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
-        for (String s : nodeIdsStr) {
-            NodeModel byKey = nodeService.getByKey(s, httpServletRequest);
-            JSONObject reqData = new JSONObject();
-            reqData.put("content", content);
-            reqData.put("restart", restart);
-            JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.SystemSaveConfig, reqData);
-            Assert.state(request.getCode() == 200, "分发 " + byKey.getName() + " 节点配置失败" + request.getMsg());
-        }
-        return JsonMessage.success("修改成功");
     }
 
 
