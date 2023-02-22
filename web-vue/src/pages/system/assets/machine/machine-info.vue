@@ -160,7 +160,7 @@
               {{ parseTime(text) }}
             </a-tooltip>
             <a-tooltip slot="durationTooltip" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
-              {{ formatDuration(text) }}
+              {{ formatDuration(text, "", 2) }}
             </a-tooltip>
 
             <a-tooltip slot="sizeTooltip" slot-scope="text" placement="topLeft" :title="renderSize(text)">
@@ -201,7 +201,7 @@
             {{ renderSize(text) }}
           </a-tooltip>
           <a-tooltip slot="durationTooltip" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
-            {{ formatDuration(text) }}
+            {{ formatDuration(text, "", 2) }}
           </a-tooltip>
           <a-table size="middle" slot="expandedRowRender" slot-scope="item" :columns="hwDiskPartitionColumns" :rowKey="(record, index) => index" :data-source="item.partition" :pagination="false">
             <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
