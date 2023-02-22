@@ -50,6 +50,7 @@ import io.jpom.plugin.IPlugin;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
+import io.jpom.util.LogRecorder;
 import io.jpom.util.StrictSyncFinisher;
 import lombok.Builder;
 import lombok.Lombok;
@@ -97,6 +98,7 @@ public class OutGivingRun {
     @Builder.Default
     private boolean doneDeleteFile = true;
     private String projectSecondaryDirectory;
+    private LogRecorder logRecorder;
 
     /**
      * 取消分发
@@ -163,10 +165,13 @@ public class OutGivingRun {
         }
     }
 
+
     /**
      * 开始异步执行分发任务
+     *
+     * @param select 只发布指定项目
      */
-    public synchronized Future<OutGivingModel.Status> startRun() {
+    public Future<OutGivingModel.Status> startRun(String select) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getByKey(id);
         Objects.requireNonNull(item, "不存在分发");
@@ -176,7 +181,8 @@ public class OutGivingRun {
         AfterOpt afterOpt = ObjectUtil.defaultIfNull(EnumUtil.likeValueOf(AfterOpt.class, item.getAfterOpt()), AfterOpt.No);
         StrictSyncFinisher syncFinisher;
         //
-        List<OutGivingNodeProject> outGivingNodeProjects = item.outGivingNodeProjectList();
+        List<OutGivingNodeProject> outGivingNodeProjects = item.outGivingNodeProjectList(select);
+        Assert.notEmpty(outGivingNodeProjects, "没有分发项目");
         int projectSize = outGivingNodeProjects.size();
         final List<OutGivingNodeProject.Status> statusList = new ArrayList<>(projectSize);
         // 开启线程
@@ -236,7 +242,7 @@ public class OutGivingRun {
         }
         String userId = Optional.ofNullable(userModel).map(BaseIdModel::getId).orElse(Const.SYSTEM_ID);
         // 更新维准备中
-        allPrepare(id, userId);
+        allPrepare(userId, item, outGivingNodeProjects);
         // 开启线程
         SYNC_FINISHER_MAP.put(id, syncFinisher);
         // 异步执行
@@ -250,6 +256,7 @@ public class OutGivingRun {
             OutGivingModel.Status status = null;
             try {
                 // 阻塞执行
+                Optional.ofNullable(logRecorder).ifPresent(logRecorder -> logRecorder.system("开始分发,需要分发 {} 个项目", projectSize));
                 syncFinisher.start();
                 // 更新分发状态
                 String msg;
@@ -267,6 +274,7 @@ public class OutGivingRun {
                         msg = StrUtil.format("完成并成功的个数不足 {}/{}", successCount, projectSize);
                     }
                 }
+                Optional.ofNullable(logRecorder).ifPresent(logRecorder -> logRecorder.system(msg));
                 updateStatus(id, status, msg);
             } catch (Exception e) {
                 log.error("分发线程异常", e);
@@ -287,15 +295,13 @@ public class OutGivingRun {
     /**
      * 将所有数据更新维准备中
      *
-     * @param outGivingId 分发id
-     * @param userId      用户id
+     * @param outGivingModel        分发
+     * @param outGivingNodeProjects 要分发的项目信息
+     * @param userId                用户id
      */
-    private void allPrepare(String outGivingId, String userId) {
-        OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
-        OutGivingModel outGivingModel = outGivingServer.getByKey(outGivingId);
-        List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
-        Assert.notEmpty(outGivingNodeProjects, "没有分发项目");
+    private void allPrepare(String userId, OutGivingModel outGivingModel, List<OutGivingNodeProject> outGivingNodeProjects) {
         //
+        String outGivingId = outGivingModel.getId();
         List<OutGivingLog> outGivingLogs = outGivingNodeProjects.stream()
             .map(outGivingNodeProject -> {
                 OutGivingLog outGivingLog = new OutGivingLog();

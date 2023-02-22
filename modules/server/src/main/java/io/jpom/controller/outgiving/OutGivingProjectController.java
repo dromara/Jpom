@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.outgiving;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
@@ -37,16 +38,20 @@ import io.jpom.common.validator.ValidatorItem;
 import io.jpom.common.validator.ValidatorRule;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.BaseIdModel;
 import io.jpom.model.BaseNodeModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.ServerWhitelist;
 import io.jpom.model.log.OutGivingLog;
+import io.jpom.model.node.ProjectInfoCacheModel;
+import io.jpom.model.outgiving.BaseNodeProject;
 import io.jpom.model.outgiving.OutGivingModel;
 import io.jpom.model.outgiving.OutGivingNodeProject;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.permission.ClassFeature;
 import io.jpom.permission.Feature;
 import io.jpom.permission.MethodFeature;
+import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.outgiving.DbOutGivingLogService;
 import io.jpom.service.outgiving.OutGivingServer;
 import io.jpom.system.ServerConfig;
@@ -63,6 +68,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -84,15 +90,18 @@ public class OutGivingProjectController extends BaseServerController {
     private final OutGivingWhitelistService outGivingWhitelistService;
     private final ServerConfig serverConfig;
     private final DbOutGivingLogService dbOutGivingLogService;
+    private final ProjectInfoCacheService projectInfoCacheService;
 
     public OutGivingProjectController(OutGivingServer outGivingServer,
                                       OutGivingWhitelistService outGivingWhitelistService,
                                       ServerConfig serverConfig,
-                                      DbOutGivingLogService dbOutGivingLogService) {
+                                      DbOutGivingLogService dbOutGivingLogService,
+                                      ProjectInfoCacheService projectInfoCacheService) {
         this.outGivingServer = outGivingServer;
         this.outGivingWhitelistService = outGivingWhitelistService;
         this.serverConfig = serverConfig;
         this.dbOutGivingLogService = dbOutGivingLogService;
+        this.projectInfoCacheService = projectInfoCacheService;
     }
 
 //    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -102,45 +111,37 @@ public class OutGivingProjectController extends BaseServerController {
 
 
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public JsonMessage<List<JSONObject>> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id, HttpServletRequest request) {
+    public JsonMessage<List<JSONObject>> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id,
+                                                     HttpServletRequest request) {
         String workspaceId = outGivingServer.getCheckUserWorkspace(request);
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
         Objects.requireNonNull(outGivingServerItem, "没有数据");
         List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
+        //
+        Set<String> nodeIds = outGivingNodeProjectList.stream().map(BaseNodeProject::getNodeId).collect(Collectors.toSet());
+        List<NodeModel> nodeModels = nodeService.getByKey(nodeIds);
+        Map<String, NodeModel> nodeMap = CollStreamUtil.toMap(nodeModels, BaseIdModel::getId, nodeModel -> nodeModel);
+        //
+        Set<String> projectIds = outGivingNodeProjectList.stream().map(nodeProject -> BaseNodeModel.fullId(workspaceId, nodeProject.getNodeId(), nodeProject.getProjectId())).collect(Collectors.toSet());
+        List<ProjectInfoCacheModel> projectInfoCacheModels = projectInfoCacheService.getByKey(projectIds);
+        Map<String, ProjectInfoCacheModel> projectMap = CollStreamUtil.toMap(projectInfoCacheModels, BaseIdModel::getId, data -> data);
+
+
         List<JSONObject> collect = outGivingNodeProjectList
             .stream()
             .map(outGivingNodeProject -> {
-                NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject.getNodeId());
+                NodeModel nodeModel = nodeMap.get(outGivingNodeProject.getNodeId());
                 JSONObject jsonObject = new JSONObject();
 
                 jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
                 jsonObject.put("projectId", outGivingNodeProject.getProjectId());
                 jsonObject.put("nodeName", nodeModel.getName());
-                jsonObject.put("id", BaseNodeModel.fullId(workspaceId, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId()));
-                // set projectStatus property
-                //NodeModel node = nodeService.getItem(outGivingNodeProject.getNodeId());
-                // Project Status: data.pid > 0 means running
-//                JSONObject projectStatus = null;
-//                if (nodeModel.isOpenStatus()) {
-//                    JSONObject projectInfo = null;
-//                    try {
-//                        projectInfo = projectInfoCacheService.getItem(nodeModel, outGivingNodeProject.getProjectId());
-//                        JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId());
-//                        projectStatus = jsonMessage.getData(JSONObject.class);
-//                    } catch (Exception e) {
-//                        log.warn("获取节点项目状态异常", e);
-//                        jsonObject.put("errorMsg", "error " + e.getMessage());
-//                    }
-//                    if (projectInfo != null) {
-//                        jsonObject.put("projectName", projectInfo.getString("name"));
-//                    }
-//                } else {
-//                    jsonObject.put("errorMsg", "节点未启用");
-//                }
-//                Integer pId = Optional.ofNullable(projectStatus).map(jsonObject1 -> jsonObject1.getInteger("pId")).orElse(null);
-//
-//                jsonObject.put("projectStatus", pId != null && pId > 0);
-//                jsonObject.put("projectPid", pId);
+                String fullId = BaseNodeModel.fullId(workspaceId, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId());
+                jsonObject.put("id", fullId);
+                ProjectInfoCacheModel projectInfoCacheModel = projectMap.get(fullId);
+                if (projectInfoCacheModel != null) {
+                    jsonObject.put("cacheProjectName", projectInfoCacheModel.getName());
+                }
 
                 OutGivingLog outGivingLog = dbOutGivingLogService.getByProject(id, outGivingNodeProject);
                 if (outGivingLog != null) {
@@ -207,6 +208,7 @@ public class OutGivingProjectController extends BaseServerController {
     @Feature(method = MethodFeature.UPLOAD)
     public JsonMessage<Object> upload(String id, String afterOpt, String clearOld, String autoUnzip,
                                       String secondaryDirectory, String stripComponents,
+                                      String selectProject,
                                       String sliceId,
                                       Integer totalSlice,
                                       String fileSumMd5) throws IOException {
@@ -240,8 +242,7 @@ public class OutGivingProjectController extends BaseServerController {
             .userModel(getUser())
             .unzip(unzip)
             .stripComponents(stripComponentsValue);
-        outGivingRunBuilder.build().startRun();
-        //OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip, stripComponentsValue);
+        outGivingRunBuilder.build().startRun(selectProject);
         return JsonMessage.success("上传成功,开始分发!");
     }
 
@@ -266,7 +267,9 @@ public class OutGivingProjectController extends BaseServerController {
     @RequestMapping(value = "remote_download", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
     public JsonMessage<String> remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip,
-                                              String secondaryDirectory, String stripComponents) {
+                                              String secondaryDirectory,
+                                              String stripComponents,
+                                              String selectProject) {
         OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"));
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, "请选择分发后的操作");
@@ -276,34 +279,29 @@ public class OutGivingProjectController extends BaseServerController {
         Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
         List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
         Assert.state(CollUtil.isNotEmpty(collect), "不允许下载当前地址的文件");
-        try {
-            //outGivingModel = outGivingServer.getItem(id);
-            outGivingModel.setClearOld(Convert.toBool(clearOld, false));
-            outGivingModel.setAfterOpt(afterOpt1.getCode());
-            outGivingModel.setSecondaryDirectory(secondaryDirectory);
-            outGivingServer.update(outGivingModel);
-            //下载
-            File file = FileUtil.file(serverConfig.getUserTempPath(), ServerConst.OUTGIVING_FILE, id);
-            FileUtil.mkdir(file);
-            File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
-            boolean unzip = BooleanUtil.toBoolean(autoUnzip);
-            //
-            this.checkZip(downloadFile, unzip);
-            int stripComponentsValue = Convert.toInt(stripComponents, 0);
-            // 开启
-            OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
-                .id(outGivingModel.getId())
-                .file(downloadFile)
-                .userModel(getUser())
-                .unzip(unzip)
-                .stripComponents(stripComponentsValue);
-            outGivingRunBuilder.build().startRun();
-            //OutGivingRun.startRun(outGivingModel.getId(), downloadFile, getUser(), unzip, stripComponentsValue);
-            return JsonMessage.success("分发成功");
-        } catch (Exception e) {
-            log.error("下载远程文件异常", e);
-            return new JsonMessage<>(500, "下载远程文件失败:" + e.getMessage());
-        }
+
+        //outGivingModel = outGivingServer.getItem(id);
+        outGivingModel.setClearOld(Convert.toBool(clearOld, false));
+        outGivingModel.setAfterOpt(afterOpt1.getCode());
+        outGivingModel.setSecondaryDirectory(secondaryDirectory);
+        outGivingServer.update(outGivingModel);
+        //下载
+        File file = FileUtil.file(serverConfig.getUserTempPath(), ServerConst.OUTGIVING_FILE, id);
+        FileUtil.mkdir(file);
+        File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
+        boolean unzip = BooleanUtil.toBoolean(autoUnzip);
+        //
+        this.checkZip(downloadFile, unzip);
+        int stripComponentsValue = Convert.toInt(stripComponents, 0);
+        // 开启
+        OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
+            .id(outGivingModel.getId())
+            .file(downloadFile)
+            .userModel(getUser())
+            .unzip(unzip)
+            .stripComponents(stripComponentsValue);
+        outGivingRunBuilder.build().startRun(selectProject);
+        return JsonMessage.success("下载成功,开始分发!");
     }
 
     @RequestMapping(value = "cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

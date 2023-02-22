@@ -153,12 +153,25 @@
       <!-- 表格视图 -->
       <template v-else-if="this.layoutType === 'table'">
         <a-table :columns="columns" :data-source="list" bordered size="middle" rowKey="id" class="table" :pagination="pagination" @change="changePage" :row-selection="rowSelection">
+          <a-tooltip slot="name" slot-scope="text, item" :title="text">
+            <a-button style="padding: 0" type="link" size="small" @click="showMachineInfo(item)"> {{ text }}</a-button>
+          </a-tooltip>
           <a-tooltip slot="tooltip" slot-scope="text" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>
           <template slot="status" slot-scope="text, item">
             <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0px"> {{ statusMap[item.status] }}</a-tag>
           </template>
+          <a-tooltip slot="duration" slot-scope="text" placement="topLeft" :title="formatDuration(text)">
+            <span>{{ formatDuration(text, "", 2) }}</span>
+          </a-tooltip>
+          <a-tooltip slot="duration2" slot-scope="text" placement="topLeft" :title="formatDuration((text || 0) * 1000)">
+            <span>{{ formatDuration((text || 0) * 1000, "", 2) }}</span>
+          </a-tooltip>
+          <a-tooltip slot="percent2Number" slot-scope="text" placement="topLeft" :title="`${(text && formatPercent2Number(text) + '%') || '-'}`">
+            <span>{{ (text && formatPercent2Number(text) + "%") || "-" }}</span>
+          </a-tooltip>
+
           <template slot="operation" slot-scope="text, record">
             <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
           </template>
@@ -298,7 +311,7 @@
       <a-alert :message="`一键分发同步多个节点的白名单配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model ref="editWhiteForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="模板节点">
-          <a-select show-search option-filter-prop="children" @click="loadWhitelistData(item.id)" placeholder="请选择模板节点" v-model="temp.templateNodeId">
+          <a-select show-search option-filter-prop="children" @change="(id) => loadWhitelistData(id)" placeholder="请选择模板节点" v-model="temp.templateNodeId">
             <a-select-option v-for="item in templateNodeList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>
@@ -338,7 +351,7 @@
       <a-alert :message="`一键分发同步多个节点的系统配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-form-model ref="editNodeConfigForm" :model="temp">
         <a-form-model-item label="模版节点">
-          <a-select show-search @change="loadNodeConfig(item.id)" option-filter-prop="children" placeholder="请选择模版节点" v-model="temp.templateNodeId">
+          <a-select show-search @change="(id) => loadNodeConfig(id)" option-filter-prop="children" placeholder="请选择模版节点" v-model="temp.templateNodeId">
             <a-select-option v-for="item in templateNodeList" :key="item.id" :value="item.id">
               {{ item.name }}
             </a-select-option>
@@ -366,7 +379,7 @@ import {
   saveWhitelist,
   saveNodeConfig,
 } from "@/api/system/assets-machine";
-import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime } from "@/utils/const";
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, PAGE_DEFAULT_SHOW_TOTAL, formatDuration, parseTime, formatPercent2Number } from "@/utils/const";
 import CustomSelect from "@/components/customSelect";
 import { mapGetters } from "vuex";
 import machineInfo from "./machine-info.vue";
@@ -405,11 +418,17 @@ export default {
       nodeList: [],
       layoutType: "card",
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "系统名", dataIndex: "osName", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "主机名", dataIndex: "hostName", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "节点地址", dataIndex: "jpomUrl", sorter: true, ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         { title: "分组名", dataIndex: "groupName", ellipsis: true, width: "100px", scopedSlots: { customRender: "tooltip" } },
         { title: "状态", dataIndex: "status", width: "130px", ellipsis: true, scopedSlots: { customRender: "status" } },
-        { title: "版本号", dataIndex: "jpomVersion", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "开机时间", sorter: true, dataIndex: "osSystemUptime", ellipsis: true, scopedSlots: { customRender: "duration2" } },
+        { title: "CPU占用", sorter: true, dataIndex: "osOccupyCpu", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "内存占用", sorter: true, dataIndex: "osOccupyMemory", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "硬盘占用", sorter: true, dataIndex: "osOccupyDisk", ellipsis: true, scopedSlots: { customRender: "percent2Number" } },
+        { title: "插件版本号", dataIndex: "jpomVersion", width: "100px", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
         {
           title: "模板节点",
           dataIndex: "templateNode",
@@ -444,13 +463,14 @@ export default {
   },
   mounted() {
     const layoutType = localStorage.getItem("tableLayout");
-    this.layoutType = layoutType === "card" ? "card" : "table";
+    this.layoutType = layoutType === "table" ? "table" : "card";
     this.loadGroupList();
     this.getMachineList();
   },
   methods: {
     parseTime,
     formatDuration,
+    formatPercent2Number,
     PAGE_DEFAULT_SHOW_TOTAL,
     // 获取所有的分组
     loadGroupList() {

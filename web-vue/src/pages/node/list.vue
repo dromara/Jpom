@@ -76,12 +76,17 @@
       <a-tooltip slot="javaVersion" slot-scope="text, item" placement="topLeft" :title="text">
         <span>{{ item.machineNodeData && item.machineNodeData.javaVersion }}</span>
       </a-tooltip>
-      <a-tooltip slot="totalMemory" slot-scope="text, item" placement="topLeft" :title="renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory)">
-        <span>{{ renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory) }}</span>
+      <a-tooltip
+        slot="jvmInfo"
+        slot-scope="text, item"
+        placement="topLeft"
+        :title="`剩余内存：${renderSize(item.machineNodeData && item.machineNodeData.jvmFreeMemory)} 总内存：${renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory)}`"
+      >
+        <span>{{ renderSize(item.machineNodeData && item.machineNodeData.jvmFreeMemory) }} / {{ renderSize(item.machineNodeData && item.machineNodeData.jvmTotalMemory) }}</span>
       </a-tooltip>
-      <a-tooltip slot="freeMemory" slot-scope="text" placement="topLeft" :title="renderSize(text)">
+      <!-- <a-tooltip slot="freeMemory" slot-scope="text" placement="topLeft" :title="renderSize(text)">
         <span>{{ renderSize(text) }}</span>
-      </a-tooltip>
+      </a-tooltip> -->
 
       <a-tooltip slot="runTime" slot-scope="text, item" placement="topLeft" :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime)">
         <span>{{ formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, "", 2) }}</span>
@@ -292,8 +297,8 @@ export default {
         { title: "节点地址", dataIndex: "url", key: "url", width: "190px", ellipsis: true, scopedSlots: { customRender: "url" } },
         { title: "系统名", dataIndex: "osName", key: "osName", width: "100px", ellipsis: true, scopedSlots: { customRender: "osName" } },
         { title: "JDK 版本", dataIndex: "javaVersion", key: "javaVersion", ellipsis: true, scopedSlots: { customRender: "javaVersion" } },
-        { title: "JVM 总内存", dataIndex: "totalMemory", ellipsis: true, scopedSlots: { customRender: "totalMemory" } },
-        { title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, scopedSlots: { customRender: "freeMemory" } },
+        { title: "JVM 信息", dataIndex: "jvmInfo", ellipsis: true, scopedSlots: { customRender: "jvmInfo" } },
+        // { title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, scopedSlots: { customRender: "freeMemory" } },
 
         { title: "项目数", dataIndex: "count", key: "count", width: "90px", scopedSlots: { customRender: "projectCount" } },
         { title: "脚本数", dataIndex: "scriptCount", key: "scriptCount", width: "90px", scopedSlots: { customRender: "scriptCount" } },

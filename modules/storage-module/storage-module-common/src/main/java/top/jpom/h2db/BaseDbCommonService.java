@@ -212,6 +212,16 @@ public abstract class BaseDbCommonService<T> {
      * @param keyValue 主键值
      * @return 数据
      */
+    public List<T> getByKey(Collection<String> keyValue) {
+        return this.getByKey(keyValue, true, null);
+    }
+
+    /**
+     * 根据主键查询实体
+     *
+     * @param keyValue 主键值
+     * @return 数据
+     */
     public T getByKey(String keyValue, boolean fill) {
         return this.getByKey(keyValue, fill, null);
     }
@@ -245,6 +255,40 @@ public abstract class BaseDbCommonService<T> {
             this.fillSelectResult(entityToBean);
         }
         return entityToBean;
+    }
+
+    /**
+     * 根据主键查询实体
+     *
+     * @param keyValue 主键值
+     * @param fill     是否执行填充逻辑
+     * @param consumer 参数回调
+     * @return 数据
+     */
+    public List<T> getByKey(Collection<String> keyValue, boolean fill, Consumer<Entity> consumer) {
+        if (CollUtil.isEmpty(keyValue)) {
+            return null;
+        }
+        Entity where = new Entity(tableName);
+        where.set(key, keyValue);
+        List<Entity> entities;
+        try {
+            Db db = Db.use(this.getDataSource());
+            if (consumer != null) {
+                consumer.accept(where);
+            }
+            entities = db.find(where);
+        } catch (Exception e) {
+            throw warpException(e);
+        }
+        return entities.stream().map(entity -> {
+            //
+            T toBean = this.entityToBean(entity, this.tClass);
+            if (fill) {
+                this.fillSelectResult(toBean);
+            }
+            return toBean;
+        }).collect(Collectors.toList());
     }
 
     /**

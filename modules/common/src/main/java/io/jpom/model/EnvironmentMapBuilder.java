@@ -32,6 +32,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
+ * 环境变量管理
+ *
  * @author bwcx_jzy
  * @since 2023/2/11
  */
@@ -135,6 +137,20 @@ public class EnvironmentMapBuilder {
             }
         });
         consumer.accept("##################################################################################");
+    }
+
+    /**
+     * 获取环境变量的执行
+     *
+     * @param key 变量名
+     * @return 值
+     */
+    public String get(String key) {
+        Item item = map.get(key);
+        if (item != null) {
+            return item.value;
+        }
+        return null;
     }
 
     @AllArgsConstructor
