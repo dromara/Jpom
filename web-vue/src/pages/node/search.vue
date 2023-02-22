@@ -18,13 +18,9 @@
           <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
             <a-button :loading="loading" type="primary" @click="getNodeProjectData">搜索</a-button>
           </a-tooltip>
-          <span>| </span>
 
-          <a-dropdown>
-            <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-              批量操作
-              <a-icon type="down" />
-            </a>
+          <a-dropdown v-if="this.selectedRowKeys && this.selectedRowKeys.length">
+            <a-button type="primary"> 批量操作 <a-icon type="down" /> </a-button>
             <a-menu slot="overlay">
               <a-menu-item>
                 <a-button type="primary" @click="batchStart">批量启动</a-button>
@@ -37,6 +33,11 @@
               </a-menu-item>
             </a-menu>
           </a-dropdown>
+          <a-button v-else type="primary" :disabled="true"> 批量操作 <a-icon type="down" /> </a-button>
+
+          <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的项目信息, 需要重新同步：可以通过节点列表逐个同步">
+            <a-button type="danger" @click="delAll()" icon="delete"> 删除缓存 </a-button>
+          </a-tooltip>
 
           <a-tooltip>
             <template slot="title">
@@ -49,10 +50,6 @@
               </div>
             </template>
             <a-icon type="question-circle" theme="filled" />
-          </a-tooltip>
-
-          <a-tooltip placement="topLeft" title="清除服务端缓存节点所有的项目信息, 需要重新同步">
-            <a-icon @click="delAll()" type="delete" />
           </a-tooltip>
         </a-space>
       </template>
@@ -161,29 +158,30 @@
                   </ul>
                 </template>
               </a-alert>
-              <template v-for="item in triggerUses">
-                <a-alert
-                  v-clipboard:copy="`${temp.triggerUrl}?action=${item.value}`"
-                  v-clipboard:success="
-                    () => {
-                      tempVue.prototype.$notification.success({ message: '复制成功' });
-                    }
-                  "
-                  v-clipboard:error="
-                    () => {
-                      tempVue.prototype.$notification.error({ message: '复制失败' });
-                    }
-                  "
-                  type="info"
-                  :message="`${item.desc}触发器地址(点击可以复制)`"
-                  :key="item.value"
-                >
-                  <template slot="description">
-                    <a-tag>GET</a-tag> <span>{{ `${temp.triggerUrl}?action=${item.value}` }} </span>
-                    <a-icon type="copy" />
-                  </template>
-                </a-alert>
-              </template>
+
+              <a-alert
+                :key="item.value"
+                v-for="item in triggerUses"
+                v-clipboard:copy="`${temp.triggerUrl}?action=${item.value}`"
+                v-clipboard:success="
+                  () => {
+                    tempVue.prototype.$notification.success({ message: '复制成功' });
+                  }
+                "
+                v-clipboard:error="
+                  () => {
+                    tempVue.prototype.$notification.error({ message: '复制失败' });
+                  }
+                "
+                type="info"
+                :message="`${item.desc}触发器地址(点击可以复制)`"
+              >
+                <template slot="description">
+                  <a-tag>GET</a-tag> <span>{{ `${temp.triggerUrl}?action=${item.value}` }} </span>
+                  <a-icon type="copy" />
+                </template>
+              </a-alert>
+
               <a-alert
                 v-clipboard:copy="temp.batchTriggerUrl"
                 v-clipboard:success="
@@ -613,7 +611,7 @@ export default {
     delAll() {
       this.$confirm({
         title: "系统提示",
-        content: "确定要清除服务端所有的项目缓存信息吗？",
+        content: "确定要清除服务端所有的项目缓存信息吗？清除后需要重新同步节点项目才能正常使用项目相关功能",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
