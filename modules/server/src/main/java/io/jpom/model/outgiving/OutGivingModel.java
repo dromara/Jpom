@@ -22,6 +22,7 @@
  */
 package io.jpom.model.outgiving;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
@@ -38,6 +39,7 @@ import top.jpom.h2db.TableName;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 分发实体
@@ -123,6 +125,10 @@ public class OutGivingModel extends BaseGroupModel {
     }
 
     public List<OutGivingNodeProject> outGivingNodeProjectList() {
+        return outGivingNodeProjectList(StrUtil.EMPTY);
+    }
+
+    public List<OutGivingNodeProject> outGivingNodeProjectList(String select) {
         List<OutGivingNodeProject> outGivingNodeProjects = StringUtil.jsonConvertArray(outGivingNodeProjectList, OutGivingNodeProject.class);
         if (outGivingNodeProjects != null) {
             // 排序
@@ -132,7 +138,18 @@ public class OutGivingModel extends BaseGroupModel {
                     outGivingNodeProject.setSortValue(ObjectUtil.defaultIfNull(outGivingNodeProject.getSortValue(), i));
                 }
             }
-            outGivingNodeProjects.sort((o1, o2) -> CompareUtil.compare(o1.getSortValue(), o2.getSortValue()));
+            List<String> list = StrUtil.splitTrim(select, StrUtil.COMMA);
+            outGivingNodeProjects = outGivingNodeProjects.stream()
+                .filter(nodeProject -> {
+                    if (CollUtil.isEmpty(list)) {
+                        return true;
+                    }
+                    return list.stream()
+                        .anyMatch(s -> StrUtil.equals(s, StrUtil.format("{}@{}", nodeProject.getProjectId(), nodeProject.getNodeId())
+                        ));
+                })
+                .sorted((o1, o2) -> CompareUtil.compare(o1.getSortValue(), o2.getSortValue()))
+                .collect(Collectors.toList());
         }
         return outGivingNodeProjects;
     }

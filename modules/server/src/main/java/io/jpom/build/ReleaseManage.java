@@ -582,17 +582,20 @@ public class ReleaseManage {
     private void doOutGiving() throws ExecutionException, InterruptedException {
         String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
         String projectSecondaryDirectory = this.buildExtraModule.getProjectSecondaryDirectory();
+        //
+        String selectProject = buildEnv.get("dispatchSelectProject");
         Future<OutGivingModel.Status> statusFuture = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.buildNumberId, this.resultFile, (unZip, zipFile) -> {
             OutGivingRun.OutGivingRunBuilder outGivingRunBuilder = OutGivingRun.builder()
                 .id(releaseMethodDataId)
                 .file(zipFile)
+                .logRecorder(logRecorder)
                 .userModel(userModel)
                 .unzip(unZip)
                 // 由构建配置决定是否删除
                 .doneDeleteFile(false)
                 .projectSecondaryDirectory(projectSecondaryDirectory)
                 .stripComponents(0);
-            return outGivingRunBuilder.build().startRun();
+            return outGivingRunBuilder.build().startRun(selectProject);
         });
         //OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);
         logRecorder.system("开始执行分发包啦,请到分发中查看详情状态");

@@ -60,7 +60,7 @@
           <ul>
             <li>发布方式：{{ releaseMethodMap[text] }}</li>
             <li>产物目录：{{ record.resultDirFile }}</li>
-            <li>构建命令：{{ record.script }}</li>
+            <li v-if="record.buildMode !== 1">构建命令：{{ record.script }}</li>
           </ul>
         </template>
         <span>{{ releaseMethodMap[text] }}</span>
@@ -76,7 +76,7 @@
         <span v-if="record.buildId <= 0"></span>
         <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
       </a-tooltip>
-      <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="tooltip" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record, index">
@@ -951,7 +951,14 @@
           <a-textarea v-model="temp.buildEnvParameter" placeholder="请输入构建环境变量：xx=abc 多个变量回车换行即可" :auto-size="{ minRows: 3, maxRows: 5 }" />
         </a-form-model-item>
         <a-form-model-item label="构建备注" prop="buildRemark" help="填写仅本次构建生效">
-          <a-textarea v-model="temp.buildRemark" :maxLength="240" placeholder="请输入构建备注,长度小于 240" :auto-size="{ minRows: 3, maxRows: 5 }" />
+          <a-textarea v-model="temp.buildRemark" :maxLength="240" placeholder="请输入构建备注,长度小于 240" :auto-size="{ minRows: 2, maxRows: 5 }" />
+        </a-form-model-item>
+        <a-form-model-item v-if="dispatchProjectList && dispatchProjectList.length" prop="selectProject" label="筛选项目" help="筛选之后本次发布操作只发布筛选项,并且只对本地操作生效">
+          <a-select mode="multiple" v-model="temp.dispatchSelectProjectArray" placeholder="请选择指定发布的项目">
+            <a-select-option v-for="item in dispatchProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
+              {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
+            </a-select-option>
+          </a-select>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -1006,7 +1013,7 @@ import {
   stopBuild,
   sortItem,
 } from "@/api/build-info";
-import { afterOptList, afterOptListSimple, getDishPatchListAll } from "@/api/dispatch";
+import { afterOptList, afterOptListSimple, getDishPatchListAll, getDispatchProject } from "@/api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
 import { getSshListAll } from "@/api/ssh";
 import codeEditor from "@/components/codeEditor";
@@ -1126,13 +1133,13 @@ export default {
           ellipsis: true,
           scopedSlots: { customRender: "branchName" },
         },
-        { title: "产物", dataIndex: "resultDirFile", ellipsis: true, scopedSlots: { customRender: "resultDirFile" } },
-        { title: "方式", dataIndex: "buildMode", align: "center", width: 80, ellipsis: true, scopedSlots: { customRender: "buildMode" } },
-        { title: "状态", dataIndex: "status", align: "center", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
+        { title: "产物", dataIndex: "resultDirFile", ellipsis: true, scopedSlots: { customRender: "tooltip" } },
+        { title: "方式", dataIndex: "buildMode", align: "center", width: "80px", ellipsis: true, scopedSlots: { customRender: "buildMode" } },
+        { title: "状态", dataIndex: "status", align: "center", width: "100px", ellipsis: true, scopedSlots: { customRender: "status" } },
         {
           title: "构建 ID",
           dataIndex: "buildId",
-          width: 90,
+          width: "90px",
           ellipsis: true,
           align: "center",
           scopedSlots: { customRender: "buildId" },
@@ -1140,10 +1147,10 @@ export default {
         {
           title: "修改人",
           dataIndex: "modifyUser",
-          width: 130,
+          width: "130px",
           ellipsis: true,
           sorter: true,
-          scopedSlots: { customRender: "modifyUser" },
+          scopedSlots: { customRender: "tooltip" },
         },
         {
           title: "修改时间",
@@ -1175,10 +1182,10 @@ export default {
         {
           title: "操作",
           dataIndex: "operation",
-          width: 130,
+          width: "130px",
           scopedSlots: { customRender: "operation" },
           align: "center",
-          // fixed: "right",
+          fixed: "right",
         },
       ],
       rules: {
@@ -1231,6 +1238,7 @@ export default {
       countdownTime: Date.now(),
       refreshInterval: 5,
       tableSelections: [],
+      dispatchProjectList: [],
     };
   },
   computed: {
@@ -1640,6 +1648,22 @@ export default {
     },
     // 开始构建
     handleConfirmStartBuild(record) {
+      this.dispatchProjectList = [];
+      // 判断构建方式
+      if (record.releaseMethod === 1) {
+        // 节点分发
+        getDispatchProject(record.releaseMethodDataId, true).then((res) => {
+          if (res.code === 200) {
+            this.dispatchProjectList = res.data;
+            this.showBuildConfirm(record);
+          }
+        });
+      } else {
+        this.showBuildConfirm(record);
+      }
+      // console.log(record);
+    },
+    showBuildConfirm(record) {
       this.temp = Object.assign({}, record);
       this.buildConfirmVisible = true;
       this.branchList = [];
@@ -1663,6 +1687,7 @@ export default {
           checkRepositoryDiff: this.temp.checkRepositoryDiff,
           projectSecondaryDirectory: this.temp.projectSecondaryDirectory,
           buildEnvParameter: this.temp.buildEnvParameter,
+          dispatchSelectProject: (this.temp.dispatchSelectProjectArray && this.temp.dispatchSelectProjectArray.join(",")) || "",
         },
         true
       ).then(() => {
