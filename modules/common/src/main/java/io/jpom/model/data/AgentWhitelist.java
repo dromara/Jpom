@@ -97,7 +97,7 @@ public class AgentWhitelist extends BaseJsonModel {
     }
 
     public List<String> project() {
-        return useConvert(nginx);
+        return useConvert(project);
     }
 
     public List<String> certificate() {
