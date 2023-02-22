@@ -950,10 +950,10 @@
         <a-form-model-item label="环境变量" prop="buildEnvParameter" help="配置后将保存到当前构建">
           <a-textarea v-model="temp.buildEnvParameter" placeholder="请输入构建环境变量：xx=abc 多个变量回车换行即可" :auto-size="{ minRows: 3, maxRows: 5 }" />
         </a-form-model-item>
-        <a-form-model-item label="构建备注" prop="buildRemark" help="填写仅本次构建生效">
+        <a-form-model-item label="构建备注" prop="buildRemark" help="填写备注仅本次构建生效">
           <a-textarea v-model="temp.buildRemark" :maxLength="240" placeholder="请输入构建备注,长度小于 240" :auto-size="{ minRows: 2, maxRows: 5 }" />
         </a-form-model-item>
-        <a-form-model-item v-if="dispatchProjectList && dispatchProjectList.length" prop="selectProject" label="筛选项目" help="筛选之后本次发布操作只发布筛选项,并且只对本地操作生效">
+        <a-form-model-item v-if="dispatchProjectList && dispatchProjectList.length" prop="selectProject" label="筛选项目" help="筛选之后本次发布操作只发布筛选项,并且只对本次操作生效">
           <a-select mode="multiple" v-model="temp.dispatchSelectProjectArray" placeholder="请选择指定发布的项目">
             <a-select-option v-for="item in dispatchProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
               {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
