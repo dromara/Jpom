@@ -43,7 +43,6 @@ import javax.servlet.http.HttpServletResponse;
  * @author bwcx_jzy
  * @since 2021/4/18
  */
-//@InterceptorPattens(sort = -2, exclude = ServerOpenApi.API + "**")
 @Configuration
 public class IpInterceptor implements HandlerMethodInterceptor {
 

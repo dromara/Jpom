@@ -60,7 +60,12 @@
           </template>
         </template>
       </template>
-      <a-tooltip slot="status" slot-scope="text, item" placement="topLeft" :title="statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'">
+      <a-tooltip
+        slot="status"
+        slot-scope="text, item"
+        placement="topLeft"
+        :title="`${statusMap[item.machineNodeData && item.machineNodeData.status] || '未知'} ${item.machineNodeData && item.machineNodeData.statusMsg}`"
+      >
         <template v-if="item.openStatus === 1">
           <a-tag :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'" style="margin-right: 0px">
             {{ statusMap[item.machineNodeData && item.machineNodeData.status] || "未知" }}

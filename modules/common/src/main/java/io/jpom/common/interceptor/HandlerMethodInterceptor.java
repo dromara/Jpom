@@ -40,7 +40,8 @@ public interface HandlerMethodInterceptor extends AsyncHandlerInterceptor {
      * @param request  current HTTP request
      * @param response current HTTP response
      * @param handler  chosen handler to execute, for type and/or instance evaluation
-     * @return
+     * @return 是否放行
+     * @throws Exception 发生异常
      */
     @Override
     default boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -56,7 +57,8 @@ public interface HandlerMethodInterceptor extends AsyncHandlerInterceptor {
      * @param request  current HTTP request
      * @param response current HTTP response
      * @param handler  chosen handler to execute, for type and/or instance evaluation
-     * @return
+     * @return 是否放行
+     * @throws Exception 发生异常
      */
     boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handler) throws Exception;
 }

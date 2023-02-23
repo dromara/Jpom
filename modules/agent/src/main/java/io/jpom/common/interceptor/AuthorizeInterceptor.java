@@ -40,7 +40,6 @@ import javax.servlet.http.HttpServletResponse;
  * @author jiangzeyin
  * @since 2019/4/17
  */
-//@InterceptorPattens()
 @Configuration
 public class AuthorizeInterceptor implements HandlerMethodInterceptor {
 
