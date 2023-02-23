@@ -156,9 +156,8 @@ public class BuildInfoHistoryController extends BaseServerController {
         List<String> strings = StrUtil.splitTrim(logId, StrUtil.COMMA);
         for (String itemId : strings) {
             BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(itemId, getRequest());
-            Objects.requireNonNull(buildHistoryLog);
             JsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(buildHistoryLog);
-            if (jsonMessage.getCode() != 200) {
+            if (!jsonMessage.success()) {
                 return jsonMessage;
             }
         }
