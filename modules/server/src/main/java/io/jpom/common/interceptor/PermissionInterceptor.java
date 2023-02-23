@@ -52,7 +52,6 @@ import javax.servlet.http.HttpServletResponse;
  * @author jiangzeyin
  * @since 2019/03/16.
  */
-//@InterceptorPattens(sort = 1)
 @Configuration
 public class PermissionInterceptor implements HandlerMethodInterceptor {
 
