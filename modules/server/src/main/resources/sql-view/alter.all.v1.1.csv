@@ -7,3 +7,4 @@ ADD,OUT_GIVING,webhook,String,255,,webhook
 DROP,NODE_INFO,unLockType
 ADD,NODE_INFO,machineId,String,50,,机器id
 ADD,MACHINE_NODE_INFO,templateNode,TINYINT,,,模板节点 ，1 模板节点 0 非模板节点
+ADD,REPOSITORY,timeout,Integer,,,仓库超时连接
