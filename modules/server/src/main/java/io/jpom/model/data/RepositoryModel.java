@@ -32,6 +32,7 @@ import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.enums.GitProtocolEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import top.jpom.h2db.TableName;
 
 import java.util.HashMap;
@@ -80,12 +81,14 @@ public class RepositoryModel extends BaseWorkspaceModel {
      * SSH RSA 私钥
      */
     private String rsaPrv;
-
     /**
      * 排序
      */
     private Float sortValue;
-
+    /**
+     * 仓库连接超时时间
+     */
+    private Integer timeout;
 
     /**
      * 返回协议类型，如果为 null 会尝试识别 http
@@ -126,12 +129,14 @@ public class RepositoryModel extends BaseWorkspaceModel {
         map.put("password", this.getPassword());
         map.put(Const.WORKSPACE_ID_REQ_HEADER, this.getWorkspaceId());
         map.put("rsaFile", BuildUtil.getRepositoryRsaFile(this));
+        map.put("timeout", this.getTimeout());
         return map;
     }
 
     /**
      * 仓库类型
      */
+    @Getter
     public enum RepoType implements BaseEnum {
         /**
          * git
@@ -145,16 +150,6 @@ public class RepositoryModel extends BaseWorkspaceModel {
         RepoType(int code, String desc) {
             this.code = code;
             this.desc = desc;
-        }
-
-        @Override
-        public int getCode() {
-            return code;
-        }
-
-        @Override
-        public String getDesc() {
-            return desc;
         }
     }
 }

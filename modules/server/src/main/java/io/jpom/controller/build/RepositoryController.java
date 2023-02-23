@@ -130,8 +130,8 @@ public class RepositoryController extends BaseServerController {
      */
     @PostMapping(value = "/build/repository/edit")
     @Feature(method = MethodFeature.EDIT)
-    public JsonMessage<String> editRepository(RepositoryModel repositoryModelReq) {
-        this.checkInfo(repositoryModelReq);
+    public JsonMessage<String> editRepository(RepositoryModel repositoryModelReq, HttpServletRequest request) {
+        this.checkInfo(repositoryModelReq, request);
         // 检查 rsa 私钥
         boolean andUpdateSshKey = this.checkAndUpdateSshKey(repositoryModelReq);
         Assert.state(andUpdateSshKey, "rsa 私钥文件不存在或者有误");
@@ -161,7 +161,7 @@ public class RepositoryController extends BaseServerController {
         } else {
             // update data
             //repositoryModelReq.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
-            repositoryService.updateById(repositoryModelReq, getRequest());
+            repositoryService.updateById(repositoryModelReq, request);
         }
 
         return new JsonMessage<>(200, "操作成功");
@@ -355,9 +355,10 @@ public class RepositoryController extends BaseServerController {
     /**
      * 检查信息
      *
+     * @param request            请求信息
      * @param repositoryModelReq 仓库信息
      */
-    private void checkInfo(RepositoryModel repositoryModelReq) {
+    private void checkInfo(RepositoryModel repositoryModelReq, HttpServletRequest request) {
         Assert.notNull(repositoryModelReq, "请输入正确的信息");
         Assert.hasText(repositoryModelReq.getName(), "请填写仓库名称");
         Integer repoType = repositoryModelReq.getRepoType();
@@ -375,7 +376,7 @@ public class RepositoryController extends BaseServerController {
             // ssh
             repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), StrUtil.EMPTY));
         }
-        String workspaceId = repositoryService.getCheckUserWorkspace(getRequest());
+        String workspaceId = repositoryService.getCheckUserWorkspace(request);
         //
         boolean repositoryUrl = this.checkRepositoryUrl(workspaceId, repositoryModelReq.getId(), repositoryModelReq.getGitUrl());
         Assert.state(!repositoryUrl, "已经存在对应的仓库信息啦");

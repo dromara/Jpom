@@ -59,9 +59,9 @@ import java.util.stream.Collectors;
 /**
  * git工具
  * <p>
- * https://developer.aliyun.com/ask/275691
+ * <a href="https://developer.aliyun.com/ask/275691">https://developer.aliyun.com/ask/275691</a>
  * <p>
- * https://github.com/centic9/jgit-cookbook
+ * <a href="https://github.com/centic9/jgit-cookbook">https://github.com/centic9/jgit-cookbook</a>
  *
  * @author bwcx_jzy
  * @author Hotstrip
@@ -165,6 +165,12 @@ public class GitUtil {
      * @param parameter        参数
      */
     private static void setCredentials(TransportCommand<?, ?> transportCommand, Map<String, Object> parameter) {
+        // 设置超时时间
+        Integer timeout = (Integer) parameter.get("timeout");
+        Optional.ofNullable(timeout)
+            .map(integer -> integer <= 0 ? null : integer)
+            .ifPresent(transportCommand::setTimeout);
+        // 设置账号密码
         Integer protocol = (Integer) parameter.get("protocol");
         String username = (String) parameter.get("username");
         String password = StrUtil.emptyToDefault((String) parameter.get("password"), StrUtil.EMPTY);
@@ -319,28 +325,6 @@ public class GitUtil {
             return null;
         }
     }
-
-//	/**
-//	 * load repository branch list by git
-//	 *
-//	 * @return list
-//	 * @throws Exception 异常
-//	 */
-//	public static List<String> getBranchList(RepositoryModel repositoryModel) throws Exception {
-//		Tuple tuple = getBranchAndTagList(repositoryModel);
-//
-//		List<String> branch = tuple == null ? null : tuple.get(0);
-//		if (CollUtil.isEmpty(branch)) {
-//			throw new JpomRuntimeException("该仓库还没有任何分支");
-//		}
-//		return tuple.get(0);
-//	}
-
-//	public static Tuple getBranchAndTagListCheck(RepositoryModel repositoryModel) throws Exception {
-//		Tuple branchAndTagList = getBranchAndTagList(repositoryModel);
-//
-//		return branchAndTagList;
-//	}
 
     /**
      * 拉取对应分支最新代码
@@ -568,44 +552,4 @@ public class GitUtil {
                 revCommit.getParentCount());
         }
     }
-
-//	/**
-//	 * git clone with ssh way
-//	 *
-//	 * @param url         远程仓库地址
-//	 * @param file        本地存档的文件地址
-//	 * @param branchName  分支名称
-//	 * @param rsaFile     私钥文件
-//	 * @param rsaPass     私钥密码
-//	 * @param printWriter
-//	 */
-//	public static String gitCloneWithSSH(String url, File file, String branchName,
-//										 File rsaFile, String rsaPass, PrintWriter printWriter) throws GitAPIException {
-//		// if file exists，delete first
-//		if (FileUtil.exist(file)) {
-//			FileUtil.del(file);
-//		}
-//
-//		// git clone
-//		Git.cloneRepository()
-//				.setProgressMonitor(new TextProgressMonitor(printWriter))
-//				.setURI(url)
-//				.setDirectory(file)
-//				.setBranch(branchName)
-//				.setTransportConfigCallback(transport -> {
-//					SshTransport sshTransport = (SshTransport) transport;
-//					sshTransport.setSshSessionFactory(new JschConfigSessionFactory() {
-//
-//						@Override
-//						protected JSch createDefaultJSch(FS fs) throws JSchException {
-//							JSch jSch = super.createDefaultJSch(fs);
-//							// 添加私钥文件
-//							jSch.addIdentity(rsaFile.getPath(), rsaPass);
-//							return jSch;
-//						}
-//					});
-//				})
-//				.call();
-//		return StrUtil.EMPTY;
-//	}
 }

@@ -41,7 +41,7 @@ import java.util.Map;
 /**
  * svn 工具
  * <p>
- * https://www.cnblogs.com/lekko/p/6005382.html
+ * <a href="https://www.cnblogs.com/lekko/p/6005382.html">https://www.cnblogs.com/lekko/p/6005382.html</a>
  *
  * @author bwcx_jzy
  * @since 2019/8/6
@@ -100,8 +100,11 @@ public class SvnKitUtil {
         } else {
             throw new IllegalStateException("不支持的协议类型");
         }
+        // 超时时间
+        Integer timeout = (Integer) map.get("timeout");
+        AuthenticationManager authenticationManager = new AuthenticationManager(authManager, timeout);
         // 实例化客户端管理类
-        return SVNClientManager.newInstance(OPTIONS, authManager);
+        return SVNClientManager.newInstance(OPTIONS, authenticationManager);
     }
 
     /**

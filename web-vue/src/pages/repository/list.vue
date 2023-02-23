@@ -168,6 +168,9 @@
           </template>
           <a-button style="margin-left: 10px" type="danger" @click="restHideField(temp)">清除</a-button>
         </a-form-model-item>
+        <a-form-model-item label="超时时间(s)" prop="timeout">
+          <a-input-number v-model="temp.timeout" :min="0" placeholder="拉取仓库超时时间,单位秒" style="width: 100%" />
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
     <a-modal destroyOnClose v-model="giteeImportVisible" title="通过私人令牌导入仓库" width="80%" :footer="null" :maskClosable="false">
