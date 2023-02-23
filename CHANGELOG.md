@@ -15,9 +15,10 @@
 ### 🐣 新增功能
 
 1. 【server】新增 容器构建缓存插件支持按照 `path` 全局缓存 `type: global`
-2. 【server】新增 容器构建缓存插件支持缓存 node_modules `mode: copy` (避免出现：[https://github.com/npm/cli/issues/3669](https://github.com/npm/cli/issues/3669))
+2. 【server】新增 容器构建缓存插件支持缓存 node_modules `mode: copy`
+   (避免出现：[https://github.com/npm/cli/issues/3669](https://github.com/npm/cli/issues/3669))
 3. 【server】新增 构建列表新增批量构建
-      （感谢 [@爱笑的眼睛](https://gitee.com/175cm75kg18cm) [Gitee issues I6GNV2](https://gitee.com/dromara/Jpom/issues/I6GNV2) ）
+   （感谢 [@爱笑的眼睛](https://gitee.com/175cm75kg18cm) [Gitee issues I6GNV2](https://gitee.com/dromara/Jpom/issues/I6GNV2) ）
 4. 【server】新增 机器管理新增查看关联节点功能
 5. 【server】新增 机器新增网络、硬件硬盘查看
 6. 【server】新增 机器管理列表新增表格视图
