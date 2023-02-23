@@ -726,7 +726,7 @@ export default {
               this.$notification.success({
                 message: res.msg,
               });
-              this.nodeConfigVisible = true;
+              this.nodeConfigVisible = false;
               this.tableSelections = [];
             }
           });
