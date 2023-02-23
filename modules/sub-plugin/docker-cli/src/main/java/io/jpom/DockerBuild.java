@@ -120,7 +120,7 @@ public class DockerBuild implements AutoCloseable {
             DockerClientUtil.copyArchiveFromContainerCmd(dockerClient, containerId, logRecorder, resultFile, resultFileOut);
             return statusCode;
         } finally {
-            DockerClientUtil.removeContainerCmd(dockerClient, containerId);
+            //DockerClientUtil.removeContainerCmd(dockerClient, containerId);
             // 删除临时目录
             FileUtil.del(tempDir);
         }
@@ -177,6 +177,7 @@ public class DockerBuild implements AutoCloseable {
 
         HostConfig hostConfig = HostConfig.newHostConfig()
             .withMounts(mounts).withBinds(bindList);
+        hostConfig.withAutoRemove(true);
         containerCmd.withHostConfig(hostConfig);
         // 环境变量
         if (env != null) {

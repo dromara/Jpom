@@ -110,7 +110,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
      */
     public JsonMessage<String> deleteLogAndFile(BuildHistoryLog buildHistoryLog) {
         if (buildHistoryLog == null) {
-            return new JsonMessage<>(405, "没有对应构建记录");
+            return JsonMessage.success("没有对应构建记录,忽略删除");
         }
         BuildInfoModel item = buildService.getByKey(buildHistoryLog.getBuildDataId());
         if (item != null) {

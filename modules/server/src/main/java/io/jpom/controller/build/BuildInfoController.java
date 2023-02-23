@@ -459,7 +459,7 @@ public class BuildInfoController extends BaseServerController {
         Assert.state(!fastDel, "清理历史构建产物失败,已经重新尝试");
         // 删除构建信息数据
         buildInfoService.delByKey(buildInfoModel.getId(), request);
-        return JsonMessage.success("清理历史构建产物成功");
+        return JsonMessage.success("删除成功,并且清理历史构建产物成功");
     }
 
 
