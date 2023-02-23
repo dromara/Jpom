@@ -40,7 +40,6 @@ import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.JsonMessage;
-import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.permission.ClassFeature;
@@ -50,6 +49,7 @@ import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.init.ProxySelectorConfig;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.YamlMapFactoryBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -69,6 +69,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 系统配置
@@ -99,26 +100,26 @@ public class SystemConfigController extends BaseServerController {
      * get server's config or node's config
      * 加载服务端或者节点端配置
      *
-     * @param nodeId 节点ID
+     * @param machineId 机器ID
      * @return json
-     * @throws IOException io
      * @author Hotstrip
      */
     @RequestMapping(value = "config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public JsonMessage<JSONObject> configData(String nodeId) throws IOException {
-        JSONObject jsonObject;
-        if (StrUtil.isNotEmpty(nodeId)) {
-            jsonObject = NodeForward.requestData(getNode(), NodeUrl.SystemGetConfig, getRequest(), JSONObject.class);
-        } else {
-            jsonObject = new JSONObject();
+    public JsonMessage<JSONObject> configData(String machineId, HttpServletRequest request) {
+        JsonMessage<JSONObject> message = this.tryRequestNode(machineId, request, NodeUrl.SystemGetConfig);
+        return Optional.ofNullable(message).orElseGet(() -> {
+            JSONObject jsonObject = new JSONObject();
             Resource resource = ExtConfigBean.getResource();
-            String content = IoUtil.read(resource.getInputStream(), CharsetUtil.CHARSET_UTF_8);
-            jsonObject.put("content", content);
-            jsonObject.put("file", FileUtil.getAbsolutePath(resource.getFile()));
-        }
-
-        return JsonMessage.success("", jsonObject);
+            try {
+                String content = IoUtil.read(resource.getInputStream(), CharsetUtil.CHARSET_UTF_8);
+                jsonObject.put("content", content);
+                jsonObject.put("file", FileUtil.getAbsolutePath(resource.getFile()));
+                return JsonMessage.success("", jsonObject);
+            } catch (IOException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+        });
     }
 
     @PostMapping(value = "save_config.json", produces = MediaType.APPLICATION_JSON_VALUE)

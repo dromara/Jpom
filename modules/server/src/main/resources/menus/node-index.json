@@ -50,7 +50,7 @@
   },
   {
     "id": "systemConfig",
-    "title": "系统管理",
+    "title": "插件端配置",
     "icon_v3": "setting",
     "childs": [
       {
