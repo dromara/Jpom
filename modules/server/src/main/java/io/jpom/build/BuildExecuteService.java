@@ -483,7 +483,6 @@ public class BuildExecuteService {
                         return StrUtil.isEmpty(antSubMatch) || AntPathUtil.ANT_PATH_MATCHER.matchStart(antSubMatch + "**", s);
                     })
                     .mapToInt(path -> {
-                        File srcFile = FileUtil.file(this.gitFile, path);
                         File toFile;
                         if (antFileUploadMode == ResultDirFileAction.AntFileUploadMode.KEEP_DIR) {
                             // 剔除文件夹层级
@@ -516,6 +515,7 @@ public class BuildExecuteService {
                         }
                         // 创建文件夹，避免出现文件全部为相关文件名（result）
                         BuildUtil.mkdirHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
+                        File srcFile = FileUtil.file(this.gitFile, path);
                         //
                         FileCopier.create(srcFile, toFile)
                             .setCopyContentIfDir(true)
