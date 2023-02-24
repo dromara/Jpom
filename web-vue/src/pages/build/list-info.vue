@@ -341,8 +341,8 @@
                         <li>项目是指,节点中的某一个项目,需要提前在节点中创建项目</li>
                         <li>SSH 是指,通过 SSH 命令的方式对产物进行发布或者执行多条命令来实现发布(需要到 SSH 中提前去添加)</li>
                         <li>本地命令是指,在服务端本地执行多条命令来实现发布</li>
-                        <li>SSH、本地命令发布都执行变量替换,系统预留变量有：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}</li>
-                        <li>可以引用工作空间的环境变量 变量占位符 #{xxxx} xxxx 为变量名称</li>
+                        <li>SSH、本地命令发布都执行变量替换,系统预留变量有：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}</li>
+                        <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
                       </ul>
                     </template>
                     <a-icon type="question-circle" theme="filled" />
@@ -419,8 +419,8 @@
                     <template slot="title">
                       发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java
                       <ul>
-                        <li>支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}</li>
-                        <li>可以引用工作空间的环境变量 变量占位符 #{xxxx} xxxx 为变量名称</li>
+                        <li>支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}</li>
+                        <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
                       </ul>
                     </template>
                     <a-icon type="question-circle" theme="filled" />
@@ -432,7 +432,7 @@
                   :auto-size="{ minRows: 2, maxRows: 10 }"
                   type="textarea"
                   :rows="3"
-                  placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java,支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}"
+                  placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}"
                 />
               </a-form-model-item>
 
