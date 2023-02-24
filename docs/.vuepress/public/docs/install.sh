@@ -390,7 +390,7 @@ function askInstallPath() {
 		else
 			if [ "$userInstallPath" == "y" ]; then
 				jpom_dir=$jpom_dir
-				if [ -e "$userInstallPath" ]; then
+				if [ -e "$jpom_dir" ]; then
 					echo "$jpom_dir 目录已经被占用请输入其他路径"
 					continue
 				fi
@@ -408,8 +408,13 @@ function askInstallPath() {
 							jpom_dir=$userInstallPath
 							break
 						else
+							#	继续等待输入
 							userInstallPath=$userOption
 						fi
+					else
+						# 目录不存在，直接安装
+						jpom_dir=$userInstallPath
+						break
 					fi
 				done
 				break
@@ -432,7 +437,7 @@ if [ "$offline" == "" ]; then
 		errorExit "没有可以的版本号"
 	fi
 fi
-
+jpom_dir=$(absPath "$jpom_dir")
 jpom_dir=$(mustMkdir "$jpom_dir" "jpom $JPOM_TYPE")
 echo "开始安装：${JPOM_TYPE} ${versions}, 安装目录 ${jpom_dir}"
 # 创建指定目录
