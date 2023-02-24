@@ -177,7 +177,8 @@ public class DockerBuild implements AutoCloseable {
 
         HostConfig hostConfig = HostConfig.newHostConfig()
             .withMounts(mounts).withBinds(bindList);
-        hostConfig.withAutoRemove(true);
+        // 一定不能使用 auto remove 否则无法下载容器构建产物
+        // hostConfig.withAutoRemove(true);
         containerCmd.withHostConfig(hostConfig);
         // 环境变量
         if (env != null) {
