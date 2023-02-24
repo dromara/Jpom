@@ -98,7 +98,17 @@ public class BuildUtil {
      * @return file
      */
     public static File getHistoryPackageFile(String buildModelId, int buildId, String resultFile) {
+        if (buildId <= 0) {
+            // 没有 0 号构建id，避免生成 #0 文件夹
+            return null;
+        }
         if (StrUtil.isEmpty(buildModelId) || StrUtil.isEmpty(resultFile)) {
+            return null;
+        }
+        ResultDirFileAction resultDirFileAction = ResultDirFileAction.parse(resultFile);
+        ResultDirFileAction.Type type = resultDirFileAction.getType();
+        if (type == ResultDirFileAction.Type.ANT_PATH) {
+            // ANT 模式 不能直接获取，避免提前创建文件夹
             return null;
         }
         File result = FileUtil.file(getBuildDataFile(buildModelId), "history", BuildInfoModel.getBuildIdStr(buildId), "result");

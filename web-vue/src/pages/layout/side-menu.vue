@@ -93,9 +93,9 @@ export default {
       }
       // 如果跳转路由跟当前一致
       if (this.$route.path === subMenu.path) {
-        this.$notification.warn({
-          message: "已经在当前页面了",
-        });
+        // this.$notification.warn({
+        //   message: "已经在当前页面了",
+        // });
         return false;
       }
       // 跳转路由
