@@ -64,7 +64,7 @@
             <a-tooltip v-show="!temp.id">
               <template slot="title">
                 <ul>
-                  <li>可以引用工作空间的环境变量 变量占位符 #{xxxx} xxxx 为变量名称</li>
+                  <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
                 </ul>
               </template>
               <a-icon type="question-circle" theme="filled" />
